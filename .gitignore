@@ -1,0 +1,6 @@
+.idea
+*.iml
+out
+gen
+src/pybel.egg-info/*
+docs/build/*
