@@ -4,11 +4,12 @@ PyBEL provides tools for loading and parsing Biological Expression Language (BEL
 
 ```python
 import pybel
+import networkx
 
 url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
 g = pybel.parse_from_url(url)
 
-pybel.draw(g)
+networkx.draw(g)
 ```
 
 ## Installation
