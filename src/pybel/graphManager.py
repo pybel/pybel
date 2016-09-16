@@ -34,15 +34,6 @@ def getNetworkxGraph():
 
 def getAllContexts():
     return list(pybel.models.Context.objects.exclude(shortName__isnull=True).values())
-
-def cleanDb():
-    """truncates everything from Neo4J and pybel except namespace and annotations"""
-    #dbCursor = django.db.connection.cursor()
-    Neo4J().truncateAll()
-    for pybelModel in [Activity,Author,Citation,Context,Edge,FuncNsValue,Function,Label,Modification,NetworkxGraph,Node,Property]:
-        pybelModel.objects.all().delete()
-        #tableName = 'pybel_'+pybelModel.__name__.lower()
-        #dbCursor.execute("truncate %s" % tableName)        
     
 def getNeo4jGraph():
     return Neo4J().getGraphDB()
