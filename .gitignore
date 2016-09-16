@@ -4,3 +4,7 @@ out
 gen
 src/pybel.egg-info/*
 docs/build/*
+.tox/*
+*.pyc
+.coverage
+

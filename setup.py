@@ -25,9 +25,12 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
     'Topic :: Scientific/Engineering :: Bio-Informatics'
 ]
-INSTALL_REQUIRES = ['requests']
+INSTALL_REQUIRES = [
+    'requests',
+    'networkx'
+]
 EXTRAS_REQUIRE = {}
-TESTS_REQUIRE = []
+TESTS_REQUIRE = ['tox']
 
 #################################################################
 
