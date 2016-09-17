@@ -3,14 +3,14 @@ PyBEL
 
 PyBEL provides tools for loading and parsing Biological Expression Language (BEL) files.
 
-.. code:: python
-   import pybel
-   import networkx
+.. code-block:: python
+	import pybel
+	import networkx
 
-   url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
-   g = pybel.parse_from_url(url)
+	url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
+	g = pybel.parse_from_url(url)
 
-   networkx.draw(g)
+	networkx.draw(g)
 
 Installation
 --------------------
@@ -20,10 +20,10 @@ Development
 
 For developers, this repository can be cloned and locally installed with pip using the following commands:
 
-.. code:: bash
-  git clone https://github.com/cthoyt/pybel.git
-  cd pybel
-  pip install -e .
+.. code-block::
+	git clone https://github.com/cthoyt/pybel.git
+	cd pybel
+	pip install -e .
 
 
 Usage
@@ -32,4 +32,4 @@ Usage
 In the future, this repository will be open to the public for use. Installation will be as easy as:
 
 .. code:: bash
-  pip install pybel
+	pip install pybel
