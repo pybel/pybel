@@ -1,3 +1,7 @@
+from .graph import BELGraph, from_url, from_file
+
+__all__ = ['BELGraph', 'from_url', 'from_file']
+
 __version__ = '0.1'
 
 __title__ = 'PyBEL'
@@ -9,3 +13,4 @@ __email__ = 'charles.hoyt@scai.fraunhofer.de'
 
 __license__ = 'All Rights Reserved.'
 __copyright__ = 'Copyright (c) Charles Tapley Hoyt'
+
