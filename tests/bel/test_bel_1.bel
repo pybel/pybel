@@ -1,0 +1,46 @@
+##################################################################################
+# Document Properties Section
+
+SET DOCUMENT Name = "PyBEL Test Document"
+SET DOCUMENT Description = "Made for testing PyBEL parsing"
+SET DOCUMENT Version = "1.6"
+SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
+SET DOCUMENT Authors = "Charles Tapley Hoyt"
+SET DOCUMENT Licenses = "Other / Proprietary"
+SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+
+
+##################################################################################
+# Definitions Section
+
+DEFINE NAMESPACE TESTNS1 AS URL "http://localhost:8000/test_ns_1.belns"
+
+DEFINE ANNOTATION TESTAN1 AS URL "http://localhost:8000/test_an_1.belanno"
+
+DEFINE ANNOTATION TESTAN2 AS LIST {"A","B","C"}
+
+
+##################################################################################
+# Statements Section
+
+SET STATEMENT_GROUP = "Group 1"
+
+SET TESTAN1 = "TestAnnot1"
+SET Citation = {"Pubmed","That one article from last week","123455"}
+
+SET Evidence = "Evidence 1 /
+w extra notes"
+
+p(TESTNS1:TestValue1) -> p(TESTNS1:TestValue2)
+
+SET Evidence = "Evidence 2"
+SET TESTAN2 = "B"
+
+p(TESTNS1:TestValue2) -| p(TESTNS1:TestValue3)
+p(TESTNS1:TestValue2) =| p(TESTNS1:TestValue4)
+
+SET Citation = {"Pubmed","That other article from last week","123456"}
+SET TESTAN1 = "TestAnnot2"
+SET Evidence = "Evidence 3"
+
+p(TESTNS1:TestValue4) -- p(TESTNS1:TestValue5)

@@ -1,0 +1,29 @@
+[Namespace]
+Keyword=TESTNS1
+NameString=Test Namespace 1 for PyBEL
+DomainString=TestNs1
+SpeciesString=all
+DescriptionString=Test Namespace 1 for PyBEL to make a subset of useful BEL
+VersionString=1.0.0
+CreatedDateTime=2016-09-17T20:50:00
+
+[Author]
+NameString=Charles Tapley Hoyt
+CopyrightString=Copyright (c) Charles Tapley Hoyt. All Rights Reserved.
+ContactInfoString=charles.hoyt@scai.fraunhofer.de
+
+[Citation]
+NameString=Test Namespace 1 for PyBEL
+DescriptionString=Test Namespace 1 for PyBEL to make a subset of useful BEL
+
+[Processing]
+CaseSensitiveFlag=no
+DelimiterString=|
+CacheableFlag=yes
+
+[Values]
+TestValue1|O
+TestValue2|O
+TestValue3|O
+TestValue4|O
+TestValue5|O

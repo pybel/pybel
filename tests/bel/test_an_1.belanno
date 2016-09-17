@@ -1,0 +1,29 @@
+[Namespace]
+Keyword=TESTAN1
+NameString=Test Annotations 1 for PyBEL
+DomainString=TestAn1
+SpeciesString=all
+DescriptionString=Test Annotations 1 for PyBEL to make a subset of useful BEL
+VersionString=1.0.0
+CreatedDateTime=2016-09-17T20:50:00
+
+[Author]
+NameString=Charles Tapley Hoyt
+CopyrightString=Copyright (c) Charles Tapley Hoyt. All Rights Reserved.
+ContactInfoString=charles.hoyt@scai.fraunhofer.de
+
+[Citation]
+NameString=Test Annotations 1 for PyBEL
+DescriptionString=Test Annotations 1 for PyBEL to make a subset of useful BEL
+
+[Processing]
+CaseSensitiveFlag=no
+DelimiterString=|
+CacheableFlag=yes
+
+[Values]
+TestAnnot1|O
+TestAnnot2|O
+TestAnnot3|O
+TestAnnot4|O
+TestAnnot5|O
