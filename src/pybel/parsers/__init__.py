@@ -45,6 +45,7 @@ def bel_to_json(path):
     }
 
 
+
 # TODO: Group command results by evidence
 """
 [{
@@ -58,5 +59,6 @@ def bel_to_json(path):
 ]
 """
 
+# Alternatively, keep a running dictionary with current 'Set' variables
 
 # TODO iterate citations/evidences, validate/canonicalize expressions, generate nodes/edges, accumulate in graph
