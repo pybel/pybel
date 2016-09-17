@@ -1,7 +1,7 @@
 __version__ = '0.1'
 
 __title__ = 'PyBEL'
-__description__ = 'A Python package for loading and parsing of BEL files'
+__description__ = 'A Python package for parsing, validating, and analysis of of BEL graphs'
 __url__ = 'https://github.com/cthoyt/pybel'
 
 __author__ = 'Charles Tapley Hoyt'
