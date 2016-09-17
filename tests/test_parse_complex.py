@@ -79,23 +79,31 @@ class TestSexpr(unittest.TestCase):
         self.assertFalse(sexpr_equal(exp1, exp2))
 
 
-class TestComplex(unittest.TestCase):
+class TestComplex1(unittest.TestCase):
+    def setUp(self):
+        self.expected = [
+            ['proteinAbundance', ['HGNC', 'CAT']],
+            'decreases',
+            [['abundance', ('CHEBI', 'hydrogen peroxide')],
+             'increases',
+             ['biologicalProcess', ['GO', 'apoptotic process']]]
+        ]
+
     def test111(self):
         """This test check double edges"""
         statement = '''proteinAbundance(HGNC:CAT) decreases (abundance(CHEBI:"hydrogen peroxide") increases biologicalProcess(GO:"apoptotic process"))'''
         result = tokenize_statement(statement)
-
-        expected = [
-            ['proteinAbundance', ['HGNC', 'CAT']],
-            'decreases',
-            ['abundance', ('CHEBI', 'hydrogen peroxide')],
-            'increases',
-            ['biologicalProcess', ['GO', 'apoptotic process']]
-        ]
-
-        self.assertTrue(sexpr_equal(expected, result))
+        self.assertTrue(sexpr_equal(self.expected, result))
 
     def test112(self):
+        """This test check double edges, with added whitespaces"""
+        statement = '''proteinAbundance(HGNC:CAT) decreases ( abundance(CHEBI:"hydrogen peroxide") increases biologicalProcess(GO:"apoptotic process") )'''
+        result = tokenize_statement(statement)
+        self.assertTrue(sexpr_equal(self.expected, result))
+
+
+class TestComplex2(unittest.TestCase):
+    def test121(self):
         """Test nested definitions"""
         statement = '''peptidaseActivity(complexAbundance(proteinAbundance(HGNC:F3),proteinAbundance(HGNC:F7))) directlyIncreases peptidaseActivity(proteinAbundance(HGNC:F9))'''
         result = tokenize_statement(statement)
