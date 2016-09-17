@@ -27,7 +27,19 @@ class BELGraph(nx.MultiGraph):
     """
 
     def parse_from_url(self, url):
+        """
+        Parses a BEL file from URL resource and adds to graph
+        :param url: URL to BEL Resource
+        :return: self
+        :rtype: BELGraph
+        """
         return self
 
     def parse_from_file(self, fl):
+        """
+        Parses a BEL file from a file-like object and adds to graph
+        :param fl: file-like object backed by BEL data
+        :return: self
+        :rtype: BELGraph
+        """
         return self

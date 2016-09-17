@@ -43,3 +43,20 @@ def bel_to_json(path):
         'definitions': definition_results,
         'commands': command_results
     }
+
+
+# TODO: Group command results by evidence
+"""
+[{
+    citation: ...,
+    evidences: [
+        {
+            annotations: []
+            biological_statements: []
+        }
+    ]
+]
+"""
+
+
+# TODO iterate citations/evidences, validate/canonicalize expressions, generate nodes/edges, accumulate in graph
