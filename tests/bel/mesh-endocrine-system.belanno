@@ -1,0 +1,76 @@
+[AnnotationDefinition]
+Keyword=EndocrineSystem
+TypeString=list
+DescriptionString=The Endocrine System [A06] sub-branch of the Medical Subject Headings (MeSH) Anatomy [A] branch.
+UsageString=Use this annotation to indicate the anatomical context of a statement. Use to annotate a statement that was demonstrated in an anatomical part of the Endocrine System or where the facts represented in the statement were shown to be relevant to such part.
+VersionString=20120202
+CreatedDateTime=2012-02-02T12:00:00
+
+[Author]
+NameString=Selventa
+CopyrightString=Copyright (c) 2011-2012, Selventa. All Rights Reserved.
+ContactInfoString=belframework@selventa.com
+
+[Citation]
+NameString=MeSH
+DescriptionString=MeSH
+PublishedVersionString=20120202
+PublishedDate=2012-02-02
+ReferenceURL=http://www.ncbi.nlm.nih.gov/mesh
+
+[Processing]
+CaseSensitiveFlag=yes
+DelimiterString=|
+CacheableFlag=yes
+
+[Values]
+Adrenal Cortex|A06.407.071.140
+Adrenal Glands|A06.407.071
+Adrenal Medulla|A06.407.071.265
+Chromaffin Cells|A06.224.161
+Chromaffin Granules|A06.224.161.500
+Chromaffin System|A06.224
+Corpus Luteum|A06.407.312.497.278
+Corticotrophs|A06.407.747.500.500
+Cumulus Cells|A06.407.312.497.535.300.500
+Endocrine Glands|A06.407
+Endocrine System|A06
+Enterochromaffin Cells|A06.390.021
+Enterochromaffin-like Cells|A06.390.043
+Enteroendocrine Cells|A06.390
+Follicular Fluid|A06.407.312.497.535.150
+Gastrin-Secreting Cells|A06.390.065
+Glucagon-Secreting Cells|A06.390.087
+Gonadotrophs|A06.407.747.500.750
+Gonads|A06.407.312
+Granulosa Cells|A06.407.312.497.535.300
+Hypothalamo-Hypophyseal System|A06.688.357
+Insulin-Secreting Cells|A06.390.131
+Islets of Langerhans|A06.407.414
+Lactotrophs|A06.407.747.500.812
+Leydig Cells|A06.407.312.782.513
+Luteal Cells|A06.407.312.497.278.400
+Median Eminence|A06.688.357.500
+Melanotrophs|A06.688.357.750.750.500
+Neurosecretory Systems|A06.688
+Ovarian Follicle|A06.407.312.497.535
+Ovary|A06.407.312.497
+Pancreatic Polypeptide-Secreting Cells|A06.390.650
+Para-Aortic Bodies|A06.224.636
+Paraganglia, Chromaffin|A06.224.736
+Parathyroid Glands|A06.407.560
+Pineal Gland|A06.688.733
+Pituitary Gland|A06.407.747
+Pituitary Gland, Anterior|A06.688.357.750.500
+Pituitary Gland, Intermediate|A06.407.747.750
+Pituitary Gland, Posterior|A06.407.747.875
+Pituitary-Adrenal System|A06.407.691
+Somatostatin-Secreting Cells|A06.390.825
+Somatotrophs|A06.407.747.500.937
+Testis|A06.407.312.782
+Theca Cells|A06.407.312.497.535.600
+Thyroid Gland|A06.407.900
+Thyrotrophs|A06.688.357.750.500.968
+Zona Fasciculata|A06.407.071.140.950
+Zona Glomerulosa|A06.407.071.140.960
+Zona Reticularis|A06.407.071.140.970
