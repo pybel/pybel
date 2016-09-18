@@ -54,8 +54,8 @@ translocations = [x for x in translocations_dict.keys() if x] + [x for x in tran
 """List of all translocation-related BEL-functions."""
 
 relations_dict = {
-    'decreases': '-\|',
-    'directlyDecreases': '=\|',
+    'decreases': '-|',
+    'directlyDecreases': '=|',
     'increases': '->',
     'directlyIncreases': '=>',
     'causesNoChange': None,
