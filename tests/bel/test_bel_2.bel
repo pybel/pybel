@@ -1,0 +1,8 @@
+complex(p(HGNC:CLSTN1),p(HGNC:KLC1)) -> tport(p(HGNC:KLC1))
+complex(p(HGNC:ARRB2), p(HGNC:APH1A)) -> pep(complex(SCOMP:"gamma Secretase Complex"))
+g(HGNC:APP,sub(G,275341,C)) -> path(MESHD:"Alzheimer Disease")
+kin(p(SFAM:"GSK3 Family")) -> p(HGNC:MAPT,pmod(P))
+composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")
+a(ADO:"Abeta_42") -> translocation(a(CHEBI:"calcium(2+)"), MESHCS:"Cell Membrane", MESHCS:"Intracellular Space")
+act(p(HGNC:CHIT1)) biomarkerFor path(MESHD:"Alzheimer Disease")
+g(HGNC:TNF,sub(G,308,A)) -> path(MESHD:"Alzheimer Disease")
