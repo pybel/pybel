@@ -21,7 +21,7 @@ def from_file(fl):
     return BELGraph().parse_from_file(fl)
 
 
-class BELGraph(nx.MultiGraph):
+class BELGraph(nx.MultiDiGraph):
     """
     An extension of a NetworkX MultiGraph to hold a BEL graph.
     """
