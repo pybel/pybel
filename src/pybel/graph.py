@@ -58,6 +58,8 @@ class BELGraph(nx.MultiDiGraph):
 
         return self.parse_from_file(io.StringIO(response.text))
 
+
+    # TODO break up into smaller commands with tests
     def parse_from_file(self, fl):
         """
         Parses a BEL file from a file-like object and adds to graph
@@ -101,18 +103,18 @@ class BELGraph(nx.MultiDiGraph):
                     s, p, o = tokens
 
                     if s[0] in language.functions and o[0] in language.functions:
-                        s_name = s[1]
-                        o_name = o[1]
+                        s_ns, s_name = s[1]
+                        o_ns, o_name = o[1]
 
-                        s_can = ':'.join(s_name)
-                        o_can = ':'.join(o_name)
+                        s_can = '{}:{}'.format(s_ns, s_name)
+                        o_can = '{}:{}'.format(o_ns, o_name)
 
                         if s_can not in self:
-                            self.add_node(s_can, type=s[0])
+                            self.add_node(s_can, type=s[0], name=s_name, namespace=s_ns)
                             log.debug('added {}:{}'.format(s[0], s_can))
 
                         if o_can not in self:
-                            self.add_node(o_can, type=o[0])
+                            self.add_node(o_can, type=o[0], name=s_name, namespace=o_ns)
                             log.debug('added {}:{}'.format(o[0], o_can))
 
                         attrs = d.copy()

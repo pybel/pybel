@@ -101,6 +101,7 @@ double_statement = (
 statement = simple_statement | nested_statement | double_statement  # | subject
 
 
+# TODO add in namespace checking and error handling
 class Parser:
     """
     Build a parser backed by a given dictionary of namespaces
@@ -120,4 +121,3 @@ class Parser:
         except Exception as e:
             log.debug('failed to parse: {}'.format(s))
             return None
-

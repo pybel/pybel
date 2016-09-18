@@ -2,9 +2,9 @@ import copy
 import logging
 import re
 
-from . import language
-from . import patterns
-from .utils import strip_quotation_marks
+from pybel.parsers import language
+from pybel.parsers import patterns
+from pybel.parsers.utils import strip_quotation_marks
 
 log = logging.getLogger(__name__)
 
