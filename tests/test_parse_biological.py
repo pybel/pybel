@@ -130,15 +130,46 @@ class TestTokenize(unittest.TestCase):
         expected = [
             ['a', ['ADO', 'Abeta_42']],
             '->',
-            ['translocation', [['a', ['CHEBI', 'calcium(2+)']],
-                               ['MESHCS', 'Cell Membrane'],
-                               ['MESHCS', 'Intracellular Space']
-                               ]]
+            ['translocation',
+             ['a', ['CHEBI', 'calcium(2+)']],
+             ['MESHCS', 'Cell Membrane'],
+             ['MESHCS', 'Intracellular Space']
+             ]
+        ]
+        self.assertEqual(expected, result)
+
+    def test141(self):
+        """Test single argument translocation"""
+        statement = 'tloc(a("T-Lymphocytes")) -- p(MGI:Cxcr3)'
+        result = self.parser.tokenize(statement)
+        expected = [
+            ['tloc', ['a', ['T-Lymphocytes']]],
+            '--',
+            ['p', ['MGI', 'Cxcr3']]
         ]
         self.assertEqual(expected, result)
 
     def test139(self):
+        """Test reaction"""
         statement = 'pep(p(SFAM:"CAPN Family")) -> reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
         result = self.parser.tokenize(statement)
-        expected = []
+        expected = [
+            ['pep', ['p', ['SFAM', 'CAPN Family']]],
+            '->',
+            ['reaction',
+             ['reactants', ['p', ['HGNC', 'CDK5R1']]],
+             ['products', ['p', ['HGNC', 'CDK5']]]
+             ]
+        ]
+        self.assertEqual(expected, result)
+
+    def test140(self):
+        """Test protein substitution"""
+        statement = 'p(HGNC:APP,sub(N,10,Y)) -> path(MESHD:"Alzheimer Disease")'
+        result = self.parser.tokenize(statement)
+        expected = [
+            ['p', ['HGNC', 'APP'], ['sub', 'N', 10, 'Y']],
+            '->',
+            ['path', ['MESHD', 'Alzheimer Disease']]
+        ]
         self.assertEqual(expected, result)

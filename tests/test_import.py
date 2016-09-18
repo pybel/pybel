@@ -7,7 +7,7 @@ import pybel
 
 class TestImport(unittest.TestCase):
     def setUp(self):
-        self.graph = nx.MultiGraph()
+        self.graph = nx.MultiDiGraph()
 
         self.graph.add_node('TestValue1', namespace='TestNS1')
         self.graph.add_node('TestValue2', namespace='TestNS1')
@@ -43,5 +43,5 @@ class TestImport(unittest.TestCase):
         })
 
     def test(self):
-        result = pybel.from_url('http://localhost:8000/test_ns_1.belns')
-        self.assertTrue(nx.is_isomorphic(self.graph, result), 'Graphs do not match')
+        result = pybel.from_url('http://localhost:8000/test_bel_1.bel')
+        self.assertSetEqual(set(self.graph.nodes()), set(result.nodes()))
