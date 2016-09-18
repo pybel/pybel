@@ -90,7 +90,7 @@ def group_statements(parsed_commands):
 
         res.append({
             'citation': citation,
-            'notes': list(z[1:] for z in subcommand_lines)
+            'notes': subcommand_lines#list(z[1:] for z in subcommand_lines)
         })
 
     return res
