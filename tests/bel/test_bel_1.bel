@@ -14,9 +14,7 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 # Definitions Section
 
 DEFINE NAMESPACE TESTNS1 AS URL "http://localhost:8000/test_ns_1.belns"
-
 DEFINE ANNOTATION TESTAN1 AS URL "http://localhost:8000/test_an_1.belanno"
-
 DEFINE ANNOTATION TESTAN2 AS LIST {"A","B","C"}
 
 
@@ -44,3 +42,4 @@ SET TESTAN1 = "TestAnnot2"
 SET Evidence = "Evidence 3"
 
 p(TESTNS1:TestValue4) -- p(TESTNS1:TestValue5)
+p(TESTNS1:TestValue1) -- ((p(TESTNS1:TestValue2) -- p(TESTNS1:TestValue3))
