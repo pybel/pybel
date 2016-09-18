@@ -42,4 +42,4 @@ SET TESTAN1 = "TestAnnot2"
 SET Evidence = "Evidence 3"
 
 p(TESTNS1:TestValue4) -- p(TESTNS1:TestValue5)
-p(TESTNS1:TestValue1) -- ((p(TESTNS1:TestValue2) -- p(TESTNS1:TestValue3))
+p(TESTNS1:TestValue1) -- (p(TESTNS1:TestValue2) -- p(TESTNS1:TestValue3))
