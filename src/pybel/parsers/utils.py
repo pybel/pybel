@@ -1,5 +1,7 @@
+import logging
 import re
 
+log = logging.getLogger(__name__)
 re_parse_list = re.compile('"\s*,\s*"')
 
 
@@ -27,9 +29,36 @@ def subitergroup(iterable, key):
     res.append((iterable[last], iterable[last + 1:]))
     return res
 
+
 def strip_quotation_marks(term):
     if isinstance(term, str):
         found = re.search('^\s*"\s*(.*)\s*"\s*$', term)
         if found:
             term = found.group(1)
     return term
+
+
+def check_stability(ns_dict, ns_mapping):
+    """
+    Check the stability of namespace mapping
+    :param ns_dict: dict of {name: set of values}
+    :param ns_mapping: dict of {name: {value: (other_name, other_value)}}
+    :return: if the mapping is stable
+    :rtype: Boolean
+    """
+    flag = True
+    for ns, kv in ns_mapping.items():
+        if ns not in ns_dict:
+            log.warning('missing namespace {}'.format(ns))
+            flag = False
+        for k, (k_ns, v_val) in kv.items():
+            if k not in ns_dict[ns]:
+                log.warning('missing value {}'.format(k))
+                flag = False
+            if k_ns not in ns_dict:
+                log.warning('missing namespace link {}'.format(k_ns))
+                flag = False
+            if v_val not in ns_dict[k_ns]:
+                log.warning('missing value {} in namespace {}'.format(v_val, k_ns))
+                flag = False
+    return flag

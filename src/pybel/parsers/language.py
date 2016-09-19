@@ -1,5 +1,5 @@
 activities_dict = {
-    'degradation': 'deg',
+    # 'degradation': 'deg',
     'catalyticActivity': 'cat',
     'chaperoneActivity': 'chap',
     'gtpBoundActivity': 'gtp',
@@ -51,6 +51,30 @@ modifications = ['trunc', 'sub', 'pmod', 'fus']
 """List of all BEL-modifications."""
 
 # TODO: Amino acid code X is not defined by BEL Language v. 1.0
+
+aminoacid_dict = {
+    'A': 'Ala',
+    'R': 'Arg',
+    'N': 'Asn',
+    'D': 'Asp',
+    'C': 'Cys',
+    'E': 'Glu',
+    'Q': 'Gln',
+    'G': 'Gly',
+    'H': 'His',
+    'I': 'Ile',
+    'L': 'Leu',
+    'K': 'Lys',
+    'M': 'Met',
+    'F': 'Phe',
+    'P': 'Pro',
+    'S': 'Ser',
+    'T': 'Thr',
+    'W': 'Trp',
+    'Y': 'Try',
+    'V': 'Val',
+}
+
 aminoacids = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'X']
 """List of all single-letter-amino acid-codes."""
 

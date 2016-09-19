@@ -7,7 +7,7 @@ import requests
 
 from .parsers import split_file_to_annotations_and_definitions
 from .parsers.set_statements import parse_commands, group_statements, sanitize_statement_lines
-from .parsers.tokenizer import Parser, handle_tokens
+from .parsers.bel_parser import Parser
 from .parsers.utils import sanitize_file_lines
 
 log = logging.getLogger(__name__)
@@ -87,18 +87,14 @@ class BELGraph(nx.MultiDiGraph):
             annotations = {}
 
             for line in lines:
-
                 if len(line) == 3 and line[0] == 'S':
                     _, key, value = line
                     annotations[key] = value.strip('"').strip()
                 elif len(line) == 2 and line[0] == 'X':
                     k, expr = line
+                    parser.set_metadata(citation, annotations)
+                    parser.parse(expr)
 
-                    tokens = parser.tokenize(expr)
-                    if tokens is None:
-                        continue
-
-                    handle_tokens(self, tokens, citation, annotations)
         return self
 
     def to_neo4j(self, neo_graph):
