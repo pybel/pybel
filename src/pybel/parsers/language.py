@@ -30,6 +30,23 @@ functions_dict = {
 functions = [x for x in functions_dict.keys() if x] + [x for x in functions_dict.values() if x]
 """List of all BEL-functions that describe a biological entity."""
 
+functions_canon = {
+    'abundance': 'Abundance',
+    'a': 'Abundance',
+    'geneAbundance': 'Gene',
+    'g': 'Gene',
+    'microRNAAbundance': 'miRNA',
+    'm': 'miRNA',
+    'proteinAbundance': 'Protein',
+    'p': 'Protein',
+    'rnaAbundance': 'RNA',
+    'r': 'RNA',
+    'biologicalProcess': 'BiologicalProcess',
+    'bp': 'BiologicalProcess',
+    'pathology': 'Pathology',
+    'path': 'Pathology'
+}
+
 modifications = ['trunc', 'sub', 'pmod', 'fus']
 """List of all BEL-modifications."""
 
@@ -91,6 +108,3 @@ relations_decode_dict = {
     '>>': 'translatedTo'
 }
 """Dictionary for decoding of symbolic relationships with short name as key and long name as value"""
-
-
-
