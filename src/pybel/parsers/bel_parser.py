@@ -35,10 +35,9 @@ class Parser:
         self.node_to_id = {}
         self.id_to_node = {}
 
-        value = Word(alphanums)
         quoted_value = dblQuotedString().setParseAction(removeQuotes)
 
-        ns_val = Word(alphanums) + Suppress(':') + (value | quoted_value)
+        ns_val = (Word(alphanums) + Suppress(':') + (Word(alphanums) | quoted_value))
         ns_val.setParseAction(self.validate_ns_pair)
 
         # 2.2 Abundance Modifier Functions
@@ -50,9 +49,10 @@ class Parser:
 
         pmod_tags = ['pmod', 'proteinModification']
 
-        pmod_option_1 = oneOf(pmod_tags) + LP + ns_val + RP
-        pmod_option_2 = oneOf(pmod_tags) + LP + ns_val + WCW + amino_acids + RP
-        pmod_option_3 = oneOf(pmod_tags) + LP + ns_val + WCW + amino_acids + WCW + pyparsing_common.number() + RP
+        pmod_option_1 = oneOf(pmod_tags) + LP + (ns_val | Word(alphanums)) + RP
+        pmod_option_2 = oneOf(pmod_tags) + LP + (ns_val | Word(alphanums)) + WCW + amino_acids + RP
+        pmod_option_3 = oneOf(pmod_tags) + LP + (
+            Group(ns_val) | Word(alphanums)) + WCW + amino_acids + WCW + pyparsing_common.number() + RP
 
         pmod = pmod_option_1 | pmod_option_2 | pmod_option_3
 
@@ -77,6 +77,16 @@ class Parser:
         # 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
         location_tags = ['loc', 'location']
         location = oneOf(location_tags) + LP + ns_val + RP
+
+        # deprecated substitution function
+        psub_tags = ['sub', 'substitution']
+        psub = oneOf(psub_tags) + LP + amino_acids + WCW + pyparsing_common.integer + WCW + amino_acids + RP
+
+        def handle_psub(s, l, tokens):
+            log.warning('PyBEL006 deprecated protein substitution function. User variant() instead. {}'.format(s))
+            return tokens
+
+        psub.setParseAction(handle_psub)
 
         # 2.6 Other Functions
 
@@ -146,7 +156,7 @@ class Parser:
             ns, val = tokens[1]
             n = cls, ns, val
             if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=value)
+                self.graph.add_node(n, type=cls, namespace=ns, value=val)
             return tokens
 
         mirna_simple.setParseAction(handle_mirna_simple)
@@ -175,14 +185,14 @@ class Parser:
 
         protein_simple.setParseAction(handle_protein_simple)
 
-        protein_modified = oneOf(protein_tags) + LP + ns_val + OneOrMore(WCW + (pmod | variant | fragment)) + Optional(
-            WCW + location) + RP
+        protein_modified = oneOf(protein_tags) + LP + Group(ns_val) + OneOrMore(
+            WCW + Group(pmod | variant | fragment | psub)) + Optional(WCW + Group(location)) + RP
 
         def handle_protein_modified(s, l, tokens):
             # TODO fill this in
             return tokens
 
-        protein_modified.setParseAction(protein_modified)
+        protein_modified.setParseAction(handle_protein_modified)
 
         protein_fusion = oneOf(protein_tags) + LP + fusion + RP
 
@@ -196,14 +206,14 @@ class Parser:
 
         # 2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA
         rna_tags = ['r', 'rnaAbundance']
-        rna_simple = oneOf(rna_tags) + LP + ns_val + RP
+        rna_simple = oneOf(rna_tags) + LP + Group(ns_val) + RP
 
         def handle_rna_simple(s, l, tokens):
             cls = tokens[0] = 'RNA'
             ns, val = tokens[1]
             n = cls, ns, val
             if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=value)
+                self.graph.add_node(n, type=cls, namespace=ns, value=val)
             return tokens
 
         rna_simple.setParseAction(handle_rna_simple)
@@ -237,15 +247,17 @@ class Parser:
             ns, val = tokens[1]
             n = cls, ns, val
             if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=value)
+                self.graph.add_node(n, type=cls, namespace=ns, value=val)
             return tokens
 
         complex_singleton_1.setParseAction(handle_complex_singleton_1)
 
         complex_singleton_2 = oneOf(complex_tags) + LP + ns_val + WCW + location + RP
 
-        complex_list_1 = oneOf(complex_tags) + LP + Group(single_abundance) + OneOrMore(
-            WCW + Group(single_abundance)) + RP
+        complex_partial = single_abundance | complex_singleton_1 | complex_singleton_2
+
+        complex_list_1 = oneOf(complex_tags) + LP + Group(complex_partial) + OneOrMore(
+            WCW + Group(complex_partial)) + RP
 
         def handle_complex_list_1(s, l, tokens):
             cls = tokens[0] = 'Complex'
@@ -264,8 +276,8 @@ class Parser:
 
         complex_list_1.setParseAction(handle_complex_list_1)
 
-        complex_list_2 = oneOf(complex_tags) + LP + Group(single_abundance) + OneOrMore(
-            WCW + Group(single_abundance)) + WCW + location + RP
+        complex_list_2 = oneOf(complex_tags) + LP + Group(complex_partial) + OneOrMore(
+            WCW + Group(complex_partial)) + WCW + location + RP
 
         complex_abundances = complex_list_2 | complex_list_1 | complex_singleton_2 | complex_singleton_1
 
@@ -318,7 +330,7 @@ class Parser:
             ns, val = tokens[1]
             n = cls, ns, val
             if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=value)
+                self.graph.add_node(n, type=cls, namespace=ns, value=val)
             return tokens
 
         biological_process.setParseAction(handle_biological_process)
@@ -346,7 +358,7 @@ class Parser:
         activity_legacy = oneOf(activity_legacy_tags) + LP + Group(abundance) + RP
 
         def handle_activity_legacy(s, l, tokens):
-            log.warning('parsing legacy activity: {}'.format(s))
+            log.warning('PyBEL001 legacy activity statement. Use activity() instead. {}'.format(s))
             legacy_cls = tokens[0]
             cls = tokens[0] = 'activity'
             tokens.append(['molecularActivity', legacy_cls])
@@ -374,28 +386,17 @@ class Parser:
         to_loc = Suppress('toLoc') + LP + ns_val + RP
 
         cell_secretion_tags = ['sec', 'cellSecretion']
-        cell_secretion_correct = oneOf(cell_secretion_tags) + LP + simple_abundance + WCW + from_loc + WCW + to_loc + RP
-        cell_secretion_wrong = oneOf(cell_secretion_tags) + LP + simple_abundance + WCW + ns_val + WCW + ns_val + RP
-        cell_secretion_wrong.setParseAction(lambda a, b, c: log.warning('Invalid cell secretion syntax!'))
-
-        cell_secretion = cell_secretion_wrong | cell_secretion_correct
+        cell_secretion = oneOf(cell_secretion_tags) + LP + Group(simple_abundance) + RP
 
         cell_surface_expression_tags = ['surf', 'cellSurfaceExpression']
-        cell_surface_expression_correct = oneOf(
-            cell_surface_expression_tags) + LP + simple_abundance + RP + WCW + from_loc + WCW + to_loc + RP
-        cell_surface_expression_wrong = oneOf(
-            cell_surface_expression_tags) + LP + simple_abundance + RP + WCW + from_loc + WCW + to_loc + RP
-
-        cell_surface_expression = cell_surface_expression_wrong | cell_surface_expression_correct
+        cell_surface_expression = oneOf(cell_surface_expression_tags) + LP + Group(simple_abundance) + RP
 
         translocation_tags = ['translocation', 'tloc']
-        translocation = oneOf(translocation_tags) + LP + Group(simple_abundance) + WCW + Group(from_loc) + WCW + Group(
+        translocation_standard = oneOf(translocation_tags) + LP + Group(simple_abundance) + WCW + Group(
+            from_loc) + WCW + Group(
             to_loc) + RP
 
-        # translocation_wrong = oneOf(translocation_tags) + LP + simple_abundance + WCW + ns_val + WCW + ns_val + RP
-        # translocation = translocation_wrong | translocation_right
-
-        def translocation_handler(s, l, tokens):
+        def translocation_standard_handler(s, l, tokens):
             cls = tokens[0] = 'Translocation'
 
             ab_fn = tokens[1][0]
@@ -419,12 +420,30 @@ class Parser:
             self.graph.add_edge(ab_n, self.node_count, type='participant', attr_dict=self.annotations.copy())
             return tokens
 
-        translocation.setParseAction(translocation_handler)
+        translocation_standard.setParseAction(translocation_standard_handler)
+
+        translocation_legacy = oneOf(translocation_tags) + LP + Group(simple_abundance) + WCW + Group(
+            ns_val) + WCW + Group(
+            ns_val) + RP
+
+        def translocation_legacy_handler(s, l, token):
+            log.warning('PyBEL005 legacy translocation statement. use fromLoc() and toLoc(). {}'.format(s))
+            return translocation_standard_handler(s, l, token)
+
+        translocation_legacy.setParseAction(translocation_legacy_handler)
+
+        translocation = translocation_legacy | translocation_standard
 
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
 
         degredation_tags = ['deg', 'degredation']
         degredation = oneOf(degredation_tags) + LP + simple_abundance + RP
+
+        def handle_degredation(s, l, tokens):
+            tokens[0] = 'degredation'
+            return tokens
+
+        degredation.setParseAction(handle_degredation)
 
         # 2.5.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
         reactants = Suppress('reactants') + LP + Group(simple_abundance) + ZeroOrMore(
@@ -470,12 +489,7 @@ class Parser:
             Group(bel_term) | (LP + causal_relationship + RP))
 
         def handle_increases(s, l, tokens):
-            tokens[1] = increases_tags[-1]
-
-            # u = self.ensure_term(tokens[0])
-            # v = self.ensure_term(tokens[2])
-            # self.graph.add_edge(u, v, type=tokens[1], attr_dict=self.annotations.copy())
-
+            tokens[1] = 'increases'
             return tokens
 
         increases.setParseAction(handle_increases)
@@ -485,15 +499,33 @@ class Parser:
         directly_increases = Group(bel_term) + WS + oneOf(directly_increases_tags) + WS + (
             Group(bel_term) | (LP + causal_relationship + RP))
 
+        def handle_directly_increases(s, l, tokens):
+            tokens[1] = 'directlyIncreasess'
+            return tokens
+
+        directly_increases.setParseAction(handle_directly_increases)
+
         # 3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
         decreases_tags = ['-|', 'decreases']
         decreases = Group(bel_term) + WS + oneOf(decreases_tags) + WS + (
             Group(bel_term) | (LP + causal_relationship + RP))
 
+        def handle_decreases(s, l, tokens):
+            tokens[1] = 'decreases'
+            return tokens
+
+        decreases.setParseAction(handle_decreases)
+
         # 3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
         directly_decreases_tags = ['=|', '→', 'directlyDecreases']
         directly_decreases = Group(bel_term) + WS + oneOf(directly_decreases_tags) + WS + (
             Group(bel_term) | (LP + causal_relationship + RP))
+
+        def handle_directly_decreases(s, l, tokens):
+            tokens[1] = 'directlyIncreases'
+            return tokens
+
+        directly_decreases.setParseAction(handle_directly_decreases)
 
         # 3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof
         rate_limit_tags = ['rateLimitingStepOf']
@@ -504,9 +536,21 @@ class Parser:
         causes_no_change_tags = ['cnc', 'causesNoChange']
         causes_no_change = Group(bel_term) + WS + oneOf(causes_no_change_tags) + WS + Group(bel_term)
 
+        def handle_causes_no_change(s, l, tokens):
+            tokens[1] = 'causesNoChange'
+            return tokens
+
+        causes_no_change.setParseAction(handle_causes_no_change)
+
         # 3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
         regulates_tags = ['reg', 'regulates']
         regulates = Group(bel_term) + WS + oneOf(regulates_tags) + WS + Group(bel_term)
+
+        def handle_regulates(s, l, tokens):
+            tokens[1] = 'regulates'
+            return tokens
+
+        regulates.setParseAction(handle_regulates)
 
         causal_relationship << (
             increases | directly_increases | decreases | directly_decreases | rate_limit | causes_no_change | regulates)
@@ -517,13 +561,31 @@ class Parser:
         negative_correlation_tags = ['neg', 'negativeCorrelation']
         negative_correlation = Group(bel_term) + WS + oneOf(negative_correlation_tags) + WS + Group(bel_term)
 
+        def handle_negative_correlation(s, l, tokens):
+            tokens[1] = 'negativeCorrelation'
+            return tokens
+
+        negative_correlation.setParseAction(handle_negative_correlation)
+
         # 3.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XposCor
         positive_correlation_tags = ['pos', 'positiveCorrelation']
         positive_correlation = Group(bel_term) + WS + oneOf(positive_correlation_tags) + WS + Group(bel_term)
 
+        def handle_positive_correlation(s, l, tokens):
+            tokens[1] = 'positiveCorrelation'
+            return tokens
+
+        positive_correlation.setParseAction(handle_positive_correlation)
+
         # 3.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xassociation
         association_tags = ['--', 'association']
         association = Group(bel_term) + WS + oneOf(association_tags) + WS + Group(bel_term)
+
+        def handle_association(s, l, tokens):
+            tokens[1] = 'association'
+            return tokens
+
+        association.setParseAction(handle_association)
 
         correlative_relationships = negative_correlation | positive_correlation | association
 
@@ -537,12 +599,18 @@ class Parser:
         transcribed_tags = [':>', 'transcribedTo']
         transcribed = gene + WS + oneOf(transcribed_tags) + WS + rna
 
+        def handle_transcribed(s, loc, tokens):
+            tokens[1] = 'transcribedTo'
+            return tokens
+
+        transcribed.setParseAction(handle_transcribed)
+
         # 3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto
-        translated_tags = [':>', 'transcribedTo']
+        translated_tags = [':>', 'tranlatedTo']
         translated = rna + WS + oneOf(translated_tags) + WS + protein
 
         def handle_translated(s, loc, tokens):
-            tokens[1] = translated_tags[-1]
+            tokens[1] = 'translatedTo'
             return tokens
 
         translated.setParseAction(handle_translated)
@@ -556,10 +624,16 @@ class Parser:
         has_member = Group(abundance) + WS + oneOf(has_member_tags) + WS + Group(abundance)
 
         # 3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
-        abundance_list = Suppress('list') + LP + OneOrMore(abundance)
+        abundance_list = Suppress('list') + LP + Group(abundance) + OneOrMore(WCW + Group(abundance)) + RP
 
         has_members_tags = ['hasMembers']
         has_members = Group(abundance) + WS + oneOf(has_members_tags) + WS + Group(abundance_list)
+
+        def handle_has_members(s, l, tokens):
+            # TODO implement
+            return tokens
+
+        has_members.setParseAction(handle_has_members)
 
         # 3.4.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hascomponent
         has_component_tags = ['hasComponent']
@@ -604,9 +678,11 @@ class Parser:
         if self.namespaces is None:
             pass
         elif ns not in self.namespaces:
-            raise Exception('Namespace Exception: invalid namespace: {}'.format(ns))
+            log.warning('PyBEL003 Namespace Exception: invalid namespace: {}'.format(ns))
+            raise Exception()
         elif val not in self.namespaces[ns]:
-            raise Exception('Namespace Exception: {} is not a valid member of {}'.format(val, ns))
+            log.warning('PyBEL004 Namespace Exception: {} is not a valid member of {}'.format(val, ns))
+            raise Exception()
 
         if self.namespace_mapping is None:
             pass
@@ -619,7 +695,7 @@ class Parser:
         try:
             return self.statement.parseString(s).asList()
         except Exception as e:
-            log.warn('failed to parse: {}'.format(s))
+            log.warning('PyBEL000 general parser failure: {}'.format(s))
             return None
 
     def set_metadata(self, citation, annotations):

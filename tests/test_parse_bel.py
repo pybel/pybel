@@ -54,7 +54,7 @@ class TestTokenParser(unittest.TestCase):
         statement = 'act(p(HGNC:CHIT1)) biomarkerFor path(MESHD:"Alzheimer Disease")'
         result = self.parser.parse(statement)
         expected = [
-            ['act', ['Protein', ['HGNC', 'CHIT1']]],
+            ['activity', ['Protein', ['HGNC', 'CHIT1']]],
             'biomarkerFor',
             ['Pathology', ['MESHD', 'Alzheimer Disease']]
         ]
