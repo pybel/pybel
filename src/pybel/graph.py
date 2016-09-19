@@ -1,4 +1,3 @@
-import io
 import logging
 import time
 
@@ -6,10 +5,9 @@ import networkx as nx
 import py2neo
 import requests
 
-from .parsers import language
 from .parsers import split_file_to_annotations_and_definitions
 from .parsers.set_statements import parse_commands, group_statements, sanitize_statement_lines
-from .parsers.tokenizer import Parser
+from .parsers.tokenizer import Parser, handle_tokens
 from .parsers.utils import sanitize_file_lines
 
 log = logging.getLogger(__name__)
@@ -41,8 +39,9 @@ class BELGraph(nx.MultiDiGraph):
     """
 
     def __init__(self, *attrs, **kwargs):
-        super().__init__(self, *attrs, **kwargs)
+        nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
+    # TODO consider requests-file https://pypi.python.org/pypi/requests-file/1.3.1
     def parse_from_url(self, url):
         """
         Parses a BEL file from URL resource and adds to graph
@@ -56,14 +55,13 @@ class BELGraph(nx.MultiDiGraph):
         if response != 200:
             raise Exception('Url not found')
 
-        return self.parse_from_file(io.StringIO(response.text))
-
+        return self.parse_from_file(response.iter_lines())
 
     # TODO break up into smaller commands with tests
     def parse_from_file(self, fl):
         """
         Parses a BEL file from a file-like object and adds to graph
-        :param fl: file-like object backed by BEL data
+        :param fl: iterable over lines of BEL data file
         :return: self
         :rtype: BELGraph
         """
@@ -86,13 +84,13 @@ class BELGraph(nx.MultiDiGraph):
             lines = com['notes']
 
             log.debug(citation)
-            d = {}
+            annotations = {}
 
             for line in lines:
 
                 if len(line) == 3 and line[0] == 'S':
                     _, key, value = line
-                    d[key] = value.strip('"').strip()
+                    annotations[key] = value.strip('"').strip()
                 elif len(line) == 2 and line[0] == 'X':
                     k, expr = line
 
@@ -100,35 +98,10 @@ class BELGraph(nx.MultiDiGraph):
                     if tokens is None:
                         continue
 
-                    s, p, o = tokens
-
-                    if s[0] in language.functions and o[0] in language.functions:
-                        s_ns, s_name = s[1]
-                        o_ns, o_name = o[1]
-
-                        s_can = '{}:{}'.format(s_ns, s_name)
-                        o_can = '{}:{}'.format(o_ns, o_name)
-
-                        if s_can not in self:
-                            self.add_node(s_can, type=s[0], name=s_name, namespace=s_ns)
-                            log.debug('added {}:{}'.format(s[0], s_can))
-
-                        if o_can not in self:
-                            self.add_node(o_can, type=o[0], name=s_name, namespace=o_ns)
-                            log.debug('added {}:{}'.format(o[0], o_can))
-
-                        attrs = d.copy()
-                        attrs['relation'] = p
-
-                        for key in citation:
-                            attrs['citation_{}'.format(key)] = citation[key]
-
-                        log.debug('added {}{}{}'.format(s_can, p, o_can))
-
-                        self.add_edge(s_can, o_can, attr_dict=attrs)
+                    handle_tokens(self, tokens, citation, annotations)
         return self
 
-    def to_neo4j(self, neo_graph: py2neo.Graph):
+    def to_neo4j(self, neo_graph):
         """
         Uploads to Neo4J graph database usiny `py2neo`
         :param neo_graph:
