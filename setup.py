@@ -27,7 +27,10 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = [
     'requests',
-    'networkx'
+    'networkx',
+    'pyparsing',
+    'py2neo',
+    'click'
 ]
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = ['tox']
