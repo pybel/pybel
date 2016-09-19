@@ -125,3 +125,12 @@ def parse_definition_url(url):
     result_dict['payload'] = dict(values)
 
     return result_dict
+
+
+# TODO implement
+def build_namespace_dictionary(definition_results):
+    """
+    Builds namespace dictionary for use in validation of BEL statements
+    :return:
+    """
+    raise NotImplementedError()

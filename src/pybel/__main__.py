@@ -1,7 +1,7 @@
+import json
 import os
 
 import click
-import json
 import networkx as nx
 from py2neo import authenticate, Graph
 
@@ -23,12 +23,12 @@ def get_from_url_or_path(url=None, path=None):
 
 
 @cli.command()
-@click.option('--url')
-@click.option('--path')
-@click.option('--neo-url', default='localhost')
-@click.option('--neo-port', type=int, default=7474)
-@click.option('--neo-user', default='neo4j')
-@click.option('--neo-pass', default='neo4j')
+@click.option('--url', help='URL of BEL file')
+@click.option('--path', help='File path of BEL file')
+@click.option('--neo-url', default='localhost', help='URL of neo4j database')
+@click.option('--neo-port', type=int, default=7474, help='Port of neo4j database')
+@click.option('--neo-user', default='neo4j', help='User for neo4j database')
+@click.option('--neo-pass', default='neo4j', help='Password for neo4j database')
 def to_neo(url, path, neo_url, neo_port, neo_user, neo_pass):
     """Parses BEL file and uploads to Neo4J"""
     g = get_from_url_or_path(url, path)
@@ -40,10 +40,10 @@ def to_neo(url, path, neo_url, neo_port, neo_user, neo_pass):
 
 
 @cli.command()
-@click.option('--url')
-@click.option('--path')
-@click.option('--node-path')
-@click.option('--edge-path')
+@click.option('--url', help='URL of BEL file')
+@click.option('--path', help='File path of BEL file')
+@click.option('--node-path', help='File path to output node file')
+@click.option('--edge-path', help='File path to output edge file')
 def to_csv(url, path, node_path, edge_path):
     """Parses BEL file and exports as node/edge list files"""
     g = get_from_url_or_path(url, path)
