@@ -514,7 +514,7 @@ class Parser:
             Group(bel_term) | (LP + causal_relationship + RP))
 
         def handle_directly_increases(s, l, tokens):
-            tokens[1] = 'directlyIncreasess'
+            tokens[1] = 'directlyIncreases'
             return tokens
 
         directly_increases.setParseAction(handle_directly_increases)
