@@ -1,6 +1,6 @@
 import re
 
-from . import language
+from pybel.parsers import language
 
 predefined_translocation_dict = {
     'sec': {
