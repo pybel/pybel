@@ -3,7 +3,7 @@ from setuptools import setup
 # see https://python-packaging.readthedocs.org/en/latest/minimal.html
 # TODO: publish on PyPi https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 
-"""Setup module for the pushover_complete package"""
+"""Setup module for the PyBEL package"""
 
 import setuptools
 import codecs  # To use a consistent encoding
