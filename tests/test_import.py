@@ -1,7 +1,8 @@
+import os
 import unittest
 
 import networkx as nx
-import os
+
 import pybel
 
 
@@ -52,5 +53,3 @@ class TestImport(unittest.TestCase):
         with open(os.path.expandvars('$PYBEL_BASE/tests/bel/test_bel_1.bel')) as f:
             result = pybel.from_file(f)
         self.assertSetEqual(set(self.graph.nodes()), set(result.nodes()))
-
-
