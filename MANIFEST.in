@@ -13,3 +13,6 @@ recursive-include docs *.rst
 recursive-include docs Makefile
 
 global-exclude docs/*
+
+exclude legacy
+recursive-exclude legacy *.py
