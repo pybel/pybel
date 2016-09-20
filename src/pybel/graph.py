@@ -80,19 +80,20 @@ class BELGraph(nx.MultiDiGraph):
 
         parser = Parser()
         for com in coms:
+            parser.reset_metadata()
+
             citation = com['citation']
-            lines = com['notes']
+            #TODO put citation into parser somehow
 
-            log.debug(citation)
-            annotations = {}
-
-            for line in lines:
+            for line in com['notes']:
                 if len(line) == 3 and line[0] == 'S':
                     _, key, value = line
-                    annotations[key] = value.strip('"').strip()
+                    parser.set_metadata(key, value)
+                elif len(line) == 2 and line[0] == 'U':
+                    _, key = line
+                    parser.unset_metadata(key)
                 elif len(line) == 2 and line[0] == 'X':
                     k, expr = line
-                    parser.set_metadata(citation, annotations)
                     parser.parse(expr)
 
         return self

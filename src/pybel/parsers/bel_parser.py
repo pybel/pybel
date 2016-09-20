@@ -47,8 +47,10 @@ class Parser:
         ns_val = (Word(alphanums) + Suppress(':') + (Word(alphanums) | quoted_value))
 
         # TODO test listed namespace
+        # TODO deal with quoted values
         if names is not None:
-            ns_val = ns_val | oneOf(names)
+            blank_ns = oneOf(names).setParseAction(lambda s,l,tokens: ['', tokens[0]])
+            ns_val = ns_val | blank_ns
 
         ns_val.setParseAction(self.validate_ns_pair)
 
@@ -685,8 +687,8 @@ class Parser:
         self.statement = relation | bel_term
 
     def validate_ns_pair(self, s, location, tokens):
-        #TODO test listed namespace
-        #if len(tokens) == 1:
+        # TODO test listed namespace
+        # if len(tokens) == 1:
         #    if tokens[0] in self.names:
         #        return tokens
         #    else:
@@ -718,6 +720,12 @@ class Parser:
             log.warning('PyBEL000 general parser failure: {}'.format(s))
             return None
 
-    def set_metadata(self, citation, annotations):
-        self.annotations.update(annotations)
-        self.annotations.update({'citation_{}'.format(k): v for k, v in citation.items()})
+    def reset_metadata(self):
+        self.annotations = {}
+
+    def set_metadata(self, key, value):
+        self.annotations[key] = value
+
+    def unset_metadata(self, key):
+        if key in self.annotations:
+            del self.annotaions[key]
