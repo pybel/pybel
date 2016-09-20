@@ -49,7 +49,7 @@ class Parser:
         # TODO test listed namespace
         # TODO deal with quoted values
         if names is not None:
-            blank_ns = oneOf(names).setParseAction(lambda s,l,tokens: ['', tokens[0]])
+            blank_ns = oneOf(names).setParseAction(lambda s, l, tokens: ['', tokens[0]])
             ns_val = ns_val | blank_ns
 
         ns_val.setParseAction(self.validate_ns_pair)
@@ -57,8 +57,8 @@ class Parser:
         # 2.2 Abundance Modifier Functions
 
         # 2.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_protein_modifications
-        aa_single = oneOf(language.aminoacid_dict)
-        aa_triple = oneOf(language.aminoacid_dict.values())
+        aa_single = oneOf(language.amino_acid_dict)
+        aa_triple = oneOf(language.amino_acid_dict.values())
         amino_acids = aa_single | aa_triple | 'X'
 
         pmod_tags = ['pmod', 'proteinModification']
@@ -729,3 +729,7 @@ class Parser:
     def unset_metadata(self, key):
         if key in self.annotations:
             del self.annotaions[key]
+
+    def set_citation(self, citation):
+        # TODO implement
+        pass

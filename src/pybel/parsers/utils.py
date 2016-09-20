@@ -4,6 +4,19 @@ import re
 log = logging.getLogger(__name__)
 re_parse_list = re.compile('"\s*,\s*"')
 
+re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
+
+
+def split_file_to_annotations_and_definitions(file):
+    content = [line.strip() for line in file]
+
+    start_of_statements = 1 + max(i for i, l in enumerate(content) if re_match_bel_header.search(l))
+
+    definition_lines = content[:start_of_statements]
+    statement_lines = content[start_of_statements:]
+
+    return definition_lines, statement_lines
+
 
 def parse_list(s):
     s = s.strip('{}')

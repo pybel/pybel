@@ -5,10 +5,9 @@ import networkx as nx
 import py2neo
 import requests
 
-from .parsers import split_file_to_annotations_and_definitions
-from .parsers.set_statements import parse_commands, group_statements, sanitize_statement_lines
 from .parsers.bel_parser import Parser
-from .parsers.utils import sanitize_file_lines
+from .parsers.set_statements import parse_commands, group_statements, sanitize_statement_lines
+from .parsers.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
 
 log = logging.getLogger(__name__)
 
@@ -70,20 +69,21 @@ class BELGraph(nx.MultiDiGraph):
 
         definition_lines, statement_lines = split_file_to_annotations_and_definitions(content)
 
+        # TODO: soon.
         # definition_results = handle_definitions(definition_lines)
+        # namespace_dict = build_namespace_dictionary(definition_results)
 
         sanitary_statement_lines = sanitize_statement_lines(statement_lines)
         parsed_commands = parse_commands(sanitary_statement_lines)
         coms = group_statements(parsed_commands)
 
-        print('Time: {:.2f} seconds'.format(time.time() - t))
+        log.info('Loaded lines in {:.2f} seconds'.format(time.time() - t))
+        t = time.time()
 
         parser = Parser()
         for com in coms:
             parser.reset_metadata()
-
-            citation = com['citation']
-            #TODO put citation into parser somehow
+            parser.set_citation(com['citation'])
 
             for line in com['notes']:
                 if len(line) == 3 and line[0] == 'S':
@@ -96,6 +96,7 @@ class BELGraph(nx.MultiDiGraph):
                     k, expr = line
                     parser.parse(expr)
 
+        log.info('Parsed BEL in {:.2f} seconds'.format(time.time() - t))
         return self
 
     def to_neo4j(self, neo_graph):
