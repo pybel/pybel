@@ -448,14 +448,14 @@ class Parser:
 
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
 
-        degredation_tags = ['deg', 'degredation']
-        degredation = oneOf(degredation_tags) + LP + simple_abundance + RP
+        degradation_tags = ['deg', 'degradation']
+        degradation = oneOf(degradation_tags) + LP + simple_abundance + RP
 
         def handle_degredation(s, l, tokens):
-            tokens[0] = 'degredation'
+            tokens[0] = 'degradation'
             return tokens
 
-        degredation.setParseAction(handle_degredation)
+        degradation.setParseAction(handle_degredation)
 
         # 2.5.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
         reactants = Suppress('reactants') + LP + Group(simple_abundance) + ZeroOrMore(
@@ -485,7 +485,7 @@ class Parser:
 
             return tokens
 
-        transformation = cell_secretion | cell_surface_expression | translocation | degredation | reaction
+        transformation = cell_secretion | cell_surface_expression | translocation | degradation | reaction
 
         # 3 BEL Relationships
 
