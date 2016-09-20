@@ -22,14 +22,21 @@ class Parser:
     Build a parser backed by a given dictionary of namespaces
     """
 
-    def __init__(self, graph=None, annotations=None, namespaces=None, namespace_mapping=None):
+    def __init__(self, graph=None, annotations=None, namespaces=None, namespace_mapping=None, names=None):
         """
         :param namespaces: A dictionary of {namespace: set of members}
+        :param annotations: initial annotation dictionary, containing BEL data like evidence, pathway, etc.
+        :param graph: the graph to put the network in
+        :type graph: nx.MultiDiGraph
+        :param namespace_mapping: a dict of {name: {value: (other_name, other_value)}}
+        :param names: a list of valid, un-spaced names
+        :type names: list
         """
         self.namespaces = namespaces
         self.namespace_mapping = namespace_mapping
         self.graph = graph if graph is not None else nx.MultiDiGraph()
         self.annotations = annotations if annotations is not None else {}
+        self.names = names
 
         self.node_count = 0
         self.node_to_id = {}
@@ -38,6 +45,11 @@ class Parser:
         quoted_value = dblQuotedString().setParseAction(removeQuotes)
 
         ns_val = (Word(alphanums) + Suppress(':') + (Word(alphanums) | quoted_value))
+
+        # TODO test listed namespace
+        if names is not None:
+            ns_val = ns_val | oneOf(names)
+
         ns_val.setParseAction(self.validate_ns_pair)
 
         # 2.2 Abundance Modifier Functions
@@ -350,8 +362,6 @@ class Parser:
         pathology.setParseAction(handle_pathology)
 
         # 2.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xactivity
-        # FIXME activity consolidation
-        # see http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_activity_functions
         activity_tags = ['act', 'activity']
 
         activity_legacy_tags = list(language.activities)
@@ -478,6 +488,8 @@ class Parser:
         # 3 BEL Relationships
 
         bel_term = abundance | process | transformation
+
+        # TODO finish all handlers for relationships
 
         # 3.1 Causal relationships
 
@@ -673,6 +685,14 @@ class Parser:
         self.statement = relation | bel_term
 
     def validate_ns_pair(self, s, location, tokens):
+        #TODO test listed namespace
+        #if len(tokens) == 1:
+        #    if tokens[0] in self.names:
+        #        return tokens
+        #    else:
+        #        log.warning('PyBEL007 Name Exception: no namespace {}'.format(tokens))
+        #        raise Exception()
+
         ns, val = tokens
 
         if self.namespaces is None:
