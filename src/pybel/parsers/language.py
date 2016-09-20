@@ -1,10 +1,8 @@
 activities_dict = {
-    # 'degradation': 'deg',
     'catalyticActivity': 'cat',
     'chaperoneActivity': 'chap',
     'gtpBoundActivity': 'gtp',
     'kinaseActivity': 'kin',
-    'molecularActivity': 'act',
     'peptidaseActivity': 'pep',
     'phosphataseActivity': 'phos',
     'ribosylationActivity': 'ribo',
@@ -41,8 +39,8 @@ functions_canon = {
     'p': 'Protein',
     'rnaAbundance': 'RNA',
     'r': 'RNA',
-    'biologicalProcess': 'BiologicalProcess',
-    'bp': 'BiologicalProcess',
+    'biologicalProcess': 'Process',
+    'bp': 'Process',
     'pathology': 'Pathology',
     'path': 'Pathology'
 }
