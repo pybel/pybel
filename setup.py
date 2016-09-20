@@ -34,6 +34,11 @@ INSTALL_REQUIRES = [
 ]
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = ['tox']
+ENTRY_POINTS = {
+    'console_scripts': [
+        'pybel = pybel.cli:main',
+    ]
+}
 
 #################################################################
 
@@ -82,6 +87,7 @@ if __name__ == '__main__':
         package_dir={'': 'src'},
         install_requires=INSTALL_REQUIRES,
         extras_require=EXTRAS_REQUIRE,
-        tests_require=TESTS_REQUIRE
+        tests_require=TESTS_REQUIRE,
+        entry_points=ENTRY_POINTS
     )
 

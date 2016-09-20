@@ -1,3 +1,6 @@
+"""'A Python package for parsing, validating, and analysis of of BEL graphs'"""
+
+from . import cli
 from .graph import BELGraph, from_url, from_file
 
 __all__ = ['BELGraph', 'from_url', 'from_file']
