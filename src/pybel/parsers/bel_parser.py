@@ -7,6 +7,7 @@ import networkx as nx
 from pyparsing import *
 
 from . import language
+from .utils import list2tuple
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class Parser:
         """
         :param namespaces: A dictionary of {namespace: set of members}
         :param annotations: initial annotation dictionary, containing BEL data like evidence, pathway, etc.
-        :param graph: the graph to put the network in
+        :param graph: the graph to put the network in. Constructs new nx.MultiDiGrap if None
         :type graph: nx.MultiDiGraph
         :param namespace_mapping: a dict of {name: {value: (other_name, other_value)}}
         :param names: a list of valid, un-spaced names
@@ -61,14 +62,21 @@ class Parser:
         aa_triple = oneOf(language.amino_acid_dict.values())
         amino_acids = aa_single | aa_triple | 'X'
 
-        pmod_tags = ['pmod', 'proteinModification']
+        pmod_tag = oneOf(['pmod', 'proteinModification'])
+        pmod_default = oneOf(language.pmod_namespace)
 
-        pmod_option_1 = oneOf(pmod_tags) + LP + (ns_val | Word(alphanums)) + RP
-        pmod_option_2 = oneOf(pmod_tags) + LP + (ns_val | Word(alphanums)) + WCW + amino_acids + RP
-        pmod_option_3 = oneOf(pmod_tags) + LP + (
-            Group(ns_val) | Word(alphanums)) + WCW + amino_acids + WCW + pyparsing_common.number() + RP
+        pmod_option_1 = pmod_tag + LP + (Group(ns_val) | pmod_default) + RP
+        pmod_option_2 = pmod_tag + LP + (Group(ns_val) | pmod_default) + WCW + amino_acids + RP
+        pmod_option_3 = pmod_tag + LP + (
+        Group(ns_val) | pmod_default) + WCW + amino_acids + WCW + pyparsing_common.number() + RP
 
         pmod = pmod_option_1 | pmod_option_2 | pmod_option_3
+
+        def handle_pmod(s, l, tokens):
+            tokens[0] = 'ProteinModification'
+            return tokens
+
+        pmod.setParseAction(handle_pmod)
 
         # 2.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
         nucleotides = oneOf(['A', 'G', 'C', 'T'])
@@ -81,12 +89,24 @@ class Parser:
         variant_tags = ['var', 'variant']
         variant = oneOf(variant_tags) + LP + hgvs_variant + RP
 
+        def handle_variant(s, loc, tokens):
+            tokens[0] = 'Variant'
+            return tokens
+
+        variant.setParseAction(handle_variant)
+
         # 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
         fragment_range = (pyparsing_common.integer() | '?') + Suppress('_') + (pyparsing_common.integer() | '?' | '*')
         fragment_tags = ['frag', 'fragment']
         fragment_1 = oneOf(fragment_tags) + LP + fragment_range + RP
         fragment_2 = oneOf(fragment_tags) + LP + fragment_range + WCW + Word(alphanums) + RP
         fragment = fragment_2 | fragment_1
+
+        def handle_fragment(s, l, tokens):
+            tokens[0] = 'Fragment'
+            return tokens
+
+        fragment.setParseAction(handle_fragment)
 
         # 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
         location_tags = ['loc', 'location']
@@ -110,7 +130,14 @@ class Parser:
         range_coordinate = (oneOf(['r', 'p']) + '.' + Word(nums) + '_' + Word(nums)) | '?'
 
         fusion_tags = ['fus', 'fusion']
-        fusion = oneOf(fusion_tags) + LP + ns_val + WCW + range_coordinate + WCW + ns_val + WCW + range_coordinate + RP
+        fusion = oneOf(fusion_tags) + LP + Group(ns_val) + WCW + range_coordinate + WCW + Group(
+            ns_val) + WCW + range_coordinate + RP
+
+        def handle_fusion(s, l, tokens):
+            tokens[0] = 'Fusion'
+            return tokens
+
+        fusion.setParseAction(handle_fusion)
 
         # 2.1 Abundance Functions
 
@@ -121,9 +148,9 @@ class Parser:
         def handle_general_abundance(s, l, tokens):
             cls = tokens[0] = 'Abundance'
             ns, val = tokens[1]
-            n = cls, ns, val
-            if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=val)
+            name = self.canonicalize_node(tokens)
+            if name not in self.graph:
+                self.graph.add_node(name, type=cls, namespace=ns, value=val)
             return tokens
 
         general_abundance.addParseAction(handle_general_abundance)
@@ -146,14 +173,16 @@ class Parser:
         gene_modified = oneOf(gene_tags) + LP + ns_val + OneOrMore(WCW + variant) + Optional(WCW + location) + RP
 
         def handle_gene_modified(s, l, tokens):
+            cls = tokens[0] = 'GeneModified'
             # TODO fill this in
             return tokens
 
         gene_modified.setParseAction(handle_gene_modified)
 
-        gene_fusion = oneOf(gene_tags) + LP + fusion + RP
+        gene_fusion = oneOf(gene_tags) + LP + Group(fusion) + RP
 
         def handle_gene_fusion(s, l, tokens):
+            cls = tokens[0] = 'GeneFusion'
             # TODO fill this in
             return tokens
 
@@ -178,6 +207,7 @@ class Parser:
         mirna_modified = oneOf(mirna_tags) + LP + ns_val + OneOrMore(WCW + variant) + Optional(WCW + location) + RP
 
         def handle_mirna_modified(s, l, tokens):
+            cls = tokens[0] = 'miRNAModified'
             # TODO fill this in
             return tokens
 
@@ -186,8 +216,8 @@ class Parser:
         mirna = mirna_modified | mirna_simple
 
         # 2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA
-        protein_tags = ['p', 'proteinAbundance']
-        protein_simple = oneOf(protein_tags) + LP + Group(ns_val) + RP
+        protein_tag = oneOf(['p', 'proteinAbundance'])
+        protein_simple = protein_tag + LP + Group(ns_val) + RP
 
         def handle_protein_simple(s, l, tokens):
             cls = tokens[0] = 'Protein'
@@ -199,16 +229,17 @@ class Parser:
 
         protein_simple.setParseAction(handle_protein_simple)
 
-        protein_modified = oneOf(protein_tags) + LP + Group(ns_val) + OneOrMore(
+        protein_modified = protein_tag + LP + Group(ns_val) + OneOrMore(
             WCW + Group(pmod | variant | fragment | psub)) + Optional(WCW + Group(location)) + RP
 
         def handle_protein_modified(s, l, tokens):
+            cls = tokens[0] = 'ProteinModified'
             # TODO fill this in
             return tokens
 
         protein_modified.setParseAction(handle_protein_modified)
 
-        protein_fusion = oneOf(protein_tags) + LP + fusion + RP
+        protein_fusion = protein_tag + LP + Group(fusion) + RP
 
         def handle_protein_fusion(s, l, tokens):
             # TODO fill this in
@@ -232,18 +263,18 @@ class Parser:
 
         rna_simple.setParseAction(handle_rna_simple)
 
-        rna_modified = oneOf(rna_tags) + LP + ns_val + OneOrMore(WCW + variant) + Optional(WCW + location) + RP
+        rna_modified = oneOf(rna_tags) + LP + Group(ns_val) + OneOrMore(WCW + variant) + Optional(WCW + location) + RP
 
         def handle_rna_modified(s, l, tokens):
-            # TODO fill this in
+            tokens[0] = 'RNAModified'
             return tokens
 
         rna_modified.setParseAction(handle_rna_modified)
 
-        rna_fusion = oneOf(rna_tags) + LP + fusion + RP
+        rna_fusion = oneOf(rna_tags) + LP + Group(fusion) + RP
 
         def handle_rna_fusion(s, l, tokens):
-            # TODO fill this in
+            tokens[0] = 'RNA'
             return tokens
 
         rna_fusion.setParseAction(handle_rna_fusion)
@@ -274,17 +305,16 @@ class Parser:
             WCW + Group(complex_partial)) + RP
 
         def handle_complex_list_1(s, l, tokens):
-            cls = tokens[0] = 'Complex'
+            cls = tokens[0] = 'ComplexList'
 
-            self.node_count += 1
-            self.node_to_id[self.node_count] = tokens
-            self.graph.add_node(self.node_count, type=cls)
+            name = self.canonicalize_node(tokens)
+
+            if name not in self.graph:
+                self.graph.add_node(name, type=cls)
 
             for token in tokens[1:]:
-                v_cls = token[0]
-                v_ns, v_val = token[1]
-                v = v_cls, v_ns, v_val
-                self.graph.add_edge(self.node_count, v, type='hasComponent', attr_dict=self.annotations.copy())
+                v_name = self.canonicalize_node(token)
+                self.graph.add_edge(name, v_name, type='hasComponent', attr_dict=self.annotations.copy())
 
             return tokens
 
@@ -305,15 +335,16 @@ class Parser:
         def handle_composite_abundance(s, loc, tokens):
             cls = tokens[0] = 'Composite'
 
-            self.node_count += 1
-            self.node_to_id[self.node_count] = tokens
-            self.graph.add_node(self.node_count, type=cls)
+            name = self.canonicalize_node(tokens)
+
+            if name not in self.graph:
+                self.graph.add_node(name, type=cls)
 
             for token in tokens[1:]:
                 v_cls = token[0]
                 v_ns, v_val = token[1]
                 v = v_cls, v_ns, v_val
-                self.graph.add_edge(self.node_count, v, type='hasComponent', attr_dict=self.annotations.copy())
+                self.graph.add_edge(name, v, type='hasComponent', attr_dict=self.annotations.copy())
 
             return tokens
 
@@ -328,10 +359,16 @@ class Parser:
         molecular_activity_tags = ['ma', 'molecularActivity']
 
         # backwards compatibility with BEL v1.0
-        molecular_activity_backwards = oneOf(molecular_activity_tags) + LP + oneOf(language.activities) + RP
-        molecular_activity_right = oneOf(molecular_activity_tags) + LP + ns_val + RP
+        molecular_activity_default_ns = oneOf(molecular_activity_tags) + LP + oneOf(language.activities) + RP
+        molecular_activity_custom_ns = oneOf(molecular_activity_tags) + LP + Group(ns_val) + RP
 
-        molecular_activity = molecular_activity_backwards | molecular_activity_right
+        molecular_activity = molecular_activity_default_ns | molecular_activity_custom_ns
+
+        def handle_molecular_activity(s, l, tokens):
+            tokens[0] = 'MolecularActivity'
+            return tokens
+
+        molecular_activity.setParseAction(handle_molecular_activity)
 
         # 2.3 Process Functions
 
@@ -340,7 +377,7 @@ class Parser:
         biological_process = oneOf(biological_process_tags) + LP + Group(ns_val) + RP
 
         def handle_biological_process(s, l, tokens):
-            cls = tokens[0] = 'Process'
+            cls = tokens[0] = 'BiologicalProcess'
             ns, val = tokens[1]
             n = cls, ns, val
             if n not in self.graph:
@@ -371,9 +408,9 @@ class Parser:
 
         def handle_activity_legacy(s, l, tokens):
             log.warning('PyBEL001 legacy activity statement. Use activity() instead. {}'.format(s))
-            legacy_cls = tokens[0]
-            cls = tokens[0] = 'activity'
-            tokens.append(['molecularActivity', legacy_cls])
+            legacy_cls = language.activity_labels[tokens[0]]
+            cls = tokens[0] = 'Activity'
+            tokens.append(['MolecularActivity', legacy_cls])
             return tokens
 
         activity_legacy.setParseAction(handle_activity_legacy)
@@ -381,7 +418,7 @@ class Parser:
         activity_modified = oneOf(activity_legacy_tags) + LP + Group(abundance) + WCW + Group(molecular_activity) + RP
 
         def handle_activity_modified(s, l, tokens):
-            # TODO fill this in
+            tokens[0] = 'Activity'
             return tokens
 
         activity_modified.setParseAction(handle_activity_modified)
@@ -400,8 +437,20 @@ class Parser:
         cell_secretion_tags = ['sec', 'cellSecretion']
         cell_secretion = oneOf(cell_secretion_tags) + LP + Group(simple_abundance) + RP
 
+        def handle_cell_secretion(s, l, tokens):
+            tokens[0] = 'CellSecretion'
+            return tokens
+
+        cell_secretion.setParseAction(handle_cell_secretion)
+
         cell_surface_expression_tags = ['surf', 'cellSurfaceExpression']
         cell_surface_expression = oneOf(cell_surface_expression_tags) + LP + Group(simple_abundance) + RP
+
+        def handle_cell_surface_expression(s, l, tokens):
+            tokens[0] = 'CellSurfaceExpression'
+            return tokens
+
+        cell_surface_expression.setParseAction(handle_cell_surface_expression)
 
         translocation_tags = ['translocation', 'tloc']
         translocation_standard = oneOf(translocation_tags) + LP + Group(simple_abundance) + WCW + Group(
@@ -421,15 +470,16 @@ class Parser:
             from_loc_ns, from_loc_val = tokens[2]
             to_loc_ns, to_loc_val = tokens[3]
 
-            self.node_count += 1
-            self.graph.add_node(self.node_count, type=cls, attr_dict={
-                'from_ns': from_loc_ns,
-                'from_value': from_loc_val,
-                'to_ns': to_loc_ns,
-                'to_value': to_loc_val
-            })
+            name = self.canonicalize_node(tokens)
+            # self.node_count += 1
+            # self.graph.add_node(self.node_count, type=cls, attr_dict={
+            #    'from_ns': from_loc_ns,
+            #    'from_value': from_loc_val,
+            #    'to_ns': to_loc_ns,
+            #    'to_value': to_loc_val
+            # })
 
-            self.graph.add_edge(ab_n, self.node_count, type='participant', attr_dict=self.annotations.copy())
+            self.graph.add_edge(ab_n, name, type='participant', attr_dict=self.annotations.copy())
             return tokens
 
         translocation_standard.setParseAction(translocation_standard_handler)
@@ -449,10 +499,10 @@ class Parser:
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
 
         degradation_tags = ['deg', 'degradation']
-        degradation = oneOf(degradation_tags) + LP + simple_abundance + RP
+        degradation = oneOf(degradation_tags) + LP + Group(simple_abundance) + RP
 
         def handle_degredation(s, l, tokens):
-            tokens[0] = 'degradation'
+            tokens[0] = 'Degradation'
             return tokens
 
         degradation.setParseAction(handle_degredation)
@@ -463,27 +513,29 @@ class Parser:
         products = Suppress('products') + LP + Group(simple_abundance) + ZeroOrMore(WCW + Group(simple_abundance)) + RP
 
         reaction_tags = ['reaction', 'rxn']
-        reaction = (oneOf(reaction_tags) + LP + Group(reactants) + WCW + Group(products) + RP)
+        reaction = oneOf(reaction_tags) + LP + Group(reactants) + WCW + Group(products) + RP
 
         def handle_reaction(s, l, tokens):
             cls = tokens[0] = 'Reaction'
 
-            self.node_count += 1
-            self.graph.add_node(self.node_count, type=cls)
+            # self.node_count += 1
+            # self.graph.add_node(self.node_count, type=cls)
 
-            for reactant in tokens[1]:
-                v_cls = reactant[0]
-                v_ns, v_val = reactant[1]
-                v = v_cls, v_ns, v_val
-                self.graph.add_edge(self.node_count, v, type='hasReactant', attr_dict=self.annotations.copy())
+            # for reactant in tokens[1]:
+            #    v_cls = reactant[0]
+            #    v_ns, v_val = reactant[1]
+            #    v = v_cls, v_ns, v_val
+            #    self.graph.add_edge(self.node_count, v, type='hasReactant', attr_dict=self.annotations.copy())
 
-            for product in tokens[2]:
-                v_cls = product[0]
-                v_ns, v_val = product[1]
-                v = v_cls, v_ns, v_val
-                self.graph.add_edge(self.node_count, v, type='hasProduct', attr_dict=self.annotations.copy())
+            # for product in tokens[2]:
+            #    v_cls = product[0]
+            #    v_ns, v_val = product[1]
+            #    v = v_cls, v_ns, v_val
+            #    self.graph.add_edge(self.node_count, v, type='hasProduct', attr_dict=self.annotations.copy())
 
             return tokens
+
+        reaction.setParseAction(handle_reaction)
 
         transformation = cell_secretion | cell_surface_expression | translocation | degradation | reaction
 
@@ -504,6 +556,12 @@ class Parser:
 
         def handle_increases(s, l, tokens):
             tokens[1] = 'increases'
+
+            u = self.ensure_node(tokens[0])
+            v = self.ensure_node(tokens[2])
+
+            self.graph.add_edge(u, v, attr_dict=self.annotations.copy())
+
             return tokens
 
         increases.setParseAction(handle_increases)
@@ -685,6 +743,35 @@ class Parser:
                     other_relationships | deprecated_relationships)
 
         self.statement = relation | bel_term
+
+    def canonicalize_node(self, tokens):
+        """Given tokens, returns node name"""
+        command, *args = tokens.asList() if hasattr(tokens, 'asList') else tokens
+        if command in ('Protein', 'Gene', 'Abundance', 'miRNA', 'RNA', 'Complex', 'Pathology', 'BiologicalProcess'):
+            ns, val = args[0]
+            return command, ns, val
+        elif command in ('ComplexList', 'Composite', 'List'):
+            t = list2tuple(args[0])
+            if t not in self.node_to_id:
+                self.node_count += 1
+                self.node_to_id[t] = self.node_count
+
+            return command, self.node_to_id[t]
+        elif command == 'Reaction':
+            pass
+        else:
+            raise NotImplementedError("Haven't written canonicalization for {}".format(command))
+
+    def ensure_node(self, tokens):
+        """Turns parsed tokens into canonical node names"""
+        command, *args = tokens
+
+        if 'Protein' == command:
+            pass
+        elif 'Gene' == command:
+            pass
+        elif command in ('Abundance', 'miRNA', 'RNA'):
+            pass
 
     def validate_ns_pair(self, s, location, tokens):
         # TODO test listed namespace
