@@ -75,3 +75,10 @@ def check_stability(ns_dict, ns_mapping):
                 log.warning('missing value {} in namespace {}'.format(v_val, k_ns))
                 flag = False
     return flag
+
+
+def list2tuple(l):
+    if not isinstance(l, list):
+        return l
+    else:
+        return tuple(list2tuple(e) for e in l)

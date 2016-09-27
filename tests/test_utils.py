@@ -4,6 +4,13 @@ from pybel.parsers import utils
 
 
 class TestUtils(unittest.TestCase):
+    def test_list2tuple(self):
+        l = [None, 1, 's', [1, 2, [4], [[]]]]
+        e = (None, 1, 's', (1, 2, (4,), ((),)))
+        t = utils.list2tuple(l)
+
+        self.assertEqual(t, e)
+
     def test_subiterator(self):
         d = [
             (True, 0),
