@@ -16,6 +16,46 @@ class TestTokenParserBase(unittest.TestCase):
         self.parser.node_count = 0
         self.parser.annotations = {}
 
+    def assertHasNode(self, member, msg=None):
+        msg = 'Node {} not in graph'.format(member) if msg is None else msg
+        self.assertIn(member, self.parser.graph, msg)
+
+    def assertHasEdge(self, u, v, msg=None):
+        msg = 'Edge ({}, {}) not in graph'.format(u, v) if msg is None else msg
+        self.assertTrue(self.parser.graph.has_edge(u, v), msg)
+
+
+class TestInternal(TestTokenParserBase):
+    def test_pmod1(self):
+        statement = 'pmod(Ph, Ser, 473)'
+        expected = ['ProteinModification', 'Ph', 'Ser', 473]
+        result = self.parser.pmod.parseString(statement)
+        self.assertEqual(expected, result.asList())
+
+    def test_pmod2(self):
+        statement = 'pmod(Ph, Ser)'
+        expected = ['ProteinModification', 'Ph', 'Ser']
+        result = self.parser.pmod.parseString(statement)
+        self.assertEqual(expected, result.asList())
+
+    def test_pmod3(self):
+        statement = 'pmod(Ph)'
+        expected = ['ProteinModification', 'Ph']
+        result = self.parser.pmod.parseString(statement)
+        self.assertEqual(expected, result.asList())
+
+    def test_pmod4(self):
+        statement = 'pmod(P, S, 9)'
+        expected = ['ProteinModification', 'P', 'S', 9]
+        result = self.parser.pmod.parseString(statement)
+        self.assertEqual(expected, result.asList())
+
+    def test_psub(self):
+        statement = 'sub(A, 127, Y)'
+        expected = ['Variant', 'A', 127, 'Y']
+        result = self.parser.psub.parseString(statement)
+        self.assertEqual(expected, result.asList())
+
 
 class TestTerms(TestTokenParserBase):
     def test_211a(self):
@@ -82,7 +122,10 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'Composite', 1
         self.assertEqual(expected_node, node)
 
+        self.assertEqual(3, len(self.parser.graph))
         self.assertIn(node, self.parser.graph)
+        self.assertIn(('Protein', 'HGNC', 'IL6'), self.parser.graph)
+        self.assertIn(('Complex', 'GOCC', 'interleukin-23 complex'), self.parser.graph)
 
     def test_214a(self):
         statement = 'geneAbundance(HGNC:AKT1)'
@@ -95,6 +138,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'Gene', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
+        self.assertEqual(1, len(self.parser.graph))
         self.assertIn(node, self.parser.graph)
 
     def test_214b(self):
@@ -169,6 +213,13 @@ class TestTerms(TestTokenParserBase):
         expected_result = ['ProteinModified', ['HGNC', 'AKT1'], ['ProteinModification', 'Ph', 'S', 473]]
         self.assertEqual(expected_result, result)
 
+        protein_node = 'Protein', 'HGNC', 'AKT1'
+        mod_node = 'ProteinModified', 'HGNC', 'AKT1', 'Ph', 'S', 473
+
+        self.assertHasNode(protein_node)
+        self.assertHasNode(mod_node)
+        self.assertHasEdge(mod_node, protein_node)
+
     def test_221b(self):
         """Test default BEL namespace and 3-letter amino acid code:"""
         statement = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
@@ -176,12 +227,26 @@ class TestTerms(TestTokenParserBase):
         expected_result = ['ProteinModified', ['HGNC', 'AKT1'], ['ProteinModification', 'Ph', 'Ser', 473]]
         self.assertEqual(expected_result, result)
 
+        protein_node = 'Protein', 'HGNC', 'AKT1'
+        mod_node = 'ProteinModification', 'HGNC', 'AKT1', 'Ph', 'Ser', 473
+
+        self.assertHasNode(protein_node)
+        self.assertHasNode(mod_node)
+        self.assertHasEdge(mod_node, protein_node)
+
     def test_221c(self):
         """Test PSI-MOD namespace and 3-letter amino acid code:"""
         statement = 'p(HGNC:AKT1, pmod(MOD:PhosRes, Ser, 473))'
         result = self.parser.parse(statement)
-        expected_result = ['ProteinModifed', ['HGNC', 'AKT1'], ['ProteinModification', ['MOD', 'PhosRes'], 'Ser', 473]]
+        expected_result = ['ProteinModified', ['HGNC', 'AKT1'], ['ProteinModification', ['MOD', 'PhosRes'], 'Ser', 473]]
         self.assertEqual(expected_result, result)
+
+        protein_node = 'Protein', 'HGNC', 'AKT1'
+        mod_node = 'ProteinModification', 'HGNC', 'AKT1', 'MOD:PhosRes', 'S', 473
+
+        self.assertHasNode(protein_node)
+        self.assertHasNode(mod_node)
+        self.assertHasEdge(mod_node, protein_node)
 
     def test_221e(self):
         """Test HRAS palmitoylated at an unspecified residue. Default BEL namespace"""
@@ -190,12 +255,26 @@ class TestTerms(TestTokenParserBase):
         expected_result = ['ProteinModified', ['HGNC', 'HRAS'], ['ProteinModification', 'Palm']]
         self.assertEqual(expected_result, result)
 
+        protein_node = 'Protein', 'HGNC', 'HRAS'
+        mod_node = 'ProteinModification', 'HGNC', 'HRAS', 'Palm'
+
+        self.assertHasNode(protein_node)
+        self.assertHasNode(mod_node)
+        self.assertHasEdge(mod_node, protein_node)
+
     def test_222a(self):
         """Test reference allele"""
         statement = 'p(HGNC:CFTR, var(=))'
         result = self.parser.parse(statement)
         expected_result = ['ProteinModified', ['HGNC', 'CFTR'], ['Variant', '=']]
         self.assertEqual(expected_result, result)
+
+        protein_node = 'Protein', 'HGNC', 'CFTR'
+        mod_node = 'ProteinVariant', 'HGNC', 'CFTR', '='
+
+        self.assertHasNode(protein_node)
+        self.assertHasNode(mod_node)
+        self.assertHasEdge(mod_node, protein_node)
 
     def test_222b(self):
         """Test unspecified variant"""
@@ -204,12 +283,26 @@ class TestTerms(TestTokenParserBase):
         expected_result = ['ProteinModified', ['HGNC', 'CFTR'], ['Variant', '?']]
         self.assertEqual(expected_result, result)
 
+        protein_node = 'Protein', 'HGNC', 'CFTR'
+        mod_node = 'ProteinVariant', 'HGNC', 'CFTR', '?'
+
+        self.assertHasNode(protein_node)
+        self.assertHasNode(mod_node)
+        self.assertHasEdge(mod_node, protein_node)
+
     def test_222c(self):
         """Test substitution"""
         statement = 'p(HGNC:CFTR, var(p.Gly576Ala))'
         result = self.parser.parse(statement)
         expected_result = ['ProteinModified', ['HGNC', 'CFTR'], ['Variant', 'Gly', 576, 'Ala']]
         self.assertEqual(expected_result, result)
+
+        protein_node = 'Protein', 'HGNC', 'CFTR'
+        mod_node = 'Protein', 'HGNC', 'CFTR', 'Variant', 'Gly', 576, 'Ala'
+
+        self.assertHasNode(protein_node)
+        self.assertHasNode(mod_node)
+        self.assertHasEdge(mod_node, protein_node)
 
     def test_222d(self):
         """deletion"""
@@ -227,7 +320,7 @@ class TestTerms(TestTokenParserBase):
 
     def test_222f(self):
         """chromosome"""
-        statement = 'g(REF:NC_000007.13, var(g.117199646_117199648delCTT))'
+        statement = 'g(REF:"NC_000007.13", var(g.117199646_117199648delCTT))'
         result = self.parser.parse(statement)
         expected_result = ['GeneModified', ['REF', 'NC_000007.13'], ['Variant', 117199646, 117199648, 'del', 'CTT']]
         self.assertEqual(expected_result, result)
@@ -236,21 +329,21 @@ class TestTerms(TestTokenParserBase):
         """gene-coding DNA reference sequence"""
         statement = 'g(HGNC:CFTR, var(c.1521_1523delCTT))'
         result = self.parser.parse(statement)
-        expected_result = ['Gene', ['HGNC', 'CFTR'], ['Variant', 'c', 1521, 1523, 'del', 'CTT']]
+        expected_result = ['GeneModified', ['HGNC', 'CFTR'], ['Variant', 1521, 1523, 'del', 'CTT']]
         self.assertEqual(expected_result, result)
 
     def test_222h(self):
         """RNA coding reference sequence"""
         statement = 'r(HGNC:CFTR, var(c.1521_1523delCTT))'
         result = self.parser.parse(statement)
-        expected_result = ['RNAModified', ['HGNC', 'CFTR'], ['Variant', 'c', 1521, 1523, 'del', 'CTT']]
+        expected_result = ['RNAModified', ['HGNC', 'CFTR'], ['Variant', 1521, 1523, 'del', 'CTT']]
         self.assertEqual(expected_result, result)
 
     def test_222i(self):
         """RNA reference sequence"""
         statement = 'r(HGNC:CFTR, var(r.1653_1655delcuu))'
         result = self.parser.parse(statement)
-        expected_result = ['RNAModified', ['HGNC', 'CFTR'], ['Variant', 'r', 1653, 1655, 'del', 'cuu']]
+        expected_result = ['RNAModified', ['HGNC', 'CFTR'], ['Variant', 1653, 1655, 'del', 'cuu']]
         self.assertEqual(expected_result, result)
 
     def test_223a(self):
@@ -285,7 +378,7 @@ class TestTerms(TestTokenParserBase):
         """fragment with unknown start/stop and a descriptor"""
         statement = 'p(HGNC:YFG, frag(?, 55kD))'
         result = self.parser.parse(statement)
-        expected_result = []
+        expected_result = ['ProteinModified', ['HGNC', 'YFG'], ['Fragment', '?', '55kD']]
         self.assertEqual(expected_result, result)
 
     def test_224a(self):
@@ -440,7 +533,7 @@ class TestTerms(TestTokenParserBase):
 
     def test_253a(self):
         """"""
-        statement = 'rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI: "oxygen"))'
+        statement = 'rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))'
         result = self.parser.parse(statement)
         expected_result = ['Reaction', [['Abundance', ['CHEBI', 'superoxide']]],
                            [['Abundance', ['CHEBI', 'hydrogen peroxide']], ['Abundance', ['CHEBI', 'oxygen']]]]
@@ -460,21 +553,222 @@ class TestTerms(TestTokenParserBase):
         expected_result = ['RNA', ['Fusion', ['HGNC', 'TMPRSS2'], '?', ['HGNC', 'ERG'], '?']]
         self.assertEqual(expected_result, result)
 
+    ''' ------------- OTHER TESTS -------------- '''
+
+    def test_110(self):
+        """Tests simple triple"""
+        statement = 'proteinAbundance(HGNC:CAT) decreases abundance(CHEBI:"hydrogen peroxide")'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Protein', ['HGNC', 'CAT']],
+            'decreases',
+            ['Abundance', ['CHEBI', 'hydrogen peroxide']]
+        ]
+        log.warning(result)
+        self.assertEqual(expected, result)
+
+    def test_111(self):
+        """Test nested statement"""
+        statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Protein', ['HGNC', 'CAT']],
+            'decreases',
+            ['Abundance', ['CHEBI', 'hydrogen peroxide']],
+            'increases',
+            ['BiologicalProcess', ['GO', 'apoptotic process']]
+        ]
+        self.assertEqual(expected, result)
+
+    def test_112(self):
+        """Test when object is simple triple, with whitespace"""
+        statement = 'p(HGNC:CAT) -| ( a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process") )'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Protein', ['HGNC', 'CAT']],
+            'decreases',
+            ['Abundance', ['CHEBI', 'hydrogen peroxide']],
+            'increases',
+            ['BiologicalProcess', ['GO', 'apoptotic process']]
+        ]
+        self.assertEqual(expected, result)
+
+        self.assertHasNode(('Protein', 'HGNC', 'CAT'))
+        self.assertHasNode(('Abundance', 'CHEBI', 'hydrogen peroxide'))
+        self.assertHasNode(('BiologicalProcess', 'GO', 'apoptotic process'))
+
+    def test_113(self):
+        """Test annotation"""
+        statement = 'act(p(HGNC:CHIT1)) biomarkerFor path(MESHD:"Alzheimer Disease")'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Activity', ['Protein', ['HGNC', 'CHIT1']]],
+            'biomarkerFor',
+            ['Pathology', ['MESHD', 'Alzheimer Disease']]
+        ]
+        self.assertEqual(expected, result)
+
+        self.assertHasNode(('Protein', 'HGNC', 'CHIT1'))
+        self.assertHasNode(('Pathology', 'MESHD', 'Alzheimer Disease'))
+
+    def test_121(self):
+        """Test nested definitions"""
+        statement = 'pep(complex(p(HGNC:F3),p(HGNC:F7))) directlyIncreases pep(p(HGNC:F9))'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Activity',
+             ['ComplexList', ['Protein', ['HGNC', 'F3']], ['Protein', ['HGNC', 'F7']]],
+             ['MolecularActivity', 'PeptidaseActivity']
+             ],
+            'directlyIncreases',
+            ['Activity', ['Protein', ['HGNC', 'F9']], ['MolecularActivity', 'PeptidaseActivity']]
+        ]
+        self.assertEqual(expected, result)
+
+    def test_131(self):
+        """Test complex statement"""
+        statement = 'complex(p(HGNC:CLSTN1),p(HGNC:KLC1)) -> tport(p(HGNC:KLC1))'
+        result = self.parser.parse(statement)
+        expected = [
+            ['ComplexList', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]],
+            'increases',
+            ['Activity', ['Protein', ['HGNC', 'KLC1']], ['MolecularActivity', 'TransportActivity']]
+        ]
+        self.assertEqual(expected, result)
+
+        complex_name = 'ComplexList', 1
+        p1_name = 'Protein', 'HGNC', 'CLSTN1'
+        p2_name = 'Protein', 'HGNC', 'KLC1'
+        self.assertHasNode(p1_name)
+        self.assertHasNode(p2_name)
+        self.assertHasNode(complex_name)
+
+        self.assertHasEdge(p1_name, complex_name)
+        self.assertHasEdge(p2_name, complex_name)
+        self.assertHasEdge(complex_name, p2_name)
+
+    def test_132(self):
+        """Test multiple nested annotations on object"""
+        statement = 'complex(p(HGNC:ARRB2),p(HGNC:APH1A)) -> pep(complex(SCOMP:"gamma Secretase Complex"))'
+        result = self.parser.parse(statement)
+        expected = [
+            ['ComplexList', ['Protein', ['HGNC', 'ARRB2']], ['Protein', ['HGNC', 'APH1A']]],
+            'increases',
+            ['Activity', ['Complex', ['SCOMP', 'gamma Secretase Complex']], ['MolecularActivity', 'PeptidaseActivity']]
+        ]
+        self.assertEqual(expected, result)
+
+    def test_133(self):
+        """Test SNP annotation"""
+        statement = 'g(HGNC:APP,sub(G,275341,C)) -> path(MESHD:"Alzheimer Disease")'
+        result = self.parser.parse(statement)
+        expected = [
+            ['GeneModified', ['HGNC', 'APP'], ['Variant', 'G', 275341, 'C']],
+            'increases',
+            ['Pathology', ['MESHD', 'Alzheimer Disease']]
+        ]
+        self.assertEqual(expected, result)
+
+    def test_134(self):
+        """Test phosphoralation tag"""
+        statement = 'kin(p(SFAM:"GSK3 Family")) -> p(HGNC:MAPT,pmod(P))'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Activity', ['Protein', ['SFAM', 'GSK3 Family']], ['MolecularActivity', 'KinaseActivity']],
+            'increases',
+            ['ProteinModified', ['HGNC', 'MAPT'], ['ProteinModification', 'P']]
+        ]
+        self.assertEqual(expected, result)
+
+    def test_135(self):
+        """Test composite in sibject"""
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Composite', ['Protein', ['HGNC', 'CASP8']], ['Protein', ['HGNC', 'FADD']],
+             ['Abundance', ['ADO', 'Abeta_42']]],
+            'increases',
+            ['BiologicalProcess', ['GOBP', 'neuron apoptotic process']]
+        ]
+        self.assertEqual(expected, result)
+
+    def test_136(self):
+        """Test translocation in object"""
+        statement = 'a(ADO:"Abeta_42") -> tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESHCS:"Cell Membrane"),' \
+                    'toLoc(MESHCS:"Intracellular Space"))'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Abundance', ['ADO', 'Abeta_42']],
+            'increases',
+            ['Translocation',
+             ['Abundance', ['CHEBI', 'calcium(2+)']],
+             ['MESHCS', 'Cell Membrane'],
+             ['MESHCS', 'Intracellular Space']
+             ]
+        ]
+        self.assertEqual(expected, result)
+
+    @unittest.expectedFailure
+    def test_141(self):
+        """F single argument translocation"""
+        statement = 'tloc(a("T-Lymphocytes")) -- p(MGI:Cxcr3)'
+        result = self.parser.parse(statement)
+
+        expected = [
+            ['Translocation', ['Abundance', ['T-Lymphocytes']]],
+            'association',
+            ['Protein', ['MGI', 'Cxcr3']]
+        ]
+
+        self.assertEqual(expected, result)
+
+    def test_253b(self):
+        """Test reaction"""
+        statement = 'pep(p(SFAM:"CAPN Family")) -> reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
+        result = self.parser.parse(statement)
+        expected = [
+            ['Activity', ['Protein', ['SFAM', 'CAPN Family']], ['MolecularActivity', 'PeptidaseActivity']],
+            'increases',
+            ['Reaction',
+             [['Protein', ['HGNC', 'CDK5R1']]],
+             [['Protein', ['HGNC', 'CDK5']]]
+             ]
+        ]
+        self.assertEqual(expected, result)
+
+    def test_140(self):
+        """Test protein substitution"""
+        statement = 'p(HGNC:APP,sub(N,10,Y)) -> path(MESHD:"Alzheimer Disease")'
+        result = self.parser.parse(statement)
+        expected = [
+            ['ProteinModified', ['HGNC', 'APP'], ['Variant', 'N', 10, 'Y']],
+            'increases',
+            ['Pathology', ['MESHD', 'Alzheimer Disease']]
+        ]
+        self.assertEqual(expected, result)
+
 
 class TestRelationships(TestTokenParserBase):
     def test_315a(self):
         """"""
         statement = 'act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GOBP:"cholesterol biosynthetic process")'
         result = self.parser.parse(statement)
-        expected_result = [[], 'rateLimitingStepOf', []]
+        expected_result = [
+            ['Activity', ['Protein', ['HGNC', 'HMGCR']], ['MolecularActivity', 'CatalyticActivity']],
+            'rateLimitingStepOf',
+            ['BiologicalProcess', ['GOBP', 'cholesterol biosynthetic process']]
+        ]
         self.assertEqual(expected_result, result)
 
     def test_317a(self):
         """Abundances and activities"""
         statement = 'p(PFH:"Hedgehog Family") =| act(p(HGNC:PTCH1))'
         result = self.parser.parse(statement)
-        expected_result = [['Protein', ['PFH', 'Hedgehog Family']], 'decreases',
-                           ['Activity', ['Protein', ['HGNC', 'PTCH1']]]]
+        expected_result = [
+            ['Protein', ['PFH', 'Hedgehog Family']],
+            'directlyDecreases',
+            ['Activity', ['Protein', ['HGNC', 'PTCH1']]]
+        ]
         self.assertEqual(expected_result, result)
 
     def test_317b(self):
@@ -482,7 +776,8 @@ class TestRelationships(TestTokenParserBase):
         statement = 'act(p(HGNC:FOXO3),ma(tscript)) =| r(HGNC:MIR21)'
         result = self.parser.parse(statement)
         expected_result = [
-            ['Activity', ['Protein', ['HGNC', 'FOXO3']], ['MolecularActivity', 'TranscriptionalActivity']], 'decreases',
+            ['Activity', ['Protein', ['HGNC', 'FOXO3']], ['MolecularActivity', 'TranscriptionalActivity']],
+            'directlyDecreases',
             ['RNA', ['HGNC', 'MIR21']]]
         self.assertEqual(expected_result, result)
 
@@ -493,7 +788,7 @@ class TestRelationships(TestTokenParserBase):
         expected_result = [['Protein', ['HGNC', 'CLSPN']], 'directlyIncreases',
                            ['Activity', ['Protein', ['HGNC', 'ATR']], ['MolecularActivity', 'KinaseActivity']],
                            'directlyIncreases',
-                           ['ProteinModified', ['HGNC', 'CHEK1'], ['ProteinModification', 'phosphorylation']]]
+                           ['ProteinModified', ['HGNC', 'CHEK1'], ['ProteinModification', 'P']]]
         self.assertEqual(expected_result, result)
 
     def test_317d(self):
@@ -549,185 +844,3 @@ class TestRelationships(TestTokenParserBase):
                              ['Abundance', ['CHEBI', 'NADP(+)']]
                              ]], 'subProcessOf', ['BiologicalProcess', ['GOBP', 'cholesterol biosynthetic process']]]
         self.assertEqual(expected_result, result)
-
-
-class Test2(TestTokenParserBase):
-    def test_110(self):
-        """Tests simple triple"""
-        statement = 'proteinAbundance(HGNC:CAT) decreases abundance(CHEBI:"hydrogen peroxide")'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Protein', ['HGNC', 'CAT']],
-            'decreases',
-            ['Abundance', ['CHEBI', 'hydrogen peroxide']]
-        ]
-        log.warning(result)
-        self.assertEqual(expected, result)
-
-    def test_111(self):
-        """Test nested statement"""
-        statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Protein', ['HGNC', 'CAT']],
-            'decreases',
-            ['Abundance', ['CHEBI', 'hydrogen peroxide']],
-            'increases',
-            ['BiologicalProcess', ['GO', 'apoptotic process']]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_112(self):
-        """Test when object is simple triple, with whitespace"""
-        statement = 'p(HGNC:CAT) -| ( a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process") )'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Protein', ['HGNC', 'CAT']],
-            'decreases',
-            ['Abundance', ['CHEBI', 'hydrogen peroxide']],
-            'increases',
-            ['BiologicalProcess', ['GO', 'apoptotic process']]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_113(self):
-        """Test annotation"""
-        statement = 'act(p(HGNC:CHIT1)) biomarkerFor path(MESHD:"Alzheimer Disease")'
-        result = self.parser.parse(statement)
-        expected = [
-            ['activity', ['Protein', ['HGNC', 'CHIT1']]],
-            'biomarkerFor',
-            ['Pathology', ['MESHD', 'Alzheimer Disease']]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_121(self):
-        """Test nested definitions"""
-        statement = 'pep(complex(p(HGNC:F3),p(HGNC:F7))) directlyIncreases pep(p(HGNC:F9))'
-        result = self.parser.parse(statement)
-        expected = [
-            ['peptidaseActivity',
-             ['Complex', ['Protein', ['HGNC', 'F3']], ['Protein', ['HGNC', 'F7']]]
-             ],
-            'directlyIncreases',
-            ['peptidaseActivity', ['Protein', ['HGNC', 'F9']]]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_131(self):
-        """Test complex statement"""
-        statement = 'complex(p(HGNC:CLSTN1),p(HGNC:KLC1)) -> tport(p(HGNC:KLC1))'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Complex', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]],
-            'increases',
-            ['tport', ['Protein', ['HGNC', 'KLC1']]]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_132(self):
-        """Test multiple nested annotations on object"""
-        statement = 'complex(p(HGNC:ARRB2),p(HGNC:APH1A)) -> pep(complex(SCOMP:"gamma Secretase Complex"))'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Complex', ['Protein', ['HGNC', 'ARRB2']], ['Protein', ['HGNC', 'APH1A']]],
-            'increases',
-            ['pep', ['Complex', ['SCOMP', 'gamma Secretase Complex']]]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_133(self):
-        """Test SNP annotation"""
-        statement = 'g(HGNC:APP,sub(G,275341,C)) -> path(MESHD:"Alzheimer Disease")'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Gene', ['HGNC', 'APP'], ['GeneSubstitution', 'G', 275341, 'C']],
-            'increases',
-            ['Pathology', ['MESHD', 'Alzheimer Disease']]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_134(self):
-        """Test phosphoralation tag"""
-        statement = 'kin(p(SFAM:"GSK3 Family")) -> p(HGNC:MAPT,pmod(P))'
-        result = self.parser.parse(statement)
-        expected = [
-            ['kin', ['Protein', ['SFAM', 'GSK3 Family']]],
-            'increases',
-            ['Protein', ['HGNC', 'MAPT'], ['ProteinModification', 'P']]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_135(self):
-        """Test composite in sibject"""
-        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Composite', ['Protein', ['HGNC', 'CASP8']], ['Protein', ['HGNC', 'FADD']],
-             ['Abundance', ['ADO', 'Abeta_42']]],
-            'increases',
-            ['BiologicalProcess', ['GOBP', 'neuron apoptotic process']]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_136(self):
-        """Test translocation in object"""
-        statement = 'a(ADO:"Abeta_42") -> tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESHCS:"Cell Membrane"),' \
-                    'toLoc(MESHCS:"Intracellular Space"))'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Abundance', ['ADO', 'Abeta_42']],
-            'increases',
-            ['translocation',
-             ['Abundance', ['CHEBI', 'calcium(2+)']],
-             ['MESHCS', 'Cell Membrane'],
-             ['MESHCS', 'Intracellular Space']
-             ]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_141(self):
-        """F single argument translocation"""
-        statement = 'tloc(a("T-Lymphocytes")) -- p(MGI:Cxcr3)'
-        result = self.parser.parse(statement)
-        '''
-        expected = [
-            ['tloc', ['Abundance', ['T-Lymphocytes']]],
-            'association',
-            ['Protein', ['MGI', 'Cxcr3']]
-        ]
-        '''
-
-        expected = [
-            ['activity', ['Abundance', ['T-Lymphocytes']], ['molecularActivity', 'tloc']],
-            'association',
-            ['Protein', ['MGI', 'Cxcr3']]
-        ]
-
-        self.assertEqual(expected, result)
-
-    def test_253b(self):
-        """Test reaction"""
-        statement = 'pep(p(SFAM:"CAPN Family")) -> reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
-        result = self.parser.parse(statement)
-        expected = [
-            ['pep', ['Protein', ['SFAM', 'CAPN Family']]],
-            'increases',
-            ['Reaction',
-             [['Protein', ['HGNC', 'CDK5R1']],
-              [['Protein', ['HGNC', 'CDK5']]]
-              ]
-             ]
-        ]
-        self.assertEqual(expected, result)
-
-    def test_140(self):
-        """Test protein substitution"""
-        statement = 'p(HGNC:APP,sub(N,10,Y)) -> path(MESHD:"Alzheimer Disease")'
-        result = self.parser.parse(statement)
-        expected = [
-            ['Protein', ['HGNC', 'APP'], ['ProteinSubstitution', 'N', 10, 'Y']],
-            'increases',
-            ['Pathology', ['MESHD', 'Alzheimer Disease']]
-        ]
-        self.assertEqual(expected, result)

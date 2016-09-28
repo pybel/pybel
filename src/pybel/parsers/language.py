@@ -68,10 +68,13 @@ amino_acid_dict = {
     'X': 'X'
 }
 
-# Protein Modification O is not defined by BEL Language v. 1.0
-pmod_parameters_A = ['P', 'A', 'F', 'G', 'H', 'M', 'R', 'S', 'U', 'O']
+dna_nucleotide_chars = ['A', 'T', 'C', 'G']
+rna_nucleotide_chars = ['a', 'u', 'c', 'g']
 
-pmod_namespace = {
+# Protein Modification O is not defined by BEL Language v. 1.0
+pmod_legacy = ['P', 'A', 'F', 'G', 'H', 'M', 'R', 'S', 'U', 'O']
+
+pmod_namespace = [
     'Ac',
     'acetylation',
     'ADPRib',
@@ -133,7 +136,7 @@ pmod_namespace = {
     'UbMono',
     'monoubiquitination',
     'UbPoly'
-}
+]
 
 # TODO add other BEL common namespaces
 

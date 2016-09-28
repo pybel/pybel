@@ -7,6 +7,7 @@ import networkx as nx
 from pyparsing import *
 
 from . import language
+from .hgvs_parser import hgvs, nucleotides
 from .utils import list2tuple
 
 log = logging.getLogger(__name__)
@@ -60,17 +61,20 @@ class Parser:
         # 2.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_protein_modifications
         aa_single = oneOf(language.amino_acid_dict)
         aa_triple = oneOf(language.amino_acid_dict.values())
-        amino_acids = aa_single | aa_triple | 'X'
+        amino_acids = aa_triple | aa_single
 
         pmod_tag = oneOf(['pmod', 'proteinModification'])
-        pmod_default = oneOf(language.pmod_namespace)
+        pmod_default = oneOf(language.pmod_namespace) | oneOf(language.pmod_legacy)
 
-        pmod_option_1 = pmod_tag + LP + (Group(ns_val) | pmod_default) + RP
-        pmod_option_2 = pmod_tag + LP + (Group(ns_val) | pmod_default) + WCW + amino_acids + RP
-        pmod_option_3 = pmod_tag + LP + (
-        Group(ns_val) | pmod_default) + WCW + amino_acids + WCW + pyparsing_common.number() + RP
+        pmod_val = Group(ns_val) | pmod_default
+
+        pmod_option_1 = pmod_tag + LP + pmod_val + WCW + amino_acids + WCW + pyparsing_common.integer() + RP
+        pmod_option_2 = pmod_tag + LP + pmod_val + WCW + amino_acids + RP
+        pmod_option_3 = pmod_tag + LP + pmod_val + RP
 
         pmod = pmod_option_1 | pmod_option_2 | pmod_option_3
+
+        self.pmod = pmod
 
         def handle_pmod(s, l, tokens):
             tokens[0] = 'ProteinModification'
@@ -79,15 +83,9 @@ class Parser:
         pmod.setParseAction(handle_pmod)
 
         # 2.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
-        nucleotides = oneOf(['A', 'G', 'C', 'T'])
-
         # TODO see spec at http://www.hgvs.org/mutnomen/recs.html
-        hgvs_protein = Suppress('p.') + aa_triple + pyparsing_common.integer() + aa_triple
-        hgvs_genomic = Suppress('g.') + pyparsing_common.integer() + nucleotides + Suppress('>') + nucleotides
-        hgvs_variant = hgvs_genomic | hgvs_protein | '=' | '?'
-
         variant_tags = ['var', 'variant']
-        variant = oneOf(variant_tags) + LP + hgvs_variant + RP
+        variant = oneOf(variant_tags) + LP + hgvs + RP
 
         def handle_variant(s, loc, tokens):
             tokens[0] = 'Variant'
@@ -98,9 +96,11 @@ class Parser:
         # 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
         fragment_range = (pyparsing_common.integer() | '?') + Suppress('_') + (pyparsing_common.integer() | '?' | '*')
         fragment_tags = ['frag', 'fragment']
-        fragment_1 = oneOf(fragment_tags) + LP + fragment_range + RP
-        fragment_2 = oneOf(fragment_tags) + LP + fragment_range + WCW + Word(alphanums) + RP
-        fragment = fragment_2 | fragment_1
+        fragment_1 = oneOf(fragment_tags) + LP + fragment_range + WCW + Word(alphanums) + RP
+        fragment_2 = oneOf(fragment_tags) + LP + fragment_range + RP
+        fragment_3 = oneOf(fragment_tags) + LP + '?' + Optional(WCW + Word(alphanums)) + RP
+
+        fragment = fragment_3 | fragment_1 | fragment_2
 
         def handle_fragment(s, l, tokens):
             tokens[0] = 'Fragment'
@@ -110,24 +110,42 @@ class Parser:
 
         # 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
         location_tags = ['loc', 'location']
-        location = oneOf(location_tags) + LP + ns_val + RP
+        location = oneOf(location_tags) + LP + Group(ns_val) + RP
+
+        def handle_location(s, l, tokens):
+            tokens[0] = 'Location'
+            return tokens
+
+        location.setParseAction(handle_location)
 
         # deprecated substitution function
-        psub_tags = ['sub', 'substitution']
-        psub = oneOf(psub_tags) + LP + amino_acids + WCW + pyparsing_common.integer + WCW + amino_acids + RP
+        sub_tags = ['sub', 'substitution']
+        psub = oneOf(sub_tags) + LP + amino_acids + WCW + pyparsing_common.integer() + WCW + amino_acids + RP
 
         def handle_psub(s, l, tokens):
+            tokens[0] = 'Variant'
             log.warning('PyBEL006 deprecated protein substitution function. User variant() instead. {}'.format(s))
             return tokens
 
         psub.setParseAction(handle_psub)
+        self.psub = psub
+
+        gsub = oneOf(sub_tags) + LP + nucleotides + WCW + pyparsing_common.integer() + WCW + nucleotides + RP
+
+        def handle_gsub(s, l, tokens):
+            log.warning('PyBEL009 old SNP annotation. Use variant() instead')
+            tokens[0] = 'Variant'
+            return tokens
+
+        gsub.setParseAction(handle_gsub)
 
         # 2.6 Other Functions
 
         # 2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
 
         # sequence coordinates?
-        range_coordinate = (oneOf(['r', 'p']) + '.' + Word(nums) + '_' + Word(nums)) | '?'
+        range_coordinate = Group(oneOf(['r', 'p']) + Suppress('.') + pyparsing_common.integer() + Suppress(
+            '_') + pyparsing_common.integer()) | '?'
 
         fusion_tags = ['fus', 'fusion']
         fusion = oneOf(fusion_tags) + LP + Group(ns_val) + WCW + range_coordinate + WCW + Group(
@@ -158,7 +176,7 @@ class Parser:
         # 2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA
         gene_tags = ['g', 'geneAbundance']
 
-        gene_simple = oneOf(gene_tags) + LP + Group(ns_val) + RP
+        gene_simple = oneOf(gene_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
 
         def handle_gene_simple(s, location, tokens):
             cls = tokens[0] = 'Gene'
@@ -170,16 +188,27 @@ class Parser:
 
         gene_simple.addParseAction(handle_gene_simple)
 
-        gene_modified = oneOf(gene_tags) + LP + ns_val + OneOrMore(WCW + variant) + Optional(WCW + location) + RP
+        gene_modified = oneOf(gene_tags) + LP + Group(ns_val) + OneOrMore(WCW + Group(variant | gsub)) + Optional(
+            WCW + Group(location)) + RP
 
         def handle_gene_modified(s, l, tokens):
             cls = tokens[0] = 'GeneModified'
-            # TODO fill this in
+            name = self.canonicalize_node(tokens)
+            if name not in self.graph:
+                self.graph.add_node(name)
+
+            gns, gval = tokens[1]
+            gname = 'Gene', gns, gval
+            if gname not in self.graph:
+                self.graph.add_node(gname)
+
+            self.graph.add_edge(gname, name)
+
             return tokens
 
         gene_modified.setParseAction(handle_gene_modified)
 
-        gene_fusion = oneOf(gene_tags) + LP + Group(fusion) + RP
+        gene_fusion = oneOf(gene_tags) + LP + Group(fusion) + Optional(WCW + Group(location)) + RP
 
         def handle_gene_fusion(s, l, tokens):
             cls = tokens[0] = 'GeneFusion'
@@ -192,7 +221,7 @@ class Parser:
 
         # 2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA
         mirna_tags = ['m', 'microRNAAbundance']
-        mirna_simple = oneOf(mirna_tags) + LP + Group(ns_val) + RP
+        mirna_simple = oneOf(mirna_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
 
         def handle_mirna_simple(s, l, tokens):
             cls = tokens[0] = 'miRNA'
@@ -217,14 +246,14 @@ class Parser:
 
         # 2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA
         protein_tag = oneOf(['p', 'proteinAbundance'])
-        protein_simple = protein_tag + LP + Group(ns_val) + RP
+        protein_simple = protein_tag + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
 
         def handle_protein_simple(s, l, tokens):
             cls = tokens[0] = 'Protein'
             ns, val = tokens[1]
-            n = cls, ns, val
-            if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=val)
+            name = self.canonicalize_node(tokens)
+            if name not in self.graph:
+                self.graph.add_node(name, type=cls, namespace=ns, value=val)
             return tokens
 
         protein_simple.setParseAction(handle_protein_simple)
@@ -234,15 +263,26 @@ class Parser:
 
         def handle_protein_modified(s, l, tokens):
             cls = tokens[0] = 'ProteinModified'
-            # TODO fill this in
+
+            name = self.canonicalize_node(tokens)
+            if name not in self.graph:
+                self.graph.add_node(name)
+
+            pns, pval = tokens[1]
+            pname = 'Protein', pns, pval
+            if pname not in self.graph:
+                self.graph.add_node(pname)
+
+            self.graph.add_edge(name, pname)
+
             return tokens
 
         protein_modified.setParseAction(handle_protein_modified)
 
-        protein_fusion = protein_tag + LP + Group(fusion) + RP
+        protein_fusion = protein_tag + LP + Group(fusion) + Optional(WCW + Group(location)) + RP
 
         def handle_protein_fusion(s, l, tokens):
-            # TODO fill this in
+            cls = tokens[0] = 'ProteinFusion'
             return tokens
 
         protein_fusion.setParseAction(handle_protein_fusion)
@@ -251,7 +291,7 @@ class Parser:
 
         # 2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA
         rna_tags = ['r', 'rnaAbundance']
-        rna_simple = oneOf(rna_tags) + LP + Group(ns_val) + RP
+        rna_simple = oneOf(rna_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
 
         def handle_rna_simple(s, l, tokens):
             cls = tokens[0] = 'RNA'
@@ -263,7 +303,8 @@ class Parser:
 
         rna_simple.setParseAction(handle_rna_simple)
 
-        rna_modified = oneOf(rna_tags) + LP + Group(ns_val) + OneOrMore(WCW + variant) + Optional(WCW + location) + RP
+        rna_modified = oneOf(rna_tags) + LP + Group(ns_val) + OneOrMore(WCW + Group(variant)) + Optional(
+            WCW + Group(location)) + RP
 
         def handle_rna_modified(s, l, tokens):
             tokens[0] = 'RNAModified'
@@ -271,7 +312,7 @@ class Parser:
 
         rna_modified.setParseAction(handle_rna_modified)
 
-        rna_fusion = oneOf(rna_tags) + LP + Group(fusion) + RP
+        rna_fusion = oneOf(rna_tags) + LP + Group(fusion) + Optional(WCW + Group(location)) + RP
 
         def handle_rna_fusion(s, l, tokens):
             tokens[0] = 'RNA'
@@ -290,7 +331,7 @@ class Parser:
         def handle_complex_singleton_1(s, l, tokens):
             cls = tokens[0] = 'Complex'
             ns, val = tokens[1]
-            n = cls, ns, val
+            n = self.canonicalize_node(tokens)
             if n not in self.graph:
                 self.graph.add_node(n, type=cls, namespace=ns, value=val)
             return tokens
@@ -358,8 +399,16 @@ class Parser:
 
         molecular_activity_tags = ['ma', 'molecularActivity']
 
+        molecular_activities_default_ns = oneOf(language.activities)
+
+        def handle_molecular_activities_default_ns(s, l, tokens):
+            tokens[0] = language.activity_labels[tokens[0]]
+            return tokens
+
+        molecular_activities_default_ns.setParseAction(handle_molecular_activities_default_ns)
+
         # backwards compatibility with BEL v1.0
-        molecular_activity_default_ns = oneOf(molecular_activity_tags) + LP + oneOf(language.activities) + RP
+        molecular_activity_default_ns = oneOf(molecular_activity_tags) + LP + molecular_activities_default_ns + RP
         molecular_activity_custom_ns = oneOf(molecular_activity_tags) + LP + Group(ns_val) + RP
 
         molecular_activity = molecular_activity_default_ns | molecular_activity_custom_ns
@@ -403,6 +452,23 @@ class Parser:
         # 2.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xactivity
         activity_tags = ['act', 'activity']
 
+        activity_modified_default_ns = oneOf(activity_tags) + LP + Group(abundance) + WCW + Group(
+            molecular_activity) + RP
+
+        def handle_activity_modified_default_ns(s, l, tokens):
+            tokens[0] = 'Activity'
+            return tokens
+
+        activity_modified_default_ns.setParseAction(handle_activity_modified_default_ns)
+
+        activity_standard = oneOf(activity_tags) + LP + Group(abundance) + RP
+
+        def handle_activity_standard(s, l, tokens):
+            tokens[0] = 'Activity'
+            return tokens
+
+        activity_standard.setParseAction(handle_activity_standard)
+
         activity_legacy_tags = list(language.activities)
         activity_legacy = oneOf(activity_legacy_tags) + LP + Group(abundance) + RP
 
@@ -415,15 +481,7 @@ class Parser:
 
         activity_legacy.setParseAction(handle_activity_legacy)
 
-        activity_modified = oneOf(activity_legacy_tags) + LP + Group(abundance) + WCW + Group(molecular_activity) + RP
-
-        def handle_activity_modified(s, l, tokens):
-            tokens[0] = 'Activity'
-            return tokens
-
-        activity_modified.setParseAction(handle_activity_modified)
-
-        activity = activity_modified | activity_legacy
+        activity = activity_modified_default_ns | activity_standard | activity_legacy
 
         process = biological_process | pathology | activity
 
@@ -460,26 +518,21 @@ class Parser:
         def translocation_standard_handler(s, l, tokens):
             cls = tokens[0] = 'Translocation'
 
-            ab_fn = tokens[1][0]
             ab_ns, ab_val = tokens[1][1]
-
-            ab_n = ab_fn, ab_ns, ab_val
-            if ab_n not in self.graph:
-                self.graph.add_node(ab_n, type=ab_fn, namespace=ab_ns, value=ab_val)
 
             from_loc_ns, from_loc_val = tokens[2]
             to_loc_ns, to_loc_val = tokens[3]
 
             name = self.canonicalize_node(tokens)
-            # self.node_count += 1
-            # self.graph.add_node(self.node_count, type=cls, attr_dict={
-            #    'from_ns': from_loc_ns,
-            #    'from_value': from_loc_val,
-            #    'to_ns': to_loc_ns,
-            #    'to_value': to_loc_val
-            # })
 
-            self.graph.add_edge(ab_n, name, type='participant', attr_dict=self.annotations.copy())
+            if name not in self.graph:
+                self.graph.add_node(name, type=cls, namespace=ab_ns, value=ab_val, attr_dict={
+                    'from_ns': from_loc_ns,
+                    'from_value': from_loc_val,
+                    'to_ns': to_loc_ns,
+                    'to_value': to_loc_val
+                })
+
             return tokens
 
         translocation_standard.setParseAction(translocation_standard_handler)
@@ -494,7 +547,16 @@ class Parser:
 
         translocation_legacy.setParseAction(translocation_legacy_handler)
 
-        translocation = translocation_legacy | translocation_standard
+        translocation_legacy_singleton = oneOf(translocation_tags) + LP + Group(simple_abundance) + RP
+
+        def handle_translocation_legacy_singleton(s, l, tokens):
+            log.warning('PyBEL008 legacy translocation + missing arguments: {}'.format(s))
+            tokens[0] = 'Translocation'
+            return tokens
+
+        translocation_legacy_singleton.setParseAction(handle_translocation_legacy_singleton)
+
+        translocation = translocation_legacy | translocation_standard | translocation_legacy_singleton
 
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
 
@@ -517,21 +579,18 @@ class Parser:
 
         def handle_reaction(s, l, tokens):
             cls = tokens[0] = 'Reaction'
+            print('RXN TOKS', tokens)
+            name = self.canonicalize_node(tokens)
+            print('RXN NAME', name)
 
-            # self.node_count += 1
-            # self.graph.add_node(self.node_count, type=cls)
-
-            # for reactant in tokens[1]:
-            #    v_cls = reactant[0]
-            #    v_ns, v_val = reactant[1]
-            #    v = v_cls, v_ns, v_val
-            #    self.graph.add_edge(self.node_count, v, type='hasReactant', attr_dict=self.annotations.copy())
-
-            # for product in tokens[2]:
-            #    v_cls = product[0]
-            #    v_ns, v_val = product[1]
-            #    v = v_cls, v_ns, v_val
-            #    self.graph.add_edge(self.node_count, v, type='hasProduct', attr_dict=self.annotations.copy())
+            # if name not in self.graph:
+            #    self.graph.add_node(name, type=cls)
+            # for reactant_tokens in tokens[1]:
+            #    reactant_name = self.canonicalize_node(reactant_tokens)
+            #    self.graph.add_edge(name, reactant_name, type='hasReactant', attr_dict=self.annotations.copy())
+            # for product_tokens in tokens[2]:
+            #    product_name = self.canonicalize_node(product_tokens)
+            #    self.graph.add_edge(name, product_name, type='hasProduct', attr_dict=self.annotations.copy())
 
             return tokens
 
@@ -594,15 +653,15 @@ class Parser:
             Group(bel_term) | (LP + causal_relationship + RP))
 
         def handle_directly_decreases(s, l, tokens):
-            tokens[1] = 'directlyIncreases'
+            tokens[1] = 'directlyDecreases'
             return tokens
 
         directly_decreases.setParseAction(handle_directly_decreases)
 
         # 3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof
         rate_limit_tags = ['rateLimitingStepOf']
-        rate_limit = (biological_process | activity | transformation) + WS + oneOf(
-            rate_limit_tags) + WS + biological_process
+        rate_limit = Group(biological_process | activity | transformation) + WS + oneOf(
+            rate_limit_tags) + WS + Group(biological_process)
 
         # 3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
         causes_no_change_tags = ['cnc', 'causesNoChange']
@@ -669,7 +728,7 @@ class Parser:
 
         # 3.3.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_transcribedto
         transcribed_tags = [':>', 'transcribedTo']
-        transcribed = gene + WS + oneOf(transcribed_tags) + WS + rna
+        transcribed = Group(gene) + WS + oneOf(transcribed_tags) + WS + Group(rna)
 
         def handle_transcribed(s, loc, tokens):
             tokens[1] = 'transcribedTo'
@@ -678,8 +737,8 @@ class Parser:
         transcribed.setParseAction(handle_transcribed)
 
         # 3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto
-        translated_tags = [':>', 'tranlatedTo']
-        translated = rna + WS + oneOf(translated_tags) + WS + protein
+        translated_tags = ['>>', 'tranlatedTo']
+        translated = Group(rna) + WS + oneOf(translated_tags) + WS + Group(protein)
 
         def handle_translated(s, loc, tokens):
             tokens[1] = 'translatedTo'
@@ -750,15 +809,23 @@ class Parser:
         if command in ('Protein', 'Gene', 'Abundance', 'miRNA', 'RNA', 'Complex', 'Pathology', 'BiologicalProcess'):
             ns, val = args[0]
             return command, ns, val
-        elif command in ('ComplexList', 'Composite', 'List'):
+        elif command in ('ComplexList', 'Composite', 'List', 'Reaction'):
             t = list2tuple(args[0])
             if t not in self.node_to_id:
                 self.node_count += 1
                 self.node_to_id[t] = self.node_count
-
             return command, self.node_to_id[t]
-        elif command == 'Reaction':
+        elif command in ('Activity', 'Degradation', 'Translocation'):
+            return self.canonicalize_node(args[0])
+        elif command == 'Composite':
             pass
+        elif command in ('GeneModified', 'ProteinModified'):
+            print('MODED', tokens)
+            ns, val = args[0]
+            mod_title, *mod_params = args[1]
+            name = (command, ns, val, *mod_params)
+            print(name)
+            return name
         else:
             raise NotImplementedError("Haven't written canonicalization for {}".format(command))
 
@@ -804,8 +871,7 @@ class Parser:
         try:
             return self.statement.parseString(s).asList()
         except Exception as e:
-            log.warning('PyBEL000 general parser failure: {}'.format(s))
-            return None
+            raise Exception('PyBEL000 general parser failure: {}'.format(s))
 
     def reset_metadata(self):
         self.annotations = {}
