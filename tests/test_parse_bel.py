@@ -927,7 +927,7 @@ class TestTerms(TestTokenParserBase):
     def test_131(self):
         """Test complex statement"""
         statement = 'complex(p(HGNC:CLSTN1), p(HGNC:KLC1))'
-        result = self.parser.parse(statement)[0]  # FIXME
+        result = self.parser.parse(statement)  # FIXME
         expected = ['ComplexList', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]]
         self.assertEqual(expected, result)
 

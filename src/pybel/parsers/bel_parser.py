@@ -373,14 +373,10 @@ class Parser:
 
         def handle_complex_list_1(s, l, tokens):
             tokens[0] = 'ComplexList'
-            print('COMPLEX LIST TOKENS: {}'.format(tokens))
 
             name = self.ensure_node(tokens)
-            print("COMPLEX LIST NAME: {}".format(name))
             for token in tokens[1:]:
-                print('COMPLEX LIST MEMBER: {}'.format(token))
                 member_name = self.ensure_node(token)
-                print('COMPLEX ENSURED MEMBER NAME: {}'.format(member_name))
                 self.graph.add_edge(name, member_name, relation='hasComponent')
 
             return tokens
@@ -543,7 +539,6 @@ class Parser:
 
         def translocation_standard_handler(s, l, tokens):
             tokens[0] = 'Translocation'
-            print('TLOC TOKENS: {}'.format(tokens))
             self.ensure_node(tokens)
             return tokens
 
@@ -770,9 +765,7 @@ class Parser:
             parent = self.ensure_node(tokens[0])
             rel = tokens[1]
             for child_tokens in tokens[2]:
-                print('CHILD TOKENS: {}'.format(child_tokens))
                 child = self.ensure_node(child_tokens)
-                print('CHILD NAME: {}'.format(child))
                 self.graph.add_edge(parent, child, relation=rel)
             return tokens
 
@@ -888,9 +881,7 @@ class Parser:
 
             self.graph.add_edge(gene_name, name, relation='transcribedTo')
         else:
-            print('ENSURE GENE TOKENS: {}'.format(tokens))
             name = self.canonicalize_node(tokens)
-            print('ENSURE GENE NAME: {}'.format(name))
             if name not in self.graph:
                 ns, val = args[0]
                 self.graph.add_node(name, type=command, namespace=ns, value=val)
