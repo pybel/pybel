@@ -97,7 +97,7 @@ class TestInternal(TestTokenParserBase):
         self.assertEqual(expected, result.asList())
 
 
-class TestAnnotations(TestTokenParserBase):
+class TestModifiers(TestTokenParserBase):
     def test_activity_1(self):
         """"""
         statement = 'act(p(HGNC:AKT1))'
@@ -160,16 +160,14 @@ class TestAnnotations(TestTokenParserBase):
     def test_tloc_1(self):
         """translocation example"""
         statement = 'tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))'
-        result = self.parser.parse(statement)
-        expected_result = [
+        tokens = [
             'Translocation',
             ['Protein', ['HGNC', 'EGFR']],
             ['GOCC', 'cell surface'],
             ['GOCC', 'endosome']
         ]
-        self.assertEqual(expected_result, result)
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = self.parser.canonicalize_modifier(tokens)
         expected_mod = {
             'modification': 'Translocation',
             'params': {
@@ -241,14 +239,15 @@ class TestTerms(TestTokenParserBase):
         expected_result = ['Composite', ['Protein', ['HGNC', 'IL6']], ['Complex', ['GOCC', 'interleukin-23 complex']]]
         self.assertEqual(expected_result, result)
 
-        node = self.parser.canonicalize_node(result)
-        expected_node = 'Composite', 1
-        self.assertEqual(expected_node, node)
+        node = 'Composite', 1
+        self.assertEqual(node, self.parser.canonicalize_node(result))
 
-        self.assertEqual(3, len(self.parser.graph))
-        self.assertIn(node, self.parser.graph)
-        self.assertIn(('Protein', 'HGNC', 'IL6'), self.parser.graph)
-        self.assertIn(('Complex', 'GOCC', 'interleukin-23 complex'), self.parser.graph)
+        self.assertEqual(5, len(self.parser.graph))
+        self.assertHasNode(node)
+        self.assertHasNode(('Protein', 'HGNC', 'IL6'))
+        self.assertHasNode(('RNA', 'HGNC', 'IL6'))
+        self.assertHasNode(('Gene', 'HGNC', 'IL6'))
+        self.assertHasNode(('Complex', 'GOCC', 'interleukin-23 complex'))
 
     def test_214a(self):
         statement = 'geneAbundance(HGNC:AKT1)'
@@ -928,9 +927,8 @@ class TestTerms(TestTokenParserBase):
     def test_131(self):
         """Test complex statement"""
         statement = 'complex(p(HGNC:CLSTN1), p(HGNC:KLC1))'
-        result = self.parser.parse(statement)
-        print(result)
-        expected = ['ComplexList', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]],
+        result = self.parser.parse(statement)[0]  # FIXME
+        expected = ['ComplexList', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]]
         self.assertEqual(expected, result)
 
         complex_name = 'ComplexList', 1
@@ -1336,12 +1334,16 @@ class TestRelationships(TestTokenParserBase):
     def test_member_list(self):
         statement = 'p(PKC:a) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))'
         result = self.parser.parse(statement)
-        expected_result = [['Protein', ['PKC', 'a']],
-                           'hasMembers',
-                           [['Protein', ['HGNC', 'PRKCA']],
-                            ['Protein', ['HGNC', 'PRKCB']],
-                            ['Protein', ['HGNC', 'PRKCD']],
-                            ['Protein', ['HGNC', 'PRKCE']]]]
+        expected_result = [
+            ['Protein', ['PKC', 'a']],
+            'hasMembers',
+            [
+                ['Protein', ['HGNC', 'PRKCA']],
+                ['Protein', ['HGNC', 'PRKCB']],
+                ['Protein', ['HGNC', 'PRKCD']],
+                ['Protein', ['HGNC', 'PRKCE']]
+            ]
+        ]
         self.assertEqual(expected_result, result)
 
         sub = 'Protein', 'PKC', 'a'

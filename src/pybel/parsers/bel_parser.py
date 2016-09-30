@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from copy import deepcopy
 
 import networkx as nx
 from pyparsing import *
@@ -19,7 +20,7 @@ CM = Suppress(',')
 WCW = WS + CM + WS
 
 # TODO rename this
-d = {
+variant_parent_dict = {
     'GeneVariant': 'Gene',
     'RNAVariant': 'RNA',
     'ProteinVariant': 'Protein'
@@ -168,8 +169,8 @@ class Parser:
         # 2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
 
         # sequence coordinates?
-        range_coordinate = Group(oneOf(['r', 'p']) + Suppress('.') + pyparsing_common.integer() + Suppress(
-            '_') + pyparsing_common.integer()) | '?'
+        range_coordinate = (Group(oneOf(['r', 'p']) + Suppress('.') + pyparsing_common.integer() +
+                                  Suppress('_') + pyparsing_common.integer()) | '?')
 
         fusion_tags = ['fus', 'fusion']
         fusion = oneOf(fusion_tags) + LP + Group(ns_val) + WCW + range_coordinate + WCW + Group(
@@ -233,12 +234,8 @@ class Parser:
         gene_fusion = oneOf(gene_tags) + LP + Group(fusion) + Optional(WCW + Group(location)) + RP
 
         def handle_gene_fusion(s, l, tokens):
-            cls = tokens[0] = 'GeneFusion'
-
-            name = self.canonicalize_node(tokens)
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls)
-
+            tokens[0] = 'GeneFusion'
+            self.ensure_node(tokens)
             return tokens
 
         gene_fusion.setParseAction(handle_gene_fusion)
@@ -250,11 +247,8 @@ class Parser:
         mirna_simple = oneOf(mirna_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
 
         def handle_mirna_simple(s, l, tokens):
-            cls = tokens[0] = 'miRNA'
-            ns, val = tokens[1]
-            name = self.canonicalize_node(tokens)
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls, namespace=ns, value=val)
+            tokens[0] = 'miRNA'
+            self.ensure_node(tokens)
             return tokens
 
         mirna_simple.setParseAction(handle_mirna_simple)
@@ -350,12 +344,12 @@ class Parser:
 
         def handle_rna_fusion(s, l, tokens):
             tokens[0] = 'RNA'
-            #self.ensure_node(tokens)
+            # self.ensure_node(tokens)
             return tokens
 
         rna_fusion.setParseAction(handle_rna_fusion)
 
-        rna = rna_modified | rna_simple | rna_fusion
+        rna = rna_fusion | rna_modified | rna_simple
 
         single_abundance = general_abundance | gene | mirna | protein | rna
 
@@ -378,14 +372,16 @@ class Parser:
             WCW + Group(complex_partial)) + RP
 
         def handle_complex_list_1(s, l, tokens):
-            tokens = tokens.asList()
-            cls = tokens[0] = 'ComplexList'
+            tokens[0] = 'ComplexList'
+            print('COMPLEX LIST TOKENS: {}'.format(tokens))
 
             name = self.ensure_node(tokens)
-
+            print("COMPLEX LIST NAME: {}".format(name))
             for token in tokens[1:]:
-                v_name = self.canonicalize_node(token)
-                self.graph.add_edge(name, v_name, relation='hasComponent')
+                print('COMPLEX LIST MEMBER: {}'.format(token))
+                member_name = self.ensure_node(token)
+                print('COMPLEX ENSURED MEMBER NAME: {}'.format(member_name))
+                self.graph.add_edge(name, member_name, relation='hasComponent')
 
             return tokens
 
@@ -546,23 +542,9 @@ class Parser:
             to_loc) + RP
 
         def translocation_standard_handler(s, l, tokens):
-            cls = tokens[0] = 'Translocation'
-
-            ab_ns, ab_val = tokens[1][1]
-
-            from_loc_ns, from_loc_val = tokens[2]
-            to_loc_ns, to_loc_val = tokens[3]
-
-            name = self.canonicalize_node(tokens)
-
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls, namespace=ab_ns, value=ab_val, attr_dict={
-                    'from_ns': from_loc_ns,
-                    'from_value': from_loc_val,
-                    'to_ns': to_loc_ns,
-                    'to_value': to_loc_val
-                })
-
+            tokens[0] = 'Translocation'
+            print('TLOC TOKENS: {}'.format(tokens))
+            self.ensure_node(tokens)
             return tokens
 
         translocation_standard.setParseAction(translocation_standard_handler)
@@ -586,7 +568,7 @@ class Parser:
 
         translocation_legacy_singleton.setParseAction(handle_translocation_legacy_singleton)
 
-        translocation = translocation_legacy | translocation_standard | translocation_legacy_singleton
+        translocation = translocation_standard | translocation_legacy | translocation_legacy_singleton
 
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
 
@@ -630,7 +612,7 @@ class Parser:
 
         # 3 BEL Relationships
 
-        bel_term = abundance | process | transformation
+        bel_term = transformation | process | abundance
 
         # TODO finish all handlers for relationships
 
@@ -785,7 +767,13 @@ class Parser:
         has_members = Group(abundance) + WS + oneOf(has_members_tags) + WS + Group(abundance_list)
 
         def handle_has_members(s, l, tokens):
-            # TODO implement
+            parent = self.ensure_node(tokens[0])
+            rel = tokens[1]
+            for child_tokens in tokens[2]:
+                print('CHILD TOKENS: {}'.format(child_tokens))
+                child = self.ensure_node(child_tokens)
+                print('CHILD NAME: {}'.format(child))
+                self.graph.add_edge(parent, child, relation=rel)
             return tokens
 
         has_members.setParseAction(handle_has_members)
@@ -804,7 +792,7 @@ class Parser:
         subprocess_of = Group(process | activity | transformation) + WS + oneOf(subprocess_of_tags) + WS + Group(
             process)
 
-        other_relationships = has_member | has_members | has_component | is_a | subprocess_of
+        other_relationships = has_member | has_component | is_a | subprocess_of
 
         # 3.5 Deprecated
 
@@ -833,6 +821,9 @@ class Parser:
             return tokens
 
         relation.setParseAction(handle_relation)
+
+        # has_members is handled differently from all other relations becuase it gets distrinbuted
+        relation = has_members | relation
 
         self.statement = relation | bel_term
 
@@ -870,9 +861,8 @@ class Parser:
             name = self.canonicalize_node(tokens)
             if name not in self.graph:
                 self.graph.add_node(name, type=command)
-
-            parent_name = self.ensure_node([d[command], tokens[1]])
-            self.graph.add_edge(name, parent_name)
+            parent_name = self.ensure_node([variant_parent_dict[command], tokens[1]])
+            self.graph.add_edge(name, parent_name, relation='hasParent')
         elif command == 'Protein':
             name = self.canonicalize_node(tokens)
 
@@ -880,7 +870,7 @@ class Parser:
                 ns, val = args[0]
                 self.graph.add_node(name, type=command, namespace=ns, value=val)
 
-            rna_tokens = tokens.copy()
+            rna_tokens = deepcopy(tokens)
             rna_tokens[0] = 'RNA'
             rna_name = self.ensure_node(rna_tokens)
 
@@ -892,13 +882,15 @@ class Parser:
                 ns, val = args[0]
                 self.graph.add_node(name, type=command, namespace=ns, value=val)
 
-            gene_tokens = tokens.copy()
+            gene_tokens = deepcopy(tokens)
             gene_tokens[0] = 'Gene'
             gene_name = self.ensure_node(gene_tokens)
 
             self.graph.add_edge(gene_name, name, relation='transcribedTo')
         else:
+            print('ENSURE GENE TOKENS: {}'.format(tokens))
             name = self.canonicalize_node(tokens)
+            print('ENSURE GENE NAME: {}'.format(name))
             if name not in self.graph:
                 ns, val = args[0]
                 self.graph.add_node(name, type=command, namespace=ns, value=val)
