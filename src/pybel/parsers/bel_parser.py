@@ -61,15 +61,24 @@ class Parser:
 
         quoted_value = dblQuotedString().setParseAction(removeQuotes)
 
-        ns_val = (Word(alphanums) + Suppress(':') + (Word(alphanums) | quoted_value))
+        ns_val_valid = (Word(alphanums) + Suppress(':') + (Word(alphanums) | quoted_value))
+
+        ns_val_invalid = dblQuotedString() | Word(alphanums)
+
+        def handle_ns_val_invalid(s, l, tokens):
+            raise Exception('PyBEL010 Invalid Namespace: {}'.format(s))
+
+        ns_val_invalid.setParseAction(handle_ns_val_invalid)
 
         # TODO test listed namespace
         # TODO deal with quoted values
         if names is not None:
             blank_ns = oneOf(names).setParseAction(lambda s, l, tokens: ['', tokens[0]])
-            ns_val = ns_val | blank_ns
+            ns_val = ns_val_valid | blank_ns
 
-        ns_val.setParseAction(self.validate_ns_pair)
+        ns_val_valid.setParseAction(self.validate_ns_pair)
+
+        ns_val = ns_val_valid | ns_val_invalid
 
         # 2.2 Abundance Modifier Functions
 
@@ -81,7 +90,7 @@ class Parser:
         pmod_tag = oneOf(['pmod', 'proteinModification'])
         pmod_default = oneOf(language.pmod_namespace) | oneOf(language.pmod_legacy)
 
-        pmod_val = Group(ns_val) | pmod_default
+        pmod_val = Group(ns_val_valid) | pmod_default
 
         pmod_option_1 = pmod_tag + LP + pmod_val + WCW + amino_acids + WCW + pyparsing_common.integer() + RP
         pmod_option_2 = pmod_tag + LP + pmod_val + WCW + amino_acids + RP
@@ -194,13 +203,8 @@ class Parser:
         gene_simple = oneOf(gene_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
 
         def handle_gene_simple(s, location, tokens):
-            cls = tokens[0] = 'Gene'
-            ns, val = tokens[1]
-
-            name = self.canonicalize_node(tokens)
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls, namespace=ns, value=val)
-
+            tokens[0] = 'Gene'
+            self.ensure_node(tokens)
             return tokens
 
         gene_simple.addParseAction(handle_gene_simple)
@@ -271,11 +275,8 @@ class Parser:
         protein_simple = protein_tag + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
 
         def handle_protein_simple(s, l, tokens):
-            cls = tokens[0] = 'Protein'
-            ns, val = tokens[1]
-            name = self.canonicalize_node(tokens)
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls, namespace=ns, value=val)
+            tokens[0] = 'Protein'
+            self.ensure_node(tokens)
             return tokens
 
         protein_simple.setParseAction(handle_protein_simple)
@@ -317,13 +318,8 @@ class Parser:
         rna_simple = oneOf(rna_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
 
         def handle_rna_simple(s, l, tokens):
-            cls = tokens[0] = 'RNA'
-            ns, val = tokens[1]
-            name = self.canonicalize_node(tokens)
-
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls, namespace=ns, value=val)
-
+            tokens[0] = 'RNA'
+            self.ensure_node(tokens)
             return tokens
 
         rna_simple.setParseAction(handle_rna_simple)
@@ -354,6 +350,7 @@ class Parser:
 
         def handle_rna_fusion(s, l, tokens):
             tokens[0] = 'RNA'
+            #self.ensure_node(tokens)
             return tokens
 
         rna_fusion.setParseAction(handle_rna_fusion)
@@ -367,11 +364,8 @@ class Parser:
         complex_singleton_1 = oneOf(complex_tags) + LP + Group(ns_val) + RP
 
         def handle_complex_singleton_1(s, l, tokens):
-            cls = tokens[0] = 'Complex'
-            ns, val = tokens[1]
-            n = self.canonicalize_node(tokens)
-            if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=val)
+            tokens[0] = 'Complex'
+            self.ensure_node(tokens)
             return tokens
 
         complex_singleton_1.setParseAction(handle_complex_singleton_1)
@@ -384,16 +378,14 @@ class Parser:
             WCW + Group(complex_partial)) + RP
 
         def handle_complex_list_1(s, l, tokens):
+            tokens = tokens.asList()
             cls = tokens[0] = 'ComplexList'
 
-            name = self.canonicalize_node(tokens)
-
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls)
+            name = self.ensure_node(tokens)
 
             for token in tokens[1:]:
                 v_name = self.canonicalize_node(token)
-                self.graph.add_edge(name, v_name, relation='hasComponent', attr_dict=self.annotations.copy())
+                self.graph.add_edge(name, v_name, relation='hasComponent')
 
             return tokens
 
@@ -872,20 +864,21 @@ class Parser:
 
     def ensure_node(self, tokens, **kwargs):
         """Turns parsed tokens into canonical node names"""
-        command, *args = tokens
+        command, *args = list2tuple(tokens.asList() if hasattr(tokens, 'asList') else tokens)
 
         if command in ('GeneVariant', 'RNAVariant', 'ProteinVariant'):
             name = self.canonicalize_node(tokens)
             if name not in self.graph:
-                self.graph.add_node(name)
+                self.graph.add_node(name, type=command)
 
             parent_name = self.ensure_node([d[command], tokens[1]])
             self.graph.add_edge(name, parent_name)
-            return name
         elif command == 'Protein':
             name = self.canonicalize_node(tokens)
+
             if name not in self.graph:
-                self.graph.add_node(name, **kwargs)
+                ns, val = args[0]
+                self.graph.add_node(name, type=command, namespace=ns, value=val)
 
             rna_tokens = tokens.copy()
             rna_tokens[0] = 'RNA'
@@ -894,8 +887,10 @@ class Parser:
             self.graph.add_edge(rna_name, name, relation='translatedTo')
         elif command == 'RNA':
             name = self.canonicalize_node(tokens)
+
             if name not in self.graph:
-                self.graph.add_node(name, **kwargs)
+                ns, val = args[0]
+                self.graph.add_node(name, type=command, namespace=ns, value=val)
 
             gene_tokens = tokens.copy()
             gene_tokens[0] = 'Gene'
@@ -905,12 +900,33 @@ class Parser:
         else:
             name = self.canonicalize_node(tokens)
             if name not in self.graph:
-                self.graph.add_node(name, **kwargs)
-            return name
+                ns, val = args[0]
+                self.graph.add_node(name, type=command, namespace=ns, value=val)
+        return name
 
     def canonicalize_modifier(self, tokens):
-        """Get activity, transformation, or transformation"""
-        pass
+        """Get activity, transformation, or transformation information as a dictionary"""
+        command, *args = list2tuple(tokens.asList() if hasattr(tokens, 'asList') else tokens)
+        res = {
+            'params': {}
+        }
+
+        if command not in ('Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
+            return None
+
+        res['modification'] = command
+
+        if command == 'Activity':
+            if len(args) > 1:  # has molecular activity annotation
+                key, value = args[1]
+                res['params'][key] = value
+            return res
+        elif command == 'Degradation':
+            return res
+        elif command == 'Translocation':
+            res['params']['fromLoc'] = args[1]
+            res['params']['toLoc'] = args[2]
+            return res
 
     def validate_ns_pair(self, s, location, tokens):
         # TODO test listed namespace

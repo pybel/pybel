@@ -6,6 +6,8 @@ from pybel.parsers.bel_parser import Parser
 log = logging.getLogger(__name__)
 
 
+# TODO test ensure node
+
 class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -22,6 +24,39 @@ class TestTokenParserBase(unittest.TestCase):
     def assertHasEdge(self, u, v, msg=None, **kwargs):
         msg = 'Edge ({}, {}) not in graph'.format(u, v) if msg is None else msg
         self.assertTrue(self.parser.graph.has_edge(u, v), msg)
+
+
+class TestEnsure(TestTokenParserBase):
+    def test_complete(self):
+        """"""
+        statement = 'p(HGNC:AKT1)'
+        result = self.parser.parse(statement)
+        expected_result = ['Protein', ['HGNC', 'AKT1']]
+        self.assertEqual(expected_result, result)
+
+        protein = 'Protein', 'HGNC', 'AKT1'
+        rna = 'RNA', 'HGNC', 'AKT1'
+        gene = 'Gene', 'HGNC', 'AKT1'
+
+        self.assertHasNode(protein)
+        self.assertHasNode(rna)
+        self.assertHasNode(gene)
+
+        self.assertHasEdge(gene, rna, relation='transcribedTo')
+        self.assertHasEdge(rna, protein, relation='translatedTo')
+
+    def ensure_no_dups(self):
+        """Ensure node isn't added twice, even if from different statements"""
+        s1 = 'g(HGNC:AKT1)'
+        s2 = 'deg(g(HGNC:AKT1))'
+        s3 = 'g(HGNC:AKT1) -- g(HGNC:AKT1)'
+
+        self.parser.parse(s1)
+        self.parser.parse(s2)
+        self.parser.parse(s3)
+
+        self.assertEqual(1, self.parser.graph)
+        self.assertHasNode(('Gene', 'HGNC', 'AKT1'))
 
 
 class TestInternal(TestTokenParserBase):
@@ -60,6 +95,89 @@ class TestInternal(TestTokenParserBase):
         expected = ['Variant', 'A', 127, 'Y']
         result = self.parser.psub.parseString(statement)
         self.assertEqual(expected, result.asList())
+
+
+class TestAnnotations(TestTokenParserBase):
+    def test_activity_1(self):
+        """"""
+        statement = 'act(p(HGNC:AKT1))'
+        result = self.parser.parse(statement)
+        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']]]
+        self.assertEqual(expected_result, result)
+
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modification': 'Activity',
+            'params': {}
+        }
+        self.assertEqual(expected_mod, mod)
+
+    def test_activity_2(self):
+        """"""
+        statement = 'act(p(HGNC:AKT1), ma(kin))'
+        result = self.parser.parse(statement)
+        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']], ['MolecularActivity', 'KinaseActivity']]
+        self.assertEqual(expected_result, result)
+
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modification': 'Activity',
+            'params': {
+                'MolecularActivity': 'KinaseActivity'
+            }
+        }
+        self.assertEqual(expected_mod, mod)
+
+    def test_activity_3(self):
+        """"""
+        statement = 'act(p(HGNC:AKT1), ma(NS:VAL))'
+        result = self.parser.parse(statement)
+        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']], ['MolecularActivity', ['NS', 'VAL']]]
+        self.assertEqual(expected_result, result)
+
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modification': 'Activity',
+            'params': {
+                'MolecularActivity': ('NS', 'VAL')
+            }
+        }
+        self.assertEqual(expected_mod, mod)
+
+    def test_degredation_1(self):
+        statement = 'deg(p(HGNC:AKT1))'
+        result = self.parser.parse(statement)
+        expected_result = ['Degradation', ['Protein', ['HGNC', 'AKT1']]]
+        self.assertEqual(expected_result, result)
+
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modification': 'Degradation',
+            'params': {}
+        }
+        self.assertEqual(expected_mod, mod)
+
+    def test_tloc_1(self):
+        """translocation example"""
+        statement = 'tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))'
+        result = self.parser.parse(statement)
+        expected_result = [
+            'Translocation',
+            ['Protein', ['HGNC', 'EGFR']],
+            ['GOCC', 'cell surface'],
+            ['GOCC', 'endosome']
+        ]
+        self.assertEqual(expected_result, result)
+
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modification': 'Translocation',
+            'params': {
+                'fromLoc': ('GOCC', 'cell surface'),
+                'toLoc': ('GOCC', 'endosome')
+            }
+        }
+        self.assertEqual(expected_mod, mod)
 
 
 class TestTerms(TestTokenParserBase):
@@ -811,6 +929,7 @@ class TestTerms(TestTokenParserBase):
         """Test complex statement"""
         statement = 'complex(p(HGNC:CLSTN1), p(HGNC:KLC1))'
         result = self.parser.parse(statement)
+        print(result)
         expected = ['ComplexList', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]],
         self.assertEqual(expected, result)
 
