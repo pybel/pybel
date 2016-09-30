@@ -43,11 +43,13 @@ class TestImport(unittest.TestCase):
             'relation': 'association'
         })
 
+    @unittest.skip
     def test_parse(self):
         """Tests no exceptions thrown during parsing. Needs internet connection"""
         with open(os.path.expandvars('$PYBEL_BASE/tests/bel/small_corpus.bel')) as f:
             pybel.from_file(f)
 
+    @unittest.skip
     def test_load(self):
         """Test graph imports correct nodes and edges"""
         with open(os.path.expandvars('$PYBEL_BASE/tests/bel/test_bel_1.bel')) as f:

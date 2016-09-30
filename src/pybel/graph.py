@@ -4,6 +4,7 @@ import time
 import networkx as nx
 import py2neo
 import requests
+import os
 
 from .parsers.bel_parser import Parser
 from .parsers.set_statements import parse_commands, group_statements, sanitize_statement_lines
@@ -12,25 +13,18 @@ from .parsers.utils import sanitize_file_lines, split_file_to_annotations_and_de
 log = logging.getLogger(__name__)
 
 
-def from_url(url):
+def from_bel(bel):
     """
-    Parses a BEL file from URL resource
-    :param url: URL to BEL resource
+    Parses a BEL file from URL or file resource
+    :param bel: URL or file path to BEL resource
+    :type bel: str
     :return: a BEL MultiGraph
     :rtype BELGraph
     """
-    return BELGraph().parse_from_url(url)
-
-
-def from_file(fl):
-    """
-    Parses a BEL file from a file-like object
-    :param fl: file-like object backed by BEL data
-    :return: a BEL MultiGraph
-    :rtype BELGraph
-    """
-    return BELGraph().parse_from_file(fl)
-
+    if bel.startswith('http'):
+        return BELGraph().parse_from_url(bel)
+    with open(os.path.expanduser(bel)) as f:
+        return BELGraph().parse_from_file(f)
 
 class BELGraph(nx.MultiDiGraph):
     """
@@ -80,7 +74,7 @@ class BELGraph(nx.MultiDiGraph):
         log.info('Loaded lines in {:.2f} seconds'.format(time.time() - t))
         t = time.time()
 
-        parser = Parser()
+        parser = Parser(graph=self)
         for com in coms:
             parser.reset_metadata()
             parser.set_citation(com['citation'])

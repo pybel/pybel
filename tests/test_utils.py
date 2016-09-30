@@ -43,3 +43,48 @@ class TestUtils(unittest.TestCase):
         self.assertEqual((False, 1), next(subit))
         self.assertEqual((False, 2), next(subit))
         self.assertEqual((False, 3), next(subit))
+
+    def test_dict_matches_1(self):
+        a = {
+            'k1': 'v1',
+            'k2': 'v2'
+        }
+        b = {
+            'k1': 'v1',
+            'k2': 'v2'
+        }
+        self.assertTrue(utils.dict_matches(a,b))
+
+    def test_dict_matches_2(self):
+        a = {
+            'k1': 'v1',
+            'k2': 'v2',
+            'k3': 'v3'
+        }
+        b = {
+            'k1': 'v1',
+            'k2': 'v2'
+        }
+        self.assertTrue(utils.dict_matches(a,b))
+
+    def test_dict_matches_3(self):
+        a = {
+            'k1': 'v1',
+        }
+        b = {
+            'k1': 'v1',
+            'k2': 'v2'
+        }
+        self.assertFalse(utils.dict_matches(a,b))
+
+    def test_dict_matches_4(self):
+        a = {
+            'k1': 'v1',
+            'k2': 'v4',
+            'k3': 'v3'
+        }
+        b = {
+            'k1': 'v1',
+            'k2': 'v2'
+        }
+        self.assertFalse(utils.dict_matches(a,b))

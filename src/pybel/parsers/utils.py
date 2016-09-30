@@ -82,3 +82,28 @@ def list2tuple(l):
         return l
     else:
         return tuple(list2tuple(e) for e in l)
+
+
+def dict_matches(a, b):
+    """
+    Checks if all the keys in b are in a, and that their values match
+    :param a: a dictionary
+    :type a: dict
+    :param b: a dictionary
+    :type b: dict
+    :return:
+    """
+    for k, v in b.items():
+        if k not in a or a[k] != v:
+            return False
+    return True
+
+
+def any_subdict_matches(a, b):
+    """
+    Checks that dictionary b matches one of the subdictionaries of a
+    :param a: dictionary of dictionaries
+    :param b: dictionary
+    :return:
+    """
+    return any(dict_matches(sd, b) for sd in a.values())

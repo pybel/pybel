@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 BEL language parameters
 """
@@ -42,8 +44,6 @@ abundance_labels = {
     'path': 'Pathology'
 }
 
-functions = list(abundance_labels.keys())
-
 amino_acid_dict = {
     'A': 'Ala',
     'R': 'Arg',
@@ -74,7 +74,7 @@ rna_nucleotide_chars = ['a', 'u', 'c', 'g']
 # Protein Modification O is not defined by BEL Language v. 1.0
 pmod_legacy = ['P', 'A', 'F', 'G', 'H', 'M', 'R', 'S', 'U', 'O']
 
-pmod_namespace = [
+pmod_namespace = {
     'Ac',
     'acetylation',
     'ADPRib',
@@ -136,7 +136,13 @@ pmod_namespace = [
     'UbMono',
     'monoubiquitination',
     'UbPoly'
-]
+}
+
+relation_labels = {
+    'pmod': 'ProteinModification',
+    'proteinModification': 'ProteinModification'
+
+}
 
 # TODO add other BEL common namespaces
 
