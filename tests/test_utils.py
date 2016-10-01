@@ -1,7 +1,10 @@
 import unittest
 
-from pybel.parsers import utils
 import networkx as nx
+
+from pybel.parsers import utils
+from pybel.parsers.utils import subdict_matches
+
 
 class TestUtils(unittest.TestCase):
     def test_list2tuple(self):
@@ -53,7 +56,7 @@ class TestUtils(unittest.TestCase):
             'k1': 'v1',
             'k2': 'v2'
         }
-        self.assertTrue(utils.dict_matches(a,b))
+        self.assertTrue(subdict_matches(a, b))
 
     def test_dict_matches_2(self):
         a = {
@@ -65,7 +68,7 @@ class TestUtils(unittest.TestCase):
             'k1': 'v1',
             'k2': 'v2'
         }
-        self.assertTrue(utils.dict_matches(a,b))
+        self.assertTrue(subdict_matches(a, b))
 
     def test_dict_matches_3(self):
         a = {
@@ -75,7 +78,7 @@ class TestUtils(unittest.TestCase):
             'k1': 'v1',
             'k2': 'v2'
         }
-        self.assertFalse(utils.dict_matches(a,b))
+        self.assertFalse(subdict_matches(a, b))
 
     def test_dict_matches_4(self):
         a = {
@@ -87,7 +90,7 @@ class TestUtils(unittest.TestCase):
             'k1': 'v1',
             'k2': 'v2'
         }
-        self.assertFalse(utils.dict_matches(a,b))
+        self.assertFalse(subdict_matches(a, b))
 
     def test_dict_matches_graph(self):
         g = nx.MultiDiGraph()

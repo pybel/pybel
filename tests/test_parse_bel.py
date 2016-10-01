@@ -2,7 +2,7 @@ import logging
 import unittest
 
 from pybel.parsers.bel_parser import Parser
-from pybel.parsers.utils import any_subdict_matches
+from pybel.parsers.utils import any_subdict_matches, subdict_matches
 
 log = logging.getLogger(__name__)
 
@@ -19,8 +19,11 @@ class TestTokenParserBase(unittest.TestCase):
         self.parser.node_count = 0
         self.parser.annotations = {}
 
-    def assertHasNode(self, member, msg=None):
+    def assertHasNode(self, member, msg=None, **kwargs):
         self.assertIn(member, self.parser.graph)
+        if kwargs:
+            self.assertTrue(subdict_matches(self.parser.graph.node[member], kwargs, ),
+                            msg='Node {} has wrong properties: {}'.format(member, kwargs))
 
     def assertHasEdge(self, u, v, msg=None, **kwargs):
         self.assertTrue(self.parser.graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
@@ -52,7 +55,7 @@ class TestEnsure(TestTokenParserBase):
         """Ensure node isn't added twice, even if from different statements"""
         s1 = 'g(HGNC:AKT1)'
         s2 = 'deg(g(HGNC:AKT1))'
-        s3 = 'g(HGNC:AKT1) -- g(HGNC:AKT1)'
+        s3 = 'deg(g(HGNC:AKT1)) -- g(HGNC:AKT1)'
 
         self.parser.parse(s1)
         self.parser.parse(s2)
@@ -191,10 +194,10 @@ class TestTerms(TestTokenParserBase):
         self.assertEqual(expected_result, result)
 
         node = self.parser.canonicalize_node(result)
-        expected_node = 'Abundance', 'CHEBI', 'oxygen atom'
+        expected_node = cls, ns, val = 'Abundance', 'CHEBI', 'oxygen atom'
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node, type=cls, namespace=ns, value=val)
 
     def test_211b(self):
         statement = 'abundance(CHEBI:"carbon atom")'
@@ -207,7 +210,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'Abundance', 'CHEBI', 'carbon atom'
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_212a(self):
         statement = 'complex(SCOMP:"AP-1 Complex")'
@@ -220,7 +223,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'Complex', 'SCOMP', 'AP-1 Complex'
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_212b(self):
         statement = 'complex(p(HGNC:FOS), p(HGNC:JUN))'
@@ -233,7 +236,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'ComplexList', 1
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_213a(self):
         statement = 'composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex"))'
@@ -264,7 +267,7 @@ class TestTerms(TestTokenParserBase):
         self.assertEqual(expected_node, node)
 
         self.assertEqual(1, len(self.parser.graph))
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_214b(self):
         statement = 'geneAbundance(HGNC:AKT2)'
@@ -277,7 +280,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'Gene', 'HGNC', 'AKT2'
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_214c(self):
         statement = 'geneAbundance(HGNC:AKT1)'
@@ -290,7 +293,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'Gene', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_215a(self):
         statement = 'm(HGNC:MIR21)'
@@ -303,7 +306,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'miRNA', 'HGNC', 'MIR21'
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_216a(self):
         statement = 'p(HGNC:AKT1)'
@@ -316,7 +319,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'Protein', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_217a(self):
         statement = 'r(HGNC:AKT1)'
@@ -329,7 +332,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'RNA', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
-        self.assertIn(node, self.parser.graph)
+        self.assertHasNode(node)
 
     def test_221a(self):
         """Test default BEL namespace and 1-letter amino acid code:"""
