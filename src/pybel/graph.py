@@ -1,10 +1,10 @@
 import logging
+import os
 import time
 
 import networkx as nx
 import py2neo
 import requests
-import os
 
 from .parsers.bel_parser import Parser
 from .parsers.set_statements import parse_commands, group_statements, sanitize_statement_lines
@@ -25,6 +25,7 @@ def from_bel(bel):
         return BELGraph().parse_from_url(bel)
     with open(os.path.expanduser(bel)) as f:
         return BELGraph().parse_from_file(f)
+
 
 class BELGraph(nx.MultiDiGraph):
     """

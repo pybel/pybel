@@ -1,7 +1,7 @@
 import unittest
 
 from pybel.parsers import utils
-
+import networkx as nx
 
 class TestUtils(unittest.TestCase):
     def test_list2tuple(self):
@@ -88,3 +88,15 @@ class TestUtils(unittest.TestCase):
             'k2': 'v2'
         }
         self.assertFalse(utils.dict_matches(a,b))
+
+    def test_dict_matches_graph(self):
+        g = nx.MultiDiGraph()
+
+        g.add_node(1)
+        g.add_node(2)
+        g.add_edge(1, 2, relation='yup')
+        g.add_edge(1, 2, relation='nope')
+
+        d = {'relation': 'yup'}
+
+        self.assertTrue(utils.any_subdict_matches(g.edge[1][2], d))

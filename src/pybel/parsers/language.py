@@ -141,7 +141,12 @@ pmod_namespace = {
 relation_labels = {
     'pmod': 'ProteinModification',
     'proteinModification': 'ProteinModification'
+}
 
+variant_parent_dict = {
+    'GeneVariant': 'Gene',
+    'RNAVariant': 'RNA',
+    'ProteinVariant': 'Protein'
 }
 
 # TODO add other BEL common namespaces

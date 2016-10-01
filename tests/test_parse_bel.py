@@ -2,6 +2,7 @@ import logging
 import unittest
 
 from pybel.parsers.bel_parser import Parser
+from pybel.parsers.utils import any_subdict_matches
 
 log = logging.getLogger(__name__)
 
@@ -22,8 +23,10 @@ class TestTokenParserBase(unittest.TestCase):
         self.assertIn(member, self.parser.graph)
 
     def assertHasEdge(self, u, v, msg=None, **kwargs):
-        msg = 'Edge ({}, {}) not in graph'.format(u, v) if msg is None else msg
-        self.assertTrue(self.parser.graph.has_edge(u, v), msg)
+        self.assertTrue(self.parser.graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
+        if kwargs:
+            self.assertTrue(any_subdict_matches(self.parser.graph.edge[u][v], kwargs),
+                            msg='No edge with correct properties: {}'.format(kwargs))
 
 
 class TestEnsure(TestTokenParserBase):
@@ -842,7 +845,7 @@ class TestTerms(TestTokenParserBase):
         obj = 'Abundance', 'CHEBI', 'hydrogen peroxide'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='decreases')
 
     def test_111(self):
         """Test nested statement"""
@@ -891,7 +894,7 @@ class TestTerms(TestTokenParserBase):
         obj = 'Pathology', 'MESHD', 'Alzheimer Disease'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='biomarkerFor')
 
     def test_121(self):
         """Test nested definitions"""
@@ -922,7 +925,7 @@ class TestTerms(TestTokenParserBase):
         obj = 'Protein', 'HGNC', 'F9'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='directlyIncreases')
 
     def test_131(self):
         """Test complex statement"""
@@ -969,7 +972,7 @@ class TestTerms(TestTokenParserBase):
         obj = 'Complex', 'SCOMP', 'gamma Secretase Complex'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, rel='increases')
+        self.assertHasEdge(sub, obj, relation='increases')
 
     def test_133(self):
         """Test SNP annotation"""
@@ -988,7 +991,7 @@ class TestTerms(TestTokenParserBase):
         obj = 'Pathology', 'MESHD', 'Alzheimer Disease'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='increases')
 
     def test_134(self):
         """Test phosphoralation tag"""
@@ -1007,7 +1010,7 @@ class TestTerms(TestTokenParserBase):
         obj = 'ProteinVariant', 'HGNC', 'MAPT', 'ProteinModification', 'P'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='increases')
 
     def test_135(self):
         """Test composite in sibject"""
@@ -1030,13 +1033,13 @@ class TestTerms(TestTokenParserBase):
         sub_member_2 = 'Protein', 'HGNC', 'FADD'
         self.assertHasNode(sub_member_2)
 
-        self.assertHasEdge(sub, sub_member_1)
-        self.assertHasEdge(sub, sub_member_2)
+        self.assertHasEdge(sub, sub_member_1, relation='hasComponent')
+        self.assertHasEdge(sub, sub_member_2, relation='hasComponent')
 
         obj = 'BiologicalProcess', 'GOBP', 'neuron apoptotic process'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='increases')
 
     def test_136(self):
         """Test translocation in object"""
@@ -1060,7 +1063,7 @@ class TestTerms(TestTokenParserBase):
         obj = 'Abundance', 'CHEBI', 'calcium(2+)'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='increases')
 
     @unittest.expectedFailure
     def test_141(self):
@@ -1082,7 +1085,7 @@ class TestTerms(TestTokenParserBase):
         obj = ''
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='association')
 
     def test_253b(self):
         """Test reaction"""
@@ -1110,10 +1113,10 @@ class TestTerms(TestTokenParserBase):
         obj_member_2 = 'Protein', 'HGNC', 'CDK5'
         self.assertHasNode(obj_member_2)
 
-        self.assertHasEdge(obj, obj_member_1)
-        self.assertHasEdge(obj, obj_member_2)
+        self.assertHasEdge(obj, obj_member_1, relation='hasReactant')
+        self.assertHasEdge(obj, obj_member_2, relation='hasProduct')
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='increases')
 
     def test_140(self):
         """Test protein substitution"""
@@ -1136,7 +1139,7 @@ class TestTerms(TestTokenParserBase):
         obj = 'Pathology', 'MESHD', 'Alzheimer Disease'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='increases')
 
 
 class TestRelationships(TestTokenParserBase):
@@ -1157,7 +1160,7 @@ class TestRelationships(TestTokenParserBase):
         obj = 'BiologicalProcess', 'GOBP', 'cholesterol biosynthetic process'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj)
+        self.assertHasEdge(sub, obj, relation='rateLimitingStepOf')
 
     def test_317a(self):
         """Abundances and activities"""

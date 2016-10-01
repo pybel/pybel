@@ -19,17 +19,23 @@ RP = WS + Suppress(')')
 CM = Suppress(',')
 WCW = WS + CM + WS
 
-# TODO rename this
-variant_parent_dict = {
-    'GeneVariant': 'Gene',
-    'RNAVariant': 'RNA',
-    'ProteinVariant': 'Protein'
-}
 
+def command_handler(command, loc=0, ensure_node_handler=None):
+    """
+    Builds a token handler
+    :param command: a string for replacement, or function that takes the old token and transforms it
+    :param loc: location of the token to normalize
+    :param ensure_node_handler: give the self object from the parser
+    :return:
+    """
 
-def command_rename_handler(command, loc=0):
     def handler(s, l, tokens):
-        tokens[loc] = command
+        if isinstance(command, str):
+            tokens[loc] = command
+        elif command is callable:
+            tokens[loc] = command(tokens[loc])
+        if ensure_node_handler is not None:
+            ensure_node_handler.ensure_node(tokens)
         return tokens
 
     return handler
@@ -101,22 +107,13 @@ class Parser:
 
         self.pmod = pmod
 
-        def handle_pmod(s, l, tokens):
-            tokens[0] = 'ProteinModification'
-            return tokens
-
-        pmod.setParseAction(handle_pmod)
+        pmod.setParseAction(command_handler('ProteinModification'))
 
         # 2.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
         # TODO see spec at http://www.hgvs.org/mutnomen/recs.html
         variant_tags = ['var', 'variant']
         variant = oneOf(variant_tags) + LP + hgvs + RP
-
-        def handle_variant(s, loc, tokens):
-            tokens[0] = 'Variant'
-            return tokens
-
-        variant.setParseAction(handle_variant)
+        variant.setParseAction(command_handler('Variant'))
 
         # 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
         fragment_range = (pyparsing_common.integer() | '?') + Suppress('_') + (pyparsing_common.integer() | '?' | '*')
@@ -126,22 +123,12 @@ class Parser:
         fragment_3 = oneOf(fragment_tags) + LP + '?' + Optional(WCW + Word(alphanums)) + RP
 
         fragment = fragment_3 | fragment_1 | fragment_2
-
-        def handle_fragment(s, l, tokens):
-            tokens[0] = 'Fragment'
-            return tokens
-
-        fragment.setParseAction(handle_fragment)
+        fragment.setParseAction(command_handler('Fragment'))
 
         # 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
         location_tags = ['loc', 'location']
         location = oneOf(location_tags) + LP + Group(ns_val) + RP
-
-        def handle_location(s, l, tokens):
-            tokens[0] = 'Location'
-            return tokens
-
-        location.setParseAction(handle_location)
+        location.setParseAction(command_handler('Location'))
 
         # deprecated substitution function
         sub_tags = ['sub', 'substitution']
@@ -396,18 +383,12 @@ class Parser:
             WCW + Group(simple_abundance)) + RP
 
         def handle_composite_abundance(s, loc, tokens):
-            cls = tokens[0] = 'Composite'
+            tokens[0] = 'Composite'
+            name = self.ensure_node(tokens)
 
-            name = self.canonicalize_node(tokens)
-
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls)
-
-            for token in tokens[1:]:
-                v_cls = token[0]
-                v_ns, v_val = token[1]
-                v = v_cls, v_ns, v_val
-                self.graph.add_edge(name, v, relation='hasComponent', attr_dict=self.annotations.copy())
+            for component_token in tokens[1:]:
+                component_name = self.ensure_node(component_token)
+                self.graph.add_edge(name, component_name, relation='hasComponent', attr_dict=self.annotations.copy())
 
             return tokens
 
@@ -448,11 +429,8 @@ class Parser:
         biological_process = oneOf(biological_process_tags) + LP + Group(ns_val) + RP
 
         def handle_biological_process(s, l, tokens):
-            cls = tokens[0] = 'BiologicalProcess'
-            ns, val = tokens[1]
-            n = cls, ns, val
-            if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=val)
+            tokens[0] = 'BiologicalProcess'
+            self.ensure_node(tokens)
             return tokens
 
         biological_process.setParseAction(handle_biological_process)
@@ -462,11 +440,8 @@ class Parser:
         pathology = oneOf(pathology_tags) + LP + Group(ns_val) + RP
 
         def handle_pathology(s, l, tokens):
-            cls = tokens[0] = 'Pathology'
-            ns, val = tokens[1]
-            n = self.canonicalize_node(tokens)
-            if n not in self.graph:
-                self.graph.add_node(n, type=cls, namespace=ns, value=val)
+            tokens[0] = 'Pathology'
+            self.ensure_node(tokens)
             return tokens
 
         pathology.setParseAction(handle_pathology)
@@ -586,8 +561,8 @@ class Parser:
 
         def handle_reaction(s, l, tokens):
             cls = tokens[0] = 'Reaction'
-            name = self.canonicalize_node(tokens)
 
+            name = self.canonicalize_node(tokens)
             if name not in self.graph:
                 self.graph.add_node(name, type=cls)
 
@@ -684,6 +659,7 @@ class Parser:
 
         regulates.setParseAction(handle_regulates)
 
+        # FIXME parsing of compound statements
         causal_relationship << (
             increases | directly_increases | decreases | directly_decreases | rate_limit | causes_no_change | regulates)
 
@@ -763,10 +739,9 @@ class Parser:
 
         def handle_has_members(s, l, tokens):
             parent = self.ensure_node(tokens[0])
-            rel = tokens[1]
             for child_tokens in tokens[2]:
                 child = self.ensure_node(child_tokens)
-                self.graph.add_edge(parent, child, relation=rel)
+                self.graph.add_edge(parent, child, relation='hasMember')
             return tokens
 
         has_members.setParseAction(handle_has_members)
@@ -854,7 +829,7 @@ class Parser:
             name = self.canonicalize_node(tokens)
             if name not in self.graph:
                 self.graph.add_node(name, type=command)
-            parent_name = self.ensure_node([variant_parent_dict[command], tokens[1]])
+            parent_name = self.ensure_node([language.variant_parent_dict[command], tokens[1]])
             self.graph.add_edge(name, parent_name, relation='hasParent')
         elif command == 'Protein':
             name = self.canonicalize_node(tokens)
@@ -912,6 +887,8 @@ class Parser:
             return res
 
     def validate_ns_pair(self, s, location, tokens):
+        """Checks the tokenized namespace/value pair is valid based on the internal settings of this parser"""
+
         # TODO test listed namespace
         # if len(tokens) == 1:
         #    if tokens[0] in self.names:
@@ -939,15 +916,32 @@ class Parser:
         return tokens
 
     def parse(self, s):
+        """
+        Tokenizes a single BEL statement
+        :param s: BEL statement
+        :type s: str
+        :return: tokenized BEL statement
+        """
         try:
             return self.statement.parseString(s).asList()
         except Exception as e:
             log.warning('PyBEL000 general parser failure: {}'.format(s))
 
     def reset_metadata(self):
+        """
+        Resets the internal metadata dictionary
+        :return:
+        """
         self.annotations = {}
 
     def set_metadata(self, key, value):
+        """
+        Sets key to value in internal metadata dictionary
+        :param key:
+        :type key: str
+        :param value:
+        :type value: str
+        """
         self.annotations[key] = value
 
     def unset_metadata(self, key):
@@ -955,5 +949,9 @@ class Parser:
             del self.annotations[key]
 
     def set_citation(self, citation):
+        """
+        Sets the citation information in internal metadata dictionary
+        :param citation: a dictionary of citation information
+        """
         # TODO implement
         pass
