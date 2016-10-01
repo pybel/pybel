@@ -816,7 +816,7 @@ class Parser:
             # mod_title, *mod_params = args[1]
             mod = list2tuple(args[1])
             # todo: flatten then splat sorted(args[1:], key=itemgetter(0))
-            name = (command, ns, val, *mod)
+            name = (command, ns, val) + tuple(mod)
             return name
         else:
             raise NotImplementedError("Haven't written canonicalization for {}".format(command))

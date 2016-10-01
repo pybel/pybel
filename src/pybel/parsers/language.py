@@ -74,6 +74,18 @@ rna_nucleotide_chars = ['a', 'u', 'c', 'g']
 # Protein Modification O is not defined by BEL Language v. 1.0
 pmod_legacy = ['P', 'A', 'F', 'G', 'H', 'M', 'R', 'S', 'U', 'O']
 
+pmod_legacy_labels = {
+    'P': 'phosphorylated',
+    'A': 'acetylated',
+    'F': 'farnesylated',
+    'G': 'glycosylated',
+    'H': 'hydroxylated',
+    'M': 'methylated',
+    'R': 'ribosylated',
+    'S': 'sumoylated',
+    'U': 'ubiquitinated',
+}
+
 pmod_namespace = {
     'Ac',
     'acetylation',
@@ -150,5 +162,6 @@ variant_parent_dict = {
 }
 
 # TODO add other BEL common namespaces
-
-labels = {**abundance_labels, **activity_labels}
+labels = {}
+labels.update(abundance_labels)
+labels.update(activity_labels)
