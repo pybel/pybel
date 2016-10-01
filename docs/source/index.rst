@@ -10,8 +10,8 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-
-
+   
+   graph
 
 Indices and tables
 ==================

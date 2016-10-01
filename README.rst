@@ -1,6 +1,9 @@
 PyBEL
 =====
 
+.. image:: https://travis-ci.com/cthoyt/pybel.svg?token=2tyMYiCcZbjqYscNWXwZ&branch=master
+    :target: https://travis-ci.com/cthoyt/pybel
+
 Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its successful use in the IMI project, AETIONOMY, to describe complex disease networks with several thousands of relationships.
 
 PyBEL is a Python software package that parses the BEL syntax, validates its semantics with the contained namespaces, applies common graph algorithms, and allows for data interchange with common formats like Neo4J, CSV, Excel, and MySQL.
