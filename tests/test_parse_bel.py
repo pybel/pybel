@@ -22,36 +22,42 @@ class TestTokenParserBase(unittest.TestCase):
     def assertHasNode(self, member, msg=None, **kwargs):
         self.assertIn(member, self.parser.graph)
         if kwargs:
+            msg_format = 'Wrong node properties. expected {} but got {}'
             self.assertTrue(subdict_matches(self.parser.graph.node[member], kwargs, ),
-                            msg='Node {} has wrong properties: {}'.format(member, kwargs))
+                            msg=msg_format.format(member, kwargs, self.parser.graph.node[member]))
 
     def assertHasEdge(self, u, v, msg=None, **kwargs):
         self.assertTrue(self.parser.graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
         if kwargs:
+            msg_format = 'No edge with correct properties. expected {} but got {}'
             self.assertTrue(any_subdict_matches(self.parser.graph.edge[u][v], kwargs),
-                            msg='No edge with correct properties: {}'.format(kwargs))
+                            msg=msg_format.format(kwargs, self.parser.graph.edge[u][v]))
 
 
 class TestEnsure(TestTokenParserBase):
     def test_complete(self):
         """"""
         statement = 'p(HGNC:AKT1)'
-        result = self.parser.parse(statement)
         expected_result = ['Protein', ['HGNC', 'AKT1']]
-        self.assertEqual(expected_result, result)
+        self.assertEqual(expected_result, self.parser.parse(statement))
 
         protein = 'Protein', 'HGNC', 'AKT1'
         rna = 'RNA', 'HGNC', 'AKT1'
         gene = 'Gene', 'HGNC', 'AKT1'
 
-        self.assertHasNode(protein)
-        self.assertHasNode(rna)
-        self.assertHasNode(gene)
+        self.assertHasNode(protein, type='Protein', namespace='HGNC', value='AKT1')
+        self.assertHasNode(rna, type='RNA', namespace='HGNC', value='AKT1')
+        self.assertHasNode(gene, type='Gene', namespace='HGNC', value='AKT1')
+
+        self.assertEqual(2, self.parser.graph.number_of_edges())
 
         self.assertHasEdge(gene, rna, relation='transcribedTo')
-        self.assertHasEdge(rna, protein, relation='translatedTo')
+        self.assertEqual(1, self.parser.graph.number_of_edges(gene, rna))
 
-    def ensure_no_dups(self):
+        self.assertHasEdge(rna, protein, relation='translatedTo')
+        self.assertEqual(1, self.parser.graph.number_of_edges(rna, protein))
+
+    def ensure_no_dup_nodes(self):
         """Ensure node isn't added twice, even if from different statements"""
         s1 = 'g(HGNC:AKT1)'
         s2 = 'deg(g(HGNC:AKT1))'
@@ -61,8 +67,37 @@ class TestEnsure(TestTokenParserBase):
         self.parser.parse(s2)
         self.parser.parse(s3)
 
+        gene = 'Gene', 'HGNC', 'AKT1'
+
         self.assertEqual(1, self.parser.graph)
-        self.assertHasNode(('Gene', 'HGNC', 'AKT1'))
+        self.assertHasNode(gene, type='Gene', namespace='HGNC', value='AKT1')
+
+    def ensure_no_dup_edges(self):
+        """Ensure node and edges aren't added twice, even if from different statements"""
+        s1 = 'p(HGNC:AKT1)'
+        s2 = 'deg(p(HGNC:AKT1))'
+        s3 = 'deg(p(HGNC:AKT1)) -- g(HGNC:AKT1)'
+
+        self.parser.parse(s1)
+        self.parser.parse(s2)
+        self.parser.parse(s3)
+
+        protein = 'Protein', 'HGNC', 'AKT1'
+        rna = 'RNA', 'HGNC', 'AKT1'
+        gene = 'Gene', 'HGNC', 'AKT1'
+
+        self.assertEqual(3, self.parser.graph)
+        self.assertHasNode(protein, type='Protein', namespace='HGNC', value='AKT1')
+        self.assertHasNode(rna, type='RNA', namespace='HGNC', value='AKT1')
+        self.assertHasNode(gene, type='Gene', namespace='HGNC', value='AKT1')
+
+        self.assertEqual(2, self.parser.graph.number_of_edges())
+
+        self.assertHasEdge(gene, rna, relation='transcribedTo')
+        self.assertEqual(1, self.parser.graph.number_of_edges(gene, rna))
+
+        self.assertHasEdge(rna, protein, relation='translatedTo')
+        self.assertEqual(1, self.parser.graph.number_of_edges(rna, protein))
 
 
 class TestInternal(TestTokenParserBase):
@@ -223,7 +258,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'Complex', 'SCOMP', 'AP-1 Complex'
         self.assertEqual(expected_node, node)
 
-        self.assertHasNode(node)
+        self.assertHasNode(node, type='Complex', namespace='SCOMP', value='AP-1 Complex')
 
     def test_212b(self):
         statement = 'complex(p(HGNC:FOS), p(HGNC:JUN))'
@@ -236,7 +271,7 @@ class TestTerms(TestTokenParserBase):
         expected_node = 'ComplexList', 1
         self.assertEqual(expected_node, node)
 
-        self.assertHasNode(node)
+        self.assertHasNode(node, type='ComplexList')
 
     def test_213a(self):
         statement = 'composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex"))'
@@ -248,12 +283,15 @@ class TestTerms(TestTokenParserBase):
         node = 'Composite', 1
         self.assertEqual(node, self.parser.canonicalize_node(result))
 
-        self.assertEqual(5, len(self.parser.graph))
+        self.assertEqual(5, self.parser.graph.number_of_nodes())
         self.assertHasNode(node)
-        self.assertHasNode(('Protein', 'HGNC', 'IL6'))
-        self.assertHasNode(('RNA', 'HGNC', 'IL6'))
-        self.assertHasNode(('Gene', 'HGNC', 'IL6'))
-        self.assertHasNode(('Complex', 'GOCC', 'interleukin-23 complex'))
+        self.assertHasNode(('Protein', 'HGNC', 'IL6'), type='Protein', namespace='HGNC', value='IL6')
+        self.assertHasNode(('RNA', 'HGNC', 'IL6'), type='RNA', namespace='HGNC', value='IL6')
+        self.assertHasNode(('Gene', 'HGNC', 'IL6'), type='Gene', namespace='HGNC', value='IL6')
+        self.assertHasNode(('Complex', 'GOCC', 'interleukin-23 complex'), type='Complex', namespace='GOCC',
+                           value='interleukin-23 complex')
+
+        self.assertEqual(4, self.parser.graph.number_of_edges())
 
     def test_214a(self):
         statement = 'geneAbundance(HGNC:AKT1)'
@@ -345,9 +383,9 @@ class TestTerms(TestTokenParserBase):
         mod_node = 'ProteinVariant', 'HGNC', 'AKT1', 'ProteinModification', 'Ph', 'S', 473
         self.assertEqual(mod_node, self.parser.canonicalize_node(result))
 
-        self.assertHasNode(protein_node)
-        self.assertHasNode(mod_node)
-        self.assertHasEdge(mod_node, protein_node)
+        self.assertHasNode(protein_node, type='Protein')
+        self.assertHasNode(mod_node, type='ProteinVariant')
+        self.assertHasEdge(mod_node, protein_node, relation='hasParent')
 
     def test_221b(self):
         """Test default BEL namespace and 3-letter amino acid code:"""
@@ -1066,7 +1104,18 @@ class TestTerms(TestTokenParserBase):
         obj = 'Abundance', 'CHEBI', 'calcium(2+)'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation='increases')
+        expected_annotations = {
+            'relation': 'increases',
+            'object': {
+                'modification': 'Translocation',
+                'params': {
+                    'fromLoc': ('MESHCS', 'Cell Membrane'),
+                    'toLoc': ('MESHCS', 'Intracellular Space')
+                }
+            }
+        }
+
+        self.assertHasEdge(sub, obj, **expected_annotations)
 
     @unittest.expectedFailure
     def test_141(self):
@@ -1119,7 +1168,17 @@ class TestTerms(TestTokenParserBase):
         self.assertHasEdge(obj, obj_member_1, relation='hasReactant')
         self.assertHasEdge(obj, obj_member_2, relation='hasProduct')
 
-        self.assertHasEdge(sub, obj, relation='increases')
+        expected_annotations = {
+            'relation': 'increases',
+            'subject': {
+                'modification': 'Activity',
+                'params': {
+                    'MolecularActivity': 'PeptidaseActivity'
+                }
+            }
+        }
+
+        self.assertHasEdge(sub, obj, **expected_annotations)
 
     def test_140(self):
         """Test protein substitution"""

@@ -64,7 +64,6 @@ class Parser:
 
         self.node_count = 0
         self.node_to_id = {}
-        self.id_to_node = {}
 
         quoted_value = dblQuotedString().setParseAction(removeQuotes)
 
@@ -135,8 +134,8 @@ class Parser:
         psub = oneOf(sub_tags) + LP + amino_acids + WCW + pyparsing_common.integer() + WCW + amino_acids + RP
 
         def handle_psub(s, l, tokens):
-            tokens[0] = 'Variant'
             log.debug('PyBEL006 deprecated protein substitution function. User variant() instead. {}'.format(s))
+            tokens[0] = 'Variant'
             return tokens
 
         psub.setParseAction(handle_psub)
@@ -162,132 +161,54 @@ class Parser:
         fusion_tags = ['fus', 'fusion']
         fusion = oneOf(fusion_tags) + LP + Group(ns_val) + WCW + range_coordinate + WCW + Group(
             ns_val) + WCW + range_coordinate + RP
-
-        def handle_fusion(s, l, tokens):
-            tokens[0] = 'Fusion'
-            return tokens
-
-        fusion.setParseAction(handle_fusion)
+        fusion.setParseAction(command_handler('Fusion'))
 
         # 2.1 Abundance Functions
 
         # 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
         general_abundance_tags = ['a', 'abundance']
         general_abundance = oneOf(general_abundance_tags) + LP + Group(ns_val) + RP
-
-        def handle_general_abundance(s, l, tokens):
-            cls = tokens[0] = 'Abundance'
-            ns, val = tokens[1]
-            name = self.canonicalize_node(tokens)
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls, namespace=ns, value=val)
-            return tokens
-
-        general_abundance.addParseAction(handle_general_abundance)
+        general_abundance.addParseAction(command_handler('Abundance', ensure_node_handler=self))
 
         # 2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA
         gene_tags = ['g', 'geneAbundance']
 
         gene_simple = oneOf(gene_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
-
-        def handle_gene_simple(s, location, tokens):
-            tokens[0] = 'Gene'
-            self.ensure_node(tokens)
-            return tokens
-
-        gene_simple.addParseAction(handle_gene_simple)
+        gene_simple.addParseAction(command_handler('Gene', ensure_node_handler=self))
 
         gene_modified = oneOf(gene_tags) + LP + Group(ns_val) + OneOrMore(WCW + Group(variant | gsub)) + Optional(
             WCW + Group(location)) + RP
-
-        def handle_gene_modified(s, l, tokens):
-            cls = tokens[0] = 'GeneVariant'
-            name = self.canonicalize_node(tokens)
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls)
-
-            gcls = 'Gene'
-            gns, gval = tokens[1]
-            gname = gcls, gns, gval
-            if gname not in self.graph:
-                self.graph.add_node(gname, type=gcls)
-
-            self.graph.add_edge(name, gname)
-
-            return tokens
-
-        gene_modified.setParseAction(handle_gene_modified)
+        gene_modified.setParseAction(command_handler('GeneVariant', ensure_node_handler=self))
 
         gene_fusion = oneOf(gene_tags) + LP + Group(fusion) + Optional(WCW + Group(location)) + RP
-
-        def handle_gene_fusion(s, l, tokens):
-            tokens[0] = 'GeneFusion'
-            self.ensure_node(tokens)
-            return tokens
-
-        gene_fusion.setParseAction(handle_gene_fusion)
+        gene_fusion.setParseAction(command_handler('GeneFusion', ensure_node_handler=self))
 
         gene = gene_modified | gene_simple | gene_fusion
 
         # 2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA
         mirna_tags = ['m', 'microRNAAbundance']
         mirna_simple = oneOf(mirna_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
-
-        def handle_mirna_simple(s, l, tokens):
-            tokens[0] = 'miRNA'
-            self.ensure_node(tokens)
-            return tokens
-
-        mirna_simple.setParseAction(handle_mirna_simple)
+        mirna_simple.setParseAction(command_handler('miRNA', ensure_node_handler=self))
 
         mirna_modified = oneOf(mirna_tags) + LP + ns_val + OneOrMore(WCW + variant) + Optional(WCW + location) + RP
-
-        def handle_mirna_modified(s, l, tokens):
-            cls = tokens[0] = 'miRNAVariant'
-            # TODO fill this in
-            return tokens
-
-        mirna_modified.setParseAction(handle_mirna_modified)
+        mirna_modified.setParseAction(command_handler('miRNAVariant'))
 
         mirna = mirna_modified | mirna_simple
 
         # 2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA
         protein_tag = oneOf(['p', 'proteinAbundance'])
         protein_simple = protein_tag + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
-
-        def handle_protein_simple(s, l, tokens):
-            tokens[0] = 'Protein'
-            self.ensure_node(tokens)
-            return tokens
-
-        protein_simple.setParseAction(handle_protein_simple)
+        protein_simple.setParseAction(command_handler('Protein', ensure_node_handler=self))
 
         protein_modified = protein_tag + LP + Group(ns_val) + OneOrMore(
             WCW + Group(pmod | variant | fragment | psub)) + Optional(WCW + Group(location)) + RP
 
-        def handle_protein_modified(s, l, tokens):
-            cls = tokens[0] = 'ProteinVariant'
-
-            name = self.canonicalize_node(tokens)
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls)
-
-            pcls = 'Protein'
-            pns, pval = tokens[1]
-            pname = pcls, pns, pval
-            if pname not in self.graph:
-                self.graph.add_node(pname, type=pcls, namespace=pns, value=pval)
-
-            self.graph.add_edge(name, pname)
-
-            return tokens
-
-        protein_modified.setParseAction(handle_protein_modified)
+        protein_modified.setParseAction(command_handler('ProteinVariant', ensure_node_handler=self))
 
         protein_fusion = protein_tag + LP + Group(fusion) + Optional(WCW + Group(location)) + RP
 
         def handle_protein_fusion(s, l, tokens):
-            cls = tokens[0] = 'ProteinFusion'
+            tokens[0] = 'ProteinFusion'
             return tokens
 
         protein_fusion.setParseAction(handle_protein_fusion)
@@ -297,35 +218,11 @@ class Parser:
         # 2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA
         rna_tags = ['r', 'rnaAbundance']
         rna_simple = oneOf(rna_tags) + LP + Group(ns_val) + Optional(WCW + Group(location)) + RP
-
-        def handle_rna_simple(s, l, tokens):
-            tokens[0] = 'RNA'
-            self.ensure_node(tokens)
-            return tokens
-
-        rna_simple.setParseAction(handle_rna_simple)
+        rna_simple.setParseAction(command_handler('RNA', ensure_node_handler=self))
 
         rna_modified = oneOf(rna_tags) + LP + Group(ns_val) + OneOrMore(WCW + Group(variant)) + Optional(
             WCW + Group(location)) + RP
-
-        def handle_rna_modified(s, l, tokens):
-            cls = tokens[0] = 'RNAVariant'
-
-            name = self.canonicalize_node(tokens)
-            if name not in self.graph:
-                self.graph.add_node(name, type=cls)
-
-            rcls = 'RNA'
-            rns, rval = tokens[1]
-            rname = rcls, rns, rval
-            if name not in self.graph:
-                self.graph.add_node(rname, type=cls, namespace=rns, value=rval)
-
-            self.graph.add_edge(name, rname)
-
-            return tokens
-
-        rna_modified.setParseAction(handle_rna_modified)
+        rna_modified.setParseAction(command_handler('RNAVariant', ensure_node_handler=self))
 
         rna_fusion = oneOf(rna_tags) + LP + Group(fusion) + Optional(WCW + Group(location)) + RP
 
@@ -364,7 +261,7 @@ class Parser:
             name = self.ensure_node(tokens)
             for token in tokens[1:]:
                 member_name = self.ensure_node(token)
-                self.graph.add_edge(name, member_name, relation='hasComponent')
+                self.add_unqualified_edge(name, member_name, relation='hasComponent')
 
             return tokens
 
@@ -388,7 +285,7 @@ class Parser:
 
             for component_token in tokens[1:]:
                 component_name = self.ensure_node(component_token)
-                self.graph.add_edge(name, component_name, relation='hasComponent', attr_dict=self.annotations.copy())
+                self.add_unqualified_edge(name, component_name, relation='hasComponent')
 
             return tokens
 
@@ -560,6 +457,7 @@ class Parser:
         reaction = oneOf(reaction_tags) + LP + Group(reactants) + WCW + Group(products) + RP
 
         def handle_reaction(s, l, tokens):
+            # TODO move to ensure node?
             cls = tokens[0] = 'Reaction'
 
             name = self.canonicalize_node(tokens)
@@ -568,11 +466,11 @@ class Parser:
 
             for reactant_tokens in tokens[1]:
                 reactant_name = self.canonicalize_node(reactant_tokens)
-                self.graph.add_edge(name, reactant_name, relation='hasReactant')
+                self.add_unqualified_edge(name, reactant_name, relation='hasReactant')
 
             for product_tokens in tokens[2]:
                 product_name = self.canonicalize_node(product_tokens)
-                self.graph.add_edge(name, product_name, relation='hasProduct')
+                self.add_unqualified_edge(name, product_name, relation='hasProduct')
 
             return tokens
 
@@ -783,9 +681,23 @@ class Parser:
 
         def handle_relation(s, l, tokens):
             sub = self.ensure_node(tokens[0])
-            pre = tokens[1]
             obj = self.ensure_node(tokens[2])
-            self.graph.add_edge(sub, obj, relation=pre)
+
+            attrs = {
+                'relation': tokens[1]
+            }
+
+            sub_mod = self.canonicalize_modifier(tokens[0])
+            if sub_mod:
+                attrs['subject'] = sub_mod
+
+            obj_mod = self.canonicalize_modifier(tokens[2])
+            if obj_mod:
+                attrs['object'] = obj_mod
+
+            # attrs.update(self.annotations)
+
+            self.graph.add_edge(sub, obj, attr_dict=attrs)
             return tokens
 
         relation.setParseAction(handle_relation)
@@ -796,6 +708,15 @@ class Parser:
         self.statement = relation | bel_term
 
     # TODO canonicalize order of fragments, protein modifications, etc with alphabetization
+
+    def add_unqualified_edge(self, u, v, relation):
+        """Adds unique edge that has no annotations
+        :param u: source node
+        :param v: target node
+        :param relation: relationship label
+        """
+        if not self.graph.has_edge(u, v, relation):
+            self.graph.add_edge(u, v, key=relation, relation=relation)
 
     def canonicalize_node(self, tokens):
         """Given tokens, returns node name"""
@@ -822,7 +743,13 @@ class Parser:
             raise NotImplementedError("Haven't written canonicalization for {}".format(command))
 
     def ensure_node(self, tokens, **kwargs):
-        """Turns parsed tokens into canonical node names"""
+        """
+        Turns parsed tokens into canonical node name and makes sure its in the graph
+        :param tokens:
+        :param kwargs:
+        :return:
+        """
+
         command, *args = list2tuple(tokens.asList() if hasattr(tokens, 'asList') else tokens)
 
         if command in ('GeneVariant', 'RNAVariant', 'ProteinVariant'):
@@ -830,7 +757,7 @@ class Parser:
             if name not in self.graph:
                 self.graph.add_node(name, type=command)
             parent_name = self.ensure_node([language.variant_parent_dict[command], tokens[1]])
-            self.graph.add_edge(name, parent_name, relation='hasParent')
+            self.add_unqualified_edge(name, parent_name, 'hasParent')
         elif command == 'Protein':
             name = self.canonicalize_node(tokens)
 
@@ -842,7 +769,7 @@ class Parser:
             rna_tokens[0] = 'RNA'
             rna_name = self.ensure_node(rna_tokens)
 
-            self.graph.add_edge(rna_name, name, relation='translatedTo')
+            self.add_unqualified_edge(rna_name, name, relation='translatedTo')
         elif command == 'RNA':
             name = self.canonicalize_node(tokens)
 
@@ -854,7 +781,7 @@ class Parser:
             gene_tokens[0] = 'Gene'
             gene_name = self.ensure_node(gene_tokens)
 
-            self.graph.add_edge(gene_name, name, relation='transcribedTo')
+            self.add_unqualified_edge(gene_name, name, relation='transcribedTo')
         else:
             name = self.canonicalize_node(tokens)
             if name not in self.graph:
@@ -863,16 +790,20 @@ class Parser:
         return name
 
     def canonicalize_modifier(self, tokens):
-        """Get activity, transformation, or transformation information as a dictionary"""
+        """
+        Get activity, transformation, or transformation information as a dictionary
+        :param tokens:
+        :return:
+        """
         command, *args = list2tuple(tokens.asList() if hasattr(tokens, 'asList') else tokens)
-        res = {
-            'params': {}
-        }
 
         if command not in ('Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
-            return None
+            return {}
 
-        res['modification'] = command
+        res = {
+            'modification': command,
+            'params': {}
+        }
 
         if command == 'Activity':
             if len(args) > 1:  # has molecular activity annotation
@@ -886,8 +817,15 @@ class Parser:
             res['params']['toLoc'] = args[2]
             return res
 
-    def validate_ns_pair(self, s, location, tokens):
-        """Checks the tokenized namespace/value pair is valid based on the internal settings of this parser"""
+    def validate_ns_pair(self, s, l, tokens):
+        """
+        Checks the tokenized namespace/value pair is valid based on the internal settings of this parser
+
+        :param s:
+        :param l:
+        :param tokens:
+        :return:
+        """
 
         # TODO test listed namespace
         # if len(tokens) == 1:
@@ -945,6 +883,11 @@ class Parser:
         self.annotations[key] = value
 
     def unset_metadata(self, key):
+        """
+        Deletes key from internal metadata dictionary
+        :param key:
+        :return:
+        """
         if key in self.annotations:
             del self.annotations[key]
 
