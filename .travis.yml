@@ -32,3 +32,6 @@ script:
 after_success:
     - tox -e coverage-report
     - codecov
+
+notifications:
+  slack: pybel:n2KbWKBum3musnBg3L76gGwq
