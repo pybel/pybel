@@ -1,5 +1,6 @@
 networkx
 requests
+requests_file
 pyparsing
 py2neo
 click

@@ -9,3 +9,5 @@ docs/build/*
 .coverage
 scratch/*
 .cache/*
+
+notebooks/PyBEL Playtime.ipynb

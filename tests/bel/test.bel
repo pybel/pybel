@@ -26,6 +26,7 @@ DEFINE NAMESPACE SCHEM AS URL "http://resource.belframework.org/belframework/1.0
 DEFINE ANNOTATION CellStructure AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"
 DEFINE ANNOTATION CellLine AS  URL "http://resource.belframework.org/belframework/1.0/annotation/atcc-cell-line.belanno"
 DEFINE ANNOTATION TextLocation AS  LIST {"Abstract","Results","Legend","Review"}
+DEFINE ANNOTATION CardiovascularSystem AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cardiovascular-system.belanno"
 DEFINE ANNOTATION MuskuloskeletalSystem AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-musculoskeletal-system.belanno"
 DEFINE ANNOTATION Tissue AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-tissue.belanno"
 DEFINE ANNOTATION Cell AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell.belanno"

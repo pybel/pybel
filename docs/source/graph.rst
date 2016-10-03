@@ -5,5 +5,5 @@ Graph
 
 BEL Parser
 ----------
-.. automodule:: pybel.parsers.bel_parser
+.. automodule:: pybel.parsers.parse_bel
     :members:

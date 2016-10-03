@@ -31,5 +31,5 @@ hgvs_protein_fs = Suppress('p.') + aa_triple + pyparsing_common.integer() + aa_t
 
 hgvs_genomic = Suppress('g.') + pyparsing_common.integer() + nucleotides + Suppress('>') + nucleotides
 
-hgvs = (hgvs_rna_del | hgvs_dna_del | hgvs_chromosome | hgvs_snp | hgvs_protein_del
-        | hgvs_protein_fs | hgvs_protein_mut | hgvs_genomic | '=' | '?')
+hgvs = (hgvs_rna_del | hgvs_dna_del | hgvs_chromosome | hgvs_snp | hgvs_protein_del |
+        hgvs_protein_fs | hgvs_protein_mut | hgvs_genomic | '=' | '?')

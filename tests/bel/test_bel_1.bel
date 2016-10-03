@@ -13,33 +13,34 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 ##################################################################################
 # Definitions Section
 
-DEFINE NAMESPACE TESTNS1 AS URL "http://localhost:8000/test_ns_1.belns"
-DEFINE ANNOTATION TESTAN1 AS URL "http://localhost:8000/test_an_1.belanno"
-DEFINE ANNOTATION TESTAN2 AS LIST {"A","B","C"}
-
+DEFINE NAMESPACE CHEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"
+DEFINE NAMESPACE ALPHABET AS LIST {"A","B","C","D","E","F"}
+DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"
+DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
+DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
 ##################################################################################
 # Statements Section
 
 SET STATEMENT_GROUP = "Group 1"
 
-SET TESTAN1 = "TestAnnot1"
+SET TESTAN1 = "1"
 SET Citation = {"Pubmed","That one article from last week","123455"}
 
-SET Evidence = "Evidence 1 /
+SET Evidence = "Evidence 1 \
 w extra notes"
 
-p(TESTNS1:TestValue1) -> p(TESTNS1:TestValue2)
+p(ALPHABET:A) -> p(ALPHABET:B)
 
 SET Evidence = "Evidence 2"
-SET TESTAN2 = "B"
+SET TESTAN2 = "3"
 
-p(TESTNS1:TestValue2) -| p(TESTNS1:TestValue3)
-p(TESTNS1:TestValue2) =| p(TESTNS1:TestValue4)
+p(ALPHABET:B) -| p(ALPHABET:C)
+p(ALPHABET:B) =| p(ALPHABET:D)
 
 SET Citation = {"Pubmed","That other article from last week","123456"}
-SET TESTAN1 = "TestAnnot2"
+SET TESTAN1 = "2"
 SET Evidence = "Evidence 3"
 
-p(TESTNS1:TestValue4) -- p(TESTNS1:TestValue5)
-p(TESTNS1:TestValue1) -- (p(TESTNS1:TestValue2) -- p(TESTNS1:TestValue3))
+p(ALPHABET:D) -- p(ALPHABET:E)
+p(ALPHABET:A) -> (p(ALPHABET:B) -> p(ALPHABET:C))

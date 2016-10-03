@@ -1,7 +1,7 @@
 import logging
 import unittest
 
-from pybel.parsers.hgvs_parser import *
+from pybel.parsers.parse_hgvs import *
 
 log = logging.getLogger(__name__)
 
@@ -37,13 +37,13 @@ class TestVariants(unittest.TestCase):
         result = hgvs_snp.parseString(statement)
         self.assertEqual(expected, result.asList())
 
-    def test_chromosome(self):
+    def test_chromosome_1(self):
         statement = 'g.117199646_117199648delCTT'
         expected = [117199646, 117199648, 'del', 'CTT']
         result = hgvs_chromosome.parseString(statement)
         self.assertEqual(expected, result.asList())
 
-    def test_chromosome(self):
+    def test_chromosome_2(self):
         statement = 'c.1521_1523delCTT'
         expected = [1521, 1523, 'del', 'CTT']
         result = hgvs_dna_del.parseString(statement)

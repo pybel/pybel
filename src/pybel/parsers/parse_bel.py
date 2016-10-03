@@ -8,7 +8,8 @@ import networkx as nx
 from pyparsing import *
 
 from . import language
-from .hgvs_parser import hgvs, nucleotides
+from .baseparser import BaseParser
+from .parse_hgvs import hgvs, nucleotides
 from .utils import list2tuple
 
 log = logging.getLogger(__name__)
@@ -32,8 +33,11 @@ def command_handler(command, loc=0, ensure_node_handler=None):
     def handler(s, l, tokens):
         if isinstance(command, str):
             tokens[loc] = command
+        elif isinstance(command, dict):
+            tokens[loc] = command[tokens[loc]]
         elif command is callable:
             tokens[loc] = command(tokens[loc])
+
         if ensure_node_handler is not None:
             ensure_node_handler.ensure_node(tokens)
         return tokens
@@ -41,7 +45,7 @@ def command_handler(command, loc=0, ensure_node_handler=None):
     return handler
 
 
-class Parser:
+class BelParser(BaseParser):
     """
     Build a parser backed by a given dictionary of namespaces
     """
@@ -56,10 +60,13 @@ class Parser:
         :param names: a list of valid, un-spaced names
         :type names: list
         """
-        self.namespaces = namespaces
-        self.namespace_mapping = namespace_mapping
+
         self.graph = graph if graph is not None else nx.MultiDiGraph()
+
         self.annotations = annotations if annotations is not None else {}
+        self.namespaces = namespaces
+
+        self.namespace_mapping = namespace_mapping
         self.names = names
 
         self.node_count = 0
@@ -252,8 +259,7 @@ class Parser:
 
         complex_partial = single_abundance | complex_singleton_1 | complex_singleton_2
 
-        complex_list_1 = oneOf(complex_tags) + LP + Group(complex_partial) + OneOrMore(
-            WCW + Group(complex_partial)) + RP
+        complex_list_1 = oneOf(complex_tags) + LP + delimitedList(Group(complex_partial)) + RP
 
         def handle_complex_list_1(s, l, tokens):
             tokens[0] = 'ComplexList'
@@ -267,8 +273,7 @@ class Parser:
 
         complex_list_1.setParseAction(handle_complex_list_1)
 
-        complex_list_2 = oneOf(complex_tags) + LP + Group(complex_partial) + OneOrMore(
-            WCW + Group(complex_partial)) + WCW + location + RP
+        complex_list_2 = oneOf(complex_tags) + LP + delimitedList(Group(complex_partial)) + WCW + location + RP
 
         complex_abundances = complex_list_2 | complex_list_1 | complex_singleton_2 | complex_singleton_1
 
@@ -276,8 +281,7 @@ class Parser:
 
         # 2.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA
         composite_abundance_tags = ['composite', 'compositeAbundance']
-        composite_abundance = oneOf(composite_abundance_tags) + LP + Group(simple_abundance) + OneOrMore(
-            WCW + Group(simple_abundance)) + RP
+        composite_abundance = oneOf(composite_abundance_tags) + LP + delimitedList(Group(simple_abundance)) + RP
 
         def handle_composite_abundance(s, loc, tokens):
             tokens[0] = 'Composite'
@@ -414,7 +418,7 @@ class Parser:
             self.ensure_node(tokens)
             return tokens
 
-        translocation_standard.setParseAction(translocation_standard_handler)
+        translocation_standard.setParseAction(command_handler('Translocation', ensure_node_handler=self))
 
         translocation_legacy = oneOf(translocation_tags) + LP + Group(simple_abundance) + WCW + Group(
             ns_val) + WCW + Group(
@@ -449,9 +453,8 @@ class Parser:
         degradation.setParseAction(handle_degredation)
 
         # 2.5.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
-        reactants = Suppress('reactants') + LP + Group(simple_abundance) + ZeroOrMore(
-            WCW + Group(simple_abundance)) + RP
-        products = Suppress('products') + LP + Group(simple_abundance) + ZeroOrMore(WCW + Group(simple_abundance)) + RP
+        reactants = Suppress('reactants') + LP + delimitedList(Group(simple_abundance)) + RP
+        products = Suppress('products') + LP + delimitedList(Group(simple_abundance)) + RP
 
         reaction_tags = ['reaction', 'rxn']
         reaction = oneOf(reaction_tags) + LP + Group(reactants) + WCW + Group(products) + RP
@@ -630,7 +633,7 @@ class Parser:
         has_member = Group(abundance) + WS + oneOf(has_member_tags) + WS + Group(abundance)
 
         # 3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
-        abundance_list = Suppress('list') + LP + Group(abundance) + OneOrMore(WCW + Group(abundance)) + RP
+        abundance_list = Suppress('list') + LP + delimitedList(Group(abundance)) + RP
 
         has_members_tags = ['hasMembers']
         has_members = Group(abundance) + WS + oneOf(has_members_tags) + WS + Group(abundance_list)
@@ -695,7 +698,7 @@ class Parser:
             if obj_mod:
                 attrs['object'] = obj_mod
 
-            # attrs.update(self.annotations)
+            attrs.update(self.get_annotations())
 
             self.graph.add_edge(sub, obj, attr_dict=attrs)
             return tokens
@@ -706,6 +709,14 @@ class Parser:
         relation = has_members | relation
 
         self.statement = relation | bel_term
+
+    def get_language(self):
+        """Get language defined by this parser"""
+        return self.statement
+
+    def get_annotations(self):
+        """Get current annotations in this parser"""
+        return deepcopy(self.annotations)
 
     # TODO canonicalize order of fragments, protein modifications, etc with alphabetization
 
@@ -853,48 +864,15 @@ class Parser:
 
         return tokens
 
-    def parse(self, s):
-        """
-        Tokenizes a single BEL statement
-        :param s: BEL statement
-        :type s: str
-        :return: tokenized BEL statement
-        """
-        try:
-            return self.statement.parseString(s).asList()
-        except Exception as e:
-            log.warning('PyBEL000 general parser failure: {}'.format(s))
-
-    def reset_metadata(self):
-        """
-        Resets the internal metadata dictionary
-        :return:
-        """
-        self.annotations = {}
-
-    def set_metadata(self, key, value):
-        """
-        Sets key to value in internal metadata dictionary
-        :param key:
-        :type key: str
-        :param value:
-        :type value: str
-        """
-        self.annotations[key] = value
-
-    def unset_metadata(self, key):
-        """
-        Deletes key from internal metadata dictionary
-        :param key:
-        :return:
-        """
-        if key in self.annotations:
-            del self.annotations[key]
-
-    def set_citation(self, citation):
-        """
-        Sets the citation information in internal metadata dictionary
-        :param citation: a dictionary of citation information
-        """
-        # TODO implement
-        pass
+    # TODO remove this and use BaseParser built-in. Check tests.
+    #def parse(self, s):
+    #    """
+    #    Tokenizes a single BEL statement
+    #    :param s: BEL statement
+    #    :type s: str
+    #    :return: tokenized BEL statement
+    #    """
+    #    try:
+    #        return self.statement.parseString(s).asList()
+    #    except Exception as e:
+    #        log.warning('PyBEL000 general parser failure: {}'.format(s))

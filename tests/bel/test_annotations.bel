@@ -1,0 +1,18 @@
+##################################################################################
+# Document Properties Section
+
+SET DOCUMENT Name = "PyBEL Test Document"
+SET DOCUMENT Description = "Made for testing PyBEL parsing"
+SET DOCUMENT Version = "1.6"
+SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
+SET DOCUMENT Authors = "Charles Tapley Hoyt"
+SET DOCUMENT Licenses = "Other / Proprietary"
+SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+
+
+##################################################################################
+# Definitions Section
+
+DEFINE NAMESPACE TESTNS1 AS URL "http://localhost:8000/test_ns_1.belns"
+DEFINE ANNOTATION TESTAN1 AS URL "http://localhost:8000/test_an_1.belanno"
+DEFINE ANNOTATION TESTAN2 AS LIST {"A","B","C"}

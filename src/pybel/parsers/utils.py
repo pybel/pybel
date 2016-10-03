@@ -2,32 +2,60 @@ import logging
 import re
 
 log = logging.getLogger(__name__)
-re_parse_list = re.compile('"\s*,\s*"')
 
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-def split_file_to_annotations_and_definitions(file):
-    content = [line.strip() for line in file]
-
-    start_of_statements = 1 + max(i for i, l in enumerate(content) if re_match_bel_header.search(l))
-
-    definition_lines = content[:start_of_statements]
-    statement_lines = content[start_of_statements:]
-
-    return definition_lines, statement_lines
-
-
-def parse_list(s):
-    s = s.strip('{}')
-    q = re_parse_list.split(s)
-    q = [z.strip('"') for z in q]
-    return q
-
-
 def sanitize_file_lines(f):
-    content = [line.strip() for line in f]
-    return [line for line in content if line and not line.startswith('#')]
+    it = map(str.strip, f)
+    it = filter(lambda i_l: i_l[1] and not i_l[1].startswith('#'), enumerate(it))
+    it = iter(it)
+
+    for line_number, line in it:
+        if line.endswith('\\'):
+            log.debug('Multiline quote starting on line:{}'.format(line_number))
+            line = line.strip('\\').strip()
+            next_line_number, next_line = next(it)
+            while next_line.endswith('\\'):
+                log.log(5, 'Extending line: {}'.format(next_line))
+                line += " " + next_line.strip('\\').strip()
+                next_line_number, next_line = next(it)
+            line += " " + next_line.strip()
+            log.debug('Final line: {}'.format(line))
+
+        elif 1 == line.count('"'):
+            log.debug('PyBEL013 Missing new line escapes [line:{}]'.format(line_number))
+            next_line_number, next_line = next(it)
+            next_line = next_line.strip()
+            while not next_line.endswith('"'):
+                log.log(5, 'Extending line: {}'.format(next_line))
+                line = '{} {}'.format(line.strip(), next_line)
+                next_line_number, next_line = next(it)
+                next_line = next_line.strip()
+            line = '{} {}'.format(line, next_line)
+            log.debug('Final line: {}'.format(line))
+
+        comment_loc = line.rfind(' //')
+        if 0 <= comment_loc:
+            line = line[:comment_loc]
+
+        yield line
+
+
+def split_file_to_annotations_and_definitions(file):
+    content = list(sanitize_file_lines(file))
+
+    end_document_section = 1 + max(i for i, l in enumerate(content) if l.startswith('SET DOCUMENT'))
+    end_definitions_section = 1 + max(i for i, l in enumerate(content) if re_match_bel_header.match(l))
+
+    log.info('File length: {}. Document section until line {}, definition section until line {}'.format(len(content),
+                                                                                                        end_document_section,
+                                                                                                        end_definitions_section))
+    documents = content[:end_document_section]
+    definitions = content[end_document_section:end_definitions_section]
+    statements = content[end_definitions_section:]
+
+    return documents, definitions, statements
 
 
 def subitergroup(iterable, key):
@@ -41,14 +69,6 @@ def subitergroup(iterable, key):
         res.append((k, z))
     res.append((iterable[last], iterable[last + 1:]))
     return res
-
-
-def strip_quotation_marks(term):
-    if isinstance(term, str):
-        found = re.search('^\s*"\s*(.*)\s*"\s*$', term)
-        if found:
-            term = found.group(1)
-    return term
 
 
 def check_stability(ns_dict, ns_mapping):

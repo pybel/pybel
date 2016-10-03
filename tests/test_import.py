@@ -43,15 +43,32 @@ class TestImport(unittest.TestCase):
             'relation': 'association'
         })
 
-    @unittest.skip
+    @unittest.skip('Only works on local')
     def test_parse(self):
         """Tests no exceptions thrown during parsing. Needs internet connection"""
         with open(os.path.expandvars('$PYBEL_BASE/tests/bel/small_corpus.bel')) as f:
             pybel.from_file(f)
 
-    @unittest.skip
+    @unittest.skip('Only works on local')
     def test_load(self):
         """Test graph imports correct nodes and edges"""
         with open(os.path.expandvars('$PYBEL_BASE/tests/bel/test_bel_1.bel')) as f:
             result = pybel.from_file(f)
         self.assertSetEqual(set(self.graph.nodes()), set(result.nodes()))
+
+    @unittest.skip('Takes too long to compile for now')
+    def test_full(self):
+        path = os.path.expandvars('$PYBEL_BASE/tests/bel/test_bel_1.bel')
+        g = pybel.from_bel(path)
+
+        expected_document_metadata = {
+            'Name': "PyBEL Test Document",
+            "Description": "Made for testing PyBEL parsing",
+            'Version': "1.6",
+            'Copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+            'Authors': "Charles Tapley Hoyt",
+            'Licenses': "Other / Proprietary",
+            'ContactInfo': "charles.hoyt@scai.fraunhofer.de"
+        }
+
+        self.assertEqual(expected_document_metadata, g.mdp.document_metadata)
