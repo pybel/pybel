@@ -71,9 +71,6 @@ amino_acid_dict = {
 dna_nucleotide_chars = ['A', 'T', 'C', 'G']
 rna_nucleotide_chars = ['a', 'u', 'c', 'g']
 
-# Protein Modification O is not defined by BEL Language v. 1.0
-pmod_legacy = ['P', 'A', 'F', 'G', 'H', 'M', 'R', 'S', 'U', 'O']
-
 pmod_legacy_labels = {
     'P': 'phosphorylated',
     'A': 'acetylated',

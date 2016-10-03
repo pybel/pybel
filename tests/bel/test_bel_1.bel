@@ -42,5 +42,5 @@ SET Citation = {"Pubmed","That other article from last week","123456"}
 SET TESTAN1 = "2"
 SET Evidence = "Evidence 3"
 
-p(ALPHABET:D) -- p(ALPHABET:E)
+kin(p(ALPHABET:D)) -- surf(p(ALPHABET:E))
 p(ALPHABET:A) -> (p(ALPHABET:B) -> p(ALPHABET:C))

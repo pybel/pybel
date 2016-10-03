@@ -1,21 +1,17 @@
 import logging
-import re
 from configparser import ConfigParser
 
 import requests
-from pyparsing import Suppress, ZeroOrMore, White, dblQuotedString, removeQuotes, Word, alphanums, delimitedList
+from pyparsing import Suppress, delimitedList
 from requests_file import FileAdapter
 
-from .baseparser import BaseParser
+from .baseparser import BaseParser, W, word, quote
 
 log = logging.getLogger(__name__)
 
 __all__ = ['MetadataParser']
 
-W = Suppress(ZeroOrMore(White()))
-q = dblQuotedString().setParseAction(removeQuotes)
-word = Word(alphanums)
-delimitedSet = Suppress('{') + delimitedList(q) + Suppress('}')
+delimitedSet = Suppress('{') + delimitedList(quote) + Suppress('}')
 delimiters = "=", "|", ":"
 
 # See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
@@ -32,6 +28,7 @@ value_map = {
 
 
 class MetadataParser(BaseParser):
+    # TODO add parameters for automatically loaded metadata and values
     def __init__(self):
         self.document_metadata = {}
 
@@ -41,20 +38,22 @@ class MetadataParser(BaseParser):
         self.annotations_metadata = {}
         self.annotations_dict = {}
 
-        self.document = Suppress('SET') + W + Suppress('DOCUMENT') + word('key') + W + Suppress('=') + W + q('value')
+        self.document = Suppress('SET') + W + Suppress('DOCUMENT') + word('key') + W + Suppress('=') + W + quote(
+            'value')
 
         namespace_tag = Suppress('DEFINE') + W + Suppress('NAMESPACE')
-        self.namespace_url = namespace_tag + W + word('name') + W + Suppress('AS') + W + Suppress('URL') + W + q('url')
+        self.namespace_url = namespace_tag + W + word('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
+            'url')
         self.namespace_list = namespace_tag + W + word('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
 
         annotation_tag = Suppress('DEFINE') + W + Suppress('ANNOTATION')
-        self.annotation_url = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress('URL') + W + q(
+        self.annotation_url = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
             'url')
         self.annotation_list = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
         self.annotation_pattern = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress(
-            'PATTERNS') + W + q('value')
+            'PATTERNS') + W + quote('value')
 
         self.document.setParseAction(self.handle_document)
         self.namespace_url.setParseAction(self.handle_namespace_url)
@@ -129,16 +128,12 @@ class MetadataParser(BaseParser):
 
     def handle_annotation_pattern(self, s, l, tokens):
         # TODO implement
-        return tokens
+        raise NotImplementedError('Custom Regex not yet implemented')
 
     # TODO restructure document metadata for internally defined Namespaces and AnnotationLists
     def transform_document_annotations(self):
         return self.document_metadata.copy()
 
-
-re_identify_definition = re.compile(
-    '^DEFINE\s*(?P<defined_element>(NAMESPACE|ANNOTATION))\s*(?P<keyName>.+?)\s+AS\s+(?P<definition_type>(URL|LIST))\s+(?P<definition>.+)$')
-"""Regular expression that is used to identify definitions of Namespaces and Annotations."""
 
 definitions_syntax = {
     'Namespace': {
@@ -172,5 +167,3 @@ definitions_syntax = {
     },
     'Values': None
 }
-definitions_syntax['AnnotationDefinition'] = definitions_syntax['Namespace']
-"""Dictionary that contains the structure of a definition-file for Namespaces or Annotations."""

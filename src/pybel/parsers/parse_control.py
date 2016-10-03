@@ -57,12 +57,14 @@ class ControlParser(BaseParser):
 
         values = tokens['values']
 
-        if 3 == len(values):
-            self.citation = dict(zip(('type', 'name', 'reference'), values))
-        elif 6 == len(values):
-            self.citation = dict(zip(('type', 'name', 'reference', 'date', 'authors', 'comments'), values))
-        else:
+        if len(values) not in (3, 6):
             raise Exception('PyBEL011 invalid citation: {}'.format(s))
+        #    self.citation = dict(zip(('type', 'name', 'reference'), values))
+        #    self.citation.update(dict(zip(('date', 'authors', 'comments'), ('', '', ''))))
+        #elif 6 == len(values):
+        self.citation = dict(zip(('type', 'name', 'reference', 'date', 'authors', 'comments'), values))
+        #else:
+
 
         return tokens
 
@@ -97,3 +99,9 @@ class ControlParser(BaseParser):
 
     def get_language(self):
         return self.commands
+
+    def get_annotations(self):
+        annot = self.annotations.copy()
+        for key, value in self.citation.items():
+            annot['citation_{}'.format(key)] = value
+        return annot

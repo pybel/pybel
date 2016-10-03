@@ -101,35 +101,6 @@ class TestEnsure(TestTokenParserBase):
 
 
 class TestInternal(TestTokenParserBase):
-    def test_pmod1(self):
-        statement = 'pmod(Ph, Ser, 473)'
-        expected = ['ProteinModification', 'Ph', 'Ser', 473]
-        result = self.parser.pmod.parseString(statement)
-        self.assertEqual(expected, result.asList())
-
-    def test_pmod2(self):
-        statement = 'pmod(Ph, Ser)'
-        expected = ['ProteinModification', 'Ph', 'Ser']
-        result = self.parser.pmod.parseString(statement)
-        self.assertEqual(expected, result.asList())
-
-    def test_pmod3(self):
-        statement = 'pmod(Ph)'
-        expected = ['ProteinModification', 'Ph']
-        result = self.parser.pmod.parseString(statement)
-        self.assertEqual(expected, result.asList())
-
-    def test_pmod4(self):
-        statement = 'pmod(P, S, 9)'
-        expected = ['ProteinModification', 'P', 'S', 9]
-        result = self.parser.pmod.parseString(statement)
-        self.assertEqual(expected, result.asList())
-
-    def test_pmod5(self):
-        statement = 'pmod(MOD:PhosRes, Ser, 473)'
-        expected = ['ProteinModification', ['MOD', 'PhosRes'], 'Ser', 473]
-        result = self.parser.pmod.parseString(statement)
-        self.assertEqual(expected, result.asList())
 
     def test_psub(self):
         statement = 'sub(A, 127, Y)'
@@ -164,7 +135,7 @@ class TestModifiers(TestTokenParserBase):
         expected_mod = {
             'modification': 'Activity',
             'params': {
-                'MolecularActivity': 'KinaseActivity'
+                'molecularActivity': 'KinaseActivity'
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -180,7 +151,7 @@ class TestModifiers(TestTokenParserBase):
         expected_mod = {
             'modification': 'Activity',
             'params': {
-                'MolecularActivity': ('NS', 'VAL')
+                'molecularActivity': ('NS', 'VAL')
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -1117,27 +1088,12 @@ class TestTerms(TestTokenParserBase):
 
         self.assertHasEdge(sub, obj, **expected_annotations)
 
-    @unittest.expectedFailure
     def test_141(self):
         """F single argument translocation"""
         statement = 'tloc(a("T-Lymphocytes")) -- p(MGI:Cxcr3)'
-        result = self.parser.parse(statement).asList()
 
-        expected = [
-            ['Translocation', ['Abundance', ['T-Lymphocytes']]],
-            'association',
-            ['Protein', ['MGI', 'Cxcr3']]
-        ]
-
-        self.assertEqual(expected, result)
-
-        sub = ''
-        self.assertHasNode(sub)
-
-        obj = ''
-        self.assertHasNode(obj)
-
-        self.assertHasEdge(sub, obj, relation='association')
+        with self.assertRaises(Exception):
+            self.parser.parse(statement)
 
     def test_253b(self):
         """Test reaction"""
@@ -1173,7 +1129,7 @@ class TestTerms(TestTokenParserBase):
             'subject': {
                 'modification': 'Activity',
                 'params': {
-                    'MolecularActivity': 'PeptidaseActivity'
+                    'molecularActivity': 'PeptidaseActivity'
                 }
             }
         }

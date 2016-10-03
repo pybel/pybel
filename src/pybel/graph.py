@@ -7,8 +7,7 @@ import py2neo
 import requests
 from requests_file import FileAdapter
 
-from .parsers.parse_bel import BelParser
-from .parsers.parse_control import ControlParser
+from .parsers.parse_bel import BelParser, flatten_modifier_dict
 from .parsers.parse_metadata import MetadataParser
 from .parsers.utils import split_file_to_annotations_and_definitions
 
@@ -16,8 +15,7 @@ log = logging.getLogger(__name__)
 
 
 def from_bel(bel):
-    """
-    Parses a BEL file from URL or file resource
+    """Parses a BEL file from URL or file resource
     :param bel: URL or file path to BEL resource
     :type bel: str
     :return: a BEL MultiGraph
@@ -30,15 +28,12 @@ def from_bel(bel):
 
 
 class BELGraph(nx.MultiDiGraph):
-    """
-    An extension of a NetworkX MultiGraph to hold a BEL graph.
-    """
+    """An extension of a NetworkX MultiGraph to hold a BEL graph."""
 
     def __init__(self, *attrs, **kwargs):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self.bsp = None
-        self.csp = None
         self.mdp = None
 
     def parse_from_url(self, url):
@@ -71,10 +66,10 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(fl)
 
-        mdp = MetadataParser()
+        self.mdp = MetadataParser()
         for line in docs:
             try:
-                mdp.parse(line)
+                self.mdp.parse(line)
             except:
                 log.error('Failed: {}'.format(line))
 
@@ -83,20 +78,22 @@ class BELGraph(nx.MultiDiGraph):
 
         for line in defs:
             try:
-                mdp.parse(line)
+                res = self.mdp.parse(line)
+                if len(res) == 2:
+                    log.debug('{}: {}'.format(res[0], res[1]))
+                else:
+                    log.debug('{}: [{}]'.format(res[0], ', '.join(res[1:])))
             except:
                 log.error('Failed: {}'.format(line))
 
         log.info('Finished parsing definitions section in {} seconds'.format(time.time() - t))
         t = time.time()
 
-        bsp = BelParser(graph=self)
-        csp = ControlParser(custom_annotations=mdp.annotations_dict)
+        self.bsp = BelParser(graph=self, custom_annotations=self.mdp.annotations_dict)
 
-        stmt = csp.get_language() | bsp.get_language()
         for line in states:
             try:
-                stmt.parseString(line)
+                self.bsp.parse(line)
             except:
                 log.error('Failed: {}'.format(line))
 
@@ -124,16 +121,13 @@ class BELGraph(nx.MultiDiGraph):
             rel_type = data['relation']
 
             attrs = {}
-            for k in ('subject', 'object'):
-                if k == 'relation' or k not in data or not data[k]:
-                    continue
-                for key, value in data[k].items():
-                    if isinstance(value, dict):
-                        for k2, v2 in value.items():
-                            attrs['subject_{}_{}'.format(key, k2)] = v2
-                    else:
-                        attrs['subject_{}'.format(key)] = value
+            if 'subject' in data:
+                attrs.update(flatten_modifier_dict(data['subject'], 'subject'))
+            if 'object' in data:
+                attrs.update(flatten_modifier_dict(data['object'], 'object'))
 
+            attrs.update({k:v for k,v in data.items() if k not in ('subject', 'object')})
+            print(attrs)
             rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
             relationships.append(rel)
 

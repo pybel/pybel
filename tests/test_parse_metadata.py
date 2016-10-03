@@ -7,6 +7,8 @@ from pybel.parsers.utils import sanitize_file_lines, split_file_to_annotations_a
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 
 class TestSanitize(unittest.TestCase):
     def test_a(self):
@@ -66,10 +68,8 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
 
         self.assertEqual(expect, result)
 
-    @unittest.skipIf('PYBEL_BASE' not in os.environ, 'Missing environmental variable')
     def test_e(self):
-        base = os.environ['PYBEL_BASE']
-        path = os.path.join(base, 'tests', 'bel', 'test_bel_1.bel')
+        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 
         with open(path) as f:
             lines = list(sanitize_file_lines(f))
@@ -84,10 +84,8 @@ and apoptosis (programmed cell death) [1,2]"'''.split('\n')
 
 
 class TestSplitLines(unittest.TestCase):
-    @unittest.skipIf('PYBEL_BASE' not in os.environ, 'Missing environmental variable')
     def test_parts(self):
-        base = os.environ['PYBEL_BASE']
-        path = os.path.join(base, 'tests', 'bel', 'test_bel_1.bel')
+        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 
         with open(path) as f:
             docs, defs, states = split_file_to_annotations_and_definitions(f)
@@ -201,9 +199,8 @@ class TestParseMetadata(unittest.TestCase):
         self.assertEqual(expected_namespace_dict, self.parser.namespace_dict)
         self.assertEqual(expected_namespace_annoations, self.parser.namespace_metadata)
 
-    @unittest.skipIf('PYBEL_BASE' not in os.environ, 'Missing environmental variable')
     def test_parse_namespace_url_1(self):
-        path = os.path.join(os.environ['PYBEL_BASE'], 'tests', 'bel', 'test_ns_1.belns')
+        path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
         s = '''DEFINE NAMESPACE TEST AS URL "file://{}"'''.format(path)
         self.parser.parse(s)
 
