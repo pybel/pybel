@@ -1,7 +1,7 @@
 import logging
 from abc import abstractmethod
-from time import time
-from pyparsing import Suppress, ZeroOrMore, White, dblQuotedString, removeQuotes, Word, alphanums
+
+from pyparsing import Suppress, ZeroOrMore, White, dblQuotedString, removeQuotes, Word, alphanums, delimitedList
 
 log = logging.getLogger(__name__)
 
@@ -12,6 +12,7 @@ RP = W + Suppress(')')
 
 word = Word(alphanums)
 quote = dblQuotedString().setParseAction(removeQuotes)
+delimitedSet = Suppress('{') + delimitedList(quote) + Suppress('}')
 
 
 class BaseParser:

@@ -5,6 +5,7 @@ import time
 import networkx as nx
 import py2neo
 import requests
+from pyparsing import ParseException
 from requests_file import FileAdapter
 
 from .parsers.parse_bel import BelParser, flatten_modifier_dict
@@ -83,8 +84,10 @@ class BELGraph(nx.MultiDiGraph):
                     log.debug('{}: {}'.format(res[0], res[1]))
                 else:
                     log.debug('{}: [{}]'.format(res[0], ', '.join(res[1:])))
-            except:
-                log.error('Failed: {}'.format(line))
+            except ParseException as e:
+                log.error('General parser failure: {}'.format(line))
+            except Exception as e:
+                log.error('{} {}'.format(e, line))
 
         log.info('Finished parsing definitions section in {} seconds'.format(time.time() - t))
         t = time.time()
@@ -94,8 +97,10 @@ class BELGraph(nx.MultiDiGraph):
         for line in states:
             try:
                 self.bsp.parse(line)
-            except:
-                log.error('Failed: {}'.format(line))
+            except ParseException as e:
+                log.error('General parser failure: {}'.format(line))
+            except Exception as e:
+                log.error('{} {}'.format(e, line))
 
         log.info('Finished parsing statements section in {} seconds'.format(time.time() - t))
 
@@ -126,7 +131,7 @@ class BELGraph(nx.MultiDiGraph):
             if 'object' in data:
                 attrs.update(flatten_modifier_dict(data['object'], 'object'))
 
-            attrs.update({k:v for k,v in data.items() if k not in ('subject', 'object')})
+            attrs.update({k: v for k, v in data.items() if k not in ('subject', 'object')})
             print(attrs)
             rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
             relationships.append(rel)

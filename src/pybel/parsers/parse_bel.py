@@ -17,8 +17,6 @@ from .utils import list2tuple
 
 log = logging.getLogger(__name__)
 
-CM = Suppress(',')
-
 
 def command_handler(command, loc=0, ensure_node_handler=None):
     """

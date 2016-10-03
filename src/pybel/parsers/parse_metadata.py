@@ -5,13 +5,12 @@ import requests
 from pyparsing import Suppress, delimitedList
 from requests_file import FileAdapter
 
-from .baseparser import BaseParser, W, word, quote
+from .baseparser import BaseParser, W, word, quote, delimitedSet
 
 log = logging.getLogger(__name__)
 
 __all__ = ['MetadataParser']
 
-delimitedSet = Suppress('{') + delimitedList(quote) + Suppress('}')
 delimiters = "=", "|", ":"
 
 # See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces

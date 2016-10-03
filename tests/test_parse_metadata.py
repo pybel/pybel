@@ -279,6 +279,16 @@ class TestParseControl(unittest.TestCase):
 
         self.assertEqual(expected_annotation, self.parser.annotations)
 
+    def test_custom_annotation_list(self):
+        s = 'SET Custom1 = {"Custom1_A","Custom1_B"}'
+        self.parser.parse(s)
+
+        expected_annotation = {
+            'Custom1': {'Custom1_A', 'Custom1_B'}
+        }
+
+        self.assertEqual(expected_annotation, self.parser.annotations)
+
     def test_custom_key_failure(self):
         s = 'SET FAILURE = "never gonna happen"'
         with self.assertRaises(Exception):
