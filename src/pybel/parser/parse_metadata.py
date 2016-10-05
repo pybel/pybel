@@ -2,7 +2,7 @@ import logging
 from configparser import ConfigParser
 
 import requests
-from pyparsing import Suppress, delimitedList
+from pyparsing import Suppress
 from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet
@@ -27,15 +27,25 @@ value_map = {
 
 
 class MetadataParser(BaseParser):
+    """Parser for the document and definitions section of a BEL document"""
+
     # TODO add parameters for automatically loaded metadata and values
-    def __init__(self):
+    # TODO build class that handles connection to namesapce and annotations database
+    def __init__(self, namespace_dict=None, annotations_dict=None):
+        """
+        :param namespace_dict: dictionary of pre-loaded namespaces {name: set of valid values}
+        :type namespace_dict: dict
+        :param annotations_dict: dictionary of pre-loaded annotations {name: set of valid values}
+        :type annotations_dict: dict
+        :return:
+        """
         self.document_metadata = {}
 
         self.namespace_metadata = {}
-        self.namespace_dict = {}
+        self.namespace_dict = {} if namespace_dict is None else namespace_dict
 
         self.annotations_metadata = {}
-        self.annotations_dict = {}
+        self.annotations_dict = {} if annotations_dict is None else annotations_dict
 
         self.document = Suppress('SET') + W + Suppress('DOCUMENT') + word('key') + W + Suppress('=') + W + quote(
             'value')
@@ -72,9 +82,11 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_url(self, s, l, tokens):
-        url = tokens['url']
         name = tokens['name']
+        if name in self.namespace_dict:
+            return tokens
 
+        url = tokens['url']
         session = requests.Session()
         if url.startswith('file://'):
             session.mount('file://', FileAdapter())
@@ -90,9 +102,11 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotations_url(self, s, l, tokens):
-        url = tokens['url']
         name = tokens['name']
+        if name in self.annotations_dict:
+            return tokens
 
+        url = tokens['url']
         session = requests.Session()
         if url.startswith('file://'):
             session.mount('file://', FileAdapter())
@@ -109,6 +123,9 @@ class MetadataParser(BaseParser):
 
     def handle_namespace_list(self, s, l, tokens):
         name = tokens['name']
+        if name in self.namespace_dict:
+            return tokens
+
         values = set(tokens['values'])
 
         self.namespace_metadata[name] = self.transform_document_annotations()
@@ -118,6 +135,9 @@ class MetadataParser(BaseParser):
 
     def handle_annotation_list(self, s, l, tokens):
         name = tokens['name']
+        if name in self.annotations_dict:
+            return tokens
+
         values = set(tokens['values'])
 
         self.annotations_metadata[name] = self.transform_document_annotations()
@@ -127,9 +147,8 @@ class MetadataParser(BaseParser):
 
     def handle_annotation_pattern(self, s, l, tokens):
         # TODO implement
-        raise NotImplementedError('Custom Regex not yet implemented')
+        raise NotImplementedError('Custom annotation regex matching not yet implemented')
 
-    # TODO restructure document metadata for internally defined Namespaces and AnnotationLists
     def transform_document_annotations(self):
         return self.document_metadata.copy()
 

@@ -2,8 +2,8 @@ import logging
 import os
 import unittest
 
-from pybel.parsers import ControlParser, MetadataParser
-from pybel.parsers.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
+from pybel.parser import ControlParser, MetadataParser
+from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -69,7 +69,7 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
         self.assertEqual(expect, result)
 
     def test_e(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
+        path = os.path.join(dir_path, os.pardir, 'bel', 'test_bel_1.bel')
 
         with open(path) as f:
             lines = list(sanitize_file_lines(f))
@@ -85,7 +85,7 @@ and apoptosis (programmed cell death) [1,2]"'''.split('\n')
 
 class TestSplitLines(unittest.TestCase):
     def test_parts(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
+        path = os.path.join(dir_path, os.pardir, 'bel', 'test_bel_1.bel')
 
         with open(path) as f:
             docs, defs, states = split_file_to_annotations_and_definitions(f)
@@ -200,7 +200,7 @@ class TestParseMetadata(unittest.TestCase):
         self.assertEqual(expected_namespace_annoations, self.parser.namespace_metadata)
 
     def test_parse_namespace_url_1(self):
-        path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
+        path = os.path.join(dir_path, os.pardir, 'bel', 'test_ns_1.belns')
         s = '''DEFINE NAMESPACE TEST AS URL "file://{}"'''.format(path)
         self.parser.parse(s)
 

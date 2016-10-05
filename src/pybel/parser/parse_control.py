@@ -23,27 +23,30 @@ class ControlParser(BaseParser):
 
         custom_annotations = oneOf(self.custom_annotations.keys())
 
-        self.set_citation = Suppress('SET') + W + Suppress('Citation') + W + Suppress('=') + W + delimitedSet('values')
-        self.set_citation.setParseAction(self.handle_citation)
+        set_tag = Suppress('SET')
+        unset_tag = Suppress('UNSET')
 
-        self.set_evidence = Suppress('SET') + W + Suppress('Evidence') + W + Suppress('=') + W + quote('value')
-        self.set_evidence.setParseAction(self.handle_evidence)
-
-        self.set_statement_group = Suppress('SET') + W + Suppress('STATEMENT_GROUP') + W + Suppress('=') + W + quote(
+        self.set_statement_group = set_tag + W + Suppress('STATEMENT_GROUP') + W + Suppress('=') + W + quote(
             'group')
         self.set_statement_group.setParseAction(self.handle_statement_group)
 
-        self.set_command = Suppress('SET') + W + custom_annotations('key') + W + Suppress('=') + W + quote('value')
+        self.set_citation = set_tag + W + Suppress('Citation') + W + Suppress('=') + W + delimitedSet('values')
+        self.set_citation.setParseAction(self.handle_citation)
+
+        self.set_evidence = set_tag + W + Suppress('Evidence') + W + Suppress('=') + W + quote('value')
+        self.set_evidence.setParseAction(self.handle_evidence)
+
+        self.set_command = set_tag + W + custom_annotations('key') + W + Suppress('=') + W + quote('value')
         self.set_command.setParseAction(self.handle_set_command)
 
-        self.set_command_list = Suppress('SET') + W + custom_annotations('key') + W + Suppress('=') + W + delimitedSet(
+        self.set_command_list = set_tag + W + custom_annotations('key') + W + Suppress('=') + W + delimitedSet(
             'values')
         self.set_command_list.setParseAction(self.handle_set_command_list)
 
-        self.unset_command = Suppress('UNSET') + W + (custom_annotations | 'Evidence')('key')
+        self.unset_command = unset_tag + W + (custom_annotations | 'Evidence')('key')
         self.unset_command.setParseAction(self.handle_unset_command)
 
-        self.unset_statement_group = Suppress('UNSET') + W + Suppress('STATEMENT_GROUP')
+        self.unset_statement_group = unset_tag + W + Suppress('STATEMENT_GROUP')
         self.unset_statement_group.setParseAction(self.handle_unset_statement_group)
 
         self.commands = (self.set_citation | self.unset_command | self.unset_statement_group |

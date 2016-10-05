@@ -42,3 +42,7 @@ Contributing
 ------------
 
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See :code:`CONTRIBUTING.rst` for more information on getting involved.
+
+
+The Cool Pool of Tools
+----------------------

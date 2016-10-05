@@ -12,6 +12,8 @@ Contents:
    :maxdepth: 2
    
    graph
+   todo
+
 
 Indices and tables
 ==================

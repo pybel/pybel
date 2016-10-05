@@ -2,8 +2,8 @@ import unittest
 
 import networkx as nx
 
-from pybel.parsers import utils
-from pybel.parsers.utils import subdict_matches
+from pybel.parser import utils
+from pybel.parser.utils import subdict_matches
 
 
 class TestUtils(unittest.TestCase):

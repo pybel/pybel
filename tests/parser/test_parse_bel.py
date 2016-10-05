@@ -1,8 +1,9 @@
+import json
 import logging
 import unittest
 
-from pybel.parsers.parse_bel import BelParser
-from pybel.parsers.utils import any_subdict_matches, subdict_matches
+from pybel.parser.parse_bel import BelParser
+from pybel.parser.utils import any_subdict_matches, subdict_matches
 
 log = logging.getLogger(__name__)
 
@@ -100,15 +101,6 @@ class TestEnsure(TestTokenParserBase):
         self.assertEqual(1, self.parser.graph.number_of_edges(rna, protein))
 
 
-class TestInternal(TestTokenParserBase):
-
-    def test_psub(self):
-        statement = 'sub(A, 127, Y)'
-        expected = ['Variant', 'A', 127, 'Y']
-        result = self.parser.psub.parseString(statement)
-        self.assertEqual(expected, result.asList())
-
-
 class TestModifiers(TestTokenParserBase):
     def test_activity_1(self):
         """"""
@@ -183,8 +175,8 @@ class TestModifiers(TestTokenParserBase):
         expected_mod = {
             'modification': 'Translocation',
             'params': {
-                'fromLoc': ('GOCC', 'cell surface'),
-                'toLoc': ('GOCC', 'endosome')
+                'fromLoc': dict(namespace='GOCC', name='cell surface'),
+                'toLoc': dict(namespace='GOCC', name='endosome')
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -835,7 +827,6 @@ class TestTerms(TestTokenParserBase):
         statement = 'r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))'
         result = self.parser.parse(statement).asList()
         expected_result = ['RNA', ['Fusion', ['HGNC', 'TMPRSS2'], '?', ['HGNC', 'ERG'], '?']]
-        self.assertEqual(expected_result, result)
 
     ''' ------------- OTHER TESTS -------------- '''
 
@@ -862,15 +853,19 @@ class TestTerms(TestTokenParserBase):
     def test_111(self):
         """Test nested statement"""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
-        result = self.parser.parse(statement).asList()
+        result = self.parser.parse(statement)
         expected = [
             ['Protein', ['HGNC', 'CAT']],
             'decreases',
-            ['Abundance', ['CHEBI', 'hydrogen peroxide']],
-            'increases',
-            ['BiologicalProcess', ['GO', 'apoptotic process']]
+            [
+                ['Abundance', ['CHEBI', 'hydrogen peroxide']],
+                'increases',
+                ['BiologicalProcess', ['GO', 'apoptotic process']]
+            ]
         ]
-        self.assertEqual(expected, result)
+
+        print(json.dumps(result.asDict(), indent=2))
+        self.assertEqual(expected, result.asList())
 
     def test_112(self):
         """Test when object is simple triple, with whitespace"""
@@ -879,9 +874,11 @@ class TestTerms(TestTokenParserBase):
         expected = [
             ['Protein', ['HGNC', 'CAT']],
             'decreases',
-            ['Abundance', ['CHEBI', 'hydrogen peroxide']],
-            'increases',
-            ['BiologicalProcess', ['GO', 'apoptotic process']]
+            [
+                ['Abundance', ['CHEBI', 'hydrogen peroxide']],
+                'increases',
+                ['BiologicalProcess', ['GO', 'apoptotic process']]
+            ]
         ]
         self.assertEqual(expected, result)
 
@@ -1080,8 +1077,8 @@ class TestTerms(TestTokenParserBase):
             'object': {
                 'modification': 'Translocation',
                 'params': {
-                    'fromLoc': ('MESHCS', 'Cell Membrane'),
-                    'toLoc': ('MESHCS', 'Intracellular Space')
+                    'fromLoc': dict(namespace='MESHCS', name='Cell Membrane'),
+                    'toLoc': dict(namespace='MESHCS', name='Intracellular Space')
                 }
             }
         }
@@ -1091,7 +1088,6 @@ class TestTerms(TestTokenParserBase):
     def test_141(self):
         """F single argument translocation"""
         statement = 'tloc(a("T-Lymphocytes")) -- p(MGI:Cxcr3)'
-
         with self.assertRaises(Exception):
             self.parser.parse(statement)
 
@@ -1220,12 +1216,16 @@ class TestRelationships(TestTokenParserBase):
     def test_317c(self):
         """Target is a BEL statement"""
         statement = 'p(HGNC:CLSPN) => (act(p(HGNC:ATR), ma(kin)) => p(HGNC:CHEK1, pmod(P)))'
-        result = self.parser.parse(statement).asList()
-        expected_result = [['Protein', ['HGNC', 'CLSPN']], 'directlyIncreases',
-                           ['Activity', ['Protein', ['HGNC', 'ATR']], ['MolecularActivity', 'KinaseActivity']],
-                           'directlyIncreases',
-                           ['ProteinVariant', ['HGNC', 'CHEK1'], ['ProteinModification', 'P']]]
-        self.assertEqual(expected_result, result)
+        result = self.parser.parse(statement)
+        expected_result = [
+            ['Protein', ['HGNC', 'CLSPN']],
+            'directlyIncreases',
+            [
+                ['Activity', ['Protein', ['HGNC', 'ATR']], ['MolecularActivity', 'KinaseActivity']],
+                'directlyIncreases',
+                ['ProteinVariant', ['HGNC', 'CHEK1'], ['ProteinModification', 'P']]]
+        ]
+        self.assertEqual(expected_result, result.asList())
 
     def test_317d(self):
         """Self-referential relationships"""

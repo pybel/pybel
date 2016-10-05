@@ -8,24 +8,27 @@ import requests
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
-from .parsers.parse_bel import BelParser, flatten_modifier_dict
-from .parsers.parse_metadata import MetadataParser
-from .parsers.utils import split_file_to_annotations_and_definitions
+from .parser.parse_bel import BelParser, flatten_modifier_dict
+from .parser.parse_metadata import MetadataParser
+from .parser.utils import split_file_to_annotations_and_definitions
 
 log = logging.getLogger(__name__)
 
 
-def from_bel(bel):
+def load(bel):
     """Parses a BEL file from URL or file resource
     :param bel: URL or file path to BEL resource
     :type bel: str
     :return: a BEL MultiGraph
     :rtype BELGraph
     """
-    if bel.startswith('http'):
+
+    if isinstance(bel, (list, tuple)):
+        return BELGraph().parse_from_lines(bel)
+    elif bel.startswith('http://') or bel.startswith('file://'):
         return BELGraph().parse_from_url(bel)
     with open(os.path.expanduser(bel)) as f:
-        return BELGraph().parse_from_file(f)
+        return BELGraph().parse_from_lines(f)
 
 
 class BELGraph(nx.MultiDiGraph):
@@ -36,6 +39,10 @@ class BELGraph(nx.MultiDiGraph):
 
         self.bsp = None
         self.mdp = None
+
+    def parse_from_path(self, path):
+        with open(os.path.expanduser(path)) as f:
+            return self.parse_from_lines(f)
 
     def parse_from_url(self, url):
         """
@@ -53,12 +60,11 @@ class BELGraph(nx.MultiDiGraph):
         if response.status_code != 200:
             raise Exception('URL not found')
 
-        return self.parse_from_file(response.iter_lines())
+        return self.parse_from_lines(response.iter_lines())
 
-    # TODO break up into smaller commands with tests
-    def parse_from_file(self, fl):
+    def parse_from_lines(self, fl):
         """
-        Parses a BEL file from a file-like object and adds to graph
+        Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
         :param fl: iterable over lines of BEL data file
         :return: self
         :rtype: BELGraph

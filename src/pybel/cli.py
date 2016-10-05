@@ -18,7 +18,7 @@ import click
 import networkx as nx
 import py2neo
 
-from .graph import from_bel
+from .graph import load
 
 
 @click.group(help="PyBEL Command Line Utilities")
@@ -35,7 +35,7 @@ def to_neo(path, neo):
     print(neo)
     p2n = py2neo.Graph(neo)
 
-    g = from_bel(path)
+    g = load(path)
     g.to_neo4j(p2n)
 
 
@@ -45,7 +45,7 @@ def to_neo(path, neo):
 @click.option('--edge-path', help='File path to output edge file')
 def to_csv(url, path, node_path, edge_path):
     """Parses BEL file and exports as node/edge list files"""
-    g = from_bel(path)
+    g = load(path)
 
     nx.write_edgelist(g, edge_path, data=True)
 

@@ -4,6 +4,11 @@
 BEL language parameters
 """
 
+from pyparsing import *
+import logging
+log = logging.getLogger(__name__)
+
+
 activity_labels = {
     'catalyticActivity': 'CatalyticActivity',
     'cat': 'CatalyticActivity',
@@ -65,11 +70,37 @@ amino_acid_dict = {
     'W': 'Trp',
     'Y': 'Try',
     'V': 'Val',
-    'X': 'X'
 }
 
-dna_nucleotide_chars = ['A', 'T', 'C', 'G']
-rna_nucleotide_chars = ['a', 'u', 'c', 'g']
+aa_single = oneOf(amino_acid_dict.keys())
+aa_triple = oneOf(amino_acid_dict.values())
+aa_placeholder = Keyword('X')
+
+def handle_aa_placeholder(s, l, tokens):
+    log.warning('PyBEL015 Placeholder amino acid X found')
+    return tokens
+
+aa_placeholder.setParseAction(handle_aa_placeholder)
+
+amino_acid = aa_triple | aa_single | aa_placeholder
+
+dna_nucleotide_labels = {
+    'A': 'Adenine',
+    'T': 'Thymine',
+    'C': 'Cytosine',
+    'G': 'Guanine'
+}
+
+dna_nucleotide = oneOf(dna_nucleotide_labels.keys())
+
+rna_nucleotide_labels = {
+    'a': 'adenine',
+    'u': 'uracil',
+    'c': 'cytosine',
+    'g': 'guanine'
+}
+
+rna_nucleotide = oneOf(rna_nucleotide_labels.keys())
 
 pmod_legacy_labels = {
     'P': 'phosphorylated',

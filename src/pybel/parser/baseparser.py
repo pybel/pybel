@@ -1,5 +1,4 @@
 import logging
-from abc import abstractmethod
 
 from pyparsing import Suppress, ZeroOrMore, White, dblQuotedString, removeQuotes, Word, alphanums, delimitedList
 
@@ -13,6 +12,16 @@ RP = W + Suppress(')')
 word = Word(alphanums)
 quote = dblQuotedString().setParseAction(removeQuotes)
 delimitedSet = Suppress('{') + delimitedList(quote) + Suppress('}')
+
+
+def nest(*content):
+    """Defines a delimited list by enumerating each element of the list"""
+    if len(content) == 0:
+        raise ValueError()
+    x = content[0]
+    for y in content[1:]:
+        x = x + WCW + y
+    return LP + x + RP
 
 
 class BaseParser:
@@ -30,10 +39,10 @@ class BaseParser:
         :param s: input string
         :type s: str
         """
-        result = self.get_language().parseString(s)
-        return result
+        return self.get_language().parseString(s)
 
-    @abstractmethod
     def get_language(self):
         """Gets the language represented by this parser"""
-        return
+        if not hasattr(self, 'language'):
+            raise Exception('Language not defined')
+        return self.language

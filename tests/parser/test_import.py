@@ -8,8 +8,9 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestImport(unittest.TestCase):
     def test_full(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
-        g = pybel.from_bel(path)
+
+        path = os.path.join(dir_path, os.pardir, 'bel', 'test_bel_1.bel')
+        g = pybel.load(path)
 
         expected_document_metadata = {
             'Name': "PyBEL Test Document",

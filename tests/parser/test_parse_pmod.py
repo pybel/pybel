@@ -1,6 +1,6 @@
 import unittest
 
-from pybel.parsers.parse_pmod import PmodParser
+from pybel.parser.parse_pmod import PmodParser
 
 
 class TestPmod(unittest.TestCase):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-The parsers module contains utilities for parsing BEL documents and BEL statements
+The pybel.parser module contains utilities for parsing BEL documents and BEL statements
 """
 
 from .parse_bel import BelParser
