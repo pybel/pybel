@@ -8,6 +8,7 @@ global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store
 include *.txt
 include tox.ini
 include .bumpversion.cfg
+exclude codecov.yml
 
 recursive-include docs *.py
 recursive-include docs *.rst
