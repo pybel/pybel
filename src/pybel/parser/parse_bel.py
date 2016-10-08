@@ -12,6 +12,7 @@ from .baseparser import BaseParser, W, WCW, nest, one_of_tags
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser
 from .parse_control import ControlParser
+from .parse_exceptions import NestedRelationNotSupportedException
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
 from .utils import list2tuple
@@ -170,14 +171,15 @@ class BelParser(BaseParser):
 
         # 2.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA
 
-        molecular_activity_tags = oneOf(['ma', 'molecularActivity']).setParseAction(replaceWith('MolecularActivity'))
+        molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
         self.molecular_activities_default_ns = oneOf(language.activities)
         self.molecular_activities_default_ns.setParseAction(lambda s, l, t: [language.activity_labels[t[0]]])
 
         # backwards compatibility with BEL v1.0
-        molecular_activity_default_ns = molecular_activity_tags + nest(self.molecular_activities_default_ns)
-        molecular_activity_custom_ns = molecular_activity_tags + nest(identifier)
+        molecular_activity_default_ns = molecular_activity_tags + nest(
+            self.molecular_activities_default_ns('MolecularActivity'))
+        molecular_activity_custom_ns = molecular_activity_tags + nest(identifier('MolecularActivity'))
 
         self.molecular_activity = molecular_activity_default_ns | molecular_activity_custom_ns
 
@@ -197,7 +199,7 @@ class BelParser(BaseParser):
         activity_tags = one_of_tags(['act', 'activity'], 'Activity', 'modifier')
 
         self.activity_modified_default_ns = activity_tags + nest(Group(self.abundance)('target') + WCW + Group(
-            self.molecular_activity)('activity'))
+            self.molecular_activity)('effect'))
         self.activity_standard = activity_tags + nest(Group(self.abundance)('target'))  # TODO compress with 'Optional'
 
         activity_legacy_tags = oneOf(language.activities)('modifier')
@@ -207,7 +209,7 @@ class BelParser(BaseParser):
             log.debug('PyBEL001 legacy activity statement. Use activity() instead. {}'.format(s))
             legacy_cls = language.activity_labels[tokens['modifier']]
             tokens['modifier'] = 'Activity'
-            tokens['activity'] = {
+            tokens['effect'] = {
                 'MolecularActivity': legacy_cls
             }
             return tokens
@@ -222,31 +224,31 @@ class BelParser(BaseParser):
 
         # 2.5.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translocations
 
-        from_loc = Suppress('fromLoc') + nest(identifier)
-        to_loc = Suppress('toLoc') + nest(identifier)
+        from_loc = Suppress('fromLoc') + nest(identifier('fromLoc'))
+        to_loc = Suppress('toLoc') + nest(identifier('toLoc'))
 
-        cell_secretion_tags = one_of_tags(['sec', 'cellSecretion'], 'CellSecretion', 'modifier')
-        self.cell_secretion = cell_secretion_tags + nest(Group(self.simple_abundance)('target'))
+        cell_secretion_tag = one_of_tags(['sec', 'cellSecretion'], 'CellSecretion', 'modifier')
+        self.cell_secretion = cell_secretion_tag + nest(Group(self.simple_abundance)('target'))
         self.cell_secretion.setParseAction(self.handle)
 
-        cell_surface_expression_tags = one_of_tags(['surf', 'cellSurfaceExpression'], 'CellSurfaceExpression',
-                                                   'modifier')
-        self.cell_surface_expression = cell_surface_expression_tags + nest(Group(self.simple_abundance)('target'))
+        cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], 'CellSurfaceExpression',
+                                                  'modifier')
+        self.cell_surface_expression = cell_surface_expression_tag + nest(Group(self.simple_abundance)('target'))
         self.cell_surface_expression.setParseAction(self.handle)
 
-        translocation_tags = one_of_tags(['translocation', 'tloc'], 'Translocation', 'modifier')
-        self.translocation_standard = translocation_tags + nest(Group(self.simple_abundance)('target'),
-                                                                from_loc('fromLoc'),
-                                                                to_loc('toLoc'))
+        translocation_tag = one_of_tags(['translocation', 'tloc'], 'Translocation', 'modifier')
+        self.translocation_standard = translocation_tag + nest(Group(self.simple_abundance)('target'),
+                                                               Group(from_loc + WCW + to_loc)('effect'))
 
         self.translocation_standard.setParseAction(self.handle)
-        self.translocation_legacy = translocation_tags + nest(Group(self.simple_abundance)('target'), identifier,
-                                                              identifier)
+        self.translocation_legacy = translocation_tag + nest(Group(self.simple_abundance)('target'),
+                                                             Group(identifier('fromLoc') + WCW +
+                                                                   identifier('toLoc'))('effect'))
         self.translocation_legacy.setParseAction(self.handle)
         self.translocation_legacy.addParseAction(
             handle_warning('PyBEL005 legacy translocation statement. use fromLoc() and toLoc(). {s}'))
 
-        self.translocation_legacy_singleton = translocation_tags + nest(Group(self.simple_abundance))
+        self.translocation_legacy_singleton = translocation_tag + nest(Group(self.simple_abundance))
         self.translocation_legacy_singleton.setParseAction(self.handle)
         self.translocation_legacy_singleton.addParseAction(
             handle_warning('PyBEL008 legacy translocation + missing arguments: {s}'))
@@ -311,8 +313,7 @@ class BelParser(BaseParser):
         causal_relationship = (increases | directly_increases | decreases |
                                directly_decreases | rate_limit | causes_no_change | regulates)
 
-        # 3.1 Causal Relationships - nested
-        # TODO should this feature be discontinued?
+        # 3.1 Causal Relationships - nested. Explicitly not supported because of ambiguity
 
         increases_nested = triple(self.bel_term, increases_tag, nest(causal_relationship))
         decreases_nested = triple(self.bel_term, decreases_tag, nest(causal_relationship))
@@ -321,6 +322,12 @@ class BelParser(BaseParser):
 
         nested_causal_relationship = (
             increases_nested | decreases_nested | directly_increases_nested | directly_decreases_nested)
+
+        def handle_nested_relation(s, l, tokens):
+            raise NestedRelationNotSupportedException(
+                'PyBEL0018 Nested statements not supported. Please explicitly specifiy.')
+
+        nested_causal_relationship.setParseAction(handle_nested_relation)
 
         # 3.2 Correlative Relationships
 
@@ -367,15 +374,7 @@ class BelParser(BaseParser):
 
         has_members_tag = oneOf(['hasMembers'])
         has_members = triple(self.abundance, has_members_tag, self.abundance_list)
-
-        def handle_has_members(s, l, tokens):
-            parent = self.ensure_node(s, l, tokens[0])
-            for child_tokens in tokens[2]:
-                child = self.ensure_node(s, l, child_tokens)
-                self.graph.add_edge(parent, child, relation='hasMember')
-            return tokens
-
-        has_members.setParseAction(handle_has_members)
+        has_members.setParseAction(self.handle_has_members)
 
         # 3.4.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hascomponent
         has_component_tag = oneOf(['hasComponent'])
@@ -411,18 +410,18 @@ class BelParser(BaseParser):
                     other_relationships | deprecated_relationships)
 
         def handle_relation(s, l, tokens):
-            sub = self.ensure_node(s, l, tokens[0])
-            obj = self.ensure_node(s, l, tokens[2])
+            sub = self.ensure_node(s, l, tokens['subject'])
+            obj = self.ensure_node(s, l, tokens['object'])
 
             attrs = {
-                'relation': tokens[1]
+                'relation': tokens['relation']
             }
 
-            sub_mod = self.canonicalize_modifier(tokens[0])
+            sub_mod = self.canonicalize_modifier(tokens['subject'])
             if sub_mod:
                 attrs['subject'] = sub_mod
 
-            obj_mod = self.canonicalize_modifier(tokens[2])
+            obj_mod = self.canonicalize_modifier(tokens['object'])
             if obj_mod:
                 attrs['object'] = obj_mod
 
@@ -432,32 +431,6 @@ class BelParser(BaseParser):
             return tokens
 
         relation.setParseAction(handle_relation)
-
-        def handle_nested_relation(s, l, tokens):
-            # TODO tests
-            subject = self.ensure_node(s, l, tokens['subject'])
-            relation_1 = tokens['relation']
-            nested = self.ensure_node(s, l, tokens['object'])
-
-            handle_relation(s, l, nested)  # ensure the nested relationship
-
-            nested_relation = tokens['object']['relation']
-            nested_object = self.ensure_node(s, l, tokens['object']['object'])
-
-            attrs = {
-                'relation': language.compound_relation_dict[relation_1, nested_relation]
-            }
-
-            sub_mod = self.canonicalize_modifier(tokens['subject'])
-            if sub_mod:
-                attrs['subject'] = sub_mod
-
-            attrs.update(self.get_annotations())
-            self.graph.add_edge(subject, nested_object, attr_dict=attrs)
-
-            return tokens
-
-        nested_causal_relationship.setParseAction(handle_nested_relation)
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         relation = has_members | nested_causal_relationship | relation
@@ -472,6 +445,16 @@ class BelParser(BaseParser):
     def get_annotations(self):
         """Get current annotations in this parser"""
         return self.control_parser.get_annotations()
+
+    def clear_annotations(self):
+        self.control_parser.clear_annotations()
+
+    def handle_has_members(self, s, l, tokens):
+        parent = self.ensure_node(s, l, tokens[0])
+        for child_tokens in tokens[2]:
+            child = self.ensure_node(s, l, child_tokens)
+            self.graph.add_edge(parent, child, relation='hasMember')
+        return tokens
 
     def handle(self, s, l, tokens):
         name = self.ensure_node(s, l, tokens)
@@ -548,11 +531,10 @@ class BelParser(BaseParser):
 
         print('ensuring tokens', tokens)
 
-        if 'modifier' in tokens and tokens['modifier'] in (
-                'Translocation', 'Degradation', 'CellSecretion', 'CellSurfaceExpression'):
+        if 'modifier' in tokens:
             return self.ensure_node(s, l, tokens['target'])
 
-        if 'transformation' in tokens:
+        elif 'transformation' in tokens:
             name = self.canonicalize_node(tokens)
             if name not in self.graph:
                 self.graph.add_node(name, type=tokens['transformation'])
@@ -567,7 +549,10 @@ class BelParser(BaseParser):
 
             return name
 
-        if 'function' in tokens and 'members' in tokens:
+        elif 'function' not in tokens:
+            raise Exception('Unexpected tokens. Developer needs to fix')
+
+        elif 'function' in tokens and 'members' in tokens:
             name = self.canonicalize_node(tokens)
             if name not in self.graph:
                 self.graph.add_node(name, type=tokens['function'])
@@ -577,7 +562,7 @@ class BelParser(BaseParser):
                 self.add_unqualified_edge(name, member_name, relation='hasComponent')
             return name
 
-        if 'function' in tokens and 'variants' in tokens:
+        elif 'function' in tokens and 'variants' in tokens:
             name = self.canonicalize_node(tokens)
             if name not in self.graph:
                 self.graph.add_node(name)
@@ -641,8 +626,8 @@ class BelParser(BaseParser):
                 self.add_unqualified_edge(rna_name, name, relation='translatedTo')
                 return name
 
-        raise NotImplementedError("ensure_node not implemented for: {}".format(tokens))
-
+        raise NotImplementedError(
+            "ensure_node not implemented for: {}".format(tokens.asDict() if hasattr(tokens, 'asDict') else tokens))
 
     def canonicalize_modifier(self, tokens):
         """
@@ -651,49 +636,50 @@ class BelParser(BaseParser):
         :return:
         """
 
-        command, *args = list2tuple(tokens.asList() if hasattr(tokens, 'asList') else tokens)
-
-        if command not in ('Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
+        if 'modifier' not in tokens:
             return {}
 
-        res = {
-            'modification': command,
-            'params': {}
-        }
+        elif tokens['modifier'] == 'Degradation':
+            return {
+                'modifier': 'Degradation'
+            }
 
-        if command == 'Activity':
-            if len(args) > 1:  # has molecular activity annotation
-                res['params'] = {
-                    'molecularActivity': args[1][1]
+        elif tokens['modifier'] == 'Activity' and 'effect' not in tokens:
+            return {
+                'modifier': tokens['modifier'],
+                'effect': {}
+            }
+
+        elif tokens['modifier'] == 'Activity' and 'effect' in tokens:
+            return {
+                'modifier': tokens['modifier'],
+                'effect': tokens['effect'].asDict() if hasattr(tokens['effect'], 'asDict') else dict(tokens['effect'])
+            }
+
+        elif tokens['modifier'] == 'Translocation':
+            return {
+                'modifier': tokens['modifier'],
+                'effect': tokens['effect'].asDict()
+            }
+
+        elif tokens['modifier'] == 'CellSecretion':
+            return {
+                'modifier': 'Translocation',
+                'effect': {
+                    'fromLoc': dict(namespace='GOCC', name='intracellular'),
+                    'toLoc': dict(namespace='GOCC', name='extracellular space')
                 }
-            # TODO switch between legacy annotation and namespace:name annotation
-            return res
-        elif command == 'Degradation':
-            return res
-        elif command == 'Translocation':
-            res['params'] = {
-                'fromLoc': {
-                    'namespace': args[1][0],
-                    'name': args[1][1]
-                },
-                'toLoc': {
-                    'namespace': args[2][0],
-                    'name': args[2][1]
+            }
+        elif tokens['modifier'] == 'CellSurfaceExpression':
+            return {
+                'modifier': 'Translocation',
+                'effect': {
+                    'fromLoc': dict(namespace='GOCC', name='intracellular'),
+                    'toLoc': dict(namespace='GOCC', name='cell surface')
                 }
             }
-            return res
-        elif command == 'CellSecretion':
-            res['params'] = {
-                'fromLoc': dict(namespace='GOCC', name='intracellular'),
-                'toLoc': dict(namespace='GOCC', name='extracellular space')
-            }
-            return res
-        elif command == 'CellSurfaceExpression':
-            res['params'] = {
-                'fromLoc': dict(namespace='GOCC', name='intracellular'),
-                'toLoc': dict(namespace='GOCC', name='cell surface')
-            }
-            return res
+
+        raise NotImplementedError('Canonicalization of modifier {} not implemented'.format(tokens['modifier']))
 
 
 def flatten_modifier_dict(d, prefix=''):

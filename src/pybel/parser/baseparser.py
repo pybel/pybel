@@ -3,6 +3,8 @@ import logging
 from pyparsing import Suppress, ZeroOrMore, Group, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
     delimitedList, replaceWith
 
+
+from .parse_exceptions import PyBelException
 log = logging.getLogger(__name__)
 
 W = Suppress(ZeroOrMore(White()))
@@ -49,7 +51,6 @@ class BaseParser:
         :param s: input string
         :type s: str
         """
-
         return self.get_language().parseString(s)
 
     def get_language(self):

@@ -15,7 +15,7 @@ class TestTokenParserBase(unittest.TestCase):
     def setUp(self):
         self.parser.graph.clear()
         self.parser.node_count = 0
-        self.parser.annotations = {}
+        self.parser.clear_annotations()
 
     def assertHasNode(self, member, msg=None, **kwargs):
         self.assertIn(member, self.parser.graph)
@@ -33,65 +33,75 @@ class TestTokenParserBase(unittest.TestCase):
 
 
 class TestActivity(TestTokenParserBase):
-    def test_activity_1(self):
+    def test_activity_bare(self):
         """"""
         statement = 'act(p(HGNC:AKT1))'
         result = self.parser.activity.parseString(statement)
+
         expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']]]
         self.assertEqual(expected_result, result.asList())
 
         mod = self.parser.canonicalize_modifier(result)
         expected_mod = {
-            'modification': 'Activity',
-            'params': {}
+            'modifier': 'Activity',
+            'effect': {}
         }
         self.assertEqual(expected_mod, mod)
 
-    def test_233a(self):
-        """"""
-        statement = 'act(p(HGNC:AKT1))'
-        result = self.parser.activity.parseString(statement)
-        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']]]
-        self.assertEqual(expected_result, result.asList())
-
-        node = 'Protein', 'HGNC', 'AKT1'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
-        self.assertHasNode(node)
-
-    def test_activity_2(self):
-        """"""
+    def test_activity_withMolecularActivityDefault(self):
+        """Tests activity modifier with molecular activity from default BEL namespace"""
         statement = 'act(p(HGNC:AKT1), ma(kin))'
         result = self.parser.activity.parseString(statement)
-        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']], ['MolecularActivity', 'KinaseActivity']]
-        self.assertEqual(expected_result, result.asList())
+
+        expected_dict = {
+            'modifier': 'Activity',
+            'effect': {
+                'MolecularActivity': 'KinaseActivity'
+            },
+            'target': {
+                'function': 'Protein',
+                'identifier': dict(namespace='HGNC', name='AKT1')
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
 
         mod = self.parser.canonicalize_modifier(result)
         expected_mod = {
-            'modification': 'Activity',
-            'params': {
-                'molecularActivity': 'KinaseActivity'
+            'modifier': 'Activity',
+            'effect': {
+                'MolecularActivity': 'KinaseActivity'
             }
         }
         self.assertEqual(expected_mod, mod)
 
-    def test_activity_3(self):
-        """"""
-        statement = 'act(p(HGNC:AKT1), ma(NS:VAL))'
+    def test_activity_withMolecularActivityCustom(self):
+        """Tests activity modifier with molecular activity from custom namespaced"""
+        statement = 'act(p(HGNC:AKT1), ma(GOMF:"catalytic activity"))'
         result = self.parser.activity.parseString(statement)
-        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']], ['MolecularActivity', ['NS', 'VAL']]]
-        self.assertEqual(expected_result, result.asList())
+
+        expected_dict = {
+            'modifier': 'Activity',
+            'effect': {
+                'MolecularActivity': dict(namespace='GOMF', name='catalytic activity')
+            },
+            'target': {
+                'function': 'Protein',
+                'identifier': dict(namespace='HGNC', name='AKT1')
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
 
         mod = self.parser.canonicalize_modifier(result)
         expected_mod = {
-            'modification': 'Activity',
-            'params': {
-                'molecularActivity': ('NS', 'VAL')
+            'modifier': 'Activity',
+            'effect': {
+                'MolecularActivity': dict(namespace='GOMF', name='catalytic activity')
             }
         }
         self.assertEqual(expected_mod, mod)
 
     def test_activity_legacy(self):
-        """"""
+        """Test BEL 1.0 style molecular activity annotation"""
         statement = 'kin(p(HGNC:AKT1))'
         result = self.parser.activity.parseString(statement)
 
@@ -102,7 +112,7 @@ class TestActivity(TestTokenParserBase):
 
         expected_dict = {
             'modifier': 'Activity',
-            'activity': {
+            'effect': {
                 'MolecularActivity': 'KinaseActivity'
             },
             'target': {
@@ -112,61 +122,14 @@ class TestActivity(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = 'Protein', 'HGNC', 'AKT1'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
-        self.assertHasNode(node)
-
-    def test_activity_bare(self):
-        """default BEL namespace, transcriptional activity"""
-        statement = 'act(p(HGNC:FOXO1))'
-        result = self.parser.activity.parseString(statement)
-        expected_result = ['Activity', ['Protein', ['HGNC', 'FOXO1']]]
-        self.assertEqual(expected_result, result.asList())
-
-        node = 'Protein', 'HGNC', 'FOXO1'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
-        self.assertHasNode(node)
-
-    def test_activity_defaultNs(self):
-        """default BEL namespace, transcriptional activity"""
-        statement = 'act(p(HGNC:FOXO1), ma(tscript))'
-        result = self.parser.activity.parseString(statement)
-        expected_result = ['Activity', ['Protein', ['HGNC', 'FOXO1']], ['MolecularActivity', 'TranscriptionalActivity']]
-        self.assertEqual(expected_result, result.asList())
-
-        node = 'Protein', 'HGNC', 'FOXO1'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
-        self.assertHasNode(node)
-
-    def test_241b(self):
-        """GO molecular function namespace, transcriptional activity"""
-        statement = 'act(p(HGNC:FOXO1), ma(GO:"nucleic acid binding transcription factor activity"))'
-        result = self.parser.activity.parseString(statement)
-        expected_result = ['Activity', ['Protein', ['HGNC', 'FOXO1']],
-                           ['MolecularActivity', ['GO', 'nucleic acid binding transcription factor activity']]]
-        self.assertEqual(expected_result, result.asList())
-
-        node = 'Protein', 'HGNC', 'FOXO1'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
-        self.assertHasNode(node)
-
-    def test_224c(self):
-        """default BEL namespace, kinase activity"""
-        statement = 'act(p(HGNC:AKT1), ma(kin))'
-        result = self.parser.activity.parseString(statement)
-        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']], ['MolecularActivity', 'KinaseActivity']]
-        self.assertEqual(expected_result, result.asList())
-
-        node = 'Protein', 'HGNC', 'AKT1'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
-        self.assertHasNode(node)
-
-    def test_224d(self):
-        """GO molecular function namespace, kinase activity"""
-        statement = 'act(p(HGNC:AKT1), ma(GO:"kinase activity"))'
-        result = self.parser.activity.parseString(statement)
-        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']], ['MolecularActivity', ['GO', 'kinase activity']]]
-        self.assertEqual(expected_result, result.asList())
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modifier': 'Activity',
+            'effect': {
+                'MolecularActivity': 'KinaseActivity'
+            }
+        }
+        self.assertEqual(expected_mod, mod)
 
         node = 'Protein', 'HGNC', 'AKT1'
         self.assertEqual(node, self.parser.canonicalize_node(result))
@@ -192,8 +155,7 @@ class TestTransformation(TestTokenParserBase):
 
         mod = self.parser.canonicalize_modifier(result)
         expected_mod = {
-            'modification': 'Degradation',
-            'params': {}
+            'modifier': 'Degradation',
         }
         self.assertEqual(expected_mod, mod)
 
@@ -214,99 +176,130 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modifier': 'Degradation',
+        }
+        self.assertEqual(expected_mod, mod)
+
         node = 'Protein', 'HGNC', 'EGFR'
         self.assertEqual(node, self.parser.canonicalize_node(result))
         self.assertHasNode(node)
 
-    def test_translocation_1(self):
+    def test_translocation_standard(self):
         """translocation example"""
         statement = 'tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))'
-        tokens = [
-            'Translocation',
-            ['Protein', ['HGNC', 'EGFR']],
-            ['GOCC', 'cell surface'],
-            ['GOCC', 'endosome']
-        ]
+        result = self.parser.translocation.parseString(statement)
 
-        mod = self.parser.canonicalize_modifier(tokens)
+        expected_dict = {
+            'modifier': 'Translocation',
+            'target': {
+                'function': 'Protein',
+                'identifier': dict(namespace='HGNC', name='EGFR')
+            },
+            'effect': {
+                'fromLoc': dict(namespace='GOCC', name='cell surface'),
+                'toLoc': dict(namespace='GOCC', name='endosome')
+            }
+        }
+
+        self.assertEqual(expected_dict, result.asDict())
+
+        mod = self.parser.canonicalize_modifier(result)
         expected_mod = {
-            'modification': 'Translocation',
-            'params': {
+            'modifier': 'Translocation',
+            'effect': {
                 'fromLoc': dict(namespace='GOCC', name='cell surface'),
                 'toLoc': dict(namespace='GOCC', name='endosome')
             }
         }
         self.assertEqual(expected_mod, mod)
 
-    def test_translocation_2(self):
+        node = 'Protein', 'HGNC', 'EGFR'
+        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertHasNode(node)
+
+    def test_translocation_bare(self):
         """translocation example"""
-        statement = 'tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))'
-        result = self.parser.transformation.parseString(statement)
-        expected_result = [
-            'Translocation',
-            ['Protein', ['HGNC', 'EGFR']],
-            ['GOCC', 'cell surface'],
-            ['GOCC', 'endosome']
-        ]
-        self.assertEqual(expected_result, result.asList())
+        statement = 'tloc(p(HGNC:EGFR), GOCC:"cell surface", GOCC:endosome)'
+        result = self.parser.translocation.parseString(statement)
+
+        expected_dict = {
+            'modifier': 'Translocation',
+            'target': {
+                'function': 'Protein',
+                'identifier': dict(namespace='HGNC', name='EGFR')
+            },
+            'effect': {
+                'fromLoc': dict(namespace='GOCC', name='cell surface'),
+                'toLoc': dict(namespace='GOCC', name='endosome')
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modifier': 'Translocation',
+            'effect': {
+                'fromLoc': dict(namespace='GOCC', name='cell surface'),
+                'toLoc': dict(namespace='GOCC', name='endosome')
+            }
+        }
+        self.assertEqual(expected_mod, mod)
 
         node = 'Protein', 'HGNC', 'EGFR'
         self.assertEqual(node, self.parser.canonicalize_node(result))
         self.assertHasNode(node)
 
-    def test_translocation_3(self):
-        """cell surface expression long form"""
-        statement = 'tloc(p(HGNC:EGFR), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell surface"))'
-        result = self.parser.transformation.parseString(statement)
-        expected_result = ['Translocation',
-                           ['Protein', ['HGNC', 'EGFR']],
-                           ['GOCC', 'intracellular'],
-                           ['GOCC', 'cell surface']]
-        self.assertEqual(expected_result, result.asList())
-
-        node = 'Protein', 'HGNC', 'EGFR'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
-        self.assertHasNode(node)
-
-    def test_translocation_4(self):
+    def test_translocation_invalid(self):
         """Fail on an improperly written single argument translocation"""
         statement = 'tloc(a("T-Lymphocytes"))'
         with self.assertRaises(Exception):
             self.parser.translocation.parseString(statement)
 
-    def test_secretion_1(self):
-        """cell secretion long form"""
-        statement = 'tloc(p(HGNC:EGFR), fromLoc(GOCC:intracellular), toLoc(GOCC:"extracellular space"))'
-        result = self.parser.transformation.parseString(statement)
-        expected_result = [
-            'Translocation',
-            ['Protein', ['HGNC', 'EGFR']],
-            ['GOCC', 'intracellular'],
-            ['GOCC', 'extracellular space']
-        ]
-        self.assertEqual(expected_result, result.asList())
-
-        node = 'Protein', 'HGNC', 'EGFR'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
-        self.assertHasNode(node)
-
-    def test_secretion_2(self):
+    def test_translocation_secretion(self):
         """cell secretion short form"""
         statement = 'sec(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
+
         expected_result = ['CellSecretion', ['Protein', ['HGNC', 'EGFR']]]
         self.assertEqual(expected_result, result.asList())
+
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modifier': 'Translocation',
+            'effect': {
+                'fromLoc': dict(namespace='GOCC', name='intracellular'),
+                'toLoc': dict(namespace='GOCC', name='extracellular space')
+            }
+        }
+        self.assertEqual(expected_mod, mod)
 
         node = 'Protein', 'HGNC', 'EGFR'
         self.assertEqual(node, self.parser.canonicalize_node(result))
         self.assertHasNode(node)
 
-    def test_surface_1(self):
+    def test_translocation_surface(self):
         """cell surface expression short form"""
         statement = 'surf(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
+
         expected_result = ['CellSurfaceExpression', ['Protein', ['HGNC', 'EGFR']]]
         self.assertEqual(expected_result, result.asList())
+
+        mod = self.parser.canonicalize_modifier(result)
+        expected_mod = {
+            'modifier': 'Translocation',
+            'effect': {
+                'fromLoc': dict(namespace='GOCC', name='intracellular'),
+                'toLoc': dict(namespace='GOCC', name='cell surface')
+            }
+        }
+        self.assertEqual(expected_mod, mod)
+
+        node = 'Protein', 'HGNC', 'EGFR'
+        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertHasNode(node)
 
     def test_reaction_1(self):
         """"""

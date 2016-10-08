@@ -3,6 +3,7 @@ import logging
 from pyparsing import Suppress, oneOf
 
 from .baseparser import BaseParser, W, quote, delimitedSet
+from .parse_exceptions import *
 
 log = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class ControlParser(BaseParser):
         values = tokens['values']
 
         if len(values) not in (3, 6):
-            raise Exception('PyBEL011 invalid citation: {}'.format(s))
+            raise InvalidCitationException('PyBEL011 invalid citation: {}'.format(s))
 
         self.citation = dict(zip(('type', 'name', 'reference', 'date', 'authors', 'comments'), values))
 
@@ -81,7 +82,7 @@ class ControlParser(BaseParser):
         value = tokens['value']
 
         if value not in self.custom_annotations[key]:
-            raise Exception('PyBEL012 illegal annotation value')
+            raise IllegalAnnotationValueExeption('PyBEL012 illegal annotation value')
 
         self.annotations[key] = value
         return tokens
@@ -92,7 +93,7 @@ class ControlParser(BaseParser):
 
         for value in values:
             if value not in self.custom_annotations[key]:
-                raise Exception('PyBEL012 illegal annotation value: {}'.format(value))
+                raise IllegalAnnotationValueExeption('PyBEL012 illegal annotation value: {}'.format(value))
 
         self.annotations[key] = set(values)
         return tokens
@@ -104,7 +105,8 @@ class ControlParser(BaseParser):
         key = tokens['key']
 
         if key not in self.annotations:
-            raise Exception("Can't UNSET missing key")
+            log.warning("PyBEL020 Can't unset missing key")
+            return tokens
 
         del self.annotations[key]
         return tokens
@@ -117,3 +119,6 @@ class ControlParser(BaseParser):
         for key, value in self.citation.items():
             annot['citation_{}'.format(key)] = value
         return annot
+
+    def clear_annotations(self):
+        self.annotations.clear()
