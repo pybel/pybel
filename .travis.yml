@@ -27,7 +27,7 @@ install:
     - pip install tox
 
 script:
-    - tox
+    - coverage run -m pytest tests
 
 after_success:
     - tox -e coverage-report
