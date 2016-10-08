@@ -53,7 +53,7 @@ class IdentifierParser(BaseParser):
         return tokens
 
     def handle_namespace_invalid(self, s, l, tokens):
-        raise Exception('Missing valid namespace.')
+        raise Exception('Missing valid namespace: {} {} {}'.format(s,l,tokens))
 
     def get_language(self):
         return self.language

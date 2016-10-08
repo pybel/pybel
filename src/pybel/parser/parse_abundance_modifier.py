@@ -41,25 +41,24 @@ class VariantParser(BaseParser):
     """
     http://www.hgvs.org/mutnomen/recs.html
     """
+
     def __init__(self):
         variant_tags = oneOf(['var', 'variant'])
-        self.language = variant_tags + nest(hgvs)
+        self.language = Suppress(variant_tags) + nest(hgvs)
         self.language.setParseAction(self.handle_variant)
 
     def handle_variant(self, s, l, tokens):
-        tokens[0] = 'Variant'
         return tokens
 
     def get_language(self):
         return self.language
 
 
-
 class PsubParser(BaseParser):
     def __init__(self):
-
-        psub_tag = oneOf(['sub', 'substitution'])
-        self.language = psub_tag + LP + amino_acid + WCW + pyparsing_common.integer() + WCW + amino_acid + RP
+        psub_tag = oneOf(['sub', 'substitution']).setParseAction(replaceWith('Variant'))
+        self.language = psub_tag + nest(amino_acid('reference'), pyparsing_common.integer()('position'),
+                                        amino_acid('variant'))
         self.language.setParseAction(self.handle_psub)
 
     def handle_psub(self, s, l, tokens):
@@ -78,9 +77,9 @@ class GsubParser(BaseParser):
     """
 
     def __init__(self):
-
         gsub_tag = oneOf(['sub', 'substitution'])
-        self.language = gsub_tag + nest(dna_nucleotide + WCW + pyparsing_common.integer() + WCW + dna_nucleotide)
+        self.language = gsub_tag + nest(dna_nucleotide('reference'), pyparsing_common.integer()('position'),
+                                        dna_nucleotide('variant'))
         self.language.setParseAction(self.handle_gsub)
 
     def handle_gsub(self, s, l, tokens):
@@ -124,14 +123,13 @@ class FusionParser(BaseParser):
     def __init__(self, namespace_parser=None):
         fusion_tags = ['fus', 'fusion']
 
-        self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
-        ns_val = self.namespace_parser.get_language()
+        self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
+        identifier = self.identifier_parser.get_language()
         # sequence coordinates?
         range_coordinate = (Group(oneOf(['r', 'p']) + Suppress('.') + pyparsing_common.integer() +
                                   Suppress('_') + pyparsing_common.integer()) | '?')
 
-        self.language = oneOf(fusion_tags) + LP + Group(ns_val) + WCW + range_coordinate + WCW + Group(
-            ns_val) + WCW + range_coordinate + RP
+        self.language = oneOf(fusion_tags) + nest(Group(identifier)('partner_5p'),range_coordinate('range_5p'),Group(identifier)('partner_3p'),range_coordinate('range_3p'))
         self.language.setParseAction(self.handle_fusion)
 
     def get_language(self):
@@ -155,13 +153,8 @@ class LocationParser(BaseParser):
         """
         self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
-        location_tags = ['loc', 'location']
-        self.language = oneOf(location_tags) + LP + Group(identifier) + RP
-        self.language.setParseAction(self.handle_location)
-
-    def handle_location(self, s, l, tokens):
-        tokens[0] = 'Location'
-        return tokens
+        location_tag = Suppress(oneOf(['loc', 'location']))
+        self.language = Group(location_tag + nest(identifier))('location')
 
     def get_language(self):
         return self.language

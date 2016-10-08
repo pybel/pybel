@@ -90,7 +90,9 @@ class MetadataParser(BaseParser):
         session = requests.Session()
         if url.startswith('file://'):
             session.mount('file://', FileAdapter())
+        logging.info('Downloading {}'.format(url))
         res = session.get(url)
+        res.raise_for_status()
 
         config = ConfigParser(delimiters=delimiters, strict=False)
         config.optionxform = lambda option: option
@@ -110,7 +112,9 @@ class MetadataParser(BaseParser):
         session = requests.Session()
         if url.startswith('file://'):
             session.mount('file://', FileAdapter())
+        logging.info('Downloading {}'.format(url))
         res = session.get(url)
+        res.raise_for_status()
 
         config = ConfigParser(delimiters=delimiters, strict=False)
         config.optionxform = lambda option: option

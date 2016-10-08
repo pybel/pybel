@@ -15,20 +15,48 @@ from .parser.utils import split_file_to_annotations_and_definitions
 log = logging.getLogger(__name__)
 
 
-def load(bel):
-    """Parses a BEL file from URL or file resource
-    :param bel: URL or file path to BEL resource
-    :type bel: str
-    :return: a BEL MultiGraph
+def from_lines(it):
+    """Loads BEL graph from an iterable of strings or file-like object
+    :param it: an iterable of strings
+    :return a parsed BEL graph
+    :rtype: BELGraph
+    """
+    return BELGraph().parse_from_lines(it)
+
+
+def from_url(url):
+    """Loads a BEL graph from a URL resource
+    :param url: a valid URL string
+    :type url: str
+    :return: a parsed BEL graph
     :rtype BELGraph
     """
+    return BELGraph().parse_from_url(url)
 
-    if isinstance(bel, (list, tuple)):
-        return BELGraph().parse_from_lines(bel)
-    elif bel.startswith('http://') or bel.startswith('file://'):
-        return BELGraph().parse_from_url(bel)
-    with open(os.path.expanduser(bel)) as f:
-        return BELGraph().parse_from_lines(f)
+
+def from_path(path):
+    """Loads a BEL graph from a file resource
+    :param bel: a file path
+    :type bel: str
+    :return: a parsed BEL graph
+    :rtype BELGraph
+    """
+    with open(os.path.expanduser(path)) as f:
+        return from_lines(f)
+
+
+def from_database(connection):
+    """Loads a BEL graph from a database
+    :param connection: The string form of the URL is dialect[+driver]://user:password@host/dbname[?key=value..], where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance of URL.
+    :type connection: str
+    :return: a BEL graph loaded from the database
+    :rtype: BELGraph
+
+    Example:
+    >>> import pybel
+    >>> g = pybel.from_database('sqlite://')
+    """
+    raise NotImplementedError('Loading from database not yet implemented')
 
 
 class BELGraph(nx.MultiDiGraph):
@@ -76,7 +104,7 @@ class BELGraph(nx.MultiDiGraph):
         self.mdp = MetadataParser()
         for line in docs:
             try:
-                self.mdp.parse(line)
+                self.mdp.parseString(line)
             except:
                 log.error('Failed: {}'.format(line))
 
@@ -85,7 +113,7 @@ class BELGraph(nx.MultiDiGraph):
 
         for line in defs:
             try:
-                res = self.mdp.parse(line)
+                res = self.mdp.parseString(line)
                 if len(res) == 2:
                     log.debug('{}: {}'.format(res[0], res[1]))
                 else:
@@ -102,7 +130,7 @@ class BELGraph(nx.MultiDiGraph):
 
         for line in states:
             try:
-                self.bsp.parse(line)
+                self.bsp.parseString(line)
             except ParseException as e:
                 log.error('General parser failure: {}'.format(line))
             except Exception as e:

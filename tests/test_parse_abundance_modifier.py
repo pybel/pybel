@@ -61,15 +61,33 @@ class TestPsub(unittest.TestCase):
 
     def test_psub(self):
         statement = 'sub(A, 127, Y)'
-        expected = ['Variant', 'A', 127, 'Y']
-        result = self.parser.parse(statement)
-        self.assertEqual(expected, result.asList())
+        result = self.parser.parseString(statement)
+
+        expected_list = ['Variant', 'A', 127, 'Y']
+        self.assertEqual(expected_list, result.asList())
+
+        expected_dict = {
+            'reference': 'A',
+            'position': 127,
+            'variant': 'Y'
+        }
+        self.assertEqual(expected_dict, result.asDict())
 
 
 class TestGsubParser(unittest.TestCase):
     def setUp(self):
         self.parser = GsubParser()
-        # FIXME
+
+    def test_gsub(self):
+        statement = 'sub(G,308,A)'
+        result = self.parser.parseString(statement)
+
+        expected_dict = {
+            'reference': 'G',
+            'position': 308,
+            'variant': 'A'
+        }
+        self.assertEqual(expected_dict, result.asDict())
 
 
 class TestFragmentParser(unittest.TestCase):
@@ -85,10 +103,25 @@ class TestFusionParser(unittest.TestCase):
         """RNA abundance of fusion with known breakpoints"""
         statement = 'fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034)'
         result = ['Fusion', ['HGNC', 'TMPRSS2'], ['r', 1, 79], ['HGNC', 'ERG'], ['r', 312, 5034]]
-        self.assertEqual(result, self.parser.parse(statement).asList())
+        self.assertEqual(result, self.parser.parseString(statement).asList())
 
     def test_261b(self):
         """RNA abundance of fusion with unspecified breakpoints"""
         statement = 'fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?)'
         expected = ['Fusion', ['HGNC', 'TMPRSS2'], '?', ['HGNC', 'ERG'], '?']
-        self.assertEqual(expected, self.parser.parse(statement).asList())
+        self.assertEqual(expected, self.parser.parseString(statement).asList())
+
+
+class TestLocation(unittest.TestCase):
+    def setUp(self):
+        self.parser = LocationParser()
+
+    def test_a(self):
+        statement = 'loc(GOCC:intracellular)'
+        result = self.parser.parseString(statement)
+        expected = {
+            'location': dict(namespace='GOCC', name='intracellular')
+        }
+        self.assertEqual(expected, result.asDict())
+
+

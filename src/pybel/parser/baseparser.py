@@ -1,6 +1,7 @@
 import logging
 
-from pyparsing import Suppress, ZeroOrMore, White, dblQuotedString, removeQuotes, Word, alphanums, delimitedList
+from pyparsing import Suppress, ZeroOrMore, Group, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
+    delimitedList, replaceWith
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,15 @@ def nest(*content):
     return LP + x + RP
 
 
+def tag(tags, *content, new_tag=None):
+    new_tag = new_tag if new_tag is not None else tags[-1]
+    return Group(Suppress(oneOf(tags)) + nest(*content))(new_tag)
+
+
+def one_of_tags(tags, canonical_tag, identifier):
+    return oneOf(tags).setParseAction(replaceWith(canonical_tag)).setResultsName(identifier)
+
+
 class BaseParser:
     """This abstract class represents a language backed by a PyParsing statement
 
@@ -32,13 +42,14 @@ class BaseParser:
 
     def parse_lines(self, l):
         """Parses multiple lines successively"""
-        return [self.parse(line) for line in l]
+        return [self.parseString(line) for line in l]
 
-    def parse(self, s):
+    def parseString(self, s):
         """Parses a string with the language represented by this parser
         :param s: input string
         :type s: str
         """
+
         return self.get_language().parseString(s)
 
     def get_language(self):

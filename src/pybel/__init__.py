@@ -1,9 +1,9 @@
-"""'A Python package for parsing, validating, and analysis of of BEL graphs'"""
+"""A Python package for parsing, validating, and analysis of of BEL graphs"""
 
 from . import cli
-from .graph import BELGraph, load
+from .graph import BELGraph, from_path, from_lines, from_url, from_database
 
-__all__ = ['BELGraph', 'load']
+__all__ = ['from_url', 'from_path', 'from_file', 'from_database']
 
 __version__ = '0.1.0'
 
@@ -16,3 +16,4 @@ __email__ = 'charles.hoyt@scai.fraunhofer.de'
 
 __license__ = 'All Rights Reserved.'
 __copyright__ = 'Copyright (c) Charles Tapley Hoyt'
+

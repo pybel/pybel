@@ -4,10 +4,11 @@
 BEL language parameters
 """
 
-from pyparsing import *
 import logging
-log = logging.getLogger(__name__)
 
+from pyparsing import *
+
+log = logging.getLogger(__name__)
 
 activity_labels = {
     'catalyticActivity': 'CatalyticActivity',
@@ -28,6 +29,18 @@ activity_labels = {
     'tscript': 'TranscriptionalActivity',
     'transportActivity': 'TransportActivity',
     'tport': 'TransportActivity'
+}
+
+# TODO fill out
+activity_ns = {
+    'CatalyticActivity': dict(namespace='GOMF', name='catalytic activity'),
+    'ChaperoneActivity': dict(namespace='GOMF', name=''),
+    'GTPBoundActivity': dict(namespace='GOMF', name='GTP binding'),
+    'PeptidaseActivity': dict(namespace='GOMF', name='peptidase activity'),
+    'PhosphotaseActivity': dict(namespace='GOMF', name=''),
+    'RibosylationActivity': dict(namespace='GOMF', name=''),
+    'TranscriptionalActivity': dict(namespace='GOMF', name='nucleic acid binding transcription factor activity'),
+    'TransportActivity': dict(namespace='GOMF', name='transporter activity')
 }
 
 activities = list(activity_labels.keys())
@@ -76,9 +89,11 @@ aa_single = oneOf(amino_acid_dict.keys())
 aa_triple = oneOf(amino_acid_dict.values())
 aa_placeholder = Keyword('X')
 
+
 def handle_aa_placeholder(s, l, tokens):
     log.warning('PyBEL015 Placeholder amino acid X found')
     return tokens
+
 
 aa_placeholder.setParseAction(handle_aa_placeholder)
 
@@ -187,6 +202,17 @@ variant_parent_dict = {
     'GeneVariant': 'Gene',
     'RNAVariant': 'RNA',
     'ProteinVariant': 'Protein'
+}
+
+compound_relation_dict = {
+    ('increases', 'increases'): 'increases',
+    ('increases', 'decreases'): 'decreases',
+    ('increases', 'increases'): 'increases',
+    ('increases', 'increases'): 'increases',
+    ('increases', 'increases'): 'increases',
+    ('increases', 'increases'): 'increases',
+    ('increases', 'increases'): 'increases',
+
 }
 
 # TODO add other BEL common namespaces
