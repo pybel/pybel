@@ -1,10 +1,8 @@
 import logging
 
-from pyparsing import Suppress, ZeroOrMore, Group, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
+from pyparsing import Suppress, ZeroOrMore, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
     delimitedList, replaceWith
 
-
-from .parse_exceptions import PyBelException
 log = logging.getLogger(__name__)
 
 W = Suppress(ZeroOrMore(White()))
@@ -25,11 +23,6 @@ def nest(*content):
     for y in content[1:]:
         x = x + WCW + y
     return LP + x + RP
-
-
-def tag(tags, *content, new_tag=None):
-    new_tag = new_tag if new_tag is not None else tags[-1]
-    return Group(Suppress(oneOf(tags)) + nest(*content))(new_tag)
 
 
 def one_of_tags(tags, canonical_tag, identifier):

@@ -1,11 +1,16 @@
 import logging
-from configparser import ConfigParser
 
 import requests
 from pyparsing import Suppress
 from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet
+
+# Get proper config parser depending on python2 or python3
+try:
+    from configparser import ConfigParser
+except:
+    from ConfigParser import ConfigParser
 
 log = logging.getLogger(__name__)
 
@@ -90,7 +95,7 @@ class MetadataParser(BaseParser):
         session = requests.Session()
         if url.startswith('file://'):
             session.mount('file://', FileAdapter())
-        logging.info('Downloading {}'.format(url))
+        logging.debug('Downloading namespaces from {}'.format(url))
         res = session.get(url)
         res.raise_for_status()
 
@@ -112,7 +117,7 @@ class MetadataParser(BaseParser):
         session = requests.Session()
         if url.startswith('file://'):
             session.mount('file://', FileAdapter())
-        logging.info('Downloading {}'.format(url))
+        logging.debug('Downloading annotations from {}'.format(url))
         res = session.get(url)
         res.raise_for_status()
 

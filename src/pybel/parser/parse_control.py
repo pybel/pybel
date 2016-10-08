@@ -68,7 +68,7 @@ class ControlParser(BaseParser):
 
     def handle_evidence(self, s, l, tokens):
         if 'value' not in tokens:
-            log.error('ERROR {} {} {}'.format(s, l, tokens))
+            raise ValueError('Missing evidence: {} {} {}'.format(s, l, tokens))
         value = tokens['value']
         self.annotations['Evidence'] = value
         return tokens
@@ -105,7 +105,7 @@ class ControlParser(BaseParser):
         key = tokens['key']
 
         if key not in self.annotations:
-            log.warning("PyBEL020 Can't unset missing key")
+            log.debug("PyBEL020 Can't unset missing key")
             return tokens
 
         del self.annotations[key]

@@ -1,6 +1,7 @@
 from pyparsing import *
 
 from .baseparser import BaseParser, word, quote
+from .parse_exceptions import InvalidNamespaceException
 
 
 class IdentifierParser(BaseParser):
@@ -38,11 +39,11 @@ class IdentifierParser(BaseParser):
     def handle_identifier_qualified(self, s, l, tokens):
         namespace = tokens['namespace']
         if namespace not in self.namespace_dict:
-            raise Exception('Invalid namespace: {}'.format(namespace))
+            raise InvalidNamespaceException('Invalid namespace: {}'.format(namespace))
 
         name = tokens['name']
         if name not in self.namespace_dict[namespace]:
-            raise Exception('Invalid {} name: {}'.format(namespace, name))
+            raise InvalidNamespaceException('Invalid {} name: {}'.format(namespace, name))
 
         return tokens
 

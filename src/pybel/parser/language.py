@@ -8,6 +8,8 @@ import logging
 
 from pyparsing import *
 
+from .parse_exceptions import PlaceholderAminoAcidException
+
 log = logging.getLogger(__name__)
 
 activity_labels = {
@@ -91,8 +93,7 @@ aa_placeholder = Keyword('X')
 
 
 def handle_aa_placeholder(s, l, tokens):
-    log.warning('PyBEL015 Placeholder amino acid X found')
-    return tokens
+    raise PlaceholderAminoAcidException('PyBEL015 Placeholder amino acid X found')
 
 
 aa_placeholder.setParseAction(handle_aa_placeholder)

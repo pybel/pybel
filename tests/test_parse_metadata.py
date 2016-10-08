@@ -94,12 +94,6 @@ class TestSplitLines(unittest.TestCase):
         self.assertEqual(5, len(defs))
         self.assertEqual(14, len(states))
 
-        print(*docs, sep='\n')
-        print('--')
-        print(*defs, sep='\n')
-        print('--')
-        print(*states, sep='\n')
-
 
 class TestParseMetadata(unittest.TestCase):
     def setUp(self):

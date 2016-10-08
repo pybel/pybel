@@ -48,8 +48,7 @@ def split_file_to_annotations_and_definitions(file):
     end_document_section = 1 + max(i for i, l in enumerate(content) if l.startswith('SET DOCUMENT'))
     end_definitions_section = 1 + max(i for i, l in enumerate(content) if re_match_bel_header.match(l))
 
-    log.info('File length: {}. Document section until line {}, '
-             'definition section until line {}'.format(len(content), end_document_section, end_definitions_section))
+    log.info('File length: {} lines'.format(len(content)))
     documents = content[:end_document_section]
     definitions = content[end_document_section:end_definitions_section]
     statements = content[end_definitions_section:]

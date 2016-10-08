@@ -11,6 +11,7 @@ from requests_file import FileAdapter
 from .parser.parse_bel import BelParser, flatten_modifier_dict
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions
+from .parser.parse_exceptions import PyBelException
 
 log = logging.getLogger(__name__)
 
@@ -69,6 +70,11 @@ class BELGraph(nx.MultiDiGraph):
         self.mdp = None
 
     def parse_from_path(self, path):
+        """Opens a BEL file from a given path and parses it
+        :param path: path to BEL file
+        :return self
+        :rtype BELGraph
+        """
         with open(os.path.expanduser(path)) as f:
             return self.parse_from_lines(f)
 
@@ -84,9 +90,7 @@ class BELGraph(nx.MultiDiGraph):
         if url.starts('file://'):
             session.mount('file://', FileAdapter())
         response = session.get(url)
-
-        if response.status_code != 200:
-            raise Exception('URL not found')
+        response.raise_for_status()
 
         return self.parse_from_lines(response.iter_lines())
 
@@ -108,7 +112,7 @@ class BELGraph(nx.MultiDiGraph):
             except:
                 log.error('Failed: {}'.format(line))
 
-        log.info('Finished parsing document section in {} seconds'.format(time.time() - t))
+        log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
         for line in defs:
@@ -120,10 +124,12 @@ class BELGraph(nx.MultiDiGraph):
                     log.debug('{}: [{}]'.format(res[0], ', '.join(res[1:])))
             except ParseException as e:
                 log.error('General parser failure: {}'.format(line))
-            except Exception as e:
-                log.error('{} {}'.format(e, line))
+            except PyBelException as e:
+                log.warning('{} {}'.format(e, line))
+            except:
+                log.error('General failure: {}'.format(line))
 
-        log.info('Finished parsing definitions section in {} seconds'.format(time.time() - t))
+        log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
         self.bsp = BelParser(graph=self, custom_annotations=self.mdp.annotations_dict)
@@ -133,10 +139,12 @@ class BELGraph(nx.MultiDiGraph):
                 self.bsp.parseString(line)
             except ParseException as e:
                 log.error('General parser failure: {}'.format(line))
-            except Exception as e:
-                log.error('{} {}'.format(e, line))
+            except PyBelException as e:
+                log.debug('{} {}'.format(e, line))
+            except:
+                log.error('General failure: {}'.format(line))
 
-        log.info('Finished parsing statements section in {} seconds'.format(time.time() - t))
+        log.info('Finished parsing statements section in {:.02f} seconds'.format(time.time() - t))
 
         return self
 

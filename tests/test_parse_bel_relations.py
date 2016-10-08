@@ -68,9 +68,9 @@ class TestEnsure(TestTokenParserBase):
         s2 = 'deg(g(HGNC:AKT1))'
         s3 = 'deg(g(HGNC:AKT1)) -- g(HGNC:AKT1)'
 
-        self.parser.parseString(s1)
-        self.parser.parseString(s2)
-        self.parser.parseString(s3)
+        self.parser.statement.parseString(s1)
+        self.parser.statement.parseString(s2)
+        self.parser.statement.parseString(s3)
 
         gene = 'Gene', 'HGNC', 'AKT1'
 
@@ -83,9 +83,9 @@ class TestEnsure(TestTokenParserBase):
         s2 = 'deg(p(HGNC:AKT1))'
         s3 = 'deg(p(HGNC:AKT1)) -- g(HGNC:AKT1)'
 
-        self.parser.parseString(s1)
-        self.parser.parseString(s2)
-        self.parser.parseString(s3)
+        self.parser.statement.parseString(s1)
+        self.parser.statement.parseString(s2)
+        self.parser.statement.parseString(s3)
 
         protein = 'Protein', 'HGNC', 'AKT1'
         rna = 'RNA', 'HGNC', 'AKT1'
@@ -109,7 +109,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
     def test_135(self):
         """Test composite in subject"""
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected = [
             ['Composite', ['Protein', ['HGNC', 'CASP8']], ['Protein', ['HGNC', 'FADD']],
              ['Abundance', ['ADO', 'Abeta_42']]],
@@ -139,7 +139,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         """Test translocation in object"""
         statement = 'a(ADO:"Abeta_42") -> tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESHCS:"Cell Membrane"),' \
                     'toLoc(MESHCS:"Intracellular Space"))'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
 
         expected_dict = {
             'subject': {
@@ -190,7 +190,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
     def test_increases(self):
         """Test increases with reaction"""
         statement = 'pep(p(SFAM:"CAPN Family")) -> reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
 
         expected_dict = {
             'subject': {
@@ -243,7 +243,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
     def test_decreases(self):
         """Tests simple triple"""
         statement = 'proteinAbundance(HGNC:CAT) decreases abundance(CHEBI:"hydrogen peroxide")'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected = [
             ['Protein', ['HGNC', 'CAT']],
             'decreases',
@@ -264,12 +264,12 @@ class TestRelationshipsRandom(TestTokenParserBase):
         """Test nested statement"""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
         with self.assertRaises(NestedRelationNotSupportedException):
-            self.parser.parseString(statement)
+            self.parser.relation.parseString(statement)
 
     def test_biomarker(self):
         """Test annotation"""
         statement = 'act(p(HGNC:CHIT1)) biomarkerFor path(MESHD:"Alzheimer Disease")'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected = [
             ['Activity', ['Protein', ['HGNC', 'CHIT1']]],
             'biomarkerFor',
@@ -288,7 +288,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
     def test_multipleAnnotations(self):
         """Test nested definitions"""
         statement = 'pep(complex(p(HGNC:F3),p(HGNC:F7))) directlyIncreases pep(p(HGNC:F9))'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
 
         expected_dict = {
             'subject': {
@@ -340,7 +340,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
     def test_increases_multipleAnnotations(self):
         """Test multiple nested annotations on object"""
         statement = 'complex(p(HGNC:ARRB2),p(HGNC:APH1A)) -> pep(complex(SCOMP:"gamma Secretase Complex"))'
-        self.parser.parseString(statement)
+        self.parser.relation.parseString(statement)
         '''
         expected = [
             ['ComplexList', ['Protein', ['HGNC', 'ARRB2']], ['Protein', ['HGNC', 'APH1A']]],
@@ -381,7 +381,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
     def test_increases_subjectSubstitution(self):
         """Test SNP annotation"""
         statement = 'g(HGNC:APP,sub(G,275341,C)) -> path(MESHD:"Alzheimer Disease")'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
 
         expected_dict = {
             'subject': {
@@ -412,7 +412,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
     def test_increases_withVariantObject(self):
         """Test phosphoralation tag"""
         statement = 'kin(p(SFAM:"GSK3 Family")) -> p(HGNC:MAPT,pmod(P))'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
 
         expected_dict = {
             'subject': {
@@ -451,7 +451,7 @@ class TestRelationshipsNumbered(TestTokenParserBase):
     def test_decreases_subjectActivity(self):
         """"""
         statement = 'act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GOBP:"cholesterol biosynthetic process")'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
 
         expected_dict = {
             'subject': {
@@ -483,7 +483,7 @@ class TestRelationshipsNumbered(TestTokenParserBase):
     def test_317a(self):
         """Abundances and activities"""
         statement = 'p(PFH:"Hedgehog Family") =| act(p(HGNC:PTCH1))'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected_result = [
             ['Protein', ['PFH', 'Hedgehog Family']],
             'directlyDecreases',
@@ -503,12 +503,12 @@ class TestRelationshipsNumbered(TestTokenParserBase):
         """Target is a BEL statement"""
         statement = 'p(HGNC:CLSPN) => (act(p(HGNC:ATR), ma(kin)) => p(HGNC:CHEK1, pmod(P)))'
         with self.assertRaises(NestedRelationNotSupportedException):
-            self.parser.parseString(statement)
+            self.parser.relation.parseString(statement)
 
     def test_self_referential(self):
         """Self-referential relationships"""
         statement = 'p(HGNC:GSK3B, pmod(P, S, 9)) =| act(p(HGNC:GSK3B), ma(kin))'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
 
         expected_dict = {
             'subject': {
@@ -543,7 +543,7 @@ class TestRelationshipsNumbered(TestTokenParserBase):
     def test_331a(self):
         """"""
         statement = 'g(HGNC:AKT1) orthologous g(MGI:AKT1)'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected_result = [['Gene', ['HGNC', 'AKT1']], 'orthologous', ['Gene', ['MGI', 'AKT1']]]
         self.assertEqual(expected_result, result.asList())
 
@@ -558,7 +558,7 @@ class TestRelationshipsNumbered(TestTokenParserBase):
     def test_332a(self):
         """"""
         statement = 'g(HGNC:AKT1) :> r(HGNC:AKT1)'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected_result = [['Gene', ['HGNC', 'AKT1']], 'transcribedTo', ['RNA', ['HGNC', 'AKT1']]]
         self.assertEqual(expected_result, result.asList())
 
@@ -573,7 +573,7 @@ class TestRelationshipsNumbered(TestTokenParserBase):
     def test_333a(self):
         """"""
         statement = 'r(HGNC:AKT1) >> p(HGNC:AKT1)'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected_result = [['RNA', ['HGNC', 'AKT1']], 'translatedTo', ['Protein', ['HGNC', 'AKT1']]]
         self.assertEqual(expected_result, result.asList())
 
@@ -588,7 +588,7 @@ class TestRelationshipsNumbered(TestTokenParserBase):
     def test_345a(self):
         """"""
         statement = 'pathology(MESH:Psoriasis) isA pathology(MESH:"Skin Diseases")'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected_result = [['Pathology', ['MESH', 'Psoriasis']], 'isA', ['Pathology', ['MESH', 'Skin Diseases']]]
         self.assertEqual(expected_result, result.asList())
 
@@ -605,7 +605,7 @@ class TestRelationshipsNumbered(TestTokenParserBase):
         statement = 'rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), \
             a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) \
             subProcessOf bp(GOBP:"cholesterol biosynthetic process")'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected_result = [['Reaction',
                             [['Abundance', ['CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA']],
                              ['Abundance', ['CHEBI', 'NADPH']],
@@ -650,7 +650,7 @@ class TestRelationshipsNumbered(TestTokenParserBase):
 
     def test_member_list(self):
         statement = 'p(PKC:a) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))'
-        result = self.parser.parseString(statement)
+        result = self.parser.relation.parseString(statement)
         expected_result = [
             ['Protein', ['PKC', 'a']],
             'hasMembers',

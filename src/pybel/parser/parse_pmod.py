@@ -1,8 +1,8 @@
 import logging
 
-from pyparsing import oneOf, Group, pyparsing_common, Suppress, replaceWith
+from pyparsing import oneOf, Group, pyparsing_common, replaceWith
 
-from .baseparser import BaseParser, WCW, nest
+from .baseparser import BaseParser, nest
 from .language import amino_acid, pmod_namespace, pmod_legacy_labels
 from .parse_identifier import IdentifierParser
 
@@ -43,7 +43,7 @@ class PmodParser(BaseParser):
         return tokens
 
     def handle_pmod_legacy_ns(self, s, l, tokens):
-        log.warning('PyBEL016 Legacy protein modification')
+        log.debug('PyBEL016 Legacy protein modification. Use new namespaces instead.')
         return tokens
 
     def get_language(self):

@@ -12,3 +12,11 @@ class InvalidCitationException(PyBelException):
 
 class NestedRelationNotSupportedException(PyBelException):
     pass
+
+
+class InvalidNamespaceException(PyBelException):
+    pass
+
+
+class PlaceholderAminoAcidException(PyBelException):
+    pass

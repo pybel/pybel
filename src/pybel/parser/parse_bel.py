@@ -24,9 +24,12 @@ def triple(subject, relation, obj):
     return Group(subject)('subject') + W + relation('relation') + W + Group(obj)('object')
 
 
-def handle_warning(fmt):
+def handle_debug(fmt):
+    """logging hook for pyparsing
+    :param fmt: a format string with {s} for string, {l} for location, and {t} for tokens
+    """
     def handle(s, l, t):
-        log.warning(fmt.format(s=s, location=l, tokens=t))
+        log.log(5, fmt.format(s=s, location=l, tokens=t))
         return t
 
     return handle
@@ -206,7 +209,6 @@ class BelParser(BaseParser):
         self.activity_legacy = activity_legacy_tags + nest(Group(self.abundance)('target'))
 
         def handle_activity_legacy(s, l, tokens):
-            log.debug('PyBEL001 legacy activity statement. Use activity() instead. {}'.format(s))
             legacy_cls = language.activity_labels[tokens['modifier']]
             tokens['modifier'] = 'Activity'
             tokens['effect'] = {
@@ -215,6 +217,7 @@ class BelParser(BaseParser):
             return tokens
 
         self.activity_legacy.setParseAction(handle_activity_legacy)
+        self.activity_legacy.addParseAction(handle_debug('PyBEL001 legacy activity statement. Use activity() instead. {s}'))
 
         self.activity = self.activity_modified_default_ns | self.activity_standard | self.activity_legacy
 
@@ -246,12 +249,12 @@ class BelParser(BaseParser):
                                                                    identifier('toLoc'))('effect'))
         self.translocation_legacy.setParseAction(self.handle)
         self.translocation_legacy.addParseAction(
-            handle_warning('PyBEL005 legacy translocation statement. use fromLoc() and toLoc(). {s}'))
+            handle_debug('PyBEL005 legacy translocation statement. use fromLoc() and toLoc(). {s}'))
 
         self.translocation_legacy_singleton = translocation_tag + nest(Group(self.simple_abundance))
         self.translocation_legacy_singleton.setParseAction(self.handle)
         self.translocation_legacy_singleton.addParseAction(
-            handle_warning('PyBEL008 legacy translocation + missing arguments: {s}'))
+            handle_debug('PyBEL008 legacy translocation + missing arguments: {s}'))
 
         self.translocation = (self.translocation_standard | self.translocation_legacy |
                               self.translocation_legacy_singleton)
@@ -433,9 +436,9 @@ class BelParser(BaseParser):
         relation.setParseAction(handle_relation)
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
-        relation = has_members | nested_causal_relationship | relation
+        self.relation = has_members | nested_causal_relationship | relation
 
-        self.statement = relation | self.bel_term
+        self.statement = self.relation | self.bel_term
         self.language = self.control_parser.get_language() | self.statement
 
     def get_language(self):
@@ -447,6 +450,7 @@ class BelParser(BaseParser):
         return self.control_parser.get_annotations()
 
     def clear_annotations(self):
+        """Clears the current annotations in this parser"""
         self.control_parser.clear_annotations()
 
     def handle_has_members(self, s, l, tokens):
@@ -457,8 +461,7 @@ class BelParser(BaseParser):
         return tokens
 
     def handle(self, s, l, tokens):
-        name = self.ensure_node(s, l, tokens)
-        log.info('handled node: {}'.format(name))
+        self.ensure_node(s, l, tokens)
         return tokens
 
     def add_unqualified_edge(self, u, v, relation):
@@ -473,9 +476,6 @@ class BelParser(BaseParser):
     def canonicalize_node(self, tokens):
         """Given tokens, returns node name"""
         if 'function' in tokens and 'variants' in tokens:
-            if tokens['function'] not in ('Gene', 'miRNA', 'Protein', 'RNA'):
-                raise NotImplementedError()
-
             type_name = '{}Variant'.format(tokens['function'])
             name = type_name, tokens['identifier']['namespace'], tokens['identifier']['name']
             variants = list2tuple(sorted(tokens['variants'].asList()))
@@ -517,19 +517,14 @@ class BelParser(BaseParser):
             if 'identifier' in tokens:
                 return tokens['function'], tokens['identifier']['namespace'], tokens['identifier']['name']
 
-        print('LOST', tokens)
-
         if 'modifier' in tokens and tokens['modifier'] in (
                 'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
-            print('modifier tokens:', tokens)
             return self.canonicalize_node(tokens['target'])
 
         raise NotImplementedError('canonicalize_node not implemented for: {}'.format(tokens))
 
     def ensure_node(self, s, l, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph"""
-
-        print('ensuring tokens', tokens)
 
         if 'modifier' in tokens:
             return self.ensure_node(s, l, tokens['target'])
@@ -610,7 +605,6 @@ class BelParser(BaseParser):
                 return name
 
             elif tokens['function'] == 'Protein':
-                print('protein time!')
                 name = self.canonicalize_node(tokens)
 
                 if name not in self.graph:
