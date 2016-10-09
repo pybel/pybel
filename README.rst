@@ -1,8 +1,14 @@
-PyBEL |buildstatus|
-===================
+PyBEL |buildstatus| |codecov| |pyversions|
+==========================================
 
 .. |buildstatus| image:: https://travis-ci.com/cthoyt/pybel.svg?token=2tyMYiCcZbjqYscNWXwZ&branch=master
     :target: https://travis-ci.com/cthoyt/pybel
+
+.. |pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
+    :alt: Stable Supported Python Versions
+
+.. |codecov| image:: https://codecov.io/gh/cthoyt/pybel/branch/master/graph/badge.svg?token=J7joRTRygG
+    :target: https://codecov.io/gh/cthoyt/pybel
 
 Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its successful use in the IMI project, AETIONOMY, to describe complex disease networks with several thousands of relationships.
 
@@ -46,3 +52,7 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 
 The Cool Pool of Tools
 ----------------------
+- Reverse Causal Reasoning Algorithm
+- Canonicalization
+- Semantic Diff
+
