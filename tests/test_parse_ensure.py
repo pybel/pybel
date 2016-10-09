@@ -30,11 +30,9 @@ class TestEnsure(TestTokenParserBase):
         """Ensure node isn't added twice, even if from different statements"""
         s1 = 'g(HGNC:AKT1)'
         s2 = 'deg(g(HGNC:AKT1))'
-        s3 = 'deg(g(HGNC:AKT1)) -- g(HGNC:AKT1)'
 
-        self.parser.statement.parseString(s1)
-        self.parser.statement.parseString(s2)
-        self.parser.statement.parseString(s3)
+        self.parser.bel_term.parseString(s1)
+        self.parser.bel_term.parseString(s2)
 
         gene = 'Gene', 'HGNC', 'AKT1'
 
@@ -43,13 +41,11 @@ class TestEnsure(TestTokenParserBase):
 
     def test_ensure_no_dup_edges(self):
         """Ensure node and edges aren't added twice, even if from different statements and has origin completion"""
-        s1 = 'g(HGNC:AKT1)'
+        s1 = 'p(HGNC:AKT1)'
         s2 = 'deg(p(HGNC:AKT1))'
-        s3 = 'deg(p(HGNC:AKT1)) -- g(HGNC:AKT1)'
 
-        self.parser.statement.parseString(s1)
-        self.parser.statement.parseString(s2)
-        self.parser.statement.parseString(s3)
+        self.parser.bel_term.parseString(s1)
+        self.parser.bel_term.parseString(s2)
 
         protein = 'Protein', 'HGNC', 'AKT1'
         rna = 'RNA', 'HGNC', 'AKT1'
@@ -60,7 +56,7 @@ class TestEnsure(TestTokenParserBase):
         self.assertHasNode(rna, type='RNA', namespace='HGNC', name='AKT1')
         self.assertHasNode(gene, type='Gene', namespace='HGNC', name='AKT1')
 
-        self.assertEqual(3, self.parser.graph.number_of_edges())
+        self.assertEqual(2, self.parser.graph.number_of_edges())
 
         self.assertHasEdge(gene, rna, relation='transcribedTo')
         self.assertEqual(1, self.parser.graph.number_of_edges(gene, rna))
