@@ -15,4 +15,4 @@ __author__ = 'Charles Tapley Hoyt'
 __email__ = 'charles.hoyt@scai.fraunhofer.de'
 
 __license__ = 'All Rights Reserved.'
-__copyright__ = 'Copyright (c) Charles Tapley Hoyt'
+__copyright__ = 'Copyright 2016 (c) Charles Tapley Hoyt'
