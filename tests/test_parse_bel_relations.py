@@ -353,6 +353,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
+        self.assertHasEdge(obj, sub, relation=expected_dict['relation'])
 
     def test_positiveCorrelation_withSelfReferential(self):
         """
@@ -390,6 +391,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         self.assertHasNode(object_node)
 
         self.assertHasEdge(subject_node, object_node, relation=expected_dict['relation'])
+        self.assertHasEdge(object_node, subject_node, relation=expected_dict['relation'])
 
     def test_orthologous(self):
         """
@@ -407,6 +409,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation='orthologous')
+        self.assertHasEdge(obj, sub, relation='orthologous')
 
     def test_transcription(self):
         """

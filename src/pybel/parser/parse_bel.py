@@ -429,6 +429,11 @@ class BelParser(BaseParser):
             attrs.update(self.get_annotations())
 
             self.graph.add_edge(sub, obj, attr_dict=attrs)
+
+            if tokens['relation'] in (
+            'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'):
+                self.graph.add_edge(obj, sub, attr_dict=attrs)
+
             return tokens
 
         self.relation.setParseAction(handle_relation)
