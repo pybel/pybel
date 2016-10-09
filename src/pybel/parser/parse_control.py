@@ -67,8 +67,6 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_evidence(self, s, l, tokens):
-        if 'value' not in tokens:
-            raise ValueError('Missing evidence: {} {} {}'.format(s, l, tokens))
         value = tokens['value']
         self.annotations['Evidence'] = value
         return tokens

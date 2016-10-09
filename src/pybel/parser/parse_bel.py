@@ -8,7 +8,7 @@ import networkx as nx
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith
 
 from . import language
-from .baseparser import BaseParser, W, WCW, nest, one_of_tags
+from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser
 from .parse_control import ControlParser
@@ -20,12 +20,9 @@ from .utils import list2tuple
 log = logging.getLogger(__name__)
 
 
-def triple(subject, relation, obj):
-    return Group(subject)('subject') + W + relation('relation') + W + Group(obj)('object')
-
-
 def handle_debug(fmt):
     """logging hook for pyparsing
+
     :param fmt: a format string with {s} for string, {l} for location, and {t} for tokens
     """
 
@@ -37,9 +34,7 @@ def handle_debug(fmt):
 
 
 class BelParser(BaseParser):
-    """
-    Build a parser backed by a given dictionary of namespaces
-    """
+    """Build a parser backed by a given dictionary of namespaces"""
 
     def __init__(self, graph=None, namespace_dict=None, namespace_mapping=None, custom_annotations=None):
         """
@@ -527,8 +522,6 @@ class BelParser(BaseParser):
                 'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
             return self.canonicalize_node(tokens['target'])
 
-        raise NotImplementedError('canonicalize_node not implemented for: {}'.format(tokens))
-
     def ensure_node(self, s, l, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph"""
 
@@ -549,9 +542,6 @@ class BelParser(BaseParser):
                 self.add_unqualified_edge(name, product_name, relation='hasProduct')
 
             return name
-
-        elif 'function' not in tokens:
-            raise Exception('Unexpected tokens. Developer needs to fix')
 
         elif 'function' in tokens and 'members' in tokens:
             name = self.canonicalize_node(tokens)
@@ -626,9 +616,6 @@ class BelParser(BaseParser):
                 self.add_unqualified_edge(rna_name, name, relation='translatedTo')
                 return name
 
-        raise NotImplementedError(
-            "ensure_node not implemented for: {}".format(tokens.asDict() if hasattr(tokens, 'asDict') else tokens))
-
     def canonicalize_modifier(self, tokens):
         """
         Get activity, transformation, or transformation information as a dictionary
@@ -678,28 +665,3 @@ class BelParser(BaseParser):
                     'toLoc': dict(namespace='GOCC', name='cell surface')
                 }
             }
-
-        raise NotImplementedError('Canonicalization of modifier {} not implemented'.format(tokens['modifier']))
-
-
-def flatten_modifier_dict(d, prefix=''):
-    command = d['modification']
-    res = {
-        '{}_modification'.format(prefix): command
-    }
-
-    if command == 'Activity':
-        if 'params' in d and 'activity' in d['params']:
-            if isinstance(d['params']['activity'], (list, tuple)):
-                res['{}_params_activity_namespace'.format(prefix)] = d['params']['activity']['namespace']
-                res['{}_params_activity_value'.format(prefix)] = d['params']['activity']['name']
-            else:
-                res['{}_params_activity'.format(prefix)] = d['params']['activity']
-    elif command in ('Translocation', 'CellSecretion', 'CellSurfaceExpression'):
-        res['{}_params_fromLoc_namespace'.format(prefix)] = d['params']['fromLoc']['namespace']
-        res['{}_params_fromLoc_value'.format(prefix)] = d['params']['fromLoc']['name']
-        res['{}_params_toLoc_namespace'.format(prefix)] = d['params']['toLoc']['namespace']
-        res['{}_params_toLoc_value'.format(prefix)] = d['params']['toLoc']['name']
-    elif command == 'Degradation':
-        pass
-    return res

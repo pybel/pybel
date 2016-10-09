@@ -106,11 +106,24 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('MGI', self.parser.namespace_dict)
         self.assertIn('MGI', self.parser.namespace_metadata)
 
+        # Test doesn't overwrite
+        s = 'DEFINE NAMESPACE MGI AS LIST {"A","B","C"}'
+        self.parser.parseString(s)
+        self.assertIn('MGI', self.parser.namespace_dict)
+        self.assertIn('MGI', self.parser.namespace_metadata)
+        self.assertNotIn('A', self.parser.namespace_dict['MGI'])
+
     def test_control_2(self):
         s = 'DEFINE NAMESPACE Custom1 AS LIST {"A","B","C"}'
         self.parser.parseString(s)
         self.assertIn('Custom1', self.parser.namespace_dict)
         self.assertIn('Custom1', self.parser.namespace_metadata)
+
+        s = 'DEFINE NAMESPACE Custom1 AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
+        self.parser.parseString(s)
+        self.assertIn('Custom1', self.parser.namespace_dict)
+        self.assertIn('Custom1', self.parser.namespace_metadata)
+        self.assertIn('A', self.parser.namespace_dict['Custom1'])
 
     def test_control_3(self):
         s = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
@@ -118,11 +131,24 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('CellStructure', self.parser.annotations_dict)
         self.assertIn('CellStructure', self.parser.annotations_metadata)
 
+        s = 'DEFINE ANNOTATION CellStructure AS LIST {"A","B","C"}'
+        self.parser.parseString(s)
+        self.assertIn('CellStructure', self.parser.annotations_dict)
+        self.assertIn('CellStructure', self.parser.annotations_metadata)
+        self.assertNotIn('A', self.parser.annotations_dict['CellStructure'])
+
     def test_control_4(self):
         s = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
         self.assertIn('TextLocation', self.parser.annotations_dict)
         self.assertIn('TextLocation', self.parser.annotations_metadata)
+
+        s = 'DEFINE NAMESPACE TextLocation AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
+        self.parser.parseString(s)
+        self.assertIn('TextLocation', self.parser.annotations_dict)
+        self.assertIn('TextLocation', self.parser.annotations_metadata)
+        self.assertIn('Abstract', self.parser.annotations_dict['TextLocation'])
+
 
     def test_control_compound_1(self):
         s1 = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
@@ -219,6 +245,19 @@ class TestParseControl(unittest.TestCase):
 
         self.parser = ControlParser(custom_annotations=custom_annotations)
 
+    def test_set_statement_group(self):
+        s = 'SET STATEMENT_GROUP = "my group"'
+        self.parser.parseString(s)
+        self.assertEqual('my group', self.parser.statement_group)
+
+        s = 'UNSET STATEMENT_GROUP'
+        self.parser.parseString(s)
+        self.assertIsNone(self.parser.statement_group)
+
+    def test_unset_missing_statement(self):
+        s = 'UNSET Evidence'
+        self.parser.parseString(s)
+
     def test_citation_short(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037"}'
 
@@ -231,6 +270,14 @@ class TestParseControl(unittest.TestCase):
         }
 
         self.assertEqual(expected_citation, self.parser.citation)
+
+        annotations = self.parser.get_annotations()
+        expected_annotations = {
+            'citation_type': 'PubMed',
+            'citation_name': 'Trends in molecular medicine',
+            'citation_reference': '12928037'
+        }
+        self.assertEqual(expected_annotations, annotations)
 
     def test_citation_long(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","","de Nigris|Lerman A|Ignarro LJ",""}'

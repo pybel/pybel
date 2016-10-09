@@ -82,6 +82,7 @@ def check_stability(ns_dict, ns_mapping):
         if ns not in ns_dict:
             log.warning('missing namespace {}'.format(ns))
             flag = False
+            continue
         for k, (k_ns, v_val) in kv.items():
             if k not in ns_dict[ns]:
                 log.warning('missing value {}'.format(k))
@@ -89,7 +90,7 @@ def check_stability(ns_dict, ns_mapping):
             if k_ns not in ns_dict:
                 log.warning('missing namespace link {}'.format(k_ns))
                 flag = False
-            if v_val not in ns_dict[k_ns]:
+            elif v_val not in ns_dict[k_ns]:
                 log.warning('missing value {} in namespace {}'.format(v_val, k_ns))
                 flag = False
     return flag

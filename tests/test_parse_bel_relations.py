@@ -11,6 +11,9 @@ log = logging.getLogger(__name__)
 
 
 class TestRelationshipsRandom(TestTokenParserBase):
+    def test_language(self):
+        self.assertIsNotNone(self.parser.get_language())
+
     def test_increases(self):
         """
         3.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases

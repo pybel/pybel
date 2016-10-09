@@ -85,5 +85,7 @@ class TestNamespaceParserDefault(unittest.TestCase):
         self.assertIn('name', result)
         self.assertEqual('W Z', result['name'])
 
-
-
+    def test_not_in_defaultNs(self):
+        s = 'D'
+        with self.assertRaises(Exception):
+            self.parser.parseString(s)

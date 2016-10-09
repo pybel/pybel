@@ -3,7 +3,7 @@ import unittest
 import networkx as nx
 
 from pybel.parser import utils
-from pybel.parser.utils import subdict_matches
+from pybel.parser.utils import subdict_matches, check_stability
 
 
 class TestUtils(unittest.TestCase):
@@ -103,3 +103,78 @@ class TestUtils(unittest.TestCase):
         d = {'relation': 'yup'}
 
         self.assertTrue(utils.any_subdict_matches(g.edge[1][2], d))
+
+    def test_check_stability_good(self):
+        d = {
+            'A': {1, 2, 3},
+            'B': {4, 5, 6}
+        }
+
+        m = {
+            'A': {
+                1: ('B', 4),
+                2: ('B', 5)
+            }
+        }
+
+        self.assertTrue(check_stability(d, m))
+
+    def test_check_stability_missingNs(self):
+        d = {
+            'A': {1, 2, 3},
+            'B': {4, 5, 6}
+        }
+
+        m = {
+            'C': {
+                1: ('B', 4),
+                2: ('B', 5)
+            }
+        }
+
+        self.assertFalse(check_stability(d, m))
+
+    def test_check_stability_MissingValue(self):
+        d = {
+            'A': {1, 2, 3},
+            'B': {4, 5, 6}
+        }
+
+        m = {
+            'A': {
+                1: ('B', 4),
+                0: ('B', 5)
+            }
+        }
+
+        self.assertFalse(check_stability(d, m))
+
+    def test_check_stability_MissingNsLink(self):
+        d = {
+            'A': {1, 2, 3},
+            'B': {4, 5, 6}
+        }
+
+        m = {
+            'A': {
+                1: ('C', 4),
+                2: ('B', 5)
+            }
+        }
+
+        self.assertFalse(check_stability(d, m))
+
+    def test_check_stability_MissingMapValue(self):
+        d = {
+            'A': {1, 2, 3},
+            'B': {4, 5, 6}
+        }
+
+        m = {
+            'A': {
+                1: ('B', 4),
+                2: ('B', 9)
+            }
+        }
+
+        self.assertFalse(check_stability(d, m))

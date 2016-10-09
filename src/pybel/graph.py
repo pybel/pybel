@@ -8,10 +8,10 @@ import requests
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
-from .parser.parse_bel import BelParser, flatten_modifier_dict
+from .parser.parse_bel import BelParser
+from .parser.parse_exceptions import PyBelException
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions
-from .parser.parse_exceptions import PyBelException
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +22,7 @@ def from_lines(it):
     :return a parsed BEL graph
     :rtype: BELGraph
     """
+
     return BELGraph().parse_from_lines(it)
 
 
@@ -32,6 +33,7 @@ def from_url(url):
     :return: a parsed BEL graph
     :rtype BELGraph
     """
+
     return BELGraph().parse_from_url(url)
 
 
@@ -79,8 +81,7 @@ class BELGraph(nx.MultiDiGraph):
             return self.parse_from_lines(f)
 
     def parse_from_url(self, url):
-        """
-        Parses a BEL file from URL resource and adds to graph
+        """Parses a BEL file from URL resource and adds to graph
         :param url: URL to BEL Resource
         :return: self
         :rtype: BELGraph
@@ -95,8 +96,7 @@ class BELGraph(nx.MultiDiGraph):
         return self.parse_from_lines(response.iter_lines())
 
     def parse_from_lines(self, fl):
-        """
-        Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
+        """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
         :param fl: iterable over lines of BEL data file
         :return: self
         :rtype: BELGraph
@@ -149,8 +149,8 @@ class BELGraph(nx.MultiDiGraph):
         return self
 
     def to_neo4j(self, neo_graph):
-        """
-        Uploads to Neo4J graph database usiny `py2neo`
+        """Uploads to Neo4J graph database usiny `py2neo`
+
         :param neo_graph:
         :return:
         """
@@ -169,9 +169,9 @@ class BELGraph(nx.MultiDiGraph):
 
             attrs = {}
             if 'subject' in data:
-                attrs.update(flatten_modifier_dict(data['subject'], 'subject'))
+                attrs.update(_flatten_modifier_dict(data['subject'], 'subject'))
             if 'object' in data:
-                attrs.update(flatten_modifier_dict(data['object'], 'object'))
+                attrs.update(_flatten_modifier_dict(data['object'], 'object'))
 
             attrs.update({k: v for k, v in data.items() if k not in ('subject', 'object')})
             print(attrs)
@@ -185,3 +185,26 @@ class BELGraph(nx.MultiDiGraph):
         for rel in relationships:
             tx.create(rel)
         tx.commit()
+
+
+def _flatten_modifier_dict(d, prefix=''):
+    command = d['modification']
+    res = {
+        '{}_modification'.format(prefix): command
+    }
+
+    if command == 'Activity':
+        if 'params' in d and 'activity' in d['params']:
+            if isinstance(d['params']['activity'], (list, tuple)):
+                res['{}_params_activity_namespace'.format(prefix)] = d['params']['activity']['namespace']
+                res['{}_params_activity_value'.format(prefix)] = d['params']['activity']['name']
+            else:
+                res['{}_params_activity'.format(prefix)] = d['params']['activity']
+    elif command in ('Translocation', 'CellSecretion', 'CellSurfaceExpression'):
+        res['{}_params_fromLoc_namespace'.format(prefix)] = d['params']['fromLoc']['namespace']
+        res['{}_params_fromLoc_value'.format(prefix)] = d['params']['fromLoc']['name']
+        res['{}_params_toLoc_namespace'.format(prefix)] = d['params']['toLoc']['namespace']
+        res['{}_params_toLoc_value'.format(prefix)] = d['params']['toLoc']['name']
+    elif command == 'Degradation':
+        pass
+    return res

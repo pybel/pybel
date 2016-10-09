@@ -19,7 +19,7 @@ class TestTokenParserBase(unittest.TestCase):
     def assertHasNode(self, member, msg=None, **kwargs):
         self.assertIn(member, self.parser.graph)
         if kwargs:
-            msg_format = 'Wrong node properties. expected {} but got {}'
+            msg_format = 'Wrong node {} properties. expected {} but got {}'
             self.assertTrue(subdict_matches(self.parser.graph.node[member], kwargs, ),
                             msg=msg_format.format(member, kwargs, self.parser.graph.node[member]))
 

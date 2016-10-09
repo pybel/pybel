@@ -1,7 +1,7 @@
 import logging
 
 from pyparsing import Suppress, ZeroOrMore, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
-    delimitedList, replaceWith
+    delimitedList, replaceWith, Group
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ delimitedSet = Suppress('{') + delimitedList(quote) + Suppress('}')
 def nest(*content):
     """Defines a delimited list by enumerating each element of the list"""
     if len(content) == 0:
-        raise ValueError()
+        raise ValueError('no arguments supplied')
     x = content[0]
     for y in content[1:]:
         x = x + WCW + y
@@ -27,6 +27,10 @@ def nest(*content):
 
 def one_of_tags(tags, canonical_tag, identifier):
     return oneOf(tags).setParseAction(replaceWith(canonical_tag)).setResultsName(identifier)
+
+
+def triple(subject, relation, obj):
+    return Group(subject)('subject') + W + relation('relation') + W + Group(obj)('object')
 
 
 class BaseParser:

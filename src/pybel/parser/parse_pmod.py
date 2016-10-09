@@ -23,8 +23,8 @@ class PmodParser(BaseParser):
         pmod_tag = oneOf(['pmod', 'proteinModification'])
         pmod_tag.addParseAction(replaceWith('ProteinModification'))
 
-        pmod_default_ns = oneOf(pmod_namespace)
-        pmod_legacy_ns = oneOf(pmod_legacy_labels.keys())
+        pmod_default_ns = oneOf(pmod_namespace).setParseAction(self.handle_pmod_default_ns)
+        pmod_legacy_ns = oneOf(pmod_legacy_labels.keys()).setParseAction(self.handle_pmod_legacy_ns)
 
         pmod_identifier = Group(self.namespace_parser.identifier_qualified) | pmod_default_ns | pmod_legacy_ns
 
@@ -44,6 +44,7 @@ class PmodParser(BaseParser):
 
     def handle_pmod_legacy_ns(self, s, l, tokens):
         log.debug('PyBEL016 Legacy protein modification. Use new namespaces instead.')
+        # TODO implement
         return tokens
 
     def get_language(self):
