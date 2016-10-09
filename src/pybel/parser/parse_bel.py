@@ -623,45 +623,45 @@ class BelParser(BaseParser):
         :return:
         """
 
-        if 'modifier' not in tokens:
-            return {}
+        attrs = {}
 
-        elif tokens['modifier'] == 'Degradation':
-            return {
-                'modifier': 'Degradation'
-            }
+        if 'location' in tokens:
+            attrs['location'] = tokens['location'].asDict()
+
+        if 'modifier' not in tokens:
+            return attrs
+
+        if 'location' in tokens['target']:
+            attrs['location'] = tokens['target']['location'].asDict()
+
+        if tokens['modifier'] == 'Degradation':
+            attrs['modifier'] = 'Degradation'
 
         elif tokens['modifier'] == 'Activity' and 'effect' not in tokens:
-            return {
-                'modifier': tokens['modifier'],
-                'effect': {}
-            }
+            attrs['modifier'] = tokens['modifier']
+            attrs['effect'] = {}
 
         elif tokens['modifier'] == 'Activity' and 'effect' in tokens:
-            return {
-                'modifier': tokens['modifier'],
-                'effect': tokens['effect'].asDict() if hasattr(tokens['effect'], 'asDict') else dict(tokens['effect'])
-            }
+            attrs['modifier'] = tokens['modifier']
+            attrs['effect'] = tokens['effect'].asDict() if hasattr(tokens['effect'], 'asDict') else dict(
+                tokens['effect'])
 
         elif tokens['modifier'] == 'Translocation':
-            return {
-                'modifier': tokens['modifier'],
-                'effect': tokens['effect'].asDict()
-            }
+            attrs['modifier'] = tokens['modifier']
+            attrs['effect'] = tokens['effect'].asDict()
 
         elif tokens['modifier'] == 'CellSecretion':
-            return {
-                'modifier': 'Translocation',
-                'effect': {
-                    'fromLoc': dict(namespace='GOCC', name='intracellular'),
-                    'toLoc': dict(namespace='GOCC', name='extracellular space')
-                }
+            attrs['modifier'] = 'Translocation'
+            attrs['effect'] = {
+                'fromLoc': dict(namespace='GOCC', name='intracellular'),
+                'toLoc': dict(namespace='GOCC', name='extracellular space')
             }
+
         elif tokens['modifier'] == 'CellSurfaceExpression':
-            return {
-                'modifier': 'Translocation',
-                'effect': {
-                    'fromLoc': dict(namespace='GOCC', name='intracellular'),
-                    'toLoc': dict(namespace='GOCC', name='cell surface')
-                }
+            attrs['modifier'] = 'Translocation'
+            attrs['effect'] = {
+                'fromLoc': dict(namespace='GOCC', name='intracellular'),
+                'toLoc': dict(namespace='GOCC', name='cell surface')
             }
+
+        return attrs

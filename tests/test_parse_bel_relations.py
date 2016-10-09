@@ -104,7 +104,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         """
         3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
         Test decreases with reaction"""
-        statement = 'pep(p(SFAM:"CAPN Family")) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
+        statement = 'pep(p(SFAM:"CAPN Family", location(GOCC:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -112,8 +112,10 @@ class TestRelationshipsRandom(TestTokenParserBase):
                 'modifier': 'Activity',
                 'target': {
                     'function': 'Protein',
-                    'identifier': {'namespace': 'SFAM', 'name': 'CAPN Family'}},
-                'effect': {'MolecularActivity': 'PeptidaseActivity'}
+                    'identifier': {'namespace': 'SFAM', 'name': 'CAPN Family'},
+                    'location': dict(namespace='GOCC', name='intracellular')
+                },
+                'effect': {'MolecularActivity': 'PeptidaseActivity'},
             },
             'relation': 'decreases',
             'object': {
@@ -148,7 +150,8 @@ class TestRelationshipsRandom(TestTokenParserBase):
             'relation': 'decreases',
             'subject': {
                 'modifier': 'Activity',
-                'effect': {'MolecularActivity': 'PeptidaseActivity'}
+                'effect': {'MolecularActivity': 'PeptidaseActivity'},
+                'location': dict(namespace='GOCC', name='intracellular')
             }
         }
         self.assertHasEdge(sub, obj, **expected_edge_attributes)
@@ -157,15 +160,22 @@ class TestRelationshipsRandom(TestTokenParserBase):
         """
         3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
         Tests simple triple"""
-        statement = 'proteinAbundance(HGNC:CAT) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
+        statement = 'proteinAbundance(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
         result = self.parser.relation.parseString(statement)
 
-        expected = [
-            ['Protein', ['HGNC', 'CAT']],
-            'directlyDecreases',
-            ['Abundance', ['CHEBI', 'hydrogen peroxide']]
-        ]
-        self.assertEqual(expected, result.asList())
+        expected_dict = {
+            'subject': {
+                'function': 'Protein',
+                'identifier': dict(namespace='HGNC', name='CAT'),
+                'location': dict(namespace='GOCC', name='intracellular')
+            },
+            'relation': 'directlyDecreases',
+            'object': {
+                'function': 'Abundance',
+                'identifier': dict(namespace='CHEBI', name='hydrogen peroxide')
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
 
         sub = 'Protein', 'HGNC', 'CAT'
         self.assertHasNode(sub)
@@ -173,7 +183,13 @@ class TestRelationshipsRandom(TestTokenParserBase):
         obj = 'Abundance', 'CHEBI', 'hydrogen peroxide'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation='directlyDecreases')
+        expected_attrs = {
+            'subject': {
+                'location': dict(namespace='GOCC', name='intracellular')
+            },
+            'relation': 'directlyDecreases',
+        }
+        self.assertHasEdge(sub, obj, **expected_attrs)
 
     def test_rateLimitingStepOf_subjectActivity(self):
         """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof"""
@@ -189,7 +205,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
                 },
                 'effect': {
                     'MolecularActivity': 'CatalyticActivity'
-                }
+                },
             },
             'relation': 'rateLimitingStepOf',
             'object': {
