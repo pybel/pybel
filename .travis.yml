@@ -38,3 +38,7 @@ after_success:
 
 notifications:
   slack: pybel:n2KbWKBum3musnBg3L76gGwq
+
+addons:
+    code_climate:
+        repo_token: e8d763f60ca5495b8bce79682b7c1e2e462a776f8de5c4540ceb01f52458f891

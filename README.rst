@@ -1,5 +1,5 @@
-PyBEL |buildstatus| |codecov| |pyversions|
-==========================================
+PyBEL |buildstatus| |codecov| |climate| |pyversions|
+====================================================
 
 .. |buildstatus| image:: https://travis-ci.com/cthoyt/pybel.svg?token=2tyMYiCcZbjqYscNWXwZ&branch=master
     :target: https://travis-ci.com/cthoyt/pybel
@@ -9,6 +9,11 @@ PyBEL |buildstatus| |codecov| |pyversions|
 
 .. |codecov| image:: https://codecov.io/gh/cthoyt/pybel/branch/master/graph/badge.svg?token=J7joRTRygG
     :target: https://codecov.io/gh/cthoyt/pybel
+
+.. |climate| image:: https://codeclimate.com/repos/57fa4c866f0a491c8900122d/badges/c0e030bca94c7746ce21/gpa.svg
+   :target: https://codeclimate.com/repos/57fa4c866f0a491c8900122d/feed
+   :alt: Code Climate
+
 
 Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its successful use in the IMI project, AETIONOMY, to describe complex disease networks with several thousands of relationships.
 
