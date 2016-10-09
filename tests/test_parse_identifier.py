@@ -78,7 +78,7 @@ class TestNamespaceParserDefault(unittest.TestCase):
         self.assertIn('name', result)
         self.assertEqual('X', result['name'])
 
-    def test_valid_2(self):
+    def test_valid_3(self):
         s = '"W Z"'
         result = self.parser.parseString(s)
 
