@@ -125,4 +125,3 @@ def any_subdict_matches(a, b):
     :return:
     """
     return any(subdict_matches(sd, b) for sd in a.values())
-

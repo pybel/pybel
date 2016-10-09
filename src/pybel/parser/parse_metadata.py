@@ -1,18 +1,11 @@
 import logging
+from configparser import ConfigParser
 
 import requests
 from pyparsing import Suppress
 from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet
-
-# Get proper config parser depending on python2 or python3
-try:
-    from configparser import ConfigParser
-except:
-    from ConfigParser import ConfigParser
-
-log = logging.getLogger(__name__)
 
 __all__ = ['MetadataParser']
 

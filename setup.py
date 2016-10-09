@@ -30,6 +30,7 @@ INSTALL_REQUIRES = [
     'requests_file',
     'networkx',
     'pyparsing',
+    'configparser',
     'py2neo',
     'click'
 ]

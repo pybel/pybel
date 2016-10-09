@@ -4,6 +4,7 @@ cache: pip
 language: python
 
 python:
+    - "2.7"
     - "3.3"
     - "3.4"
     - "3.5"
@@ -13,6 +14,8 @@ env:
 
 matrix:
     include:
+        - python: "2.7"
+          env: TOXENV=py27
         - python: "3.3"
           env: TOXENV=py33
         - python: "3.4"
