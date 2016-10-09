@@ -28,22 +28,41 @@ def main():
 
 
 @main.command()
-@click.option('--path', help='BEL file')
+@click.option('--path', help='BEL file file path')
+@click.option('--url', help='BEL file URL')
+@click.option('--database', help='BEL database')
 @click.option('--neo', help='URL of neo4j database')
-def to_neo(path, neo):
+def to_neo(path, url, database, neo):
     """Parses BEL file and uploads to Neo4J"""
+    if path:
+        g = graph.from_path(path)
+    elif url:
+        g = graph.from_url(path)
+    elif database:
+        g = graph.from_database(path)
+    else:
+        raise ValueError('missing BEL file')
+
     p2n = py2neo.Graph(neo)
-    g = graph.from_path(path)
     g.to_neo4j(p2n)
 
 
 @main.command()
-@click.option('--path', help='Path of BEL file (url or local)')
+@click.option('--path', help='BEL file file path')
+@click.option('--url', help='BEL file URL')
+@click.option('--database', help='BEL database')
 @click.option('--node-path', help='File path to output node file')
 @click.option('--edge-path', help='File path to output edge file')
-def to_csv(url, path, node_path, edge_path):
+def to_csv(path, url, database, node_path, edge_path):
     """Parses BEL file and exports as node/edge list files"""
-    g = graph.from_path(path)
+    if path:
+        g = graph.from_path(path)
+    elif url:
+        g = graph.from_url(path)
+    elif database:
+        g = graph.from_database(path)
+    else:
+        raise ValueError('missing BEL file')
 
     nx.write_edgelist(g, edge_path, data=True)
 
