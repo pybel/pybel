@@ -1,7 +1,7 @@
 import unittest
 
-from .parse_bel import BelParser
-from .utils import subdict_matches, any_subdict_matches
+from pybel.parser.parse_bel import BelParser
+from pybel.parser.utils import subdict_matches, any_subdict_matches
 
 
 class TestTokenParserBase(unittest.TestCase):

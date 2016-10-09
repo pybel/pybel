@@ -5,7 +5,7 @@ This class requires the parser to be fully compiled, and takes a long time to ru
 import logging
 
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException
-from pybel.parser.test_utils import TestTokenParserBase
+from tests.constants import TestTokenParserBase
 
 log = logging.getLogger(__name__)
 
