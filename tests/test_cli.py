@@ -12,7 +12,8 @@ log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-@unittest.skipIf('TRAVIS_SKIP' in os.environ, 'not enough memory on Travis-CI for this test')
+@unittest.skipUnless('PYBEL_ALLTESTS' in os.environ and os.environ['PYBEL_ALLTESTS'] == '3',
+                     'not enough memory on Travis-CI for this test')
 class TestCliGraphML(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
