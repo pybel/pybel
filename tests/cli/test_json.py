@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import unittest
 
 from pybel import cli
 from tests.constants import TestCliBase
@@ -8,6 +9,7 @@ from tests.constants import TestCliBase
 log = logging.getLogger(__name__)
 
 
+@unittest.skipIf('TRAVIS_SKIP' in os.environ, 'not enough memory on Travis-CI for this test')
 class TestCliJson(TestCliBase):
     def test_json(self):
         test_file = 'mygraph.json'

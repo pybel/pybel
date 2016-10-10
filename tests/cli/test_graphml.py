@@ -1,5 +1,6 @@
 import logging
 import os
+import unittest
 
 import networkx as nx
 
@@ -10,6 +11,7 @@ log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
+@unittest.skipIf('TRAVIS_SKIP' in os.environ, 'not enough memory on Travis-CI for this test')
 class TestCliGraphML(TestCliBase):
     def test_graphml(self):
         test_file = 'mygraph.graphml'

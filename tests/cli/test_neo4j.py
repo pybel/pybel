@@ -9,6 +9,7 @@ from tests.constants import TestCliBase
 log = logging.getLogger(__name__)
 
 
+@unittest.skipIf('TRAVIS_SKIP' in os.environ, 'not enough memory on Travis-CI for this test')
 class TestCliNeo(TestCliBase):
     @unittest.skip
     def test_neo4j(self):

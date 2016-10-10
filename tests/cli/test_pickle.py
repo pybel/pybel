@@ -1,5 +1,6 @@
 import logging
 import os
+import unittest
 
 import networkx as nx
 
@@ -9,6 +10,7 @@ from tests.constants import TestCliBase
 log = logging.getLogger(__name__)
 
 
+@unittest.skipIf('TRAVIS_SKIP' in os.environ, 'not enough memory on Travis-CI for this test')
 class TestCliPickle(TestCliBase):
     def test_pickle(self):
         test_file = 'mygraph.gpickle'
