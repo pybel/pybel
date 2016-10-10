@@ -1,7 +1,12 @@
+import os
 import unittest
+
+from click.testing import CliRunner
 
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import subdict_matches, any_subdict_matches
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -29,3 +34,9 @@ class TestTokenParserBase(unittest.TestCase):
             msg_format = 'No edge with correct properties. expected {} but got {}'
             self.assertTrue(any_subdict_matches(self.parser.graph.edge[u][v], kwargs),
                             msg=msg_format.format(kwargs, self.parser.graph.edge[u][v]))
+
+
+class TestCliBase(unittest.TestCase):
+    def setUp(self):
+        self.runner = CliRunner()
+        self.test_path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
