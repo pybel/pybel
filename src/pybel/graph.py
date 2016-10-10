@@ -106,16 +106,16 @@ class BELGraph(nx.MultiDiGraph):
         docs, defs, states = split_file_to_annotations_and_definitions(fl)
 
         self.mdp = MetadataParser()
-        for line in docs:
+        for line_number, line in docs:
             try:
                 self.mdp.parseString(line)
             except:
-                log.error('Failed: {}'.format(line))
+                log.error('Failed on [line:{}]: {}'.format(line_number,line))
 
         log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
-        for line in defs:
+        for line_number, line in defs:
             try:
                 res = self.mdp.parseString(line)
                 if len(res) == 2:
@@ -123,26 +123,26 @@ class BELGraph(nx.MultiDiGraph):
                 else:
                     log.debug('{}: [{}]'.format(res[0], ', '.join(res[1:])))
             except ParseException as e:
-                log.error('General parser failure: {}'.format(line))
+                log.error('General parser failure on [line:{}]: {}'.format(line_number, line))
             except PyBelException as e:
-                log.warning('{} {}'.format(e, line))
+                log.warning('{} [line:{}] {}'.format(e, line_number, line))
             except:
-                log.error('General failure: {}'.format(line))
+                log.error('General failure [line:{}]: {}'.format(line_number, line))
 
         log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
         self.bsp = BelParser(graph=self, custom_annotations=self.mdp.annotations_dict)
 
-        for line in states:
+        for line_number, line in states:
             try:
                 self.bsp.parseString(line)
             except ParseException as e:
-                log.error('General parser failure: {}'.format(line))
+                log.error('General parser failure on [line:{}]: {}'.format(line_number, line))
             except PyBelException as e:
-                log.debug('{} {}'.format(e, line))
+                log.debug('{} on [line:{}]: {}'.format(e, line_number, line))
             except:
-                log.error('General failure: {}'.format(line))
+                log.error('General failure on [line:{}]: {}'.format(line_number, line))
 
         log.info('Finished parsing statements section in {:.02f} seconds'.format(time.time() - t))
 

@@ -16,8 +16,9 @@ class TestSanitize(unittest.TestCase):
 in the SIN1-/- cells (Figure 5A)."'''.split('\n')
 
         expect = [
-            'SET Evidence = "The phosphorylation of S6K at Thr389, which is the TORC1-mediated site, was not inhibited '
-            'in the SIN1-/- cells (Figure 5A)."']
+            (1,
+             'SET Evidence = "The phosphorylation of S6K at Thr389, which is the TORC1-mediated site, was not inhibited '
+             'in the SIN1-/- cells (Figure 5A)."')]
         result = list(sanitize_file_lines(s))
         self.assertEqual(expect, result)
 
@@ -36,11 +37,12 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
         result = list(sanitize_file_lines(s))
 
         expect = [
-            'SET Species = 9606',
-            'SET Tissue = "t-cells"',
-            'SET Evidence = "Here we show that interfereon-alpha (IFNalpha) is a potent producer of SOCS expression in '
-            'human T cells, as high expression of CIS, SOCS-1, SOCS-2, and SOCS-3 was detectable after IFNalpha '
-            'stimulation. After 4 h of stimulation CIS, SOCS-1, and SOCS-3 had ret'
+            (2, 'SET Species = 9606'),
+            (3, 'SET Tissue = "t-cells"'),
+            (5,
+             'SET Evidence = "Here we show that interfereon-alpha (IFNalpha) is a potent producer of SOCS expression in '
+             'human T cells, as high expression of CIS, SOCS-1, SOCS-2, and SOCS-3 was detectable after IFNalpha '
+             'stimulation. After 4 h of stimulation CIS, SOCS-1, and SOCS-3 had ret')
         ]
 
         self.assertEqual(expect, result)
@@ -51,7 +53,7 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
         ]
 
         result = list(sanitize_file_lines(s))
-        expect = ['SET Evidence = "yada yada yada"']
+        expect = [(1, 'SET Evidence = "yada yada yada"')]
 
         self.assertEqual(expect, result)
 
@@ -64,7 +66,7 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
         ]
 
         result = list(sanitize_file_lines(s))
-        expect = ['SET Evidence = "Something or other or other"']
+        expect = [(1, 'SET Evidence = "Something or other or other"')]
 
         self.assertEqual(expect, result)
 
@@ -148,7 +150,6 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('TextLocation', self.parser.annotations_dict)
         self.assertIn('TextLocation', self.parser.annotations_metadata)
         self.assertIn('Abstract', self.parser.annotations_dict['TextLocation'])
-
 
     def test_control_compound_1(self):
         s1 = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
@@ -398,7 +399,7 @@ class TestParseEvidence(unittest.TestCase):
         statement = '''SET Evidence = "3.1 Backward slash break test \\
 second line"'''
         expect = '''SET Evidence = "3.1 Backward slash break test second line"'''
-        lines = list(sanitize_file_lines(statement.split('\n')))
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
         self.assertEqual(1, len(lines))
         line = lines[0]
         self.assertEqual(expect, line)
@@ -407,7 +408,7 @@ second line"'''
         statement = '''SET Evidence = "3.2 Backward slash break test with whitespace \\
 second line"'''
         expect = '''SET Evidence = "3.2 Backward slash break test with whitespace second line"'''
-        lines = list(sanitize_file_lines(statement.split('\n')))
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
         self.assertEqual(1, len(lines))
         line = lines[0]
         self.assertEqual(expect, line)
@@ -417,7 +418,7 @@ second line"'''
 second line \\
 third line"'''
         expect = '''SET Evidence = "3.3 Backward slash break test second line third line"'''
-        lines = list(sanitize_file_lines(statement.split('\n')))
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
         self.assertEqual(1, len(lines))
         line = lines[0]
         self.assertEqual(expect, line)
@@ -426,7 +427,7 @@ third line"'''
         statement = '''SET Evidence = "4.1 Malformed line breakcase
 second line"'''
         expect = '''SET Evidence = "4.1 Malformed line breakcase second line"'''
-        lines = list(sanitize_file_lines(statement.split('\n')))
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
         self.assertEqual(1, len(lines))
         line = lines[0]
         self.assertEqual(expect, line)
@@ -436,7 +437,7 @@ second line"'''
 second line
 third line"'''
         expect = '''SET Evidence = "4.2 Malformed line breakcase second line third line"'''
-        lines = list(sanitize_file_lines(statement.split('\n')))
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
         self.assertEqual(1, len(lines))
         line = lines[0]
         self.assertEqual(expect, line)

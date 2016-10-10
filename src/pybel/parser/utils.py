@@ -10,8 +10,9 @@ re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+AN
 
 
 def sanitize_file_lines(f):
+    """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned"""
     it = map(str.strip, f)
-    it = filter(lambda i_l: i_l[1] and not i_l[1].startswith('#'), enumerate(it))
+    it = filter(lambda i_l: i_l[1] and not i_l[1].startswith('#'), enumerate(it, start=1))
     it = iter(it)
 
     for line_number, line in it:
@@ -42,14 +43,15 @@ def sanitize_file_lines(f):
         if 0 <= comment_loc:
             line = line[:comment_loc]
 
-        yield line
+        yield line_number, line
 
 
 def split_file_to_annotations_and_definitions(file):
+    """Enumerates a line iterable and splits into 3 parts"""
     content = list(sanitize_file_lines(file))
 
-    end_document_section = 1 + max(i for i, l in enumerate(content) if l.startswith('SET DOCUMENT'))
-    end_definitions_section = 1 + max(i for i, l in enumerate(content) if re_match_bel_header.match(l))
+    end_document_section = 1 + max(j for j, (i, l) in enumerate(content) if l.startswith('SET DOCUMENT'))
+    end_definitions_section = 1 + max(j for j, (i, l) in enumerate(content) if re_match_bel_header.match(l))
 
     log.info('File length: {} lines'.format(len(content)))
     documents = content[:end_document_section]
