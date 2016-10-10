@@ -7,6 +7,8 @@ from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet
 
+log = logging.getLogger(__name__)
+
 __all__ = ['MetadataParser']
 
 delimiters = "=", "|", ":"
@@ -88,7 +90,7 @@ class MetadataParser(BaseParser):
         session = requests.Session()
         if url.startswith('file://'):
             session.mount('file://', FileAdapter())
-        logging.debug('Downloading namespaces from {}'.format(url))
+        log.debug('Downloading namespaces from {}'.format(url))
         res = session.get(url)
         res.raise_for_status()
 
@@ -110,7 +112,7 @@ class MetadataParser(BaseParser):
         session = requests.Session()
         if url.startswith('file://'):
             session.mount('file://', FileAdapter())
-        logging.debug('Downloading annotations from {}'.format(url))
+        log.debug('Downloading annotations from {}'.format(url))
         res = session.get(url)
         res.raise_for_status()
 
