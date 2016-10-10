@@ -19,11 +19,9 @@ class TestCliGraphML(unittest.TestCase):
         self.runner = CliRunner()
         self.test_path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 
-    @unittest.skip
     def test_neo4j(self):
         pass
 
-    @unittest.skip
     def test_csv(self):
         test_edge_file = 'myedges.csv'
 
