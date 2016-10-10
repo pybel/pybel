@@ -2,6 +2,8 @@ import collections
 import logging
 import re
 
+import networkx as nx
+
 log = logging.getLogger(__name__)
 
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
@@ -139,3 +141,19 @@ def flatten(d, parent_key='', sep='_'):
         else:
             items.append((new_key, v))
     return dict(items)
+
+
+def flatten_edges(self):
+    """Returns a new graph with flattened edge data dictionaries
+    :rtype: nx.MultiDiGraph
+    """
+
+    g = nx.MultiDiGraph()
+
+    for node, data in self.nodes(data=True):
+        g.add_node(node, data)
+
+    for u, v, key, data in self.edges(data=True, keys=True):
+        g.add_edge(u, v, key=key, attr_dict=flatten(data))
+
+    return g
