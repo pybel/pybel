@@ -4,6 +4,7 @@ import os
 import unittest
 
 import networkx as nx
+import py2neo
 from click.testing import CliRunner
 
 from pybel import cli
@@ -14,13 +15,23 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 @unittest.skipUnless('PYBEL_ALLTESTS' in os.environ and os.environ['PYBEL_ALLTESTS'] == '3',
                      'not enough memory on Travis-CI for this test')
-class TestCliGraphML(unittest.TestCase):
+class TestCli(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
         self.test_path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 
+    # def test_neo4j_fail(self):
+    #    with self.assertRaises(Exception):
+    #        self.runner.invoke(cli.main, ['to_neo', '--path', self.test_path, '--neo', 'GARBAGE'])
+
+    @unittest.skipUnless('NEO_PATH' in os.environ, 'Need neo4j to test')
     def test_neo4j(self):
-        pass
+        self.runner.invoke(cli.main, ['to_neo', '--path', self.test_path, '--neo', os.environ['NEO_PATH'], '--context',
+                                      'TESTCTX'])
+
+        neo = py2neo.Graph(os.environ['NEO_PATH'])
+        count = neo.data('match (n)-[r]-() where r.pybel_context="TESTCTX" return count(n) as count')[0]['count']
+        self.assertEqual(60, count)
 
     def test_csv(self):
         test_edge_file = 'myedges.csv'

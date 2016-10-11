@@ -38,8 +38,13 @@ def main():
 @click.option('--url', help='BEL file URL')
 @click.option('--database', help='BEL database')
 @click.option('--neo', help='URL of neo4j database')
-def to_neo(path, url, database, neo):
+@click.option('--context', help='Context tag for multiple simultaneous neo4j graphs')
+def to_neo(path, url, database, neo, context):
     """Parses BEL file and uploads to Neo4J"""
+
+    p2n = py2neo.Graph(neo)
+    p2n.data('match (n) return count(n) as count')[0]['count']
+
     if path:
         g = graph.from_path(path)
     elif url:
@@ -49,7 +54,7 @@ def to_neo(path, url, database, neo):
     else:
         raise ValueError('missing BEL file')
 
-    p2n = py2neo.Graph(neo)
+    g.context = context
     g.to_neo4j(p2n)
 
 

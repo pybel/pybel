@@ -65,11 +65,12 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiGraph to hold a BEL graph."""
 
-    def __init__(self, *attrs, **kwargs):
+    def __init__(self, *attrs, context=None, **kwargs):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self.bsp = None
         self.mdp = None
+        self.context = context
 
     def parse_from_path(self, path):
         """Opens a BEL file from a given path and parses it
@@ -170,6 +171,8 @@ class BELGraph(nx.MultiDiGraph):
             neo_v = node_map[v]
             rel_type = data['relation']
             attrs = flatten(data)
+            if self.context is not None:
+                attrs['pybel_context'] = str(self.context)
             rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
             relationships.append(rel)
 
