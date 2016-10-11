@@ -1,4 +1,4 @@
-from pybel.parser.test_utils import TestTokenParserBase
+from tests.constants import TestTokenParserBase
 
 
 class TestEnsure(TestTokenParserBase):

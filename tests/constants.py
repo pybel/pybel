@@ -1,7 +1,10 @@
+import os
 import unittest
 
-from .parse_bel import BelParser
-from .utils import subdict_matches, any_subdict_matches
+from pybel.parser.parse_bel import BelParser
+from pybel.parser.utils import subdict_matches, any_subdict_matches
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestTokenParserBase(unittest.TestCase):

@@ -1,6 +1,6 @@
 import logging
 
-from pybel.parser.test_utils import TestTokenParserBase
+from tests.constants import TestTokenParserBase
 
 log = logging.getLogger(__name__)
 

@@ -11,7 +11,7 @@ from requests_file import FileAdapter
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import PyBelException
 from .parser.parse_metadata import MetadataParser
-from .parser.utils import split_file_to_annotations_and_definitions
+from .parser.utils import split_file_to_annotations_and_definitions, flatten
 
 log = logging.getLogger(__name__)
 
@@ -106,16 +106,16 @@ class BELGraph(nx.MultiDiGraph):
         docs, defs, states = split_file_to_annotations_and_definitions(fl)
 
         self.mdp = MetadataParser()
-        for line in docs:
+        for line_number, line in docs:
             try:
                 self.mdp.parseString(line)
             except:
-                log.error('Failed: {}'.format(line))
+                log.error('Failed on [line:{}]: {}'.format(line_number,line))
 
         log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
-        for line in defs:
+        for line_number, line in defs:
             try:
                 res = self.mdp.parseString(line)
                 if len(res) == 2:
@@ -123,26 +123,26 @@ class BELGraph(nx.MultiDiGraph):
                 else:
                     log.debug('{}: [{}]'.format(res[0], ', '.join(res[1:])))
             except ParseException as e:
-                log.error('General parser failure: {}'.format(line))
+                log.error('General parser failure on [line:{}]: {}'.format(line_number, line))
             except PyBelException as e:
-                log.warning('{} {}'.format(e, line))
+                log.warning('{} [line:{}] {}'.format(e, line_number, line))
             except:
-                log.error('General failure: {}'.format(line))
+                log.error('General failure [line:{}]: {}'.format(line_number, line))
 
         log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
         self.bsp = BelParser(graph=self, custom_annotations=self.mdp.annotations_dict)
 
-        for line in states:
+        for line_number, line in states:
             try:
                 self.bsp.parseString(line)
             except ParseException as e:
-                log.error('General parser failure: {}'.format(line))
+                log.error('General parser failure on [line:{}]: {}'.format(line_number, line))
             except PyBelException as e:
-                log.debug('{} {}'.format(e, line))
+                log.debug('{} on [line:{}]: {}'.format(e, line_number, line))
             except:
-                log.error('General failure: {}'.format(line))
+                log.error('General failure on [line:{}]: {}'.format(line_number, line))
 
         log.info('Finished parsing statements section in {:.02f} seconds'.format(time.time() - t))
 
@@ -152,29 +152,24 @@ class BELGraph(nx.MultiDiGraph):
         """Uploads to Neo4J graph database usiny `py2neo`
 
         :param neo_graph:
-        :return:
+        :type neo_graph: py2neo.Graph
         """
         node_map = {}
         for i, (node, data) in enumerate(self.nodes(data=True)):
             node_type = data['type']
-            attrs = {k: v for k, v in data.items() if k != 'type'}
+            attrs = {k: v for k, v in data.items() if k not in ('type', 'name')}
+
+            if 'name' in data:
+                attrs['value'] = data['name']
+
             node_map[node] = py2neo.Node(node_type, name=str(i), **attrs)
 
         relationships = []
         for u, v, data in self.edges(data=True):
             neo_u = node_map[u]
             neo_v = node_map[v]
-
             rel_type = data['relation']
-
-            attrs = {}
-            if 'subject' in data:
-                attrs.update(_flatten_modifier_dict(data['subject'], 'subject'))
-            if 'object' in data:
-                attrs.update(_flatten_modifier_dict(data['object'], 'object'))
-
-            attrs.update({k: v for k, v in data.items() if k not in ('subject', 'object')})
-            print(attrs)
+            attrs = flatten(data)
             rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
             relationships.append(rel)
 
@@ -185,26 +180,3 @@ class BELGraph(nx.MultiDiGraph):
         for rel in relationships:
             tx.create(rel)
         tx.commit()
-
-
-def _flatten_modifier_dict(d, prefix=''):
-    command = d['modification']
-    res = {
-        '{}_modification'.format(prefix): command
-    }
-
-    if command == 'Activity':
-        if 'params' in d and 'activity' in d['params']:
-            if isinstance(d['params']['activity'], (list, tuple)):
-                res['{}_params_activity_namespace'.format(prefix)] = d['params']['activity']['namespace']
-                res['{}_params_activity_value'.format(prefix)] = d['params']['activity']['name']
-            else:
-                res['{}_params_activity'.format(prefix)] = d['params']['activity']
-    elif command in ('Translocation', 'CellSecretion', 'CellSurfaceExpression'):
-        res['{}_params_fromLoc_namespace'.format(prefix)] = d['params']['fromLoc']['namespace']
-        res['{}_params_fromLoc_value'.format(prefix)] = d['params']['fromLoc']['name']
-        res['{}_params_toLoc_namespace'.format(prefix)] = d['params']['toLoc']['namespace']
-        res['{}_params_toLoc_value'.format(prefix)] = d['params']['toLoc']['name']
-    elif command == 'Degradation':
-        pass
-    return res

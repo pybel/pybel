@@ -1,5 +1,8 @@
+import collections
 import logging
 import re
+
+import networkx as nx
 
 log = logging.getLogger(__name__)
 
@@ -7,8 +10,9 @@ re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+AN
 
 
 def sanitize_file_lines(f):
+    """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned"""
     it = map(str.strip, f)
-    it = filter(lambda i_l: i_l[1] and not i_l[1].startswith('#'), enumerate(it))
+    it = filter(lambda i_l: i_l[1] and not i_l[1].startswith('#'), enumerate(it, start=1))
     it = iter(it)
 
     for line_number, line in it:
@@ -39,14 +43,15 @@ def sanitize_file_lines(f):
         if 0 <= comment_loc:
             line = line[:comment_loc]
 
-        yield line
+        yield line_number, line
 
 
 def split_file_to_annotations_and_definitions(file):
+    """Enumerates a line iterable and splits into 3 parts"""
     content = list(sanitize_file_lines(file))
 
-    end_document_section = 1 + max(i for i, l in enumerate(content) if l.startswith('SET DOCUMENT'))
-    end_definitions_section = 1 + max(i for i, l in enumerate(content) if re_match_bel_header.match(l))
+    end_document_section = 1 + max(j for j, (i, l) in enumerate(content) if l.startswith('SET DOCUMENT'))
+    end_definitions_section = 1 + max(j for j, (i, l) in enumerate(content) if re_match_bel_header.match(l))
 
     log.info('File length: {} lines'.format(len(content)))
     documents = content[:end_document_section]
@@ -126,3 +131,31 @@ def any_subdict_matches(a, b):
     :return:
     """
     return any(subdict_matches(sd, b) for sd in a.values())
+
+
+# Borrowed from http://stackoverflow.com/a/6027615
+def flatten(d, parent_key='', sep='_'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+
+def flatten_edges(self):
+    """Returns a new graph with flattened edge data dictionaries
+    :rtype: nx.MultiDiGraph
+    """
+
+    g = nx.MultiDiGraph()
+
+    for node, data in self.nodes(data=True):
+        g.add_node(node, data)
+
+    for u, v, key, data in self.edges(data=True, keys=True):
+        g.add_edge(u, v, key=key, attr_dict=flatten(data))
+
+    return g
