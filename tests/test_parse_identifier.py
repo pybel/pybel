@@ -1,5 +1,6 @@
 import unittest
 
+from pybel.parser import parse_exceptions
 from pybel.parser.parse_identifier import IdentifierParser
 
 
@@ -42,12 +43,12 @@ class TestIdentifierParser(unittest.TestCase):
 
     def test_invalid_3(self):
         s = 'bare'
-        with self.assertRaises(Exception):
+        with self.assertRaises(parse_exceptions.NakedNamespaceException):
             self.parser.parseString(s)
 
     def test_invalid_4(self):
         s = '"quoted"'
-        with self.assertRaises(Exception):
+        with self.assertRaises(parse_exceptions.NakedNamespaceException):
             self.parser.parseString(s)
 
 

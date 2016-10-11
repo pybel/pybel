@@ -1,7 +1,7 @@
 from pyparsing import *
 
 from .baseparser import BaseParser, word, quote
-from .parse_exceptions import InvalidNamespaceException
+from .parse_exceptions import NamespaceException, NakedNamespaceException
 
 
 class IdentifierParser(BaseParser):
@@ -25,7 +25,7 @@ class IdentifierParser(BaseParser):
             self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
 
         self.identifier_bare = (word | quote)('name')
-        if default_namespace is not None:
+        if self.default_namespace is not None:
             self.identifier_bare.setParseAction(self.handle_identifier_default)
         else:
             self.identifier_bare.setParseAction(self.handle_namespace_invalid)
@@ -39,22 +39,22 @@ class IdentifierParser(BaseParser):
     def handle_identifier_qualified(self, s, l, tokens):
         namespace = tokens['namespace']
         if namespace not in self.namespace_dict:
-            raise InvalidNamespaceException('Invalid namespace: {}'.format(namespace))
+            raise NamespaceException('Invalid namespace: {}'.format(namespace))
 
         name = tokens['name']
         if name not in self.namespace_dict[namespace]:
-            raise InvalidNamespaceException('Invalid {} name: {}'.format(namespace, name))
+            raise NamespaceException('Invalid {} name: {}'.format(namespace, name))
 
         return tokens
 
     def handle_identifier_default(self, s, l, tokens):
         name = tokens['name']
         if name not in self.default_namespace:
-            raise Exception('Default namespace missing name: {}'.format(name))
+            raise NamespaceException('Default namespace missing name: {}'.format(name))
         return tokens
 
     def handle_namespace_invalid(self, s, l, tokens):
-        raise Exception('Missing valid namespace: {} {} {}'.format(s,l,tokens))
+        raise NakedNamespaceException('Missing valid namespace: {} {} {}'.format(s,l,tokens))
 
     def get_language(self):
         return self.language
