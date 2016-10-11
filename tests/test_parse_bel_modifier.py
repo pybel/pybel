@@ -1,6 +1,7 @@
 import logging
 
 from tests.constants import TestTokenParserBase
+from pybel.parser.parse_bel import IllegalTranslocationException
 
 log = logging.getLogger(__name__)
 
@@ -226,8 +227,8 @@ class TestTransformation(TestTokenParserBase):
 
     def test_translocation_invalid(self):
         """Fail on an improperly written single argument translocation"""
-        statement = 'tloc(a("T-Lymphocytes"))'
-        with self.assertRaises(Exception):
+        statement = 'tloc(a(NS:"T-Lymphocytes"))'
+        with self.assertRaises(IllegalTranslocationException):
             self.parser.translocation.parseString(statement)
 
     def test_translocation_secretion(self):

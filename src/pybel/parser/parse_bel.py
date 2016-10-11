@@ -12,7 +12,7 @@ from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser
 from .parse_control import ControlParser
-from .parse_exceptions import NestedRelationNotSupportedException
+from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
 from .utils import list2tuple
@@ -253,7 +253,14 @@ class BelParser(BaseParser):
         self.translocation_legacy_singleton.addParseAction(
             handle_debug('PyBEL008 legacy translocation + missing arguments: {s}'))
 
-        self.translocation = (self.translocation_standard | self.translocation_legacy |
+        self.translocation_illegal = translocation_tag + nest(self.simple_abundance)
+
+        def handle_translocation_illegal(s, l, t):
+            raise IllegalTranslocationException('{}{}{}'.format(s, l, t))
+
+        self.translocation_illegal.setParseAction(handle_translocation_illegal)
+
+        self.translocation = ( self.translocation_illegal | self.translocation_standard | self.translocation_legacy |
                               self.translocation_legacy_singleton)
 
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
@@ -431,7 +438,7 @@ class BelParser(BaseParser):
             self.graph.add_edge(sub, obj, attr_dict=attrs)
 
             if tokens['relation'] in (
-            'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'):
+                    'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'):
                 self.graph.add_edge(obj, sub, attr_dict=attrs)
 
             return tokens

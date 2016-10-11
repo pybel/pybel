@@ -24,3 +24,7 @@ class PlaceholderAminoAcidException(PyBelException):
 
 class NakedNamespaceException(PyBelException):
     pass
+
+
+class IllegalTranslocationException(PyBelException):
+    pass
