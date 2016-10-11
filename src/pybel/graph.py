@@ -65,7 +65,7 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiGraph to hold a BEL graph."""
 
-    def __init__(self, *attrs, context=None, **kwargs):
+    def __init__(self, context=None, *attrs, **kwargs):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self.bsp = None
