@@ -145,7 +145,7 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('TextLocation', self.parser.annotations_dict)
         self.assertIn('TextLocation', self.parser.annotations_metadata)
 
-        s = 'DEFINE NAMESPACE TextLocation AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
+        s = 'DEFINE ANNOTATION TextLocation AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
         self.parser.parseString(s)
         self.assertIn('TextLocation', self.parser.annotations_dict)
         self.assertIn('TextLocation', self.parser.annotations_metadata)
@@ -235,6 +235,27 @@ class TestParseMetadata(unittest.TestCase):
 
         self.assertIn('TEST', self.parser.namespace_dict)
         self.assertEqual(expected_values, self.parser.namespace_dict['TEST'])
+
+    def test_parse_annotation_url_1(self):
+        path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
+        s = '''DEFINE ANNOTATION Test AS URL "file://{}"'''.format(path)
+        self.parser.parseString(s)
+
+        expected_values = {
+            'TestAnnot1': 'O',
+            'TestAnnot2': 'O',
+            'TestAnnot3': 'O',
+            'TestAnnot4': 'O',
+            'TestAnnot5': 'O'
+        }
+
+        self.assertIn('Test', self.parser.annotations_dict)
+        self.assertEqual(expected_values, self.parser.annotations_dict['Test'])
+
+    def test_parse_pattern(self):
+        s = 'DEFINE ANNOTATION Test AS PATTERN "\w+"'
+        with self.assertRaises(NotImplementedError):
+            self.parser.parseString(s)
 
 
 class TestParseControl(unittest.TestCase):
