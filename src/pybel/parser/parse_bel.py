@@ -260,7 +260,7 @@ class BelParser(BaseParser):
 
         self.translocation_illegal.setParseAction(handle_translocation_illegal)
 
-        self.translocation = ( self.translocation_illegal | self.translocation_standard | self.translocation_legacy |
+        self.translocation = (self.translocation_illegal | self.translocation_standard | self.translocation_legacy |
                               self.translocation_legacy_singleton)
 
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
@@ -567,15 +567,16 @@ class BelParser(BaseParser):
 
         elif 'function' in tokens and 'variants' in tokens:
             name = self.canonicalize_node(tokens)
+            cls = '{}Variant'.format(tokens['function'])
             if name not in self.graph:
-                self.graph.add_node(name)
+                self.graph.add_node(name, type=cls)
 
             c = {
                 'function': tokens['function'],
                 'identifier': tokens['identifier']
             }
 
-            parent = self.canonicalize_node(c)
+            parent = self.ensure_node(s, l, c)
             self.add_unqualified_edge(parent, name, relation='hasVariant')
             return name
 
