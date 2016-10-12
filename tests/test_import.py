@@ -9,7 +9,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestImport(unittest.TestCase):
     @unittest.skip
     def test_full(self):
-
         path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
         g = pybel.from_file(path)
 
@@ -24,3 +23,12 @@ class TestImport(unittest.TestCase):
         }
 
         self.assertEqual(expected_document_metadata, g.mdp.document_metadata)
+
+    def test_from_url(self):
+        g = pybel.from_url('http://resource.belframework.org/belframework/20150611/knowledge/full_abstract1.bel')
+        self.assertIsNotNone(g)
+
+    def test_from_fileUrl(self):
+        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
+        g = pybel.from_url('file://{}'.format(path))
+        self.assertIsNotNone(g)

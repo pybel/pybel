@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import time
@@ -5,6 +6,7 @@ import time
 import networkx as nx
 import py2neo
 import requests
+from networkx.readwrite import json_graph
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
@@ -98,7 +100,7 @@ class BELGraph(nx.MultiDiGraph):
         response = session.get(url)
         response.raise_for_status()
 
-        return self.parse_from_lines(response.iter_lines())
+        return self.parse_from_lines(line.decode('utf-8') for line in response.iter_lines())
 
     def parse_from_lines(self, fl):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
@@ -153,12 +155,18 @@ class BELGraph(nx.MultiDiGraph):
 
         return self
 
-    def to_neo4j(self, neo_graph):
+    def to_neo4j(self, neo_graph, context=None):
         """Uploads to Neo4J graph database usiny `py2neo`
 
         :param neo_graph:
         :type neo_graph: py2neo.Graph
+        :param context: a disease context to allow for multiple disease models in one neo4j instance
+        :type context: str
         """
+
+        if context is not None:
+            self.context = context
+
         node_map = {}
         for i, (node, data) in enumerate(self.nodes(data=True)):
             node_type = data['type']
@@ -189,5 +197,33 @@ class BELGraph(nx.MultiDiGraph):
         tx.commit()
 
     def to_pickle(self, output):
-        """Writes this graph to a pickle object with nx.write_gpickle"""
+        """Writes this graph to a pickle object with nx.write_gpickle
+
+        :param output: a file or filename to write to
+        """
         nx.write_gpickle(flatten_edges(self), output)
+
+    def to_json(self, output):
+        """Writes this graph to a node-link JSON object
+
+        :param output: a write-supporting filelike object
+        :return:
+        """
+        data = json_graph.node_link_data(flatten_edges(self))
+        json.dump(data, output, ensure_ascii=False)
+
+    def to_graphml(self, output):
+        """Writes this graph to GraphML file
+
+        :param output: a file or filelike object
+        :return:
+        """
+        nx.write_graphml(flatten_edges(self), output)
+
+    def to_csv(self, output):
+        """Writes graph to edge list csv
+
+        :param output: a file or filelike object
+        """
+
+        nx.write_edgelist(flatten_edges(self), output, data=True)
