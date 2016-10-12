@@ -3,7 +3,7 @@
 from . import cli
 from .graph import BELGraph, from_path, from_lines, from_url, from_database
 
-__all__ = ['from_url', 'from_path', 'from_lines', 'from_database']
+__all__ = ['from_url', 'from_path', 'from_lines', 'from_database', 'BELGraph']
 
 __version__ = '0.1.2'
 

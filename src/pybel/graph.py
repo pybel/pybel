@@ -11,7 +11,7 @@ from requests_file import FileAdapter
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import PyBelException
 from .parser.parse_metadata import MetadataParser
-from .parser.utils import split_file_to_annotations_and_definitions, flatten
+from .parser.utils import split_file_to_annotations_and_definitions, flatten, flatten_edges
 
 log = logging.getLogger(__name__)
 
@@ -72,6 +72,10 @@ class BELGraph(nx.MultiDiGraph):
         self.mdp = None
         self.context = context
 
+    def clear(self):
+        """Clears the content of the graph and its BEL parser"""
+        self.bsp.clear()
+
     def parse_from_path(self, path):
         """Opens a BEL file from a given path and parses it
         :param path: path to BEL file
@@ -89,7 +93,7 @@ class BELGraph(nx.MultiDiGraph):
         """
 
         session = requests.session()
-        if url.starts('file://'):
+        if url.startswith('file://'):
             session.mount('file://', FileAdapter())
         response = session.get(url)
         response.raise_for_status()
@@ -111,7 +115,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.mdp.parseString(line)
             except:
-                log.error('Failed on [line:{}]: {}'.format(line_number,line))
+                log.error('Failed on [line:{}]: {}'.format(line_number, line))
 
         log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
@@ -183,3 +187,7 @@ class BELGraph(nx.MultiDiGraph):
         for rel in relationships:
             tx.create(rel)
         tx.commit()
+
+    def to_pickle(self, output):
+        """Writes this graph to a pickle object with nx.write_gpickle"""
+        nx.write_gpickle(flatten_edges(self), output)

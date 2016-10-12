@@ -13,11 +13,7 @@ class TestTokenParserBase(unittest.TestCase):
         cls.parser = BelParser()
 
     def setUp(self):
-        self.parser.graph.clear()
-        self.parser.clear_annotations()
-        self.parser.node_to_id.clear()
-        self.parser.id_to_node.clear()
-        self.parser.node_count = 0
+        self.parser.clear()
 
     def assertHasNode(self, member, msg=None, **kwargs):
         self.assertIn(member, self.parser.graph)
