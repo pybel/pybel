@@ -206,7 +206,11 @@ class TestUtils(unittest.TestCase):
         expected = nx.MultiDiGraph()
         expected.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B_C': 'c', 'B_D': 'd'})
 
-        self.assertCountEqual(result.nodes(), expected.nodes())
-        self.assertCountEqual(result.edges(data=True, keys=True), expected.edges(data=True, keys=True))
+        self.assertEqual(set(result.nodes()), set(expected.nodes()))
 
+        res_edges = result.edges(keys=True)
+        exp_edges = expected.edges(keys=True)
+        self.assertEqual(set(res_edges), set(exp_edges))
 
+        for u, v, k in expected.edges(keys=True):
+            self.assertEqual(expected[u][v][k], result[u][v][k])
