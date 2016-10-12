@@ -6,7 +6,7 @@ from .baseparser import BaseParser, LP, RP, WCW, word, nest
 from .language import aa_triple, amino_acid, dna_nucleotide, dna_nucleotide_labels, rna_nucleotide_labels
 from .parse_identifier import IdentifierParser
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 dna_nucleotide_seq = Word(''.join(dna_nucleotide_labels.keys()))
 rna_nucleotide_seq = Word(''.join(rna_nucleotide_labels.keys()))

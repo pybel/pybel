@@ -4,7 +4,7 @@ import re
 
 import networkx as nx
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 

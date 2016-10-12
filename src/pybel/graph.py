@@ -15,7 +15,7 @@ from .parser.parse_exceptions import PyBelException
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, flatten, flatten_edges
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 
 def from_lines(it):
@@ -24,7 +24,6 @@ def from_lines(it):
     :return a parsed BEL graph
     :rtype: BELGraph
     """
-
     return BELGraph().parse_from_lines(it)
 
 
@@ -35,7 +34,7 @@ def from_url(url):
     :return: a parsed BEL graph
     :rtype BELGraph
     """
-
+    log.info('Loading from url: {}'.format(url))
     return BELGraph().parse_from_url(url)
 
 
@@ -46,6 +45,7 @@ def from_path(path):
     :return: a parsed BEL graph
     :rtype BELGraph
     """
+    log.info('Loading from path: {}'.format(path))
     with open(os.path.expanduser(path)) as f:
         return from_lines(f)
 
@@ -117,7 +117,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.mdp.parseString(line)
             except:
-                log.error('Failed on [line:{}]: {}'.format(line_number, line))
+                log.error('Line {:05} - failed: {}'.format(line_number, line))
 
         log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
@@ -130,11 +130,11 @@ class BELGraph(nx.MultiDiGraph):
                 else:
                     log.debug('{}: [{}]'.format(res[0], ', '.join(res[1:])))
             except ParseException as e:
-                log.error('General parser failure on [line:{}]: {}'.format(line_number, line))
+                log.error('Line {:05} - invalid statement: {}'.format(line_number, line))
             except PyBelException as e:
-                log.warning('{} [line:{}] {}'.format(e, line_number, line))
+                log.warning('Line {:05} - {}: {}'.format(line_number, e, line))
             except:
-                log.error('General failure [line:{}]: {}'.format(line_number, line))
+                log.error('Line {:05} - general failure: {}'.format(line_number, line))
 
         log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
@@ -145,11 +145,11 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.bsp.parseString(line)
             except ParseException as e:
-                log.error('General parser failure on [line:{}]: {}'.format(line_number, line))
+                log.error('Line {:05} - general parser failure: {}'.format(line_number, line))
             except PyBelException as e:
-                log.debug('{} on [line:{}]: {}'.format(e, line_number, line))
+                log.debug('Line {:05} - {}'.format(line_number, e, line))
             except:
-                log.error('General failure on [line:{}]: {}'.format(line_number, line))
+                log.error('Line {:05} - general failure: {}'.format(line_number, line))
 
         log.info('Finished parsing statements section in {:.02f} seconds'.format(time.time() - t))
 
@@ -213,7 +213,7 @@ class BELGraph(nx.MultiDiGraph):
         json.dump(data, output, ensure_ascii=False)
 
     def to_graphml(self, output):
-        """Writes this graph to GraphML file
+        """Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it
 
         :param output: a file or filelike object
         :return:

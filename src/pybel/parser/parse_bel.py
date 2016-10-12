@@ -17,7 +17,7 @@ from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
 from .utils import list2tuple
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 
 def handle_debug(fmt):

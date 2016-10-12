@@ -6,7 +6,7 @@ from .baseparser import BaseParser, nest
 from .language import amino_acid, pmod_namespace, pmod_legacy_labels
 from .parse_identifier import IdentifierParser
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 
 class PmodParser(BaseParser):

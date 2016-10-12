@@ -10,7 +10,7 @@ from pyparsing import *
 
 from .parse_exceptions import PlaceholderAminoAcidException
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 activity_labels = {
     'catalyticActivity': 'CatalyticActivity',

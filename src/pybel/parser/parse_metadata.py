@@ -7,7 +7,7 @@ from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 __all__ = ['MetadataParser']
 

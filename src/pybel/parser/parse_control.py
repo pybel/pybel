@@ -5,7 +5,7 @@ from pyparsing import Suppress, oneOf
 from .baseparser import BaseParser, W, quote, delimitedSet
 from .parse_exceptions import *
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 
 # TODO remove citation and annotations as arguments?
