@@ -102,10 +102,10 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         name = self.parser.canonicalize_node(result)
-        self.assertHasNode(name)
+        self.assertHasNode(name, type='GeneVariant')
 
         parent = 'Gene', 'HGNC', 'AKT1'
-        self.assertHasNode(parent)
+        self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
 
         self.assertHasEdge(parent, name, relation='hasVariant')
 
@@ -131,7 +131,12 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         name = self.parser.canonicalize_node(result)
-        self.assertHasNode(name)
+        self.assertHasNode(name, type='GeneVariant')
+
+        parent = 'Gene', 'HGNC', 'AKT1'
+        self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
+
+        self.assertHasEdge(parent, name, relation='hasVariant')
 
     def test_variant_location(self):
         """Test BEL 1.0 gene substitution with location tag"""
@@ -159,7 +164,12 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         name = self.parser.canonicalize_node(result)
-        self.assertHasNode(name)
+        self.assertHasNode(name, type='GeneVariant')
+
+        parent = 'Gene', 'HGNC', 'AKT1'
+        self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
+
+        self.assertHasEdge(parent, name, relation='hasVariant')
 
     def test_214e(self):
         """Test multiple variants"""
@@ -185,7 +195,12 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         name = self.parser.canonicalize_node(result)
-        self.assertHasNode(name)
+        self.assertHasNode(name, type='GeneVariant')
+
+        parent = 'Gene', 'HGNC', 'AKT1'
+        self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
+
+        self.assertHasEdge(parent, name, relation='hasVariant')
 
     def test_gene_fusion_1(self):
         statement = 'g(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))'
@@ -216,7 +231,7 @@ class TestGene(TestTokenParserBase):
         self.assertHasNode(mod_node)
 
         gene_node = 'Gene', 'SNP', 'rs113993960'
-        self.assertHasNode(gene_node)
+        self.assertHasNode(gene_node, type='Gene', namespace='SNP', name='rs113993960')
 
         self.assertHasEdge(gene_node, mod_node, relation='hasVariant')
 
@@ -231,8 +246,8 @@ class TestGene(TestTokenParserBase):
         gene_node = 'Gene', 'REF', 'NC_000007.13'
         mod_node = self.parser.canonicalize_node(result)
 
-        self.assertHasNode(gene_node)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(gene_node, type='Gene', namespace='REF', name='NC_000007.13')
+        self.assertHasNode(mod_node, type='GeneVariant')
         self.assertHasEdge(gene_node, mod_node, relation='hasVariant')
 
     def test_gene_variant_deletion(self):
@@ -244,10 +259,10 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         mod_node = self.parser.canonicalize_node(result)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(mod_node, type='GeneVariant')
 
         gene_node = 'Gene', 'HGNC', 'CFTR'
-        self.assertHasNode(gene_node)
+        self.assertHasNode(gene_node, type='Gene', namespace='HGNC', name='CFTR')
 
         self.assertHasEdge(gene_node, mod_node, relation='hasVariant')
 
@@ -406,7 +421,7 @@ class TestProtein(TestTokenParserBase):
         expected_node = 'Protein', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
-        self.assertHasNode(node)
+        self.assertHasNode(node, type='Protein', namespace='HGNC', name='AKT1')
 
     def test_multiVariant(self):
         statement = 'p(HGNC:AKT1,sub(A,127,Y),pmod(Ph, Ser),loc(GOCC:intracellular))'
@@ -441,10 +456,10 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         node = self.parser.canonicalize_node(result)
-        self.assertHasNode(node)
+        self.assertHasNode(node, type='ProteinVariant')
 
         parent = 'Protein', 'HGNC', 'AKT1'
-        self.assertHasNode(parent)
+        self.assertHasNode(parent, type='Protein', namespace='HGNC', name='AKT1')
         self.assertHasEdge(parent, node, relation='hasVariant')
 
     def test_protein_fusion_1(self):
@@ -475,8 +490,8 @@ class TestProtein(TestTokenParserBase):
         protein_node = 'Protein', 'HGNC', 'AKT1'
         mod_node = self.parser.canonicalize_node(result)
 
-        self.assertHasNode(protein_node)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='AKT1')
+        self.assertHasNode(mod_node, type='ProteinVariant')
         # self.assertHasEdge(mod_node, protein_node, relation='hasParent')
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -491,8 +506,8 @@ class TestProtein(TestTokenParserBase):
         protein_node = 'Protein', 'HGNC', 'AKT1'
         mod_node = self.parser.canonicalize_node(result)
 
-        self.assertHasNode(protein_node)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='AKT1')
+        self.assertHasNode(mod_node, type='ProteinVariant')
         # self.assertHasEdge(mod_node, protein_node, relation='hasParent')
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -507,7 +522,7 @@ class TestProtein(TestTokenParserBase):
         self.assertHasNode(mod_node)
 
         protein_node = 'Protein', 'HGNC', 'AKT1'
-        self.assertHasNode(protein_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='AKT1')
 
         # self.assertHasEdge(mod_node, protein_node, relation='hasParent)
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
@@ -522,8 +537,8 @@ class TestProtein(TestTokenParserBase):
         protein_node = 'Protein', 'HGNC', 'HRAS'
         mod_node = self.parser.canonicalize_node(result)
 
-        self.assertHasNode(protein_node)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='HRAS')
+        self.assertHasNode(mod_node, type='ProteinVariant')
         # self.assertHasEdge(mod_node, protein_node, relation='hasParent')
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -538,10 +553,10 @@ class TestProtein(TestTokenParserBase):
         # self.assertEqual(mod_node, self.parser.canonicalize_node(result))
 
         mod_node = self.parser.canonicalize_node(result)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
-        self.assertHasNode(protein_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
 
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -557,8 +572,8 @@ class TestProtein(TestTokenParserBase):
         # mod_node = 'Protein', 'HGNC', 'CFTR', 'Variant', '?'
         mod_node = self.parser.canonicalize_node(result)
 
-        self.assertHasNode(protein_node)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
+        self.assertHasNode(mod_node, type='ProteinVariant')
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
     def test_protein_variant_substitution(self):
@@ -572,8 +587,8 @@ class TestProtein(TestTokenParserBase):
         # mod_node = 'Protein', 'HGNC', 'CFTR', 'Variant', 'Gly', 576, 'Ala'
         mod_node = self.parser.canonicalize_node(result)
 
-        self.assertHasNode(protein_node)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
+        self.assertHasNode(mod_node, type='ProteinVariant')
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
     def test_protein_variant_deletion(self):
@@ -587,7 +602,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = 'Protein', 'HGNC', 'CFTR'
         mod_node = self.parser.canonicalize_node(result)
 
-        self.assertHasNode(protein_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
         self.assertHasNode(mod_node)
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -600,10 +615,10 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         mod_node = self.parser.canonicalize_node(result)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
-        self.assertHasNode(protein_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='YFG')
 
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -616,10 +631,10 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         mod_node = self.parser.canonicalize_node(result)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
-        self.assertHasNode(protein_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='YFG')
 
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -632,10 +647,10 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         mod_node = self.parser.canonicalize_node(result)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
-        self.assertHasNode(protein_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='YFG')
 
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -648,10 +663,10 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         mod_node = self.parser.canonicalize_node(result)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
-        self.assertHasNode(protein_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='YFG')
 
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -663,10 +678,10 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         mod_node = self.parser.canonicalize_node(result)
-        self.assertHasNode(mod_node)
+        self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
-        self.assertHasNode(protein_node)
+        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='YFG')
 
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -694,7 +709,7 @@ class TestRna(TestTokenParserBase):
         expected_node = 'RNA', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
-        self.assertHasNode(node)
+        self.assertHasNode(node, type='RNA', namespace='HGNC', name='AKT1')
 
     def test_214e(self):
         """Test multiple variants"""
@@ -715,7 +730,12 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         name = self.parser.canonicalize_node(result)
-        self.assertHasNode(name)
+        self.assertHasNode(name, type='RNAVariant')
+
+        parent = 'RNA', 'HGNC', 'AKT1'
+        self.assertHasNode(parent, type='RNA', namespace='HGNC', name='AKT1')
+
+        self.assertHasEdge(parent, name, relation='hasVariant')
 
     def test_261a(self):
         """2.6.1 RNA abundance of fusion with known breakpoints"""
@@ -746,7 +766,7 @@ class TestRna(TestTokenParserBase):
         self.assertHasNode(mod_node)
 
         rna_node = 'RNA', 'HGNC', 'CFTR'
-        self.assertHasNode(rna_node)
+        self.assertHasNode(rna_node, type='RNA', namespace='HGNC', name='CFTR')
 
         self.assertHasEdge(rna_node, mod_node, relation='hasVariant')
 
@@ -762,7 +782,7 @@ class TestRna(TestTokenParserBase):
         self.assertHasNode(mod_node)
 
         rna_node = 'RNA', 'HGNC', 'CFTR'
-        self.assertHasNode(rna_node)
+        self.assertHasNode(rna_node, type='RNA', namespace='HGNC', name='CFTR')
 
         self.assertHasEdge(rna_node, mod_node, relation='hasVariant')
 

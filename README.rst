@@ -29,19 +29,32 @@ PyBEL provides a simple API so bioinformaticians and scientists with limited pro
 Command Line Interface
 ----------------------
 
-PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data conversion.
+PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data conversion. Need help? All logs go to :code:`~/.pybel`
+
+Export for Cytoscape
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: sh
+
+    $ pybel to_graphml --path ~/Desktop/example.bel --output ~/Desktop/example.graphml
+   
+In Cytoscape, open with :code:`Import > Network > From File`.
+
+Export to Neo4j
+~~~~~~~~~~~~~~~
 
 .. code-block:: sh
 
    $ URL="http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel"
    $ NEO="neo4j:neo4j@localhost:7474"
    $
-   $ pybel to_neo --url "$URL" --neo "$NEO"
+   $ pybel to_neo --url $URL --neo $NEO
 
 
 Installation
 ------------
 
+Check :code:`CONTRIBUTING.rst` for installing the latest version from GitHub or a zip archive.
 In the future, this repository will be open to the public for use. Installation will be as easy as:
 
 .. code-block:: sh
@@ -52,7 +65,8 @@ In the future, this repository will be open to the public for use. Installation 
 Contributing
 ------------
 
-Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See :code:`CONTRIBUTING.rst` for more information on getting involved.
+Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
+:code:`CONTRIBUTING.rst` for more information on getting involved.
 
 
 The Cool Pool of Tools

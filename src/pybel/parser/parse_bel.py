@@ -12,12 +12,12 @@ from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser
 from .parse_control import ControlParser
-from .parse_exceptions import NestedRelationNotSupportedException
+from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
 from .utils import list2tuple
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 
 def handle_debug(fmt):
@@ -34,20 +34,22 @@ def handle_debug(fmt):
 
 
 class BelParser(BaseParser):
-    """Build a parser backed by a given dictionary of namespaces"""
+    def __init__(self, graph=None, namespace_dict=None, namespace_mapping=None, custom_annotations=None, lenient=False):
+        """Build a parser backed by a given dictionary of namespaces
 
-    def __init__(self, graph=None, namespace_dict=None, namespace_mapping=None, custom_annotations=None):
-        """
         :param namespace_dict: A dictionary of {namespace: set of members}
         :param graph: the graph to put the network in. Constructs new nx.MultiDiGrap if None
         :type graph: nx.MultiDiGraph
         :param namespace_mapping: a dict of {name: {value: (other_namepace, other_name)}}
+        :param lenient: if true, turn off naked namespace failures
+        :type lenient: bool
         """
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
 
         self.control_parser = ControlParser(custom_annotations=custom_annotations)
-        self.identifier_parser = IdentifierParser(namespace_dict=namespace_dict, mapping=namespace_mapping)
+        self.identifier_parser = IdentifierParser(namespace_dict=namespace_dict, mapping=namespace_mapping,
+                                                  lenient=lenient)
 
         self.node_count = 0
         self.node_to_id = {}
@@ -253,7 +255,14 @@ class BelParser(BaseParser):
         self.translocation_legacy_singleton.addParseAction(
             handle_debug('PyBEL008 legacy translocation + missing arguments: {s}'))
 
-        self.translocation = (self.translocation_standard | self.translocation_legacy |
+        self.translocation_illegal = translocation_tag + nest(self.simple_abundance)
+
+        def handle_translocation_illegal(s, l, t):
+            raise IllegalTranslocationException('{}{}{}'.format(s, l, t))
+
+        self.translocation_illegal.setParseAction(handle_translocation_illegal)
+
+        self.translocation = (self.translocation_illegal | self.translocation_standard | self.translocation_legacy |
                               self.translocation_legacy_singleton)
 
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
@@ -431,7 +440,7 @@ class BelParser(BaseParser):
             self.graph.add_edge(sub, obj, attr_dict=attrs)
 
             if tokens['relation'] in (
-            'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'):
+                    'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'):
                 self.graph.add_edge(obj, sub, attr_dict=attrs)
 
             return tokens
@@ -456,6 +465,14 @@ class BelParser(BaseParser):
         """Clears the current annotations in this parser"""
         self.control_parser.clear_annotations()
 
+    def clear(self):
+        """Clears the data stored in the parser"""
+        self.node_count = 0
+        self.node_to_id.clear()
+        self.id_to_node.clear()
+        self.graph.clear()
+        self.control_parser.clear()
+
     def handle_has_members(self, s, l, tokens):
         parent = self.ensure_node(s, l, tokens[0])
         for child_tokens in tokens[2]:
@@ -469,6 +486,7 @@ class BelParser(BaseParser):
 
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
+
         :param u: source node
         :param v: target node
         :param relation: relationship label
@@ -528,7 +546,11 @@ class BelParser(BaseParser):
             return self.canonicalize_node(tokens['target'])
 
     def ensure_node(self, s, l, tokens):
-        """Turns parsed tokens into canonical node name and makes sure its in the graph"""
+        """Turns parsed tokens into canonical node name and makes sure its in the graph
+
+        :return: the canonical name of the node
+        :rtype: str
+        """
 
         if 'modifier' in tokens:
             return self.ensure_node(s, l, tokens['target'])
@@ -560,15 +582,16 @@ class BelParser(BaseParser):
 
         elif 'function' in tokens and 'variants' in tokens:
             name = self.canonicalize_node(tokens)
+            cls = '{}Variant'.format(tokens['function'])
             if name not in self.graph:
-                self.graph.add_node(name)
+                self.graph.add_node(name, type=cls)
 
             c = {
                 'function': tokens['function'],
                 'identifier': tokens['identifier']
             }
 
-            parent = self.canonicalize_node(c)
+            parent = self.ensure_node(s, l, c)
             self.add_unqualified_edge(parent, name, relation='hasVariant')
             return name
 
@@ -622,10 +645,10 @@ class BelParser(BaseParser):
                 return name
 
     def canonicalize_modifier(self, tokens):
-        """
-        Get activity, transformation, or transformation information as a dictionary
-        :param tokens:
-        :return:
+        """Get activity, transformation, or transformation information as a dictionary
+
+        :return: a dictionary describing the modifier
+        :rtype: dict
         """
 
         attrs = {}

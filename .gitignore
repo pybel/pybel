@@ -11,3 +11,5 @@ scratch/*
 .cache/*
 
 notebooks/PyBEL Playtime.ipynb
+
+*.gpickle

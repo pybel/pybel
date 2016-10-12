@@ -2,6 +2,7 @@ graft src
 graft tests
 
 include *.rst
+include LICENSE
 
 global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store
 

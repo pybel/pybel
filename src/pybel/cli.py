@@ -12,19 +12,15 @@ problems--the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
-import json
 import logging
 import sys
 
 import click
-import networkx as nx
 import py2neo
-from networkx.readwrite import json_graph
 
 from . import graph
-from .parser.utils import flatten_edges
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 
 @click.group(help="PyBEL Command Line Utilities")
@@ -43,7 +39,7 @@ def to_neo(path, url, database, neo, context):
     """Parses BEL file and uploads to Neo4J"""
 
     p2n = py2neo.Graph(neo)
-    p2n.data('match (n) return count(n) as count')[0]['count']
+    assert p2n.data('match (n) return count(n) as count')[0]['count'] is not None
 
     if path:
         g = graph.from_path(path)
@@ -54,8 +50,7 @@ def to_neo(path, url, database, neo, context):
     else:
         raise ValueError('missing BEL file')
 
-    g.context = context
-    g.to_neo4j(p2n)
+    g.to_neo4j(p2n, context)
 
 
 # FIXME
@@ -75,17 +70,16 @@ def to_csv(path, url, database, edge_path):
     else:
         raise ValueError('missing BEL file')
 
-    h = flatten_edges(g)
-    nx.write_edgelist(h, edge_path, data=True)
+    g.to_csv(edge_path)
 
 
 @main.command()
 @click.option('--path', help='BEL file file path')
 @click.option('--url', help='BEL file URL')
 @click.option('--database', help='BEL database')
-@click.option('--output', default=sys.stdout)
+@click.option('--output', default=sys.stdout, help="GraphML outout. Use .graphml extension for cytoscape")
 def to_graphml(path, url, database, output):
-    """Parses BEL file and exports as GraphML file"""
+    """Parses BEL file and exports as GraphML file. Use .graphml extension for Cytoscape"""
     if path:
         g = graph.from_path(path)
     elif url:
@@ -95,7 +89,7 @@ def to_graphml(path, url, database, output):
     else:
         raise ValueError('missing BEL file')
 
-    nx.write_graphml(flatten_edges(g), output)
+    g.to_graphml(output)
 
 
 @main.command()
@@ -115,7 +109,7 @@ def to_pickle(path, url, database, output):
     else:
         raise ValueError('missing BEL file')
 
-    nx.write_gpickle(flatten_edges(g), output)
+    g.to_pickle(output)
 
 
 @main.command()
@@ -134,8 +128,7 @@ def to_json(path, url, database, output):
     else:
         raise ValueError('missing BEL file')
 
-    data = json_graph.node_link_data(flatten_edges(g))
-    json.dump(data, output, ensure_ascii=False)
+    g.to_json(output)
 
 
 if __name__ == '__main__':

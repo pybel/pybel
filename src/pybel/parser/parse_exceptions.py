@@ -14,9 +14,17 @@ class NestedRelationNotSupportedException(PyBelException):
     pass
 
 
-class InvalidNamespaceException(PyBelException):
+class NamespaceException(PyBelException):
     pass
 
 
 class PlaceholderAminoAcidException(PyBelException):
+    pass
+
+
+class NakedNamespaceException(PyBelException):
+    pass
+
+
+class IllegalTranslocationException(PyBelException):
     pass

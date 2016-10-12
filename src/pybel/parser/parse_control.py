@@ -5,16 +5,16 @@ from pyparsing import Suppress, oneOf
 from .baseparser import BaseParser, W, quote, delimitedSet
 from .parse_exceptions import *
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 
+# TODO remove citation and annotations as arguments?
 class ControlParser(BaseParser):
     def __init__(self, citation=None, annotations=None, custom_annotations=None):
         """Builds parser for BEL custom_annotations statements
 
         :param custom_annotations: A dictionary from {annotation: set of valid values} for parsing
         :type custom_annotations: dict
-        :return:
         """
 
         self.citation = {} if citation is None else citation
@@ -120,3 +120,8 @@ class ControlParser(BaseParser):
 
     def clear_annotations(self):
         self.annotations.clear()
+
+    def clear(self):
+        self.annotations.clear()
+        self.citation.clear()
+        self.statement_group = None

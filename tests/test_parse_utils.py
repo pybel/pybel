@@ -178,3 +178,39 @@ class TestUtils(unittest.TestCase):
         }
 
         self.assertFalse(check_stability(d, m))
+
+    def test_flatten_dict(self):
+        d = {
+            'A': 5,
+            'B': 'b',
+            'C': {
+                'D': 'd',
+                'E': 'e'
+            }
+        }
+
+        expected = {
+            'A': 5,
+            'B': 'b',
+            'C_D': 'd',
+            'C_E': 'e'
+        }
+        self.assertEqual(expected, utils.flatten(d))
+
+    def test_flatten_edges(self):
+        g = nx.MultiDiGraph()
+        g.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}})
+
+        result = utils.flatten_edges(g)
+
+        expected = nx.MultiDiGraph()
+        expected.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B_C': 'c', 'B_D': 'd'})
+
+        self.assertEqual(set(result.nodes()), set(expected.nodes()))
+
+        res_edges = result.edges(keys=True)
+        exp_edges = expected.edges(keys=True)
+        self.assertEqual(set(res_edges), set(exp_edges))
+
+        for u, v, k in expected.edges(keys=True):
+            self.assertEqual(expected[u][v][k], result[u][v][k])

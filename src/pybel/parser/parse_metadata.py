@@ -7,7 +7,7 @@ from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel')
 
 __all__ = ['MetadataParser']
 
@@ -62,7 +62,7 @@ class MetadataParser(BaseParser):
         self.annotation_list = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
         self.annotation_pattern = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress(
-            'PATTERNS') + W + quote('value')
+            'PATTERN') + W + quote('value')
 
         self.document.setParseAction(self.handle_document)
         self.namespace_url.setParseAction(self.handle_namespace_url)
@@ -72,7 +72,7 @@ class MetadataParser(BaseParser):
         self.annotation_pattern.setParseAction(self.handle_annotation_pattern)
 
         self.language = (self.document | self.namespace_url | self.namespace_list |
-                         self.annotation_url | self.annotation_list)
+                         self.annotation_url | self.annotation_list | self.annotation_pattern)
 
     def get_language(self):
         return self.language

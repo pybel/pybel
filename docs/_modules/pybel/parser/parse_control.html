@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pybel.parser.parse_control &#8212; PyBEL 0.1.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="top" title="PyBEL 0.1.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyBEL 0.1.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pybel.parser.parse_control</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">pyparsing</span> <span class="k">import</span> <span class="n">Suppress</span><span class="p">,</span> <span class="n">oneOf</span>
+
+<span class="kn">from</span> <span class="nn">.baseparser</span> <span class="k">import</span> <span class="n">BaseParser</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">quote</span><span class="p">,</span> <span class="n">delimitedSet</span>
+<span class="kn">from</span> <span class="nn">.parse_exceptions</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pybel&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># TODO remove citation and annotations as arguments?</span>
+<div class="viewcode-block" id="ControlParser"><a class="viewcode-back" href="../../../parsers.html#pybel.parser.parse_control.ControlParser">[docs]</a><span class="k">class</span> <span class="nc">ControlParser</span><span class="p">(</span><span class="n">BaseParser</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">citation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Builds parser for BEL custom_annotations statements</span>
+
+<span class="sd">        :param custom_annotations: A dictionary from {annotation: set of valid values} for parsing</span>
+<span class="sd">        :type custom_annotations: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">citation</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">citation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">citation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">annotations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">annotations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_annotations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">custom_annotations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">custom_annotations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statement_group</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">custom_annotations</span> <span class="o">=</span> <span class="n">oneOf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">custom_annotations</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">set_tag</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;SET&#39;</span><span class="p">)</span>
+        <span class="n">unset_tag</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;UNSET&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_statement_group</span> <span class="o">=</span> <span class="n">set_tag</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;STATEMENT_GROUP&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">quote</span><span class="p">(</span>
+            <span class="s1">&#39;group&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_statement_group</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_statement_group</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_citation</span> <span class="o">=</span> <span class="n">set_tag</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;Citation&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">delimitedSet</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_citation</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_citation</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_evidence</span> <span class="o">=</span> <span class="n">set_tag</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;Evidence&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">quote</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_evidence</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_evidence</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_command</span> <span class="o">=</span> <span class="n">set_tag</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">custom_annotations</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">quote</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_command</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_set_command</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_command_list</span> <span class="o">=</span> <span class="n">set_tag</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">custom_annotations</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">delimitedSet</span><span class="p">(</span>
+            <span class="s1">&#39;values&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_command_list</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_set_command_list</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">unset_command</span> <span class="o">=</span> <span class="n">unset_tag</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="p">(</span><span class="n">custom_annotations</span> <span class="o">|</span> <span class="s1">&#39;Evidence&#39;</span><span class="p">)(</span><span class="s1">&#39;key&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unset_command</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_unset_command</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">unset_statement_group</span> <span class="o">=</span> <span class="n">unset_tag</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s1">&#39;STATEMENT_GROUP&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unset_statement_group</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_unset_statement_group</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_citation</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">unset_command</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">unset_statement_group</span> <span class="o">|</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">set_statement_group</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_evidence</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_command</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_command_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">handle_citation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">citation</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidCitationException</span><span class="p">(</span><span class="s1">&#39;PyBEL011 invalid citation: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">citation</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">((</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;reference&#39;</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;authors&#39;</span><span class="p">,</span> <span class="s1">&#39;comments&#39;</span><span class="p">),</span> <span class="n">values</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">tokens</span>
+
+    <span class="k">def</span> <span class="nf">handle_evidence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">[</span><span class="s1">&#39;Evidence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">tokens</span>
+
+    <span class="k">def</span> <span class="nf">handle_statement_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statement_group</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">tokens</span>
+
+    <span class="k">def</span> <span class="nf">handle_set_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_annotations</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">IllegalAnnotationValueExeption</span><span class="p">(</span><span class="s1">&#39;PyBEL012 illegal annotation value&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">tokens</span>
+
+    <span class="k">def</span> <span class="nf">handle_set_command_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_annotations</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">IllegalAnnotationValueExeption</span><span class="p">(</span><span class="s1">&#39;PyBEL012 illegal annotation value: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tokens</span>
+
+    <span class="k">def</span> <span class="nf">handle_unset_statement_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statement_group</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">handle_unset_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;PyBEL020 Can&#39;t unset missing key&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">tokens</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">tokens</span>
+
+    <span class="k">def</span> <span class="nf">get_language</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span>
+
+    <span class="k">def</span> <span class="nf">get_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">annot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">citation</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;citation_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">annot</span>
+
+    <span class="k">def</span> <span class="nf">clear_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">citation</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statement_group</span> <span class="o">=</span> <span class="kc">None</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyBEL 0.1.2 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Charles Tapley Hoyt.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>
