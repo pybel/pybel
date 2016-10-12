@@ -20,6 +20,9 @@ if __name__ == '__main__':
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+    if not os.path.exists(os.path.expanduser('~/.pybel')):
+        os.mkdir(os.path.expanduser('~/.pybel'))
+
     fh_path = os.path.expanduser(time.strftime('~/.pybel/pybel_%Y_%m_%d_%H_%M_%S.txt'))
     fh = logging.FileHandler(fh_path)
     fh.setLevel(logging.DEBUG)
