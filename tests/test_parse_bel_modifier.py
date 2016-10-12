@@ -1,7 +1,7 @@
 import logging
 
-from tests.constants import TestTokenParserBase
 from pybel.parser.parse_bel import IllegalTranslocationException
+from tests.constants import TestTokenParserBase
 
 log = logging.getLogger(__name__)
 
@@ -323,3 +323,13 @@ class TestTransformation(TestTokenParserBase):
 
         self.assertHasNode(('Abundance', 'CHEBI', 'oxygen'))
         self.assertHasEdge(node, ('Abundance', 'CHEBI', 'oxygen'))
+
+        # TODO move to own test
+        self.parser.clear()
+        self.assertEqual(0, self.parser.node_count)
+        self.assertEqual(0, len(self.parser.node_to_id))
+        self.assertEqual(0, len(self.parser.id_to_node))
+        self.assertEqual(0, self.parser.graph.number_of_nodes())
+        self.assertEqual(0, self.parser.graph.number_of_edges())
+        self.assertEqual(0, len(self.parser.control_parser.annotations))
+        self.assertEqual(0, len(self.parser.control_parser.citation))

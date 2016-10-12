@@ -463,6 +463,14 @@ class BelParser(BaseParser):
         """Clears the current annotations in this parser"""
         self.control_parser.clear_annotations()
 
+    def clear(self):
+        """Clears the data stored in the parser"""
+        self.node_count = 0
+        self.node_to_id.clear()
+        self.id_to_node.clear()
+        self.graph.clear()
+        self.control_parser.clear()
+
     def handle_has_members(self, s, l, tokens):
         parent = self.ensure_node(s, l, tokens[0])
         for child_tokens in tokens[2]:
