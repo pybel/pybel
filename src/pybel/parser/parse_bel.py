@@ -34,20 +34,22 @@ def handle_debug(fmt):
 
 
 class BelParser(BaseParser):
-    """Build a parser backed by a given dictionary of namespaces"""
+    def __init__(self, graph=None, namespace_dict=None, namespace_mapping=None, custom_annotations=None, lenient=False):
+        """Build a parser backed by a given dictionary of namespaces
 
-    def __init__(self, graph=None, namespace_dict=None, namespace_mapping=None, custom_annotations=None):
-        """
         :param namespace_dict: A dictionary of {namespace: set of members}
         :param graph: the graph to put the network in. Constructs new nx.MultiDiGrap if None
         :type graph: nx.MultiDiGraph
         :param namespace_mapping: a dict of {name: {value: (other_namepace, other_name)}}
+        :param lenient: if true, turn off naked namespace failures
+        :type lenient: bool
         """
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
 
         self.control_parser = ControlParser(custom_annotations=custom_annotations)
-        self.identifier_parser = IdentifierParser(namespace_dict=namespace_dict, mapping=namespace_mapping)
+        self.identifier_parser = IdentifierParser(namespace_dict=namespace_dict, mapping=namespace_mapping,
+                                                  lenient=lenient)
 
         self.node_count = 0
         self.node_to_id = {}
@@ -484,6 +486,7 @@ class BelParser(BaseParser):
 
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
+
         :param u: source node
         :param v: target node
         :param relation: relationship label
@@ -543,7 +546,11 @@ class BelParser(BaseParser):
             return self.canonicalize_node(tokens['target'])
 
     def ensure_node(self, s, l, tokens):
-        """Turns parsed tokens into canonical node name and makes sure its in the graph"""
+        """Turns parsed tokens into canonical node name and makes sure its in the graph
+
+        :return: the canonical name of the node
+        :rtype: str
+        """
 
         if 'modifier' in tokens:
             return self.ensure_node(s, l, tokens['target'])
@@ -638,10 +645,10 @@ class BelParser(BaseParser):
                 return name
 
     def canonicalize_modifier(self, tokens):
-        """
-        Get activity, transformation, or transformation information as a dictionary
-        :param tokens:
-        :return:
+        """Get activity, transformation, or transformation information as a dictionary
+
+        :return: a dictionary describing the modifier
+        :rtype: dict
         """
 
         attrs = {}

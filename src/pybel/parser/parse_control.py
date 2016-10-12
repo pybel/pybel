@@ -15,7 +15,6 @@ class ControlParser(BaseParser):
 
         :param custom_annotations: A dictionary from {annotation: set of valid values} for parsing
         :type custom_annotations: dict
-        :return:
         """
 
         self.citation = {} if citation is None else citation
