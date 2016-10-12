@@ -13,9 +13,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
-import os
 import sys
-import time
 
 import click
 import py2neo
@@ -23,20 +21,6 @@ import py2neo
 from . import graph
 
 log = logging.getLogger('pybel')
-log.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-fh_path = os.path.expanduser(time.strftime('~/.pybel/pybel_%Y_%m_%d_%H_%M_%S.txt'))
-fh = logging.FileHandler(fh_path)
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
-log.addHandler(fh)
-
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-ch.setFormatter(formatter)
-log.addHandler(ch)
 
 
 @click.group(help="PyBEL Command Line Utilities")
