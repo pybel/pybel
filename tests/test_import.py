@@ -6,11 +6,12 @@ import pybel
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
+@unittest.skipUnless('PYBEL_ALLTESTS' in os.environ and os.environ['PYBEL_ALLTESTS'] == '3',
+                     'not enough memory on Travis-CI for this test')
 class TestImport(unittest.TestCase):
-    @unittest.skip
     def test_full(self):
         path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
-        g = pybel.from_file(path)
+        g = pybel.from_path(path)
 
         expected_document_metadata = {
             'Name': "PyBEL Test Document",
