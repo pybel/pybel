@@ -77,9 +77,9 @@ def to_csv(path, url, database, edge_path):
 @click.option('--path', help='BEL file file path')
 @click.option('--url', help='BEL file URL')
 @click.option('--database', help='BEL database')
-@click.option('--output', default=sys.stdout)
+@click.option('--output', default=sys.stdout, help="GraphML outout. Use .graphml extension for cytoscape")
 def to_graphml(path, url, database, output):
-    """Parses BEL file and exports as GraphML file"""
+    """Parses BEL file and exports as GraphML file. Use .graphml extension for Cytoscape"""
     if path:
         g = graph.from_path(path)
     elif url:
