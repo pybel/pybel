@@ -17,27 +17,27 @@ def sanitize_file_lines(f):
 
     for line_number, line in it:
         if line.endswith('\\'):
-            log.debug('Multiline quote starting on line:{}'.format(line_number))
+            log.log(4, 'Multiline quote starting on line:{}'.format(line_number))
             line = line.strip('\\').strip()
             next_line_number, next_line = next(it)
             while next_line.endswith('\\'):
-                log.log(5, 'Extending line: {}'.format(next_line))
+                log.log(3, 'Extending line: {}'.format(next_line))
                 line += " " + next_line.strip('\\').strip()
                 next_line_number, next_line = next(it)
             line += " " + next_line.strip()
-            log.debug('Final line: {}'.format(line))
+            log.log(3, 'Final line: {}'.format(line))
 
         elif 1 == line.count('"'):
-            log.debug('PyBEL013 Missing new line escapes [line:{}]'.format(line_number))
+            log.log(4, 'PyBEL013 Missing new line escapes [line:{}]'.format(line_number))
             next_line_number, next_line = next(it)
             next_line = next_line.strip()
             while not next_line.endswith('"'):
-                log.log(5, 'Extending line: {}'.format(next_line))
+                log.log(3, 'Extending line: {}'.format(next_line))
                 line = '{} {}'.format(line.strip(), next_line)
                 next_line_number, next_line = next(it)
                 next_line = next_line.strip()
             line = '{} {}'.format(line, next_line)
-            log.debug('Final line: {}'.format(line))
+            log.log(3, 'Final line: {}'.format(line))
 
         comment_loc = line.rfind(' //')
         if 0 <= comment_loc:
