@@ -610,7 +610,7 @@ class TestProtein(TestTokenParserBase):
         """2.2.2 Test substitution"""
         statement = 'p(HGNC:CFTR, var(p.Gly576Ala))'
         result = self.parser.protein.parseString(statement)
-        expected_result = ['Protein', ['HGNC', 'CFTR'], ['Variant' 'Gly', 576, 'Ala']]
+        expected_result = ['Protein', ['HGNC', 'CFTR'], ['Variant', 'Gly', 576, 'Ala']]
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
