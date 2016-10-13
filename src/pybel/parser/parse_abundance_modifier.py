@@ -136,7 +136,7 @@ class FusionParser(BaseParser):
     """
 
     def __init__(self, namespace_parser=None):
-        fusion_tags = ['fus', 'fusion']
+        fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith('Fusion'))
 
         self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
@@ -144,7 +144,7 @@ class FusionParser(BaseParser):
         range_coordinate = (Group(oneOf(['r', 'p']) + Suppress('.') + pyparsing_common.integer() +
                                   Suppress('_') + pyparsing_common.integer()) | '?')
 
-        self.language = oneOf(fusion_tags) + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
+        self.language = fusion_tags + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
                                                   Group(identifier)('partner_3p'), range_coordinate('range_3p'))
         self.language.setParseAction(self.handle_fusion)
 
@@ -152,7 +152,6 @@ class FusionParser(BaseParser):
         return self.language
 
     def handle_fusion(self, s, l, tokens):
-        tokens[0] = 'Fusion'
         return tokens
 
 

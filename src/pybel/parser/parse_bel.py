@@ -5,7 +5,7 @@ import logging
 from copy import deepcopy
 
 import networkx as nx
-from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith
+from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, pyparsing_common
 
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
@@ -100,7 +100,22 @@ class BelParser(BaseParser):
         self.gene_fusion = gene_tag + nest(Group(self.fusion)('fusion') + Optional(WCW + self.location))
         self.gene_fusion.setParseAction(self.handle)
 
-        self.gene = self.gene_modified | self.gene_simple | self.gene_fusion
+        fusion_tag = oneOf(['fus', 'fusion']).setParseAction(replaceWith('Fusion'))
+
+        gene_break_start = pyparsing_common.integer()
+        gene_break_start.setParseAction(lambda s, l, t: [['c', '?', int(t[0])]])
+
+        gene_break_end = pyparsing_common.integer()
+        gene_break_end.setParseAction(lambda s, l, t: [['c', int(t[0]), '?']])
+
+        self.gene_fusion_legacy = gene_tag + nest(Group(identifier('partner_5p') + WCW + fusion_tag + nest(
+            identifier('partner_3p') + Optional(
+                WCW + gene_break_start('range_5p') + WCW + gene_break_end('range_3p'))))('fusion'))
+
+        self.gene_fusion_legacy.setParseAction(self.handle_fusion_legacy)
+        self.gene_fusion_legacy.addParseAction(self.handle)
+
+        self.gene = self.gene_modified | self.gene_simple | self.gene_fusion | self.gene_fusion_legacy
 
         # 2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA
         mirna_tag = one_of_tags(['m', 'microRNAAbundance'], 'miRNA', 'function')
@@ -127,7 +142,20 @@ class BelParser(BaseParser):
         self.protein_fusion = protein_tag + nest(Group(self.fusion)('fusion') + Optional(WCW + self.location))
         self.protein_fusion.setParseAction(self.handle)
 
-        self.protein = self.protein_fusion | self.protein_modified | self.protein_simple
+        protein_break_start = pyparsing_common.integer()
+        protein_break_start.setParseAction(lambda s, l, t: [['p', '?', int(t[0])]])
+
+        protein_break_end = pyparsing_common.integer()
+        protein_break_end.setParseAction(lambda s, l, t: [['p', int(t[0]), '?']])
+
+        self.protein_fusion_legacy = protein_tag + nest(Group(identifier('partner_5p') + WCW + fusion_tag + nest(
+            identifier('partner_3p') + Optional(
+                WCW + protein_break_start('range_5p') + WCW + protein_break_end('range_3p'))))('fusion'))
+
+        self.protein_fusion_legacy.setParseAction(self.handle_fusion_legacy)
+        self.protein_fusion_legacy.addParseAction(self.handle)
+
+        self.protein = self.protein_fusion | self.protein_fusion_legacy | self.protein_modified | self.protein_simple
 
         # 2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA
         rna_tag = one_of_tags(['r', 'rnaAbundance'], 'RNA', 'function')
@@ -141,7 +169,20 @@ class BelParser(BaseParser):
         self.rna_fusion = rna_tag + nest(Group(self.fusion)('fusion') + Optional(WCW + self.location))
         self.rna_fusion.setParseAction(self.handle)
 
-        self.rna = self.rna_fusion | self.rna_modified | self.rna_simple
+        rna_break_start = pyparsing_common.integer()
+        rna_break_start.setParseAction(lambda s, l, t: [['r', '?', int(t[0])]])
+
+        rna_break_end = pyparsing_common.integer()
+        rna_break_end.setParseAction(lambda s, l, t: [['r', int(t[0]), '?']])
+
+        self.rna_fusion_legacy = rna_tag + nest(Group(identifier('partner_5p') + WCW + fusion_tag + nest(
+            identifier('partner_3p') + Optional(
+                WCW + rna_break_start('range_5p') + WCW + rna_break_end('range_3p'))))('fusion'))
+
+        self.rna_fusion_legacy.setParseAction(self.handle_fusion_legacy)
+        self.rna_fusion_legacy.addParseAction(self.handle)
+
+        self.rna = self.rna_fusion | self.rna_fusion_legacy | self.rna_modified | self.rna_simple
 
         self.single_abundance = self.general_abundance | self.gene | self.mirna | self.protein | self.rna
 
@@ -473,6 +514,14 @@ class BelParser(BaseParser):
         for child_tokens in tokens[2]:
             child = self.ensure_node(s, l, child_tokens)
             self.graph.add_edge(parent, child, relation='hasMember')
+        return tokens
+
+    def handle_fusion_legacy(self, s, l, tokens):
+        if 'range_5p' in tokens['fusion']:
+            return tokens
+
+        tokens['fusion']['range_5p'] = '?'
+        tokens['fusion']['range_3p'] = '?'
         return tokens
 
     def handle(self, s, l, tokens):

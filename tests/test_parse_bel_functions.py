@@ -219,6 +219,42 @@ class TestGene(TestTokenParserBase):
         name = self.parser.canonicalize_node(result)
         self.assertHasNode(name)
 
+    def test_gene_fusion_legacy_1(self):
+        statement = "g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        result = self.parser.gene.parseString(statement)
+
+        expected_dict = {
+            'function': 'Gene',
+            'fusion': {
+                'partner_5p': dict(namespace='HGNC', name='BCR'),
+                'partner_3p': dict(namespace='HGNC', name='JAK2'),
+                'range_5p': ['c', '?', 1875],
+                'range_3p': ['c', 2626, '?']
+            }
+        }
+        print(result.asDict())
+
+        self.assertEqual(expected_dict, result.asDict())
+        name = self.parser.canonicalize_node(result)
+        self.assertHasNode(name)
+
+    def test_gene_fusion_legacy_2(self):
+        statement = "g(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        result = self.parser.gene.parseString(statement)
+
+        expected_dict = {
+            'function': 'Gene',
+            'fusion': {
+                'partner_5p': dict(namespace='HGNC', name='CHCHD4'),
+                'partner_3p': dict(namespace='HGNC', name='AIFM1'),
+                'range_5p': '?',
+                'range_3p': '?'
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+        name = self.parser.canonicalize_node(result)
+        self.assertHasNode(name)
+
     def test_gene_variant_snp(self):
         """2.2.2 SNP"""
         statement = 'g(SNP:rs113993960, var(delCTT))'
@@ -476,6 +512,42 @@ class TestProtein(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
+        name = self.parser.canonicalize_node(result)
+        self.assertHasNode(name)
+
+    def test_protein_fusion_legacy_1(self):
+        statement = "p(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        result = self.parser.protein.parseString(statement)
+
+        expected_dict = {
+            'function': 'Protein',
+            'fusion': {
+                'partner_5p': dict(namespace='HGNC', name='BCR'),
+                'partner_3p': dict(namespace='HGNC', name='JAK2'),
+                'range_5p': ['p', '?', 1875],
+                'range_3p': ['p', 2626, '?']
+            }
+        }
+        print(result.asDict())
+
+        self.assertEqual(expected_dict, result.asDict())
+        name = self.parser.canonicalize_node(result)
+        self.assertHasNode(name)
+
+    def test_protein_fusion_legacy_2(self):
+        statement = "p(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        result = self.parser.protein.parseString(statement)
+
+        expected_dict = {
+            'function': 'Protein',
+            'fusion': {
+                'partner_5p': dict(namespace='HGNC', name='CHCHD4'),
+                'partner_3p': dict(namespace='HGNC', name='AIFM1'),
+                'range_5p': '?',
+                'range_3p': '?'
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
         name = self.parser.canonicalize_node(result)
         self.assertHasNode(name)
 
@@ -783,6 +855,43 @@ class TestRna(TestTokenParserBase):
         statement = 'r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))'
         result = self.parser.rna.parseString(statement)
         expected_result = ['RNA', ['Fusion', ['HGNC', 'TMPRSS2'], '?', ['HGNC', 'ERG'], '?']]
+
+    def test_gene_fusion_legacy_1(self):
+        statement = "r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        result = self.parser.rna.parseString(statement)
+
+        expected_dict = {
+            'function': 'RNA',
+            'fusion': {
+                'partner_5p': dict(namespace='HGNC', name='BCR'),
+                'partner_3p': dict(namespace='HGNC', name='JAK2'),
+                'range_5p': ['r', '?', 1875],
+                'range_3p': ['r', 2626, '?']
+            }
+        }
+        print(result.asDict())
+
+        self.assertEqual(expected_dict, result.asDict())
+        name = self.parser.canonicalize_node(result)
+        self.assertHasNode(name)
+
+    def test_gene_fusion_legacy_2(self):
+        statement = "r(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        result = self.parser.rna.parseString(statement)
+
+        expected_dict = {
+            'function': 'RNA',
+            'fusion': {
+                'partner_5p': dict(namespace='HGNC', name='CHCHD4'),
+                'partner_3p': dict(namespace='HGNC', name='AIFM1'),
+                'range_5p': '?',
+                'range_3p': '?'
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+        name = self.parser.canonicalize_node(result)
+        self.assertHasNode(name)
+
 
     def test_rna_variant_codingReference(self):
         """2.2.2 RNA coding reference sequence"""
