@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Parsers &#8212; PyBEL 0.1.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="PyBEL 0.1.3 documentation" href="index.html" />
+    <link rel="next" title="To Do" href="todo.html" />
+    <link rel="prev" title="Logging Messages" href="logging.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="todo.html" title="To Do"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="logging.html" title="Logging Messages"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyBEL 0.1.3 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="parsers">
+<h1>Parsers<a class="headerlink" href="#parsers" title="Permalink to this headline">¶</a></h1>
+<p>PyBEL makes extensive use of the PyParsing module. The code is organized to different modules to reflect
+the different faces ot the BEL language. These parsers support BEL 2.0 and have some backwards compatability
+for rewriting BEL 1.0 statements as BEL 2.0.</p>
+<p>See: <a class="reference external" href="https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BEL2.md">https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BEL2.md</a></p>
+<div class="section" id="control-parser">
+<h2>Control Parser<a class="headerlink" href="#control-parser" title="Permalink to this headline">¶</a></h2>
+<p>This module handles parsing control statement, which add annotations and namespaces to the document.</p>
+<p>See: <a class="reference external" href="https://wiki.openbel.org/display/BLD/Control+Records">https://wiki.openbel.org/display/BLD/Control+Records</a></p>
+<dl class="class">
+<dt id="pybel.parser.parse_control.ControlParser">
+<em class="property">class </em><code class="descclassname">pybel.parser.parse_control.</code><code class="descname">ControlParser</code><span class="sig-paren">(</span><em>citation=None</em>, <em>annotations=None</em>, <em>custom_annotations=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_control.html#ControlParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_control.ControlParser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="relation-parser">
+<h2>Relation Parser<a class="headerlink" href="#relation-parser" title="Permalink to this headline">¶</a></h2>
+<p>This module handles parsing BEL relations and validation of semantics.</p>
+<dl class="class">
+<dt id="pybel.parser.parse_bel.BelParser">
+<em class="property">class </em><code class="descclassname">pybel.parser.parse_bel.</code><code class="descname">BelParser</code><span class="sig-paren">(</span><em>graph=None</em>, <em>namespace_dict=None</em>, <em>namespace_mapping=None</em>, <em>custom_annotations=None</em>, <em>lenient=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pybel.parser.parse_bel.BelParser.add_unqualified_edge">
+<code class="descname">add_unqualified_edge</code><span class="sig-paren">(</span><em>u</em>, <em>v</em>, <em>relation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.add_unqualified_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.add_unqualified_edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds unique edge that has no annotations</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>u</strong> &#8211; source node</li>
+<li><strong>v</strong> &#8211; target node</li>
+<li><strong>relation</strong> &#8211; relationship label</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybel.parser.parse_bel.BelParser.canonicalize_modifier">
+<code class="descname">canonicalize_modifier</code><span class="sig-paren">(</span><em>tokens</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.canonicalize_modifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.canonicalize_modifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get activity, transformation, or transformation information as a dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a dictionary describing the modifier</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybel.parser.parse_bel.BelParser.canonicalize_node">
+<code class="descname">canonicalize_node</code><span class="sig-paren">(</span><em>tokens</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.canonicalize_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.canonicalize_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given tokens, returns node name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tokens</strong> &#8211; tokens ParseObject or dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybel.parser.parse_bel.BelParser.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the data stored in the parser</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybel.parser.parse_bel.BelParser.clear_annotations">
+<code class="descname">clear_annotations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.clear_annotations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.clear_annotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the current annotations in this parser</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybel.parser.parse_bel.BelParser.ensure_node">
+<code class="descname">ensure_node</code><span class="sig-paren">(</span><em>s</em>, <em>l</em>, <em>tokens</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.ensure_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.ensure_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turns parsed tokens into canonical node name and makes sure its in the graph</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the canonical name of the node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybel.parser.parse_bel.BelParser.get_annotations">
+<code class="descname">get_annotations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.get_annotations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.get_annotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get current annotations in this parser</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybel.parser.parse_bel.BelParser.get_language">
+<code class="descname">get_language</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.get_language"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.get_language" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get language defined by this parser</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="metadata-parser">
+<h2>Metadata Parser<a class="headerlink" href="#metadata-parser" title="Permalink to this headline">¶</a></h2>
+<p>This module supports the relation parser by handling statements.</p>
+<dl class="class">
+<dt id="pybel.parser.parse_metadata.MetadataParser">
+<em class="property">class </em><code class="descclassname">pybel.parser.parse_metadata.</code><code class="descname">MetadataParser</code><span class="sig-paren">(</span><em>namespace_dict=None</em>, <em>annotations_dict=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_metadata.html#MetadataParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_metadata.MetadataParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parser for the document and definitions section of a BEL document</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Parsers</a><ul>
+<li><a class="reference internal" href="#control-parser">Control Parser</a></li>
+<li><a class="reference internal" href="#relation-parser">Relation Parser</a></li>
+<li><a class="reference internal" href="#metadata-parser">Metadata Parser</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="logging.html"
+                        title="previous chapter">Logging Messages</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="todo.html"
+                        title="next chapter">To Do</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/parsers.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="todo.html" title="To Do"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="logging.html" title="Logging Messages"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyBEL 0.1.3 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Charles Tapley Hoyt.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>
