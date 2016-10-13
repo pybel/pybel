@@ -13,6 +13,7 @@ Contents:
    
    graph
    dirtynames
+   logging
    parsers
    todo
 
