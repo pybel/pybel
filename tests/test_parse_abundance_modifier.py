@@ -55,6 +55,11 @@ class TestHgvsParser(unittest.TestCase):
         result = hgvs_rna_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
+    def test_protein_trunc(self):
+        statement = 'p.C65*'
+        result = hgvs_protein_truncation.parseString(statement)
+        expected = ['C', 65, '*']
+        self.assertEqual(expected, result.asList())
 
 class TestPmod(unittest.TestCase):
     def setUp(self):
@@ -129,6 +134,18 @@ class TestGsubParser(unittest.TestCase):
 class TestFragmentParser(unittest.TestCase):
     def setUp(self):
         self.parser = FragmentParser()
+
+
+class TestTruncationParser(unittest.TestCase):
+    def setUp(self):
+        self.parser = TruncParser()
+
+    def test_trunc_1(self):
+        statement = 'trunc(40)'
+        result = self.parser.parseString(statement)
+
+        expected = ['Variant', 'C', 40, '*']
+        self.assertEqual(expected, result.asList())
 
 
 class TestFusionParser(unittest.TestCase):

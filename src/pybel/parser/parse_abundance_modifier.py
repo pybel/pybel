@@ -33,7 +33,9 @@ hgvs_protein_fs = Suppress('p.') + aa_triple + pyparsing_common.integer() + aa_t
 
 hgvs_genomic = Suppress('g.') + pyparsing_common.integer() + dna_nucleotide + Suppress('>') + dna_nucleotide
 
-hgvs = (hgvs_rna_del | hgvs_dna_del | hgvs_chromosome | hgvs_snp | hgvs_protein_del |
+hgvs_protein_truncation = Suppress('p.') + 'C' + pyparsing_common.integer()('location') + '*'
+
+hgvs = (hgvs_protein_truncation | hgvs_rna_del | hgvs_dna_del | hgvs_chromosome | hgvs_snp | hgvs_protein_del |
         hgvs_protein_fs | hgvs_protein_mut | hgvs_genomic | '=' | '?')
 
 
@@ -43,8 +45,8 @@ class VariantParser(BaseParser):
     """
 
     def __init__(self):
-        variant_tags = oneOf(['var', 'variant'])
-        self.language = Suppress(variant_tags) + nest(hgvs)
+        variant_tags = oneOf(['var', 'variant']).setParseAction(replaceWith('Variant'))
+        self.language = variant_tags + nest(hgvs)
         self.language.setParseAction(self.handle_variant)
 
     def handle_variant(self, s, l, tokens):
@@ -63,8 +65,21 @@ class PsubParser(BaseParser):
 
     def handle_psub(self, s, l, tokens):
         log.debug('PyBEL006 deprecated protein substitution function. User variant() instead. {}'.format(s))
-        tokens[0] = 'Variant'
         return tokens
+
+    def get_language(self):
+        return self.language
+
+
+class TruncParser(BaseParser):
+    def __init__(self):
+        trunc_tag = oneOf(['trunc', 'truncation']).setParseAction(replaceWith('Variant'))
+        self.language = trunc_tag + nest(pyparsing_common.integer()('position'))
+        self.language.setParseAction(self.handle_trunc_legacy)
+
+    def handle_trunc_legacy(self, s, l, tokens):
+        log.debug('PyBEL024 deprecated trunc(). Use variant() instead {}'.format(s))
+        return ['Variant', 'C', tokens['position'], '*']
 
     def get_language(self):
         return self.language
@@ -129,7 +144,8 @@ class FusionParser(BaseParser):
         range_coordinate = (Group(oneOf(['r', 'p']) + Suppress('.') + pyparsing_common.integer() +
                                   Suppress('_') + pyparsing_common.integer()) | '?')
 
-        self.language = oneOf(fusion_tags) + nest(Group(identifier)('partner_5p'),range_coordinate('range_5p'),Group(identifier)('partner_3p'),range_coordinate('range_3p'))
+        self.language = oneOf(fusion_tags) + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
+                                                  Group(identifier)('partner_3p'), range_coordinate('range_3p'))
         self.language.setParseAction(self.handle_fusion)
 
     def get_language(self):

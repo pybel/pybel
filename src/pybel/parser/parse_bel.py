@@ -10,7 +10,7 @@ from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWi
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
-    LocationParser
+    LocationParser, TruncParser
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
 from .parse_identifier import IdentifierParser
@@ -74,6 +74,7 @@ class BelParser(BaseParser):
         # 2.2.X Deprecated substitution function from BEL 1.0
         self.psub = PsubParser().get_language()
         self.gsub = GsubParser().get_language()
+        self.trunc = TruncParser().get_language()
 
         # 2.6 Other Functions
 
@@ -118,7 +119,7 @@ class BelParser(BaseParser):
         self.protein_simple.setParseAction(self.handle)
 
         self.protein_modified = protein_tag + nest(
-            identifier, delimitedList(Group(self.pmod | self.variant | self.fragment | self.psub))(
+            identifier, delimitedList(Group(self.pmod | self.variant | self.fragment | self.psub | self.trunc))(
                 'variants') + Optional(WCW + self.location))
 
         self.protein_modified.setParseAction(self.handle)
