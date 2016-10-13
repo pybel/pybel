@@ -22,10 +22,16 @@ Installation
 
 .. code-block:: sh
 
-   pip install .
+   python -m pip install -U .
+
+This is a good chance to upgrade your pip and setuptools as well with
+
+.. code-block:: sh
+
+    python -m pip install -U setuptools pip wheel
 
 
-4. Check that all tests are passing
+4. If you're a developer and don't mind googling to figure out problems, check that all tests are passing:
 
 .. code-block:: sh
 
