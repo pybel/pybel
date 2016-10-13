@@ -73,11 +73,15 @@
 <ol class="arabic simple" start="3">
 <li>Install with <code class="code docutils literal"><span class="pre">pip</span></code>. If you want to make changes, add <code class="code docutils literal"><span class="pre">-e</span></code> before the dot</li>
 </ol>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>pip install .
+<div class="highlight-sh"><div class="highlight"><pre><span></span>python -m pip install -U .
+</pre></div>
+</div>
+<p>This is a good chance to upgrade your pip and setuptools as well with</p>
+<div class="highlight-sh"><div class="highlight"><pre><span></span>python -m pip install -U setuptools pip wheel
 </pre></div>
 </div>
 <ol class="arabic simple" start="4">
-<li>Check that all tests are passing</li>
+<li>If you&#8217;re a developer and don&#8217;t mind googling to figure out problems, check that all tests are passing:</li>
 </ol>
 <div class="highlight-sh"><div class="highlight"><pre><span></span>tox
 </pre></div>
