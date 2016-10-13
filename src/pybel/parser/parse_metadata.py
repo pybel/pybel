@@ -5,7 +5,7 @@ import requests
 from pyparsing import Suppress
 from requests_file import FileAdapter
 
-from .baseparser import BaseParser, W, word, quote, delimitedSet
+from .baseparser import BaseParser, W, word, quote, delimitedSet, Word, alphanums
 
 log = logging.getLogger('pybel')
 
@@ -47,21 +47,23 @@ class MetadataParser(BaseParser):
         self.annotations_metadata = {}
         self.annotations_dict = {} if annotations_dict is None else annotations_dict
 
+        word_under = Word(alphanums + '_')
+
         self.document = Suppress('SET') + W + Suppress('DOCUMENT') + word('key') + W + Suppress('=') + W + quote(
             'value')
 
         namespace_tag = Suppress('DEFINE') + W + Suppress('NAMESPACE')
-        self.namespace_url = namespace_tag + W + word('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
+        self.namespace_url = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
             'url')
-        self.namespace_list = namespace_tag + W + word('name') + W + Suppress('AS') + W + Suppress(
+        self.namespace_list = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
 
         annotation_tag = Suppress('DEFINE') + W + Suppress('ANNOTATION')
-        self.annotation_url = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
+        self.annotation_url = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
             'url')
-        self.annotation_list = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress(
+        self.annotation_list = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
-        self.annotation_pattern = annotation_tag + W + word('name') + W + Suppress('AS') + W + Suppress(
+        self.annotation_pattern = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
             'PATTERN') + W + quote('value')
 
         self.document.setParseAction(self.handle_document)

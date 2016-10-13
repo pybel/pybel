@@ -151,6 +151,12 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('TextLocation', self.parser.annotations_metadata)
         self.assertIn('Abstract', self.parser.annotations_dict['TextLocation'])
 
+    def test_underscore(self):
+        s = 'DEFINE ANNOTATION Text_Location AS LIST {"Abstract","Results","Legend","Review"}'
+        self.parser.parseString(s)
+        self.assertIn('Text_Location', self.parser.annotations_dict)
+        self.assertIn('Text_Location', self.parser.annotations_metadata)
+
     def test_control_compound_1(self):
         s1 = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
         s2 = 'DEFINE NAMESPACE CHEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"'
