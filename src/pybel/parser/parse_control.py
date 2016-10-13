@@ -80,7 +80,7 @@ class ControlParser(BaseParser):
         value = tokens['value']
 
         if value not in self.custom_annotations[key]:
-            raise IllegalAnnotationValueExeption('PyBEL012 illegal annotation value')
+            raise IllegalAnnotationValueExeption('PyBEL012 illegal annotation value: {}'.format(value))
 
         self.annotations[key] = value
         return tokens

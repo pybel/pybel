@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>pybel.parser.parse_bel &#8212; PyBEL 0.1.2 documentation</title>
+    <title>pybel.parser.parse_bel &#8212; PyBEL 0.1.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.1.2',
+        VERSION:     '0.1.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="top" title="PyBEL 0.1.2 documentation" href="../../../index.html" />
+    <link rel="top" title="PyBEL 0.1.3 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body role="document">
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">PyBEL 0.1.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyBEL 0.1.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -301,20 +301,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">translocation_legacy</span><span class="o">.</span><span class="n">addParseAction</span><span class="p">(</span>
             <span class="n">handle_debug</span><span class="p">(</span><span class="s1">&#39;PyBEL005 legacy translocation statement. use fromLoc() and toLoc(). </span><span class="si">{s}</span><span class="s1">&#39;</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">translocation_legacy_singleton</span> <span class="o">=</span> <span class="n">translocation_tag</span> <span class="o">+</span> <span class="n">nest</span><span class="p">(</span><span class="n">Group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simple_abundance</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">translocation_legacy_singleton</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">translocation_legacy_singleton</span><span class="o">.</span><span class="n">addParseAction</span><span class="p">(</span>
-            <span class="n">handle_debug</span><span class="p">(</span><span class="s1">&#39;PyBEL008 legacy translocation + missing arguments: </span><span class="si">{s}</span><span class="s1">&#39;</span><span class="p">))</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">translocation_illegal</span> <span class="o">=</span> <span class="n">translocation_tag</span> <span class="o">+</span> <span class="n">nest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simple_abundance</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">handle_translocation_illegal</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">IllegalTranslocationException</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">IllegalTranslocationException</span><span class="p">(</span><span class="s1">&#39;PyBEL008 legacy translocation </span><span class="si">{}{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">translocation_illegal</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="n">handle_translocation_illegal</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">translocation</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translocation_illegal</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">translocation_standard</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">translocation_legacy</span> <span class="o">|</span>
-                              <span class="bp">self</span><span class="o">.</span><span class="n">translocation_legacy_singleton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translocation</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translocation_illegal</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">translocation_standard</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">translocation_legacy</span><span class="p">)</span>
 
         <span class="c1"># 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg</span>
 
@@ -774,7 +768,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">PyBEL 0.1.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyBEL 0.1.3 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

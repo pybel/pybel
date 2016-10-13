@@ -18,12 +18,14 @@ See: https://wiki.openbel.org/display/BLD/Control+Records
 
 Relation Parser
 ---------------
+This module handles parsing BEL relations and validation of semantics.
+
 .. autoclass:: pybel.parser.parse_bel.BelParser
     :members:
 
 Metadata Parser
 ---------------
-This module supports the relation parser by handling statements
+This module supports the relation parser by handling statements.
 
 .. autoclass:: pybel.parser.parse_metadata.MetadataParser
     :members:

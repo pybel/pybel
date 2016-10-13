@@ -250,20 +250,14 @@ class BelParser(BaseParser):
         self.translocation_legacy.addParseAction(
             handle_debug('PyBEL005 legacy translocation statement. use fromLoc() and toLoc(). {s}'))
 
-        self.translocation_legacy_singleton = translocation_tag + nest(Group(self.simple_abundance))
-        self.translocation_legacy_singleton.setParseAction(self.handle)
-        self.translocation_legacy_singleton.addParseAction(
-            handle_debug('PyBEL008 legacy translocation + missing arguments: {s}'))
-
         self.translocation_illegal = translocation_tag + nest(self.simple_abundance)
 
         def handle_translocation_illegal(s, l, t):
-            raise IllegalTranslocationException('{}{}{}'.format(s, l, t))
+            raise IllegalTranslocationException('PyBEL008 legacy translocation {}{}{}'.format(s, l, t))
 
         self.translocation_illegal.setParseAction(handle_translocation_illegal)
 
-        self.translocation = (self.translocation_illegal | self.translocation_standard | self.translocation_legacy |
-                              self.translocation_legacy_singleton)
+        self.translocation = (self.translocation_illegal | self.translocation_standard | self.translocation_legacy)
 
         # 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
 
