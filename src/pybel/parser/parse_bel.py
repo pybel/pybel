@@ -295,7 +295,7 @@ class BelParser(BaseParser):
         self.translocation_illegal = translocation_tag + nest(self.simple_abundance)
 
         def handle_translocation_illegal(s, l, t):
-            raise IllegalTranslocationException('PyBEL008 legacy translocation {}{}{}'.format(s, l, t))
+            raise IllegalTranslocationException('Unqualified translocation {} {} {}'.format(s, l, t))
 
         self.translocation_illegal.setParseAction(handle_translocation_illegal)
 
@@ -369,8 +369,7 @@ class BelParser(BaseParser):
                                            self.directly_increases_nested | self.directly_decreases_nested)
 
         def handle_nested_relation(s, l, tokens):
-            raise NestedRelationNotSupportedException(
-                'PyBEL0018 Nested statements not supported. Please explicitly specifiy.')
+            raise NestedRelationNotSupportedException('Nested statements not supported. Please explicitly specifiy.')
 
         self.nested_causal_relationship.setParseAction(handle_nested_relation)
 

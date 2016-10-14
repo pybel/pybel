@@ -107,7 +107,7 @@ class ControlParser(BaseParser):
         value = tokens['value']
 
         if value not in self.valid_annotations[key]:
-            raise IllegalAnnotationValueExeption('Illegal annotation value: {}'.format(value))
+            raise IllegalAnnotationValueExeption('Illegal annotation value for {}: {}'.format(key, value))
 
         self.annotations[key] = value
         return tokens
@@ -118,7 +118,7 @@ class ControlParser(BaseParser):
 
         for value in values:
             if value not in self.valid_annotations[key]:
-                raise IllegalAnnotationValueExeption('Illegal annotation value: {}'.format(value))
+                raise IllegalAnnotationValueExeption('Illegal annotation value for {}: {}'.format(key, value))
 
         self.annotations[key] = set(values)
         return tokens

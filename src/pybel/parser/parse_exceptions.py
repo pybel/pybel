@@ -1,5 +1,5 @@
 class PyBelException(Exception):
-    """PyBEL throws exceptions for statements that cannot be fixed automatically"""
+    """PyBEL throws exceptions labeled PyBEL1xx for statements that cannot be fixed automatically"""
     #:
     code = 0
 
@@ -7,7 +7,7 @@ class PyBelException(Exception):
         self.message = message
 
     def __str__(self):
-        return 'PyBEL{:03} - {}'.format(self.code, self.message)
+        return 'PyBEL1{:02} - {}'.format(self.code, self.message)
 
 
 class IllegalAnnotationValueExeption(PyBelException):
