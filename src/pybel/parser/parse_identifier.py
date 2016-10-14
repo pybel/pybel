@@ -3,7 +3,8 @@ import logging
 from pyparsing import *
 
 from .baseparser import BaseParser, word, quote
-from .parse_exceptions import NamespaceException, NakedNamespaceException
+from .parse_exceptions import IllegalNamespaceException, NakedNamespaceException, IllegalNamespaceNameException, \
+    IllegalDefaultNameException
 
 log = logging.getLogger('pybel')
 DIRTY = 'dirty'
@@ -48,18 +49,18 @@ class IdentifierParser(BaseParser):
     def handle_identifier_qualified(self, s, l, tokens):
         namespace = tokens['namespace']
         if namespace not in self.namespace_dict:
-            raise NamespaceException('PyBEL023 Invalid namespace: {}'.format(namespace))
+            raise IllegalNamespaceException('Invalid namespace: {}'.format(namespace))
 
         name = tokens['name']
         if name not in self.namespace_dict[namespace]:
-            raise NamespaceException('PyBEL023 Invalid {} name: {}'.format(namespace, name))
+            raise IllegalNamespaceNameException('Invalid {} name: {}'.format(namespace, name))
 
         return tokens
 
     def handle_identifier_default(self, s, l, tokens):
         name = tokens['name']
         if name not in self.default_namespace:
-            raise NamespaceException('PyBEL022 Default namespace missing name: {}'.format(name))
+            raise IllegalDefaultNameException('Default namespace missing name: {}'.format(name))
         return tokens
 
     def handle_namespace_lenient(self, s, l, tokens):
@@ -68,7 +69,7 @@ class IdentifierParser(BaseParser):
         return tokens
 
     def handle_namespace_invalid(self, s, l, tokens):
-        raise NakedNamespaceException('PyBEL021 Missing valid namespace: {} {} {}'.format(s, l, tokens))
+        raise NakedNamespaceException('Missing valid namespace: {} {} {}'.format(s, l, tokens))
 
     def get_language(self):
         return self.language

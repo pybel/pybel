@@ -4,6 +4,7 @@ import unittest
 
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
+from pybel.parser.parse_exceptions import *
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -273,8 +274,12 @@ class TestParseControl(unittest.TestCase):
 
         self.parser = ControlParser(custom_annotations=custom_annotations)
 
+
     def test_set_statement_group(self):
         s = 'SET STATEMENT_GROUP = "my group"'
+
+        self.assertIsNotNone(self.parser.set_statement_group.parseString(s))
+
         self.parser.parseString(s)
         self.assertEqual('my group', self.parser.statement_group)
 
@@ -282,9 +287,28 @@ class TestParseControl(unittest.TestCase):
         self.parser.parseString(s)
         self.assertIsNone(self.parser.statement_group)
 
-    def test_unset_missing_statement(self):
+    def test_unset_missing_evidence(self):
         s = 'UNSET Evidence'
         self.parser.parseString(s)
+
+    def test_unset_missing_command(self):
+        s = 'UNSET Custom1'
+        with self.assertRaises(MissingAnnotationKeyException):
+            self.parser.parseString(s)
+
+    def test_unset_invalid_command(self):
+        s = 'UNSET Custom3'
+        with self.assertRaises(InvalidAnnotationKeyException):
+            self.parser.parseString(s)
+
+    def test_unset_missing_citation(self):
+        s = 'UNSET Citation'
+        self.parser.parseString(s)
+
+    def test_set_missing_statement(self):
+        s = 'SET MissingKey = "lol"'
+        with self.assertRaises(InvalidAnnotationKeyException):
+            self.parser.parseString(s)
 
     def test_citation_short(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037"}'
