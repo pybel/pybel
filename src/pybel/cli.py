@@ -13,6 +13,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
+import os
 import sys
 
 import click
@@ -37,9 +38,19 @@ def main():
 @click.option('--graphml', help='Path for GraphML output. Use .graphml for Cytoscale')
 @click.option('--json', type=click.File('w'), help='Path for Node-Link JSON output')
 @click.option('--pickle', help='Path for NetworkX gpickle output')
-@click.option('--lenient', is_flag=True)
-def convert(path, url, database, csv, graphml, json, pickle, lenient):
+@click.option('--lenient', is_flag=True, help="Enable lenient parsing")
+@click.option('--log-file', help="Optional path for verbose log output")
+def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file):
     """Options for multiple outputs/conversions"""
+    if log_file:
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        log_path = os.path.expanduser(log_file)
+        log.info('Logging output to {}'.format(log_path))
+        fh = logging.FileHandler(log_path)
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        log.addHandler(fh)
+
     if path:
         g = graph.from_path(path, lenient=lenient)
     elif url:
