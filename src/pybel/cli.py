@@ -33,6 +33,45 @@ def main():
 @click.option('--path', help='BEL file file path')
 @click.option('--url', help='BEL file URL')
 @click.option('--database', help='BEL database')
+@click.option('--csv', help='Path for CSV output')
+@click.option('--graphml', help='Path for GraphML output. Use .graphml for Cytoscale')
+@click.option('--json', type=click.File('w'), help='Path for Node-Link JSON output')
+@click.option('--pickle', help='Path for NetworkX gpickle output')
+@click.option('--lenient', is_flag=True)
+def convert(path, url, database, csv, graphml, json, pickle, lenient):
+    """Options for multiple outputs/conversions"""
+    if path:
+        g = graph.from_path(path, lenient=lenient)
+    elif url:
+        g = graph.from_url(url, lenient=lenient)
+    elif database:
+        g = graph.from_database(database)
+    else:
+        raise ValueError('missing BEL file')
+
+    log.info('Done loading BEL')
+
+    if csv:
+        log.info('Outputting csv to {}'.format(csv))
+        g.to_csv(csv)
+
+    if graphml:
+        log.info('Outputting graphml to {}'.format(graphml))
+        g.to_graphml(graphml)
+
+    if json:
+        log.info('Outputting json to {}'.format(json))
+        g.to_json(json)
+
+    if pickle:
+        log.info('Outputting pickle to {}'.format(pickle))
+        g.to_pickle(pickle)
+
+
+@main.command()
+@click.option('--path', help='BEL file file path')
+@click.option('--url', help='BEL file URL')
+@click.option('--database', help='BEL database')
 @click.option('--neo', help='URL of neo4j database')
 @click.option('--context', help='Context tag for multiple simultaneous neo4j graphs')
 def to_neo(path, url, database, neo, context):
