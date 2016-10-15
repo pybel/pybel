@@ -51,10 +51,6 @@ class BelParser(BaseParser):
         self.identifier_parser = IdentifierParser(namespace_dict=namespace_dict, mapping=namespace_mapping,
                                                   lenient=lenient)
 
-        self.node_count = 0
-        self.node_to_id = {}
-        self.id_to_node = {}
-
         identifier = Group(self.identifier_parser.get_language())('identifier')
 
         # 2.2 Abundance Modifier Functions
@@ -295,7 +291,7 @@ class BelParser(BaseParser):
         self.translocation_illegal = translocation_tag + nest(self.simple_abundance)
 
         def handle_translocation_illegal(s, l, t):
-            raise IllegalTranslocationException('PyBEL008 legacy translocation {}{}{}'.format(s, l, t))
+            raise IllegalTranslocationException('Unqualified translocation {} {} {}'.format(s, l, t))
 
         self.translocation_illegal.setParseAction(handle_translocation_illegal)
 
@@ -369,8 +365,7 @@ class BelParser(BaseParser):
                                            self.directly_increases_nested | self.directly_decreases_nested)
 
         def handle_nested_relation(s, l, tokens):
-            raise NestedRelationNotSupportedException(
-                'PyBEL0018 Nested statements not supported. Please explicitly specifiy.')
+            raise NestedRelationNotSupportedException('Nested statements not supported. Please explicitly specifiy.')
 
         self.nested_causal_relationship.setParseAction(handle_nested_relation)
 
@@ -503,9 +498,6 @@ class BelParser(BaseParser):
 
     def clear(self):
         """Clears the data stored in the parser"""
-        self.node_count = 0
-        self.node_to_id.clear()
-        self.id_to_node.clear()
         self.graph.clear()
         self.control_parser.clear()
 
@@ -550,29 +542,12 @@ class BelParser(BaseParser):
             return name + variants
 
         elif 'function' in tokens and 'members' in tokens:
-            t = (tokens['function'],) + tuple(sorted(list2tuple(tokens['members'].asList())))
-
-            if t in self.node_to_id:
-                return tokens['function'], self.node_to_id[t]
-
-            self.node_count += 1
-            self.node_to_id[t] = self.node_count
-            self.id_to_node[self.node_count] = t
-
-            return tokens['function'], self.node_count
+            return (tokens['function'],) + tuple(sorted(list2tuple(tokens['members'].asList())))
 
         elif 'transformation' in tokens and tokens['transformation'] == 'Reaction':
             reactants = tuple(sorted(list2tuple(tokens['reactants'].asList())))
             products = tuple(sorted(list2tuple(tokens['products'].asList())))
-            t = (tokens['transformation'],) + reactants + products
-
-            if t in self.node_to_id:
-                return tokens['transformation'], self.node_to_id[t]
-
-            self.node_count += 1
-            self.node_to_id[t] = self.node_count
-            self.id_to_node[self.node_count] = t
-            return tokens['transformation'], self.node_count
+            return (tokens['transformation'],) + (reactants,) + (products,)
 
         elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'Protein') and 'fusion' in tokens:
             f = tokens['fusion']

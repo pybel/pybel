@@ -43,7 +43,7 @@ class PmodParser(BaseParser):
         return tokens
 
     def handle_pmod_legacy_ns(self, s, l, tokens):
-        log.debug('PyBEL016 Legacy protein modification. Use new namespaces instead.')
+        log.debug('PyBEL016 legacy pmod() values: {}.'.format(s))
         # TODO implement
         return tokens
 

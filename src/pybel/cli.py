@@ -13,6 +13,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
+import os
 import sys
 
 import click
@@ -27,6 +28,55 @@ log = logging.getLogger('pybel')
 @click.version_option()
 def main():
     pass
+
+
+@main.command()
+@click.option('--path', help='BEL file file path')
+@click.option('--url', help='BEL file URL')
+@click.option('--database', help='BEL database')
+@click.option('--csv', help='Path for CSV output')
+@click.option('--graphml', help='Path for GraphML output. Use .graphml for Cytoscale')
+@click.option('--json', type=click.File('w'), help='Path for Node-Link JSON output')
+@click.option('--pickle', help='Path for NetworkX gpickle output')
+@click.option('--lenient', is_flag=True, help="Enable lenient parsing")
+@click.option('--log-file', help="Optional path for verbose log output")
+def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file):
+    """Options for multiple outputs/conversions"""
+    if log_file:
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        log_path = os.path.expanduser(log_file)
+        log.info('Logging output to {}'.format(log_path))
+        fh = logging.FileHandler(log_path)
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        log.addHandler(fh)
+
+    if path:
+        g = graph.from_path(path, lenient=lenient)
+    elif url:
+        g = graph.from_url(url, lenient=lenient)
+    elif database:
+        g = graph.from_database(database)
+    else:
+        raise ValueError('missing BEL file')
+
+    log.info('Done loading BEL')
+
+    if csv:
+        log.info('Outputting csv to {}'.format(csv))
+        g.to_csv(csv)
+
+    if graphml:
+        log.info('Outputting graphml to {}'.format(graphml))
+        g.to_graphml(graphml)
+
+    if json:
+        log.info('Outputting json to {}'.format(json))
+        g.to_json(json)
+
+    if pickle:
+        log.info('Outputting pickle to {}'.format(pickle))
+        g.to_pickle(pickle)
 
 
 @main.command()

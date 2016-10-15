@@ -56,6 +56,17 @@ Load, compile, and export to Cytoscape format:
 
 In Cytoscape, open with :code:`Import > Network > From File`.
 
+Example Workflow
+~~~~~~~~~~~~~~~~
+
+.. code-block:: sh
+
+    #!/usr/bin/env bash
+    python3 -m pybel convert --path ~/Downloads/PD_Aetionomy.bel --graphml ~/Downloads/PD.graphml --pickle ~/Downloads/PD.gpickle --log-file ~/Downloads/PD_log.txt
+
+    cat ~/Downloads/PD_log.txt | grep ERROR > ~/Downloads/PD_log_errors.txt
+    cat ~/Downloads/PD_log.txt | grep PyBEL1 > ~/Downloads/PD_log_caught.txt
+    cat ~/Downloads/AD_log.txt | grep PyBEL121 | cut -d "-" -f 6,8 | tr '-' '\t' > ~/Downloads/PD_missing_namespaces.tsv
 
 Python API
 ~~~~~~~~~~

@@ -232,7 +232,6 @@ class TestGene(TestTokenParserBase):
                 'range_3p': ['c', 2626, '?']
             }
         }
-        print(result.asDict())
 
         self.assertEqual(expected_dict, result.asDict())
         name = self.parser.canonicalize_node(result)
@@ -464,8 +463,6 @@ class TestProtein(TestTokenParserBase):
 
         result = self.parser.protein.parseString(statement)
 
-        print(result.asList())
-
         expected_dict = {
             'function': 'Protein',
             'identifier': {
@@ -528,7 +525,6 @@ class TestProtein(TestTokenParserBase):
                 'range_3p': ['p', 2626, '?']
             }
         }
-        print(result.asDict())
 
         self.assertEqual(expected_dict, result.asDict())
         name = self.parser.canonicalize_node(result)
@@ -869,7 +865,6 @@ class TestRna(TestTokenParserBase):
                 'range_3p': ['r', 2626, '?']
             }
         }
-        print(result.asDict())
 
         self.assertEqual(expected_dict, result.asDict())
         name = self.parser.canonicalize_node(result)
@@ -891,7 +886,6 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
         name = self.parser.canonicalize_node(result)
         self.assertHasNode(name)
-
 
     def test_rna_variant_codingReference(self):
         """2.2.2 RNA coding reference sequence"""
@@ -973,7 +967,7 @@ class TestComplex(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = 'Complex', 1
+        expected_node = 'Complex', ('Protein', ('HGNC', 'FOS')), ('Protein', ('HGNC', 'JUN'))
 
         node = self.parser.canonicalize_node(result)
         self.assertEqual(expected_node, node)
@@ -990,11 +984,13 @@ class TestComplex(TestTokenParserBase):
     def test_complex(self):
         """Test complex statement"""
         statement = 'complex(p(HGNC:CLSTN1), p(HGNC:KLC1))'
-        result = self.parser.complex_abundances.parseString(statement).asList()  # FIXME
-        expected = ['Complex', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]]
-        self.assertEqual(expected, result)
+        result = self.parser.complex_abundances.parseString(statement)
 
-        complex_name = 'Complex', 1
+        expected = ['Complex', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]]
+        self.assertEqual(expected, result.asList())
+
+        complex_name = 'Complex', ('Protein', ('HGNC', 'CLSTN1')), ('Protein', ('HGNC', 'KLC1'))
+        self.assertEqual(complex_name, self.parser.canonicalize_node(result))
         self.assertHasNode(complex_name)
 
         p1_name = 'Protein', 'HGNC', 'CLSTN1'
@@ -1031,7 +1027,7 @@ class TestComposite(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = 'Composite', 1
+        node = 'Composite', ('Complex', ('GOCC', 'interleukin-23 complex')), ('Protein', ('HGNC', 'IL6'))
         self.assertEqual(node, self.parser.canonicalize_node(result))
 
         self.parser.graph[node]

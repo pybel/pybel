@@ -18,16 +18,16 @@ from .parser.utils import split_file_to_annotations_and_definitions, flatten, fl
 log = logging.getLogger('pybel')
 
 
-def from_lines(it):
+def from_lines(it, lenient=False):
     """Loads BEL graph from an iterable of strings or file-like object
 
     :param it: an iterable of strings
     :return: a parsed BEL graph
     :rtype: BELGraph"""
-    return BELGraph().parse_from_lines(it)
+    return BELGraph(lenient=lenient).parse_from_lines(it)
 
 
-def from_url(url):
+def from_url(url, lenient=False):
     """Loads a BEL graph from a URL resource
 
     :param url: a valid URL string
@@ -36,10 +36,10 @@ def from_url(url):
     :rtype: BELGraph
     """
     log.info('Loading from url: {}'.format(url))
-    return BELGraph().parse_from_url(url)
+    return BELGraph(lenient=lenient).parse_from_url(url)
 
 
-def from_path(path):
+def from_path(path, lenient=False):
     """Loads a BEL graph from a file resource
 
     :param bel: a file path
@@ -49,7 +49,7 @@ def from_path(path):
 
     log.info('Loading from path: {}'.format(path))
     with open(os.path.expanduser(path)) as f:
-        return from_lines(f)
+        return from_lines(f, lenient=lenient)
 
 
 def from_database(connection):

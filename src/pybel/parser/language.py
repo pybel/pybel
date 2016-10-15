@@ -93,7 +93,7 @@ aa_placeholder = Keyword('X')
 
 
 def handle_aa_placeholder(s, l, tokens):
-    raise PlaceholderAminoAcidException('PyBEL015 Placeholder amino acid X found')
+    raise PlaceholderAminoAcidException('Placeholder amino acid X found')
 
 
 aa_placeholder.setParseAction(handle_aa_placeholder)

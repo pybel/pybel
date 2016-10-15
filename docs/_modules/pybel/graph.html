@@ -1,52 +1,137 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>pybel.graph &#8212; PyBEL 0.1.3 documentation</title>
-    
-    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.1.3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="top" title="PyBEL 0.1.3 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
-  </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">PyBEL 0.1.3 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
-      </ul>
-    </div>  
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pybel.graph &mdash; PyBEL 0.1.3 documentation</title>
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyBEL 0.1.3 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyBEL
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging Messages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../todo.html">To Do</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">PyBEL</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pybel.graph</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <h1>Source code for pybel.graph</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">json</span>
@@ -69,16 +154,16 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pybel&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="from_lines"><a class="viewcode-back" href="../../graph.html#pybel.from_lines">[docs]</a><span class="k">def</span> <span class="nf">from_lines</span><span class="p">(</span><span class="n">it</span><span class="p">):</span>
+<div class="viewcode-block" id="from_lines"><a class="viewcode-back" href="../../tutorial.html#pybel.from_lines">[docs]</a><span class="k">def</span> <span class="nf">from_lines</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads BEL graph from an iterable of strings or file-like object</span>
 
 <span class="sd">    :param it: an iterable of strings</span>
 <span class="sd">    :return: a parsed BEL graph</span>
 <span class="sd">    :rtype: BELGraph&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">BELGraph</span><span class="p">()</span><span class="o">.</span><span class="n">parse_from_lines</span><span class="p">(</span><span class="n">it</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">BELGraph</span><span class="p">(</span><span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span><span class="o">.</span><span class="n">parse_from_lines</span><span class="p">(</span><span class="n">it</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="from_url"><a class="viewcode-back" href="../../graph.html#pybel.from_url">[docs]</a><span class="k">def</span> <span class="nf">from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="from_url"><a class="viewcode-back" href="../../tutorial.html#pybel.from_url">[docs]</a><span class="k">def</span> <span class="nf">from_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads a BEL graph from a URL resource</span>
 
 <span class="sd">    :param url: a valid URL string</span>
@@ -87,10 +172,10 @@
 <span class="sd">    :rtype: BELGraph</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Loading from url: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">BELGraph</span><span class="p">()</span><span class="o">.</span><span class="n">parse_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">BELGraph</span><span class="p">(</span><span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span><span class="o">.</span><span class="n">parse_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="from_path"><a class="viewcode-back" href="../../graph.html#pybel.from_path">[docs]</a><span class="k">def</span> <span class="nf">from_path</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="from_path"><a class="viewcode-back" href="../../tutorial.html#pybel.from_path">[docs]</a><span class="k">def</span> <span class="nf">from_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads a BEL graph from a file resource</span>
 
 <span class="sd">    :param bel: a file path</span>
@@ -100,10 +185,10 @@
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Loading from path: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">from_lines</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">from_lines</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="from_database"><a class="viewcode-back" href="../../graph.html#pybel.from_database">[docs]</a><span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="n">connection</span><span class="p">):</span>
+<div class="viewcode-block" id="from_database"><a class="viewcode-back" href="../../tutorial.html#pybel.from_database">[docs]</a><span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="n">connection</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads a BEL graph from a database</span>
 
 <span class="sd">    :param connection: The string form of the URL is dialect[+driver]://user:password@host/dbname[?key=value..], where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance of URL.</span>
@@ -118,7 +203,7 @@
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Loading from database not yet implemented&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BELGraph"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph">[docs]</a><span class="k">class</span> <span class="nc">BELGraph</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph">[docs]</a><span class="k">class</span> <span class="nc">BELGraph</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;An extension of a NetworkX MultiDiGraph to hold a BEL graph.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -136,11 +221,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lenient</span> <span class="o">=</span> <span class="n">lenient</span>
 
-<div class="viewcode-block" id="BELGraph.clear"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.clear"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clears the content of the graph and its BEL parser&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bsp</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BELGraph.parse_from_path"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.parse_from_path">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.parse_from_path"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.parse_from_path">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Opens a BEL file from a given path and parses it</span>
 
 <span class="sd">        :param path: path to BEL file</span>
@@ -150,7 +235,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_from_lines</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BELGraph.parse_from_url"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.parse_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.parse_from_url"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.parse_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parses a BEL file from URL resource and adds to graph</span>
 
 <span class="sd">        :param url: URL to BEL Resource</span>
@@ -166,7 +251,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_from_lines</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">iter_lines</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="BELGraph.parse_from_lines"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.parse_from_lines">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fl</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.parse_from_lines"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.parse_from_lines">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fl</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.</span>
 
 <span class="sd">        :param fl: iterable over lines of BEL data file</span>
@@ -220,7 +305,7 @@
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_neo4j"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.to_neo4j">[docs]</a>    <span class="k">def</span> <span class="nf">to_neo4j</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neo_graph</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.to_neo4j"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_neo4j">[docs]</a>    <span class="k">def</span> <span class="nf">to_neo4j</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neo_graph</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Uploads to Neo4J graph database usiny `py2neo`</span>
 
 <span class="sd">        :param neo_graph:</span>
@@ -261,14 +346,14 @@
             <span class="n">tx</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">rel</span><span class="p">)</span>
         <span class="n">tx</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_pickle"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.to_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">to_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.to_pickle"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">to_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Writes this graph to a pickle object with nx.write_gpickle</span>
 
 <span class="sd">        :param output: a file or filename to write to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">write_gpickle</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">output</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_json"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.to_json"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Writes this graph to a node-link JSON object</span>
 
 <span class="sd">        :param output: a write-supporting filelike object</span>
@@ -276,14 +361,14 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">json_graph</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_graphml"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.to_graphml">[docs]</a>    <span class="k">def</span> <span class="nf">to_graphml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.to_graphml"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_graphml">[docs]</a>    <span class="k">def</span> <span class="nf">to_graphml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it</span>
 
 <span class="sd">        :param output: a file or filelike object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">write_graphml</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">output</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_csv"><a class="viewcode-back" href="../../graph.html#pybel.BELGraph.to_csv">[docs]</a>    <span class="k">def</span> <span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+<div class="viewcode-block" id="BELGraph.to_csv"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_csv">[docs]</a>    <span class="k">def</span> <span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Writes graph to edge list csv</span>
 
 <span class="sd">        :param output: a file or filelike object</span>
@@ -292,41 +377,62 @@
         <span class="n">nx</span><span class="o">.</span><span class="n">write_edgelist</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">output</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
 </pre></div>
 
+           </div>
           </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Charles Tapley Hoyt.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">PyBEL 0.1.3 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Charles Tapley Hoyt.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

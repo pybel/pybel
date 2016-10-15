@@ -1,104 +1,46 @@
 Logging Messages
 ================
 
-Catch-All
----------
-
 General Parser Failure
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
+
 This message is displayed when a problem was caused due to an unforseen error. The line number and original statement
 are printed for the user to debug.
 
-
-Exceptions
-----------
+Error Codes
+-----------
 
 When errors in the statement leave the term or relation as nonsense, these errors are thrown and the statement is
-excluded.
+excluded. These are debugged with code :code:`PyBEL1XX`.
 
-PyBEL008
-~~~~~~~~
-Message: legacy translocation
+.. automodule:: pybel.parser.parse_exceptions
+    :members:
 
-There is a translocation statement without location information.
-
-PyBEL0018
-~~~~~~~~~
-Message: Nested statements not supported
-
-See our wiki for an explanation of why we explicitly do not support nested statements.
-
-PyBEL011
-~~~~~~~~
-Message: invalid citation
-
-The format for this citation is wrong. Should have either {type, name, reference}; or
-{type, name, reference, date, authors, comments}
-
-PyBEL012
-~~~~~~~~
-Message: illegal annotation value
-
-An annotation has a value that does not belong to the original set of valid annotation values.
-
-PyBEL015
-~~~~~~~~
-Message: Placeholder amino acid X found
-
-This error finds placeholder amino acids that are invalid and warns the user to fix it.
-
-PyBEL021
-~~~~~~~~
-Message:  Missing valid namespace
-
-A naked namespace was used. To disregard these errors, use lenient mode.
-
-PyBEL022
-~~~~~~~~
-Message: Default namespace missing name
-
-This exception is thrown if default namespace mode is on and a naked name is used that isn't in the default namespace
-
-PyBEL023
-~~~~~~~~
-This is a general namespace problem for when undefined namespaces or illegal names are used.
-
-Debug
------
+Debugging Codes
+---------------
 
 There are certain statements that aren't correct, but PyBEL can understand and fix. These will be handled automatically,
-and a nice message with :code:`PyBELXXX` number will be output to debug.
+and a nice message with :code:`PyBEL0XX` number will be output to debug.
 
-PyBEL001
-~~~~~~~~
-Message: Legacy activity statement. Use activity() instead.
++------+---------------------------+------------------------------------------------------------------------------------+
+| Code | Problem                   | Explanation                                                                        |
++------+---------------------------+------------------------------------------------------------------------------------+
+| 001  | Legacy molecular activity | This means that an old style activity, like kin(p(HGNC:YFG)) was used.             |
+|      |                           |                                                                                    |
+|      |                           | PyBEL converts this automatically to activity(HGNC:YFG, ma(KinaseActivity))        |
++------+---------------------------+------------------------------------------------------------------------------------+
+| 016  | Legacy pmod()             | Old single-letter names have been deprecated in favor of more informative names.   |
+|      |                           | See: BelSpecPmod_                                                                  |
++------+---------------------------+------------------------------------------------------------------------------------+
+| 006  | Legacy sub()              | Attribute sub() in p() has been deprecated in favor of variant() and HGVS style.   |
+|      |                           | Old protein substitutions are convert automatically to the new HGVS style.         |
++------+---------------------------+------------------------------------------------------------------------------------+
+| 009  | Legacy sub()              | Attribute sub() in g() has been deprecated in favor of variant() and HGVS style.   |
+|      |                           | Old gene substitutions are convert automatically to the new HGVS style.            |
++------+---------------------------+------------------------------------------------------------------------------------+
+| 024  | Missing Key               | Tried to UNSET annotation that is not set                                          |
++------+---------------------------+------------------------------------------------------------------------------------+
+| 025  | Legacy trunc()            | Attribute trunc() in p() has been deprecated in favor of variant() and HGVS style. |
++------+---------------------------+------------------------------------------------------------------------------------+
 
-This means that an old style activity, like kin(p(HGNC:YFG)) was used. PyBEL converts this automatically to
-activity(HGNC:YFG, molecularActivity(KinaseActivity))
-
-PyBEL005
-~~~~~~~~
-Message: Legacy translocation statement. use fromLoc() and toLoc()
-
-In BEL 1.0, translocation statements didn't have the qualifiers fromLoc and toLoc. PyBEL
-adds these for you.
-
-
-PyBEL006
-~~~~~~~~
-Message: deprecated protein substitution function. User variant() instead
-
-Old protein substitutions are converted automatically to new HGVS style.
-
-PyBEL009
-~~~~~~~~
-Message: old SNP annotation. Use variant() instead
-
-Old gene substitutions are convert automatically to ne HGVS style.
-
-PyBEL020
-~~~~~~~~
-Message: Can't unset missing key
-
-This doesn't throw an error, but could mean there's a typo and could have unintended consequences for the
-resulting BEL graph.
+.. _BelSpecPmod: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_modification_types_provided_in_default_bel_namespace
