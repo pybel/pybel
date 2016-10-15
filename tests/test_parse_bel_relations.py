@@ -21,6 +21,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         """
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")'
         result = self.parser.relation.parseString(statement)
+
         expected = [
             ['Composite', ['Protein', ['HGNC', 'CASP8']], ['Protein', ['HGNC', 'FADD']],
              ['Abundance', ['ADO', 'Abeta_42']]],
@@ -29,7 +30,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = 'Composite', 1
+        sub = self.parser.canonicalize_node(result['subject'])
         self.assertHasNode(sub)
 
         sub_member_1 = 'Protein', 'HGNC', 'CASP8'
@@ -134,7 +135,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         sub = 'Protein', 'SFAM', 'CAPN Family'
         self.assertHasNode(sub)
 
-        obj = 'Reaction', 1
+        obj = self.parser.canonicalize_node(result['object'])
         self.assertHasNode(obj)
 
         obj_member_1 = 'Protein', 'HGNC', 'CDK5R1'
@@ -291,7 +292,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = 'Complex', 1
+        sub = self.parser.canonicalize_node(result['subject'])
         self.assertHasNode(sub)
 
         sub_member_1 = 'Protein', 'HGNC', 'F3'
@@ -524,7 +525,7 @@ class TestRelationshipsRandom(TestTokenParserBase):
                            ['BiologicalProcess', ['GOBP', 'cholesterol biosynthetic process']]]
         self.assertEqual(expected_result, result.asList())
 
-        sub = 'Reaction', 1
+        sub = self.parser.canonicalize_node(result['subject'])
         self.assertHasNode(sub)
 
         sub_reactant_1 = 'Abundance', 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'

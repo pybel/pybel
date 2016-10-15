@@ -279,7 +279,7 @@ class TestTransformation(TestTokenParserBase):
         """"""
         statement = 'rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))'
         result = self.parser.transformation.parseString(statement)
-        print(result.asDict())
+
         expected_result = [
             'Reaction',
             [['Abundance', ['CHEBI', 'superoxide']]],
@@ -309,9 +309,7 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        print('N2ID', self.parser.node_to_id)
-
-        node = 'Reaction', 1
+        node = 'Reaction', (('Abundance', ('CHEBI', 'superoxide')),), (('Abundance', ('CHEBI', 'hydrogen peroxide')), ('Abundance', ('CHEBI', 'oxygen')))
         self.assertEqual(node, self.parser.canonicalize_node(result))
         self.assertHasNode(node)
 
@@ -326,9 +324,6 @@ class TestTransformation(TestTokenParserBase):
 
         # TODO move to own test
         self.parser.clear()
-        self.assertEqual(0, self.parser.node_count)
-        self.assertEqual(0, len(self.parser.node_to_id))
-        self.assertEqual(0, len(self.parser.id_to_node))
         self.assertEqual(0, self.parser.graph.number_of_nodes())
         self.assertEqual(0, self.parser.graph.number_of_edges())
         self.assertEqual(0, len(self.parser.control_parser.annotations))
