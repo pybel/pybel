@@ -1,14 +1,13 @@
-from setuptools import setup
-
-# see https://python-packaging.readthedocs.org/en/latest/minimal.html
-# TODO: publish on PyPi https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
-
 """Setup module for the PyBEL package"""
 
-import setuptools
 import codecs  # To use a consistent encoding
 import os
 import re
+
+import setuptools
+
+# see https://python-packaging.readthedocs.org/en/latest/minimal.html
+# TODO: publish on PyPi https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 
 #################################################################
 
@@ -52,6 +51,7 @@ def read(*parts):
     with codecs.open(os.path.join(HERE, *parts), 'rb', 'utf-8') as f:
         return f.read()
 
+
 META_FILE = read(META_PATH)
 
 
@@ -71,6 +71,7 @@ def get_long_description():
     with codecs.open(os.path.join(HERE, 'README.rst'), encoding='utf-8') as f:
         long_description = f.read()
     return long_description
+
 
 if __name__ == '__main__':
     setuptools.setup(
@@ -92,4 +93,3 @@ if __name__ == '__main__':
         tests_require=TESTS_REQUIRE,
         entry_points=ENTRY_POINTS
     )
-
