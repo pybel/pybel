@@ -24,22 +24,22 @@ class TestCli(unittest.TestCase):
     #    with self.assertRaises(Exception):
     #        self.runner.invoke(cli.main, ['to_neo', '--path', self.test_path, '--neo', 'GARBAGE'])
 
-    @unittest.skipUnless('NEO_PATH' in os.environ, 'Need neo4j to test')
+    @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     def test_neo4j(self):
         self.runner.invoke(cli.main, ['to_neo', '--path', self.test_path, '--neo', os.environ['NEO_PATH'], '--context',
                                       'TESTCTX'])
 
         neo = py2neo.Graph(os.environ['NEO_PATH'])
-        count = neo.data('match (n)-[r]-() where r.pybel_context="TESTCTX" return count(n) as count')[0]['count']
+        count = neo.data('match (n)-[r]->() where r.pybel_context="TESTCTX" return count(n) as count')[0]['count']
         self.assertEqual(60, count)
 
+    @unittest.skip
     def test_csv(self):
         test_edge_file = 'myedges.csv'
 
         with self.runner.isolated_filesystem():
             abs_test_edge_file = os.path.abspath(test_edge_file)
-            result = self.runner.invoke(cli.main,
-                                        ['to_csv', '--path', self.test_path, '--edge-path', abs_test_edge_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', self.test_path, '--csv', abs_test_edge_file])
             log.info('File paths: {}'.format(abs_test_edge_file))
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_edge_file))
@@ -53,7 +53,7 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['to_pickle', '--path', self.test_path, '--output', abs_test_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', self.test_path, '--pickle', abs_test_file])
             log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
@@ -65,7 +65,7 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['to_graphml', '--path', self.test_path, '--output', abs_test_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', self.test_path, '--graphml', abs_test_file])
             log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
@@ -77,7 +77,7 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['to_json', '--path', self.test_path, '--output', abs_test_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', self.test_path, '--json', abs_test_file])
             log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_file))

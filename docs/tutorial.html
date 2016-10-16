@@ -184,7 +184,7 @@
 and convert to other formats. See <code class="code docutils literal"><span class="pre">pybel</span> <span class="pre">--help</span></code> for usage details. This command makes logs of all conversions
 and warnings to the directory <code class="code docutils literal"><span class="pre">~/.pybel/</span></code>.</p>
 <p>Load, compile, and export to Cytoscape format:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>$ pybel to_graphml --path ~/Desktop/example.bel --output ~/Desktop/example.graphml
+<div class="highlight-sh"><div class="highlight"><pre><span></span>$ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
 </pre></div>
 </div>
 <p>In Cytoscape, open with <code class="code docutils literal"><span class="pre">Import</span> <span class="pre">&gt;</span> <span class="pre">Network</span> <span class="pre">&gt;</span> <span class="pre">From</span> <span class="pre">File</span></code>.</p>
@@ -196,7 +196,7 @@ python3 -m pybel convert --path ~/Downloads/PD_Aetionomy.bel --graphml ~/Downloa
 
 cat ~/Downloads/PD_log.txt <span class="p">|</span> grep ERROR &gt; ~/Downloads/PD_log_errors.txt
 cat ~/Downloads/PD_log.txt <span class="p">|</span> grep PyBEL1 &gt; ~/Downloads/PD_log_caught.txt
-cat ~/Downloads/AD_log.txt <span class="p">|</span> grep PyBEL121 <span class="p">|</span> cut -d <span class="s2">&quot;-&quot;</span> -f 6,8 <span class="p">|</span> tr <span class="s1">&#39;-&#39;</span> <span class="s1">&#39;\t&#39;</span> &gt; ~/Downloads/PD_missing_namespaces.tsv
+cat ~/Downloads/PD_log.txt <span class="p">|</span> grep PyBEL121 <span class="p">|</span> cut -d <span class="s2">&quot;-&quot;</span> -f 6,8 <span class="p">|</span> tr <span class="s1">&#39;-&#39;</span> <span class="s1">&#39;\t&#39;</span> &gt; ~/Downloads/PD_missing_namespaces.tsv
 </pre></div>
 </div>
 </div>

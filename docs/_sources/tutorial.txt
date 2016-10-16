@@ -52,7 +52,7 @@ Load, compile, and export to Cytoscape format:
 
 .. code-block:: sh
 
-    $ pybel to_graphml --path ~/Desktop/example.bel --output ~/Desktop/example.graphml
+    $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
 
 In Cytoscape, open with :code:`Import > Network > From File`.
 
@@ -66,7 +66,7 @@ Example Workflow
 
     cat ~/Downloads/PD_log.txt | grep ERROR > ~/Downloads/PD_log_errors.txt
     cat ~/Downloads/PD_log.txt | grep PyBEL1 > ~/Downloads/PD_log_caught.txt
-    cat ~/Downloads/AD_log.txt | grep PyBEL121 | cut -d "-" -f 6,8 | tr '-' '\t' > ~/Downloads/PD_missing_namespaces.tsv
+    cat ~/Downloads/PD_log.txt | grep PyBEL121 | cut -d "-" -f 6,8 | tr '-' '\t' > ~/Downloads/PD_missing_namespaces.tsv
 
 Python API
 ~~~~~~~~~~
