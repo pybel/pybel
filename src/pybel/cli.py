@@ -14,7 +14,6 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 
 import logging
 import os
-import sys
 
 import click
 import py2neo
@@ -101,84 +100,6 @@ def to_neo(path, url, database, neo, context):
         raise ValueError('missing BEL file')
 
     g.to_neo4j(p2n, context)
-
-
-# FIXME
-@main.command()
-@click.option('--path', help='BEL file file path')
-@click.option('--url', help='BEL file URL')
-@click.option('--database', help='BEL database')
-@click.option('--edge-path', help='File path to output edge file')
-def to_csv(path, url, database, edge_path):
-    """Parses BEL file and exports as edge list files"""
-    if path:
-        g = graph.from_path(path)
-    elif url:
-        g = graph.from_url(url)
-    elif database:
-        g = graph.from_database(database)
-    else:
-        raise ValueError('missing BEL file')
-
-    g.to_csv(edge_path)
-
-
-@main.command()
-@click.option('--path', help='BEL file file path')
-@click.option('--url', help='BEL file URL')
-@click.option('--database', help='BEL database')
-@click.option('--output', default=sys.stdout, help="GraphML outout. Use .graphml extension for cytoscape")
-def to_graphml(path, url, database, output):
-    """Parses BEL file and exports as GraphML file. Use .graphml extension for Cytoscape"""
-    if path:
-        g = graph.from_path(path)
-    elif url:
-        g = graph.from_url(url)
-    elif database:
-        g = graph.from_database(database)
-    else:
-        raise ValueError('missing BEL file')
-
-    g.to_graphml(output)
-
-
-@main.command()
-@click.option('--path', help='BEL file file path')
-@click.option('--url', help='BEL file URL')
-@click.option('--database', help='BEL database')
-@click.option('--output', default=sys.stdout)
-def to_pickle(path, url, database, output):
-    """Parses BEL file and exports as pickled python object"""
-    if path:
-        log.info('loading graph from path for picking')
-        g = graph.from_path(path)
-    elif url:
-        g = graph.from_url(path)
-    elif database:
-        g = graph.from_database(path)
-    else:
-        raise ValueError('missing BEL file')
-
-    g.to_pickle(output)
-
-
-@main.command()
-@click.option('--path', help='BEL file file path')
-@click.option('--url', help='BEL file URL')
-@click.option('--database', help='BEL database')
-@click.option('--output', type=click.File('w'), default=sys.stdout)
-def to_json(path, url, database, output):
-    """Parses BEL file and exports as node-link json"""
-    if path:
-        g = graph.from_path(path)
-    elif url:
-        g = graph.from_url(path)
-    elif database:
-        g = graph.from_database(path)
-    else:
-        raise ValueError('missing BEL file')
-
-    g.to_json(output)
 
 
 if __name__ == '__main__':
