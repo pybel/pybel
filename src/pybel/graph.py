@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 import time
 
 import networkx as nx
@@ -10,6 +11,7 @@ from networkx.readwrite import json_graph
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
+from .exceptions import PyBelEpicFailure
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import PyBelException
 from .parser.parse_metadata import MetadataParser
@@ -147,13 +149,21 @@ class BELGraph(nx.MultiDiGraph):
                 log.error('Line {:05} - invalid statement: {}'.format(line_number, line))
             except PyBelException as e:
                 log.warning('Line {:05} - {}: {}'.format(line_number, e, line))
+            except PyBelEpicFailure as e:
+                log.critical('Line {:05} - {}'.format(line_number, line))
+                raise e
             except:
-                log.error('Line {:05} - general failure: {}'.format(line_number, line))
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                log.error('Line {:05} - general failure: {} - {}: {}'.format(line_number, line, exc_type, exc_value))
+                log.debug('Traceback: {}'.format(exc_traceback))
 
         log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
-        self.bsp = BelParser(graph=self, custom_annotations=self.mdp.annotations_dict, lenient=self.lenient)
+        self.bsp = BelParser(graph=self,
+                             namespace_dict=self.mdp.namespace_dict,
+                             annotations_dict=self.mdp.annotations_dict,
+                             lenient=self.lenient)
 
         for line_number, line in states:
             try:

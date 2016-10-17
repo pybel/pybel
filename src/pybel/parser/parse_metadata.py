@@ -6,6 +6,8 @@ from pyparsing import Suppress
 from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet, Word, alphanums
+from .parse_exceptions import LexicographyException
+from ..exceptions import NamespaceMismatch, AnnotationMismatch
 
 log = logging.getLogger('pybel')
 
@@ -49,17 +51,19 @@ class MetadataParser(BaseParser):
 
         word_under = Word(alphanums + '_')
 
-        self.document = Suppress('SET') + W + Suppress('DOCUMENT') + word('key') + W + Suppress('=') + W + quote(
+        self.document = Suppress('SET') + W + Suppress('DOCUMENT') + W + word('key') + W + Suppress('=') + W + quote(
             'value')
 
         namespace_tag = Suppress('DEFINE') + W + Suppress('NAMESPACE')
-        self.namespace_url = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
+        self.namespace_url = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
+            'URL') + W + quote(
             'url')
         self.namespace_list = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
 
         annotation_tag = Suppress('DEFINE') + W + Suppress('ANNOTATION')
-        self.annotation_url = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
+        self.annotation_url = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
+            'URL') + W + quote(
             'url')
         self.annotation_list = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
@@ -85,6 +89,10 @@ class MetadataParser(BaseParser):
 
     def handle_namespace_url(self, s, l, tokens):
         name = tokens['name']
+
+        # FIXME - use URL as check for okay
+        # Make a warning
+        # externalize this function
         if name in self.namespace_dict:
             return tokens
 
@@ -99,6 +107,12 @@ class MetadataParser(BaseParser):
         config = ConfigParser(delimiters=delimiters, strict=False)
         config.optionxform = lambda option: option
         config.read_file(line.decode('utf-8') for line in res.iter_lines())
+
+        config_keyword = config['Namespace']['Keyword']
+        if name != config_keyword and name.lower() == config_keyword.lower():
+            raise LexicographyException('Got {}. Should be {}'.format(name, config_keyword))
+        elif name != config_keyword:
+            raise NamespaceMismatch('Namespace name mismatch {}: {}'.format(name, url))
 
         self.namespace_dict[name] = dict(config['Values'])
         self.namespace_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
@@ -122,6 +136,12 @@ class MetadataParser(BaseParser):
         config.optionxform = lambda option: option
         config.read_file(line.decode('utf-8') for line in res.iter_lines())
 
+        config_keyword = config['AnnotationDefinition']['Keyword']
+        if name != config_keyword and name.lower() == config_keyword.lower():
+            raise LexicographyException('Got {}. Should be {}'.format(name, config_keyword))
+        elif name != config_keyword:
+            raise AnnotationMismatch('Annotation name mismatch for {}: {}'.format(name, url))
+
         self.annotations_dict[name] = dict(config['Values'])
         self.annotations_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
 
@@ -132,10 +152,7 @@ class MetadataParser(BaseParser):
         if name in self.namespace_dict:
             return tokens
 
-        values = set(tokens['values'])
-
-        self.namespace_metadata[name] = self.transform_document_annotations()
-        self.namespace_dict[name] = values
+        self.namespace_dict[name] = set(tokens['values'])
 
         return tokens
 
@@ -157,37 +174,3 @@ class MetadataParser(BaseParser):
 
     def transform_document_annotations(self):
         return self.document_metadata.copy()
-
-
-definitions_syntax = {
-    'Namespace': {
-        'NameString': 'name',
-        'Keyword': 'keyword',
-        'DomainString': 'domain',
-        'SpeciesString': 'species',
-        'DescriptionString': 'description',
-        'VersionString': 'version',
-        'CreatedDateTime': 'createdDateTime',
-        'QueryValueURL': 'queryValueUrl',
-        'UsageString': 'usageDescription',
-        'TypeString': 'typeClass'
-    },
-    'Author': {
-        'NameString': 'authorName',
-        'CopyrightString': 'authorCopyright',
-        'ContactInfoString': 'authorContactInfo'
-    },
-    'Citation': {
-        'NameString': 'citationName',
-        'DescriptionString': 'citationDescription',
-        'PublishedVersionString': 'citationPublishedVersion',
-        'PublishedDate': 'citationPublishedDate',
-        'ReferenceURL': 'citationReferenceURL'
-    },
-    'Processing': {
-        'CaseSensitiveFlag': 'processingCaseSensitiveFlag',
-        'DelimiterString': 'processingDelimiter',
-        'CacheableFlag': 'processingCacheableFlag'
-    },
-    'Values': None
-}

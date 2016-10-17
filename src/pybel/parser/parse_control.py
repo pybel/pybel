@@ -8,7 +8,6 @@ from .parse_exceptions import *
 log = logging.getLogger('pybel')
 
 
-# TODO remove citation and annotations as arguments?
 class ControlParser(BaseParser):
     def __init__(self, custom_annotations=None):
         """Builds parser for BEL custom_annotations statements
@@ -17,9 +16,10 @@ class ControlParser(BaseParser):
         :type custom_annotations: dict
         """
 
+        self.valid_annotations = dict() if custom_annotations is None else custom_annotations
+
         self.citation = {}
         self.annotations = {}
-        self.valid_annotations = dict() if custom_annotations is None else custom_annotations
         self.statement_group = None
 
         # custom_annotations = oneOf(self.custom_annotations.keys())
@@ -86,7 +86,7 @@ class ControlParser(BaseParser):
 
         values = tokens['values']
 
-        if len(values) not in (3, 6):
+        if not (3 <= len(values) <= 6):
             raise InvalidCitationException('Invalid citation: {}'.format(s))
 
         self.citation = dict(zip(('type', 'name', 'reference', 'date', 'authors', 'comments'), values))

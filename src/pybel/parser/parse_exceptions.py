@@ -74,3 +74,9 @@ class MissingAnnotationKeyException(PyBelException):
     """Raised when trying to unset an annotation that is not set"""
     #:
     code = 30
+
+
+class LexicographyException(PyBelException):
+    """Improper capitalization"""
+    #:
+    code = 34

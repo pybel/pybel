@@ -47,10 +47,6 @@ class VariantParser(BaseParser):
     def __init__(self):
         variant_tags = oneOf(['var', 'variant']).setParseAction(replaceWith('Variant'))
         self.language = variant_tags + nest(hgvs)
-        self.language.setParseAction(self.handle_variant)
-
-    def handle_variant(self, s, l, tokens):
-        return tokens
 
     def get_language(self):
         return self.language
