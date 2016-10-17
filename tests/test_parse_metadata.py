@@ -350,7 +350,7 @@ class TestParseControl(unittest.TestCase):
         self.assertEqual(expected_citation, self.parser.citation)
 
     def test_citation_error(self):
-        s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037",""}'
+        s = 'SET Citation = {"PubMed","Trends in molecular medicine"}'
         with self.assertRaises(Exception):
             self.parser.parseString(s)
 
