@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; PyBEL 0.1.3 documentation</title>
+  <title>Index &mdash; PyBEL 0.1.5 documentation</title>
   
 
   
@@ -34,7 +34,7 @@
         <link rel="index" title="Index"
               href="#"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyBEL 0.1.3 documentation" href="index.html"/> 
+    <link rel="top" title="PyBEL 0.1.5 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.1.3
+                0.1.5
               </div>
             
           
@@ -88,6 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releasing.html">Releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a></li>
 </ul>
 
@@ -146,6 +148,7 @@
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#V"><strong>V</strong></a>
  
@@ -161,6 +164,10 @@
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="logging.html#pybel.exceptions.AnnotationMismatch">AnnotationMismatch</a>
+  </dt>
+
+      
+  <dt><a href="utils.html#pybel.parser.utils.any_subdict_matches">any_subdict_matches() (in module pybel.parser.utils)</a>
   </dt>
 
   </dl></td>
@@ -191,6 +198,10 @@
 
       
   <dt><a href="parsers.html#pybel.parser.parse_bel.BelParser.canonicalize_node">canonicalize_node() (pybel.parser.parse_bel.BelParser method)</a>
+  </dt>
+
+      
+  <dt><a href="utils.html#pybel.parser.utils.check_stability">check_stability() (in module pybel.parser.utils)</a>
   </dt>
 
       
@@ -280,6 +291,14 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="utils.html#pybel.parser.utils.flatten">flatten() (in module pybel.parser.utils)</a>
+  </dt>
+
+      
+  <dt><a href="utils.html#pybel.parser.utils.flatten_edges">flatten_edges() (in module pybel.parser.utils)</a>
+  </dt>
+
+      
   <dt><a href="parsers.html#pybel.parser.parse_bel.BelParser.fragment">fragment (pybel.parser.parse_bel.BelParser attribute)</a>
   </dt>
 
@@ -287,12 +306,12 @@
   <dt><a href="tutorial.html#pybel.from_database">from_database() (in module pybel)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="tutorial.html#pybel.from_lines">from_lines() (in module pybel)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="tutorial.html#pybel.from_path">from_path() (in module pybel)</a>
   </dt>
@@ -378,6 +397,10 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="utils.html#pybel.parser.utils.list2tuple">list2tuple() (in module pybel.parser.utils)</a>
+  </dt>
+
+      
   <dt><a href="parsers.html#pybel.parser.parse_bel.BelParser.location">location (pybel.parser.parse_bel.BelParser attribute)</a>
   </dt>
 
@@ -443,12 +466,12 @@
   <dt><a href="parsers.html#pybel.parser.parse_bel.BelParser.pmod">pmod (pybel.parser.parse_bel.BelParser attribute)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="parsers.html#pybel.parser.parse_bel.BelParser.psub">psub (pybel.parser.parse_bel.BelParser attribute)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="tutorial.html#module-pybel">pybel (module)</a>
   </dt>
@@ -462,11 +485,35 @@
   </dt>
 
       
+  <dt><a href="utils.html#module-pybel.parser.utils">pybel.parser.utils (module)</a>
+  </dt>
+
+      
   <dt><a href="logging.html#pybel.exceptions.PyBelError">PyBelError</a>
   </dt>
 
       
   <dt><a href="logging.html#pybel.parser.parse_exceptions.PyBelException">PyBelException</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="utils.html#pybel.parser.utils.sanitize_file_lines">sanitize_file_lines() (in module pybel.parser.utils)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="utils.html#pybel.parser.utils.split_file_to_annotations_and_definitions">split_file_to_annotations_and_definitions() (in module pybel.parser.utils)</a>
+  </dt>
+
+      
+  <dt><a href="utils.html#pybel.parser.utils.subdict_matches">subdict_matches() (in module pybel.parser.utils)</a>
   </dt>
 
   </dl></td>
@@ -543,7 +590,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.3',
+            VERSION:'0.1.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
