@@ -309,7 +309,8 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = 'Reaction', (('Abundance', ('CHEBI', 'superoxide')),), (('Abundance', ('CHEBI', 'hydrogen peroxide')), ('Abundance', ('CHEBI', 'oxygen')))
+        node = 'Reaction', (('Abundance', ('CHEBI', 'superoxide')),), (
+        ('Abundance', ('CHEBI', 'hydrogen peroxide')), ('Abundance', ('CHEBI', 'oxygen')))
         self.assertEqual(node, self.parser.canonicalize_node(result))
         self.assertHasNode(node)
 
@@ -322,7 +323,16 @@ class TestTransformation(TestTokenParserBase):
         self.assertHasNode(('Abundance', 'CHEBI', 'oxygen'))
         self.assertHasEdge(node, ('Abundance', 'CHEBI', 'oxygen'))
 
-        # TODO move to own test
+    def test_clearance(self):
+        """Tests that after adding things, the graph and parser can be cleared properly"""
+        s1 = 'surf(p(HGNC:EGFR))'
+        s2 = 'rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))'
+
+        self.parser.transformation.parseString(s1)
+        self.parser.transformation.parseString(s2)
+        self.assertGreater(self.parser.graph.number_of_nodes(), 0)
+        self.assertGreater(self.parser.graph.number_of_edges(), 0)
+
         self.parser.clear()
         self.assertEqual(0, self.parser.graph.number_of_nodes())
         self.assertEqual(0, self.parser.graph.number_of_edges())

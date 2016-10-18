@@ -144,7 +144,6 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pybel&#39;</span><span class="p">)</span>
 
 
-<span class="c1"># TODO remove citation and annotations as arguments?</span>
 <div class="viewcode-block" id="ControlParser"><a class="viewcode-back" href="../../../parsers.html#pybel.parser.parse_control.ControlParser">[docs]</a><span class="k">class</span> <span class="nc">ControlParser</span><span class="p">(</span><span class="n">BaseParser</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">custom_annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Builds parser for BEL custom_annotations statements</span>
@@ -153,9 +152,10 @@
 <span class="sd">        :type custom_annotations: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_annotations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">custom_annotations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">custom_annotations</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">citation</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">valid_annotations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">custom_annotations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">custom_annotations</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">statement_group</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># custom_annotations = oneOf(self.custom_annotations.keys())</span>
@@ -222,7 +222,7 @@
 
         <span class="n">values</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">3</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">InvalidCitationException</span><span class="p">(</span><span class="s1">&#39;Invalid citation: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">citation</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">((</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;reference&#39;</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;authors&#39;</span><span class="p">,</span> <span class="s1">&#39;comments&#39;</span><span class="p">),</span> <span class="n">values</span><span class="p">))</span>
@@ -280,9 +280,6 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">citation</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">annot</span><span class="p">[</span><span class="s1">&#39;citation_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">annot</span>
-
-    <span class="k">def</span> <span class="nf">clear_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>

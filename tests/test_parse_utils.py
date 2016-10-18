@@ -197,6 +197,24 @@ class TestUtils(unittest.TestCase):
         }
         self.assertEqual(expected, utils.flatten(d))
 
+    def test_flatten_dict_withLists(self):
+        d = {
+            'A': 5,
+            'B': 'b',
+            'C': {
+                'D': ['d','delta'],
+                'E': 'e'
+            }
+        }
+
+        expected = {
+            'A': 5,
+            'B': 'b',
+            'C_D': 'd,delta',
+            'C_E': 'e'
+        }
+        self.assertEqual(expected, utils.flatten(d))
+
     def test_flatten_edges(self):
         g = nx.MultiDiGraph()
         g.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}})

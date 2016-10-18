@@ -34,7 +34,7 @@ def handle_debug(fmt):
 
 
 class BelParser(BaseParser):
-    def __init__(self, graph=None, namespace_dict=None, namespace_mapping=None, custom_annotations=None, lenient=False):
+    def __init__(self, graph=None, namespace_dict=None, namespace_mapping=None, annotations_dict=None, lenient=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param namespace_dict: A dictionary of {namespace: set of members}
@@ -47,44 +47,45 @@ class BelParser(BaseParser):
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
 
-        self.control_parser = ControlParser(custom_annotations=custom_annotations)
-        self.identifier_parser = IdentifierParser(namespace_dict=namespace_dict, mapping=namespace_mapping,
+        self.control_parser = ControlParser(custom_annotations=annotations_dict)
+        self.identifier_parser = IdentifierParser(namespace_dict=namespace_dict,
+                                                  mapping=namespace_mapping,
                                                   lenient=lenient)
 
         identifier = Group(self.identifier_parser.get_language())('identifier')
 
         # 2.2 Abundance Modifier Functions
 
-        # 2.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_protein_modifications
+        #: 2.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_protein_modifications
         self.pmod = PmodParser(namespace_parser=self.identifier_parser).get_language()
 
-        # 2.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
+        #: 2.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
         self.variant = VariantParser().get_language()
 
-        # 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
+        #: 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
         self.fragment = FragmentParser().get_language()
 
-        # 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
+        #: 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
         self.location = LocationParser(self.identifier_parser).get_language()
 
-        # 2.2.X Deprecated substitution function from BEL 1.0
+        #: 2.2.X Deprecated substitution function from BEL 1.0
         self.psub = PsubParser().get_language()
         self.gsub = GsubParser().get_language()
         self.trunc = TruncParser().get_language()
 
         # 2.6 Other Functions
 
-        # 2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
+        #: 2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
         self.fusion = FusionParser(self.identifier_parser).get_language()
 
         # 2.1 Abundance Functions
 
-        # 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
+        #: 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
         general_abundance_tags = one_of_tags(['a', 'abundance'], 'Abundance', 'function')
         self.general_abundance = general_abundance_tags + nest(identifier)
         self.general_abundance.addParseAction(self.handle)
 
-        # 2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA
+        #: 2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA
         gene_tag = one_of_tags(['g', 'geneAbundance'], 'Gene', 'function')
         self.gene_simple = gene_tag + nest(identifier + Optional(WCW + self.location))
         self.gene_simple.addParseAction(self.handle)
@@ -334,7 +335,7 @@ class BelParser(BaseParser):
         self.decreases = triple(self.bel_term, decreases_tag, self.bel_term)
 
         # 3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
-        directly_decreases_tag = oneOf(['=|', '→', 'directlyDecreases']).setParseAction(
+        directly_decreases_tag = oneOf(['=|', 'directlyDecreases']).setParseAction(
             replaceWith('directlyDecreases'))
         self.directly_decreases = triple(self.bel_term, directly_decreases_tag, self.bel_term)
 
@@ -455,7 +456,7 @@ class BelParser(BaseParser):
             obj = self.ensure_node(s, l, tokens['object'])
 
             attrs = {
-                'relation': tokens['relation']
+                'relation': tokens['relation'],
             }
 
             sub_mod = self.canonicalize_modifier(tokens['subject'])
@@ -491,10 +492,6 @@ class BelParser(BaseParser):
     def get_annotations(self):
         """Get current annotations in this parser"""
         return self.control_parser.get_annotations()
-
-    def clear_annotations(self):
-        """Clears the current annotations in this parser"""
-        self.control_parser.clear_annotations()
 
     def clear(self):
         """Clears the data stored in the parser"""
@@ -574,6 +571,7 @@ class BelParser(BaseParser):
         if 'modifier' in tokens:
             return self.ensure_node(s, l, tokens['target'])
 
+        # FIXME change to make more sense. Explicitly look for reaction
         elif 'transformation' in tokens:
             name = self.canonicalize_node(tokens)
             if name not in self.graph:

@@ -1,11 +1,13 @@
+import unittest
+
 from pybel.parser.baseparser import nest, BaseParser
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidException
-import unittest
+from pybel.parser.parse_exceptions import PyBelException
+from pybel.parser.parse_identifier import IdentifierParser
+
 
 class TestRandom(unittest.TestCase):
-
-
     def test_nest_failure(self):
         with self.assertRaises(ValueError):
             nest()
@@ -13,6 +15,7 @@ class TestRandom(unittest.TestCase):
     def test_bad_subclass(self):
         class BadParser(BaseParser):
             pass
+
         with self.assertRaises(Exception):
             BadParser().get_language()
 
@@ -20,9 +23,20 @@ class TestRandom(unittest.TestCase):
         class GoodParser(BaseParser):
             def __init__(self):
                 self.language = 5
+
         self.assertIsNotNone(GoodParser().get_language())
 
     def test_bad_aminoAcid(self):
         with self.assertRaises(PlaceholderAminoAcidException):
             amino_acid.parseString('X')
 
+    def test_pybelexception_str(self):
+        e = PyBelException('XXX')
+        self.assertEqual("PyBEL100 - XXX", str(e))
+
+        with self.assertRaises(PyBelException):
+            raise e
+
+    def test_unimplemented_mapping(self):
+        with self.assertRaises(NotImplementedError):
+            IdentifierParser(mapping={})

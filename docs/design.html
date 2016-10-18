@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Design Choices</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#dealing-with-dirty-namespaces">Dealing with Dirty Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#namespace-and-annotation-name-choices">Namespace and Annotation Name Choices</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a></li>
@@ -155,6 +156,14 @@ namespace at the time. There&#8217;s a setting in the BELGraph for these occassi
 <li>Write your own <code class="code docutils literal"><span class="pre">belns</span></code> file</li>
 <li>Use pybel-tools to convert OWL Ontologies to <code class="code docutils literal"><span class="pre">belns</span></code> file</li>
 </ul>
+</div>
+<div class="section" id="namespace-and-annotation-name-choices">
+<h2>Namespace and Annotation Name Choices<a class="headerlink" href="#namespace-and-annotation-name-choices" title="Permalink to this headline">¶</a></h2>
+<p><code class="code docutils literal"><span class="pre">*.belns</span></code> and <code class="code docutils literal"><span class="pre">*.belanno</span></code> configuration files include an entry called &#8220;Keyword&#8221; in their respective
+[Namespace] and [AnnotationDefinition] sections. To maintain understandability between BEL documents, PyBEL
+enforces that the names given in <code class="code docutils literal"><span class="pre">*.bel</span></code> documents match their respective resources. For now, capitilization
+is not considered, but in the future, PyBEL will also ensure that capitlization is properly stylized, like
+the lowercase &#8216;h&#8217; in &#8220;ChEMBL&#8221;.</p>
 </div>
 </div>
 

@@ -3,9 +3,12 @@ from configparser import ConfigParser
 
 import requests
 from pyparsing import Suppress
+from pyparsing import pyparsing_common as ppc
 from requests_file import FileAdapter
 
-from .baseparser import BaseParser, W, word, quote, delimitedSet, Word, alphanums
+from .baseparser import BaseParser, W, word, quote, delimitedSet
+from .parse_exceptions import LexicographyException
+from ..exceptions import NamespaceMismatch, AnnotationMismatch
 
 log = logging.getLogger('pybel')
 
@@ -26,11 +29,22 @@ value_map = {
 }
 
 
+def download_url(url):
+    """Downloads and parses a config file from url"""
+    session = requests.Session()
+    if url.startswith('file://'):
+        session.mount('file://', FileAdapter())
+    log.debug('Downloading annotations from {}'.format(url))
+    res = session.get(url)
+    config = ConfigParser(delimiters=delimiters, strict=False)
+    config.optionxform = lambda option: option
+    config.read_file(line.decode('utf-8', errors='ignore') for line in res.iter_lines())
+    return config
+
+
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document"""
 
-    # TODO add parameters for automatically loaded metadata and values
-    # TODO build class that handles connection to namesapce and annotations database
     def __init__(self, namespace_dict=None, annotations_dict=None):
         """
         :param namespace_dict: dictionary of pre-loaded namespaces {name: set of valid values}
@@ -47,19 +61,22 @@ class MetadataParser(BaseParser):
         self.annotations_metadata = {}
         self.annotations_dict = {} if annotations_dict is None else annotations_dict
 
-        word_under = Word(alphanums + '_')
+        # word_under = Word(alphanums + '_')
+        word_under = ppc.identifier
 
-        self.document = Suppress('SET') + W + Suppress('DOCUMENT') + word('key') + W + Suppress('=') + W + quote(
+        self.document = Suppress('SET') + W + Suppress('DOCUMENT') + W + word('key') + W + Suppress('=') + W + quote(
             'value')
 
         namespace_tag = Suppress('DEFINE') + W + Suppress('NAMESPACE')
-        self.namespace_url = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
+        self.namespace_url = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
+            'URL') + W + quote(
             'url')
         self.namespace_list = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
 
         annotation_tag = Suppress('DEFINE') + W + Suppress('ANNOTATION')
-        self.annotation_url = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress('URL') + W + quote(
+        self.annotation_url = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
+            'URL') + W + quote(
             'url')
         self.annotation_list = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
             'LIST') + W + delimitedSet('values')
@@ -85,20 +102,21 @@ class MetadataParser(BaseParser):
 
     def handle_namespace_url(self, s, l, tokens):
         name = tokens['name']
+
+        # FIXME - use URL as check for okay
+        # Make a warning
+        # externalize this function
         if name in self.namespace_dict:
             return tokens
 
         url = tokens['url']
-        session = requests.Session()
-        if url.startswith('file://'):
-            session.mount('file://', FileAdapter())
-        log.debug('Downloading namespaces from {}'.format(url))
-        res = session.get(url)
-        res.raise_for_status()
+        config = download_url(url)
 
-        config = ConfigParser(delimiters=delimiters, strict=False)
-        config.optionxform = lambda option: option
-        config.read_file(line.decode('utf-8') for line in res.iter_lines())
+        config_keyword = config['Namespace']['Keyword']
+        if name != config_keyword and name.lower() == config_keyword.lower():
+            raise LexicographyException('{} should be {}'.format(name, config_keyword))
+        elif name != config_keyword:
+            raise NamespaceMismatch('Namespace name mismatch for {}: {}'.format(name, url))
 
         self.namespace_dict[name] = dict(config['Values'])
         self.namespace_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
@@ -111,16 +129,14 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
-        session = requests.Session()
-        if url.startswith('file://'):
-            session.mount('file://', FileAdapter())
-        log.debug('Downloading annotations from {}'.format(url))
-        res = session.get(url)
-        res.raise_for_status()
 
-        config = ConfigParser(delimiters=delimiters, strict=False)
-        config.optionxform = lambda option: option
-        config.read_file(line.decode('utf-8') for line in res.iter_lines())
+        config = download_url(url)
+
+        config_keyword = config['AnnotationDefinition']['Keyword']
+        if name != config_keyword and name.lower() == config_keyword.lower():
+            raise LexicographyException('{} should be {}'.format(name, config_keyword))
+        elif name != config_keyword:
+            raise AnnotationMismatch('Annotation name mismatch for {}: {}'.format(name, url))
 
         self.annotations_dict[name] = dict(config['Values'])
         self.annotations_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
@@ -132,10 +148,7 @@ class MetadataParser(BaseParser):
         if name in self.namespace_dict:
             return tokens
 
-        values = set(tokens['values'])
-
-        self.namespace_metadata[name] = self.transform_document_annotations()
-        self.namespace_dict[name] = values
+        self.namespace_dict[name] = set(tokens['values'])
 
         return tokens
 
@@ -157,37 +170,3 @@ class MetadataParser(BaseParser):
 
     def transform_document_annotations(self):
         return self.document_metadata.copy()
-
-
-definitions_syntax = {
-    'Namespace': {
-        'NameString': 'name',
-        'Keyword': 'keyword',
-        'DomainString': 'domain',
-        'SpeciesString': 'species',
-        'DescriptionString': 'description',
-        'VersionString': 'version',
-        'CreatedDateTime': 'createdDateTime',
-        'QueryValueURL': 'queryValueUrl',
-        'UsageString': 'usageDescription',
-        'TypeString': 'typeClass'
-    },
-    'Author': {
-        'NameString': 'authorName',
-        'CopyrightString': 'authorCopyright',
-        'ContactInfoString': 'authorContactInfo'
-    },
-    'Citation': {
-        'NameString': 'citationName',
-        'DescriptionString': 'citationDescription',
-        'PublishedVersionString': 'citationPublishedVersion',
-        'PublishedDate': 'citationPublishedDate',
-        'ReferenceURL': 'citationReferenceURL'
-    },
-    'Processing': {
-        'CaseSensitiveFlag': 'processingCaseSensitiveFlag',
-        'DelimiterString': 'processingDelimiter',
-        'CacheableFlag': 'processingCacheableFlag'
-    },
-    'Values': None
-}

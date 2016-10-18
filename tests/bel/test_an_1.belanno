@@ -1,4 +1,4 @@
-[Namespace]
+[AnnotationDefinition]
 Keyword=TESTAN1
 NameString=Test Annotations 1 for PyBEL
 DomainString=TestAn1

@@ -2,9 +2,10 @@ import logging
 import os
 import unittest
 
+from pybel.exceptions import NamespaceMismatch, AnnotationMismatch
 from pybel.parser import ControlParser, MetadataParser
-from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
 from pybel.parser.parse_exceptions import *
+from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -120,13 +121,21 @@ class TestParseMetadata(unittest.TestCase):
         s = 'DEFINE NAMESPACE Custom1 AS LIST {"A","B","C"}'
         self.parser.parseString(s)
         self.assertIn('Custom1', self.parser.namespace_dict)
-        self.assertIn('Custom1', self.parser.namespace_metadata)
 
         s = 'DEFINE NAMESPACE Custom1 AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
         self.parser.parseString(s)
         self.assertIn('Custom1', self.parser.namespace_dict)
-        self.assertIn('Custom1', self.parser.namespace_metadata)
         self.assertIn('A', self.parser.namespace_dict['Custom1'])
+
+    def test_control_annotation_lexicographyException(self):
+        s = 'DEFINE ANNOTATION CELLSTRUCTURE AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
+        with self.assertRaises(LexicographyException):
+            self.parser.parseString(s)
+
+    def test_control_namespace_lexicographyException(self):
+        s = 'DEFINE NAMESPACE mgi AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
+        with self.assertRaises(LexicographyException):
+            self.parser.parseString(s)
 
     def test_control_3(self):
         s = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
@@ -194,16 +203,9 @@ class TestParseMetadata(unittest.TestCase):
             'BRCO': {'Hippocampus', 'Parietal Lobe'}
         }
 
-        expected_namespace_annoations = {
-            'BRCO': {}
-        }
-
         self.assertIn('BRCO', self.parser.namespace_dict)
         self.assertEqual(2, len(self.parser.namespace_dict['BRCO']))
         self.assertEqual(expected_namespace_dict, self.parser.namespace_dict)
-
-        self.assertIn('BRCO', self.parser.namespace_metadata)
-        self.assertEqual(expected_namespace_annoations, self.parser.namespace_metadata)
 
     def test_parse_namespace_list_2(self):
         s1 = '''SET DOCUMENT Name = "Alzheimer's Disease Model"'''
@@ -217,9 +219,6 @@ class TestParseMetadata(unittest.TestCase):
         }
 
         expected_namespace_annoations = {
-            'BRCO': {
-                'Name': "Alzheimer's Disease Model",
-            }
         }
 
         self.assertIn('BRCO', self.parser.namespace_dict)
@@ -227,9 +226,16 @@ class TestParseMetadata(unittest.TestCase):
         self.assertEqual(expected_namespace_dict, self.parser.namespace_dict)
         self.assertEqual(expected_namespace_annoations, self.parser.namespace_metadata)
 
-    def test_parse_namespace_url_1(self):
+    def test_parse_namespace_url_mismatch(self):
         path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
         s = '''DEFINE NAMESPACE TEST AS URL "file://{}"'''.format(path)
+
+        with self.assertRaises(NamespaceMismatch):
+            self.parser.parseString(s)
+
+    def test_parse_namespace_url_1(self):
+        path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
+        s = '''DEFINE NAMESPACE TESTNS1 AS URL "file://{}"'''.format(path)
         self.parser.parseString(s)
 
         expected_values = {
@@ -240,12 +246,12 @@ class TestParseMetadata(unittest.TestCase):
             'TestValue5': 'O'
         }
 
-        self.assertIn('TEST', self.parser.namespace_dict)
-        self.assertEqual(expected_values, self.parser.namespace_dict['TEST'])
+        self.assertIn('TESTNS1', self.parser.namespace_dict)
+        self.assertEqual(expected_values, self.parser.namespace_dict['TESTNS1'])
 
     def test_parse_annotation_url_1(self):
         path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
-        s = '''DEFINE ANNOTATION Test AS URL "file://{}"'''.format(path)
+        s = '''DEFINE ANNOTATION TESTAN1 AS URL "file://{}"'''.format(path)
         self.parser.parseString(s)
 
         expected_values = {
@@ -256,8 +262,15 @@ class TestParseMetadata(unittest.TestCase):
             'TestAnnot5': 'O'
         }
 
-        self.assertIn('Test', self.parser.annotations_dict)
-        self.assertEqual(expected_values, self.parser.annotations_dict['Test'])
+        self.assertIn('TESTAN1', self.parser.annotations_dict)
+        self.assertEqual(expected_values, self.parser.annotations_dict['TESTAN1'])
+
+    def test_parse_annotation_url_failure(self):
+        path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
+        s = '''DEFINE ANNOTATION Test AS URL "file://{}"'''.format(path)
+
+        with self.assertRaises(AnnotationMismatch):
+            self.parser.parseString(s)
 
     def test_parse_pattern(self):
         s = 'DEFINE ANNOTATION Test AS PATTERN "\w+"'
@@ -273,7 +286,6 @@ class TestParseControl(unittest.TestCase):
         }
 
         self.parser = ControlParser(custom_annotations=custom_annotations)
-
 
     def test_set_statement_group(self):
         s = 'SET STATEMENT_GROUP = "my group"'
@@ -331,6 +343,9 @@ class TestParseControl(unittest.TestCase):
         }
         self.assertEqual(expected_annotations, annotations)
 
+        self.parser.parseString('UNSET Citation')
+        self.assertEqual(0, len(self.parser.citation))
+
     def test_citation_long(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","","de Nigris|Lerman A|Ignarro LJ",""}'
 
@@ -348,7 +363,7 @@ class TestParseControl(unittest.TestCase):
         self.assertEqual(expected_citation, self.parser.citation)
 
     def test_citation_error(self):
-        s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037",""}'
+        s = 'SET Citation = {"PubMed","Trends in molecular medicine"}'
         with self.assertRaises(Exception):
             self.parser.parseString(s)
 
@@ -381,6 +396,12 @@ class TestParseControl(unittest.TestCase):
         }
 
         self.assertEqual(expected_annotation, self.parser.annotations)
+
+    def test_custom_annotation_list_withInvalid(self):
+        s = 'SET Custom1 = {"Custom1_A","Custom1_B","Evil invalid!!!"}'
+
+        with self.assertRaises(IllegalAnnotationValueExeption):
+            self.parser.parseString(s)
 
     def test_custom_key_failure(self):
         s = 'SET FAILURE = "never gonna happen"'

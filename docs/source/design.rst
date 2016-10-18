@@ -21,4 +21,11 @@ Here are some suggestions on how to find an appropriate namespace:
 - Write your own :code:`belns` file
 - Use pybel-tools to convert OWL Ontologies to :code:`belns` file
 
+Namespace and Annotation Name Choices
+-------------------------------------
 
+:code:`*.belns` and :code:`*.belanno` configuration files include an entry called "Keyword" in their respective
+[Namespace] and [AnnotationDefinition] sections. To maintain understandability between BEL documents, PyBEL
+enforces that the names given in :code:`*.bel` documents match their respective resources. For now, capitilization
+is not considered, but in the future, PyBEL will also ensure that capitlization is properly stylized, like
+the lowercase 'h' in "ChEMBL". 
