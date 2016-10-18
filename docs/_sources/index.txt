@@ -22,6 +22,8 @@ Table of Contents
    design
    logging
    parsers
+   utils
+   releasing
    todo
 
 Indices and Tables

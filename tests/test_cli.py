@@ -26,12 +26,14 @@ class TestCli(unittest.TestCase):
 
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     def test_neo4j(self):
+        neo = py2neo.Graph(os.environ['NEO_PATH'])
+        neo.data('match (n)-[r]->() where r.pybel_context="TESTCTX" detach delete n')
+
         self.runner.invoke(cli.main, ['to_neo', '--path', self.test_path, '--neo', os.environ['NEO_PATH'], '--context',
                                       'TESTCTX'])
 
-        neo = py2neo.Graph(os.environ['NEO_PATH'])
         count = neo.data('match (n)-[r]->() where r.pybel_context="TESTCTX" return count(n) as count')[0]['count']
-        self.assertEqual(60, count)
+        self.assertEqual(14, count)
 
     @unittest.skip
     def test_csv(self):

@@ -61,22 +61,9 @@ def split_file_to_annotations_and_definitions(file):
     return documents, definitions, statements
 
 
-def subitergroup(iterable, key):
-    poss = (i for i, v in enumerate(iterable) if key(v))
-    res = []
-    last = next(poss)
-    for pos in poss:
-        k = iterable[last]
-        z = iterable[last + 1:pos]
-        last = pos
-        res.append((k, z))
-    res.append((iterable[last], iterable[last + 1:]))
-    return res
-
-
 def check_stability(ns_dict, ns_mapping):
-    """
-    Check the stability of namespace mapping
+    """Check the stability of namespace mapping
+
     :param ns_dict: dict of {name: set of values}
     :param ns_mapping: dict of {name: {value: (other_name, other_value)}}
     :return: if the mapping is stable
@@ -102,6 +89,7 @@ def check_stability(ns_dict, ns_mapping):
 
 
 def list2tuple(l):
+    """turns a nested list to a nested tuple"""
     if not isinstance(l, list):
         return l
     else:
@@ -109,13 +97,14 @@ def list2tuple(l):
 
 
 def subdict_matches(a, b):
-    """
-    Checks if all the keys in b are in a, and that their values match
+    """Checks if all the keys in b are in a, and that their values match
+
     :param a: a dictionary
     :type a: dict
     :param b: a dictionary
     :type b: dict
-    :return:
+    :return: if all keys in b are in a and their values match
+    :rtype: bool
     """
     for k, v in b.items():
         if k not in a or a[k] != v:
@@ -124,17 +113,21 @@ def subdict_matches(a, b):
 
 
 def any_subdict_matches(a, b):
-    """
-    Checks that dictionary b matches one of the subdictionaries of a
+    """Checks if dictionary b matches one of the subdictionaries of a
+
     :param a: dictionary of dictionaries
     :param b: dictionary
-    :return:
+    :return: if dictionary b matches one of the subdictionaries of a
+    :rtype: bool
     """
     return any(subdict_matches(sd, b) for sd in a.values())
 
 
-# Borrowed from http://stackoverflow.com/a/6027615
 def flatten(d, parent_key='', sep='_'):
+    """Flattens a nested dictionary
+
+    Borrowed from http://stackoverflow.com/a/6027615
+    """
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
@@ -149,6 +142,7 @@ def flatten(d, parent_key='', sep='_'):
 
 def flatten_edges(graph):
     """Returns a new graph with flattened edge data dictionaries
+
     :param graph:
     :type graph: nx.MultiDiGraph
     :rtype: nx.MultiDiGraph

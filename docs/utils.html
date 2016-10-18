@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Utilities &mdash; PyBEL 0.1.5 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="PyBEL 0.1.5 documentation" href="index.html"/>
+        <link rel="next" title="Releases" href="releasing.html"/>
+        <link rel="prev" title="Parsers" href="parsers.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyBEL
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releasing.html">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PyBEL</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Utilities</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/utils.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="utilities">
+<h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
+<p>Some utilities that are used throughout the software are explained here:</p>
+<span class="target" id="module-pybel.parser.utils"></span><dl class="function">
+<dt id="pybel.parser.utils.any_subdict_matches">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">any_subdict_matches</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#any_subdict_matches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.any_subdict_matches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if dictionary b matches one of the subdictionaries of a</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> &#8211; dictionary of dictionaries</li>
+<li><strong>b</strong> &#8211; dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">if dictionary b matches one of the subdictionaries of a</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.parser.utils.check_stability">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">check_stability</code><span class="sig-paren">(</span><em>ns_dict</em>, <em>ns_mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#check_stability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.check_stability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the stability of namespace mapping</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_dict</strong> &#8211; dict of {name: set of values}</li>
+<li><strong>ns_mapping</strong> &#8211; dict of {name: {value: (other_name, other_value)}}</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">if the mapping is stable</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.parser.utils.flatten">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>d</em>, <em>parent_key=''</em>, <em>sep='_'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#flatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens a nested dictionary</p>
+<p>Borrowed from <a class="reference external" href="http://stackoverflow.com/a/6027615">http://stackoverflow.com/a/6027615</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.parser.utils.flatten_edges">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">flatten_edges</code><span class="sig-paren">(</span><em>graph</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#flatten_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.flatten_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new graph with flattened edge data dictionaries</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> (<em>nx.MultiDiGraph</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">nx.MultiDiGraph</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.parser.utils.list2tuple">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">list2tuple</code><span class="sig-paren">(</span><em>l</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#list2tuple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.list2tuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>turns a nested list to a nested tuple</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.parser.utils.sanitize_file_lines">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">sanitize_file_lines</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#sanitize_file_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.sanitize_file_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.parser.utils.split_file_to_annotations_and_definitions">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">split_file_to_annotations_and_definitions</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#split_file_to_annotations_and_definitions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.split_file_to_annotations_and_definitions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumerates a line iterable and splits into 3 parts</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.parser.utils.subdict_matches">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">subdict_matches</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#subdict_matches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.subdict_matches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if all the keys in b are in a, and that their values match</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; a dictionary</li>
+<li><strong>b</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; a dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">if all keys in b are in a and their values match</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="releasing.html" class="btn btn-neutral float-right" title="Releases" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="parsers.html" class="btn btn-neutral" title="Parsers" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Charles Tapley Hoyt.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
