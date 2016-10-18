@@ -127,6 +127,16 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('Custom1', self.parser.namespace_dict)
         self.assertIn('A', self.parser.namespace_dict['Custom1'])
 
+    def test_control_annotation_lexicographyException(self):
+        s = 'DEFINE ANNOTATION CELLSTRUCTURE AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
+        with self.assertRaises(LexicographyException):
+            self.parser.parseString(s)
+
+    def test_control_namespace_lexicographyException(self):
+        s = 'DEFINE NAMESPACE mgi AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
+        with self.assertRaises(LexicographyException):
+            self.parser.parseString(s)
+
     def test_control_3(self):
         s = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
         self.parser.parseString(s)
@@ -333,6 +343,9 @@ class TestParseControl(unittest.TestCase):
         }
         self.assertEqual(expected_annotations, annotations)
 
+        self.parser.parseString('UNSET Citation')
+        self.assertEqual(0, len(self.parser.citation))
+
     def test_citation_long(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","","de Nigris|Lerman A|Ignarro LJ",""}'
 
@@ -383,6 +396,12 @@ class TestParseControl(unittest.TestCase):
         }
 
         self.assertEqual(expected_annotation, self.parser.annotations)
+
+    def test_custom_annotation_list_withInvalid(self):
+        s = 'SET Custom1 = {"Custom1_A","Custom1_B","Evil invalid!!!"}'
+
+        with self.assertRaises(IllegalAnnotationValueExeption):
+            self.parser.parseString(s)
 
     def test_custom_key_failure(self):
         s = 'SET FAILURE = "never gonna happen"'
