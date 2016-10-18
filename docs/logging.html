@@ -88,9 +88,9 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Logging Messages</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#general-parser-failure">General Parser Failure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#error-codes">Error Codes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#debugging-codes">Debugging Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#errors">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exceptions">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging">Debugging</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
@@ -141,15 +141,37 @@
             
   <div class="section" id="logging-messages">
 <h1>Logging Messages<a class="headerlink" href="#logging-messages" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="general-parser-failure">
-<h2>General Parser Failure<a class="headerlink" href="#general-parser-failure" title="Permalink to this headline">¶</a></h2>
-<p>This message is displayed when a problem was caused due to an unforseen error. The line number and original statement
-are printed for the user to debug.</p>
+<div class="section" id="errors">
+<h2>Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h2>
+<p>These errors are produced when PyBEL cannot continue parsing, because of a technical problem, or unsalvagable
+syntatic/semantic problem. These are logged at the CRITICAL level.</p>
+<span class="target" id="module-pybel.exceptions"></span><dl class="exception">
+<dt id="pybel.exceptions.AnnotationMismatch">
+<em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">AnnotationMismatch</code><a class="reference internal" href="_modules/pybel/exceptions.html#AnnotationMismatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.AnnotationMismatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the annotation name in a BEL document doesn&#8217;t match
+the AnnotationDefinition Keyword in the corresponding annotation definition file</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pybel.exceptions.NamespaceMismatch">
+<em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">NamespaceMismatch</code><a class="reference internal" href="_modules/pybel/exceptions.html#NamespaceMismatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.NamespaceMismatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the namespace name in a BEL document doesn&#8217;t match
+the Namespace Keyword in the corresponding namespace file</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pybel.exceptions.PyBelError">
+<em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">PyBelError</code><a class="reference internal" href="_modules/pybel/exceptions.html#PyBelError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.PyBelError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when PyBEL can no longer continue</p>
+</dd></dl>
+
 </div>
-<div class="section" id="error-codes">
-<h2>Error Codes<a class="headerlink" href="#error-codes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
+<p>A message for &#8220;General Parser Failure&#8221; is displayed when a problem was caused due to an unforseen error. The line
+number and original statement are printed for the user to debug.</p>
 <p>When errors in the statement leave the term or relation as nonsense, these errors are thrown and the statement is
-excluded. These are debugged with code <code class="code docutils literal"><span class="pre">PyBEL1XX</span></code>.</p>
+excluded. These are logged at the ERROR level with code <code class="code docutils literal"><span class="pre">PyBEL1XX</span></code>.</p>
 <span class="target" id="module-pybel.parser.parse_exceptions"></span><dl class="exception">
 <dt id="pybel.parser.parse_exceptions.IllegalAnnotationValueExeption">
 <em class="property">exception </em><code class="descclassname">pybel.parser.parse_exceptions.</code><code class="descname">IllegalAnnotationValueExeption</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_exceptions.html#IllegalAnnotationValueExeption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_exceptions.IllegalAnnotationValueExeption" title="Permalink to this definition">¶</a></dt>
@@ -228,6 +250,17 @@ excluded. These are debugged with code <code class="code docutils literal"><span
 </dd></dl>
 
 <dl class="exception">
+<dt id="pybel.parser.parse_exceptions.LexicographyException">
+<em class="property">exception </em><code class="descclassname">pybel.parser.parse_exceptions.</code><code class="descname">LexicographyException</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_exceptions.html#LexicographyException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_exceptions.LexicographyException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Improper capitalization</p>
+<dl class="attribute">
+<dt id="pybel.parser.parse_exceptions.LexicographyException.code">
+<code class="descname">code</code><em class="property"> = 34</em><a class="headerlink" href="#pybel.parser.parse_exceptions.LexicographyException.code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
 <dt id="pybel.parser.parse_exceptions.MissingAnnotationKeyException">
 <em class="property">exception </em><code class="descclassname">pybel.parser.parse_exceptions.</code><code class="descname">MissingAnnotationKeyException</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_exceptions.html#MissingAnnotationKeyException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_exceptions.MissingAnnotationKeyException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when trying to unset an annotation that is not set</p>
@@ -283,10 +316,10 @@ excluded. These are debugged with code <code class="code docutils literal"><span
 </dd></dl>
 
 </div>
-<div class="section" id="debugging-codes">
-<h2>Debugging Codes<a class="headerlink" href="#debugging-codes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
 <p>There are certain statements that aren&#8217;t correct, but PyBEL can understand and fix. These will be handled automatically,
-and a nice message with <code class="code docutils literal"><span class="pre">PyBEL0XX</span></code> number will be output to debug.</p>
+and are logged at the DEBUG level with <code class="code docutils literal"><span class="pre">PyBEL0XX</span></code> number will be output to debug.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="5%" />
