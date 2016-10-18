@@ -493,10 +493,6 @@ class BelParser(BaseParser):
         """Get current annotations in this parser"""
         return self.control_parser.get_annotations()
 
-    def clear_annotations(self):
-        """Clears the current annotations in this parser"""
-        self.control_parser.clear_annotations()
-
     def clear(self):
         """Clears the data stored in the parser"""
         self.graph.clear()

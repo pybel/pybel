@@ -204,19 +204,3 @@ variant_parent_dict = {
     'RNAVariant': 'RNA',
     'ProteinVariant': 'Protein'
 }
-
-compound_relation_dict = {
-    ('increases', 'increases'): 'increases',
-    ('increases', 'decreases'): 'decreases',
-    ('increases', 'increases'): 'increases',
-    ('increases', 'increases'): 'increases',
-    ('increases', 'increases'): 'increases',
-    ('increases', 'increases'): 'increases',
-    ('increases', 'increases'): 'increases',
-
-}
-
-# TODO add other BEL common namespaces
-labels = {}
-labels.update(abundance_labels)
-labels.update(activity_labels)

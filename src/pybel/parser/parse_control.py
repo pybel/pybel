@@ -145,9 +145,6 @@ class ControlParser(BaseParser):
             annot['citation_{}'.format(key)] = value
         return annot
 
-    def clear_annotations(self):
-        self.annotations.clear()
-
     def clear(self):
         self.annotations.clear()
         self.citation.clear()
