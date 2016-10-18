@@ -11,7 +11,7 @@ from networkx.readwrite import json_graph
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
-from .exceptions import PyBelEpicFailure
+from .exceptions import PyBelError
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import PyBelException
 from .parser.parse_metadata import MetadataParser
@@ -61,10 +61,6 @@ def from_database(connection):
     :type connection: str
     :return: a BEL graph loaded from the database
     :rtype: BELGraph
-
-    Example:
-    >>> import pybel
-    >>> g = pybel.from_database('sqlite://')
     """
     raise NotImplementedError('Loading from database not yet implemented')
 
@@ -149,7 +145,7 @@ class BELGraph(nx.MultiDiGraph):
                 log.error('Line {:05} - invalid statement: {}'.format(line_number, line))
             except PyBelException as e:
                 log.warning('Line {:05} - {}: {}'.format(line_number, e, line))
-            except PyBelEpicFailure as e:
+            except PyBelError as e:
                 log.critical('Line {:05} - {}'.format(line_number, line))
                 raise e
             except:
