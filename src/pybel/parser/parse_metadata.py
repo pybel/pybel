@@ -3,9 +3,10 @@ from configparser import ConfigParser
 
 import requests
 from pyparsing import Suppress
+from pyparsing import pyparsing_common as ppc
 from requests_file import FileAdapter
 
-from .baseparser import BaseParser, W, word, quote, delimitedSet, Word, alphanums
+from .baseparser import BaseParser, W, word, quote, delimitedSet
 from .parse_exceptions import LexicographyException
 from ..exceptions import NamespaceMismatch, AnnotationMismatch
 
@@ -28,11 +29,22 @@ value_map = {
 }
 
 
+def download_url(url):
+    """Downloads and parses a config file from url"""
+    session = requests.Session()
+    if url.startswith('file://'):
+        session.mount('file://', FileAdapter())
+    log.debug('Downloading annotations from {}'.format(url))
+    res = session.get(url)
+    config = ConfigParser(delimiters=delimiters, strict=False)
+    config.optionxform = lambda option: option
+    config.read_file(line.decode('utf-8', errors='ignore') for line in res.iter_lines())
+    return config
+
+
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document"""
 
-    # TODO add parameters for automatically loaded metadata and values
-    # TODO build class that handles connection to namesapce and annotations database
     def __init__(self, namespace_dict=None, annotations_dict=None):
         """
         :param namespace_dict: dictionary of pre-loaded namespaces {name: set of valid values}
@@ -49,7 +61,8 @@ class MetadataParser(BaseParser):
         self.annotations_metadata = {}
         self.annotations_dict = {} if annotations_dict is None else annotations_dict
 
-        word_under = Word(alphanums + '_')
+        # word_under = Word(alphanums + '_')
+        word_under = ppc.identifier
 
         self.document = Suppress('SET') + W + Suppress('DOCUMENT') + W + word('key') + W + Suppress('=') + W + quote(
             'value')
@@ -97,22 +110,13 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
-        session = requests.Session()
-        if url.startswith('file://'):
-            session.mount('file://', FileAdapter())
-        log.debug('Downloading namespaces from {}'.format(url))
-        res = session.get(url)
-        res.raise_for_status()
-
-        config = ConfigParser(delimiters=delimiters, strict=False)
-        config.optionxform = lambda option: option
-        config.read_file(line.decode('utf-8') for line in res.iter_lines())
+        config = download_url(url)
 
         config_keyword = config['Namespace']['Keyword']
         if name != config_keyword and name.lower() == config_keyword.lower():
-            raise LexicographyException('Got {}. Should be {}'.format(name, config_keyword))
+            raise LexicographyException('{} should be {}'.format(name, config_keyword))
         elif name != config_keyword:
-            raise NamespaceMismatch('Namespace name mismatch {}: {}'.format(name, url))
+            raise NamespaceMismatch('Namespace name mismatch for {}: {}'.format(name, url))
 
         self.namespace_dict[name] = dict(config['Values'])
         self.namespace_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
@@ -125,20 +129,12 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
-        session = requests.Session()
-        if url.startswith('file://'):
-            session.mount('file://', FileAdapter())
-        log.debug('Downloading annotations from {}'.format(url))
-        res = session.get(url)
-        res.raise_for_status()
 
-        config = ConfigParser(delimiters=delimiters, strict=False)
-        config.optionxform = lambda option: option
-        config.read_file(line.decode('utf-8') for line in res.iter_lines())
+        config = download_url(url)
 
         config_keyword = config['AnnotationDefinition']['Keyword']
         if name != config_keyword and name.lower() == config_keyword.lower():
-            raise LexicographyException('Got {}. Should be {}'.format(name, config_keyword))
+            raise LexicographyException('{} should be {}'.format(name, config_keyword))
         elif name != config_keyword:
             raise AnnotationMismatch('Annotation name mismatch for {}: {}'.format(name, url))
 
