@@ -5,7 +5,7 @@ from .graph import BELGraph, from_path, from_lines, from_url, from_database
 
 __all__ = ['from_url', 'from_path', 'from_lines', 'from_database', 'BELGraph']
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 __title__ = 'PyBEL'
 __description__ = 'A Python package for parsing, validating, and analysis of of BEL graphs'
