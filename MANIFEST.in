@@ -1,22 +1,15 @@
 graft src
 graft tests
 
-include *.rst
-include LICENSE
+recursive-include docs/source *.py
+recursive-include docs/source *.rst
+recursive-include docs Makefile
 
 global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store
 
-include *.txt
-include tox.ini
-exclude .codecov.yml .bumpversion.cfg .coveragerc .codeclimate.yml
+exclude .bumpversion.cfg
+include *.rst *.txt LICENSE tox.ini .travis.yml docs/Makefile .coveragerc .codecov.yml .codeclimate.yml
 
-recursive-include docs *.py
-recursive-include docs *.rst
-recursive-include docs Makefile
 recursive-include notebooks *.ipynb
-
 global-exclude notebooks/.ipynb_checkpoints/*
 global-exclude docs/*
-
-exclude legacy
-recursive-exclude legacy *.py

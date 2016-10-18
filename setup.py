@@ -6,9 +6,6 @@ import re
 
 import setuptools
 
-# see https://python-packaging.readthedocs.org/en/latest/minimal.html
-# TODO: publish on PyPi https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
-
 #################################################################
 
 PACKAGES = setuptools.find_packages(where='src')
@@ -82,7 +79,8 @@ if __name__ == '__main__':
         url=find_meta('url'),
         author=find_meta('author'),
         author_email=find_meta('email'),
-        maintainer=find_meta('author'),
+        maintainer='Charles Tapley Hoyt',
+        maintainer_email=find_meta('email'),
         license=find_meta('license'),
         classifiers=CLASSIFIERS,
         keywords=KEYWORDS,
