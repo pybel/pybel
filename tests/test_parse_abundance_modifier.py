@@ -61,6 +61,7 @@ class TestHgvsParser(unittest.TestCase):
         expected = ['C', 65, '*']
         self.assertEqual(expected, result.asList())
 
+
 class TestPmod(unittest.TestCase):
     def setUp(self):
         self.parser = PmodParser()
@@ -132,8 +133,50 @@ class TestGsubParser(unittest.TestCase):
 
 
 class TestFragmentParser(unittest.TestCase):
+    """See http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_examples_2"""
+
     def setUp(self):
         self.parser = FragmentParser()
+
+    def test_known_length(self):
+        """test known length"""
+        s = 'frag(5_20)'
+        result = self.parser.parseString(s)
+        expected = {
+            'start': 5,
+            'stop': 20
+        }
+        self.assertEqual(expected, result.asDict())
+
+    def test_unknown_length(self):
+        """amino-terminal fragment of unknown length"""
+        s = 'frag(1_?)'
+        result = self.parser.parseString(s)
+        expected = {
+            'start': 1,
+            'stop': '?'
+        }
+        self.assertEqual(expected, result.asDict())
+
+    def test_unknown_start_stop(self):
+        """fragment with unknown start/stop"""
+        s = 'frag(?_*)'
+        result = self.parser.parseString(s)
+        expected = {
+            'start': '?',
+            'stop': '*'
+        }
+        self.assertEqual(expected, result.asDict())
+
+    def test_descriptor(self):
+        """fragment with unknown start/stop and a descriptor"""
+        s = 'frag(?, 55kD)'
+        result = self.parser.parseString(s)
+        expected = {
+            'missing': '?',
+            'description': '55kD'
+        }
+        self.assertEqual(expected, result.asDict())
 
 
 class TestTruncationParser(unittest.TestCase):

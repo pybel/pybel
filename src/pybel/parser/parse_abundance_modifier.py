@@ -1,8 +1,9 @@
 import logging
 
 from pyparsing import *
+from pyparsing import pyparsing_common as ppc
 
-from .baseparser import BaseParser, LP, RP, WCW, word, nest
+from .baseparser import BaseParser, WCW, word, nest
 from .language import aa_triple, amino_acid, dna_nucleotide, dna_nucleotide_labels, rna_nucleotide_labels
 from .parse_identifier import IdentifierParser
 
@@ -108,19 +109,13 @@ class FragmentParser(BaseParser):
     """
 
     def __init__(self):
-        self.fragment_range = (pyparsing_common.integer() | '?') + Suppress('_') + (
-            pyparsing_common.integer() | '?' | '*')
-        fragment_tags = ['frag', 'fragment']
-        fragment_1 = oneOf(fragment_tags) + LP + self.fragment_range + WCW + word + RP
-        fragment_2 = oneOf(fragment_tags) + LP + self.fragment_range + RP
-        fragment_3 = oneOf(fragment_tags) + LP + '?' + Optional(WCW + word) + RP
+        self.fragment_range = (ppc.integer | '?')('start') + Suppress('_') + (ppc.integer | '?' | '*')('stop')
+        self.missing_fragment = Keyword('?')('missing')
+        fragment_tag = oneOf(['frag', 'fragment']).setParseAction(replaceWith('Fragment'))
+        fragment_1 = fragment_tag + nest(self.fragment_range + Optional(WCW + word('description')))
+        fragment_2 = fragment_tag + nest(self.missing_fragment + Optional(WCW + word('description')))
 
-        self.language = fragment_3 | fragment_1 | fragment_2
-        self.language.setParseAction(self.handle_fragment)
-
-    def handle_fragment(self, s, l, tokens):
-        tokens[0] = 'Fragment'
-        return tokens
+        self.language = fragment_1 | fragment_2
 
     def get_language(self):
         return self.language
@@ -141,7 +136,7 @@ class FusionParser(BaseParser):
                                   Suppress('_') + pyparsing_common.integer()) | '?')
 
         self.language = fusion_tags + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
-                                                  Group(identifier)('partner_3p'), range_coordinate('range_3p'))
+                                           Group(identifier)('partner_3p'), range_coordinate('range_3p'))
         self.language.setParseAction(self.handle_fusion)
 
     def get_language(self):
