@@ -15,27 +15,16 @@ from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
-from .utils import list2tuple, cartesian_dictionary
+from .utils import handle_debug, list2tuple, cartesian_dictionary
 
 log = logging.getLogger('pybel')
 
 TWO_WAY_RELATIONS = {'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'}
 
-def handle_debug(fmt):
-    """logging hook for pyparsing
-
-    :param fmt: a format string with {s} for string, {l} for location, and {t} for tokens
-    """
-
-    def handle(s, l, t):
-        log.log(5, fmt.format(s=s, location=l, tokens=t))
-        return t
-
-    return handle
-
 
 class BelParser(BaseParser):
-    def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None, lenient=False):
+    def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
+                 lenient=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: the graph to put the network in. Constructs new nx.MultiDiGrap if None
@@ -371,7 +360,7 @@ class BelParser(BaseParser):
                                            self.directly_increases_nested | self.directly_decreases_nested)
 
         def handle_nested_relation(s, l, tokens):
-            raise NestedRelationNotSupportedException('Nested statements not supported. Please explicitly specifiy.')
+            raise NestedRelationNotSupportedException('Nesting unsupported: {}'.format(s))
 
         self.nested_causal_relationship.setParseAction(handle_nested_relation)
 
@@ -471,8 +460,6 @@ class BelParser(BaseParser):
             obj_mod = self.canonicalize_modifier(tokens['object'])
             if obj_mod:
                 attrs['object'] = obj_mod
-
-            #attrs.update(self.get_annotations())
 
             list_attrs = {}
             for annotation_name, annotation_entry in self.get_annotations().items():

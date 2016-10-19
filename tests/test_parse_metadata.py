@@ -127,11 +127,13 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('Custom1', self.parser.namespace_dict)
         self.assertIn('A', self.parser.namespace_dict['Custom1'])
 
+    @unittest.skip('Future versions may not be so relaxed')
     def test_control_annotation_lexicographyException(self):
         s = 'DEFINE ANNOTATION CELLSTRUCTURE AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
         with self.assertRaises(LexicographyException):
             self.parser.parseString(s)
 
+    @unittest.skip('Future versions may not be so relaxed')
     def test_control_namespace_lexicographyException(self):
         s = 'DEFINE NAMESPACE mgi AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
         with self.assertRaises(LexicographyException):
@@ -226,6 +228,7 @@ class TestParseMetadata(unittest.TestCase):
         self.assertEqual(expected_namespace_dict, self.parser.namespace_dict)
         self.assertEqual(expected_namespace_annoations, self.parser.namespace_metadata)
 
+    @unittest.skip('Future versions may not be so relaxed')
     def test_parse_namespace_url_mismatch(self):
         path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
         s = '''DEFINE NAMESPACE TEST AS URL "file://{}"'''.format(path)
@@ -265,6 +268,7 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('TESTAN1', self.parser.annotations_dict)
         self.assertEqual(expected_values, self.parser.annotations_dict['TESTAN1'])
 
+    @unittest.skip('Future versions may not be so relaxed')
     def test_parse_annotation_url_failure(self):
         path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
         s = '''DEFINE ANNOTATION Test AS URL "file://{}"'''.format(path)

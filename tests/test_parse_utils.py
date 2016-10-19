@@ -216,3 +216,4 @@ class TestUtils(unittest.TestCase):
         ]
 
         self.assertCountEqual(expected_result, utils.cartesian_dictionary(d))
+

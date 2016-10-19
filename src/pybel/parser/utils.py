@@ -176,3 +176,16 @@ def cartesian_dictionary(d):
         res.append(dict(values))
 
     return res
+
+
+def handle_debug(fmt):
+    """logging hook for pyparsing
+
+    :param fmt: a format string with {s} for string, {l} for location, and {t} for tokens
+    """
+
+    def handle(s, l, t):
+        log.log(5, fmt.format(s=s, location=l, tokens=t))
+        return t
+
+    return handle

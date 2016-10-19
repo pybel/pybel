@@ -39,8 +39,23 @@ def main():
 @click.option('--pickle', help='Path for NetworkX gpickle output')
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
 @click.option('--log-file', help="Optional path for verbose log output")
-def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file):
+@click.option('-v', '--verbose', count=True)
+def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, verbose):
     """Options for multiple outputs/conversions"""
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+
+    if verbose == 1:
+        ch.setLevel(logging.DEBUG)
+    elif verbose >= 2:
+        ch.setLevel(5)
+    else:
+        ch.setLevel(logging.INFO)
+
+    log.addHandler(ch)
+
     if log_file:
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         log_path = os.path.expanduser(log_file)

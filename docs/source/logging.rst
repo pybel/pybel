@@ -22,11 +22,11 @@ excluded. These are logged at the ERROR level with code :code:`PyBEL1XX`.
 .. automodule:: pybel.parser.parse_exceptions
     :members:
 
-Debugging
----------
+Tracing
+-------
 
 There are certain statements that aren't correct, but PyBEL can understand and fix. These will be handled automatically,
-and are logged at the DEBUG level with :code:`PyBEL0XX` number will be output to debug.
+and are logged at the TRACE level with :code:`PyBEL0XX` number will be output to debug.
 
 +------+---------------------------+------------------------------------------------------------------------------------+
 | Code | Problem                   | Explanation                                                                        |

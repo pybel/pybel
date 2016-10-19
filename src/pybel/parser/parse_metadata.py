@@ -1,20 +1,14 @@
 import logging
-from configparser import ConfigParser
 
-import requests
 from pyparsing import Suppress
 from pyparsing import pyparsing_common as ppc
-from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet
-from .parse_exceptions import LexicographyException
-from ..exceptions import NamespaceMismatch, AnnotationMismatch
+from ..utils import download_url
 
 log = logging.getLogger('pybel')
 
 __all__ = ['MetadataParser']
-
-delimiters = "=", "|", ":"
 
 # See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
 value_map = {
@@ -27,19 +21,6 @@ value_map = {
     'O': 'Pathology',
     'C': 'Complex'
 }
-
-
-def download_url(url):
-    """Downloads and parses a config file from url"""
-    session = requests.Session()
-    if url.startswith('file://'):
-        session.mount('file://', FileAdapter())
-    log.debug('Downloading annotations from {}'.format(url))
-    res = session.get(url)
-    config = ConfigParser(delimiters=delimiters, strict=False)
-    config.optionxform = lambda option: option
-    config.read_file(line.decode('utf-8', errors='ignore') for line in res.iter_lines())
-    return config
 
 
 class MetadataParser(BaseParser):
@@ -107,39 +88,46 @@ class MetadataParser(BaseParser):
         # Make a warning
         # externalize this function
         if name in self.namespace_dict:
+            log.warning('Tried to overwrite namespace: {}'.format(name))
             return tokens
 
         url = tokens['url']
+        log.debug('Downloading namespace {} from {}'.format(name, url))
         config = download_url(url)
 
         config_keyword = config['Namespace']['Keyword']
         if name != config_keyword and name.lower() == config_keyword.lower():
-            raise LexicographyException('{} should be {}'.format(name, config_keyword))
+            log.warning('Lexicography error. {} should be {}'.format(name, url))
+            # raise LexicographyException('{} should be {}'.format(name, config_keyword))
         elif name != config_keyword:
-            raise NamespaceMismatch('Namespace name mismatch for {}: {}'.format(name, url))
+            log.warning('Annotation name mismatch for {}: {}'.format(name, url))
+            # raise NamespaceMismatch('Namespace name mismatch for {}: {}'.format(name, url))
 
-        self.namespace_dict[name] = dict(config['Values'])
-        self.namespace_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
+        self.namespace_dict[name] = config['Values']
+        self.namespace_metadata[name] = {k: v for k, v in config.items() if k != 'Values'}
 
         return tokens
 
     def handle_annotations_url(self, s, l, tokens):
         name = tokens['name']
         if name in self.annotations_dict:
+            log.warning('Tried to overwrite annotation: {}'.format(name))
             return tokens
 
         url = tokens['url']
-
+        log.debug('Downloading annotations {} from {}'.format(name, url))
         config = download_url(url)
 
         config_keyword = config['AnnotationDefinition']['Keyword']
         if name != config_keyword and name.lower() == config_keyword.lower():
-            raise LexicographyException('{} should be {}'.format(name, config_keyword))
+            # raise LexicographyException('{} should be {}'.format(name, config_keyword))
+            log.warning('Lexicography error. {} should be {}'.format(name, url))
         elif name != config_keyword:
-            raise AnnotationMismatch('Annotation name mismatch for {}: {}'.format(name, url))
+            log.warning('Annotation name mismatch for {}: {}'.format(name, url))
+            # raise AnnotationMismatch
 
-        self.annotations_dict[name] = dict(config['Values'])
-        self.annotations_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
+        self.annotations_dict[name] = config['Values']
+        self.annotations_metadata[name] = {k: v for k, v in config.items() if k != 'Values'}
 
         return tokens
 

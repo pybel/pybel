@@ -14,11 +14,11 @@ class PyBelWarning(Exception):
         return 'PyBEL1{:02} - {}'.format(self.code, self.message)
 
 
-class NamespaceMismatch(PyBelError):
+class NamespaceMismatch(PyBelWarning):
     """Raised when the namespace name in a BEL document doesn't match
     the Namespace Keyword in the corresponding namespace file"""
 
 
-class AnnotationMismatch(PyBelError):
+class AnnotationMismatch(PyBelWarning):
     """Raised when the annotation name in a BEL document doesn't match
     the AnnotationDefinition Keyword in the corresponding annotation definition file"""

@@ -129,7 +129,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except:
-                log.error('Line {:05} - failed: {}'.format(line_number, line))
+                log.error('Line {:07} - failed: {}'.format(line_number, line))
 
         log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
@@ -137,16 +137,16 @@ class BELGraph(nx.MultiDiGraph):
         for line_number, line in defs:
             try:
                 self.metadata_parser.parseString(line)
-            except ParseException as e:
-                log.error('Line {:05} - invalid statement: {}'.format(line_number, line))
-            except PyBelWarning as e:
-                log.warning('Line {:05} - {}: {}'.format(line_number, e, line))
             except PyBelError as e:
-                log.critical('Line {:05} - {}'.format(line_number, line))
+                log.critical('Line {:07} - {}'.format(line_number, line))
                 raise e
+            except ParseException as e:
+                log.error('Line {:07} - invalid statement: {}'.format(line_number, line))
+            except PyBelWarning as e:
+                log.warning('Line {:07} - {}: {}'.format(line_number, e, line))
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
-                log.error('Line {:05} - general failure: {} - {}: {}'.format(line_number, line, exc_type, exc_value))
+                log.error('Line {:07} - general failure: {} - {}: {}'.format(line_number, line, exc_type, exc_value))
                 log.debug('Traceback: {}'.format(exc_traceback))
 
         log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
@@ -160,12 +160,15 @@ class BELGraph(nx.MultiDiGraph):
         for line_number, line in states:
             try:
                 self.bel_parser.parseString(line)
+            except PyBelError as e:
+                log.critical('Line {:07} - {}'.format(line_number, line))
+                raise e
             except ParseException as e:
-                log.error('Line {:05} - general parser failure: {}'.format(line_number, line))
+                log.error('Line {:07} - general parser failure: {}'.format(line_number, line))
             except PyBelWarning as e:
-                log.debug('Line {:05} - {}'.format(line_number, e, line))
+                log.debug('Line {:07} - {}'.format(line_number, e, line))
             except:
-                log.error('Line {:05} - general failure: {}'.format(line_number, line))
+                log.error('Line {:07} - general failure: {}'.format(line_number, line))
 
         log.info('Finished parsing statements section in {:.02f} seconds'.format(time.time() - t))
 

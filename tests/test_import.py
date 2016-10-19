@@ -36,6 +36,7 @@ class TestImport(unittest.TestCase):
         self.assertIsNotNone(g)
 
 
+@unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
 class TestFull(TestTokenParserBase):
     def setUp(self):
         namespaces = {

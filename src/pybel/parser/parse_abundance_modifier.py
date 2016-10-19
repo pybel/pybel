@@ -61,7 +61,7 @@ class PsubParser(BaseParser):
         self.language.setParseAction(self.handle_psub)
 
     def handle_psub(self, s, l, tokens):
-        log.debug('PyBEL006 sub() is deprecated: {}'.format(s))
+        log.log(5, 'PyBEL006 sub() is deprecated: {}'.format(s))
         return tokens
 
     def get_language(self):
@@ -75,7 +75,7 @@ class TruncParser(BaseParser):
         self.language.setParseAction(self.handle_trunc_legacy)
 
     def handle_trunc_legacy(self, s, l, tokens):
-        log.debug('PyBEL025 trunc() is deprecated: {}'.format(s))
+        log.log(5, 'PyBEL025 trunc() is deprecated: {}'.format(s))
         return ['Variant', 'C', tokens['position'], '*']
 
     def get_language(self):
@@ -95,7 +95,7 @@ class GsubParser(BaseParser):
         self.language.setParseAction(self.handle_gsub)
 
     def handle_gsub(self, s, l, tokens):
-        log.debug('PyBEL009 sub() is deprecated: {}'.format(s))
+        log.log(5, 'PyBEL009 sub() is deprecated: {}'.format(s))
         tokens[0] = 'Variant'
         return tokens
 
