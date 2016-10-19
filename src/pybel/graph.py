@@ -13,7 +13,7 @@ from requests_file import FileAdapter
 
 from .exceptions import PyBelError
 from .parser.parse_bel import BelParser
-from .parser.parse_exceptions import PyBelException
+from pybel.exceptions import PyBelWarning
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, flatten, flatten_edges
 
@@ -78,14 +78,14 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.bsp = None
-        self.mdp = None
+        self.bel_parser = None
+        self.metadata_parser = None
         self.context = context
         self.lenient = lenient
 
     def clear(self):
         """Clears the content of the graph and its BEL parser"""
-        self.bsp.clear()
+        self.bel_parser.clear()
 
     def parse_from_path(self, path):
         """Opens a BEL file from a given path and parses it
@@ -124,10 +124,10 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(fl)
 
-        self.mdp = MetadataParser()
+        self.metadata_parser = MetadataParser()
         for line_number, line in docs:
             try:
-                self.mdp.parseString(line)
+                self.metadata_parser.parseString(line)
             except:
                 log.error('Line {:05} - failed: {}'.format(line_number, line))
 
@@ -136,14 +136,10 @@ class BELGraph(nx.MultiDiGraph):
 
         for line_number, line in defs:
             try:
-                res = self.mdp.parseString(line)
-                if len(res) == 2:
-                    log.debug('{}: {}'.format(res[0], res[1]))
-                else:
-                    log.debug('{}: [{}]'.format(res[0], ', '.join(res[1:])))
+                self.metadata_parser.parseString(line)
             except ParseException as e:
                 log.error('Line {:05} - invalid statement: {}'.format(line_number, line))
-            except PyBelException as e:
+            except PyBelWarning as e:
                 log.warning('Line {:05} - {}: {}'.format(line_number, e, line))
             except PyBelError as e:
                 log.critical('Line {:05} - {}'.format(line_number, line))
@@ -156,17 +152,17 @@ class BELGraph(nx.MultiDiGraph):
         log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
-        self.bsp = BelParser(graph=self,
-                             namespace_dict=self.mdp.namespace_dict,
-                             annotations_dict=self.mdp.annotations_dict,
-                             lenient=self.lenient)
+        self.bel_parser = BelParser(graph=self,
+                                    valid_namespaces=self.metadata_parser.namespace_dict,
+                                    valid_annotations=self.metadata_parser.annotations_dict,
+                                    lenient=self.lenient)
 
         for line_number, line in states:
             try:
-                self.bsp.parseString(line)
+                self.bel_parser.parseString(line)
             except ParseException as e:
                 log.error('Line {:05} - general parser failure: {}'.format(line_number, line))
-            except PyBelException as e:
+            except PyBelWarning as e:
                 log.debug('Line {:05} - {}'.format(line_number, e, line))
             except:
                 log.error('Line {:05} - general failure: {}'.format(line_number, line))

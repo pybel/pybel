@@ -199,3 +199,20 @@ class TestUtils(unittest.TestCase):
 
         for u, v, k in expected.edges(keys=True):
             self.assertEqual(expected[u][v][k], result[u][v][k])
+
+    def test_cartesian_dictionary(self):
+        d = {
+            'A': {'1', '2'},
+            'B': {'x', 'y', 'z'}
+        }
+
+        expected_result = [
+            {'A': '1', 'B': 'x'},
+            {'A': '1', 'B': 'y'},
+            {'A': '1', 'B': 'z'},
+            {'A': '2', 'B': 'x'},
+            {'A': '2', 'B': 'y'},
+            {'A': '2', 'B': 'z'},
+        ]
+
+        self.assertCountEqual(expected_result, utils.cartesian_dictionary(d))

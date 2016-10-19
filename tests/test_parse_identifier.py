@@ -11,7 +11,7 @@ class TestIdentifierParser(unittest.TestCase):
             'B': {'4', '5', '6'}
         }
 
-        self.parser = IdentifierParser(namespace_dict=nsd)
+        self.parser = IdentifierParser(valid_namespaces=nsd)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -61,7 +61,7 @@ class TestNamespaceParserDefault(unittest.TestCase):
 
         dns = {'X', 'Y', 'W Z'}
 
-        self.parser = IdentifierParser(namespace_dict=nsd, default_namespace=dns)
+        self.parser = IdentifierParser(valid_namespaces=nsd, default_namespace=dns)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -98,7 +98,7 @@ class TestNamespaceParserLenient(unittest.TestCase):
             'B': {'4', '5', '6'}
         }
 
-        self.parser = IdentifierParser(namespace_dict=nsd, lenient=True)
+        self.parser = IdentifierParser(valid_namespaces=nsd, lenient=True)
 
     def test_valid_1(self):
         s = 'A:3'

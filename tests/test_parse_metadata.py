@@ -285,7 +285,7 @@ class TestParseControl(unittest.TestCase):
             'Custom2': {'Custom2_A', 'Custom2_B'}
         }
 
-        self.parser = ControlParser(custom_annotations=custom_annotations)
+        self.parser = ControlParser(valid_annotations=custom_annotations)
 
     def test_set_statement_group(self):
         s = 'SET STATEMENT_GROUP = "my group"'

@@ -9,20 +9,19 @@ log = logging.getLogger('pybel')
 
 
 class ControlParser(BaseParser):
-    def __init__(self, custom_annotations=None):
-        """Builds parser for BEL custom_annotations statements
+    def __init__(self, valid_annotations=None):
+        """Builds parser for BEL valid_annotations statements
 
-        :param custom_annotations: A dictionary from {annotation: set of valid values} for parsing
-        :type custom_annotations: dict
+        :param valid_annotations: A dictionary from {annotation: set of valid values} for parsing
+        :type valid_annotations: dict
         """
 
-        self.valid_annotations = dict() if custom_annotations is None else custom_annotations
+        self.valid_annotations = dict() if valid_annotations is None else valid_annotations
 
         self.citation = {}
         self.annotations = {}
         self.statement_group = None
 
-        # custom_annotations = oneOf(self.custom_annotations.keys())
         annotation_key = pyparsing_common.identifier.setResultsName('key')
         annotation_key.setParseAction(self.handle_annotation_key)
 

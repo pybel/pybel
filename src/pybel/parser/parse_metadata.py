@@ -45,21 +45,21 @@ def download_url(url):
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document"""
 
-    def __init__(self, namespace_dict=None, annotations_dict=None):
+    def __init__(self, valid_namespaces=None, valid_annotations=None):
         """
-        :param namespace_dict: dictionary of pre-loaded namespaces {name: set of valid values}
-        :type namespace_dict: dict
-        :param annotations_dict: dictionary of pre-loaded annotations {name: set of valid values}
-        :type annotations_dict: dict
+        :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
+        :type valid_namespaces: dict
+        :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
+        :type valid_annotations: dict
         :return:
         """
         self.document_metadata = {}
 
         self.namespace_metadata = {}
-        self.namespace_dict = {} if namespace_dict is None else namespace_dict
+        self.namespace_dict = {} if valid_namespaces is None else valid_namespaces
 
         self.annotations_metadata = {}
-        self.annotations_dict = {} if annotations_dict is None else annotations_dict
+        self.annotations_dict = {} if valid_annotations is None else valid_annotations
 
         # word_under = Word(alphanums + '_')
         word_under = ppc.identifier

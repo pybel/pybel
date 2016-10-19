@@ -11,10 +11,10 @@ DIRTY = 'dirty'
 
 
 class IdentifierParser(BaseParser):
-    def __init__(self, namespace_dict=None, default_namespace=None, mapping=None, lenient=False):
+    def __init__(self, valid_namespaces=None, default_namespace=None, mapping=None, lenient=False):
         """Builds a namespace parser.
-        :param namespace_dict: dictionary of {namespace: set of names}
-        :type namespace_dict: dict
+        :param valid_namespaces: dictionary of {namespace: set of names}
+        :type valid_namespaces: dict
         :param default_namespace: set of valid values that can be used without a namespace
         :type default_namespace: set
         :param mapping: dictionary of {namespace: {name: (mapped_ns, mapped_name)}}
@@ -24,7 +24,7 @@ class IdentifierParser(BaseParser):
         :return:
         """
 
-        self.namespace_dict = namespace_dict
+        self.namespace_dict = valid_namespaces
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
 
         self.identifier_qualified = word('namespace') + Suppress(':') + (word | quote)('name')

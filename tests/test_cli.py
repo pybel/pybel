@@ -8,13 +8,13 @@ import py2neo
 from click.testing import CliRunner
 
 from pybel import cli
+from tests.constants import PYBEL_TEST_ALL
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-@unittest.skipUnless('PYBEL_ALLTESTS' in os.environ and os.environ['PYBEL_ALLTESTS'] == '3',
-                     'not enough memory on Travis-CI for this test')
+@unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
 class TestCli(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()

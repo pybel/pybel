@@ -3,7 +3,7 @@ import unittest
 from pybel.parser.baseparser import nest, BaseParser
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidException
-from pybel.parser.parse_exceptions import PyBelException
+from pybel.exceptions import PyBelWarning
 from pybel.parser.parse_identifier import IdentifierParser
 
 
@@ -31,10 +31,10 @@ class TestRandom(unittest.TestCase):
             amino_acid.parseString('X')
 
     def test_pybelexception_str(self):
-        e = PyBelException('XXX')
+        e = PyBelWarning('XXX')
         self.assertEqual("PyBEL100 - XXX", str(e))
 
-        with self.assertRaises(PyBelException):
+        with self.assertRaises(PyBelWarning):
             raise e
 
     def test_unimplemented_mapping(self):

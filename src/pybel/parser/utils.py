@@ -1,4 +1,5 @@
 import collections
+import itertools as itt
 import logging
 import re
 
@@ -157,3 +158,21 @@ def flatten_edges(graph):
         g.add_edge(u, v, key=key, attr_dict=flatten(data))
 
     return g
+
+
+def cartesian_dictionary(d):
+    """takes a dictionary of sets and provides subdicts
+
+    :param d: a dictionary of sets
+    :type d: dict
+    :rtype: list
+    """
+    q = {}
+    for key in d:
+        q[key] = {(key, value) for value in d[key]}
+
+    res = []
+    for values in itt.product(*q.values()):
+        res.append(dict(values))
+
+    return res
