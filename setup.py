@@ -30,7 +30,8 @@ INSTALL_REQUIRES = [
     'pyparsing',
     'configparser',
     'py2neo',
-    'click'
+    'click',
+    'sqlalchemy'
 ]
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = ['tox']
