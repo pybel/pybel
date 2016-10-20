@@ -11,13 +11,15 @@ from networkx.readwrite import json_graph
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
+from pybel.exceptions import PyBelWarning
 from .exceptions import PyBelError
 from .parser.parse_bel import BelParser
-from .parser.parse_exceptions import PyBelException
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, flatten, flatten_edges
 
 log = logging.getLogger('pybel')
+
+PYBEL_CONTEXT_TAG = 'pybel_context'
 
 
 def from_lines(it, lenient=False):
@@ -78,14 +80,14 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.bsp = None
-        self.mdp = None
+        self.bel_parser = None
+        self.metadata_parser = None
         self.context = context
         self.lenient = lenient
 
     def clear(self):
         """Clears the content of the graph and its BEL parser"""
-        self.bsp.clear()
+        self.bel_parser.clear()
 
     def parse_from_path(self, path):
         """Opens a BEL file from a given path and parses it
@@ -124,52 +126,51 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(fl)
 
-        self.mdp = MetadataParser()
+        self.metadata_parser = MetadataParser()
         for line_number, line in docs:
             try:
-                self.mdp.parseString(line)
+                self.metadata_parser.parseString(line)
             except:
-                log.error('Line {:05} - failed: {}'.format(line_number, line))
+                log.error('Line {:07} - failed: {}'.format(line_number, line))
 
         log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
         for line_number, line in defs:
             try:
-                res = self.mdp.parseString(line)
-                if len(res) == 2:
-                    log.debug('{}: {}'.format(res[0], res[1]))
-                else:
-                    log.debug('{}: [{}]'.format(res[0], ', '.join(res[1:])))
-            except ParseException as e:
-                log.error('Line {:05} - invalid statement: {}'.format(line_number, line))
-            except PyBelException as e:
-                log.warning('Line {:05} - {}: {}'.format(line_number, e, line))
+                self.metadata_parser.parseString(line)
             except PyBelError as e:
-                log.critical('Line {:05} - {}'.format(line_number, line))
+                log.critical('Line {:07} - {}'.format(line_number, line))
                 raise e
+            except ParseException as e:
+                log.error('Line {:07} - invalid statement: {}'.format(line_number, line))
+            except PyBelWarning as e:
+                log.warning('Line {:07} - {}: {}'.format(line_number, e, line))
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
-                log.error('Line {:05} - general failure: {} - {}: {}'.format(line_number, line, exc_type, exc_value))
+                log.error('Line {:07} - general failure: {} - {}: {}'.format(line_number, line, exc_type, exc_value))
                 log.debug('Traceback: {}'.format(exc_traceback))
 
         log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
         t = time.time()
 
-        self.bsp = BelParser(graph=self,
-                             namespace_dict=self.mdp.namespace_dict,
-                             annotations_dict=self.mdp.annotations_dict,
-                             lenient=self.lenient)
+        self.bel_parser = BelParser(graph=self,
+                                    valid_namespaces=self.metadata_parser.namespace_dict,
+                                    valid_annotations=self.metadata_parser.annotations_dict,
+                                    lenient=self.lenient)
 
         for line_number, line in states:
             try:
-                self.bsp.parseString(line)
+                self.bel_parser.parseString(line)
+            except PyBelError as e:
+                log.critical('Line {:07} - {}'.format(line_number, line))
+                raise e
             except ParseException as e:
-                log.error('Line {:05} - general parser failure: {}'.format(line_number, line))
-            except PyBelException as e:
-                log.debug('Line {:05} - {}'.format(line_number, e, line))
+                log.error('Line {:07} - general parser failure: {}'.format(line_number, line))
+            except PyBelWarning as e:
+                log.debug('Line {:07} - {}'.format(line_number, e, line))
             except:
-                log.error('Line {:05} - general failure: {}'.format(line_number, line))
+                log.error('Line {:07} - general failure: {}'.format(line_number, line))
 
         log.info('Finished parsing statements section in {:.02f} seconds'.format(time.time() - t))
 
@@ -187,33 +188,30 @@ class BELGraph(nx.MultiDiGraph):
         if context is not None:
             self.context = context
 
+        tx = neo_graph.begin()
+
         node_map = {}
         for i, (node, data) in enumerate(self.nodes(data=True)):
             node_type = data['type']
-            attrs = {k: v for k, v in data.items() if k not in ('type', 'name')}
+            attrs = {k: v for k, v in data.items() if k != 'type'}
 
             if 'name' in data:
                 attrs['value'] = data['name']
 
-            node_map[node] = py2neo.Node(node_type, name=str(i), **attrs)
+            node_map[node] = py2neo.Node(node_type, cname=str(node), cnum=str(i), **attrs)
 
-        relationships = []
+            tx.create(node_map[node])
+
         for u, v, data in self.edges(data=True):
             neo_u = node_map[u]
             neo_v = node_map[v]
             rel_type = data['relation']
             attrs = flatten(data)
             if self.context is not None:
-                attrs['pybel_context'] = str(self.context)
+                attrs[PYBEL_CONTEXT_TAG] = str(self.context)
             rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
-            relationships.append(rel)
-
-        tx = neo_graph.begin()
-        for neo_node in node_map.values():
-            tx.create(neo_node)
-
-        for rel in relationships:
             tx.create(rel)
+
         tx.commit()
 
     def to_pickle(self, output):

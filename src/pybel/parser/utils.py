@@ -1,4 +1,5 @@
 import collections
+import itertools as itt
 import logging
 import re
 
@@ -11,7 +12,7 @@ re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+AN
 
 def sanitize_file_lines(f):
     """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned"""
-    it = map(str.strip, f)
+    it = (line.strip() for line in f)
     it = filter(lambda i_l: i_l[1] and not i_l[1].startswith('#'), enumerate(it, start=1))
     it = iter(it)
 
@@ -157,3 +158,34 @@ def flatten_edges(graph):
         g.add_edge(u, v, key=key, attr_dict=flatten(data))
 
     return g
+
+
+def cartesian_dictionary(d):
+    """takes a dictionary of sets and provides subdicts
+
+    :param d: a dictionary of sets
+    :type d: dict
+    :rtype: list
+    """
+    q = {}
+    for key in d:
+        q[key] = {(key, value) for value in d[key]}
+
+    res = []
+    for values in itt.product(*q.values()):
+        res.append(dict(values))
+
+    return res
+
+
+def handle_debug(fmt):
+    """logging hook for pyparsing
+
+    :param fmt: a format string with {s} for string, {l} for location, and {t} for tokens
+    """
+
+    def handle(s, l, t):
+        log.log(5, fmt.format(s=s, location=l, tokens=t))
+        return t
+
+    return handle

@@ -30,7 +30,8 @@ activity_labels = {
     'transcriptionalActivity': 'TranscriptionalActivity',
     'tscript': 'TranscriptionalActivity',
     'transportActivity': 'TransportActivity',
-    'tport': 'TransportActivity'
+    'tport': 'TransportActivity',
+    'molecularActivity': 'MolecularActivity'
 }
 
 # TODO fill out

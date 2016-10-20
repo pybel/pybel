@@ -15,40 +15,34 @@ from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
-from .utils import list2tuple
+from .utils import handle_debug, list2tuple, cartesian_dictionary
 
 log = logging.getLogger('pybel')
 
-
-def handle_debug(fmt):
-    """logging hook for pyparsing
-
-    :param fmt: a format string with {s} for string, {l} for location, and {t} for tokens
-    """
-
-    def handle(s, l, t):
-        log.log(5, fmt.format(s=s, location=l, tokens=t))
-        return t
-
-    return handle
+TWO_WAY_RELATIONS = {'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'}
 
 
 class BelParser(BaseParser):
-    def __init__(self, graph=None, namespace_dict=None, namespace_mapping=None, annotations_dict=None, lenient=False):
+    def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
+                 lenient=False):
         """Build a parser backed by a given dictionary of namespaces
 
-        :param namespace_dict: A dictionary of {namespace: set of members}
         :param graph: the graph to put the network in. Constructs new nx.MultiDiGrap if None
         :type graph: nx.MultiDiGraph
+        :param valid_namespaces: A dictionary of {namespace: set of members}
+        :type valid_namespaces: dict
+        :param valid_annotations: a dict of {annotation: set of values}
+        :type valid_annotations: dict
         :param namespace_mapping: a dict of {name: {value: (other_namepace, other_name)}}
+        :type namespace_mapping: dict
         :param lenient: if true, turn off naked namespace failures
         :type lenient: bool
         """
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
 
-        self.control_parser = ControlParser(custom_annotations=annotations_dict)
-        self.identifier_parser = IdentifierParser(namespace_dict=namespace_dict,
+        self.control_parser = ControlParser(valid_annotations=valid_annotations)
+        self.identifier_parser = IdentifierParser(valid_namespaces=valid_namespaces,
                                                   mapping=namespace_mapping,
                                                   lenient=lenient)
 
@@ -366,7 +360,7 @@ class BelParser(BaseParser):
                                            self.directly_increases_nested | self.directly_decreases_nested)
 
         def handle_nested_relation(s, l, tokens):
-            raise NestedRelationNotSupportedException('Nested statements not supported. Please explicitly specifiy.')
+            raise NestedRelationNotSupportedException('Nesting unsupported: {}'.format(s))
 
         self.nested_causal_relationship.setParseAction(handle_nested_relation)
 
@@ -467,13 +461,17 @@ class BelParser(BaseParser):
             if obj_mod:
                 attrs['object'] = obj_mod
 
-            attrs.update(self.get_annotations())
+            list_attrs = {}
+            for annotation_name, annotation_entry in self.get_annotations().items():
+                if isinstance(annotation_entry, set):
+                    list_attrs[annotation_name] = annotation_entry
+                else:
+                    attrs[annotation_name] = annotation_entry
 
-            self.graph.add_edge(sub, obj, attr_dict=attrs)
-
-            if tokens['relation'] in (
-                    'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'):
-                self.graph.add_edge(obj, sub, attr_dict=attrs)
+            for single_annotation in cartesian_dictionary(list_attrs):
+                self.graph.add_edge(sub, obj, attr_dict=attrs, **single_annotation)
+                if tokens['relation'] in TWO_WAY_RELATIONS:
+                    self.graph.add_edge(obj, sub, attr_dict=attrs, **single_annotation)
 
             return tokens
 

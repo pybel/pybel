@@ -14,6 +14,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 
 import logging
 import os
+import time
 
 import click
 import py2neo
@@ -21,6 +22,10 @@ import py2neo
 from . import graph
 
 log = logging.getLogger('pybel')
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
 
 
 @click.group(help="PyBEL Command Line Utilities")
@@ -39,8 +44,19 @@ def main():
 @click.option('--pickle', help='Path for NetworkX gpickle output')
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
 @click.option('--log-file', help="Optional path for verbose log output")
-def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file):
+@click.option('-v', '--verbose', count=True)
+def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, verbose):
     """Options for multiple outputs/conversions"""
+
+    if verbose == 1:
+        ch.setLevel(logging.DEBUG)
+    elif verbose >= 2:
+        ch.setLevel(5)
+    else:
+        ch.setLevel(logging.INFO)
+
+    log.addHandler(ch)
+
     if log_file:
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         log_path = os.path.expanduser(log_file)
@@ -84,8 +100,18 @@ def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file):
 @click.option('--database', help='BEL database')
 @click.option('--neo', help='URL of neo4j database')
 @click.option('--context', help='Context tag for multiple simultaneous neo4j graphs')
-def to_neo(path, url, database, neo, context):
+@click.option('-v', '--verbose', count=True)
+def to_neo(path, url, database, neo, context, verbose):
     """Parses BEL file and uploads to Neo4J"""
+
+    if verbose == 1:
+        ch.setLevel(logging.DEBUG)
+    elif verbose >= 2:
+        ch.setLevel(5)
+    else:
+        ch.setLevel(logging.INFO)
+
+    log.addHandler(ch)
 
     p2n = py2neo.Graph(neo)
     assert p2n.data('match (n) return count(n) as count')[0]['count'] is not None
@@ -99,7 +125,9 @@ def to_neo(path, url, database, neo, context):
     else:
         raise ValueError('missing BEL file')
 
+    t = time.time()
     g.to_neo4j(p2n, context)
+    log.info('Upload to neo4j done in {:.02f} seconds'.format(time.time() - t))
 
 
 if __name__ == '__main__':

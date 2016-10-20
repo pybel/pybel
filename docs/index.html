@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>PyBEL Documentation &mdash; PyBEL 0.1.5 documentation</title>
+  <title>PyBEL Documentation &mdash; PyBEL 0.1.6 documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyBEL 0.1.5 documentation" href="#"/>
-        <link rel="next" title="Getting Started" href="tutorial.html"/> 
+    <link rel="top" title="PyBEL 0.1.6 documentation" href="#"/>
+        <link rel="next" title="Roadmap" href="roadmap.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
             
           
@@ -84,8 +84,10 @@
             
             
                 <ul>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
@@ -137,18 +139,19 @@
             
   <div class="section" id="pybel-documentation">
 <h1>PyBEL Documentation<a class="headerlink" href="#pybel-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Biological Expression Language (BEL) is a domain specific language that enables the expression of complex
-molecular relationships and their context in a machine-readable form. Its simple grammar and expressive power
-have led to its successful use in the IMI project, AETIONOMY, to describe complex disease networks with several
-thousands of relationships.</p>
-<p>PyBEL is a Python software package that parses the BEL syntax, validates its semantics with the contained namespaces,
-applies common graph algorithms, and allows for data interchange with common formats like Neo4J, CSV, Excel, and MySQL.</p>
-<p>PyBEL provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily use it to
-interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.</p>
+<p>Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its successful use in the IMI project, AETIONOMY, to describe complex disease networks with several thousands of relationships.</p>
+<p>PyBEL is a Python software package that parses BEL statements, validates their semantics, applies common graph algorithms, and allows for data interchange with common formats like Neo4J, JSON, CSV, Excel, and SQL.</p>
+<p>PyBEL provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily use it to interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.</p>
 <div class="section" id="table-of-contents">
 <h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#current-features">Current Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#issues">Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#id1">Roadmap</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tutorial.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial.html#basic-usage">Basic Usage</a></li>
@@ -157,12 +160,21 @@ interface with BEL graphs, but is built on a rich framework that can be extended
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="design.html#dealing-with-dirty-namespaces">Dealing with Dirty Namespaces</a></li>
 <li class="toctree-l2"><a class="reference internal" href="design.html#namespace-and-annotation-name-choices">Namespace and Annotation Name Choices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#complexes">Complexes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nestedstatements.html#direct">Direct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nestedstatements.html#indirect">Indirect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nestedstatements.html#increasing-nested-relationships">Increasing Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nestedstatements.html#decreasing-nested-relationships">Decreasing Nested Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nestedstatements.html#reccomendations-for-use-in-pybel">Reccomendations for Use in PyBEL</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="logging.html#errors">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="logging.html#exceptions">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="logging.html#debugging">Debugging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#tracing">Tracing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a><ul>
@@ -197,7 +209,7 @@ interface with BEL graphs, but is built on a rich framework that can be extended
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tutorial.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="roadmap.html" class="btn btn-neutral float-right" title="Roadmap" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
@@ -229,7 +241,7 @@ interface with BEL graphs, but is built on a rich framework that can be extended
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.5',
+            VERSION:'0.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -29,8 +29,4 @@ if __name__ == '__main__':
     fh.setFormatter(formatter)
     log.addHandler(fh)
 
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
     main()

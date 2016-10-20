@@ -1,20 +1,14 @@
 import logging
-from configparser import ConfigParser
 
-import requests
 from pyparsing import Suppress
 from pyparsing import pyparsing_common as ppc
-from requests_file import FileAdapter
 
 from .baseparser import BaseParser, W, word, quote, delimitedSet
-from .parse_exceptions import LexicographyException
-from ..exceptions import NamespaceMismatch, AnnotationMismatch
+from ..utils import download_url
 
 log = logging.getLogger('pybel')
 
 __all__ = ['MetadataParser']
-
-delimiters = "=", "|", ":"
 
 # See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
 value_map = {
@@ -29,37 +23,24 @@ value_map = {
 }
 
 
-def download_url(url):
-    """Downloads and parses a config file from url"""
-    session = requests.Session()
-    if url.startswith('file://'):
-        session.mount('file://', FileAdapter())
-    log.debug('Downloading annotations from {}'.format(url))
-    res = session.get(url)
-    config = ConfigParser(delimiters=delimiters, strict=False)
-    config.optionxform = lambda option: option
-    config.read_file(line.decode('utf-8', errors='ignore') for line in res.iter_lines())
-    return config
-
-
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document"""
 
-    def __init__(self, namespace_dict=None, annotations_dict=None):
+    def __init__(self, valid_namespaces=None, valid_annotations=None):
         """
-        :param namespace_dict: dictionary of pre-loaded namespaces {name: set of valid values}
-        :type namespace_dict: dict
-        :param annotations_dict: dictionary of pre-loaded annotations {name: set of valid values}
-        :type annotations_dict: dict
+        :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
+        :type valid_namespaces: dict
+        :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
+        :type valid_annotations: dict
         :return:
         """
         self.document_metadata = {}
 
         self.namespace_metadata = {}
-        self.namespace_dict = {} if namespace_dict is None else namespace_dict
+        self.namespace_dict = {} if valid_namespaces is None else valid_namespaces
 
         self.annotations_metadata = {}
-        self.annotations_dict = {} if annotations_dict is None else annotations_dict
+        self.annotations_dict = {} if valid_annotations is None else valid_annotations
 
         # word_under = Word(alphanums + '_')
         word_under = ppc.identifier
@@ -107,39 +88,46 @@ class MetadataParser(BaseParser):
         # Make a warning
         # externalize this function
         if name in self.namespace_dict:
+            log.warning('Tried to overwrite namespace: {}'.format(name))
             return tokens
 
         url = tokens['url']
+        log.debug('Downloading namespace {} from {}'.format(name, url))
         config = download_url(url)
 
         config_keyword = config['Namespace']['Keyword']
         if name != config_keyword and name.lower() == config_keyword.lower():
-            raise LexicographyException('{} should be {}'.format(name, config_keyword))
+            log.warning('Lexicography error. {} should be {}'.format(name, url))
+            # raise LexicographyException('{} should be {}'.format(name, config_keyword))
         elif name != config_keyword:
-            raise NamespaceMismatch('Namespace name mismatch for {}: {}'.format(name, url))
+            log.warning('Annotation name mismatch for {}: {}'.format(name, url))
+            # raise NamespaceMismatch('Namespace name mismatch for {}: {}'.format(name, url))
 
-        self.namespace_dict[name] = dict(config['Values'])
-        self.namespace_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
+        self.namespace_dict[name] = config['Values']
+        self.namespace_metadata[name] = {k: v for k, v in config.items() if k != 'Values'}
 
         return tokens
 
     def handle_annotations_url(self, s, l, tokens):
         name = tokens['name']
         if name in self.annotations_dict:
+            log.warning('Tried to overwrite annotation: {}'.format(name))
             return tokens
 
         url = tokens['url']
-
+        log.debug('Downloading annotations {} from {}'.format(name, url))
         config = download_url(url)
 
         config_keyword = config['AnnotationDefinition']['Keyword']
         if name != config_keyword and name.lower() == config_keyword.lower():
-            raise LexicographyException('{} should be {}'.format(name, config_keyword))
+            # raise LexicographyException('{} should be {}'.format(name, config_keyword))
+            log.warning('Lexicography error. {} should be {}'.format(name, url))
         elif name != config_keyword:
-            raise AnnotationMismatch('Annotation name mismatch for {}: {}'.format(name, url))
+            log.warning('Annotation name mismatch for {}: {}'.format(name, url))
+            # raise AnnotationMismatch
 
-        self.annotations_dict[name] = dict(config['Values'])
-        self.annotations_metadata[name] = {k: dict(v) for k, v in config.items() if k != 'Values'}
+        self.annotations_dict[name] = config['Values']
+        self.annotations_metadata[name] = {k: v for k, v in config.items() if k != 'Values'}
 
         return tokens
 

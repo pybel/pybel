@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pybel.parser.parse_control &mdash; PyBEL 0.1.5 documentation</title>
+  <title>pybel.parser.parse_control &mdash; PyBEL 0.1.6 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="PyBEL 0.1.5 documentation" href="../../../index.html"/>
+    <link rel="top" title="PyBEL 0.1.6 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
             
           
@@ -84,8 +84,10 @@
             
             
                 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nestedstatements.html">Why Not Nested Statements?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../logging.html">Logging Messages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utilities</a></li>
@@ -147,20 +149,19 @@
 
 
 <div class="viewcode-block" id="ControlParser"><a class="viewcode-back" href="../../../parsers.html#pybel.parser.parse_control.ControlParser">[docs]</a><span class="k">class</span> <span class="nc">ControlParser</span><span class="p">(</span><span class="n">BaseParser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">custom_annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Builds parser for BEL custom_annotations statements</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valid_annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Builds parser for BEL valid_annotations statements</span>
 
-<span class="sd">        :param custom_annotations: A dictionary from {annotation: set of valid values} for parsing</span>
-<span class="sd">        :type custom_annotations: dict</span>
+<span class="sd">        :param valid_annotations: A dictionary from {annotation: set of valid values} for parsing</span>
+<span class="sd">        :type valid_annotations: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">valid_annotations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">custom_annotations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">custom_annotations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_annotations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">valid_annotations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">valid_annotations</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">citation</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">statement_group</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># custom_annotations = oneOf(self.custom_annotations.keys())</span>
         <span class="n">annotation_key</span> <span class="o">=</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">identifier</span><span class="o">.</span><span class="n">setResultsName</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">)</span>
         <span class="n">annotation_key</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_annotation_key</span><span class="p">)</span>
 
@@ -320,7 +321,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.1.5',
+            VERSION:'0.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

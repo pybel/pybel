@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Logging Messages &mdash; PyBEL 0.1.5 documentation</title>
+  <title>Logging Messages &mdash; PyBEL 0.1.6 documentation</title>
   
 
   
@@ -33,9 +33,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyBEL 0.1.5 documentation" href="index.html"/>
+    <link rel="top" title="PyBEL 0.1.6 documentation" href="index.html"/>
         <link rel="next" title="Parsers" href="parsers.html"/>
-        <link rel="prev" title="Design Choices" href="design.html"/> 
+        <link rel="prev" title="Why Not Nested Statements?" href="nestedstatements.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
             
           
@@ -85,12 +85,14 @@
             
             
                 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Logging Messages</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#errors">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#exceptions">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#debugging">Debugging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tracing">Tracing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
@@ -149,14 +151,14 @@
 syntatic/semantic problem. These are logged at the CRITICAL level.</p>
 <span class="target" id="module-pybel.exceptions"></span><dl class="exception">
 <dt id="pybel.exceptions.AnnotationMismatch">
-<em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">AnnotationMismatch</code><a class="reference internal" href="_modules/pybel/exceptions.html#AnnotationMismatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.AnnotationMismatch" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">AnnotationMismatch</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/exceptions.html#AnnotationMismatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.AnnotationMismatch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when the annotation name in a BEL document doesn&#8217;t match
 the AnnotationDefinition Keyword in the corresponding annotation definition file</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="pybel.exceptions.NamespaceMismatch">
-<em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">NamespaceMismatch</code><a class="reference internal" href="_modules/pybel/exceptions.html#NamespaceMismatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.NamespaceMismatch" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">NamespaceMismatch</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/exceptions.html#NamespaceMismatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.NamespaceMismatch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when the namespace name in a BEL document doesn&#8217;t match
 the Namespace Keyword in the corresponding namespace file</p>
 </dd></dl>
@@ -165,6 +167,17 @@ the Namespace Keyword in the corresponding namespace file</p>
 <dt id="pybel.exceptions.PyBelError">
 <em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">PyBelError</code><a class="reference internal" href="_modules/pybel/exceptions.html#PyBelError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.PyBelError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when PyBEL can no longer continue</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pybel.exceptions.PyBelWarning">
+<em class="property">exception </em><code class="descclassname">pybel.exceptions.</code><code class="descname">PyBelWarning</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/exceptions.html#PyBelWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.exceptions.PyBelWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>PyBEL throws exceptions labeled PyBEL1xx for statements that cannot be fixed automatically</p>
+<dl class="attribute">
+<dt id="pybel.exceptions.PyBelWarning.code">
+<code class="descname">code</code><em class="property"> = 0</em><a class="headerlink" href="#pybel.exceptions.PyBelWarning.code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -306,22 +319,11 @@ excluded. These are logged at the ERROR level with code <code class="code docuti
 
 </dd></dl>
 
-<dl class="exception">
-<dt id="pybel.parser.parse_exceptions.PyBelException">
-<em class="property">exception </em><code class="descclassname">pybel.parser.parse_exceptions.</code><code class="descname">PyBelException</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_exceptions.html#PyBelException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_exceptions.PyBelException" title="Permalink to this definition">¶</a></dt>
-<dd><p>PyBEL throws exceptions labeled PyBEL1xx for statements that cannot be fixed automatically</p>
-<dl class="attribute">
-<dt id="pybel.parser.parse_exceptions.PyBelException.code">
-<code class="descname">code</code><em class="property"> = 0</em><a class="headerlink" href="#pybel.parser.parse_exceptions.PyBelException.code" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 </div>
-<div class="section" id="debugging">
-<h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tracing">
+<h2>Tracing<a class="headerlink" href="#tracing" title="Permalink to this headline">¶</a></h2>
 <p>There are certain statements that aren&#8217;t correct, but PyBEL can understand and fix. These will be handled automatically,
-and are logged at the DEBUG level with <code class="code docutils literal"><span class="pre">PyBEL0XX</span></code> number will be output to debug.</p>
+and are logged at the TRACE level with <code class="code docutils literal"><span class="pre">PyBEL0XX</span></code> number will be output to debug.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="5%" />
@@ -377,7 +379,7 @@ Old gene substitutions are convert automatically to the new HGVS style.</td>
         <a href="parsers.html" class="btn btn-neutral float-right" title="Parsers" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="design.html" class="btn btn-neutral" title="Design Choices" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="nestedstatements.html" class="btn btn-neutral" title="Why Not Nested Statements?" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -408,7 +410,7 @@ Old gene substitutions are convert automatically to the new HGVS style.</td>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.5',
+            VERSION:'0.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

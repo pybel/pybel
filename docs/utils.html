@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Utilities &mdash; PyBEL 0.1.5 documentation</title>
+  <title>Utilities &mdash; PyBEL 0.1.6 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyBEL 0.1.5 documentation" href="index.html"/>
+    <link rel="top" title="PyBEL 0.1.6 documentation" href="index.html"/>
         <link rel="next" title="Releases" href="releasing.html"/>
         <link rel="prev" title="Parsers" href="parsers.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
             
           
@@ -85,8 +85,10 @@
             
             
                 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a></li>
@@ -164,6 +166,22 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="pybel.parser.utils.cartesian_dictionary">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">cartesian_dictionary</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#cartesian_dictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.cartesian_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>takes a dictionary of sets and provides subdicts</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>d</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; a dictionary of sets</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="pybel.parser.utils.check_stability">
 <code class="descclassname">pybel.parser.utils.</code><code class="descname">check_stability</code><span class="sig-paren">(</span><em>ns_dict</em>, <em>ns_mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#check_stability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.check_stability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check the stability of namespace mapping</p>
@@ -205,6 +223,20 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> (<em>nx.MultiDiGraph</em>) &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">nx.MultiDiGraph</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.parser.utils.handle_debug">
+<code class="descclassname">pybel.parser.utils.</code><code class="descname">handle_debug</code><span class="sig-paren">(</span><em>fmt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#handle_debug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.handle_debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>logging hook for pyparsing</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fmt</strong> &#8211; a format string with {s} for string, {l} for location, and {t} for tokens</td>
 </tr>
 </tbody>
 </table>
@@ -295,7 +327,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.5',
+            VERSION:'0.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
