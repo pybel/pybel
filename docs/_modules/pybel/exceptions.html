@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pybel.exceptions &mdash; PyBEL 0.1.5 documentation</title>
+  <title>pybel.exceptions &mdash; PyBEL 0.1.6 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PyBEL 0.1.5 documentation" href="../../index.html"/>
+    <link rel="top" title="PyBEL 0.1.6 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
             
           
@@ -84,8 +84,10 @@
             
             
                 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nestedstatements.html">Why Not Nested Statements?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging Messages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utilities</a></li>
@@ -140,12 +142,24 @@
     <span class="sd">&quot;&quot;&quot;Raised when PyBEL can no longer continue&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="NamespaceMismatch"><a class="viewcode-back" href="../../logging.html#pybel.exceptions.NamespaceMismatch">[docs]</a><span class="k">class</span> <span class="nc">NamespaceMismatch</span><span class="p">(</span><span class="n">PyBelError</span><span class="p">):</span>
+<div class="viewcode-block" id="PyBelWarning"><a class="viewcode-back" href="../../logging.html#pybel.exceptions.PyBelWarning">[docs]</a><span class="k">class</span> <span class="nc">PyBelWarning</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;PyBEL throws exceptions labeled PyBEL1xx for statements that cannot be fixed automatically&quot;&quot;&quot;</span>
+    <span class="c1">#:</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;PyBEL1</span><span class="si">{:02}</span><span class="s1"> - </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NamespaceMismatch"><a class="viewcode-back" href="../../logging.html#pybel.exceptions.NamespaceMismatch">[docs]</a><span class="k">class</span> <span class="nc">NamespaceMismatch</span><span class="p">(</span><span class="n">PyBelWarning</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised when the namespace name in a BEL document doesn&#39;t match</span>
 <span class="sd">    the Namespace Keyword in the corresponding namespace file&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="AnnotationMismatch"><a class="viewcode-back" href="../../logging.html#pybel.exceptions.AnnotationMismatch">[docs]</a><span class="k">class</span> <span class="nc">AnnotationMismatch</span><span class="p">(</span><span class="n">PyBelError</span><span class="p">):</span>
+<div class="viewcode-block" id="AnnotationMismatch"><a class="viewcode-back" href="../../logging.html#pybel.exceptions.AnnotationMismatch">[docs]</a><span class="k">class</span> <span class="nc">AnnotationMismatch</span><span class="p">(</span><span class="n">PyBelWarning</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised when the annotation name in a BEL document doesn&#39;t match</span>
 <span class="sd">    the AnnotationDefinition Keyword in the corresponding annotation definition file&quot;&quot;&quot;</span></div>
 </pre></div>
@@ -181,7 +195,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.1.5',
+            VERSION:'0.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

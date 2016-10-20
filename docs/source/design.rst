@@ -9,7 +9,7 @@ namespace at the time. There's a setting in the BELGraph for these occassions. T
 a flat :code:`--lenient` for use. Again, this is not reccomended. If you are using names that don't have namespaces,
 consult the scientific community working in your area of research and organize the development of a proper ontology,
 terminology, or namespace that can be used. Ultimately, a namespace allows many people to talk, without ambiguity,
-about the same thing.
+about the same thing. WARNING: Lenient mode is not tested very well. Use at your own risk.
 
 .. code-block:: python
 

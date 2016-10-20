@@ -1,0 +1,278 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Roadmap &mdash; PyBEL 0.1.6 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="PyBEL 0.1.6 documentation" href="index.html"/>
+        <link rel="next" title="Getting Started" href="tutorial.html"/>
+        <link rel="prev" title="PyBEL Documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyBEL
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Roadmap</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#current-features">Current Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#issues">Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Roadmap</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-management">Data Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#knowledge-assembly">Knowledge Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post-processing-tools">Post-Processing Tools</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releasing.html">Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PyBEL</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Roadmap</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/roadmap.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="roadmap">
+<h1>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="current-features">
+<h2>Current Features<a class="headerlink" href="#current-features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Easy to install with pip</li>
+<li>Easy to use, with most common functions at top package level</li>
+<li>Good documentation and tutorials</li>
+<li>Extensible API, allowing for bioinformaticians to develop their own algorithms and own their data, instead of using
+a complicated plugin in Cytoscape with multiple dependencies and little ability for export or customization</li>
+<li>Caching system for downloaded data</li>
+</ul>
+</div>
+<div class="section" id="issues">
+<h2>Issues<a class="headerlink" href="#issues" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Only the most common parts of BEL 1.0 are fully supported. If there are statements you are expressing that
+you would like added, open an issue on GitHub.</li>
+<li>Speed is still an issue, because documents above 100K lines still take a couple minutes to run. This issue is
+exacerbated by (optionally) logging output to the console, which can make it more than 3x or 4x as slow.</li>
+<li>The default namespaces from OpenBEL do not follow a standard file format. They are similar to INI config files,
+but do not use consistient delimiters. Also, many of the namespaces don&#8217;t respect that the delimiter should not
+be used in the namespace names. There are also lots of names with strange characters, which may have been caused
+by copying from a data source that had specfic escape characters without proper care.</li>
+<li>Testing was very difficult because the example documents on the OpenBEL website had many semantic errors, such as
+using names and annotation values that were not defined within their respective namespace and annotation definition
+files. They also contained syntax errors like naked names, which are not only syntatically incorrect, but lead to
+bad science; and improper usage of activities, like illegally nesting an activity within a composite statement.</li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h2>Roadmap<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="data-management">
+<h3>Data Management<a class="headerlink" href="#data-management" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Parallelization of BEL tokenization</li>
+<li>Query tools for BELGraph and nx.MultiDiGraph</li>
+<li>Database import and export with SQLAlchemy</li>
+</ul>
+</div>
+<div class="section" id="knowledge-assembly">
+<h3>Knowledge Assembly<a class="headerlink" href="#knowledge-assembly" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Integration of prior knowledge, such orthology between genes/proteins and resolution of protein complex names</li>
+<li>Integration of heirarchical information, insertion of missing complex members and protein family heirarchies</li>
+<li>Leverage of ontologies in the OWL format for disease-specific entities and annotations</li>
+</ul>
+</div>
+<div class="section" id="post-processing-tools">
+<h3>Post-Processing Tools<a class="headerlink" href="#post-processing-tools" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Implementation of Reverse Causal Reasoning and Network Perturbation Amplitude</li>
+<li>Distributed BEL document infrastructure</li>
+<li>Semantic Diff tool</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="PyBEL Documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Charles Tapley Hoyt.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.6',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

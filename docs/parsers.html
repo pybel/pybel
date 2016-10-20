@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Parsers &mdash; PyBEL 0.1.5 documentation</title>
+  <title>Parsers &mdash; PyBEL 0.1.6 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyBEL 0.1.5 documentation" href="index.html"/>
+    <link rel="top" title="PyBEL 0.1.6 documentation" href="index.html"/>
         <link rel="next" title="Utilities" href="utils.html"/>
         <link rel="prev" title="Logging Messages" href="logging.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
             
           
@@ -85,8 +85,10 @@
             
             
                 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Parsers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#control-parser">Control Parser</a></li>
@@ -145,7 +147,9 @@
 <h1>Parsers<a class="headerlink" href="#parsers" title="Permalink to this headline">¶</a></h1>
 <p>PyBEL makes extensive use of the PyParsing module. The code is organized to different modules to reflect
 the different faces ot the BEL language. These parsers support BEL 2.0 and have some backwards compatability
-for rewriting BEL 1.0 statements as BEL 2.0.</p>
+for rewriting BEL 1.0 statements as BEL 2.0. The biologist and bioinformatician using this software will likely never
+need to read this page, but a developer seeking to extend the language will be interested to see the inner workings
+of these parsers.</p>
 <p>See: <a class="reference external" href="https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BEL2.md">https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BEL2.md</a></p>
 <div class="section" id="control-parser">
 <h2>Control Parser<a class="headerlink" href="#control-parser" title="Permalink to this headline">¶</a></h2>
@@ -153,7 +157,7 @@ for rewriting BEL 1.0 statements as BEL 2.0.</p>
 <p>See: <a class="reference external" href="https://wiki.openbel.org/display/BLD/Control+Records">https://wiki.openbel.org/display/BLD/Control+Records</a></p>
 <dl class="class">
 <dt id="pybel.parser.parse_control.ControlParser">
-<em class="property">class </em><code class="descclassname">pybel.parser.parse_control.</code><code class="descname">ControlParser</code><span class="sig-paren">(</span><em>custom_annotations=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_control.html#ControlParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_control.ControlParser" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pybel.parser.parse_control.</code><code class="descname">ControlParser</code><span class="sig-paren">(</span><em>valid_annotations=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_control.html#ControlParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_control.ControlParser" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -162,7 +166,7 @@ for rewriting BEL 1.0 statements as BEL 2.0.</p>
 <p>This module handles parsing BEL relations and validation of semantics.</p>
 <dl class="class">
 <dt id="pybel.parser.parse_bel.BelParser">
-<em class="property">class </em><code class="descclassname">pybel.parser.parse_bel.</code><code class="descname">BelParser</code><span class="sig-paren">(</span><em>graph=None</em>, <em>namespace_dict=None</em>, <em>namespace_mapping=None</em>, <em>annotations_dict=None</em>, <em>lenient=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pybel.parser.parse_bel.</code><code class="descname">BelParser</code><span class="sig-paren">(</span><em>graph=None</em>, <em>valid_namespaces=None</em>, <em>namespace_mapping=None</em>, <em>valid_annotations=None</em>, <em>lenient=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="pybel.parser.parse_bel.BelParser.add_unqualified_edge">
 <code class="descname">add_unqualified_edge</code><span class="sig-paren">(</span><em>u</em>, <em>v</em>, <em>relation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_bel.html#BelParser.add_unqualified_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_bel.BelParser.add_unqualified_edge" title="Permalink to this definition">¶</a></dt>
@@ -302,7 +306,7 @@ for rewriting BEL 1.0 statements as BEL 2.0.</p>
 <p>This module supports the relation parser by handling statements.</p>
 <dl class="class">
 <dt id="pybel.parser.parse_metadata.MetadataParser">
-<em class="property">class </em><code class="descclassname">pybel.parser.parse_metadata.</code><code class="descname">MetadataParser</code><span class="sig-paren">(</span><em>namespace_dict=None</em>, <em>annotations_dict=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_metadata.html#MetadataParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_metadata.MetadataParser" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pybel.parser.parse_metadata.</code><code class="descname">MetadataParser</code><span class="sig-paren">(</span><em>valid_namespaces=None</em>, <em>valid_annotations=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/parse_metadata.html#MetadataParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.parse_metadata.MetadataParser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parser for the document and definitions section of a BEL document</p>
 </dd></dl>
 
@@ -350,7 +354,7 @@ for rewriting BEL 1.0 statements as BEL 2.0.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.5',
+            VERSION:'0.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

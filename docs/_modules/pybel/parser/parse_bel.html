@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pybel.parser.parse_bel &mdash; PyBEL 0.1.5 documentation</title>
+  <title>pybel.parser.parse_bel &mdash; PyBEL 0.1.6 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="PyBEL 0.1.5 documentation" href="../../../index.html"/>
+    <link rel="top" title="PyBEL 0.1.6 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
             
           
@@ -84,8 +84,10 @@
             
             
                 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nestedstatements.html">Why Not Nested Statements?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../logging.html">Logging Messages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utilities</a></li>
@@ -153,40 +155,34 @@
 <span class="kn">from</span> <span class="nn">.parse_exceptions</span> <span class="k">import</span> <span class="n">NestedRelationNotSupportedException</span><span class="p">,</span> <span class="n">IllegalTranslocationException</span>
 <span class="kn">from</span> <span class="nn">.parse_identifier</span> <span class="k">import</span> <span class="n">IdentifierParser</span>
 <span class="kn">from</span> <span class="nn">.parse_pmod</span> <span class="k">import</span> <span class="n">PmodParser</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">list2tuple</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">handle_debug</span><span class="p">,</span> <span class="n">list2tuple</span><span class="p">,</span> <span class="n">cartesian_dictionary</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pybel&#39;</span><span class="p">)</span>
 
-
-<span class="k">def</span> <span class="nf">handle_debug</span><span class="p">(</span><span class="n">fmt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;logging hook for pyparsing</span>
-
-<span class="sd">    :param fmt: a format string with {s} for string, {l} for location, and {t} for tokens</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">l</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">t</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">t</span>
-
-    <span class="k">return</span> <span class="n">handle</span>
+<span class="n">TWO_WAY_RELATIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;negativeCorrelation&#39;</span><span class="p">,</span> <span class="s1">&#39;positiveCorrelation&#39;</span><span class="p">,</span> <span class="s1">&#39;association&#39;</span><span class="p">,</span> <span class="s1">&#39;orthologous&#39;</span><span class="p">,</span> <span class="s1">&#39;analogousTo&#39;</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="BelParser"><a class="viewcode-back" href="../../../parsers.html#pybel.parser.parse_bel.BelParser">[docs]</a><span class="k">class</span> <span class="nc">BelParser</span><span class="p">(</span><span class="n">BaseParser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">namespace_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">namespace_mapping</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotations_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valid_namespaces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">namespace_mapping</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valid_annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Build a parser backed by a given dictionary of namespaces</span>
 
-<span class="sd">        :param namespace_dict: A dictionary of {namespace: set of members}</span>
 <span class="sd">        :param graph: the graph to put the network in. Constructs new nx.MultiDiGrap if None</span>
 <span class="sd">        :type graph: nx.MultiDiGraph</span>
+<span class="sd">        :param valid_namespaces: A dictionary of {namespace: set of members}</span>
+<span class="sd">        :type valid_namespaces: dict</span>
+<span class="sd">        :param valid_annotations: a dict of {annotation: set of values}</span>
+<span class="sd">        :type valid_annotations: dict</span>
 <span class="sd">        :param namespace_mapping: a dict of {name: {value: (other_namepace, other_name)}}</span>
+<span class="sd">        :type namespace_mapping: dict</span>
 <span class="sd">        :param lenient: if true, turn off naked namespace failures</span>
 <span class="sd">        :type lenient: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">graph</span> <span class="k">if</span> <span class="n">graph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">control_parser</span> <span class="o">=</span> <span class="n">ControlParser</span><span class="p">(</span><span class="n">custom_annotations</span><span class="o">=</span><span class="n">annotations_dict</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">identifier_parser</span> <span class="o">=</span> <span class="n">IdentifierParser</span><span class="p">(</span><span class="n">namespace_dict</span><span class="o">=</span><span class="n">namespace_dict</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">control_parser</span> <span class="o">=</span> <span class="n">ControlParser</span><span class="p">(</span><span class="n">valid_annotations</span><span class="o">=</span><span class="n">valid_annotations</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier_parser</span> <span class="o">=</span> <span class="n">IdentifierParser</span><span class="p">(</span><span class="n">valid_namespaces</span><span class="o">=</span><span class="n">valid_namespaces</span><span class="p">,</span>
                                                   <span class="n">mapping</span><span class="o">=</span><span class="n">namespace_mapping</span><span class="p">,</span>
                                                   <span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span>
 
@@ -504,7 +500,7 @@
                                            <span class="bp">self</span><span class="o">.</span><span class="n">directly_increases_nested</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">directly_decreases_nested</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">handle_nested_relation</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">NestedRelationNotSupportedException</span><span class="p">(</span><span class="s1">&#39;Nested statements not supported. Please explicitly specifiy.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NestedRelationNotSupportedException</span><span class="p">(</span><span class="s1">&#39;Nesting unsupported: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nested_causal_relationship</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="n">handle_nested_relation</span><span class="p">)</span>
 
@@ -605,13 +601,17 @@
             <span class="k">if</span> <span class="n">obj_mod</span><span class="p">:</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj_mod</span>
 
-            <span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_annotations</span><span class="p">())</span>
+            <span class="n">list_attrs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">annotation_name</span><span class="p">,</span> <span class="n">annotation_entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_annotations</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">annotation_entry</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+                    <span class="n">list_attrs</span><span class="p">[</span><span class="n">annotation_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">annotation_entry</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">attrs</span><span class="p">[</span><span class="n">annotation_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">annotation_entry</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">attr_dict</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;relation&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span>
-                    <span class="s1">&#39;negativeCorrelation&#39;</span><span class="p">,</span> <span class="s1">&#39;positiveCorrelation&#39;</span><span class="p">,</span> <span class="s1">&#39;association&#39;</span><span class="p">,</span> <span class="s1">&#39;orthologous&#39;</span><span class="p">,</span> <span class="s1">&#39;analogousTo&#39;</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">sub</span><span class="p">,</span> <span class="n">attr_dict</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">single_annotation</span> <span class="ow">in</span> <span class="n">cartesian_dictionary</span><span class="p">(</span><span class="n">list_attrs</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">attr_dict</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">single_annotation</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;relation&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">TWO_WAY_RELATIONS</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">sub</span><span class="p">,</span> <span class="n">attr_dict</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">single_annotation</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">tokens</span>
 
@@ -881,7 +881,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.1.5',
+            VERSION:'0.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
