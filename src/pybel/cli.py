@@ -58,7 +58,6 @@ def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, 
     log.addHandler(ch)
 
     if log_file:
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         log_path = os.path.expanduser(log_file)
         log.info('Logging output to {}'.format(log_path))
         fh = logging.FileHandler(log_path)
@@ -79,19 +78,19 @@ def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, 
 
     if csv:
         log.info('Outputting csv to {}'.format(csv))
-        g.to_csv(csv)
+        graph.to_csv(g, csv)
 
     if graphml:
         log.info('Outputting graphml to {}'.format(graphml))
-        g.to_graphml(graphml)
+        graph.to_graphml(g, graphml)
 
     if json:
         log.info('Outputting json to {}'.format(json))
-        g.to_json(json)
+        graph.to_json(g, json)
 
     if pickle:
         log.info('Outputting pickle to {}'.format(pickle))
-        g.to_pickle(pickle)
+        graph.to_pickle(g, pickle)
 
 
 @main.command()
@@ -126,7 +125,7 @@ def to_neo(path, url, database, neo, context, verbose):
         raise ValueError('missing BEL file')
 
     t = time.time()
-    g.to_neo4j(p2n, context)
+    graph.to_neo4j(g, p2n, context)
     log.info('Upload to neo4j done in {:.02f} seconds'.format(time.time() - t))
 
 

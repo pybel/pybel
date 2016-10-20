@@ -1,5 +1,8 @@
+import collections
+from collections import defaultdict
 from configparser import ConfigParser
 
+import networkx as nx
 import requests
 from requests_file import FileAdapter
 
@@ -17,7 +20,7 @@ def download_url(url):
 
     metadata_config = ConfigParser()
     metadata_config.optionxform = lambda option: option
-    metadata_config.read_file(lines[:value_line ])
+    metadata_config.read_file(lines[:value_line])
 
     delimiter = metadata_config['Processing']['DelimiterString']
 
@@ -33,3 +36,78 @@ def download_url(url):
     res['Values'] = value_dict
 
     return res
+
+
+def expand_dict(flat_dict, sep='_'):
+    """Expands a flattened dictionary
+    :param flat_dict: a nested dictionary that has been flattened so the keys are composite and
+    """
+    res = {}
+    rdict = defaultdict(list)
+
+    for flat_key, value in flat_dict.items():
+        key = flat_key.split(sep, 1)
+        if 1 == len(key):
+            res[key[0]] = value
+        else:
+            rdict[key[0]].append((key[1:], value))
+
+    for k, v in rdict.items():
+        res[k] = expand_dict({ik: iv for (ik,), iv in v})
+
+    return res
+
+
+def flatten(d, parent_key='', sep='_'):
+    """Flattens a nested dictionary
+
+    Borrowed from http://stackoverflow.com/a/6027615
+    """
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        elif isinstance(v, (set, list)):
+            items.append((new_key, ','.join(v)))
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+
+def flatten_edges(graph):
+    """Returns a new graph with flattened edge data dictionaries
+
+    :param graph:
+    :type graph: nx.MultiDiGraph
+    :rtype: nx.MultiDiGraph
+    """
+
+    g = nx.MultiDiGraph()
+
+    for node, data in graph.nodes(data=True):
+        g.add_node(node, data)
+
+    for u, v, key, data in graph.edges(data=True, keys=True):
+        g.add_edge(u, v, key=key, attr_dict=flatten(data))
+
+    return g
+
+
+def expand_edges(graph):
+    """Returns a new graph with expanded edge data dictionaries
+
+    :param graph:
+    :type graph: nx.MultiDiGraph
+    :rtype: nx.MultiDiGraph
+    """
+
+    g = nx.MultiDiGraph()
+
+    for node, data in graph.nodes(data=True):
+        g.add_node(node, data)
+
+    for u, v, key, data in graph.edges(data=True, keys=True):
+        g.add_edge(u, v, key=key, attr_dict=expand_dict(data))
+
+    return g

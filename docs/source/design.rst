@@ -13,9 +13,8 @@ about the same thing. WARNING: Lenient mode is not tested very well. Use at your
 
 .. code-block:: python
 
-    >>> from pybel import BELGraph
-    >>> g = BELGraph(lenient=True)
-    >>> g.parse_from_path('~/Desktop/my_document.bel')
+    >>> import pybel
+    >>> pybel.from_path('~/Desktop/my_document.bel', lenient=True)
 
 For now, the namespace for naked names is assigned the sentinel value from pybel.parser.parse_identifier.DIRTY.
 

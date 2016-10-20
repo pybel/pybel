@@ -1,9 +1,9 @@
 """A Python package for parsing, validating, and analysis of of BEL graphs"""
 
 from . import cli
-from .graph import BELGraph, from_path, from_lines, from_url, from_database
+from .graph import BELGraph, from_path, from_url, from_database
 
-__all__ = ['from_url', 'from_path', 'from_lines', 'from_database', 'BELGraph']
+__all__ = ['from_url', 'from_path', 'from_database', 'BELGraph']
 
 __version__ = '0.1.6'
 
