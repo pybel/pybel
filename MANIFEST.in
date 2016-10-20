@@ -13,3 +13,6 @@ include *.rst *.txt LICENSE tox.ini .travis.yml docs/Makefile .coveragerc .codec
 recursive-include notebooks *.ipynb
 global-exclude notebooks/.ipynb_checkpoints/*
 global-exclude docs/*
+
+exclude artwork
+global-exclude artwork/*
