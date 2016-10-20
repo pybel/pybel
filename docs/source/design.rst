@@ -21,6 +21,7 @@ For now, the namespace for naked names is assigned the sentinel value from pybel
 Here are some suggestions on how to find an appropriate namespace:
 
 - Search the namespaces provided by Selventa, BELIEF, and other sources
+- See https://wiki.openbel.org/display/BELNA/Namespaces+Overview
 - Write your own :code:`belns` file
 - Use pybel-tools to convert OWL Ontologies to :code:`belns` file
 

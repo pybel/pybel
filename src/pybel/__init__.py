@@ -15,4 +15,4 @@ __author__ = 'Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
 __email__ = 'charles.hoyt@scai.fraunhofer.de'
 
 __license__ = 'Apache 2.0 License'
-__copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Chrstian Ebeling'
+__copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'

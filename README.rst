@@ -68,8 +68,8 @@ Contributing
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
 :code:`CONTRIBUTING.rst` for more information on getting involved.
 
-Thanks
-------
+Acknowledgements
+----------------
 
 - PyBEL is proudly built with Paul McGuire's PyParsing package.
 - Scott Colby designed our logo and provided sage advice

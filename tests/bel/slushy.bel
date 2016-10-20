@@ -1,0 +1,64 @@
+SET DOCUMENT Name = "The Worst BEL Document, Ever"
+SET DOCUMENT Description = "This document outlines all of the evil and awful work that is possible during BEL curation"
+SET DOCUMENT Version = "0.0"
+SET DOCUMENT Author = "Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling"
+SET DOCUMENT Licenses = "WTF License"
+SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+
+# Definitions Section
+
+DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"
+DEFINE NAMESPACE CHEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"
+DEFINE NAMESPACE NCR AS URL "http://resource.belframework.org/belframework/1.0/namespace/selventa-named-rat-complexes.belns"
+DEFINE NAMESPACE HGNC AS URL "http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns"
+DEFINE NAMESPACE SPAC AS URL "http://resource.belframework.org/belframework/1.0/namespace/swissprot-accession-numbers.belns"
+DEFINE NAMESPACE PFH AS URL "http://resource.belframework.org/belframework/1.0/namespace/selventa-named-human-protein-families.belns"
+DEFINE NAMESPACE CHEBIID AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-ids.belns"
+DEFINE NAMESPACE MESHD AS URL "http://resource.belframework.org/belframework/1.0/namespace/mesh-diseases.belns"
+DEFINE NAMESPACE GO AS URL "http://resource.belframework.org/belframework/1.0/namespace/go-biological-processes-names.belns"
+DEFINE NAMESPACE SCHEM AS URL "http://resource.belframework.org/belframework/1.0/namespace/selventa-legacy-chemical-names.belns"
+
+DEFINE ANNOTATION CellStructure AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"
+DEFINE ANNOTATION CellLine AS  URL "http://resource.belframework.org/belframework/1.0/annotation/atcc-cell-line.belanno"
+DEFINE ANNOTATION TextLocation AS  LIST {"Abstract","Results","Legend","Review"}
+DEFINE ANNOTATION CardiovascularSystem AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cardiovascular-system.belanno"
+
+# Name doesn't match annotation file Keyword
+DEFINE ANNOTATION MuskuloskeletalSystem AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-musculoskeletal-system.belanno"
+
+DEFINE ANNOTATION Tissue AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-tissue.belanno"
+DEFINE ANNOTATION Cell AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell.belanno"
+DEFINE ANNOTATION Disease AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-disease.belanno"
+DEFINE ANNOTATION Species AS  URL "http://resource.belframework.org/belframework/1.0/annotation/species-taxonomy-id.belanno"
+
+# Statements Section
+
+SET STATEMENT_GROUP = "Group 1"
+
+# Forgot quotes
+SET Disease = Atherosclerosis
+
+# Typo
+SET CardiovascularSystem = "Artereis"
+SET TextLocation = "Review"
+
+# 
+SET Evidence = "Oxidation and nitration of macromolecules, such as proteins, DNA and lipids, are prominent
+in atherosclerotic arteries."
+
+# Missing citation information
+SET Citation = {"PubMed","Trends in molecular medicine","12928037","","de Nigris F|Lerman A|Ignarro LJ|Williams-Ignarro S|Sica V|Baker AH|Lerman LO|Geng YJ|Napoli C",""}
+
+# Missing newline escapes
+SET Evidence = "Arterial cells are highly susceptible to oxidative stress, which can induce both necrosis
+and apoptosis (programmed cell death) [1,2]"
+
+biologicalProcess(GO:"response to oxidative stress") increases biologicalProcess(GO:"apoptotic process")
+
+# Naked name
+biologicalProcess("response to oxidative stress") increases biologicalProcess(GO:necrosis)
+
+# Mixed up arguments
+proteinAbundance(HGNC:TP53,substitution(Q,248,R)) directlyDecreases transcriptionalActivity(proteinAbundance(HGNC:TP53))
+
+
