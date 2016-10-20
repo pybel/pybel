@@ -1,5 +1,5 @@
 from . import database_models
-import urllib.request
+from .. import utils
 import time
 import logging
 import pandas as pd
@@ -159,23 +159,19 @@ class NamespaceCache:
         namespace_old = None
         namespace_model = database_models.Namespace
         
-        tmp_file, headers = urllib.request.urlretrieve(namespace_url)
+        ns_config = utils.download_url(namespace_url)
         
-        config = ConfigParser(delimiters=("=", "|", ":"), strict=False)
-        config.optionxform = lambda option: option
-        config.read_file(open(tmp_file))
-        
-        namespace_key = config['Namespace']['Keyword']
-        creationDateTime = datetime.strptime(config['Namespace']['CreatedDateTime'],'%Y-%m-%dT%H:%M:%S')
+        namespace_key = ns_config['Namespace']['Keyword']
+        creationDateTime = datetime.strptime(ns_config['Namespace']['CreatedDateTime'],'%Y-%m-%dT%H:%M:%S')
         
         namespace_insert_values = [{'url':namespace_url,
-                                    'author':config['Author']['NameString'],
+                                    'author':ns_config['Author']['NameString'],
                                     'keyword':namespace_key,
                                     'createdDateTime':creationDateTime,
-                                    'pubDate':datetime.strptime(config['Citation']['PublishedDate'],'%Y-%m-%d') if 'PublishedDate' in config['Citation'] else None,
-                                    'copyright':config['Author']['CopyrightString'],
-                                    'version':config['Namespace']['VersionString'],
-                                    'contact':config['Author']['ContactInfoString']}]
+                                    'pubDate':datetime.strptime(ns_config['Citation']['PublishedDate'],'%Y-%m-%d') if 'PublishedDate' in ns_config['Citation'] else None,
+                                    'copyright':ns_config['Author']['CopyrightString'],
+                                    'version':ns_config['Namespace']['VersionString'],
+                                    'contact':ns_config['Author']['ContactInfoString']}]
                     
         namespace_check = self.check_namespace(namespace_key) 
         
@@ -187,8 +183,8 @@ class NamespaceCache:
             namespace_entry = self.__db_engine.execute(namespace_model.__table__.insert(),namespace_insert_values)
             namespace_pk = namespace_entry.inserted_primary_key[0]
             
-            names_dict = dict(config['Values'])
-            self.cache[namespace_url] = dict(config['Values'])
+            names_dict = dict(ns_config['Values'])
+            self.cache[namespace_url] = dict(ns_config['Values'])
             
             name_insert_values = [{'namespace_id':namespace_pk,'name':name_info[0],'encoding':name_info[1]} for name_info in names_dict.items()]
             
