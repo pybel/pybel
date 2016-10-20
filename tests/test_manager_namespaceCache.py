@@ -18,7 +18,7 @@ class TestNsCache(unittest.TestCase):
                           'namespaces':['test_ns_1.belns']}
         
         test_db = NamespaceCache(test_db_string)
-        test_db.setup_database(drop_existing=True)
+        test_db.setup_database()
         
         for namespace in test_namespace['namespaces']:
             namespace_exists = test_db.check_namespace("{}{}".format(test_namespace['url'],namespace))
@@ -39,41 +39,6 @@ class TestNsCache(unittest.TestCase):
                                                                       'TestValue4':'O',
                                                                       'TestValue5':'O'}}
         
-        test_db = NamespaceCache(test_db_string)
-        test_db.setup_database(drop_existing=True)
-        test_db.setup_namespace_cache(test_namespace)
-
-        self.assertEqual(expected_cache_dict, test_db.cache)
-    
-    def test_fromDB(self):
-        
-        test_db_string = 'sqlite:///'+os.path.join(dir_path,'bel','testDB.db')#'sqlite:///testDB.db'
-        
-        data_url = os.path.join(dir_path,'bel')
-        
-        test_namespace = {'url':'file://'+data_url,
-                          'namespaces':['test_ns_1.belns']}
-    
-        expected_cache_dict = {'file://'+data_url+"/test_ns_1.belns":{'TestValue1':'O',
-                                                                      'TestValue2':'O',
-                                                                      'TestValue3':'O',
-                                                                      'TestValue4':'O',
-                                                                      'TestValue5':'O'}}
-        
-        test_db = NamespaceCache(test_db_string)
-        test_db.setup_namespace_cache()
-        self.assertEqual(expected_cache_dict, test_db.cache)
-    
-    def test_allreadyIn2(self):
-        
-        test_db_string = 'sqlite:///'+os.path.join(dir_path,'bel','testDB.db')#'sqlite:///testDB.db'
-        test_db = NamespaceCache(test_db_string)
-        
-        data_url = os.path.join(dir_path,'bel')
-        
-        test_namespace = {'url':'file://'+data_url,
-                          'namespaces':['test_ns_1.belns']}
-        
         expected_result = {'keyword':'TESTNS1',
                               'version':'1.0.0',
                               'url':'file://'+os.path.join(dir_path,'bel','test_ns_1.belns'),
@@ -83,9 +48,15 @@ class TestNsCache(unittest.TestCase):
                               'author':'Charles Tapley Hoyt',
                               'contact':'charles.hoyt@scai.fraunhofer.de'}
         
-        check_result = test_db.check_namespace('TESTNS1')
+        test_db = NamespaceCache(test_db_string)
+        test_db.setup_database(drop_existing=True)
+        test_db.setup_namespace_cache(test_namespace)
+
+        self.assertEqual(expected_cache_dict, test_db.cache)
         
+        check_result = test_db.check_namespace('TESTNS1')
         self.assertEqual(expected_result, check_result)
+        
     
     def test_delete(self):
         
@@ -111,7 +82,7 @@ class TestNsCache(unittest.TestCase):
         
         test_db.remove_namespace('file://'+data_url+"/test_ns_1.belns",datetime(2016, 9, 17, 20, 50))
         
-        check_result = test_db.check_namespace("TESTNS1")
+        check_result = test_db.check_namespace("TESTNS1")        
         self.assertIsNone(check_result)
     
     def test_update(self):
