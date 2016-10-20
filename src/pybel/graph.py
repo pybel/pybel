@@ -11,13 +11,15 @@ from networkx.readwrite import json_graph
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
+from pybel.exceptions import PyBelWarning
 from .exceptions import PyBelError
 from .parser.parse_bel import BelParser
-from pybel.exceptions import PyBelWarning
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, flatten, flatten_edges
 
 log = logging.getLogger('pybel')
+
+PYBEL_CONTEXT_TAG = 'pybel_context'
 
 
 def from_lines(it, lenient=False):
@@ -186,33 +188,30 @@ class BELGraph(nx.MultiDiGraph):
         if context is not None:
             self.context = context
 
+        tx = neo_graph.begin()
+
         node_map = {}
         for i, (node, data) in enumerate(self.nodes(data=True)):
             node_type = data['type']
-            attrs = {k: v for k, v in data.items() if k not in ('type', 'name')}
+            attrs = {k: v for k, v in data.items() if k != 'type'}
 
             if 'name' in data:
                 attrs['value'] = data['name']
 
-            node_map[node] = py2neo.Node(node_type, name=str(i), **attrs)
+            node_map[node] = py2neo.Node(node_type, cname=str(node), cnum=str(i), **attrs)
 
-        relationships = []
+            tx.create(node_map[node])
+
         for u, v, data in self.edges(data=True):
             neo_u = node_map[u]
             neo_v = node_map[v]
             rel_type = data['relation']
             attrs = flatten(data)
             if self.context is not None:
-                attrs['pybel_context'] = str(self.context)
+                attrs[PYBEL_CONTEXT_TAG] = str(self.context)
             rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
-            relationships.append(rel)
-
-        tx = neo_graph.begin()
-        for neo_node in node_map.values():
-            tx.create(neo_node)
-
-        for rel in relationships:
             tx.create(rel)
+
         tx.commit()
 
     def to_pickle(self, output):

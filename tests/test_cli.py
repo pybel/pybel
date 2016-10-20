@@ -8,6 +8,7 @@ import py2neo
 from click.testing import CliRunner
 
 from pybel import cli
+from pybel.graph import PYBEL_CONTEXT_TAG
 from tests.constants import PYBEL_TEST_ALL
 
 log = logging.getLogger(__name__)
@@ -26,13 +27,16 @@ class TestCli(unittest.TestCase):
 
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     def test_neo4j(self):
+        test_context = 'PYBEL_TEST_CTX'
+
         neo = py2neo.Graph(os.environ['NEO_PATH'])
-        neo.data('match (n)-[r]->() where r.pybel_context="TESTCTX" detach delete n')
+        neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
 
         self.runner.invoke(cli.main, ['to_neo', '--path', self.test_path, '--neo', os.environ['NEO_PATH'], '--context',
-                                      'TESTCTX'])
+                                      test_context])
 
-        count = neo.data('match (n)-[r]->() where r.pybel_context="TESTCTX" return count(n) as count')[0]['count']
+        q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
+        count = neo.data(q)[0]['count']
         self.assertEqual(14, count)
 
     @unittest.skip
