@@ -12,12 +12,14 @@ PACKAGES = setuptools.find_packages(where='src')
 META_PATH = os.path.join('src', 'pybel', '__init__.py')
 KEYWORDS = ['Fraunhofer', 'SCAI', 'BEL']
 CLASSIFIERS = [
-    'Development Status :: 1 - Planning',
+    'Development Status :: 4 - Beta',
     'Environment :: Console',
     'Intended Audience :: Developers',
-    'License :: Other/Proprietary License',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: Apache Software License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.5',
     'Topic :: Scientific/Engineering :: Bio-Informatics'
 ]
