@@ -29,16 +29,18 @@ class NamespaceCache:
         :param: sql_echo: Weather or not echo the running sql code.
         :type: bool
         """
-        conn = conn if conn is not None else os.path.join('sqlite:///', pybel_data, 'namespaceCache.db')
+        conn = conn if conn is not None else 'sqlite:///' + os.path.join(pybel_data, 'namespace_cache.db')
+        log.info('Loading namespace cache from {}'.format(conn))
         start_time = time.time()
         self.eng = create_engine(conn, echo=log_sql)
         self.sesh = scoped_session(sessionmaker(bind=self.eng, autoflush=False, expire_on_commit=False))
         self.cache = {}
 
+        self.setup_database()
         if setup_default_cache:
             self.ensure_cache()
 
-        log.info("Initiation of NamespaceCache done ({runtime:3.2f})".format(runtime=(time.time() - start_time)))
+        log.info("Initiation of namespace cache took {runtime:3.2f}s".format(runtime=(time.time() - start_time)))
 
     def __insert_namespace(self, namespace_url):
         """Inserts namespace and names into namespace cache db.
@@ -119,54 +121,47 @@ class NamespaceCache:
             log.info("Database was dropped! ({runtime:3.2f}sec.)".format(runtime=(time.time() - start_time)))
         database_models.Base.metadata.create_all(self.eng, checkfirst=True)
 
-    def ensure_cache(self, namespace_definition=None):
+    def ensure_cache(self, namespace_urls=None):
         """Checks if a namespace cache already exists in given database and loads the namespace_cache dict.
 
-        :param namespace_definition: Dictionary configuration see: defaults.py
+        :param namespace_urls: Dictionary configuration see: defaults.py
         :type namespace_definiton: dict
         """
         start_time = time.time()
-        namespace_definition = namespace_definition if namespace_definition else default_namespaces
+        namespace_urls = namespace_urls if namespace_urls else default_namespaces
         if self.eng.dialect.has_table(self.eng, NAMESPACE_TABLE_NAME):
 
             if self.sesh.query(database_models.Namespace).first():
                 self.__cached_namespaces()
-                log.info("Namespace cache allready exists and is loaded from database ({runtime:3.2f}sec.)".format(
-                    runtime=(time.time() - start_time)))
+                log.info("Namespace cache already exists  {:.02}s".format(time.time() - start_time))
             else:
-                self.insert_namespaces(namespace_definition)
+                for url in namespace_urls:
+                    self.__insert_namespace(url)
                 log.info("Database allready exists and namespace cache gets created ({runtime:3.2f}sec.)".format(
                     runtime=(time.time() - start_time)))
 
         else:
             self.setup_database()
-            self.ensure_cache(namespace_definition)
+            self.ensure_cache(namespace_urls)
             log.info("New database is setup and cache was created! ({runtime:3.2f})".format(
                 runtime=(time.time() - start_time)))
 
-    def insert_namespaces(self, namespace_definition):
-        """Inserts latest BEL namespaces to the database.
-        :param namespace_definition: Dictionary configuration see: defaults.py
-        :type namespace_definiton: dict
-        """
-        for namespace in namespace_definition['namespaces']:
-            self.__insert_namespace(os.path.join(namespace_definition['url'], namespace))
-
-    def update_namespace_cache(self, namespace_definition=default_namespaces, overwrite_old_namespaces=True):
+    def update_namespace_cache(self, namespace_urls=None, overwrite_old_namespaces=True):
         """Updates the namespace cache DB with given namespace definition dictionary (see defaults.py)
 
-        :param namespace_definition: Dictionary configuration see: defaults.py
-        :type namespace_definiton: dict
+        :param namespace_urls: List of namespace files by url
+        :type namespace_urls: list
         :param overwrite_old_namespaces: Indicates if outdated namespaces should be overwritten
         :type overwrite_old_namespaces: bool
         """
+        namespace_urls = namespace_urls if namespace_urls is not None else default_namespaces
         if self.eng.dialect.has_table(self.eng, NAMESPACE_TABLE_NAME):
-            for namespace in namespace_definition['namespaces']:
-                self.update_namespace(os.path.join(namespace_definition['url'], namespace), overwrite_old_namespaces)
+            for url in namespace_urls:
+                self.update_namespace(url, overwrite_old_namespaces)
 
         else:
             self.setup_database()
-            self.update_namespace_cache(namespace_definition, overwrite_old_namespaces)
+            self.update_namespace_cache(namespace_urls, overwrite_old_namespaces)
 
     def update_namespace(self, namespace_url, remove_old_namespace=True):
         """

@@ -2,6 +2,7 @@ import os
 import unittest
 from datetime import datetime
 
+from pybel.manager.defaults import default_namespaces as expected_keys
 from pybel.manager.namespace_cache import NamespaceCache
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -9,46 +10,15 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 test_ns1 = 'file:///' + os.path.join(dir_path, 'bel', 'test_ns_1.belns')
 test_ns2 = 'file:///' + os.path.join(dir_path, 'bel', "test_ns_1_updated.belns")
 
-expected_keys = [
-    'http://resource.belframework.org/belframework/20150611/namespace/mesh-cellular-structures-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/chebi.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/disease-ontology-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/selventa-protein-families.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/affy-probeset-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/go-biological-process.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/go-cellular-component-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/mesh-diseases-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/disease-ontology.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/mesh-chemicals.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/mesh-cellular-structures.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/go-cellular-component.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/selventa-legacy-chemicals.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/swissprot.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/rgd-rat-genes.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/mesh-processes.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/selventa-named-complexes.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/chebi-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/entrez-gene-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/mesh-diseases.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/mesh-chemicals-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/swissprot-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/selventa-legacy-diseases.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/go-biological-process-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/mesh-processes-ids.belns',
-    'http://resource.belframework.org/belframework/20150611/namespace/mgi-mouse-genes.belns'
-]
-
 
 class TestNsCache(unittest.TestCase):
     def setUp(self):
         self.test_db = 'sqlite://'
         self.data = os.path.join(dir_path, 'bel')
 
-        self.test_namespace = {
-            'url': 'file:///' + self.data,
-            'namespaces': ['test_ns_1.belns']
-        }
+        self.test_namespace = [
+            test_ns1
+        ]
 
         self.expected_test_cache = {
             test_ns1: {
@@ -92,11 +62,11 @@ class TestNsCache(unittest.TestCase):
 
     def test_allreadyIn(self):
 
-        test_db = NamespaceCache(self.test_db)
+        test_db = NamespaceCache(self.test_db, setup_default_cache=False)
         test_db.setup_database()
 
-        for namespace in self.test_namespace['namespaces']:
-            namespace_exists = test_db.check_namespace(os.path.join(self.test_namespace['url'], namespace))
+        for namespace in self.test_namespace:
+            namespace_exists = test_db.check_namespace(namespace)
             self.assertIsNone(namespace_exists)
 
     def test_importing(self):
@@ -112,7 +82,7 @@ class TestNsCache(unittest.TestCase):
             'contact': 'charles.hoyt@scai.fraunhofer.de'
         }
 
-        test_db = NamespaceCache(self.test_db)
+        test_db = NamespaceCache(self.test_db, setup_default_cache=False)
         test_db.setup_database(drop_existing=True)
         test_db.ensure_cache(self.test_namespace)
         print(test_db.cache)
@@ -155,7 +125,7 @@ class TestNsCache(unittest.TestCase):
             }
         }
 
-        test_db = NamespaceCache(self.test_db)
+        test_db = NamespaceCache(self.test_db, setup_default_cache=False)
         test_db.setup_database(drop_existing=True)
         test_db.ensure_cache(self.test_namespace)
 
@@ -170,7 +140,7 @@ class TestNsCache(unittest.TestCase):
         self.assertEqual(expected_cache_dict2, test_db.cache)
         self.assertNotEqual(expected_cache_dict3, test_db.cache)
 
-        test_db2 = NamespaceCache(self.test_db)
+        test_db2 = NamespaceCache(self.test_db, setup_default_cache=False)
         test_db2.setup_database(drop_existing=True)
         test_db2.ensure_cache(self.test_namespace)
 
@@ -183,7 +153,7 @@ class TestNsCache(unittest.TestCase):
         self.assertEqual(expected_cache_dict3, test_db2.cache)
 
     def test_update_namespaceCache(self):
-        test_db = NamespaceCache(self.test_db)
+        test_db = NamespaceCache(self.test_db, setup_default_cache=False)
         test_db.update_namespace_cache()
         test_db_keys = test_db.cache.keys()
         for db_key in expected_keys:
