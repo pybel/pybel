@@ -29,14 +29,16 @@ PyBEL provides a simple API so bioinformaticians and scientists with limited pro
 Command Line Interface
 ----------------------
 
-PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data conversion. Need help? All logs go to :code:`~/.pybel`
+PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
+conversion. Need help? All logs go to :code:`~/.pybel` or add :code:`-v` for verbose output to the standard error
+stream
 
 Export for Cytoscape
 ~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: sh
 
-    $ pybel to_graphml --path ~/Desktop/example.bel --output ~/Desktop/example.graphml
+    $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
    
 In Cytoscape, open with :code:`Import > Network > From File`.
 
