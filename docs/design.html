@@ -91,7 +91,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#dealing-with-dirty-namespaces">Dealing with Dirty Namespaces</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#namespace-and-annotation-name-choices">Namespace and Annotation Name Choices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#complexes">Complexes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#representation-of-events">Representation of Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#representation-of-events-and-modifiers">Representation of Events and Modifiers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a></li>
@@ -182,8 +182,8 @@ that is not implemented in the core of PyBEL. One suggestion to assign values to
 <code class="code docutils literal"><span class="pre">complex(p(HGNC:YFG1),p(HGNC:YFG2))</span></code> would be to sort over the 3-tuples of (Function, Namespace, Name) for
 each of the complex&#8217;s elements. This order is guaranteed to be unique and persistient.</p>
 </div>
-<div class="section" id="representation-of-events">
-<h2>Representation of Events<a class="headerlink" href="#representation-of-events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="representation-of-events-and-modifiers">
+<h2>Representation of Events and Modifiers<a class="headerlink" href="#representation-of-events-and-modifiers" title="Permalink to this headline">¶</a></h2>
 <p>In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
 degredations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
 of the edge. In reality, an edge like <code class="code docutils literal"><span class="pre">sec(p(HGNC:A))</span> <span class="pre">-&gt;</span> <span class="pre">activity(p(HGNC:B),</span> <span class="pre">ma(kinaseActivity))</span></code> represents
@@ -194,6 +194,25 @@ protein now can be directly queried by filtering all edges for those with a subj
 molecular activity, and whose effect is kinase activity. Having fewer nodes also allows for a much easier display
 and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
 as a color coded source and terminus of the connecting edge.</p>
+<p>The compiler in OpenBEL framework created nodes for molecular activities like <code class="code docutils literal"><span class="pre">kin(p(HGNC:YFG))</span></code> and induced an
+edge like <code class="code docutils literal"><span class="pre">p(HGNC:YFG)</span> <span class="pre">actsIn</span> <span class="pre">kin(p(HGNC:YFG))</span></code>. For transformations, a statement like
+<code class="code docutils literal"><span class="pre">tloc(p(HGNC:YFG),</span> <span class="pre">GOCC:intracellular,</span> <span class="pre">GOCC:&quot;cell</span> <span class="pre">membrane&quot;)</span></code> also induced
+<code class="code docutils literal"><span class="pre">tloc(p(HGNC:YFG),</span> <span class="pre">GOCC:intracellular,</span> <span class="pre">GOCC:&quot;cell</span> <span class="pre">membrange&quot;)</span> <span class="pre">translocates</span> <span class="pre">p(HGNC:YFG)</span></code>.</p>
+<p>In PyBEL, we recognize that these modifications are actually annotations to the type of relationship between the
+subject&#8217;s entity and the object&#8217;s entity. <code class="code docutils literal"><span class="pre">p(HGNC:ABC)</span> <span class="pre">-&gt;</span> <span class="pre">tloc(p(HGNC:YFG),</span> <span class="pre">GOCC:intracellular,</span> <span class="pre">GOCC:&quot;cell</span> <span class="pre">membrane&quot;)</span></code>
+is about the relationship between <code class="code docutils literal"><span class="pre">p(HGNC:ABC)</span></code> and <code class="code docutils literal"><span class="pre">p(HGNC:YFG)</span></code>, while
+the information about the translocation qualifies that the object is undergoing an event, and not just the abundance.
+This is a confusion with the use of <code class="code docutils literal"><span class="pre">proteinAbundance</span></code> as a keyword, and perhaps is why many people prefer to use
+just the keyword <code class="code docutils literal"><span class="pre">p</span></code></p>
+<p>This also begs the question of what statements mean. BEL 2.0 introduced the <code class="code docutils literal"><span class="pre">location()</span></code> element that can be
+inside any abundances. This means that it&#8217;s possible to unambiguously express the differences between the process of
+<code class="code docutils literal"><span class="pre">HGNC:A</span></code> moving from one place to another and the existence of <code class="code docutils literal"><span class="pre">HGNC:A</span></code> in a specfic location having
+different effects. In BEL 1.0, this action had its own node, but this introduced unnecessary complexity to the network
+and made querying more difficult. Consider the difference between the following two statements:</p>
+<ul class="simple">
+<li><code class="code docutils literal"><span class="pre">tloc(p(HGNC:A),</span> <span class="pre">fromLoc(GOCC:intracellular),</span> <span class="pre">toLoc(GOCC:&quot;cell</span> <span class="pre">membrane&quot;))</span> <span class="pre">-&gt;</span> <span class="pre">p(HGNC:B)</span></code></li>
+<li><code class="code docutils literal"><span class="pre">p(HGNC:A,</span> <span class="pre">location(GOCC:&quot;cell</span> <span class="pre">membrane&quot;))</span> <span class="pre">-&gt;</span> <span class="pre">p(HGNC:B)</span></code></li>
+</ul>
 </div>
 </div>
 
