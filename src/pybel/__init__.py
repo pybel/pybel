@@ -6,7 +6,7 @@ from .graph import *
 
 __all__ = graph.__all__
 
-__version__ = '0.1.6'
+__version__ = '0.2.0'
 
 __title__ = 'PyBEL'
 __description__ = 'A Python package for parsing, validating, and analysis of of BEL graphs'
