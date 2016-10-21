@@ -14,7 +14,7 @@ log = logging.getLogger('pybel')
 
 class NamespaceCache:
     
-    def __init__(self, database_string='namespaceCache.db', setup_default_cache=False, sql_echo=False):
+    def __init__(self, database_string='sqlite:///namespaceCache.db', setup_default_cache=False, sql_echo=False):
         """
         :param: database_string: Database connection
         :type: str
@@ -61,7 +61,7 @@ class NamespaceCache:
         
         else:
             self.setup_database()
-            self.setup_namespace_cache()
+            self.setup_namespace_cache(namespace_definition)
             log.info("New database is setup and cache was created! ({runtime:3.2f})".format(runtime=(time.time()-start_time)))
     
     def insert_namespaces(self, namespace_definition):
@@ -82,8 +82,15 @@ class NamespaceCache:
         default_url = namespace_definition['url']
         url = default_url if default_url.endswith("/") else default_url+"/"
         
-        for namespace in namespace_definition['namespaces']:
-            self.update_namespace(namespace_definition, remove_old_namespaces)
+        if self.__db_engine.dialect.has_table(self.__db_engine, 'pybelcache_namespace'):
+            default_url = namespace_definition['url']
+            url = default_url if default_url.endswith("/") else default_url+"/"
+            for namespace in namespace_definition['namespaces']:
+                self.update_namespace(url+namespace, remove_old_namespaces)
+        
+        else:
+            self.setup_database()
+            self.update_namespace_cache(namespace_definition, remove_old_namespaces)
     
     def update_namespace(self, namespace_url, remove_old_namespace=True):
         """
@@ -99,7 +106,9 @@ class NamespaceCache:
             namespace_key, creationDateTime, namespace_old = self.__insert_namespace(namespace_url)
             
             if namespace_old and remove_old_namespace and namespace_old.createdDateTime < creationDateTime:
-                log.warning("Old namespace '{}' [{}] will be removed from cache database due to updated version!".format(namespace_old.keyword,namespace_old.url))
+                log.warning("Old namespace '{ns_key}' [{ns_old_url}] will be removed from cache database due to updated version [{ns_new_url}]".format(ns_key=namespace_old.keyword,
+                                                                                                                                                       ns_old_url=namespace_old.url,
+                                                                                                                                                       ns_new_url=namespace_url))
                 old_dateTime = namespace_old.createdDateTime
                 self.remove_namespace(namespace_old.url,namespace_old.createdDateTime)
 
