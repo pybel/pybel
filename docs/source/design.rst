@@ -41,3 +41,17 @@ Currently, an ordering is not assigned to the members of complexes . This is a p
 that is not implemented in the core of PyBEL. One suggestion to assign values to members in a complex like
 :code:`complex(p(HGNC:YFG1),p(HGNC:YFG2))` would be to sort over the 3-tuples of (Function, Namespace, Name) for
 each of the complex's elements. This order is guaranteed to be unique and persistient.
+
+Representation of Events
+------------------------
+
+In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
+degredations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
+of the edge. In reality, an edge like :code:`sec(p(HGNC:A)) -> activity(p(HGNC:B), ma(kinaseActivity))` represents
+a connection between :code:`HGNC:A` and :code:`HGNC:B`. Each of these modifiers explains the context of the relationship
+between these physical entities. Further, querying a network where these modifiers are part of a relationship
+is much more straightforward. For example, finding all proteins that are upregulated by the kinase activity of another
+protein now can be directly queried by filtering all edges for those with a subject modifier whose modification is
+molecular activity, and whose effect is kinase activity. Having fewer nodes also allows for a much easier display
+and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
+as a color coded source and terminus of the connecting edge.
