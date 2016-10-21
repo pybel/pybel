@@ -7,7 +7,7 @@ from pybel.parser.utils import subdict_matches, any_subdict_matches
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-PYBEL_TEST_ALL = 'cthoyt' == getpass.getuser() or os.environ.get('PYBEL_ALLTESTS', None) == '3'
+PYBEL_TEST_ALL = getpass.getuser() in ('cthoyt',) or int(os.environ.get('PYBEL_ALLTESTS', '0')) == 3
 
 
 class TestTokenParserBase(unittest.TestCase):

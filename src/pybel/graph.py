@@ -8,12 +8,13 @@ import networkx as nx
 import py2neo
 import requests
 from networkx.readwrite import json_graph
+from pybel.exceptions import PyBelWarning
+from pybel.utils import flatten
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
-from pybel.exceptions import PyBelWarning
-from pybel.utils import flatten
 from .exceptions import PyBelError
+from .manager.namespace_cache import NamespaceCache
 from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions
@@ -75,7 +76,7 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines, context=None, lenient=False, *attrs, **kwargs):
+    def __init__(self, lines, context=None, lenient=False, ns_cache_path=None, *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
         :param lines: iterable over lines of BEL data file
@@ -83,6 +84,8 @@ class BELGraph(nx.MultiDiGraph):
         :type context: str
         :param lenient: if true, allow naked namespaces
         :type lenient: bool
+        :param ns_cache_path: database connection string to namespace cache
+        :type ns_cache_path: str or pybel.mangager.NamespaceCache
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
@@ -90,7 +93,13 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(lines)
 
-        self.metadata_parser = MetadataParser()
+        if isinstance(ns_cache_path, NamespaceCache):
+            self.metadata_parser = MetadataParser(ns_cache_manager=ns_cache_path)
+        elif isinstance(ns_cache_path, str):
+            self.metadata_parser = MetadataParser(ns_cache_manager=NamespaceCache(conn=ns_cache_path))
+        else:
+            self.metadata_parser = MetadataParser()
+
 
         self.parse_document(docs)
 

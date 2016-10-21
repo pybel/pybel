@@ -20,6 +20,7 @@ import click
 import py2neo
 
 from . import graph
+from .manager.namespace_cache import NamespaceCache
 
 log = logging.getLogger('pybel')
 
@@ -127,6 +128,12 @@ def to_neo(path, url, database, neo, context, verbose):
     t = time.time()
     graph.to_neo4j(g, p2n, context)
     log.info('Upload to neo4j done in {:.02f} seconds'.format(time.time() - t))
+
+
+@main.command()
+@click.option('--path', help='Destination for namespace cache. Defaults to ~/.pybel/data/namespace_cache.db')
+def setup_nscache(conn):
+    NamespaceCache(conn=conn, setup_default_cache=True)
 
 
 if __name__ == '__main__':
