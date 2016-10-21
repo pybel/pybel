@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Utilities &mdash; PyBEL 0.1.6 documentation</title>
+  <title>Utilities &mdash; PyBEL 0.2.0 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyBEL 0.1.6 documentation" href="index.html"/>
+    <link rel="top" title="PyBEL 0.2.0 documentation" href="index.html"/>
         <link rel="next" title="Releases" href="releasing.html"/>
         <link rel="prev" title="Parsers" href="parsers.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.1.6
+                0.2.0
               </div>
             
           
@@ -91,7 +91,11 @@
 <li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging Messages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybel.utils">General Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pybel.parser.utils">Parser Utilities</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="releasing.html">Releases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a></li>
 </ul>
@@ -141,7 +145,64 @@
   <div class="section" id="utilities">
 <h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
 <p>Some utilities that are used throughout the software are explained here:</p>
-<span class="target" id="module-pybel.parser.utils"></span><dl class="function">
+<div class="section" id="module-pybel.utils">
+<span id="general-utilities"></span><h2>General Utilities<a class="headerlink" href="#module-pybel.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pybel.utils.download_url">
+<code class="descclassname">pybel.utils.</code><code class="descname">download_url</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/utils.html#download_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.utils.download_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads and parses a config file from url</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.utils.expand_dict">
+<code class="descclassname">pybel.utils.</code><code class="descname">expand_dict</code><span class="sig-paren">(</span><em>flat_dict</em>, <em>sep='_'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/utils.html#expand_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.utils.expand_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expands a flattened dictionary
+:param flat_dict: a nested dictionary that has been flattened so the keys are composite and</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.utils.expand_edges">
+<code class="descclassname">pybel.utils.</code><code class="descname">expand_edges</code><span class="sig-paren">(</span><em>graph</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/utils.html#expand_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.utils.expand_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new graph with expanded edge data dictionaries</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> (<em>nx.MultiDiGraph</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">nx.MultiDiGraph</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.utils.flatten">
+<code class="descclassname">pybel.utils.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>d</em>, <em>parent_key=''</em>, <em>sep='_'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/utils.html#flatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.utils.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens a nested dictionary</p>
+<p>Borrowed from <a class="reference external" href="http://stackoverflow.com/a/6027615">http://stackoverflow.com/a/6027615</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybel.utils.flatten_edges">
+<code class="descclassname">pybel.utils.</code><code class="descname">flatten_edges</code><span class="sig-paren">(</span><em>graph</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/utils.html#flatten_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.utils.flatten_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new graph with flattened edge data dictionaries</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> (<em>nx.MultiDiGraph</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">nx.MultiDiGraph</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pybel.parser.utils">
+<span id="parser-utilities"></span><h2>Parser Utilities<a class="headerlink" href="#module-pybel.parser.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
 <dt id="pybel.parser.utils.any_subdict_matches">
 <code class="descclassname">pybel.parser.utils.</code><code class="descname">any_subdict_matches</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#any_subdict_matches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.any_subdict_matches" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if dictionary b matches one of the subdictionaries of a</p>
@@ -206,29 +267,6 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="pybel.parser.utils.flatten">
-<code class="descclassname">pybel.parser.utils.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>d</em>, <em>parent_key=''</em>, <em>sep='_'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#flatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.flatten" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flattens a nested dictionary</p>
-<p>Borrowed from <a class="reference external" href="http://stackoverflow.com/a/6027615">http://stackoverflow.com/a/6027615</a></p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pybel.parser.utils.flatten_edges">
-<code class="descclassname">pybel.parser.utils.</code><code class="descname">flatten_edges</code><span class="sig-paren">(</span><em>graph</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#flatten_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.flatten_edges" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new graph with flattened edge data dictionaries</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> (<em>nx.MultiDiGraph</em>) &#8211; </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">nx.MultiDiGraph</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="pybel.parser.utils.handle_debug">
 <code class="descclassname">pybel.parser.utils.</code><code class="descname">handle_debug</code><span class="sig-paren">(</span><em>fmt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/parser/utils.html#handle_debug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.parser.utils.handle_debug" title="Permalink to this definition">¶</a></dt>
 <dd><p>logging hook for pyparsing</p>
@@ -285,6 +323,7 @@
 </dd></dl>
 
 </div>
+</div>
 
 
            </div>
@@ -327,7 +366,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.6',
+            VERSION:'0.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

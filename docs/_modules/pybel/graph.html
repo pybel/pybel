@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pybel.graph &mdash; PyBEL 0.1.6 documentation</title>
+  <title>pybel.graph &mdash; PyBEL 0.2.0 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PyBEL 0.1.6 documentation" href="../../index.html"/>
+    <link rel="top" title="PyBEL 0.2.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.1.6
+                0.2.0
               </div>
             
           
@@ -148,39 +148,45 @@
 <span class="kn">import</span> <span class="nn">py2neo</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">networkx.readwrite</span> <span class="k">import</span> <span class="n">json_graph</span>
+<span class="kn">from</span> <span class="nn">pybel.exceptions</span> <span class="k">import</span> <span class="n">PyBelWarning</span>
+<span class="kn">from</span> <span class="nn">pybel.utils</span> <span class="k">import</span> <span class="n">flatten</span>
 <span class="kn">from</span> <span class="nn">pyparsing</span> <span class="k">import</span> <span class="n">ParseException</span>
 <span class="kn">from</span> <span class="nn">requests_file</span> <span class="k">import</span> <span class="n">FileAdapter</span>
 
-<span class="kn">from</span> <span class="nn">pybel.exceptions</span> <span class="k">import</span> <span class="n">PyBelWarning</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="k">import</span> <span class="n">PyBelError</span>
+<span class="kn">from</span> <span class="nn">.manager.namespace_cache</span> <span class="k">import</span> <span class="n">NamespaceCache</span>
 <span class="kn">from</span> <span class="nn">.parser.parse_bel</span> <span class="k">import</span> <span class="n">BelParser</span>
 <span class="kn">from</span> <span class="nn">.parser.parse_metadata</span> <span class="k">import</span> <span class="n">MetadataParser</span>
-<span class="kn">from</span> <span class="nn">.parser.utils</span> <span class="k">import</span> <span class="n">split_file_to_annotations_and_definitions</span><span class="p">,</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">flatten_edges</span>
+<span class="kn">from</span> <span class="nn">.parser.utils</span> <span class="k">import</span> <span class="n">split_file_to_annotations_and_definitions</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">flatten_edges</span><span class="p">,</span> <span class="n">expand_edges</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BELGraph&#39;</span><span class="p">,</span> <span class="s1">&#39;from_url&#39;</span><span class="p">,</span> <span class="s1">&#39;from_path&#39;</span><span class="p">,</span> <span class="s1">&#39;from_pickle&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;from_graphml&#39;</span><span class="p">,</span> <span class="s1">&#39;to_graphml&#39;</span><span class="p">,</span> <span class="s1">&#39;to_json&#39;</span><span class="p">,</span> <span class="s1">&#39;to_neo4j&#39;</span><span class="p">,</span> <span class="s1">&#39;to_pickle&#39;</span><span class="p">]</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pybel&#39;</span><span class="p">)</span>
 
 <span class="n">PYBEL_CONTEXT_TAG</span> <span class="o">=</span> <span class="s1">&#39;pybel_context&#39;</span>
 
 
-<div class="viewcode-block" id="from_lines"><a class="viewcode-back" href="../../tutorial.html#pybel.from_lines">[docs]</a><span class="k">def</span> <span class="nf">from_lines</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loads BEL graph from an iterable of strings or file-like object</span>
-
-<span class="sd">    :param it: an iterable of strings</span>
-<span class="sd">    :return: a parsed BEL graph</span>
-<span class="sd">    :rtype: BELGraph&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">BELGraph</span><span class="p">(</span><span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span><span class="o">.</span><span class="n">parse_from_lines</span><span class="p">(</span><span class="n">it</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="from_url"><a class="viewcode-back" href="../../tutorial.html#pybel.from_url">[docs]</a><span class="k">def</span> <span class="nf">from_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads a BEL graph from a URL resource</span>
 
-<span class="sd">    :param url: a valid URL string</span>
+<span class="sd">    :param url: a valid URL pointing to a BEL resource</span>
 <span class="sd">    :type url: str</span>
 <span class="sd">    :return: a parsed BEL graph</span>
 <span class="sd">    :rtype: BELGraph</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Loading from url: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">BELGraph</span><span class="p">(</span><span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span><span class="o">.</span><span class="n">parse_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div>
+
+    <span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;file://&#39;</span><span class="p">):</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s1">&#39;file://&#39;</span><span class="p">,</span> <span class="n">FileAdapter</span><span class="p">())</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">iter_lines</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">BELGraph</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="from_path"><a class="viewcode-back" href="../../tutorial.html#pybel.from_path">[docs]</a><span class="k">def</span> <span class="nf">from_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -193,10 +199,10 @@
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Loading from path: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">from_lines</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">BELGraph</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="from_database"><a class="viewcode-back" href="../../tutorial.html#pybel.from_database">[docs]</a><span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="n">connection</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="n">connection</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loads a BEL graph from a database</span>
 
 <span class="sd">    :param connection: The string form of the URL is dialect[+driver]://user:password@host/dbname[?key=value..], where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance of URL.</span>
@@ -204,79 +210,67 @@
 <span class="sd">    :return: a BEL graph loaded from the database</span>
 <span class="sd">    :rtype: BELGraph</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Loading from database not yet implemented&#39;</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Loading from database not yet implemented&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BELGraph"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph">[docs]</a><span class="k">class</span> <span class="nc">BELGraph</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;An extension of a NetworkX MultiDiGraph to hold a BEL graph.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;An extension of a NetworkX MultiDiGraph for holding BEL data</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ns_cache_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.</span>
 
+<span class="sd">        :param lines: iterable over lines of BEL data file</span>
 <span class="sd">        :param context: disease context string</span>
 <span class="sd">        :type context: str</span>
 <span class="sd">        :param lenient: if true, allow naked namespaces</span>
 <span class="sd">        :type lenient: bool</span>
+<span class="sd">        :param ns_cache_path: database connection string to namespace cache</span>
+<span class="sd">        :type ns_cache_path: str or pybel.mangager.NamespaceCache</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">bel_parser</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lenient</span> <span class="o">=</span> <span class="n">lenient</span>
+
+        <span class="n">docs</span><span class="p">,</span> <span class="n">defs</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">split_file_to_annotations_and_definitions</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ns_cache_path</span><span class="p">,</span> <span class="n">NamespaceCache</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span> <span class="o">=</span> <span class="n">MetadataParser</span><span class="p">(</span><span class="n">ns_cache_manager</span><span class="o">=</span><span class="n">ns_cache_path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ns_cache_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span> <span class="o">=</span> <span class="n">MetadataParser</span><span class="p">(</span><span class="n">ns_cache_manager</span><span class="o">=</span><span class="n">NamespaceCache</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">ns_cache_path</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span> <span class="o">=</span> <span class="n">MetadataParser</span><span class="p">()</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_document</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_definitions</span><span class="p">(</span><span class="n">defs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bel_parser</span> <span class="o">=</span> <span class="n">BelParser</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                                    <span class="n">valid_namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span><span class="o">.</span><span class="n">namespace_dict</span><span class="p">,</span>
+                                    <span class="n">valid_annotations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span><span class="o">.</span><span class="n">annotations_dict</span><span class="p">,</span>
+                                    <span class="n">lenient</span><span class="o">=</span><span class="n">lenient</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_statements</span><span class="p">(</span><span class="n">states</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BELGraph.clear"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clears the content of the graph and its BEL parser&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bel_parser</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BELGraph.parse_from_path"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.parse_from_path">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Opens a BEL file from a given path and parses it</span>
-
-<span class="sd">        :param path: path to BEL file</span>
-<span class="sd">        :return: self</span>
-<span class="sd">        :rtype: BELGraph</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_from_lines</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="BELGraph.parse_from_url"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.parse_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Parses a BEL file from URL resource and adds to graph</span>
-
-<span class="sd">        :param url: URL to BEL Resource</span>
-<span class="sd">        :return: self</span>
-<span class="sd">        :rtype: BELGraph</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;file://&#39;</span><span class="p">):</span>
-            <span class="n">session</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s1">&#39;file://&#39;</span><span class="p">,</span> <span class="n">FileAdapter</span><span class="p">())</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-        <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_from_lines</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">iter_lines</span><span class="p">())</span></div>
-
-<div class="viewcode-block" id="BELGraph.parse_from_lines"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.parse_from_lines">[docs]</a>    <span class="k">def</span> <span class="nf">parse_from_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fl</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.</span>
-
-<span class="sd">        :param fl: iterable over lines of BEL data file</span>
-<span class="sd">        :return: self</span>
-<span class="sd">        :rtype: BELGraph</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">parse_document</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">document_metadata</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="n">docs</span><span class="p">,</span> <span class="n">defs</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">split_file_to_annotations_and_definitions</span><span class="p">(</span><span class="n">fl</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span> <span class="o">=</span> <span class="n">MetadataParser</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">document_metadata</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Line </span><span class="si">{:07}</span><span class="s1"> - failed: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line_number</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
 
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Finished parsing document section in </span><span class="si">{:.02f}</span><span class="s1"> seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">parse_definitions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definitions</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">defs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">definitions</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">PyBelError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -292,14 +286,10 @@
                 <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Traceback: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exc_traceback</span><span class="p">))</span>
 
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Finished parsing definitions section in </span><span class="si">{:.02f}</span><span class="s1"> seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">parse_statements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statements</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">bel_parser</span> <span class="o">=</span> <span class="n">BelParser</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                    <span class="n">valid_namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span><span class="o">.</span><span class="n">namespace_dict</span><span class="p">,</span>
-                                    <span class="n">valid_annotations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_parser</span><span class="o">.</span><span class="n">annotations_dict</span><span class="p">,</span>
-                                    <span class="n">lenient</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lenient</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">states</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">statements</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">bel_parser</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">PyBelError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -312,77 +302,109 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Line </span><span class="si">{:07}</span><span class="s1"> - general failure: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line_number</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
 
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Finished parsing statements section in </span><span class="si">{:.02f}</span><span class="s1"> seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Finished parsing statements section in </span><span class="si">{:.02f}</span><span class="s1"> seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span></div>
 
-        <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_neo4j"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_neo4j">[docs]</a>    <span class="k">def</span> <span class="nf">to_neo4j</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neo_graph</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Uploads to Neo4J graph database usiny `py2neo`</span>
+<div class="viewcode-block" id="to_neo4j"><a class="viewcode-back" href="../../tutorial.html#pybel.to_neo4j">[docs]</a><span class="k">def</span> <span class="nf">to_neo4j</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">neo_graph</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Uploads a BEL graph to Neo4J graph database using `py2neo`</span>
 
-<span class="sd">        :param neo_graph:</span>
-<span class="sd">        :type neo_graph: py2neo.Graph</span>
-<span class="sd">        :param context: a disease context to allow for multiple disease models in one neo4j instance</span>
-<span class="sd">        :type context: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    :param graph: a BEL Graph</span>
+<span class="sd">    :type graph: BELGraph</span>
+<span class="sd">    :param neo_graph:</span>
+<span class="sd">    :type neo_graph: py2neo.Graph</span>
+<span class="sd">    :param context: a disease context to allow for multiple disease models in one neo4j instance</span>
+<span class="sd">    :type context: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
 
-        <span class="n">tx</span> <span class="o">=</span> <span class="n">neo_graph</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span>
+    <span class="n">tx</span> <span class="o">=</span> <span class="n">neo_graph</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span>
 
-        <span class="n">node_map</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
-            <span class="n">node_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
-            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;type&#39;</span><span class="p">}</span>
+    <span class="n">node_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+        <span class="n">node_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;type&#39;</span><span class="p">}</span>
 
-            <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
 
-            <span class="n">node_map</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">py2neo</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">node_type</span><span class="p">,</span> <span class="n">cname</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">cnum</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="o">**</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">node_map</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">py2neo</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">node_type</span><span class="p">,</span> <span class="n">cname</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">cnum</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="o">**</span><span class="n">attrs</span><span class="p">)</span>
 
-            <span class="n">tx</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">node_map</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
+        <span class="n">tx</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">node_map</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
 
-        <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">neo_u</span> <span class="o">=</span> <span class="n">node_map</span><span class="p">[</span><span class="n">u</span><span class="p">]</span>
-            <span class="n">neo_v</span> <span class="o">=</span> <span class="n">node_map</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
-            <span class="n">rel_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;relation&#39;</span><span class="p">]</span>
-            <span class="n">attrs</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">attrs</span><span class="p">[</span><span class="n">PYBEL_CONTEXT_TAG</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
-            <span class="n">rel</span> <span class="o">=</span> <span class="n">py2neo</span><span class="o">.</span><span class="n">Relationship</span><span class="p">(</span><span class="n">neo_u</span><span class="p">,</span> <span class="n">rel_type</span><span class="p">,</span> <span class="n">neo_v</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">)</span>
-            <span class="n">tx</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">rel</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">neo_u</span> <span class="o">=</span> <span class="n">node_map</span><span class="p">[</span><span class="n">u</span><span class="p">]</span>
+        <span class="n">neo_v</span> <span class="o">=</span> <span class="n">node_map</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
+        <span class="n">rel_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;relation&#39;</span><span class="p">]</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">graph</span><span class="o">.</span><span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="n">PYBEL_CONTEXT_TAG</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">rel</span> <span class="o">=</span> <span class="n">py2neo</span><span class="o">.</span><span class="n">Relationship</span><span class="p">(</span><span class="n">neo_u</span><span class="p">,</span> <span class="n">rel_type</span><span class="p">,</span> <span class="n">neo_v</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="n">tx</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">rel</span><span class="p">)</span>
 
-        <span class="n">tx</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+    <span class="n">tx</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_pickle"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">to_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Writes this graph to a pickle object with nx.write_gpickle</span>
 
-<span class="sd">        :param output: a file or filename to write to</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">nx</span><span class="o">.</span><span class="n">write_gpickle</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">output</span><span class="p">)</span></div>
+<div class="viewcode-block" id="to_pickle"><a class="viewcode-back" href="../../tutorial.html#pybel.to_pickle">[docs]</a><span class="k">def</span> <span class="nf">to_pickle</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes this graph to a pickle object with nx.write_gpickle</span>
 
-<div class="viewcode-block" id="BELGraph.to_json"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Writes this graph to a node-link JSON object</span>
+<span class="sd">    :param graph: a BEL graph</span>
+<span class="sd">    :type graph: BELGraph</span>
+<span class="sd">    :param output: a file or filename to write to</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nx</span><span class="o">.</span><span class="n">write_gpickle</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="n">graph</span><span class="p">),</span> <span class="n">output</span><span class="p">)</span></div>
 
-<span class="sd">        :param output: a write-supporting filelike object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">json_graph</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_graphml"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_graphml">[docs]</a>    <span class="k">def</span> <span class="nf">to_graphml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it</span>
+<div class="viewcode-block" id="from_pickle"><a class="viewcode-back" href="../../tutorial.html#pybel.from_pickle">[docs]</a><span class="k">def</span> <span class="nf">from_pickle</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reads a graph from a gpickle file</span>
 
-<span class="sd">        :param output: a file or filelike object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">nx</span><span class="o">.</span><span class="n">write_graphml</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">output</span><span class="p">)</span></div>
+<span class="sd">    :param path: File or filename to write. Filenames ending in .gz or .bz2 will be uncompressed.</span>
+<span class="sd">    :type path: file or list</span>
+<span class="sd">    :rtype: nx.MultiDiGraph</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">expand_edges</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">read_gpickle</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="BELGraph.to_csv"><a class="viewcode-back" href="../../tutorial.html#pybel.BELGraph.to_csv">[docs]</a>    <span class="k">def</span> <span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Writes graph to edge list csv</span>
 
-<span class="sd">        :param output: a file or filelike object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="to_json"><a class="viewcode-back" href="../../tutorial.html#pybel.to_json">[docs]</a><span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes this graph to a node-link JSON object</span>
 
-        <span class="n">nx</span><span class="o">.</span><span class="n">write_edgelist</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">output</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+<span class="sd">    :param graph: a BEL graph</span>
+<span class="sd">    :type graph: BELGraph</span>
+<span class="sd">    :param output: a write-supporting filelike object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json_graph</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="n">graph</span><span class="p">))</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_graphml"><a class="viewcode-back" href="../../tutorial.html#pybel.to_graphml">[docs]</a><span class="k">def</span> <span class="nf">to_graphml</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it</span>
+
+<span class="sd">    :param graph: a BEL graph</span>
+<span class="sd">    :type graph: BELGraph</span>
+<span class="sd">    :param output: a file or filelike object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nx</span><span class="o">.</span><span class="n">write_graphml</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="n">graph</span><span class="p">),</span> <span class="n">output</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="from_graphml"><a class="viewcode-back" href="../../tutorial.html#pybel.from_graphml">[docs]</a><span class="k">def</span> <span class="nf">from_graphml</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reads a graph from a graphml file</span>
+
+<span class="sd">    :param path: File or filename to write. Filenames ending in .gz or .bz2 will be compressed.</span>
+<span class="sd">    :type path: file or string</span>
+<span class="sd">    :rtype: nx.MultiDiGraph</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">expand_edges</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">read_graphml</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
+
+
+<span class="k">def</span> <span class="nf">to_csv</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes graph to edge list csv</span>
+
+<span class="sd">    :param graph: a BEL graph</span>
+<span class="sd">    :type graph: BELGraph</span>
+<span class="sd">    :param output: a file or filelike object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nx</span><span class="o">.</span><span class="n">write_edgelist</span><span class="p">(</span><span class="n">flatten_edges</span><span class="p">(</span><span class="n">graph</span><span class="p">),</span> <span class="n">output</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -416,7 +438,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.1.6',
+            VERSION:'0.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

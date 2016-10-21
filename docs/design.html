@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Design Choices &mdash; PyBEL 0.1.6 documentation</title>
+  <title>Design Choices &mdash; PyBEL 0.2.0 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyBEL 0.1.6 documentation" href="index.html"/>
+    <link rel="top" title="PyBEL 0.2.0 documentation" href="index.html"/>
         <link rel="next" title="Why Not Nested Statements?" href="nestedstatements.html"/>
         <link rel="prev" title="Getting Started" href="tutorial.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.1.6
+                0.2.0
               </div>
             
           
@@ -91,6 +91,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#dealing-with-dirty-namespaces">Dealing with Dirty Namespaces</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#namespace-and-annotation-name-choices">Namespace and Annotation Name Choices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#complexes">Complexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#representation-of-events">Representation of Events</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nestedstatements.html">Why Not Nested Statements?</a></li>
@@ -153,15 +154,15 @@ a flat <code class="code docutils literal"><span class="pre">--lenient</span></c
 consult the scientific community working in your area of research and organize the development of a proper ontology,
 terminology, or namespace that can be used. Ultimately, a namespace allows many people to talk, without ambiguity,
 about the same thing. WARNING: Lenient mode is not tested very well. Use at your own risk.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pybel</span> <span class="kn">import</span> <span class="n">BELGraph</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">BELGraph</span><span class="p">(</span><span class="n">lenient</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">parse_from_path</span><span class="p">(</span><span class="s1">&#39;~/Desktop/my_document.bel&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pybel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pybel</span><span class="o">.</span><span class="n">from_path</span><span class="p">(</span><span class="s1">&#39;~/Desktop/my_document.bel&#39;</span><span class="p">,</span> <span class="n">lenient</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For now, the namespace for naked names is assigned the sentinel value from pybel.parser.parse_identifier.DIRTY.</p>
 <p>Here are some suggestions on how to find an appropriate namespace:</p>
 <ul class="simple">
 <li>Search the namespaces provided by Selventa, BELIEF, and other sources</li>
+<li>See <a class="reference external" href="https://wiki.openbel.org/display/BELNA/Namespaces+Overview">https://wiki.openbel.org/display/BELNA/Namespaces+Overview</a></li>
 <li>Write your own <code class="code docutils literal"><span class="pre">belns</span></code> file</li>
 <li>Use pybel-tools to convert OWL Ontologies to <code class="code docutils literal"><span class="pre">belns</span></code> file</li>
 </ul>
@@ -180,6 +181,19 @@ the lowercase &#8216;h&#8217; in &#8220;ChEMBL&#8221;.</p>
 that is not implemented in the core of PyBEL. One suggestion to assign values to members in a complex like
 <code class="code docutils literal"><span class="pre">complex(p(HGNC:YFG1),p(HGNC:YFG2))</span></code> would be to sort over the 3-tuples of (Function, Namespace, Name) for
 each of the complex&#8217;s elements. This order is guaranteed to be unique and persistient.</p>
+</div>
+<div class="section" id="representation-of-events">
+<h2>Representation of Events<a class="headerlink" href="#representation-of-events" title="Permalink to this headline">¶</a></h2>
+<p>In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
+degredations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
+of the edge. In reality, an edge like <code class="code docutils literal"><span class="pre">sec(p(HGNC:A))</span> <span class="pre">-&gt;</span> <span class="pre">activity(p(HGNC:B),</span> <span class="pre">ma(kinaseActivity))</span></code> represents
+a connection between <code class="code docutils literal"><span class="pre">HGNC:A</span></code> and <code class="code docutils literal"><span class="pre">HGNC:B</span></code>. Each of these modifiers explains the context of the relationship
+between these physical entities. Further, querying a network where these modifiers are part of a relationship
+is much more straightforward. For example, finding all proteins that are upregulated by the kinase activity of another
+protein now can be directly queried by filtering all edges for those with a subject modifier whose modification is
+molecular activity, and whose effect is kinase activity. Having fewer nodes also allows for a much easier display
+and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
+as a color coded source and terminus of the connecting edge.</p>
 </div>
 </div>
 
@@ -224,7 +238,7 @@ each of the complex&#8217;s elements. This order is guaranteed to be unique and 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.6',
+            VERSION:'0.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
