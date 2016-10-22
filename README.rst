@@ -15,8 +15,8 @@ Development |develop_build| |develop_coverage| |develop_documentation| |develop_
     :target: https://codecov.io/gh/pybel/pybel?branch=master
     :alt: Stable Coverage Status
 
-.. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
-    :target: https://readthedocs.org/projects/pybel/badge/?version=stable
+.. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=stable
+    :target: http://pybel.readthedocs.io/en/stable/
     :alt: Stable Documentation Status
 
 .. |stable_pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
@@ -31,7 +31,7 @@ Development |develop_build| |develop_coverage| |develop_documentation| |develop_
     :alt: Development Coverage Status
 
 .. |develop_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
-    :target: https://readthedocs.org/projects/pybel/badge/?version=latest
+    :target: http://pybel.readthedocs.io/en/latest/
     :alt: Development Documentation Status
 
 .. |develop_pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
