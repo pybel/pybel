@@ -25,34 +25,35 @@ class ControlParser(BaseParser):
         annotation_key = pyparsing_common.identifier.setResultsName('key')
         annotation_key.setParseAction(self.handle_annotation_key)
 
-        set_tag = Suppress('SET')
-        unset_tag = Suppress('UNSET')
+        set_tag = Suppress('SET') + W
+        unset_tag = Suppress('UNSET') + W
 
-        self.set_statement_group = set_tag + W + Suppress('STATEMENT_GROUP') + W + Suppress('=') + W + quote('group')
+        self.set_statement_group = set_tag + Suppress('STATEMENT_GROUP') + W + Suppress('=') + W + quote('group')
         self.set_statement_group.setParseAction(self.handle_statement_group)
 
-        self.set_citation = set_tag + W + Suppress('Citation') + W + Suppress('=') + W + delimitedSet('values')
+        self.set_citation = set_tag + Suppress('Citation') + W + Suppress('=') + W + delimitedSet('values')
         self.set_citation.setParseAction(self.handle_citation)
 
-        self.set_evidence = set_tag + W + Suppress('Evidence') + W + Suppress('=') + W + quote('value')
+        self.set_evidence = set_tag + Suppress('Evidence') + W + Suppress('=') + W + quote('value')
         self.set_evidence.setParseAction(self.handle_evidence)
 
-        self.set_command = set_tag + W + annotation_key + W + Suppress('=') + W + quote('value')
+        set_command_prefix = set_tag + annotation_key + W + Suppress('=') + W
+        self.set_command = set_command_prefix + quote('value')
         self.set_command.setParseAction(self.handle_set_command)
 
-        self.set_command_list = set_tag + W + annotation_key + W + Suppress('=') + W + delimitedSet('values')
+        self.set_command_list = set_command_prefix + delimitedSet('values')
         self.set_command_list.setParseAction(self.handle_set_command_list)
 
-        self.unset_command = unset_tag + W + annotation_key
+        self.unset_command = unset_tag + annotation_key
         self.unset_command.setParseAction(self.handle_unset_command)
 
-        self.unset_evidence = unset_tag + W + Suppress('Evidence')
+        self.unset_evidence = unset_tag + Suppress('Evidence')
         self.unset_evidence.setParseAction(self.handle_unset_evidence)
 
-        self.unset_citation = unset_tag + W + Suppress('Citation')
+        self.unset_citation = unset_tag + Suppress('Citation')
         self.unset_citation.setParseAction(self.handle_unset_citation)
 
-        self.unset_statement_group = unset_tag + W + Suppress('STATEMENT_GROUP')
+        self.unset_statement_group = unset_tag + Suppress('STATEMENT_GROUP')
         self.unset_statement_group.setParseAction(self.handle_unset_statement_group)
 
         self.commands = (self.set_statement_group | self.set_citation | self.set_evidence |

@@ -7,6 +7,11 @@ log = logging.getLogger(__name__)
 
 
 class TestActivity(TestTokenParserBase):
+
+    def setUp(self):
+        self.parser.clear()
+        self.parser.activity.setParseAction(self.parser.handle_term)
+
     def test_activity_bare(self):
         """"""
         statement = 'act(p(HGNC:AKT1))'
@@ -111,6 +116,11 @@ class TestActivity(TestTokenParserBase):
 
 
 class TestTransformation(TestTokenParserBase):
+
+    def setUp(self):
+        self.parser.clear()
+        self.parser.transformation.setParseAction(self.parser.handle_term)
+
     def test_degredation_1(self):
         statement = 'deg(p(HGNC:AKT1))'
         result = self.parser.transformation.parseString(statement)
@@ -163,7 +173,7 @@ class TestTransformation(TestTokenParserBase):
     def test_translocation_standard(self):
         """translocation example"""
         statement = 'tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))'
-        result = self.parser.translocation.parseString(statement)
+        result = self.parser.transformation.parseString(statement)
 
         expected_dict = {
             'modifier': 'Translocation',
@@ -196,7 +206,7 @@ class TestTransformation(TestTokenParserBase):
     def test_translocation_bare(self):
         """translocation example"""
         statement = 'tloc(p(HGNC:EGFR), GOCC:"cell surface", GOCC:endosome)'
-        result = self.parser.translocation.parseString(statement)
+        result = self.parser.transformation.parseString(statement)
 
         expected_dict = {
             'modifier': 'Translocation',

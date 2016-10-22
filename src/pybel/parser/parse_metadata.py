@@ -10,18 +10,6 @@ log = logging.getLogger('pybel')
 
 __all__ = ['MetadataParser']
 
-# See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
-value_map = {
-    'G': 'Gene',
-    'R': 'RNA',
-    'P': 'Protein',
-    'M': 'microRNA',
-    'A': 'Abundance',
-    'B': 'BiologicalProcess',
-    'O': 'Pathology',
-    'C': 'Complex'
-}
-
 
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document"""

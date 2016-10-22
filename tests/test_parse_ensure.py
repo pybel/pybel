@@ -2,6 +2,11 @@ from tests.constants import TestTokenParserBase
 
 
 class TestEnsure(TestTokenParserBase):
+
+    def setUp(self):
+        self.parser.clear()
+        self.parser.protein.setParseAction(self.parser.handle_term)
+
     def test_complete_origin(self):
         """"""
         statement = 'p(HGNC:AKT1)'

@@ -112,10 +112,8 @@ class FragmentParser(BaseParser):
         self.fragment_range = (ppc.integer | '?')('start') + Suppress('_') + (ppc.integer | '?' | '*')('stop')
         self.missing_fragment = Keyword('?')('missing')
         fragment_tag = oneOf(['frag', 'fragment']).setParseAction(replaceWith('Fragment'))
-        fragment_1 = fragment_tag + nest(self.fragment_range + Optional(WCW + word('description')))
-        fragment_2 = fragment_tag + nest(self.missing_fragment + Optional(WCW + word('description')))
-
-        self.language = fragment_1 | fragment_2
+        self.language = fragment_tag + nest(
+            (self.fragment_range | self.missing_fragment) + Optional(WCW + word('description')))
 
     def get_language(self):
         return self.language
