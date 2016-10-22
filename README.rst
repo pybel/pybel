@@ -1,17 +1,44 @@
-PyBEL |buildstatus| |codecov| |climate| |pyversions|
-====================================================
+PyBEL
+=====
 
-.. |buildstatus| image:: https://travis-ci.com/cthoyt/pybel.svg?token=2tyMYiCcZbjqYscNWXwZ&branch=master
-    :target: https://travis-ci.com/cthoyt/pybel
+=========== =============== ================== ======================= ====================
+Stable      |stable_build|  |stable_coverage|  |stable_documentation|  |stable_pyversions|
+Development |develop_build| |develop_coverage| |develop_documentation| |develop_pyversions|
+=========== =============== ================== ======================= ====================
 
-.. |pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
+
+.. |stable_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=master
+    :target: https://travis-ci.org/pybel/pybel
+    :alt: Stable Build Status
+
+.. |stable_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=master
+    :target: https://codecov.io/gh/pybel/pybel?branch=master
+    :alt: Stable Coverage Status
+
+.. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
+    :target: http://pybel.readthedocs.io/en/latest/?badge=stable
+    :alt: Stable Documentation Status
+
+.. |stable_pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
     :alt: Stable Supported Python Versions
 
-.. |codecov| image:: https://codecov.io/gh/cthoyt/pybel/branch/master/graph/badge.svg?token=J7joRTRygG
-    :target: https://codecov.io/gh/cthoyt/pybel
+.. |develop_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
+    :target: https://travis-ci.org/pybel/pybel
+    :alt: Development Build Status
 
-.. |climate| image:: https://codeclimate.com/repos/57fa4c866f0a491c8900122d/badges/c0e030bca94c7746ce21/gpa.svg
-    :target: https://codeclimate.com/repos/57fa4c866f0a491c8900122d/feed
+.. |develop_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
+    :target: https://codecov.io/gh/pybel/pybel?branch=develop
+    :alt: Development Coverage Status
+
+.. |develop_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
+    :target: http://pybel.readthedocs.io/en/latest/?badge=latest
+    :alt: Development Documentation Status
+
+.. |develop_pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
+    :alt: Development Supported Python Versions
+
+.. |climate| image:: https://codeclimate.com/github/pybel/pybel/badges/gpa.svg
+    :target: https://codeclimate.com/github/pybel/pybel
     :alt: Code Climate
 
 
@@ -56,13 +83,14 @@ Export to Neo4j
 Installation
 ------------
 
-Check :code:`CONTRIBUTING.rst` for installing the latest version from GitHub or a zip archive.
-In the future, this repository will be open to the public for use. Installation will be as easy as:
+Installation is as easy as running from your favorite terminal:
 
 .. code-block:: sh
 
    pip install pybel
-	
+
+Currently, :code:`PyBEL` officially supports Python 2.7 and Python 3.5. Builds also pass on Python 3.4, and there
+are some problems that can be solved with the installation of :code:`pandas` for Python 3.3 usage.
 
 Contributing
 ------------
@@ -75,10 +103,11 @@ Acknowledgements
 
 - PyBEL is proudly built with Paul McGuire's PyParsing package.
 - Scott Colby designed our logo and provided sage advice
+- PyBEL Core Team: Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling
 
-The Cool Pool of Tools
-----------------------
-- Reverse Causal Reasoning Algorithm
-- Canonicalization
-- Semantic Diff
+Find Us
+-------
 
+- http://pybel.readthedocs.io/
+- https://github.com/pybel/pybel
+- https://pypi.python.org/pypi/pybel

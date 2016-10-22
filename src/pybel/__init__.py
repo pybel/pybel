@@ -10,7 +10,7 @@ __version__ = '0.2.0'
 
 __title__ = 'PyBEL'
 __description__ = 'A Python package for parsing, validating, and analysis of of BEL graphs'
-__url__ = 'https://github.com/cthoyt/pybel'
+__url__ = 'https://github.com/pybel/pybel'
 
 __author__ = 'Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
 __email__ = 'charles.hoyt@scai.fraunhofer.de'
