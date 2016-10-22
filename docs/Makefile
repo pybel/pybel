@@ -54,12 +54,6 @@ html:
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
-.PHONY: htmldot
-htmldot:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) .
-	@echo
-	@echo "Build finished. The HTML pages are in ."
-
 .PHONY: dirhtml
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
