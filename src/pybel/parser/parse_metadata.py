@@ -26,12 +26,14 @@ value_map = {
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document"""
 
-    def __init__(self, valid_namespaces=None, valid_annotations=None):
+    def __init__(self, valid_namespaces=None, valid_annotations=None, ns_cache_manager=None):
         """
         :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
         :type valid_namespaces: dict
         :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
         :type valid_annotations: dict
+        :param ns_cache_manager: a namespace cache manager
+        :type ns_cache_manager: pybel.manager.NamespaceCache
         :return:
         """
         self.document_metadata = {}
@@ -41,6 +43,8 @@ class MetadataParser(BaseParser):
 
         self.annotations_metadata = {}
         self.annotations_dict = {} if valid_annotations is None else valid_annotations
+
+        self.ns_cache_manager = ns_cache_manager
 
         # word_under = Word(alphanums + '_')
         word_under = ppc.identifier
@@ -84,14 +88,18 @@ class MetadataParser(BaseParser):
     def handle_namespace_url(self, s, l, tokens):
         name = tokens['name']
 
-        # FIXME - use URL as check for okay
-        # Make a warning
-        # externalize this function
         if name in self.namespace_dict:
             log.warning('Tried to overwrite namespace: {}'.format(name))
             return tokens
 
         url = tokens['url']
+
+        if self.ns_cache_manager is not None:
+            self.ns_cache_manager.update_namespace(url, remove_old_namespace=False)
+            log.debug('Retrieved namespace {} from cache'.format(name))
+            self.namespace_dict[name] = self.ns_cache_manager.cache[url]
+            return tokens
+
         log.debug('Downloading namespace {} from {}'.format(name, url))
         config = download_url(url)
 

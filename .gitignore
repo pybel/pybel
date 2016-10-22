@@ -13,3 +13,4 @@ notebooks/PyBEL Playtime.ipynb
 *.gpickle
 build/*
 dist/*
+*.db

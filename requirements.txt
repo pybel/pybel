@@ -5,3 +5,5 @@ pyparsing
 configparser
 py2neo
 click
+sqlalchemy
+pandas

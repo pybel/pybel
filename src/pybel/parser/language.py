@@ -88,8 +88,8 @@ amino_acid_dict = {
     'V': 'Val',
 }
 
-aa_single = oneOf(amino_acid_dict.keys())
-aa_triple = oneOf(amino_acid_dict.values())
+aa_single = oneOf(list(amino_acid_dict.keys()))
+aa_triple = oneOf(list(amino_acid_dict.values()))
 aa_placeholder = Keyword('X')
 
 
@@ -108,7 +108,7 @@ dna_nucleotide_labels = {
     'G': 'Guanine'
 }
 
-dna_nucleotide = oneOf(dna_nucleotide_labels.keys())
+dna_nucleotide = oneOf(list(dna_nucleotide_labels.keys()))
 
 rna_nucleotide_labels = {
     'a': 'adenine',
@@ -117,7 +117,7 @@ rna_nucleotide_labels = {
     'g': 'guanine'
 }
 
-rna_nucleotide = oneOf(rna_nucleotide_labels.keys())
+rna_nucleotide = oneOf(list(rna_nucleotide_labels.keys()))
 
 pmod_legacy_labels = {
     'P': 'phosphorylated',

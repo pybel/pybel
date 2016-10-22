@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Started &mdash; PyBEL 0.1.6 documentation</title>
+  <title>Getting Started &mdash; PyBEL 0.2.0 documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyBEL 0.1.6 documentation" href="index.html"/>
+    <link rel="top" title="PyBEL 0.2.0 documentation" href="index.html"/>
         <link rel="next" title="Design Choices" href="design.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.1.6
+                0.2.0
               </div>
             
           
@@ -214,6 +214,18 @@ from URL, file, iterable, or a database. It also includes various export options
 </pre></div>
 </div>
 <span class="target" id="module-pybel"></span><p>A Python package for parsing, validating, and analysis of of BEL graphs</p>
+<dl class="class">
+<dt id="pybel.BELGraph">
+<em class="property">class </em><code class="descclassname">pybel.</code><code class="descname">BELGraph</code><span class="sig-paren">(</span><em>lines</em>, <em>context=None</em>, <em>lenient=False</em>, <em>ns_cache_path=None</em>, <em>*attrs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>An extension of a NetworkX MultiDiGraph to hold a BEL graph.</p>
+<dl class="method">
+<dt id="pybel.BELGraph.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the content of the graph and its BEL parser</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="pybel.from_url">
 <code class="descclassname">pybel.</code><code class="descname">from_url</code><span class="sig-paren">(</span><em>url</em>, <em>lenient=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#from_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.from_url" title="Permalink to this definition">¶</a></dt>
@@ -222,7 +234,7 @@ from URL, file, iterable, or a database. It also includes various export options
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a valid URL string</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a valid URL pointing to a BEL resource</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a parsed BEL graph</td>
 </tr>
@@ -251,156 +263,83 @@ from URL, file, iterable, or a database. It also includes various export options
 </dd></dl>
 
 <dl class="function">
-<dt id="pybel.from_lines">
-<code class="descclassname">pybel.</code><code class="descname">from_lines</code><span class="sig-paren">(</span><em>it</em>, <em>lenient=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#from_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.from_lines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads BEL graph from an iterable of strings or file-like object</p>
+<dt id="pybel.from_pickle">
+<code class="descclassname">pybel.</code><code class="descname">from_pickle</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#from_pickle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.from_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a graph from a gpickle file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>it</strong> &#8211; an iterable of strings</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>file or list</em>) &#8211; File or filename to write. Filenames ending in .gz or .bz2 will be uncompressed.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a parsed BEL graph</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph">BELGraph</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">nx.MultiDiGraph</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="pybel.from_database">
-<code class="descclassname">pybel.</code><code class="descname">from_database</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#from_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.from_database" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads a BEL graph from a database</p>
+<dt id="pybel.from_graphml">
+<code class="descclassname">pybel.</code><code class="descname">from_graphml</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#from_graphml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.from_graphml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a graph from a graphml file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The string form of the URL is dialect[+driver]://user:password&#64;host/dbname[?key=value..], where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance of URL.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>file or string</em>) &#8211; File or filename to write. Filenames ending in .gz or .bz2 will be compressed.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a BEL graph loaded from the database</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph">BELGraph</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">nx.MultiDiGraph</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="class">
-<dt id="pybel.BELGraph">
-<em class="property">class </em><code class="descclassname">pybel.</code><code class="descname">BELGraph</code><span class="sig-paren">(</span><em>context=None</em>, <em>lenient=False</em>, <em>*attrs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph" title="Permalink to this definition">¶</a></dt>
-<dd><p>An extension of a NetworkX MultiDiGraph to hold a BEL graph.</p>
-<dl class="method">
-<dt id="pybel.BELGraph.clear">
-<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.clear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clears the content of the graph and its BEL parser</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pybel.BELGraph.parse_from_lines">
-<code class="descname">parse_from_lines</code><span class="sig-paren">(</span><em>fl</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.parse_from_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.parse_from_lines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fl</strong> &#8211; iterable over lines of BEL data file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph">BELGraph</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pybel.BELGraph.parse_from_path">
-<code class="descname">parse_from_path</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.parse_from_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.parse_from_path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Opens a BEL file from a given path and parses it</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; path to BEL file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph">BELGraph</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pybel.BELGraph.parse_from_url">
-<code class="descname">parse_from_url</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.parse_from_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.parse_from_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses a BEL file from URL resource and adds to graph</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> &#8211; URL to BEL Resource</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph">BELGraph</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pybel.BELGraph.to_csv">
-<code class="descname">to_csv</code><span class="sig-paren">(</span><em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.to_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.to_csv" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes graph to edge list csv</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output</strong> &#8211; a file or filelike object</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pybel.BELGraph.to_graphml">
-<code class="descname">to_graphml</code><span class="sig-paren">(</span><em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.to_graphml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.to_graphml" title="Permalink to this definition">¶</a></dt>
+<dl class="function">
+<dt id="pybel.to_graphml">
+<code class="descclassname">pybel.</code><code class="descname">to_graphml</code><span class="sig-paren">(</span><em>graph</em>, <em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#to_graphml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.to_graphml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output</strong> &#8211; a file or filelike object</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>graph</strong> (<a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph"><em>BELGraph</em></a>) &#8211; a BEL graph</li>
+<li><strong>output</strong> &#8211; a file or filelike object</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="pybel.BELGraph.to_json">
-<code class="descname">to_json</code><span class="sig-paren">(</span><em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.to_json" title="Permalink to this definition">¶</a></dt>
+<dl class="function">
+<dt id="pybel.to_json">
+<code class="descclassname">pybel.</code><code class="descname">to_json</code><span class="sig-paren">(</span><em>graph</em>, <em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.to_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes this graph to a node-link JSON object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output</strong> &#8211; a write-supporting filelike object</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>graph</strong> (<a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph"><em>BELGraph</em></a>) &#8211; a BEL graph</li>
+<li><strong>output</strong> &#8211; a write-supporting filelike object</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="pybel.BELGraph.to_neo4j">
-<code class="descname">to_neo4j</code><span class="sig-paren">(</span><em>neo_graph</em>, <em>context=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.to_neo4j"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.to_neo4j" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uploads to Neo4J graph database usiny <cite>py2neo</cite></p>
+<dl class="function">
+<dt id="pybel.to_neo4j">
+<code class="descclassname">pybel.</code><code class="descname">to_neo4j</code><span class="sig-paren">(</span><em>graph</em>, <em>neo_graph</em>, <em>context=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#to_neo4j"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.to_neo4j" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uploads a BEL graph to Neo4J graph database using <cite>py2neo</cite></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>graph</strong> (<a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph"><em>BELGraph</em></a>) &#8211; a BEL Graph</li>
 <li><strong>neo_graph</strong> (<em>py2neo.Graph</em>) &#8211; </li>
 <li><strong>context</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a disease context to allow for multiple disease models in one neo4j instance</li>
 </ul>
@@ -410,20 +349,22 @@ from URL, file, iterable, or a database. It also includes various export options
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="pybel.BELGraph.to_pickle">
-<code class="descname">to_pickle</code><span class="sig-paren">(</span><em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#BELGraph.to_pickle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.BELGraph.to_pickle" title="Permalink to this definition">¶</a></dt>
+<dl class="function">
+<dt id="pybel.to_pickle">
+<code class="descclassname">pybel.</code><code class="descname">to_pickle</code><span class="sig-paren">(</span><em>graph</em>, <em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybel/graph.html#to_pickle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybel.to_pickle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes this graph to a pickle object with nx.write_gpickle</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output</strong> &#8211; a file or filename to write to</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>graph</strong> (<a class="reference internal" href="#pybel.BELGraph" title="pybel.BELGraph"><em>BELGraph</em></a>) &#8211; a BEL graph</li>
+<li><strong>output</strong> &#8211; a file or filename to write to</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -471,7 +412,7 @@ from URL, file, iterable, or a database. It also includes various export options
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.6',
+            VERSION:'0.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

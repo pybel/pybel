@@ -37,8 +37,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
+    'sphinx.ext.viewcode'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -68,7 +67,7 @@ author = u'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = u'0.1.6'
+release = u'0.2.0'
 
 # The short X.Y version.
 parsed_version = re.match('(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?',release)

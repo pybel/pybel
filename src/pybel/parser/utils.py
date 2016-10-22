@@ -1,9 +1,6 @@
-import collections
 import itertools as itt
 import logging
 import re
-
-import networkx as nx
 
 log = logging.getLogger('pybel')
 
@@ -122,42 +119,6 @@ def any_subdict_matches(a, b):
     :rtype: bool
     """
     return any(subdict_matches(sd, b) for sd in a.values())
-
-
-def flatten(d, parent_key='', sep='_'):
-    """Flattens a nested dictionary
-
-    Borrowed from http://stackoverflow.com/a/6027615
-    """
-    items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, collections.MutableMapping):
-            items.extend(flatten(v, new_key, sep=sep).items())
-        elif isinstance(v, (set, list)):
-            items.append((new_key, ','.join(v)))
-        else:
-            items.append((new_key, v))
-    return dict(items)
-
-
-def flatten_edges(graph):
-    """Returns a new graph with flattened edge data dictionaries
-
-    :param graph:
-    :type graph: nx.MultiDiGraph
-    :rtype: nx.MultiDiGraph
-    """
-
-    g = nx.MultiDiGraph()
-
-    for node, data in graph.nodes(data=True):
-        g.add_node(node, data)
-
-    for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten(data))
-
-    return g
 
 
 def cartesian_dictionary(d):

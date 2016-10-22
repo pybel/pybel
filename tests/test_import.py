@@ -1,11 +1,40 @@
+import logging
 import os
 import unittest
 
 import pybel
+from pybel.manager import NamespaceCache
 from pybel.parser import BelParser
 from tests.constants import TestTokenParserBase, PYBEL_TEST_ALL
 
+logging.getLogger('requests').setLevel(logging.WARNING)
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
+
+
+@unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
+class TestCacheIntegration(unittest.TestCase):
+    def test_cached_winning(self):
+        path = os.path.join(dir_path, 'bel', 'test_bel_3.bel')
+
+        c_path = 'sqlite://'
+
+        c = NamespaceCache(conn=c_path, setup_default_cache=False)
+
+        with open(path) as f:
+            g = pybel.BELGraph(f, ns_cache_path=c)
+
+        expected_document_metadata = {
+            'Name': "PyBEL Test Document",
+            "Description": "Made for testing PyBEL parsing",
+            'Version': "1.6",
+            'Copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+            'Authors': "Charles Tapley Hoyt",
+            'Licenses': "Other / Proprietary",
+            'ContactInfo': "charles.hoyt@scai.fraunhofer.de"
+        }
+
+        self.assertEqual(expected_document_metadata, g.metadata_parser.document_metadata)
 
 
 @unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')

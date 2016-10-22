@@ -1,0 +1,24 @@
+##################################################################################
+# Document Properties Section
+
+SET DOCUMENT Name = "PyBEL Test Document"
+SET DOCUMENT Description = "Made for testing PyBEL parsing"
+SET DOCUMENT Version = "1.6"
+SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
+SET DOCUMENT Authors = "Charles Tapley Hoyt"
+SET DOCUMENT Licenses = "Other / Proprietary"
+SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+
+##################################################################################
+# Definitions Section
+
+DEFINE NAMESPACE ChEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"
+
+##################################################################################
+# Statements Section
+
+SET Citation = {"Pubmed","That one article from last week","123455"}
+
+SET Evidence = "Evidence 1"
+
+p(ChEBI:"oxygen radical") -> p(ChEBI:"oxygen atom")

@@ -8,39 +8,45 @@ import networkx as nx
 import py2neo
 import requests
 from networkx.readwrite import json_graph
+from pybel.exceptions import PyBelWarning
+from pybel.utils import flatten
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
-from pybel.exceptions import PyBelWarning
 from .exceptions import PyBelError
+from .manager.namespace_cache import NamespaceCache
 from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
-from .parser.utils import split_file_to_annotations_and_definitions, flatten, flatten_edges
+from .parser.utils import split_file_to_annotations_and_definitions
+from .utils import flatten_edges, expand_edges
+
+__all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle',
+           'from_graphml', 'to_graphml', 'to_json', 'to_neo4j', 'to_pickle']
 
 log = logging.getLogger('pybel')
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
 
 
-def from_lines(it, lenient=False):
-    """Loads BEL graph from an iterable of strings or file-like object
-
-    :param it: an iterable of strings
-    :return: a parsed BEL graph
-    :rtype: BELGraph"""
-    return BELGraph(lenient=lenient).parse_from_lines(it)
-
-
 def from_url(url, lenient=False):
     """Loads a BEL graph from a URL resource
 
-    :param url: a valid URL string
+    :param url: a valid URL pointing to a BEL resource
     :type url: str
     :return: a parsed BEL graph
     :rtype: BELGraph
     """
     log.info('Loading from url: {}'.format(url))
-    return BELGraph(lenient=lenient).parse_from_url(url)
+
+    session = requests.session()
+    if url.startswith('file://'):
+        session.mount('file://', FileAdapter())
+    response = session.get(url)
+    response.raise_for_status()
+
+    lines = (line.decode('utf-8') for line in response.iter_lines())
+
+    return BELGraph(lines, lenient=lenient)
 
 
 def from_path(path, lenient=False):
@@ -53,7 +59,7 @@ def from_path(path, lenient=False):
 
     log.info('Loading from path: {}'.format(path))
     with open(os.path.expanduser(path)) as f:
-        return from_lines(f, lenient=lenient)
+        return BELGraph(f, lenient=lenient)
 
 
 def from_database(connection):
@@ -70,73 +76,61 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, context=None, lenient=False, *attrs, **kwargs):
-        """An extension of a NetworkX MultiDiGraph for holding BEL data
+    def __init__(self, lines, context=None, lenient=False, ns_cache_path=None, *attrs, **kwargs):
+        """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
+        :param lines: iterable over lines of BEL data file
         :param context: disease context string
         :type context: str
         :param lenient: if true, allow naked namespaces
         :type lenient: bool
+        :param ns_cache_path: database connection string to namespace cache
+        :type ns_cache_path: str or pybel.mangager.NamespaceCache
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.bel_parser = None
-        self.metadata_parser = None
         self.context = context
-        self.lenient = lenient
+
+        docs, defs, states = split_file_to_annotations_and_definitions(lines)
+
+        if isinstance(ns_cache_path, NamespaceCache):
+            self.metadata_parser = MetadataParser(ns_cache_manager=ns_cache_path)
+        elif isinstance(ns_cache_path, str):
+            self.metadata_parser = MetadataParser(ns_cache_manager=NamespaceCache(conn=ns_cache_path))
+        else:
+            self.metadata_parser = MetadataParser()
+
+
+        self.parse_document(docs)
+
+        self.parse_definitions(defs)
+
+        self.bel_parser = BelParser(graph=self,
+                                    valid_namespaces=self.metadata_parser.namespace_dict,
+                                    valid_annotations=self.metadata_parser.annotations_dict,
+                                    lenient=lenient)
+
+        self.parse_statements(states)
 
     def clear(self):
         """Clears the content of the graph and its BEL parser"""
         self.bel_parser.clear()
 
-    def parse_from_path(self, path):
-        """Opens a BEL file from a given path and parses it
-
-        :param path: path to BEL file
-        :return: self
-        :rtype: BELGraph
-        """
-        with open(os.path.expanduser(path)) as f:
-            return self.parse_from_lines(f)
-
-    def parse_from_url(self, url):
-        """Parses a BEL file from URL resource and adds to graph
-
-        :param url: URL to BEL Resource
-        :return: self
-        :rtype: BELGraph
-        """
-
-        session = requests.session()
-        if url.startswith('file://'):
-            session.mount('file://', FileAdapter())
-        response = session.get(url)
-        response.raise_for_status()
-
-        return self.parse_from_lines(line.decode('utf-8') for line in response.iter_lines())
-
-    def parse_from_lines(self, fl):
-        """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
-
-        :param fl: iterable over lines of BEL data file
-        :return: self
-        :rtype: BELGraph
-        """
+    def parse_document(self, document_metadata):
         t = time.time()
 
-        docs, defs, states = split_file_to_annotations_and_definitions(fl)
-
-        self.metadata_parser = MetadataParser()
-        for line_number, line in docs:
+        for line_number, line in document_metadata:
             try:
                 self.metadata_parser.parseString(line)
             except:
                 log.error('Line {:07} - failed: {}'.format(line_number, line))
 
         log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
+
+    def parse_definitions(self, definitions):
         t = time.time()
 
-        for line_number, line in defs:
+        for line_number, line in definitions:
             try:
                 self.metadata_parser.parseString(line)
             except PyBelError as e:
@@ -152,14 +146,10 @@ class BELGraph(nx.MultiDiGraph):
                 log.debug('Traceback: {}'.format(exc_traceback))
 
         log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
+
+    def parse_statements(self, statements):
         t = time.time()
-
-        self.bel_parser = BelParser(graph=self,
-                                    valid_namespaces=self.metadata_parser.namespace_dict,
-                                    valid_annotations=self.metadata_parser.annotations_dict,
-                                    lenient=self.lenient)
-
-        for line_number, line in states:
+        for line_number, line in statements:
             try:
                 self.bel_parser.parseString(line)
             except PyBelError as e:
@@ -174,72 +164,104 @@ class BELGraph(nx.MultiDiGraph):
 
         log.info('Finished parsing statements section in {:.02f} seconds'.format(time.time() - t))
 
-        return self
 
-    def to_neo4j(self, neo_graph, context=None):
-        """Uploads to Neo4J graph database usiny `py2neo`
+def to_neo4j(graph, neo_graph, context=None):
+    """Uploads a BEL graph to Neo4J graph database using `py2neo`
 
-        :param neo_graph:
-        :type neo_graph: py2neo.Graph
-        :param context: a disease context to allow for multiple disease models in one neo4j instance
-        :type context: str
-        """
+    :param graph: a BEL Graph
+    :type graph: BELGraph
+    :param neo_graph:
+    :type neo_graph: py2neo.Graph
+    :param context: a disease context to allow for multiple disease models in one neo4j instance
+    :type context: str
+    """
 
-        if context is not None:
-            self.context = context
+    if context is not None:
+        graph.context = context
 
-        tx = neo_graph.begin()
+    tx = neo_graph.begin()
 
-        node_map = {}
-        for i, (node, data) in enumerate(self.nodes(data=True)):
-            node_type = data['type']
-            attrs = {k: v for k, v in data.items() if k != 'type'}
+    node_map = {}
+    for i, (node, data) in enumerate(graph.nodes(data=True)):
+        node_type = data['type']
+        attrs = {k: v for k, v in data.items() if k != 'type'}
 
-            if 'name' in data:
-                attrs['value'] = data['name']
+        if 'name' in data:
+            attrs['value'] = data['name']
 
-            node_map[node] = py2neo.Node(node_type, cname=str(node), cnum=str(i), **attrs)
+        node_map[node] = py2neo.Node(node_type, cname=str(node), cnum=str(i), **attrs)
 
-            tx.create(node_map[node])
+        tx.create(node_map[node])
 
-        for u, v, data in self.edges(data=True):
-            neo_u = node_map[u]
-            neo_v = node_map[v]
-            rel_type = data['relation']
-            attrs = flatten(data)
-            if self.context is not None:
-                attrs[PYBEL_CONTEXT_TAG] = str(self.context)
-            rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
-            tx.create(rel)
+    for u, v, data in graph.edges(data=True):
+        neo_u = node_map[u]
+        neo_v = node_map[v]
+        rel_type = data['relation']
+        attrs = flatten(data)
+        if graph.context is not None:
+            attrs[PYBEL_CONTEXT_TAG] = str(graph.context)
+        rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
+        tx.create(rel)
 
-        tx.commit()
+    tx.commit()
 
-    def to_pickle(self, output):
-        """Writes this graph to a pickle object with nx.write_gpickle
 
-        :param output: a file or filename to write to
-        """
-        nx.write_gpickle(flatten_edges(self), output)
+def to_pickle(graph, output):
+    """Writes this graph to a pickle object with nx.write_gpickle
 
-    def to_json(self, output):
-        """Writes this graph to a node-link JSON object
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :param output: a file or filename to write to
+    """
+    nx.write_gpickle(flatten_edges(graph), output)
 
-        :param output: a write-supporting filelike object
-        """
-        data = json_graph.node_link_data(flatten_edges(self))
-        json.dump(data, output, ensure_ascii=False)
 
-    def to_graphml(self, output):
-        """Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it
+def from_pickle(path):
+    """Reads a graph from a gpickle file
 
-        :param output: a file or filelike object
-        """
-        nx.write_graphml(flatten_edges(self), output)
+    :param path: File or filename to write. Filenames ending in .gz or .bz2 will be uncompressed.
+    :type path: file or list
+    :rtype: nx.MultiDiGraph
+    """
+    return expand_edges(nx.read_gpickle(path))
 
-    def to_csv(self, output):
-        """Writes graph to edge list csv
 
-        :param output: a file or filelike object
-        """
+def to_json(graph, output):
+    """Writes this graph to a node-link JSON object
 
-        nx.write_edgelist(flatten_edges(self), output, data=True)
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :param output: a write-supporting filelike object
+    """
+    data = json_graph.node_link_data(flatten_edges(graph))
+    json.dump(data, output, ensure_ascii=False)
+
+
+def to_graphml(graph, output):
+    """Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it
+
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :param output: a file or filelike object
+    """
+    nx.write_graphml(flatten_edges(graph), output)
+
+
+def from_graphml(path):
+    """Reads a graph from a graphml file
+
+    :param path: File or filename to write. Filenames ending in .gz or .bz2 will be compressed.
+    :type path: file or string
+    :rtype: nx.MultiDiGraph
+    """
+    return expand_edges(nx.read_graphml(path))
+
+
+def to_csv(graph, output):
+    """Writes graph to edge list csv
+
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :param output: a file or filelike object
+    """
+    nx.write_edgelist(flatten_edges(graph), output, data=True)
