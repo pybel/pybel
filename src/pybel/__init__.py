@@ -1,4 +1,4 @@
-"""A Python package for parsing, validating, and analysis of of BEL graphs"""
+"""Parsing, validation, and analysis of of BEL graphs"""
 
 from . import cli
 from . import graph
@@ -9,7 +9,7 @@ __all__ = graph.__all__
 __version__ = '0.2.0'
 
 __title__ = 'PyBEL'
-__description__ = 'A Python package for parsing, validating, and analysis of of BEL graphs'
+__description__ = 'Parsing, validation, and analysis of BEL graphs'
 __url__ = 'https://github.com/pybel/pybel'
 
 __author__ = 'Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
