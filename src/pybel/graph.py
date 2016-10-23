@@ -28,7 +28,7 @@ log = logging.getLogger('pybel')
 PYBEL_CONTEXT_TAG = 'pybel_context'
 
 
-def from_url(url, lenient=False):
+def from_url(url, **kwargs):
     """Loads a BEL graph from a URL resource
 
     :param url: a valid URL pointing to a BEL resource
@@ -46,20 +46,20 @@ def from_url(url, lenient=False):
 
     lines = (line.decode('utf-8') for line in response.iter_lines())
 
-    return BELGraph(lines, lenient=lenient)
+    return BELGraph(lines, **kwargs)
 
 
-def from_path(path, lenient=False):
+def from_path(path, **kwargs):
     """Loads a BEL graph from a file resource
 
-    :param bel: a file path
-    :type bel: str
+    :param path: a file path
+    :type path: str
     :return: a parsed BEL graph
     :rtype: BELGraph"""
 
     log.info('Loading from path: {}'.format(path))
     with open(os.path.expanduser(path)) as f:
-        return BELGraph(f, lenient=lenient)
+        return BELGraph(f, **kwargs)
 
 
 def from_database(connection):
@@ -70,13 +70,13 @@ def from_database(connection):
     :return: a BEL graph loaded from the database
     :rtype: BELGraph
     """
-    raise NotImplementedError('Loading from database not yet implemented')
+    raise NotImplementedError("Can't load from from database: {}".format(connection))
 
 
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines, context=None, lenient=False, ns_cache_path=None, *attrs, **kwargs):
+    def __init__(self, lines, context=None, lenient=False, definition_cache_manager=None, *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
         :param lines: iterable over lines of BEL data file
@@ -84,8 +84,9 @@ class BELGraph(nx.MultiDiGraph):
         :type context: str
         :param lenient: if true, allow naked namespaces
         :type lenient: bool
-        :param ns_cache_path: database connection string to namespace cache
-        :type ns_cache_path: str or pybel.mangager.NamespaceCache
+        :param definition_cache_manager: database connection string to namespace cache, pre-built namespace cache manager,
+                    or True to use the default
+        :type definition_cache_manager: str or pybel.mangager.NamespaceCache or bool
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
@@ -93,10 +94,12 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(lines)
 
-        if isinstance(ns_cache_path, NamespaceCache):
-            self.metadata_parser = MetadataParser(ns_cache_manager=ns_cache_path)
-        elif isinstance(ns_cache_path, str):
-            self.metadata_parser = MetadataParser(ns_cache_manager=NamespaceCache(conn=ns_cache_path))
+        if isinstance(definition_cache_manager, NamespaceCache):
+            self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
+        elif isinstance(definition_cache_manager, str):
+            self.metadata_parser = MetadataParser(definition_cache_manager=NamespaceCache(conn=definition_cache_manager))
+        elif definition_cache_manager:
+            self.metadata_parser = MetadataParser(definition_cache_manager=NamespaceCache())
         else:
             self.metadata_parser = MetadataParser()
 
