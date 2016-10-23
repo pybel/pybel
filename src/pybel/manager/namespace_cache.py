@@ -48,6 +48,8 @@ class NamespaceCache:
 
         :param namespace_url: URL of the namespace definition file (.belns)
         """
+        log.info('Downloading and inserting to cache {}'.format(namespace_url))
+
         ns_config = utils.download_url(namespace_url)
 
         namespace_key = ns_config['Namespace']['Keyword']
@@ -55,7 +57,7 @@ class NamespaceCache:
         pubDate = datetime.strptime(ns_config['Citation']['PublishedDate'], '%Y-%m-%d') if 'PublishedDate' in ns_config[
             'Citation'] else None
 
-        namespace_insert_values = [{
+        namespace_insert_values = {
             'url': namespace_url,
             'author': ns_config['Author']['NameString'],
             'keyword': namespace_key,
@@ -64,7 +66,7 @@ class NamespaceCache:
             'copyright': ns_config['Author']['CopyrightString'],
             'version': ns_config['Namespace']['VersionString'],
             'contact': ns_config['Author']['ContactInfoString']
-        }]
+        }
 
         self.cache[namespace_url] = dict(ns_config['Values'])
 
@@ -80,10 +82,10 @@ class NamespaceCache:
                 return namespace_key, namespace_old.createdDateTime, None
 
             else:
-                self.__insert_namespace_helper(namespace_insert_values, self.cache[namespace_url])
+                self.__insert_namespace_helper([namespace_insert_values], self.cache[namespace_url])
                 return namespace_key, creationDateTime, namespace_old
 
-        self.__insert_namespace_helper(namespace_insert_values, self.cache[namespace_url])
+        self.__insert_namespace_helper([namespace_insert_values], self.cache[namespace_url])
 
         return namespace_key, creationDateTime, None
 
@@ -174,7 +176,7 @@ class NamespaceCache:
         if self.sesh.query(exists().where(database_models.Namespace.url == namespace_url)).scalar():
             return
 
-        log.info('Downloading and inserting to cache {}'.format(namespace_url))
+
         namespace_key, creationDateTime, namespace_old = self.__insert_namespace(namespace_url)
 
         if namespace_old and remove_old_namespace and namespace_old.createdDateTime < creationDateTime:
