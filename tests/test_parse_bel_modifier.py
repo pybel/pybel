@@ -271,7 +271,6 @@ class TestTransformation(TestTokenParserBase):
         expected_result = ['CellSurfaceExpression', ['Protein', ['HGNC', 'EGFR']]]
         self.assertEqual(expected_result, result.asList())
 
-        mod = self.parser.canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Translocation',
             'effect': {
@@ -279,7 +278,7 @@ class TestTransformation(TestTokenParserBase):
                 'toLoc': dict(namespace='GOCC', name='cell surface')
             }
         }
-        self.assertEqual(expected_mod, mod)
+        self.assertEqual(expected_mod, self.parser.canonicalize_modifier(result))
 
         node = 'Protein', 'HGNC', 'EGFR'
         self.assertEqual(node, self.parser.canonicalize_node(result))

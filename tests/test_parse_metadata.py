@@ -2,6 +2,7 @@ import logging
 import os
 import unittest
 
+from pybel.manager import NamespaceCache
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
@@ -21,6 +22,31 @@ class TestSplitLines(unittest.TestCase):
         self.assertEqual(7, len(docs))
         self.assertEqual(5, len(defs))
         self.assertEqual(14, len(states))
+
+
+class TestParseMetadataCached(unittest.TestCase):
+    def setUp(self):
+        dcm = NamespaceCache()
+        dcm.setup_database()
+        self.parser = MetadataParser(definition_cache_manager=dcm)
+
+    def test_control_1(self):
+        s = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
+
+        self.parser.parseString(s)
+
+        print(self.parser.namespace_dict.keys())
+
+        self.assertIn('MGI', self.parser.namespace_dict)
+        # TODO LeKono implement namespace_metadata caching loading as well
+        # self.assertIn('MGI', self.parser.namespace_metadata)
+
+        # Test doesn't overwrite
+        s = 'DEFINE NAMESPACE MGI AS LIST {"A","B","C"}'
+        self.parser.parseString(s)
+        self.assertIn('MGI', self.parser.namespace_dict)
+        # self.assertIn('MGI', self.parser.namespace_metadata)
+        self.assertNotIn('A', self.parser.namespace_dict['MGI'])
 
 
 class TestParseMetadata(unittest.TestCase):
