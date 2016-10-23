@@ -152,8 +152,9 @@ class BELGraph(nx.MultiDiGraph):
     def parse_statements(self, statements):
         t = time.time()
 
+        log.info('Streamlining BEL parser')
         self.bel_parser.language.streamline()
-        log.info('Streamlined BEL parser in {:.02f}s'.format(time.time() - t))
+        log.info('Finished Streamlining BEL parser in {:.02f}s'.format(time.time() - t))
 
         t = time.time()
 
