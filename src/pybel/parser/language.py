@@ -99,7 +99,7 @@ def handle_aa_placeholder(s, l, tokens):
 
 aa_placeholder.setParseAction(handle_aa_placeholder)
 
-amino_acid = aa_triple | aa_single | aa_placeholder
+amino_acid = MatchFirst([aa_triple, aa_single, aa_placeholder])
 
 dna_nucleotide_labels = {
     'A': 'Adenine',

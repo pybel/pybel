@@ -1,9 +1,9 @@
 import logging
 
-from pyparsing import Suppress
+from pyparsing import Suppress, And
 from pyparsing import pyparsing_common as ppc
 
-from .baseparser import BaseParser, W, word, quote, delimitedSet
+from .baseparser import BaseParser, word, quote, delimitedSet
 from ..utils import download_url
 
 log = logging.getLogger('pybel')
@@ -14,14 +14,14 @@ __all__ = ['MetadataParser']
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document"""
 
-    def __init__(self, valid_namespaces=None, valid_annotations=None, ns_cache_manager=None):
+    def __init__(self, valid_namespaces=None, valid_annotations=None, definition_cache_manager=None):
         """
         :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
         :type valid_namespaces: dict
         :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
         :type valid_annotations: dict
-        :param ns_cache_manager: a namespace cache manager
-        :type ns_cache_manager: pybel.manager.NamespaceCache
+        :param definition_cache_manager: a namespace cache manager
+        :type definition_cache_manager: pybel.manager.NamespaceCache
         :return:
         """
         self.document_metadata = {}
@@ -32,29 +32,26 @@ class MetadataParser(BaseParser):
         self.annotations_metadata = {}
         self.annotations_dict = {} if valid_annotations is None else valid_annotations
 
-        self.ns_cache_manager = ns_cache_manager
+        self.definition_cache_manager = definition_cache_manager
 
-        # word_under = Word(alphanums + '_')
         word_under = ppc.identifier
 
-        self.document = Suppress('SET') + W + Suppress('DOCUMENT') + W + word('key') + W + Suppress('=') + W + quote(
-            'value')
+        as_tag = Suppress('AS')
+        url_tag = Suppress('URL')
+        list_tag = Suppress('LIST')
+        set_tag = Suppress('SET')
+        define_tag = Suppress('DEFINE')
 
-        namespace_tag = Suppress('DEFINE') + W + Suppress('NAMESPACE')
-        self.namespace_url = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
-            'URL') + W + quote(
-            'url')
-        self.namespace_list = namespace_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
-            'LIST') + W + delimitedSet('values')
+        self.document = And([set_tag, Suppress('DOCUMENT'), word('key'), Suppress('='), quote('value')])
 
-        annotation_tag = Suppress('DEFINE') + W + Suppress('ANNOTATION')
-        self.annotation_url = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
-            'URL') + W + quote(
-            'url')
-        self.annotation_list = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
-            'LIST') + W + delimitedSet('values')
-        self.annotation_pattern = annotation_tag + W + word_under('name') + W + Suppress('AS') + W + Suppress(
-            'PATTERN') + W + quote('value')
+        namespace_tag = And([define_tag, Suppress('NAMESPACE'), word_under('name'), as_tag])
+        self.namespace_url = And([namespace_tag, url_tag, quote('url')])
+        self.namespace_list = And([namespace_tag, list_tag, delimitedSet('values')])
+
+        annotation_tag = And([define_tag, Suppress('ANNOTATION'), word_under('name'), as_tag])
+        self.annotation_url = And([annotation_tag, url_tag, quote('url')])
+        self.annotation_list = And([annotation_tag, list_tag, delimitedSet('values')])
+        self.annotation_pattern = And([annotation_tag, Suppress('PATTERN'), quote('value')])
 
         self.document.setParseAction(self.handle_document)
         self.namespace_url.setParseAction(self.handle_namespace_url)
@@ -82,10 +79,11 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        if self.ns_cache_manager is not None:
-            self.ns_cache_manager.update_namespace(url, remove_old_namespace=False)
+        if self.definition_cache_manager is not None:
+            # TODO LeKono change to .ensure_namespace that gives it back
+            self.definition_cache_manager.update_namespace(url, remove_old_namespace=False)
             log.debug('Retrieved namespace {} from cache'.format(name))
-            self.namespace_dict[name] = self.ns_cache_manager.cache[url]
+            self.namespace_dict[name] = self.definition_cache_manager.cache[url]
             return tokens
 
         log.debug('Downloading namespace {} from {}'.format(name, url))

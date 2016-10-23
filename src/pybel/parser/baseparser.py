@@ -1,28 +1,28 @@
+import itertools as itt
 import logging
 
 from pyparsing import Suppress, ZeroOrMore, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
-    delimitedList, replaceWith, Group
+    delimitedList, replaceWith, Group, And
 
 log = logging.getLogger(__name__)
 
 W = Suppress(ZeroOrMore(White()))
-WCW = W + Suppress(',') + W
+C = Suppress(',')
+WCW = W + C + W
 LP = Suppress('(') + W
 RP = W + Suppress(')')
+LPF, RPF = map(Suppress, '()')
 
 word = Word(alphanums)
 quote = dblQuotedString().setParseAction(removeQuotes)
-delimitedSet = Suppress('{') + delimitedList(quote) + Suppress('}')
+delimitedSet = And([Suppress('{'), delimitedList(quote), Suppress('}')])
 
 
 def nest(*content):
     """Defines a delimited list by enumerating each element of the list"""
     if len(content) == 0:
         raise ValueError('no arguments supplied')
-    x = content[0]
-    for y in content[1:]:
-        x = x + WCW + y
-    return LP + x + RP
+    return And([LPF, content[0]] + list(itt.chain.from_iterable(zip(itt.repeat(C), content[1:]))) + [RPF])
 
 
 def one_of_tags(tags, canonical_tag, identifier):
@@ -30,7 +30,7 @@ def one_of_tags(tags, canonical_tag, identifier):
 
 
 def triple(subject, relation, obj):
-    return Group(subject)('subject') + W + relation('relation') + W + Group(obj)('object')
+    return And([Group(subject)('subject'), relation('relation'), Group(obj)('object')])
 
 
 class BaseParser:

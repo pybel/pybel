@@ -22,7 +22,7 @@ class TestCacheIntegration(unittest.TestCase):
         c = NamespaceCache(conn=c_path, setup_default_cache=False)
 
         with open(path) as f:
-            g = pybel.BELGraph(f, ns_cache_path=c)
+            g = pybel.BELGraph(f, definition_cache_manager=c)
 
         expected_document_metadata = {
             'Name': "PyBEL Test Document",
