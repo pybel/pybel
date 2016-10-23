@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from pybel.manager import NamespaceCache
+from pybel.manager import DefinitionCacheManager
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
@@ -26,7 +26,7 @@ class TestSplitLines(unittest.TestCase):
 
 class TestParseMetadataCached(unittest.TestCase):
     def setUp(self):
-        dcm = NamespaceCache()
+        dcm = DefinitionCacheManager()
         dcm.setup_database()
         self.parser = MetadataParser(definition_cache_manager=dcm)
 

@@ -3,7 +3,7 @@ import unittest
 from datetime import datetime
 
 from pybel.manager.defaults import default_namespaces as expected_keys
-from pybel.manager.namespace_cache import NamespaceCache
+from pybel.manager.namespace_cache import DefinitionCacheManager
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -43,7 +43,7 @@ class TestNsCache(unittest.TestCase):
             'contact': 'info@openbel.org'
         }
 
-        test_db = NamespaceCache(self.test_db, setup_default_cache=True)
+        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=True)
         test_db_keys = test_db.cache.keys()
         for db_key in expected_keys:
             self.assertTrue(db_key in test_db_keys)
@@ -62,7 +62,7 @@ class TestNsCache(unittest.TestCase):
 
     def test_allreadyIn(self):
 
-        test_db = NamespaceCache(self.test_db, setup_default_cache=False)
+        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
         test_db.setup_database()
 
         for namespace in self.test_namespace:
@@ -82,7 +82,7 @@ class TestNsCache(unittest.TestCase):
             'contact': 'charles.hoyt@scai.fraunhofer.de'
         }
 
-        test_db = NamespaceCache(self.test_db, setup_default_cache=False)
+        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
         test_db.setup_database(drop_existing=True)
         test_db.ensure_cache(self.test_namespace)
         print(test_db.cache)
@@ -125,7 +125,7 @@ class TestNsCache(unittest.TestCase):
             }
         }
 
-        test_db = NamespaceCache(self.test_db, setup_default_cache=False)
+        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
         test_db.setup_database(drop_existing=True)
         test_db.ensure_cache(self.test_namespace)
 
@@ -140,7 +140,7 @@ class TestNsCache(unittest.TestCase):
         self.assertEqual(expected_cache_dict2, test_db.cache)
         self.assertNotEqual(expected_cache_dict3, test_db.cache)
 
-        test_db2 = NamespaceCache(self.test_db, setup_default_cache=False)
+        test_db2 = DefinitionCacheManager(self.test_db, setup_default_cache=False)
         test_db2.setup_database(drop_existing=True)
         test_db2.ensure_cache(self.test_namespace)
 
@@ -153,7 +153,7 @@ class TestNsCache(unittest.TestCase):
         self.assertEqual(expected_cache_dict3, test_db2.cache)
 
     def test_update_namespaceCache(self):
-        test_db = NamespaceCache(self.test_db, setup_default_cache=False)
+        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
         test_db.update_namespace_cache()
         test_db_keys = test_db.cache.keys()
         for db_key in expected_keys:

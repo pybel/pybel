@@ -20,7 +20,7 @@ pybel_data = os.path.expanduser('~/.pybel/data')
 if not os.path.exists(pybel_data):
     os.makedirs(pybel_data)
 
-class NamespaceCache:
+class DefinitionCacheManager:
     def __init__(self, conn=None, setup_default_cache=False, log_sql=False):
         """
         :param: conn: custom database connection string'

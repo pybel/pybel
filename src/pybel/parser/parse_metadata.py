@@ -21,7 +21,7 @@ class MetadataParser(BaseParser):
         :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
         :type valid_annotations: dict
         :param definition_cache_manager: a namespace cache manager
-        :type definition_cache_manager: pybel.manager.NamespaceCache
+        :type definition_cache_manager: pybel.manager.DefinitionCacheManager
         """
         self.document_metadata = {}
 

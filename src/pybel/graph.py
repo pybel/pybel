@@ -14,7 +14,7 @@ from requests_file import FileAdapter
 from pybel.exceptions import PyBelWarning
 from pybel.utils import flatten
 from .exceptions import PyBelError
-from .manager.namespace_cache import NamespaceCache
+from .manager.namespace_cache import DefinitionCacheManager
 from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions
@@ -94,12 +94,12 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(lines)
 
-        if isinstance(definition_cache_manager, NamespaceCache):
+        if isinstance(definition_cache_manager, DefinitionCacheManager):
             self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
         elif isinstance(definition_cache_manager, str):
-            self.metadata_parser = MetadataParser(definition_cache_manager=NamespaceCache(conn=definition_cache_manager))
+            self.metadata_parser = MetadataParser(definition_cache_manager=DefinitionCacheManager(conn=definition_cache_manager))
         elif definition_cache_manager:
-            self.metadata_parser = MetadataParser(definition_cache_manager=NamespaceCache())
+            self.metadata_parser = MetadataParser(definition_cache_manager=DefinitionCacheManager())
         else:
             self.metadata_parser = MetadataParser()
 
