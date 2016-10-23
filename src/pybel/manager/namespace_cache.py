@@ -14,6 +14,8 @@ from .. import utils
 
 log = logging.getLogger('pybel')
 
+DEFAULT_DEFINITION_CACHE_NAME = 'namespace_cache.db'
+
 pybel_data = os.path.expanduser('~/.pybel/data')
 if not os.path.exists(pybel_data):
     os.makedirs(pybel_data)
@@ -21,14 +23,14 @@ if not os.path.exists(pybel_data):
 class NamespaceCache:
     def __init__(self, conn=None, setup_default_cache=False, log_sql=False):
         """
-        :param: conn: Database connection string. Defaults to 'sqlite:///namespaceCache.db'
+        :param: conn: custom database connection string'
         :type: str
         :param: setup_cache: Weather or not the namespace cache should be setted up on initiation.
         :type: bool
         :param: sql_echo: Weather or not echo the running sql code.
         :type: bool
         """
-        conn = conn if conn is not None else 'sqlite:///' + os.path.join(pybel_data, 'namespace_cache.db')
+        conn = conn if conn is not None else 'sqlite:///' + os.path.join(pybel_data, DEFAULT_DEFINITION_CACHE_NAME)
         log.info('Loading namespace cache from {}'.format(conn))
         start_time = time.time()
         self.eng = create_engine(conn, echo=log_sql)
@@ -172,6 +174,7 @@ class NamespaceCache:
         if self.sesh.query(exists().where(database_models.Namespace.url == namespace_url)).scalar():
             return
 
+        log.info('Downloading and inserting to cache {}'.format(namespace_url))
         namespace_key, creationDateTime, namespace_old = self.__insert_namespace(namespace_url)
 
         if namespace_old and remove_old_namespace and namespace_old.createdDateTime < creationDateTime:
