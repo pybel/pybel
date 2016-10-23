@@ -22,7 +22,6 @@ class MetadataParser(BaseParser):
         :type valid_annotations: dict
         :param definition_cache_manager: a namespace cache manager
         :type definition_cache_manager: pybel.manager.NamespaceCache
-        :return:
         """
         self.document_metadata = {}
 
@@ -80,7 +79,9 @@ class MetadataParser(BaseParser):
         url = tokens['url']
 
         if self.definition_cache_manager is not None:
-            # TODO LeKono change to .ensure_namespace that gives it back
+            # TODO LeKono change to .ensure_namespace that gives it back as return value like this:
+            # self.namespace_dict[name]=self.definition_cache_manager.ensure_namespace(url, remove_old_namespace=False)
+            # even better, hack up __getitem__ so: self.namespace_dict[name] = self.definition_cache_manager[url]
             self.definition_cache_manager.update_namespace(url, remove_old_namespace=False)
             log.debug('Retrieved namespace {} from cache'.format(name))
             self.namespace_dict[name] = self.definition_cache_manager.cache[url]
