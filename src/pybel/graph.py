@@ -98,10 +98,8 @@ class BELGraph(nx.MultiDiGraph):
             self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
         elif isinstance(definition_cache_manager, str):
             self.metadata_parser = MetadataParser(definition_cache_manager=DefinitionCacheManager(conn=definition_cache_manager))
-        elif definition_cache_manager:
-            self.metadata_parser = MetadataParser(definition_cache_manager=DefinitionCacheManager())
         else:
-            self.metadata_parser = MetadataParser()
+            self.metadata_parser = MetadataParser(definition_cache_manager=DefinitionCacheManager())
 
         self.parse_document(docs)
 
