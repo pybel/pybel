@@ -18,7 +18,7 @@ def download_url(url):
 
     value_line = 1 + max(i for i, line in enumerate(lines) if '[Values]' == line.strip())
 
-    metadata_config = ConfigParser()
+    metadata_config = ConfigParser(strict=False)
     metadata_config.optionxform = lambda option: option
     metadata_config.read_file(lines[:value_line])
 
