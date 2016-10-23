@@ -4,39 +4,11 @@ Getting Started
 Installation
 ------------
 
-1. Get the code. Either clone/fork/branch from GitHub using :code:`git` or unzip your archive.
+Get the code from PyPI:
 
 .. code-block:: sh
 
-    git clone https://github.com/cthoyt/pybel.git
-
-
-2. :code:`cd` into your directory
-
-.. code-block:: sh
-
-    cd pybel
-
-
-3. Install with :code:`pip`. If you want to make changes, add :code:`-e` before the dot
-
-.. code-block:: sh
-
-   python -m pip install -U .
-
-This is a good chance to upgrade your pip and setuptools as well with
-
-.. code-block:: sh
-
-    python -m pip install -U setuptools pip wheel
-
-
-4. If you're a developer and don't mind googling to figure out problems, check that all tests are passing:
-
-.. code-block:: sh
-
-   tox
-
+    pip install pybel
 
 Basic Usage
 -----------
@@ -62,7 +34,7 @@ Example Workflow
 .. code-block:: sh
 
     #!/usr/bin/env bash
-    python3 -m pybel convert --path ~/Downloads/PD_Aetionomy.bel --graphml ~/Downloads/PD.graphml --pickle ~/Downloads/PD.gpickle --log-file ~/Downloads/PD_log.txt
+    pybel convert --path ~/ownCloud/BEL/PD_Aetionomy.bel --graphml ~/Downloads/PD.graphml --pickle ~/Downloads/PD.gpickle --log-file ~/Downloads/PD_log.txt
 
     cat ~/Downloads/PD_log.txt | grep ERROR > ~/Downloads/PD_log_errors.txt
     cat ~/Downloads/PD_log.txt | grep PyBEL1 > ~/Downloads/PD_log_caught.txt
