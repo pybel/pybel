@@ -8,11 +8,11 @@ import networkx as nx
 import py2neo
 import requests
 from networkx.readwrite import json_graph
-from pybel.exceptions import PyBelWarning
-from pybel.utils import flatten
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
+from pybel.exceptions import PyBelWarning
+from pybel.utils import flatten
 from .exceptions import PyBelError
 from .manager.namespace_cache import NamespaceCache
 from .parser.parse_bel import BelParser
@@ -100,7 +100,6 @@ class BELGraph(nx.MultiDiGraph):
         else:
             self.metadata_parser = MetadataParser()
 
-
         self.parse_document(docs)
 
         self.parse_definitions(defs)
@@ -149,6 +148,12 @@ class BELGraph(nx.MultiDiGraph):
 
     def parse_statements(self, statements):
         t = time.time()
+
+        self.bel_parser.language.streamline()
+        log.info('Streamlined BEL parser in {:.02f}s'.format(time.time() - t))
+
+        t = time.time()
+
         for line_number, line in statements:
             try:
                 self.bel_parser.parseString(line)
