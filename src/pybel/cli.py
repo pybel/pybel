@@ -132,8 +132,8 @@ def to_neo(path, url, database, neo, context, verbose):
 
 @main.command()
 @click.option('--path', help='Destination for namespace cache. Defaults to ~/.pybel/data/namespace_cache.db')
-def setup_nscache(conn):
-    NamespaceCache(conn=conn, setup_default_cache=True)
+def setup_nscache(path):
+    NamespaceCache(conn=path, setup_default_cache=True)
 
 
 if __name__ == '__main__':
