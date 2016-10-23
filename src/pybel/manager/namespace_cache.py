@@ -20,6 +20,8 @@ pybel_data = os.path.expanduser('~/.pybel/data')
 if not os.path.exists(pybel_data):
     os.makedirs(pybel_data)
 
+DEFAULT_CACHE_LOCATION = os.path.join(pybel_data, DEFAULT_DEFINITION_CACHE_NAME)
+
 class DefinitionCacheManager:
     def __init__(self, conn=None, setup_default_cache=False, log_sql=False):
         """
@@ -30,7 +32,7 @@ class DefinitionCacheManager:
         :param: sql_echo: Weather or not echo the running sql code.
         :type: bool
         """
-        conn = conn if conn is not None else 'sqlite:///' + os.path.join(pybel_data, DEFAULT_DEFINITION_CACHE_NAME)
+        conn = conn if conn is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
         log.info('Loading namespace cache from {}'.format(conn))
         start_time = time.time()
         self.eng = create_engine(conn, echo=log_sql)
@@ -75,8 +77,7 @@ class DefinitionCacheManager:
         if namespace_check:
             namespace_old = self.sesh.query(database_models.Namespace).filter_by(
                 keyword=namespace_check['keyword'],
-                version=namespace_check[
-                    'version']).first()
+                version=namespace_check['version']).first()
 
             if not namespace_old.createdDateTime < creationDateTime:
                 return namespace_key, namespace_old.createdDateTime, None

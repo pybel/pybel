@@ -20,7 +20,7 @@ import click
 import py2neo
 
 from . import graph
-from .manager.namespace_cache import DefinitionCacheManager
+from .manager.namespace_cache import DefinitionCacheManager, DEFAULT_CACHE_LOCATION
 
 log = logging.getLogger('pybel')
 
@@ -130,10 +130,20 @@ def to_neo(path, url, database, neo, context, verbose):
     log.info('Upload to neo4j done in {:.02f} seconds'.format(time.time() - t))
 
 
-@main.command()
+@main.group(help="PyBEL Data Manager Utilities")
+def manage():
+    pass
+
+
+@manage.command()
 @click.option('--path', help='Destination for namespace cache. Defaults to ~/.pybel/data/namespace_cache.db')
-def setup_nscache(path):
+def setup_definition_cache(path):
     DefinitionCacheManager(conn=path, setup_default_cache=True)
+
+
+@manage.command()
+def remove_definition_cache():
+    os.remove(DEFAULT_CACHE_LOCATION)
 
 
 if __name__ == '__main__':
