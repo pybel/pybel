@@ -46,7 +46,7 @@ class TestNsCache(unittest.TestCase):
         test_db = DefinitionCacheManager(self.test_db, setup_default_cache=True)
         test_db_keys = test_db.cache.keys()
         for db_key in expected_keys:
-            self.assertTrue(db_key in test_db_keys)
+            self.assertIn(db_key, test_db_keys)
 
         app_in_hgnc = 'APP' in test_db.cache[
             'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns']
@@ -55,10 +55,44 @@ class TestNsCache(unittest.TestCase):
         test_db.ensure_cache()
         test_db_keys = test_db.cache.keys()
         for db_key in expected_keys:
-            self.assertTrue(db_key in test_db_keys)
+            self.assertIn(db_key, test_db_keys)
 
         fake_key = 'http://resource.belframework.org/belframework/20150611/namespace/chebi-ids.belns341'
-        self.assertFalse(fake_key in test_db_keys)
+        self.assertNotIn(fake_key, test_db_keys)
+
+    def test_setupWith_ensureCache(self):
+        # 153 - 155
+        test_db = DefinitionCacheManager(self.test_db)
+        test_db.ensure_cache([test_ns1])
+
+        self.assertIn(test_ns1, test_db.cache.keys())
+
+        # 141 - 153
+        test_db2 = DefinitionCacheManager(self.test_db)
+        test_db2.setup_database(drop_existing=True)
+        test_db2.ensure_cache([test_ns2])
+
+        self.assertIn(test_ns2, test_db2.cache.keys())
+
+    def test_setupWith_updateCache(self):
+        # 172 - 173
+        test_db = DefinitionCacheManager(self.test_db)
+        test_db.update_namespace_cache([test_ns1])
+
+        self.assertIn(test_ns1, test_db.cache.keys())
+
+        # 141 - 153
+        test_db.cache = {}
+        test_db.ensure_cache()
+
+        self.assertIn(test_ns1, test_db.cache.keys())
+
+        # 167 - 172
+        test_db2 = DefinitionCacheManager(self.test_db)
+        test_db2.setup_database()
+        test_db2.ensure_cache([test_ns1])
+
+        self.assertIn(test_ns1, test_db2.cache.keys())
 
     def test_allreadyIn(self):
 
@@ -135,7 +169,7 @@ class TestNsCache(unittest.TestCase):
         self.assertNotEqual(expected_cache_dict2, test_db.cache)
         self.assertNotEqual(expected_cache_dict3, test_db.cache)
 
-        test_db.update_namespace(test_ns2, remove_old_namespace=False)
+        test_db.update_namespace(test_ns2, overwrite_old_namespace=False)
         self.assertNotEqual(self.expected_test_cache, test_db.cache)
         self.assertEqual(expected_cache_dict2, test_db.cache)
         self.assertNotEqual(expected_cache_dict3, test_db.cache)
@@ -147,10 +181,16 @@ class TestNsCache(unittest.TestCase):
         check_result_before2 = test_db2.check_namespace("TESTNS1")
         self.assertIsNotNone(check_result_before2)
 
-        test_db2.update_namespace(test_ns2, remove_old_namespace=True)
+        test_db2.update_namespace(test_ns2, overwrite_old_namespace=True)
         self.assertNotEqual(self.expected_test_cache, test_db2.cache)
         self.assertNotEqual(expected_cache_dict2, test_db2.cache)
         self.assertEqual(expected_cache_dict3, test_db2.cache)
+
+        # 187 - 189
+        test_db2.cache = {}
+        test_db2.ensure_cache([test_ns2])
+
+        self.assertIn(test_ns2, test_db2.cache.keys())
 
     def test_update_namespaceCache(self):
         test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
@@ -162,15 +202,24 @@ class TestNsCache(unittest.TestCase):
         ns_removed = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
         ns_to_add = 'http://resource.belframework.org/belframework/20131211/namespace/hgnc-human-genes.belns'
 
+        # 245 - exit
         test_db.remove_namespace(ns_removed, '2015-06-11T19:51:19')
-
         self.assertNotIn(ns_removed, test_db.cache.keys())
 
         test_db.update_namespace(ns_to_add)
         self.assertIn(ns_to_add, test_db.cache.keys())
 
         ns_to_update = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
-        test_db.update_namespace(ns_to_update)
+        test_db.update_namespace(ns_to_update, overwrite_old_namespace=True)
 
         self.assertIn(ns_to_update, test_db.cache.keys())
         self.assertNotIn(ns_to_add, test_db.cache.keys())
+
+        outdated_namespace = 'http://resource.belframework.org/belframework/1.0/namespace/entrez-gene-ids-hmr.belns'
+        test_db.update_namespace(outdated_namespace, overwrite_old_namespace=False)
+        self.assertIn(outdated_namespace, test_db.cache.keys())
+
+        test_db.update_namespace_cache([test_ns1, test_ns2])
+
+        self.assertNotIn(test_ns1, test_db.cache.keys())
+        self.assertIn(test_ns2, test_db.cache.keys())

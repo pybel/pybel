@@ -22,6 +22,7 @@ if not os.path.exists(pybel_data):
 
 DEFAULT_CACHE_LOCATION = os.path.join(pybel_data, DEFAULT_DEFINITION_CACHE_NAME)
 
+
 class DefinitionCacheManager:
     def __init__(self, conn=None, setup_default_cache=False, log_sql=False):
         """
@@ -45,10 +46,15 @@ class DefinitionCacheManager:
 
         log.info("Initiation of namespace cache took {runtime:3.2f}s".format(runtime=(time.time() - start_time)))
 
-    def __insert_namespace(self, namespace_url):
+    def __insert_namespace(self, namespace_url, check_date=True):
         """Inserts namespace and names into namespace cache db.
 
         :param namespace_url: URL of the namespace definition file (.belns)
+        :type namespace_url: str
+        :param inset_outdated_namespaces: Indicates if outdated namespaces should be added to the cache.
+        :type inset_outdated_namespaces: bool
+        :param check_date: Indicates if creation dates of namespaces should be checked (outdated namespaces will not be inserted!)
+        :type check_date: bool
         """
         log.info('Downloading and inserting to cache {}'.format(namespace_url))
 
@@ -77,9 +83,9 @@ class DefinitionCacheManager:
         if namespace_check:
             namespace_old = self.sesh.query(database_models.Namespace).filter_by(
                 keyword=namespace_check['keyword'],
-                version=namespace_check['version']).first()
+                createdDateTime=namespace_check['createdDateTime']).first()
 
-            if not namespace_old.createdDateTime < creationDateTime:
+            if check_date and not namespace_old.createdDateTime < creationDateTime:
                 return namespace_key, namespace_old.createdDateTime, None
 
             else:
@@ -100,8 +106,7 @@ class DefinitionCacheManager:
         self.eng.execute(database_models.NamespaceName.__table__.insert(), name_insert_values)
 
     def __cached_namespaces(self):
-        """
-        Returns the cached namespaces as dictionary.
+        """Creates dictionary for cache.
         """
         namespace_dataframe = pd.read_sql_table(NAMESPACE_TABLE_NAME, self.eng)
         name_dataframe = pd.read_sql_table(NAMESPACENAME_TABLE_NAME, self.eng)
@@ -128,8 +133,8 @@ class DefinitionCacheManager:
     def ensure_cache(self, namespace_urls=None):
         """Checks if a namespace cache already exists in given database and loads the namespace_cache dict.
 
-        :param namespace_urls: Dictionary configuration see: defaults.py
-        :type namespace_definiton: dict
+        :param namespace_urls: List of namespace files by url (.belns files)
+        :type namespace_definiton: list
         """
         start_time = time.time()
         namespace_urls = namespace_urls if namespace_urls else default_namespaces
@@ -140,7 +145,7 @@ class DefinitionCacheManager:
                 log.info("Namespace cache already exists  {:.02}s".format(time.time() - start_time))
             else:
                 for url in namespace_urls:
-                    self.__insert_namespace(url)
+                    self.__insert_namespace(url, check_date=False)
                 log.info("Database allready exists and namespace cache gets created ({runtime:3.2f}sec.)".format(
                     runtime=(time.time() - start_time)))
 
@@ -153,7 +158,7 @@ class DefinitionCacheManager:
     def update_namespace_cache(self, namespace_urls=None, overwrite_old_namespaces=True):
         """Updates the namespace cache DB with given namespace definition dictionary (see defaults.py)
 
-        :param namespace_urls: List of namespace files by url
+        :param namespace_urls: List of namespace files by url (.belns files)
         :type namespace_urls: list
         :param overwrite_old_namespaces: Indicates if outdated namespaces should be overwritten
         :type overwrite_old_namespaces: bool
@@ -167,20 +172,26 @@ class DefinitionCacheManager:
             self.setup_database()
             self.update_namespace_cache(namespace_urls, overwrite_old_namespaces)
 
-    def update_namespace(self, namespace_url, remove_old_namespace=True):
-        """
-        Checks if a namespace that is given by url is already in namespace cache and if so, if it is up to date.
+    def update_namespace(self, namespace_url, overwrite_old_namespace=True):
+        """Checks if a namespace that is given by url is already in namespace cache and if so, if it is up to date.
         Works for urls like: http://resource.belframework.org/belframework/20150611/namespace/
+        
+        :param namespace_url: URL to the namespace definition file (.belns)
+        :type namespace_url: str
+        :param overwrite_old_namespace: Indicates if old namespaces should be removed from cache if a new version is inersted.
+        :type overwrite_old_namespace: bool
         """
         start_time = time.time()
 
         if self.sesh.query(exists().where(database_models.Namespace.url == namespace_url)).scalar():
+            if not self.cache:
+                self.ensure_cache()
             return
 
+        namespace_key, creationDateTime, namespace_old = self.__insert_namespace(namespace_url,
+                                                                                 check_date=overwrite_old_namespace)
 
-        namespace_key, creationDateTime, namespace_old = self.__insert_namespace(namespace_url)
-
-        if namespace_old and remove_old_namespace and namespace_old.createdDateTime < creationDateTime:
+        if namespace_old and overwrite_old_namespace and namespace_old.createdDateTime < creationDateTime:
             log.warning(
                 "Old namespace '{ns_key}' [{ns_old_url}] will be removed from cache database due to updated version [{ns_new_url}]".format(
                     ns_key=namespace_old.keyword,
@@ -201,7 +212,7 @@ class DefinitionCacheManager:
 
         :param namesapce_key: Keyword for a namespace. i.e.: 'HGNC'
         :type namespace_key: str
-        :return: None (doese not exist) or number of namesapces.
+        :return: None (does not exist) or number of namesapces.
         :rtype: None or dict
         """
         namespace_old = self.sesh.query(database_models.Namespace).filter_by(keyword=namespace_key).first()
@@ -218,7 +229,7 @@ class DefinitionCacheManager:
             }
 
     def remove_namespace(self, namespace_url, created_date_time):
-        """Removes namespace from cache by url.
+        """Removes namespace from cache by url and createdDateTime.
 
         :param namespace_url: URL to the namespace definition file (.belns)
         :type namespace_url: str
