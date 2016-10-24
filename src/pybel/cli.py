@@ -136,7 +136,7 @@ def manage():
 
 
 @manage.command()
-@click.option('--path', help='Destination for namespace cache. Defaults to ~/.pybel/data/namespace_cache.db')
+@click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/namespace_cache.db')
 def setup_definition_cache(path):
     DefinitionCacheManager(conn=path, setup_default_cache=True)
 

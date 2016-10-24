@@ -235,7 +235,10 @@
         <span class="n">url</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ns_cache_manager</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ns_cache_manager</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">remove_old_namespace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ns_cache_manager</span><span
+            class="o">.</span><span class="n">update_definition</span><span class="p">(</span><span class="n">url</span><span
+            class="p">,</span> <span class="n">remove_old_namespace</span><span class="o">=</span><span
+            class="kc">False</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Retrieved namespace </span><span class="si">{}</span><span class="s1"> from cache&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">namespace_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ns_cache_manager</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">url</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">tokens</span>

@@ -8,11 +8,11 @@ import networkx as nx
 import py2neo
 import requests
 from networkx.readwrite import json_graph
+from pybel.exceptions import PyBelWarning
+from pybel.utils import flatten
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
-from pybel.exceptions import PyBelWarning
-from pybel.utils import flatten
 from .exceptions import PyBelError
 from .manager.namespace_cache import DefinitionCacheManager
 from .parser.parse_bel import BelParser
@@ -84,7 +84,7 @@ class BELGraph(nx.MultiDiGraph):
         :type context: str
         :param lenient: if true, allow naked namespaces
         :type lenient: bool
-        :param definition_cache_manager: database connection string to namespace cache, pre-built namespace cache manager,
+        :param definition_cache_manager: database connection string to namespace namspace_cache, pre-built namespace namspace_cache manager,
                     or True to use the default
         :type definition_cache_manager: str or pybel.mangager.NamespaceCache or bool
         """
