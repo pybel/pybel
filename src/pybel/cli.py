@@ -36,13 +36,13 @@ def main():
 
 
 @main.command()
-@click.option('--path', help='BEL file file path')
-@click.option('--url', help='BEL file URL')
-@click.option('--database', help='BEL database')
-@click.option('--csv', help='Path for CSV output')
-@click.option('--graphml', help='Path for GraphML output. Use .graphml for Cytoscale')
-@click.option('--json', type=click.File('w'), help='Path for Node-Link JSON output')
-@click.option('--pickle', help='Path for NetworkX gpickle output')
+@click.option('--path', type=click.File('rb'), help='Input BEL file file path. Use - for stdin')
+@click.option('--url', help='Input BEL file URL')
+@click.option('--database', help='Input BEL database')
+@click.option('--csv', help='Output path for *.csv')
+@click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
+@click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
+@click.option('--pickle', help='Output path for NetworkX *.gpickle')
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
 @click.option('--log-file', help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
@@ -67,7 +67,7 @@ def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, 
         log.addHandler(fh)
 
     if path:
-        g = graph.from_path(path, lenient=lenient)
+        g = graph.BELGraph(path, lenient=lenient)
     elif url:
         g = graph.from_url(url, lenient=lenient)
     elif database:
@@ -95,7 +95,7 @@ def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, 
 
 
 @main.command()
-@click.option('--path', help='BEL file file path')
+@click.option('--path', type=click.File('rb'), help='BEL file file path. Use - for stdin')
 @click.option('--url', help='BEL file URL')
 @click.option('--database', help='BEL database')
 @click.option('--neo', help='URL of neo4j database')
@@ -117,7 +117,7 @@ def to_neo(path, url, database, neo, context, verbose):
     assert p2n.data('match (n) return count(n) as count')[0]['count'] is not None
 
     if path:
-        g = graph.from_path(path)
+        g = graph.BELGraph(path)
     elif url:
         g = graph.from_url(url)
     elif database:
