@@ -1,27 +1,21 @@
 import logging
-import os
 import unittest
 
 import pybel
 from pybel.manager import DefinitionCacheManager
 from pybel.parser import BelParser
-from tests.constants import TestTokenParserBase, PYBEL_TEST_ALL
+from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
-@unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
 class TestCacheIntegration(unittest.TestCase):
     def test_cached_winning(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel_3.bel')
-
         c_path = 'sqlite://'
 
         c = DefinitionCacheManager(conn=c_path, setup_default_cache=False)
 
-        with open(path) as f:
+        with open(test_bel_3) as f:
             g = pybel.BELGraph(f, definition_cache_manager=c)
 
         expected_document_metadata = {
@@ -37,11 +31,9 @@ class TestCacheIntegration(unittest.TestCase):
         self.assertEqual(expected_document_metadata, g.metadata_parser.document_metadata)
 
 
-@unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
 class TestImport(unittest.TestCase):
     def test_full(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
-        g = pybel.from_path(path)
+        g = pybel.from_path(test_bel_1)
 
         expected_document_metadata = {
             'Name': "PyBEL Test Document",
@@ -55,17 +47,16 @@ class TestImport(unittest.TestCase):
 
         self.assertEqual(expected_document_metadata, g.metadata_parser.document_metadata)
 
-    def test_from_url(self):
-        g = pybel.from_url('http://resource.belframework.org/belframework/20150611/knowledge/full_abstract1.bel')
+    def test_from_path(self):
+        g = pybel.from_path(test_bel_1)
         self.assertIsNotNone(g)
 
     def test_from_fileUrl(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
-        g = pybel.from_url('file://{}'.format(path))
+        g = pybel.from_url('file://{}'.format(test_bel_1))
         self.assertIsNotNone(g)
 
 
-@unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
+# @unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
 class TestFull(TestTokenParserBase):
     def setUp(self):
         namespaces = {
