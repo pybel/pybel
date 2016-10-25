@@ -14,7 +14,7 @@ from .. import utils
 
 log = logging.getLogger('pybel')
 
-DEFAULT_DEFINITION_CACHE_NAME = 'namespace_cache.db'  # was namespace_cache.db
+DEFAULT_DEFINITION_CACHE_NAME = 'namespace_cache.db'
 
 pybel_data = os.path.expanduser('~/.pybel/data')
 if not os.path.exists(pybel_data):
@@ -34,7 +34,7 @@ class DefinitionCacheManager:
         :type: bool
         """
         conn = conn if conn is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
-        log.info('Loading namespace namespace_cache from {}'.format(conn))
+        log.info('Loading definition cache from {}'.format(conn))
         start_time = time.time()
         self.eng = create_engine(conn, echo=log_sql)
         self.sesh = scoped_session(sessionmaker(bind=self.eng, autoflush=False, expire_on_commit=False))
@@ -45,8 +45,7 @@ class DefinitionCacheManager:
         if setup_default_cache:
             self.ensure_cache()
 
-        log.info(
-            "Initiation of namespace namespace_cache took {runtime:3.2f}s".format(runtime=(time.time() - start_time)))
+        log.info("Initiation of definition cachetook {runtime:3.2f}s".format(runtime=(time.time() - start_time)))
 
     def __insert_definition(self, definition_url, check_date=True):
         """Inserts namespace and names into namespace namespace_cache db.
@@ -56,7 +55,7 @@ class DefinitionCacheManager:
         :param check_date: Indicates if creation dates of namespaces should be checked (outdated namespaces will not be inserted!)
         :type check_date: bool
         """
-        log.info('Downloading and inserting to definition_cache {}'.format(definition_url))
+
         def_type = None
         defDict = {
             DEFINITION_NAMESPACE: 'Namespace',
@@ -66,6 +65,8 @@ class DefinitionCacheManager:
             def_type = DEFINITION_NAMESPACE
         elif definition_url.endswith('.belanno'):
             def_type = DEFINITION_ANNOTATION
+
+        log.info('Inserting {} {} to definitions cache '.format(defDict[def_type], definition_url))
 
         def_config = utils.download_url(definition_url)
 
@@ -156,7 +157,7 @@ class DefinitionCacheManager:
         start_time = time.time()
         if drop_existing:
             database_models.Base.metadata.drop_all(self.eng)
-            log.info("Database was dropped! ({runtime:3.2f}sec.)".format(runtime=(time.time() - start_time)))
+            log.info("Database was dropped ({runtime:3.2f}sec.)".format(runtime=(time.time() - start_time)))
         database_models.Base.metadata.create_all(self.eng, checkfirst=True)
 
     def ensure_cache(self, namespace_urls=None, annotation_urls=None):

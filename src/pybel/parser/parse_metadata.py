@@ -83,7 +83,7 @@ class MetadataParser(BaseParser):
             # self.namespace_dict[name]=self.definition_cache_manager.ensure_namespace(url, remove_old_namespace=False)
             # even better, hack up __getitem__ so: self.namespace_dict[name] = self.definition_cache_manager[url]
             self.definition_cache_manager.update_definition(url, overwrite_old_definition=False)
-            log.debug('Retrieved namespace {} from namespace_cache'.format(name))
+            log.debug('Retrieved namespace {} from definitions cache'.format(name))
             self.namespace_dict[name] = self.definition_cache_manager.namespace_cache[url]
             return tokens
 
@@ -110,6 +110,13 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+
+        if self.definition_cache_manager is not None:
+            self.definition_cache_manager.update_definition(url, overwrite_old_definition=False)
+            log.debug('Retrieved annotation {} from definitions cache'.format(name))
+            self.annotations_dict[name] = self.definition_cache_manager.annotation_cache[url]
+            return tokens
+
         log.debug('Downloading annotations {} from {}'.format(name, url))
         config = download_url(url)
 
