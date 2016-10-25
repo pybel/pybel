@@ -34,7 +34,7 @@ class DefinitionCacheManager:
         :type: bool
         """
         conn = conn if conn is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
-        log.info('Loading definition cache from {}'.format(conn))
+        log.info('Loading definition cache from %s', conn)
         start_time = time.time()
         self.eng = create_engine(conn, echo=log_sql)
         self.sesh = scoped_session(sessionmaker(bind=self.eng, autoflush=False, expire_on_commit=False))
@@ -45,7 +45,7 @@ class DefinitionCacheManager:
         if setup_default_cache:
             self.ensure_cache()
 
-        log.info("Initiation of definition cachetook {runtime:3.2f}s".format(runtime=(time.time() - start_time)))
+        log.info("Initiation of definition cache took %02f seconds", time.time() - start_time)
 
     def __insert_definition(self, definition_url, check_date=True):
         """Inserts namespace and names into namespace namespace_cache db.
@@ -66,7 +66,7 @@ class DefinitionCacheManager:
         elif definition_url.endswith('.belanno'):
             def_type = DEFINITION_ANNOTATION
 
-        log.info('Inserting {} {} to definitions cache '.format(defDict[def_type], definition_url))
+        log.info('Inserting %s %s to definitions cache ', defDict[def_type], definition_url)
 
         def_config = utils.download_url(definition_url)
 
@@ -157,7 +157,7 @@ class DefinitionCacheManager:
         start_time = time.time()
         if drop_existing:
             database_models.Base.metadata.drop_all(self.eng)
-            log.info("Database was dropped ({runtime:3.2f}sec.)".format(runtime=(time.time() - start_time)))
+            log.info("Database was dropped in %3.2fs", time.time() - start_time)
         database_models.Base.metadata.create_all(self.eng, checkfirst=True)
 
     def ensure_cache(self, namespace_urls=None, annotation_urls=None):
@@ -187,14 +187,10 @@ class DefinitionCacheManager:
                             self.__insert_definition(url, check_date=False)
 
             self.__cached_definitions()
-
-            log.info("Cache setup for namespaces and annotations done! ({runtime:3.2f}sec.)".format(
-                runtime=(time.time() - start_time)))
         else:
             self.setup_database()
             self.ensure_cache(namespace_urls, annotation_urls)
-            log.info("New database is setup and caches were created! ({runtime:3.2f}sec.)".format(
-                runtime=(time.time() - start_time)))
+            log.info("New database is setup and caches were created in %3.2fs", time.time() - start_time)
 
     def update_definition_cache(self, namespace_urls=None, annotation_urls=None, overwrite_old_definitions=True):
         """Updates the cache DB with given namespace and annotation list (see defaults.py)
@@ -237,19 +233,21 @@ class DefinitionCacheManager:
 
         if definition_old and overwrite_old_definition and definition_old.createdDateTime < creationDateTime:
             log.warning(
-                "Old definition '{def_key}' [{def_old_url}] will be removed from cache database due to updated version [{def_new_url}]".format(
-                    def_key=definition_old.keyword,
-                    def_old_url=definition_old.url,
-                    def_new_url=definition_url))
+                "Old definition %s [%s] will be removed from cache database due to updated version [%s]",
+                definition_old.keyword,
+                definition_old.url,
+                definition_url
+            )
             old_dateTime = definition_old.createdDateTime
             self.remove_definition(definition_old.url, definition_old.createdDateTime)
 
             log.info(
-                "'{definition_keyword}' was updated from v.{version_old} to v.{version_new} ({runtime:3.2f}sec.)".format(
-                    definition_keyword=definition_key,
-                    version_old=old_dateTime,
-                    version_new=creationDateTime,
-                    runtime=time.time() - start_time))
+                "%s was updated from v.%s to v.%s in %3.2fs",
+                definition_key,
+                old_dateTime,
+                creationDateTime,
+                time.time() - start_time
+            )
 
     def check_definition(self, definition_key, definition_type):
         """Check if namespace exists and what version is in the namespace_cache.

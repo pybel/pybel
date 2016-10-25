@@ -7,23 +7,17 @@ import networkx as nx
 import py2neo
 from click.testing import CliRunner
 
+import pybel
 from pybel import cli
 from pybel.graph import PYBEL_CONTEXT_TAG
-from tests.constants import PYBEL_TEST_ALL
+from tests.constants import test_bel_1
 
 log = logging.getLogger(__name__)
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-@unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
 class TestCli(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
-        self.test_path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
-
-    # def test_neo4j_fail(self):
-    #    with self.assertRaises(Exception):
-    #        self.runner.invoke(cli.main, ['to_neo', '--path', self.test_path, '--neo', 'GARBAGE'])
 
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     def test_neo4j(self):
@@ -32,7 +26,7 @@ class TestCli(unittest.TestCase):
         neo = py2neo.Graph(os.environ['NEO_PATH'])
         neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
 
-        self.runner.invoke(cli.main, ['to_neo', '--path', self.test_path, '--neo', os.environ['NEO_PATH'], '--context',
+        self.runner.invoke(cli.main, ['to_neo', '--path', test_bel_1, '--neo', os.environ['NEO_PATH'], '--context',
                                       test_context])
 
         q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
@@ -45,7 +39,7 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_edge_file = os.path.abspath(test_edge_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', self.test_path, '--csv', abs_test_edge_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--csv', abs_test_edge_file])
             log.info('File paths: {}'.format(abs_test_edge_file))
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_edge_file))
@@ -59,11 +53,11 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', self.test_path, '--pickle', abs_test_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--pickle', abs_test_file])
             log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
-            g = nx.read_gpickle(abs_test_file)
+            g = pybel.from_pickle(abs_test_file)
             self.assertTrue(isinstance(g, nx.MultiDiGraph))
 
     def test_graphml(self):
@@ -71,7 +65,7 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', self.test_path, '--graphml', abs_test_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--graphml', abs_test_file])
             log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
@@ -83,7 +77,7 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', self.test_path, '--json', abs_test_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--json', abs_test_file])
             log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_file))

@@ -61,7 +61,7 @@ class PsubParser(BaseParser):
         self.language.setParseAction(self.handle_psub)
 
     def handle_psub(self, s, l, tokens):
-        log.log(5, 'PyBEL006 sub() is deprecated: {}'.format(s))
+        log.log(5, 'PyBEL006 sub() is deprecated: %s', s)
         return tokens
 
     def get_language(self):
@@ -89,14 +89,13 @@ class GsubParser(BaseParser):
     """
 
     def __init__(self):
-        gsub_tag = oneOf(['sub', 'substitution'])
+        gsub_tag = oneOf(['sub', 'substitution']).setParseAction(replaceWith('Variant'))
         self.language = gsub_tag + nest(dna_nucleotide('reference'), pyparsing_common.integer()('position'),
                                         dna_nucleotide('variant'))
         self.language.setParseAction(self.handle_gsub)
 
     def handle_gsub(self, s, l, tokens):
-        log.log(5, 'PyBEL009 sub() is deprecated: {}'.format(s))
-        tokens[0] = 'Variant'
+        log.log(5, 'PyBEL009 sub() is deprecated: %s', s)
         return tokens
 
     def get_language(self):
@@ -135,13 +134,10 @@ class FusionParser(BaseParser):
 
         self.language = fusion_tags + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
                                            Group(identifier)('partner_3p'), range_coordinate('range_3p'))
-        self.language.setParseAction(self.handle_fusion)
 
     def get_language(self):
         return self.language
 
-    def handle_fusion(self, s, l, tokens):
-        return tokens
 
 
 class LocationParser(BaseParser):

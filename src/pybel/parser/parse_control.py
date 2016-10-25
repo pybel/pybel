@@ -2,7 +2,7 @@ import logging
 
 from pyparsing import Suppress, pyparsing_common
 
-from .baseparser import BaseParser, W, quote, delimitedSet
+from .baseparser import BaseParser, W, quote, delimitedSet, And
 from .parse_exceptions import *
 
 log = logging.getLogger('pybel')
@@ -28,16 +28,16 @@ class ControlParser(BaseParser):
         set_tag = Suppress('SET') + W
         unset_tag = Suppress('UNSET') + W
 
-        self.set_statement_group = set_tag + Suppress('STATEMENT_GROUP') + W + Suppress('=') + W + quote('group')
+        self.set_statement_group = And([set_tag, Suppress('STATEMENT_GROUP'), Suppress('='), quote('group')])
         self.set_statement_group.setParseAction(self.handle_statement_group)
 
-        self.set_citation = set_tag + Suppress('Citation') + W + Suppress('=') + W + delimitedSet('values')
+        self.set_citation = And([set_tag, Suppress('Citation'), Suppress('='), delimitedSet('values')])
         self.set_citation.setParseAction(self.handle_citation)
 
-        self.set_evidence = set_tag + Suppress('Evidence') + W + Suppress('=') + W + quote('value')
+        self.set_evidence = And([set_tag, Suppress('Evidence'), Suppress('='), quote('value')])
         self.set_evidence.setParseAction(self.handle_evidence)
 
-        set_command_prefix = set_tag + annotation_key + W + Suppress('=') + W
+        set_command_prefix = And([set_tag, annotation_key, Suppress('=')])
         self.set_command = set_command_prefix + quote('value')
         self.set_command.setParseAction(self.handle_set_command)
 
@@ -56,6 +56,12 @@ class ControlParser(BaseParser):
         self.unset_statement_group = unset_tag + Suppress('STATEMENT_GROUP')
         self.unset_statement_group.setParseAction(self.handle_unset_statement_group)
 
+        self.unset_list = unset_tag + delimitedSet('values')
+        self.unset_list.setParseAction(self.handle_unset_list)
+
+        self.unset_all = unset_tag + Suppress("ALL")
+        self.unset_all.setParseAction(self.handle_unset_all)
+
         self.commands = (self.set_statement_group | self.set_citation | self.set_evidence |
                          self.set_command | self.set_command_list | self.unset_citation |
                          self.unset_evidence | self.unset_statement_group | self.unset_command)
@@ -68,14 +74,14 @@ class ControlParser(BaseParser):
 
     def handle_unset_evidence(self, s, l, tokens):
         if 'Evidence' not in self.annotations:
-            log.debug("PyBEL024 Can't unset missing key: {}".format('Evidence'))
+            log.debug("PyBEL024 Can't unset missing key: %s", 'Evidence')
         else:
             del self.annotations['Evidence']
         return tokens
 
     def handle_unset_citation(self, s, l, tokens):
         if 0 == len(self.citation):
-            log.debug("PyBEL024 Can't unset missing key: {}".format('Citation'))
+            log.debug("PyBEL024 Can't unset missing key: %s", 'Citation')
         else:
             self.citation.clear()
         return tokens
@@ -134,6 +140,22 @@ class ControlParser(BaseParser):
             raise MissingAnnotationKeyException("Can't unset missing key: {}".format(key))
 
         del self.annotations[key]
+        return tokens
+
+    def handle_unset_all(self, s, l, tokens):
+        self.clear()
+        return tokens
+
+    def handle_unset_list(self, s, l, tokens):
+        for key in tokens['values']:
+            if key == 'Citation':
+                self.citation.clear()
+            elif key == 'STATEMENT_GROUP':
+                self.statement_group = None
+            else:
+                if key not in self.annotations:
+                    raise MissingAnnotationKeyException("Can't unset missing key: {}".format(key))
+                del self.citation[key]
         return tokens
 
     def get_language(self):
