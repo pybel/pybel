@@ -32,10 +32,7 @@ class TestParseMetadataCached(unittest.TestCase):
 
     def test_control_1(self):
         s = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
-        print("hello:", s)
         self.parser.parseString(s)
-
-        print(self.parser.namespace_dict.keys())
 
         self.assertIn('MGI', self.parser.namespace_dict)
         # TODO LeKono implement namespace_metadata caching loading as well

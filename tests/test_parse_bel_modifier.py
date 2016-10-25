@@ -84,11 +84,6 @@ class TestActivity(TestTokenParserBase):
         statement = 'kin(p(HGNC:AKT1))'
         result = self.parser.activity.parseString(statement)
 
-        # expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']], ['MolecularActivity', 'KinaseActivity']]
-        # self.assertEqual(expected_result, result.asList())
-
-        print(result.asDict())
-
         expected_dict = {
             'modifier': 'Activity',
             'effect': {
