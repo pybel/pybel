@@ -192,6 +192,49 @@ class TestRelationshipsRandom(TestTokenParserBase):
         }
         self.assertHasEdge(sub, obj, **expected_attrs)
 
+    def test_directlyDecreases_annotationExpansion(self):
+        """
+        3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
+        Tests simple triple"""
+        statement = 'g(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
+
+        self.parser.control_parser.annotations.update({
+            'ListAnnotation': set('ab'),
+            'ScalarAnnotation': 'c'
+        })
+
+        result = self.parser.relation.parseString(statement)
+
+        expected_dict = {
+            'subject': {
+                'function': 'Gene',
+                'identifier': dict(namespace='HGNC', name='CAT'),
+                'location': dict(namespace='GOCC', name='intracellular')
+            },
+            'relation': 'directlyDecreases',
+            'object': {
+                'function': 'Abundance',
+                'identifier': dict(namespace='CHEBI', name='hydrogen peroxide')
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        sub = 'Gene', 'HGNC', 'CAT'
+        self.assertHasNode(sub)
+
+        obj = 'Abundance', 'CHEBI', 'hydrogen peroxide'
+        self.assertHasNode(obj)
+
+        expected_attrs = {
+            'subject': {
+                'location': dict(namespace='GOCC', name='intracellular')
+            },
+            'relation': 'directlyDecreases',
+        }
+        self.assertEqual(2, self.parser.graph.number_of_edges())
+        self.assertHasEdge(sub, obj, ListAnnotation='a', ScalarAnnotation='c', **expected_attrs)
+        self.assertHasEdge(sub, obj, ListAnnotation='b', ScalarAnnotation='c', **expected_attrs)
+
     def test_rateLimitingStepOf_subjectActivity(self):
         """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof"""
         statement = 'act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GOBP:"cholesterol biosynthetic process")'

@@ -1,6 +1,9 @@
 PyBEL
 =====
 
+:code:`PyBEL` is a Python software package that parses BEL statements, validates their semantics, applies common graph
+algorithms, and allows for data interchange between common formats like Neo4J, JSON, CSV, Excel, and SQL.
+
 =========== =============== ================== ======================= ====================
 Stable      |stable_build|  |stable_coverage|  |stable_documentation|  |stable_pyversions|
 Development |develop_build| |develop_coverage| |develop_documentation| |develop_pyversions|
@@ -15,8 +18,8 @@ Development |develop_build| |develop_coverage| |develop_documentation| |develop_
     :target: https://codecov.io/gh/pybel/pybel?branch=master
     :alt: Stable Coverage Status
 
-.. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
-    :target: http://pybel.readthedocs.io/en/latest/?badge=stable
+.. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=stable
+    :target: http://pybel.readthedocs.io/en/stable/
     :alt: Stable Documentation Status
 
 .. |stable_pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
@@ -31,7 +34,7 @@ Development |develop_build| |develop_coverage| |develop_documentation| |develop_
     :alt: Development Coverage Status
 
 .. |develop_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
-    :target: http://pybel.readthedocs.io/en/latest/?badge=latest
+    :target: http://pybel.readthedocs.io/en/latest/
     :alt: Development Documentation Status
 
 .. |develop_pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
@@ -42,10 +45,13 @@ Development |develop_build| |develop_coverage| |develop_documentation| |develop_
     :alt: Code Climate
 
 
-Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its successful use in the IMI project, AETIONOMY, to describe complex disease networks with several thousands of relationships.
+Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular
+relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
+successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
+complex disease networks with several thousands of relationships.
 
-PyBEL is a Python software package that parses BEL statements, validates their semantics, applies common graph algorithms, and allows for data interchange with common formats like Neo4J, JSON, CSV, Excel, and SQL.
-PyBEL provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily use it to interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.
+PyBEL provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily use it to
+interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.
 
 .. code-block:: python
 

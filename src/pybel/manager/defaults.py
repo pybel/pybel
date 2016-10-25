@@ -34,3 +34,14 @@ default_namespaces = [
     'http://resource.belframework.org/belframework/20150611/namespace/swissprot-ids.belns',
     'http://resource.belframework.org/belframework/20150611/namespace/swissprot.belns'
 ]
+
+default_annotations = [
+    'http://resource.belframework.org/belframework/20150611/annotation/anatomy.belanno',
+    'http://resource.belframework.org/belframework/20150611/annotation/cell-line.belanno',
+    'http://resource.belframework.org/belframework/20150611/annotation/cell-structure.belanno',
+    'http://resource.belframework.org/belframework/20150611/annotation/cell.belanno',
+    'http://resource.belframework.org/belframework/20150611/annotation/disease.belanno',
+    'http://resource.belframework.org/belframework/20150611/annotation/mesh-anatomy.belanno',
+    'http://resource.belframework.org/belframework/20150611/annotation/mesh-diseases.belanno',
+    'http://resource.belframework.org/belframework/20150611/annotation/species-taxonomy-id.belanno'
+]

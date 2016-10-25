@@ -1,3 +1,3 @@
-from .namespace_cache import NamespaceCache
+from .namespace_cache import DefinitionCacheManager
 
-__all__ = ['NamespaceCache']
+__all__ = ['DefinitionCacheManager']

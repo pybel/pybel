@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from pybel.exceptions import NamespaceMismatch, AnnotationMismatch
+from pybel.manager import DefinitionCacheManager
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
@@ -10,9 +10,6 @@ from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_an
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-
-
-
 
 
 class TestSplitLines(unittest.TestCase):
@@ -25,6 +22,28 @@ class TestSplitLines(unittest.TestCase):
         self.assertEqual(7, len(docs))
         self.assertEqual(5, len(defs))
         self.assertEqual(14, len(states))
+
+
+class TestParseMetadataCached(unittest.TestCase):
+    def setUp(self):
+        dcm = DefinitionCacheManager()
+        dcm.setup_database()
+        self.parser = MetadataParser(definition_cache_manager=dcm)
+
+    def test_control_1(self):
+        s = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
+        self.parser.parseString(s)
+
+        self.assertIn('MGI', self.parser.namespace_dict)
+        # TODO LeKono implement namespace_metadata caching loading as well
+        # self.assertIn('MGI', self.parser.namespace_metadata)
+
+        # Test doesn't overwrite
+        s = 'DEFINE NAMESPACE MGI AS LIST {"A","B","C"}'
+        self.parser.parseString(s)
+        self.assertIn('MGI', self.parser.namespace_dict)
+        # self.assertIn('MGI', self.parser.namespace_metadata)
+        self.assertNotIn('A', self.parser.namespace_dict['MGI'])
 
 
 class TestParseMetadata(unittest.TestCase):
@@ -55,17 +74,15 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('Custom1', self.parser.namespace_dict)
         self.assertIn('A', self.parser.namespace_dict['Custom1'])
 
-    @unittest.skip('Future versions may not be so relaxed')
     def test_control_annotation_lexicographyException(self):
         s = 'DEFINE ANNOTATION CELLSTRUCTURE AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
-        with self.assertRaises(LexicographyException):
-            self.parser.parseString(s)
+        # with self.assertRaises(LexicographyException):
+        self.parser.parseString(s)
 
-    @unittest.skip('Future versions may not be so relaxed')
     def test_control_namespace_lexicographyException(self):
         s = 'DEFINE NAMESPACE mgi AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
-        with self.assertRaises(LexicographyException):
-            self.parser.parseString(s)
+        # with self.assertRaises(LexicographyException):
+        self.parser.parseString(s)
 
     def test_control_3(self):
         s = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
@@ -156,13 +173,11 @@ class TestParseMetadata(unittest.TestCase):
         self.assertEqual(expected_namespace_dict, self.parser.namespace_dict)
         self.assertEqual(expected_namespace_annoations, self.parser.namespace_metadata)
 
-    @unittest.skip('Future versions may not be so relaxed')
     def test_parse_namespace_url_mismatch(self):
         path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
         s = '''DEFINE NAMESPACE TEST AS URL "file://{}"'''.format(path)
-
-        with self.assertRaises(NamespaceMismatch):
-            self.parser.parseString(s)
+        # with self.assertRaises(NamespaceMismatch):
+        self.parser.parseString(s)
 
     def test_parse_namespace_url_1(self):
         path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
@@ -196,13 +211,11 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('TESTAN1', self.parser.annotations_dict)
         self.assertEqual(expected_values, self.parser.annotations_dict['TESTAN1'])
 
-    @unittest.skip('Future versions may not be so relaxed')
     def test_parse_annotation_url_failure(self):
         path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
         s = '''DEFINE ANNOTATION Test AS URL "file://{}"'''.format(path)
-
-        with self.assertRaises(AnnotationMismatch):
-            self.parser.parseString(s)
+        # with self.assertRaises(AnnotationMismatch):
+        self.parser.parseString(s)
 
     def test_parse_pattern(self):
         s = 'DEFINE ANNOTATION Test AS PATTERN "\w+"'

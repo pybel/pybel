@@ -8,6 +8,10 @@ log = logging.getLogger(__name__)
 class TestAbundance(TestTokenParserBase):
     """2.1.1"""
 
+    def setUp(self):
+        self.parser.clear()
+        self.parser.general_abundance.setParseAction(self.parser.handle_term)
+
     def test_211a(self):
         """small molecule"""
         statement = 'a(CHEBI:"oxygen atom")'
@@ -35,10 +39,14 @@ class TestAbundance(TestTokenParserBase):
 class TestGene(TestTokenParserBase):
     """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA"""
 
+    def setUp(self):
+        self.parser.clear()
+        self.parser.gene.setParseAction(self.parser.handle_term)
+
     def test_214a(self):
         statement = 'g(HGNC:AKT1)'
 
-        result = self.parser.gene_simple.parseString(statement)
+        result = self.parser.gene.parseString(statement)
         expected_list = ['Gene', ['HGNC', 'AKT1']]
         self.assertEqual(expected_list, result.asList())
 
@@ -61,7 +69,7 @@ class TestGene(TestTokenParserBase):
     def test_214b(self):
         statement = 'g(HGNC:AKT1, loc(GOCC:intracellular))'
 
-        result = self.parser.gene_simple.parseString(statement)
+        result = self.parser.gene.parseString(statement)
 
         expected_dict = {
             'function': 'Gene',
@@ -86,7 +94,7 @@ class TestGene(TestTokenParserBase):
     def test_214c(self):
         """Test variant"""
         statement = 'g(HGNC:AKT1, var(p.Phe508del))'
-        result = self.parser.gene_modified.parseString(statement)
+        result = self.parser.gene.parseString(statement)
 
         expected_result = {
             'function': 'Gene',
@@ -112,7 +120,7 @@ class TestGene(TestTokenParserBase):
     def test_214d(self):
         """Test BEL 1.0 gene substitution"""
         statement = 'g(HGNC:AKT1,sub(G,308,A))'
-        result = self.parser.gene_modified.parseString(statement)
+        result = self.parser.gene.parseString(statement)
 
         expected_result = {
             'function': 'Gene',
@@ -141,7 +149,7 @@ class TestGene(TestTokenParserBase):
     def test_variant_location(self):
         """Test BEL 1.0 gene substitution with location tag"""
         statement = 'g(HGNC:AKT1,sub(G,308,A),loc(GOCC:intracellular))'
-        result = self.parser.gene_modified.parseString(statement)
+        result = self.parser.gene.parseString(statement)
 
         expected_result = {
             'function': 'Gene',
@@ -174,7 +182,7 @@ class TestGene(TestTokenParserBase):
     def test_214e(self):
         """Test multiple variants"""
         statement = 'g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(delCTT))'
-        result = self.parser.gene_modified.parseString(statement)
+        result = self.parser.gene.parseString(statement)
 
         expected_result = {
             'function': 'Gene',
@@ -204,7 +212,7 @@ class TestGene(TestTokenParserBase):
 
     def test_gene_fusion_1(self):
         statement = 'g(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))'
-        result = self.parser.gene_fusion.parseString(statement)
+        result = self.parser.gene.parseString(statement)
         expected_dict = {
             'function': 'Gene',
             'fusion': {
@@ -305,9 +313,12 @@ class TestGene(TestTokenParserBase):
 class TestMiRNA(TestTokenParserBase):
     """2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA"""
 
+    def setUp(self):
+        self.parser.clear()
+        self.parser.mirna.setParseAction(self.parser.handle_term)
+
     def test_215a(self):
         statement = 'm(HGNC:MIR21)'
-
         result = self.parser.mirna.parseString(statement)
         expected_result = ['miRNA', ['HGNC', 'MIR21']]
         self.assertEqual(expected_result, result.asList())
@@ -410,6 +421,10 @@ class TestMiRNA(TestTokenParserBase):
 
 class TestProtein(TestTokenParserBase):
     """2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA"""
+
+    def setUp(self):
+        self.parser.clear()
+        self.parser.protein.setParseAction(self.parser.handle_term)
 
     def test_216a(self):
         statement = 'p(HGNC:AKT1)'
@@ -787,6 +802,10 @@ class TestProtein(TestTokenParserBase):
 class TestRna(TestTokenParserBase):
     """2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA"""
 
+    def setUp(self):
+        self.parser.clear()
+        self.parser.rna.setParseAction(self.parser.handle_term)
+
     def test_217a(self):
         statement = 'r(HGNC:AKT1)'
 
@@ -923,6 +942,10 @@ class TestRna(TestTokenParserBase):
 class TestComplex(TestTokenParserBase):
     """2.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA"""
 
+    def setUp(self):
+        self.parser.clear()
+        self.parser.complex_abundances.setParseAction(self.parser.handle_term)
+
     def test_212a(self):
         statement = 'complex(SCOMP:"AP-1 Complex")'
         result = self.parser.complex_abundances.parseString(statement)
@@ -1006,6 +1029,10 @@ class TestComplex(TestTokenParserBase):
 class TestComposite(TestTokenParserBase):
     """2.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA"""
 
+    def setUp(self):
+        self.parser.clear()
+        self.parser.composite_abundance.setParseAction(self.parser.handle_term)
+
     def test_213a(self):
         statement = 'composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex"))'
         result = self.parser.composite_abundance.parseString(statement)
@@ -1044,6 +1071,10 @@ class TestComposite(TestTokenParserBase):
 
 
 class TestBiologicalProcess(TestTokenParserBase):
+    def setUp(self):
+        self.parser.clear()
+        self.parser.biological_process.setParseAction(self.parser.handle_term)
+
     def test_231a(self):
         """"""
         statement = 'bp(GOBP:"cell cycle arrest")'
@@ -1067,6 +1098,10 @@ class TestBiologicalProcess(TestTokenParserBase):
 
 
 class TestPathology(TestTokenParserBase):
+    def setUp(self):
+        self.parser.clear()
+        self.parser.pathology.setParseAction(self.parser.handle_term)
+
     def test_232a(self):
         statement = 'pathology(MESHD:adenocarcinoma)'
         result = self.parser.pathology.parseString(statement)

@@ -3,7 +3,7 @@ import os
 import unittest
 
 import pybel
-from pybel.manager import NamespaceCache
+from pybel.manager import DefinitionCacheManager
 from pybel.parser import BelParser
 from tests.constants import TestTokenParserBase, PYBEL_TEST_ALL
 
@@ -19,10 +19,10 @@ class TestCacheIntegration(unittest.TestCase):
 
         c_path = 'sqlite://'
 
-        c = NamespaceCache(conn=c_path, setup_default_cache=False)
+        c = DefinitionCacheManager(conn=c_path, setup_default_cache=False)
 
         with open(path) as f:
-            g = pybel.BELGraph(f, ns_cache_path=c)
+            g = pybel.BELGraph(f, definition_cache_manager=c)
 
         expected_document_metadata = {
             'Name': "PyBEL Test Document",

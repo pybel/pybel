@@ -99,7 +99,7 @@ def handle_aa_placeholder(s, l, tokens):
 
 aa_placeholder.setParseAction(handle_aa_placeholder)
 
-amino_acid = aa_triple | aa_single | aa_placeholder
+amino_acid = MatchFirst([aa_triple, aa_single, aa_placeholder])
 
 dna_nucleotide_labels = {
     'A': 'Adenine',
@@ -204,4 +204,16 @@ variant_parent_dict = {
     'GeneVariant': 'Gene',
     'RNAVariant': 'RNA',
     'ProteinVariant': 'Protein'
+}
+
+# See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
+value_map = {
+    'G': 'Gene',
+    'R': 'RNA',
+    'P': 'Protein',
+    'M': 'microRNA',
+    'A': 'Abundance',
+    'B': 'BiologicalProcess',
+    'O': 'Pathology',
+    'C': 'Complex'
 }

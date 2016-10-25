@@ -32,7 +32,8 @@ INSTALL_REQUIRES = [
     'py2neo',
     'click',
     'sqlalchemy',
-    'pandas'
+    'pandas',
+    'matplotlib'
 ]
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = ['tox']

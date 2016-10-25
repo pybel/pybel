@@ -20,6 +20,7 @@ Table of Contents
    nestedstatements
    logging
    parsers
+   manager
    utils
    releasing
    todo
