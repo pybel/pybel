@@ -65,7 +65,7 @@ class IdentifierParser(BaseParser):
 
     def handle_namespace_lenient(self, s, l, tokens):
         tokens['namespace'] = DIRTY
-        log.debug('Naked namespace: {}'.format(s))
+        log.debug('Naked namespace: %s', s)
         return tokens
 
     def handle_namespace_invalid(self, s, l, tokens):

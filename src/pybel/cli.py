@@ -60,7 +60,7 @@ def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, 
 
     if log_file:
         log_path = os.path.expanduser(log_file)
-        log.info('Logging output to {}'.format(log_path))
+        log.info('Logging output to %s', log_path)
         fh = logging.FileHandler(log_path)
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
@@ -78,19 +78,19 @@ def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, 
     log.info('Done loading BEL')
 
     if csv:
-        log.info('Outputting csv to {}'.format(csv))
+        log.info('Outputting csv to %s', csv)
         graph.to_csv(g, csv)
 
     if graphml:
-        log.info('Outputting graphml to {}'.format(graphml))
+        log.info('Outputting graphml to %s', graphml)
         graph.to_graphml(g, graphml)
 
     if json:
-        log.info('Outputting json to {}'.format(json))
+        log.info('Outputting json to %s', json)
         graph.to_json(g, json)
 
     if pickle:
-        log.info('Outputting pickle to {}'.format(pickle))
+        log.info('Outputting pickle to %s', pickle)
         graph.to_pickle(g, pickle)
 
 
@@ -127,7 +127,7 @@ def to_neo(path, url, database, neo, context, verbose):
 
     t = time.time()
     graph.to_neo4j(g, p2n, context)
-    log.info('Upload to neo4j done in {:.02f} seconds'.format(time.time() - t))
+    log.info('Upload to neo4j done in %.02f seconds', time.time() - t)
 
 
 @main.group(help="PyBEL Data Manager Utilities")
@@ -135,14 +135,14 @@ def manage():
     pass
 
 
-@manage.command()
+@manage.command(help='Set up definition cache with default definitions')
 @click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/namespace_cache.db')
-def setup_definition_cache(path):
+def setup(path):
     DefinitionCacheManager(conn=path, setup_default_cache=True)
 
 
-@manage.command()
-def remove_definition_cache():
+@manage.command(help='Remove definition cache')
+def remove():
     os.remove(DEFAULT_CACHE_LOCATION)
 
 

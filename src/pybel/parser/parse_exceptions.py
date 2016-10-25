@@ -1,4 +1,4 @@
-from ..exceptions import PyBelWarning, PyBelError
+from ..exceptions import PyBelWarning
 
 
 class IllegalAnnotationValueExeption(PyBelWarning):

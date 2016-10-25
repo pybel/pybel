@@ -68,14 +68,14 @@ class ControlParser(BaseParser):
 
     def handle_unset_evidence(self, s, l, tokens):
         if 'Evidence' not in self.annotations:
-            log.debug("PyBEL024 Can't unset missing key: {}".format('Evidence'))
+            log.debug("PyBEL024 Can't unset missing key: %s", 'Evidence')
         else:
             del self.annotations['Evidence']
         return tokens
 
     def handle_unset_citation(self, s, l, tokens):
         if 0 == len(self.citation):
-            log.debug("PyBEL024 Can't unset missing key: {}".format('Citation'))
+            log.debug("PyBEL024 Can't unset missing key: %s", 'Citation')
         else:
             self.citation.clear()
         return tokens
