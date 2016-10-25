@@ -36,7 +36,7 @@ def from_url(url, **kwargs):
     :return: a parsed BEL graph
     :rtype: BELGraph
     """
-    log.info('Loading from url: {}'.format(url))
+    log.info('Loading from url: %s', url)
 
     session = requests.session()
     if url.startswith('file://'):
@@ -57,7 +57,7 @@ def from_path(path, **kwargs):
     :return: a parsed BEL graph
     :rtype: BELGraph"""
 
-    log.info('Loading from path: {}'.format(path))
+    log.info('Loading from path: %s', path)
     with open(os.path.expanduser(path)) as f:
         return BELGraph(f, **kwargs)
 
@@ -123,9 +123,9 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except:
-                log.error('Line {:07} - failed: {}'.format(line_number, line))
+                log.error('Line %07d - failed: %d', line_number, line)
 
-        log.info('Finished parsing document section in {:.02f} seconds'.format(time.time() - t))
+        log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
     def parse_definitions(self, definitions):
         t = time.time()
@@ -134,25 +134,25 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except PyBelError as e:
-                log.critical('Line {:07} - {}'.format(line_number, line))
+                log.critical('Line %07d - %d', line_number, line)
                 raise e
             except ParseException as e:
-                log.error('Line {:07} - invalid statement: {}'.format(line_number, line))
+                log.error('Line %07d - invalid statement: %s', line_number, line)
             except PyBelWarning as e:
-                log.warning('Line {:07} - {}: {}'.format(line_number, e, line))
+                log.warning('Line %07d - %s: %s', line_number, e, line)
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
-                log.error('Line {:07} - general failure: {} - {}: {}'.format(line_number, line, exc_type, exc_value))
-                log.debug('Traceback: {}'.format(exc_traceback))
+                log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
+                log.debug('Traceback: %s', exc_traceback)
 
-        log.info('Finished parsing definitions section in {:.02f} seconds'.format(time.time() - t))
+        log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
     def parse_statements(self, statements):
         t = time.time()
 
         log.info('Streamlining BEL parser')
         self.bel_parser.language.streamline()
-        log.info('Finished Streamlining BEL parser in {:.02f}s'.format(time.time() - t))
+        log.info('Finished Streamlining BEL parser in %.02fs', time.time() - t)
 
         t = time.time()
 
@@ -160,16 +160,16 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.bel_parser.parseString(line)
             except PyBelError as e:
-                log.critical('Line {:07} - {}'.format(line_number, line))
+                log.critical('Line %07d - %s', line_number, line)
                 raise e
             except ParseException as e:
-                log.error('Line {:07} - general parser failure: {}'.format(line_number, line))
+                log.error('Line %07d - general parser failure: %s', line_number, line)
             except PyBelWarning as e:
-                log.debug('Line {:07} - {}'.format(line_number, e, line))
+                log.debug('Line %07d - %s: %s', line_number, e, line)
             except:
-                log.error('Line {:07} - general failure: {}'.format(line_number, line))
+                log.error('Line %07d - general failure: %s', line_number, line)
 
-        log.info('Finished parsing statements section in {:.02f} seconds'.format(time.time() - t))
+        log.info('Finished parsing statements section in %.02f seconds', time.time() - t)
 
 
 def to_neo4j(graph, neo_graph, context=None):
