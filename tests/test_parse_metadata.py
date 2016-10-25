@@ -391,16 +391,25 @@ class TestParseControl(unittest.TestCase):
 
         s3 = 'SET Citation = {"e","f","g"}'
         s4 = 'SET Evidence = "h"'
+        s5 = 'SET Custom1 = "Custom1_A"'
+        s6 = 'SET Custom2 = "Custom2_A"'
 
-        self.parser.parseString(s1)
-        self.parser.parseString(s2)
-        self.parser.parseString(s3)
-        self.parser.parseString(s4)
+        self.parser.parse_lines([s1, s2, s3, s4, s5, s6])
 
         self.assertEqual('h', self.parser.annotations['Evidence'])
         self.assertEqual('e', self.parser.citation['type'])
         self.assertEqual('f', self.parser.citation['name'])
         self.assertEqual('g', self.parser.citation['reference'])
+
+        self.parser.parseString('UNSET {"Custom1","Evidence"}')
+        self.assertNotIn('Custom1', self.parser.annotations)
+        self.assertNotIn('Evidence', self.parser.annotations)
+        self.assertIn('Custom2', self.parser.annotations)
+        self.assertNotEqual(0, len(self.parser.citation))
+
+        self.parser.parseString('UNSET ALL')
+        self.assertEqual(0, len(self.parser.annotations))
+        self.assertEqual(0, len(self.parser.citation))
 
 
 class TestParseEvidence(unittest.TestCase):

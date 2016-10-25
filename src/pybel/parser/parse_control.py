@@ -1,6 +1,6 @@
 import logging
 
-from pyparsing import Suppress, pyparsing_common
+from pyparsing import Suppress, pyparsing_common, MatchFirst
 
 from .baseparser import BaseParser, W, quote, delimitedSet, And
 from .parse_exceptions import *
@@ -25,8 +25,8 @@ class ControlParser(BaseParser):
         annotation_key = pyparsing_common.identifier.setResultsName('key')
         annotation_key.setParseAction(self.handle_annotation_key)
 
-        set_tag = Suppress('SET') + W
-        unset_tag = Suppress('UNSET') + W
+        set_tag = Suppress('SET')
+        unset_tag = Suppress('UNSET')
 
         self.set_statement_group = And([set_tag, Suppress('STATEMENT_GROUP'), Suppress('='), quote('group')])
         self.set_statement_group.setParseAction(self.handle_statement_group)
@@ -62,28 +62,18 @@ class ControlParser(BaseParser):
         self.unset_all = unset_tag + Suppress("ALL")
         self.unset_all.setParseAction(self.handle_unset_all)
 
-        self.commands = (self.set_statement_group | self.set_citation | self.set_evidence |
-                         self.set_command | self.set_command_list | self.unset_citation |
-                         self.unset_evidence | self.unset_statement_group | self.unset_command)
+        self.unset_statements = MatchFirst([
+            self.unset_all, self.unset_citation, self.unset_evidence,
+            self.unset_statement_group, self.unset_command, self.unset_list
+        ])
+
+        self.commands = MatchFirst([self.set_statement_group, self.set_citation, self.set_evidence,
+                                    self.set_command, self.set_command_list, self.unset_statements])
 
     def handle_annotation_key(self, s, l, tokens):
         key = tokens['key']
         if key not in self.valid_annotations:
             raise InvalidAnnotationKeyException("Illegal annotation: {}".format(key))
-        return tokens
-
-    def handle_unset_evidence(self, s, l, tokens):
-        if 'Evidence' not in self.annotations:
-            log.debug("PyBEL024 Can't unset missing key: %s", 'Evidence')
-        else:
-            del self.annotations['Evidence']
-        return tokens
-
-    def handle_unset_citation(self, s, l, tokens):
-        if 0 == len(self.citation):
-            log.debug("PyBEL024 Can't unset missing key: %s", 'Citation')
-        else:
-            self.citation.clear()
         return tokens
 
     def handle_citation(self, s, l, tokens):
@@ -129,6 +119,20 @@ class ControlParser(BaseParser):
         self.annotations[key] = set(values)
         return tokens
 
+    def handle_unset_evidence(self, s, l, tokens):
+        if 'Evidence' not in self.annotations:
+            log.debug("PyBEL024 Can't unset missing key: %s", 'Evidence')
+        else:
+            del self.annotations['Evidence']
+        return tokens
+
+    def handle_unset_citation(self, s, l, tokens):
+        if 0 == len(self.citation):
+            log.debug("PyBEL024 Can't unset missing key: %s", 'Citation')
+        else:
+            self.citation.clear()
+        return tokens
+
     def handle_unset_statement_group(self, s, l, tokens):
         self.statement_group = None
         return tokens
@@ -136,6 +140,7 @@ class ControlParser(BaseParser):
     def handle_unset_command(self, s, l, tokens):
         key = tokens['key']
 
+        # TODO refactor to own function
         if key not in self.annotations:
             raise MissingAnnotationKeyException("Can't unset missing key: {}".format(key))
 
@@ -148,15 +153,18 @@ class ControlParser(BaseParser):
 
     def handle_unset_list(self, s, l, tokens):
         for key in tokens['values']:
-            if key == 'Citation':
-                self.citation.clear()
-            elif key == 'STATEMENT_GROUP':
-                self.statement_group = None
-            else:
-                if key not in self.annotations:
-                    raise MissingAnnotationKeyException("Can't unset missing key: {}".format(key))
-                del self.citation[key]
+            self.handle_unset(key)
         return tokens
+
+    def handle_unset(self, key):
+        if key == 'Citation':
+            self.citation.clear()
+        elif key == 'STATEMENT_GROUP':
+            self.statement_group = None
+        elif key not in self.annotations:
+            raise MissingAnnotationKeyException("Can't unset missing key: {}".format(key))
+        else:
+            del self.annotations[key]
 
     def get_language(self):
         return self.commands
