@@ -8,7 +8,7 @@ from .graph import *
 
 __all__ = graph.__all__
 
-__version__ = '0.2.2'
+__version__ = '0.2.3-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'
