@@ -291,55 +291,43 @@ class BelParser(BaseParser):
 
         # 3.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases
         increases_tag = oneOf(['->', '→', 'increases']).setParseAction(replaceWith('increases'))
-        # self.increases = triple(self.bel_term, increases_tag, self.bel_term)
 
         # 3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
         directly_increases_tag = oneOf(['=>', '⇒', 'directlyIncreases']).setParseAction(
             replaceWith('directlyIncreases'))
-        # self.directly_increases = triple(self.bel_term, directly_increases_tag, self.bel_term)
 
         # 3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
         decreases_tag = oneOf(['-|', 'decreases']).setParseAction(replaceWith('decreases'))
-        # self.decreases = triple(self.bel_term, decreases_tag, self.bel_term)
 
         # 3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
         directly_decreases_tag = oneOf(['=|', 'directlyDecreases']).setParseAction(
             replaceWith('directlyDecreases'))
-        # self.directly_decreases = triple(self.bel_term, directly_decreases_tag, self.bel_term)
 
         # 3.5.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_analogous
         analogous_tag = oneOf(['analogousTo'])
-        # self.analogous = triple(self.bel_term, analogous_tag, self.bel_term)
 
         # 3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
         causes_no_change_tag = oneOf(['cnc', 'causesNoChange']).setParseAction(replaceWith('causesNoChange'))
-        # self.causes_no_change = triple(self.bel_term, causes_no_change_tag, self.bel_term)
 
         # 3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
         regulates_tag = oneOf(['reg', 'regulates']).setParseAction(replaceWith('regulates'))
-        # self.regulates = triple(self.bel_term, regulates_tag, self.bel_term)
 
         # 3.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor
         negative_correlation_tag = oneOf(['neg', 'negativeCorrelation']).setParseAction(
             replaceWith('negativeCorrelation'))
-        # self.negative_correlation = triple(self.bel_term, negative_correlation_tag, self.bel_term)
 
         # 3.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XposCor
         positive_correlation_tag = oneOf(['pos', 'positiveCorrelation']).setParseAction(
             replaceWith('positiveCorrelation'))
-        # self.positive_correlation = triple(self.bel_term, positive_correlation_tag, self.bel_term)
 
         # 3.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xassociation
         association_tag = oneOf(['--', 'association']).setParseAction(replaceWith('association'))
-        # self.association = triple(self.bel_term, association_tag, self.bel_term)
 
         # 3.3.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_orthologous
         orthologous_tag = oneOf(['orthologous'])
-        # self.orthologous = triple(self.bel_term, orthologous_tag, self.bel_term)
 
         # 3.4.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa
         is_a_tag = oneOf(['isA'])
-        # self.is_a = triple(self.bel_term, is_a_tag, self.bel_term)
 
         self.bel_to_bel_relations = [
             increases_tag,
@@ -395,11 +383,9 @@ class BelParser(BaseParser):
 
         # 3.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_biomarkerfor
         biomarker_tag = oneOf(['biomarkerFor'])
-        # self.biomarker = triple(self.bel_term, biomarker_tag, self.process)
 
         # 3.5.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_prognosticbiomarkerfor
         prognostic_biomarker_tag = oneOf(['prognosticBiomarkerFor'])
-        # self.prognostic_biomarker = triple(self.bel_term, prognostic_biomarker_tag, self.process)
 
         biomarker_tags = biomarker_tag | prognostic_biomarker_tag
 
@@ -425,15 +411,6 @@ class BelParser(BaseParser):
 
         self.nested_causal_relationship = triple(self.bel_term, causal_relation_tags,
                                                  nest(triple(self.bel_term, causal_relation_tags, self.bel_term)))
-
-        # self.increases_nested = triple(self.bel_term, increases_tag, nest(self.causal_relationship))
-        # self.decreases_nested = triple(self.bel_term, decreases_tag, nest(self.causal_relationship))
-        # self.directly_increases_nested = triple(self.bel_term, directly_increases_tag, nest(self.causal_relationship))
-        # self.directly_decreases_nested = triple(self.bel_term, directly_decreases_tag, nest(self.causal_relationship))
-
-        # self.nested_causal_relationship = MatchFirst(
-        #    [self.increases_nested, self.decreases_nested, self.directly_increases_nested,
-        #     self.directly_decreases_nested])
 
         def handle_nested_relation(s, l, tokens):
             raise NestedRelationNotSupportedException('Nesting unsupported: {}'.format(s))
