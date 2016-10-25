@@ -36,7 +36,7 @@ def main():
 
 
 @main.command()
-@click.option('--path', type=click.File('rb'), help='Input BEL file file path. Use - for stdin')
+@click.option('--path', type=click.File('r'), help='Input BEL file file path. Use - for stdin')
 @click.option('--url', help='Input BEL file URL')
 @click.option('--database', help='Input BEL database')
 @click.option('--csv', help='Output path for *.csv')
