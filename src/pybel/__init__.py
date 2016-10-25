@@ -1,5 +1,7 @@
 """Parsing, validation, and analysis of of BEL graphs"""
 
+from __future__ import print_function
+
 from . import cli
 from . import graph
 from .graph import *
@@ -17,3 +19,7 @@ __email__ = 'charles.hoyt@scai.fraunhofer.de'
 
 __license__ = 'Apache 2.0 License'
 __copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
+
+
+def version():
+    print('{} Version: {}'.format(__title__, __version__))
