@@ -8,7 +8,7 @@ from .graph import *
 
 __all__ = graph.__all__
 
-__version__ = '0.2.3'
+__version__ = '0.2.4-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'
@@ -21,5 +21,5 @@ __license__ = 'Apache 2.0 License'
 __copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
 
 
-def version():
+def print_version():
     print('{} Version: {}'.format(__title__, __version__))

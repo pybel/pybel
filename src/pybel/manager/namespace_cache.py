@@ -14,18 +14,19 @@ from .. import utils
 
 log = logging.getLogger('pybel')
 
-DEFAULT_DEFINITION_CACHE_NAME = 'namespace_cache.db'
-
 pybel_data = os.path.expanduser('~/.pybel/data')
 if not os.path.exists(pybel_data):
     os.makedirs(pybel_data)
 
+DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
 DEFAULT_CACHE_LOCATION = os.path.join(pybel_data, DEFAULT_DEFINITION_CACHE_NAME)
 
 
 class DefinitionCacheManager:
     def __init__(self, conn=None, setup_default_cache=False, log_sql=False):
-        """
+        """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
+        It uses SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
+
         :param: conn: custom database connection string'
         :type: str
         :param: setup_cache: Weather or not the namespace namespace_cache should be setted up on initiation.
@@ -45,7 +46,7 @@ class DefinitionCacheManager:
         if setup_default_cache:
             self.ensure_cache()
 
-        log.info("Initiation of definition cache took %02f seconds", time.time() - start_time)
+        log.info("Initiation of definition cache took %.02f seconds", time.time() - start_time)
 
     def __insert_definition(self, definition_url, check_date=True):
         """Inserts namespace and names into namespace namespace_cache db.

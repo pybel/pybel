@@ -14,16 +14,13 @@ Table of Contents
 .. toctree::
    :maxdepth: 2
 
-   roadmap
    tutorial
    design
-   nestedstatements
    logging
    parsers
    manager
    utils
-   releasing
-   todo
+   roadmap
 
 Indices and Tables
 ------------------
