@@ -1,14 +1,10 @@
 Data Management
 ===============
 
-Models
-------
-
-.. autoclass:: pybel.manager.database_models
-    :members:
+Under the hood, PyBEL caches namespace and annotation files for quick recall on later use. The user doesn't need to
+enable this option, but can specifiy a specific database location if they choose.
 
 Managers
 --------
 
-.. autoclass:: pybel.manager.namespace_cache
-    :members:
+.. automethod:: pybel.manager.namespace_cache.DefinitionCacheManager.__init__

@@ -21,5 +21,5 @@ __license__ = 'Apache 2.0 License'
 __copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
 
 
-def version():
+def print_version():
     print('{} Version: {}'.format(__title__, __version__))

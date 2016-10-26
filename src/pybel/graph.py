@@ -33,6 +33,7 @@ def from_url(url, **kwargs):
 
     :param url: a valid URL pointing to a BEL resource
     :type url: str
+    :param \**kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
     :rtype: BELGraph
     """
@@ -54,6 +55,7 @@ def from_path(path, **kwargs):
 
     :param path: a file path
     :type path: str
+    :param \**kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
     :rtype: BELGraph"""
 
@@ -65,7 +67,10 @@ def from_path(path, **kwargs):
 def from_database(connection):
     """Loads a BEL graph from a database
 
-    :param connection: The string form of the URL is dialect[+driver]://user:password@host/dbname[?key=value..], where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance of URL.
+    :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
+                       where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
+                       of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
+                       of URL.
     :type connection: str
     :return: a BEL graph loaded from the database
     :rtype: BELGraph
@@ -87,6 +92,8 @@ class BELGraph(nx.MultiDiGraph):
         :param definition_cache_manager: database connection string to namespace namspace_cache, pre-built namespace namspace_cache manager,
                     or True to use the default
         :type definition_cache_manager: str or pybel.mangager.NamespaceCache or bool
+        :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
+        :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
@@ -150,9 +157,8 @@ class BELGraph(nx.MultiDiGraph):
     def parse_statements(self, statements):
         t = time.time()
 
-        log.info('Streamlining BEL parser')
         self.bel_parser.language.streamline()
-        log.info('Finished Streamlining BEL parser in %.02fs', time.time() - t)
+        log.info('Finished streamlining BEL parser in %.02fs', time.time() - t)
 
         t = time.time()
 
@@ -228,7 +234,7 @@ def from_pickle(path):
 
     :param path: File or filename to write. Filenames ending in .gz or .bz2 will be uncompressed.
     :type path: file or list
-    :rtype: nx.MultiDiGraph
+    :rtype: networkx.MultiDiGraph
     """
     return expand_edges(nx.read_gpickle(path))
 
@@ -259,7 +265,7 @@ def from_graphml(path):
 
     :param path: File or filename to write. Filenames ending in .gz or .bz2 will be compressed.
     :type path: file or string
-    :rtype: nx.MultiDiGraph
+    :rtype: networkx.MultiDiGraph
     """
     return expand_edges(nx.read_graphml(path))
 

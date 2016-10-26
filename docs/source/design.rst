@@ -1,22 +1,54 @@
 Design Choices
 ==============
 
+Why Not RDF?
+------------
+
+Writing BEL requires using curated namespaces that have been agreed upon by the community. As of now, these namespaces
+are hosted with the OpenBEL Consortium. Unfortunately, their format does not explicitly link back to the original
+ontologies and terminologies from which these entities were named. Current bel2rdf serialization tools build URLs with
+the OpenBEL Framework domain as a namespace, rather than respect the original entities. This does not follow the best
+practices of the semantic web, where URL’s representing an object point to a real page with additional information.
+For example, UniProt Knowledge Base does an exemplary job of this. Ultimately, using non-standard URL’s makes
+harmonizing and data integration difficult.  In the future, BEL should explicitly support OWL-format ontologies that are
+independent of the original Selventa format and easier to maintain. Many BEL documents contain entities without
+namespaces simply because the namespaces for their domain are not properly maintained or distributed. PyBEL will
+eventually take creative freedom and provide a variant of the BEL language where this is easily possible with statements
+like :code:`DEFINE NAMESPACE AS OWL http://example.com/ontology.owl`. Ontologies can also provide immediate access to
+hierarchical knowledge like subclass relationships that can provide better context in analysis.
+
+Additionally, the RDF format does not easily allow for the annotation of edges. A simple statement in BEL that one
+protein upregulates another can be easily represented in a triple in RDF, but when the annotations and citation from
+the BEL document need to be included, this forces RDF serialization to use approaches like representing the statement
+itself as a node. Furthermore, many blank nodes are introduced throughout the process. This makes RDF incredibly
+difficult to understand or work with. Later, writing queries in SPARQL becomes very difficult because the data format
+is complicated and the language is limited. For example, it would be incredibly complicated to write a query in SPARQL
+to get the objects of statements from publications by a certain author.
+
+Instead of supporting RDF serialization, PyBEL serializes to formats that more resemble a mathematical graph. The
+internal data structure in PyBEL is the NetworkX MultiDiGraph. This data structure allows for both nodes
+and edges to have dictionaries of annotations. This allows for much easier programmatic access to answer more
+complicated questions, which can be written with python code. Because the data structure is the same in Neo4J, the
+data can be directly exported with :code:`pybel.to_neo4j`. Neo4J supports the Cypher querying language so that the
+same queries can be written in an elegant and simple way.
+
 Dealing with Dirty Namespaces
 -----------------------------
 
 While it's not good practice to leave unqualified elements in a BEL document, sometimes there isn't a proper
-namespace at the time. There's a setting in the BELGraph for these occassions. The command line interface also provides
-a flat :code:`--lenient` for use. Again, this is not reccomended. If you are using names that don't have namespaces,
+namespace at the time. There's a setting in the BELGraph for these occasions. The command line interface also provides
+a flag, :code:`--lenient`, for use. Again, this is not recommended. If you are using names that don't have namespaces,
 consult the scientific community working in your area of research and organize the development of a proper ontology,
 terminology, or namespace that can be used. Ultimately, a namespace allows many people to talk, without ambiguity,
 about the same thing. WARNING: Lenient mode is not tested very well. Use at your own risk.
 
 .. code-block:: python
 
-    >>> import pybel
-    >>> pybel.from_path('~/Desktop/my_document.bel', lenient=True)
+   >>> import pybel
+   >>> pybel.from_path('~/Desktop/my_document.bel', lenient=True)
 
-For now, the namespace for naked names is assigned the sentinel value from pybel.parser.parse_identifier.DIRTY.
+
+For now, the namespace for naked names is assigned the sentinel value from :code:`pybel.parser.parse_identifier.DIRTY`.
 
 Here are some suggestions on how to find an appropriate namespace:
 
@@ -30,9 +62,9 @@ Namespace and Annotation Name Choices
 
 :code:`*.belns` and :code:`*.belanno` configuration files include an entry called "Keyword" in their respective
 [Namespace] and [AnnotationDefinition] sections. To maintain understandability between BEL documents, PyBEL
-enforces that the names given in :code:`*.bel` documents match their respective resources. For now, capitilization
-is not considered, but in the future, PyBEL will also ensure that capitlization is properly stylized, like
-the lowercase 'h' in "ChEMBL". 
+warns when the names given in :code:`*.bel` documents do not match their respective resources. For now, capitalization
+is not considered, but in the future, PyBEL will also warn when capitalization is not properly stylized, like forgetting
+the lowercase 'h' in "ChEMBL".
 
 Complexes
 ---------
@@ -40,13 +72,13 @@ Complexes
 Currently, an ordering is not assigned to the members of complexes . This is a post-processing implementation detail
 that is not implemented in the core of PyBEL. One suggestion to assign values to members in a complex like
 :code:`complex(p(HGNC:YFG1),p(HGNC:YFG2))` would be to sort over the 3-tuples of (Function, Namespace, Name) for
-each of the complex's elements. This order is guaranteed to be unique and persistient.
+each of the complex's elements. This order is guaranteed to be unique and persistent.
 
 Representation of Events and Modifiers
 --------------------------------------
 
 In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
-degredations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
+degradations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
 of the edge. In reality, an edge like :code:`sec(p(HGNC:A)) -> activity(p(HGNC:B), ma(kinaseActivity))` represents
 a connection between :code:`HGNC:A` and :code:`HGNC:B`. Each of these modifiers explains the context of the relationship
 between these physical entities. Further, querying a network where these modifiers are part of a relationship
@@ -56,11 +88,10 @@ molecular activity, and whose effect is kinase activity. Having fewer nodes also
 and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
 as a color coded source and terminus of the connecting edge.
 
-
 The compiler in OpenBEL framework created nodes for molecular activities like :code:`kin(p(HGNC:YFG))` and induced an
 edge like :code:`p(HGNC:YFG) actsIn kin(p(HGNC:YFG))`. For transformations, a statement like
 :code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")` also induced
-:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrange") translocates p(HGNC:YFG)`.
+:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane") translocates p(HGNC:YFG)`.
 
 In PyBEL, we recognize that these modifications are actually annotations to the type of relationship between the
 subject's entity and the object's entity. :code:`p(HGNC:ABC) -> tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")`
@@ -71,9 +102,84 @@ just the keyword :code:`p`
 
 This also begs the question of what statements mean. BEL 2.0 introduced the :code:`location()` element that can be
 inside any abundances. This means that it's possible to unambiguously express the differences between the process of
-:code:`HGNC:A` moving from one place to another and the existence of :code:`HGNC:A` in a specfic location having
+:code:`HGNC:A` moving from one place to another and the existence of :code:`HGNC:A` in a specific location having
 different effects. In BEL 1.0, this action had its own node, but this introduced unnecessary complexity to the network
 and made querying more difficult. Consider the difference between the following two statements:
 
 - :code:`tloc(p(HGNC:A), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell membrane")) -> p(HGNC:B)`
 - :code:`p(HGNC:A, location(GOCC:"cell membrane")) -> p(HGNC:B)`
+
+Why Not Nested Statements?
+--------------------------
+
+BEL has different relationships for modeling direct and indirect causal relations.
+
+Direct
+~~~~~~
+
+- :code:`A => B` means that `A` directly increases `B` through a physical process.
+- :code:`A =| B` means that `A` directly decreases `B` through a physical process.
+
+Indirect
+~~~~~~~~
+
+The relationship between two entities can be coded in BEL, even if the process is not well understood.
+
+- :code:`A -> B` means that `A` indirectly increases `B`. There are hidden elements in `X` that mediate this interaction
+  through a pathway direct interactions :code:`A (=> or =|) X_1 (=> or =|) ... X_n (=> or =|) B`, or through an entire
+  network.
+
+- :code:`A -| B` means that `A` indirectly decreases `B`. Like for :code:`A -> B`, this process involves hidden
+  components with varying activities.
+
+Increasing Nested Relationships
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+BEL also allows object of a relationship to be another statement.
+
+- :code:`A => (B => C)` means that `A` increases the process by which `B` increases `C`. The example in the BEL Spec
+  :code:`p(HGNC:GATA1) => (act(p(HGNC:ZBTB16)) => r(HGNC:MPL))` represents GATA1 directly increasing the process by which
+  ZBTB16 directly increases MPL. Before, we were using directly increasing to specify physical contact, so it's
+  reasonable to conclude that  :code:`p(HGNC:GATA1) => act(p(HGNC:ZBTB16))`. The specification cites examples when `B` is
+  an activitythat only is affected in the context of `A` and `C`. This complicated enough that it is both impractical to
+  standardize during curation, and impractical to represent in a network.
+
+- :code:`A -> (B => C)` can be interpreted by assuming that `A` indirectly increases `B`, and because of monotonicity,
+  conclude that :code:`A -> C` as well.
+
+- :code:`A => (B -> C)` is more difficult to interpret, because it does not describe which part of process
+  :code:`B -> C` is affected by `A` or how. Is it that :code:`A => B`, and :code:`B => C`, so we conclude :code:`A -> C`,
+  or does it mean something else? Perhaps `A` impacts a different portion of the hidden process in :code:`B -> C`. These
+  statements are ambiguous enough that they should be written as just :code:`A => B`, and :code:`B -> C`. If there is no
+  literature evidence for the statement :code:`A -> C`, then it is not the job of the curator to make this inference.
+  Identifying statements of this might be the goal of a bioinformatics analysis of the BEL network after compilation.
+
+- :code:`A -> (B -> C)` introduces even more ambiguity, and it should not be used.
+
+- :code:`A => (B =| C)` states `A` increases the process by which `B` decreases `C`. One interpretation of this
+  statement might be that :code:`A => B` and :code:`B =| C`. An analysis could infer :code:`A -| C`.  Statements in the
+  form of :code:`A -> (B =| C)` can also be resolved this way, but with added ambiguity.
+
+Decreasing Nested Relationships
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While we could agree on usage for the previous examples, the decrease of a nested statement introduces an unreasonable
+amount of ambiguity.
+
+- :code:`A =| (B => C)` could mean `A` decreases `B`, and `B` also increases `C`. Does this mean A decreases C, or does
+  it mean that C is still increased, but just not as much? Which of these statements takes precedence? Or do their effects
+  cancel? The same can be said about :code:`A -| (B => C)`, and with added ambiguity for indirect increases :code:`A -| (B -> C)`
+
+- :code:`A =| (B =| C)` could mean that `A` decreases `B` and `B` decreases `C`. We could conclude that `A` increases
+  `C`, or could we again run into the problem of not knowing the precedence? The same is true for the indirect versions.
+
+Reccomendations for Use in PyBEL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We considered the ambiguity of nested statements to be too great of a risk to include their usage in the PyBEL compiler.
+In our group at Fraunhofer SCAI, curators resolved these statements to single statements to improve the precision and
+readability of our BEL documents.
+
+While most statements in the form :code:`A rel1 (B rel2 C)` can be reasonably expanded to :code:`A rel1 B` and
+:code:`B rel2 C`, the few that cannot are the difficult-to-interpret cases that we need to be careful about in our
+curation and later analyses.

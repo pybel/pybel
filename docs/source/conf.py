@@ -357,9 +357,13 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'https://docs.python.org/': None,
+    'networkx': ('https://networkx.readthedocs.io/en/latest/', None),
+}
 
 autodoc_member_order = 'bysource'
+autoclass_content = 'init'
 
 if os.environ.get('READTHEDOCS', None):
     tags.add('readthedocs')
