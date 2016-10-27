@@ -133,6 +133,11 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('CellLine', self.parser.annotations_dict)
         self.assertIn('TextLocation', self.parser.annotations_dict)
 
+    def test_document_metadata_exception(self):
+        s = 'SET DOCUMENT InvalidKey = "nope"'
+        with self.assertRaises(IllegalDocumentMetadataException):
+            self.parser.parseString(s)
+
     def test_parse_document(self):
         s = '''SET DOCUMENT Name = "Alzheimer's Disease Model"'''
 

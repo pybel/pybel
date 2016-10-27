@@ -4,6 +4,8 @@ from pyparsing import Suppress, And
 from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser, word, quote, delimitedSet
+from . import language
+from .parse_exceptions import IllegalDocumentMetadataException
 from ..utils import download_url
 
 log = logging.getLogger('pybel')
@@ -66,7 +68,12 @@ class MetadataParser(BaseParser):
         return self.language
 
     def handle_document(self, s, l, tokens):
-        self.document_metadata[tokens['key']] = tokens['value']
+        key = tokens['key']
+
+        if key not in language.document_keys:
+            raise IllegalDocumentMetadataException('Invalid document metadata key: {}'.format(key))
+
+        self.document_metadata[key] = tokens['value']
         return tokens
 
     def handle_namespace_url(self, s, l, tokens):

@@ -12,6 +12,17 @@ from .parse_exceptions import PlaceholderAminoAcidException
 
 log = logging.getLogger('pybel')
 
+document_keys = {
+    'Authors',
+    'ContactInfo',
+    'Copyright',
+    'Description',
+    'Disclaimer',
+    'Licenses',
+    'Name',
+    'Version'
+}
+
 activity_labels = {
     'catalyticActivity': 'CatalyticActivity',
     'cat': 'CatalyticActivity',
