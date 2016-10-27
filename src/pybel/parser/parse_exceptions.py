@@ -89,3 +89,9 @@ See also: http://openbel.org/language/web/version_1.0/bel_specification_version_
     """
     #:
     code = 35
+
+
+class MissingCitationException(PyBelWarning):
+    """Tried to add an edge, but no citatation present. Most likely due to previous improperly formatted citation"""
+    #:
+    code = 36
