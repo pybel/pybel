@@ -6,7 +6,10 @@ from . import cli
 from . import graph
 from .graph import *
 
-__all__ = graph.__all__
+small_corpus_url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
+large_corpus_url = 'http://resource.belframework.org/belframework/1.0/knowledge/large_corpus.bel'
+
+__all__ = ['small_corpus_url', 'large_corpus_url'] + graph.__all__
 
 __version__ = '0.2.4-dev'
 
