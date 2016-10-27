@@ -47,6 +47,12 @@ class TestImport(unittest.TestCase):
 
         self.assertEqual(expected_document_metadata, g.metadata_parser.document_metadata)
 
+        nodes = list(g.nodes_iter(namespace='ALPHABET', name='A'))
+        self.assertEqual(3, len(nodes))
+
+        edges = list(g.edges_iter(relation='increases'))
+        self.assertEqual(2, len(edges))
+
     def test_from_path(self):
         g = pybel.from_path(test_bel_1)
         self.assertIsNotNone(g)
@@ -56,7 +62,7 @@ class TestImport(unittest.TestCase):
         self.assertIsNotNone(g)
 
 
-# @unittest.skipUnless(PYBEL_TEST_ALL, 'not enough memory on Travis-CI for this test')
+
 class TestFull(TestTokenParserBase):
     def setUp(self):
         namespaces = {
@@ -145,3 +151,5 @@ class TestFull(TestTokenParserBase):
             'TestAnnotation2': 'X',
             'TestAnnotation3': 'E'
         })
+
+
