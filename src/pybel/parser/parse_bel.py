@@ -509,8 +509,9 @@ class BelParser(BaseParser):
         if 'modifier' in tokens:
             return self.ensure_node(s, l, tokens['target'])
 
-        elif 'transformation' in tokens:
-            name = canonicalize_node(tokens)
+        name = canonicalize_node(tokens)
+
+        if 'transformation' in tokens:
             if name not in self.graph:
                 self.graph.add_node(name, type=tokens['transformation'])
 
@@ -525,7 +526,6 @@ class BelParser(BaseParser):
             return name
 
         elif 'function' in tokens and 'members' in tokens:
-            name = canonicalize_node(tokens)
             if name not in self.graph:
                 self.graph.add_node(name, type=tokens['function'])
 
@@ -535,7 +535,6 @@ class BelParser(BaseParser):
             return name
 
         elif 'function' in tokens and 'variants' in tokens:
-            name = canonicalize_node(tokens)
             cls = '{}Variant'.format(tokens['function'])
             if name not in self.graph:
                 self.graph.add_node(name, type=cls)
@@ -550,7 +549,6 @@ class BelParser(BaseParser):
             return name
 
         elif 'function' in tokens and 'fusion' in tokens:
-            name = canonicalize_node(tokens)
             cls = '{}Fusion'.format(tokens['function'])
             if name not in self.graph:
                 self.graph.add_node(name, type=cls)
@@ -558,7 +556,6 @@ class BelParser(BaseParser):
 
         elif 'function' in tokens and 'identifier' in tokens:
             if tokens['function'] in ('Gene', 'miRNA', 'Pathology', 'BiologicalProcess', 'Abundance', 'Complex'):
-                name = canonicalize_node(tokens)
                 if name not in self.graph:
                     self.graph.add_node(name,
                                         type=tokens['function'],
@@ -567,8 +564,6 @@ class BelParser(BaseParser):
                 return name
 
             elif tokens['function'] == 'RNA':
-                name = canonicalize_node(tokens)
-
                 if name not in self.graph:
                     self.graph.add_node(name,
                                         type=tokens['function'],
@@ -583,8 +578,6 @@ class BelParser(BaseParser):
                 return name
 
             elif tokens['function'] == 'Protein':
-                name = canonicalize_node(tokens)
-
                 if name not in self.graph:
                     self.graph.add_node(name,
                                         type=tokens['function'],
@@ -611,7 +604,7 @@ def canonicalize_node(tokens):
         return name + variants
 
     elif 'function' in tokens and 'members' in tokens:
-        return (tokens['function'],) + tuple(sorted(list2tuple(tokens['members'].asList())))
+        return (tokens['function'],) + tuple(sorted(canonicalize_node(member) for member in tokens['members']))
 
     elif 'transformation' in tokens and tokens['transformation'] == 'Reaction':
         reactants = tuple(sorted(list2tuple(tokens['reactants'].asList())))
@@ -625,12 +618,12 @@ def canonicalize_node(tokens):
             tokens['fusion']['range_3p'])
 
     elif 'function' in tokens and tokens['function'] in (
-    'Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
+            'Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
         if 'identifier' in tokens:
             return tokens['function'], tokens['identifier']['namespace'], tokens['identifier']['name']
 
     if 'modifier' in tokens and tokens['modifier'] in (
-    'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
+            'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
         return canonicalize_node(tokens['target'])
 
 

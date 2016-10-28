@@ -1055,7 +1055,7 @@ class TestComplex(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = 'Complex', ('Protein', ('HGNC', 'FOS')), ('Protein', ('HGNC', 'JUN'))
+        expected_node = 'Complex', ('Protein', 'HGNC', 'FOS'), ('Protein', 'HGNC', 'JUN')
 
         node = canonicalize_node(result)
         self.assertEqual(expected_node, node)
@@ -1077,7 +1077,7 @@ class TestComplex(TestTokenParserBase):
         expected = ['Complex', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]]
         self.assertEqual(expected, result.asList())
 
-        complex_name = 'Complex', ('Protein', ('HGNC', 'CLSTN1')), ('Protein', ('HGNC', 'KLC1'))
+        complex_name = 'Complex', ('Protein', 'HGNC', 'CLSTN1'), ('Protein', 'HGNC', 'KLC1')
         self.assertEqual(complex_name, canonicalize_node(result))
         self.assertHasNode(complex_name)
 
@@ -1119,10 +1119,8 @@ class TestComposite(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = 'Composite', ('Complex', ('GOCC', 'interleukin-23 complex')), ('Protein', ('HGNC', 'IL6'))
+        node = 'Composite', ('Complex', 'GOCC', 'interleukin-23 complex'), ('Protein', 'HGNC', 'IL6')
         self.assertEqual(node, canonicalize_node(result))
-
-        self.parser.graph[node]
 
         self.assertEqual(5, self.parser.graph.number_of_nodes())
         self.assertHasNode(node)
