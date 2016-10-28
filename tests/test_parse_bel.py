@@ -1,6 +1,8 @@
 import logging
 
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
+from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
+
 from tests.constants import TestTokenParserBase, test_citation_dict
 
 log = logging.getLogger(__name__)
@@ -26,11 +28,11 @@ class TestAbundance(TestTokenParserBase):
 
         self.assertEqual(expected_result, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = cls, ns, val = 'Abundance', 'CHEBI', 'oxygen atom'
         self.assertEqual(expected_node, node)
 
-        modifier = self.parser.canonicalize_modifier(result)
+        modifier = canonicalize_modifier(result)
         expected_modifier = {}
         self.assertEqual(expected_modifier, modifier)
 
@@ -60,7 +62,7 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = 'Gene', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
@@ -86,7 +88,7 @@ class TestGene(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = 'Gene', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
@@ -110,7 +112,7 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name, type='GeneVariant')
 
         parent = 'Gene', 'HGNC', 'AKT1'
@@ -139,7 +141,7 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name, type='GeneVariant')
 
         parent = 'Gene', 'HGNC', 'AKT1'
@@ -172,7 +174,7 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name, type='GeneVariant')
 
         parent = 'Gene', 'HGNC', 'AKT1'
@@ -203,7 +205,7 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name, type='GeneVariant')
 
         parent = 'Gene', 'HGNC', 'AKT1'
@@ -225,7 +227,7 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name)
 
     def test_gene_fusion_legacy_1(self):
@@ -243,7 +245,7 @@ class TestGene(TestTokenParserBase):
         }
 
         self.assertEqual(expected_dict, result.asDict())
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name)
 
     def test_gene_fusion_legacy_2(self):
@@ -260,7 +262,7 @@ class TestGene(TestTokenParserBase):
             }
         }
         self.assertEqual(expected_dict, result.asDict())
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name)
 
     def test_gene_variant_snp(self):
@@ -271,7 +273,7 @@ class TestGene(TestTokenParserBase):
         expected_result = ['Gene', ['SNP', 'rs113993960'], ['Variant', 'del', 'CTT']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node)
 
         gene_node = 'Gene', 'SNP', 'rs113993960'
@@ -288,7 +290,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         gene_node = 'Gene', 'REF', 'NC_000007.13'
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
 
         self.assertHasNode(gene_node, type='Gene', namespace='REF', name='NC_000007.13')
         self.assertHasNode(mod_node, type='GeneVariant')
@@ -302,7 +304,7 @@ class TestGene(TestTokenParserBase):
         expected_result = ['Gene', ['HGNC', 'CFTR'], ['Variant', 1521, 1523, 'del', 'CTT']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='GeneVariant')
 
         gene_node = 'Gene', 'HGNC', 'CFTR'
@@ -334,7 +336,7 @@ class TestMiRNA(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = 'miRNA', 'HGNC', 'MIR21'
         self.assertEqual(expected_node, node)
 
@@ -357,7 +359,7 @@ class TestMiRNA(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = 'miRNA', 'HGNC', 'MIR21'
         self.assertEqual(expected_node, node)
 
@@ -379,7 +381,7 @@ class TestMiRNA(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         self.assertHasNode(node)
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
@@ -409,7 +411,7 @@ class TestMiRNA(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         self.assertHasNode(node)
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
@@ -443,7 +445,7 @@ class TestProtein(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = 'Protein', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
@@ -468,7 +470,7 @@ class TestProtein(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = 'Protein', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
@@ -504,7 +506,7 @@ class TestProtein(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         self.assertHasNode(node, type='ProteinVariant')
 
         parent = 'Protein', 'HGNC', 'AKT1'
@@ -525,7 +527,7 @@ class TestProtein(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name)
 
     def test_protein_fusion_legacy_1(self):
@@ -543,7 +545,7 @@ class TestProtein(TestTokenParserBase):
         }
 
         self.assertEqual(expected_dict, result.asDict())
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name)
 
     def test_protein_fusion_legacy_2(self):
@@ -560,7 +562,7 @@ class TestProtein(TestTokenParserBase):
             }
         }
         self.assertEqual(expected_dict, result.asDict())
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name)
 
     def test_protein_trunc_1(self):
@@ -570,7 +572,7 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'C', 40, '*']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'AKT1'
@@ -585,7 +587,7 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'C', 40, '*']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'AKT1'
@@ -602,7 +604,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'AKT1'
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='AKT1')
         self.assertHasNode(mod_node, type='ProteinVariant')
@@ -618,7 +620,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'AKT1'
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='AKT1')
         self.assertHasNode(mod_node, type='ProteinVariant')
@@ -632,7 +634,7 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'AKT1'], ['ProteinModification', ['MOD', 'PhosRes'], 'Ser', 473]]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node)
 
         protein_node = 'Protein', 'HGNC', 'AKT1'
@@ -649,7 +651,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'HRAS'
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='HRAS')
         self.assertHasNode(mod_node, type='ProteinVariant')
@@ -664,9 +666,9 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         # mod_node = 'Protein', 'HGNC', 'CFTR', 'Variant', '='
-        # self.assertEqual(mod_node, self.parser.canonicalize_node(result))
+        # self.assertEqual(mod_node, canonicalize_node(result))
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
@@ -684,7 +686,7 @@ class TestProtein(TestTokenParserBase):
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
         # mod_node = 'Protein', 'HGNC', 'CFTR', 'Variant', '?'
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
         self.assertHasNode(mod_node, type='ProteinVariant')
@@ -699,7 +701,7 @@ class TestProtein(TestTokenParserBase):
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
         # mod_node = 'Protein', 'HGNC', 'CFTR', 'Variant', 'Gly', 576, 'Ala'
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
         self.assertHasNode(mod_node, type='ProteinVariant')
@@ -714,7 +716,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
         self.assertHasNode(mod_node)
@@ -728,7 +730,7 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'YFG'], ['Fragment', 5, 20]]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
@@ -744,7 +746,7 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'YFG'], ['Fragment', 1, '?']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
@@ -760,7 +762,7 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'YFG'], ['Fragment', '?', '*']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
@@ -776,7 +778,7 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'YFG'], ['Fragment', '?']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
@@ -791,7 +793,7 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'YFG'], ['Fragment', '?', '55kD']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node, type='ProteinVariant')
 
         protein_node = 'Protein', 'HGNC', 'YFG'
@@ -885,7 +887,7 @@ class TestRna(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = 'RNA', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
@@ -909,7 +911,7 @@ class TestRna(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name, type='RNAVariant')
 
         parent = 'RNA', 'HGNC', 'AKT1'
@@ -925,7 +927,7 @@ class TestRna(TestTokenParserBase):
         expected_result = ['RNA', ['Fusion', ['HGNC', 'TMPRSS2'], ['r', 1, 79], ['HGNC', 'ERG'], ['r', 312, 5034]]]
         self.assertEqual(expected_result, result.asList())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         self.assertHasNode(node)
 
     def test_rna_fusion_2(self):
@@ -949,7 +951,7 @@ class TestRna(TestTokenParserBase):
         }
 
         self.assertEqual(expected_dict, result.asDict())
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name)
 
     def test_gene_fusion_legacy_2(self):
@@ -966,7 +968,7 @@ class TestRna(TestTokenParserBase):
             }
         }
         self.assertEqual(expected_dict, result.asDict())
-        name = self.parser.canonicalize_node(result)
+        name = canonicalize_node(result)
         self.assertHasNode(name)
 
     def test_rna_variant_codingReference(self):
@@ -977,7 +979,7 @@ class TestRna(TestTokenParserBase):
         expected_result = ['RNA', ['HGNC', 'CFTR'], ['Variant', 1521, 1523, 'del', 'CTT']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node)
 
         rna_node = 'RNA', 'HGNC', 'CFTR'
@@ -993,7 +995,7 @@ class TestRna(TestTokenParserBase):
         expected_result = ['RNA', ['HGNC', 'CFTR'], ['Variant', 1653, 1655, 'del', 'cuu']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = self.parser.canonicalize_node(result)
+        mod_node = canonicalize_node(result)
         self.assertHasNode(mod_node)
 
         rna_node = 'RNA', 'HGNC', 'CFTR'
@@ -1026,7 +1028,7 @@ class TestComplex(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         expected_node = 'Complex', 'SCOMP', 'AP-1 Complex'
         self.assertEqual(expected_node, node)
 
@@ -1055,7 +1057,7 @@ class TestComplex(TestTokenParserBase):
 
         expected_node = 'Complex', ('Protein', ('HGNC', 'FOS')), ('Protein', ('HGNC', 'JUN'))
 
-        node = self.parser.canonicalize_node(result)
+        node = canonicalize_node(result)
         self.assertEqual(expected_node, node)
         self.assertHasNode(node, type='Complex')
 
@@ -1076,7 +1078,7 @@ class TestComplex(TestTokenParserBase):
         self.assertEqual(expected, result.asList())
 
         complex_name = 'Complex', ('Protein', ('HGNC', 'CLSTN1')), ('Protein', ('HGNC', 'KLC1'))
-        self.assertEqual(complex_name, self.parser.canonicalize_node(result))
+        self.assertEqual(complex_name, canonicalize_node(result))
         self.assertHasNode(complex_name)
 
         p1_name = 'Protein', 'HGNC', 'CLSTN1'
@@ -1118,7 +1120,7 @@ class TestComposite(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         node = 'Composite', ('Complex', ('GOCC', 'interleukin-23 complex')), ('Protein', ('HGNC', 'IL6'))
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
 
         self.parser.graph[node]
 
@@ -1153,7 +1155,7 @@ class TestBiologicalProcess(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         node = 'BiologicalProcess', 'GOBP', 'cell cycle arrest'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node,
                            type='BiologicalProcess',
                            namespace='GOBP',
@@ -1179,7 +1181,7 @@ class TestPathology(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         node = 'Pathology', 'MESHD', 'adenocarcinoma'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node,
                            type='Pathology',
                            namespace='MESHD',
@@ -1199,7 +1201,7 @@ class TestActivity(TestTokenParserBase):
         expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']]]
         self.assertEqual(expected_result, result.asList())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Activity',
             'effect': {}
@@ -1223,7 +1225,7 @@ class TestActivity(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Activity',
             'effect': {
@@ -1249,7 +1251,7 @@ class TestActivity(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Activity',
             'effect': {
@@ -1275,7 +1277,7 @@ class TestActivity(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Activity',
             'effect': {
@@ -1285,7 +1287,7 @@ class TestActivity(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
         node = 'Protein', 'HGNC', 'AKT1'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node)
 
 
@@ -1310,7 +1312,7 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Degradation',
         }
@@ -1333,14 +1335,14 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Degradation',
         }
         self.assertEqual(expected_mod, mod)
 
         node = 'Protein', 'HGNC', 'EGFR'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node)
 
     def test_translocation_standard(self):
@@ -1362,7 +1364,7 @@ class TestTransformation(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Translocation',
             'effect': {
@@ -1373,7 +1375,7 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
         node = 'Protein', 'HGNC', 'EGFR'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node)
 
     def test_translocation_bare(self):
@@ -1394,7 +1396,7 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Translocation',
             'effect': {
@@ -1405,7 +1407,7 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
         node = 'Protein', 'HGNC', 'EGFR'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node)
 
     def test_translocation_invalid(self):
@@ -1422,7 +1424,7 @@ class TestTransformation(TestTokenParserBase):
         expected_result = ['CellSecretion', ['Protein', ['HGNC', 'EGFR']]]
         self.assertEqual(expected_result, result.asList())
 
-        mod = self.parser.canonicalize_modifier(result)
+        mod = canonicalize_modifier(result)
         expected_mod = {
             'modifier': 'Translocation',
             'effect': {
@@ -1433,7 +1435,7 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
         node = 'Protein', 'HGNC', 'EGFR'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node)
 
     def test_translocation_surface(self):
@@ -1451,10 +1453,10 @@ class TestTransformation(TestTokenParserBase):
                 'toLoc': dict(namespace='GOCC', name='cell surface')
             }
         }
-        self.assertEqual(expected_mod, self.parser.canonicalize_modifier(result))
+        self.assertEqual(expected_mod, canonicalize_modifier(result))
 
         node = 'Protein', 'HGNC', 'EGFR'
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node)
 
     def test_reaction_1(self):
@@ -1493,7 +1495,7 @@ class TestTransformation(TestTokenParserBase):
 
         node = 'Reaction', (('Abundance', ('CHEBI', 'superoxide')),), (
             ('Abundance', ('CHEBI', 'hydrogen peroxide')), ('Abundance', ('CHEBI', 'oxygen')))
-        self.assertEqual(node, self.parser.canonicalize_node(result))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node)
 
         self.assertHasNode(('Abundance', 'CHEBI', 'superoxide'))
@@ -1547,7 +1549,7 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = self.parser.canonicalize_node(result['subject'])
+        sub = canonicalize_node(result['subject'])
         self.assertHasNode(sub)
 
         sub_member_1 = 'Protein', 'HGNC', 'CASP8'
@@ -1652,7 +1654,7 @@ class TestRelations(TestTokenParserBase):
         sub = 'Protein', 'SFAM', 'CAPN Family'
         self.assertHasNode(sub)
 
-        obj = self.parser.canonicalize_node(result['object'])
+        obj = canonicalize_node(result['object'])
         self.assertHasNode(obj)
 
         obj_member_1 = 'Protein', 'HGNC', 'CDK5R1'
@@ -1852,7 +1854,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = self.parser.canonicalize_node(result['subject'])
+        sub = canonicalize_node(result['subject'])
         self.assertHasNode(sub)
 
         sub_member_1 = 'Protein', 'HGNC', 'F3'
@@ -2085,7 +2087,7 @@ class TestRelations(TestTokenParserBase):
                            ['BiologicalProcess', ['GOBP', 'cholesterol biosynthetic process']]]
         self.assertEqual(expected_result, result.asList())
 
-        sub = self.parser.canonicalize_node(result['subject'])
+        sub = canonicalize_node(result['subject'])
         self.assertHasNode(sub)
 
         sub_reactant_1 = 'Abundance', 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
