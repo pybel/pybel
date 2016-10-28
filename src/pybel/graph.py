@@ -139,7 +139,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except:
-                log.error('Line %07d - failed: %d', line_number, line)
+                log.error('Line %07d - failed: %s', line_number, line)
 
         log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
@@ -150,7 +150,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except PyBelError as e:
-                log.critical('Line %07d - %d', line_number, line)
+                log.critical('Line %07d - %s', line_number, line)
                 raise e
             except ParseException as e:
                 log.error('Line %07d - invalid statement: %s', line_number, line)

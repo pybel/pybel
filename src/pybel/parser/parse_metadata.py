@@ -35,21 +35,21 @@ class MetadataParser(BaseParser):
 
         self.definition_cache_manager = definition_cache_manager
 
-        word_under = ppc.identifier
-
         as_tag = Suppress('AS')
         url_tag = Suppress('URL')
         list_tag = Suppress('LIST')
         set_tag = Suppress('SET')
         define_tag = Suppress('DEFINE')
 
-        self.document = And([set_tag, Suppress('DOCUMENT'), word('key'), Suppress('='), quote('value')])
+        value = quote | ppc.identifier
 
-        namespace_tag = And([define_tag, Suppress('NAMESPACE'), word_under('name'), as_tag])
+        self.document = And([set_tag, Suppress('DOCUMENT'), word('key'), Suppress('='), value('value')])
+
+        namespace_tag = And([define_tag, Suppress('NAMESPACE'), ppc.identifier('name'), as_tag])
         self.namespace_url = And([namespace_tag, url_tag, quote('url')])
         self.namespace_list = And([namespace_tag, list_tag, delimitedSet('values')])
 
-        annotation_tag = And([define_tag, Suppress('ANNOTATION'), word_under('name'), as_tag])
+        annotation_tag = And([define_tag, Suppress('ANNOTATION'), ppc.identifier('name'), as_tag])
         self.annotation_url = And([annotation_tag, url_tag, quote('url')])
         self.annotation_list = And([annotation_tag, list_tag, delimitedSet('values')])
         self.annotation_pattern = And([annotation_tag, Suppress('PATTERN'), quote('value')])
