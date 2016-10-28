@@ -15,18 +15,4 @@ import time
 from .cli import main
 
 if __name__ == '__main__':
-    log = logging.getLogger('pybel')
-    log.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    if not os.path.exists(os.path.expanduser('~/.pybel')):
-        os.mkdir(os.path.expanduser('~/.pybel'))
-
-    fh_path = os.path.expanduser(time.strftime('~/.pybel/pybel_%Y_%m_%d_%H_%M_%S.txt'))
-    fh = logging.FileHandler(fh_path)
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
     main()

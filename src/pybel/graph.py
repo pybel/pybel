@@ -81,7 +81,8 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines, context=None, lenient=False, definition_cache_manager=None, *attrs, **kwargs):
+    def __init__(self, lines, context=None, lenient=False, definition_cache_manager=None, log_stream=None,
+                 *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
         :param lines: iterable over lines of BEL data file
@@ -92,10 +93,17 @@ class BELGraph(nx.MultiDiGraph):
         :param definition_cache_manager: database connection string to namespace namspace_cache, pre-built namespace namspace_cache manager,
                     or True to use the default
         :type definition_cache_manager: str or pybel.mangager.NamespaceCache or bool
+        :param log_stream: a stream to write debug logging to
         :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
         :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
+
+        if log_stream is not None:
+            sh = logging.StreamHandler(stream=log_stream)
+            sh.setLevel(5)
+            sh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            log.addHandler(sh)
 
         self.context = context
 
