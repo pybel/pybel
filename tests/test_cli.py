@@ -20,14 +20,14 @@ class TestCli(unittest.TestCase):
         self.runner = CliRunner()
 
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
-    def test_neo4j(self):
+    def test_neo4j_remote(self):
         test_context = 'PYBEL_TEST_CTX'
-
-        neo = py2neo.Graph(os.environ['NEO_PATH'])
+        neo_path = os.environ['NEO_PATH']
+        neo = py2neo.Graph(neo_path)
         neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
 
-        self.runner.invoke(cli.main, ['to_neo', '--path', test_bel_1, '--neo', os.environ['NEO_PATH'], '--context',
-                                      test_context])
+        self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--neo',
+                                      neo_path, '--neo-context',test_context])
 
         q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
         count = neo.data(q)[0]['count']

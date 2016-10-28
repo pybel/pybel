@@ -12,7 +12,8 @@ from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser, TruncParser
 from .parse_control import ControlParser
-from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
+from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException, \
+    MissingCitationException
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
@@ -456,6 +457,9 @@ class BelParser(BaseParser):
         return tokens
 
     def handle_relation(self, s, l, tokens):
+        if not self.control_parser.citation:
+            raise MissingCitationException('unable to add relation {}'.format(s))
+
         sub = self.ensure_node(s, l, tokens['subject'])
         obj = self.ensure_node(s, l, tokens['object'])
 

@@ -17,7 +17,7 @@ from .exceptions import PyBelError
 from .manager.namespace_cache import DefinitionCacheManager
 from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
-from .parser.utils import split_file_to_annotations_and_definitions
+from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import flatten_edges, expand_edges
 
 __all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle',
@@ -81,7 +81,8 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines, context=None, lenient=False, definition_cache_manager=None, *attrs, **kwargs):
+    def __init__(self, lines, context=None, lenient=False, definition_cache_manager=None, log_stream=None,
+                 *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
         :param lines: iterable over lines of BEL data file
@@ -92,10 +93,17 @@ class BELGraph(nx.MultiDiGraph):
         :param definition_cache_manager: database connection string to namespace namspace_cache, pre-built namespace namspace_cache manager,
                     or True to use the default
         :type definition_cache_manager: str or pybel.mangager.NamespaceCache or bool
+        :param log_stream: a stream to write debug logging to
         :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
         :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
+
+        if log_stream is not None:
+            sh = logging.StreamHandler(stream=log_stream)
+            sh.setLevel(5)
+            sh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            log.addHandler(sh)
 
         self.context = context
 
@@ -104,7 +112,8 @@ class BELGraph(nx.MultiDiGraph):
         if isinstance(definition_cache_manager, DefinitionCacheManager):
             self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
         elif isinstance(definition_cache_manager, str):
-            self.metadata_parser = MetadataParser(definition_cache_manager=DefinitionCacheManager(conn=definition_cache_manager))
+            self.metadata_parser = MetadataParser(
+                definition_cache_manager=DefinitionCacheManager(conn=definition_cache_manager))
         else:
             self.metadata_parser = MetadataParser(definition_cache_manager=DefinitionCacheManager())
 
@@ -130,7 +139,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except:
-                log.error('Line %07d - failed: %d', line_number, line)
+                log.error('Line %07d - failed: %s', line_number, line)
 
         log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
@@ -141,7 +150,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except PyBelError as e:
-                log.critical('Line %07d - %d', line_number, line)
+                log.critical('Line %07d - %s', line_number, line)
                 raise e
             except ParseException as e:
                 log.error('Line %07d - invalid statement: %s', line_number, line)
@@ -177,15 +186,39 @@ class BELGraph(nx.MultiDiGraph):
 
         log.info('Finished parsing statements section in %.02f seconds', time.time() - t)
 
+    def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
+        """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data. See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
+        for u, v, k, d in nx.MultiDiGraph.edges_iter(self, nbunch=nbunch, data=True, keys=True, default=default):
+            if not subdict_matches(d, kwargs):
+                continue
+            elif keys and data:
+                yield u, v, k, d
+            elif data:
+                yield u, v, d
+            elif keys:
+                yield u, v, k
+            else:
+                yield u, v
+
+    def nodes_iter(self, data=False, **kwargs):
+        """Allows for filtering by checking keyword arguments are a subdictionary of each nodes' data. See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
+        for n, d in nx.MultiDiGraph.nodes_iter(self, data=True):
+            if not subdict_matches(d, kwargs):
+                continue
+            elif data:
+                yield n, d
+            else:
+                yield n
+
 
 def to_neo4j(graph, neo_graph, context=None):
     """Uploads a BEL graph to Neo4J graph database using `py2neo`
 
     :param graph: a BEL Graph
     :type graph: BELGraph
-    :param neo_graph:
+    :param neo_graph: a py2neo graph object, Refer to the `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_ for how to build this object.
     :type neo_graph: py2neo.Graph
-    :param context: a disease context to allow for multiple disease models in one neo4j instance
+    :param context: a disease context to allow for multiple disease models in one neo4j instance. Each edge will be assigned an attribute :code:`pybel_context` with this value
     :type context: str
     """
 

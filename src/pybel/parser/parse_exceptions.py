@@ -71,3 +71,27 @@ class LexicographyException(PyBelWarning):
     """Improper capitalization"""
     #:
     code = 34
+
+
+class IllegalDocumentMetadataException(PyBelWarning):
+    """Illegal document metadata. Should be one of:
+
+- Authors
+- ContactInfo
+- Copyright
+- Description
+- Disclaimer
+- Licenses
+- Name
+- Version
+
+See also: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section
+    """
+    #:
+    code = 35
+
+
+class MissingCitationException(PyBelWarning):
+    """Tried to add an edge, but no citatation present. Most likely due to previous improperly formatted citation"""
+    #:
+    code = 36

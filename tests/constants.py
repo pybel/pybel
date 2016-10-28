@@ -13,6 +13,9 @@ test_bel_1 = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 test_bel_2 = os.path.join(dir_path, 'bel', 'test_bel_2.bel')
 test_bel_3 = os.path.join(dir_path, 'bel', 'test_bel_3.bel')
 
+test_citation_bel = 'SET Citation = {"TestType","TestName","TestRef"}'
+test_citation_dict = dict(citation_type='TestType', citation_name='TestName', citation_reference='TestRef')
+
 
 class TestTokenParserBase(unittest.TestCase):
     @classmethod

@@ -69,6 +69,8 @@ stream
 Export for Cytoscape
 ~~~~~~~~~~~~~~~~~~~~
 
+This example retrieves a BEL file from a path and exports to a GraphML file for use in Cytoscape.
+
 .. code-block:: sh
 
     $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
@@ -78,13 +80,26 @@ In Cytoscape, open with :code:`Import > Network > From File`.
 Export to Neo4j
 ~~~~~~~~~~~~~~~
 
+This example retrieves a BEL file from a URL, and exports to Neo4j
+
 .. code-block:: sh
 
    $ URL="http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel"
    $ NEO="neo4j:neo4j@localhost:7474"
    $
-   $ pybel to_neo --url $URL --neo $NEO
+   $ pybel convert --url $URL --neo $NEO
 
+Multiple Export
+~~~~~~~~~~~~~~~
+
+This example gets a file from stdin and exports to multiple locations, with logging
+
+.. code-block:: sh
+
+   $ URL="http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel"
+   $ NEO="neo4j:neo4j@localhost:7474"
+   $
+   $ curl $URL | pybel convert --path - --neo $NEO --json ~/Desktop/example.json --log-file ~/Desktop/log.txt
 
 Installation
 ------------
