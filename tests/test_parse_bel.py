@@ -1,7 +1,7 @@
 import logging
 
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
-from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
+from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node, write_bel
 
 from tests.constants import TestTokenParserBase, test_citation_dict
 
@@ -106,7 +106,7 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['Variant', 'Phe', 508, 'del']
+                ['Variant', 'p.', 'Phe', 508, 'del']
             ]
 
         }
@@ -117,7 +117,6 @@ class TestGene(TestTokenParserBase):
 
         parent = 'Gene', 'HGNC', 'AKT1'
         self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
-
         self.assertHasEdge(parent, name, relation='hasVariant')
 
     def test_214d(self):
@@ -132,11 +131,7 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                {
-                    'reference': 'G',
-                    'position': 308,
-                    'variant': 'A'
-                }
+                ['Variant', 'g.', 308, 'G', '>', 'A']
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -161,11 +156,7 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                {
-                    'reference': 'G',
-                    'position': 308,
-                    'variant': 'A'
-                }
+                ['Variant', 'g.', 308, 'G', '>', 'A']
             ],
             'location': {
                 'namespace': 'GOCC',
@@ -194,12 +185,8 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['Variant', 'Phe', 508, 'del'],
-                {
-                    'reference': 'G',
-                    'position': 308,
-                    'variant': 'A'
-                },
+                ['Variant', 'p.', 'Phe', 508, 'del'],
+                ['Variant', 'g.', 308, 'G', '>', 'A'],
                 ['Variant', 'del', 'CTT']
             ]
         }
@@ -286,7 +273,7 @@ class TestGene(TestTokenParserBase):
         statement = 'g(REF:"NC_000007.13", var(g.117199646_117199648delCTT))'
         result = self.parser.gene.parseString(statement)
 
-        expected_result = ['Gene', ['REF', 'NC_000007.13'], ['Variant', 117199646, 117199648, 'del', 'CTT']]
+        expected_result = ['Gene', ['REF', 'NC_000007.13'], ['Variant', 'g.', 117199646, 117199648, 'del', 'CTT']]
         self.assertEqual(expected_result, result.asList())
 
         gene_node = 'Gene', 'REF', 'NC_000007.13'
@@ -301,7 +288,7 @@ class TestGene(TestTokenParserBase):
         statement = 'g(HGNC:CFTR, var(c.1521_1523delCTT))'
         result = self.parser.gene.parseString(statement)
 
-        expected_result = ['Gene', ['HGNC', 'CFTR'], ['Variant', 1521, 1523, 'del', 'CTT']]
+        expected_result = ['Gene', ['HGNC', 'CFTR'], ['Variant', 'c.', 1521, 1523, 'del', 'CTT']]
         self.assertEqual(expected_result, result.asList())
 
         mod_node = canonicalize_node(result)
@@ -376,7 +363,7 @@ class TestMiRNA(TestTokenParserBase):
                 'name': 'MIR21'
             },
             'variants': [
-                ['Variant', 'Phe', 508, 'del'],
+                ['Variant', 'p.', 'Phe', 508, 'del'],
             ]
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -402,7 +389,7 @@ class TestMiRNA(TestTokenParserBase):
                 'name': 'MIR21'
             },
             'variants': [
-                ['Variant', 'Phe', 508, 'del'],
+                ['Variant', 'p.', 'Phe', 508, 'del'],
             ],
             'location': {
                 'namespace': 'GOCC',
@@ -492,11 +479,7 @@ class TestProtein(TestTokenParserBase):
                 'name': 'intracellular'
             },
             'variants': [
-                {
-                    'reference': 'A',
-                    'position': 127,
-                    'variant': 'Y'
-                },
+                ['Variant', 'p.', 'Ala', 127, 'Tyr'],
                 {
                     'identifier': 'Ph',
                     'code': 'Ser'
@@ -584,7 +567,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, var(p.C40*))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'C', 40, '*']]
+        expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'p.', 'C', 40, '*']]
         self.assertEqual(expected_result, result.asList())
 
         mod_node = canonicalize_node(result)
@@ -600,7 +583,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(Ph, S, 473))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = ['Protein', ['HGNC', 'AKT1'], ['ProteinModification', 'Ph', 'S', 473]]
+        expected_result = ['Protein', ['HGNC', 'AKT1'], ['ProteinModification', 'Ph', 'Ser', 473]]
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'AKT1'
@@ -696,11 +679,10 @@ class TestProtein(TestTokenParserBase):
         """2.2.2 Test substitution"""
         statement = 'p(HGNC:CFTR, var(p.Gly576Ala))'
         result = self.parser.protein.parseString(statement)
-        expected_result = ['Protein', ['HGNC', 'CFTR'], ['Variant', 'Gly', 576, 'Ala']]
+        expected_result = ['Protein', ['HGNC', 'CFTR'], ['Variant', 'p.', 'Gly', 576, 'Ala']]
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
-        # mod_node = 'Protein', 'HGNC', 'CFTR', 'Variant', 'Gly', 576, 'Ala'
         mod_node = canonicalize_node(result)
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
@@ -712,7 +694,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:CFTR, var(p.Phe508del))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = ['Protein', ['HGNC', 'CFTR'], ['Variant', 'Phe', 508, 'del']]
+        expected_result = ['Protein', ['HGNC', 'CFTR'], ['Variant', 'p.', 'Phe', 508, 'del']]
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
@@ -905,7 +887,7 @@ class TestRna(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['Variant', 'Phe', 508, 'del'],
+                ['Variant', 'p.', 'Phe', 508, 'del'],
                 ['Variant', 'del', 'CTT']
             ]
         }
@@ -976,7 +958,7 @@ class TestRna(TestTokenParserBase):
         statement = 'r(HGNC:CFTR, var(c.1521_1523delCTT))'
         result = self.parser.rna.parseString(statement)
 
-        expected_result = ['RNA', ['HGNC', 'CFTR'], ['Variant', 1521, 1523, 'del', 'CTT']]
+        expected_result = ['RNA', ['HGNC', 'CFTR'], ['Variant', 'c.', 1521, 1523, 'del', 'CTT']]
         self.assertEqual(expected_result, result.asList())
 
         mod_node = canonicalize_node(result)
@@ -992,7 +974,7 @@ class TestRna(TestTokenParserBase):
         statement = 'r(HGNC:CFTR, var(r.1653_1655delcuu))'
         result = self.parser.rna.parseString(statement)
 
-        expected_result = ['RNA', ['HGNC', 'CFTR'], ['Variant', 1653, 1655, 'del', 'cuu']]
+        expected_result = ['RNA', ['HGNC', 'CFTR'], ['Variant', 'r.', 1653, 1655, 'del', 'cuu']]
         self.assertEqual(expected_result, result.asList())
 
         mod_node = canonicalize_node(result)
@@ -1523,7 +1505,6 @@ class TestTransformation(TestTokenParserBase):
 
 
 class TestRelations(TestTokenParserBase):
-
     def setUp(self):
         TestTokenParserBase.setUp(self)
         self.parser.control_parser.citation.update(test_citation_dict)
@@ -1797,7 +1778,7 @@ class TestRelations(TestTokenParserBase):
                 'function': 'Gene',
                 'identifier': dict(namespace='HGNC', name='APP'),
                 'variants': [
-                    dict(reference='G', position=275341, variant='C')
+                    ['Variant', 'g.', 275341, 'G', '>', 'C']
                 ]
             },
             'relation': 'causesNoChange',
@@ -1808,7 +1789,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = 'GeneVariant', 'HGNC', 'APP', ('Variant', 'G', 275341, 'C')
+        sub = 'GeneVariant', 'HGNC', 'APP', ('Variant', 'g.', 275341, 'G', '>', 'C')
         self.assertHasNode(sub)
 
         obj = 'Pathology', 'MESHD', 'Alzheimer Disease'
@@ -1900,9 +1881,10 @@ class TestRelations(TestTokenParserBase):
                 'function': 'Protein',
                 'identifier': dict(namespace='HGNC', name='MAPT'),
                 'variants': [
-                    {'identifier': 'P'}
+                    {
+                        'identifier': 'phosphorylation',
+                    }
                 ]
-
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1910,7 +1892,7 @@ class TestRelations(TestTokenParserBase):
         sub = 'Protein', 'SFAM', 'GSK3 Family'
         self.assertHasNode(sub)
 
-        obj = 'ProteinVariant', 'HGNC', 'MAPT', ('ProteinModification', 'P')
+        obj = 'ProteinVariant', 'HGNC', 'MAPT', ('ProteinModification', 'phosphorylation')
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
@@ -1928,7 +1910,11 @@ class TestRelations(TestTokenParserBase):
                 'function': 'Protein',
                 'identifier': dict(namespace='HGNC', name='GSK3B'),
                 'variants': [
-                    dict(identifier='P', code='S', pos=9)
+                    {
+                        'code': 'Ser',
+                        'identifier': 'phosphorylation',
+                        'pos': 9
+                    }
                 ]
             },
             'relation': 'positiveCorrelation',
@@ -1945,7 +1931,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        subject_node = 'ProteinVariant', 'HGNC', 'GSK3B', ('ProteinModification', 'P', 'S', 9)
+        subject_node = 'ProteinVariant', 'HGNC', 'GSK3B', ('ProteinModification', 'phosphorylation', 'Ser', 9)
         self.assertHasNode(subject_node)
 
         object_node = 'Protein', 'HGNC', 'GSK3B'

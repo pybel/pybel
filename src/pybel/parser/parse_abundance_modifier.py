@@ -12,29 +12,47 @@ log = logging.getLogger('pybel')
 dna_nucleotide_seq = Word(''.join(dna_nucleotide_labels.keys()))
 rna_nucleotide_seq = Word(''.join(rna_nucleotide_labels.keys()))
 
-hgvs_rna_del = (Suppress('r.') + pyparsing_common.integer() +
+"""
+From http://varnomen.hgvs.org/recommendations/general/
+a letter prefix should be used to indicate the reference sequence used. Accepted prefixes are;
+“g.” for a genomic reference sequence
+“m.” for a mitochondrial reference sequence
+“c.” for a coding DNA reference sequence
+“n.” for a non-coding DNA reference sequence
+“r.” for an RNA reference sequence (transcript)
+“p.” for a protein reference sequence
+"""
+
+p_dot = Literal('p.')  #: protein reference sequence
+r_dot = Literal('r.')  #: rna transcript reference sequence
+c_dot = Literal('c.')  #: coding DNA reference sequence
+g_dot = Literal('g.')  #: genomic reference sequence
+
+deletion = Literal('del')
+
+hgvs_rna_del = (r_dot + pyparsing_common.integer() +
                 Suppress('_') + pyparsing_common.integer() + 'del' +
                 rna_nucleotide_seq)
 
-hgvs_dna_del = (Suppress('c.') + pyparsing_common.integer() +
+hgvs_dna_del = (c_dot + pyparsing_common.integer() +
                 Suppress('_') + pyparsing_common.integer() + 'del' +
                 dna_nucleotide_seq)
 
-hgvs_chromosome = (Suppress('g.') + pyparsing_common.integer() +
+hgvs_chromosome = (g_dot + pyparsing_common.integer() +
                    Suppress('_') + pyparsing_common.integer() + 'del' +
                    dna_nucleotide_seq)
 
 hgvs_snp = 'del' + dna_nucleotide_seq
 
-hgvs_protein_del = Suppress('p.') + aa_triple + pyparsing_common.integer() + 'del'
+hgvs_protein_del = p_dot + aa_triple + pyparsing_common.integer() + 'del'
 
-hgvs_protein_mut = Suppress('p.') + aa_triple + pyparsing_common.integer() + aa_triple
+hgvs_protein_mut = p_dot + aa_triple + pyparsing_common.integer() + aa_triple
 
-hgvs_protein_fs = Suppress('p.') + aa_triple + pyparsing_common.integer() + aa_triple + 'fs'
+hgvs_protein_fs = p_dot + aa_triple + pyparsing_common.integer() + aa_triple + 'fs'
 
-hgvs_genomic = Suppress('g.') + pyparsing_common.integer() + dna_nucleotide + Suppress('>') + dna_nucleotide
+hgvs_genomic = g_dot + pyparsing_common.integer() + dna_nucleotide + Suppress('>') + dna_nucleotide
 
-hgvs_protein_truncation = Suppress('p.') + 'C' + pyparsing_common.integer()('location') + '*'
+hgvs_protein_truncation = p_dot + 'C' + pyparsing_common.integer()('location') + '*'
 
 hgvs = (hgvs_protein_truncation | hgvs_rna_del | hgvs_dna_del | hgvs_chromosome | hgvs_snp | hgvs_protein_del |
         hgvs_protein_fs | hgvs_protein_mut | hgvs_genomic | '=' | '?')
@@ -62,7 +80,7 @@ class PsubParser(BaseParser):
 
     def handle_psub(self, s, l, tokens):
         log.log(5, 'PyBEL006 sub() is deprecated: %s', s)
-        return tokens
+        return ['Variant', 'p.', tokens['reference'], tokens['position'], tokens['variant']]
 
     def get_language(self):
         return self.language
@@ -96,7 +114,7 @@ class GsubParser(BaseParser):
 
     def handle_gsub(self, s, l, tokens):
         log.log(5, 'PyBEL009 sub() is deprecated: %s', s)
-        return tokens
+        return ['Variant', 'g.', tokens['position'], tokens['reference'], '>', tokens['variant']]
 
     def get_language(self):
         return self.language
@@ -137,7 +155,6 @@ class FusionParser(BaseParser):
 
     def get_language(self):
         return self.language
-
 
 
 class LocationParser(BaseParser):
