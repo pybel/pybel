@@ -29,9 +29,9 @@ class DefinitionCacheManager:
 
         :param: conn: custom database connection string'
         :type: str
-        :param: setup_cache: Weather or not the namespace namespace_cache should be setted up on initiation.
+        :param: setup_cache: Whether or not the definition cache should be set up on initiation.
         :type: bool
-        :param: sql_echo: Weather or not echo the running sql code.
+        :param: sql_echo: Whether or not echo the running sql code.
         :type: bool
         """
         conn = conn if conn is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
@@ -130,8 +130,7 @@ class DefinitionCacheManager:
         self.eng.execute(database_models.Context.__table__.insert(), context_insert_values)
 
     def __cached_definitions(self):
-        """Creates the namespace and annotation caches.
-        """
+        """Creates the namespace and annotation caches"""
         definition_dataframe = pd.read_sql_table(DEFINITION_TABLE_NAME, self.eng)
         context_dataframe = pd.read_sql_table(CONTEXT_TABLE_NAME, self.eng)
         definition_context_dataframe = definition_dataframe.merge(context_dataframe,
@@ -152,7 +151,7 @@ class DefinitionCacheManager:
     def setup_database(self, drop_existing=False):
         """Sets the database with the needed tables.
 
-        :param drop_existing: Indicates if exising tables should be dropped and the namespace_cache should be reset.
+        :param drop_existing: Indicates if existing tables should be dropped and the namespace_cache should be reset.
         :type drop_existing: bool
         """
         start_time = time.time()

@@ -143,6 +143,7 @@ rna_nucleotide_labels = {
 
 rna_nucleotide = oneOf(list(rna_nucleotide_labels.keys()))
 
+#: dictionary of default protein modifications to their preferred value
 pmod_namespace = {
     'Ac': 'acetylation',
     'acetylation': 'acetylation',
@@ -208,6 +209,7 @@ pmod_namespace = {
     'polyubiquitination': 'polyubiquitination'
 }
 
+#: dictionary of legacy (BEL 1.0) default namespace protein modifications to their BEL 2.0 preferred value
 pmod_legacy_labels = {
     'P': 'phosphorylation',
     'A': 'acetylation',
@@ -231,7 +233,7 @@ variant_parent_dict = {
     'ProteinVariant': 'Protein'
 }
 
-# See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
+#: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
 value_map = {
     'G': 'Gene',
     'R': 'RNA',
