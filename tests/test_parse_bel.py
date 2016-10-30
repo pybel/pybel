@@ -1882,7 +1882,7 @@ class TestRelations(TestTokenParserBase):
                 'identifier': dict(namespace='HGNC', name='MAPT'),
                 'variants': [
                     {
-                        'identifier': 'phosphorylation',
+                        'identifier': 'Ph',
                     }
                 ]
             }
@@ -1892,7 +1892,7 @@ class TestRelations(TestTokenParserBase):
         sub = 'Protein', 'SFAM', 'GSK3 Family'
         self.assertHasNode(sub)
 
-        obj = 'ProteinVariant', 'HGNC', 'MAPT', ('ProteinModification', 'phosphorylation')
+        obj = 'ProteinVariant', 'HGNC', 'MAPT', ('ProteinModification', 'Ph')
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
@@ -1912,7 +1912,7 @@ class TestRelations(TestTokenParserBase):
                 'variants': [
                     {
                         'code': 'Ser',
-                        'identifier': 'phosphorylation',
+                        'identifier': 'Ph',
                         'pos': 9
                     }
                 ]
@@ -1931,7 +1931,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        subject_node = 'ProteinVariant', 'HGNC', 'GSK3B', ('ProteinModification', 'phosphorylation', 'Ser', 9)
+        subject_node = 'ProteinVariant', 'HGNC', 'GSK3B', ('ProteinModification', 'Ph', 'Ser', 9)
         self.assertHasNode(subject_node)
 
         object_node = 'Protein', 'HGNC', 'GSK3B'

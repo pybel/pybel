@@ -24,7 +24,7 @@ class PmodParser(BaseParser):
         pmod_tag = oneOf(['pmod', 'proteinModification'])
         pmod_tag.addParseAction(replaceWith('ProteinModification'))
 
-        pmod_default_ns = oneOf(pmod_namespace).setParseAction(self.handle_pmod_default_ns)
+        pmod_default_ns = oneOf(pmod_namespace.keys()).setParseAction(self.handle_pmod_default_ns)
         pmod_legacy_ns = oneOf(pmod_legacy_labels.keys()).setParseAction(self.handle_pmod_legacy_ns)
 
         pmod_identifier = Group(self.namespace_parser.identifier_qualified) | pmod_default_ns | pmod_legacy_ns
@@ -40,8 +40,7 @@ class PmodParser(BaseParser):
         return tokens
 
     def handle_pmod_default_ns(self, s, l, tokens):
-        # TODO implement canonicalization to bel 2.0
-        return tokens
+        return [language.pmod_namespace[tokens[0]]]
 
     def handle_pmod_legacy_ns(self, s, l, tokens):
         log.log(5, 'PyBEL016 legacy pmod() values: {}.'.format(s))

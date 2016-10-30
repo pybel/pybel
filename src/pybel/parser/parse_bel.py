@@ -676,3 +676,24 @@ def canonicalize_modifier(tokens):
         }
 
     return attrs
+
+
+def write_variant(tokens):
+    if isinstance(tokens, dict):
+        if {'identifier', 'code', 'pos'} <= set(tokens):
+            return 'pmod({}, {}, {})'.format(tokens['identifier'], tokens['code'], tokens['pos'])
+        elif {'identifier', 'code'} <= set(tokens):
+            return 'pmod({}, {})'.format(tokens['identifier'], tokens['code'])
+        elif 'identifier' in tokens:
+            return 'pmod({})'.format(tokens['identifier'])
+        else:
+            raise NotImplementedError('prob with {}'.format(tokens))
+
+    elif tokens[0] == 'Variant':
+        return 'var({})'.format(''.join(str(token) for token in tokens[1:]))
+    elif tokens[0] == 'ProteinModification':
+        return 'pmod({})'.format(tokens[1])
+    else:
+        raise NotImplementedError('prob with :{}'.format(tokens))
+
+
