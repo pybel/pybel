@@ -66,6 +66,32 @@ warns when the names given in :code:`*.bel` documents do not match their respect
 is not considered, but in the future, PyBEL will also warn when capitalization is not properly stylized, like forgetting
 the lowercase 'h' in "ChEMBL".
 
+Multiple Annotations
+--------------------
+
+When an annotation has a list, it means that the following BEL relations are true for each of the listed values.
+The lines below show a BEL relation that corresponds to two edges, each with the same citation but different values
+for :code:`ExampleAnnotation`.
+
+.. code-block::
+
+    SET Citation = {"PubMed","Example Article","12345"}
+    SET ExampleAnnotation = {"Example Value 1", "Example Value 2"}
+    p(HGNC:YFG1) -> p(HGNC:YFG2)
+
+Furthermore, if there are multiple annotations with lists, the following BEL relations are true for all of the
+different combinations of them. The following statements will produce four edges, as the cartesian product of the values
+used for both :code:`ExampleAnnotation1` and :code:`ExampleAnnotation2`. This might not be the knowledge that the
+annotator wants to express, and is prone to mistakes, so use of annotation lists are not reccomended.
+
+.. code-block::
+
+    SET Citation = {"PubMed","Example Article","12345"}
+    SET ExampleAnnotation1 = {"Example Value 11", "Example Value 12"}
+    SET ExampleAnnotation2 = {"Example Value 21", "Example Value 22"}
+    p(HGNC:YFG1) -> p(HGNC:YFG2)
+
+
 Complexes
 ---------
 
