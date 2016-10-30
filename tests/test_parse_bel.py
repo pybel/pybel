@@ -1,7 +1,7 @@
 import logging
 
+from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
-from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node, write_bel
 
 from tests.constants import TestTokenParserBase, test_citation_dict
 
