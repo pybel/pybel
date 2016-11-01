@@ -1,8 +1,15 @@
 Design Choices
 ==============
 
+Data Model
+----------
+
+Molecular biology is a directed graph; not a table. BEL expresses how biological entities interact within many
+different contexts, with descriptive annotations. PyBEL uses NetworkX to store these interactions as a graph, with
+dicationaries of annotations for its nodes and edges.
+
 Why Not RDF?
-------------
+~~~~~~~~~~~~
 
 Writing BEL requires using curated namespaces that have been agreed upon by the community. As of now, these namespaces
 are hosted with the OpenBEL Consortium. Unfortunately, their format does not explicitly link back to the original
@@ -31,6 +38,41 @@ and edges to have dictionaries of annotations. This allows for much easier progr
 complicated questions, which can be written with python code. Because the data structure is the same in Neo4J, the
 data can be directly exported with :code:`pybel.to_neo4j`. Neo4J supports the Cypher querying language so that the
 same queries can be written in an elegant and simple way.
+
+Representation of Events and Modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
+degradations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
+of the edge. In reality, an edge like :code:`sec(p(HGNC:A)) -> activity(p(HGNC:B), ma(kinaseActivity))` represents
+a connection between :code:`HGNC:A` and :code:`HGNC:B`. Each of these modifiers explains the context of the relationship
+between these physical entities. Further, querying a network where these modifiers are part of a relationship
+is much more straightforward. For example, finding all proteins that are upregulated by the kinase activity of another
+protein now can be directly queried by filtering all edges for those with a subject modifier whose modification is
+molecular activity, and whose effect is kinase activity. Having fewer nodes also allows for a much easier display
+and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
+as a color coded source and terminus of the connecting edge.
+
+The compiler in OpenBEL framework created nodes for molecular activities like :code:`kin(p(HGNC:YFG))` and induced an
+edge like :code:`p(HGNC:YFG) actsIn kin(p(HGNC:YFG))`. For transformations, a statement like
+:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")` also induced
+:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane") translocates p(HGNC:YFG)`.
+
+In PyBEL, we recognize that these modifications are actually annotations to the type of relationship between the
+subject's entity and the object's entity. :code:`p(HGNC:ABC) -> tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")`
+is about the relationship between :code:`p(HGNC:ABC)` and :code:`p(HGNC:YFG)`, while
+the information about the translocation qualifies that the object is undergoing an event, and not just the abundance.
+This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
+just the keyword :code:`p`
+
+This also begs the question of what statements mean. BEL 2.0 introduced the :code:`location()` element that can be
+inside any abundances. This means that it's possible to unambiguously express the differences between the process of
+:code:`HGNC:A` moving from one place to another and the existence of :code:`HGNC:A` in a specific location having
+different effects. In BEL 1.0, this action had its own node, but this introduced unnecessary complexity to the network
+and made querying more difficult. Consider the difference between the following two statements:
+
+- :code:`tloc(p(HGNC:A), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell membrane")) -> p(HGNC:B)`
+- :code:`p(HGNC:A, location(GOCC:"cell membrane")) -> p(HGNC:B)`
 
 Dealing with Dirty Namespaces
 -----------------------------
@@ -66,6 +108,27 @@ warns when the names given in :code:`*.bel` documents do not match their respect
 is not considered, but in the future, PyBEL will also warn when capitalization is not properly stylized, like forgetting
 the lowercase 'h' in "ChEMBL".
 
+Multiple Annotations
+--------------------
+
+When an annotation has a list, it means that the following BEL relations are true for each of the listed values.
+The lines below show a BEL relation that corresponds to two edges, each with the same citation but different values
+for :code:`ExampleAnnotation`.
+
+- ``SET Citation = {"PubMed","Example Article","12345"}``
+- ``SET ExampleAnnotation = {"Example Value 1", "Example Value 2"}``
+- ``p(HGNC:YFG1) -> p(HGNC:YFG2)``
+
+Furthermore, if there are multiple annotations with lists, the following BEL relations are true for all of the
+different combinations of them. The following statements will produce four edges, as the cartesian product of the values
+used for both :code:`ExampleAnnotation1` and :code:`ExampleAnnotation2`. This might not be the knowledge that the
+annotator wants to express, and is prone to mistakes, so use of annotation lists are not reccomended.
+
+- ``SET Citation = {"PubMed","Example Article","12345"}``
+- ``SET ExampleAnnotation1 = {"Example Value 11", "Example Value 12"}``
+- ``SET ExampleAnnotation2 = {"Example Value 21", "Example Value 22"}``
+- ``p(HGNC:YFG1) -> p(HGNC:YFG2)``
+
 Complexes
 ---------
 
@@ -74,40 +137,7 @@ that is not implemented in the core of PyBEL. One suggestion to assign values to
 :code:`complex(p(HGNC:YFG1),p(HGNC:YFG2))` would be to sort over the 3-tuples of (Function, Namespace, Name) for
 each of the complex's elements. This order is guaranteed to be unique and persistent.
 
-Representation of Events and Modifiers
---------------------------------------
 
-In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
-degradations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
-of the edge. In reality, an edge like :code:`sec(p(HGNC:A)) -> activity(p(HGNC:B), ma(kinaseActivity))` represents
-a connection between :code:`HGNC:A` and :code:`HGNC:B`. Each of these modifiers explains the context of the relationship
-between these physical entities. Further, querying a network where these modifiers are part of a relationship
-is much more straightforward. For example, finding all proteins that are upregulated by the kinase activity of another
-protein now can be directly queried by filtering all edges for those with a subject modifier whose modification is
-molecular activity, and whose effect is kinase activity. Having fewer nodes also allows for a much easier display
-and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
-as a color coded source and terminus of the connecting edge.
-
-The compiler in OpenBEL framework created nodes for molecular activities like :code:`kin(p(HGNC:YFG))` and induced an
-edge like :code:`p(HGNC:YFG) actsIn kin(p(HGNC:YFG))`. For transformations, a statement like
-:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")` also induced
-:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane") translocates p(HGNC:YFG)`.
-
-In PyBEL, we recognize that these modifications are actually annotations to the type of relationship between the
-subject's entity and the object's entity. :code:`p(HGNC:ABC) -> tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")`
-is about the relationship between :code:`p(HGNC:ABC)` and :code:`p(HGNC:YFG)`, while
-the information about the translocation qualifies that the object is undergoing an event, and not just the abundance.
-This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
-just the keyword :code:`p`
-
-This also begs the question of what statements mean. BEL 2.0 introduced the :code:`location()` element that can be
-inside any abundances. This means that it's possible to unambiguously express the differences between the process of
-:code:`HGNC:A` moving from one place to another and the existence of :code:`HGNC:A` in a specific location having
-different effects. In BEL 1.0, this action had its own node, but this introduced unnecessary complexity to the network
-and made querying more difficult. Consider the difference between the following two statements:
-
-- :code:`tloc(p(HGNC:A), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell membrane")) -> p(HGNC:B)`
-- :code:`p(HGNC:A, location(GOCC:"cell membrane")) -> p(HGNC:B)`
 
 Why Not Nested Statements?
 --------------------------

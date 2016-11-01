@@ -180,7 +180,7 @@ class BELGraph(nx.MultiDiGraph):
             except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
             except PyBelWarning as e:
-                log.debug('Line %07d - %s: %s', line_number, e, line)
+                log.warning('Line %07d - %s: %s', line_number, e, line)
             except:
                 log.error('Line %07d - general failure: %s', line_number, line)
 

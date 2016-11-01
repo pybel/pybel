@@ -2,6 +2,7 @@ import unittest
 
 from pybel.parser.parse_abundance_modifier import *
 from pybel.parser.parse_pmod import PmodParser
+from pybel.parser.parse_bel import write_variant
 
 log = logging.getLogger(__name__)
 
@@ -9,13 +10,13 @@ log = logging.getLogger(__name__)
 class TestHgvsParser(unittest.TestCase):
     def test_protein_del(self):
         statement = 'p.Phe508del'
-        expected = ['Phe', 508, 'del']
+        expected = ['p.', 'Phe', 508, 'del']
         result = hgvs_protein_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_protein_mut(self):
         statement = 'p.Gly576Ala'
-        expected = ['Gly', 576, 'Ala']
+        expected = ['p.', 'Gly', 576, 'Ala']
         result = hgvs_protein_mut.parseString(statement)
         self.assertEqual(expected, result.asList())
 
@@ -27,7 +28,7 @@ class TestHgvsParser(unittest.TestCase):
 
     def test_frameshift(self):
         statement = 'p.Thr1220Lysfs'
-        expected = ['Thr', 1220, 'Lys', 'fs']
+        expected = ['p.', 'Thr', 1220, 'Lys', 'fs']
         result = hgvs_protein_fs.parseString(statement)
         self.assertEqual(expected, result.asList())
 
@@ -39,26 +40,26 @@ class TestHgvsParser(unittest.TestCase):
 
     def test_chromosome_1(self):
         statement = 'g.117199646_117199648delCTT'
-        expected = [117199646, 117199648, 'del', 'CTT']
+        expected = ['g.', 117199646, 117199648, 'del', 'CTT']
         result = hgvs_chromosome.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_chromosome_2(self):
         statement = 'c.1521_1523delCTT'
-        expected = [1521, 1523, 'del', 'CTT']
+        expected = ['c.', 1521, 1523, 'del', 'CTT']
         result = hgvs_dna_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_rna_del(self):
         statement = 'r.1653_1655delcuu'
-        expected = [1653, 1655, 'del', 'cuu']
+        expected = ['r.', 1653, 1655, 'del', 'cuu']
         result = hgvs_rna_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_protein_trunc(self):
         statement = 'p.C65*'
         result = hgvs_protein_truncation.parseString(statement)
-        expected = ['C', 65, '*']
+        expected = ['p.', 'C', 65, '*']
         self.assertEqual(expected, result.asList())
 
 
@@ -68,32 +69,40 @@ class TestPmod(unittest.TestCase):
 
     def test_pmod1(self):
         statement = 'pmod(Ph, Ser, 473)'
-        expected = ['ProteinModification', 'Ph', 'Ser', 473]
         result = self.parser.parseString(statement)
+
+        expected = ['ProteinModification', 'Ph', 'Ser', 473]
         self.assertEqual(expected, result.asList())
+
+        expected_bel = 'pmod(Ph, Ser, 473)'
+        self.assertEqual(expected_bel, write_variant(result.asDict()))
 
     def test_pmod2(self):
         statement = 'pmod(Ph, Ser)'
-        expected = ['ProteinModification', 'Ph', 'Ser']
         result = self.parser.parseString(statement)
+
+        expected = ['ProteinModification', 'Ph', 'Ser']
         self.assertEqual(expected, result.asList())
 
     def test_pmod3(self):
         statement = 'pmod(Ph)'
-        expected = ['ProteinModification', 'Ph']
         result = self.parser.parseString(statement)
+
+        expected = ['ProteinModification', 'Ph']
         self.assertEqual(expected, result.asList())
 
     def test_pmod4(self):
         statement = 'pmod(P, S, 9)'
-        expected = ['ProteinModification', 'P', 'S', 9]
         result = self.parser.parseString(statement)
+
+        expected = ['ProteinModification', 'Ph', 'Ser', 9]
         self.assertEqual(expected, result.asList())
 
     def test_pmod5(self):
         statement = 'pmod(MOD:PhosRes, Ser, 473)'
-        expected = ['ProteinModification', ['MOD', 'PhosRes'], 'Ser', 473]
         result = self.parser.parseString(statement)
+
+        expected = ['ProteinModification', ['MOD', 'PhosRes'], 'Ser', 473]
         self.assertEqual(expected, result.asList())
 
 
@@ -101,19 +110,19 @@ class TestPsub(unittest.TestCase):
     def setUp(self):
         self.parser = PsubParser()
 
-    def test_psub(self):
+    def test_psub_1(self):
         statement = 'sub(A, 127, Y)'
         result = self.parser.parseString(statement)
 
-        expected_list = ['Variant', 'A', 127, 'Y']
+        expected_list = ['Variant', 'p.', 'Ala', 127, 'Tyr']
         self.assertEqual(expected_list, result.asList())
 
-        expected_dict = {
-            'reference': 'A',
-            'position': 127,
-            'variant': 'Y'
-        }
-        self.assertEqual(expected_dict, result.asDict())
+    def test_psub_2(self):
+        statement = 'sub(Ala, 127, Tyr)'
+        result = self.parser.parseString(statement)
+
+        expected_list = ['Variant', 'p.', 'Ala', 127, 'Tyr']
+        self.assertEqual(expected_list, result.asList())
 
 
 class TestGsubParser(unittest.TestCase):
@@ -124,12 +133,8 @@ class TestGsubParser(unittest.TestCase):
         statement = 'sub(G,308,A)'
         result = self.parser.parseString(statement)
 
-        expected_dict = {
-            'reference': 'G',
-            'position': 308,
-            'variant': 'A'
-        }
-        self.assertEqual(expected_dict, result.asDict())
+        expected_dict = ['Variant', 'g.', 308, 'G', '>', 'A']
+        self.assertEqual(expected_dict, result.asList())
 
 
 class TestFragmentParser(unittest.TestCase):

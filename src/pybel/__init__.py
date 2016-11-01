@@ -25,4 +25,5 @@ __copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Chris
 
 
 def print_version():
+    """Convenience function for printing the PyBEL version"""
     print('{} Version: {}'.format(__title__, __version__))
