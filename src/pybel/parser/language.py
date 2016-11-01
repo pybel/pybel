@@ -84,7 +84,8 @@ rev_abundance_labels = {
     'RNA': 'r',
     'Process': 'bp',
     'Pathology': 'path',
-    'Complex': 'complex'
+    'Complex': 'complex',
+    'Composite': 'composite'
 }
 
 amino_acid_dict = {
