@@ -1,6 +1,7 @@
 import os
 import unittest
 
+import pybel
 from pybel.exceptions import PyBelWarning
 from pybel.parser.baseparser import nest, BaseParser
 from pybel.parser.language import amino_acid
@@ -15,6 +16,10 @@ class TestRandom(unittest.TestCase):
     def test_nest_failure(self):
         with self.assertRaises(ValueError):
             nest()
+
+    def test_database_notimplemented(self):
+        with self.assertRaises(NotImplementedError):
+            pybel.graph.from_database('')
 
     def test_bad_subclass(self):
         class BadParser(BaseParser):
@@ -58,3 +63,6 @@ class TestRandom(unittest.TestCase):
         }
 
         self.assertEqual(expected_values, res['Values'])
+
+    def test_print_version(self):
+        self.assertIsInstance(pybel.get_version(), str)

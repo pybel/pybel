@@ -11,6 +11,7 @@ Base = declarative_base()
 
 
 class Definition(Base):
+    """This table represents the metadata for a BEL Namespace or annotation"""
     __tablename__ = DEFINITION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -27,6 +28,7 @@ class Definition(Base):
 
 
 class Context(Base):
+    """This table represents the one-to-many relationship between a BEL Namespace/annotation, its values, and their semantic annotations"""
     __tablename__ = CONTEXT_TABLE_NAME
 
     id = Column(Integer, primary_key=True)

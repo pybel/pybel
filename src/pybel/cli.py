@@ -15,6 +15,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 import logging
 import os
 import time
+import sys
 
 import click
 import py2neo
@@ -23,10 +24,26 @@ from . import graph
 from .manager.namespace_cache import DefinitionCacheManager, DEFAULT_CACHE_LOCATION
 
 log = logging.getLogger('pybel')
+log.setLevel(logging.DEBUG)
+
+log_levels = {
+    0: logging.INFO,
+    1: logging.DEBUG,
+}
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
+
+pybel_directory = os.path.expanduser('~/.pybel')
+if not os.path.exists(pybel_directory):
+    os.mkdir(os.path.expanduser(pybel_directory))
+
+fh_path = os.path.join(pybel_directory, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
+fh = logging.FileHandler(fh_path)
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+log.addHandler(fh)
 
 
 @click.group(help="PyBEL Command Line Utilities")
@@ -43,39 +60,25 @@ def main():
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
 @click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
 @click.option('--pickle', help='Output path for NetworkX *.gpickle')
+@click.option('--neo', help="Connection string for neo4j upload")
+@click.option('--neo-context', help="Context for neo4j upload")
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
-@click.option('--log-file', help="Optional path for verbose log output")
+@click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, verbose):
+def convert(path, url, database, csv, graphml, json, pickle, neo, neo_context, lenient, log_file, verbose):
     """Options for multiple outputs/conversions"""
 
-    if verbose == 1:
-        ch.setLevel(logging.DEBUG)
-    elif verbose >= 2:
-        ch.setLevel(5)
-    else:
-        ch.setLevel(logging.INFO)
-
+    ch.setLevel(log_levels.get(verbose, 5))
     log.addHandler(ch)
 
-    if log_file:
-        log_path = os.path.expanduser(log_file)
-        log.info('Logging output to %s', log_path)
-        fh = logging.FileHandler(log_path)
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        log.addHandler(fh)
-
     if path:
-        g = graph.BELGraph(path, lenient=lenient)
+        g = graph.BELGraph(path, lenient=lenient, log_stream=log_file)
     elif url:
-        g = graph.from_url(url, lenient=lenient)
+        g = graph.from_url(url, lenient=lenient, log_stream=log_file)
     elif database:
         g = graph.from_database(database)
     else:
         raise ValueError('missing BEL file')
-
-    log.info('Done loading BEL')
 
     if csv:
         log.info('Outputting csv to %s', csv)
@@ -93,41 +96,13 @@ def convert(path, url, database, csv, graphml, json, pickle, lenient, log_file, 
         log.info('Outputting pickle to %s', pickle)
         graph.to_pickle(g, pickle)
 
+    if neo:
+        log.info('Uploading to neo4j with context %s', neo_context)
+        neo_graph = py2neo.Graph(neo)
+        assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
+        graph.to_neo4j(g, neo_graph, neo_context)
 
-@main.command()
-@click.option('--path', type=click.File('rb'), help='BEL file file path. Use - for stdin')
-@click.option('--url', help='BEL file URL')
-@click.option('--database', help='BEL database')
-@click.option('--neo', help='URL of neo4j database')
-@click.option('--context', help='Context tag for multiple simultaneous neo4j graphs')
-@click.option('-v', '--verbose', count=True)
-def to_neo(path, url, database, neo, context, verbose):
-    """Parses BEL file and uploads to Neo4J"""
-
-    if verbose == 1:
-        ch.setLevel(logging.DEBUG)
-    elif verbose >= 2:
-        ch.setLevel(5)
-    else:
-        ch.setLevel(logging.INFO)
-
-    log.addHandler(ch)
-
-    p2n = py2neo.Graph(neo)
-    assert p2n.data('match (n) return count(n) as count')[0]['count'] is not None
-
-    if path:
-        g = graph.BELGraph(path)
-    elif url:
-        g = graph.from_url(url)
-    elif database:
-        g = graph.from_database(database)
-    else:
-        raise ValueError('missing BEL file')
-
-    t = time.time()
-    graph.to_neo4j(g, p2n, context)
-    log.info('Upload to neo4j done in %.02f seconds', time.time() - t)
+    sys.exit(0 if g.last_parse_errors == 0 else 1)
 
 
 @main.group(help="PyBEL Data Manager Utilities")
@@ -139,11 +114,13 @@ def manage():
 @click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/namespace_cache.db')
 def setup(path):
     DefinitionCacheManager(conn=path, setup_default_cache=True)
+    sys.exit(0)
 
 
 @manage.command(help='Remove definition cache')
 def remove():
     os.remove(DEFAULT_CACHE_LOCATION)
+    sys.exit(0)
 
 
 if __name__ == '__main__':

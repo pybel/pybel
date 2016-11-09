@@ -105,8 +105,14 @@ def subdict_matches(a, b):
     :rtype: bool
     """
     for k, v in b.items():
-        if k not in a or a[k] != v:
+        if k not in a:
             return False
+        elif isinstance(v, (str, dict)) and a[k] != v:
+            return False
+        elif isinstance(v, (list, set)) and a[k] not in v:
+            return False
+        elif not isinstance(v, (str, list, set, dict)):
+            raise ValueError('invalid value: {}'.format(v))
     return True
 
 

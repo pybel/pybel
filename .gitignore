@@ -14,3 +14,4 @@ notebooks/PyBEL Playtime.ipynb
 build/*
 dist/*
 *.db
+*.coverage.*

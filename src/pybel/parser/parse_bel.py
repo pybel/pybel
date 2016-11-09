@@ -12,7 +12,8 @@ from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser, TruncParser
 from .parse_control import ControlParser
-from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
+from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException, \
+    MissingCitationException, IllegalFunctionSemantic
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
@@ -175,6 +176,7 @@ class BelParser(BaseParser):
 
         # Definition of all simple abundances that can be used in a composite abundance
         self.simple_abundance = self.complex_abundances | self.single_abundance
+        self.simple_abundance.setParseAction(self.check_function_semantics)
 
         # 2.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA
         composite_abundance_tag = one_of_tags(['composite', 'compositeAbundance'], 'Composite', 'function')
@@ -208,6 +210,9 @@ class BelParser(BaseParser):
         pathology_tag = one_of_tags(['path', 'pathology'], 'Pathology', 'function')
         self.pathology = pathology_tag + nest(identifier)
 
+        self.bp_path = self.biological_process | self.pathology
+        self.bp_path.setParseAction(self.check_function_semantics)
+
         # 2.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xactivity
         activity_tag = one_of_tags(['act', 'activity'], 'Activity', 'modifier')
 
@@ -231,7 +236,7 @@ class BelParser(BaseParser):
 
         self.activity = self.activity_standard | self.activity_legacy
 
-        self.process = MatchFirst([self.biological_process, self.pathology, self.activity])
+        self.process = self.bp_path | self.activity
 
         # 2.5 Transformation Functions
 
@@ -436,6 +441,17 @@ class BelParser(BaseParser):
         self.graph.clear()
         self.control_parser.clear()
 
+    def check_function_semantics(self, s, l, tokens):
+        if self.identifier_parser.namespace_dict is None:
+            return tokens
+
+        function_code = language.rev_value_map[tokens['function']]
+        namespace, name = tokens['identifier']['namespace'], tokens['identifier']['name']
+
+        if function_code not in self.identifier_parser.namespace_dict[namespace][name]:
+            raise IllegalFunctionSemantic("Invalid function for identifier {}:{}".format(namespace, name))
+        return tokens
+
     def handle_has_members(self, s, l, tokens):
         parent = self.ensure_node(s, l, tokens[0])
         for child_tokens in tokens[2]:
@@ -456,6 +472,9 @@ class BelParser(BaseParser):
         return tokens
 
     def handle_relation(self, s, l, tokens):
+        if not self.control_parser.citation:
+            raise MissingCitationException('unable to add relation {}'.format(s))
+
         sub = self.ensure_node(s, l, tokens['subject'])
         obj = self.ensure_node(s, l, tokens['object'])
 
@@ -463,11 +482,11 @@ class BelParser(BaseParser):
             'relation': tokens['relation'],
         }
 
-        sub_mod = self.canonicalize_modifier(tokens['subject'])
+        sub_mod = canonicalize_modifier(tokens['subject'])
         if sub_mod:
             attrs['subject'] = sub_mod
 
-        obj_mod = self.canonicalize_modifier(tokens['object'])
+        obj_mod = canonicalize_modifier(tokens['object'])
         if obj_mod:
             attrs['object'] = obj_mod
 
@@ -495,40 +514,6 @@ class BelParser(BaseParser):
         if not self.graph.has_edge(u, v, relation):
             self.graph.add_edge(u, v, key=relation, relation=relation)
 
-    def canonicalize_node(self, tokens):
-        """Given tokens, returns node name
-
-        :param tokens: tokens ParseObject or dict
-        """
-        if 'function' in tokens and 'variants' in tokens:
-            type_name = '{}Variant'.format(tokens['function'])
-            name = type_name, tokens['identifier']['namespace'], tokens['identifier']['name']
-            variants = list2tuple(sorted(tokens['variants'].asList()))
-            return name + variants
-
-        elif 'function' in tokens and 'members' in tokens:
-            return (tokens['function'],) + tuple(sorted(list2tuple(tokens['members'].asList())))
-
-        elif 'transformation' in tokens and tokens['transformation'] == 'Reaction':
-            reactants = tuple(sorted(list2tuple(tokens['reactants'].asList())))
-            products = tuple(sorted(list2tuple(tokens['products'].asList())))
-            return (tokens['transformation'],) + (reactants,) + (products,)
-
-        elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'Protein') and 'fusion' in tokens:
-            f = tokens['fusion']
-            return (tokens['function'], f['partner_5p']['namespace'], f['partner_5p']['name']) + tuple(
-                f['range_5p']) + (f['partner_3p']['namespace'], f['partner_3p']['name']) + tuple(
-                tokens['fusion']['range_3p'])
-
-        elif 'function' in tokens and tokens['function'] in (
-                'Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
-            if 'identifier' in tokens:
-                return tokens['function'], tokens['identifier']['namespace'], tokens['identifier']['name']
-
-        if 'modifier' in tokens and tokens['modifier'] in (
-                'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
-            return self.canonicalize_node(tokens['target'])
-
     def ensure_node(self, s, l, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
 
@@ -539,8 +524,9 @@ class BelParser(BaseParser):
         if 'modifier' in tokens:
             return self.ensure_node(s, l, tokens['target'])
 
-        elif 'transformation' in tokens:
-            name = self.canonicalize_node(tokens)
+        name = canonicalize_node(tokens)
+
+        if 'transformation' in tokens:
             if name not in self.graph:
                 self.graph.add_node(name, type=tokens['transformation'])
 
@@ -555,7 +541,6 @@ class BelParser(BaseParser):
             return name
 
         elif 'function' in tokens and 'members' in tokens:
-            name = self.canonicalize_node(tokens)
             if name not in self.graph:
                 self.graph.add_node(name, type=tokens['function'])
 
@@ -565,7 +550,6 @@ class BelParser(BaseParser):
             return name
 
         elif 'function' in tokens and 'variants' in tokens:
-            name = self.canonicalize_node(tokens)
             cls = '{}Variant'.format(tokens['function'])
             if name not in self.graph:
                 self.graph.add_node(name, type=cls)
@@ -580,7 +564,6 @@ class BelParser(BaseParser):
             return name
 
         elif 'function' in tokens and 'fusion' in tokens:
-            name = self.canonicalize_node(tokens)
             cls = '{}Fusion'.format(tokens['function'])
             if name not in self.graph:
                 self.graph.add_node(name, type=cls)
@@ -588,7 +571,6 @@ class BelParser(BaseParser):
 
         elif 'function' in tokens and 'identifier' in tokens:
             if tokens['function'] in ('Gene', 'miRNA', 'Pathology', 'BiologicalProcess', 'Abundance', 'Complex'):
-                name = self.canonicalize_node(tokens)
                 if name not in self.graph:
                     self.graph.add_node(name,
                                         type=tokens['function'],
@@ -597,8 +579,6 @@ class BelParser(BaseParser):
                 return name
 
             elif tokens['function'] == 'RNA':
-                name = self.canonicalize_node(tokens)
-
                 if name not in self.graph:
                     self.graph.add_node(name,
                                         type=tokens['function'],
@@ -613,8 +593,6 @@ class BelParser(BaseParser):
                 return name
 
             elif tokens['function'] == 'Protein':
-                name = self.canonicalize_node(tokens)
-
                 if name not in self.graph:
                     self.graph.add_node(name,
                                         type=tokens['function'],
@@ -628,52 +606,107 @@ class BelParser(BaseParser):
                 self.add_unqualified_edge(rna_name, name, relation='translatedTo')
                 return name
 
-    def canonicalize_modifier(self, tokens):
-        """Get activity, transformation, or transformation information as a dictionary
 
-        :return: a dictionary describing the modifier
-        :rtype: dict
-        """
+def canonicalize_node(tokens):
+    """Given tokens, returns node name
 
-        attrs = {}
+    :param tokens: tokens ParseObject or dict
+    """
+    if 'function' in tokens and 'variants' in tokens:
+        type_name = '{}Variant'.format(tokens['function'])
+        name = type_name, tokens['identifier']['namespace'], tokens['identifier']['name']
+        variants = list2tuple(sorted(tokens['variants'].asList()))
+        return name + variants
 
-        if 'location' in tokens:
-            attrs['location'] = tokens['location'].asDict()
+    elif 'function' in tokens and 'members' in tokens:
+        return (tokens['function'],) + tuple(sorted(canonicalize_node(member) for member in tokens['members']))
 
-        if 'modifier' not in tokens:
-            return attrs
+    elif 'transformation' in tokens and tokens['transformation'] == 'Reaction':
+        reactants = tuple(sorted(list2tuple(tokens['reactants'].asList())))
+        products = tuple(sorted(list2tuple(tokens['products'].asList())))
+        return (tokens['transformation'],) + (reactants,) + (products,)
 
-        if 'location' in tokens['target']:
-            attrs['location'] = tokens['target']['location'].asDict()
+    elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'Protein') and 'fusion' in tokens:
+        f = tokens['fusion']
+        return (tokens['function'], f['partner_5p']['namespace'], f['partner_5p']['name']) + tuple(
+            f['range_5p']) + (f['partner_3p']['namespace'], f['partner_3p']['name']) + tuple(
+            tokens['fusion']['range_3p'])
 
-        if tokens['modifier'] == 'Degradation':
-            attrs['modifier'] = 'Degradation'
+    elif 'function' in tokens and tokens['function'] in (
+            'Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
+        if 'identifier' in tokens:
+            return tokens['function'], tokens['identifier']['namespace'], tokens['identifier']['name']
 
-        elif tokens['modifier'] == 'Activity' and 'effect' not in tokens:
-            attrs['modifier'] = tokens['modifier']
-            attrs['effect'] = {}
+    if 'modifier' in tokens and tokens['modifier'] in (
+            'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
+        return canonicalize_node(tokens['target'])
 
-        elif tokens['modifier'] == 'Activity' and 'effect' in tokens:
-            attrs['modifier'] = tokens['modifier']
-            attrs['effect'] = tokens['effect'].asDict() if hasattr(tokens['effect'], 'asDict') else dict(
-                tokens['effect'])
 
-        elif tokens['modifier'] == 'Translocation':
-            attrs['modifier'] = tokens['modifier']
-            attrs['effect'] = tokens['effect'].asDict()
+def canonicalize_modifier(tokens):
+    """Get activity, transformation, or transformation information as a dictionary
 
-        elif tokens['modifier'] == 'CellSecretion':
-            attrs['modifier'] = 'Translocation'
-            attrs['effect'] = {
-                'fromLoc': dict(namespace='GOCC', name='intracellular'),
-                'toLoc': dict(namespace='GOCC', name='extracellular space')
-            }
+    :return: a dictionary describing the modifier
+    :rtype: dict
+    """
 
-        elif tokens['modifier'] == 'CellSurfaceExpression':
-            attrs['modifier'] = 'Translocation'
-            attrs['effect'] = {
-                'fromLoc': dict(namespace='GOCC', name='intracellular'),
-                'toLoc': dict(namespace='GOCC', name='cell surface')
-            }
+    attrs = {}
 
+    if 'location' in tokens:
+        attrs['location'] = tokens['location'].asDict()
+
+    if 'modifier' not in tokens:
         return attrs
+
+    if 'location' in tokens['target']:
+        attrs['location'] = tokens['target']['location'].asDict()
+
+    if tokens['modifier'] == 'Degradation':
+        attrs['modifier'] = 'Degradation'
+
+    elif tokens['modifier'] == 'Activity' and 'effect' not in tokens:
+        attrs['modifier'] = tokens['modifier']
+        attrs['effect'] = {}
+
+    elif tokens['modifier'] == 'Activity' and 'effect' in tokens:
+        attrs['modifier'] = tokens['modifier']
+        attrs['effect'] = tokens['effect'].asDict() if hasattr(tokens['effect'], 'asDict') else dict(
+            tokens['effect'])
+
+    elif tokens['modifier'] == 'Translocation':
+        attrs['modifier'] = tokens['modifier']
+        attrs['effect'] = tokens['effect'].asDict()
+
+    elif tokens['modifier'] == 'CellSecretion':
+        attrs['modifier'] = 'Translocation'
+        attrs['effect'] = {
+            'fromLoc': dict(namespace='GOCC', name='intracellular'),
+            'toLoc': dict(namespace='GOCC', name='extracellular space')
+        }
+
+    elif tokens['modifier'] == 'CellSurfaceExpression':
+        attrs['modifier'] = 'Translocation'
+        attrs['effect'] = {
+            'fromLoc': dict(namespace='GOCC', name='intracellular'),
+            'toLoc': dict(namespace='GOCC', name='cell surface')
+        }
+
+    return attrs
+
+
+def write_variant(tokens):
+    if isinstance(tokens, dict):
+        if {'identifier', 'code', 'pos'} <= set(tokens):
+            return 'pmod({}, {}, {})'.format(tokens['identifier'], tokens['code'], tokens['pos'])
+        elif {'identifier', 'code'} <= set(tokens):
+            return 'pmod({}, {})'.format(tokens['identifier'], tokens['code'])
+        elif 'identifier' in tokens:
+            return 'pmod({})'.format(tokens['identifier'])
+        else:
+            raise NotImplementedError('prob with {}'.format(tokens))
+
+    elif tokens[0] == 'Variant':
+        return 'var({})'.format(''.join(str(token) for token in tokens[1:]))
+    elif tokens[0] == 'ProteinModification':
+        return 'pmod({})'.format(tokens[1])
+    else:
+        raise NotImplementedError('prob with :{}'.format(tokens))

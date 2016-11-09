@@ -62,6 +62,41 @@ class TestUtils(unittest.TestCase):
         }
         self.assertFalse(subdict_matches(a, b))
 
+    def test_dict_matches_5(self):
+        a = {
+            'k1': 'v1',
+            'k2': 'v2'
+        }
+        b = {
+            'k1': 'v1',
+            'k2': ['v2', 'v3']
+        }
+        self.assertTrue(subdict_matches(a, b))
+
+    def test_dict_matches_6(self):
+        a = {
+            'k1': 'v1',
+            'k2': ['v2', 'v3']
+        }
+        b = {
+            'k1': 'v1',
+            'k2': 'v4'
+        }
+        self.assertFalse(subdict_matches(a, b))
+
+    def test_dict_matches_7(self):
+        a = {
+            'k1': 'v1',
+            'k2': 'v2'
+        }
+        b = {
+            'k1': 'v1',
+            'k2': {'v2':'v3'}
+        }
+
+        self.assertFalse(subdict_matches(a, b))
+
+
     def test_dict_matches_graph(self):
         g = nx.MultiDiGraph()
 
