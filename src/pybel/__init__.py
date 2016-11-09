@@ -11,7 +11,7 @@ large_corpus_url = 'http://resource.belframework.org/belframework/1.0/knowledge/
 
 __all__ = ['small_corpus_url', 'large_corpus_url'] + graph.__all__
 
-__version__ = '0.2.4-dev'
+__version__ = '0.2.4'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'
