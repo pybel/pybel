@@ -15,6 +15,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 import logging
 import os
 import time
+import sys
 
 import click
 import py2neo
@@ -101,6 +102,8 @@ def convert(path, url, database, csv, graphml, json, pickle, neo, neo_context, l
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
         graph.to_neo4j(g, neo_graph, neo_context)
 
+    sys.exit(0 if g.last_parse_errors == 0 else 1)
+
 
 @main.group(help="PyBEL Data Manager Utilities")
 def manage():
@@ -111,11 +114,13 @@ def manage():
 @click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/namespace_cache.db')
 def setup(path):
     DefinitionCacheManager(conn=path, setup_default_cache=True)
+    sys.exit(0)
 
 
 @manage.command(help='Remove definition cache')
 def remove():
     os.remove(DEFAULT_CACHE_LOCATION)
+    sys.exit(0)
 
 
 if __name__ == '__main__':

@@ -97,6 +97,8 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
+        self.last_parse_errors = 0
+
         if lines is not None:
             self.parse_lines(lines, context, lenient, definition_cache_manager, log_stream)
 
@@ -185,6 +187,8 @@ class BELGraph(nx.MultiDiGraph):
 
         t = time.time()
 
+        self.last_parse_errors = 0
+
         for line_number, line in statements:
             try:
                 self.bel_parser.parseString(line)
@@ -193,10 +197,13 @@ class BELGraph(nx.MultiDiGraph):
                 raise e
             except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
+                self.last_parse_errors += 1
             except PyBelWarning as e:
                 log.warning('Line %07d - %s: %s', line_number, e, line)
+                self.last_parse_errors += 1
             except:
                 log.error('Line %07d - general failure: %s', line_number, line)
+                self.last_parse_errors += 1
 
         log.info('Finished parsing statements section in %.02f seconds', time.time() - t)
 

@@ -10,7 +10,7 @@ from click.testing import CliRunner
 import pybel
 from pybel import cli
 from pybel.graph import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel_1
+from tests.constants import test_bel_1, test_bel_slushy
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +47,11 @@ class TestCli(unittest.TestCase):
             with open(abs_test_edge_file) as f:
                 loaded = json.load(f)
                 self.assertIsNotNone(loaded)
+
+    def test_slushy(self):
+        with self.runner.isolated_filesystem():
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_slushy])
+            self.assertEqual(1, result.exit_code, msg=result.exc_info)
 
     def test_pickle(self):
         test_file = 'mygraph.gpickle'
