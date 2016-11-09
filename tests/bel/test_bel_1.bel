@@ -14,7 +14,7 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 # Definitions Section
 
 DEFINE NAMESPACE CHEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"
-DEFINE NAMESPACE ALPHABET AS LIST {"A","B","C","D","E","F"}
+DEFINE NAMESPACE HGNC AS URL "http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns"
 DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
 DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
@@ -30,17 +30,17 @@ SET Citation = {"Pubmed","That one article from last week","123455"}
 SET Evidence = "Evidence 1 \
 w extra notes"
 
-p(ALPHABET:A) -> p(ALPHABET:B)
+p(HGNC:AKT1) -> p(HGNC:EGFR)
 
 SET Evidence = "Evidence 2"
 SET TESTAN2 = "3"
 
-p(ALPHABET:B) -| p(ALPHABET:C)
-p(ALPHABET:B) =| p(ALPHABET:D)
+p(HGNC:EGFR) -| p(HGNC:FADD)
+p(HGNC:EGFR) =| p(HGNC:CASP8)
 
 SET Citation = {"Pubmed","That other article from last week","123456"}
 SET TESTAN1 = "2"
 SET Evidence = "Evidence 3"
 
-p(ALPHABET:C) -> p(ALPHABET:D)
-p(ALPHABET:A) -- p(ALPHABET:D)
+p(HGNC:FADD) -> p(HGNC:CASP8)
+p(HGNC:AKT1) -- p(HGNC:CASP8)

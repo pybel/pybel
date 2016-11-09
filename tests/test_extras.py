@@ -65,4 +65,4 @@ class TestRandom(unittest.TestCase):
         self.assertEqual(expected_values, res['Values'])
 
     def test_print_version(self):
-        self.assertIsNone(pybel.print_version())
+        self.assertIsInstance(pybel.get_version(), str)

@@ -245,3 +245,5 @@ value_map = {
     'O': 'Pathology',
     'C': 'Complex'
 }
+
+rev_value_map = {v: k for k, v in value_map.items()}

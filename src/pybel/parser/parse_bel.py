@@ -13,7 +13,7 @@ from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, Fra
     LocationParser, TruncParser
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException, \
-    MissingCitationException
+    MissingCitationException, IllegalFunctionSemantic
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
@@ -176,6 +176,7 @@ class BelParser(BaseParser):
 
         # Definition of all simple abundances that can be used in a composite abundance
         self.simple_abundance = self.complex_abundances | self.single_abundance
+        self.simple_abundance.setParseAction(self.check_function_semantics)
 
         # 2.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA
         composite_abundance_tag = one_of_tags(['composite', 'compositeAbundance'], 'Composite', 'function')
@@ -209,6 +210,9 @@ class BelParser(BaseParser):
         pathology_tag = one_of_tags(['path', 'pathology'], 'Pathology', 'function')
         self.pathology = pathology_tag + nest(identifier)
 
+        self.bp_path = self.biological_process | self.pathology
+        self.bp_path.setParseAction(self.check_function_semantics)
+
         # 2.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xactivity
         activity_tag = one_of_tags(['act', 'activity'], 'Activity', 'modifier')
 
@@ -232,7 +236,7 @@ class BelParser(BaseParser):
 
         self.activity = self.activity_standard | self.activity_legacy
 
-        self.process = MatchFirst([self.biological_process, self.pathology, self.activity])
+        self.process = self.bp_path | self.activity
 
         # 2.5 Transformation Functions
 
@@ -436,6 +440,17 @@ class BelParser(BaseParser):
         """Clears the data stored in the parser"""
         self.graph.clear()
         self.control_parser.clear()
+
+    def check_function_semantics(self, s, l, tokens):
+        if self.identifier_parser.namespace_dict is None:
+            return tokens
+
+        function_code = language.rev_value_map[tokens['function']]
+        namespace, name = tokens['identifier']['namespace'], tokens['identifier']['name']
+
+        if function_code not in self.identifier_parser.namespace_dict[namespace][name]:
+            raise IllegalFunctionSemantic("Invalid function for identifier {}:{}".format(namespace, name))
+        return tokens
 
     def handle_has_members(self, s, l, tokens):
         parent = self.ensure_node(s, l, tokens[0])
@@ -695,5 +710,3 @@ def write_variant(tokens):
         return 'pmod({})'.format(tokens[1])
     else:
         raise NotImplementedError('prob with :{}'.format(tokens))
-
-

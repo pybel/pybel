@@ -92,22 +92,3 @@ def flatten_edges(graph):
         g.add_edge(u, v, key=key, attr_dict=flatten(data))
 
     return g
-
-
-def expand_edges(graph):
-    """Returns a new graph with expanded edge data dictionaries
-
-    :param graph:
-    :type graph: nx.MultiDiGraph
-    :rtype: nx.MultiDiGraph
-    """
-
-    g = nx.MultiDiGraph()
-
-    for node, data in graph.nodes(data=True):
-        g.add_node(node, data)
-
-    for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=expand_dict(data))
-
-    return g
