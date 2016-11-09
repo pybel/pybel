@@ -4,6 +4,7 @@ import unittest
 import pybel
 from pybel.manager import DefinitionCacheManager
 from pybel.parser import BelParser
+from pybel.parser.parse_exceptions import IllegalFunctionSemantic
 from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict
 
 logging.getLogger('requests').setLevel(logging.WARNING)
@@ -47,7 +48,7 @@ class TestImport(unittest.TestCase):
 
         self.assertEqual(expected_document_metadata, g.metadata_parser.document_metadata)
 
-        nodes = list(g.nodes_iter(namespace='ALPHABET', name='A'))
+        nodes = list(g.nodes_iter(namespace='HGNC', name='AKT1'))
         self.assertEqual(3, len(nodes))
 
         edges = list(g.edges_iter(relation='increases'))
@@ -65,7 +66,10 @@ class TestImport(unittest.TestCase):
 class TestFull(TestTokenParserBase):
     def setUp(self):
         namespaces = {
-            'TESTNS': {"1", "2"}
+            'TESTNS': {
+                "1": "GRP",
+                "2": "GRP"
+            }
         }
 
         annotations = {
@@ -75,6 +79,11 @@ class TestFull(TestTokenParserBase):
         }
 
         self.parser = BelParser(valid_namespaces=namespaces, valid_annotations=annotations)
+
+    def test_semantic_failure(self):
+        statement = "bp(TESTNS:1) -- p(TESTNS:2)"
+        with self.assertRaises(IllegalFunctionSemantic):
+            self.parser.parseString(statement)
 
     def test_annotations(self):
         statements = [
