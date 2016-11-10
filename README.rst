@@ -129,6 +129,7 @@ Acknowledgements
 Find Us
 -------
 
-- http://pybel.readthedocs.io/
-- https://github.com/pybel/pybel
-- https://pypi.python.org/pypi/pybel
+- `Read the Docs <http://pybel.readthedocs.io/>`_
+- `GitHub <https://github.com/pybel/pybel>`_
+- `PyPI <https://pypi.python.org/pypi/pybel>`_
+- `Chat on Gitter <https://gitter.im/pybel/Lobby>`_
