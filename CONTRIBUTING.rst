@@ -8,7 +8,8 @@ and has a lot of excited people working on it!
 Want to Chat?
 -------------
 
-We're really interesting in what the community thinks about our software. If you're in the Rheinland, come say hello!
+We're really interesting in what the community thinks about our software. Chat with us on Gitter at
+https://gitter.im/pybel/Lobby.
 
 Having a Problem? Submit an Issue.
 ----------------------------------
