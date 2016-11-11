@@ -202,7 +202,8 @@ class BELGraph(nx.MultiDiGraph):
                 log.warning('Line %07d - %s: %s', line_number, e, line)
                 self.last_parse_errors += 1
             except:
-                log.error('Line %07d - general failure: %s', line_number, line)
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
                 self.last_parse_errors += 1
 
         log.info('Finished parsing statements section in %.02f seconds', time.time() - t)
