@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 The pybel.parser module contains utilities for parsing BEL documents and BEL statements
