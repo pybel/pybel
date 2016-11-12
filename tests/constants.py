@@ -13,7 +13,7 @@ test_bel_3 = os.path.join(dir_path, 'bel', 'test_bel_3.bel')
 test_bel_slushy = os.path.join(dir_path, 'bel', 'slushy.bel')
 
 test_citation_bel = 'SET Citation = {"TestType","TestName","TestRef"}'
-test_citation_dict = dict(citation_type='TestType', citation_name='TestName', citation_reference='TestRef')
+test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')
 
 
 class TestTokenParserBase(unittest.TestCase):

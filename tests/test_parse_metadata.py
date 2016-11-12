@@ -287,9 +287,11 @@ class TestParseControl(unittest.TestCase):
 
         annotations = self.parser.get_annotations()
         expected_annotations = {
-            'citation_type': 'PubMed',
-            'citation_name': 'Trends in molecular medicine',
-            'citation_reference': '12928037'
+            'citation': {
+                'type': 'PubMed',
+                'name': 'Trends in molecular medicine',
+                'reference': '12928037'
+            }
         }
         self.assertEqual(expected_annotations, annotations)
 
