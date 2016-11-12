@@ -70,8 +70,8 @@ abundance_labels = {
     'p': 'Protein',
     'rnaAbundance': 'RNA',
     'r': 'RNA',
-    'biologicalProcess': 'Process',
-    'bp': 'Process',
+    'biologicalProcess': 'BiologicalProcess',
+    'bp': 'BiologicalProcess',
     'pathology': 'Pathology',
     'path': 'Pathology'
 }
@@ -82,7 +82,7 @@ rev_abundance_labels = {
     'miRNA': 'm',
     'Protein': 'p',
     'RNA': 'r',
-    'Process': 'bp',
+    'BiologicalProcess': 'bp',
     'Pathology': 'path',
     'Complex': 'complex',
     'Composite': 'composite'
@@ -239,7 +239,7 @@ value_map = {
     'G': 'Gene',
     'R': 'RNA',
     'P': 'Protein',
-    'M': 'microRNA',
+    'M': 'miRNA',
     'A': 'Abundance',
     'B': 'BiologicalProcess',
     'O': 'Pathology',
