@@ -88,6 +88,20 @@ rev_abundance_labels = {
     'Composite': 'composite'
 }
 
+#: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
+value_map = {
+    'G': 'Gene',
+    'R': 'RNA',
+    'P': 'Protein',
+    'M': 'miRNA',
+    'A': 'Abundance',
+    'B': 'BiologicalProcess',
+    'O': 'Pathology',
+    'C': 'Complex'
+}
+
+rev_value_map = {v: k for k, v in value_map.items()}
+
 amino_acid_dict = {
     'A': 'Ala',
     'R': 'Arg',
@@ -233,17 +247,3 @@ variant_parent_dict = {
     'RNAVariant': 'RNA',
     'ProteinVariant': 'Protein'
 }
-
-#: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
-value_map = {
-    'G': 'Gene',
-    'R': 'RNA',
-    'P': 'Protein',
-    'M': 'miRNA',
-    'A': 'Abundance',
-    'B': 'BiologicalProcess',
-    'O': 'Pathology',
-    'C': 'Complex'
-}
-
-rev_value_map = {v: k for k, v in value_map.items()}
