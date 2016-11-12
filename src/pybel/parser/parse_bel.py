@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import logging
@@ -41,11 +40,11 @@ class BelParser(BaseParser):
         """
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
-
+        self.lenient = lenient
         self.control_parser = ControlParser(valid_annotations=valid_annotations)
         self.identifier_parser = IdentifierParser(valid_namespaces=valid_namespaces,
                                                   mapping=namespace_mapping,
-                                                  lenient=lenient)
+                                                  lenient=self.lenient)
 
         identifier = Group(self.identifier_parser.get_language())('identifier')
 
@@ -417,10 +416,7 @@ class BelParser(BaseParser):
         self.nested_causal_relationship = triple(self.bel_term, causal_relation_tags,
                                                  nest(triple(self.bel_term, causal_relation_tags, self.bel_term)))
 
-        def handle_nested_relation(s, l, tokens):
-            raise NestedRelationNotSupportedException('Nesting unsupported: {}'.format(s))
-
-        self.nested_causal_relationship.setParseAction(handle_nested_relation)
+        self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         self.relation = MatchFirst([self.has_members, self.nested_causal_relationship, self.relation])
@@ -441,15 +437,30 @@ class BelParser(BaseParser):
         self.graph.clear()
         self.control_parser.clear()
 
+    def handle_nested_relation(self, s, l, tokens):
+        if not self.lenient:
+            raise NestedRelationNotSupportedException('Nesting unsupported: {}'.format(s))
+
+        self.handle_relation(s, l, dict(subject=tokens['subject'],
+                                        relation=tokens['relation'],
+                                        object=tokens['object']['subject']))
+
+        self.handle_relation(s, l, dict(subject=tokens['object']['subject'],
+                                        relation=tokens['object']['relation'],
+                                        object=tokens['object']['object']))
+        return tokens
+
     def check_function_semantics(self, s, l, tokens):
-        if self.identifier_parser.namespace_dict is None:
+        if self.identifier_parser.namespace_dict is None or 'identifier' not in tokens:
             return tokens
 
         function_code = language.rev_value_map[tokens['function']]
         namespace, name = tokens['identifier']['namespace'], tokens['identifier']['name']
 
         if function_code not in self.identifier_parser.namespace_dict[namespace][name]:
-            raise IllegalFunctionSemantic("Invalid function for identifier {}:{}".format(namespace, name))
+            valid_list = ','.join(self.identifier_parser.namespace_dict[namespace][name])
+            fmt = "Invalid function for identifier {}:{}. Valid are: [{}]"
+            raise IllegalFunctionSemantic(fmt.format(namespace, name, valid_list))
         return tokens
 
     def handle_has_members(self, s, l, tokens):
