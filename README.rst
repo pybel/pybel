@@ -22,7 +22,7 @@ Development |develop_build| |develop_coverage| |develop_documentation| |develop_
     :target: http://pybel.readthedocs.io/en/stable/
     :alt: Stable Documentation Status
 
-.. |stable_pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
+.. |stable_pyversions| image::  https://img.shields.io/pypi/pyversions/PyBEL.svg
     :alt: Stable Supported Python Versions
 
 .. |develop_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
@@ -129,6 +129,7 @@ Acknowledgements
 Find Us
 -------
 
-- http://pybel.readthedocs.io/
-- https://github.com/pybel/pybel
-- https://pypi.python.org/pypi/pybel
+- `Read the Docs <http://pybel.readthedocs.io/>`_
+- `GitHub <https://github.com/pybel/pybel>`_
+- `PyPI <https://pypi.python.org/pypi/pybel>`_
+- `Chat on Gitter <https://gitter.im/pybel/Lobby>`_

@@ -21,4 +21,4 @@ SET Citation = {"Pubmed","That one article from last week","123455"}
 
 SET Evidence = "Evidence 1"
 
-p(ChEBI:"oxygen radical") -> p(ChEBI:"oxygen atom")
+a(ChEBI:"oxygen radical") -> a(ChEBI:"oxygen atom")

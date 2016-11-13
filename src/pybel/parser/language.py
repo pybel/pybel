@@ -70,8 +70,8 @@ abundance_labels = {
     'p': 'Protein',
     'rnaAbundance': 'RNA',
     'r': 'RNA',
-    'biologicalProcess': 'Process',
-    'bp': 'Process',
+    'biologicalProcess': 'BiologicalProcess',
+    'bp': 'BiologicalProcess',
     'pathology': 'Pathology',
     'path': 'Pathology'
 }
@@ -82,11 +82,25 @@ rev_abundance_labels = {
     'miRNA': 'm',
     'Protein': 'p',
     'RNA': 'r',
-    'Process': 'bp',
+    'BiologicalProcess': 'bp',
     'Pathology': 'path',
     'Complex': 'complex',
     'Composite': 'composite'
 }
+
+#: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
+value_map = {
+    'G': 'Gene',
+    'R': 'RNA',
+    'P': 'Protein',
+    'M': 'miRNA',
+    'A': 'Abundance',
+    'B': 'BiologicalProcess',
+    'O': 'Pathology',
+    'C': 'Complex'
+}
+
+rev_value_map = {v: k for k, v in value_map.items()}
 
 amino_acid_dict = {
     'A': 'Ala',
@@ -233,17 +247,3 @@ variant_parent_dict = {
     'RNAVariant': 'RNA',
     'ProteinVariant': 'Protein'
 }
-
-#: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
-value_map = {
-    'G': 'Gene',
-    'R': 'RNA',
-    'P': 'Protein',
-    'M': 'microRNA',
-    'A': 'Abundance',
-    'B': 'BiologicalProcess',
-    'O': 'Pathology',
-    'C': 'Complex'
-}
-
-rev_value_map = {v: k for k, v in value_map.items()}

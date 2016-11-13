@@ -15,9 +15,32 @@ class TestAbundance(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-    def test_211a(self):
+    def test_short_abundance(self):
         """small molecule"""
         statement = 'a(CHEBI:"oxygen atom")'
+
+        result = self.parser.general_abundance.parseString(statement)
+
+        expected_result = {
+            'function': 'Abundance',
+            'identifier': dict(namespace='CHEBI', name='oxygen atom')
+        }
+
+        self.assertEqual(expected_result, result.asDict())
+
+        node = canonicalize_node(result)
+        expected_node = cls, ns, val = 'Abundance', 'CHEBI', 'oxygen atom'
+        self.assertEqual(expected_node, node)
+
+        expected_modifier = {}
+        self.assertEqual(expected_modifier, canonicalize_modifier(result))
+
+        self.assertHasNode(node, type=cls, namespace=ns, name=val)
+
+    # TODO compress to parametrized test with test_short_abundance
+    def test_long_abundance(self):
+        """small molecule"""
+        statement = 'abundance(CHEBI:"oxygen atom")'
 
         result = self.parser.general_abundance.parseString(statement)
 
@@ -63,11 +86,11 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         node = canonicalize_node(result)
-        expected_node = 'Gene', 'HGNC', 'AKT1'
+        expected_node = cls, ns, val = 'Gene', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
         self.assertEqual(1, len(self.parser.graph))
-        self.assertHasNode(node)
+        self.assertHasNode(node, type=cls, namespace=ns, name=val)
 
     def test_214b(self):
         statement = 'g(HGNC:AKT1, loc(GOCC:intracellular))'
@@ -89,10 +112,10 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         node = canonicalize_node(result)
-        expected_node = 'Gene', 'HGNC', 'AKT1'
+        expected_node = cls, ns, val = 'Gene', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
-        self.assertHasNode(node)
+        self.assertHasNode(node, type=cls, namespace=ns, name=val)
 
     def test_214c(self):
         """Test variant"""
@@ -112,8 +135,10 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        name = canonicalize_node(result)
-        self.assertHasNode(name, type='GeneVariant')
+        name = 'GeneVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'Phe', 508, 'del')
+        self.assertEqual(name, canonicalize_node(result))
+        self.assertHasNode(name, type='GeneVariant', namespace='HGNC',
+                           name='AKT1', variants=(('Variant', 'p.', 'Phe', 508, 'del'),))
 
         parent = 'Gene', 'HGNC', 'AKT1'
         self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
@@ -166,7 +191,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         name = canonicalize_node(result)
-        self.assertHasNode(name, type='GeneVariant')
+        self.assertHasNode(name, type='GeneVariant', namespace='HGNC', name='AKT1')
 
         parent = 'Gene', 'HGNC', 'AKT1'
         self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
@@ -307,8 +332,30 @@ class TestMiRNA(TestTokenParserBase):
         self.parser.clear()
         self.parser.mirna.setParseAction(self.parser.handle_term)
 
-    def test_215a(self):
+    def test_short(self):
         statement = 'm(HGNC:MIR21)'
+        result = self.parser.mirna.parseString(statement)
+        expected_result = ['miRNA', ['HGNC', 'MIR21']]
+        self.assertEqual(expected_result, result.asList())
+
+        expected_dict = {
+            'function': 'miRNA',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'MIR21'
+            }
+        }
+
+        self.assertEqual(expected_dict, result.asDict())
+
+        node = canonicalize_node(result)
+        expected_node = 'miRNA', 'HGNC', 'MIR21'
+        self.assertEqual(expected_node, node)
+
+        self.assertHasNode(node)
+
+    def test_long(self):
+        statement = 'microRNAAbundance(HGNC:MIR21)'
         result = self.parser.mirna.parseString(statement)
         expected_result = ['miRNA', ['HGNC', 'MIR21']]
         self.assertEqual(expected_result, result.asList())
@@ -438,7 +485,7 @@ class TestProtein(TestTokenParserBase):
 
         self.assertHasNode(node)
 
-    def test_214b(self):
+    def test_protein_wLocation(self):
         statement = 'p(HGNC:AKT1, loc(GOCC:intracellular))'
 
         result = self.parser.protein.parseString(statement)
@@ -489,7 +536,10 @@ class TestProtein(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = canonicalize_node(result)
+        node = (
+            'ProteinVariant', 'HGNC', 'AKT1', ('ProteinModification', 'Ph', 'Ser'),
+            ('Variant', 'p.', 'Ala', 127, 'Tyr'))
+        self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node, type='ProteinVariant')
 
         parent = 'Protein', 'HGNC', 'AKT1'
@@ -510,7 +560,8 @@ class TestProtein(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        name = canonicalize_node(result)
+        name = 'ProteinFusion', ('HGNC', 'TMPRSS2'), ('r', 1, 79), ('HGNC', 'ERG'), ('r', 312, 5034)
+        self.assertEqual(name, canonicalize_node(result))
         self.assertHasNode(name)
 
     def test_protein_fusion_legacy_1(self):
@@ -545,7 +596,10 @@ class TestProtein(TestTokenParserBase):
             }
         }
         self.assertEqual(expected_dict, result.asDict())
-        name = canonicalize_node(result)
+
+        name = 'ProteinFusion', ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)
+        self.assertEqual(name, canonicalize_node(result))
+
         self.assertHasNode(name)
 
     def test_protein_trunc_1(self):
@@ -570,11 +624,12 @@ class TestProtein(TestTokenParserBase):
         expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'p.', 'C', 40, '*']]
         self.assertEqual(expected_result, result.asList())
 
-        mod_node = canonicalize_node(result)
-        self.assertHasNode(mod_node, type='ProteinVariant')
+        protein_node = cls, ns, val = 'Protein', 'HGNC', 'AKT1'
+        self.assertHasNode(protein_node, type='Protein', namespace=ns, name=val)
 
-        protein_node = 'Protein', 'HGNC', 'AKT1'
-        self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='AKT1')
+        mod_node = 'ProteinVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'C', 40, '*')
+        self.assertEqual(mod_node, canonicalize_node(result))
+        self.assertHasNode(mod_node, type='ProteinVariant', namespace=ns, name=val)
 
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
@@ -587,11 +642,12 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'AKT1'
-        mod_node = canonicalize_node(result)
+
+        mod_node = ('ProteinVariant', 'HGNC', 'AKT1', ('ProteinModification', 'Ph', 'Ser', 473))
+        self.assertEqual(mod_node, canonicalize_node(result))
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='AKT1')
-        self.assertHasNode(mod_node, type='ProteinVariant')
-        # self.assertHasEdge(mod_node, protein_node, relation='hasParent')
+        self.assertHasNode(mod_node, type='ProteinVariant', namespace='HGNC', name='AKT1')
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
     def test_protein_pmod_2(self):
@@ -607,7 +663,6 @@ class TestProtein(TestTokenParserBase):
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='AKT1')
         self.assertHasNode(mod_node, type='ProteinVariant')
-        # self.assertHasEdge(mod_node, protein_node, relation='hasParent')
         self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
 
     def test_protein_pmod_3(self):
@@ -668,8 +723,8 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         protein_node = 'Protein', 'HGNC', 'CFTR'
-        # mod_node = 'Protein', 'HGNC', 'CFTR', 'Variant', '?'
-        mod_node = canonicalize_node(result)
+        mod_node = 'ProteinVariant', 'HGNC', 'CFTR', ('Variant', '?')
+        self.assertEqual(mod_node, canonicalize_node(result))
 
         self.assertHasNode(protein_node, type='Protein', namespace='HGNC', name='CFTR')
         self.assertHasNode(mod_node, type='ProteinVariant')
@@ -993,7 +1048,7 @@ class TestComplex(TestTokenParserBase):
         self.parser.clear()
         self.parser.complex_abundances.setParseAction(self.parser.handle_term)
 
-    def test_212a(self):
+    def test_complex_singleton(self):
         statement = 'complex(SCOMP:"AP-1 Complex")'
         result = self.parser.complex_abundances.parseString(statement)
 
@@ -1016,9 +1071,9 @@ class TestComplex(TestTokenParserBase):
 
         self.assertHasNode(node, type='Complex', namespace='SCOMP', name='AP-1 Complex')
 
-    def test_212b(self):
+    def test_complex_list_short(self):
         statement = 'complex(p(HGNC:FOS), p(HGNC:JUN))'
-        result = self.parser.complex_abundances.parseString(statement)
+        result = self.parser.parseString(statement)
 
         expected_result = ['Complex', ['Protein', ['HGNC', 'FOS']], ['Protein', ['HGNC', 'JUN']]]
         self.assertEqual(expected_result, result.asList())
@@ -1051,26 +1106,9 @@ class TestComplex(TestTokenParserBase):
         self.assertHasNode(child_2)
         self.assertHasEdge(node, child_2, relation='hasComponent')
 
-    def test_complex(self):
-        """Test complex statement"""
-        statement = 'complex(p(HGNC:CLSTN1), p(HGNC:KLC1))'
-        result = self.parser.complex_abundances.parseString(statement)
-
-        expected = ['Complex', ['Protein', ['HGNC', 'CLSTN1']], ['Protein', ['HGNC', 'KLC1']]]
-        self.assertEqual(expected, result.asList())
-
-        complex_name = 'Complex', ('Protein', 'HGNC', 'CLSTN1'), ('Protein', 'HGNC', 'KLC1')
-        self.assertEqual(complex_name, canonicalize_node(result))
-        self.assertHasNode(complex_name)
-
-        p1_name = 'Protein', 'HGNC', 'CLSTN1'
-        self.assertHasNode(p1_name)
-
-        p2_name = 'Protein', 'HGNC', 'KLC1'
-        self.assertHasNode(p2_name)
-
-        self.assertHasEdge(complex_name, p1_name)
-        self.assertHasEdge(complex_name, p2_name)
+    def test_complex_list_long(self):
+        statement = 'complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))'
+        result = self.parser.parseString(statement)
 
 
 class TestComposite(TestTokenParserBase):
@@ -1850,13 +1888,26 @@ class TestRelations(TestTokenParserBase):
 
         self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
 
-    def test_nested(self):
+    def test_nested_failure(self):
         """
         3.1 \
         Test nested statement"""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
         with self.assertRaises(NestedRelationNotSupportedException):
             self.parser.relation.parseString(statement)
+
+    def test_nested_lenient(self):
+        """ 3.1 \ Test nested statement"""
+        statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
+        self.parser.lenient = True
+
+        result = self.parser.relation.parseString(statement)
+
+        self.assertHasEdge(('Protein', 'HGNC', 'CAT'), ('Abundance', 'CHEBI', "hydrogen peroxide"))
+        self.assertHasEdge(('Abundance', 'CHEBI', "hydrogen peroxide"),
+                           ('BiologicalProcess', 'GO', "apoptotic process"))
+
+        self.parser.lenient = False
 
     def test_negativeCorrelation_withObjectVariant(self):
         """
@@ -2095,7 +2146,11 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(sub, sub_product_2, relation='hasProduct')
         self.assertHasEdge(sub, sub_product_3, relation='hasProduct')
 
-        obj = 'BiologicalProcess', 'GOBP', 'cholesterol biosynthetic process'
-        self.assertHasNode(obj)
+        obj = cls, ns, val = 'BiologicalProcess', 'GOBP', 'cholesterol biosynthetic process'
+        self.assertHasNode(obj, type=cls, namespace=ns, name=val)
 
         self.assertHasEdge(sub, obj, relation='subProcessOf')
+
+    def test_extra_1(self):
+        statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
+        result = self.parser.parseString(statement)

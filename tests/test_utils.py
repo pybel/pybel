@@ -69,7 +69,7 @@ class TestUtils(unittest.TestCase):
         g = nx.MultiDiGraph()
         g.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}})
 
-        result = pybel.utils.flatten_edges(g)
+        result = pybel.utils.flatten_graph_data(g)
 
         expected = nx.MultiDiGraph()
         expected.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B_C': 'c', 'B_D': 'd'})

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import logging
 
 from pyparsing import Suppress, pyparsing_common, MatchFirst
@@ -170,10 +172,9 @@ class ControlParser(BaseParser):
         return self.commands
 
     def get_annotations(self):
-        annot = self.annotations.copy()
-        for key, value in self.citation.items():
-            annot['citation_{}'.format(key)] = value
-        return annot
+        annotations = self.annotations.copy()
+        annotations['citation'] = self.citation.copy()
+        return annotations
 
     def clear(self):
         self.annotations.clear()

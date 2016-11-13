@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import logging
 
 from pyparsing import oneOf, Group, pyparsing_common, replaceWith
