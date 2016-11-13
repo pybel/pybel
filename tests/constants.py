@@ -27,9 +27,11 @@ class TestTokenParserBase(unittest.TestCase):
     def assertHasNode(self, member, msg=None, **kwargs):
         self.assertIn(member, self.parser.graph)
         if kwargs:
-            msg_format = 'Wrong node {} properties. expected {} but got {}'
-            self.assertTrue(subdict_matches(self.parser.graph.node[member], kwargs, ),
-                            msg=msg_format.format(member, kwargs, self.parser.graph.node[member]))
+            self.assertTrue(all(kwarg in self.parser.graph.node[member] for kwarg in kwargs), msg="Missing kwarg in node data")
+            self.assertEqual(kwargs, {k: self.parser.graph.node[member][k] for k in kwargs}, msg="Wrong values in node data")
+            #msg_format = 'Wrong node {} properties. expected {} but got {}'
+            #self.assertTrue(subdict_matches(self.parser.graph.node[member], kwargs, ),
+            #                msg=msg_format.format(member, kwargs, self.parser.graph.node[member]))
 
     def assertHasEdge(self, u, v, msg=None, **kwargs):
         self.assertTrue(self.parser.graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
