@@ -75,7 +75,7 @@ def flatten(d, parent_key='', sep='_'):
     return dict(items)
 
 
-def flatten_edges(graph):
+def flatten_graph_data(graph):
     """Returns a new graph with flattened edge data dictionaries
 
     :param graph:

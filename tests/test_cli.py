@@ -27,26 +27,20 @@ class TestCli(unittest.TestCase):
         neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
 
         self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--neo',
-                                      neo_path, '--neo-context',test_context])
+                                      neo_path, '--neo-context', test_context])
 
         q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
         count = neo.data(q)[0]['count']
         self.assertEqual(14, count)
 
-    @unittest.skip
     def test_csv(self):
         test_edge_file = 'myedges.csv'
 
         with self.runner.isolated_filesystem():
             abs_test_edge_file = os.path.abspath(test_edge_file)
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--csv', abs_test_edge_file])
-            log.info('File paths: {}'.format(abs_test_edge_file))
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_edge_file))
-
-            with open(abs_test_edge_file) as f:
-                loaded = json.load(f)
-                self.assertIsNotNone(loaded)
 
     def test_slushy(self):
         with self.runner.isolated_filesystem():
@@ -59,7 +53,6 @@ class TestCli(unittest.TestCase):
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--pickle', abs_test_file])
-            log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_pickle(abs_test_file)
@@ -71,7 +64,6 @@ class TestCli(unittest.TestCase):
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--graphml', abs_test_file])
-            log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
             g = nx.read_graphml(abs_test_file)
@@ -83,7 +75,6 @@ class TestCli(unittest.TestCase):
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--json', abs_test_file])
-            log.info('File path: {}'.format(abs_test_file))
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_file))
 
