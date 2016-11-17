@@ -41,3 +41,11 @@ class TestTokenParserBase(unittest.TestCase):
             msg_format = 'No edge with correct properties. expected {} but got {}'
             self.assertTrue(any_subdict_matches(self.parser.graph.edge[u][v], kwargs),
                             msg=msg_format.format(kwargs, self.parser.graph.edge[u][v]))
+
+
+def test_bel_1_reconstituted(self, g):
+    nodes = list(g.nodes_iter(namespace='HGNC', name='AKT1'))
+    self.assertEqual(3, len(nodes))
+
+    edges = list(g.edges_iter(relation='increases'))
+    self.assertEqual(2, len(edges))

@@ -5,7 +5,8 @@ import pybel
 from pybel.manager import DefinitionCacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import IllegalFunctionSemantic
-from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict
+from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
+    test_bel_1_reconstituted
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
@@ -33,10 +34,8 @@ class TestCacheIntegration(unittest.TestCase):
 
 
 class TestImport(unittest.TestCase):
-    def test_full(self):
-        g = pybel.from_path(test_bel_1)
-
-        expected_document_metadata = {
+    def setUp(self):
+        self.expected_document_metadata = {
             'Name': "PyBEL Test Document",
             "Description": "Made for testing PyBEL parsing",
             'Version': "1.6",
@@ -46,21 +45,15 @@ class TestImport(unittest.TestCase):
             'ContactInfo': "charles.hoyt@scai.fraunhofer.de"
         }
 
-        self.assertEqual(expected_document_metadata, g.metadata_parser.document_metadata)
-
-        nodes = list(g.nodes_iter(namespace='HGNC', name='AKT1'))
-        self.assertEqual(3, len(nodes))
-
-        edges = list(g.edges_iter(relation='increases'))
-        self.assertEqual(2, len(edges))
-
     def test_from_path(self):
         g = pybel.from_path(test_bel_1)
-        self.assertIsNotNone(g)
+        self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
+        test_bel_1_reconstituted(self, g)
 
     def test_from_fileUrl(self):
         g = pybel.from_url('file://{}'.format(test_bel_1))
-        self.assertIsNotNone(g)
+        self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
+        test_bel_1_reconstituted(self, g)
 
 
 class TestFull(TestTokenParserBase):

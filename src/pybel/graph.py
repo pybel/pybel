@@ -7,6 +7,7 @@ import time
 import networkx as nx
 import py2neo
 import requests
+from networkx.readwrite import GraphMLReader
 from networkx.readwrite import json_graph
 from pyparsing import ParseException
 from requests_file import FileAdapter
@@ -19,7 +20,7 @@ from .parser.utils import split_file_to_annotations_and_definitions, subdict_mat
 from .utils import flatten, flatten_graph_data, expand_dict
 
 __all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle',
-           'from_graphml', 'to_graphml', 'to_json', 'to_neo4j', 'to_pickle']
+           'from_graphml', 'to_graphml', 'to_json', 'to_neo4j', 'to_pickle', 'from_json']
 
 log = logging.getLogger('pybel')
 
@@ -300,7 +301,7 @@ def to_json(graph, output):
     :type graph: BELGraph
     :param output: a write-supporting filelike object
     """
-    data = json_graph.node_link_data(flatten_graph_data(graph))
+    data = json_graph.node_link_data(graph)
     json.dump(data, output, ensure_ascii=False)
 
 
@@ -308,8 +309,14 @@ def from_json(path):
     """Reads graph from node-link JSON Object"""
     with open(os.path.expanduser(path)) as f:
         data = json.load(f)
-    g = json_graph.node_link_graph(data)
-    return expand_edges(g)
+
+    print(json.dumps(data, indent=2))
+
+    for i, node in enumerate(data['nodes']):
+        data['nodes'][i]['id'] = tuple(node['id'])
+
+    g = json_graph.node_link_graph(data, directed=True, multigraph=True)
+    return BELGraph(data=g)
 
 
 def to_graphml(graph, output):
@@ -334,11 +341,13 @@ def to_graphml(graph, output):
 def from_graphml(path):
     """Reads a graph from a graphml file
 
-    :param path: File or filename to write. Filenames ending in .gz or .bz2 will be compressed.
-    :type path: file or string
+    :param path: File or filename to write
+    :type path: file or str
     :rtype: networkx.MultiDiGraph
     """
-    g = nx.read_graphml(path)
+    reader = GraphMLReader(node_type=str)
+    reader.multigraph = True
+    g = list(reader(path=path))[0]
     g = expand_edges(g)
     for n in g:
         g.node[n] = json.loads(g.node[n]['json'])

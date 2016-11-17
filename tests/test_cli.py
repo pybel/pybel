@@ -1,16 +1,14 @@
-import json
 import logging
 import os
 import unittest
 
-import networkx as nx
 import py2neo
 from click.testing import CliRunner
 
 import pybel
 from pybel import cli
 from pybel.graph import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel_1, test_bel_slushy
+from tests.constants import test_bel_1, test_bel_slushy, test_bel_1_reconstituted
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +54,7 @@ class TestCli(unittest.TestCase):
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_pickle(abs_test_file)
-            self.assertTrue(isinstance(g, nx.MultiDiGraph))
+            test_bel_1_reconstituted(self, g)
 
     def test_graphml(self):
         test_file = 'mygraph.graphml'
@@ -66,8 +64,8 @@ class TestCli(unittest.TestCase):
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--graphml', abs_test_file])
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
-            g = nx.read_graphml(abs_test_file)
-            self.assertTrue(isinstance(g, (nx.MultiDiGraph, nx.DiGraph)))
+            g = pybel.from_graphml(abs_test_file)
+            test_bel_1_reconstituted(self, g)
 
     def test_json(self):
         test_file = 'mygraph.json'
@@ -77,7 +75,5 @@ class TestCli(unittest.TestCase):
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--json', abs_test_file])
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_file))
-
-            with open(abs_test_file) as f:
-                loaded = json.load(f)
-                self.assertIsNotNone(loaded)
+            g = pybel.from_json(abs_test_file)
+            test_bel_1_reconstituted(self, g)
