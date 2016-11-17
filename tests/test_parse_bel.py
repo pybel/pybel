@@ -623,13 +623,29 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, var(p.C40*))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'p.', 'C', 40, '*']]
+        expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'p.', 'Cys', 40, '*']]
         self.assertEqual(expected_result, result.asList())
 
         protein_node = cls, ns, val = 'Protein', 'HGNC', 'AKT1'
         self.assertHasNode(protein_node, type='Protein', namespace=ns, name=val)
 
-        mod_node = 'ProteinVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'C', 40, '*')
+        mod_node = 'ProteinVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'Cys', 40, '*')
+        self.assertEqual(mod_node, canonicalize_node(result))
+        self.assertHasNode(mod_node, type='ProteinVariant', namespace=ns, name=val)
+
+        self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
+
+    def test_protein_trunc_3(self):
+        statement = 'p(HGNC:AKT1, var(p.Arg1851*))'
+        result = self.parser.protein.parseString(statement)
+
+        expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'p.', 'Arg', 1851, '*']]
+        self.assertEqual(expected_result, result.asList())
+
+        protein_node = cls, ns, val = 'Protein', 'HGNC', 'AKT1'
+        self.assertHasNode(protein_node, type='Protein', namespace=ns, name=val)
+
+        mod_node = 'ProteinVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'Arg', 1851, '*')
         self.assertEqual(mod_node, canonicalize_node(result))
         self.assertHasNode(mod_node, type='ProteinVariant', namespace=ns, name=val)
 

@@ -54,7 +54,7 @@ hgvs_protein_fs = p_dot + aa_triple + pyparsing_common.integer() + aa_triple + '
 
 hgvs_genomic = g_dot + pyparsing_common.integer() + dna_nucleotide + Suppress('>') + dna_nucleotide
 
-hgvs_protein_truncation = p_dot + 'C' + pyparsing_common.integer()('location') + '*'
+hgvs_protein_truncation = p_dot + amino_acid + pyparsing_common.integer()('location') + '*'
 
 hgvs = (hgvs_protein_truncation | hgvs_rna_del | hgvs_dna_del | hgvs_chromosome | hgvs_snp | hgvs_protein_del |
         hgvs_protein_fs | hgvs_protein_mut | hgvs_genomic | '=' | '?')

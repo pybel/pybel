@@ -59,7 +59,7 @@ class TestHgvsParser(unittest.TestCase):
     def test_protein_trunc(self):
         statement = 'p.C65*'
         result = hgvs_protein_truncation.parseString(statement)
-        expected = ['p.', 'C', 65, '*']
+        expected = ['p.', 'Cys', 65, '*']
         self.assertEqual(expected, result.asList())
 
 
