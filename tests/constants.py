@@ -42,8 +42,7 @@ class TestTokenParserBase(unittest.TestCase):
             self.assertTrue(any_subdict_matches(self.parser.graph.edge[u][v], kwargs),
                             msg=msg_format.format(kwargs, self.parser.graph.edge[u][v]))
 
-
-def test_bel_1_reconstituted(self, g):
+def bel_1_reconstituted(self, g):
     nodes = list(g.nodes_iter(namespace='HGNC', name='AKT1'))
     self.assertEqual(3, len(nodes))
 
