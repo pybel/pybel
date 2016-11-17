@@ -37,16 +37,16 @@ class TestAbundance(TestTokenParserBase):
 
         self.assertHasNode(node, type=cls, namespace=ns, name=val)
 
-    # TODO compress to parametrized test with test_short_abundance
     def test_long_abundance(self):
         """small molecule"""
-        statement = 'abundance(CHEBI:"oxygen atom")'
+        statement = 'abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))'
 
         result = self.parser.general_abundance.parseString(statement)
 
         expected_result = {
             'function': 'Abundance',
-            'identifier': dict(namespace='CHEBI', name='oxygen atom')
+            'identifier': dict(namespace='CHEBI', name='oxygen atom'),
+            'location': dict(namespace='GOCC', name='intracellular')
         }
 
         self.assertEqual(expected_result, result.asDict())
@@ -56,7 +56,9 @@ class TestAbundance(TestTokenParserBase):
         self.assertEqual(expected_node, node)
 
         modifier = canonicalize_modifier(result)
-        expected_modifier = {}
+        expected_modifier = {
+            'location': dict(namespace='GOCC', name='intracellular')
+        }
         self.assertEqual(expected_modifier, modifier)
 
         self.assertHasNode(node, type=cls, namespace=ns, name=val)

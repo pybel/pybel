@@ -77,7 +77,7 @@ class BelParser(BaseParser):
 
         #: 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
         general_abundance_tags = one_of_tags(['a', 'abundance'], 'Abundance', 'function')
-        self.general_abundance = general_abundance_tags + nest(identifier)
+        self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
 
         #: 2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA
         gene_tag = one_of_tags(['g', 'geneAbundance'], 'Gene', 'function')
