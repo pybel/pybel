@@ -324,7 +324,7 @@ class TestParseControl(unittest.TestCase):
         self.parser.parseString(s)
 
         expected_annotation = {
-            'Evidence': 'For instance, during 7-ketocholesterol-induced apoptosis of U937 cells'
+            'SupportingText': 'For instance, during 7-ketocholesterol-induced apoptosis of U937 cells'
         }
 
         self.assertEqual(expected_annotation, self.parser.annotations)
@@ -372,7 +372,7 @@ class TestParseControl(unittest.TestCase):
         self.parser.parseString(s1)
         self.parser.parseString(s2)
 
-        self.assertEqual('b', self.parser.annotations['Evidence'])
+        self.assertEqual('b', self.parser.annotations['SupportingText'])
 
     def test_unset_evidence(self):
         s1 = 'SET Evidence = "a"'
@@ -403,14 +403,14 @@ class TestParseControl(unittest.TestCase):
 
         self.parser.parse_lines([s1, s2, s3, s4, s5, s6])
 
-        self.assertEqual('h', self.parser.annotations['Evidence'])
+        self.assertEqual('h', self.parser.annotations['SupportingText'])
         self.assertEqual('e', self.parser.citation['type'])
         self.assertEqual('f', self.parser.citation['name'])
         self.assertEqual('g', self.parser.citation['reference'])
 
         self.parser.parseString('UNSET {"Custom1","Evidence"}')
         self.assertNotIn('Custom1', self.parser.annotations)
-        self.assertNotIn('Evidence', self.parser.annotations)
+        self.assertNotIn('SupportingText', self.parser.annotations)
         self.assertIn('Custom2', self.parser.annotations)
         self.assertNotEqual(0, len(self.parser.citation))
 
