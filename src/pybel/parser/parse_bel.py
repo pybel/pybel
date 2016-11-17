@@ -522,8 +522,9 @@ class BelParser(BaseParser):
         :param v: target node
         :param relation: relationship label
         """
-        if not self.graph.has_edge(u, v, relation):
-            self.graph.add_edge(u, v, key=relation, relation=relation)
+        key = language.unqualified_edge_code[relation]
+        if not self.graph.has_edge(u, v, key):
+            self.graph.add_edge(u, v, key=key, relation=relation)
 
     def ensure_node(self, s, l, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
