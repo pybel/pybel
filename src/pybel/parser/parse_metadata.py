@@ -5,8 +5,8 @@ import logging
 from pyparsing import Suppress, And
 from pyparsing import pyparsing_common as ppc
 
-from .baseparser import BaseParser, word, quote, delimitedSet
 from . import language
+from .baseparser import BaseParser, word, quote, delimitedSet
 from .parse_exceptions import IllegalDocumentMetadataException
 from ..utils import download_url
 

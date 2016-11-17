@@ -4,7 +4,7 @@ import logging
 
 from pyparsing import Suppress, pyparsing_common, MatchFirst
 
-from .baseparser import BaseParser, W, quote, delimitedSet, And, oneOf, replaceWith
+from .baseparser import BaseParser, quote, delimitedSet, And, oneOf
 from .parse_exceptions import *
 
 log = logging.getLogger('pybel')
