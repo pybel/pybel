@@ -1,8 +1,8 @@
 import logging
 
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
+from pybel.parser.parse_bel import write_bel_term
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
-
 from tests.constants import TestTokenParserBase, test_citation_dict
 
 log = logging.getLogger(__name__)
@@ -2172,3 +2172,25 @@ class TestRelations(TestTokenParserBase):
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
         result = self.parser.parseString(statement)
+
+
+class TestWrite(TestTokenParserBase):
+    def test_1(self):
+        cases = [
+            ('abundance(CHEBI:"superoxide")', 'a(CHEBI:superoxide)'),
+            ('g(HGNC:AKT1,var(p.Phe508del))', 'g(HGNC:AKT1, var(p.Phe508del))'),
+            ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(delCTT))',
+             'g(HGNC:AKT1, var(p.Phe508del), var(g.308G>A), var(delCTT))'),
+            ('p(HGNC:MAPT,proteinModification(P))', 'p(HGNC:MAPT, pmod(Ph))'),
+            ('proteinAbundance(HGNC:SFN)', 'p(HGNC:SFN)'),
+            ('complex(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'complex(p(HGNC:SFN), p(HGNC:YWHAB))'),
+            ('composite(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'composite(p(HGNC:SFN), p(HGNC:YWHAB))'),
+            ('reaction(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"oxygen"),a(CHEBI:"hydrogen peroxide")))',
+             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
+            ('rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))',
+             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))')
+        ]
+
+        for source_bel, expected_bel in cases:
+            result = self.parser.parseString(source_bel)
+            self.assertEqual(expected_bel, write_bel_term(result))

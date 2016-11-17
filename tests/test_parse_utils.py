@@ -91,11 +91,10 @@ class TestUtils(unittest.TestCase):
         }
         b = {
             'k1': 'v1',
-            'k2': {'v2':'v3'}
+            'k2': {'v2': 'v3'}
         }
 
         self.assertFalse(subdict_matches(a, b))
-
 
     def test_dict_matches_graph(self):
         g = nx.MultiDiGraph()
@@ -281,3 +280,13 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
 and apoptosis (programmed cell death) [1,2]"'''.split('\n')
         lines = list(sanitize_file_lines(s))
         self.assertEqual(1, len(lines))
+
+    def test_quote(self):
+        a = "word1 word2"
+        self.assertEqual('"word1 word2"', utils.ensure_quotes(a))
+
+        b = "word1"
+        self.assertEqual('word1', utils.ensure_quotes(b))
+
+        c = "word1$#"
+        self.assertEqual('"word1$#"', utils.ensure_quotes(c))
