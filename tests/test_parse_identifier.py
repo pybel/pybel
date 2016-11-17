@@ -91,6 +91,7 @@ class TestNamespaceParserDefault(unittest.TestCase):
         with self.assertRaises(Exception):
             self.parser.parseString(s)
 
+
 class TestNamespaceParserLenient(unittest.TestCase):
     def setUp(self):
         nsd = {

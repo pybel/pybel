@@ -96,7 +96,6 @@ class TestNsCache(unittest.TestCase):
         self.assertNotIn(fake_an_key, test_db.annotation_cache.keys())
         self.assertNotIn(ns, test_db.annotation_cache.keys())
 
-
     def test_setupWith_ensureCache(self):
         # 153 - 155
         test_db = DefinitionCacheManager(self.test_db)
