@@ -15,7 +15,7 @@ from .parse_exceptions import NestedRelationNotSupportedException, IllegalTransl
     MissingCitationException, IllegalFunctionSemantic
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
-from .utils import handle_debug, list2tuple, cartesian_dictionary
+from .utils import handle_debug, list2tuple, cartesian_dictionary, ensure_quotes
 
 log = logging.getLogger('pybel')
 
@@ -77,7 +77,7 @@ class BelParser(BaseParser):
 
         #: 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
         general_abundance_tags = one_of_tags(['a', 'abundance'], 'Abundance', 'function')
-        self.general_abundance = general_abundance_tags + nest(identifier)
+        self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
 
         #: 2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA
         gene_tag = one_of_tags(['g', 'geneAbundance'], 'Gene', 'function')
@@ -522,8 +522,9 @@ class BelParser(BaseParser):
         :param v: target node
         :param relation: relationship label
         """
-        if not self.graph.has_edge(u, v, relation):
-            self.graph.add_edge(u, v, key=relation, relation=relation)
+        key = language.unqualified_edge_code[relation]
+        if not self.graph.has_edge(u, v, key):
+            self.graph.add_edge(u, v, key=key, relation=relation)
 
     def ensure_node(self, s, l, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
@@ -736,3 +737,40 @@ def write_variant(tokens):
         return 'pmod({})'.format(tokens[1])
     else:
         raise NotImplementedError('prob with :{}'.format(tokens))
+
+
+def write_bel_term(tokens):
+    if 'function' in tokens and 'variants' in tokens:
+        variants = ', '.join(write_variant(var) for var in tokens['variants'])
+        return "{}({}:{}, {})".format(language.rev_abundance_labels[tokens['function']],
+                                      tokens['identifier']['namespace'],
+                                      ensure_quotes(tokens['identifier']['name']),
+                                      variants)
+
+    elif 'function' in tokens and 'members' in tokens:
+        return '{}({})'.format(language.rev_abundance_labels[tokens['function']],
+                               ', '.join(sorted(write_bel_term(member) for member in tokens['members'])))
+
+    elif 'transformation' in tokens and 'Reaction' == tokens['transformation']:
+        reactants = sorted(write_bel_term(reactant) for reactant in tokens['reactants'])
+        products = sorted(write_bel_term(product) for product in tokens['products'])
+        return 'rxn(reactants({}), products({}))'.format(", ".join(reactants), ", ".join(products))
+
+    elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'Protein') and 'fusion' in tokens:
+        f = tokens['fusion']
+        return '{}(fus({}:{}, r.{}, {}:{}, r.{}))'.format(
+            language.rev_abundance_labels[tokens['function']],
+            f['partner_5p']['namespace'],
+            f['partner_5p']['name'],
+            f['range_5p'],
+            f['partner_3p']['namespace'],
+            f['partner_3p']['name'],
+            tokens['fusion']['range_3p']
+        )
+
+    elif 'function' in tokens and tokens['function'] in (
+            'Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
+        if 'identifier' in tokens:
+            return '{}({}:{})'.format(language.rev_abundance_labels[tokens['function']],
+                                      tokens['identifier']['namespace'],
+                                      ensure_quotes(tokens['identifier']['name']))

@@ -247,3 +247,14 @@ variant_parent_dict = {
     'RNAVariant': 'RNA',
     'ProteinVariant': 'Protein'
 }
+
+unqualified_edges = [
+    'hasReactant',
+    'hasProduct',
+    'hasComponent',
+    'hasVariant',
+    'transcribedTo',
+    'translatedTo'
+]
+
+unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}

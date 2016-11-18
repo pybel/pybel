@@ -1,8 +1,8 @@
 import logging
 
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
+from pybel.parser.parse_bel import write_bel_term
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
-
 from tests.constants import TestTokenParserBase, test_citation_dict
 
 log = logging.getLogger(__name__)
@@ -37,16 +37,16 @@ class TestAbundance(TestTokenParserBase):
 
         self.assertHasNode(node, type=cls, namespace=ns, name=val)
 
-    # TODO compress to parametrized test with test_short_abundance
     def test_long_abundance(self):
         """small molecule"""
-        statement = 'abundance(CHEBI:"oxygen atom")'
+        statement = 'abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))'
 
         result = self.parser.general_abundance.parseString(statement)
 
         expected_result = {
             'function': 'Abundance',
-            'identifier': dict(namespace='CHEBI', name='oxygen atom')
+            'identifier': dict(namespace='CHEBI', name='oxygen atom'),
+            'location': dict(namespace='GOCC', name='intracellular')
         }
 
         self.assertEqual(expected_result, result.asDict())
@@ -56,7 +56,9 @@ class TestAbundance(TestTokenParserBase):
         self.assertEqual(expected_node, node)
 
         modifier = canonicalize_modifier(result)
-        expected_modifier = {}
+        expected_modifier = {
+            'location': dict(namespace='GOCC', name='intracellular')
+        }
         self.assertEqual(expected_modifier, modifier)
 
         self.assertHasNode(node, type=cls, namespace=ns, name=val)
@@ -621,13 +623,29 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, var(p.C40*))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'p.', 'C', 40, '*']]
+        expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'p.', 'Cys', 40, '*']]
         self.assertEqual(expected_result, result.asList())
 
         protein_node = cls, ns, val = 'Protein', 'HGNC', 'AKT1'
         self.assertHasNode(protein_node, type='Protein', namespace=ns, name=val)
 
-        mod_node = 'ProteinVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'C', 40, '*')
+        mod_node = 'ProteinVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'Cys', 40, '*')
+        self.assertEqual(mod_node, canonicalize_node(result))
+        self.assertHasNode(mod_node, type='ProteinVariant', namespace=ns, name=val)
+
+        self.assertHasEdge(protein_node, mod_node, relation='hasVariant')
+
+    def test_protein_trunc_3(self):
+        statement = 'p(HGNC:AKT1, var(p.Arg1851*))'
+        result = self.parser.protein.parseString(statement)
+
+        expected_result = ['Protein', ['HGNC', 'AKT1'], ['Variant', 'p.', 'Arg', 1851, '*']]
+        self.assertEqual(expected_result, result.asList())
+
+        protein_node = cls, ns, val = 'Protein', 'HGNC', 'AKT1'
+        self.assertHasNode(protein_node, type='Protein', namespace=ns, name=val)
+
+        mod_node = 'ProteinVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'Arg', 1851, '*')
         self.assertEqual(mod_node, canonicalize_node(result))
         self.assertHasNode(mod_node, type='ProteinVariant', namespace=ns, name=val)
 
@@ -2154,3 +2172,25 @@ class TestRelations(TestTokenParserBase):
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
         result = self.parser.parseString(statement)
+
+
+class TestWrite(TestTokenParserBase):
+    def test_1(self):
+        cases = [
+            ('abundance(CHEBI:"superoxide")', 'a(CHEBI:superoxide)'),
+            ('g(HGNC:AKT1,var(p.Phe508del))', 'g(HGNC:AKT1, var(p.Phe508del))'),
+            ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(delCTT))',
+             'g(HGNC:AKT1, var(p.Phe508del), var(g.308G>A), var(delCTT))'),
+            ('p(HGNC:MAPT,proteinModification(P))', 'p(HGNC:MAPT, pmod(Ph))'),
+            ('proteinAbundance(HGNC:SFN)', 'p(HGNC:SFN)'),
+            ('complex(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'complex(p(HGNC:SFN), p(HGNC:YWHAB))'),
+            ('composite(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'composite(p(HGNC:SFN), p(HGNC:YWHAB))'),
+            ('reaction(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"oxygen"),a(CHEBI:"hydrogen peroxide")))',
+             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
+            ('rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))',
+             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))')
+        ]
+
+        for source_bel, expected_bel in cases:
+            result = self.parser.parseString(source_bel)
+            self.assertEqual(expected_bel, write_bel_term(result))

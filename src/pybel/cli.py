@@ -14,13 +14,14 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 
 import logging
 import os
-import time
 import sys
+import time
 
 import click
 import py2neo
 
 from . import graph
+from .constants import PYBEL_DIR
 from .manager.namespace_cache import DefinitionCacheManager, DEFAULT_CACHE_LOCATION
 
 log = logging.getLogger('pybel')
@@ -35,11 +36,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
 
-pybel_directory = os.path.expanduser('~/.pybel')
-if not os.path.exists(pybel_directory):
-    os.mkdir(os.path.expanduser(pybel_directory))
-
-fh_path = os.path.join(pybel_directory, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
+fh_path = os.path.join(PYBEL_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
 fh = logging.FileHandler(fh_path)
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
