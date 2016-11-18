@@ -11,15 +11,12 @@ from . import database_models
 from .database_models import DEFINITION_TABLE_NAME, CONTEXT_TABLE_NAME, DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
 from .defaults import default_namespaces, default_annotations
 from .. import utils
+from ..constants import PYBEL_DATA
 
 log = logging.getLogger('pybel')
 
-pybel_data = os.path.expanduser('~/.pybel/data')
-if not os.path.exists(pybel_data):
-    os.makedirs(pybel_data)
-
 DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
-DEFAULT_CACHE_LOCATION = os.path.join(pybel_data, DEFAULT_DEFINITION_CACHE_NAME)
+DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA, DEFAULT_DEFINITION_CACHE_NAME)
 
 
 class DefinitionCacheManager:
@@ -187,10 +184,10 @@ class DefinitionCacheManager:
                             self.__insert_definition(url, check_date=False)
 
             self.__cached_definitions()
-        else:
-            self.setup_database()
-            self.ensure_cache(namespace_urls, annotation_urls)
-            log.info("New database is setup and caches were created in %3.2fs", time.time() - start_time)
+        #else:
+        #    self.setup_database()
+        #    self.ensure_cache(namespace_urls, annotation_urls)
+        #    log.info("New database is setup and caches were created in %3.2fs", time.time() - start_time)
 
     def update_definition_cache(self, namespace_urls=None, annotation_urls=None, overwrite_old_definitions=True):
         """Updates the cache DB with given namespace and annotation list (see defaults.py)
@@ -209,9 +206,9 @@ class DefinitionCacheManager:
             for url in namespace_urls + annotation_urls:
                 self.update_definition(url, overwrite_old_definitions)
 
-        else:
-            self.setup_database()
-            self.update_definition_cache(namespace_urls, annotation_urls, overwrite_old_definitions)
+        #else:
+        #    self.setup_database()
+        #    self.update_definition_cache(namespace_urls, annotation_urls, overwrite_old_definitions)
 
     def update_definition(self, definition_url, overwrite_old_definition=True):
         """Checks if a namespace or annotation that is given by url is already in cache and if so, if it is up to date.

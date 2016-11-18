@@ -158,3 +158,13 @@ def handle_debug(fmt):
         return t
 
     return handle
+
+
+def ensure_quotes(s):
+    """Quote a string that isn't solely alphanumeric
+
+    :param s: a string
+    :type s: str
+    :rtype: str
+    """
+    return '"{}"'.format(s) if not s.isalnum() else s

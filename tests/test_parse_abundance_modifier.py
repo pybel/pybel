@@ -1,8 +1,8 @@
 import unittest
 
 from pybel.parser.parse_abundance_modifier import *
-from pybel.parser.parse_pmod import PmodParser
 from pybel.parser.parse_bel import write_variant
+from pybel.parser.parse_pmod import PmodParser
 
 log = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class TestHgvsParser(unittest.TestCase):
     def test_protein_trunc(self):
         statement = 'p.C65*'
         result = hgvs_protein_truncation.parseString(statement)
-        expected = ['p.', 'C', 65, '*']
+        expected = ['p.', 'Cys', 65, '*']
         self.assertEqual(expected, result.asList())
 
 

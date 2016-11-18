@@ -2,7 +2,7 @@ import os
 import unittest
 
 from pybel.parser.parse_bel import BelParser
-from pybel.parser.utils import subdict_matches, any_subdict_matches
+from pybel.parser.utils import any_subdict_matches
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -27,10 +27,12 @@ class TestTokenParserBase(unittest.TestCase):
     def assertHasNode(self, member, msg=None, **kwargs):
         self.assertIn(member, self.parser.graph)
         if kwargs:
-            self.assertTrue(all(kwarg in self.parser.graph.node[member] for kwarg in kwargs), msg="Missing kwarg in node data")
-            self.assertEqual(kwargs, {k: self.parser.graph.node[member][k] for k in kwargs}, msg="Wrong values in node data")
-            #msg_format = 'Wrong node {} properties. expected {} but got {}'
-            #self.assertTrue(subdict_matches(self.parser.graph.node[member], kwargs, ),
+            self.assertTrue(all(kwarg in self.parser.graph.node[member] for kwarg in kwargs),
+                            msg="Missing kwarg in node data")
+            self.assertEqual(kwargs, {k: self.parser.graph.node[member][k] for k in kwargs},
+                             msg="Wrong values in node data")
+            # msg_format = 'Wrong node {} properties. expected {} but got {}'
+            # self.assertTrue(subdict_matches(self.parser.graph.node[member], kwargs, ),
             #                msg=msg_format.format(member, kwargs, self.parser.graph.node[member]))
 
     def assertHasEdge(self, u, v, msg=None, **kwargs):
@@ -39,3 +41,10 @@ class TestTokenParserBase(unittest.TestCase):
             msg_format = 'No edge with correct properties. expected {} but got {}'
             self.assertTrue(any_subdict_matches(self.parser.graph.edge[u][v], kwargs),
                             msg=msg_format.format(kwargs, self.parser.graph.edge[u][v]))
+
+def bel_1_reconstituted(self, g):
+    nodes = list(g.nodes_iter(namespace='HGNC', name='AKT1'))
+    self.assertEqual(3, len(nodes))
+
+    edges = list(g.edges_iter(relation='increases'))
+    self.assertEqual(2, len(edges))
