@@ -9,7 +9,7 @@ from .graph import *
 
 __all__ = ['SMALL_CORPUS_URL', 'LARGE_CORPUS_URL'] + graph.__all__
 
-__version__ = '0.2.6-dev'
+__version__ = '0.2.6'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'

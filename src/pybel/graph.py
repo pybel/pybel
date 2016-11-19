@@ -310,8 +310,6 @@ def from_json(path):
     with open(os.path.expanduser(path)) as f:
         data = json.load(f)
 
-    print(json.dumps(data, indent=2))
-
     for i, node in enumerate(data['nodes']):
         data['nodes'][i]['id'] = tuple(node['id'])
 

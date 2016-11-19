@@ -537,13 +537,14 @@ class BelParser(BaseParser):
             return self.ensure_node(s, l, tokens['target'])
 
         name = canonicalize_node(tokens)
+        bel = write_bel_term(tokens)
 
         if name in self.graph:
             return name
 
         if 'transformation' in tokens:
             if name not in self.graph:
-                self.graph.add_node(name, type=tokens['transformation'])
+                self.graph.add_node(name, type=tokens['transformation'], bel=bel)
 
             for reactant_tokens in tokens['reactants']:
                 reactant_name = self.ensure_node(s, l, reactant_tokens)
@@ -557,7 +558,7 @@ class BelParser(BaseParser):
 
         elif 'function' in tokens and 'members' in tokens:
             if name not in self.graph:
-                self.graph.add_node(name, type=tokens['function'])
+                self.graph.add_node(name, type=tokens['function'], bel=bel)
 
             for token in tokens['members']:
                 member_name = self.ensure_node(s, l, token)
@@ -572,7 +573,8 @@ class BelParser(BaseParser):
                                     type=cls,
                                     namespace=ns,
                                     name=val,
-                                    variants=vars)
+                                    variants=vars,
+                                    bel=bel)
 
             c = {
                 'function': tokens['function'],
@@ -593,7 +595,7 @@ class BelParser(BaseParser):
                     'partner_3p': dict(namespace=f['partner_3p']['namespace'], name=f['partner_3p']['name']),
                     'range_3p': tuple(f['range_3p'])
                 }
-                self.graph.add_node(name, type=cls, **d)
+                self.graph.add_node(name, type=cls, bel=bel, **d)
             return name
 
         elif 'function' in tokens and 'identifier' in tokens:
@@ -602,7 +604,8 @@ class BelParser(BaseParser):
                     self.graph.add_node(name,
                                         type=tokens['function'],
                                         namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'])
+                                        name=tokens['identifier']['name'],
+                                        bel=bel)
                 return name
 
             elif tokens['function'] == 'RNA':
@@ -610,7 +613,8 @@ class BelParser(BaseParser):
                     self.graph.add_node(name,
                                         type=tokens['function'],
                                         namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'])
+                                        name=tokens['identifier']['name'],
+                                        bel=bel)
 
                 gene_tokens = deepcopy(tokens)
                 gene_tokens['function'] = 'Gene'
@@ -624,7 +628,8 @@ class BelParser(BaseParser):
                     self.graph.add_node(name,
                                         type=tokens['function'],
                                         namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'])
+                                        name=tokens['identifier']['name'],
+                                        bel=bel)
 
                 rna_tokens = deepcopy(tokens)
                 rna_tokens['function'] = 'RNA'
@@ -735,6 +740,9 @@ def write_variant(tokens):
         return 'var({})'.format(''.join(str(token) for token in tokens[1:]))
     elif tokens[0] == 'ProteinModification':
         return 'pmod({})'.format(tokens[1])
+    elif tokens[0] == 'Fragment':
+        r = '?' if 'missing' in tokens else '{}_{}'.format(tokens['start'], tokens['stop'])
+        return 'frag({}, {})'.format(r, tokens['description']) if 'description' in tokens else 'frag({})'.format(r)
     else:
         raise NotImplementedError('prob with :{}'.format(tokens))
 
