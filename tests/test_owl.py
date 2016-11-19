@@ -101,7 +101,7 @@ class TestWine(TestOwlBase):
 
     def test_string(self):
         with open(test_owl_2) as f:
-            owl = OWLParser(contents=f.read())
+            owl = OWLParser(content=f.read())
 
         self.assertEqual(owl.name_url, "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine")
 
