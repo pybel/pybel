@@ -1,4 +1,5 @@
 import collections
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 from configparser import ConfigParser
 
@@ -92,3 +93,76 @@ def flatten_graph_data(graph):
         g.add_edge(u, v, key=key, attr_dict=flatten(data))
 
     return g
+
+
+owl_ns = {
+    'owl': 'http://www.w3.org/2002/07/owl#',
+    'dc': 'http://purl.org/dc/elements/1.1'
+}
+
+
+class OWLParser(nx.DiGraph):
+    def __init__(self, source, *attrs, **kwargs):
+        """Builds a model of an OWL ontology in OWL/XML document using a NetworkX graph
+        :param source: input OWL path or filelike object
+        """
+
+        nx.DiGraph.__init__(self, *attrs, **kwargs)
+
+        self.tree = ET.parse(source)
+        self.root = self.tree.getroot()
+
+        self.name_url = self.root.attrib['ontologyIRI']
+
+        labels = {}
+
+        for el in self.root.findall('./owl:AnnotationAssertion', owl_ns):
+            if len(el) == 3:
+                prop, iri, lit = el
+
+                if '{http://www.w3.org/XML/1998/namespace}lang' in lit.attrib:
+                    if 'en' != lit.attrib['{http://www.w3.org/XML/1998/namespace}lang']:
+                        print('non-english detected')
+                        continue
+
+                labels[iri.text.lstrip('#').strip()] = lit.text.strip()
+
+        for el in self.root.findall('./owl:SubClassOf', owl_ns):
+            children = el.findall('./owl:Class[@IRI]', owl_ns)
+            if len(children) == 2:
+                sub, sup = children
+
+                u = sub.attrib['IRI'].lstrip('#').strip()
+                v = sup.attrib['IRI'].lstrip('#').strip()
+
+                if u in labels:
+                    u = labels[u]
+                if v in labels:
+                    v = labels[v]
+
+                self.add_edge(u, v)
+
+    def ensure_metadata(self):
+        email = self.root.find('''./owl:Annotation/owl:AnnotationProperty[@IRI='#email']/../owl:Literal''', owl_ns)
+        if not email:
+            raise Exception('Missing #email document Annotation. Add this custom metadata with protege')
+        self.graph['email'] = email.text.strip()
+
+        required_dc = 'title', 'subject', 'creator', 'description', 'date'
+
+        for dc_term in required_dc:
+            self.graph[dc_term] = self.find_dc(dc_term, owl_ns)
+
+        if not all(key in self.graph and self.graph[key] for key in required_dc):
+            raise Exception(
+                'Missing DC terms in Annotation section. Required: {}. See purl.org/dc/elements/1.1/. Found {}'.format(
+                    required_dc, self.graph))
+
+    def find_dc(self, term, ns):
+        search_string1 = './owl:Annotation/owl:AnnotationProperty[@abbreviatedIRI="dc:{}"]/../owl:Literal'
+        for el in self.root.findall(search_string1.format(term), ns):
+            return el.text.strip()
+
+        search_string2 = './owl:Annotation/owl:AnnotationProperty[@IRI="http://purl.org/dc/elements/1.1/{}"]/../owl:Literal'
+        for el in self.root.findall(search_string2.format(term), ns):
+            return el.text.strip()

@@ -15,3 +15,5 @@ build/*
 dist/*
 *.db
 *.coverage.*
+
+tests/owl/catalog-v*.xml
