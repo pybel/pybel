@@ -51,23 +51,15 @@ class TestPizza(TestOwlBase):
         owl = OWLParser(file=test_owl_1)
 
         self.assertEqual(self.url, owl.name_url)
-
-        for node in self.expected_nodes:
-            self.assertHasNode(owl, node)
-
-        for u, v in self.expected_edges:
-            self.assertHasEdge(owl, u, v)
+        self.assertEqual(self.expected_nodes, set(owl.nodes()))
+        self.assertEqual(self.expected_edges, set(owl.edges()))
 
     def test_url(self):
         owl = OWLParser(url=self.url)
 
         self.assertEqual(self.url, owl.name_url)
-
-        for node in self.expected_nodes:
-            self.assertHasNode(owl, node)
-
-        for u, v in self.expected_edges:
-            self.assertHasEdge(owl, u, v)
+        self.assertEqual(self.expected_nodes, set(owl.nodes()))
+        self.assertEqual(self.expected_edges, set(owl.edges()))
 
 
 class TestWine(TestOwlBase):
@@ -96,7 +88,7 @@ class TestWine(TestOwlBase):
             'Sweet'
         }
 
-        self.expected_edges = [
+        self.expected_edges = {
             ('Dry', 'WineSugar'),
             ('OffDry', 'WineSugar'),
             ('Sweet', 'WineSugar'),
@@ -106,30 +98,22 @@ class TestWine(TestOwlBase):
             ('Rose', 'WineColor'),
             ('White', 'WineColor'),
             ('WineColor', 'WineDescriptor')
-        ]
+        }
 
     def test_file(self):
         owl = OWLParser(file=test_owl_2)
 
         self.assertEqual(self.url, owl.name_url)
-
-        for node in self.expected_nodes:
-            self.assertHasNode(owl, node)
-
-        for u, v in self.expected_edges:
-            self.assertHasEdge(owl, u, v)
+        self.assertEqual(self.expected_nodes, set(owl.nodes()))
+        self.assertEqual(self.expected_edges, set(owl.edges()))
 
     def test_string(self):
         with open(test_owl_2) as f:
             owl = OWLParser(content=f.read())
 
         self.assertEqual(self.url, owl.name_url)
-
-        for node in self.expected_nodes:
-            self.assertHasNode(owl, node)
-
-        for u, v in self.expected_edges:
-            self.assertHasEdge(owl, u, v)
+        self.assertEqual(self.expected_nodes, set(owl.nodes()))
+        self.assertEqual(self.expected_edges, set(owl.edges()))
 
     def test_metadata_parser(self):
         functions = 'A'

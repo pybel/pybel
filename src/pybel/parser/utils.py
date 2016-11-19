@@ -220,15 +220,17 @@ class OWLParser(nx.DiGraph):
                         log.debug('non-english detected')
                         continue
 
-                labels[iri.text.lstrip('#').strip()] = lit.text.strip()
+                labels[self.strip_iri(iri.text)] = lit.text.strip()
+
+        # TODO add elements with no children in first step
 
         for el in self.root.findall('./owl:SubClassOf', owl_ns):
             children = el.findall('./owl:Class[@IRI]', owl_ns)
             if len(children) == 2:
                 sub, sup = children
 
-                u = sub.attrib['IRI'].lstrip('#').strip()
-                v = sup.attrib['IRI'].lstrip('#').strip()
+                u = self.strip_iri(sub.attrib['IRI'])
+                v = self.strip_iri(sup.attrib['IRI'])
 
                 if u in labels:
                     u = labels[u]
@@ -236,6 +238,9 @@ class OWLParser(nx.DiGraph):
                     v = labels[v]
 
                 self.add_edge(u, v)
+
+    def strip_iri(self, iri):
+        return iri.lstrip(self.name_url).lstrip('#').strip()
 
     def ensure_metadata(self):
         email = self.root.find('''./owl:Annotation/owl:AnnotationProperty[@IRI='#email']/../owl:Literal''', owl_ns)
