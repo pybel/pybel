@@ -1,4 +1,5 @@
 import collections
+import logging
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from configparser import ConfigParser
@@ -6,6 +7,8 @@ from configparser import ConfigParser
 import networkx as nx
 import requests
 from requests_file import FileAdapter
+
+log = logging.getLogger(__name__)
 
 
 def download_url(url):
@@ -102,16 +105,21 @@ owl_ns = {
 
 
 class OWLParser(nx.DiGraph):
-    def __init__(self, source, *attrs, **kwargs):
+    def __init__(self, content=None, file=None, *attrs, **kwargs):
         """Builds a model of an OWL ontology in OWL/XML document using a NetworkX graph
-        :param source: input OWL path or filelike object
+        :param file: input OWL path or filelike object
         """
 
         nx.DiGraph.__init__(self, *attrs, **kwargs)
 
-        self.tree = ET.parse(source)
-        self.root = self.tree.getroot()
+        if file is not None:
+            self.tree = ET.parse(file)
+        elif content is not None:
+            self.tree = ET.ElementTree(ET.fromstring(content))
+        else:
+            raise ValueError('Missing data source (file/content)')
 
+        self.root = self.tree.getroot()
         self.name_url = self.root.attrib['ontologyIRI']
 
         labels = {}
@@ -122,7 +130,7 @@ class OWLParser(nx.DiGraph):
 
                 if '{http://www.w3.org/XML/1998/namespace}lang' in lit.attrib:
                     if 'en' != lit.attrib['{http://www.w3.org/XML/1998/namespace}lang']:
-                        print('non-english detected')
+                        log.debug('non-english detected')
                         continue
 
                 labels[iri.text.lstrip('#').strip()] = lit.text.strip()

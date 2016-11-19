@@ -8,39 +8,54 @@ test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
 test_owl_2 = os.path.join(dir_path, 'owl', 'wine.owl')
 
 
-class TestOwl(unittest.TestCase):
+class TestOwlBase(unittest.TestCase):
     def assertHasNode(self, g, n):
         self.assertTrue(g.has_node(n), msg="Missing node: {}".format(n))
 
     def assertHasEdge(self, g, u, v):
         self.assertTrue(g.has_edge(u, v), msg="Missing edge: ({}, {})".format(u, v))
 
-    def test_pizza(self):
-        owl = OWLParser(test_owl_1)
+
+class TestOwlUtils(unittest.TestCase):
+    def test_value_error(self):
+        with self.assertRaises(ValueError):
+            OWLParser()
+
+
+class TestPizza(TestOwlBase):
+    def setUp(self):
+        self.expected_nodes = {
+            'Pizza',
+            'Topping',
+            'CheeseTopping',
+            'FishTopping',
+            'MeatTopping',
+            'TomatoTopping'
+        }
+
+        self.expected_edges = {
+            ('CheeseTopping', 'Topping'),
+            ('FishTopping', 'Topping'),
+            ('MeatTopping', 'Topping'),
+            ('TomatoTopping', 'Topping')
+        }
+
+    def test_file(self):
+        owl = OWLParser(file=test_owl_1)
 
         self.assertEqual(owl.name_url, "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl")
 
-        # print(owl.nodes())
-        # print(owl.edges())
+        for node in self.expected_nodes:
+            self.assertHasNode(owl, node)
 
-        self.assertHasNode(owl, 'Pizza')
-        self.assertHasNode(owl, 'Topping')
-        self.assertHasNode(owl, 'CheeseTopping')
-        self.assertHasEdge(owl, 'CheeseTopping', 'Topping')
-        self.assertHasNode(owl, 'FishTopping')
-        self.assertHasEdge(owl, 'FishTopping', 'Topping')
-        self.assertHasNode(owl, 'MeatTopping')
-        self.assertHasEdge(owl, 'MeatTopping', 'Topping')
-        self.assertHasNode(owl, 'TomatoTopping')
-        self.assertHasEdge(owl, 'TomatoTopping', 'Topping')
+        for u, v in self.expected_edges:
+            self.assertHasEdge(owl, u, v)
 
-    def test_wine(self):
-        owl = OWLParser(test_owl_2)
 
-        self.assertEqual(owl.name_url, "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine")
-
+class TestWine(TestOwlBase):
+    def setUp(self):
         # TODO add remaining items from hierarchy
-        expected_nodes = {
+        self.expected_nodes = {
             'WineDescriptor',
             'WineColor',
             'Red',
@@ -61,7 +76,7 @@ class TestOwl(unittest.TestCase):
             'Sweet'
         }
 
-        expected_edges = [
+        self.expected_edges = [
             ('Dry', 'WineSugar'),
             ('OffDry', 'WineSugar'),
             ('Sweet', 'WineSugar'),
@@ -73,8 +88,25 @@ class TestOwl(unittest.TestCase):
             ('WineColor', 'WineDescriptor')
         ]
 
-        for node in expected_nodes:
+    def test_file(self):
+        owl = OWLParser(file=test_owl_2)
+
+        self.assertEqual(owl.name_url, "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine")
+
+        for node in self.expected_nodes:
             self.assertHasNode(owl, node)
 
-        for u, v in expected_edges:
+        for u, v in self.expected_edges:
+            self.assertHasEdge(owl, u, v)
+
+    def test_string(self):
+        with open(test_owl_2) as f:
+            owl = OWLParser(contents=f.read())
+
+        self.assertEqual(owl.name_url, "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine")
+
+        for node in self.expected_nodes:
+            self.assertHasNode(owl, node)
+
+        for u, v in self.expected_edges:
             self.assertHasEdge(owl, u, v)
