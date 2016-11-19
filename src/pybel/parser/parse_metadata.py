@@ -8,7 +8,8 @@ from pyparsing import pyparsing_common as ppc
 from . import language
 from .baseparser import BaseParser, word, quote, delimitedSet
 from .parse_exceptions import IllegalDocumentMetadataException
-from ..utils import download_url, OWLParser
+from .utils import OWLParser
+from ..utils import download_url
 
 log = logging.getLogger('pybel')
 

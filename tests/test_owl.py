@@ -2,7 +2,7 @@ import os
 import unittest
 
 from pybel.parser.parse_metadata import MetadataParser
-from pybel.utils import OWLParser
+from pybel.parser.utils import OWLParser
 
 from tests.constants import dir_path
 
