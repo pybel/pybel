@@ -1,11 +1,16 @@
 import os
 import unittest
 
+from pybel.parser.parse_metadata import MetadataParser
 from pybel.utils import OWLParser
+
 from tests.constants import dir_path
 
 test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
 test_owl_2 = os.path.join(dir_path, 'owl', 'wine.owl')
+
+pizza_url = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
+wine_url = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
 
 
 class TestOwlBase(unittest.TestCase):
@@ -24,6 +29,8 @@ class TestOwlUtils(unittest.TestCase):
 
 class TestPizza(TestOwlBase):
     def setUp(self):
+        self.url = pizza_url
+
         self.expected_nodes = {
             'Pizza',
             'Topping',
@@ -43,7 +50,18 @@ class TestPizza(TestOwlBase):
     def test_file(self):
         owl = OWLParser(file=test_owl_1)
 
-        self.assertEqual(owl.name_url, "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl")
+        self.assertEqual(self.url, owl.name_url)
+
+        for node in self.expected_nodes:
+            self.assertHasNode(owl, node)
+
+        for u, v in self.expected_edges:
+            self.assertHasEdge(owl, u, v)
+
+    def test_url(self):
+        owl = OWLParser(url=self.url)
+
+        self.assertEqual(self.url, owl.name_url)
 
         for node in self.expected_nodes:
             self.assertHasNode(owl, node)
@@ -54,6 +72,8 @@ class TestPizza(TestOwlBase):
 
 class TestWine(TestOwlBase):
     def setUp(self):
+        self.url = wine_url
+
         # TODO add remaining items from hierarchy
         self.expected_nodes = {
             'WineDescriptor',
@@ -91,7 +111,7 @@ class TestWine(TestOwlBase):
     def test_file(self):
         owl = OWLParser(file=test_owl_2)
 
-        self.assertEqual(owl.name_url, "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine")
+        self.assertEqual(self.url, owl.name_url)
 
         for node in self.expected_nodes:
             self.assertHasNode(owl, node)
@@ -103,10 +123,20 @@ class TestWine(TestOwlBase):
         with open(test_owl_2) as f:
             owl = OWLParser(content=f.read())
 
-        self.assertEqual(owl.name_url, "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine")
+        self.assertEqual(self.url, owl.name_url)
 
         for node in self.expected_nodes:
             self.assertHasNode(owl, node)
 
         for u, v in self.expected_edges:
             self.assertHasEdge(owl, u, v)
+
+    def test_metadata_parser(self):
+        functions = 'A'
+        s = "DEFINE NAMESPACE Wine as {} {}".format(functions, wine_url)
+        parser = MetadataParser()
+        parser.parseString(s)
+
+        for node in self.expected_nodes:
+            self.assertIn(node, parser.namespace_dict['Wine'])
+            self.assertEqual(functions, parser.namespace_dict['Wine'][node])

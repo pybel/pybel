@@ -8,6 +8,8 @@ import networkx as nx
 import requests
 from requests_file import FileAdapter
 
+from .parser import language
+
 log = logging.getLogger(__name__)
 
 
@@ -105,7 +107,7 @@ owl_ns = {
 
 
 class OWLParser(nx.DiGraph):
-    def __init__(self, content=None, file=None, *attrs, **kwargs):
+    def __init__(self, content=None, file=None, url=None, functions=None, *attrs, **kwargs):
         """Builds a model of an OWL ontology in OWL/XML document using a NetworkX graph
         :param file: input OWL path or filelike object
         """
@@ -116,8 +118,17 @@ class OWLParser(nx.DiGraph):
             self.tree = ET.parse(file)
         elif content is not None:
             self.tree = ET.ElementTree(ET.fromstring(content))
+        elif url is not None:
+            session = requests.Session()
+            if url.startswith('file://'):
+                session.mount('file://', FileAdapter())
+            res = session.get(url)
+            self.tree = ET.ElementTree(ET.fromstring(res.content))
         else:
             raise ValueError('Missing data source (file/content)')
+
+        # if no functions defined, then all elements can be everything
+        self.functions = set(functions) if functions is not None else set(language.value_map)
 
         self.root = self.tree.getroot()
         self.name_url = self.root.attrib['ontologyIRI']
@@ -174,3 +185,6 @@ class OWLParser(nx.DiGraph):
         search_string2 = './owl:Annotation/owl:AnnotationProperty[@IRI="http://purl.org/dc/elements/1.1/{}"]/../owl:Literal'
         for el in self.root.findall(search_string2.format(term), ns):
             return el.text.strip()
+
+    def build_namespace_dict(self):
+        return {node: set(self.functions) for node in self.nodes_iter()}
