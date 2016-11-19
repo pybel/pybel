@@ -1,7 +1,6 @@
 import unittest
 
 import networkx as nx
-
 import pybel.utils
 
 

@@ -2,7 +2,6 @@ import os
 import unittest
 
 import networkx as nx
-
 from pybel.parser import utils
 from pybel.parser.utils import subdict_matches, check_stability, sanitize_file_lines
 

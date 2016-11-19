@@ -3,11 +3,11 @@ import os
 import unittest
 
 import py2neo
-from click.testing import CliRunner
-
 import pybel
+from click.testing import CliRunner
 from pybel import cli
 from pybel.graph import PYBEL_CONTEXT_TAG
+
 from tests.constants import test_bel_1, test_bel_slushy, bel_1_reconstituted
 
 log = logging.getLogger(__name__)
