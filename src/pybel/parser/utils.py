@@ -176,14 +176,41 @@ def ensure_quotes(s):
     return '"{}"'.format(s) if not s.isalnum() else s
 
 
+conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?ontology={}&format=OWL/XML"
+
+
+# TODO directly parse with OWLReady
+def parse_owl(url, functions=None):
+    """
+
+    :param url:
+    :param functions:
+    :return:
+    :rtype: OWLParser
+    """
+
+    session = requests.Session()
+    if url.startswith('file://'):
+        session.mount('file://', FileAdapter())
+    res = session.get(url)
+
+    try:
+        owl = OWLParser(content=res.content, functions=functions)
+        return owl
+    except:
+        new_url = conversion_service.format(url)
+        owl = parse_owl(url=new_url, functions=functions)
+        return owl
+
+
 owl_ns = {
     'owl': 'http://www.w3.org/2002/07/owl#',
     'dc': 'http://purl.org/dc/elements/1.1'
 }
 
-
+# TODO handle synonyms. Only one can make it through. Find equivalence classes?
 class OWLParser(nx.DiGraph):
-    def __init__(self, content=None, file=None, url=None, functions=None, *attrs, **kwargs):
+    def __init__(self, content=None, file=None, functions=None, *attrs, **kwargs):
         """Builds a model of an OWL ontology in OWL/XML document using a NetworkX graph
         :param file: input OWL path or filelike object
         """
@@ -194,12 +221,6 @@ class OWLParser(nx.DiGraph):
             self.tree = ET.parse(file)
         elif content is not None:
             self.tree = ET.ElementTree(ET.fromstring(content))
-        elif url is not None:
-            session = requests.Session()
-            if url.startswith('file://'):
-                session.mount('file://', FileAdapter())
-            res = session.get(url)
-            self.tree = ET.ElementTree(ET.fromstring(res.content))
         else:
             raise ValueError('Missing data source (file/content)')
 
@@ -222,7 +243,9 @@ class OWLParser(nx.DiGraph):
 
                 labels[self.strip_iri(iri.text)] = lit.text.strip()
 
-        # TODO add elements with no children in first step
+        for el in itt.chain(self.root.findall('./owl:Declaration/owl:Class', owl_ns),
+                            self.root.findall('./owl:Declaration/owl:NamedIndividual', owl_ns)):
+            self.add_node(self.strip_iri(el.attrib['IRI']))
 
         for el in self.root.findall('./owl:SubClassOf', owl_ns):
             children = el.findall('./owl:Class[@IRI]', owl_ns)
@@ -239,33 +262,20 @@ class OWLParser(nx.DiGraph):
 
                 self.add_edge(u, v)
 
+        for el in self.root.findall('./owl:ClassAssertion', owl_ns):
+            vv = el.findall('./owl:NamedIndividual', owl_ns)[0]
+            if 'IRI' not in vv:
+                continue
+            v = self.strip_iri(vv.attrib['IRI'])
+
+            uu = el.findall('./owl:Class', owl_ns)[0]
+            if 'IRI' not in uu:
+                continue
+            u = self.strip_iri(uu.attrib['IRI'])
+            self.add_edge(v, u)
+
     def strip_iri(self, iri):
         return iri.lstrip(self.name_url).lstrip('#').strip()
-
-    def ensure_metadata(self):
-        email = self.root.find('''./owl:Annotation/owl:AnnotationProperty[@IRI='#email']/../owl:Literal''', owl_ns)
-        if not email:
-            raise Exception('Missing #email document Annotation. Add this custom metadata with protege')
-        self.graph['email'] = email.text.strip()
-
-        required_dc = 'title', 'subject', 'creator', 'description', 'date'
-
-        for dc_term in required_dc:
-            self.graph[dc_term] = self.find_dc(dc_term, owl_ns)
-
-        if not all(key in self.graph and self.graph[key] for key in required_dc):
-            raise Exception(
-                'Missing DC terms in Annotation section. Required: {}. See purl.org/dc/elements/1.1/. Found {}'.format(
-                    required_dc, self.graph))
-
-    def find_dc(self, term, ns):
-        search_string1 = './owl:Annotation/owl:AnnotationProperty[@abbreviatedIRI="dc:{}"]/../owl:Literal'
-        for el in self.root.findall(search_string1.format(term), ns):
-            return el.text.strip()
-
-        search_string2 = './owl:Annotation/owl:AnnotationProperty[@IRI="http://purl.org/dc/elements/1.1/{}"]/../owl:Literal'
-        for el in self.root.findall(search_string2.format(term), ns):
-            return el.text.strip()
 
     def build_namespace_dict(self):
         return {node: set(self.functions) for node in self.nodes_iter()}

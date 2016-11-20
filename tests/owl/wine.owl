@@ -1,817 +1,315 @@
 <?xml version="1.0"?>
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
      xml:base="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      ontologyIRI="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine">
     <Prefix name="" IRI="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#"/>
-    <Prefix name="dc" IRI="http://purl.org/dc/elements/1.1"/>
+    <Prefix name="e" IRI="http://example.org/ex#"/>
+    <Prefix name="NS" IRI="http://uri-not-absolute.com#"/>
+    <Prefix name="bf" IRI="http://id.loc.gov/ontologies/bibframe/"/>
+    <Prefix name="p1" IRI="http://www.owl-ontologies.com/assert.owl#"/>
+    <Prefix name="edt" IRI="http://www.daedafusion.com/editor_annotation#"/>
+    <Prefix name="obo" IRI="http://purl.obolibrary.org/obo/"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
     <Prefix name="vin" IRI="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#"/>
     <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="xsp" IRI="http://www.owl-ontologies.com/2005/08/07/xsp.owl#"/>
     <Prefix name="food" IRI="http://www.w3.org/TR/2003/PR-owl-guide-20031209/food#"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="skos" IRI="http://www.w3.org/2004/02/skos/core#"/>
+    <Prefix name="stix" IRI="http://stix.mitre.org/stix_core#"/>
+    <Prefix name="swrl" IRI="http://www.w3.org/2003/11/swrl#"/>
+    <Prefix name="dtype" IRI="http://www.srdc.com.tr/ontmalizer#"/>
+    <Prefix name="swrlb" IRI="http://www.w3.org/2003/11/swrlb#"/>
+    <Prefix name="dcterms" IRI="http://purl.org/dc/terms/"/>
+    <Prefix name="protege" IRI="http://protege.stanford.edu/plugins/owl/protege#"/>
+    <Prefix name="oboInOwl" IRI="http://www.geneontology.org/formats/oboInOwl#"/>
+    <Prefix name="winHandleObj" IRI="http://cybox.mitre.org/objects/WindowsHandle#"/>
     <Import>http://www.w3.org/TR/2003/PR-owl-guide-20031209/food</Import>
     <Annotation>
-        <AnnotationProperty abbreviatedIRI="owl:priorVersion"/>
-        <IRI>http://www.w3.org/TR/2003/CR-owl-guide-20030818/wine</IRI>
-    </Annotation>
-    <Annotation>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/description"/>
-        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">An example OWL ontology</Literal>
-    </Annotation>
-    <Annotation>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/subject"/>
-        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">Wine</Literal>
-    </Annotation>
-    <Annotation>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/creator"/>
-        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">Stanford guys</Literal>
-    </Annotation>
-    <Annotation>
         <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-        <Literal datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">Derived from the DAML Wine ontology at 
+        <Literal datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">Derived from the DAML Wine ontology at
       http://ontolingua.stanford.edu/doc/chimaera/ontologies/wines.daml
       Substantially changed, in particular the Region based relations.
     </Literal>
     </Annotation>
     <Annotation>
-        <AnnotationProperty IRI="#email"/>
-        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">cthoyt@gmail.com</Literal>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <Literal datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">Wine Ontology</Literal>
     </Annotation>
     <Annotation>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/title"/>
-        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">Wine Ontology</Literal>
+        <AnnotationProperty abbreviatedIRI="owl:priorVersion"/>
+        <IRI>http://www.w3.org/TR/2003/CR-owl-guide-20030818/wine</IRI>
     </Annotation>
     <Annotation>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/date"/>
-        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">20161012</Literal>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <Literal datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">An example OWL ontology</Literal>
     </Annotation>
     <Declaration>
-        <ObjectProperty IRI="#producesWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WineBody"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Tours"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#DessertWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#DryRiesling"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#PinotBlanc"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Muscadet"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Margaux"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Chianti"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WhiteWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WineTaste"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasColor"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#RedBordeaux"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Loire"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#locatedIn"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#LateHarvest"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Semillon"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#DryRedWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#RedTableWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WineColor"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#madeIntoWine"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasMaker"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#IceWine"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasSugar"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WineGrape"/>
-    </Declaration>
-    <Declaration>
-        <AnnotationProperty IRI="#email"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#PetiteSyrah"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Meritage"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#CheninBlanc"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Winery"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#CabernetSauvignon"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#ItalianWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#CaliforniaWine"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#adjacentRegion"/>
-    </Declaration>
-    <Declaration>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/description"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Burgundy"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#SweetWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#RedBurgundy"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WineSugar"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#SemillonOrSauvignonBlanc"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WhiteNonSweetWine"/>
-    </Declaration>
-    <Declaration>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/subject"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Gamay"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasVintageYear"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#VintageYear"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Wine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WhiteTableWine"/>
-    </Declaration>
-    <Declaration>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/title"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Region"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Sancerre"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WineDescriptor"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Meursault"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#TexasWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#FrenchWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#DryWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#SweetRiesling"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WhiteBordeaux"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#CotesDOr"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Merlot"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#madeFromGrape"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#StEmilion"/>
-    </Declaration>
-    <Declaration>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/creator"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WhiteLoire"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasBody"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Bordeaux"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WhiteBurgundy"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Beaujolais"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Medoc"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Pauillac"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasFlavor"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Vintage"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasWineDescriptor"/>
-    </Declaration>
-    <Declaration>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/date"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#WineFlavor"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#SauvignonBlanc"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#GermanWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#RedWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#RoseWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#CabernetFranc"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#TableWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Port"/>
+        <Class IRI="#AlsatianWine"/>
     </Declaration>
     <Declaration>
         <Class IRI="#AmericanWine"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#AlsatianWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Riesling"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#FullBodiedWine"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#DryWhiteWine"/>
-    </Declaration>
-    <Declaration>
-        <DataProperty IRI="#yearValue"/>
-    </Declaration>
-    <Declaration>
         <Class IRI="#Anjou"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#EarlyHarvest"/>
+        <Class IRI="#Beaujolais"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Bordeaux"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Burgundy"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#CabernetFranc"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#CabernetSauvignon"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#CaliforniaWine"/>
     </Declaration>
     <Declaration>
         <Class IRI="#Chardonnay"/>
     </Declaration>
     <Declaration>
+        <Class IRI="#CheninBlanc"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Chianti"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#CotesDOr"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#DessertWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#DryRedWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#DryRiesling"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#DryWhiteWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#DryWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#EarlyHarvest"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#FrenchWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#FullBodiedWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Gamay"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#GermanWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#IceWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#ItalianWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#LateHarvest"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Loire"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Margaux"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Medoc"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Meritage"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Merlot"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Meursault"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Muscadet"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Pauillac"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#PetiteSyrah"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#PinotBlanc"/>
+    </Declaration>
+    <Declaration>
         <Class IRI="#PinotNoir"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Port"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RedBordeaux"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RedBurgundy"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RedTableWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RedWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Region"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Riesling"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RoseWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Sancerre"/>
     </Declaration>
     <Declaration>
         <Class IRI="#Sauternes"/>
     </Declaration>
     <Declaration>
+        <Class IRI="#SauvignonBlanc"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Semillon"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#SemillonOrSauvignonBlanc"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#StEmilion"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#SweetRiesling"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#SweetWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#TableWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#TexasWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Tours"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Vintage"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#VintageYear"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WhiteBordeaux"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WhiteBurgundy"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WhiteLoire"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WhiteNonSweetWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WhiteTableWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WhiteWine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Wine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WineBody"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WineColor"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WineDescriptor"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WineFlavor"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WineGrape"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WineSugar"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WineTaste"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Winery"/>
+    </Declaration>
+    <Declaration>
         <Class IRI="#Zinfandel"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#WhitehallLane"/>
+        <ObjectProperty IRI="#adjacentRegion"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#Stonleigh"/>
+        <ObjectProperty IRI="#hasBody"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#PulignyMontrachetWhiteBurgundy"/>
+        <ObjectProperty IRI="#hasColor"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#SchlossRothermel"/>
+        <ObjectProperty IRI="#hasFlavor"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#PageMillWinery"/>
+        <ObjectProperty IRI="#hasMaker"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#ChateauMargaux"/>
+        <ObjectProperty IRI="#hasSugar"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#Ventana"/>
+        <ObjectProperty IRI="#hasVintageYear"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#CaliforniaRegion"/>
+        <ObjectProperty IRI="#hasWineDescriptor"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#KathrynKennedy"/>
+        <ObjectProperty IRI="#locatedIn"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#GamayGrape"/>
+        <ObjectProperty IRI="#madeFromGrape"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#MariettaCabernetSauvignon"/>
+        <ObjectProperty IRI="#madeIntoWine"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#ArroyoGrandeRegion"/>
+        <ObjectProperty IRI="#producesWine"/>
     </Declaration>
     <Declaration>
-        <NamedIndividual IRI="#PulignyMontrachet"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#NewZealandRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SaucelitoCanyonZinfandel"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#FormanChardonnay"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CabernetSauvignonGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauMorgon"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#RoseDAnjou"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MerlotGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#KathrynKennedyLateral"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SchlossVolrad"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#KalinCellarsSemillon"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#TaylorPort"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CabernetFrancGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ClosDeVougeotCotesDOr"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#USRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#GermanyRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CorbansDryWhiteRiesling"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CotturiZinfandel"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauMargauxWinery"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Year1998"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#AlsaceRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#StonleighSauvignonBlanc"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#White"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SemillonGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#StGenevieve"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChiantiRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Delicate"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MountadamChardonnay"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CortonMontrachet"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#WhitehallLaneCabernetFranc"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MuscadetRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#GaryFarrellMerlot"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MendocinoRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PetiteSyrahGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SaucelitoCanyonZinfandel1998"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SaucelitoCanyon"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SeanThackreySiriusPetiteSyrah"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SantaBarbaraRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Red"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Medium"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SevreEtMaineMuscadet"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauMorgonBeaujolais"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Elyse"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Strong"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SchlossRothermelTrochenbierenausleseRiesling"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#GaryFarrell"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PinotNoirGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MariettaPetiteSyrah"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#AustralianRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SeanThackrey"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Full"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#TexasRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CotesDOrRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#LaneTannerPinotNoir"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauChevalBlanc"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SevreEtMaine"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#NapaRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MountEdenVineyardEdnaValleyChardonnay"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Bancroft"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#LoireRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauChevalBlancStEmilion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#FoxenCheninBlanc"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Corbans"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Selaks"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CentralTexasRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CorbansPrivateBinSauvignonBlanc"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#AnjouRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#OffDry"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SonomaRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#BourgogneRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Beringer"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MountadamPinotNoir"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#DAnjou"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ElyseZinfandel"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MargauxRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SantaCruzMountainsRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#EdnaValleyRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SantaCruzMountainVineyard"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SauvignonBlancGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#StGenevieveTexasWhite"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauDeMeursaultMeursault"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauDYchem"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ClosDeVougeot"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#StEmilionRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CongressSprings"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SancerreRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PeterMccoy"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CheninBlancGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#BancroftChardonnay"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauLafiteRothschildPauillac"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#VentanaCheninBlanc"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauLafiteRothschild"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CortonMontrachetWhiteBurgundy"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MountEdenVineyardEstatePinotNoir"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ZinfandelGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SelaksSauvignonBlanc"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#WhitehallLanePrimavera"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ClosDeLaPoussieSancerre"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SelaksIceWine"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Moderate"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PeterMccoyChardonnay"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Cotturi"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#KalinCellars"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauDeMeursault"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CorbansSauvignonBlanc"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SangioveseGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PortugalRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#LongridgeMerlot"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CentralCoastRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#CongressSpringsSemillon"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SauterneRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MountadamRiesling"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PinotBlancGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ItalianRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PauillacRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Foxen"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#FormanCabernetSauvignon"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Longridge"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Taylor"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SantaCruzMountainVineyardCabernetSauvignon"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Marietta"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Forman"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Mountadam"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ToursRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Light"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChateauDYchemSauterne"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#LaneTanner"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChardonnayGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#BeaujolaisRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PageMillWineryCabernetSauvignon"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Handley"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SouthAustraliaRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#SchlossVolradTrochenbierenausleseRiesling"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MariettaOldVinesRed"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MountEdenVineyard"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MeursaultRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#FrenchRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#McGuinnesso"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#RieslingGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ClosDeLaPoussie"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MedocRegion"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#PetiteVerdotGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MariettaZinfandel"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#ChiantiClassico"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#MalbecGrape"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Sweet"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Rose"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#Dry"/>
-    </Declaration>
-    <Declaration>
-        <NamedIndividual IRI="#BordeauxRegion"/>
+        <DataProperty IRI="#yearValue"/>
     </Declaration>
     <EquivalentClasses>
         <Class IRI="#AlsatianWine"/>
@@ -1081,9 +579,9 @@
                 <ObjectProperty IRI="#madeFromGrape"/>
                 <ObjectOneOf>
                     <NamedIndividual IRI="#PetiteVerdotGrape"/>
-                    <NamedIndividual IRI="#CabernetSauvignonGrape"/>
-                    <NamedIndividual IRI="#MalbecGrape"/>
                     <NamedIndividual IRI="#MerlotGrape"/>
+                    <NamedIndividual IRI="#MalbecGrape"/>
+                    <NamedIndividual IRI="#CabernetSauvignonGrape"/>
                     <NamedIndividual IRI="#CabernetFrancGrape"/>
                 </ObjectOneOf>
             </ObjectAllValuesFrom>
@@ -1398,16 +896,16 @@
         <Class IRI="#WineBody"/>
         <ObjectOneOf>
             <NamedIndividual IRI="#Full"/>
-            <NamedIndividual IRI="#Light"/>
             <NamedIndividual IRI="#Medium"/>
+            <NamedIndividual IRI="#Light"/>
         </ObjectOneOf>
     </EquivalentClasses>
     <EquivalentClasses>
         <Class IRI="#WineColor"/>
         <ObjectOneOf>
-            <NamedIndividual IRI="#White"/>
             <NamedIndividual IRI="#Red"/>
             <NamedIndividual IRI="#Rose"/>
+            <NamedIndividual IRI="#White"/>
         </ObjectOneOf>
     </EquivalentClasses>
     <EquivalentClasses>
@@ -1429,8 +927,8 @@
         <Class IRI="#WineSugar"/>
         <ObjectOneOf>
             <NamedIndividual IRI="#OffDry"/>
-            <NamedIndividual IRI="#Sweet"/>
             <NamedIndividual IRI="#Dry"/>
+            <NamedIndividual IRI="#Sweet"/>
         </ObjectOneOf>
     </EquivalentClasses>
     <EquivalentClasses>
@@ -1654,8 +1152,8 @@
         <ObjectAllValuesFrom>
             <ObjectProperty IRI="#hasBody"/>
             <ObjectOneOf>
-                <NamedIndividual IRI="#Light"/>
                 <NamedIndividual IRI="#Medium"/>
+                <NamedIndividual IRI="#Light"/>
             </ObjectOneOf>
         </ObjectAllValuesFrom>
     </SubClassOf>
@@ -1720,8 +1218,8 @@
         <ObjectAllValuesFrom>
             <ObjectProperty IRI="#hasBody"/>
             <ObjectOneOf>
-                <NamedIndividual IRI="#Light"/>
                 <NamedIndividual IRI="#Medium"/>
+                <NamedIndividual IRI="#Light"/>
             </ObjectOneOf>
         </ObjectAllValuesFrom>
     </SubClassOf>
@@ -1840,8 +1338,8 @@
         <ObjectAllValuesFrom>
             <ObjectProperty IRI="#hasBody"/>
             <ObjectOneOf>
-                <NamedIndividual IRI="#Light"/>
                 <NamedIndividual IRI="#Medium"/>
+                <NamedIndividual IRI="#Light"/>
             </ObjectOneOf>
         </ObjectAllValuesFrom>
     </SubClassOf>
@@ -2022,8 +1520,8 @@
         <ObjectAllValuesFrom>
             <ObjectProperty IRI="#madeFromGrape"/>
             <ObjectOneOf>
-                <NamedIndividual IRI="#CabernetSauvignonGrape"/>
                 <NamedIndividual IRI="#MerlotGrape"/>
+                <NamedIndividual IRI="#CabernetSauvignonGrape"/>
             </ObjectOneOf>
         </ObjectAllValuesFrom>
     </SubClassOf>
@@ -2222,9 +1720,9 @@
         <ObjectAllValuesFrom>
             <ObjectProperty IRI="#madeFromGrape"/>
             <ObjectOneOf>
+                <NamedIndividual IRI="#CheninBlancGrape"/>
                 <NamedIndividual IRI="#SauvignonBlancGrape"/>
                 <NamedIndividual IRI="#PinotBlancGrape"/>
-                <NamedIndividual IRI="#CheninBlancGrape"/>
             </ObjectOneOf>
         </ObjectAllValuesFrom>
     </SubClassOf>
@@ -3235,12 +2733,12 @@
     <ObjectPropertyAssertion>
         <ObjectProperty IRI="#madeFromGrape"/>
         <NamedIndividual IRI="#ChateauDYchemSauterne"/>
-        <NamedIndividual IRI="#SauvignonBlancGrape"/>
+        <NamedIndividual IRI="#SemillonGrape"/>
     </ObjectPropertyAssertion>
     <ObjectPropertyAssertion>
         <ObjectProperty IRI="#madeFromGrape"/>
         <NamedIndividual IRI="#ChateauDYchemSauterne"/>
-        <NamedIndividual IRI="#SemillonGrape"/>
+        <NamedIndividual IRI="#SauvignonBlancGrape"/>
     </ObjectPropertyAssertion>
     <ObjectPropertyAssertion>
         <ObjectProperty IRI="#hasFlavor"/>
@@ -4403,12 +3901,12 @@
         <ObjectProperty abbreviatedIRI="food:madeFromFruit"/>
     </SubObjectPropertyOf>
     <InverseObjectProperties>
-        <ObjectProperty IRI="#hasMaker"/>
         <ObjectProperty IRI="#producesWine"/>
+        <ObjectProperty IRI="#hasMaker"/>
     </InverseObjectProperties>
     <InverseObjectProperties>
-        <ObjectProperty IRI="#madeFromGrape"/>
         <ObjectProperty IRI="#madeIntoWine"/>
+        <ObjectProperty IRI="#madeFromGrape"/>
     </InverseObjectProperties>
     <FunctionalObjectProperty>
         <ObjectProperty IRI="#hasBody"/>
@@ -4517,37 +4015,8 @@
         <IRI>#WineDescriptor</IRI>
         <Literal datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">Made WineDescriptor unionType of tastes and color</Literal>
     </AnnotationAssertion>
-    <SubAnnotationPropertyOf>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/creator"/>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/title"/>
-    </SubAnnotationPropertyOf>
-    <SubAnnotationPropertyOf>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/date"/>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/subject"/>
-    </SubAnnotationPropertyOf>
-    <SubAnnotationPropertyOf>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/description"/>
-        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-    </SubAnnotationPropertyOf>
-    <SubAnnotationPropertyOf>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/subject"/>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/title"/>
-    </SubAnnotationPropertyOf>
-    <SubAnnotationPropertyOf>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/subject"/>
-        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-    </SubAnnotationPropertyOf>
-    <SubAnnotationPropertyOf>
-        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/title"/>
-        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
-    </SubAnnotationPropertyOf>
-    <SubAnnotationPropertyOf>
-        <AnnotationProperty IRI="#email"/>
-        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-    </SubAnnotationPropertyOf>
 </Ontology>
 
 
 
-<!-- Generated by the OWL API (version 4.2.5.20160517-0735) https://github.com/owlcs/owlapi -->
-
+<!-- Generated by the OWL API (version 3.4.5-SNAPSHOT) http://owlapi.sourceforge.net -->

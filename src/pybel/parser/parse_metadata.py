@@ -8,7 +8,7 @@ from pyparsing import pyparsing_common as ppc
 from . import language
 from .baseparser import BaseParser, word, quote, delimitedSet
 from .parse_exceptions import IllegalDocumentMetadataException
-from .utils import OWLParser
+from .utils import parse_owl
 from ..utils import download_url
 
 log = logging.getLogger('pybel')
@@ -69,7 +69,7 @@ class MetadataParser(BaseParser):
         self.annotation_list.setParseAction(self.handle_annotation_list)
         self.annotation_pattern.setParseAction(self.handle_annotation_pattern)
 
-        self.language = (self.document | self.namespace_url | self.namespace_list |
+        self.language = (self.document | self.namespace_url | self.namespace_list | self.namespace_owl |
                          self.annotation_url | self.annotation_list | self.annotation_pattern)
 
     def get_language(self):
@@ -128,7 +128,7 @@ class MetadataParser(BaseParser):
         url = tokens['url']
         functions = tokens['functions'] if 'functions' in tokens else None
 
-        owl = OWLParser(url=url, functions=functions)
+        owl = parse_owl(url=url, functions=functions)
         self.namespace_dict[name] = owl.build_namespace_dict()
 
         return tokens
