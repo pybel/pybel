@@ -3,7 +3,6 @@ import unittest
 
 from pybel.parser.parse_metadata import MetadataParser
 from pybel.parser.utils import OWLParser, parse_owl
-
 from tests.constants import dir_path
 
 test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
@@ -25,6 +24,7 @@ class TestOwlUtils(unittest.TestCase):
     def test_value_error(self):
         with self.assertRaises(ValueError):
             OWLParser()
+
 
 # TODO parametrize tests
 
@@ -80,26 +80,10 @@ class TestWine(TestOwlBase):
 
         # TODO add remaining items from hierarchy
         self.expected_classes = {
-            'ConsumableThing',
-            'EdibleThing',
-            'Dessert',
-            'Fowl',
-            'Meat',
-            'NonSweetFruit',
-            'OtherTomatoBasedFood',
-            'Pasta',
-            'Seafood',
-            'SweetFruit',
-            'Meal',
-            'MealCourse',
-            'PotableLiquid',
-            'Juice',
-            'Fruit',
-            'NonConsumableThing',
             'Region',
             'Vintage',
             'VintageYear',
-            'Wine'
+            'Wine',
             'WineDescriptor',
             'WineColor',
             'WineTaste',
@@ -166,7 +150,9 @@ class TestWine(TestOwlBase):
             'Stonleigh',
             'Taylor',
             'Ventana',
-            'WhitehallLane'
+            'WhitehallLane',
+
+            # Wines
         }
 
         self.expected_nodes = self.expected_classes | self.expected_individuals
@@ -257,7 +243,6 @@ class TestWine(TestOwlBase):
         for u, v in sorted(self.expected_membership):
             self.assertHasEdge(owl, u, v)
 
-
     def test_string(self):
         with open(test_owl_2) as f:
             owl = OWLParser(content=f.read())
@@ -282,7 +267,7 @@ class TestWine(TestOwlBase):
         parser = MetadataParser()
         parser.parseString(s)
 
-        names = set(parser.namespace_dict['Wine'].keys())
+        names = sorted(parser.namespace_dict['Wine'].keys())
         for node in sorted(self.expected_nodes):
             self.assertIn(node, names)
             self.assertEqual(functions, ''.join(sorted(parser.namespace_dict['Wine'][node])))

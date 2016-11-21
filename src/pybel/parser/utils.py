@@ -7,8 +7,9 @@ from xml.etree import ElementTree as ET
 
 import networkx as nx
 import requests
-from pybel.parser import language
 from requests_file import FileAdapter
+
+from pybel.parser import language
 
 log = logging.getLogger('pybel')
 
@@ -208,6 +209,7 @@ owl_ns = {
     'dc': 'http://purl.org/dc/elements/1.1'
 }
 
+
 # TODO handle synonyms. Only one can make it through. Find equivalence classes?
 class OWLParser(nx.DiGraph):
     def __init__(self, content=None, file=None, functions=None, *attrs, **kwargs):
@@ -230,19 +232,6 @@ class OWLParser(nx.DiGraph):
         self.root = self.tree.getroot()
         self.name_url = self.root.attrib['ontologyIRI']
 
-        labels = {}
-
-        for el in self.root.findall('./owl:AnnotationAssertion', owl_ns):
-            if len(el) == 3:
-                prop, iri, lit = el
-
-                if '{http://www.w3.org/XML/1998/namespace}lang' in lit.attrib:
-                    if 'en' != lit.attrib['{http://www.w3.org/XML/1998/namespace}lang']:
-                        log.debug('non-english detected')
-                        continue
-
-                labels[self.strip_iri(iri.text)] = lit.text.strip()
-
         for el in itt.chain(self.root.findall('./owl:Declaration/owl:Class', owl_ns),
                             self.root.findall('./owl:Declaration/owl:NamedIndividual', owl_ns)):
             self.add_node(self.strip_iri(el.attrib['IRI']))
@@ -250,29 +239,22 @@ class OWLParser(nx.DiGraph):
         for el in self.root.findall('./owl:SubClassOf', owl_ns):
             children = el.findall('./owl:Class[@IRI]', owl_ns)
             if len(children) == 2:
-                sub, sup = children
-
+                sub, sup = el
                 u = self.strip_iri(sub.attrib['IRI'])
                 v = self.strip_iri(sup.attrib['IRI'])
-
-                if u in labels:
-                    u = labels[u]
-                if v in labels:
-                    v = labels[v]
-
                 self.add_edge(u, v)
 
         for el in self.root.findall('./owl:ClassAssertion', owl_ns):
-            vv = el.findall('./owl:NamedIndividual', owl_ns)[0]
-            if 'IRI' not in vv:
+            a = el.find('./owl:Class', owl_ns)
+            if 'IRI' not in a.attrib:
                 continue
-            v = self.strip_iri(vv.attrib['IRI'])
+            a = self.strip_iri(a.attrib['IRI'])
 
-            uu = el.findall('./owl:Class', owl_ns)[0]
-            if 'IRI' not in uu:
+            b = el.find('./owl:NamedIndividual', owl_ns)
+            if 'IRI' not in b.attrib:
                 continue
-            u = self.strip_iri(uu.attrib['IRI'])
-            self.add_edge(v, u)
+            b = self.strip_iri(b.attrib['IRI'])
+            self.add_edge(b, a)
 
     def strip_iri(self, iri):
         return iri.lstrip(self.name_url).lstrip('#').strip()
