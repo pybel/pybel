@@ -5,7 +5,6 @@ import pybel
 from pybel.manager import DefinitionCacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import IllegalFunctionSemantic
-
 from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
     bel_1_reconstituted
 
