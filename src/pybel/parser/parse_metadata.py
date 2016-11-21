@@ -126,6 +126,11 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+
+        # if self.definition_cache_manager is not None:
+        # TODOdo the thing
+
+        log.debug('Downloading ontology %s from %s', name, url)
         functions = tokens['functions'] if 'functions' in tokens else None
 
         owl = parse_owl(url=url, functions=functions)
