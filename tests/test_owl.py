@@ -1,9 +1,10 @@
 import os
 import unittest
 
+import pybel
 from pybel.parser.parse_metadata import MetadataParser
 from pybel.parser.utils import OWLParser, parse_owl
-from tests.constants import dir_path
+from tests.constants import dir_path, test_bel_4
 
 test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
 test_owl_2 = os.path.join(dir_path, 'owl', 'wine.owl')
@@ -271,3 +272,17 @@ class TestWine(TestOwlBase):
         for node in sorted(self.expected_nodes):
             self.assertIn(node, names)
             self.assertEqual(functions, ''.join(sorted(parser.namespace_dict['Wine'][node])))
+
+    def test_from_path(self):
+        g = pybel.from_path(test_bel_4)
+
+        a = 'Protein', 'HGNC', 'AKT1'
+        b = 'Protein', 'HGNC', 'EGFR'
+        self.assertHasNode(g, a)
+        self.assertHasNode(g, b)
+        self.assertHasEdge(g, a, b)
+
+        self.assertHasEdge(g, ('Abundance', "PIZZA", "MeatTopping"), ('Abundance', 'WINE', 'Wine'))
+        self.assertHasEdge(g, ('Abundance', "PIZZA", "TomatoTopping"), ('Abundance', 'WINE', 'Wine'))
+        self.assertHasEdge(g, ('Abundance', 'WINE', 'WhiteWine'), ('Abundance', "PIZZA", "FishTopping"))
+
