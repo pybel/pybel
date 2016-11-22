@@ -2,15 +2,15 @@ import os
 import unittest
 
 import pybel
+from pybel.manager.owl_cache import OwlCacheManager
 from pybel.parser.parse_metadata import MetadataParser
-from pybel.parser.utils import OWLParser, parse_owl
-from tests.constants import dir_path, test_bel_4
+from pybel.parser.utils import OWLParser
+from pybel.parser.utils import parse_owl
+from tests.constants import dir_path, test_bel_4, wine_iri
+from tests.constants import pizza_iri
 
 test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
 test_owl_2 = os.path.join(dir_path, 'owl', 'wine.owl')
-
-pizza_iri = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
-wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
 
 
 class TestOwlBase(unittest.TestCase):
@@ -27,41 +27,39 @@ class TestOwlUtils(unittest.TestCase):
             OWLParser()
 
 
+expected_pizza_nodes = {
+    'Pizza',
+    'Topping',
+    'CheeseTopping',
+    'FishTopping',
+    'MeatTopping',
+    'TomatoTopping'
+}
+
+expected_pizza_edges = {
+    ('CheeseTopping', 'Topping'),
+    ('FishTopping', 'Topping'),
+    ('MeatTopping', 'Topping'),
+    ('TomatoTopping', 'Topping')
+}
+
+
 # TODO parametrize tests
 
-class TestPizza(TestOwlBase):
-    def setUp(self):
-        self.iri = pizza_iri
-
-        self.expected_nodes = {
-            'Pizza',
-            'Topping',
-            'CheeseTopping',
-            'FishTopping',
-            'MeatTopping',
-            'TomatoTopping'
-        }
-
-        self.expected_edges = {
-            ('CheeseTopping', 'Topping'),
-            ('FishTopping', 'Topping'),
-            ('MeatTopping', 'Topping'),
-            ('TomatoTopping', 'Topping')
-        }
-
+class TestParsePizza(TestOwlBase):
     def test_file(self):
         owl = OWLParser(file=test_owl_1)
 
-        self.assertEqual(self.iri, owl.iri)
-        self.assertEqual(self.expected_nodes, set(owl.nodes()))
-        self.assertEqual(self.expected_edges, set(owl.edges()))
+        self.assertEqual(pizza_iri, owl.iri)
+        self.assertEqual(expected_pizza_nodes, set(owl.nodes()))
+        self.assertEqual(expected_pizza_edges, set(owl.edges()))
 
     def test_url(self):
-        owl = parse_owl(url=self.iri)
+        owl = parse_owl(url=pizza_iri)
 
-        self.assertEqual(self.iri, owl.iri)
-        self.assertEqual(self.expected_nodes, set(owl.nodes()))
-        self.assertEqual(self.expected_edges, set(owl.edges()))
+        self.assertEqual(pizza_iri, owl.iri)
+        self.assertEqual(expected_pizza_nodes, set(owl.nodes()))
+        self.assertEqual(expected_pizza_edges, set(owl.edges()))
 
     def test_metadata_parser(self):
         functions = set('A')
@@ -70,9 +68,23 @@ class TestPizza(TestOwlBase):
         parser.parseString(s)
 
         names = set(parser.namespace_dict['Pizza'].keys())
-        for node in self.expected_nodes:
+        for node in expected_pizza_nodes:
             self.assertIn(node, names)
             self.assertEqual(functions, parser.namespace_dict['Pizza'][node])
+
+
+class TestOwlManager(unittest.TestCase):
+    def setUp(self):
+        self.manager = OwlCacheManager()
+        self.manager.create_database()
+
+    def test_insert(self):
+        owl = parse_owl(pizza_iri, 'A')
+        self.manager.insert(owl)
+
+        entries = self.manager.get(pizza_iri)
+
+        self.assertEqual(expected_pizza_nodes, entries)
 
 
 class TestWine(TestOwlBase):
@@ -285,4 +297,3 @@ class TestWine(TestOwlBase):
         self.assertHasEdge(g, ('Abundance', "PIZZA", "MeatTopping"), ('Abundance', 'WINE', 'Wine'))
         self.assertHasEdge(g, ('Abundance', "PIZZA", "TomatoTopping"), ('Abundance', 'WINE', 'Wine'))
         self.assertHasEdge(g, ('Abundance', 'WINE', 'WhiteWine'), ('Abundance', "PIZZA", "FishTopping"))
-

@@ -35,3 +35,27 @@ class Context(Base):
     definition_id = Column(Integer, ForeignKey('pybel_cache_definition.id'), index=True)
     context = Column(String(255))
     encoding = Column(String(50))
+
+
+class Owl(Base):
+    __tablename__ = 'owl'
+
+    id = Column(Integer, primary_key=True)
+    iri = Column(String(255))
+
+    entries = relationship("OwlEntry", order_by="owl_entry.id", backref="owl")
+
+
+class OwlEntry(Base):
+    __tablename__ = 'owl_entry'
+
+    id = Column(Integer, primary_key=True)
+    owl_id = Column(Integer, ForeignKey('owl.id'), index=True)
+    entry = Column(String(255))
+
+
+class OwlRelationship(Base):
+    __tablename__ = 'owl_relationship'
+
+    child = Column(Integer, ForeignKey('owl_entry.id'), index=True, primary_key=True)
+    parent = Column(Integer, ForeignKey('owl_entry.id'), index=True, primary_key=True)

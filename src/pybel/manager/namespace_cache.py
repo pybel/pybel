@@ -19,6 +19,8 @@ DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
 DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA, DEFAULT_DEFINITION_CACHE_NAME)
 
 
+# TODO: seperate definition cache management from database management
+
 class DefinitionCacheManager:
     def __init__(self, conn=None, setup_default_cache=False, log_sql=False):
         """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
