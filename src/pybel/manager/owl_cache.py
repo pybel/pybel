@@ -1,15 +1,46 @@
+import os
+
 import sqlalchemy
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 
-from .database_models import Base, Owl, OwlEntry
 from .defaults import default_owl
-from .namespace_cache import DEFAULT_CACHE_LOCATION
+from ..constants import PYBEL_DATA
 from ..parser.utils import parse_owl
+
+Base = declarative_base()
+OWL_CACHE_LOCATION = os.path.join(PYBEL_DATA, 'owl_cache.db')
+
+
+class Owl(Base):
+    __tablename__ = 'owl'
+
+    id = Column(Integer, primary_key=True)
+    iri = Column(String(255))
+
+    entries = relationship("OwlEntry", order_by="owl_entry.id", backref="owl")
+
+
+class OwlEntry(Base):
+    __tablename__ = 'owl_entry'
+
+    id = Column(Integer, primary_key=True)
+    owl_id = Column(Integer, ForeignKey('owl.id'), index=True)
+    entry = Column(String(255))
+
+
+class OwlRelationship(Base):
+    __tablename__ = 'owl_relationship'
+
+    child = Column(Integer, ForeignKey('owl_entry.id'), index=True, primary_key=True)
+    parent = Column(Integer, ForeignKey('owl_entry.id'), index=True, primary_key=True)
 
 
 class OwlCacheManager:
     def __init__(self, conn=None):
-        self.connection_url = conn if conn is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
+        self.connection_url = conn if conn is not None else 'sqlite://' + OWL_CACHE_LOCATION
         self.engine = sqlalchemy.create_engine(self.connection_url)
         self.session = sessionmaker(bind=self.engine)
 
