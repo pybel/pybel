@@ -145,7 +145,7 @@ class BELGraph(nx.MultiDiGraph):
 
         self.parse_statements(states)
 
-        log.info('Networkx produced with %d nodes and %d edges', self.number_of_nodes(), self.number_of_edges())
+        log.info('Network has %d nodes and %d edges', self.number_of_nodes(), self.number_of_edges())
 
     def parse_document(self, document_metadata):
         t = time.time()
