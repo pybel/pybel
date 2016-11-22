@@ -181,6 +181,7 @@ conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?ontology=
 
 
 # TODO directly parse with OWLReady
+# TODO insert all relevant metadata into owl.graph (networkx graph annotations)
 def parse_owl(url, functions=None):
     """
 
@@ -210,7 +211,7 @@ owl_ns = {
 }
 
 
-# TODO handle synonyms. Only one can make it through. Find equivalence classes?
+# TODO consider synonyms. Only one can make it through. Find equivalence classes?
 class OWLParser(nx.DiGraph):
     def __init__(self, content=None, file=None, functions=None, *attrs, **kwargs):
         """Builds a model of an OWL ontology in OWL/XML document using a NetworkX graph
@@ -230,7 +231,7 @@ class OWLParser(nx.DiGraph):
         self.functions = set(functions) if functions is not None else set(language.value_map)
 
         self.root = self.tree.getroot()
-        self.name_url = self.root.attrib['ontologyIRI']
+        self.graph['IRI'] = self.root.attrib['ontologyIRI']
 
         for el in itt.chain(self.root.findall('./owl:Declaration/owl:Class', owl_ns),
                             self.root.findall('./owl:Declaration/owl:NamedIndividual', owl_ns)):
@@ -257,7 +258,13 @@ class OWLParser(nx.DiGraph):
             self.add_edge(b, a)
 
     def strip_iri(self, iri):
-        return iri.lstrip(self.name_url).lstrip('#').strip()
+        return iri.lstrip(self.graph['IRI']).lstrip('#').strip()
 
+    @property
+    def iri(self):
+        return self.graph['IRI']
+
+    # TODO factor this out of parsing. Shouldn't be part of parser logic
     def build_namespace_dict(self):
         return {node: set(self.functions) for node in self.nodes_iter()}
+

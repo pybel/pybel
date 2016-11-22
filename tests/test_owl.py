@@ -9,8 +9,8 @@ from tests.constants import dir_path, test_bel_4
 test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
 test_owl_2 = os.path.join(dir_path, 'owl', 'wine.owl')
 
-pizza_url = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
-wine_url = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
+pizza_iri = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
+wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
 
 
 class TestOwlBase(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestOwlUtils(unittest.TestCase):
 
 class TestPizza(TestOwlBase):
     def setUp(self):
-        self.url = pizza_url
+        self.iri = pizza_iri
 
         self.expected_nodes = {
             'Pizza',
@@ -52,20 +52,20 @@ class TestPizza(TestOwlBase):
     def test_file(self):
         owl = OWLParser(file=test_owl_1)
 
-        self.assertEqual(self.url, owl.name_url)
+        self.assertEqual(self.iri, owl.iri)
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
     def test_url(self):
-        owl = parse_owl(url=self.url)
+        owl = parse_owl(url=self.iri)
 
-        self.assertEqual(self.url, owl.name_url)
+        self.assertEqual(self.iri, owl.iri)
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
     def test_metadata_parser(self):
         functions = set('A')
-        s = 'DEFINE NAMESPACE Pizza AS OWL {} "{}"'.format(''.join(functions), pizza_url)
+        s = 'DEFINE NAMESPACE Pizza AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
         parser = MetadataParser()
         parser.parseString(s)
 
@@ -77,7 +77,7 @@ class TestPizza(TestOwlBase):
 
 class TestWine(TestOwlBase):
     def setUp(self):
-        self.url = wine_url
+        self.iri = wine_iri
 
         # TODO add remaining items from hierarchy
         self.expected_classes = {
@@ -230,7 +230,7 @@ class TestWine(TestOwlBase):
     def test_file(self):
         owl = OWLParser(file=test_owl_2)
 
-        self.assertEqual(self.url, owl.name_url)
+        self.assertEqual(self.iri, owl.iri)
 
         for node in sorted(self.expected_classes):
             self.assertHasNode(owl, node)
@@ -248,7 +248,7 @@ class TestWine(TestOwlBase):
         with open(test_owl_2) as f:
             owl = OWLParser(content=f.read())
 
-        self.assertEqual(self.url, owl.name_url)
+        self.assertEqual(self.iri, owl.iri)
 
         for node in sorted(self.expected_classes):
             self.assertHasNode(owl, node)
@@ -264,7 +264,7 @@ class TestWine(TestOwlBase):
 
     def test_metadata_parser(self):
         functions = 'A'
-        s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_url)
+        s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
         parser = MetadataParser()
         parser.parseString(s)
 
