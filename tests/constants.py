@@ -19,6 +19,7 @@ test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')
 pizza_iri = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
 wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
 
+
 class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

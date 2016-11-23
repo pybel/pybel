@@ -181,6 +181,7 @@ conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?ontology=
 
 
 # TODO directly parse with OWLReady
+# TODO logging of download??
 # TODO insert all relevant metadata into owl.graph (networkx graph annotations)
 def parse_owl(url, functions=None, fail=False):
     """
@@ -188,7 +189,7 @@ def parse_owl(url, functions=None, fail=False):
     :param url:
     :param functions:
     :return:
-    :rtype: nx.DiGraph
+    :rtype: OWLParser
     """
 
     session = requests.Session()

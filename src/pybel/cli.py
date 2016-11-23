@@ -45,7 +45,7 @@ fh.setFormatter(formatter)
 log.addHandler(fh)
 
 
-@click.group(help="PyBEL Command Line Utilities on Python {}.{}".format(sys.version_info[0], sys.version_info[1]))
+@click.group(help="PyBEL Command Line Utilities on {}".format(sys.executable))
 @click.version_option()
 def main():
     pass
@@ -142,6 +142,7 @@ def ls(path):
 
     for url in sorted(itt.chain(dcm.ls(), ocm.ls())):
         click.echo(url)
+
 
 if __name__ == '__main__':
     main()
