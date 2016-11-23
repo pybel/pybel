@@ -1,15 +1,18 @@
+import logging
+
 import networkx as nx
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, ForeignKey, Sequence, Text, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker, scoped_session
-
 from sqlalchemy.orm.exc import NoResultFound
 
 from .database_models import Base
 from .defaults import default_owl
 from .namespace_cache import DEFAULT_CACHE_LOCATION
 from ..parser.utils import parse_owl
+
+log = logging.getLogger('pybel')
 
 owl_relationship = Table(
     'owl_relationship', Base.metadata,
@@ -65,6 +68,10 @@ class OwlCacheManager:
         for url in default_owl:
             self.insert_by_iri(url)
 
+    def ls(self):
+        return [owl.iri for owl in self.session.query(Owl).all()]
+
+
     def insert_by_iri(self, iri):
         self.insert(graph=parse_owl(iri))
 
@@ -72,6 +79,7 @@ class OwlCacheManager:
         iri = iri if iri is not None else graph.iri
 
         if 0 < self.session.query(Owl).filter(Owl.iri == iri).count():
+            log.debug('%s already cached', iri)
             return
 
         owl = Owl(iri=iri)
