@@ -26,6 +26,10 @@ class TestOwlUtils(unittest.TestCase):
         with self.assertRaises(ValueError):
             OWLParser()
 
+    def test_invalid_owl(self):
+        with self.assertRaises(ValueError):
+            parse_owl('http://example.com/not_owl.owl')
+
 
 expected_pizza_nodes = {
     'Pizza',
@@ -86,12 +90,20 @@ class TestOwlManager(unittest.TestCase):
         self.assertEqual(expected_pizza_nodes, entries)
 
         # get edges out
-        edges = set(self.manager.get_edges_iter(pizza_iri))
+        edges = self.manager.get_edges(pizza_iri)
 
         self.assertEqual(expected_pizza_edges, edges)
 
         # check nothing bad happens on second insert
         self.manager.insert(owl)
+
+    def test_missing(self):
+        with self.assertRaises(ValueError):
+            self.manager.ensure('http://example.com/not_owl.owl')
+
+    def test_insert_missing(self):
+        with self.assertRaises(ValueError):
+            self.manager.insert_by_iri('http://cthoyt.com/not_owl.owl')
 
 
 class TestWine(TestOwlBase):

@@ -1,7 +1,10 @@
+import networkx as nx
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, ForeignKey, Sequence, Text, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker, scoped_session
+
+from sqlalchemy.orm.exc import NoResultFound
 
 from .database_models import Base
 from .defaults import default_owl
@@ -14,6 +17,7 @@ owl_relationship = Table(
     Column('right_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True)
 )
 
+
 class Owl(Base):
     __tablename__ = 'Owl'
 
@@ -22,7 +26,7 @@ class Owl(Base):
     entries = relationship("OwlEntry", order_by="OwlEntry.id", backref="owl")
 
     def __repr__(self):
-        return "<Owl(iri='{}', #entries='{}')>".format(self.iri, list(self.entries))
+        return "Owl(iri='{}', #entries='{}')>".format(self.iri, list(self.entries))
 
 
 class OwlEntry(Base):
@@ -38,7 +42,7 @@ class OwlEntry(Base):
                             secondaryjoin=id == owl_relationship.c.right_id)
 
     def __repr__(self):
-        return '<OwlEntry({})>'.format(self.entry)
+        return 'OwlEntry({})'.format(self.entry)
 
 
 class OwlCacheManager:
@@ -49,6 +53,7 @@ class OwlCacheManager:
 
         self.term_cache = {}
         self.edge_cache = {}
+        self.graph_cache = {}
 
     def create_database(self):
         Base.metadata.create_all(self.engine)
@@ -56,10 +61,12 @@ class OwlCacheManager:
     def drop_database(self):
         Base.metadata.drop_all(self.engine)
 
-    def ensure_cache(self):
+    def load_default_owl(self):
         for url in default_owl:
-            graph = parse_owl(url)
-            self.insert(graph.iri, graph)
+            self.insert_by_iri(url)
+
+    def insert_by_iri(self, iri):
+        self.insert(graph=parse_owl(iri))
 
     def insert(self, graph, iri=None):
         iri = iri if iri is not None else graph.iri
@@ -79,14 +86,29 @@ class OwlCacheManager:
         self.session.add(owl)
         self.session.commit()
 
-    def get_terms(self, iri):
-        if iri not in self.term_cache:
+    def ensure(self, iri):
+        if iri in self.term_cache:
+            return
+        try:
             results = self.session.query(Owl).filter(Owl.iri == iri).one()
-            self.term_cache[iri] = set(entry.entry for entry in results.entries)
+        except NoResultFound:
+            raise ValueError('IRI {} missing from cache'.format(iri))
+
+        self.term_cache[iri] = set(entry.entry for entry in results.entries)
+        self.edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
+
+        graph = nx.DiGraph()
+        graph.add_edges_from(self.edge_cache[iri])
+        self.graph_cache[iri] = graph
+
+    def get_terms(self, iri):
+        self.ensure(iri)
         return self.term_cache[iri]
 
-    def get_edges_iter(self, iri):
-        result = self.session.query(Owl).filter(Owl.iri == iri).one()
-        for entry in result.entries:
-            for child in entry.children:
-                yield (entry.entry, child.entry)
+    def get_edges(self, iri):
+        self.ensure(iri)
+        return self.edge_cache[iri]
+
+    def get_graph(self, iri):
+        self.ensure(iri)
+        return self.graph_cache[iri]

@@ -182,13 +182,13 @@ conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?ontology=
 
 # TODO directly parse with OWLReady
 # TODO insert all relevant metadata into owl.graph (networkx graph annotations)
-def parse_owl(url, functions=None):
+def parse_owl(url, functions=None, fail=False):
     """
 
     :param url:
     :param functions:
     :return:
-    :rtype: OWLParser
+    :rtype: nx.DiGraph
     """
 
     session = requests.Session()
@@ -200,8 +200,11 @@ def parse_owl(url, functions=None):
         owl = OWLParser(content=res.content, functions=functions)
         return owl
     except:
+        if fail:
+            raise ValueError('IRI {} not valid OWL'.format(url))
+
         new_url = conversion_service.format(url)
-        owl = parse_owl(url=new_url, functions=functions)
+        owl = parse_owl(url=new_url, functions=functions, fail=True)
         return owl
 
 
