@@ -71,18 +71,15 @@ class OwlCacheManager:
     def ls(self):
         return [owl.iri for owl in self.session.query(Owl).all()]
 
+    def insert_by_iri(self, iri, functions=None):
+        return self.insert_by_graph(graph=parse_owl(iri, functions))
 
-    def insert_by_iri(self, iri):
-        self.insert(graph=parse_owl(iri))
-
-    def insert(self, graph, iri=None):
-        iri = iri if iri is not None else graph.iri
-
-        if 0 < self.session.query(Owl).filter(Owl.iri == iri).count():
-            log.debug('%s already cached', iri)
+    def insert_by_graph(self, graph):
+        if 0 < self.session.query(Owl).filter(Owl.iri == graph.iri).count():
+            log.debug('%s already cached', graph.iri)
             return
 
-        owl = Owl(iri=iri)
+        owl = Owl(iri=graph.iri)
 
         entries = {node: OwlEntry(entry=node) for node in graph.nodes_iter()}
 
@@ -94,13 +91,15 @@ class OwlCacheManager:
         self.session.add(owl)
         self.session.commit()
 
+        return owl
+
     def ensure(self, iri):
         if iri in self.term_cache:
             return
         try:
             results = self.session.query(Owl).filter(Owl.iri == iri).one()
         except NoResultFound:
-            raise ValueError('IRI {} missing from cache'.format(iri))
+            results = self.insert_by_iri(iri)
 
         self.term_cache[iri] = set(entry.entry for entry in results.entries)
         self.edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)

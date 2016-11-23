@@ -3,6 +3,7 @@ import unittest
 
 import pybel
 from pybel.manager.owl_cache import OwlCacheManager
+from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
 from pybel.parser.utils import OWLParser
 from pybel.parser.utils import parse_owl
@@ -76,6 +77,17 @@ class TestParsePizza(TestOwlBase):
             self.assertIn(node, names)
             self.assertEqual(functions, parser.namespace_dict['Pizza'][node])
 
+    def test_metadata_parser_no_function(self):
+        s = 'DEFINE NAMESPACE Pizza AS OWL "{}"'.format(pizza_iri)
+        parser = MetadataParser()
+        parser.parseString(s)
+
+        functions = set(value_map.keys())
+        names = set(parser.namespace_dict['Pizza'].keys())
+        for node in expected_pizza_nodes:
+            self.assertIn(node, names)
+            self.assertEqual(functions, parser.namespace_dict['Pizza'][node])
+
 
 class TestOwlManager(unittest.TestCase):
     def setUp(self):
@@ -85,7 +97,7 @@ class TestOwlManager(unittest.TestCase):
 
     def test_insert(self):
         owl = parse_owl(pizza_iri, 'A')
-        self.manager.insert(owl)
+        self.manager.insert_by_graph(owl)
         entries = self.manager.get_terms(pizza_iri)
         self.assertEqual(expected_pizza_nodes, entries)
 
@@ -95,7 +107,7 @@ class TestOwlManager(unittest.TestCase):
         self.assertEqual(expected_pizza_edges, edges)
 
         # check nothing bad happens on second insert
-        self.manager.insert(owl)
+        self.manager.insert_by_graph(owl)
 
     def test_missing(self):
         with self.assertRaises(ValueError):
@@ -110,7 +122,6 @@ class TestWine(TestOwlBase):
     def setUp(self):
         self.iri = wine_iri
 
-        # TODO add remaining items from hierarchy
         self.expected_classes = {
             'Region',
             'Vintage',
