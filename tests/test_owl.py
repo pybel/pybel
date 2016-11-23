@@ -82,12 +82,15 @@ class TestOwlManager(unittest.TestCase):
     def test_insert(self):
         owl = parse_owl(pizza_iri, 'A')
         self.manager.insert(owl)
-        entries = self.manager.get(pizza_iri)
+        entries = self.manager.get_terms(pizza_iri)
         self.assertEqual(expected_pizza_nodes, entries)
 
-        # check nothing bad happens on second insert
-        print(self.manager.session.query(pybel.manager.owl_cache.Owl).filter(pybel.manager.owl_cache.Owl.iri == pizza_iri).count())
+        # get edges out
+        edges = set(self.manager.get_edges_iter(pizza_iri))
 
+        self.assertEqual(expected_pizza_edges, edges)
+
+        # check nothing bad happens on second insert
         self.manager.insert(owl)
 
 

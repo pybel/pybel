@@ -1,5 +1,5 @@
 import sqlalchemy
-from sqlalchemy import Column, Integer, String, ForeignKey, Sequence, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Sequence, Text, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker, scoped_session
 
@@ -8,6 +8,11 @@ from .defaults import default_owl
 from .namespace_cache import DEFAULT_CACHE_LOCATION
 from ..parser.utils import parse_owl
 
+owl_relationship = Table(
+    'owl_relationship', Base.metadata,
+    Column('left_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True),
+    Column('right_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True)
+)
 
 class Owl(Base):
     __tablename__ = 'Owl'
@@ -27,15 +32,13 @@ class OwlEntry(Base):
     owl_id = Column(Integer, ForeignKey('Owl.id'), index=True)
     entry = Column(String(255))
 
+    children = relationship('OwlEntry',
+                            secondary=owl_relationship,
+                            primaryjoin=id == owl_relationship.c.left_id,
+                            secondaryjoin=id == owl_relationship.c.right_id)
+
     def __repr__(self):
         return '<OwlEntry({})>'.format(self.entry)
-
-
-class OwlRelationship(Base):
-    __tablename__ = 'OwlRelationship'
-
-    child = Column(Integer, ForeignKey('OwlEntry.id'), index=True, primary_key=True)
-    parent = Column(Integer, ForeignKey('OwlEntry.id'), index=True, primary_key=True)
 
 
 class OwlCacheManager:
@@ -44,7 +47,8 @@ class OwlCacheManager:
         self.engine = sqlalchemy.create_engine(self.connection_url)
         self.session = scoped_session(sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False))
 
-        self.cache = {}
+        self.term_cache = {}
+        self.edge_cache = {}
 
     def create_database(self):
         Base.metadata.create_all(self.engine)
@@ -64,15 +68,25 @@ class OwlCacheManager:
             return
 
         owl = Owl(iri=iri)
-        owl.entries = [OwlEntry(entry=node) for node in graph.nodes_iter()]
 
-        # TODO add heirarchy entries
+        entries = {node: OwlEntry(entry=node) for node in graph.nodes_iter()}
+
+        owl.entries = list(entries.values())
+
+        for u, v in graph.edges_iter():
+            entries[u].children.append(entries[v])
 
         self.session.add(owl)
         self.session.commit()
 
-    def get(self, iri):
-        if iri not in self.cache:
+    def get_terms(self, iri):
+        if iri not in self.term_cache:
             results = self.session.query(Owl).filter(Owl.iri == iri).one()
-            self.cache[iri] = set(entry.entry for entry in results.entries)
-        return self.cache[iri]
+            self.term_cache[iri] = set(entry.entry for entry in results.entries)
+        return self.term_cache[iri]
+
+    def get_edges_iter(self, iri):
+        result = self.session.query(Owl).filter(Owl.iri == iri).one()
+        for entry in result.entries:
+            for child in entry.children:
+                yield (entry.entry, child.entry)
