@@ -1,28 +1,5 @@
-Getting Started
-===============
-
-Installation
-------------
-
-Installing is as easy as getting the code from PyPI:
-
-.. code-block:: sh
-
-    pip install pybel
-
-The latest and greatest can be installed from the development branch on GitHub with:
-
-.. code-block:: sh
-
-    pip install git+https://github.com/pybel/pybel.git@develop
-
-The entire project can be downloaded for development with:
-
-.. code-block:: sh
-
-    git clone https://github.com/pybel/pybel.git
-    cd pybel
-    pip install -e .
+Cookbook
+========
 
 Command Line Usage
 ------------------
@@ -40,7 +17,7 @@ Load, compile, and export to Cytoscape format:
 In Cytoscape, open with :code:`Import > Network > From File`.
 
 Example Workflow
-----------------
+~~~~~~~~~~~~~~~~
 
 In this example, a local file is parsed and output to both GraphML and a Python pickle object for later. The logging
 is output as well, for error triaging with grep. This example makes use of the logging message codes, which are
@@ -83,9 +60,3 @@ Export to Neo4j
    >>> g = pybel.from_url(url)
    >>> neo_graph = py2neo.Graph("http://localhost:7474/db/data/")  # use your own connection settings
    >>> pybel.to_neo4j(g, neo_graph)
-
-Top-Level API
-~~~~~~~~~~~~~
-
-.. automodule:: pybel
-    :members:

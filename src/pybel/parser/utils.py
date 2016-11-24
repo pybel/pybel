@@ -3,6 +3,13 @@
 import itertools as itt
 import logging
 import re
+from xml.etree import ElementTree as ET
+
+import networkx as nx
+import requests
+from requests_file import FileAdapter
+
+from pybel.parser import language
 
 log = logging.getLogger('pybel')
 
@@ -168,3 +175,100 @@ def ensure_quotes(s):
     :rtype: str
     """
     return '"{}"'.format(s) if not s.isalnum() else s
+
+
+conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?ontology={}&format=OWL/XML"
+
+
+# TODO directly parse with OWLReady
+# TODO logging of download??
+# TODO insert all relevant metadata into owl.graph (networkx graph annotations)
+def parse_owl(url, functions=None, fail=False):
+    """
+
+    :param url:
+    :param functions:
+    :return:
+    :rtype: OWLParser
+    """
+
+    session = requests.Session()
+    if url.startswith('file://'):
+        session.mount('file://', FileAdapter())
+    res = session.get(url)
+
+    try:
+        owl = OWLParser(content=res.content, functions=functions)
+        return owl
+    except:
+        if fail:
+            raise ValueError('IRI {} not valid OWL'.format(url))
+
+        new_url = conversion_service.format(url)
+        owl = parse_owl(url=new_url, functions=functions, fail=True)
+        return owl
+
+
+owl_ns = {
+    'owl': 'http://www.w3.org/2002/07/owl#',
+    'dc': 'http://purl.org/dc/elements/1.1'
+}
+
+
+# TODO consider synonyms. Only one can make it through. Find equivalence classes?
+class OWLParser(nx.DiGraph):
+    def __init__(self, content=None, file=None, functions=None, *attrs, **kwargs):
+        """Builds a model of an OWL ontology in OWL/XML document using a NetworkX graph
+        :param file: input OWL path or filelike object
+        """
+
+        nx.DiGraph.__init__(self, *attrs, **kwargs)
+
+        if file is not None:
+            self.tree = ET.parse(file)
+        elif content is not None:
+            self.tree = ET.ElementTree(ET.fromstring(content))
+        else:
+            raise ValueError('Missing data source (file/content)')
+
+        # if no functions defined, then all elements can be everything
+        self.functions = set(functions) if functions is not None else set(language.value_map)
+
+        self.root = self.tree.getroot()
+        self.graph['IRI'] = self.root.attrib['ontologyIRI']
+
+        for el in itt.chain(self.root.findall('./owl:Declaration/owl:Class', owl_ns),
+                            self.root.findall('./owl:Declaration/owl:NamedIndividual', owl_ns)):
+            self.add_node(self.strip_iri(el.attrib['IRI']))
+
+        for el in self.root.findall('./owl:SubClassOf', owl_ns):
+            children = el.findall('./owl:Class[@IRI]', owl_ns)
+            if len(children) == 2:
+                sub, sup = el
+                u = self.strip_iri(sub.attrib['IRI'])
+                v = self.strip_iri(sup.attrib['IRI'])
+                self.add_edge(u, v)
+
+        for el in self.root.findall('./owl:ClassAssertion', owl_ns):
+            a = el.find('./owl:Class', owl_ns)
+            if 'IRI' not in a.attrib:
+                continue
+            a = self.strip_iri(a.attrib['IRI'])
+
+            b = el.find('./owl:NamedIndividual', owl_ns)
+            if 'IRI' not in b.attrib:
+                continue
+            b = self.strip_iri(b.attrib['IRI'])
+            self.add_edge(b, a)
+
+    def strip_iri(self, iri):
+        return iri.lstrip(self.graph['IRI']).lstrip('#').strip()
+
+    @property
+    def iri(self):
+        return self.graph['IRI']
+
+    # TODO factor this out of parsing. Shouldn't be part of parser logic
+    def build_namespace_dict(self):
+        return {node: set(self.functions) for node in self.nodes_iter()}
+

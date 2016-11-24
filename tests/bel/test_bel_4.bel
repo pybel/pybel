@@ -1,0 +1,34 @@
+##################################################################################
+# Document Properties Section
+
+SET DOCUMENT Name = "PyBEL Test Document 4"
+SET DOCUMENT Description = "Tests the use of OWL ontologies as namespaces"
+SET DOCUMENT Version = "1.6"
+SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
+SET DOCUMENT Authors = "Charles Tapley Hoyt"
+SET DOCUMENT Licenses = "WTF License"
+SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+
+
+##################################################################################
+# Definitions Section
+
+DEFINE NAMESPACE HGNC AS URL "http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns"
+DEFINE NAMESPACE PIZZA AS OWL A "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
+DEFINE NAMESPACE WINE AS OWL A "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
+##################################################################################
+# Statements Section
+
+SET STATEMENT_GROUP = "Group 1"
+
+SET Citation = {"Pubmed","That one article from last week","123455"}
+SET SupportingText = "Made up support, not even qualifying as evidence"
+
+# Standard namespace setup
+p(HGNC:AKT1) -> p(HGNC:EGFR)
+
+# OWL Namespace setup
+
+a(PIZZA:"MeatTopping") -> a(WINE:Wine)
+a(PIZZA:"TomatoTopping") -> a(WINE:Wine)
+a(WINE:WhiteWine) -| a(PIZZA:"FishTopping")

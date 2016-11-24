@@ -12,6 +12,7 @@ problems--the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
+import itertools as itt
 import logging
 import os
 import sys
@@ -22,6 +23,7 @@ import py2neo
 
 from . import graph
 from .constants import PYBEL_DIR
+from .manager import OwlCacheManager
 from .manager.namespace_cache import DefinitionCacheManager, DEFAULT_CACHE_LOCATION
 
 log = logging.getLogger('pybel')
@@ -43,7 +45,7 @@ fh.setFormatter(formatter)
 log.addHandler(fh)
 
 
-@click.group(help="PyBEL Command Line Utilities")
+@click.group(help="PyBEL Command Line Utilities on {}".format(sys.executable))
 @click.version_option()
 def main():
     pass
@@ -108,7 +110,7 @@ def manage():
 
 
 @manage.command(help='Set up definition cache with default definitions')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/namespace_cache.db')
+@click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/definitions.db')
 def setup(path):
     DefinitionCacheManager(conn=path, setup_default_cache=True)
     sys.exit(0)
@@ -118,6 +120,28 @@ def setup(path):
 def remove():
     os.remove(DEFAULT_CACHE_LOCATION)
     sys.exit(0)
+
+
+@manage.command(help='Manually add definition by URL')
+@click.argument('url')
+@click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/definitions.db')
+def insert(url, path):
+    if url.lower().endswith('.belns') or url.lower().endswith('.belanno'):
+        dcm = DefinitionCacheManager(conn=path)
+        dcm.insert_definition(url)
+    else:
+        ocm = OwlCacheManager(conn=path)
+        ocm.insert_by_iri(url)
+
+
+@manage.command(help='List cached resources')
+@click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/definitions.db')
+def ls(path):
+    dcm = DefinitionCacheManager(conn=path)
+    ocm = OwlCacheManager(conn=path)
+
+    for url in sorted(itt.chain(dcm.ls(), ocm.ls())):
+        click.echo(url)
 
 
 if __name__ == '__main__':

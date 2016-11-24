@@ -10,10 +10,14 @@ test_ns_1 = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
 test_bel_1 = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 test_bel_2 = os.path.join(dir_path, 'bel', 'test_bel_2.bel')
 test_bel_3 = os.path.join(dir_path, 'bel', 'test_bel_3.bel')
+test_bel_4 = os.path.join(dir_path, 'bel', 'test_bel_4.bel')
 test_bel_slushy = os.path.join(dir_path, 'bel', 'slushy.bel')
 
 test_citation_bel = 'SET Citation = {"TestType","TestName","TestRef"}'
 test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')
+
+pizza_iri = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
+wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -41,6 +45,7 @@ class TestTokenParserBase(unittest.TestCase):
             msg_format = 'No edge with correct properties. expected {} but got {}'
             self.assertTrue(any_subdict_matches(self.parser.graph.edge[u][v], kwargs),
                             msg=msg_format.format(kwargs, self.parser.graph.edge[u][v]))
+
 
 def bel_1_reconstituted(self, g):
     nodes = list(g.nodes_iter(namespace='HGNC', name='AKT1'))
