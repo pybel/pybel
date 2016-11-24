@@ -177,7 +177,7 @@ def ensure_quotes(s):
     return '"{}"'.format(s) if not s.isalnum() else s
 
 
-conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?ontology={}&format=OWL/XML"
+conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?format=OWL/XML&ontology={}"
 
 
 # TODO directly parse with OWLReady
@@ -219,7 +219,11 @@ owl_ns = {
 class OWLParser(nx.DiGraph):
     def __init__(self, content=None, file=None, functions=None, *attrs, **kwargs):
         """Builds a model of an OWL ontology in OWL/XML document using a NetworkX graph
-        :param file: input OWL path or filelike object
+
+        :param content: The content of an XML file as a string
+        :type content: str
+        :param file: input OWL file path or file-like object
+        :type file: file or str
         """
 
         nx.DiGraph.__init__(self, *attrs, **kwargs)
@@ -271,4 +275,3 @@ class OWLParser(nx.DiGraph):
     # TODO factor this out of parsing. Shouldn't be part of parser logic
     def build_namespace_dict(self):
         return {node: set(self.functions) for node in self.nodes_iter()}
-
