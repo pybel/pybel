@@ -156,6 +156,8 @@ class BELGraph(nx.MultiDiGraph):
             except:
                 log.error('Line %07d - failed: %s', line_number, line)
 
+        self.graph['document_metadata'] = self.metadata_parser.document_metadata
+
         log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
     def parse_definitions(self, definitions):
@@ -175,6 +177,8 @@ class BELGraph(nx.MultiDiGraph):
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
                 log.debug('Traceback: %s', exc_traceback)
+
+        self.graph['name_mapping'] = self.metadata_parser.name_mapping
 
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 

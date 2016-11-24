@@ -36,6 +36,8 @@ class MetadataParser(BaseParser):
         self.annotations_metadata = {}
         self.annotations_dict = {} if valid_annotations is None else valid_annotations
 
+        self.name_mapping = {}
+
         self.definition_cache_manager = definition_cache_manager
 
         as_tag = Suppress('AS')
@@ -92,6 +94,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        self.name_mapping[name] = url
 
         if self.definition_cache_manager is not None:
             # TODO LeKono change to .ensure_namespace that gives it back as return value like this:
@@ -126,6 +129,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        self.name_mapping[name] = url
 
         # if self.definition_cache_manager is not None:
         # TODOdo the thing
@@ -145,6 +149,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        self.name_mapping[name] = url
 
         if self.definition_cache_manager is not None:
             self.definition_cache_manager.update_definition(url, overwrite_old_definition=False)
