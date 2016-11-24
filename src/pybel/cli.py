@@ -110,7 +110,7 @@ def manage():
 
 
 @manage.command(help='Set up definition cache with default definitions')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/definitions.db')
+@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def setup(path):
     DefinitionCacheManager(conn=path, setup_default_cache=True)
     sys.exit(0)
@@ -124,7 +124,7 @@ def remove():
 
 @manage.command(help='Manually add definition by URL')
 @click.argument('url')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/definitions.db')
+@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def insert(url, path):
     if url.lower().endswith('.belns') or url.lower().endswith('.belanno'):
         dcm = DefinitionCacheManager(conn=path)
@@ -135,7 +135,7 @@ def insert(url, path):
 
 
 @manage.command(help='List cached resources')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to ~/.pybel/data/definitions.db')
+@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def ls(path):
     dcm = DefinitionCacheManager(conn=path)
     ocm = OwlCacheManager(conn=path)
