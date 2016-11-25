@@ -251,15 +251,7 @@ class OWLParser(nx.DiGraph):
             self.add_node(self.get_iri(el.attrib), type="NamedIndividual")
 
         for el in self.root.findall('./owl:SubClassOf', owl_ns):
-            children = el.findall('./owl:Class', owl_ns)
-            if len(children) == 2:
-                sub, sup = el
-                u = self.get_iri(sub.attrib)
-                v = self.get_iri(sup.attrib)
-                self.add_edge(u, v, type="SubClassOf")
-
-        """
-                    if len(el) != 2:
+            if len(el) != 2:
                 raise ValueError('something weird with SubClassOf: {} {}'.format(el, el.attrib))
 
             child = self.get_iri(el[0].attrib)
@@ -267,19 +259,11 @@ class OWLParser(nx.DiGraph):
             if any(x in el[1].attrib for x in {IRI, AIRI}):
                 parent = self.get_iri(el[1].attrib)
                 self.add_edge(child, parent, type='SubClasOf')
-            elif True: #check if ObjectSomeValuesFrom?
+            elif el[1].tag == '{http://www.w3.org/2002/07/owl#}ObjectSomeValuesFrom':  # check if ObjectSomeValuesFrom?
                 object_property, parent = el[1]
                 parent = self.get_iri(parent.attrib)
                 relation = self.get_iri(object_property.attrib)
                 self.add_edge(child, parent, type=relation)
-
-        <SubClassOf>
-        <Class IRI="#COX2"/>
-        <ObjectSomeValuesFrom>
-            <ObjectProperty abbreviatedIRI="NDDUO:has_role"/>
-            <Class IRI="#Inflammatory_markers"/>
-        </ObjectSomeValuesFrom>
-    </SubClassOf>"""
 
         for el in self.root.findall('./owl:ClassAssertion', owl_ns):
             a = el.find('./owl:Class', owl_ns)
