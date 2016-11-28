@@ -214,6 +214,9 @@ owl_ns = {
     'dc': 'http://purl.org/dc/elements/1.1'
 }
 
+IRI = 'IRI'
+AIRI = 'abbreviatedIRI'
+
 
 # TODO consider synonyms. Only one can make it through. Find equivalence classes?
 class OWLParser(nx.DiGraph):
@@ -241,32 +244,54 @@ class OWLParser(nx.DiGraph):
         self.root = self.tree.getroot()
         self.graph['IRI'] = self.root.attrib['ontologyIRI']
 
-        for el in itt.chain(self.root.findall('./owl:Declaration/owl:Class', owl_ns),
-                            self.root.findall('./owl:Declaration/owl:NamedIndividual', owl_ns)):
-            self.add_node(self.strip_iri(el.attrib['IRI']))
+        for el in self.root.findall('./owl:Declaration/owl:Class', owl_ns):
+            self.add_node(self.get_iri(el.attrib), type="Class")
+
+        for el in self.root.findall('./owl:Declaration/owl:NamedIndividual', owl_ns):
+            self.add_node(self.get_iri(el.attrib), type="NamedIndividual")
 
         for el in self.root.findall('./owl:SubClassOf', owl_ns):
-            children = el.findall('./owl:Class[@IRI]', owl_ns)
-            if len(children) == 2:
-                sub, sup = el
-                u = self.strip_iri(sub.attrib['IRI'])
-                v = self.strip_iri(sup.attrib['IRI'])
-                self.add_edge(u, v)
+            if len(el) != 2:
+                raise ValueError('something weird with SubClassOf: {} {}'.format(el, el.attrib))
+
+            child = self.get_iri(el[0].attrib)
+
+            if any(x in el[1].attrib for x in {IRI, AIRI}):
+                parent = self.get_iri(el[1].attrib)
+                self.add_edge(child, parent, type='SubClasOf')
+            elif el[1].tag == '{http://www.w3.org/2002/07/owl#}ObjectSomeValuesFrom':  # check if ObjectSomeValuesFrom?
+                object_property, parent = el[1]
+                parent = self.get_iri(parent.attrib)
+                relation = self.get_iri(object_property.attrib)
+                self.add_edge(child, parent, type=relation)
 
         for el in self.root.findall('./owl:ClassAssertion', owl_ns):
             a = el.find('./owl:Class', owl_ns)
-            if 'IRI' not in a.attrib:
+            if not self.has_iri(a.attrib):
                 continue
-            a = self.strip_iri(a.attrib['IRI'])
+            a = self.get_iri(a.attrib)
 
             b = el.find('./owl:NamedIndividual', owl_ns)
-            if 'IRI' not in b.attrib:
+            if not self.has_iri(b.attrib):
                 continue
-            b = self.strip_iri(b.attrib['IRI'])
-            self.add_edge(b, a)
+            b = self.get_iri(b.attrib)
+            self.add_edge(b, a, type="ClassAssertion")
+
+    def has_iri(self, attribs):
+        return any(key in {IRI, AIRI} for key in attribs)
+
+    def strip_airi(self, airi):
+        l, r = airi.split(':')
+        return r
 
     def strip_iri(self, iri):
-        return iri.lstrip(self.graph['IRI']).lstrip('#').strip()
+        return iri.lstrip(self.graph[IRI]).lstrip('#').strip()
+
+    def get_iri(self, attribs):
+        if IRI in attribs:
+            return self.strip_iri(attribs[IRI])
+        elif AIRI in attribs:
+            return self.strip_airi(attribs[AIRI])
 
     @property
     def iri(self):

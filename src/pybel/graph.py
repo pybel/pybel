@@ -126,6 +126,9 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(lines)
 
+        self.graph['document_lines'] = docs
+        self.graph['definition_lines'] = defs
+
         if isinstance(definition_cache_manager, DefinitionCacheManager):
             self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
         elif isinstance(definition_cache_manager, str):
@@ -234,6 +237,14 @@ class BELGraph(nx.MultiDiGraph):
                 yield n, d
             else:
                 yield n
+
+    @property
+    def document(self):
+        return self.graph['document_metadata']
+
+    @property
+    def definitions(self):
+        return self.graph['name_mapping']
 
 
 def to_neo4j(graph, neo_graph, context=None):
