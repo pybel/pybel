@@ -126,6 +126,9 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(lines)
 
+        self.graph['document_lines'] = docs
+        self.graph['definition_lines'] = defs
+
         if isinstance(definition_cache_manager, DefinitionCacheManager):
             self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
         elif isinstance(definition_cache_manager, str):
