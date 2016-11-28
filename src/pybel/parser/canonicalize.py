@@ -105,13 +105,20 @@ blacklist_features = ['relation', 'subject', 'object', 'citation', 'SupportingTe
 
 
 def decanonicalize_graph(g, file=sys.stdout):
-    for k, v in g.document:
-        print('SET DOCUMENT {} = ""'.format(k, v), file=file)
+    for k, v in g.document.items():
+        print('SET DOCUMENT {} = "{}"'.format(k, v), file=file)
 
-    for k, v in g.definitions:
-        print('DEFINE {} AS URL {}'.format(k, v), file=file)
+    print(file=file)
+
+    for ln, l in g.graph['definition_lines']:
+        print(l, file=file)
 
     for u, v, k, d in g.edges_iter(data=True, keys=True):
+
+        if 'citation' not in d or 'SupportingText' not in d:
+            continue
+        print(file=file)
+
         quoted_citation = ['"{}"'.format(d['citation'][x]) for x in CITATION_ENTRIES[:len(d['citation'])]]
         print('SET Citation = {{{}}}'.format(','.join(quoted_citation)), file=file)
         print('SET SupportingText = "{}"'.format(d['SupportingText']), file=file)
