@@ -235,6 +235,14 @@ class BELGraph(nx.MultiDiGraph):
             else:
                 yield n
 
+    @property
+    def document(self):
+        return self.graph['document_metadata']
+
+    @property
+    def definitions(self):
+        return self.graph['name_mapping']
+
 
 def to_neo4j(graph, neo_graph, context=None):
     """Uploads a BEL graph to Neo4J graph database using `py2neo`
