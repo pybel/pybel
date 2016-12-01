@@ -15,6 +15,8 @@ test_bel_slushy = os.path.join(dir_path, 'bel', 'slushy.bel')
 
 test_citation_bel = 'SET Citation = {"TestType","TestName","TestRef"}'
 test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')
+test_evidence_bel = 'SET Evidence = "I read it on Twitter"'
+test_evidence_text = 'I read it on Twitter'
 
 pizza_iri = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
 wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
