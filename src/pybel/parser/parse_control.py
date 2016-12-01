@@ -162,6 +162,7 @@ class ControlParser(BaseParser):
     def handle_unset(self, key):
         if key == 'Citation':
             self.citation.clear()
+            self.annotations.clear()
         elif key == 'STATEMENT_GROUP':
             self.statement_group = None
         elif key in {'SupportingText', 'Evidence'}:
