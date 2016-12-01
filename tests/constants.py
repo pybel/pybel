@@ -7,6 +7,7 @@ from pybel.parser.utils import any_subdict_matches
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 test_ns_1 = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
+test_bel_0 = os.path.join(dir_path, 'bel', 'small_corpus.bel')
 test_bel_1 = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 test_bel_2 = os.path.join(dir_path, 'bel', 'test_bel_2.bel')
 test_bel_3 = os.path.join(dir_path, 'bel', 'test_bel_3.bel')

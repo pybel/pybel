@@ -181,7 +181,13 @@ class BELGraph(nx.MultiDiGraph):
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
                 log.debug('Traceback: %s', exc_traceback)
 
-        self.graph['name_mapping'] = self.metadata_parser.name_mapping
+        self.graph['namespace_owl'] = self.metadata_parser.namespace_owl_dict
+        self.graph['namespace_url'] = self.metadata_parser.namespace_url_dict
+        self.graph['namespace_list'] = {e: self.metadata_parser.namespace_dict[e] for e in
+                                        self.metadata_parser.namespace_list_list}
+        self.graph['annotation_url'] = self.metadata_parser.annotation_url_dict
+        self.graph['annotation_list'] = {e: self.metadata_parser.annotations_dict[e] for e in
+                                         self.metadata_parser.annotation_list_list}
 
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
@@ -243,8 +249,24 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph['document_metadata']
 
     @property
-    def definitions(self):
-        return self.graph['name_mapping']
+    def namespace_url(self):
+        return self.graph['namespace_url']
+
+    @property
+    def namespace_owl(self):
+        return self.graph['namespace_owl']
+
+    @property
+    def namespace_list(self):
+        return self.graph['namespace_list']
+
+    @property
+    def annotation_url(self):
+        return self.graph['annotation_url']
+
+    @property
+    def annotation_list(self):
+        return self.graph['annotation_list']
 
 
 def to_neo4j(graph, neo_graph, context=None):

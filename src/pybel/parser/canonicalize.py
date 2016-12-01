@@ -1,4 +1,6 @@
+import itertools as itt
 import sys
+from operator import itemgetter
 
 from .parse_bel import write_bel_term
 
@@ -104,28 +106,62 @@ def decanonicalize_edge(g, u, v, k):
 blacklist_features = ['relation', 'subject', 'object', 'citation', 'SupportingText']
 
 
+def flatten_citation(citation):
+    #return "\t".join(d[k] for k in CITATION_ENTRIES)
+    return ','.join('"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)])
+
+
+def sort_edges(d):
+    return (flatten_citation(d['citation']), d['SupportingText']) + tuple(
+        itt.chain.from_iterable((k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in blacklist_features))
+
+
 def decanonicalize_graph(g, file=sys.stdout):
-    for k, v in g.document.items():
-        print('SET DOCUMENT {} = "{}"'.format(k, v), file=file)
+    for k in sorted(g.document):
+        print('SET DOCUMENT {} = "{}"'.format(k, g.document[k]), file=file)
 
-    print(file=file)
+    print('###############################################\n', file=file)
 
-    for ln, l in g.graph['definition_lines']:
-        print(l, file=file)
+    for namespace, url in sorted(g.namespace_url.items(), key=itemgetter(0)):
+        print('DEFINE NAMESPACE {} AS URL "{}"'.format(namespace, url), file=file)
 
-    for u, v, k, d in g.edges_iter(data=True, keys=True):
+    for namespace, url in sorted(g.namespace_owl.items(), key=itemgetter(0)):
+        print('DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url), file=file)
 
-        if 'citation' not in d or 'SupportingText' not in d:
-            continue
-        print(file=file)
+    for namespace, ns_list in sorted(g.namespace_list.items(), key=itemgetter(0)):
+        ns_list_str = ', '.join('"{}"'.format(e) for e in ns_list)
+        print('DEFINE NAMESPACE {} AS LIST {{{}}}'.format(namespace, ns_list_str), file=file)
 
-        quoted_citation = ['"{}"'.format(d['citation'][x]) for x in CITATION_ENTRIES[:len(d['citation'])]]
-        print('SET Citation = {{{}}}'.format(','.join(quoted_citation)), file=file)
-        print('SET SupportingText = "{}"'.format(d['SupportingText']), file=file)
+    print('###############################################\n', file=file)
 
-        for dk in sorted(d):
-            if dk in blacklist_features:
-                continue
-            print('SET {} = "{}"'.format(dk, d[dk]), file=file)
+    for annotation, url in sorted(g.annotation_url.items(), key=itemgetter(0)):
+        print('DEFINE ANNOTATION {} AS URL "{}"'.format(annotation, url), file=file)
 
-        print(decanonicalize_edge(g, u, v, k), file=file)
+    for annotation, an_list in sorted(g.annotation_list.items(), key=itemgetter(0)):
+        an_list_str = ', '.join('"{}"'.format(e) for e in an_list)
+        print('DEFINE ANNOTATION {} AS LIST {{{}}}'.format(annotation, an_list_str), file=file)
+
+    print('###############################################\n', file=file)
+
+    # sort by citation, then supporting text
+    qualified_edges = filter(lambda u_v_k_d: 'citation' in u_v_k_d[3] and 'SupportingText' in u_v_k_d[3],
+                             g.edges_iter(data=True, keys=True))
+    qualified_edges = sorted(qualified_edges, key=lambda u_v_k_d: sort_edges(u_v_k_d[3]))
+
+    for citation, citation_edges in itt.groupby(qualified_edges,
+                                                key=lambda u_v_k_d: flatten_citation(u_v_k_d[3]['citation'])):
+        #quoted_citation = ['"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)]]
+        #print('SET Citation = {{{}}}'.format(','.join(quoted_citation)), file=file)
+        print('SET Citation = {{{}}}'.format(citation), file=file)
+
+        for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3]['SupportingText']):
+            print('SET SupportingText = "{}"'.format(evidence), file=file)
+
+            for u, v, k, d in evidence_edges:
+                for dk in sorted(d):
+                    if dk in blacklist_features:
+                        continue
+                    print('SET {} = "{}"'.format(dk, d[dk]), file=file)
+                print(decanonicalize_edge(g, u, v, k), file=file)
+            print('UNSET SupportingText', file=file)
+        print('\n', file=file)
