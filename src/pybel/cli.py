@@ -25,6 +25,7 @@ from . import graph
 from .constants import PYBEL_DIR
 from .manager import OwlCacheManager
 from .manager.namespace_cache import DefinitionCacheManager, DEFAULT_CACHE_LOCATION
+from .parser.canonicalize import decanonicalize_graph
 
 log = logging.getLogger('pybel')
 log.setLevel(logging.DEBUG)
@@ -59,12 +60,13 @@ def main():
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
 @click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
 @click.option('--pickle', help='Output path for NetworkX *.gpickle')
+@click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Context for neo4j upload")
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
 @click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, database, csv, graphml, json, pickle, neo, neo_context, lenient, log_file, verbose):
+def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_context, lenient, log_file, verbose):
     """Options for multiple outputs/conversions"""
 
     ch.setLevel(log_levels.get(verbose, 5))
@@ -94,6 +96,10 @@ def convert(path, url, database, csv, graphml, json, pickle, neo, neo_context, l
     if pickle:
         log.info('Outputting pickle to %s', pickle)
         graph.to_pickle(g, pickle)
+
+    if bel:
+        log.info('Outputting BEL to %s', bel)
+        decanonicalize_graph(graph, bel)
 
     if neo:
         log.info('Uploading to neo4j with context %s', neo_context)

@@ -15,7 +15,7 @@ from .parse_exceptions import NestedRelationNotSupportedException, IllegalTransl
     MissingCitationException, IllegalFunctionSemantic
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
-from .utils import handle_debug, list2tuple, cartesian_dictionary, ensure_quotes
+from .utils import handle_debug, list2tuple, cartesian_dictionary
 
 log = logging.getLogger('pybel')
 
@@ -511,6 +511,16 @@ class BelParser(BaseParser):
         for single_annotation in cartesian_dictionary(list_attrs):
             self.graph.add_edge(sub, obj, attr_dict=attrs, **single_annotation)
             if tokens['relation'] in TWO_WAY_RELATIONS:
+                attrs_subject, attrs_object = attrs.get('subject'), attrs.get('object')
+                if 'subject' in attrs:
+                    del attrs['subject']
+                if 'object' in attrs:
+                    del attrs['object']
+                if attrs_subject:
+                    attrs['object'] = attrs_subject
+                if attrs_object:
+                    attrs['subject'] = attrs_object
+
                 self.graph.add_edge(obj, sub, attr_dict=attrs, **single_annotation)
 
         return tokens
@@ -537,14 +547,13 @@ class BelParser(BaseParser):
             return self.ensure_node(s, l, tokens['target'])
 
         name = canonicalize_node(tokens)
-        bel = write_bel_term(tokens)
 
         if name in self.graph:
             return name
 
         if 'transformation' in tokens:
             if name not in self.graph:
-                self.graph.add_node(name, type=tokens['transformation'], bel=bel)
+                self.graph.add_node(name, type=tokens['transformation'])
 
             for reactant_tokens in tokens['reactants']:
                 reactant_name = self.ensure_node(s, l, reactant_tokens)
@@ -558,7 +567,7 @@ class BelParser(BaseParser):
 
         elif 'function' in tokens and 'members' in tokens:
             if name not in self.graph:
-                self.graph.add_node(name, type=tokens['function'], bel=bel)
+                self.graph.add_node(name, type=tokens['function'])
 
             for token in tokens['members']:
                 member_name = self.ensure_node(s, l, token)
@@ -573,8 +582,7 @@ class BelParser(BaseParser):
                                     type=cls,
                                     namespace=ns,
                                     name=val,
-                                    variants=vars,
-                                    bel=bel)
+                                    variants=vars)
 
             c = {
                 'function': tokens['function'],
@@ -595,7 +603,7 @@ class BelParser(BaseParser):
                     'partner_3p': dict(namespace=f['partner_3p']['namespace'], name=f['partner_3p']['name']),
                     'range_3p': tuple(f['range_3p'])
                 }
-                self.graph.add_node(name, type=cls, bel=bel, **d)
+                self.graph.add_node(name, type=cls, **d)
             return name
 
         elif 'function' in tokens and 'identifier' in tokens:
@@ -604,8 +612,7 @@ class BelParser(BaseParser):
                     self.graph.add_node(name,
                                         type=tokens['function'],
                                         namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'],
-                                        bel=bel)
+                                        name=tokens['identifier']['name'])
                 return name
 
             elif tokens['function'] == 'RNA':
@@ -613,8 +620,7 @@ class BelParser(BaseParser):
                     self.graph.add_node(name,
                                         type=tokens['function'],
                                         namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'],
-                                        bel=bel)
+                                        name=tokens['identifier']['name'])
 
                 gene_tokens = deepcopy(tokens)
                 gene_tokens['function'] = 'Gene'
@@ -628,8 +634,7 @@ class BelParser(BaseParser):
                     self.graph.add_node(name,
                                         type=tokens['function'],
                                         namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'],
-                                        bel=bel)
+                                        name=tokens['identifier']['name'])
 
                 rna_tokens = deepcopy(tokens)
                 rna_tokens['function'] = 'RNA'
@@ -672,7 +677,6 @@ def canonicalize_node(tokens):
     if 'modifier' in tokens and tokens['modifier'] in (
             'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
         return canonicalize_node(tokens['target'])
-
 
 def canonicalize_modifier(tokens):
     """Get activity, transformation, or transformation information as a dictionary
@@ -723,62 +727,3 @@ def canonicalize_modifier(tokens):
         }
 
     return attrs
-
-
-def write_variant(tokens):
-    if isinstance(tokens, dict):
-        if {'identifier', 'code', 'pos'} <= set(tokens):
-            return 'pmod({}, {}, {})'.format(tokens['identifier'], tokens['code'], tokens['pos'])
-        elif {'identifier', 'code'} <= set(tokens):
-            return 'pmod({}, {})'.format(tokens['identifier'], tokens['code'])
-        elif 'identifier' in tokens:
-            return 'pmod({})'.format(tokens['identifier'])
-        else:
-            raise NotImplementedError('prob with {}'.format(tokens))
-
-    elif tokens[0] == 'Variant':
-        return 'var({})'.format(''.join(str(token) for token in tokens[1:]))
-    elif tokens[0] == 'ProteinModification':
-        return 'pmod({})'.format(tokens[1])
-    elif tokens[0] == 'Fragment':
-        r = '?' if 'missing' in tokens else '{}_{}'.format(tokens['start'], tokens['stop'])
-        return 'frag({}, {})'.format(r, tokens['description']) if 'description' in tokens else 'frag({})'.format(r)
-    else:
-        raise NotImplementedError('prob with :{}'.format(tokens))
-
-
-def write_bel_term(tokens):
-    if 'function' in tokens and 'variants' in tokens:
-        variants = ', '.join(write_variant(var) for var in tokens['variants'])
-        return "{}({}:{}, {})".format(language.rev_abundance_labels[tokens['function']],
-                                      tokens['identifier']['namespace'],
-                                      ensure_quotes(tokens['identifier']['name']),
-                                      variants)
-
-    elif 'function' in tokens and 'members' in tokens:
-        return '{}({})'.format(language.rev_abundance_labels[tokens['function']],
-                               ', '.join(sorted(write_bel_term(member) for member in tokens['members'])))
-
-    elif 'transformation' in tokens and 'Reaction' == tokens['transformation']:
-        reactants = sorted(write_bel_term(reactant) for reactant in tokens['reactants'])
-        products = sorted(write_bel_term(product) for product in tokens['products'])
-        return 'rxn(reactants({}), products({}))'.format(", ".join(reactants), ", ".join(products))
-
-    elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'Protein') and 'fusion' in tokens:
-        f = tokens['fusion']
-        return '{}(fus({}:{}, r.{}, {}:{}, r.{}))'.format(
-            language.rev_abundance_labels[tokens['function']],
-            f['partner_5p']['namespace'],
-            f['partner_5p']['name'],
-            f['range_5p'],
-            f['partner_3p']['namespace'],
-            f['partner_3p']['name'],
-            tokens['fusion']['range_3p']
-        )
-
-    elif 'function' in tokens and tokens['function'] in (
-            'Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
-        if 'identifier' in tokens:
-            return '{}({}:{})'.format(language.rev_abundance_labels[tokens['function']],
-                                      tokens['identifier']['namespace'],
-                                      ensure_quotes(tokens['identifier']['name']))

@@ -1,8 +1,13 @@
+from __future__ import print_function
+
 import itertools as itt
 import sys
 from operator import itemgetter
 
-from .parse_bel import write_bel_term
+from pybel.parser import language
+from .language import rev_activity_labels
+from .utils import ensure_quotes
+from ..constants import GOCC_LATEST
 
 # TODO extract from .parse_control
 CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
@@ -12,16 +17,6 @@ def write_bel_statement(tokens):
     return "{} {} {}".format(write_bel_term(tokens['subject']),
                              tokens['relation'],
                              write_bel_term(tokens['object']))
-
-
-def decanonicalize_node(g, v):
-    """Returns a node from a graph as a BEL string
-
-    :param g:
-    :param v:
-    :return:
-    """
-    return g.node[v]['bel']
 
 
 def postpend_location(s, location_model):
@@ -36,53 +31,55 @@ def postpend_location(s, location_model):
     """
 
     if all(k in location_model for k in {'namespace', 'name'}):
-        return "loc({}:{})".format(location_model['namespace'], location_model['name'])
+        return "loc({}:{})".format(location_model['namespace'], ensure_quotes(location_model['name']))
     raise ValueError('Confused! {}'.format(location_model))
 
 
-def decanonicalize_edge_node(g, u, ed, p='subject'):
-    u_str = decanonicalize_node(g, u)
+def decanonicalize_edge_node(g, node, edge_data, node_position):
+    node_str = decanonicalize_node(g, node)
 
-    if p not in ed:
-        return u_str
+    if node_position not in edge_data:
+        return node_str
 
-    part = ed[p]
+    node_edge_data = edge_data[node_position]
 
-    if 'location' in part:
-        u_str = postpend_location(u_str, part['location'])
+    if 'location' in node_edge_data:
+        node_str = postpend_location(node_str, node_edge_data['location'])
 
-    if 'modifier' in part and 'Degredation' == part['modifier']:
-        u_str = "deg({})".format(u_str)
-    elif 'modifier' in part and 'Activity' == part['modifier']:
-        u_str = "act({}".format(u_str)
+    if 'modifier' in node_edge_data and 'Degredation' == node_edge_data['modifier']:
+        node_str = "deg({})".format(node_str)
+    elif 'modifier' in node_edge_data and 'Activity' == node_edge_data['modifier']:
+        node_str = "act({}".format(node_str)
         # switch missing, default, and dict
-        if 'effect' in part and 'MolecularActivity' in part['effect']:
-            ma = part['effect']['MolecularActivity']
+        if 'effect' in node_edge_data and 'MolecularActivity' in node_edge_data['effect']:
+            ma = node_edge_data['effect']['MolecularActivity']
 
             if isinstance(ma, str):
-                u_str = "{}, ma({}))".format(u_str, ma)
+                node_str = "{}, ma({}))".format(node_str, rev_activity_labels[ma])
             elif isinstance(ma, dict):
-                u_str = "{}, ma({}:{}))".format(u_str, ma['namespace'], ma['name'])
+                node_str = "{}, ma({}:{}))".format(node_str, ma['namespace'], ensure_quotes(ma['name']))
         else:
-            u_str = "{})".format(u_str)
+            node_str = "{})".format(node_str)
 
-    elif 'modifier' in part and 'Translocation' == part['modifier']:
+    elif 'modifier' in node_edge_data and 'Translocation' == node_edge_data['modifier']:
         fromLoc = "fromLoc("
         toLoc = "toLoc("
 
-        if isinstance(part['effect']['fromLoc'], dict):
-            fromLoc += "{}:{})".format(part['effect']['fromLoc']['namespace'], part['effect']['fromLoc']['name'])
+        if isinstance(node_edge_data['effect']['fromLoc'], dict):
+            fromLoc += "{}:{})".format(node_edge_data['effect']['fromLoc']['namespace'],
+                                       ensure_quotes(node_edge_data['effect']['fromLoc']['name']))
         else:
             raise ValueError()
 
-        if isinstance(part['effect']['toLoc'], dict):
-            toLoc += "{}:{})".format(part['effect']['toLoc']['namespace'], part['effect']['toLoc']['name'])
+        if isinstance(node_edge_data['effect']['toLoc'], dict):
+            toLoc += "{}:{})".format(node_edge_data['effect']['toLoc']['namespace'],
+                                     ensure_quotes(node_edge_data['effect']['toLoc']['name']))
         else:
             raise ValueError()
 
-        u_str = "tloc({}, {}, {})".format(u_str, fromLoc, toLoc)
+        node_str = "tloc({}, {}, {})".format(node_str, fromLoc, toLoc)
 
-    return u_str
+    return node_str
 
 
 def decanonicalize_edge(g, u, v, k):
@@ -97,8 +94,8 @@ def decanonicalize_edge(g, u, v, k):
 
     ed = g.edge[u][v][k]
 
-    u_str = decanonicalize_edge_node(g, u, ed, p='subject')
-    v_str = decanonicalize_edge_node(g, v, ed, p='object')
+    u_str = decanonicalize_edge_node(g, u, ed, node_position='subject')
+    v_str = decanonicalize_edge_node(g, v, ed, node_position='object')
 
     return "{} {} {}".format(u_str, ed['relation'], v_str)
 
@@ -107,7 +104,6 @@ blacklist_features = ['relation', 'subject', 'object', 'citation', 'SupportingTe
 
 
 def flatten_citation(citation):
-    #return "\t".join(d[k] for k in CITATION_ENTRIES)
     return ','.join('"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)])
 
 
@@ -121,6 +117,9 @@ def decanonicalize_graph(g, file=sys.stdout):
         print('SET DOCUMENT {} = "{}"'.format(k, g.document[k]), file=file)
 
     print('###############################################\n', file=file)
+
+    if 'GOCC' not in g.namespace_url:
+        g.namespace_url['GOCC'] = GOCC_LATEST
 
     for namespace, url in sorted(g.namespace_url.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS URL "{}"'.format(namespace, url), file=file)
@@ -150,8 +149,6 @@ def decanonicalize_graph(g, file=sys.stdout):
 
     for citation, citation_edges in itt.groupby(qualified_edges,
                                                 key=lambda u_v_k_d: flatten_citation(u_v_k_d[3]['citation'])):
-        #quoted_citation = ['"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)]]
-        #print('SET Citation = {{{}}}'.format(','.join(quoted_citation)), file=file)
         print('SET Citation = {{{}}}'.format(citation), file=file)
 
         for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3]['SupportingText']):
@@ -165,3 +162,103 @@ def decanonicalize_graph(g, file=sys.stdout):
                 print(decanonicalize_edge(g, u, v, k), file=file)
             print('UNSET SupportingText', file=file)
         print('\n', file=file)
+
+
+def write_variant(tokens):
+    if isinstance(tokens, dict):
+        if {'identifier', 'code', 'pos'} <= set(tokens):
+            return 'pmod({}, {}, {})'.format(tokens['identifier'], tokens['code'], tokens['pos'])
+        elif {'identifier', 'code'} <= set(tokens):
+            return 'pmod({}, {})'.format(tokens['identifier'], tokens['code'])
+        elif 'identifier' in tokens:
+            return 'pmod({})'.format(tokens['identifier'])
+        else:
+            raise NotImplementedError('prob with {}'.format(tokens))
+
+    elif tokens[0] == 'Variant':
+        return 'var({})'.format(''.join(str(token) for token in tokens[1:]))
+    elif tokens[0] == 'ProteinModification':
+        return 'pmod({})'.format(','.join(tokens[1:]))
+    elif tokens[0] == 'Fragment':
+        r = '?' if 'missing' in tokens else '{}_{}'.format(tokens['start'], tokens['stop'])
+        return 'frag({}, {})'.format(r, tokens['description']) if 'description' in tokens else 'frag({})'.format(r)
+    else:
+        raise NotImplementedError('prob with :{}'.format(tokens))
+
+
+def write_bel_term(tokens):
+    if 'function' in tokens and 'variants' in tokens:
+        variants = ', '.join(write_variant(var) for var in tokens['variants'])
+        return "{}({}:{}, {})".format(language.rev_abundance_labels[tokens['function']],
+                                      tokens['identifier']['namespace'],
+                                      ensure_quotes(tokens['identifier']['name']),
+                                      variants)
+
+    elif 'function' in tokens and 'members' in tokens:
+        return '{}({})'.format(language.rev_abundance_labels[tokens['function']],
+                               ', '.join(sorted(write_bel_term(member) for member in tokens['members'])))
+
+    elif 'transformation' in tokens and 'Reaction' == tokens['transformation']:
+        reactants = sorted(write_bel_term(reactant) for reactant in tokens['reactants'])
+        products = sorted(write_bel_term(product) for product in tokens['products'])
+        return 'rxn(reactants({}), products({}))'.format(", ".join(reactants), ", ".join(products))
+
+    elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'Protein') and 'fusion' in tokens:
+        f = tokens['fusion']
+        return '{}(fus({}:{}, r.{}, {}:{}, r.{}))'.format(
+            language.rev_abundance_labels[tokens['function']],
+            f['partner_5p']['namespace'],
+            f['partner_5p']['name'],
+            f['range_5p'],
+            f['partner_3p']['namespace'],
+            f['partner_3p']['name'],
+            tokens['fusion']['range_3p']
+        )
+
+    elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
+        if 'identifier' in tokens:
+            return '{}({}:{})'.format(language.rev_abundance_labels[tokens['function']],
+                                      tokens['identifier']['namespace'],
+                                      ensure_quotes(tokens['identifier']['name']))
+
+
+def get_neighbors_by_path_type(g, v, relation):
+    result = []
+    for neighbor in g.edge[v]:
+        for data in g.edge[v][neighbor].values():
+            if data['relation'] == relation:
+                result.append(neighbor)
+    return set(result)
+
+def decanonicalize_variant(tokens):
+    if tokens[0] == 'ProteinModification':
+        return 'pmod({})'.format(', '.join(tokens[1:]))
+    elif tokens[0] == 'Variant':
+        return 'var({})'.format(''.join(tokens[1:]))
+    elif tokens[0] == 'Fragment':
+        r = '?' if 'missing' in tokens else '{}_{}'.format(tokens['start'], tokens['stop'])
+        return 'frag({}, {})'.format(r, tokens['description']) if 'description' in tokens else 'frag({})'.format(r)
+    else:
+        raise NotImplementedError('prob with :{}'.format(tokens))
+
+def decanonicalize_node(g, v):
+    """Returns a node from a graph as a BEL string
+    """
+    tokens = g.node[v]
+    if tokens['function'] == 'Reaction':
+        reactants = get_neighbors_by_path_type(g, v, 'hasReactant')
+        reactants_canon = map(lambda n: decanonicalize_node(g, n), reactants)
+        products = get_neighbors_by_path_type(g, v, 'hasProduct')
+        products_canon = map(lambda n: decanonicalize_node(g, n), products)
+        return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
+    elif 'members' in tokens:
+        members = get_neighbors_by_path_type(g, v, 'hasComponent')
+        members_canon = map(lambda n: decanonicalize_node(g, n), members)
+        return '{}({})'.format(language.rev_abundance_labels[tokens['function']], ', '.join(members_canon))
+
+    if 'function' in tokens and 'variants' in tokens:
+        variants = ', '.join(map(decanonicalize_variant, tokens['variants']))
+        return "{}({}:{}, {})".format(language.rev_abundance_labels[tokens['function']],
+                                      tokens['identifier']['namespace'],
+                                      ensure_quotes(tokens['identifier']['name']),
+                                      variants)

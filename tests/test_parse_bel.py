@@ -1,7 +1,7 @@
 import logging
 
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
-from pybel.parser.parse_bel import write_bel_term
+from pybel.parser.canonicalize import write_bel_term
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
 from tests.constants import TestTokenParserBase, test_citation_dict
 
@@ -1266,6 +1266,32 @@ class TestActivity(TestTokenParserBase):
             'modifier': 'Activity',
             'effect': {
                 'MolecularActivity': 'KinaseActivity'
+            }
+        }
+        self.assertEqual(expected_mod, mod)
+
+    def test_activity_withMolecularActivityDefaultLong(self):
+        """Tests activity modifier with molecular activity from custom namespaced"""
+        statement = 'act(p(HGNC:AKT1), ma(catalyticActivity))'
+        result = self.parser.activity.parseString(statement)
+
+        expected_dict = {
+            'modifier': 'Activity',
+            'effect': {
+                'MolecularActivity': 'CatalyticActivity'
+            },
+            'target': {
+                'function': 'Protein',
+                'identifier': dict(namespace='HGNC', name='AKT1')
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        mod = canonicalize_modifier(result)
+        expected_mod = {
+            'modifier': 'Activity',
+            'effect': {
+                'MolecularActivity': 'CatalyticActivity'
             }
         }
         self.assertEqual(expected_mod, mod)

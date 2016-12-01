@@ -22,20 +22,20 @@ __license__ = 'Apache 2.0 License'
 __copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
 
 
-def get_large_corpus(**kwargs):
+def get_large_corpus(force_reload=False, **kwargs):
     """Gets the example large corpus"""
     path = os.path.join(PYBEL_DIR, 'large_corpus.gpickle')
-    if os.path.exists(path):
+    if os.path.exists(path) and not force_reload:
         return from_pickle(path)
     g = from_url(LARGE_CORPUS_URL, **kwargs)
     to_pickle(g, path)
     return g
 
 
-def get_small_corpus(**kwargs):
+def get_small_corpus(force_reload=False, **kwargs):
     """Gets the example small corpus"""
     path = os.path.join(PYBEL_DIR, 'small_corpus.gpickle')
-    if os.path.exists(path):
+    if os.path.exists(path) and not force_reload:
         return from_pickle(path)
     g = from_url(SMALL_CORPUS_URL, **kwargs)
     to_pickle(g, path)

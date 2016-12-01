@@ -218,7 +218,8 @@ class BELGraph(nx.MultiDiGraph):
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
                 self.last_parse_errors += 1
 
-        log.info('Finished parsing statements section in %.02f seconds', time.time() - t)
+        log.info('Finished parsing statements section in %.02f seconds with %d warnings', time.time() - t,
+                 self.last_parse_errors)
 
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
         """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data. See :py:meth:`networkx.MultiDiGraph.edges_iter`"""

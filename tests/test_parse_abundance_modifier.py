@@ -1,7 +1,7 @@
 import unittest
 
 from pybel.parser.parse_abundance_modifier import *
-from pybel.parser.parse_bel import write_variant
+from pybel.parser.canonicalize import write_variant
 from pybel.parser.parse_pmod import PmodParser
 
 log = logging.getLogger(__name__)

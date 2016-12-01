@@ -3,6 +3,7 @@ import tempfile
 import unittest
 
 import pybel
+from pybel.constants import GOCC_LATEST
 from pybel.parser.canonicalize import decanonicalize_graph
 from tests.constants import test_bel_0, test_bel_1, test_bel_3, test_bel_4
 
@@ -12,6 +13,8 @@ class TestCanonicalize(unittest.TestCase):
         self.tdir = tempfile.mkdtemp()
 
     def doCleanups(self):
+        for f in os.listdir(self.tdir):
+            os.remove(os.path.join(self.tdir, f))
         os.rmdir(self.tdir)
 
     def canonicalize_tester_helper(self, test_path):
@@ -27,12 +30,16 @@ class TestCanonicalize(unittest.TestCase):
         os.remove(tpath)
         self.assertFalse(os.path.exists(tpath))
 
+        g_out.namespace_url['GOCC'] = GOCC_LATEST
+
         self.assertEqual(g_out.document, g_in.document)
         self.assertEqual(g_out.namespace_owl, g_out.namespace_owl)
         self.assertEqual(g_out.namespace_url, g_out.namespace_url)
         self.assertEqual(g_out.namespace_list, g_out.namespace_list)
         self.assertEqual(g_out.annotation_url, g_out.annotation_url)
         self.assertEqual(g_out.annotation_list, g_out.annotation_list)
+
+        self.assertEqual(0, g_in.last_parse_errors)
 
         # self.assertEqual(set(g_out.nodes()), set(g_in.nodes()))
         self.assertEqual(set(g_out.edges()), set(g_in.edges()))
