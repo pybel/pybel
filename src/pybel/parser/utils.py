@@ -182,7 +182,7 @@ conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?format=OW
 
 # TODO logging of download??
 # TODO insert all relevant metadata into owl.graph (networkx graph annotations)
-def parse_owl(url, functions=None, fail=False):
+def parse_owl(url, fail=False):
     """
 
     :param url:
@@ -197,14 +197,14 @@ def parse_owl(url, functions=None, fail=False):
     res = session.get(url)
 
     try:
-        owl = OWLParser(content=res.content, functions=functions)
+        owl = OWLParser(content=res.content)
         return owl
     except:
         if fail:
             raise ValueError('IRI {} not valid OWL'.format(url))
 
         new_url = conversion_service.format(url)
-        owl = parse_owl(url=new_url, functions=functions, fail=True)
+        owl = parse_owl(url=new_url, fail=True)
         return owl
 
 
