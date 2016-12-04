@@ -245,7 +245,7 @@ def decanonicalize_node(g, v):
     """Returns a node from a graph as a BEL string
     """
     tokens = g.node[v]
-    if tokens['function'] == 'Reaction':
+    if tokens['type'] == 'Reaction':
         reactants = get_neighbors_by_path_type(g, v, 'hasReactant')
         reactants_canon = map(lambda n: decanonicalize_node(g, n), reactants)
         products = get_neighbors_by_path_type(g, v, 'hasProduct')
@@ -256,7 +256,7 @@ def decanonicalize_node(g, v):
         members_canon = map(lambda n: decanonicalize_node(g, n), members)
         return '{}({})'.format(language.rev_abundance_labels[tokens['function']], ', '.join(members_canon))
 
-    if 'function' in tokens and 'variants' in tokens:
+    if 'type' in tokens and 'variants' in tokens:
         variants = ', '.join(map(decanonicalize_variant, tokens['variants']))
         return "{}({}:{}, {})".format(language.rev_abundance_labels[tokens['function']],
                                       tokens['identifier']['namespace'],
