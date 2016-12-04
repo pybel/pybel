@@ -6,7 +6,7 @@ from pybel.manager import DefinitionCacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import IllegalFunctionSemantic
 from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
-    bel_1_reconstituted
+    bel_1_reconstituted, test_evidence_bel
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
@@ -81,6 +81,7 @@ class TestFull(TestTokenParserBase):
     def test_annotations(self):
         statements = [
             test_citation_bel,
+            test_evidence_bel,
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
@@ -106,6 +107,7 @@ class TestFull(TestTokenParserBase):
     def test_annotations_withList(self):
         statements = [
             test_citation_bel,
+            test_evidence_bel,
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
@@ -128,6 +130,7 @@ class TestFull(TestTokenParserBase):
     def test_annotations_withMultiList(self):
         statements = [
             test_citation_bel,
+            test_evidence_bel,
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'SET TestAnnotation3 = {"D","E"}',
