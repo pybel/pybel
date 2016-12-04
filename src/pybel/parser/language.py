@@ -237,17 +237,6 @@ pmod_legacy_labels = {
     'U': 'Ub',
 }
 
-relation_labels = {
-    'pmod': 'ProteinModification',
-    'proteinModification': 'ProteinModification'
-}
-
-variant_parent_dict = {
-    'GeneVariant': 'Gene',
-    'RNAVariant': 'RNA',
-    'ProteinVariant': 'Protein'
-}
-
 unqualified_edges = [
     'hasReactant',
     'hasProduct',

@@ -135,10 +135,10 @@ class MetadataParser(BaseParser):
         # TODOdo the thing
 
         log.debug('Downloading ontology %s from %s', name, url)
-        functions = tokens['functions'] if 'functions' in tokens else None
+        functions = set(tokens['functions']) if 'functions' in tokens else set(language.value_map)
 
-        owl = parse_owl(url=url, functions=functions)
-        self.namespace_dict[name] = owl.build_namespace_dict()
+        owl = parse_owl(url=url)
+        self.namespace_dict[name] = {node: set(functions) for node in owl.nodes_iter()}
 
         return tokens
 
