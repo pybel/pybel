@@ -180,7 +180,6 @@ def ensure_quotes(s):
 conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?format=OWL/XML&ontology={}"
 
 
-# TODO directly parse with OWLReady
 # TODO logging of download??
 # TODO insert all relevant metadata into owl.graph (networkx graph annotations)
 def parse_owl(url, functions=None, fail=False):
@@ -218,7 +217,6 @@ IRI = 'IRI'
 AIRI = 'abbreviatedIRI'
 
 
-# TODO consider synonyms. Only one can make it through. Find equivalence classes?
 class OWLParser(nx.DiGraph):
     def __init__(self, content=None, file=None, functions=None, *attrs, **kwargs):
         """Builds a model of an OWL ontology in OWL/XML document using a NetworkX graph
@@ -296,7 +294,3 @@ class OWLParser(nx.DiGraph):
     @property
     def iri(self):
         return self.graph['IRI']
-
-    # TODO factor this out of parsing. Shouldn't be part of parser logic
-    def build_namespace_dict(self):
-        return {node: set(self.functions) for node in self.nodes_iter()}
