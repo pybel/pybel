@@ -11,6 +11,13 @@ complex disease networks with several thousands of relationships.
 Design Choices
 --------------
 
+Do All Statements Need Supporting Text?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Yes! All statements must be minimally qualified with a citation and evidence (now called SupportingText in BEL 2.0) to
+maintain provenance. Statements without evidence can't be traced to their source or evaluated independently from the
+curator, so they will be excluded from the analysis.
+
 Missing Namespaces and Improper Names
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The use of controlled vocabularies (namespaces) within BEL facilitates the exchange and consistiency of information.

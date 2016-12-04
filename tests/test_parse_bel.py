@@ -3,7 +3,7 @@ import logging
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.canonicalize import write_bel_term
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
-from tests.constants import TestTokenParserBase, test_citation_dict
+from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel
 
 log = logging.getLogger(__name__)
 
@@ -1589,7 +1589,8 @@ class TestTransformation(TestTokenParserBase):
 class TestRelations(TestTokenParserBase):
     def setUp(self):
         TestTokenParserBase.setUp(self)
-        self.parser.control_parser.citation.update(test_citation_dict)
+        self.parser.parseString(test_citation_bel)
+        self.parser.parseString(test_evidence_bel)
 
     def test_language(self):
         self.assertIsNotNone(self.parser.get_language())

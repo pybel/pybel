@@ -32,8 +32,6 @@ class TestOwlUtils(unittest.TestCase):
             parse_owl('http://example.com/not_owl')
 
 
-# TODO parametrize tests
-
 class TestParsePizza(TestOwlBase):
     expected_prefixes = {
         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
