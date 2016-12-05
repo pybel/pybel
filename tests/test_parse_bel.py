@@ -1,7 +1,7 @@
 import logging
 
+from pybel.parser.canonicalize import decanonicalize_node
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
-from pybel.parser.canonicalize import write_bel_term
 from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
 from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel
 
@@ -31,6 +31,7 @@ class TestAbundance(TestTokenParserBase):
         node = canonicalize_node(result)
         expected_node = cls, ns, val = 'Abundance', 'CHEBI', 'oxygen atom'
         self.assertEqual(expected_node, node)
+        self.assertEqual(decanonicalize_node(self.parser.graph, expected_node), 'a(CHEBI:"oxygen atom")')
 
         expected_modifier = {}
         self.assertEqual(expected_modifier, canonicalize_modifier(result))
@@ -54,6 +55,7 @@ class TestAbundance(TestTokenParserBase):
         node = canonicalize_node(result)
         expected_node = cls, ns, val = 'Abundance', 'CHEBI', 'oxygen atom'
         self.assertEqual(expected_node, node)
+        self.assertEqual(decanonicalize_node(self.parser.graph, expected_node), 'a(CHEBI:"oxygen atom")')
 
         modifier = canonicalize_modifier(result)
         expected_modifier = {
@@ -90,6 +92,7 @@ class TestGene(TestTokenParserBase):
         node = canonicalize_node(result)
         expected_node = cls, ns, val = 'Gene', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
+        self.assertEqual(decanonicalize_node(self.parser.graph, expected_node), 'g(HGNC:AKT1)')
 
         self.assertEqual(1, len(self.parser.graph))
         self.assertHasNode(node, type=cls, namespace=ns, name=val)
@@ -116,6 +119,7 @@ class TestGene(TestTokenParserBase):
         node = canonicalize_node(result)
         expected_node = cls, ns, val = 'Gene', 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
+        self.assertEqual(decanonicalize_node(self.parser.graph, expected_node), 'g(HGNC:AKT1)')
 
         self.assertHasNode(node, type=cls, namespace=ns, name=val)
 
@@ -139,6 +143,7 @@ class TestGene(TestTokenParserBase):
 
         name = 'GeneVariant', 'HGNC', 'AKT1', ('Variant', 'p.', 'Phe', 508, 'del')
         self.assertEqual(name, canonicalize_node(result))
+        self.assertEqual(decanonicalize_node(self.parser.graph, name), 'g(HGNC:AKT1, var(p.Phe508del))')
         self.assertHasNode(name, type='GeneVariant', namespace='HGNC',
                            name='AKT1', variants=(('Variant', 'p.', 'Phe', 508, 'del'),))
 
@@ -165,6 +170,7 @@ class TestGene(TestTokenParserBase):
 
         name = canonicalize_node(result)
         self.assertHasNode(name, type='GeneVariant')
+        self.assertEqual(decanonicalize_node(self.parser.graph, name), 'g(HGNC:AKT1, var(g.308G>A))')
 
         parent = 'Gene', 'HGNC', 'AKT1'
         self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
@@ -194,6 +200,7 @@ class TestGene(TestTokenParserBase):
 
         name = canonicalize_node(result)
         self.assertHasNode(name, type='GeneVariant', namespace='HGNC', name='AKT1')
+        self.assertEqual(decanonicalize_node(self.parser.graph, name), 'g(HGNC:AKT1, var(g.308G>A))')
 
         parent = 'Gene', 'HGNC', 'AKT1'
         self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
@@ -221,6 +228,8 @@ class TestGene(TestTokenParserBase):
 
         name = canonicalize_node(result)
         self.assertHasNode(name, type='GeneVariant')
+        self.assertEqual(decanonicalize_node(self.parser.graph, name),
+                         'g(HGNC:AKT1, var(delCTT), var(g.308G>A), var(p.Phe508del))')
 
         parent = 'Gene', 'HGNC', 'AKT1'
         self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
@@ -2207,7 +2216,7 @@ class TestWrite(TestTokenParserBase):
             ('abundance(CHEBI:"superoxide")', 'a(CHEBI:superoxide)'),
             ('g(HGNC:AKT1,var(p.Phe508del))', 'g(HGNC:AKT1, var(p.Phe508del))'),
             ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(delCTT))',
-             'g(HGNC:AKT1, var(p.Phe508del), var(g.308G>A), var(delCTT))'),
+             'g(HGNC:AKT1, var(delCTT), var(g.308G>A), var(p.Phe508del))'),
             ('p(HGNC:MAPT,proteinModification(P))', 'p(HGNC:MAPT, pmod(Ph))'),
             ('proteinAbundance(HGNC:SFN)', 'p(HGNC:SFN)'),
             ('complex(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'complex(p(HGNC:SFN), p(HGNC:YWHAB))'),
@@ -2220,4 +2229,5 @@ class TestWrite(TestTokenParserBase):
 
         for source_bel, expected_bel in cases:
             result = self.parser.parseString(source_bel)
-            self.assertEqual(expected_bel, write_bel_term(result))
+            bel = decanonicalize_node(self.parser.graph, canonicalize_node(result))
+            self.assertEqual(expected_bel, bel)

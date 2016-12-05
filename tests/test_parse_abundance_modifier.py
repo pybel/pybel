@@ -1,7 +1,6 @@
 import unittest
 
 from pybel.parser.parse_abundance_modifier import *
-from pybel.parser.canonicalize import write_variant
 from pybel.parser.parse_pmod import PmodParser
 
 log = logging.getLogger(__name__)
@@ -75,7 +74,6 @@ class TestPmod(unittest.TestCase):
         self.assertEqual(expected, result.asList())
 
         expected_bel = 'pmod(Ph, Ser, 473)'
-        self.assertEqual(expected_bel, write_variant(result.asDict()))
 
     def test_pmod2(self):
         statement = 'pmod(Ph, Ser)'

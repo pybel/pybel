@@ -39,9 +39,7 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual(g_out.annotation_url, g_out.annotation_url)
         self.assertEqual(g_out.annotation_list, g_out.annotation_list)
 
-        self.assertEqual(0, g_in.last_parse_errors)
-
-        # self.assertEqual(set(g_out.nodes()), set(g_in.nodes()))
+        self.assertEqual(set(g_out.nodes()), set(g_in.nodes()))
         self.assertEqual(set(g_out.edges()), set(g_in.edges()))
 
     def test_canonicalize_0(self):

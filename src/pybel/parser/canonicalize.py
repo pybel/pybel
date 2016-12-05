@@ -12,11 +12,19 @@ from ..constants import GOCC_LATEST
 # TODO extract from .parse_control
 CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
 
+variant_parent_dict = {
+    'GeneVariant': 'g',
+    'RNAVariant': 'r',
+    'ProteinVariant': 'p'
+}
 
-def write_bel_statement(tokens):
-    return "{} {} {}".format(write_bel_term(tokens['subject']),
-                             tokens['relation'],
-                             write_bel_term(tokens['object']))
+def get_neighbors_by_path_type(g, v, relation):
+    result = []
+    for neighbor in g.edge[v]:
+        for data in g.edge[v][neighbor].values():
+            if data['relation'] == relation:
+                result.append(neighbor)
+    return set(result)
 
 
 def postpend_location(s, location_model):
@@ -33,6 +41,50 @@ def postpend_location(s, location_model):
     if all(k in location_model for k in {'namespace', 'name'}):
         return "loc({}:{})".format(location_model['namespace'], ensure_quotes(location_model['name']))
     raise ValueError('Confused! {}'.format(location_model))
+
+
+def decanonicalize_variant(tokens):
+    if tokens[0] == 'ProteinModification':
+        return 'pmod({})'.format(', '.join(map(str, tokens[1:])))
+    elif tokens[0] == 'Variant':
+        return 'var({})'.format(''.join(map(str, tokens[1:])))
+    elif tokens[0] == 'Fragment':
+        r = '?' if 'missing' in tokens else '{}_{}'.format(tokens['start'], tokens['stop'])
+        return 'frag({}, {})'.format(r, tokens['description']) if 'description' in tokens else 'frag({})'.format(r)
+    else:
+        raise NotImplementedError('prob with :{}'.format(tokens))
+
+
+def decanonicalize_node(g, v):
+    """Returns a node from a graph as a BEL string
+    """
+    tokens = g.node[v]
+
+    if tokens['type'] == 'Reaction':
+        reactants = get_neighbors_by_path_type(g, v, 'hasReactant')
+        reactants_canon = map(lambda n: decanonicalize_node(g, n), sorted(reactants))
+        products = get_neighbors_by_path_type(g, v, 'hasProduct')
+        products_canon = map(lambda n: decanonicalize_node(g, n), sorted(products))
+        return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
+
+    if tokens['type'] in ('Composite', 'Complex') and 'namespace' not in tokens:
+        members = get_neighbors_by_path_type(g, v, 'hasComponent')
+        members_canon = map(lambda n: decanonicalize_node(g, n), members)
+        return '{}({})'.format(language.rev_abundance_labels[tokens['type']], ', '.join(members_canon))
+
+    if 'type' in tokens and 'variants' in tokens:
+        variants = ', '.join(map(decanonicalize_variant, sorted(tokens['variants'])))
+        return "{}({}:{}, {})".format(variant_parent_dict[tokens['type']],
+                                      tokens['namespace'],
+                                      ensure_quotes(tokens['name']),
+                                      variants)
+
+    if tokens['type'] in ('Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
+        return "{}({}:{})".format(language.rev_abundance_labels[tokens['type']], tokens['namespace'],
+                                  ensure_quotes(tokens['name']))
+
+    raise NotImplementedError('unknown node data: {} {}'.format(v, tokens))
+
 
 
 def decanonicalize_edge_node(g, node, edge_data, node_position):
@@ -163,102 +215,3 @@ def decanonicalize_graph(g, file=sys.stdout):
             print('UNSET SupportingText', file=file)
         print('\n', file=file)
 
-
-def write_variant(tokens):
-    if isinstance(tokens, dict):
-        if {'identifier', 'code', 'pos'} <= set(tokens):
-            return 'pmod({}, {}, {})'.format(tokens['identifier'], tokens['code'], tokens['pos'])
-        elif {'identifier', 'code'} <= set(tokens):
-            return 'pmod({}, {})'.format(tokens['identifier'], tokens['code'])
-        elif 'identifier' in tokens:
-            return 'pmod({})'.format(tokens['identifier'])
-        else:
-            raise NotImplementedError('prob with {}'.format(tokens))
-
-    elif tokens[0] == 'Variant':
-        return 'var({})'.format(''.join(str(token) for token in tokens[1:]))
-    elif tokens[0] == 'ProteinModification':
-        return 'pmod({})'.format(','.join(tokens[1:]))
-    elif tokens[0] == 'Fragment':
-        r = '?' if 'missing' in tokens else '{}_{}'.format(tokens['start'], tokens['stop'])
-        return 'frag({}, {})'.format(r, tokens['description']) if 'description' in tokens else 'frag({})'.format(r)
-    else:
-        raise NotImplementedError('prob with :{}'.format(tokens))
-
-
-def write_bel_term(tokens):
-    if 'function' in tokens and 'variants' in tokens:
-        variants = ', '.join(write_variant(var) for var in tokens['variants'])
-        return "{}({}:{}, {})".format(language.rev_abundance_labels[tokens['function']],
-                                      tokens['identifier']['namespace'],
-                                      ensure_quotes(tokens['identifier']['name']),
-                                      variants)
-
-    elif 'function' in tokens and 'members' in tokens:
-        return '{}({})'.format(language.rev_abundance_labels[tokens['function']],
-                               ', '.join(sorted(write_bel_term(member) for member in tokens['members'])))
-
-    elif 'transformation' in tokens and 'Reaction' == tokens['transformation']:
-        reactants = sorted(write_bel_term(reactant) for reactant in tokens['reactants'])
-        products = sorted(write_bel_term(product) for product in tokens['products'])
-        return 'rxn(reactants({}), products({}))'.format(", ".join(reactants), ", ".join(products))
-
-    elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'Protein') and 'fusion' in tokens:
-        f = tokens['fusion']
-        return '{}(fus({}:{}, r.{}, {}:{}, r.{}))'.format(
-            language.rev_abundance_labels[tokens['function']],
-            f['partner_5p']['namespace'],
-            f['partner_5p']['name'],
-            f['range_5p'],
-            f['partner_3p']['namespace'],
-            f['partner_3p']['name'],
-            tokens['fusion']['range_3p']
-        )
-
-    elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
-        if 'identifier' in tokens:
-            return '{}({}:{})'.format(language.rev_abundance_labels[tokens['function']],
-                                      tokens['identifier']['namespace'],
-                                      ensure_quotes(tokens['identifier']['name']))
-
-
-def get_neighbors_by_path_type(g, v, relation):
-    result = []
-    for neighbor in g.edge[v]:
-        for data in g.edge[v][neighbor].values():
-            if data['relation'] == relation:
-                result.append(neighbor)
-    return set(result)
-
-def decanonicalize_variant(tokens):
-    if tokens[0] == 'ProteinModification':
-        return 'pmod({})'.format(', '.join(tokens[1:]))
-    elif tokens[0] == 'Variant':
-        return 'var({})'.format(''.join(tokens[1:]))
-    elif tokens[0] == 'Fragment':
-        r = '?' if 'missing' in tokens else '{}_{}'.format(tokens['start'], tokens['stop'])
-        return 'frag({}, {})'.format(r, tokens['description']) if 'description' in tokens else 'frag({})'.format(r)
-    else:
-        raise NotImplementedError('prob with :{}'.format(tokens))
-
-def decanonicalize_node(g, v):
-    """Returns a node from a graph as a BEL string
-    """
-    tokens = g.node[v]
-    if tokens['type'] == 'Reaction':
-        reactants = get_neighbors_by_path_type(g, v, 'hasReactant')
-        reactants_canon = map(lambda n: decanonicalize_node(g, n), reactants)
-        products = get_neighbors_by_path_type(g, v, 'hasProduct')
-        products_canon = map(lambda n: decanonicalize_node(g, n), products)
-        return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
-    elif 'members' in tokens:
-        members = get_neighbors_by_path_type(g, v, 'hasComponent')
-        members_canon = map(lambda n: decanonicalize_node(g, n), members)
-        return '{}({})'.format(language.rev_abundance_labels[tokens['function']], ', '.join(members_canon))
-
-    if 'type' in tokens and 'variants' in tokens:
-        variants = ', '.join(map(decanonicalize_variant, tokens['variants']))
-        return "{}({}:{}, {})".format(language.rev_abundance_labels[tokens['function']],
-                                      tokens['identifier']['namespace'],
-                                      ensure_quotes(tokens['identifier']['name']),
-                                      variants)
