@@ -107,7 +107,7 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
         graph.to_neo4j(g, neo_graph, neo_context)
 
-    sys.exit(0 if g.last_parse_errors == 0 else 1)
+    sys.exit(0 if 0 == sum(g.last_parse_errors.values()) else 1)
 
 
 @main.group(help="PyBEL Data Manager Utilities")

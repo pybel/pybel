@@ -19,6 +19,8 @@ from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import flatten, flatten_graph_data, expand_dict
 
+from collections import defaultdict
+
 __all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle',
            'from_graphml', 'to_graphml', 'to_json', 'to_neo4j', 'to_pickle', 'from_json']
 
@@ -98,7 +100,7 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.last_parse_errors = 0
+        self.last_parse_errors = defaultdict(int)
 
         if lines is not None:
             self.parse_lines(lines, context, lenient, definition_cache_manager, log_stream)
@@ -199,7 +201,7 @@ class BELGraph(nx.MultiDiGraph):
 
         t = time.time()
 
-        self.last_parse_errors = 0
+        self.last_parse_errors = defaultdict(int)
 
         for line_number, line in statements:
             try:
@@ -209,17 +211,17 @@ class BELGraph(nx.MultiDiGraph):
                 raise e
             except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
-                self.last_parse_errors += 1
+                self.last_parse_errors['parse_exception'] += 1
             except PyBelWarning as e:
                 log.warning('Line %07d - %s: %s', line_number, e, line)
-                self.last_parse_errors += 1
+                self.last_parse_errors[e.code] += 1
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
-                self.last_parse_errors += 1
+                self.last_parse_errors['general'] += 1
 
-        log.info('Finished parsing statements section in %.02f seconds with %d warnings', time.time() - t,
-                 self.last_parse_errors)
+        log.info('Finished parsing statements section in %.02f seconds with %s warnings', time.time() - t,
+                 dict(self.last_parse_errors))
 
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
         """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data. See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
@@ -341,6 +343,7 @@ def to_json(graph, output):
     :type graph: BELGraph
     :param output: a write-supporting filelike object
     """
+    # FIXME
     data = json_graph.node_link_data(graph)
     json.dump(data, output, ensure_ascii=False)
 
