@@ -18,6 +18,7 @@ variant_parent_dict = {
     'ProteinVariant': 'p'
 }
 
+
 def get_neighbors_by_path_type(g, v, relation):
     result = []
     for neighbor in g.edge[v]:
@@ -84,7 +85,6 @@ def decanonicalize_node(g, v):
                                   ensure_quotes(tokens['name']))
 
     raise NotImplementedError('unknown node data: {} {}'.format(v, tokens))
-
 
 
 def decanonicalize_edge_node(g, node, edge_data, node_position):
@@ -207,11 +207,25 @@ def decanonicalize_graph(g, file=sys.stdout):
             print('SET SupportingText = "{}"'.format(evidence), file=file)
 
             for u, v, k, d in evidence_edges:
-                for dk in sorted(d):
-                    if dk in blacklist_features:
-                        continue
+                dkeys = sorted(dk for dk in d if dk not in blacklist_features)
+                for dk in dkeys:
                     print('SET {} = "{}"'.format(dk, d[dk]), file=file)
                 print(decanonicalize_edge(g, u, v, k), file=file)
+                if dkeys:
+                    print('UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys)), file=file)
             print('UNSET SupportingText', file=file)
         print('\n', file=file)
 
+    # output missing edges about reactions, composite, and complexes that aren't in an edge
+    # 1. calculate which reactions, composites, and complexes don't appear in nodes
+    # ??? how to match up to a citation? Give a default pybel citation.
+
+    print('###############################################\n', file=file)
+
+    print('SET Citation = {"PyBEL","",""}', file=file)
+
+    for u in g.nodes_iter():
+        if any(d['relation'] not in language.unqualified_edges for v in g.adj[u] for d in g.edge[u][v].values()):
+            continue
+
+        print(decanonicalize_node(g, u), file=file)
