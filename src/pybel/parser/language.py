@@ -246,7 +246,7 @@ pmod_legacy_labels = {
     'H': 'Hy',
     'M': 'Me',
     'R': 'ADPRib',
-    'S': 'Sump',
+    'S': 'Sumo',
     'U': 'Ub',
 }
 
