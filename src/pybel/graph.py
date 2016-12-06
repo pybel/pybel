@@ -3,6 +3,8 @@ import logging
 import os
 import sys
 import time
+from collections import Counter
+from collections import defaultdict
 
 import networkx as nx
 import py2neo
@@ -18,8 +20,6 @@ from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import flatten, flatten_graph_data, expand_dict
-
-from collections import defaultdict
 
 __all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle',
            'from_graphml', 'to_graphml', 'to_json', 'to_neo4j', 'to_pickle', 'from_json']
@@ -151,6 +151,8 @@ class BELGraph(nx.MultiDiGraph):
         self.parse_statements(states)
 
         log.info('Network has %d nodes and %d edges', self.number_of_nodes(), self.number_of_edges())
+        for fn, count in sorted(Counter(d['type'] for n, d in self.nodes_iter(data=True)).items()):
+            log.debug(' %s: %d', fn, count)
 
     def parse_document(self, document_metadata):
         t = time.time()
