@@ -349,7 +349,7 @@ def to_json(graph, output):
     data = json_graph.node_link_data(graph)
 
     data['graph']['namespace_list'] = {k: list(sorted(v)) for k, v in data['graph']['namespace_list'].items()}
-    data['graph']['namespace_list'] = {k: list(sorted(v)) for k, v in data['graph']['annotation_list'].items()}
+    data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph']['annotation_list'].items()}
 
     json.dump(data, output, ensure_ascii=False)
 
