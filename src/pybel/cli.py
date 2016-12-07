@@ -64,18 +64,20 @@ def main():
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Context for neo4j upload")
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
+@click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
 @click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_context, lenient, log_file, verbose):
+def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_context, lenient, complete_origin, log_file,
+            verbose):
     """Options for multiple outputs/conversions"""
 
     ch.setLevel(log_levels.get(verbose, 5))
     log.addHandler(ch)
 
     if path:
-        g = graph.BELGraph(path, lenient=lenient, log_stream=log_file)
+        g = graph.BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
     elif url:
-        g = graph.from_url(url, lenient=lenient, log_stream=log_file)
+        g = graph.from_url(url, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
     elif database:
         g = graph.from_database(database)
     else:

@@ -24,7 +24,7 @@ TWO_WAY_RELATIONS = {'negativeCorrelation', 'positiveCorrelation', 'association'
 
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
-                 lenient=False):
+                 lenient=False, complete_origin=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: the graph to put the network in. Constructs new nx.MultiDiGrap if None
@@ -41,6 +41,7 @@ class BelParser(BaseParser):
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
         self.lenient = lenient
+        self.complete_origin = complete_origin
         self.control_parser = ControlParser(valid_annotations=valid_annotations)
         self.identifier_parser = IdentifierParser(valid_namespaces=valid_namespaces,
                                                   mapping=namespace_mapping,
@@ -463,13 +464,6 @@ class BelParser(BaseParser):
             raise IllegalFunctionSemantic(fmt.format(namespace, name, valid_list))
         return tokens
 
-    def handle_has_members(self, s, l, tokens):
-        parent = self.ensure_node(s, l, tokens[0])
-        for child_tokens in tokens[2]:
-            child = self.ensure_node(s, l, child_tokens)
-            self.graph.add_edge(parent, child, relation='hasMember')
-        return tokens
-
     def handle_fusion_legacy(self, s, l, tokens):
         if 'range_5p' in tokens['fusion']:
             return tokens
@@ -482,19 +476,39 @@ class BelParser(BaseParser):
         self.ensure_node(s, l, tokens)
         return tokens
 
-    def handle_relation(self, s, l, tokens):
+    def check_required_annotations(self, s):
         if not self.control_parser.citation:
             raise MissingCitationException('unable to add relation {}'.format(s))
 
         if 'SupportingText' not in self.control_parser.annotations:
             raise MissingSupportingTextException('unable to add relation {}'.format(s))
 
+    def build_attrs(self, attrs=None, list_attrs=None):
+        attrs = {} if attrs is None else attrs
+        list_attrs = {} if list_attrs is None else list_attrs
+        for annotation_name, annotation_entry in self.get_annotations().items():
+            if isinstance(annotation_entry, set):
+                list_attrs[annotation_name] = annotation_entry
+            else:
+                attrs[annotation_name] = annotation_entry
+        return attrs, list_attrs
+
+    def handle_has_members(self, s, l, tokens):
+        parent = self.ensure_node(s, l, tokens[0])
+        for child_tokens in tokens[2]:
+            child = self.ensure_node(s, l, child_tokens)
+            self.graph.add_edge(parent, child, relation='hasMember')
+        return tokens
+
+    def handle_relation(self, s, l, tokens):
+        self.check_required_annotations(s)
+
         sub = self.ensure_node(s, l, tokens['subject'])
         obj = self.ensure_node(s, l, tokens['object'])
 
-        attrs = {
-            'relation': tokens['relation'],
-        }
+        attrs, list_attrs = self.build_attrs()
+
+        attrs['relation'] = tokens['relation']
 
         sub_mod = canonicalize_modifier(tokens['subject'])
         if sub_mod:
@@ -504,29 +518,23 @@ class BelParser(BaseParser):
         if obj_mod:
             attrs['object'] = obj_mod
 
-        list_attrs = {}
-        for annotation_name, annotation_entry in self.get_annotations().items():
-            if isinstance(annotation_entry, set):
-                list_attrs[annotation_name] = annotation_entry
-            else:
-                attrs[annotation_name] = annotation_entry
-
         for single_annotation in cartesian_dictionary(list_attrs):
             self.graph.add_edge(sub, obj, attr_dict=attrs, **single_annotation)
             if tokens['relation'] in TWO_WAY_RELATIONS:
-                attrs_subject, attrs_object = attrs.get('subject'), attrs.get('object')
-                if 'subject' in attrs:
-                    del attrs['subject']
-                if 'object' in attrs:
-                    del attrs['object']
-                if attrs_subject:
-                    attrs['object'] = attrs_subject
-                if attrs_object:
-                    attrs['subject'] = attrs_object
-
-                self.graph.add_edge(obj, sub, attr_dict=attrs, **single_annotation)
+                self.add_reverse_edge(sub, obj, attrs, **single_annotation)
 
         return tokens
+
+    def add_reverse_edge(self, sub, obj, attrs, **single_annotation):
+        attrs_subject, attrs_object = attrs.get('subject'), attrs.get('object')
+        if attrs_subject:
+            del attrs['subject']
+            attrs['object'] = attrs_subject
+        if attrs_object:
+            del attrs['object']
+            attrs['subject'] = attrs_object
+
+        self.graph.add_edge(obj, sub, attr_dict=attrs, **single_annotation)
 
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
@@ -625,6 +633,9 @@ class BelParser(BaseParser):
                                         namespace=tokens['identifier']['namespace'],
                                         name=tokens['identifier']['name'])
 
+                if not self.complete_origin:
+                    return name
+
                 gene_tokens = deepcopy(tokens)
                 gene_tokens['function'] = 'Gene'
                 gene_name = self.ensure_node(s, l, gene_tokens)
@@ -638,6 +649,9 @@ class BelParser(BaseParser):
                                         type=tokens['function'],
                                         namespace=tokens['identifier']['namespace'],
                                         name=tokens['identifier']['name'])
+
+                if not self.complete_origin:
+                    return name
 
                 rna_tokens = deepcopy(tokens)
                 rna_tokens['function'] = 'RNA'
@@ -680,6 +694,7 @@ def canonicalize_node(tokens):
     if 'modifier' in tokens and tokens['modifier'] in (
             'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
         return canonicalize_node(tokens['target'])
+
 
 def canonicalize_modifier(tokens):
     """Get activity, transformation, or transformation information as a dictionary

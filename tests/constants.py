@@ -26,12 +26,12 @@ wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
 class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.parser = BelParser()
+        cls.parser = BelParser(complete_origin=True)
 
     def setUp(self):
         self.parser.clear()
 
-    def assertHasNode(self, member, msg=None, **kwargs):
+    def assertHasNode(self, member, **kwargs):
         self.assertIn(member, self.parser.graph)
         if kwargs:
             self.assertTrue(all(kwarg in self.parser.graph.node[member] for kwarg in kwargs),
@@ -42,7 +42,7 @@ class TestTokenParserBase(unittest.TestCase):
             # self.assertTrue(subdict_matches(self.parser.graph.node[member], kwargs, ),
             #                msg=msg_format.format(member, kwargs, self.parser.graph.node[member]))
 
-    def assertHasEdge(self, u, v, msg=None, **kwargs):
+    def assertHasEdge(self, u, v, **kwargs):
         self.assertTrue(self.parser.graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
         if kwargs:
             msg_format = 'No edge with correct properties. expected {} but got {}'

@@ -46,12 +46,12 @@ class TestImport(unittest.TestCase):
         }
 
     def test_from_path(self):
-        g = pybel.from_path(test_bel_1)
+        g = pybel.from_path(test_bel_1, complete_origin=True)
         self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
         bel_1_reconstituted(self, g)
 
     def test_from_fileUrl(self):
-        g = pybel.from_url('file://{}'.format(test_bel_1))
+        g = pybel.from_url('file://{}'.format(test_bel_1), complete_origin=True)
         self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
         bel_1_reconstituted(self, g)
 

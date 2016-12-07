@@ -82,7 +82,7 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines=None, context=None, lenient=False, definition_cache_manager=None, log_stream=None,
+    def __init__(self, lines=None, context=None, lenient=False, complete_origin=False, definition_cache_manager=None, log_stream=None,
                  *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
@@ -103,9 +103,9 @@ class BELGraph(nx.MultiDiGraph):
         self.last_parse_errors = defaultdict(int)
 
         if lines is not None:
-            self.parse_lines(lines, context, lenient, definition_cache_manager, log_stream)
+            self.parse_lines(lines, context, lenient, complete_origin, definition_cache_manager, log_stream)
 
-    def parse_lines(self, lines, context=None, lenient=False, definition_cache_manager=None, log_stream=None):
+    def parse_lines(self, lines, context=None, lenient=False, complete_origin=False, definition_cache_manager=None, log_stream=None):
         """Parses an iterable of lines into this graph
 
         :param lines: iterable over lines of BEL data file
@@ -128,8 +128,8 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(lines)
 
-        self.graph['document_lines'] = docs
-        self.graph['definition_lines'] = defs
+        #self.graph['document_lines'] = docs
+        #self.graph['definition_lines'] = defs
 
         if isinstance(definition_cache_manager, DefinitionCacheManager):
             self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
@@ -146,7 +146,8 @@ class BELGraph(nx.MultiDiGraph):
         self.bel_parser = BelParser(graph=self,
                                     valid_namespaces=self.metadata_parser.namespace_dict,
                                     valid_annotations=self.metadata_parser.annotations_dict,
-                                    lenient=lenient)
+                                    lenient=lenient,
+                                    complete_origin=complete_origin)
 
         self.parse_statements(states)
 
@@ -345,8 +346,11 @@ def to_json(graph, output):
     :type graph: BELGraph
     :param output: a write-supporting filelike object
     """
-    # FIXME
     data = json_graph.node_link_data(graph)
+
+    data['graph']['namespace_list'] = {k: list(sorted(v)) for k, v in data['graph']['namespace_list'].items()}
+    data['graph']['namespace_list'] = {k: list(sorted(v)) for k, v in data['graph']['annotation_list'].items()}
+
     json.dump(data, output, ensure_ascii=False)
 
 

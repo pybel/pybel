@@ -69,8 +69,8 @@ def decanonicalize_node(g, v):
         return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
 
     if tokens['type'] in ('Composite', 'Complex') and 'namespace' not in tokens:
-        members = get_neighbors_by_path_type(g, v, 'hasComponent')
-        members_canon = map(lambda n: decanonicalize_node(g, n), members)
+        #members = get_neighbors_by_path_type(g, v, 'hasComponent')
+        members_canon = map(lambda n: decanonicalize_node(g, n), v[1:])
         return '{}({})'.format(language.rev_abundance_labels[tokens['type']], ', '.join(members_canon))
 
     if 'type' in tokens and 'variants' in tokens:
@@ -98,7 +98,7 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
     if 'location' in node_edge_data:
         node_str = postpend_location(node_str, node_edge_data['location'])
 
-    if 'modifier' in node_edge_data and 'Degredation' == node_edge_data['modifier']:
+    if 'modifier' in node_edge_data and 'Degradation' == node_edge_data['modifier']:
         node_str = "deg({})".format(node_str)
     elif 'modifier' in node_edge_data and 'Activity' == node_edge_data['modifier']:
         node_str = "act({}".format(node_str)
@@ -216,16 +216,17 @@ def decanonicalize_graph(g, file=sys.stdout):
             print('UNSET SupportingText', file=file)
         print('\n', file=file)
 
-    # output missing edges about reactions, composite, and complexes that aren't in an edge
-    # 1. calculate which reactions, composites, and complexes don't appear in nodes
-    # ??? how to match up to a citation? Give a default pybel citation.
-
     print('###############################################\n', file=file)
 
     print('SET Citation = {"PyBEL","",""}', file=file)
+    print('SET Evidence = "Automatically added by PyBEL"', file=file)
 
     for u in g.nodes_iter():
         if any(d['relation'] not in language.unqualified_edges for v in g.adj[u] for d in g.edge[u][v].values()):
             continue
 
         print(decanonicalize_node(g, u), file=file)
+
+    # Can't infer hasMember relationships, but it's not due to specific evidence or citation
+    for u, v in g.edges_iter(relation='hasMember'):
+        print("{} hasMember {}".format(decanonicalize_node(g, u), decanonicalize_node(g, v)), file=file)
