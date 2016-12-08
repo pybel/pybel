@@ -53,7 +53,7 @@ def main():
 
 
 @main.command()
-@click.option('--path', type=click.File('r'), help='Input BEL file file path. Use - for stdin')
+@click.option('--path', type=click.File('r'), help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
 @click.option('--database', help='Input BEL database')
 @click.option('--csv', help='Output path for *.csv')
@@ -81,7 +81,7 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
     elif database:
         g = graph.from_database(database)
     else:
-        raise ValueError('missing BEL file')
+        g = graph.BELGraph(sys.stdin, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
 
     if csv:
         log.info('Outputting csv to %s', csv)
@@ -101,7 +101,7 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
 
     if bel:
         log.info('Outputting BEL to %s', bel)
-        decanonicalize_graph(graph, bel)
+        decanonicalize_graph(g, bel)
 
     if neo:
         log.info('Uploading to neo4j with context %s', neo_context)

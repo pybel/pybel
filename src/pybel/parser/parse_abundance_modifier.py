@@ -33,15 +33,15 @@ g_dot = Literal('g.')  #: genomic reference sequence
 deletion = Literal('del')
 
 hgvs_rna_del = (r_dot + pyparsing_common.integer() +
-                Suppress('_') + pyparsing_common.integer() + 'del' +
+                '_' + pyparsing_common.integer() + 'del' +
                 rna_nucleotide_seq)
 
 hgvs_dna_del = (c_dot + pyparsing_common.integer() +
-                Suppress('_') + pyparsing_common.integer() + 'del' +
+                '_' + pyparsing_common.integer() + 'del' +
                 dna_nucleotide_seq)
 
 hgvs_chromosome = (g_dot + pyparsing_common.integer() +
-                   Suppress('_') + pyparsing_common.integer() + 'del' +
+                   '_' + pyparsing_common.integer() + 'del' +
                    dna_nucleotide_seq)
 
 hgvs_snp = 'del' + dna_nucleotide_seq
@@ -52,12 +52,12 @@ hgvs_protein_mut = p_dot + aa_triple + pyparsing_common.integer() + aa_triple
 
 hgvs_protein_fs = p_dot + aa_triple + pyparsing_common.integer() + aa_triple + 'fs'
 
-hgvs_genomic = g_dot + pyparsing_common.integer() + dna_nucleotide + Suppress('>') + dna_nucleotide
+hgvs_genomic = g_dot + pyparsing_common.integer() + dna_nucleotide + '>' + dna_nucleotide
 
 hgvs_protein_truncation = p_dot + amino_acid + pyparsing_common.integer()('location') + '*'
 
-hgvs = (hgvs_protein_truncation | hgvs_rna_del | hgvs_dna_del | hgvs_chromosome | hgvs_snp | hgvs_protein_del |
-        hgvs_protein_fs | hgvs_protein_mut | hgvs_genomic | '=' | '?')
+hgvs = MatchFirst([hgvs_protein_truncation, hgvs_rna_del, hgvs_dna_del, hgvs_chromosome, hgvs_snp, hgvs_protein_del,
+                   hgvs_protein_fs, hgvs_protein_mut, hgvs_genomic, Keyword('='), Keyword('?')])
 
 
 class VariantParser(BaseParser):
@@ -94,9 +94,10 @@ class TruncParser(BaseParser):
         self.language = trunc_tag + nest(pyparsing_common.integer()('position'))
         self.language.setParseAction(self.handle_trunc_legacy)
 
+    # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     def handle_trunc_legacy(self, s, l, tokens):
-        log.log(5, 'PyBEL025 trunc() is deprecated: {}'.format(s))
-        return ['Variant', 'C', tokens['position'], '*']
+        log.log(5, 'PyBEL025 trunc() is deprecated. Please look up reference terminal amino acid: {}'.format(s))
+        return ['Variant', 'p.', tokens['position'], '*']
 
     def get_language(self):
         return self.language
@@ -128,7 +129,7 @@ class FragmentParser(BaseParser):
     """
 
     def __init__(self):
-        self.fragment_range = (ppc.integer | '?')('start') + Suppress('_') + (ppc.integer | '?' | '*')('stop')
+        self.fragment_range = (ppc.integer | '?')('start') + '_' + (ppc.integer | '?' | '*')('stop')
         self.missing_fragment = Keyword('?')('missing')
         fragment_tag = oneOf(['frag', 'fragment']).setParseAction(replaceWith('Fragment'))
         self.language = fragment_tag + nest(
@@ -149,7 +150,7 @@ class FusionParser(BaseParser):
         self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
         # sequence coordinates?
-        range_coordinate = (Group(oneOf(['r', 'p']) + Suppress('.') + pyparsing_common.integer() +
+        range_coordinate = (Group(oneOf(['r', 'p', 'c']) + Suppress('.') + pyparsing_common.integer() +
                                   Suppress('_') + pyparsing_common.integer()) | '?')
 
         self.language = fusion_tags + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),

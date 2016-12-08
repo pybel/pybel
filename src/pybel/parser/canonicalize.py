@@ -4,7 +4,7 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
-from pybel.parser import language
+from . import language
 from .language import rev_activity_labels
 from .utils import ensure_quotes
 from ..constants import GOCC_LATEST
@@ -16,6 +16,12 @@ variant_parent_dict = {
     'GeneVariant': 'g',
     'RNAVariant': 'r',
     'ProteinVariant': 'p'
+}
+
+fusion_parent_dict = {
+    'GeneFusion': 'g',
+    'RNAFusion': 'r',
+    'ProteinFusion': 'p'
 }
 
 
@@ -46,14 +52,28 @@ def postpend_location(s, location_model):
 
 def decanonicalize_variant(tokens):
     if tokens[0] == 'ProteinModification':
-        return 'pmod({})'.format(', '.join(map(str, tokens[1:])))
+        if isinstance(tokens[1], str):
+            return 'pmod({})'.format(', '.join(map(str, tokens[1:])))
+        return 'pmod({}:{}{})'.format(tokens[1][0], tokens[1][1], ''.join(', {}'.format(t) for t in tokens[2:]))
     elif tokens[0] == 'Variant':
         return 'var({})'.format(''.join(map(str, tokens[1:])))
     elif tokens[0] == 'Fragment':
-        r = '?' if 'missing' in tokens else '{}_{}'.format(tokens['start'], tokens['stop'])
-        return 'frag({}, {})'.format(r, tokens['description']) if 'description' in tokens else 'frag({})'.format(r)
+        if '?' == tokens[1] and len(tokens) == 2:
+            return 'frag(?)'
+        elif '?' == tokens[1] and len(tokens) == 3: # has description
+            return 'frag(?, {})'.format(tokens[2])
+        elif len(tokens) == 4:
+            return 'frag({})'.format(''.join(map(str, tokens[1:])))
+        else:
+            return 'frag({}, {})'.format(''.join(map(str, tokens[1:])), tokens[-1])
     else:
         raise NotImplementedError('prob with :{}'.format(tokens))
+
+
+def decanonicalize_fusion_range(tokens):
+    if '?' == tokens[0]:
+        return '?'
+    return '{}.{}_{}'.format(tokens[0], tokens[1], tokens[2])
 
 
 def decanonicalize_node(g, v):
@@ -69,7 +89,6 @@ def decanonicalize_node(g, v):
         return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
 
     if tokens['type'] in ('Composite', 'Complex') and 'namespace' not in tokens:
-        #members = get_neighbors_by_path_type(g, v, 'hasComponent')
         members_canon = map(lambda n: decanonicalize_node(g, n), v[1:])
         return '{}({})'.format(language.rev_abundance_labels[tokens['type']], ', '.join(members_canon))
 
@@ -83,6 +102,17 @@ def decanonicalize_node(g, v):
     if tokens['type'] in ('Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
         return "{}({}:{})".format(language.rev_abundance_labels[tokens['type']], tokens['namespace'],
                                   ensure_quotes(tokens['name']))
+
+    if tokens['type'].endswith('Fusion'):
+        return "{}(fus({}:{}, {}, {}:{}, {}))".format(
+            fusion_parent_dict[tokens['type']],
+            tokens['partner_5p']['namespace'],
+            tokens['partner_5p']['name'],
+            decanonicalize_fusion_range(tokens['range_5p']),
+            tokens['partner_3p']['namespace'],
+            tokens['partner_3p']['name'],
+            decanonicalize_fusion_range(tokens['range_3p'])
+        )
 
     raise NotImplementedError('unknown node data: {} {}'.format(v, tokens))
 
@@ -117,17 +147,17 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
         fromLoc = "fromLoc("
         toLoc = "toLoc("
 
-        if isinstance(node_edge_data['effect']['fromLoc'], dict):
-            fromLoc += "{}:{})".format(node_edge_data['effect']['fromLoc']['namespace'],
-                                       ensure_quotes(node_edge_data['effect']['fromLoc']['name']))
-        else:
+        if not isinstance(node_edge_data['effect']['fromLoc'], dict):
             raise ValueError()
 
-        if isinstance(node_edge_data['effect']['toLoc'], dict):
-            toLoc += "{}:{})".format(node_edge_data['effect']['toLoc']['namespace'],
-                                     ensure_quotes(node_edge_data['effect']['toLoc']['name']))
-        else:
+        fromLoc += "{}:{})".format(node_edge_data['effect']['fromLoc']['namespace'],
+                                   ensure_quotes(node_edge_data['effect']['fromLoc']['name']))
+
+        if not isinstance(node_edge_data['effect']['toLoc'], dict):
             raise ValueError()
+
+        toLoc += "{}:{})".format(node_edge_data['effect']['toLoc']['namespace'],
+                                 ensure_quotes(node_edge_data['effect']['toLoc']['name']))
 
         node_str = "tloc({}, {}, {})".format(node_str, fromLoc, toLoc)
 
@@ -165,6 +195,7 @@ def sort_edges(d):
 
 
 def decanonicalize_graph(g, file=sys.stdout):
+
     for k in sorted(g.document):
         print('SET DOCUMENT {} = "{}"'.format(k, g.document[k]), file=file)
 

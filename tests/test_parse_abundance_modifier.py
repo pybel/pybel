@@ -39,19 +39,19 @@ class TestHgvsParser(unittest.TestCase):
 
     def test_chromosome_1(self):
         statement = 'g.117199646_117199648delCTT'
-        expected = ['g.', 117199646, 117199648, 'del', 'CTT']
+        expected = ['g.', 117199646, '_', 117199648, 'del', 'CTT']
         result = hgvs_chromosome.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_chromosome_2(self):
         statement = 'c.1521_1523delCTT'
-        expected = ['c.', 1521, 1523, 'del', 'CTT']
+        expected = ['c.', 1521, '_', 1523, 'del', 'CTT']
         result = hgvs_dna_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_rna_del(self):
         statement = 'r.1653_1655delcuu'
-        expected = ['r.', 1653, 1655, 'del', 'cuu']
+        expected = ['r.', 1653, '_', 1655, 'del', 'cuu']
         result = hgvs_rna_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
@@ -190,7 +190,7 @@ class TestTruncationParser(unittest.TestCase):
         statement = 'trunc(40)'
         result = self.parser.parseString(statement)
 
-        expected = ['Variant', 'C', 40, '*']
+        expected = ['Variant', 'p.', 40, '*']
         self.assertEqual(expected, result.asList())
 
 
