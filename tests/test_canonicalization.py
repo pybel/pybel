@@ -12,6 +12,8 @@ from tests.constants import test_bel_0, test_bel_1, test_bel_3, test_bel_4
 
 log = logging.getLogger('pybel')
 
+pd_local_test = os.path.expanduser('~/dev/bms/parkinsons_aetionomy.bel')
+
 
 class TestCanonicalize(unittest.TestCase):
     def setUp(self):
@@ -66,7 +68,6 @@ class TestCanonicalize(unittest.TestCase):
 
                 self.assertTrue(x, msg="Nodes with problem: {}, {}".format(u, v))
 
-
     def test_canonicalize_0(self):
         self.canonicalize_tester_helper(test_bel_0)
 
@@ -78,3 +79,7 @@ class TestCanonicalize(unittest.TestCase):
 
     def test_canonicalize_4(self):
         self.canonicalize_tester_helper(test_bel_4)
+
+    @unittest.skipUnless(os.path.exists(pd_local_test), 'Testing with SCAI data only')
+    def test_canonicalize_5(self):
+        self.canonicalize_tester_helper(pd_local_test)

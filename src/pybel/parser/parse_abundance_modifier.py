@@ -2,7 +2,7 @@
 
 import logging
 
-from pyparsing import *
+from pyparsing import Word, Literal, oneOf, replaceWith, Optional, Keyword, MatchFirst, Suppress, Group
 from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser, WCW, word, nest
@@ -32,29 +32,23 @@ g_dot = Literal('g.')  #: genomic reference sequence
 
 deletion = Literal('del')
 
-hgvs_rna_del = (r_dot + pyparsing_common.integer() +
-                '_' + pyparsing_common.integer() + 'del' +
-                rna_nucleotide_seq)
+hgvs_rna_del = (r_dot + ppc.integer + '_' + ppc.integer + 'del' + rna_nucleotide_seq)
 
-hgvs_dna_del = (c_dot + pyparsing_common.integer() +
-                '_' + pyparsing_common.integer() + 'del' +
-                dna_nucleotide_seq)
+hgvs_dna_del = (c_dot + ppc.integer + '_' + ppc.integer + 'del' + dna_nucleotide_seq)
 
-hgvs_chromosome = (g_dot + pyparsing_common.integer() +
-                   '_' + pyparsing_common.integer() + 'del' +
-                   dna_nucleotide_seq)
+hgvs_chromosome = (g_dot + ppc.integer + '_' + ppc.integer + 'del' + dna_nucleotide_seq)
 
 hgvs_snp = 'del' + dna_nucleotide_seq
 
-hgvs_protein_del = p_dot + aa_triple + pyparsing_common.integer() + 'del'
+hgvs_protein_del = p_dot + aa_triple + ppc.integer + 'del'
 
-hgvs_protein_mut = p_dot + aa_triple + pyparsing_common.integer() + aa_triple
+hgvs_protein_mut = p_dot + aa_triple + ppc.integer + aa_triple
 
-hgvs_protein_fs = p_dot + aa_triple + pyparsing_common.integer() + aa_triple + 'fs'
+hgvs_protein_fs = p_dot + aa_triple + ppc.integer + aa_triple + 'fs'
 
-hgvs_genomic = g_dot + pyparsing_common.integer() + dna_nucleotide + '>' + dna_nucleotide
+hgvs_genomic = g_dot + ppc.integer + dna_nucleotide + '>' + dna_nucleotide
 
-hgvs_protein_truncation = p_dot + amino_acid + pyparsing_common.integer()('location') + '*'
+hgvs_protein_truncation = p_dot + Optional(amino_acid) + ppc.integer('location') + '*'
 
 hgvs = MatchFirst([hgvs_protein_truncation, hgvs_rna_del, hgvs_dna_del, hgvs_chromosome, hgvs_snp, hgvs_protein_del,
                    hgvs_protein_fs, hgvs_protein_mut, hgvs_genomic, Keyword('='), Keyword('?')])
@@ -76,8 +70,7 @@ class VariantParser(BaseParser):
 class PsubParser(BaseParser):
     def __init__(self):
         psub_tag = oneOf(['sub', 'substitution']).setParseAction(replaceWith('Variant'))
-        self.language = psub_tag + nest(amino_acid('reference'), pyparsing_common.integer()('position'),
-                                        amino_acid('variant'))
+        self.language = psub_tag + nest(amino_acid('reference'), ppc.integer('position'), amino_acid('variant'))
         self.language.setParseAction(self.handle_psub)
 
     def handle_psub(self, s, l, tokens):
@@ -91,7 +84,7 @@ class PsubParser(BaseParser):
 class TruncParser(BaseParser):
     def __init__(self):
         trunc_tag = oneOf(['trunc', 'truncation']).setParseAction(replaceWith('Variant'))
-        self.language = trunc_tag + nest(pyparsing_common.integer()('position'))
+        self.language = trunc_tag + nest(ppc.integer('position'))
         self.language.setParseAction(self.handle_trunc_legacy)
 
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
@@ -111,7 +104,7 @@ class GsubParser(BaseParser):
 
     def __init__(self):
         gsub_tag = oneOf(['sub', 'substitution']).setParseAction(replaceWith('Variant'))
-        self.language = gsub_tag + nest(dna_nucleotide('reference'), pyparsing_common.integer()('position'),
+        self.language = gsub_tag + nest(dna_nucleotide('reference'), ppc.integer('position'),
                                         dna_nucleotide('variant'))
         self.language.setParseAction(self.handle_gsub)
 
@@ -150,8 +143,7 @@ class FusionParser(BaseParser):
         self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
         # sequence coordinates?
-        range_coordinate = (Group(oneOf(['r', 'p', 'c']) + Suppress('.') + pyparsing_common.integer() +
-                                  Suppress('_') + pyparsing_common.integer()) | '?')
+        range_coordinate = (Group(oneOf(['r', 'p', 'c']) + Suppress('.') + ppc.integer + Suppress('_') + ppc.integer) | '?')
 
         self.language = fusion_tags + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
                                            Group(identifier)('partner_3p'), range_coordinate('range_3p'))

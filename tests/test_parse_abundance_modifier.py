@@ -55,10 +55,22 @@ class TestHgvsParser(unittest.TestCase):
         result = hgvs_rna_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
-    def test_protein_trunc(self):
+    def test_protein_trunc_single(self):
         statement = 'p.C65*'
         result = hgvs_protein_truncation.parseString(statement)
         expected = ['p.', 'Cys', 65, '*']
+        self.assertEqual(expected, result.asList())
+
+    def test_protein_trunc_triple(self):
+        statement = 'p.Cys65*'
+        result = hgvs_protein_truncation.parseString(statement)
+        expected = ['p.', 'Cys', 65, '*']
+        self.assertEqual(expected, result.asList())
+
+    def test_protein_trunc_legacy(self):
+        statement = 'p.65*'
+        result = hgvs_protein_truncation.parseString(statement)
+        expected = ['p.', 65, '*']
         self.assertEqual(expected, result.asList())
 
 
