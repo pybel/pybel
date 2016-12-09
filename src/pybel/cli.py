@@ -25,6 +25,7 @@ from . import graph
 from .constants import PYBEL_DIR
 from .manager import OwlCacheManager
 from .manager.namespace_cache import DefinitionCacheManager, DEFAULT_CACHE_LOCATION
+from .parser.canonicalize import decanonicalize_graph
 
 log = logging.getLogger('pybel')
 log.setLevel(logging.DEBUG)
@@ -52,32 +53,35 @@ def main():
 
 
 @main.command()
-@click.option('--path', type=click.File('r'), help='Input BEL file file path. Use - for stdin')
+@click.option('--path', type=click.File('r'), help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
 @click.option('--database', help='Input BEL database')
 @click.option('--csv', help='Output path for *.csv')
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
 @click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
 @click.option('--pickle', help='Output path for NetworkX *.gpickle')
+@click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Context for neo4j upload")
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
+@click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
 @click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, database, csv, graphml, json, pickle, neo, neo_context, lenient, log_file, verbose):
+def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_context, lenient, complete_origin, log_file,
+            verbose):
     """Options for multiple outputs/conversions"""
 
     ch.setLevel(log_levels.get(verbose, 5))
     log.addHandler(ch)
 
     if path:
-        g = graph.BELGraph(path, lenient=lenient, log_stream=log_file)
+        g = graph.BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
     elif url:
-        g = graph.from_url(url, lenient=lenient, log_stream=log_file)
+        g = graph.from_url(url, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
     elif database:
         g = graph.from_database(database)
     else:
-        raise ValueError('missing BEL file')
+        g = graph.BELGraph(sys.stdin, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
 
     if csv:
         log.info('Outputting csv to %s', csv)
@@ -95,13 +99,17 @@ def convert(path, url, database, csv, graphml, json, pickle, neo, neo_context, l
         log.info('Outputting pickle to %s', pickle)
         graph.to_pickle(g, pickle)
 
+    if bel:
+        log.info('Outputting BEL to %s', bel)
+        decanonicalize_graph(g, bel)
+
     if neo:
         log.info('Uploading to neo4j with context %s', neo_context)
         neo_graph = py2neo.Graph(neo)
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
         graph.to_neo4j(g, neo_graph, neo_context)
 
-    sys.exit(0 if g.last_parse_errors == 0 else 1)
+    sys.exit(0 if 0 == sum(g.last_parse_errors.values()) else 1)
 
 
 @main.group(help="PyBEL Data Manager Utilities")

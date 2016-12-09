@@ -383,7 +383,12 @@ class TestIntegration(TestOwlBase):
         )
 
         self.assertEqual(expected_document, g.document)
-        self.assertEqual(expected_definitions, g.definitions)
+
+        actual_definitions = {}
+        actual_definitions.update(g.namespace_url)
+        actual_definitions.update(g.namespace_owl)
+
+        self.assertEqual(expected_definitions, actual_definitions)
 
         a = 'Protein', 'HGNC', 'AKT1'
         b = 'Protein', 'HGNC', 'EGFR'
