@@ -10,7 +10,7 @@ import requests
 from requests_file import FileAdapter
 
 from pybel.parser import language
-
+import ontospy
 log = logging.getLogger('pybel')
 
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
@@ -200,12 +200,20 @@ def parse_owl(url, fail=False):
         owl = OWLParser(content=res.content)
         return owl
     except:
-        if fail:
-            raise ValueError('IRI {} not valid OWL'.format(url))
 
-        new_url = conversion_service.format(url)
-        owl = parse_owl(url=new_url, fail=True)
-        return owl
+        g = nx.DiGraph(IRI=url)
+        o = ontospy.Ontospy(url)
+
+        for cls in o.classes:
+            g.add_node(cls.locale, type='Class')
+
+            for parent in cls.parents():
+                g.add_edge(cls.locale, parent.locale, type='SubClassOf')
+
+            for instance in cls.instances():
+                g.add_edge(instance.locale, cls.locale, type='ClassAssertion')
+
+        return g
 
 
 owl_ns = {
@@ -256,7 +264,7 @@ class OWLParser(nx.DiGraph):
 
             if any(x in el[1].attrib for x in {IRI, AIRI}):
                 parent = self.get_iri(el[1].attrib)
-                self.add_edge(child, parent, type='SubClasOf')
+                self.add_edge(child, parent, type='SubClassOf')
             elif el[1].tag == '{http://www.w3.org/2002/07/owl#}ObjectSomeValuesFrom':  # check if ObjectSomeValuesFrom?
                 object_property, parent = el[1]
                 parent = self.get_iri(parent.attrib)
@@ -265,22 +273,16 @@ class OWLParser(nx.DiGraph):
 
         for el in self.root.findall('./owl:ClassAssertion', owl_ns):
             a = el.find('./owl:Class', owl_ns)
-            if not self.has_iri(a.attrib):
+            if not has_iri(a.attrib):
                 continue
             a = self.get_iri(a.attrib)
 
             b = el.find('./owl:NamedIndividual', owl_ns)
-            if not self.has_iri(b.attrib):
+            if not has_iri(b.attrib):
                 continue
             b = self.get_iri(b.attrib)
             self.add_edge(b, a, type="ClassAssertion")
 
-    def has_iri(self, attribs):
-        return any(key in {IRI, AIRI} for key in attribs)
-
-    def strip_airi(self, airi):
-        l, r = airi.split(':')
-        return r
 
     def strip_iri(self, iri):
         return iri.lstrip(self.graph[IRI]).lstrip('#').strip()
@@ -289,8 +291,15 @@ class OWLParser(nx.DiGraph):
         if IRI in attribs:
             return self.strip_iri(attribs[IRI])
         elif AIRI in attribs:
-            return self.strip_airi(attribs[AIRI])
+            return strip_airi(attribs[AIRI])
 
     @property
     def iri(self):
         return self.graph['IRI']
+
+def has_iri(attribs):
+    return any(key in {IRI, AIRI} for key in attribs)
+
+def strip_airi(airi):
+    l, r = airi.split(':')
+    return r

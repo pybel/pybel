@@ -8,3 +8,4 @@ click
 sqlalchemy
 pandas
 matplotlib
+ontospy

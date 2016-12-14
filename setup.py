@@ -33,7 +33,8 @@ INSTALL_REQUIRES = [
     'click',
     'sqlalchemy',
     'pandas',
-    'matplotlib'
+    'matplotlib',
+    'ontospy'
 ]
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = ['tox']
