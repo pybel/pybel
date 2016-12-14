@@ -8,7 +8,8 @@ from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from . import database_models
-from .database_models import DEFINITION_TABLE_NAME, CONTEXT_TABLE_NAME, DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
+from .database_models import DEFINITION_TABLE_NAME, CONTEXT_TABLE_NAME, DEFINITION_ANNOTATION, DEFINITION_NAMESPACE, \
+    Definition
 from .defaults import default_namespaces, default_annotations
 from .. import utils
 from ..constants import PYBEL_DATA
@@ -18,6 +19,8 @@ log = logging.getLogger('pybel')
 DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
 DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA, DEFAULT_DEFINITION_CACHE_NAME)
 
+
+# TODO: seperate definition cache management from database management
 
 class DefinitionCacheManager:
     def __init__(self, conn=None, setup_default_cache=False, log_sql=False):
@@ -45,7 +48,7 @@ class DefinitionCacheManager:
 
         log.info("Initiation of definition cache took %.02f seconds", time.time() - start_time)
 
-    def __insert_definition(self, definition_url, check_date=True):
+    def insert_definition(self, definition_url, check_date=True):
         """Inserts namespace and names into namespace namespace_cache db.
 
         :param definition_url: URL of a namespace or annotation definition file (.belns / .belanno)
@@ -165,7 +168,6 @@ class DefinitionCacheManager:
         :param annotation_urls: List of annotation files by url (.belanno files)
         :type annotation_urls: list
         """
-        start_time = time.time()
         namespace_urls = namespace_urls if namespace_urls else default_namespaces
         annotation_urls = annotation_urls if annotation_urls else default_annotations
 
@@ -177,17 +179,13 @@ class DefinitionCacheManager:
                     if def_type == DEFINITION_NAMESPACE:
                         log.info("Namespace cache is empty, new one is created.")
                         for url in namespace_urls:
-                            self.__insert_definition(url, check_date=False)
+                            self.insert_definition(url, check_date=False)
                     elif def_type == DEFINITION_ANNOTATION:
                         log.info("Annotation cache is empty, new one is created.")
                         for url in annotation_urls:
-                            self.__insert_definition(url, check_date=False)
+                            self.insert_definition(url, check_date=False)
 
             self.__cached_definitions()
-        #else:
-        #    self.setup_database()
-        #    self.ensure_cache(namespace_urls, annotation_urls)
-        #    log.info("New database is setup and caches were created in %3.2fs", time.time() - start_time)
 
     def update_definition_cache(self, namespace_urls=None, annotation_urls=None, overwrite_old_definitions=True):
         """Updates the cache DB with given namespace and annotation list (see defaults.py)
@@ -206,10 +204,6 @@ class DefinitionCacheManager:
             for url in namespace_urls + annotation_urls:
                 self.update_definition(url, overwrite_old_definitions)
 
-        #else:
-        #    self.setup_database()
-        #    self.update_definition_cache(namespace_urls, annotation_urls, overwrite_old_definitions)
-
     def update_definition(self, definition_url, overwrite_old_definition=True):
         """Checks if a namespace or annotation that is given by url is already in cache and if so, if it is up to date.
         
@@ -225,8 +219,8 @@ class DefinitionCacheManager:
                 self.ensure_cache()
             return
 
-        definition_key, creationDateTime, definition_old = self.__insert_definition(definition_url,
-                                                                                    check_date=overwrite_old_definition)
+        definition_key, creationDateTime, definition_old = self.insert_definition(definition_url,
+                                                                                  check_date=overwrite_old_definition)
 
         if definition_old and overwrite_old_definition and definition_old.createdDateTime < creationDateTime:
             log.warning(
@@ -290,3 +284,6 @@ class DefinitionCacheManager:
                 del self.namespace_cache[definition_url]
             elif definition_type == DEFINITION_ANNOTATION:
                 del self.annotation_cache[definition_url]
+
+    def ls(self):
+        return [definition.url for definition in self.sesh.query(Definition).all()]

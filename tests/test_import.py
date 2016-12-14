@@ -4,9 +4,9 @@ import unittest
 import pybel
 from pybel.manager import DefinitionCacheManager
 from pybel.parser import BelParser
-from pybel.parser.parse_exceptions import IllegalFunctionSemantic
+from pybel.parser.parse_exceptions import IllegalFunctionSemantic, MissingCitationException
 from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
-    bel_1_reconstituted
+    bel_1_reconstituted, test_evidence_bel
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
@@ -46,12 +46,12 @@ class TestImport(unittest.TestCase):
         }
 
     def test_from_path(self):
-        g = pybel.from_path(test_bel_1)
+        g = pybel.from_path(test_bel_1, complete_origin=True)
         self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
         bel_1_reconstituted(self, g)
 
     def test_from_fileUrl(self):
-        g = pybel.from_url('file://{}'.format(test_bel_1))
+        g = pybel.from_url('file://{}'.format(test_bel_1), complete_origin=True)
         self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
         bel_1_reconstituted(self, g)
 
@@ -78,9 +78,21 @@ class TestFull(TestTokenParserBase):
         with self.assertRaises(IllegalFunctionSemantic):
             self.parser.parseString(statement)
 
+    def test_missing_citation(self):
+        statements = [
+            test_evidence_bel,
+            'SET TestAnnotation1 = "A"',
+            'SET TestAnnotation2 = "X"',
+            'g(TESTNS:1) -> g(TESTNS:2)'
+        ]
+
+        with self.assertRaises(MissingCitationException):
+            self.parser.parse_lines(statements)
+
     def test_annotations(self):
         statements = [
             test_citation_bel,
+            test_evidence_bel,
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
@@ -106,6 +118,7 @@ class TestFull(TestTokenParserBase):
     def test_annotations_withList(self):
         statements = [
             test_citation_bel,
+            test_evidence_bel,
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
@@ -128,6 +141,7 @@ class TestFull(TestTokenParserBase):
     def test_annotations_withMultiList(self):
         statements = [
             test_citation_bel,
+            test_evidence_bel,
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'SET TestAnnotation3 = {"D","E"}',

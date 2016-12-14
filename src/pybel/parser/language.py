@@ -29,7 +29,7 @@ activity_labels = {
     'chaperoneActivity': 'ChaperoneActivity',
     'chap': 'ChaperoneActivity',
     'gtpBoundActivity': 'GTPBoundActivity',
-    'gtp': 'GTPBoungActivity',
+    'gtp': 'GTPBoundActivity',
     'kinaseActivity': 'KinaseActivity',
     'kin': 'KinaseActivity',
     'peptidaseActivity': 'PeptidaseActivity',
@@ -43,6 +43,19 @@ activity_labels = {
     'transportActivity': 'TransportActivity',
     'tport': 'TransportActivity',
     'molecularActivity': 'MolecularActivity'
+}
+
+rev_activity_labels = {
+    'CatalyticActivity': 'cat',
+    'ChaperoneActivity': 'chap',
+    'GTPBoundActivity': 'gtp',
+    'KinaseActivity': 'kin',
+    'PeptidaseActivity': 'pep',
+    'PhosphotaseActivity': 'phos',
+    'RibosylationActivity': 'ribo',
+    'TranscriptionalActivity': 'tscript',
+    'TransportActivity': 'tport',
+    'MolecularActivity': 'molecularActivity'
 }
 
 # TODO fill out
@@ -233,19 +246,8 @@ pmod_legacy_labels = {
     'H': 'Hy',
     'M': 'Me',
     'R': 'ADPRib',
-    'S': 'Sump',
+    'S': 'Sumo',
     'U': 'Ub',
-}
-
-relation_labels = {
-    'pmod': 'ProteinModification',
-    'proteinModification': 'ProteinModification'
-}
-
-variant_parent_dict = {
-    'GeneVariant': 'Gene',
-    'RNAVariant': 'RNA',
-    'ProteinVariant': 'Protein'
 }
 
 unqualified_edges = [

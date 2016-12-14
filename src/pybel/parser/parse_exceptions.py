@@ -102,3 +102,8 @@ class MissingCitationException(PyBelWarning):
 class IllegalFunctionSemantic(PyBelWarning):
     """Used an identifier in a semantically invalid function"""
     code = 37  #:
+
+
+class MissingSupportingTextException(PyBelWarning):
+    """All BEL statements must be qualified with evidence"""
+    code = 38  #:

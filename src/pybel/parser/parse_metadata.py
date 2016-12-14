@@ -2,12 +2,13 @@
 
 import logging
 
-from pyparsing import Suppress, And
+from pyparsing import Suppress, And, Word, Optional
 from pyparsing import pyparsing_common as ppc
 
 from . import language
 from .baseparser import BaseParser, word, quote, delimitedSet
 from .parse_exceptions import IllegalDocumentMetadataException
+from .utils import parse_owl
 from ..utils import download_url
 
 log = logging.getLogger('pybel')
@@ -35,13 +36,22 @@ class MetadataParser(BaseParser):
         self.annotations_metadata = {}
         self.annotations_dict = {} if valid_annotations is None else valid_annotations
 
+        self.namespace_url_dict = {}
+        self.namespace_owl_dict = {}
+        self.namespace_list_list = []
+        self.annotation_url_dict = {}
+        self.annotation_list_list = []
+
         self.definition_cache_manager = definition_cache_manager
 
         as_tag = Suppress('AS')
         url_tag = Suppress('URL')
         list_tag = Suppress('LIST')
+        owl_tag = Suppress('OWL')
         set_tag = Suppress('SET')
         define_tag = Suppress('DEFINE')
+
+        function_tags = Word(''.join(language.value_map))
 
         value = quote | ppc.identifier
 
@@ -50,6 +60,7 @@ class MetadataParser(BaseParser):
         namespace_tag = And([define_tag, Suppress('NAMESPACE'), ppc.identifier('name'), as_tag])
         self.namespace_url = And([namespace_tag, url_tag, quote('url')])
         self.namespace_list = And([namespace_tag, list_tag, delimitedSet('values')])
+        self.namespace_owl = And([namespace_tag, owl_tag, Optional(function_tags('functions')), quote('url')])
 
         annotation_tag = And([define_tag, Suppress('ANNOTATION'), ppc.identifier('name'), as_tag])
         self.annotation_url = And([annotation_tag, url_tag, quote('url')])
@@ -59,11 +70,12 @@ class MetadataParser(BaseParser):
         self.document.setParseAction(self.handle_document)
         self.namespace_url.setParseAction(self.handle_namespace_url)
         self.namespace_list.setParseAction(self.handle_namespace_list)
+        self.namespace_owl.setParseAction(self.handle_namespace_owl)
         self.annotation_url.setParseAction(self.handle_annotations_url)
         self.annotation_list.setParseAction(self.handle_annotation_list)
         self.annotation_pattern.setParseAction(self.handle_annotation_pattern)
 
-        self.language = (self.document | self.namespace_url | self.namespace_list |
+        self.language = (self.document | self.namespace_url | self.namespace_list | self.namespace_owl |
                          self.annotation_url | self.annotation_list | self.annotation_pattern)
 
     def get_language(self):
@@ -86,6 +98,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        self.namespace_url_dict[name] = url
 
         if self.definition_cache_manager is not None:
             # TODO LeKono change to .ensure_namespace that gives it back as return value like this:
@@ -112,6 +125,27 @@ class MetadataParser(BaseParser):
 
         return tokens
 
+    def handle_namespace_owl(self, s, l, tokens):
+        name = tokens['name']
+
+        if name in self.namespace_dict:
+            log.warning('Tried to overwrite namespace: {}'.format(name))
+            return tokens
+
+        url = tokens['url']
+        self.namespace_owl_dict[name] = url
+
+        # if self.definition_cache_manager is not None:
+        # TODOdo the thing
+
+        log.debug('Downloading ontology %s from %s', name, url)
+        functions = set(tokens['functions']) if 'functions' in tokens else set(language.value_map)
+
+        owl = parse_owl(url=url)
+        self.namespace_dict[name] = {node: set(functions) for node in owl.nodes_iter()}
+
+        return tokens
+
     def handle_annotations_url(self, s, l, tokens):
         name = tokens['name']
         if name in self.annotations_dict:
@@ -119,6 +153,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        self.annotation_url_dict[name] = url
 
         if self.definition_cache_manager is not None:
             self.definition_cache_manager.update_definition(url, overwrite_old_definition=False)
@@ -148,6 +183,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         self.namespace_dict[name] = set(tokens['values'])
+        self.namespace_list_list.append(name)
 
         return tokens
 
@@ -160,6 +196,7 @@ class MetadataParser(BaseParser):
 
         self.annotations_metadata[name] = self.transform_document_annotations()
         self.annotations_dict[name] = values
+        self.annotation_list_list.append(name)
 
         return tokens
 

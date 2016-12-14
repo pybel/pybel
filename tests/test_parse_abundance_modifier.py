@@ -1,7 +1,6 @@
 import unittest
 
 from pybel.parser.parse_abundance_modifier import *
-from pybel.parser.parse_bel import write_variant
 from pybel.parser.parse_pmod import PmodParser
 
 log = logging.getLogger(__name__)
@@ -40,26 +39,38 @@ class TestHgvsParser(unittest.TestCase):
 
     def test_chromosome_1(self):
         statement = 'g.117199646_117199648delCTT'
-        expected = ['g.', 117199646, 117199648, 'del', 'CTT']
+        expected = ['g.', 117199646, '_', 117199648, 'del', 'CTT']
         result = hgvs_chromosome.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_chromosome_2(self):
         statement = 'c.1521_1523delCTT'
-        expected = ['c.', 1521, 1523, 'del', 'CTT']
+        expected = ['c.', 1521, '_', 1523, 'del', 'CTT']
         result = hgvs_dna_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_rna_del(self):
         statement = 'r.1653_1655delcuu'
-        expected = ['r.', 1653, 1655, 'del', 'cuu']
+        expected = ['r.', 1653, '_', 1655, 'del', 'cuu']
         result = hgvs_rna_del.parseString(statement)
         self.assertEqual(expected, result.asList())
 
-    def test_protein_trunc(self):
+    def test_protein_trunc_single(self):
         statement = 'p.C65*'
         result = hgvs_protein_truncation.parseString(statement)
         expected = ['p.', 'Cys', 65, '*']
+        self.assertEqual(expected, result.asList())
+
+    def test_protein_trunc_triple(self):
+        statement = 'p.Cys65*'
+        result = hgvs_protein_truncation.parseString(statement)
+        expected = ['p.', 'Cys', 65, '*']
+        self.assertEqual(expected, result.asList())
+
+    def test_protein_trunc_legacy(self):
+        statement = 'p.65*'
+        result = hgvs_protein_truncation.parseString(statement)
+        expected = ['p.', 65, '*']
         self.assertEqual(expected, result.asList())
 
 
@@ -75,7 +86,6 @@ class TestPmod(unittest.TestCase):
         self.assertEqual(expected, result.asList())
 
         expected_bel = 'pmod(Ph, Ser, 473)'
-        self.assertEqual(expected_bel, write_variant(result.asDict()))
 
     def test_pmod2(self):
         statement = 'pmod(Ph, Ser)'
@@ -192,7 +202,7 @@ class TestTruncationParser(unittest.TestCase):
         statement = 'trunc(40)'
         result = self.parser.parseString(statement)
 
-        expected = ['Variant', 'C', 40, '*']
+        expected = ['Variant', 'p.', 40, '*']
         self.assertEqual(expected, result.asList())
 
 

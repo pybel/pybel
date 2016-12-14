@@ -3,6 +3,8 @@ import logging
 import os
 import sys
 import time
+from collections import Counter
+from collections import defaultdict
 
 import networkx as nx
 import py2neo
@@ -14,6 +16,7 @@ from requests_file import FileAdapter
 
 from .exceptions import PyBelWarning, PyBelError
 from .manager.namespace_cache import DefinitionCacheManager
+from .parser.canonicalize import decanonicalize_node
 from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
@@ -80,7 +83,8 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines=None, context=None, lenient=False, definition_cache_manager=None, log_stream=None,
+    def __init__(self, lines=None, context=None, lenient=False, complete_origin=False, definition_cache_manager=None,
+                 log_stream=None,
                  *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
@@ -98,12 +102,13 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.last_parse_errors = 0
+        self.last_parse_errors = defaultdict(int)
 
         if lines is not None:
-            self.parse_lines(lines, context, lenient, definition_cache_manager, log_stream)
+            self.parse_lines(lines, context, lenient, complete_origin, definition_cache_manager, log_stream)
 
-    def parse_lines(self, lines, context=None, lenient=False, definition_cache_manager=None, log_stream=None):
+    def parse_lines(self, lines, context=None, lenient=False, complete_origin=False, definition_cache_manager=None,
+                    log_stream=None):
         """Parses an iterable of lines into this graph
 
         :param lines: iterable over lines of BEL data file
@@ -126,6 +131,9 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, defs, states = split_file_to_annotations_and_definitions(lines)
 
+        # self.graph['document_lines'] = docs
+        # self.graph['definition_lines'] = defs
+
         if isinstance(definition_cache_manager, DefinitionCacheManager):
             self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
         elif isinstance(definition_cache_manager, str):
@@ -141,9 +149,14 @@ class BELGraph(nx.MultiDiGraph):
         self.bel_parser = BelParser(graph=self,
                                     valid_namespaces=self.metadata_parser.namespace_dict,
                                     valid_annotations=self.metadata_parser.annotations_dict,
-                                    lenient=lenient)
+                                    lenient=lenient,
+                                    complete_origin=complete_origin)
 
         self.parse_statements(states)
+
+        log.info('Network has %d nodes and %d edges', self.number_of_nodes(), self.number_of_edges())
+        for fn, count in sorted(Counter(d['type'] for n, d in self.nodes_iter(data=True)).items()):
+            log.debug(' %s: %d', fn, count)
 
     def parse_document(self, document_metadata):
         t = time.time()
@@ -153,6 +166,8 @@ class BELGraph(nx.MultiDiGraph):
                 self.metadata_parser.parseString(line)
             except:
                 log.error('Line %07d - failed: %s', line_number, line)
+
+        self.graph['document_metadata'] = self.metadata_parser.document_metadata
 
         log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
@@ -174,6 +189,14 @@ class BELGraph(nx.MultiDiGraph):
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
                 log.debug('Traceback: %s', exc_traceback)
 
+        self.graph['namespace_owl'] = self.metadata_parser.namespace_owl_dict
+        self.graph['namespace_url'] = self.metadata_parser.namespace_url_dict
+        self.graph['namespace_list'] = {e: self.metadata_parser.namespace_dict[e] for e in
+                                        self.metadata_parser.namespace_list_list}
+        self.graph['annotation_url'] = self.metadata_parser.annotation_url_dict
+        self.graph['annotation_list'] = {e: self.metadata_parser.annotations_dict[e] for e in
+                                         self.metadata_parser.annotation_list_list}
+
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
     def parse_statements(self, statements):
@@ -184,7 +207,7 @@ class BELGraph(nx.MultiDiGraph):
 
         t = time.time()
 
-        self.last_parse_errors = 0
+        self.last_parse_errors = defaultdict(int)
 
         for line_number, line in statements:
             try:
@@ -194,16 +217,21 @@ class BELGraph(nx.MultiDiGraph):
                 raise e
             except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
-                self.last_parse_errors += 1
+                self.last_parse_errors['parse_exception'] += 1
             except PyBelWarning as e:
                 log.warning('Line %07d - %s: %s', line_number, e, line)
-                self.last_parse_errors += 1
+                self.last_parse_errors[str(type(e))] += 1
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
-                self.last_parse_errors += 1
+                self.last_parse_errors['general'] += 1
 
-        log.info('Finished parsing statements section in %.02f seconds', time.time() - t)
+        log.info('Finished parsing statements section in %.02f seconds with %d warnings', time.time() - t,
+                 sum(self.last_parse_errors.values()))
+
+        for k, v in sorted(self.last_parse_errors.items()):
+            log.debug('  %s: %d', k, v)
+
 
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
         """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data. See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
@@ -229,6 +257,30 @@ class BELGraph(nx.MultiDiGraph):
             else:
                 yield n
 
+    @property
+    def document(self):
+        return self.graph['document_metadata']
+
+    @property
+    def namespace_url(self):
+        return self.graph['namespace_url']
+
+    @property
+    def namespace_owl(self):
+        return self.graph['namespace_owl']
+
+    @property
+    def namespace_list(self):
+        return self.graph['namespace_list']
+
+    @property
+    def annotation_url(self):
+        return self.graph['annotation_url']
+
+    @property
+    def annotation_list(self):
+        return self.graph['annotation_list']
+
 
 def to_neo4j(graph, neo_graph, context=None):
     """Uploads a BEL graph to Neo4J graph database using `py2neo`
@@ -247,14 +299,14 @@ def to_neo4j(graph, neo_graph, context=None):
     tx = neo_graph.begin()
 
     node_map = {}
-    for i, (node, data) in enumerate(graph.nodes(data=True)):
+    for node, data in graph.nodes(data=True):
         node_type = data['type']
         attrs = {k: v for k, v in data.items() if k != 'type'}
 
         if 'name' in data:
             attrs['value'] = data['name']
 
-        node_map[node] = py2neo.Node(node_type, cname=str(node), cnum=str(i), **attrs)
+        node_map[node] = py2neo.Node(node_type, bel=decanonicalize_node(graph, node), **attrs)
 
         tx.create(node_map[node])
 
@@ -302,6 +354,10 @@ def to_json(graph, output):
     :param output: a write-supporting filelike object
     """
     data = json_graph.node_link_data(graph)
+
+    data['graph']['namespace_list'] = {k: list(sorted(v)) for k, v in data['graph']['namespace_list'].items()}
+    data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph']['annotation_list'].items()}
+
     json.dump(data, output, ensure_ascii=False)
 
 

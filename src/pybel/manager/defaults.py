@@ -45,3 +45,8 @@ default_annotations = [
     'http://resource.belframework.org/belframework/20150611/annotation/mesh-diseases.belanno',
     'http://resource.belframework.org/belframework/20150611/annotation/species-taxonomy-id.belanno'
 ]
+
+default_owl = [
+    'http://purl.obolibrary.org/obo/hp/releases/2016-09-03/hp.owl', # Human Phenotype Ontology
+    'http://purl.obolibrary.org/obo/pr/49.0./pr-non-classified.owl' # Protein Ontology
+]

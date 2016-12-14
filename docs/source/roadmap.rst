@@ -9,17 +9,17 @@ Current Features
 - Good documentation and tutorials
 - Extensible API, allowing for bioinformaticians to develop their own algorithms and own their data, instead of using
   a complicated plugin in Cytoscape with multiple dependencies and little ability for export or customization
-- Caching system for downloaded data
+- Caching system for downloaded namespace and annotations
+- Fully BEL 1.0 and BEL 2.0 support
+- Node and edge filtering API
 
 Issues
 ------
 
-- Only the most common parts of BEL 1.0 are fully supported. If there are statements you are expressing that
-  you would like added, open an issue on GitHub.
 - Speed is still an issue, because documents above 100K lines still take a couple minutes to run. This issue is
   exacerbated by (optionally) logging output to the console, which can make it more than 3x or 4x as slow.
 - The default namespaces from OpenBEL do not follow a standard file format. They are similar to INI config files,
-  but do not use consistient delimiters. Also, many of the namespaces don't respect that the delimiter should not
+  but do not use consistent delimiters. Also, many of the namespaces don't respect that the delimiter should not
   be used in the namespace names. There are also lots of names with strange characters, which may have been caused
   by copying from a data source that had specfic escape characters without proper care.
 - Testing was very difficult because the example documents on the OpenBEL website had many semantic errors, such as
@@ -30,12 +30,11 @@ Issues
 Roadmap
 -------
 
-Data Management
-~~~~~~~~~~~~~~~
+Performance
+~~~~~~~~~~~
 
+- Packrat Parsing
 - Parallelization of BEL tokenization
-- Query tools for BELGraph and nx.MultiDiGraph
-- Database import and export with SQLAlchemy
 
 Knowledge Assembly
 ~~~~~~~~~~~~~~~~~~

@@ -25,7 +25,7 @@ class TestCli(unittest.TestCase):
         neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
 
         self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--neo',
-                                      neo_path, '--neo-context', test_context])
+                                      neo_path, '--neo-context', test_context, '--complete-origin'])
 
         q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
         count = neo.data(q)[0]['count']
@@ -50,7 +50,8 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--pickle', abs_test_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--pickle', abs_test_file,
+                                                   '--complete-origin'])
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_pickle(abs_test_file)
@@ -61,7 +62,8 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--graphml', abs_test_file])
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--graphml', abs_test_file,
+                                                   '--complete-origin'])
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_graphml(abs_test_file)
@@ -72,7 +74,8 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--json', abs_test_file])
+            result = self.runner.invoke(cli.main,
+                                        ['convert', '--path', test_bel_1, '--json', abs_test_file, '--complete-origin'])
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_json(abs_test_file)
