@@ -340,7 +340,7 @@ class TestOwlManager(unittest.TestCase):
         self.manager.create_database()
 
     def test_insert(self):
-        owl = parse_owl(pizza_iri, 'A')
+        owl = parse_owl(pizza_iri)
         self.manager.insert_by_graph(owl)
         entries = self.manager.get_terms(pizza_iri)
         self.assertEqual(TestParsePizza.expected_nodes, entries)

@@ -12,7 +12,7 @@ from tests.constants import test_bel_0, test_bel_1, test_bel_3, test_bel_4
 
 log = logging.getLogger('pybel')
 
-pd_local_test = os.path.expanduser('~/dev/bms/parkinsons_aetionomy.bel')
+pd_local_test = os.path.expanduser('~/dev/bms/aetionomy/parkinsons.bel')
 
 
 class TestCanonicalize(unittest.TestCase):

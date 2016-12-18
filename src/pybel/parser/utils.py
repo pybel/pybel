@@ -6,11 +6,13 @@ import re
 from xml.etree import ElementTree as ET
 
 import networkx as nx
+import ontospy
 import requests
+from rdflib.term import urldefrag
 from requests_file import FileAdapter
 
-from pybel.parser import language
-import ontospy
+from . import language
+
 log = logging.getLogger('pybel')
 
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
@@ -182,7 +184,7 @@ conversion_service = "http://owl.cs.manchester.ac.uk/converter/convert?format=OW
 
 # TODO logging of download??
 # TODO insert all relevant metadata into owl.graph (networkx graph annotations)
-def parse_owl(url, fail=False):
+def parse_owl(url):
     """
 
     :param url:
@@ -211,7 +213,8 @@ def parse_owl(url, fail=False):
                 g.add_edge(cls.locale, parent.locale, type='SubClassOf')
 
             for instance in cls.instances():
-                g.add_edge(instance.locale, cls.locale, type='ClassAssertion')
+                _, frag = urldefrag(instance)
+                g.add_edge(frag, cls.locale, type='ClassAssertion')
 
         return g
 
@@ -283,7 +286,6 @@ class OWLParser(nx.DiGraph):
             b = self.get_iri(b.attrib)
             self.add_edge(b, a, type="ClassAssertion")
 
-
     def strip_iri(self, iri):
         return iri.lstrip(self.graph[IRI]).lstrip('#').strip()
 
@@ -297,8 +299,10 @@ class OWLParser(nx.DiGraph):
     def iri(self):
         return self.graph['IRI']
 
+
 def has_iri(attribs):
     return any(key in {IRI, AIRI} for key in attribs)
+
 
 def strip_airi(airi):
     l, r = airi.split(':')
