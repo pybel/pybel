@@ -11,7 +11,7 @@ class PyBelWarning(Exception):
         self.message = message
 
     def __str__(self):
-        return 'PyBEL1{:02} - {}'.format(self.code, self.message)
+        return 'PyBEL1{:02} - {} - {}'.format(self.code, self.__class__.__name__, self.message)
 
 
 class NamespaceMismatch(PyBelWarning):

@@ -460,8 +460,8 @@ class BelParser(BaseParser):
 
         if function_code not in self.identifier_parser.namespace_dict[namespace][name]:
             valid_list = ','.join(self.identifier_parser.namespace_dict[namespace][name])
-            fmt = "Invalid function for identifier {}:{}. Valid are: [{}]"
-            raise IllegalFunctionSemantic(fmt.format(namespace, name, valid_list))
+            fmt = "Invalid function ({}) for identifier {}:{}. Valid are: [{}]"
+            raise IllegalFunctionSemantic(fmt.format(function_code, namespace, name, valid_list))
         return tokens
 
     def handle_fusion_legacy(self, s, l, tokens):

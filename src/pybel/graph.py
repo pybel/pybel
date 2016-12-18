@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 import time
-from collections import Counter
 from collections import defaultdict
 
 import networkx as nx
@@ -124,7 +123,7 @@ class BELGraph(nx.MultiDiGraph):
         if log_stream is not None:
             sh = logging.StreamHandler(stream=log_stream)
             sh.setLevel(5)
-            sh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            sh.setFormatter(logging.Formatter('%(name)s:%(levelname)s - %(message)s'))
             log.addHandler(sh)
 
         self.context = context
@@ -155,8 +154,16 @@ class BELGraph(nx.MultiDiGraph):
         self.parse_statements(states)
 
         log.info('Network has %d nodes and %d edges', self.number_of_nodes(), self.number_of_edges())
-        for fn, count in sorted(Counter(d['type'] for n, d in self.nodes_iter(data=True)).items()):
-            log.debug(' %s: %d', fn, count)
+
+        counter = defaultdict(lambda: defaultdict(int))
+
+        for n, d in self.nodes_iter(data=True):
+            counter[d['type']][d['namespace'] if 'namespace' in d else 'DEFAULT'] += 1
+
+        for fn, nss in sorted(counter.items()):
+            log.debug(' %s: %d', fn, sum(nss.values()))
+            for ns, count in sorted(nss.items()):
+                log.debug('   %s: %d', ns, count)
 
     def parse_document(self, document_metadata):
         t = time.time()
@@ -180,14 +187,10 @@ class BELGraph(nx.MultiDiGraph):
             except PyBelError as e:
                 log.critical('Line %07d - %s', line_number, line)
                 raise e
-            except ParseException as e:
+            except ParseException:
                 log.error('Line %07d - invalid statement: %s', line_number, line)
             except PyBelWarning as e:
-                log.warning('Line %07d - %s: %s', line_number, e, line)
-            except:
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
-                log.debug('Traceback: %s', exc_traceback)
+                log.warning('Line %07d - %s', line_number, e)
 
         self.graph['namespace_owl'] = self.metadata_parser.namespace_owl_dict
         self.graph['namespace_url'] = self.metadata_parser.namespace_url_dict
@@ -217,21 +220,20 @@ class BELGraph(nx.MultiDiGraph):
                 raise e
             except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
-                self.last_parse_errors['parse_exception'] += 1
+                self.last_parse_errors['general parser failure'] += 1
             except PyBelWarning as e:
-                log.warning('Line %07d - %s: %s', line_number, e, line)
-                self.last_parse_errors[str(type(e))] += 1
+                log.warning('Line %07d - %s', line_number, e)
+                self.last_parse_errors[e.__class__.__name__] += 1
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
-                self.last_parse_errors['general'] += 1
+                self.last_parse_errors['general failure'] += 1
 
         log.info('Finished parsing statements section in %.02f seconds with %d warnings', time.time() - t,
                  sum(self.last_parse_errors.values()))
 
         for k, v in sorted(self.last_parse_errors.items()):
             log.debug('  %s: %d', k, v)
-
 
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
         """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data. See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
