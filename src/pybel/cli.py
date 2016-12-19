@@ -23,8 +23,7 @@ import py2neo
 
 from . import graph
 from .constants import PYBEL_DIR
-from .manager import OwlCacheManager
-from .manager.namespace_cache import DefinitionCacheManager, DEFAULT_CACHE_LOCATION
+from .manager.cache import DEFAULT_CACHE_LOCATION, OwlCacheManager, CacheManager
 from .parser.canonicalize import decanonicalize_graph
 
 log = logging.getLogger('pybel')
@@ -35,7 +34,7 @@ log_levels = {
     1: logging.DEBUG,
 }
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(name)s:%(levelname)s - %(message)s')
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
 
@@ -120,7 +119,7 @@ def manage():
 @manage.command(help='Set up definition cache with default definitions')
 @click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def setup(path):
-    DefinitionCacheManager(conn=path, setup_default_cache=True)
+    CacheManager(connection=path, setup_default_cache=True)
     sys.exit(0)
 
 
@@ -135,21 +134,32 @@ def remove():
 @click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def insert(url, path):
     if url.lower().endswith('.belns') or url.lower().endswith('.belanno'):
-        dcm = DefinitionCacheManager(conn=path)
+        dcm = CacheManager(connection=path)
         dcm.insert_definition(url)
     else:
-        ocm = OwlCacheManager(conn=path)
+        ocm = OwlCacheManager(connection=path)
         ocm.insert_by_iri(url)
 
 
 @manage.command(help='List cached resources')
 @click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def ls(path):
-    dcm = DefinitionCacheManager(conn=path)
-    ocm = OwlCacheManager(conn=path)
+    dcm = CacheManager(connection=path)
+    ocm = OwlCacheManager(connection=path)
 
     for url in sorted(itt.chain(dcm.ls(), ocm.ls())):
         click.echo(url)
+
+
+@manage.command(help='List cache contents')
+@click.argument('definition_url')
+@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('--owl', is_flag=True)
+def ls_cache(definition_url, path, owl):
+    dcm = CacheManager(connection=path) if not owl else OwlCacheManager(connection=path)
+    res = dcm.ls_definition(definition_url)
+
+    click.echo_via_pager('\n'.join(res))
 
 
 if __name__ == '__main__':

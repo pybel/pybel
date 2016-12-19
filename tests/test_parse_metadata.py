@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from pybel.manager import DefinitionCacheManager
+from pybel.manager.cache import CacheManager
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
@@ -17,116 +17,111 @@ class TestSplitLines(unittest.TestCase):
         path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 
         with open(path) as f:
-            docs, defs, states = split_file_to_annotations_and_definitions(f)
+            docs, definitions, statements = split_file_to_annotations_and_definitions(f)
 
         self.assertEqual(7, len(docs))
-        self.assertEqual(5, len(defs))
-        self.assertEqual(14, len(states))
-
-
-class TestParseMetadataCached(unittest.TestCase):
-    def setUp(self):
-        dcm = DefinitionCacheManager()
-        dcm.setup_database()
-        self.parser = MetadataParser(definition_cache_manager=dcm)
-
-    def test_control_1(self):
-        s = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
-        self.parser.parseString(s)
-
-        self.assertIn('MGI', self.parser.namespace_dict)
-        # TODO LeKono implement namespace_metadata caching loading as well
-        # self.assertIn('MGI', self.parser.namespace_metadata)
-
-        # Test doesn't overwrite
-        s = 'DEFINE NAMESPACE MGI AS LIST {"A","B","C"}'
-        self.parser.parseString(s)
-        self.assertIn('MGI', self.parser.namespace_dict)
-        # self.assertIn('MGI', self.parser.namespace_metadata)
-        self.assertNotIn('A', self.parser.namespace_dict['MGI'])
+        self.assertEqual(5, len(definitions))
+        self.assertEqual(14, len(statements))
 
 
 class TestParseMetadata(unittest.TestCase):
-    def setUp(self):
-        self.parser = MetadataParser()
+    @classmethod
+    def setUpClass(cls):
+        cls.connection = 'sqlite://'
+        cls.cm = CacheManager(cls.connection)
+        cls.cm.create_database()
 
-    def test_control_1(self):
+    def setUp(self):
+        self.parser = MetadataParser(cache_manager=CacheManager(self.connection))
+
+    def check_mgi(self):
+        self.assertIn('MGI', self.parser.namespace_dict)
+        self.assertIn('Oprk1', self.parser.namespace_dict['MGI'])
+        self.assertEqual(set('GRP'), self.parser.namespace_dict['MGI']['Oprk1'])
+        self.assertIn('Gm16328', self.parser.namespace_dict['MGI'])
+        self.assertEqual(set('GR'), self.parser.namespace_dict['MGI']['Gm16328'])
+
+    def test_namespace_name_persistience(self):
+        """Tests that a namespace defined by a URL can't be overwritten by a definition by another URL"""
         s = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
 
         self.parser.parseString(s)
-        self.assertIn('MGI', self.parser.namespace_dict)
-        self.assertIn('MGI', self.parser.namespace_metadata)
+        self.check_mgi()
+
 
         # Test doesn't overwrite
-        s = 'DEFINE NAMESPACE MGI AS LIST {"A","B","C"}'
+        s = 'DEFINE NAMESPACE MGI AS URL "http://resources.openbel.org/belframework/20150611/namespace/rgd-rat-genes.belns"'
         self.parser.parseString(s)
         self.assertIn('MGI', self.parser.namespace_dict)
-        self.assertIn('MGI', self.parser.namespace_metadata)
-        self.assertNotIn('A', self.parser.namespace_dict['MGI'])
+        self.assertNotIn('2310ex4-5', self.parser.namespace_dict['MGI'])
 
-    def test_control_2(self):
-        s = 'DEFINE NAMESPACE Custom1 AS LIST {"A","B","C"}'
-        self.parser.parseString(s)
-        self.assertIn('Custom1', self.parser.namespace_dict)
-
-        s = 'DEFINE NAMESPACE Custom1 AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
-        self.parser.parseString(s)
-        self.assertIn('Custom1', self.parser.namespace_dict)
-        self.assertIn('A', self.parser.namespace_dict['Custom1'])
-
+    '''
     def test_control_annotation_lexicographyException(self):
+        """Asserts an error is thrown when the preferred name for an annotation is not used"""
         s = 'DEFINE ANNOTATION CELLSTRUCTURE AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
-        # with self.assertRaises(LexicographyException):
         self.parser.parseString(s)
 
     def test_control_namespace_lexicographyException(self):
+        """Asserts an error is thrown when the preferred name for an namespace is not used"""
         s = 'DEFINE NAMESPACE mgi AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
         # with self.assertRaises(LexicographyException):
         self.parser.parseString(s)
 
-    def test_control_3(self):
+    def test_parse_namespace_url_mismatch(self):
+        path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
+        s = 'DEFINE NAMESPACE TEST AS URL "file://{}"'.format(path)
+        # with self.assertRaises(NamespaceMismatch):
+        self.parser.parseString(s)
+
+    def test_parse_annotation_url_failure(self):
+        path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
+        s = 'DEFINE ANNOTATION Test AS URL "file://{}"'.format(path)
+        # with self.assertRaises(AnnotationMismatch):
+        self.parser.parseString(s)
+    '''
+
+    def test_annotation_name_persistience_1(self):
+        """Tests that an annotation defined by a URL can't be overwritten by a definition by a list"""
         s = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
         self.parser.parseString(s)
         self.assertIn('CellStructure', self.parser.annotations_dict)
-        self.assertIn('CellStructure', self.parser.annotations_metadata)
 
         s = 'DEFINE ANNOTATION CellStructure AS LIST {"A","B","C"}'
         self.parser.parseString(s)
         self.assertIn('CellStructure', self.parser.annotations_dict)
-        self.assertIn('CellStructure', self.parser.annotations_metadata)
         self.assertNotIn('A', self.parser.annotations_dict['CellStructure'])
 
-    def test_control_4(self):
+    def test_annotation_name_persistience_2(self):
+        """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
         s = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
         self.assertIn('TextLocation', self.parser.annotations_dict)
-        self.assertIn('TextLocation', self.parser.annotations_metadata)
 
         s = 'DEFINE ANNOTATION TextLocation AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
         self.parser.parseString(s)
         self.assertIn('TextLocation', self.parser.annotations_dict)
-        self.assertIn('TextLocation', self.parser.annotations_metadata)
         self.assertIn('Abstract', self.parser.annotations_dict['TextLocation'])
 
     def test_underscore(self):
+        """Tests that an underscore is a valid character in an annotation name"""
         s = 'DEFINE ANNOTATION Text_Location AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
         self.assertIn('Text_Location', self.parser.annotations_dict)
-        self.assertIn('Text_Location', self.parser.annotations_metadata)
 
     def test_control_compound_1(self):
-        s1 = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
-        s2 = 'DEFINE NAMESPACE CHEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"'
+        lines = [
+            'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"',
+            'DEFINE NAMESPACE CHEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"'
+        ]
 
-        self.parser.parse_lines([s1, s2])
+        self.parser.parse_lines(lines)
+        self.check_mgi()
 
-        self.assertIn('MGI', self.parser.namespace_dict)
-        self.assertIn('CHEBI', self.parser.namespace_dict)
 
     def test_control_compound_2(self):
-        s1 = 'DEFINE ANNOTATION CellStructure AS  URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
-        s2 = 'DEFINE ANNOTATION CellLine AS  URL "http://resource.belframework.org/belframework/1.0/annotation/atcc-cell-line.belanno"'
-        s3 = 'DEFINE ANNOTATION TextLocation AS  LIST {"Abstract","Results","Legend","Review"}'
+        s1 = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
+        s2 = 'DEFINE ANNOTATION CellLine AS URL "http://resource.belframework.org/belframework/1.0/annotation/atcc-cell-line.belanno"'
+        s3 = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parse_lines([s1, s2, s3])
 
         self.assertIn('CellStructure', self.parser.annotations_dict)
@@ -146,61 +141,28 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('Name', self.parser.document_metadata)
         self.assertEqual("Alzheimer's Disease Model", self.parser.document_metadata['Name'])
 
-    def test_parse_namespace_list_1(self):
-        s = '''DEFINE NAMESPACE BRCO AS LIST {"Hippocampus", "Parietal Lobe"}'''
-
-        self.parser.parseString(s)
-
-        expected_namespace_dict = {
-            'BRCO': {'Hippocampus', 'Parietal Lobe'}
-        }
-
-        self.assertIn('BRCO', self.parser.namespace_dict)
-        self.assertEqual(2, len(self.parser.namespace_dict['BRCO']))
-        self.assertEqual(expected_namespace_dict, self.parser.namespace_dict)
-
-    def test_parse_namespace_list_2(self):
-        s1 = '''SET DOCUMENT Name = "Alzheimer's Disease Model"'''
-        s2 = '''DEFINE NAMESPACE BRCO AS LIST {"Hippocampus", "Parietal Lobe"}'''
-
-        self.parser.parseString(s1)
-        self.parser.parseString(s2)
-
-        expected_namespace_dict = {
-            'BRCO': {'Hippocampus', 'Parietal Lobe'}
-        }
-
-        expected_namespace_annoations = {
-        }
-
-        self.assertIn('BRCO', self.parser.namespace_dict)
-        self.assertEqual(2, len(self.parser.namespace_dict['BRCO']))
-        self.assertEqual(expected_namespace_dict, self.parser.namespace_dict)
-        self.assertEqual(expected_namespace_annoations, self.parser.namespace_metadata)
-
-    def test_parse_namespace_url_mismatch(self):
+    def test_parse_namespace_url_file(self):
+        """Tests parsing a namespace by file URL"""
         path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
-        s = '''DEFINE NAMESPACE TEST AS URL "file://{}"'''.format(path)
-        # with self.assertRaises(NamespaceMismatch):
-        self.parser.parseString(s)
-
-    def test_parse_namespace_url_1(self):
-        path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
-        s = '''DEFINE NAMESPACE TESTNS1 AS URL "file://{}"'''.format(path)
+        s = 'DEFINE NAMESPACE TESTNS1 AS URL "file://{}"'.format(path)
         self.parser.parseString(s)
 
         expected_values = {
-            'TestValue1': 'O',
-            'TestValue2': 'O',
-            'TestValue3': 'O',
-            'TestValue4': 'O',
-            'TestValue5': 'O'
+            'TestValue1': {'O'},
+            'TestValue2': {'O'},
+            'TestValue3': {'O'},
+            'TestValue4': {'O'},
+            'TestValue5': {'O'}
         }
 
         self.assertIn('TESTNS1', self.parser.namespace_dict)
-        self.assertEqual(expected_values, self.parser.namespace_dict['TESTNS1'])
 
-    def test_parse_annotation_url_1(self):
+        for k, values in expected_values.items():
+            self.assertIn(k, self.parser.namespace_dict['TESTNS1'])
+            self.assertEqual(set(values), set(self.parser.namespace_dict['TESTNS1'][k]))
+
+    def test_parse_annotation_url_file(self):
+        """Tests parsing an annotation by file URL"""
         path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
         s = '''DEFINE ANNOTATION TESTAN1 AS URL "file://{}"'''.format(path)
         self.parser.parseString(s)
@@ -216,13 +178,7 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('TESTAN1', self.parser.annotations_dict)
         self.assertEqual(expected_values, self.parser.annotations_dict['TESTAN1'])
 
-    def test_parse_annotation_url_failure(self):
-        path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
-        s = '''DEFINE ANNOTATION Test AS URL "file://{}"'''.format(path)
-        # with self.assertRaises(AnnotationMismatch):
-        self.parser.parseString(s)
-
-    def test_parse_pattern(self):
+    def test_parse_annotation_pattern(self):
         s = 'DEFINE ANNOTATION Test AS PATTERN "\w+"'
         with self.assertRaises(NotImplementedError):
             self.parser.parseString(s)

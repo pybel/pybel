@@ -210,10 +210,6 @@ def decanonicalize_graph(g, file=sys.stdout):
     for namespace, url in sorted(g.namespace_owl.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url), file=file)
 
-    for namespace, ns_list in sorted(g.namespace_list.items(), key=itemgetter(0)):
-        ns_list_str = ', '.join('"{}"'.format(e) for e in ns_list)
-        print('DEFINE NAMESPACE {} AS LIST {{{}}}'.format(namespace, ns_list_str), file=file)
-
     print('###############################################\n', file=file)
 
     for annotation, url in sorted(g.annotation_url.items(), key=itemgetter(0)):

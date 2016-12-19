@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -37,3 +37,36 @@ class Context(Base):
     encoding = Column(String(50))
 
 
+owl_relationship = Table(
+    'owl_relationship', Base.metadata,
+    Column('left_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True),
+    Column('right_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True)
+)
+
+
+class Owl(Base):
+    __tablename__ = 'Owl'
+
+    id = Column(Integer, Sequence('owl_id_seq'), primary_key=True)
+    iri = Column(Text, unique=True)
+    entries = relationship("OwlEntry", order_by="OwlEntry.id", backref="owl")
+
+    def __repr__(self):
+        return "Owl(iri='{}', #entries='{}')>".format(self.iri, list(self.entries))
+
+
+class OwlEntry(Base):
+    __tablename__ = 'OwlEntry'
+
+    id = Column(Integer, Sequence('OwlEntry_id_seq'), primary_key=True)
+    owl_id = Column(Integer, ForeignKey('Owl.id'), index=True)
+    entry = Column(String(255))
+    encoding = Column(String(50))
+
+    children = relationship('OwlEntry',
+                            secondary=owl_relationship,
+                            primaryjoin=id == owl_relationship.c.left_id,
+                            secondaryjoin=id == owl_relationship.c.right_id)
+
+    def __repr__(self):
+        return 'OwlEntry({})'.format(self.entry)

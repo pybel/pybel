@@ -2,10 +2,10 @@ import os
 import unittest
 
 import pybel
-from pybel.manager.owl_cache import OwlCacheManager
+from pybel.manager.cache import OwlCacheManager, CacheManager
+from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
-from pybel.parser.utils import parse_owl, OWLParser
 from tests.constants import dir_path, test_bel_4, wine_iri
 from tests.constants import pizza_iri
 
@@ -80,7 +80,7 @@ class TestParsePizza(TestOwlBase):
     def test_metadata_parser(self):
         functions = set('A')
         s = 'DEFINE NAMESPACE Pizza AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
-        parser = MetadataParser()
+        parser = MetadataParser(CacheManager('sqlite:///'))
         parser.parseString(s)
 
         names = set(parser.namespace_dict['Pizza'].keys())
@@ -90,7 +90,7 @@ class TestParsePizza(TestOwlBase):
 
     def test_metadata_parser_no_function(self):
         s = 'DEFINE NAMESPACE Pizza AS OWL "{}"'.format(pizza_iri)
-        parser = MetadataParser()
+        parser = MetadataParser(CacheManager('sqlite:///'))
         parser.parseString(s)
 
         functions = set(value_map.keys())
@@ -302,7 +302,7 @@ class TestWine(TestOwlBase):
     def test_metadata_parser(self):
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
-        parser = MetadataParser()
+        parser = MetadataParser(CacheManager('sqlite:///', create_all=True))
         parser.parseString(s)
 
         self.assertIn('Wine', parser.namespace_dict)
@@ -341,7 +341,7 @@ class TestOwlManager(unittest.TestCase):
 
     def test_insert(self):
         owl = parse_owl(pizza_iri)
-        self.manager.insert_by_graph(owl)
+        self.manager.insert_by_graph(pizza_iri, owl)
         entries = self.manager.get_terms(pizza_iri)
         self.assertEqual(TestParsePizza.expected_nodes, entries)
 
@@ -351,7 +351,7 @@ class TestOwlManager(unittest.TestCase):
         self.assertEqual(TestParsePizza.expected_edges, edges)
 
         # check nothing bad happens on second insert
-        self.manager.insert_by_graph(owl)
+        self.manager.insert_by_graph(pizza_iri, owl)
 
     def test_missing(self):
         with self.assertRaises(Exception):

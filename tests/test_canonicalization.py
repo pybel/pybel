@@ -47,7 +47,6 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual(g_out.document, g_in.document)
         self.assertEqual(g_out.namespace_owl, g_out.namespace_owl)
         self.assertEqual(g_out.namespace_url, g_out.namespace_url)
-        self.assertEqual(g_out.namespace_list, g_out.namespace_list)
         self.assertEqual(g_out.annotation_url, g_out.annotation_url)
         self.assertEqual(g_out.annotation_list, g_out.annotation_list)
 

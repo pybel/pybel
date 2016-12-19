@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import itertools as itt
 import logging
 from copy import deepcopy
 
@@ -455,13 +456,14 @@ class BelParser(BaseParser):
         if self.identifier_parser.namespace_dict is None or 'identifier' not in tokens:
             return tokens
 
-        function_code = language.rev_value_map[tokens['function']]
         namespace, name = tokens['identifier']['namespace'], tokens['identifier']['name']
 
-        if function_code not in self.identifier_parser.namespace_dict[namespace][name]:
+        valid_function_codes = set(itt.chain.from_iterable(language.value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
+
+        if tokens['function'] not in valid_function_codes:
             valid_list = ','.join(self.identifier_parser.namespace_dict[namespace][name])
             fmt = "Invalid function ({}) for identifier {}:{}. Valid are: [{}]"
-            raise IllegalFunctionSemantic(fmt.format(function_code, namespace, name, valid_list))
+            raise IllegalFunctionSemantic(fmt.format(tokens['function'], namespace, name, valid_list))
         return tokens
 
     def handle_fusion_legacy(self, s, l, tokens):

@@ -56,3 +56,4 @@ def bel_1_reconstituted(self, g):
 
     edges = list(g.edges_iter(relation='increases'))
     self.assertEqual(2, len(edges))
+

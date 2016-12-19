@@ -2,9 +2,26 @@ import os
 import unittest
 from datetime import datetime
 
+from pybel.manager import defaults
+from pybel.manager.cache import CacheManager
 from pybel.manager.defaults import default_annotations as expected_an_keys
 from pybel.manager.defaults import default_namespaces as expected_ns_keys
-from pybel.manager.namespace_cache import DefinitionCacheManager
+
+MGI_NAMESPACE = 'http://resource.belframework.org/belframework/20150611/namespace/mgi-mouse-genes.belns'
+HGNC_NAMESPACE = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
+
+CELLSTRUCTURE_ANNOTATION = 'http://resource.belframework.org/belframework/20150611/annotation/cell-structure.belanno'
+CELL_ANNOTATION = 'http://resource.belframework.org/belframework/20150611/annotation/cell.belanno'
+
+defaults.default_namespaces = [
+    MGI_NAMESPACE,
+    HGNC_NAMESPACE
+]
+
+defaults.default_annotations = [
+    CELLSTRUCTURE_ANNOTATION,
+    CELL_ANNOTATION
+]
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -13,7 +30,27 @@ test_ns2 = 'file:///' + os.path.join(dir_path, 'bel', "test_ns_1_updated.belns")
 test_an1 = 'file:///' + os.path.join(dir_path, 'bel', "test_an_1.belanno")
 
 
-class TestNsCache(unittest.TestCase):
+class TestCache(unittest.TestCase):
+    def setUp(self):
+        self.connection = 'sqlite://'
+        self.cm = CacheManager(connection=self.connection)
+
+    def test_insert_namespace(self):
+        self.cm.ensure_namespace(MGI_NAMESPACE)
+        self.assertIn(MGI_NAMESPACE, self.cm.namespace_cache)
+        self.assertIn('Oprk1', self.cm.namespace_cache[MGI_NAMESPACE])
+        self.assertEqual(set('GRP'), self.cm.namespace_cache[MGI_NAMESPACE]['Oprk1'])
+        self.assertIn('Gm16328', self.cm.namespace_cache[MGI_NAMESPACE])
+        self.assertEqual(set('GR'), self.cm.namespace_cache[MGI_NAMESPACE]['Gm16328'])
+
+    def test_insert_annotation(self):
+        self.cm.ensure_annotation(CELL_ANNOTATION)
+        self.assertIn(CELL_ANNOTATION, self.cm.annotation_cache)
+        self.assertIn('B cell', self.cm.annotation_cache[CELL_ANNOTATION])
+        self.assertEqual('CL_0000236', self.cm.annotation_cache[CELL_ANNOTATION]['B cell'])
+
+
+class TestCacheKono(unittest.TestCase):
     def setUp(self):
         self.test_db = 'sqlite://'
         self.data = os.path.join(dir_path, 'bel')
@@ -62,7 +99,7 @@ class TestNsCache(unittest.TestCase):
         ns = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
         an = 'http://resource.belframework.org/belframework/20150611/annotation/anatomy.belanno'
 
-        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=True)
+        test_db = CacheManager(self.test_db, setup_default_cache=True)
         for ns_key in expected_ns_keys:
             self.assertIn(ns_key, test_db.namespace_cache.keys())
 
@@ -97,15 +134,13 @@ class TestNsCache(unittest.TestCase):
         self.assertNotIn(ns, test_db.annotation_cache.keys())
 
     def test_setupWith_ensureCache(self):
-        # 153 - 155
-        test_db = DefinitionCacheManager(self.test_db)
+        test_db = CacheManager(self.test_db)
         test_db.ensure_cache([test_ns1], [test_an1])
 
         self.assertIn(test_ns1, test_db.namespace_cache.keys())
         self.assertIn(test_an1, test_db.annotation_cache.keys())
 
-        # 141 - 153
-        test_db2 = DefinitionCacheManager(self.test_db)
+        test_db2 = CacheManager(self.test_db)
         test_db2.setup_database(drop_existing=True)
         test_db2.ensure_cache([test_ns2], [test_an1])
 
@@ -113,14 +148,12 @@ class TestNsCache(unittest.TestCase):
         self.assertIn(test_an1, test_db2.annotation_cache.keys())
 
     def test_setupWith_updateCache(self):
-        # 172 - 173
-        test_db = DefinitionCacheManager(self.test_db)
+        test_db = CacheManager(self.test_db)
         test_db.update_definition_cache([test_ns1], [test_an1])
 
         self.assertIn(test_ns1, test_db.namespace_cache.keys())
         self.assertIn(test_an1, test_db.annotation_cache.keys())
 
-        # 141 - 153
         test_db.namespace_cache = {}
         test_db.annotation_cache = {}
         test_db.ensure_cache()
@@ -128,8 +161,7 @@ class TestNsCache(unittest.TestCase):
         self.assertIn(test_ns1, test_db.namespace_cache.keys())
         self.assertIn(test_an1, test_db.annotation_cache.keys())
 
-        # 167 - 172
-        test_db2 = DefinitionCacheManager(self.test_db)
+        test_db2 = CacheManager(self.test_db)
         test_db2.setup_database()
         test_db2.ensure_cache([test_ns1], [test_an1])
 
@@ -138,7 +170,7 @@ class TestNsCache(unittest.TestCase):
 
     def test_allreadyIn(self):
 
-        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
+        test_db = CacheManager(connection=self.test_db, setup_default_cache=False)
         test_db.setup_database()
 
         for namespace in self.test_namespace:
@@ -173,7 +205,7 @@ class TestNsCache(unittest.TestCase):
             'contact': 'charles.hoyt@scai.fraunhofer.de'
         }
 
-        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
+        test_db = CacheManager(self.test_db, setup_default_cache=False)
         test_db.setup_database(drop_existing=True)
         test_db.ensure_cache(self.test_namespace, self.test_annotation)
 
@@ -218,7 +250,7 @@ class TestNsCache(unittest.TestCase):
             }
         }
 
-        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
+        test_db = CacheManager(self.test_db, setup_default_cache=False)
         test_db.setup_database(drop_existing=True)
         test_db.ensure_cache(self.test_namespace)
 
@@ -233,7 +265,7 @@ class TestNsCache(unittest.TestCase):
         self.assertEqual(expected_cache_dict2, test_db.namespace_cache)
         self.assertNotEqual(expected_cache_dict3, test_db.namespace_cache)
 
-        test_db2 = DefinitionCacheManager(self.test_db, setup_default_cache=False)
+        test_db2 = CacheManager(self.test_db, setup_default_cache=False)
         test_db2.setup_database(drop_existing=True)
         test_db2.ensure_cache(self.test_namespace)
 
@@ -245,14 +277,13 @@ class TestNsCache(unittest.TestCase):
         self.assertNotEqual(expected_cache_dict2, test_db2.namespace_cache)
         self.assertEqual(expected_cache_dict3, test_db2.namespace_cache)
 
-        # 187 - 189
         test_db2.namespace_cache = {}
         test_db2.ensure_cache([test_ns2])
 
         self.assertIn(test_ns2, test_db2.namespace_cache.keys())
 
     def test_update_namespaceCache(self):
-        test_db = DefinitionCacheManager(self.test_db, setup_default_cache=False)
+        test_db = CacheManager(connection=self.test_db, setup_default_cache=False)
         test_db.update_definition_cache()
         test_db_keys = test_db.namespace_cache.keys()
         for db_key in expected_ns_keys:
@@ -261,7 +292,6 @@ class TestNsCache(unittest.TestCase):
         ns_removed = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
         ns_to_add = 'http://resource.belframework.org/belframework/20131211/namespace/hgnc-human-genes.belns'
 
-        # 245 - exit
         test_db.remove_definition(ns_removed, '2015-06-11T19:51:19')
         self.assertNotIn(ns_removed, test_db.namespace_cache.keys())
 

@@ -14,7 +14,7 @@ from pyparsing import ParseException
 from requests_file import FileAdapter
 
 from .exceptions import PyBelWarning, PyBelError
-from .manager.namespace_cache import DefinitionCacheManager
+from .manager.cache import CacheManager
 from .parser.canonicalize import decanonicalize_node
 from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
@@ -82,7 +82,7 @@ def from_database(connection):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines=None, context=None, lenient=False, complete_origin=False, definition_cache_manager=None,
+    def __init__(self, lines=None, context=None, lenient=False, complete_origin=False, cache_manager=None,
                  log_stream=None,
                  *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
@@ -92,9 +92,9 @@ class BELGraph(nx.MultiDiGraph):
         :type context: str
         :param lenient: if true, allow naked namespaces
         :type lenient: bool
-        :param definition_cache_manager: database connection string to namespace namspace_cache, pre-built namespace namspace_cache manager,
+        :param cache_manager: database connection string to namespace namspace_cache, pre-built namespace namspace_cache manager,
                     or True to use the default
-        :type definition_cache_manager: str or pybel.mangager.NamespaceCache or bool
+        :type cache_manager: str or pybel.mangager.NamespaceCache or bool
         :param log_stream: a stream to write debug logging to
         :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
         :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
@@ -102,22 +102,26 @@ class BELGraph(nx.MultiDiGraph):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self.last_parse_errors = defaultdict(int)
+        self.context = None
+        self.metadata_parser = None
+        self.bel_parser = None
 
         if lines is not None:
-            self.parse_lines(lines, context, lenient, complete_origin, definition_cache_manager, log_stream)
+            self.parse_lines(lines, context, lenient, complete_origin, cache_manager, log_stream)
 
-    def parse_lines(self, lines, context=None, lenient=False, complete_origin=False, definition_cache_manager=None,
+    def parse_lines(self, lines, context=None, lenient=False, complete_origin=False, cache_manager=None,
                     log_stream=None):
         """Parses an iterable of lines into this graph
+
 
         :param lines: iterable over lines of BEL data file
         :param context: disease context string
         :type context: str
         :param lenient: if true, allow naked namespaces
         :type lenient: bool
-        :param definition_cache_manager: database connection string to namespace namspace_cache, pre-built namespace namspace_cache manager,
-                    or True to use the default
-        :type definition_cache_manager: str or pybel.mangager.NamespaceCache or bool
+        :param complete_origin: add corresponding DNA and RNA entities for all proteins
+        :param cache_manager: database connection string to cache or pre-built namespace namspace_cache manager
+        :type cache_manager: str or pybel.mangager.NamespaceCache
         :param log_stream: a stream to write debug logging to
         """
         if log_stream is not None:
@@ -128,22 +132,18 @@ class BELGraph(nx.MultiDiGraph):
 
         self.context = context
 
-        docs, defs, states = split_file_to_annotations_and_definitions(lines)
+        docs, definitions, states = split_file_to_annotations_and_definitions(lines)
 
-        # self.graph['document_lines'] = docs
-        # self.graph['definition_lines'] = defs
-
-        if isinstance(definition_cache_manager, DefinitionCacheManager):
-            self.metadata_parser = MetadataParser(definition_cache_manager=definition_cache_manager)
-        elif isinstance(definition_cache_manager, str):
-            self.metadata_parser = MetadataParser(
-                definition_cache_manager=DefinitionCacheManager(conn=definition_cache_manager))
+        if isinstance(cache_manager, CacheManager):
+            self.metadata_parser = MetadataParser(cache_manager)
+        elif isinstance(cache_manager, str):
+            self.metadata_parser = MetadataParser(CacheManager(connection=cache_manager))
         else:
-            self.metadata_parser = MetadataParser(definition_cache_manager=DefinitionCacheManager())
+            self.metadata_parser = MetadataParser(CacheManager())
 
         self.parse_document(docs)
 
-        self.parse_definitions(defs)
+        self.parse_definitions(definitions)
 
         self.bel_parser = BelParser(graph=self,
                                     valid_namespaces=self.metadata_parser.namespace_dict,
@@ -194,8 +194,6 @@ class BELGraph(nx.MultiDiGraph):
 
         self.graph['namespace_owl'] = self.metadata_parser.namespace_owl_dict
         self.graph['namespace_url'] = self.metadata_parser.namespace_url_dict
-        self.graph['namespace_list'] = {e: self.metadata_parser.namespace_dict[e] for e in
-                                        self.metadata_parser.namespace_list_list}
         self.graph['annotation_url'] = self.metadata_parser.annotation_url_dict
         self.graph['annotation_list'] = {e: self.metadata_parser.annotations_dict[e] for e in
                                          self.metadata_parser.annotation_list_list}
@@ -270,10 +268,6 @@ class BELGraph(nx.MultiDiGraph):
     @property
     def namespace_owl(self):
         return self.graph['namespace_owl']
-
-    @property
-    def namespace_list(self):
-        return self.graph['namespace_list']
 
     @property
     def annotation_url(self):
