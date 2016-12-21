@@ -181,7 +181,7 @@ class CacheManager(BaseCacheManager):
         definition_entry = self.engine.execute(models.Definition.__table__.insert(), definition_insert_values)
         definition_pk = definition_entry.inserted_primary_key[0]
 
-        context_insert_values = [{'definition_id': definition_pk, 'context': name, 'encoding': encoding} for
+        context_insert_values = [{'definition_id': definition_pk, 'name': name, 'encoding': encoding} for
                                  name, encoding in contexts_dict.items()]
 
         self.engine.execute(models.Entry.__table__.insert(), context_insert_values)
@@ -194,9 +194,9 @@ class CacheManager(BaseCacheManager):
                                                                   left_on='id',
                                                                   right_on='definition_id',
                                                                   how='inner')
-        grouped_dataframe = definition_context_dataframe[['url', 'context', 'encoding']].groupby("url")
+        grouped_dataframe = definition_context_dataframe[['url', 'name', 'encoding']].groupby("url")
 
-        cache = {url: pd.Series(group.encoding.values, index=group.context).to_dict() for url, group in
+        cache = {url: pd.Series(group.encoding.values, index=group.name).to_dict() for url, group in
                  grouped_dataframe}
 
         for definition_url in cache:
@@ -372,7 +372,7 @@ class CacheManager(BaseCacheManager):
             definition_insert_values['pubDate'] = parse_datetime(config['Citation']['PublishedDate'])
 
         definition = models.Definition(**definition_insert_values)
-        definition.entries = [models.Entry(context=c, encoding=e) for c, e in config['Values'].items() if c]
+        definition.entries = [models.Entry(name=c, encoding=e) for c, e in config['Values'].items() if c]
 
         self.session.add(definition)
         self.session.commit()
@@ -396,9 +396,9 @@ class CacheManager(BaseCacheManager):
         if results is None:
             raise ValueError('No results for {}'.format(url))
         elif not results.entries:
-            raise ValueError('No context for {}'.format(url))
+            raise ValueError('No entries for {}'.format(url))
 
-        self.namespace_cache[url] = {context.context: set(context.encoding) for context in results.entries}
+        self.namespace_cache[url] = {entry.name: set(entry.encoding) for entry in results.entries}
 
     def ensure_annotation(self, url):
         if url in self.annotation_cache:
@@ -409,7 +409,7 @@ class CacheManager(BaseCacheManager):
         except NoResultFound:
             results = self.insert_definition_cth(url, DEFINITION_ANNOTATION)
 
-        self.annotation_cache[url] = {context.context: context.encoding for context in results.entries}
+        self.annotation_cache[url] = {entry.name: entry.encoding for entry in results.entries}
 
     def get_belns(self, url):
         self.ensure_namespace(url)
@@ -424,7 +424,7 @@ class CacheManager(BaseCacheManager):
 
     def ls_definition(self, definition_url):
         definition = self.session.query(models.Definition).filter_by(url=definition_url).first()
-        return [context.context for context in definition.contexts]
+        return [context.context for context in definition.entries]
 
     def ensure_owl(self, iri):
         if iri in self.term_cache:
@@ -451,11 +451,6 @@ class CacheManager(BaseCacheManager):
 
     def ls_owl(self):
         return [owl.iri for owl in self.session.query(models.Owl).all()]
-
-    def ls_owl_definition(self, iri):
-        res = self.session.query(models.Owl).filter(models.Owl.iri == iri).one()
-        log.info('Load OWL %s from cache', res)
-        return [entry.entry for entry in res.entries]
 
     def insert_by_iri(self, iri):
         return self.insert_by_graph(iri, parse_owl(iri))

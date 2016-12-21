@@ -42,14 +42,14 @@ class Entry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    context = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False)
     encoding = Column(String(50), nullable=True)
 
     definition_id = Column(Integer, ForeignKey(DEFINITION_TABLE_NAME + '.id'), index=True)
     definition = relationship('Definition', back_populates='entries')
 
     def __repr__(self):
-        return 'Entry(name={}, encoding={})'.format(self.context, self.encoding)
+        return 'Entry(name={}, encoding={})'.format(self.name, self.encoding)
 
 
 owl_relationship = Table(
