@@ -11,7 +11,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from . import models
 from .defaults import default_namespaces, default_annotations, default_owl
-from .models import DEFINITION_TABLE_NAME, CONTEXT_TABLE_NAME, DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
+from .models import DEFINITION_TABLE_NAME, DEFINITION_ENTRY_TABLE_NAME, DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
 from .utils import parse_owl
 from ..constants import PYBEL_DATA
 from ..utils import download_url
@@ -29,6 +29,8 @@ definition_headers = {
     DEFINITION_NAMESPACE: 'Namespace',
     DEFINITION_ANNOTATION: 'AnnotationDefinition'
 }
+
+VALID_NAMESPACE_DOMAINSTRING = {"BiologicalProcess", "Chemical", "Gene and Gene Products", "Other"}
 
 
 def parse_datetime(s):
@@ -64,22 +66,27 @@ class CacheManager(BaseCacheManager):
         """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
         It uses SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
 
-        :param: conn: custom database connection string'
-        :type: str
-        :param: setup_cache: Whether or not the definition cache should be set up on initiation.
-        :type: bool
-        :param: sql_echo: Whether or not echo the running sql code.
-        :type: bool
+        :param: conn: custom database connection string
+        :type conn: str
+        :param create_all: create database?
+        :type create_all: bool
+        :param: setup_default_cache: Whether or not the definition cache should be set up on initiation.
+        :type setup_default_cache: bool
+        :param: echo: Whether or not echo the running sql code.
+        :type echo: bool
         """
 
         BaseCacheManager.__init__(self, connection=connection, echo=echo, create_all=create_all)
 
-        self.owl_cache_manager = OwlCacheManager(connection=connection, echo=echo)
-
-        log.info('Opening cache: %s', connection)
-
+        # Normal cache management
         self.namespace_cache = {}
         self.annotation_cache = {}
+
+        # Owl Cache Management
+        # TODO harmonize term cache with namespace cache
+        self.term_cache = {}
+        self.edge_cache = {}
+        self.graph_cache = {}
 
         self.setup_database()
 
@@ -103,7 +110,7 @@ class CacheManager(BaseCacheManager):
         else:
             raise ValueError('Definition URL has invalid extension: {}'.format(definition_url))
 
-        log.info('Inserting %s %s to definitions cache ', definition_headers[def_type], definition_url)
+        log.info('Caching %s %s', definition_headers[def_type], definition_url)
 
         config = download_url(definition_url)
 
@@ -144,12 +151,12 @@ class CacheManager(BaseCacheManager):
         elif def_type == DEFINITION_ANNOTATION:
             self.annotation_cache[definition_url] = dict(config['Values'])
 
-        defintion_check = self.check_definition(def_key, def_type)
+        definition_check = self.check_definition(def_key, def_type)
 
-        if defintion_check:
+        if definition_check:
             definition_old = self.session.query(models.Definition).filter_by(
-                keyword=defintion_check['keyword'],
-                createdDateTime=defintion_check['createdDateTime']).first()
+                keyword=definition_check['keyword'],
+                createdDateTime=definition_check['createdDateTime']).first()
 
             if check_date and not definition_old.createdDateTime < creation_date_time:
                 return def_key, definition_old.createdDateTime, None
@@ -177,12 +184,12 @@ class CacheManager(BaseCacheManager):
         context_insert_values = [{'definition_id': definition_pk, 'context': name, 'encoding': encoding} for
                                  name, encoding in contexts_dict.items()]
 
-        self.engine.execute(models.Context.__table__.insert(), context_insert_values)
+        self.engine.execute(models.Entry.__table__.insert(), context_insert_values)
 
     def __cached_definitions(self):
         """Creates the namespace and annotation caches"""
         definition_dataframe = pd.read_sql_table(DEFINITION_TABLE_NAME, self.engine)
-        context_dataframe = pd.read_sql_table(CONTEXT_TABLE_NAME, self.engine)
+        context_dataframe = pd.read_sql_table(DEFINITION_ENTRY_TABLE_NAME, self.engine)
         definition_context_dataframe = definition_dataframe.merge(context_dataframe,
                                                                   left_on='id',
                                                                   right_on='definition_id',
@@ -362,10 +369,8 @@ class CacheManager(BaseCacheManager):
         if 'PublishedDate' in config['Citation']:
             definition_insert_values['pubDate'] = parse_datetime(config['Citation']['PublishedDate'])
 
-        values = dict(config['Values'])
-
         definition = models.Definition(**definition_insert_values)
-        definition.contexts = [models.Context(context=c, encoding=e) for c, e in values.items()]
+        definition.entries = [models.Entry(context=c, encoding=e) for c, e in config['Values'].items() if c]
 
         self.session.add(definition)
         self.session.commit()
@@ -379,9 +384,19 @@ class CacheManager(BaseCacheManager):
         try:
             results = self.session.query(models.Definition).filter(models.Definition.url == url).one()
         except NoResultFound:
+
+            # TODO split namespace and annotation handling
+            # if config[header]['DomainString'] not in VALID_NAMESPACE_DOMAINSTRING:
+            #    raise ValueError("Invalid DomainString {}".format(config[header]['DomainString']))
+
             results = self.insert_definition_cth(url, DEFINITION_NAMESPACE)
 
-        self.namespace_cache[url] = {context.context: set(context.encoding) for context in results.contexts}
+        if results is None:
+            raise ValueError('No results for {}'.format(url))
+        elif not results.entries:
+            raise ValueError('No context for {}'.format(url))
+
+        self.namespace_cache[url] = {context.context: set(context.encoding) for context in results.entries}
 
     def ensure_annotation(self, url):
         if url in self.annotation_cache:
@@ -392,13 +407,13 @@ class CacheManager(BaseCacheManager):
         except NoResultFound:
             results = self.insert_definition_cth(url, DEFINITION_ANNOTATION)
 
-        self.annotation_cache[url] = {context.context: context.encoding for context in results.contexts}
+        self.annotation_cache[url] = {context.context: context.encoding for context in results.entries}
 
-    def get_namespace(self, url):
+    def get_belns(self, url):
         self.ensure_namespace(url)
         return self.namespace_cache[url]
 
-    def get_annotation(self, url):
+    def get_belanno(self, url):
         self.ensure_annotation(url)
         return self.annotation_cache[url]
 
@@ -409,26 +424,33 @@ class CacheManager(BaseCacheManager):
         definition = self.session.query(models.Definition).filter_by(url=definition_url).first()
         return [context.context for context in definition.contexts]
 
+    def ensure_owl(self, iri):
+        if iri in self.term_cache:
+            return
+        try:
+            results = self.session.query(models.Owl).filter(models.Owl.iri == iri).one()
+        except NoResultFound:
+            results = self.insert_by_iri(iri)
+
+        self.term_cache[iri] = set(entry.entry for entry in results.entries)
+        self.edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
+
+        graph = nx.DiGraph()
+        graph.add_edges_from(self.edge_cache[iri])
+        self.graph_cache[iri] = graph
+
     def get_owl_terms(self, iri):
-        self.owl_cache_manager.get_terms(iri)
-
-
-class OwlCacheManager(BaseCacheManager):
-    def __init__(self, connection=None, echo=False):
-        BaseCacheManager.__init__(self, connection=connection, echo=echo)
-
-        self.term_cache = {}
-        self.edge_cache = {}
-        self.graph_cache = {}
+        self.ensure_owl(iri)
+        return self.term_cache[iri]
 
     def load_default_owl(self):
         for url in default_owl:
             self.insert_by_iri(url)
 
-    def ls(self):
+    def ls_owl(self):
         return [owl.iri for owl in self.session.query(models.Owl).all()]
 
-    def ls_definition(self, iri):
+    def ls_owl_definition(self, iri):
         res = self.session.query(models.Owl).filter(models.Owl.iri == iri).one()
         log.info('Load OWL %s from cache', res)
         return [entry.entry for entry in res.entries]
@@ -455,29 +477,10 @@ class OwlCacheManager(BaseCacheManager):
 
         return owl
 
-    def ensure(self, iri):
-        if iri in self.term_cache:
-            return
-        try:
-            results = self.session.query(models.Owl).filter(models.Owl.iri == iri).one()
-        except NoResultFound:
-            results = self.insert_by_iri(iri)
-
-        self.term_cache[iri] = set(entry.entry for entry in results.entries)
-        self.edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
-
-        graph = nx.DiGraph()
-        graph.add_edges_from(self.edge_cache[iri])
-        self.graph_cache[iri] = graph
-
-    def get_terms(self, iri):
-        self.ensure(iri)
-        return self.term_cache[iri]
-
     def get_edges(self, iri):
-        self.ensure(iri)
+        self.ensure_owl(iri)
         return self.edge_cache[iri]
 
     def get_graph(self, iri):
-        self.ensure(iri)
+        self.ensure_owl(iri)
         return self.graph_cache[iri]

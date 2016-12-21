@@ -1,11 +1,14 @@
 import os
+import tempfile
 import unittest
 from datetime import datetime
 
+from sqlalchemy import MetaData, Table
+
 from pybel.manager import defaults
 from pybel.manager.cache import CacheManager
-from pybel.manager.defaults import default_annotations as expected_an_keys
-from pybel.manager.defaults import default_namespaces as expected_ns_keys
+from pybel.manager.models import OWL_TABLE_NAME
+from tests.constants import wine_iri
 
 MGI_NAMESPACE = 'http://resource.belframework.org/belframework/20150611/namespace/mgi-mouse-genes.belns'
 HGNC_NAMESPACE = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
@@ -30,10 +33,45 @@ test_ns2 = 'file:///' + os.path.join(dir_path, 'bel', "test_ns_1_updated.belns")
 test_an1 = 'file:///' + os.path.join(dir_path, 'bel', "test_an_1.belanno")
 
 
+class TestCachePersistient(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.db_path =  os.path.join(self.dir, 'test.db')
+        self.connection = 'sqlite:///' +self.db_path
+
+    def tearDown(self):
+        os.remove(self.db_path)
+        os.rmdir(self.dir)
+
+    def test_insert_namespace(self):
+        cm1 = CacheManager(connection=self.connection)
+
+        cm1.ensure_namespace(MGI_NAMESPACE)
+        self.assertIn(MGI_NAMESPACE, cm1.namespace_cache)
+        self.assertIn('Oprk1', cm1.namespace_cache[MGI_NAMESPACE])
+        self.assertEqual(set('GRP'), cm1.namespace_cache[MGI_NAMESPACE]['Oprk1'])
+        self.assertIn('Gm16328', cm1.namespace_cache[MGI_NAMESPACE])
+        self.assertEqual(set('GR'), cm1.namespace_cache[MGI_NAMESPACE]['Gm16328'])
+
+        cm2 = CacheManager(connection=self.connection)
+
+        cm2.ensure_namespace(MGI_NAMESPACE)
+        self.assertIn(MGI_NAMESPACE, cm2.namespace_cache)
+        self.assertIn('Oprk1', cm2.namespace_cache[MGI_NAMESPACE])
+        self.assertEqual(set('GRP'), cm2.namespace_cache[MGI_NAMESPACE]['Oprk1'])
+        self.assertIn('Gm16328', cm2.namespace_cache[MGI_NAMESPACE])
+        self.assertEqual(set('GR'), cm2.namespace_cache[MGI_NAMESPACE]['Gm16328'])
+
+
 class TestCache(unittest.TestCase):
     def setUp(self):
-        self.connection = 'sqlite://'
-        self.cm = CacheManager(connection=self.connection)
+        self.connection = 'sqlite:///'
+        self.cm = CacheManager(connection=self.connection, create_all=True)
+
+    def test_existence(self):
+        metadata = MetaData(self.cm.engine)
+        table = Table(OWL_TABLE_NAME, metadata, autoload=True)
+        self.assertIsNotNone(table)
 
     def test_insert_namespace(self):
         self.cm.ensure_namespace(MGI_NAMESPACE)
@@ -49,11 +87,16 @@ class TestCache(unittest.TestCase):
         self.assertIn('B cell', self.cm.annotation_cache[CELL_ANNOTATION])
         self.assertEqual('CL_0000236', self.cm.annotation_cache[CELL_ANNOTATION]['B cell'])
 
+    def test_insert_owl(self):
+        self.cm.ensure_owl(wine_iri)
+        self.assertIn(wine_iri, self.cm.term_cache)
+        self.assertIn('ChateauMorgon', self.cm.term_cache[wine_iri])
+        self.assertIn('Winery', self.cm.term_cache[wine_iri])
+
 
 class TestCacheKono(unittest.TestCase):
     def setUp(self):
-        self.test_db = 'sqlite://'
-        self.data = os.path.join(dir_path, 'bel')
+        self.test_db = 'sqlite:///'
 
         self.test_namespace = [
             test_ns1
@@ -100,29 +143,27 @@ class TestCacheKono(unittest.TestCase):
         an = 'http://resource.belframework.org/belframework/20150611/annotation/anatomy.belanno'
 
         test_db = CacheManager(self.test_db, setup_default_cache=True)
-        for ns_key in expected_ns_keys:
+        for ns_key in defaults.default_namespaces:
             self.assertIn(ns_key, test_db.namespace_cache.keys())
 
-        for an_key in expected_an_keys:
+        for an_key in defaults.default_annotations:
             self.assertIn(an_key, test_db.annotation_cache.keys())
 
         self.assertEqual(expected_check, test_db.check_definition('CHEBIID', definition_type='N'))
 
-        app_in_hgnc = 'APP' in test_db.namespace_cache[ns]
-        self.assertTrue(app_in_hgnc)
+        self.assertIn('APP', test_db.namespace_cache[ns])
 
-        brain_in_anatomy = 'brain' in test_db.annotation_cache[an]
-        self.assertTrue(brain_in_anatomy)
+        self.assertIn('brain', test_db.annotation_cache[an])
 
         test_db.namespace_cache = {}
         test_db.annotation_cache = {}
 
         test_db.ensure_cache()
 
-        for ns_key in expected_ns_keys:
+        for ns_key in defaults.default_namespaces:
             self.assertIn(ns_key, test_db.namespace_cache.keys())
 
-        for an_key in expected_an_keys:
+        for an_key in defaults.default_annotations:
             self.assertIn(an_key, test_db.annotation_cache.keys())
 
         fake_ns_key = 'http://resource.belframework.org/belframework/20150611/namespace/chebi-ids.belns341'
@@ -286,7 +327,7 @@ class TestCacheKono(unittest.TestCase):
         test_db = CacheManager(connection=self.test_db, setup_default_cache=False)
         test_db.update_definition_cache()
         test_db_keys = test_db.namespace_cache.keys()
-        for db_key in expected_ns_keys:
+        for db_key in defaults.default_namespaces:
             self.assertIn(db_key, test_db_keys)
 
         ns_removed = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'

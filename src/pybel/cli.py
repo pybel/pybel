@@ -12,7 +12,6 @@ problems--the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
-import itertools as itt
 import logging
 import os
 import sys
@@ -23,7 +22,7 @@ import py2neo
 
 from . import graph
 from .constants import PYBEL_DIR
-from .manager.cache import DEFAULT_CACHE_LOCATION, OwlCacheManager, CacheManager
+from .manager.cache import DEFAULT_CACHE_LOCATION, CacheManager
 from .parser.canonicalize import decanonicalize_graph
 
 log = logging.getLogger('pybel')
@@ -133,33 +132,27 @@ def remove():
 @click.argument('url')
 @click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def insert(url, path):
+    dcm = CacheManager(connection=path)
     if url.lower().endswith('.belns') or url.lower().endswith('.belanno'):
-        dcm = CacheManager(connection=path)
         dcm.insert_definition(url)
     else:
-        ocm = OwlCacheManager(connection=path)
-        ocm.insert_by_iri(url)
+        dcm.insert_by_iri(url)
 
 
-@manage.command(help='List cached resources')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def ls(path):
-    dcm = CacheManager(connection=path)
-    ocm = OwlCacheManager(connection=path)
-
-    for url in sorted(itt.chain(dcm.ls(), ocm.ls())):
-        click.echo(url)
-
-
-@manage.command(help='List cache contents')
+@manage.command(help='List cached resource(s)')
 @click.argument('definition_url')
 @click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--owl', is_flag=True)
-def ls_cache(definition_url, path, owl):
-    dcm = CacheManager(connection=path) if not owl else OwlCacheManager(connection=path)
-    res = dcm.ls_definition(definition_url)
+def ls(definition_url, path, owl):
+    dcm = CacheManager(connection=path)
 
-    click.echo_via_pager('\n'.join(res))
+    if definition_url:
+
+        res = dcm.ls_definition(definition_url) if not owl else  dcm.ls_owl_definition(definition_url)
+        click.echo_via_pager('\n'.join(res))
+    else:
+        for url in dcm.ls():
+            click.echo(url)
 
 
 if __name__ == '__main__':

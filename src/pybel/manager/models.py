@@ -2,10 +2,13 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-DEFINITION_TABLE_NAME = 'pybel_cache_definition'
-CONTEXT_TABLE_NAME = 'pybel_cache_context'
+DEFINITION_TABLE_NAME = 'pybel_cache_definitions'
+DEFINITION_ENTRY_TABLE_NAME = 'pybel_cache_entries'
 DEFINITION_NAMESPACE = 'N'
 DEFINITION_ANNOTATION = 'A'
+
+OWL_TABLE_NAME = 'Owl'
+OWL_ENTRY_TABLE_NAME = 'OwlEntry'
 
 Base = declarative_base()
 
@@ -15,6 +18,7 @@ class Definition(Base):
     __tablename__ = DEFINITION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
+
     definitionType = Column(String(1))
     url = Column(String(255))
     author = Column(String(255))
@@ -24,17 +28,28 @@ class Definition(Base):
     copyright = Column(String(255))
     version = Column(String(50))
     contact = Column(String(255))
-    contexts = relationship("Context", cascade='delete, delete-orphan')
+
+    entries = relationship('Entry', back_populates="definition")
+
+    def __repr__(self):
+        return '{}({})'.format('Namespace' if self.definitionType == 'N' else 'Annotation', self.keyword)
 
 
-class Context(Base):
-    """This table represents the one-to-many relationship between a BEL Namespace/annotation, its values, and their semantic annotations"""
-    __tablename__ = CONTEXT_TABLE_NAME
+class Entry(Base):
+    """This table represents the one-to-many relationship between a BEL Namespace/annotation,
+        its values, and their semantic annotations"""
+    __tablename__ = DEFINITION_ENTRY_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    definition_id = Column(Integer, ForeignKey('pybel_cache_definition.id'), index=True)
-    context = Column(String(255))
-    encoding = Column(String(50))
+
+    context = Column(String(255), nullable=False)
+    encoding = Column(String(50), nullable=True)
+
+    definition_id = Column(Integer, ForeignKey(DEFINITION_TABLE_NAME + '.id'), index=True)
+    definition = relationship('Definition', back_populates='entries')
+
+    def __repr__(self):
+        return 'Entry(name={}, encoding={})'.format(self.context, self.encoding)
 
 
 owl_relationship = Table(
@@ -45,23 +60,27 @@ owl_relationship = Table(
 
 
 class Owl(Base):
-    __tablename__ = 'Owl'
+    __tablename__ = OWL_TABLE_NAME
 
-    id = Column(Integer, Sequence('owl_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('Owl_id_seq'), primary_key=True)
     iri = Column(Text, unique=True)
-    entries = relationship("OwlEntry", order_by="OwlEntry.id", backref="owl")
+
+    entries = relationship("OwlEntry", back_populates='owl')
 
     def __repr__(self):
-        return "Owl(iri='{}', #entries='{}')>".format(self.iri, list(self.entries))
+        return "Owl(iri={})>".format(self.iri)
 
 
 class OwlEntry(Base):
-    __tablename__ = 'OwlEntry'
+    __tablename__ = OWL_ENTRY_TABLE_NAME
 
     id = Column(Integer, Sequence('OwlEntry_id_seq'), primary_key=True)
-    owl_id = Column(Integer, ForeignKey('Owl.id'), index=True)
+
     entry = Column(String(255))
     encoding = Column(String(50))
+
+    owl_id = Column(Integer, ForeignKey('Owl.id'), index=True)
+    owl = relationship('Owl', back_populates='entries')
 
     children = relationship('OwlEntry',
                             secondary=owl_relationship,
@@ -69,4 +88,4 @@ class OwlEntry(Base):
                             secondaryjoin=id == owl_relationship.c.right_id)
 
     def __repr__(self):
-        return 'OwlEntry({})'.format(self.entry)
+        return 'OwlEntry({}:{})'.format(self.owl, self.entry)

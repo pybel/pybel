@@ -22,12 +22,12 @@ class MetadataParser(BaseParser):
 
     def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, ):
         """
+        :param cache_manager: a namespace namespace_cache manager
+        :type cache_manager: pybel.manager.CacheManager
         :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
         :type valid_namespaces: dict
         :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
         :type valid_annotations: dict
-        :param cache_manager: a namespace namespace_cache manager
-        :type cache_manager: pybel.manager.CacheManager
         """
 
         self.cache_manager = cache_manager
@@ -70,7 +70,7 @@ class MetadataParser(BaseParser):
         self.annotation_list.setParseAction(self.handle_annotation_list)
         self.annotation_pattern.setParseAction(self.handle_annotation_pattern)
 
-        self.language = (self.document | self.namespace_url |  self.namespace_owl |
+        self.language = (self.document | self.namespace_url | self.namespace_owl |
                          self.annotation_url | self.annotation_list | self.annotation_pattern)
 
     def get_language(self):
@@ -98,7 +98,12 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        self.namespace_dict[name] = self.cache_manager.get_namespace(url)
+        terms = self.cache_manager.get_belns(url)
+
+        if 0 == len(terms):
+            raise ValueError("Empty Namespace: {}".format(url))
+
+        self.namespace_dict[name] = terms
         self.namespace_url_dict[name] = url
 
         return tokens
@@ -120,6 +125,10 @@ class MetadataParser(BaseParser):
         url = tokens['url']
 
         terms = self.cache_manager.get_owl_terms(url)
+
+        if 0 == len(terms):
+            raise ValueError("Empty ontology: {}".format(url))
+
         self.namespace_dict[name] = {term: functions for term in terms}
         self.namespace_owl_dict[name] = url
 
@@ -134,7 +143,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        self.annotations_dict[name] = self.cache_manager.get_annotation(url)
+        self.annotations_dict[name] = self.cache_manager.get_belanno(url)
         self.annotation_url_dict[name] = url
 
         return tokens

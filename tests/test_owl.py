@@ -2,12 +2,15 @@ import os
 import unittest
 
 import pybel
-from pybel.manager.cache import OwlCacheManager, CacheManager
+from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import dir_path, test_bel_4, wine_iri
 from tests.constants import pizza_iri
+
+from sqlalchemy import Table, MetaData
+from pybel.manager.models import OWL_TABLE_NAME
 
 test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
 test_owl_2 = os.path.join(dir_path, 'owl', 'wine.owl')
@@ -300,9 +303,15 @@ class TestWine(TestOwlBase):
     '''
 
     def test_metadata_parser(self):
+        cm = CacheManager('sqlite://', create_all=True)
+        metadata = MetaData(cm.engine)
+        table = Table(OWL_TABLE_NAME, metadata, autoload=True)
+        self.assertIsNotNone(table)
+
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
-        parser = MetadataParser(CacheManager('sqlite:///', create_all=True))
+
+        parser = MetadataParser(cm)
         parser.parseString(s)
 
         self.assertIn('Wine', parser.namespace_dict)
@@ -335,14 +344,14 @@ class TestAdo(TestOwlBase):
 
 class TestOwlManager(unittest.TestCase):
     def setUp(self):
-        self.manager = OwlCacheManager()
+        self.manager = CacheManager()
         self.manager.drop_database()
         self.manager.create_database()
 
     def test_insert(self):
         owl = parse_owl(pizza_iri)
         self.manager.insert_by_graph(pizza_iri, owl)
-        entries = self.manager.get_terms(pizza_iri)
+        entries = self.manager.get_owl_terms(pizza_iri)
         self.assertEqual(TestParsePizza.expected_nodes, entries)
 
         # get edges out
@@ -355,7 +364,7 @@ class TestOwlManager(unittest.TestCase):
 
     def test_missing(self):
         with self.assertRaises(Exception):
-            self.manager.ensure('http://example.com/not_owl.owl')
+            self.manager.ensure_owl('http://example.com/not_owl.owl')
 
     def test_insert_missing(self):
         with self.assertRaises(Exception):

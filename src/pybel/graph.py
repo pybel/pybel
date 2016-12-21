@@ -92,9 +92,9 @@ class BELGraph(nx.MultiDiGraph):
         :type context: str
         :param lenient: if true, allow naked namespaces
         :type lenient: bool
-        :param cache_manager: database connection string to namespace namspace_cache, pre-built namespace namspace_cache manager,
+        :param cache_manager: database connection string to cache, pre-built cache manager,
                     or True to use the default
-        :type cache_manager: str or pybel.mangager.NamespaceCache or bool
+        :type cache_manager: str or pybel.manager.CacheManager
         :param log_stream: a stream to write debug logging to
         :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
         :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
@@ -171,8 +171,9 @@ class BELGraph(nx.MultiDiGraph):
         for line_number, line in document_metadata:
             try:
                 self.metadata_parser.parseString(line)
-            except:
-                log.error('Line %07d - failed: %s', line_number, line)
+            except Exception as e:
+                log.error('Line %07d - Critical Failure - %s', line_number, line)
+                raise e
 
         self.graph['document_metadata'] = self.metadata_parser.document_metadata
 
@@ -184,13 +185,9 @@ class BELGraph(nx.MultiDiGraph):
         for line_number, line in definitions:
             try:
                 self.metadata_parser.parseString(line)
-            except PyBelError as e:
-                log.critical('Line %07d - %s', line_number, line)
+            except Exception as e:
+                log.critical('Line %07d - Critical Failure - %s', line_number, line)
                 raise e
-            except ParseException:
-                log.error('Line %07d - invalid statement: %s', line_number, line)
-            except PyBelWarning as e:
-                log.warning('Line %07d - %s', line_number, e)
 
         self.graph['namespace_owl'] = self.metadata_parser.namespace_owl_dict
         self.graph['namespace_url'] = self.metadata_parser.namespace_url_dict
@@ -216,16 +213,16 @@ class BELGraph(nx.MultiDiGraph):
             except PyBelError as e:
                 log.critical('Line %07d - %s', line_number, line)
                 raise e
-            except ParseException as e:
+            except ParseException:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
                 self.last_parse_errors['general parser failure'] += 1
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
                 self.last_parse_errors[e.__class__.__name__] += 1
-            except:
+            except e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
-                self.last_parse_errors['general failure'] += 1
+                self.last_parse_errors[e.__class__.__name__] += 1
 
         log.info('Finished parsing statements section in %.02f seconds with %d warnings', time.time() - t,
                  sum(self.last_parse_errors.values()))
@@ -234,7 +231,8 @@ class BELGraph(nx.MultiDiGraph):
             log.debug('  %s: %d', k, v)
 
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
-        """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data. See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
+        """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data.
+            See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
         for u, v, k, d in nx.MultiDiGraph.edges_iter(self, nbunch=nbunch, data=True, keys=True, default=default):
             if not subdict_matches(d, kwargs):
                 continue
@@ -248,7 +246,8 @@ class BELGraph(nx.MultiDiGraph):
                 yield u, v
 
     def nodes_iter(self, data=False, **kwargs):
-        """Allows for filtering by checking keyword arguments are a subdictionary of each nodes' data. See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
+        """Allows for filtering by checking keyword arguments are a subdictionary of each nodes' data.
+            See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
         for n, d in nx.MultiDiGraph.nodes_iter(self, data=True):
             if not subdict_matches(d, kwargs):
                 continue
@@ -283,9 +282,12 @@ def to_neo4j(graph, neo_graph, context=None):
 
     :param graph: a BEL Graph
     :type graph: BELGraph
-    :param neo_graph: a py2neo graph object, Refer to the `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_ for how to build this object.
+    :param neo_graph: a py2neo graph object, Refer to the
+                        `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_
+                        for how to build this object.
     :type neo_graph: py2neo.Graph
-    :param context: a disease context to allow for multiple disease models in one neo4j instance. Each edge will be assigned an attribute :code:`pybel_context` with this value
+    :param context: a disease context to allow for multiple disease models in one neo4j instance.
+                    Each edge will be assigned an attribute :code:`pybel_context` with this value
     :type context: str
     """
 
@@ -350,10 +352,7 @@ def to_json(graph, output):
     :param output: a write-supporting filelike object
     """
     data = json_graph.node_link_data(graph)
-
-    data['graph']['namespace_list'] = {k: list(sorted(v)) for k, v in data['graph']['namespace_list'].items()}
     data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph']['annotation_list'].items()}
-
     json.dump(data, output, ensure_ascii=False)
 
 
