@@ -47,6 +47,6 @@ default_annotations = [
 ]
 
 default_owl = [
-    'http://purl.obolibrary.org/obo/hp/releases/2016-09-03/hp.owl', # Human Phenotype Ontology
-    'http://purl.obolibrary.org/obo/pr/49.0./pr-non-classified.owl' # Protein Ontology
+    'http://purl.obolibrary.org/obo/hp/releases/2016-09-03/hp.owl',  # Human Phenotype Ontology
+    'http://purl.obolibrary.org/obo/pr/49.0./pr-non-classified.owl'  # Protein Ontology
 ]

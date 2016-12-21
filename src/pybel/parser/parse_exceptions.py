@@ -10,13 +10,15 @@ class IllegalAnnotationValueExeption(PyBelWarning):
 
 
 class InvalidCitationException(PyBelWarning):
-    """Raised when the format for a citation is wrong. It should have either {type, name, reference}; or {type, name, reference, date, authors, comments}"""
+    """Raised when the format for a citation is wrong. It should have either {type, name, reference}; or
+        {type, name, reference, date, authors, comments}"""
     #:
     code = 11
 
 
 class NestedRelationNotSupportedException(PyBelWarning):
-    """Raised when encountering a nested statement. See our wiki for an explanation of why we explicitly do not support nested statements."""
+    """Raised when encountering a nested statement. See our wiki for an explanation of why we explicitly
+        do not support nested statements."""
     #:
     code = 18
 

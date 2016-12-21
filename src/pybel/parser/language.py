@@ -113,7 +113,7 @@ value_map = {
     'C': {'Complex'}
 }
 
-#rev_value_map = {v: k for k, v in value_map.items()}
+# rev_value_map = {v: k for k, v in value_map.items()}
 
 amino_acid_dict = {
     'A': 'Ala',

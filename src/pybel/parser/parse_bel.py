@@ -458,7 +458,8 @@ class BelParser(BaseParser):
 
         namespace, name = tokens['identifier']['namespace'], tokens['identifier']['name']
 
-        valid_function_codes = set(itt.chain.from_iterable(language.value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
+        valid_function_codes = set(itt.chain.from_iterable(
+            language.value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
 
         if tokens['function'] not in valid_function_codes:
             valid_list = ','.join(self.identifier_parser.namespace_dict[namespace][name])
@@ -589,13 +590,13 @@ class BelParser(BaseParser):
 
         elif 'function' in tokens and 'variants' in tokens:
             cls, ns, val = name[:3]
-            vars = tuple(name[3:])
+            variants = tuple(name[3:])
             if name not in self.graph:
                 self.graph.add_node(name,
                                     type=cls,
                                     namespace=ns,
                                     name=val,
-                                    variants=vars)
+                                    variants=variants)
 
             c = {
                 'function': tokens['function'],

@@ -66,8 +66,8 @@ class CacheManager(BaseCacheManager):
         """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
         It uses SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
 
-        :param: conn: custom database connection string
-        :type conn: str
+        :param: connetion: custom database connection string
+        :type connection: str
         :param create_all: create database?
         :type create_all: bool
         :param: setup_default_cache: Whether or not the definition cache should be set up on initiation.
@@ -221,7 +221,7 @@ class CacheManager(BaseCacheManager):
         """Checks if a namespace namespace_cache already exists in given database and loads the namespace_cache dict.
 
         :param namespace_urls: List of namespace files by url (.belns files)
-        :type namespace_definiton: list
+        :type namespace_urls: list
         :param annotation_urls: List of annotation files by url (.belanno files)
         :type annotation_urls: list
         """
@@ -301,8 +301,10 @@ class CacheManager(BaseCacheManager):
     def check_definition(self, definition_key, definition_type):
         """Check if namespace exists and what version is in the namespace_cache.
 
-        :param namesapce_key: Keyword for a namespace or annotation. i.e.: 'HGNC' or 'Anatomy'
-        :type definition_key: str ('N' for Namespace or 'A' for Annotation)
+        :param definition_key: Keyword for a namespace or annotation. i.e.: 'HGNC' or 'Anatomy'
+        :type definition_key: str
+        :param definition_type: 'N' for Namespace or 'A' for Annotation
+        :type definition_type: str
         :return: None (does not exist) or number of namesapces.
         :rtype: None or dict
         """
