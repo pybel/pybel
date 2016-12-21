@@ -140,18 +140,23 @@ def insert(url, path):
 
 
 @manage.command(help='List cached resource(s)')
-@click.argument('definition_url')
+@click.option('-d', '--definition_url')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-@click.option('--owl', is_flag=True)
-def ls(definition_url, path, owl):
+def ls(definition_url, path):
     dcm = CacheManager(connection=path)
 
-    if definition_url:
-        res = dcm.ls_definition(definition_url) if not owl else dcm.ls_owl_definition(definition_url)
-        click.echo_via_pager('\n'.join(res))
-    else:
+    if not definition_url:
         for url in dcm.ls():
             click.echo(url)
+        sys.exit(0)
+    elif definition_url.endswith('.belanno'):
+        res = dcm.get_belanno(definition_url)
+    elif definition_url.endswith('.belns'):
+        res = dcm.get_belns(definition_url)
+    else:
+        res = dcm.get_owl_terms(definition_url)
+    click.echo_via_pager('\n'.join(res))
+    sys.exit(0)
 
 
 if __name__ == '__main__':
