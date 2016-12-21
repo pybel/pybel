@@ -23,7 +23,6 @@ import py2neo
 from . import graph
 from .constants import PYBEL_DIR
 from .manager.cache import DEFAULT_CACHE_LOCATION, CacheManager
-from .parser.canonicalize import decanonicalize_graph
 
 log = logging.getLogger('pybel')
 log.setLevel(logging.DEBUG)
@@ -99,7 +98,7 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
 
     if bel:
         log.info('Outputting BEL to %s', bel)
-        decanonicalize_graph(g, bel)
+        graph.to_bel(g, bel)
 
     if neo:
         log.info('Uploading to neo4j with context %s', neo_context)
@@ -116,7 +115,7 @@ def manage():
 
 
 @manage.command(help='Set up definition cache with default definitions')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def setup(path):
     CacheManager(connection=path, setup_default_cache=True)
     sys.exit(0)
@@ -130,9 +129,10 @@ def remove():
 
 @manage.command(help='Manually add definition by URL')
 @click.argument('url')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def insert(url, path):
     dcm = CacheManager(connection=path)
+
     if url.lower().endswith('.belns') or url.lower().endswith('.belanno'):
         dcm.insert_definition(url)
     else:
@@ -141,14 +141,13 @@ def insert(url, path):
 
 @manage.command(help='List cached resource(s)')
 @click.argument('definition_url')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--owl', is_flag=True)
 def ls(definition_url, path, owl):
     dcm = CacheManager(connection=path)
 
     if definition_url:
-
-        res = dcm.ls_definition(definition_url) if not owl else  dcm.ls_owl_definition(definition_url)
+        res = dcm.ls_definition(definition_url) if not owl else dcm.ls_owl_definition(definition_url)
         click.echo_via_pager('\n'.join(res))
     else:
         for url in dcm.ls():

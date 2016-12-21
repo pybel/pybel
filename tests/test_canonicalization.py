@@ -7,7 +7,7 @@ import networkx as nx
 
 import pybel
 from pybel.constants import GOCC_LATEST
-from pybel.parser.canonicalize import decanonicalize_graph
+from pybel.parser.canonicalize import to_bel
 from tests.constants import test_bel_0, test_bel_1, test_bel_3, test_bel_4
 
 log = logging.getLogger('pybel')
@@ -35,7 +35,7 @@ class TestCanonicalize(unittest.TestCase):
         tpath = os.path.join(self.tdir, 'out.bel')
 
         with open(tpath, 'w') as f:
-            decanonicalize_graph(g_out, f)
+            to_bel(g_out, f)
 
         g_in = pybel.from_path(tpath)
 

@@ -194,7 +194,7 @@ def sort_edges(d):
         itt.chain.from_iterable((k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in blacklist_features))
 
 
-def decanonicalize_graph(g, file=sys.stdout):
+def to_bel(g, file=sys.stdout):
 
     for k in sorted(g.document):
         print('SET DOCUMENT {} = "{}"'.format(k, g.document[k]), file=file)

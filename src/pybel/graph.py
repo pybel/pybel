@@ -15,14 +15,14 @@ from requests_file import FileAdapter
 
 from .exceptions import PyBelWarning, PyBelError
 from .manager.cache import CacheManager
-from .parser.canonicalize import decanonicalize_node
+from .parser.canonicalize import decanonicalize_node, to_bel
 from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import flatten, flatten_graph_data, expand_dict
 
-__all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle',
-           'from_graphml', 'to_graphml', 'to_json', 'to_neo4j', 'to_pickle', 'from_json']
+__all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle', 'from_graphml', 'to_graphml', 'to_json', 'to_neo4j',
+           'to_pickle', 'from_json', 'to_bel']
 
 log = logging.getLogger('pybel')
 
