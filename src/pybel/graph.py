@@ -34,7 +34,7 @@ def from_url(url, **kwargs):
 
     :param url: a valid URL pointing to a BEL resource
     :type url: str
-    :param \**kwargs: keyword arguments to pass to :py:meth:`BELGraph`
+    :param \*\*kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
     :rtype: BELGraph
     """
@@ -56,7 +56,7 @@ def from_path(path, **kwargs):
 
     :param path: a file path
     :type path: str
-    :param \**kwargs: keyword arguments to pass to :py:meth:`BELGraph`
+    :param \*\*kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
     :rtype: BELGraph"""
 
