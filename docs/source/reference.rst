@@ -48,7 +48,7 @@ enable this option, but can specifiy a specific database location if they choose
 Managers
 ~~~~~~~~
 
-.. automethod:: pybel.manager.namespace_cache.DefinitionCacheManager.__init__
+.. automethod:: pybel.manager.cache.CacheManager.__init__
 
 Utilities
 ---------
