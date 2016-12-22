@@ -288,8 +288,8 @@ def to_neo4j(graph, neo_graph, context=None):
     :type context: str
     """
 
-    if context is not None:
-        graph.context = context
+    if graph.context is not None:
+        context = graph.context
 
     tx = neo_graph.begin()
 
@@ -310,8 +310,8 @@ def to_neo4j(graph, neo_graph, context=None):
         neo_v = node_map[v]
         rel_type = data['relation']
         attrs = flatten(data)
-        if graph.context is not None:
-            attrs[PYBEL_CONTEXT_TAG] = str(graph.context)
+        if context is not None:
+            attrs[PYBEL_CONTEXT_TAG] = str(context)
         rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
         tx.create(rel)
 
