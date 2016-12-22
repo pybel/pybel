@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
+from ..parser.language import value_map
+
 DEFINITION_TABLE_NAME = 'pybel_cache_definitions'
 DEFINITION_ENTRY_TABLE_NAME = 'pybel_cache_entries'
 DEFINITION_NAMESPACE = 'N'
@@ -9,6 +11,8 @@ DEFINITION_ANNOTATION = 'A'
 
 OWL_TABLE_NAME = 'Owl'
 OWL_ENTRY_TABLE_NAME = 'OwlEntry'
+
+DEFAULT_BELNS_ENCODING = ''.join(sorted(value_map))
 
 Base = declarative_base()
 
@@ -43,7 +47,7 @@ class Entry(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), nullable=False)
-    encoding = Column(String(50), nullable=True)
+    encoding = Column(String(len(value_map)), nullable=False, default=DEFAULT_BELNS_ENCODING)
 
     definition_id = Column(Integer, ForeignKey(DEFINITION_TABLE_NAME + '.id'), index=True)
     definition = relationship('Definition', back_populates='entries')
