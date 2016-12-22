@@ -13,7 +13,7 @@ from networkx.readwrite import json_graph
 from pyparsing import ParseException
 from requests_file import FileAdapter
 
-from .exceptions import PyBelWarning, PyBelError
+from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
 from .parser.canonicalize import decanonicalize_node, to_bel
 from .parser.parse_bel import BelParser
@@ -210,9 +210,6 @@ class BELGraph(nx.MultiDiGraph):
         for line_number, line in statements:
             try:
                 self.bel_parser.parseString(line)
-            except PyBelError as e:
-                log.critical('Line %07d - %s', line_number, line)
-                raise e
             except ParseException:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
                 self.last_parse_errors['general parser failure'] += 1
