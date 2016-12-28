@@ -146,10 +146,12 @@ class CacheManager(BaseCacheManager):
             'contact': config['Author']['ContactInfoString']
         }
 
+        values = {k: v for k, v in config['Values'].items() if k}
+
         if def_type == DEFINITION_NAMESPACE:
-            self.namespace_cache[definition_url] = dict(config['Values'])
+            self.namespace_cache[definition_url] = values
         elif def_type == DEFINITION_ANNOTATION:
-            self.annotation_cache[definition_url] = dict(config['Values'])
+            self.annotation_cache[definition_url] = values
 
         definition_check = self.check_definition(def_key, def_type)
 
