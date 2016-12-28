@@ -10,6 +10,7 @@ from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3
+import requests.exceptions
 
 log = logging.getLogger('pybel')
 
@@ -75,7 +76,7 @@ class TestParsePizza(TestOwlBase):
 
         try:
             parser.parseString(s)
-        except ConnectionError as e:
+        except requests.exceptions.ConnectionError as e:
             log.warning('Connection Error %s', e)
             return
 
@@ -90,7 +91,7 @@ class TestParsePizza(TestOwlBase):
 
         try:
             parser.parseString(s)
-        except ConnectionError as e:
+        except requests.exceptions.ConnectionError as e:
             log.warning('Connection Error %s', e)
             return
 
