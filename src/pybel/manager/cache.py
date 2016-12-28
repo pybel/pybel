@@ -1,17 +1,15 @@
 import logging
 import os
-import time
 from datetime import datetime
 
 import networkx as nx
-import pandas as pd
-from sqlalchemy import create_engine, exists
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.exc import NoResultFound
 
 from . import models
-from .defaults import default_namespaces, default_annotations, default_owl
-from .models import DEFINITION_TABLE_NAME, DEFINITION_ENTRY_TABLE_NAME, DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
+from .defaults import default_owl
+from .models import DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
 from .utils import parse_owl
 from ..constants import PYBEL_DATA
 from ..parser import language
@@ -57,8 +55,8 @@ class BaseCacheManager:
         if create_all:
             self.create_database()
 
-    def create_database(self):
-        models.Base.metadata.create_all(self.engine)
+    def create_database(self, checkfirst=True):
+        models.Base.metadata.create_all(self.engine, checkfirst=checkfirst)
 
     def drop_database(self):
         models.Base.metadata.drop_all(self.engine)
@@ -81,276 +79,16 @@ class CacheManager(BaseCacheManager):
 
         BaseCacheManager.__init__(self, connection=connection, echo=echo, create_all=create_all)
 
-        # Normal cache management
         self.namespace_cache = {}
         self.annotation_cache = {}
 
-        # Owl Cache Management
         # TODO harmonize term cache with namespace cache
         self.term_cache = {}
         self.edge_cache = {}
         self.graph_cache = {}
 
-        self.setup_database()
+        self.create_database()
 
-        if setup_default_cache:
-            self.ensure_cache()
-
-    def insert_definition(self, definition_url, check_date=True):
-        """Inserts namespace and names into namespace namespace_cache db.
-
-        :param definition_url: URL of a namespace or annotation definition file (.belns / .belanno)
-        :type definition_url: str
-        :param check_date: Indicates if creation dates of namespaces should be checked
-                            (outdated namespaces will not be inserted!)
-        :type check_date: bool
-        """
-
-        if definition_url.endswith('.belns'):
-            def_type = DEFINITION_NAMESPACE
-        elif definition_url.endswith('.belanno'):
-            def_type = DEFINITION_ANNOTATION
-        else:
-            raise ValueError('Definition URL has invalid extension: {}'.format(definition_url))
-
-        log.info('Caching %s %s', definition_headers[def_type], definition_url)
-
-        config = download_url(definition_url)
-
-        defDictType = config[definition_headers[def_type]]
-
-        def_key = defDictType['Keyword']
-
-        try:
-            creation_date_time = datetime.strptime(defDictType['CreatedDateTime'], CREATION_DATE_FMT)
-        except:
-            raise ValueError('Incorrect format for datetime: {}'.format(defDictType['CreatedDateTime']))
-
-        pub_date = None
-        if 'PublishedDate' in config['Citation']:
-            try:
-                pub_date = datetime.strptime(config['Citation']['PublishedDate'], PUBLISHED_DATE_FMT)
-            except:
-                try:
-                    pub_date = datetime.strptime(config['Citation']['PublishedDate'], CREATION_DATE_FMT)
-                except:
-                    raise ValueError(
-                        "Incorrect format for datetime: {}".format(config['Citation']['PublishedDate']))
-
-        definition_insert_values = {
-            'url': definition_url,
-            'definitionType': def_type,
-            'author': config['Author']['NameString'],
-            'keyword': def_key,
-            'createdDateTime': creation_date_time,
-            'pubDate': pub_date,
-            'copyright': config['Author']['CopyrightString'],
-            'version': config[definition_headers[def_type]]['VersionString'],
-            'contact': config['Author']['ContactInfoString']
-        }
-
-        values = {k: v for k, v in config['Values'].items() if k}
-
-        if def_type == DEFINITION_NAMESPACE:
-            self.namespace_cache[definition_url] = values
-        elif def_type == DEFINITION_ANNOTATION:
-            self.annotation_cache[definition_url] = values
-
-        definition_check = self.check_definition(def_key, def_type)
-
-        if definition_check:
-            definition_old = self.session.query(models.Definition).filter_by(
-                keyword=definition_check['keyword'],
-                createdDateTime=definition_check['createdDateTime']).first()
-
-            if check_date and not definition_old.createdDateTime < creation_date_time:
-                return def_key, definition_old.createdDateTime, None
-
-            else:
-                if def_type == DEFINITION_NAMESPACE:
-                    self.__insert_definition_helper([definition_insert_values], self.namespace_cache[definition_url])
-                elif def_type == DEFINITION_ANNOTATION:
-                    self.__insert_definition_helper([definition_insert_values], self.annotation_cache[definition_url])
-
-                return def_key, creation_date_time, definition_old
-
-        if def_type == DEFINITION_NAMESPACE:
-            self.__insert_definition_helper([definition_insert_values], self.namespace_cache[definition_url])
-        elif def_type == DEFINITION_ANNOTATION:
-            self.__insert_definition_helper([definition_insert_values], self.annotation_cache[definition_url])
-
-        return def_key, creation_date_time, None
-
-    def __insert_definition_helper(self, definition_insert_values, contexts_dict):
-
-        definition_entry = self.engine.execute(models.Definition.__table__.insert(), definition_insert_values)
-        definition_pk = definition_entry.inserted_primary_key[0]
-
-        context_insert_values = [{'definition_id': definition_pk, 'name': name, 'encoding': encoding} for
-                                 name, encoding in contexts_dict.items()]
-
-        self.engine.execute(models.Entry.__table__.insert(), context_insert_values)
-
-    def __cached_definitions(self):
-        """Creates the namespace and annotation caches"""
-        definition_dataframe = pd.read_sql_table(DEFINITION_TABLE_NAME, self.engine)
-        context_dataframe = pd.read_sql_table(DEFINITION_ENTRY_TABLE_NAME, self.engine)
-        definition_context_dataframe = definition_dataframe.merge(context_dataframe,
-                                                                  left_on='id',
-                                                                  right_on='definition_id',
-                                                                  how='inner')
-        grouped_dataframe = definition_context_dataframe[['url', 'name', 'encoding']].groupby("url")
-
-        cache = {url: pd.Series(group.encoding.values, index=group.name).to_dict() for url, group in
-                 grouped_dataframe}
-
-        for definition_url in cache:
-            if definition_url.endswith('.belns'):
-                self.namespace_cache[definition_url] = cache[definition_url]
-            elif definition_url.endswith('.belanno'):
-                self.annotation_cache[definition_url] = cache[definition_url]
-
-    def setup_database(self, drop_existing=False):
-        """Sets the database with the needed tables.
-
-        :param drop_existing: Indicates if existing tables should be dropped and the namespace_cache should be reset.
-        :type drop_existing: bool
-        """
-        start_time = time.time()
-        if drop_existing:
-            models.Base.metadata.drop_all(self.engine)
-            log.info("Database was dropped in %3.2fs", time.time() - start_time)
-        models.Base.metadata.create_all(self.engine, checkfirst=True)
-
-    def ensure_cache(self, namespace_urls=None, annotation_urls=None):
-        """Checks if a namespace namespace_cache already exists in given database and loads the namespace_cache dict.
-
-        :param namespace_urls: List of namespace files by url (.belns files)
-        :type namespace_urls: list
-        :param annotation_urls: List of annotation files by url (.belanno files)
-        :type annotation_urls: list
-        """
-        namespace_urls = namespace_urls if namespace_urls else default_namespaces
-        annotation_urls = annotation_urls if annotation_urls else default_annotations
-
-        if self.engine.dialect.has_table(self.engine, DEFINITION_TABLE_NAME):
-
-            for def_type in (DEFINITION_NAMESPACE, DEFINITION_ANNOTATION):
-
-                if not self.session.query(models.Definition).filter_by(definitionType=def_type).first():
-                    if def_type == DEFINITION_NAMESPACE:
-                        log.info("Namespace cache is empty, new one is created.")
-                        for url in namespace_urls:
-                            self.insert_definition(url, check_date=False)
-                    elif def_type == DEFINITION_ANNOTATION:
-                        log.info("Annotation cache is empty, new one is created.")
-                        for url in annotation_urls:
-                            self.insert_definition(url, check_date=False)
-
-            self.__cached_definitions()
-
-    def update_definition_cache(self, namespace_urls=None, annotation_urls=None, overwrite_old_definitions=True):
-        """Updates the cache DB with given namespace and annotation list (see defaults.py)
-
-        :param namespace_urls: List of namespace files by url (.belns files)
-        :type namespace_urls: list
-        :param annotation_urls: List of namespaces files by url (.belanno files)
-        :type annotation_urls: list
-        :param overwrite_old_definitions: Indicates if outdated namespaces or annotations should be overwritten
-        :type overwrite_old_definitions: bool
-        """
-        namespace_urls = namespace_urls if namespace_urls is not None else default_namespaces
-        annotation_urls = annotation_urls if annotation_urls is not None else default_annotations
-
-        if self.engine.dialect.has_table(self.engine, DEFINITION_TABLE_NAME):
-            for url in namespace_urls + annotation_urls:
-                self.update_definition(url, overwrite_old_definitions)
-
-    def update_definition(self, definition_url, overwrite_old_definition=True):
-        """Checks if a namespace or annotation that is given by url is already in cache and if so, if it is up to date.
-        
-        :param definition_url: URL to a namespace or annotation definition file (.belns / .belanno)
-        :type definition_url: str
-        :param overwrite_old_definition: Indicates if old namespaces should be removed from namespace_cache
-                                            if a new version is inersted.
-        :type overwrite_old_definition: bool
-        """
-        start_time = time.time()
-
-        if self.session.query(exists().where(models.Definition.url == definition_url)).scalar():
-            if not self.namespace_cache or not self.annotation_cache:
-                self.ensure_cache()
-            return
-
-        definition_key, creationDateTime, definition_old = self.insert_definition(definition_url,
-                                                                                  check_date=overwrite_old_definition)
-
-        if definition_old and overwrite_old_definition and definition_old.createdDateTime < creationDateTime:
-            log.warning(
-                "Old definition %s [%s] will be removed from cache database due to updated version [%s]",
-                definition_old.keyword,
-                definition_old.url,
-                definition_url
-            )
-            old_dateTime = definition_old.createdDateTime
-            self.remove_definition(definition_old.url, definition_old.createdDateTime)
-
-            log.info(
-                "%s was updated from v.%s to v.%s in %3.2fs",
-                definition_key,
-                old_dateTime,
-                creationDateTime,
-                time.time() - start_time
-            )
-
-    def check_definition(self, definition_key, definition_type):
-        """Check if namespace exists and what version is in the namespace_cache.
-
-        :param definition_key: Keyword for a namespace or annotation. i.e.: 'HGNC' or 'Anatomy'
-        :type definition_key: str
-        :param definition_type: 'N' for Namespace or 'A' for Annotation
-        :type definition_type: str
-        :return: None (does not exist) or number of namesapces.
-        :rtype: None or dict
-        """
-        definition_old = self.session.query(models.Definition).filter_by(keyword=definition_key,
-                                                                         definitionType=definition_type).first()
-        if definition_old:
-            return {
-                'keyword': definition_old.keyword,
-                'version': definition_old.version,
-                'url': definition_old.url,
-                'createdDateTime': definition_old.createdDateTime,
-                'pubDate': definition_old.pubDate,
-                'copyright': definition_old.copyright,
-                'author': definition_old.author,
-                'contact': definition_old.contact
-            }
-
-    def remove_definition(self, definition_url, created_date_time):
-        """Removes namespace or annotation from cache by url and createdDateTime.
-
-        :param definition_url: URL to a namespace or annotation definition file (.belns / .belanno)
-        :type definition_url: str
-        :param created_date_time: Date and time for creation (createdDateTime) in the definition file.
-        format like: 2015-06-11T19:51:19
-        :type created_date_time: str
-
-        """
-        def_to_remove = created_date_time if isinstance(created_date_time, datetime) else datetime.strptime(
-            created_date_time, CREATION_DATE_FMT)
-        definition = self.session.query(models.Definition).filter_by(url=definition_url,
-                                                                     createdDateTime=def_to_remove).first()
-        if definition:
-            definition_type = definition.definitionType
-            self.session.delete(definition)
-            self.session.commit()
-            if definition_type == DEFINITION_NAMESPACE:
-                del self.namespace_cache[definition_url]
-            elif definition_type == DEFINITION_ANNOTATION:
-                del self.annotation_cache[definition_url]
-
-    #######################################################
 
     def insert_definition_cth(self, url, definition_type):
         """

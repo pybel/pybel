@@ -133,28 +133,30 @@ def remove():
 def insert(url, path):
     dcm = CacheManager(connection=path)
 
-    if url.lower().endswith('.belns') or url.lower().endswith('.belanno'):
-        dcm.insert_definition(url)
+    if url.endswith('.belns'):
+        dcm.ensure_namespace(url)
+    elif url.endswith('.belanno'):
+        dcm.ensure_annotation(url)
     else:
         dcm.insert_by_iri(url)
 
 
-@manage.command(help='List cached resource(s)')
-@click.option('-d', '--definition_url')
+@manage.command(help='List URLs of cached resources, or contents of a specific resource')
+@click.option('--url', help='Resource to list')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def ls(definition_url, path):
+def ls(url, path):
     dcm = CacheManager(connection=path)
 
-    if not definition_url:
+    if not url:
         for url in dcm.ls():
             click.echo(url)
         sys.exit(0)
-    elif definition_url.endswith('.belanno'):
-        res = dcm.get_belanno(definition_url)
-    elif definition_url.endswith('.belns'):
-        res = dcm.get_belns(definition_url)
+    elif url.endswith('.belns'):
+        res = dcm.get_belns(url)
+    elif url.endswith('.belanno'):
+        res = dcm.get_belanno(url)
     else:
-        res = dcm.get_owl_terms(definition_url)
+        res = dcm.get_owl_terms(url)
     click.echo_via_pager('\n'.join(res))
     sys.exit(0)
 
