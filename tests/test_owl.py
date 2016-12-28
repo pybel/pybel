@@ -1,20 +1,14 @@
-import os
 import unittest
+
+from sqlalchemy import Table, MetaData
 
 import pybel
 from pybel.manager.cache import CacheManager
+from pybel.manager.models import OWL_TABLE_NAME
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
-from tests.constants import dir_path, test_bel_4, wine_iri
-from tests.constants import pizza_iri
-
-from sqlalchemy import Table, MetaData
-from pybel.manager.models import OWL_TABLE_NAME
-
-test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
-test_owl_2 = os.path.join(dir_path, 'owl', 'wine.owl')
-test_owl_3 = os.path.join(dir_path, 'owl', 'ado.owl')
+from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3
 
 
 class TestOwlBase(unittest.TestCase):
@@ -59,24 +53,15 @@ class TestParsePizza(TestOwlBase):
         ('TomatoTopping', 'Topping')
     }
 
-    '''
     def test_file(self):
-        owl = parse_owl(test_owl_1)
-
-        print(owl.nodes())
-        print(owl.edges())
-
-        self.assertEqual('file://' + test_owl_1, owl.iri)
-        #self.assertEqual(self.expected_prefixes, owl.prefix_url)
+        owl = parse_owl('file://' + test_owl_1)
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
-    '''
 
     def test_url(self):
         owl = parse_owl(pizza_iri)
 
         self.assertEqual(pizza_iri, owl.iri)
-        # self.assertEqual(self.expected_prefixes, owl.prefix_url)
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
@@ -259,15 +244,8 @@ class TestWine(TestOwlBase):
 
         self.expected_edges = self.expected_subclasses | self.expected_membership
 
-    '''
     def test_file(self):
-        owl = parse_owl(test_owl_2)
-
-        self.assertEqual(self.iri, owl.iri)
-
-        #for k, v in self.expected_prefixes:
-        #    self.assertIn(k, owl.prefix_url)
-        #    self.assertEqual(v, owl.prefix_url[k])
+        owl = parse_owl('file://' + test_owl_2)
 
         for node in sorted(self.expected_classes):
             self.assertHasNode(owl, node)
@@ -280,27 +258,6 @@ class TestWine(TestOwlBase):
 
         for u, v in sorted(self.expected_membership):
             self.assertHasEdge(owl, u, v)
-    '''
-
-    '''
-    def test_string(self):
-        with open(test_owl_2) as f:
-            owl = OWLParser(content=f.read())
-
-        self.assertEqual(self.iri, owl.iri)
-
-        for node in sorted(self.expected_classes):
-            self.assertHasNode(owl, node)
-
-        for node in sorted(self.expected_individuals):
-            self.assertHasNode(owl, node)
-
-        for u, v in sorted(self.expected_subclasses):
-            self.assertHasEdge(owl, u, v)
-
-        for u, v in sorted(self.expected_membership):
-            self.assertHasEdge(owl, u, v)
-    '''
 
     def test_metadata_parser(self):
         cm = CacheManager('sqlite://', create_all=True)
@@ -332,7 +289,7 @@ class TestAdo(TestOwlBase):
         ('control_trials_study_arm', 'Study_arm'),
         ('copper', 'MaterialEntity'),
         ('curcumin_plant', 'plant'),
-        ('cytokine', 'cell_signalling') # Line 12389 of ado.owl
+        ('cytokine', 'cell_signalling')  # Line 12389 of ado.owl
     }
 
     def test_ado(self):

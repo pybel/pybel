@@ -5,6 +5,7 @@ from datetime import datetime
 
 from sqlalchemy import MetaData, Table
 
+import tests.constants
 from pybel.manager import defaults
 from pybel.manager.cache import CacheManager
 from pybel.manager.models import OWL_TABLE_NAME
@@ -28,9 +29,9 @@ defaults.default_annotations = [
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-test_ns1 = 'file:///' + os.path.join(dir_path, 'bel', 'test_ns_1.belns')
-test_ns2 = 'file:///' + os.path.join(dir_path, 'bel', "test_ns_1_updated.belns")
-test_an1 = 'file:///' + os.path.join(dir_path, 'bel', "test_an_1.belanno")
+test_ns1 = 'file:///' + tests.constants.test_ns_1
+test_ns2 = 'file:///' + tests.constants.test_ns_2
+test_an1 = 'file:///' + tests.constants.test_an_1
 
 
 class TestCachePersistient(unittest.TestCase):
