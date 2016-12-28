@@ -36,8 +36,8 @@ test_an1 = 'file:///' + os.path.join(dir_path, 'bel', "test_an_1.belanno")
 class TestCachePersistient(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
-        self.db_path =  os.path.join(self.dir, 'test.db')
-        self.connection = 'sqlite:///' +self.db_path
+        self.db_path = os.path.join(self.dir, 'test.db')
+        self.connection = 'sqlite:///' + self.db_path
 
     def tearDown(self):
         os.remove(self.db_path)
