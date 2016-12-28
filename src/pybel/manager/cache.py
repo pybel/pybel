@@ -14,12 +14,15 @@ from .defaults import default_namespaces, default_annotations, default_owl
 from .models import DEFINITION_TABLE_NAME, DEFINITION_ENTRY_TABLE_NAME, DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
 from .utils import parse_owl
 from ..constants import PYBEL_DATA
+from ..parser import language
 from ..utils import download_url
 
 log = logging.getLogger('pybel')
 
 DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
 DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA, DEFAULT_DEFINITION_CACHE_NAME)
+
+DEFAULT_BELNS_ENCODING = ''.join(sorted(language.value_map))
 
 CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
 PUBLISHED_DATE_FMT = '%Y-%m-%d'
@@ -374,7 +377,13 @@ class CacheManager(BaseCacheManager):
             definition_insert_values['pubDate'] = parse_datetime(config['Citation']['PublishedDate'])
 
         definition = models.Definition(**definition_insert_values)
-        definition.entries = [models.Entry(name=c, encoding=e) for c, e in config['Values'].items() if c]
+
+        if definition_type == DEFINITION_ANNOTATION:
+            values = {c: e for c, e in config['Values'].items() if c}
+        else:
+            values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in config['Values'].items() if c}
+
+        definition.entries = [models.Entry(name=c, encoding=e) for c, e in values.items() if c]
 
         self.session.add(definition)
         self.session.commit()
