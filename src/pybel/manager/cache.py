@@ -1,3 +1,4 @@
+import itertools as itt
 import logging
 import os
 from datetime import datetime
@@ -9,7 +10,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from . import defaults
 from . import models
-from .models import DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
 from .utils import parse_owl
 from ..constants import PYBEL_DATA
 from ..parser import language
@@ -24,14 +24,6 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(language.value_map))
 
 CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
 PUBLISHED_DATE_FMT = '%Y-%m-%d'
-
-# TODO make Enum
-definition_headers = {
-    DEFINITION_NAMESPACE: 'Namespace',
-    DEFINITION_ANNOTATION: 'AnnotationDefinition'
-}
-
-VALID_NAMESPACE_DOMAINSTRING = {"BiologicalProcess", "Chemical", "Gene and Gene Products", "Other"}
 
 
 def parse_datetime(s):
@@ -63,6 +55,44 @@ class BaseCacheManager:
         models.Base.metadata.drop_all(self.engine)
 
 
+def extract_shared_required(config, definition_header='Namespace'):
+    """
+
+    :param config:
+    :param definition_header: 'Namespace' or 'AnnotationDefinition'
+    :return:
+    """
+    return {
+        'keyword': config[definition_header]['Keyword'],
+        'created': parse_datetime(config[definition_header]['CreatedDateTime']),
+        'author': config['Author']['NameString'],
+        'citation': config['Citation']['NameString']
+    }
+
+
+def extract_shared_optional(config, definition_header='Namespace'):
+    s = {
+        'description': (definition_header, 'DescriptionString'),
+        'version': (definition_header, 'VersionString'),
+        'license': ('Author', 'CopyrightString'),
+        'contact': ('Author', 'ContactInfoString'),
+        'citation_description': ('Citation', 'DescriptionString'),
+        'citation_version': ('Citation', 'PublishedVersionString'),
+        'citation_url': ('Citation', 'ReferenceURL')
+    }
+
+    x = {}
+
+    for database_column, (section, key) in s.items():
+        if section in config and key in config[section]:
+            x[database_column] = config[section][key]
+
+    if 'PublishedDate' in config['Citation']:
+        x['citation_published'] = parse_datetime(config['Citation']['PublishedDate'])
+
+    return x
+
+
 class CacheManager(BaseCacheManager):
     def __init__(self, connection=None, echo=False):
         """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
@@ -79,52 +109,74 @@ class CacheManager(BaseCacheManager):
         self.namespace_cache = {}
         self.annotation_cache = {}
 
-        # TODO harmonize term cache with namespace cache
         self.term_cache = {}
         self.edge_cache = {}
         self.graph_cache = {}
 
         self.create_database()
 
-    def insert_definition(self, url, definition_type):
-        """Inserts the definition file at the given location to the cache
+    def insert_namespace(self, url):
+        """Inserts the namespace file at the given location to the cache
 
-        :param url: the location of the definition file
+        :param url: the location of the namespace file
         :type url: str
-        :param definition_type: either DEFINITION_NAMESPACE or DEFINITION_ANNOTATION
         :return: SQL Alchemy model instance, populated with data from URL
+        :rtype: :class:`models.Namespace`
         """
         config = download_url(url)
 
-        header = definition_headers[definition_type]
-
-        definition_insert_values = {
+        namespace_insert_values = {
+            'name': config['Namespace']['NameString'],
             'url': url,
-            'definitionType': definition_type,
-            'author': config['Author']['NameString'],
-            'keyword': config[header]['Keyword'],
-            'createdDateTime': parse_datetime(config[header]['CreatedDateTime']),
-            'copyright': config['Author']['CopyrightString'],
-            'version': config[header]['VersionString'],
-            'contact': config['Author']['ContactInfoString']
+            'domain': config['Namespace']['DomainString']
         }
 
-        if 'PublishedDate' in config['Citation']:
-            definition_insert_values['pubDate'] = parse_datetime(config['Citation']['PublishedDate'])
+        namespace_insert_values.update(extract_shared_required(config, 'Namespace'))
+        namespace_insert_values.update(extract_shared_optional(config, 'Namespace'))
 
-        definition = models.Definition(**definition_insert_values)
+        namespace_mapping = {
+            'species': ('Namespace', 'SpeciesString'),
+            'query_url': ('Namespace', 'QueryValueURL')
+        }
 
-        if definition_type == DEFINITION_ANNOTATION:
-            values = {c: e for c, e in config['Values'].items() if c}
-        else:
-            values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in config['Values'].items() if c}
+        for database_column, (section, key) in namespace_mapping.items():
+            if section in config and key in config[section]:
+                namespace_insert_values[database_column] = config[section][key]
 
-        definition.entries = [models.Entry(name=c, encoding=e) for c, e in values.items() if c]
+        namespace = models.Namespace(**namespace_insert_values)
 
-        self.session.add(definition)
+        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in config['Values'].items() if c}
+
+        namespace.entries = [models.NamespaceEntry(name=c, encoding=e) for c, e in values.items()]
+
+        self.session.add(namespace)
         self.session.commit()
 
-        return definition
+        return namespace
+
+    def insert_annotation(self, url):
+        config = download_url(url)
+        annotation_insert_values = {
+            'type': config['AnnotationDefinition']['TypeString']
+        }
+        annotation_insert_values.update(extract_shared_required(config, 'AnnotationDefinition'))
+        annotation_insert_values.update(extract_shared_optional(config, 'AnnotationDefinition'))
+
+        annotation_mapping = {
+            'name': ('Citation', 'NameString')
+        }
+
+        for database_column, (section, key) in annotation_mapping.items():
+            if section in config and key in config[section]:
+                annotation_insert_values[database_column] = config[section][key]
+
+        annotation = models.Annotation(**annotation_insert_values)
+        annotation.entries = [models.AnnotationEntry(name=c, label=l) for c, l in config['Values'].items() if c]
+
+        self.session.add(annotation)
+        self.session.commit()
+
+        return annotation
 
     def ensure_namespace(self, url):
         """Caches a namespace file if not already in the cache
@@ -136,14 +188,9 @@ class CacheManager(BaseCacheManager):
             return
 
         try:
-            results = self.session.query(models.Definition).filter(models.Definition.url == url).one()
+            results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
         except NoResultFound:
-
-            # TODO split namespace and annotation handling
-            # if config[header]['DomainString'] not in VALID_NAMESPACE_DOMAINSTRING:
-            #    raise ValueError("Invalid DomainString {}".format(config[header]['DomainString']))
-
-            results = self.insert_definition(url, DEFINITION_NAMESPACE)
+            results = self.insert_namespace(url)
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
@@ -162,11 +209,11 @@ class CacheManager(BaseCacheManager):
             return
 
         try:
-            results = self.session.query(models.Definition).filter(models.Definition.url == url).one()
+            results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one()
         except NoResultFound:
-            results = self.insert_definition(url, DEFINITION_ANNOTATION)
+            results = self.insert_annotation(url)
 
-        self.annotation_cache[url] = {entry.name: entry.encoding for entry in results.entries}
+        self.annotation_cache[url] = {entry.name: entry.label for entry in results.entries}
 
     def get_namespace(self, url):
         """Returns a dict of names and their encodings for the given namespace file
@@ -187,17 +234,15 @@ class CacheManager(BaseCacheManager):
         return self.annotation_cache[url]
 
     def ls(self):
+        return itt.chain(self.ls_namespaces(), self.ls_annotations())
+
+    def ls_namespaces(self):
         """Returns a list of the locations of the stored namespaces and annotations"""
-        return [definition.url for definition in self.session.query(models.Definition).all()]
+        return [definition.url for definition in self.session.query(models.Namespace).all()]
 
-    def ls_definition(self, url):
-        """Returns a list of the entries for the given definition file
-
-        :param url: the location of the annotation file
-        :type url: str
-        """
-        definition = self.session.query(models.Definition).filter_by(url=url).first()
-        return [context.context for context in definition.entries]
+    def ls_annotations(self):
+        """Returns a list of the locations of the stored namespaces and annotations"""
+        return [definition.url for definition in self.session.query(models.Annotation).all()]
 
     def ensure_owl(self, iri):
         """Caches an ontology at the given IRI if it is not already in the cache

@@ -7,6 +7,8 @@ from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
 
+from tests.constants import test_an_1, test_ns_1, test_bel_1
+
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -14,9 +16,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestSplitLines(unittest.TestCase):
     def test_parts(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
 
-        with open(path) as f:
+        with open(test_bel_1) as f:
             docs, definitions, statements = split_file_to_annotations_and_definitions(f)
 
         self.assertEqual(7, len(docs))
@@ -141,8 +142,7 @@ class TestParseMetadata(unittest.TestCase):
 
     def test_parse_namespace_url_file(self):
         """Tests parsing a namespace by file URL"""
-        path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
-        s = 'DEFINE NAMESPACE TESTNS1 AS URL "file://{}"'.format(path)
+        s = 'DEFINE NAMESPACE TESTNS1 AS URL "file://{}"'.format(test_ns_1)
         self.parser.parseString(s)
 
         expected_values = {
@@ -161,8 +161,7 @@ class TestParseMetadata(unittest.TestCase):
 
     def test_parse_annotation_url_file(self):
         """Tests parsing an annotation by file URL"""
-        path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
-        s = '''DEFINE ANNOTATION TESTAN1 AS URL "file://{}"'''.format(path)
+        s = '''DEFINE ANNOTATION TESTAN1 AS URL "file://{}"'''.format(test_an_1)
         self.parser.parseString(s)
 
         expected_values = {
