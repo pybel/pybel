@@ -32,7 +32,6 @@ INSTALL_REQUIRES = [
     'py2neo',
     'click',
     'sqlalchemy',
-    'pandas',
     'matplotlib',
     'ontospy'
 ]
