@@ -117,7 +117,10 @@ def manage():
 @manage.command(help='Set up definition cache with default definitions')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def setup(path):
-    CacheManager(connection=path, setup_default_cache=True)
+    cm = CacheManager(connection=path)
+    cm.load_default_namespaces()
+    cm.load_default_annotations()
+    cm.load_default_owl()
     sys.exit(0)
 
 

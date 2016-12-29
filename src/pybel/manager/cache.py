@@ -7,8 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.exc import NoResultFound
 
+from . import defaults
 from . import models
-from .defaults import default_owl
 from .models import DEFINITION_ANNOTATION, DEFINITION_NAMESPACE
 from .utils import parse_owl
 from ..constants import PYBEL_DATA
@@ -48,13 +48,11 @@ def parse_datetime(s):
 
 
 class BaseCacheManager:
-    def __init__(self, connection=None, echo=False, create_all=False):
+    def __init__(self, connection=None, echo=False):
         connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
         self.engine = create_engine(connection, echo=echo)
         self.session = scoped_session(sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False))
-
-        if create_all:
-            self.create_database()
+        self.create_database()
 
     def create_database(self, checkfirst=True):
         models.Base.metadata.create_all(self.engine, checkfirst=checkfirst)
@@ -64,19 +62,17 @@ class BaseCacheManager:
 
 
 class CacheManager(BaseCacheManager):
-    def __init__(self, connection=None, create_all=False, echo=False):
+    def __init__(self, connection=None, echo=False):
         """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
         It uses SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
 
-        :param: connection: custom database connection string
+        :param connection: custom database connection string
         :type connection: str
-        :param create_all: create database?
-        :type create_all: bool
-        :param: echo: Whether or not echo the running sql code.
+        :param echo: Whether or not echo the running sql code.
         :type echo: bool
         """
 
-        BaseCacheManager.__init__(self, connection=connection, echo=echo, create_all=create_all)
+        BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
         self.namespace_cache = {}
         self.annotation_cache = {}
@@ -192,13 +188,13 @@ class CacheManager(BaseCacheManager):
         """Returns a list of the locations of the stored namespaces and annotations"""
         return [definition.url for definition in self.session.query(models.Definition).all()]
 
-    def ls_definition(self, definition_url):
+    def ls_definition(self, url):
         """Returns a list of the entries for the given definition file
 
         :param url: the location of the annotation file
         :type url: str
         """
-        definition = self.session.query(models.Definition).filter_by(url=definition_url).first()
+        definition = self.session.query(models.Definition).filter_by(url=url).first()
         return [context.context for context in definition.entries]
 
     def ensure_owl(self, iri):
@@ -222,14 +218,23 @@ class CacheManager(BaseCacheManager):
         graph.add_edges_from(self.edge_cache[iri])
         self.graph_cache[iri] = graph
 
+    def load_default_namespaces(self):
+        """Caches the default set of namespaces"""
+        for url in defaults.default_namespaces:
+            self.ensure_namespace(url)
+
+    def load_default_annotations(self):
+        """Caches the default set of annotations"""
+        for url in defaults.default_annotations:
+            self.ensure_annotation(url)
+
     def load_default_owl(self):
         """Caches the default set of ontologies"""
-        for url in default_owl:
-            self.insert_by_iri(url)
+        for url in defaults.default_owl:
+            self.ensure_owl(url)
 
     def ls_owl(self):
         """Returns a list of the locations of the stored ontologies"""
-
         return [owl.iri for owl in self.session.query(models.Owl).all()]
 
     def insert_by_iri(self, iri):
