@@ -50,7 +50,7 @@ def main():
 
 
 @main.command()
-@click.option('--path', type=click.File('r'), help='Input BEL file file path')
+@click.option('--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
 @click.option('--database', help='Input BEL database')
 @click.option('--csv', help='Output path for *.csv')
@@ -71,14 +71,12 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
     ch.setLevel(log_levels.get(verbose, 5))
     log.addHandler(ch)
 
-    if path:
-        g = graph.BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
-    elif url:
+    if url:
         g = graph.from_url(url, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
     elif database:
         g = graph.from_database(database)
     else:
-        g = graph.BELGraph(sys.stdin, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
+        g = graph.BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
 
     if csv:
         log.info('Outputting csv to %s', csv)
@@ -121,13 +119,11 @@ def setup(path):
     cm.load_default_namespaces()
     cm.load_default_annotations()
     cm.load_default_owl()
-    sys.exit(0)
 
 
-@manage.command(help='Remove definition cache')
+@manage.command(help='Remove default definition cache at {}'.format(DEFAULT_CACHE_LOCATION))
 def remove():
     os.remove(DEFAULT_CACHE_LOCATION)
-    sys.exit(0)
 
 
 @manage.command(help='Manually add definition by URL')
@@ -141,7 +137,7 @@ def insert(url, path):
     elif url.endswith('.belanno'):
         dcm.ensure_annotation(url)
     else:
-        dcm.insert_by_iri(url)
+        dcm.ensure_owl(url)
 
 
 @manage.command(help='List URLs of cached resources, or contents of a specific resource')
@@ -153,15 +149,14 @@ def ls(url, path):
     if not url:
         for url in dcm.ls():
             click.echo(url)
-        sys.exit(0)
-    elif url.endswith('.belns'):
-        res = dcm.get_namespace(url)
-    elif url.endswith('.belanno'):
-        res = dcm.get_annotation(url)
     else:
-        res = dcm.get_owl_terms(url)
-    click.echo_via_pager('\n'.join(res))
-    sys.exit(0)
+        if url.endswith('.belns'):
+            res = dcm.get_namespace(url)
+        elif url.endswith('.belanno'):
+            res = dcm.get_annotation(url)
+        else:
+            res = dcm.get_owl_terms(url)
+        click.echo_via_pager('\n'.join(res))
 
 
 if __name__ == '__main__':
