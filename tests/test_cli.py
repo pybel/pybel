@@ -75,19 +75,20 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main,
-                                        ['convert', '--path', test_bel_1, '--json', abs_test_file, '--complete-origin'])
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--json', abs_test_file,
+                                                   '--complete-origin'])
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_json(abs_test_file)
             bel_1_reconstituted(self, g)
 
     def test_bel(self):
-        test_edge_file = 'mygraph.bel'
+        test_file = 'mygraph.bel'
 
         with self.runner.isolated_filesystem():
-            abs_test_file = os.path.abspath(test_edge_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--bel', abs_test_file])
+            abs_test_file = os.path.abspath(test_file)
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--bel', abs_test_file,
+                                                   '--complete-origin'])
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             g = pybel.from_path(abs_test_file)
             bel_1_reconstituted(self, g)
