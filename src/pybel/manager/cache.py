@@ -48,6 +48,8 @@ def parse_datetime(s):
 
 
 class BaseCacheManager:
+    """Creates a connection to database and a persistient session using SQLAlchemy"""
+
     def __init__(self, connection=None, echo=False):
         connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
         self.engine = create_engine(connection, echo=echo)
@@ -246,7 +248,13 @@ class CacheManager(BaseCacheManager):
         return self.insert_by_graph(iri, parse_owl(iri))
 
     def insert_by_graph(self, iri, graph):
-        """"""
+        """Caches an ontology represented by a graph
+
+        :param iri: the location of the ontology
+        :type iri: str
+        :param graph: the graph representation of the ontology's subclass and instanceof relationships
+        :type graph: :class:`networkx.DiGraph`
+        """
         if 0 < self.session.query(models.Owl).filter(models.Owl.iri == iri).count():
             log.debug('%s already cached', iri)
             return
