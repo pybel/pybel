@@ -66,7 +66,7 @@ class TestCachePersistient(unittest.TestCase):
 class TestCache(unittest.TestCase):
     def setUp(self):
         self.connection = 'sqlite:///'
-        self.cm = CacheManager(connection=self.connection, create_all=True)
+        self.cm = CacheManager(connection=self.connection)
 
     def test_existence(self):
         metadata = MetaData(self.cm.engine)

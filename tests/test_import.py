@@ -15,10 +15,10 @@ class TestCacheIntegration(unittest.TestCase):
     def test_cached_winning(self):
         c_path = 'sqlite://'
 
-        c = CacheManager(connection=c_path, setup_default_cache=False)
+        cm = CacheManager(connection=c_path)
 
         with open(test_bel_3) as f:
-            g = pybel.BELGraph(f, cache_manager=c)
+            g = pybel.BELGraph(f, cache_manager=cm)
 
         expected_document_metadata = {
             'Name': "PyBEL Test Document",

@@ -1,6 +1,7 @@
 import logging
 import unittest
 
+import requests.exceptions
 from sqlalchemy import Table, MetaData
 
 import pybel
@@ -10,7 +11,6 @@ from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3
-import requests.exceptions
 
 log = logging.getLogger('pybel')
 
@@ -274,7 +274,7 @@ class TestWine(TestOwlBase):
             self.assertHasEdge(owl, u, v)
 
     def test_metadata_parser(self):
-        cm = CacheManager('sqlite://', create_all=True)
+        cm = CacheManager('sqlite://')
         metadata = MetaData(cm.engine)
         table = Table(OWL_TABLE_NAME, metadata, autoload=True)
         self.assertIsNotNone(table)
