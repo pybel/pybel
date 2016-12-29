@@ -103,17 +103,17 @@ rev_abundance_labels = {
 
 #: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
 value_map = {
-    'G': 'Gene',
-    'R': 'RNA',
-    'P': 'Protein',
-    'M': 'miRNA',
-    'A': 'Abundance',
-    'B': 'BiologicalProcess',
-    'O': 'Pathology',
-    'C': 'Complex'
+    'G': {'Gene'},
+    'R': {'miRNA', 'RNA'},
+    'P': {'Protein'},
+    'M': {'miRNA'},
+    'A': {'Abundance', 'RNA', 'miRNA', 'Protein', 'Gene', 'Complex'},
+    'B': {'Pathology', 'BiologicalProcess'},
+    'O': {'Pathology'},
+    'C': {'Complex'}
 }
 
-rev_value_map = {v: k for k, v in value_map.items()}
+# rev_value_map = {v: k for k, v in value_map.items()}
 
 amino_acid_dict = {
     'A': 'Ala',

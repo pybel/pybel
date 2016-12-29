@@ -60,7 +60,7 @@ def decanonicalize_variant(tokens):
     elif tokens[0] == 'Fragment':
         if '?' == tokens[1] and len(tokens) == 2:
             return 'frag(?)'
-        elif '?' == tokens[1] and len(tokens) == 3: # has description
+        elif '?' == tokens[1] and len(tokens) == 3:  # has description
             return 'frag(?, {})'.format(tokens[2])
         elif len(tokens) == 4:
             return 'frag({})'.format(''.join(map(str, tokens[1:])))
@@ -167,10 +167,11 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
 def decanonicalize_edge(g, u, v, k):
     """Takes two nodes and gives back a BEL string representing the statement
 
-    :param g:
+    :param g: The graph
     :type g: BELGraph
-    :param u:
-    :param v:
+    :param u: The edge's source node
+    :param v: The edge's target node
+    :param k: The edge key
     :return:
     """
 
@@ -194,8 +195,7 @@ def sort_edges(d):
         itt.chain.from_iterable((k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in blacklist_features))
 
 
-def decanonicalize_graph(g, file=sys.stdout):
-
+def to_bel(g, file=sys.stdout):
     for k in sorted(g.document):
         print('SET DOCUMENT {} = "{}"'.format(k, g.document[k]), file=file)
 
@@ -209,10 +209,6 @@ def decanonicalize_graph(g, file=sys.stdout):
 
     for namespace, url in sorted(g.namespace_owl.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url), file=file)
-
-    for namespace, ns_list in sorted(g.namespace_list.items(), key=itemgetter(0)):
-        ns_list_str = ', '.join('"{}"'.format(e) for e in ns_list)
-        print('DEFINE NAMESPACE {} AS LIST {{{}}}'.format(namespace, ns_list_str), file=file)
 
     print('###############################################\n', file=file)
 

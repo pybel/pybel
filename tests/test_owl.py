@@ -1,17 +1,18 @@
-import os
+import logging
 import unittest
 
+import requests.exceptions
+from sqlalchemy import Table, MetaData
+
 import pybel
-from pybel.manager.owl_cache import OwlCacheManager
+from pybel.manager.cache import CacheManager
+from pybel.manager.models import OWL_TABLE_NAME
+from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
-from pybel.parser.utils import parse_owl, OWLParser
-from tests.constants import dir_path, test_bel_4, wine_iri
-from tests.constants import pizza_iri
+from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3
 
-test_owl_1 = os.path.join(dir_path, 'owl', 'pizza_onto.owl')
-test_owl_2 = os.path.join(dir_path, 'owl', 'wine.owl')
-test_owl_3 = os.path.join(dir_path, 'owl', 'ado.owl')
+log = logging.getLogger('pybel')
 
 
 class TestOwlBase(unittest.TestCase):
@@ -56,32 +57,28 @@ class TestParsePizza(TestOwlBase):
         ('TomatoTopping', 'Topping')
     }
 
-    '''
     def test_file(self):
-        owl = parse_owl(test_owl_1)
-
-        print(owl.nodes())
-        print(owl.edges())
-
-        self.assertEqual('file://' + test_owl_1, owl.iri)
-        #self.assertEqual(self.expected_prefixes, owl.prefix_url)
+        owl = parse_owl('file://' + test_owl_1)
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
-    '''
 
     def test_url(self):
         owl = parse_owl(pizza_iri)
 
         self.assertEqual(pizza_iri, owl.iri)
-        # self.assertEqual(self.expected_prefixes, owl.prefix_url)
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
     def test_metadata_parser(self):
         functions = set('A')
         s = 'DEFINE NAMESPACE Pizza AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
-        parser = MetadataParser()
-        parser.parseString(s)
+        parser = MetadataParser(CacheManager('sqlite:///'))
+
+        try:
+            parser.parseString(s)
+        except requests.exceptions.ConnectionError as e:
+            log.warning('Connection Error %s', e)
+            return
 
         names = set(parser.namespace_dict['Pizza'].keys())
         for node in self.expected_nodes:
@@ -90,8 +87,13 @@ class TestParsePizza(TestOwlBase):
 
     def test_metadata_parser_no_function(self):
         s = 'DEFINE NAMESPACE Pizza AS OWL "{}"'.format(pizza_iri)
-        parser = MetadataParser()
-        parser.parseString(s)
+        parser = MetadataParser(CacheManager('sqlite:///'))
+
+        try:
+            parser.parseString(s)
+        except requests.exceptions.ConnectionError as e:
+            log.warning('Connection Error %s', e)
+            return
 
         functions = set(value_map.keys())
         names = set(parser.namespace_dict['Pizza'].keys())
@@ -256,15 +258,8 @@ class TestWine(TestOwlBase):
 
         self.expected_edges = self.expected_subclasses | self.expected_membership
 
-    '''
     def test_file(self):
-        owl = parse_owl(test_owl_2)
-
-        self.assertEqual(self.iri, owl.iri)
-
-        #for k, v in self.expected_prefixes:
-        #    self.assertIn(k, owl.prefix_url)
-        #    self.assertEqual(v, owl.prefix_url[k])
+        owl = parse_owl('file://' + test_owl_2)
 
         for node in sorted(self.expected_classes):
             self.assertHasNode(owl, node)
@@ -277,33 +272,23 @@ class TestWine(TestOwlBase):
 
         for u, v in sorted(self.expected_membership):
             self.assertHasEdge(owl, u, v)
-    '''
-
-    '''
-    def test_string(self):
-        with open(test_owl_2) as f:
-            owl = OWLParser(content=f.read())
-
-        self.assertEqual(self.iri, owl.iri)
-
-        for node in sorted(self.expected_classes):
-            self.assertHasNode(owl, node)
-
-        for node in sorted(self.expected_individuals):
-            self.assertHasNode(owl, node)
-
-        for u, v in sorted(self.expected_subclasses):
-            self.assertHasEdge(owl, u, v)
-
-        for u, v in sorted(self.expected_membership):
-            self.assertHasEdge(owl, u, v)
-    '''
 
     def test_metadata_parser(self):
+        cm = CacheManager('sqlite://')
+        metadata = MetaData(cm.engine)
+        table = Table(OWL_TABLE_NAME, metadata, autoload=True)
+        self.assertIsNotNone(table)
+
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
-        parser = MetadataParser()
-        parser.parseString(s)
+
+        parser = MetadataParser(cm)
+
+        try:
+            parser.parseString(s)
+        except ConnectionError as e:
+            log.warning('Connection Error %s', e)
+            return
 
         self.assertIn('Wine', parser.namespace_dict)
         names = sorted(parser.namespace_dict['Wine'].keys())
@@ -323,7 +308,7 @@ class TestAdo(TestOwlBase):
         ('control_trials_study_arm', 'Study_arm'),
         ('copper', 'MaterialEntity'),
         ('curcumin_plant', 'plant'),
-        ('cytokine', 'cell_signalling') # Line 12389 of ado.owl
+        ('cytokine', 'cell_signalling')  # Line 12389 of ado.owl
     }
 
     def test_ado(self):
@@ -335,14 +320,14 @@ class TestAdo(TestOwlBase):
 
 class TestOwlManager(unittest.TestCase):
     def setUp(self):
-        self.manager = OwlCacheManager()
+        self.manager = CacheManager()
         self.manager.drop_database()
         self.manager.create_database()
 
     def test_insert(self):
-        owl = parse_owl(pizza_iri, 'A')
-        self.manager.insert_by_graph(owl)
-        entries = self.manager.get_terms(pizza_iri)
+        owl = parse_owl(pizza_iri)
+        self.manager.insert_by_graph(pizza_iri, owl)
+        entries = self.manager.get_owl_terms(pizza_iri)
         self.assertEqual(TestParsePizza.expected_nodes, entries)
 
         # get edges out
@@ -351,11 +336,11 @@ class TestOwlManager(unittest.TestCase):
         self.assertEqual(TestParsePizza.expected_edges, edges)
 
         # check nothing bad happens on second insert
-        self.manager.insert_by_graph(owl)
+        self.manager.insert_by_graph(pizza_iri, owl)
 
     def test_missing(self):
         with self.assertRaises(Exception):
-            self.manager.ensure('http://example.com/not_owl.owl')
+            self.manager.ensure_owl('http://example.com/not_owl.owl')
 
     def test_insert_missing(self):
         with self.assertRaises(Exception):

@@ -12,7 +12,6 @@ problems--the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
-import itertools as itt
 import logging
 import os
 import sys
@@ -23,9 +22,7 @@ import py2neo
 
 from . import graph
 from .constants import PYBEL_DIR
-from .manager import OwlCacheManager
-from .manager.namespace_cache import DefinitionCacheManager, DEFAULT_CACHE_LOCATION
-from .parser.canonicalize import decanonicalize_graph
+from .manager.cache import DEFAULT_CACHE_LOCATION, CacheManager
 
 log = logging.getLogger('pybel')
 log.setLevel(logging.DEBUG)
@@ -35,7 +32,7 @@ log_levels = {
     1: logging.DEBUG,
 }
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(name)s:%(levelname)s - %(message)s')
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
 
@@ -53,7 +50,7 @@ def main():
 
 
 @main.command()
-@click.option('--path', type=click.File('r'), help='Input BEL file file path')
+@click.option('--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
 @click.option('--database', help='Input BEL database')
 @click.option('--csv', help='Output path for *.csv')
@@ -74,14 +71,12 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
     ch.setLevel(log_levels.get(verbose, 5))
     log.addHandler(ch)
 
-    if path:
-        g = graph.BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
-    elif url:
+    if url:
         g = graph.from_url(url, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
     elif database:
         g = graph.from_database(database)
     else:
-        g = graph.BELGraph(sys.stdin, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
+        g = graph.BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
 
     if csv:
         log.info('Outputting csv to %s', csv)
@@ -101,7 +96,7 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
 
     if bel:
         log.info('Outputting BEL to %s', bel)
-        decanonicalize_graph(g, bel)
+        graph.to_bel(g, bel)
 
     if neo:
         log.info('Uploading to neo4j with context %s', neo_context)
@@ -118,38 +113,50 @@ def manage():
 
 
 @manage.command(help='Set up definition cache with default definitions')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def setup(path):
-    DefinitionCacheManager(conn=path, setup_default_cache=True)
-    sys.exit(0)
+    cm = CacheManager(connection=path)
+    cm.load_default_namespaces()
+    cm.load_default_annotations()
+    cm.load_default_owl()
 
 
-@manage.command(help='Remove definition cache')
+@manage.command(help='Remove default definition cache at {}'.format(DEFAULT_CACHE_LOCATION))
 def remove():
     os.remove(DEFAULT_CACHE_LOCATION)
-    sys.exit(0)
 
 
 @manage.command(help='Manually add definition by URL')
 @click.argument('url')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def insert(url, path):
-    if url.lower().endswith('.belns') or url.lower().endswith('.belanno'):
-        dcm = DefinitionCacheManager(conn=path)
-        dcm.insert_definition(url)
+    dcm = CacheManager(connection=path)
+
+    if url.endswith('.belns'):
+        dcm.ensure_namespace(url)
+    elif url.endswith('.belanno'):
+        dcm.ensure_annotation(url)
     else:
-        ocm = OwlCacheManager(conn=path)
-        ocm.insert_by_iri(url)
+        dcm.ensure_owl(url)
 
 
-@manage.command(help='List cached resources')
-@click.option('--path', help='Destination for namespace namspace_cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def ls(path):
-    dcm = DefinitionCacheManager(conn=path)
-    ocm = OwlCacheManager(conn=path)
+@manage.command(help='List URLs of cached resources, or contents of a specific resource')
+@click.option('--url', help='Resource to list')
+@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def ls(url, path):
+    dcm = CacheManager(connection=path)
 
-    for url in sorted(itt.chain(dcm.ls(), ocm.ls())):
-        click.echo(url)
+    if not url:
+        for url in dcm.ls():
+            click.echo(url)
+    else:
+        if url.endswith('.belns'):
+            res = dcm.get_namespace(url)
+        elif url.endswith('.belanno'):
+            res = dcm.get_annotation(url)
+        else:
+            res = dcm.get_owl_terms(url)
+        click.echo_via_pager('\n'.join(res))
 
 
 if __name__ == '__main__':

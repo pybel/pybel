@@ -41,7 +41,7 @@ class TestRandom(unittest.TestCase):
 
     def test_pybelexception_str(self):
         e = PyBelWarning('XXX')
-        self.assertEqual("PyBEL100 - XXX", str(e))
+        self.assertEqual("PyBEL100 - PyBelWarning - XXX", str(e))
 
         with self.assertRaises(PyBelWarning):
             raise e

@@ -2,12 +2,14 @@ PyBEL
 =====
 
 :code:`PyBEL` is a Python software package that parses BEL statements, validates their semantics, applies common graph
-algorithms, and allows for data interchange between common formats like Neo4J, JSON, CSV, Excel, and SQL.
+algorithms, and allows for data interchange between common formats and database systems like JSON, CSV, SQL, and Neo4J.
 
-=========== =============== ================== ======================= ====================
-Stable      |stable_build|  |stable_coverage|  |stable_documentation|  |stable_pyversions|
-Development |develop_build| |develop_coverage| |develop_documentation| |develop_pyversions|
-=========== =============== ================== ======================= ====================
+Development:
+
+=========== =============== ================== =======================
+Stable      |stable_build|  |stable_coverage|  |stable_documentation| 
+Development |develop_build| |develop_coverage| |develop_documentation|
+=========== =============== ================== =======================
 
 
 .. |stable_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=master
@@ -22,9 +24,6 @@ Development |develop_build| |develop_coverage| |develop_documentation| |develop_
     :target: http://pybel.readthedocs.io/en/stable/
     :alt: Stable Documentation Status
 
-.. |stable_pyversions| image::  https://img.shields.io/pypi/pyversions/PyBEL.svg
-    :alt: Stable Supported Python Versions
-
 .. |develop_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
     :target: https://travis-ci.org/pybel/pybel
     :alt: Development Build Status
@@ -37,13 +36,17 @@ Development |develop_build| |develop_coverage| |develop_documentation| |develop_
     :target: http://pybel.readthedocs.io/en/latest/
     :alt: Development Documentation Status
 
-.. |develop_pyversions| image:: https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg
-    :alt: Development Supported Python Versions
-
 .. |climate| image:: https://codeclimate.com/github/pybel/pybel/badges/gpa.svg
     :target: https://codeclimate.com/github/pybel/pybel
     :alt: Code Climate
 
+.. |python_versions| image::  https://img.shields.io/pypi/pyversions/PyBEL.svg
+    :alt: Stable Supported Python Versions
+	
+.. |pypi_version| image:: https://img.shields.io/pypi/v/PyBEL.svg
+
+.. |pypi_license| image:: https://img.shields.io/pypi/l/PyBEL.svg
+	
 
 Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
@@ -99,19 +102,22 @@ This example gets a file from stdin and exports to multiple locations, with logg
    $ URL="http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel"
    $ NEO="neo4j:neo4j@localhost:7474"
    $
-   $ curl $URL | pybel convert --path - --neo $NEO --json ~/Desktop/example.json --log-file ~/Desktop/log.txt
+   $ curl $URL | pybel convert --neo $NEO --json ~/Desktop/example.json --log-file ~/Desktop/log.txt
 
 Installation
 ------------
 
-Installation is as easy as running from your favorite terminal:
+|pypi_version| |python_versions| |pypi_license|
+
+
+PyBEL can be installed easily from `PyPI <https://pypi.python.org/pypi/pybel>`_ with the following code in
+your favorite terminal:
 
 .. code-block:: sh
 
    pip install pybel
 
-Currently, :code:`PyBEL` officially supports Python 2.7 and Python 3.5. Builds also pass on Python 3.4, and there
-are some problems that can be solved with the installation of :code:`pandas` for Python 3.3 usage.
+See the `documentation <http://pybel.readthedocs.io/>`_ for more advanced instructions.
 
 Contributing
 ------------
@@ -122,9 +128,9 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 Acknowledgements
 ----------------
 
-- PyBEL is proudly built with Paul McGuire's PyParsing package.
+- This software is proudly built with Paul McGuire's PyParsing package.
 - Scott Colby designed our logo and provided sage advice
-- PyBEL Core Team: Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling
+- Core Team: Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling
 
 Find Us
 -------

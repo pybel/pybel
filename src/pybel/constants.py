@@ -12,5 +12,3 @@ if not os.path.exists(PYBEL_DIR):
 PYBEL_DATA = os.path.join(PYBEL_DIR, 'data')
 if not os.path.exists(PYBEL_DATA):
     os.mkdir(PYBEL_DATA)
-
-

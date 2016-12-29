@@ -10,7 +10,7 @@ import setuptools
 
 PACKAGES = setuptools.find_packages(where='src')
 META_PATH = os.path.join('src', 'pybel', '__init__.py')
-KEYWORDS = ['Fraunhofer', 'SCAI', 'BEL']
+KEYWORDS = ['Biological Expression Language', 'BEL', 'Systems Biology', 'Networks Biology']
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Environment :: Console',
@@ -20,7 +20,10 @@ CLASSIFIERS = [
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'Topic :: Scientific/Engineering :: Bio-Informatics'
 ]
 INSTALL_REQUIRES = [
@@ -32,8 +35,7 @@ INSTALL_REQUIRES = [
     'py2neo',
     'click',
     'sqlalchemy',
-    'pandas',
-    'matplotlib'
+    'ontospy'
 ]
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = ['tox']

@@ -41,9 +41,10 @@ class TestCli(unittest.TestCase):
             self.assertTrue(os.path.exists(abs_test_edge_file))
 
     def test_slushy(self):
+        """Tests that slushy document doesn't even make it to warning counting"""
         with self.runner.isolated_filesystem():
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_slushy])
-            self.assertEqual(1, result.exit_code, msg=result.exc_info)
+            self.assertEqual(-1, result.exit_code, msg=result.exc_info)
 
     def test_pickle(self):
         test_file = 'mygraph.gpickle'
@@ -74,9 +75,20 @@ class TestCli(unittest.TestCase):
 
         with self.runner.isolated_filesystem():
             abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main,
-                                        ['convert', '--path', test_bel_1, '--json', abs_test_file, '--complete-origin'])
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--json', abs_test_file,
+                                                   '--complete-origin'])
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_json(abs_test_file)
+            bel_1_reconstituted(self, g)
+
+    def test_bel(self):
+        test_file = 'mygraph.bel'
+
+        with self.runner.isolated_filesystem():
+            abs_test_file = os.path.abspath(test_file)
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--bel', abs_test_file,
+                                                   '--complete-origin'])
+            self.assertEqual(0, result.exit_code, msg=result.exc_info)
+            g = pybel.from_path(abs_test_file)
             bel_1_reconstituted(self, g)

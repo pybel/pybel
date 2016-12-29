@@ -40,7 +40,8 @@ def download_url(url):
 
 def expand_dict(flat_dict, sep='_'):
     """Expands a flattened dictionary
-    :param flat_dict: a nested dictionary that has been flattened so the keys are composite and
+    :param flat_dict: a nested dictionary that has been flattened so the keys are composite
+    :param sep: the seperator between concatenated keys
     """
     res = {}
     rdict = defaultdict(list)

@@ -17,6 +17,7 @@ Installation is as easy as getting the code from PyPI with :code:`pip install py
 .. toctree::
    :maxdepth: 2
 
+   installation
    overview
    cookbook
    reference
