@@ -2,7 +2,7 @@ import logging
 import unittest
 
 import pybel
-from pybel.manager import DefinitionCacheManager
+from pybel.manager.cache import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import IllegalFunctionSemantic, MissingCitationException
 from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
@@ -15,10 +15,10 @@ class TestCacheIntegration(unittest.TestCase):
     def test_cached_winning(self):
         c_path = 'sqlite://'
 
-        c = DefinitionCacheManager(conn=c_path, setup_default_cache=False)
+        cm = CacheManager(connection=c_path)
 
         with open(test_bel_3) as f:
-            g = pybel.BELGraph(f, definition_cache_manager=c)
+            g = pybel.BELGraph(f, cache_manager=cm)
 
         expected_document_metadata = {
             'Name': "PyBEL Test Document",

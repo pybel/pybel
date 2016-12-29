@@ -143,7 +143,8 @@ class FusionParser(BaseParser):
         self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
         # sequence coordinates?
-        range_coordinate = (Group(oneOf(['r', 'p', 'c']) + Suppress('.') + ppc.integer + Suppress('_') + ppc.integer) | '?')
+        range_coordinate = (Group(oneOf(['r', 'p', 'c']) + Suppress('.') + ppc.integer +
+                                  Suppress('_') + ppc.integer) | '?')
 
         self.language = fusion_tags + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
                                            Group(identifier)('partner_3p'), range_coordinate('range_3p'))
