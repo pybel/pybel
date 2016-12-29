@@ -67,7 +67,7 @@ class CacheManager(BaseCacheManager):
         """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
         It uses SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
 
-        :param: connetion: custom database connection string
+        :param: connection: custom database connection string
         :type connection: str
         :param create_all: create database?
         :type create_all: bool
@@ -89,8 +89,7 @@ class CacheManager(BaseCacheManager):
 
         self.create_database()
 
-
-    def insert_definition_cth(self, url, definition_type):
+    def insert_definition(self, url, definition_type):
         """
         :param url:
         :param definition_type: either DEFINITION_NAMESPACE or DEFINITION_ANNOTATION
@@ -140,7 +139,7 @@ class CacheManager(BaseCacheManager):
             # if config[header]['DomainString'] not in VALID_NAMESPACE_DOMAINSTRING:
             #    raise ValueError("Invalid DomainString {}".format(config[header]['DomainString']))
 
-            results = self.insert_definition_cth(url, DEFINITION_NAMESPACE)
+            results = self.insert_definition(url, DEFINITION_NAMESPACE)
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
@@ -156,7 +155,7 @@ class CacheManager(BaseCacheManager):
         try:
             results = self.session.query(models.Definition).filter(models.Definition.url == url).one()
         except NoResultFound:
-            results = self.insert_definition_cth(url, DEFINITION_ANNOTATION)
+            results = self.insert_definition(url, DEFINITION_ANNOTATION)
 
         self.annotation_cache[url] = {entry.name: entry.encoding for entry in results.entries}
 
