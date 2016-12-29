@@ -152,9 +152,9 @@ def ls(url, path):
             click.echo(url)
         sys.exit(0)
     elif url.endswith('.belns'):
-        res = dcm.get_belns(url)
+        res = dcm.get_namespace(url)
     elif url.endswith('.belanno'):
-        res = dcm.get_belanno(url)
+        res = dcm.get_annotation(url)
     else:
         res = dcm.get_owl_terms(url)
     click.echo_via_pager('\n'.join(res))

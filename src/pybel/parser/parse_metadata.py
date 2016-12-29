@@ -98,7 +98,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        terms = self.cache_manager.get_belns(url)
+        terms = self.cache_manager.get_namespace(url)
 
         if 0 == len(terms):
             raise ValueError("Empty Namespace: {}".format(url))
@@ -143,7 +143,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        self.annotations_dict[name] = self.cache_manager.get_belanno(url)
+        self.annotations_dict[name] = self.cache_manager.get_annotation(url)
         self.annotation_url_dict[name] = url
 
         return tokens

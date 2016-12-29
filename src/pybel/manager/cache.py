@@ -35,6 +35,7 @@ VALID_NAMESPACE_DOMAINSTRING = {"BiologicalProcess", "Chemical", "Gene and Gene 
 
 
 def parse_datetime(s):
+    """Tries to parse a datetime object from a standard datetime format or date format"""
     try:
         dt = datetime.strptime(s, CREATION_DATE_FMT)
         return dt
@@ -63,7 +64,7 @@ class BaseCacheManager:
 
 
 class CacheManager(BaseCacheManager):
-    def __init__(self, connection=None, create_all=False, setup_default_cache=False, echo=False):
+    def __init__(self, connection=None, create_all=False, echo=False):
         """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
         It uses SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
 
@@ -71,8 +72,6 @@ class CacheManager(BaseCacheManager):
         :type connection: str
         :param create_all: create database?
         :type create_all: bool
-        :param: setup_default_cache: Whether or not the definition cache should be set up on initiation.
-        :type setup_default_cache: bool
         :param: echo: Whether or not echo the running sql code.
         :type echo: bool
         """
@@ -90,8 +89,10 @@ class CacheManager(BaseCacheManager):
         self.create_database()
 
     def insert_definition(self, url, definition_type):
-        """
-        :param url:
+        """Inserts the definition file at the given location to the cache
+
+        :param url: the location of the definition file
+        :type url: str
         :param definition_type: either DEFINITION_NAMESPACE or DEFINITION_ANNOTATION
         :return: SQL Alchemy model instance, populated with data from URL
         """
@@ -128,6 +129,11 @@ class CacheManager(BaseCacheManager):
         return definition
 
     def ensure_namespace(self, url):
+        """Caches a namespace file if not already in the cache
+
+        :param url: the location of the namespace file
+        :type url: str
+        """
         if url in self.namespace_cache:
             return
 
@@ -149,6 +155,11 @@ class CacheManager(BaseCacheManager):
         self.namespace_cache[url] = {entry.name: set(entry.encoding) for entry in results.entries}
 
     def ensure_annotation(self, url):
+        """Caches an annotation file if not already in the cache
+
+        :param url: the location of the annotation file
+        :type url: str
+        """
         if url in self.annotation_cache:
             return
 
@@ -159,22 +170,44 @@ class CacheManager(BaseCacheManager):
 
         self.annotation_cache[url] = {entry.name: entry.encoding for entry in results.entries}
 
-    def get_belns(self, url):
+    def get_namespace(self, url):
+        """Returns a dict of names and their encodings for the given namespace file
+
+        :param url: the location of the namespace file
+        :type url: str
+        """
         self.ensure_namespace(url)
         return self.namespace_cache[url]
 
-    def get_belanno(self, url):
+    def get_annotation(self, url):
+        """Returns a dict of annotations and their labels for the given annotation file
+
+        :param url: the location of the annotation file
+        :type url: str
+        """
         self.ensure_annotation(url)
         return self.annotation_cache[url]
 
     def ls(self):
+        """Returns a list of the locations of the stored namespaces and annotations"""
         return [definition.url for definition in self.session.query(models.Definition).all()]
 
     def ls_definition(self, definition_url):
+        """Returns a list of the entries for the given definition file
+
+        :param url: the location of the annotation file
+        :type url: str
+        """
         definition = self.session.query(models.Definition).filter_by(url=definition_url).first()
         return [context.context for context in definition.entries]
 
     def ensure_owl(self, iri):
+        """Caches an ontology at the given IRI if it is not already in the cache
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
+
         if iri in self.term_cache:
             return
         try:
@@ -189,21 +222,26 @@ class CacheManager(BaseCacheManager):
         graph.add_edges_from(self.edge_cache[iri])
         self.graph_cache[iri] = graph
 
-    def get_owl_terms(self, iri):
-        self.ensure_owl(iri)
-        return self.term_cache[iri]
-
     def load_default_owl(self):
+        """Caches the default set of ontologies"""
         for url in default_owl:
             self.insert_by_iri(url)
 
     def ls_owl(self):
+        """Returns a list of the locations of the stored ontologies"""
+
         return [owl.iri for owl in self.session.query(models.Owl).all()]
 
     def insert_by_iri(self, iri):
+        """Caches an ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
         return self.insert_by_graph(iri, parse_owl(iri))
 
     def insert_by_graph(self, iri, graph):
+        """"""
         if 0 < self.session.query(models.Owl).filter(models.Owl.iri == iri).count():
             log.debug('%s already cached', iri)
             return
@@ -222,10 +260,29 @@ class CacheManager(BaseCacheManager):
 
         return owl
 
+    def get_owl_terms(self, iri):
+        """Gets a set of classes and individuals in the ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
+        self.ensure_owl(iri)
+        return self.term_cache[iri]
+
     def get_edges(self, iri):
+        """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
         self.ensure_owl(iri)
         return self.edge_cache[iri]
 
     def get_graph(self, iri):
+        """Gets the graph representing the ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
         self.ensure_owl(iri)
         return self.graph_cache[iri]
