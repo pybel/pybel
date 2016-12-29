@@ -25,6 +25,9 @@ matrix:
           env: TOXENV=py35
         - python: "3.6"
           env: TOXENV=py36
+    exclude:
+        - python: "3.3"
+          env: TOXENV=docs
 
 before_install:
     - pip install codecov
