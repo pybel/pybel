@@ -48,7 +48,6 @@ class TestParseMetadata(unittest.TestCase):
         self.parser.parseString(s)
         self.check_mgi()
 
-
         # Test doesn't overwrite
         s = 'DEFINE NAMESPACE MGI AS URL "http://resources.openbel.org/belframework/20150611/namespace/rgd-rat-genes.belns"'
         self.parser.parseString(s)
@@ -116,7 +115,6 @@ class TestParseMetadata(unittest.TestCase):
 
         self.parser.parse_lines(lines)
         self.check_mgi()
-
 
     def test_control_compound_2(self):
         s1 = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
