@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Enum, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -11,6 +11,8 @@ NAMESPACE_TABLE_NAME = 'pybel_namespaces'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntries'
 ANNOTATION_TABLE_NAME = 'pybel_annotations'
 ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntries'
+
+NETWORK_TABLE_NAME = 'pybel_network'
 
 OWL_TABLE_NAME = 'Owl'
 OWL_ENTRY_TABLE_NAME = 'OwlEntry'
@@ -151,3 +153,19 @@ class OwlEntry(Base):
 
     def __repr__(self):
         return 'OwlEntry({}:{})'.format(self.owl, self.entry)
+
+
+class Network(Base):
+    __tablename__ = NETWORK_TABLE_NAME
+    #id = Column(Integer, primary_key=True)
+    name = Column(String(255), primary_key=True, index=True)
+    version = Column(String(255), primary_key=True)
+
+    authors = Column(Text, nullable=True)
+    contactinfo = Column(String(255), nullable=True)
+    description = Column(Text, nullable=True)
+    copyright = Column(String(255), nullable=True)
+    disclaimer = Column(String(255), nullable=True)
+    licenses = Column(String(255), nullable=True)
+
+    blob = Column(Binary)
