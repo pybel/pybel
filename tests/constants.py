@@ -7,8 +7,9 @@ from pybel.parser.utils import any_subdict_matches
 dir_path = os.path.dirname(os.path.realpath(__file__))
 owl_dir_path = os.path.join(dir_path, 'owl')
 bel_dir_path = os.path.join(dir_path, 'bel')
-belns_dir_path = os.path.join(dir_path, 'bel')
-belanno_dir_path = os.path.join(dir_path, 'bel')
+belns_dir_path = os.path.join(dir_path, 'belns')
+belanno_dir_path = os.path.join(dir_path, 'belanno')
+beleq_dir_path = os.path.join(dir_path, 'beleq')
 
 test_bel_0 = os.path.join(bel_dir_path, 'small_corpus.bel')
 test_bel_1 = os.path.join(bel_dir_path, 'test_bel_1.bel')
@@ -25,6 +26,9 @@ test_an_1 = os.path.join(belanno_dir_path, 'test_an_1.belanno')
 
 test_ns_1 = os.path.join(belns_dir_path, 'test_ns_1.belns')
 test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
+
+test_eq_1 = os.path.join(beleq_dir_path, 'disease-ontology.beleq')
+test_eq_2 = os.path.join(beleq_dir_path, 'mesh-diseases.beleq')
 
 test_citation_bel = 'SET Citation = {"TestType","TestName","TestRef"}'
 test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')

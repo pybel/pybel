@@ -6,6 +6,8 @@ NAMESPACE_TABLE_NAME = 'pybel_namespaces'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntries'
 ANNOTATION_TABLE_NAME = 'pybel_annotations'
 ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntries'
+NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClasses'
+NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalences'
 
 OWL_TABLE_NAME = 'Owl'
 OWL_ENTRY_TABLE_NAME = 'OwlEntry'
@@ -62,6 +64,23 @@ class NamespaceEntry(Base):
 
     def __repr__(self):
         return 'NamespaceEntry({}, {})'.format(self.name, self.encoding)
+
+
+class NamespaceEquivalenceClass(Base):
+    __tablename__ = NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+    label = Column(String(255), nullable=True)
+
+    members = relationship('NamespaceEquivalence', back_populates='namespace_equivalence_class')
+
+
+class NamespaceEquivalence(Base):
+    __tablename__ = NAMESPACE_EQUIVALENCE_TABLE_NAME
+    namespace_equivalence_class_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)),
+                                            primary_key=True)
+    namespace_equivalence_class = relationship('NamespaceEquivalenceClass', back_populates='members')
+
+    namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True)
 
 
 class Annotation(Base):
