@@ -114,11 +114,17 @@ def manage():
 
 @manage.command(help='Set up definition cache with default definitions')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def setup(path):
+@click.option('--skip-namespaces', is_flag=True)
+@click.option('--skip-annotations', is_flag=True)
+@click.option('--skip-owl', is_flag=True)
+def setup(path, skip_namespaces, skip_annotations, skip_owl):
     cm = CacheManager(connection=path)
-    cm.load_default_namespaces()
-    cm.load_default_annotations()
-    cm.load_default_owl()
+    if not skip_namespaces:
+        cm.load_default_namespaces()
+    if not skip_annotations:
+        cm.load_default_annotations()
+    if not skip_owl:
+        cm.load_default_owl()
 
 
 @manage.command(help='Remove default definition cache at {}'.format(DEFAULT_CACHE_LOCATION))
