@@ -324,19 +324,18 @@ class TestOwlManager(unittest.TestCase):
         self.manager.drop_database()
         self.manager.create_database()
 
-    def test_insert(self):
-        owl = parse_owl(pizza_iri)
-        self.manager.insert_by_graph(pizza_iri, owl)
+    def test_ensure(self):
+        self.manager.ensure_owl(pizza_iri)
         entries = self.manager.get_owl_terms(pizza_iri)
         self.assertEqual(TestParsePizza.expected_nodes, entries)
 
         # get edges out
-        edges = self.manager.get_edges(pizza_iri)
+        edges = self.manager.get_owl_edges(pizza_iri)
 
         self.assertEqual(TestParsePizza.expected_edges, edges)
 
         # check nothing bad happens on second insert
-        self.manager.insert_by_graph(pizza_iri, owl)
+        self.manager.ensure_owl(pizza_iri)
 
     def test_missing(self):
         with self.assertRaises(Exception):
@@ -344,7 +343,7 @@ class TestOwlManager(unittest.TestCase):
 
     def test_insert_missing(self):
         with self.assertRaises(Exception):
-            self.manager.insert_by_iri('http://cthoyt.com/not_owl.owl')
+            self.manager.insert_owl('http://cthoyt.com/not_owl.owl')
 
 
 class TestIntegration(TestOwlBase):

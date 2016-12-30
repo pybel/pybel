@@ -123,6 +123,8 @@ class CacheManager(BaseCacheManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: :class:`models.Namespace`
         """
+        log.info('Caching namespace %s', url)
+
         config = download_url(url)
 
         namespace_insert_values = {
@@ -154,8 +156,57 @@ class CacheManager(BaseCacheManager):
 
         return namespace
 
+    def ensure_namespace(self, url):
+        """Caches a namespace file if not already in the cache
+
+        :param url: the location of the namespace file
+        :type url: str
+        """
+        if url in self.namespace_cache:
+            return
+
+        try:
+            results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
+        except NoResultFound:
+            results = self.insert_namespace(url)
+
+        if results is None:
+            raise ValueError('No results for {}'.format(url))
+        elif not results.entries:
+            raise ValueError('No entries for {}'.format(url))
+
+        self.namespace_cache[url] = {entry.name: set(entry.encoding) for entry in results.entries}
+
+    def get_namespace(self, url):
+        """Returns a dict of names and their encodings for the given namespace file
+
+        :param url: the location of the namespace file
+        :type url: str
+        """
+        self.ensure_namespace(url)
+        return self.namespace_cache[url]
+
+    def ls_namespaces(self):
+        """Returns a list of the locations of the stored namespaces and annotations"""
+        return [definition.url for definition in self.session.query(models.Namespace).all()]
+
+    def load_default_namespaces(self):
+        """Caches the default set of namespaces"""
+        for url in defaults.default_namespaces:
+            self.ensure_namespace(url)
+
     def insert_annotation(self, url):
+        """Inserts the namespace file at the given location to the cache
+
+        :param url: the location of the namespace file
+        :type url: str
+        :return: SQL Alchemy model instance, populated with data from URL
+        :rtype: :class:`models.Namespace`
+        """
+        log.info('Caching annotation %s', url)
+
         config = download_url(url)
+
         annotation_insert_values = {
             'type': config['AnnotationDefinition']['TypeString']
         }
@@ -178,27 +229,6 @@ class CacheManager(BaseCacheManager):
 
         return annotation
 
-    def ensure_namespace(self, url):
-        """Caches a namespace file if not already in the cache
-
-        :param url: the location of the namespace file
-        :type url: str
-        """
-        if url in self.namespace_cache:
-            return
-
-        try:
-            results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
-        except NoResultFound:
-            results = self.insert_namespace(url)
-
-        if results is None:
-            raise ValueError('No results for {}'.format(url))
-        elif not results.entries:
-            raise ValueError('No entries for {}'.format(url))
-
-        self.namespace_cache[url] = {entry.name: set(entry.encoding) for entry in results.entries}
-
     def ensure_annotation(self, url):
         """Caches an annotation file if not already in the cache
 
@@ -215,15 +245,6 @@ class CacheManager(BaseCacheManager):
 
         self.annotation_cache[url] = {entry.name: entry.label for entry in results.entries}
 
-    def get_namespace(self, url):
-        """Returns a dict of names and their encodings for the given namespace file
-
-        :param url: the location of the namespace file
-        :type url: str
-        """
-        self.ensure_namespace(url)
-        return self.namespace_cache[url]
-
     def get_annotation(self, url):
         """Returns a dict of annotations and their labels for the given annotation file
 
@@ -233,76 +254,24 @@ class CacheManager(BaseCacheManager):
         self.ensure_annotation(url)
         return self.annotation_cache[url]
 
-    def ls(self):
-        return itt.chain(self.ls_namespaces(), self.ls_annotations())
-
-    def ls_namespaces(self):
-        """Returns a list of the locations of the stored namespaces and annotations"""
-        return [definition.url for definition in self.session.query(models.Namespace).all()]
-
     def ls_annotations(self):
         """Returns a list of the locations of the stored namespaces and annotations"""
         return [definition.url for definition in self.session.query(models.Annotation).all()]
-
-    def ensure_owl(self, iri):
-        """Caches an ontology at the given IRI if it is not already in the cache
-
-        :param iri: the location of the ontology
-        :type iri: str
-        """
-
-        if iri in self.term_cache:
-            return
-        try:
-            results = self.session.query(models.Owl).filter(models.Owl.iri == iri).one()
-        except NoResultFound:
-            results = self.insert_by_iri(iri)
-
-        self.term_cache[iri] = set(entry.entry for entry in results.entries)
-        self.edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
-
-        graph = nx.DiGraph()
-        graph.add_edges_from(self.edge_cache[iri])
-        self.graph_cache[iri] = graph
-
-    def load_default_namespaces(self):
-        """Caches the default set of namespaces"""
-        for url in defaults.default_namespaces:
-            self.ensure_namespace(url)
 
     def load_default_annotations(self):
         """Caches the default set of annotations"""
         for url in defaults.default_annotations:
             self.ensure_annotation(url)
 
-    def load_default_owl(self):
-        """Caches the default set of ontologies"""
-        for url in defaults.default_owl:
-            self.ensure_owl(url)
-
-    def ls_owl(self):
-        """Returns a list of the locations of the stored ontologies"""
-        return [owl.iri for owl in self.session.query(models.Owl).all()]
-
-    def insert_by_iri(self, iri):
+    def insert_owl(self, iri):
         """Caches an ontology at the given IRI
 
         :param iri: the location of the ontology
         :type iri: str
         """
-        return self.insert_by_graph(iri, parse_owl(iri))
+        log.info('Caching owl %s', iri)
 
-    def insert_by_graph(self, iri, graph):
-        """Caches an ontology represented by a graph
-
-        :param iri: the location of the ontology
-        :type iri: str
-        :param graph: the graph representation of the ontology's subclass and instanceof relationships
-        :type graph: :class:`networkx.DiGraph`
-        """
-        if 0 < self.session.query(models.Owl).filter(models.Owl.iri == iri).count():
-            log.debug('%s already cached', iri)
-            return
+        graph = parse_owl(iri)
 
         owl = models.Owl(iri=iri)
 
@@ -318,6 +287,27 @@ class CacheManager(BaseCacheManager):
 
         return owl
 
+    def ensure_owl(self, iri):
+        """Caches an ontology at the given IRI if it is not already in the cache
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
+
+        if iri in self.term_cache:
+            return
+        try:
+            results = self.session.query(models.Owl).filter(models.Owl.iri == iri).one()
+        except NoResultFound:
+            results = self.insert_owl(iri)
+
+        self.term_cache[iri] = set(entry.entry for entry in results.entries)
+        self.edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
+
+        graph = nx.DiGraph()
+        graph.add_edges_from(self.edge_cache[iri])
+        self.graph_cache[iri] = graph
+
     def get_owl_terms(self, iri):
         """Gets a set of classes and individuals in the ontology at the given IRI
 
@@ -327,7 +317,7 @@ class CacheManager(BaseCacheManager):
         self.ensure_owl(iri)
         return self.term_cache[iri]
 
-    def get_edges(self, iri):
+    def get_owl_edges(self, iri):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
 
         :param iri: the location of the ontology
@@ -336,7 +326,7 @@ class CacheManager(BaseCacheManager):
         self.ensure_owl(iri)
         return self.edge_cache[iri]
 
-    def get_graph(self, iri):
+    def get_owl_graph(self, iri):
         """Gets the graph representing the ontology at the given IRI
 
         :param iri: the location of the ontology
@@ -344,3 +334,15 @@ class CacheManager(BaseCacheManager):
         """
         self.ensure_owl(iri)
         return self.graph_cache[iri]
+
+    def ls_owl(self):
+        """Returns a list of the locations of the stored ontologies"""
+        return [owl.iri for owl in self.session.query(models.Owl).all()]
+
+    def load_default_owl(self):
+        """Caches the default set of ontologies"""
+        for url in defaults.default_owl:
+            self.ensure_owl(url)
+
+    def ls(self):
+        return itt.chain(self.ls_namespaces(), self.ls_annotations(), self.ls_owl())
