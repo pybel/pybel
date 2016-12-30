@@ -21,8 +21,13 @@ from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import flatten, flatten_graph_data, expand_dict
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 __all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle', 'from_graphml', 'to_graphml', 'to_json', 'to_neo4j',
-           'to_pickle', 'from_json', 'to_bel']
+           'to_pickle', 'from_json', 'to_bel', 'from_bytes', 'to_bytes']
 
 log = logging.getLogger('pybel')
 
@@ -427,3 +432,21 @@ def expand_edges(graph):
         g.add_edge(u, v, key=key, attr_dict=expand_dict(data))
 
     return g
+
+def to_bytes(graph):
+    """Converts a graph to bytes (as BytesIO object)
+
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :param output: a file or filelike object"""
+    return pickle.dumps(nx.MultiDiGraph(graph), protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def from_bytes(bytes_graph):
+    """Reads a graph from bytes (BytesIO objet)
+
+    :param bytes_graph: File or filename to write
+    :type bytes_graph: bytes
+    :rtype: BELGraph
+    """
+    return BELGraph(data=pickle.loads(bytes_graph))
