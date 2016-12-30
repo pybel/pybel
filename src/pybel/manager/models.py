@@ -1,11 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Enum, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-
-DEFINITION_TABLE_NAME = 'pybel_cache_definitions'
-DEFINITION_ENTRY_TABLE_NAME = 'pybel_cache_entries'
-DEFINITION_NAMESPACE = 'N'
-DEFINITION_ANNOTATION = 'A'
 
 NAMESPACE_TABLE_NAME = 'pybel_namespaces'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntries'
@@ -32,7 +27,7 @@ class Namespace(Base):
     keyword = Column(String(8), index=True)
     name = Column(String(255))
     domain = Column(String(255))
-    #domain = Column(Enum(*NAMESPACE_DOMAIN_TYPES, name='namespaceDomain_types'))
+    # domain = Column(Enum(*NAMESPACE_DOMAIN_TYPES, name='namespaceDomain_types'))
     species = Column(String(255), nullable=True)
     description = Column(String(255), nullable=True)
     version = Column(String(255), nullable=True)
