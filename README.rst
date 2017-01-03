@@ -1,8 +1,8 @@
 PyBEL
 =====
 
-:code:`PyBEL` is a Python software package that parses BEL statements, validates their semantics, applies common graph
-algorithms, and allows for data interchange between common formats and database systems like JSON, CSV, SQL, and Neo4J.
+:code:`PyBEL` is a Python software package that parses BEL scripts, validates their semantics, applies common graph
+algorithms, and facilitates data interchange between common formats and database systems like JSON, CSV, SQL, and Neo4J.
 
 Development:
 
@@ -40,7 +40,7 @@ Development |develop_build| |develop_coverage| |develop_documentation|
     :target: https://codeclimate.com/github/pybel/pybel
     :alt: Code Climate
 
-.. |python_versions| image::  https://img.shields.io/pypi/pyversions/PyBEL.svg
+.. |python_versions| image:: https://img.shields.io/pypi/pyversions/PyBEL.svg
     :alt: Stable Supported Python Versions
 	
 .. |pypi_version| image:: https://img.shields.io/pypi/v/PyBEL.svg
@@ -130,9 +130,9 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 Acknowledgements
 ----------------
 
-- This software is proudly built with Paul McGuire's PyParsing package.
-- Scott Colby designed our logo and provided sage advice
-- Core Team: Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling
+- This software is proudly built with Paul McGuire's `PyParsing <http://pyparsing.wikispaces.com/>`_ package.
+- `Scott Colby <https://github.com/scolby33>`_ designed our `logo <https://github.com/pybel/pybel-art>`_ and provided sage advice
+- Core Team: `Charles Tapley Hoyt <https://github.com/cthoyt>`_, `Andrej Konotopez <https://github.com/lekono>`_, and `Christian Ebeling <https://github.com/cebel>`_
 
 Links
 -----
@@ -142,5 +142,5 @@ Links
 - Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
 - Versioned on `GitHub <https://github.com/pybel/pybel>`_
 - Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
-- Deployed on `PyPI <https://pypi.python.org/pypi/pybel>`_
+- Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
 - Chat on `Gitter <https://gitter.im/pybel/Lobby>`_
