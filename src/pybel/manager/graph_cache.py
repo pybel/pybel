@@ -60,7 +60,13 @@ def to_database(graph, connection=None):
                        of URL
     :type connection: str
     """
-    GraphCacheManager(connection).store_graph(graph)
+    if isinstance(connection, GraphCacheManager):
+        connection.store_graph(graph)
+    elif isinstance(connection, str) or connection is None:
+        GraphCacheManager(connection).store_graph(graph)
+    else:
+        raise ValueError('Invalid argument for connection, should be either a None, str, or {}'.format(
+            GraphCacheManager.__class__.__name__))
 
 
 def from_database(name, version=None, connection=None):
