@@ -2,10 +2,10 @@ import unittest
 
 import pybel
 from pybel.manager.graph_cache import GraphCacheManager
-from tests.constants import test_bel_1, test_bel_3, bel_1_reconstituted
+from tests.constants import test_bel_1, test_bel_3, BelReconstitutionMixin
 
 
-class TestGraphCache(unittest.TestCase):
+class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
     def setUp(self):
         self.gcm = GraphCacheManager('sqlite://')
 
@@ -21,7 +21,8 @@ class TestGraphCache(unittest.TestCase):
         self.assertEqual((name, label), x[0])
 
         g2 = self.gcm.load_graph(name, label)
-        bel_1_reconstituted(self, g2)
+        self.bel_1_reconstituted(g2)
+
 
     def test_get_versions(self):
         g1 = pybel.from_path(test_bel_1)

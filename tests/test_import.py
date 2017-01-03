@@ -6,7 +6,7 @@ from pybel.manager.cache import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import IllegalFunctionSemantic, MissingCitationException
 from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
-    bel_1_reconstituted, test_evidence_bel
+    test_evidence_bel, BelReconstitutionMixin
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
@@ -33,7 +33,7 @@ class TestCacheIntegration(unittest.TestCase):
         self.assertEqual(expected_document_metadata, g.metadata_parser.document_metadata)
 
 
-class TestImport(unittest.TestCase):
+class TestImport(BelReconstitutionMixin, unittest.TestCase):
     def setUp(self):
         self.expected_document_metadata = {
             'Name': "PyBEL Test Document",
@@ -48,17 +48,17 @@ class TestImport(unittest.TestCase):
     def test_from_path(self):
         g = pybel.from_path(test_bel_1, complete_origin=True)
         self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
-        bel_1_reconstituted(self, g)
+        self.bel_1_reconstituted(g)
 
     def test_bytes_io(self):
         g = pybel.from_path(test_bel_1, complete_origin=True)
         g_reloaded = pybel.from_bytes(pybel.to_bytes(g))
-        bel_1_reconstituted(self, g_reloaded)
+        self.bel_1_reconstituted(g_reloaded)
 
     def test_from_fileUrl(self):
         g = pybel.from_url('file://{}'.format(test_bel_1), complete_origin=True)
         self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
-        bel_1_reconstituted(self, g)
+        self.bel_1_reconstituted(g)
 
 
 class TestFull(TestTokenParserBase):

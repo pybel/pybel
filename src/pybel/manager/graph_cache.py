@@ -1,8 +1,8 @@
+from sqlalchemy import desc
+
 from .cache import BaseCacheManager
 from .models import Network
 from ..graph import to_bytes, from_bytes
-
-from sqlalchemy import desc
 
 try:
     import cPickle as pickle
@@ -11,9 +11,6 @@ except ImportError:
 
 
 class GraphCacheManager(BaseCacheManager):
-    def __init__(self, connection=None, echo=False):
-        BaseCacheManager.__init__(self, connection=connection, echo=echo)
-
     def store_graph(self, graph):
         """Stores a graph in the database
 
@@ -51,7 +48,8 @@ class GraphCacheManager(BaseCacheManager):
         return from_bytes(n.blob)
 
     def ls(self):
-        return [(x.name, x.version) for x in self.session.query(Network).all()]
+        return [(network.name, network.version) for network in self.session.query(Network).all()]
+
 
 def to_database(graph, connection=None):
     """Stores a graph in a database
@@ -64,8 +62,7 @@ def to_database(graph, connection=None):
                        of URL
     :type connection: str
     """
-    gcm = GraphCacheManager(connection)
-    gcm.store_graph(graph)
+    GraphCacheManager(connection).store_graph(graph)
 
 
 def from_database(name, version=None, connection=None):
@@ -84,5 +81,4 @@ def from_database(name, version=None, connection=None):
     :return: a BEL graph loaded from the database
     :rtype: BELGraph
     """
-    gcm = GraphCacheManager(connection)
-    return gcm.load_graph(name, version)
+    return GraphCacheManager(connection).load_graph(name, version)

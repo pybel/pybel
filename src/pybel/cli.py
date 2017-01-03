@@ -61,12 +61,14 @@ def main():
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Context for neo4j upload")
+@click.option('--store-default', is_flag=True, help="Stores to default cache at {}".format(DEFAULT_CACHE_LOCATION))
 @click.option('--store', help="Database connection string")
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
 @click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
 @click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_context, store, lenient, complete_origin,
+def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_context, store_default, store, lenient,
+            complete_origin,
             log_file, verbose):
     """Options for multiple outputs/conversions"""
 
@@ -100,8 +102,11 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
         log.info('Outputting BEL to %s', bel)
         graph.to_bel(g, bel)
 
+    if store_default:
+        to_database(g)
+
     if store:
-        to_database(g, store if isinstance(store, str) else None)
+        to_database(g, store)
 
     if neo:
         log.info('Uploading to neo4j with context %s', neo_context)
@@ -170,13 +175,8 @@ def ls(url, path):
         click.echo_via_pager('\n'.join(res))
 
 
-@main.group()
-def manage_graph():
-    pass
-
-
-@manage_graph.command()
-def ls():
+@manage.command(help='Lists stored graph names and versions')
+def ls_graphs():
     gcm = GraphCacheManager()
     return gcm.ls()
 

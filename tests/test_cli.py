@@ -8,12 +8,12 @@ from click.testing import CliRunner
 import pybel
 from pybel import cli
 from pybel.graph import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel_1, test_bel_slushy, bel_1_reconstituted
-
+from tests.constants import test_bel_1, test_bel_slushy, BelReconstitutionMixin
+import py2neo.database.status
 log = logging.getLogger(__name__)
 
 
-class TestCli(unittest.TestCase):
+class TestCli(BelReconstitutionMixin, unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
@@ -21,15 +21,19 @@ class TestCli(unittest.TestCase):
     def test_neo4j_remote(self):
         test_context = 'PYBEL_TEST_CTX'
         neo_path = os.environ['NEO_PATH']
-        neo = py2neo.Graph(neo_path)
-        neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
 
-        self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--neo',
-                                      neo_path, '--neo-context', test_context, '--complete-origin'])
+        try:
+            neo = py2neo.Graph(neo_path)
+            neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
+        except py2neo.database.status.GraphError:
+            self.skipTest("Can't connect to neo4j")
+        else:
+            self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--neo',
+                                          neo_path, '--neo-context', test_context, '--complete-origin'])
 
-        q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
-        count = neo.data(q)[0]['count']
-        self.assertEqual(14, count)
+            q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
+            count = neo.data(q)[0]['count']
+            self.assertEqual(14, count)
 
     def test_csv(self):
         test_edge_file = 'myedges.csv'
@@ -43,10 +47,11 @@ class TestCli(unittest.TestCase):
     def test_database(self):
         with self.runner.isolated_filesystem():
             conn = 'sqlite:///' + os.path.abspath('test.db')
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--store', conn, '--complete-origin'])
+            result = self.runner.invoke(cli.main,
+                                        ['convert', '--path', test_bel_1, '--store', conn, '--complete-origin'])
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             g = pybel.from_database('PyBEL Test Document', connection=conn)
-            bel_1_reconstituted(self, g)
+            self.bel_1_reconstituted(g)
 
     def test_slushy(self):
         """Tests that slushy document doesn't even make it to warning counting"""
@@ -64,7 +69,7 @@ class TestCli(unittest.TestCase):
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_pickle(abs_test_file)
-            bel_1_reconstituted(self, g)
+            self.bel_1_reconstituted(g)
 
     def test_graphml(self):
         test_file = 'mygraph.graphml'
@@ -76,7 +81,7 @@ class TestCli(unittest.TestCase):
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_graphml(abs_test_file)
-            bel_1_reconstituted(self, g)
+            self.bel_1_reconstituted(g)
 
     def test_json(self):
         test_file = 'mygraph.json'
@@ -88,7 +93,7 @@ class TestCli(unittest.TestCase):
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_json(abs_test_file)
-            bel_1_reconstituted(self, g)
+            self.bel_1_reconstituted(g)
 
     def test_bel(self):
         test_file = 'mygraph.bel'
@@ -99,4 +104,4 @@ class TestCli(unittest.TestCase):
                                                    '--complete-origin'])
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             g = pybel.from_path(abs_test_file)
-            bel_1_reconstituted(self, g)
+            self.bel_1_reconstituted(g)

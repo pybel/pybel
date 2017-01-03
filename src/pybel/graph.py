@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import time
+from ast import literal_eval
 from collections import defaultdict
 
 import networkx as nx
@@ -388,6 +389,7 @@ def from_graphml(path):
     g = expand_edges(g)
     for n in g:
         g.node[n] = json.loads(g.node[n]['json'])
+    nx.relabel_nodes(g, literal_eval, copy=False)  # shh don't tell anyone
     return g
 
 
@@ -418,6 +420,7 @@ def expand_edges(graph):
         g.add_edge(u, v, key=key, attr_dict=expand_dict(data))
 
     return g
+
 
 def to_bytes(graph):
     """Converts a graph to bytes (as BytesIO object)

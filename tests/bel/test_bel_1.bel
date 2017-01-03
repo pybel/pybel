@@ -24,8 +24,8 @@ DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
 SET STATEMENT_GROUP = "Group 1"
 
-SET TESTAN1 = "1"
 SET Citation = {"Pubmed","That one article from last week","123455"}
+SET TESTAN1 = "1"
 
 SET Evidence = "Evidence 1 \
 w extra notes"
