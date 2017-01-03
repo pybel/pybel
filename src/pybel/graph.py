@@ -247,6 +247,12 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def document(self):
+        """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
+        according to :py:data:`pybel.parser.language.document_keys`
+
+        :return: metadata derived from the BEL "Document" section
+        :rtype: dict
+        """
         return self.graph['document_metadata']
 
     @property

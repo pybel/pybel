@@ -1,14 +1,13 @@
 ##################################################################################
 # Document Properties Section
 
-SET DOCUMENT Name = "PyBEL Test Document"
+SET DOCUMENT Name = "PyBEL Test Document 1"
 SET DOCUMENT Description = "Made for testing PyBEL parsing"
 SET DOCUMENT Version = "1.6"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
-SET DOCUMENT Licenses = "Other / Proprietary"
+SET DOCUMENT Licenses = "WTF License"
 SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
-
 
 ##################################################################################
 # Definitions Section

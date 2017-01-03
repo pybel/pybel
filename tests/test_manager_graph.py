@@ -2,6 +2,8 @@ import os
 import tempfile
 import unittest
 
+import sqlalchemy.exc
+
 import pybel
 from pybel.manager.graph_cache import GraphCacheManager
 from tests.constants import test_bel_1, test_bel_3, BelReconstitutionMixin
@@ -18,8 +20,8 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         os.remove(self.db_path)
         os.rmdir(self.dir)
 
-    def test_1(self):
-        path, name, label = test_bel_1, 'PyBEL Test Document', '1.6'
+    def test_load_reload(self):
+        path, name, label = test_bel_1, 'PyBEL Test Document 1', '1.6'
 
         g = pybel.from_path(path, complete_origin=True)
         self.gcm.store_graph(g)
@@ -32,16 +34,28 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         g2 = self.gcm.load_graph(name, label)
         self.bel_1_reconstituted(g2)
 
-    def test_get_versions(self):
+    def test_integrity_failure(self):
+        """Tests that a graph with the same name and version can't be added twice"""
         g1 = pybel.from_path(test_bel_1)
-        g1.graph['document_metadata']['name'] = 'TEST'
-        g1.graph['document_metadata']['version'] = '1.6'
+        self.gcm.store_graph(g1)
+
+        with self.assertRaises(sqlalchemy.exc.IntegrityError):
+            self.gcm.store_graph(g1)
+
+    def test_get_versions(self):
+        TEST_NAME = 'TEST'
+        TEST_V1 = '1.6'
+        TEST_V2 = '1.7'
+
+        g1 = pybel.from_path(test_bel_1)
+        g1.document['name'] = TEST_NAME
+        g1.document['version'] = TEST_V1
 
         self.gcm.store_graph(g1)
 
         g2 = pybel.from_path(test_bel_3)
-        g2.graph['document_metadata']['name'] = 'TEST'
-        g2.graph['document_metadata']['version'] = '1.7'
+        g2.document['name'] = TEST_NAME
+        g2.document['version'] = TEST_V2
 
         self.gcm.store_graph(g2)
 

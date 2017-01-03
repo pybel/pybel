@@ -137,8 +137,8 @@ class TestParseMetadata(unittest.TestCase):
 
         self.parser.parseString(s)
 
-        self.assertIn('Name', self.parser.document_metadata)
-        self.assertEqual("Alzheimer's Disease Model", self.parser.document_metadata['Name'])
+        self.assertIn('name', self.parser.document_metadata)
+        self.assertEqual("Alzheimer's Disease Model", self.parser.document_metadata['name'])
 
     def test_parse_namespace_url_file(self):
         """Tests parsing a namespace by file URL"""

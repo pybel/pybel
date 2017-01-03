@@ -82,10 +82,12 @@ class MetadataParser(BaseParser):
         if key not in language.document_keys:
             raise IllegalDocumentMetadataException('Invalid document metadata key: {}'.format(key))
 
-        if key in self.document_metadata:
+        norm_key = language.document_keys[key]
+
+        if norm_key in self.document_metadata:
             log.warning('Tried to overwrite metadata: {}'.format(key))
 
-        self.document_metadata[key] = tokens['value']
+        self.document_metadata[norm_key] = tokens['value']
 
         return tokens
 

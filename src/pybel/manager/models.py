@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary, \
-    PrimaryKeyConstraint
+    UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -160,12 +160,13 @@ class OwlEntry(Base):
 
 class Network(Base):
     __tablename__ = NETWORK_TABLE_NAME
-    # id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
+
     name = Column(String(255), index=True)
     version = Column(String(255))
 
     authors = Column(Text, nullable=True)
-    contactinfo = Column(String(255), nullable=True)
+    contact = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     copyright = Column(String(255), nullable=True)
     disclaimer = Column(String(255), nullable=True)
@@ -175,5 +176,5 @@ class Network(Base):
     blob = Column(Binary)
 
     __table_args__ = (
-        PrimaryKeyConstraint("name", "version"),
+        UniqueConstraint("name", "version"),
     )

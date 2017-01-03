@@ -18,7 +18,7 @@ class GraphCacheManager(BaseCacheManager):
         :type graph: :class:`pybel.BELGraph`
         """
 
-        d = {k.lower(): v for k, v in graph.document.items()}
+        d = graph.document.copy()
         d['blob'] = to_bytes(graph)
 
         g = Network(**d)

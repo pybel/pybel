@@ -13,7 +13,6 @@ belanno_dir_path = os.path.join(dir_path, 'bel')
 
 test_bel_0 = os.path.join(bel_dir_path, 'small_corpus.bel')
 test_bel_1 = os.path.join(bel_dir_path, 'test_bel_1.bel')
-test_bel_2 = os.path.join(bel_dir_path, 'test_bel_2.bel')
 test_bel_3 = os.path.join(bel_dir_path, 'test_bel_3.bel')
 test_bel_4 = os.path.join(bel_dir_path, 'test_bel_4.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
@@ -51,7 +50,7 @@ def assertHasNode(self, member, graph, **kwargs):
 
 
 def assertHasEdge(self, u, v, graph, **kwargs):
-    self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
+    self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph {}'.format(u, v, graph))
     if kwargs:
         msg_format = 'No edge ({}, {}) with correct properties. expected {} but got {}'
         self.assertTrue(any_subdict_matches(graph.edge[u][v], kwargs),
@@ -88,3 +87,34 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, EGFR, CASP8, g, relation='directlyDecreases', TESTAN1="1", TESTAN2="3")
         assertHasEdge(self, FADD, CASP8, g, relation='increases', TESTAN1="2")
         assertHasEdge(self, AKT1, CASP8, g, relation='association', TESTAN1="2")
+
+
+expected_test_bel_1_metadata = {
+    'name': "PyBEL Test Document 1",
+    "description": "Made for testing PyBEL parsing",
+    'version': "1.6",
+    'copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+    'authors': "Charles Tapley Hoyt",
+    'licenses': "WTF License",
+    'contact': "charles.hoyt@scai.fraunhofer.de"
+}
+
+expected_test_bel_3_metadata = {
+    'name': "PyBEL Test Document 3",
+    "description": "Made for testing PyBEL parsing",
+    'version': "1.6",
+    'copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+    'authors': "Charles Tapley Hoyt",
+    'licenses': "WTF License",
+    'contact': "charles.hoyt@scai.fraunhofer.de"
+}
+
+expected_test_bel_4_metadata = {
+    'name': "PyBEL Test Document 4",
+    'description': "Tests the use of OWL ontologies as namespaces",
+    'version': "1.6",
+    'copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+    'authors': "Charles Tapley Hoyt",
+    'licenses': "WTF License",
+    'contact': "charles.hoyt@scai.fraunhofer.de"
+}

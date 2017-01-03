@@ -3,13 +3,14 @@ import os
 import unittest
 
 import py2neo
+import py2neo.database.status
 from click.testing import CliRunner
 
 import pybel
 from pybel import cli
 from pybel.graph import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel_1, test_bel_slushy, BelReconstitutionMixin
-import py2neo.database.status
+from tests.constants import test_bel_1, test_bel_slushy, BelReconstitutionMixin, expected_test_bel_1_metadata
+
 log = logging.getLogger(__name__)
 
 
@@ -50,7 +51,7 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             result = self.runner.invoke(cli.main,
                                         ['convert', '--path', test_bel_1, '--store', conn, '--complete-origin'])
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
-            g = pybel.from_database('PyBEL Test Document', connection=conn)
+            g = pybel.from_database(expected_test_bel_1_metadata['name'], connection=conn)
             self.bel_1_reconstituted(g)
 
     def test_slushy(self):
