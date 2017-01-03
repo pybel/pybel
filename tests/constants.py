@@ -1,6 +1,7 @@
 import os
 import unittest
 
+from pybel import BELGraph
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
 
@@ -63,10 +64,15 @@ class TestTokenParserBase(unittest.TestCase):
 
 
 def bel_1_reconstituted(self, g):
+    self.assertIsInstance(g, BELGraph)
+
     nodes = list(g.nodes_iter(namespace='HGNC', name='AKT1'))
     self.assertEqual(3, len(nodes))
 
+    self.assertIn(('Protein', 'HGNC', 'AKT1'), g)
+    self.assertIn(('Protein', 'HGNC', 'EGFR'), g)
+    self.assertIn(('Protein', 'HGNC', 'FADD'), g)
+    self.assertIn(('Protein', 'HGNC', 'CASP8'), g)
+
     edges = list(g.edges_iter(relation='increases'))
     self.assertEqual(2, len(edges))
-
-
