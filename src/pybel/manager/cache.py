@@ -113,8 +113,6 @@ class CacheManager(BaseCacheManager):
         self.edge_cache = {}
         self.graph_cache = {}
 
-        self.create_database()
-
     def insert_namespace(self, url):
         """Inserts the namespace file at the given location to the cache
 
