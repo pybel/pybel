@@ -176,9 +176,10 @@ def ls(url, path):
 
 
 @manage.command(help='Lists stored graph names and versions')
-def ls_graphs():
-    gcm = GraphCacheManager()
-    return gcm.ls()
+@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def ls_graphs(path):
+    gcm = GraphCacheManager(connection=path)
+    click.echo_via_pager('\n'.join('{} - {}'.format(a, b) for a, b in gcm.ls()))
 
 
 if __name__ == '__main__':
