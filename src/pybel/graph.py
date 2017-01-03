@@ -433,7 +433,7 @@ def to_bytes(graph):
 
     :param graph: a BEL graph
     :type graph: BELGraph
-    :param output: a file or filelike object"""
+    """
     return pickle.dumps(nx.MultiDiGraph(graph), protocol=pickle.HIGHEST_PROTOCOL)
 
 
