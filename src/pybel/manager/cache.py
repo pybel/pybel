@@ -45,7 +45,7 @@ class BaseCacheManager:
     def __init__(self, connection=None, echo=False):
         connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
         self.engine = create_engine(connection, echo=echo)
-        self.session = scoped_session(sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False))
+        self.session = scoped_session(sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False))()
         self.create_database()
 
     def create_database(self, checkfirst=True):
@@ -112,6 +112,8 @@ class CacheManager(BaseCacheManager):
         self.term_cache = {}
         self.edge_cache = {}
         self.graph_cache = {}
+
+    # NAMESPACE MANAGEMENT
 
     def insert_namespace(self, url):
         """Inserts the namespace file at the given location to the cache
@@ -193,6 +195,8 @@ class CacheManager(BaseCacheManager):
         for url in defaults.default_namespaces:
             self.ensure_namespace(url)
 
+    # ANNOTATION MANAGEMENT
+
     def insert_annotation(self, url):
         """Inserts the namespace file at the given location to the cache
 
@@ -260,6 +264,8 @@ class CacheManager(BaseCacheManager):
         """Caches the default set of annotations"""
         for url in defaults.default_annotations:
             self.ensure_annotation(url)
+
+    # NAMESPACE OWL MANAGEMENT
 
     def insert_owl(self, iri):
         """Caches an ontology at the given IRI

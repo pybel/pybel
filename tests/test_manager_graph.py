@@ -6,7 +6,7 @@ import sqlalchemy.exc
 
 import pybel
 from pybel.manager.graph_cache import GraphCacheManager
-from tests.constants import test_bel_1, test_bel_3, BelReconstitutionMixin
+from tests.constants import BelReconstitutionMixin, test_bel_1, test_bel_3
 
 
 class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
@@ -31,7 +31,7 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         self.assertEqual(1, len(x))
         self.assertEqual((name, label), x[0])
 
-        g2 = self.gcm.load_graph(name, label)
+        g2 = self.gcm.get_graph(name, label)
         self.bel_1_reconstituted(g2)
 
     def test_integrity_failure(self):
@@ -59,6 +59,6 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
 
         self.gcm.store_graph(g2)
 
-        self.assertEqual({'1.7', '1.6'}, set(self.gcm.get_versions('TEST')))
+        self.assertEqual({'1.7', '1.6'}, set(self.gcm.get_graph_versions('TEST')))
 
-        self.assertEqual('1.7', self.gcm.load_graph('TEST').document['version'])
+        self.assertEqual('1.7', self.gcm.get_graph('TEST').document['version'])
