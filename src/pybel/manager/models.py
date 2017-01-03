@@ -1,7 +1,9 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary
+import datetime
+
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary, \
+    PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 
 DEFINITION_TABLE_NAME = 'pybel_cache_definitions'
 DEFINITION_ENTRY_TABLE_NAME = 'pybel_cache_entries'
@@ -35,7 +37,7 @@ class Namespace(Base):
     keyword = Column(String(8), index=True)
     name = Column(String(255))
     domain = Column(String(255))
-    #domain = Column(Enum(*NAMESPACE_DOMAIN_TYPES, name='namespaceDomain_types'))
+    # domain = Column(Enum(*NAMESPACE_DOMAIN_TYPES, name='namespaceDomain_types'))
     species = Column(String(255), nullable=True)
     description = Column(String(255), nullable=True)
     version = Column(String(255), nullable=True)
@@ -158,9 +160,9 @@ class OwlEntry(Base):
 
 class Network(Base):
     __tablename__ = NETWORK_TABLE_NAME
-    #id = Column(Integer, primary_key=True)
-    name = Column(String(255), primary_key=True, index=True)
-    version = Column(String(255), primary_key=True)
+    # id = Column(Integer, primary_key=True)
+    name = Column(String(255), index=True)
+    version = Column(String(255))
 
     authors = Column(Text, nullable=True)
     contactinfo = Column(String(255), nullable=True)
@@ -169,5 +171,9 @@ class Network(Base):
     disclaimer = Column(String(255), nullable=True)
     licenses = Column(String(255), nullable=True)
 
-    created = Column(DateTime(timezone=True), server_default=func.now())
+    created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(Binary)
+
+    __table_args__ = (
+        PrimaryKeyConstraint("name", "version"),
+    )
