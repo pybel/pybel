@@ -65,8 +65,7 @@ def to_database(graph, connection=None):
     elif isinstance(connection, str) or connection is None:
         GraphCacheManager(connection).store_graph(graph)
     else:
-        raise ValueError('Invalid argument for connection, should be either a None, str, or {}'.format(
-            type(GraphCacheManager).__name__))
+        raise ValueError('Should be either a None, str, or {}'.format(GraphCacheManager.__name__))
 
 
 def from_database(name, version=None, connection=None):
