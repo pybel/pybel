@@ -70,20 +70,6 @@ def from_path(path, **kwargs):
         return BELGraph(lines=f, **kwargs)
 
 
-def from_database(connection):
-    """Loads a BEL graph from a database
-
-    :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
-                       where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
-                       of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
-                       of URL.
-    :type connection: str
-    :return: a BEL graph loaded from the database
-    :rtype: BELGraph
-    """
-    raise NotImplementedError("Can't load from from database: {}".format(connection))
-
-
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 

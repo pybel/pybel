@@ -23,6 +23,7 @@ import py2neo
 from . import graph
 from .constants import PYBEL_DIR
 from .manager.cache import DEFAULT_CACHE_LOCATION, CacheManager
+from .manager.graph_cache import GraphCacheManager, to_database, from_database
 
 log = logging.getLogger('pybel')
 log.setLevel(logging.DEBUG)
@@ -60,12 +61,13 @@ def main():
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Context for neo4j upload")
+@click.option('--store', help="Database connection string")
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
 @click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
 @click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_context, lenient, complete_origin, log_file,
-            verbose):
+def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_context, store, lenient, complete_origin,
+            log_file, verbose):
     """Options for multiple outputs/conversions"""
 
     ch.setLevel(log_levels.get(verbose, 5))
@@ -74,7 +76,7 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
     if url:
         g = graph.from_url(url, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
     elif database:
-        g = graph.from_database(database)
+        g = from_database(database)
     else:
         g = graph.BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
 
@@ -97,6 +99,9 @@ def convert(path, url, database, csv, graphml, json, pickle, bel, neo, neo_conte
     if bel:
         log.info('Outputting BEL to %s', bel)
         graph.to_bel(g, bel)
+
+    if store:
+        to_database(g, store if isinstance(store, str) else None)
 
     if neo:
         log.info('Uploading to neo4j with context %s', neo_context)
@@ -163,6 +168,17 @@ def ls(url, path):
         else:
             res = dcm.get_owl_terms(url)
         click.echo_via_pager('\n'.join(res))
+
+
+@main.group()
+def manage_graph():
+    pass
+
+
+@manage_graph.command()
+def ls():
+    gcm = GraphCacheManager()
+    return gcm.ls()
 
 
 if __name__ == '__main__':

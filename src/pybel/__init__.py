@@ -6,8 +6,9 @@ from . import cli
 from . import graph
 from .constants import LARGE_CORPUS_URL, SMALL_CORPUS_URL, PYBEL_DIR
 from .graph import *
+from .manager.graph_cache import to_database, from_database
 
-__all__ = ['SMALL_CORPUS_URL', 'LARGE_CORPUS_URL'] + graph.__all__
+__all__ = ['SMALL_CORPUS_URL', 'LARGE_CORPUS_URL', 'to_database', 'from_database'] + graph.__all__
 
 __version__ = '0.3.1-dev'
 

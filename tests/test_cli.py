@@ -40,6 +40,14 @@ class TestCli(unittest.TestCase):
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_edge_file))
 
+    def test_database(self):
+        with self.runner.isolated_filesystem():
+            conn = 'sqlite:///' + os.path.abspath('test.db')
+            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--store', conn, '--complete-origin'])
+            self.assertEqual(0, result.exit_code, msg=result.exc_info)
+            g = pybel.from_database('PyBEL Test Document', connection=conn)
+            bel_1_reconstituted(self, g)
+
     def test_slushy(self):
         """Tests that slushy document doesn't even make it to warning counting"""
         with self.runner.isolated_filesystem():

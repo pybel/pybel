@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 DEFINITION_TABLE_NAME = 'pybel_cache_definitions'
 DEFINITION_ENTRY_TABLE_NAME = 'pybel_cache_entries'
@@ -168,4 +169,5 @@ class Network(Base):
     disclaimer = Column(String(255), nullable=True)
     licenses = Column(String(255), nullable=True)
 
+    created = Column(DateTime(timezone=True), server_default=func.now())
     blob = Column(Binary)
