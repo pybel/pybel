@@ -211,7 +211,8 @@ class CacheManager(BaseCacheManager):
         config = download_url(url)
 
         annotation_insert_values = {
-            'type': config['AnnotationDefinition']['TypeString']
+            'type': config['AnnotationDefinition']['TypeString'],
+            'url': url
         }
         annotation_insert_values.update(extract_shared_required(config, 'AnnotationDefinition'))
         annotation_insert_values.update(extract_shared_optional(config, 'AnnotationDefinition'))
