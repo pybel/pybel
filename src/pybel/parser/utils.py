@@ -96,37 +96,37 @@ def list2tuple(l):
         return tuple(list2tuple(e) for e in l)
 
 
-def subdict_matches(a, b):
-    """Checks if all the keys in b are in a, and that their values match
+def subdict_matches(target_dict, query_dict):
+    """Checks if all the keys in the query dict are in the target dict, and that their values match
 
-    :param a: a dictionary
-    :type a: dict
-    :param b: a dictionary
-    :type b: dict
-    :return: if all keys in b are in a and their values match
+    :param target_dict: target_dict dictionary
+    :type target_dict: dict
+    :param query_dict: target_dict dictionary
+    :type query_dict: dict
+    :return: if all keys in b are in target_dict and their values match
     :rtype: bool
     """
-    for k, v in b.items():
-        if k not in a:
+    for k, v in query_dict.items():
+        if k not in target_dict:
             return False
-        elif isinstance(v, (str, dict)) and a[k] != v:
+        elif isinstance(v, (str, dict)) and target_dict[k] != v:
             return False
-        elif isinstance(v, (list, set, tuple)) and a[k] not in v:
+        elif isinstance(v, (list, set, tuple)) and target_dict[k] not in v:
             return False
         elif not isinstance(v, (str, list, set, dict, tuple)):
             raise ValueError('invalid value: {}'.format(v))
     return True
 
 
-def any_subdict_matches(a, b):
-    """Checks if dictionary b matches one of the subdictionaries of a
+def any_subdict_matches(dict_of_dicts, query_dict):
+    """Checks if dictionary target_dict matches one of the subdictionaries of a
 
-    :param a: dictionary of dictionaries
-    :param b: dictionary
-    :return: if dictionary b matches one of the subdictionaries of a
+    :param dict_of_dicts: dictionary of dictionaries
+    :param query_dict: dictionary
+    :return: if dictionary target_dict matches one of the subdictionaries of a
     :rtype: bool
     """
-    return any(subdict_matches(sd, b) for sd in a.values())
+    return any(subdict_matches(sd, query_dict) for sd in dict_of_dicts.values())
 
 
 def cartesian_dictionary(d):

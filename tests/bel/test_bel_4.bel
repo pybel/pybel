@@ -9,13 +9,13 @@ SET DOCUMENT Authors = "Charles Tapley Hoyt"
 SET DOCUMENT Licenses = "WTF License"
 SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 
-
 ##################################################################################
 # Definitions Section
 
 DEFINE NAMESPACE HGNC AS URL "http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns"
 DEFINE NAMESPACE PIZZA AS OWL A "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
 DEFINE NAMESPACE WINE AS OWL A "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
+
 ##################################################################################
 # Statements Section
 

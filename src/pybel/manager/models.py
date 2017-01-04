@@ -1,4 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Enum, Date
+import datetime
+
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary, \
+    UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -11,6 +14,8 @@ NAMESPACE_TABLE_NAME = 'pybel_namespaces'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntries'
 ANNOTATION_TABLE_NAME = 'pybel_annotations'
 ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntries'
+
+NETWORK_TABLE_NAME = 'pybel_network'
 
 OWL_TABLE_NAME = 'Owl'
 OWL_ENTRY_TABLE_NAME = 'OwlEntry'
@@ -32,7 +37,7 @@ class Namespace(Base):
     keyword = Column(String(8), index=True)
     name = Column(String(255))
     domain = Column(String(255))
-    #domain = Column(Enum(*NAMESPACE_DOMAIN_TYPES, name='namespaceDomain_types'))
+    # domain = Column(Enum(*NAMESPACE_DOMAIN_TYPES, name='namespaceDomain_types'))
     species = Column(String(255), nullable=True)
     description = Column(String(255), nullable=True)
     version = Column(String(255), nullable=True)
@@ -151,3 +156,25 @@ class OwlEntry(Base):
 
     def __repr__(self):
         return 'OwlEntry({}:{})'.format(self.owl, self.entry)
+
+
+class Network(Base):
+    __tablename__ = NETWORK_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String(255), index=True)
+    version = Column(String(255))
+
+    authors = Column(Text, nullable=True)
+    contact = Column(String(255), nullable=True)
+    description = Column(Text, nullable=True)
+    copyright = Column(String(255), nullable=True)
+    disclaimer = Column(String(255), nullable=True)
+    licenses = Column(String(255), nullable=True)
+
+    created = Column(DateTime, default=datetime.datetime.utcnow)
+    blob = Column(Binary)
+
+    __table_args__ = (
+        UniqueConstraint("name", "version"),
+    )
