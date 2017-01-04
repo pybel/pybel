@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import time
+from ast import literal_eval
 from collections import defaultdict
 
 import networkx as nx
@@ -68,20 +69,6 @@ def from_path(path, **kwargs):
     log.info('Loading from path: %s', path)
     with open(os.path.expanduser(path)) as f:
         return BELGraph(lines=f, **kwargs)
-
-
-def from_database(connection):
-    """Loads a BEL graph from a database
-
-    :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
-                       where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
-                       of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
-                       of URL.
-    :type connection: str
-    :return: a BEL graph loaded from the database
-    :rtype: BELGraph
-    """
-    raise NotImplementedError("Can't load from from database: {}".format(connection))
 
 
 class BELGraph(nx.MultiDiGraph):
@@ -221,7 +208,7 @@ class BELGraph(nx.MultiDiGraph):
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
                 self.last_parse_errors[e.__class__.__name__] += 1
-            except e:
+            except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
                 self.last_parse_errors[e.__class__.__name__] += 1
@@ -260,6 +247,12 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def document(self):
+        """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
+        according to :py:data:`pybel.parser.language.document_keys`
+
+        :return: metadata derived from the BEL "Document" section
+        :rtype: dict
+        """
         return self.graph['document_metadata']
 
     @property
@@ -402,6 +395,7 @@ def from_graphml(path):
     g = expand_edges(g)
     for n in g:
         g.node[n] = json.loads(g.node[n]['json'])
+    nx.relabel_nodes(g, literal_eval, copy=False)  # shh don't tell anyone
     return g
 
 
@@ -433,12 +427,13 @@ def expand_edges(graph):
 
     return g
 
+
 def to_bytes(graph):
     """Converts a graph to bytes (as BytesIO object)
 
     :param graph: a BEL graph
     :type graph: BELGraph
-    :param output: a file or filelike object"""
+    """
     return pickle.dumps(nx.MultiDiGraph(graph), protocol=pickle.HIGHEST_PROTOCOL)
 
 

@@ -10,17 +10,18 @@ from pybel.manager.models import OWL_TABLE_NAME
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
-from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3
+from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3, \
+    expected_test_bel_4_metadata, assertHasNode, assertHasEdge
 
 log = logging.getLogger('pybel')
 
 
 class TestOwlBase(unittest.TestCase):
     def assertHasNode(self, g, n):
-        self.assertTrue(g.has_node(n), msg="Missing node: {}".format(n))
+        assertHasNode(self, n, g)
 
     def assertHasEdge(self, g, u, v):
-        self.assertTrue(g.has_edge(u, v), msg="Missing edge: ({}, {})".format(u, v))
+        assertHasEdge(self, u, v, g)
 
 
 class TestOwlUtils(unittest.TestCase):
@@ -350,23 +351,13 @@ class TestIntegration(TestOwlBase):
     def test_from_path(self):
         g = pybel.from_path(test_bel_4)
 
-        expected_document = dict(
-            Name="PyBEL Test Document 4",
-            Description="Tests the use of OWL ontologies as namespaces",
-            Version="1.6",
-            Copyright="Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
-            Authors="Charles Tapley Hoyt",
-            Licenses="WTF License",
-            ContactInfo="charles.hoyt@scai.fraunhofer.de",
-        )
-
         expected_definitions = dict(
             HGNC="http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns",
             PIZZA="http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl",
             WINE="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
         )
 
-        self.assertEqual(expected_document, g.document)
+        self.assertEqual(expected_test_bel_4_metadata, g.document)
 
         actual_definitions = {}
         actual_definitions.update(g.namespace_url)

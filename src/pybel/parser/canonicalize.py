@@ -5,7 +5,7 @@ import sys
 from operator import itemgetter
 
 from . import language
-from .language import rev_activity_labels
+from .language import rev_activity_labels, inv_document_keys
 from .utils import ensure_quotes
 from ..constants import GOCC_LATEST
 
@@ -197,7 +197,7 @@ def sort_edges(d):
 
 def to_bel(g, file=sys.stdout):
     for k in sorted(g.document):
-        print('SET DOCUMENT {} = "{}"'.format(k, g.document[k]), file=file)
+        print('SET DOCUMENT {} = "{}"'.format(inv_document_keys[k], g.document[k]), file=file)
 
     print('###############################################\n', file=file)
 
