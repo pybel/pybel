@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+[0.3.1] - 2017-01-03
+--------------------
+Added
+~~~~~
+- Bytes IO of BEL Graphs
+- Graph caching and Graph Cache Manager
+
+Fixed
+~~~~~
+- Annotations weren't getting cached because *somebody* forgot to add the urls. Fixed.
+- Removed typos in default namespace list
+
+Changed
+~~~~~~~
+- More explicit tests and overall test case refactoring
+- Better handling of BEL script metadata
+
 [0.3.0] - 2016-12-29
 --------------------
 Added
@@ -22,7 +39,6 @@ Removed
 
 [0.2.6] - 2016-11-19
 --------------------
-
 Added
 ~~~~~
 - Canonical BEL terms added to nodes on parsing
@@ -43,7 +59,6 @@ Removed
 
 [0.2.5] - 2016-11-13
 --------------------
-
 Added
 ~~~~~
 - Nested statement parsing support
@@ -57,7 +72,6 @@ Fixed
 
 [0.2.4] - 2016-11-13
 --------------------
-
 Added
 ~~~~~
 - Neo4J CLI output
@@ -75,9 +89,8 @@ Fixed
 - Typo in amino acid dictionary
 - Assertion of citation
 
-[0.2.3] - 2016-11-9
--------------------
-
+[0.2.3] - 2016-11-09
+--------------------
 Changed
 ~~~~~~~
 - Made logging lazy and updated logging codes
@@ -86,7 +99,6 @@ Changed
 
 [0.2.2] - 2016-10-25
 --------------------
-
 Removed
 ~~~~~~~
 - Documentation is no longer stored in version control
@@ -94,14 +106,12 @@ Removed
 
 [0.2.1] - 2016-10-25 [YANKED]
 -----------------------------
-
 Added
 ~~~~~
 - Added CLI for data manager
 
 [0.2.0] - 2016-10-22
 --------------------
-
 Added
 ~~~~~
 - Added definition cache manager
@@ -109,7 +119,8 @@ Added
 Diffs
 -----
 
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.0...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.1...HEAD
+- [0.3.1]: https://github.com/pybel/pybel/compare/v0.3.0...v0.3.1
 - [0.3.0]: https://github.com/pybel/pybel/compare/v0.2.6...v0.3.0
 - [0.2.6]: https://github.com/pybel/pybel/compare/v0.2.5...v0.2.6
 - [0.2.5]: https://github.com/pybel/pybel/compare/v0.2.4...v0.2.5
