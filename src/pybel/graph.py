@@ -208,7 +208,7 @@ class BELGraph(nx.MultiDiGraph):
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
                 self.last_parse_errors[e.__class__.__name__] += 1
-            except e:
+            except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
                 self.last_parse_errors[e.__class__.__name__] += 1
