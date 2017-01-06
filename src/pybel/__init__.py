@@ -1,6 +1,9 @@
 """Parsing, validation, and analysis of of BEL graphs"""
 
 import os
+from pkg_resources import iter_entry_points
+import types
+import warnings
 
 from . import cli
 from . import graph
@@ -21,6 +24,14 @@ __email__ = 'charles.hoyt@scai.fraunhofer.de'
 
 __license__ = 'Apache 2.0 License'
 __copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
+
+ext = types.ModuleType('ext', 'PyBEL extensions')
+for entry_point in iter_entry_points(group='pybel.ext', name=None):
+    name = entry_point.name
+    if name in ext.__dict__:
+        warnings.warn('An extension named `{}` has already been imported. Alert the author of `{}` about this collision.'.format(name, entry_point.module_name))
+    else:
+        ext.__dict__[name] = entry_point.load()
 
 
 def get_large_corpus(force_reload=False, **kwargs):
