@@ -4,7 +4,7 @@ import unittest
 from pybel.exceptions import PyBelWarning
 from pybel.parser.baseparser import nest, BaseParser
 from pybel.parser.language import amino_acid
-from pybel.parser.parse_exceptions import PlaceholderAminoAcidException
+from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.parse_identifier import IdentifierParser
 from pybel.utils import download_url
 from tests.constants import test_an_1
@@ -32,12 +32,12 @@ class TestRandom(unittest.TestCase):
         self.assertIsNotNone(GoodParser().get_language())
 
     def test_bad_aminoAcid(self):
-        with self.assertRaises(PlaceholderAminoAcidException):
+        with self.assertRaises(PlaceholderAminoAcidWarning):
             amino_acid.parseString('X')
 
     def test_pybelexception_str(self):
         e = PyBelWarning('XXX')
-        self.assertEqual("PyBEL100 - PyBelWarning - XXX", str(e))
+        self.assertEqual("PyBelWarning - XXX", str(e))
 
         with self.assertRaises(PyBelWarning):
             raise e

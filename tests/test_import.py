@@ -4,7 +4,7 @@ import unittest
 import pybel
 from pybel.manager.cache import CacheManager
 from pybel.parser import BelParser
-from pybel.parser.parse_exceptions import IllegalFunctionSemantic, MissingCitationException
+from pybel.parser.parse_exceptions import InvalidFunctionSemantic, MissingCitationException
 from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
     test_evidence_bel, BelReconstitutionMixin, expected_test_bel_3_metadata, expected_test_bel_1_metadata
 
@@ -57,7 +57,7 @@ class TestFull(TestTokenParserBase):
 
     def test_semantic_failure(self):
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
-        with self.assertRaises(IllegalFunctionSemantic):
+        with self.assertRaises(InvalidFunctionSemantic):
             self.parser.parseString(statement)
 
     def test_missing_citation(self):

@@ -129,7 +129,7 @@ class TestParseMetadata(unittest.TestCase):
 
     def test_document_metadata_exception(self):
         s = 'SET DOCUMENT InvalidKey = "nope"'
-        with self.assertRaises(IllegalDocumentMetadataException):
+        with self.assertRaises(InvalidMetadataException):
             self.parser.parseString(s)
 
     def test_parse_document(self):
@@ -208,12 +208,12 @@ class TestParseControl(unittest.TestCase):
 
     def test_unset_missing_command(self):
         s = 'UNSET Custom1'
-        with self.assertRaises(MissingAnnotationKeyException):
+        with self.assertRaises(MissingAnnotationKeyWarning):
             self.parser.parseString(s)
 
     def test_unset_invalid_command(self):
         s = 'UNSET Custom3'
-        with self.assertRaises(InvalidAnnotationKeyException):
+        with self.assertRaises(UndefinedAnnotationWarning):
             self.parser.parseString(s)
 
     def test_unset_missing_citation(self):
@@ -222,7 +222,7 @@ class TestParseControl(unittest.TestCase):
 
     def test_set_missing_statement(self):
         s = 'SET MissingKey = "lol"'
-        with self.assertRaises(InvalidAnnotationKeyException):
+        with self.assertRaises(UndefinedAnnotationWarning):
             self.parser.parseString(s)
 
     def test_citation_short(self):
@@ -305,7 +305,7 @@ class TestParseControl(unittest.TestCase):
     def test_custom_annotation_list_withInvalid(self):
         s = 'SET Custom1 = {"Custom1_A","Custom1_B","Evil invalid!!!"}'
 
-        with self.assertRaises(IllegalAnnotationValueExeption):
+        with self.assertRaises(IllegalAnnotationValueWarning):
             self.parser.parseString(s)
 
     def test_custom_key_failure(self):
