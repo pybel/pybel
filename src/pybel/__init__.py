@@ -3,7 +3,6 @@
 import os
 
 from . import cli
-from . import ext
 from . import graph
 from .constants import LARGE_CORPUS_URL, SMALL_CORPUS_URL, PYBEL_DIR
 from .graph import *
