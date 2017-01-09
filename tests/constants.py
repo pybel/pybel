@@ -8,15 +8,19 @@ from pybel import BELGraph
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 owl_dir_path = os.path.join(dir_path, 'owl')
 bel_dir_path = os.path.join(dir_path, 'bel')
 belns_dir_path = os.path.join(dir_path, 'belns')
 belanno_dir_path = os.path.join(dir_path, 'belanno')
 
-test_bel_0 = os.path.join(bel_dir_path, 'small_corpus.bel')
-test_bel_1 = os.path.join(bel_dir_path, 'test_bel_1.bel')
-test_bel_4 = os.path.join(bel_dir_path, 'test_bel_4.bel')
+test_bel_1 = os.path.join(bel_dir_path, 'test_bel.bel')
+test_bel_4 = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 
 test_owl_1 = os.path.join(owl_dir_path, 'pizza_onto.owl')
@@ -164,3 +168,6 @@ class MockSession:
     @staticmethod
     def get(url):
         return MockResponse(url)
+
+
+patch_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)

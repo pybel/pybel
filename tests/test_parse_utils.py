@@ -268,7 +268,7 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
         self.assertEqual(expect, result)
 
     def test_e(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel_1.bel')
+        path = os.path.join(dir_path, 'bel', 'test_bel.bel')
 
         with open(path) as f:
             lines = list(sanitize_file_lines(f))
