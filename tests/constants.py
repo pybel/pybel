@@ -29,7 +29,7 @@ test_ns_1 = os.path.join(belns_dir_path, 'test_ns_1.belns')
 test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
 
 test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')
-test_citation_bel = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format_map(test_citation_dict)
+test_citation_bel = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(**test_citation_dict)
 test_evidence_text = 'I read it on Twitter'
 test_evidence_bel = 'SET Evidence = "{}"'.format(test_evidence_text)
 
