@@ -82,7 +82,7 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.exists(abs_test_file))
             g = pybel.from_graphml(abs_test_file)
-            self.bel_1_reconstituted(g)
+            self.bel_1_reconstituted(g, check_metadata=False)
 
     def test_json(self):
         test_file = 'mygraph.json'

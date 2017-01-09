@@ -6,7 +6,7 @@ import sqlalchemy.exc
 
 import pybel
 from pybel.manager.graph_cache import GraphCacheManager
-from tests.constants import BelReconstitutionMixin, test_bel_1, test_bel_3
+from tests.constants import BelReconstitutionMixin, test_bel_1
 
 
 class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
@@ -53,7 +53,7 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
 
         self.gcm.store_graph(g1)
 
-        g2 = pybel.from_path(test_bel_3)
+        g2 = pybel.from_path(test_bel_1)
         g2.document['name'] = TEST_NAME
         g2.document['version'] = TEST_V2
 

@@ -6,22 +6,22 @@ from pybel.manager.cache import CacheManager
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
-
 from tests.constants import test_an_1, test_ns_1, test_bel_1
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+mgi_url = 'http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns'
+rgd_url = 'http://resources.openbel.org/belframework/20150611/namespace/rgd-rat-genes.belns'
 
 
 class TestSplitLines(unittest.TestCase):
     def test_parts(self):
-
         with open(test_bel_1) as f:
             docs, definitions, statements = split_file_to_annotations_and_definitions(f)
 
         self.assertEqual(7, len(docs))
-        self.assertEqual(5, len(definitions))
+        self.assertEqual(4, len(definitions))
         self.assertEqual(14, len(statements))
 
 
@@ -44,13 +44,14 @@ class TestParseMetadata(unittest.TestCase):
 
     def test_namespace_name_persistience(self):
         """Tests that a namespace defined by a URL can't be overwritten by a definition by another URL"""
-        s = 'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
+
+        s = 'DEFINE NAMESPACE MGI AS URL "{}"'.format(mgi_url)
 
         self.parser.parseString(s)
         self.check_mgi()
 
         # Test doesn't overwrite
-        s = 'DEFINE NAMESPACE MGI AS URL "http://resources.openbel.org/belframework/20150611/namespace/rgd-rat-genes.belns"'
+        s = 'DEFINE NAMESPACE MGI AS URL "{}"'.format(rgd_url)
         self.parser.parseString(s)
         self.assertIn('MGI', self.parser.namespace_dict)
         self.assertNotIn('2310ex4-5', self.parser.namespace_dict['MGI'])

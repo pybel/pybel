@@ -9,7 +9,7 @@ from requests.exceptions import ConnectionError
 import pybel
 from pybel.constants import GOCC_LATEST
 from pybel.parser.canonicalize import to_bel
-from tests.constants import test_bel_0, test_bel_1, test_bel_3, test_bel_4
+from tests.constants import test_bel_0, test_bel_1, test_bel_4
 
 log = logging.getLogger('pybel')
 
@@ -73,9 +73,6 @@ class TestCanonicalize(unittest.TestCase):
 
     def test_canonicalize_1(self):
         self.canonicalize_tester_helper(test_bel_1)
-
-    def test_canonicalize_3(self):
-        self.canonicalize_tester_helper(test_bel_3)
 
     def test_canonicalize_4(self):
         try:

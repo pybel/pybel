@@ -5,26 +5,22 @@ import pybel
 from pybel.manager.cache import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import InvalidFunctionSemantic, MissingCitationException
-from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
-    test_evidence_bel, BelReconstitutionMixin, expected_test_bel_3_metadata, expected_test_bel_1_metadata
+from tests.constants import TestTokenParserBase, test_bel_1, test_citation_bel, test_citation_dict, \
+    test_evidence_bel, BelReconstitutionMixin
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
 
-class TestCacheIntegration(unittest.TestCase):
+class TestImport(BelReconstitutionMixin, unittest.TestCase):
     def test_cached_winning(self):
         cm = CacheManager('sqlite://')
 
-        with open(test_bel_3) as f:
+        with open(test_bel_1) as f:
             g = pybel.BELGraph(f, cache_manager=cm)
+        self.bel_1_reconstituted(g)
 
-        self.assertEqual(expected_test_bel_3_metadata, g.metadata_parser.document_metadata)
-
-
-class TestImport(BelReconstitutionMixin, unittest.TestCase):
     def test_from_path(self):
         g = pybel.from_path(test_bel_1, complete_origin=True)
-        self.assertEqual(expected_test_bel_1_metadata, g.metadata_parser.document_metadata)
         self.bel_1_reconstituted(g)
 
     def test_bytes_io(self):
@@ -34,7 +30,6 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
 
     def test_from_fileUrl(self):
         g = pybel.from_url('file://{}'.format(test_bel_1), complete_origin=True)
-        self.assertEqual(expected_test_bel_1_metadata, g.metadata_parser.document_metadata)
         self.bel_1_reconstituted(g)
 
 

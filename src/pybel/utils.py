@@ -1,4 +1,5 @@
 import collections
+import logging
 from collections import defaultdict
 from configparser import ConfigParser
 
@@ -6,12 +7,17 @@ import networkx as nx
 import requests
 from requests_file import FileAdapter
 
+log = logging.getLogger('pybel')
+
 
 def download_url(url):
-    """Downloads and parses a config file from url"""
+    """Downloads and parses a config file from url
+
+    :param url: the URL of a BELNS, BELANNO, or BELEQ file to download and parse
+    :type url: str
+    """
     session = requests.Session()
-    if url.startswith('file://'):
-        session.mount('file://', FileAdapter())
+    session.mount('file://', FileAdapter())
     res = session.get(url)
 
     lines = [line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines()]
