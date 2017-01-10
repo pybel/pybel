@@ -7,7 +7,7 @@ from pyparsing import pyparsing_common as ppc
 
 from . import language
 from .baseparser import BaseParser, word, quote, delimitedSet
-from .parse_exceptions import IllegalDocumentMetadataException
+from .parse_exceptions import InvalidMetadataException
 
 log = logging.getLogger('pybel')
 
@@ -80,12 +80,14 @@ class MetadataParser(BaseParser):
         key = tokens['key']
 
         if key not in language.document_keys:
-            raise IllegalDocumentMetadataException('Invalid document metadata key: {}'.format(key))
+            raise InvalidMetadataException('Invalid document metadata key: {}'.format(key))
 
-        if key in self.document_metadata:
+        norm_key = language.document_keys[key]
+
+        if norm_key in self.document_metadata:
             log.warning('Tried to overwrite metadata: {}'.format(key))
 
-        self.document_metadata[key] = tokens['value']
+        self.document_metadata[norm_key] = tokens['value']
 
         return tokens
 

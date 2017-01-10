@@ -43,12 +43,12 @@ class TestIdentifierParser(unittest.TestCase):
 
     def test_invalid_3(self):
         s = 'bare'
-        with self.assertRaises(parse_exceptions.NakedNamespaceException):
+        with self.assertRaises(parse_exceptions.NakedNameWarning):
             self.parser.parseString(s)
 
     def test_invalid_4(self):
         s = '"quoted"'
-        with self.assertRaises(parse_exceptions.NakedNamespaceException):
+        with self.assertRaises(parse_exceptions.NakedNameWarning):
             self.parser.parseString(s)
 
 

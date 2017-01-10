@@ -12,8 +12,8 @@ from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser, TruncParser
 from .parse_control import ControlParser
-from .parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException, \
-    MissingCitationException, IllegalFunctionSemantic, MissingSupportingTextException
+from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
+    MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
 from .parse_pmod import PmodParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
@@ -267,7 +267,7 @@ class BelParser(BaseParser):
         self.translocation_illegal = nest(self.simple_abundance)
 
         def handle_translocation_illegal(s, l, t):
-            raise IllegalTranslocationException('Unqualified translocation {} {} {}'.format(s, l, t))
+            raise MalformedTranslocationWarning('Unqualified translocation {} {} {}'.format(s, l, t))
 
         self.translocation_illegal.setParseAction(handle_translocation_illegal)
 
@@ -441,7 +441,7 @@ class BelParser(BaseParser):
 
     def handle_nested_relation(self, s, l, tokens):
         if not self.lenient:
-            raise NestedRelationNotSupportedException('Nesting unsupported: {}'.format(s))
+            raise NestedRelationWarning('Nesting unsupported: {}'.format(s))
 
         self.handle_relation(s, l, dict(subject=tokens['subject'],
                                         relation=tokens['relation'],
@@ -464,7 +464,7 @@ class BelParser(BaseParser):
         if tokens['function'] not in valid_function_codes:
             valid_list = ','.join(self.identifier_parser.namespace_dict[namespace][name])
             fmt = "Invalid function ({}) for identifier {}:{}. Valid are: [{}]"
-            raise IllegalFunctionSemantic(fmt.format(tokens['function'], namespace, name, valid_list))
+            raise InvalidFunctionSemantic(fmt.format(tokens['function'], namespace, name, valid_list))
         return tokens
 
     def handle_fusion_legacy(self, s, l, tokens):
@@ -484,7 +484,7 @@ class BelParser(BaseParser):
             raise MissingCitationException('unable to add relation {}'.format(s))
 
         if 'SupportingText' not in self.control_parser.annotations:
-            raise MissingSupportingTextException('unable to add relation {}'.format(s))
+            raise MissingSupportWarning('unable to add relation {}'.format(s))
 
     def build_attrs(self, attrs=None, list_attrs=None):
         attrs = {} if attrs is None else attrs

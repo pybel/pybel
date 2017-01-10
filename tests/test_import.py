@@ -4,56 +4,27 @@ import unittest
 import pybel
 from pybel.manager.cache import CacheManager
 from pybel.parser import BelParser
-from pybel.parser.parse_exceptions import IllegalFunctionSemantic, MissingCitationException
-from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
-    bel_1_reconstituted, test_evidence_bel
+from pybel.parser.parse_exceptions import InvalidFunctionSemantic, MissingCitationException
+from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
+    test_citation_dict, test_evidence_bel, mock_bel_resources
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
 
-class TestCacheIntegration(unittest.TestCase):
-    def test_cached_winning(self):
-        c_path = 'sqlite://'
+class TestImport(BelReconstitutionMixin, unittest.TestCase):
 
-        cm = CacheManager(connection=c_path)
+    @mock_bel_resources
+    def test_bytes_io(self, mock_get):
+        g = pybel.from_path(test_bel, complete_origin=True)
+        self.bel_1_reconstituted(g)
 
-        with open(test_bel_3) as f:
-            g = pybel.BELGraph(f, cache_manager=cm)
+        g_reloaded = pybel.from_bytes(pybel.to_bytes(g))
+        self.bel_1_reconstituted(g_reloaded)
 
-        expected_document_metadata = {
-            'Name': "PyBEL Test Document",
-            "Description": "Made for testing PyBEL parsing",
-            'Version': "1.6",
-            'Copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
-            'Authors': "Charles Tapley Hoyt",
-            'Licenses': "Other / Proprietary",
-            'ContactInfo': "charles.hoyt@scai.fraunhofer.de"
-        }
-
-        self.assertEqual(expected_document_metadata, g.metadata_parser.document_metadata)
-
-
-class TestImport(unittest.TestCase):
-    def setUp(self):
-        self.expected_document_metadata = {
-            'Name': "PyBEL Test Document",
-            "Description": "Made for testing PyBEL parsing",
-            'Version': "1.6",
-            'Copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
-            'Authors': "Charles Tapley Hoyt",
-            'Licenses': "Other / Proprietary",
-            'ContactInfo': "charles.hoyt@scai.fraunhofer.de"
-        }
-
-    def test_from_path(self):
-        g = pybel.from_path(test_bel_1, complete_origin=True)
-        self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
-        bel_1_reconstituted(self, g)
-
-    def test_from_fileUrl(self):
-        g = pybel.from_url('file://{}'.format(test_bel_1), complete_origin=True)
-        self.assertEqual(self.expected_document_metadata, g.metadata_parser.document_metadata)
-        bel_1_reconstituted(self, g)
+    @mock_bel_resources
+    def test_from_fileUrl(self, mock_get):
+        g = pybel.from_url('file://{}'.format(test_bel), complete_origin=True)
+        self.bel_1_reconstituted(g)
 
 
 class TestFull(TestTokenParserBase):
@@ -75,7 +46,7 @@ class TestFull(TestTokenParserBase):
 
     def test_semantic_failure(self):
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
-        with self.assertRaises(IllegalFunctionSemantic):
+        with self.assertRaises(InvalidFunctionSemantic):
             self.parser.parseString(statement)
 
     def test_missing_citation(self):

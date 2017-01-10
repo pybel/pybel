@@ -1,13 +1,13 @@
 import os
 import unittest
 
-import pybel
 from pybel.exceptions import PyBelWarning
 from pybel.parser.baseparser import nest, BaseParser
 from pybel.parser.language import amino_acid
-from pybel.parser.parse_exceptions import PlaceholderAminoAcidException
+from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.parse_identifier import IdentifierParser
 from pybel.utils import download_url
+from tests.constants import test_an_1
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -16,10 +16,6 @@ class TestRandom(unittest.TestCase):
     def test_nest_failure(self):
         with self.assertRaises(ValueError):
             nest()
-
-    def test_database_notimplemented(self):
-        with self.assertRaises(NotImplementedError):
-            pybel.graph.from_database('')
 
     def test_bad_subclass(self):
         class BadParser(BaseParser):
@@ -36,12 +32,12 @@ class TestRandom(unittest.TestCase):
         self.assertIsNotNone(GoodParser().get_language())
 
     def test_bad_aminoAcid(self):
-        with self.assertRaises(PlaceholderAminoAcidException):
+        with self.assertRaises(PlaceholderAminoAcidWarning):
             amino_acid.parseString('X')
 
     def test_pybelexception_str(self):
         e = PyBelWarning('XXX')
-        self.assertEqual("PyBEL100 - PyBelWarning - XXX", str(e))
+        self.assertEqual("PyBelWarning - XXX", str(e))
 
         with self.assertRaises(PyBelWarning):
             raise e
@@ -51,8 +47,7 @@ class TestRandom(unittest.TestCase):
             IdentifierParser(mapping={})
 
     def test_download_url(self):
-        path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
-        res = download_url('file://{}'.format(path))
+        res = download_url('file://{}'.format(test_an_1))
 
         expected_values = {
             'TestAnnot1': 'O',

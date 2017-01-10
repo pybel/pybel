@@ -1,0 +1,4688 @@
+[AnnotationDefinition]
+Keyword=MeSHDisease
+TypeString=list
+DescriptionString=Disease terms from the [C] branch of Medical Subject Headings (MeSH).
+UsageString=Use to annotate a statement demonstrated in the context of a specific disease.
+VersionString=20150611
+CreatedDateTime=2015-06-11T19:57:45
+
+[Author]
+NameString=OpenBEL 
+CopyrightString=Copyright (c) 2015, OpenBEL Project. This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+ContactInfoString=info@openbel.org
+
+[Citation]
+NameString=MeSH
+DescriptionString=MeSH (Medical Subject Headings) is a controlled vocabulary thesaurus created, maintained, and provided by the U.S. National Library of Medicine.
+PublishedVersionString=2015
+ReferenceURL=http://www.nlm.nih.gov/mesh/meshhome.html
+
+[Processing]
+CaseSensitiveFlag=yes
+DelimiterString=|
+CacheableFlag=yes
+
+[Values]
+22q11 Deletion Syndrome|D058165
+46, XX Disorders of Sex Development|D058489
+46, XX Testicular Disorders of Sex Development|D058531
+46, XY Disorders of Sex Development|D058490
+ACTH Syndrome, Ectopic|D000182
+ACTH-Secreting Pituitary Adenoma|D049913
+AIDS Arteritis, Central Nervous System|D020943
+AIDS Dementia Complex|D015526
+AIDS-Associated Nephropathy|D016263
+AIDS-Related Complex|D000386
+AIDS-Related Opportunistic Infections|D017088
+Abdomen, Acute|D000006
+Abdominal Abscess|D018784
+Abdominal Injuries|D000007
+Abdominal Neoplasms|D000008
+Abdominal Pain|D015746
+Abducens Nerve Diseases|D020434
+Abducens Nerve Injury|D020222
+Aberrant Crypt Foci|D058739
+Abetalipoproteinemia|D000012
+Abnormal Karyotype|D059786
+Abnormalities, Drug-Induced|D000014
+Abnormalities, Multiple|D000015
+Abnormalities, Radiation-Induced|D000016
+Abnormalities, Severe Teratoid|D009008
+Abortion, Habitual|D000026
+Abortion, Incomplete|D000027
+Abortion, Missed|D000030
+Abortion, Septic|D000031
+Abortion, Spontaneous|D000022
+Abortion, Threatened|D000033
+Abortion, Veterinary|D000034
+Abruptio Placentae|D000037
+Abscess|D000038
+Acalculous Cholecystitis|D042101
+Acanthamoeba Keratitis|D015823
+Acanthocheilonemiasis|D063485
+Acantholysis|D000051
+Acanthoma|D049309
+Acanthosis Nigricans|D000052
+Acatalasia|D020642
+Accelerated Idioventricular Rhythm|D016170
+Accessory Atrioventricular Bundle|D058606
+Accessory Nerve Diseases|D020436
+Accessory Nerve Injuries|D061227
+Achlorhydria|D000126
+Achondroplasia|D000130
+Acid-Base Imbalance|D000137
+Acidosis|D000138
+Acidosis, Lactic|D000140
+Acidosis, Renal Tubular|D000141
+Acidosis, Respiratory|D000142
+Acinetobacter Infections|D000151
+Acne Keloid|D000153
+Acne Vulgaris|D000152
+Acneiform Eruptions|D017486
+Acquired Hyperostosis Syndrome|D020083
+Acquired Immunodeficiency Syndrome|D000163
+Acro-Osteolysis|D030981
+Acrocallosal Syndrome|D055673
+Acrocephalosyndactylia|D000168
+Acrodermatitis|D000169
+Acrodynia|D000170
+Acromegaly|D000172
+Acrospiroma|D018250
+Actinobacillosis|D000187
+Actinobacillus Infections|D000189
+Actinomycetales Infections|D000193
+Actinomycosis|D000196
+Actinomycosis, Cervicofacial|D000197
+Activated Protein C Resistance|D020016
+Acute Chest Syndrome|D056586
+Acute Coronary Syndrome|D054058
+Acute Disease|D000208
+Acute Generalized Exanthematous Pustulosis|D056150
+Acute Kidney Injury|D058186
+Acute Lung Injury|D055371
+Acute Pain|D059787
+Acute Radiation Syndrome|D054508
+Acute-On-Chronic Liver Failure|D065290
+Acute-Phase Reaction|D000210
+Adamantinoma|D050398
+Adams-Stokes Syndrome|D000219
+Addison Disease|D000224
+Adenocarcinoma|D000230
+Adenocarcinoma in Situ|D065311
+Adenocarcinoma, Bronchiolo-Alveolar|D002282
+Adenocarcinoma, Clear Cell|D018262
+Adenocarcinoma, Follicular|D018263
+Adenocarcinoma, Mucinous|D002288
+Adenocarcinoma, Papillary|D000231
+Adenocarcinoma, Scirrhous|D002293
+Adenocarcinoma, Sebaceous|D018266
+Adenofibroma|D000232
+Adenolymphoma|D000235
+Adenoma|D000236
+Adenoma, Acidophil|D000239
+Adenoma, Basophil|D000237
+Adenoma, Bile Duct|D002759
+Adenoma, Chromophobe|D000238
+Adenoma, Islet Cell|D007516
+Adenoma, Liver Cell|D018248
+Adenoma, Oxyphilic|D018249
+Adenoma, Pleomorphic|D008949
+Adenoma, Sweat Gland|D006607
+Adenoma, Villous|D018253
+Adenomatoid Tumor|D018254
+Adenomatosis, Pulmonary|D018255
+Adenomatous Polyposis Coli|D011125
+Adenomatous Polyps|D018256
+Adenomyoepithelioma|D055331
+Adenomyoma|D018194
+Adenomyosis|D062788
+Adenophorea Infections|D017188
+Adenosarcoma|D018195
+Adenoviridae Infections|D000257
+Adenovirus Infections, Human|D000258
+Adie Syndrome|D000270
+Adiposis Dolorosa|D000274
+Adnexal Diseases|D000291
+Adrenal Cortex Diseases|D000303
+Adrenal Cortex Neoplasms|D000306
+Adrenal Gland Diseases|D000307
+Adrenal Gland Neoplasms|D000310
+Adrenal Hyperplasia, Congenital|D000312
+Adrenal Insufficiency|D000309
+Adrenal Rest Tumor|D000314
+Adrenocortical Adenoma|D018246
+Adrenocortical Carcinoma|D018268
+Adrenocortical Hyperfunction|D000308
+Adrenogenital Syndrome|D047808
+Adrenoleukodystrophy|D000326
+Aerophagy|D000334
+Afferent Loop Syndrome|D000343
+Afibrinogenemia|D000347
+African Horse Sickness|D000355
+African Swine Fever|D000357
+Agammaglobulinemia|D000361
+Agenesis of Corpus Callosum|D061085
+Ageusia|D000370
+Aggressive Periodontitis|D010520
+Aging, Premature|D019588
+Agnosia|D000377
+Agranulocytosis|D000380
+Agraphia|D000381
+Agricultural Workers' Diseases|D000382
+Aicardi Syndrome|D058540
+Ainhum|D000387
+Airway Obstruction|D000402
+Airway Remodeling|D056151
+Akathisia, Drug-Induced|D017109
+Akinetic Mutism|D000405
+Alagille Syndrome|D016738
+Albinism|D000417
+Albinism, Ocular|D016117
+Albinism, Oculocutaneous|D016115
+Albuminuria|D000419
+Alcohol Amnestic Disorder|D000425
+Alcohol Withdrawal Delirium|D000430
+Alcohol Withdrawal Seizures|D020270
+Alcohol-Induced Disorders|D020751
+Alcohol-Induced Disorders, Nervous System|D020268
+Alcohol-Related Disorders|D019973
+Alcoholic Intoxication|D000435
+Alcoholic Neuropathy|D020269
+Alcoholism|D000437
+Aleutian Mink Disease|D000453
+Alexander Disease|D038261
+Alexia, Pure|D020237
+Alice in Wonderland Syndrome|D062026
+Alien Hand Syndrome|D055964
+Aliivibrio Infections|D059707
+Alkalosis|D000471
+Alkalosis, Respiratory|D000472
+Alkaptonuria|D000474
+Allesthesia|D066190
+Alopecia|D000505
+Alopecia Areata|D000506
+Alphavirus Infections|D018354
+Alstrom Syndrome|D056769
+Alternariosis|D060487
+Altitude Sickness|D000532
+Alveolar Bone Loss|D016301
+Alveolitis, Extrinsic Allergic|D000542
+Alzheimer Disease|D000544
+Amaurosis Fugax|D020757
+Amblyopia|D000550
+Amebiasis|D000562
+Ameloblastoma|D000564
+Amelogenesis Imperfecta|D000567
+Amenorrhea|D000568
+Amino Acid Metabolism, Inborn Errors|D000592
+Amino Acid Transport Disorders, Inborn|D020157
+Amnesia|D000647
+Amnesia, Anterograde|D020324
+Amnesia, Retrograde|D000648
+Amnesia, Transient Global|D020236
+Amniotic Band Syndrome|D000652
+Amphetamine-Related Disorders|D019969
+Amputation, Traumatic|D000673
+Amyloid Neuropathies|D017772
+Amyloid Neuropathies, Familial|D028227
+Amyloidosis|D000686
+Amyloidosis, Familial|D028226
+Amyotrophic Lateral Sclerosis|D000690
+Anal Gland Neoplasms|D000694
+Anaphylaxis|D000707
+Anaplasia|D000708
+Anaplasmataceae Infections|D000711
+Anaplasmosis|D000712
+Anastomotic Leak|D057868
+Ancylostomiasis|D000724
+Andersen Syndrome|D050030
+Androgen-Insensitivity Syndrome|D013734
+Anemia|D000740
+Anemia, Aplastic|D000741
+Anemia, Diamond-Blackfan|D029503
+Anemia, Dyserythropoietic, Congenital|D000742
+Anemia, Hemolytic|D000743
+Anemia, Hemolytic, Autoimmune|D000744
+Anemia, Hemolytic, Congenital|D000745
+Anemia, Hemolytic, Congenital Nonspherocytic|D000746
+Anemia, Hypochromic|D000747
+Anemia, Hypoplastic, Congenital|D029502
+Anemia, Iron-Deficiency|D018798
+Anemia, Macrocytic|D000748
+Anemia, Megaloblastic|D000749
+Anemia, Myelophthisic|D000750
+Anemia, Neonatal|D000751
+Anemia, Pernicious|D000752
+Anemia, Refractory|D000753
+Anemia, Refractory, with Excess of Blasts|D000754
+Anemia, Sickle Cell|D000755
+Anemia, Sideroblastic|D000756
+Anencephaly|D000757
+Anetoderma|D057088
+Aneuploidy|D000782
+Aneurysm|D000783
+Aneurysm, Dissecting|D000784
+Aneurysm, False|D017541
+Aneurysm, Infected|D000785
+Aneurysm, Ruptured|D017542
+Angelman Syndrome|D017204
+Angina Pectoris|D000787
+Angina Pectoris, Variant|D000788
+Angina, Stable|D060050
+Angina, Unstable|D000789
+Angiodysplasia|D016888
+Angioedema|D000799
+Angioedemas, Hereditary|D054179
+Angiofibroma|D018322
+Angioid Streaks|D000793
+Angiokeratoma|D000794
+Angiolipoma|D018206
+Angiolymphoid Hyperplasia with Eosinophilia|D000796
+Angiomatosis|D000798
+Angiomatosis, Bacillary|D016917
+Angiomyolipoma|D018207
+Angiomyoma|D018229
+Anhedonia|D059445
+Animal Diseases|D000820
+Aniridia|D015783
+Anisakiasis|D017129
+Aniseikonia|D000839
+Anisocoria|D015875
+Anisometropia|D015858
+Ankle Fractures|D064386
+Ankle Injuries|D016512
+Ankylosis|D000844
+Anodontia|D000848
+Anomia|D000849
+Anophthalmos|D000853
+Anorexia|D000855
+Anovulation|D000858
+Anoxia|D000860
+Anterior Capsular Rupture, Ocular|D057971
+Anterior Compartment Syndrome|D000868
+Anterior Spinal Artery Syndrome|D020759
+Anterior Wall Myocardial Infarction|D056988
+Anthracosilicosis|D000874
+Anthracosis|D055008
+Anthrax|D000881
+Anti-Glomerular Basement Membrane Disease|D019867
+Anti-N-Methyl-D-Aspartate Receptor Encephalitis|D060426
+Anti-Neutrophil Cytoplasmic Antibody-Associated Vasculitis|D056648
+Anticholinergic Syndrome|D064807
+Anticipation, Genetic|D020132
+Antiphospholipid Syndrome|D016736
+Antithrombin III Deficiency|D020152
+Antley-Bixler Syndrome Phenotype|D054882
+Anuria|D001002
+Anus Diseases|D001004
+Anus Neoplasms|D001005
+Anus, Imperforate|D001006
+Aortic Aneurysm|D001014
+Aortic Aneurysm, Abdominal|D017544
+Aortic Aneurysm, Thoracic|D017545
+Aortic Arch Syndromes|D001015
+Aortic Coarctation|D001017
+Aortic Diseases|D001018
+Aortic Rupture|D001019
+Aortic Stenosis, Subvalvular|D001020
+Aortic Stenosis, Supravalvular|D021921
+Aortic Valve Insufficiency|D001022
+Aortic Valve Prolapse|D001023
+Aortic Valve Stenosis|D001024
+Aortitis|D001025
+Aortopulmonary Septal Defect|D001028
+Ape Diseases|D018420
+Aphakia|D001035
+Aphakia, Postcataract|D001036
+Aphasia|D001037
+Aphasia, Broca|D001039
+Aphasia, Conduction|D018886
+Aphasia, Primary Progressive|D018888
+Aphasia, Wernicke|D001041
+Aphonia|D001044
+Apnea|D001049
+Appendiceal Neoplasms|D001063
+Appendicitis|D001064
+Apraxia, Ideomotor|D020240
+Apraxias|D001072
+Apudoma|D001079
+Arachnodactyly|D054119
+Arachnoid Cysts|D016080
+Arachnoiditis|D001100
+Arbovirus Infections|D001102
+Arcus Senilis|D001112
+Arenaviridae Infections|D001117
+Argininosuccinic Aciduria|D056807
+Argyria|D001129
+Arm Injuries|D001134
+Arnold-Chiari Malformation|D001139
+Arrhythmia, Sinus|D001146
+Arrhythmias, Cardiac|D001145
+Arrhythmogenic Right Ventricular Dysplasia|D019571
+Arsenic Poisoning|D020261
+Arterial Occlusive Diseases|D001157
+Arterio-Arterial Fistula|D001159
+Arteriolosclerosis|D050379
+Arteriosclerosis|D001161
+Arteriosclerosis Obliterans|D001162
+Arteriovenous Fistula|D001164
+Arteriovenous Malformations|D001165
+Arteritis|D001167
+Arterivirus Infections|D018174
+Arthralgia|D018771
+Arthritis|D001168
+Arthritis, Experimental|D001169
+Arthritis, Gouty|D015210
+Arthritis, Infectious|D001170
+Arthritis, Juvenile|D001171
+Arthritis, Psoriatic|D015535
+Arthritis, Reactive|D016918
+Arthritis, Rheumatoid|D001172
+Arthrogryposis|D001176
+Arthropathy, Neurogenic|D001177
+Arthus Reaction|D001183
+Articulation Disorders|D001184
+Artificial Lens Implant Migration|D060437
+Asbestosis|D001195
+Ascariasis|D001196
+Ascaridiasis|D001198
+Ascaridida Infections|D017191
+Ascites|D001201
+Ascorbic Acid Deficiency|D001206
+Aspartylglucosaminuria|D054880
+Aspergillosis|D001228
+Aspergillosis, Allergic Bronchopulmonary|D001229
+Aspermia|D053714
+Asphyxia|D001237
+Asphyxia Neonatorum|D001238
+Asthenia|D001247
+Asthenopia|D001248
+Asthenozoospermia|D053627
+Asthma|D001249
+Asthma, Aspirin-Induced|D055963
+Asthma, Exercise-Induced|D001250
+Asthma, Occupational|D059366
+Astigmatism|D001251
+Astrocytoma|D001254
+Astroviridae Infections|D019350
+Asymptomatic Diseases|D058070
+Asymptomatic Infections|D058345
+Ataxia|D001259
+Ataxia Telangiectasia|D001260
+Atherosclerosis|D050197
+Athetosis|D001264
+Athletic Injuries|D001265
+Atrial Fibrillation|D001281
+Atrial Flutter|D001282
+Atrial Premature Complexes|D018880
+Atrial Remodeling|D064752
+Atrioventricular Block|D054537
+Atrophic Vaginitis|D059268
+Atrophy|D001284
+Atypical Hemolytic Uremic Syndrome|D065766
+Atypical Squamous Cells of the Cervix|D065309
+Auditory Diseases, Central|D001304
+Auditory Perceptual Disorders|D001308
+Autoimmune Diseases|D001327
+Autoimmune Diseases of the Nervous System|D020274
+Autoimmune Lymphoproliferative Syndrome|D056735
+Autolysis|D001329
+Autonomic Dysreflexia|D020211
+Autonomic Nervous System Diseases|D001342
+Avian Leukosis|D001353
+Avitaminosis|D001361
+Avulavirus Infections|D045463
+Azoospermia|D053713
+Azotemia|D053099
+Babesiosis|D001404
+Bacillaceae Infections|D016863
+Back Injuries|D019567
+Back Pain|D001416
+Bacteremia|D016470
+Bacterial Infections|D001424
+Bacterial Infections and Mycoses|D001423
+Bacteriuria|D001437
+Bacteroidaceae Infections|D016866
+Bacteroides Infections|D001442
+Balanitis|D001446
+Balanitis Xerotica Obliterans|D052798
+Balantidiasis|D001447
+Balkan Nephropathy|D001449
+Bardet-Biedl Syndrome|D020788
+Barotrauma|D001469
+Barrett Esophagus|D001471
+Barth Syndrome|D056889
+Bartonella Infections|D001474
+Bartonellaceae Infections|D001476
+Bartter Syndrome|D001477
+Basal Cell Nevus Syndrome|D001478
+Basal Ganglia Cerebrovascular Disease|D020144
+Basal Ganglia Diseases|D001480
+Basal Ganglia Hemorrhage|D020145
+Battered Child Syndrome|D001497
+Beckwith-Wiedemann Syndrome|D001506
+Behcet Syndrome|D001528
+Bell Palsy|D020330
+Benign Paroxysmal Positional Vertigo|D065635
+Beriberi|D001602
+Bernard-Soulier Syndrome|D001606
+Berylliosis|D001607
+Bezoars|D001630
+Bifidobacteriales Infections|D039941
+Bile Duct Diseases|D001649
+Bile Duct Neoplasms|D001650
+Bile Reflux|D001655
+Biliary Atresia|D001656
+Biliary Dyskinesia|D001657
+Biliary Fistula|D001658
+Biliary Tract Diseases|D001660
+Biliary Tract Neoplasms|D001661
+Binge Drinking|D063425
+Biotinidase Deficiency|D028921
+Bird Diseases|D001715
+Bird Fancier's Lung|D001716
+Birnaviridae Infections|D018175
+Birt-Hogg-Dube Syndrome|D058249
+Birth Injuries|D001720
+Birth Weight|D001724
+Bisphosphonate-Associated Osteonecrosis of the Jaw|D059266
+Bites and Stings|D001733
+Bites, Human|D001734
+Blackwater Fever|D001742
+Bladder Exstrophy|D001746
+Bland White Garland Syndrome|D063748
+Blast Crisis|D001752
+Blast Injuries|D001753
+Blastocystis Infections|D016776
+Blastomycosis|D001759
+Blepharitis|D001762
+Blepharophimosis|D016569
+Blepharoptosis|D001763
+Blepharospasm|D001764
+Blind Loop Syndrome|D001765
+Blindness|D001766
+Blindness, Cortical|D019575
+Blister|D001768
+Blood Coagulation Disorders|D001778
+Blood Coagulation Disorders, Inherited|D025861
+Blood Loss, Surgical|D016063
+Blood Platelet Disorders|D001791
+Blood Protein Disorders|D001796
+Bloom Syndrome|D001816
+Blue Toe Syndrome|D018438
+Bluetongue|D001819
+Body Temperature Changes|D001832
+Body Weight|D001835
+Body Weight Changes|D001836
+Bone Anteversion|D060750
+Bone Cysts|D001845
+Bone Cysts, Aneurysmal|D017824
+Bone Demineralization, Pathologic|D018488
+Bone Diseases|D001847
+Bone Diseases, Developmental|D001848
+Bone Diseases, Endocrine|D001849
+Bone Diseases, Infectious|D001850
+Bone Diseases, Metabolic|D001851
+Bone Malalignment|D017760
+Bone Marrow Diseases|D001855
+Bone Marrow Neoplasms|D019046
+Bone Neoplasms|D001859
+Bone Resorption|D001862
+Bone Retroversion|D060751
+Border Disease|D001882
+Bordetella Infections|D001885
+Borna Disease|D001890
+Borrelia Infections|D001899
+Botulism|D001906
+Boutonneuse Fever|D001907
+Bovine Respiratory Disease Complex|D048090
+Bovine Virus Diarrhea-Mucosal Disease|D001912
+Bowen's Disease|D001913
+Brachial Plexus Neuritis|D020968
+Brachial Plexus Neuropathies|D020516
+Brachydactyly|D059327
+Bradycardia|D001919
+Brain Abscess|D001922
+Brain Concussion|D001924
+Brain Damage, Chronic|D001925
+Brain Death|D001926
+Brain Diseases|D001927
+Brain Diseases, Metabolic|D001928
+Brain Diseases, Metabolic, Inborn|D020739
+Brain Edema|D001929
+Brain Hemorrhage, Traumatic|D020201
+Brain Infarction|D020520
+Brain Injuries|D001930
+Brain Injury, Chronic|D020208
+Brain Ischemia|D002545
+Brain Neoplasms|D001932
+Brain Stem Hemorrhage, Traumatic|D020203
+Brain Stem Infarctions|D020526
+Brain Stem Neoplasms|D020295
+Branchio-Oto-Renal Syndrome|D019280
+Branchioma|D001935
+Breakthrough Pain|D059390
+Breast Cyst|D047688
+Breast Diseases|D001941
+Breast Neoplasms|D001943
+Breast Neoplasms, Male|D018567
+Breech Presentation|D001946
+Brenner Tumor|D001948
+Bronchial Diseases|D001982
+Bronchial Fistula|D001983
+Bronchial Hyperreactivity|D016535
+Bronchial Neoplasms|D001984
+Bronchial Spasm|D001986
+Bronchiectasis|D001987
+Bronchiolitis|D001988
+Bronchiolitis Obliterans|D001989
+Bronchiolitis, Viral|D001990
+Bronchitis|D001991
+Bronchitis, Chronic|D029481
+Bronchogenic Cyst|D001994
+Bronchomalacia|D055091
+Bronchopneumonia|D001996
+Bronchopulmonary Dysplasia|D001997
+Bronchopulmonary Sequestration|D001998
+Brown-Sequard Syndrome|D018437
+Brucellosis|D002006
+Brucellosis, Bovine|D002007
+Brugada Syndrome|D053840
+Bruxism|D002012
+Budd-Chiari Syndrome|D006502
+Bulbar Palsy, Progressive|D010244
+Bulbo-Spinal Atrophy, X-Linked|D055534
+Bulimia|D002032
+Bundle-Branch Block|D002037
+Bunion, Tailor's|D050489
+Bunyaviridae Infections|D002044
+Burkholderia Infections|D019121
+Burkitt Lymphoma|D002051
+Burning Mouth Syndrome|D002054
+Burns|D002056
+Burns, Chemical|D002057
+Burns, Electric|D002058
+Burns, Inhalation|D002059
+Bursitis|D002062
+Buruli Ulcer|D054312
+Buschke-Lowenstein Tumor|D062688
+Byssinosis|D002095
+CADASIL|D046589
+CHARGE Syndrome|D058747
+CREST Syndrome|D017675
+Cachexia|D002100
+Cadaver|D002102
+Cadmium Poisoning|D002105
+Cafe-au-Lait Spots|D019080
+Calcinosis|D002114
+Calciphylaxis|D002115
+Calcium Metabolism Disorders|D002128
+Calculi|D002137
+Caliciviridae Infections|D017250
+Callosities|D002145
+Campomelic Dysplasia|D055036
+Campylobacter Infections|D002169
+Camurati-Engelmann Syndrome|D003966
+Canavan Disease|D017825
+Candidemia|D058387
+Candidiasis|D002177
+Candidiasis, Chronic Mucocutaneous|D002178
+Candidiasis, Cutaneous|D002179
+Candidiasis, Invasive|D058365
+Candidiasis, Oral|D002180
+Candidiasis, Vulvovaginal|D002181
+Capillary Leak Syndrome|D019559
+Caplan Syndrome|D002205
+Capsule Opacification|D058442
+Carbamoyl-Phosphate Synthase I Deficiency Disease|D020165
+Carbohydrate Metabolism, Inborn Errors|D002239
+Carbon Monoxide Poisoning|D002249
+Carbon Tetrachloride Poisoning|D002252
+Carbuncle|D002270
+Carcinogenesis|D063646
+Carcinoid Heart Disease|D002275
+Carcinoid Tumor|D002276
+Carcinoma|D002277
+Carcinoma 256, Walker|D002279
+Carcinoma in Situ|D002278
+Carcinoma, Acinar Cell|D018267
+Carcinoma, Adenoid Cystic|D003528
+Carcinoma, Adenosquamous|D018196
+Carcinoma, Basal Cell|D002280
+Carcinoma, Basosquamous|D002281
+Carcinoma, Bronchogenic|D002283
+Carcinoma, Brown-Pearce|D002284
+Carcinoma, Ductal|D044584
+Carcinoma, Ductal, Breast|D018270
+Carcinoma, Ehrlich Tumor|D002286
+Carcinoma, Embryonal|D018236
+Carcinoma, Endometrioid|D018269
+Carcinoma, Giant Cell|D018286
+Carcinoma, Hepatocellular|D006528
+Carcinoma, Intraductal, Noninfiltrating|D002285
+Carcinoma, Islet Cell|D018273
+Carcinoma, Krebs 2|D002287
+Carcinoma, Large Cell|D018287
+Carcinoma, Lewis Lung|D018827
+Carcinoma, Lobular|D018275
+Carcinoma, Medullary|D018276
+Carcinoma, Merkel Cell|D015266
+Carcinoma, Mucoepidermoid|D018277
+Carcinoma, Neuroendocrine|D018278
+Carcinoma, Non-Small-Cell Lung|D002289
+Carcinoma, Pancreatic Ductal|D021441
+Carcinoma, Papillary|D002291
+Carcinoma, Papillary, Follicular|D018265
+Carcinoma, Renal Cell|D002292
+Carcinoma, Signet Ring Cell|D018279
+Carcinoma, Skin Appendage|D018280
+Carcinoma, Small Cell|D018288
+Carcinoma, Squamous Cell|D002294
+Carcinoma, Transitional Cell|D002295
+Carcinoma, Verrucous|D018289
+Carcinosarcoma|D002296
+Cardiac Complexes, Premature|D005117
+Cardiac Output, High|D016534
+Cardiac Output, Low|D002303
+Cardiac Tamponade|D002305
+Cardio-Renal Syndrome|D059347
+Cardiomegaly|D006332
+Cardiomyopathies|D009202
+Cardiomyopathy, Alcoholic|D002310
+Cardiomyopathy, Dilated|D002311
+Cardiomyopathy, Hypertrophic|D002312
+Cardiomyopathy, Hypertrophic, Familial|D024741
+Cardiomyopathy, Restrictive|D002313
+Cardiotoxicity|D066126
+Cardiovascular Abnormalities|D018376
+Cardiovascular Diseases|D002318
+Cardiovascular Infections|D053821
+Cardiovirus Infections|D018188
+Carney Complex|D056733
+Caroli Disease|D016767
+Carotid Artery Diseases|D002340
+Carotid Artery Injuries|D020212
+Carotid Artery Thrombosis|D002341
+Carotid Artery, Internal, Dissection|D020215
+Carotid Body Tumor|D002345
+Carotid Stenosis|D016893
+Carotid-Cavernous Sinus Fistula|D020216
+Carpal Tunnel Syndrome|D002349
+Cartilage Diseases|D002357
+Cat Diseases|D002371
+Cat-Scratch Disease|D002372
+Catalepsy|D002375
+Cataplexy|D002385
+Cataract|D002386
+Catastrophic Illness|D002388
+Catatonia|D002389
+Catheter-Related Infections|D055499
+Cattle Diseases|D002418
+Causalgia|D002422
+Cavernous Sinus Thrombosis|D020226
+Cecal Diseases|D002429
+Cecal Neoplasms|D002430
+Celiac Disease|D002446
+Cell Transformation, Neoplastic|D002471
+Cell Transformation, Viral|D002472
+Cellulitis|D002481
+Cementoma|D002485
+Central Cord Syndrome|D020210
+Central Nervous System Bacterial Infections|D020806
+Central Nervous System Cysts|D020863
+Central Nervous System Diseases|D002493
+Central Nervous System Fungal Infections|D020314
+Central Nervous System Helminthiasis|D020809
+Central Nervous System Infections|D002494
+Central Nervous System Neoplasms|D016543
+Central Nervous System Parasitic Infections|D020807
+Central Nervous System Protozoal Infections|D020808
+Central Nervous System Vascular Malformations|D020785
+Central Nervous System Venous Angioma|D020787
+Central Nervous System Viral Diseases|D020805
+Central Serous Chorioretinopathy|D056833
+Cephalopelvic Disproportion|D052178
+Cerebellar Ataxia|D002524
+Cerebellar Diseases|D002526
+Cerebellar Neoplasms|D002528
+Cerebral Amyloid Angiopathy|D016657
+Cerebral Amyloid Angiopathy, Familial|D028243
+Cerebral Arterial Diseases|D002539
+Cerebral Hemorrhage|D002543
+Cerebral Hemorrhage, Traumatic|D020202
+Cerebral Infarction|D002544
+Cerebral Palsy|D002547
+Cerebral Phaeohyphomycosis|D060425
+Cerebral Small Vessel Diseases|D059345
+Cerebral Ventricle Neoplasms|D002551
+Cerebral Ventriculitis|D058565
+Cerebrospinal Fluid Leak|D065634
+Cerebrospinal Fluid Otorrhea|D002558
+Cerebrospinal Fluid Rhinorrhea|D002559
+Cerebrovascular Disorders|D002561
+Cerebrovascular Trauma|D020214
+Cervical Intraepithelial Neoplasia|D018290
+Cervical Rib Syndrome|D002573
+Cestode Infections|D002590
+Chagas Cardiomyopathy|D002598
+Chagas Disease|D014355
+Chalazion|D017043
+Chancre|D002601
+Chancroid|D002602
+Channelopathies|D053447
+Charcot-Marie-Tooth Disease|D002607
+Chediak-Higashi Syndrome|D002609
+Cheilitis|D002613
+Chemically-Induced Disorders|D064419
+Chemotherapy-Induced Febrile Neutropenia|D064146
+Cherubism|D002636
+Chest Pain|D002637
+Cheyne-Stokes Respiration|D002639
+Chiari-Frommel Syndrome|D002640
+Chickenpox|D002644
+Chikungunya Fever|D065632
+Chilaiditi Syndrome|D059269
+Chilblains|D002647
+Child Nutrition Disorders|D015362
+Chills|D023341
+Chlamydia Infections|D002690
+Chlamydiaceae Infections|D002694
+Chlamydial Pneumonia|D061387
+Chlamydophila Infections|D023521
+Chloracne|D054506
+Choanal Atresia|D002754
+Cholangiocarcinoma|D018281
+Cholangitis|D002761
+Cholangitis, Sclerosing|D015209
+Cholecystitis|D002764
+Cholecystitis, Acute|D041881
+Cholecystolithiasis|D041761
+Choledochal Cyst|D015529
+Choledocholithiasis|D042883
+Cholelithiasis|D002769
+Cholera|D002771
+Cholera Morbus|D017688
+Cholestasis|D002779
+Cholestasis, Extrahepatic|D001651
+Cholestasis, Intrahepatic|D002780
+Cholesteatoma|D002781
+Cholesteatoma, Middle Ear|D018424
+Cholesterol Ester Storage Disease|D015217
+Choline Deficiency|D002796
+Chondroblastoma|D002804
+Chondrocalcinosis|D002805
+Chondrodysplasia Punctata|D002806
+Chondrodysplasia Punctata, Rhizomelic|D018902
+Chondroma|D002812
+Chondromalacia Patellae|D046789
+Chondromatosis|D018210
+Chondromatosis, Synovial|D015838
+Chondrosarcoma|D002813
+Chondrosarcoma, Mesenchymal|D018211
+Chordoma|D002817
+Chorea|D002819
+Chorea Gravidarum|D020150
+Chorioamnionitis|D002821
+Choriocarcinoma|D002822
+Choriocarcinoma, Non-gestational|D031954
+Chorioretinitis|D002825
+Choristoma|D002828
+Choroid Diseases|D015862
+Choroid Hemorrhage|D002832
+Choroid Neoplasms|D002830
+Choroid Plexus Neoplasms|D016545
+Choroidal Neovascularization|D020256
+Choroideremia|D015794
+Choroiditis|D002833
+Chromoblastomycosis|D002862
+Chromosomal Instability|D043171
+Chromosome Aberrations|D002869
+Chromosome Breakage|D019457
+Chromosome Deletion|D002872
+Chromosome Disorders|D025063
+Chromosome Duplication|D058674
+Chromosome Fragility|D002873
+Chromosome Inversion|D007446
+Chronic Disease|D002908
+Chronic Pain|D059350
+Chronic Periodontitis|D055113
+Chronobiology Disorders|D021081
+Churg-Strauss Syndrome|D015267
+Chylothorax|D002916
+Chylous Ascites|D002915
+Cicatrix|D002921
+Cicatrix, Hypertrophic|D017439
+Ciguatera Poisoning|D036841
+Ciliary Motility Disorders|D002925
+Ciliophora Infections|D016770
+Circoviridae Infections|D018173
+Citrullinemia|D020159
+Classical Lissencephalies and Subcortical Band Heterotopias|D054221
+Classical Swine Fever|D006691
+Cleft Lip|D002971
+Cleft Palate|D002972
+Cleidocranial Dysplasia|D002973
+Clonorchiasis|D003003
+Clostridium Infections|D003015
+Clubfoot|D003025
+Cluster Headache|D003027
+Coagulation Protein Disorders|D020147
+Cobblestone Lissencephaly|D054222
+Cocaine-Related Disorders|D019970
+Cocarcinogenesis|D003043
+Coccidioidomycosis|D003047
+Coccidiosis|D003048
+Cochlear Diseases|D015834
+Cockayne Syndrome|D003057
+Coffin-Lowry Syndrome|D038921
+Cogan Syndrome|D055952
+Coinfection|D060085
+Colic|D003085
+Colitis|D003092
+Colitis, Collagenous|D046729
+Colitis, Ischemic|D017091
+Colitis, Lymphocytic|D046730
+Colitis, Microscopic|D046728
+Colitis, Ulcerative|D003093
+Collagen Diseases|D003095
+Collagenous Sprue|D064068
+Colles' Fracture|D003100
+Colloid Cysts|D056364
+Coloboma|D003103
+Colonic Diseases|D003108
+Colonic Diseases, Functional|D003109
+Colonic Neoplasms|D003110
+Colonic Polyps|D003111
+Colonic Pseudo-Obstruction|D003112
+Color Vision Defects|D003117
+Colorado Tick Fever|D003121
+Colorectal Neoplasms|D015179
+Colorectal Neoplasms, Hereditary Nonpolyposis|D003123
+Coma|D003128
+Coma, Post-Head Injury|D020207
+Common Bile Duct Diseases|D003137
+Common Bile Duct Neoplasms|D003138
+Common Cold|D003139
+Common Variable Immunodeficiency|D017074
+Commotio Cordis|D056104
+Communicable Diseases|D003141
+Communicable Diseases, Emerging|D021821
+Communication Disorders|D003147
+Community-Acquired Infections|D017714
+Compartment Syndromes|D003161
+Complex Regional Pain Syndromes|D020918
+Composite Lymphoma|D058617
+Conducted Energy Weapon Injuries|D057667
+Condylomata Acuminata|D003218
+Confusion|D003221
+Congenital Abnormalities|D000013
+Congenital Disorders of Glycosylation|D018981
+Congenital Hyperinsulinism|D044903
+Congenital Hypothyroidism|D003409
+Congenital Microtia|D065817
+Congenital, Hereditary, and Neonatal Diseases and Abnormalities|D009358
+Conjunctival Diseases|D003229
+Conjunctival Neoplasms|D003230
+Conjunctivitis|D003231
+Conjunctivitis, Acute Hemorrhagic|D003232
+Conjunctivitis, Allergic|D003233
+Conjunctivitis, Bacterial|D003234
+Conjunctivitis, Inclusion|D003235
+Conjunctivitis, Viral|D003236
+Connective Tissue Diseases|D003240
+Consciousness Disorders|D003244
+Constipation|D003248
+Constriction, Pathologic|D003251
+Contracture|D003286
+Contrecoup Injury|D056886
+Contusions|D003288
+Convalescence|D003289
+Coproporphyria, Hereditary|D046349
+Cor Triatriatum|D003310
+Corneal Diseases|D003316
+Corneal Dystrophies, Hereditary|D003317
+Corneal Dystrophy, Juvenile Epithelial of Meesmann|D053559
+Corneal Edema|D015715
+Corneal Endothelial Cell Loss|D055954
+Corneal Injuries|D065306
+Corneal Neovascularization|D016510
+Corneal Opacity|D003318
+Corneal Perforation|D057112
+Corneal Ulcer|D003320
+Corneal Wavefront Aberration|D057108
+Coronary Aneurysm|D003323
+Coronary Artery Disease|D003324
+Coronary Disease|D003327
+Coronary Occlusion|D054059
+Coronary Restenosis|D023903
+Coronary Stenosis|D023921
+Coronary Thrombosis|D003328
+Coronary Vasospasm|D003329
+Coronary Vessel Anomalies|D003330
+Coronary-Subclavian Steal Syndrome|D058686
+Coronaviridae Infections|D003333
+Coronavirus Infections|D018352
+Corpse Dismemberment|D056146
+Corynebacterium Infections|D003354
+Costello Syndrome|D056685
+Cough|D003371
+Cowpox|D015605
+Coxa Valga|D060906
+Coxa Vara|D060905
+Coxsackievirus Infections|D003384
+Cracked Tooth Syndrome|D003387
+Cranial Nerve Diseases|D003389
+Cranial Nerve Injuries|D020209
+Cranial Nerve Neoplasms|D003390
+Craniocerebral Trauma|D006259
+Craniofacial Abnormalities|D019465
+Craniofacial Dysostosis|D003394
+Craniomandibular Disorders|D017271
+Craniopharyngioma|D003397
+Craniosynostoses|D003398
+Creutzfeldt-Jakob Syndrome|D007562
+Cri-du-Chat Syndrome|D003410
+Crigler-Najjar Syndrome|D003414
+Crisscross Heart|D003420
+Critical Illness|D016638
+Crohn Disease|D003424
+Cross Infection|D003428
+Croup|D003440
+Crush Syndrome|D003444
+Cryoglobulinemia|D003449
+Cryopyrin-Associated Periodic Syndromes|D056587
+Cryptococcosis|D003453
+Cryptogenic Organizing Pneumonia|D018549
+Cryptorchidism|D003456
+Cryptosporidiosis|D003457
+Cubital Tunnel Syndrome|D020430
+Cumulative Trauma Disorders|D012090
+Cushing Syndrome|D003480
+Cutaneous Fistula|D017577
+Cutis Laxa|D003483
+Cyanosis|D003490
+Cyclosporiasis|D021866
+Cystadenocarcinoma|D003536
+Cystadenocarcinoma, Mucinous|D018282
+Cystadenocarcinoma, Papillary|D018283
+Cystadenocarcinoma, Serous|D018284
+Cystadenofibroma|D062625
+Cystadenoma|D003537
+Cystadenoma, Mucinous|D018291
+Cystadenoma, Papillary|D018292
+Cystadenoma, Serous|D018293
+Cystic Adenomatoid Malformation of Lung, Congenital|D015615
+Cystic Fibrosis|D003550
+Cysticercosis|D003551
+Cystinosis|D003554
+Cystinuria|D003555
+Cystitis|D003556
+Cystitis, Interstitial|D018856
+Cystocele|D052858
+Cysts|D003560
+Cytochrome-c Oxidase Deficiency|D030401
+Cytomegalovirus Infections|D003586
+Cytomegalovirus Retinitis|D017726
+Cytophagaceae Infections|D045827
+DNA Degradation, Necrotic|D053836
+DNA Repair-Deficiency Disorders|D049914
+DNA Virus Infections|D004266
+Dacryocystitis|D003607
+Dandruff|D063807
+Dandy-Walker Syndrome|D003616
+Darier Disease|D007644
+De Lange Syndrome|D003635
+De Quervain Disease|D053684
+Deaf-Blind Disorders|D054062
+Deafness|D003638
+Death|D003643
+Death, Sudden|D003645
+Death, Sudden, Cardiac|D016757
+Decalcification, Pathologic|D003649
+Decapitation|D049248
+Decerebrate State|D003655
+Decompression Sickness|D003665
+Deficiency Diseases|D003677
+Deglutition Disorders|D003680
+Dehydration|D003681
+Delayed Emergence from Anesthesia|D055191
+Delayed Graft Function|D051799
+Delirium|D003693
+Deltaretrovirus Infections|D006800
+Dementia|D003704
+Dementia, Multi-Infarct|D015161
+Dementia, Vascular|D015140
+Demyelinating Autoimmune Diseases, CNS|D020278
+Demyelinating Diseases|D003711
+Dendritic Cell Sarcoma, Follicular|D054740
+Dendritic Cell Sarcoma, Interdigitating|D054739
+Dengue|D003715
+Dens in Dente|D003719
+Dent Disease|D057973
+Dental Calculus|D003728
+Dental Caries|D003731
+Dental Deposits|D003741
+Dental Enamel Hypoplasia|D003744
+Dental Fissures|D003750
+Dental Fistula|D003751
+Dental Leakage|D003763
+Dental Occlusion, Traumatic|D003769
+Dental Plaque|D003773
+Dental Pulp Calcification|D003784
+Dental Pulp Diseases|D003788
+Dental Pulp Exposure|D003789
+Dental Pulp Necrosis|D003790
+Dentigerous Cyst|D003803
+Dentin Dysplasia|D003805
+Dentin Sensitivity|D003807
+Dentin, Secondary|D003809
+Dentinogenesis Imperfecta|D003811
+Dentofacial Deformities|D063169
+Denys-Drash Syndrome|D030321
+Depression, Postpartum|D019052
+Dermatitis|D003872
+Dermatitis Herpetiformis|D003874
+Dermatitis, Allergic Contact|D017449
+Dermatitis, Atopic|D003876
+Dermatitis, Contact|D003877
+Dermatitis, Exfoliative|D003873
+Dermatitis, Irritant|D017453
+Dermatitis, Occupational|D009783
+Dermatitis, Perioral|D019557
+Dermatitis, Photoallergic|D017454
+Dermatitis, Phototoxic|D017484
+Dermatitis, Seborrheic|D012628
+Dermatitis, Toxicodendron|D011040
+Dermatofibrosarcoma|D018223
+Dermatomycoses|D003881
+Dermatomyositis|D003882
+Dermoid Cyst|D003884
+Desmoplastic Small Round Cell Tumor|D058405
+Desulfovibrionaceae Infections|D045824
+Dextrocardia|D003914
+DiGeorge Syndrome|D004062
+Diabetes Complications|D048909
+Diabetes Insipidus|D003919
+Diabetes Insipidus, Nephrogenic|D018500
+Diabetes Insipidus, Neurogenic|D020790
+Diabetes Mellitus|D003920
+Diabetes Mellitus, Experimental|D003921
+Diabetes Mellitus, Lipoatrophic|D003923
+Diabetes Mellitus, Type 1|D003922
+Diabetes Mellitus, Type 2|D003924
+Diabetes, Gestational|D016640
+Diabetic Angiopathies|D003925
+Diabetic Cardiomyopathies|D058065
+Diabetic Coma|D003926
+Diabetic Foot|D017719
+Diabetic Ketoacidosis|D016883
+Diabetic Nephropathies|D003928
+Diabetic Neuropathies|D003929
+Diabetic Retinopathy|D003930
+Diaper Rash|D003963
+Diaphragmatic Eventration|D003965
+Diarrhea|D003967
+Diarrhea, Infantile|D003968
+Diastema|D003970
+Dicrocoeliasis|D004011
+Dictyocaulus Infections|D004022
+Dientamoebiasis|D004030
+Diffuse Axonal Injury|D020833
+Diffuse Cerebral Sclerosis of Schilder|D002549
+Diffuse Neurofibrillary Tangles with Calcification|D055956
+Digestive System Abnormalities|D004065
+Digestive System Diseases|D004066
+Digestive System Fistula|D016154
+Digestive System Neoplasms|D004067
+Digital Dermatitis|D058066
+Dihydropyrimidine Dehydrogenase Deficiency|D054067
+Dilatation, Pathologic|D004108
+Dipetalonema Infections|D004154
+Diphtheria|D004165
+Diphyllobothriasis|D004169
+Diplopia|D004172
+Dirofilariasis|D004184
+Discitis|D015299
+Discrete Subaortic Stenosis|D021922
+Disease|D004194
+Disease Attributes|D020969
+Disease Models, Animal|D004195
+Disease Progression|D018450
+Disease Resistance|D060467
+Disease Susceptibility|D004198
+Diseases in Twins|D004200
+Dislocations|D004204
+Disorders of Environmental Origin|D007280
+Disorders of Excessive Somnolence|D006970
+Disorders of Sex Development|D012734
+Disseminated Intravascular Coagulation|D004211
+Distal Myopathies|D049310
+Distemper|D004216
+Diurnal Enuresis|D053207
+Diverticulitis|D004238
+Diverticulitis, Colonic|D004239
+Diverticulosis, Colonic|D043963
+Diverticulosis, Esophageal|D045723
+Diverticulosis, Stomach|D045724
+Diverticulum|D004240
+Diverticulum, Colon|D004241
+Diverticulum, Esophageal|D004936
+Diverticulum, Stomach|D013273
+Dizziness|D004244
+Dog Diseases|D004283
+Donohue Syndrome|D056731
+Double Outlet Right Ventricle|D004310
+Dourine|D004313
+Down Syndrome|D004314
+Dracunculiasis|D004320
+Drowning|D004332
+Drug Eruptions|D003875
+Drug Hypersensitivity|D004342
+Drug Hypersensitivity Syndrome|D063926
+Drug Overdose|D062787
+Drug-Induced Liver Injury|D056486
+Drug-Induced Liver Injury, Chronic|D056487
+Drug-Related Side Effects and Adverse Reactions|D064420
+Dry Eye Syndromes|D015352
+Dry Socket|D004368
+Duane Retraction Syndrome|D004370
+Ductus Arteriosus, Patent|D004374
+Dumping Syndrome|D004377
+Duodenal Diseases|D004378
+Duodenal Neoplasms|D004379
+Duodenal Obstruction|D004380
+Duodenal Ulcer|D004381
+Duodenitis|D004382
+Duodenogastric Reflux|D004383
+Dupuytren Contracture|D004387
+Dwarfism|D004392
+Dwarfism, Pituitary|D004393
+Dysarthria|D004401
+Dysautonomia, Familial|D004402
+Dysbiosis|D064806
+Dyscalculia|D060705
+Dysentery|D004403
+Dysentery, Amebic|D004404
+Dysentery, Bacillary|D004405
+Dysgammaglobulinemia|D004406
+Dysgerminoma|D004407
+Dysgeusia|D004408
+Dyskeratosis Congenita|D019871
+Dyskinesia, Drug-Induced|D004409
+Dyskinesias|D020820
+Dyslexia|D004410
+Dyslexia, Acquired|D004411
+Dyslipidemias|D050171
+Dysmenorrhea|D004412
+Dysostoses|D004413
+Dyspareunia|D004414
+Dyspepsia|D004415
+Dysphonia|D055154
+Dysplastic Nevus Syndrome|D004416
+Dyspnea|D004417
+Dyspnea, Paroxysmal|D004418
+Dyssomnias|D020920
+Dystocia|D004420
+Dystonia|D004421
+Dystonia Musculorum Deformans|D004422
+Dystonic Disorders|D020821
+Dysuria|D053159
+Ear Deformities, Acquired|D004426
+Ear Diseases|D004427
+Ear Neoplasms|D004428
+Earache|D004433
+Ebstein Anomaly|D004437
+Ecchymosis|D004438
+Eccrine Porocarcinoma|D057090
+Echinococcosis|D004443
+Echinococcosis, Hepatic|D004444
+Echinococcosis, Pulmonary|D004445
+Echinostomiasis|D004451
+Echogenic Bowel|D058535
+Echolalia|D004454
+Echovirus Infections|D004457
+Eclampsia|D004461
+Ecthyma|D004473
+Ecthyma, Contagious|D004474
+Ectodermal Dysplasia|D004476
+Ectodermal Dysplasia 1, Anhidrotic|D053358
+Ectodermal Dysplasia 3, Anhidrotic|D053359
+Ectodermal Dysplasia, Hypohidrotic, Autosomal Recessive|D053360
+Ectoparasitic Infestations|D004478
+Ectopia Cordis|D054083
+Ectopia Lentis|D004479
+Ectromelia|D004480
+Ectromelia, Infectious|D004482
+Ectropion|D004483
+Eczema|D004485
+Eczema, Dyshidrotic|D011146
+Edema|D004487
+Edema Disease of Swine|D004488
+Edema, Cardiac|D004489
+Egg Hypersensitivity|D021181
+Ehlers-Danlos Syndrome|D004535
+Ehrlichiosis|D016873
+Eisenmenger Complex|D004541
+Electric Injuries|D004556
+Elephantiasis|D004604
+Elephantiasis, Filarial|D004605
+Elliptocytosis, Hereditary|D004612
+Ellis-Van Creveld Syndrome|D004613
+Emaciation|D004614
+Embolism|D004617
+Embolism and Thrombosis|D016769
+Embolism, Air|D004618
+Embolism, Amniotic Fluid|D004619
+Embolism, Cholesterol|D017700
+Embolism, Fat|D004620
+Embolism, Paradoxical|D019320
+Embryo Loss|D020964
+Emergencies|D004630
+Emphysema|D004646
+Emphysematous Cholecystitis|D041882
+Empty Sella Syndrome|D004652
+Empyema|D004653
+Empyema, Pleural|D016724
+Empyema, Subdural|D013354
+Empyema, Tuberculous|D004654
+Encephalitis|D004660
+Encephalitis, Arbovirus|D004671
+Encephalitis, California|D004670
+Encephalitis, Herpes Simplex|D020803
+Encephalitis, Japanese|D004672
+Encephalitis, St. Louis|D004674
+Encephalitis, Tick-Borne|D004675
+Encephalitis, Varicella Zoster|D020804
+Encephalitis, Viral|D018792
+Encephalitozoonosis|D016890
+Encephalocele|D004677
+Encephalomalacia|D004678
+Encephalomyelitis|D004679
+Encephalomyelitis, Acute Disseminated|D004673
+Encephalomyelitis, Autoimmune, Experimental|D004681
+Encephalomyelitis, Eastern Equine|D020242
+Encephalomyelitis, Enzootic Porcine|D004682
+Encephalomyelitis, Equine|D004683
+Encephalomyelitis, Venezuelan Equine|D004685
+Encephalomyelitis, Western Equine|D020241
+Encephalopathy, Bovine Spongiform|D016643
+Enchondromatosis|D004687
+Encopresis|D004688
+End Stage Liver Disease|D058625
+Endarteritis|D004692
+Endocardial Cushion Defects|D004694
+Endocardial Fibroelastosis|D004695
+Endocarditis|D004696
+Endocarditis, Bacterial|D004697
+Endocarditis, Non-Infective|D059905
+Endocarditis, Subacute Bacterial|D004698
+Endocrine Gland Neoplasms|D004701
+Endocrine System Diseases|D004700
+Endodermal Sinus Tumor|D018240
+Endoleak|D057867
+Endolymphatic Hydrops|D018159
+Endometrial Hyperplasia|D004714
+Endometrial Neoplasms|D016889
+Endometrial Stromal Tumors|D036821
+Endometriosis|D004715
+Endometritis|D004716
+Endomyocardial Fibrosis|D004719
+Endophthalmitis|D009877
+Endotoxemia|D019446
+Enophthalmos|D015841
+Enoplida Infections|D017189
+Entamoebiasis|D004749
+Enteritis|D004751
+Enteritis, Transmissible, of Turkeys|D004753
+Enterobacteriaceae Infections|D004756
+Enterobiasis|D017229
+Enterocolitis|D004760
+Enterocolitis, Necrotizing|D020345
+Enterocolitis, Neutropenic|D044504
+Enterocolitis, Pseudomembranous|D004761
+Enteropathy-Associated T-Cell Lymphoma|D058527
+Enterotoxemia|D004767
+Enterovirus Infections|D004769
+Entropion|D004774
+Enuresis|D004775
+Environmental Illness|D018876
+Enzootic Bovine Leukosis|D016583
+Eosinophilia|D004802
+Eosinophilia-Myalgia Syndrome|D016603
+Eosinophilic Esophagitis|D057765
+Eosinophilic Granuloma|D004803
+Ependymoma|D004806
+Ephemeral Fever|D004810
+Epidermal Cyst|D004814
+Epidermitis, Exudative, of Swine|D004818
+Epidermodysplasia Verruciformis|D004819
+Epidermolysis Bullosa|D004820
+Epidermolysis Bullosa Acquisita|D016107
+Epidermolysis Bullosa Dystrophica|D016108
+Epidermolysis Bullosa Simplex|D016110
+Epidermolysis Bullosa, Junctional|D016109
+Epididymitis|D004823
+Epidural Abscess|D020802
+Epidural Neoplasms|D015174
+Epiglottitis|D004826
+Epilepsia Partialis Continua|D017036
+Epilepsies, Myoclonic|D004831
+Epilepsies, Partial|D004828
+Epilepsy|D004827
+Epilepsy, Absence|D004832
+Epilepsy, Benign Neonatal|D020936
+Epilepsy, Complex Partial|D017029
+Epilepsy, Frontal Lobe|D017034
+Epilepsy, Generalized|D004829
+Epilepsy, Partial, Motor|D020938
+Epilepsy, Partial, Sensory|D020937
+Epilepsy, Post-Traumatic|D004834
+Epilepsy, Reflex|D020195
+Epilepsy, Rolandic|D019305
+Epilepsy, Temporal Lobe|D004833
+Epilepsy, Tonic-Clonic|D004830
+Epiphyses, Slipped|D004839
+Epiretinal Membrane|D019773
+Epispadias|D004842
+Epistaxis|D004844
+Epstein-Barr Virus Infections|D020031
+Equine Infectious Anemia|D004859
+Equinus Deformity|D004863
+Erdheim-Chester Disease|D031249
+Erectile Dysfunction|D007172
+Ergotism|D004881
+Eructation|D004884
+Erysipelas|D004886
+Erysipeloid|D004887
+Erysipelothrix Infections|D004889
+Erythema|D004890
+Erythema Chronicum Migrans|D015787
+Erythema Induratum|D004891
+Erythema Infectiosum|D016731
+Erythema Multiforme|D004892
+Erythema Nodosum|D004893
+Erythrasma|D004894
+Erythroblastosis, Fetal|D004899
+Erythrokeratodermia Variabilis|D056266
+Erythromelalgia|D004916
+Erythroplasia|D004919
+Escherichia coli Infections|D004927
+Esophageal Achalasia|D004931
+Esophageal Atresia|D004933
+Esophageal Cyst|D004934
+Esophageal Diseases|D004935
+Esophageal Fistula|D004937
+Esophageal Motility Disorders|D015154
+Esophageal Neoplasms|D004938
+Esophageal Perforation|D004939
+Esophageal Spasm, Diffuse|D015155
+Esophageal Stenosis|D004940
+Esophageal and Gastric Varices|D004932
+Esophagitis|D004941
+Esophagitis, Peptic|D004942
+Esotropia|D004948
+Essential Tremor|D020329
+Esthesioneuroblastoma, Olfactory|D018304
+Ethmoid Sinusitis|D015521
+Euglenozoa Infections|D056986
+Eunuchism|D005058
+Euthyroid Sick Syndromes|D005067
+Exanthema|D005076
+Exanthema Subitum|D005077
+Exfoliation Syndrome|D017889
+Exocrine Pancreatic Insufficiency|D010188
+Exophthalmos|D005094
+Exostoses|D005096
+Exostoses, Multiple Hereditary|D005097
+Exotropia|D005099
+Exsanguination|D058734
+Extensively Drug-Resistant Tuberculosis|D054908
+Extravasation of Diagnostic and Therapeutic Materials|D005119
+Eye Abnormalities|D005124
+Eye Burns|D005126
+Eye Diseases|D005128
+Eye Diseases, Hereditary|D015785
+Eye Foreign Bodies|D005129
+Eye Hemorrhage|D005130
+Eye Infections|D015817
+Eye Infections, Bacterial|D015818
+Eye Infections, Fungal|D015821
+Eye Infections, Parasitic|D015822
+Eye Infections, Viral|D015828
+Eye Injuries|D005131
+Eye Injuries, Penetrating|D015807
+Eye Manifestations|D005132
+Eye Neoplasms|D005134
+Eye Pain|D058447
+Eyelid Diseases|D005141
+Eyelid Neoplasms|D005142
+Fabry Disease|D000795
+Facial Asymmetry|D005146
+Facial Dermatoses|D005148
+Facial Hemiatrophy|D005150
+Facial Injuries|D005151
+Facial Neoplasms|D005153
+Facial Nerve Diseases|D005155
+Facial Nerve Injuries|D020220
+Facial Neuralgia|D005156
+Facial Pain|D005157
+Facial Paralysis|D005158
+Facies|D019066
+Factor V Deficiency|D005166
+Factor VII Deficiency|D005168
+Factor X Deficiency|D005171
+Factor XI Deficiency|D005173
+Factor XII Deficiency|D005175
+Factor XIII Deficiency|D005177
+Failed Back Surgery Syndrome|D055111
+Failure to Thrive|D005183
+Fallopian Tube Diseases|D005184
+Fallopian Tube Neoplasms|D005185
+Familial Hypophosphatemic Rickets|D053098
+Familial Mediterranean Fever|D010505
+Familial Primary Pulmonary Hypertension|D065627
+Fanconi Anemia|D005199
+Fanconi Syndrome|D005198
+Farber Lipogranulomatosis|D055577
+Farmer's Lung|D005203
+Fasciculation|D005207
+Fasciitis|D005208
+Fasciitis, Necrotizing|D019115
+Fasciitis, Plantar|D036981
+Fascioliasis|D005211
+Fascioloidiasis|D005213
+Fat Necrosis|D005218
+Fatigue|D005221
+Fatigue Syndrome, Chronic|D015673
+Fatty Liver|D005234
+Fatty Liver, Alcoholic|D005235
+Favism|D005236
+Febrile Neutropenia|D064147
+Fecal Impaction|D005244
+Fecal Incontinence|D005242
+Feline Acquired Immunodeficiency Syndrome|D016181
+Feline Infectious Peritonitis|D016766
+Feline Panleukopenia|D005254
+Felty Syndrome|D005258
+Female Athlete Triad Syndrome|D053716
+Female Urogenital Diseases|D052776
+Female Urogenital Diseases and Pregnancy Complications|D005261
+Feminization|D005262
+Femoracetabular Impingement|D057925
+Femoral Fractures|D005264
+Femoral Neck Fractures|D005265
+Femoral Neoplasms|D005266
+Femoral Neuropathy|D020428
+Femur Head Necrosis|D005271
+Fetal Alcohol Spectrum Disorders|D063647
+Fetal Death|D005313
+Fetal Diseases|D005315
+Fetal Distress|D005316
+Fetal Growth Retardation|D005317
+Fetal Hypoxia|D005311
+Fetal Macrosomia|D005320
+Fetal Membranes, Premature Rupture|D005322
+Fetal Nutrition Disorders|D048070
+Fetal Resorption|D005327
+Fetal Weight|D020567
+Fetofetal Transfusion|D005330
+Fetomaternal Transfusion|D005331
+Fever|D005334
+Fever of Unknown Origin|D005335
+Fibroadenoma|D018226
+Fibrocystic Breast Disease|D005348
+Fibroma|D005350
+Fibroma, Desmoplastic|D018220
+Fibroma, Ossifying|D018214
+Fibromatosis, Abdominal|D018221
+Fibromatosis, Aggressive|D018222
+Fibromatosis, Gingival|D005351
+Fibromuscular Dysplasia|D005352
+Fibromyalgia|D005356
+Fibrosarcoma|D005354
+Fibrosis|D005355
+Fibrous Dysplasia of Bone|D005357
+Fibrous Dysplasia, Monostotic|D005358
+Fibrous Dysplasia, Polyostotic|D005359
+Filariasis|D005368
+Filoviridae Infections|D018702
+Finger Injuries|D005383
+Fish Diseases|D005393
+Fissure in Ano|D005401
+Fistula|D005402
+Flail Chest|D005409
+Flank Pain|D021501
+Flatfoot|D005413
+Flatulence|D005414
+Flaviviridae Infections|D018178
+Flavivirus Infections|D018177
+Flavobacteriaceae Infections|D045826
+Flea Infestations|D058267
+Fluoride Poisoning|D005458
+Fluorosis, Dental|D009050
+Flushing|D005483
+Focal Dermal Hypoplasia|D005489
+Focal Epithelial Hyperplasia|D017573
+Focal Infection|D005490
+Focal Infection, Dental|D005491
+Focal Nodular Hyperplasia|D020518
+Folic Acid Deficiency|D005494
+Follicular Cyst|D005497
+Folliculitis|D005499
+Food Hypersensitivity|D005512
+Foodborne Diseases|D005517
+Foot Deformities|D005530
+Foot Deformities, Acquired|D005531
+Foot Deformities, Congenital|D005532
+Foot Dermatoses|D005533
+Foot Diseases|D005534
+Foot Injuries|D018409
+Foot Rot|D005535
+Foot Ulcer|D016523
+Foot-and-Mouth Disease|D005536
+Foramen Ovale, Patent|D054092
+Forearm Injuries|D005543
+Foreign Bodies|D005547
+Foreign-Body Migration|D005548
+Foreign-Body Reaction|D005549
+Fournier Gangrene|D018934
+Fowlpox|D005586
+Fox-Fordyce Disease|D005588
+Fractures, Bone|D050723
+Fractures, Cartilage|D050724
+Fractures, Closed|D005596
+Fractures, Comminuted|D018460
+Fractures, Compression|D050815
+Fractures, Malunited|D017759
+Fractures, Open|D005597
+Fractures, Spontaneous|D005598
+Fractures, Stress|D015775
+Fractures, Ununited|D005599
+Fragile X Syndrome|D005600
+Fraser Syndrome|D058497
+Frasier Syndrome|D052159
+Freemartinism|D005611
+Friedreich Ataxia|D005621
+Frontal Sinusitis|D015522
+Frontotemporal Dementia|D057180
+Frontotemporal Lobar Degeneration|D057174
+Frostbite|D005627
+Fructose Intolerance|D005633
+Fructose Metabolism, Inborn Errors|D015318
+Fructose-1,6-Diphosphatase Deficiency|D015319
+Fuchs' Endothelial Dystrophy|D005642
+Fucosidosis|D005645
+Fungemia|D016469
+Funnel Chest|D005660
+Furcation Defects|D017823
+Furunculosis|D005667
+Fusariosis|D060585
+Fused Teeth|D005671
+Fusobacteriaceae Infections|D045825
+Fusobacterium Infections|D005674
+Gagging|D005683
+Gait Apraxia|D020235
+Gait Ataxia|D020234
+Gait Disorders, Neurologic|D020233
+Galactorrhea|D005687
+Galactosemias|D005693
+Gallbladder Diseases|D005705
+Gallbladder Neoplasms|D005706
+Gallstones|D042882
+Ganglioglioma|D018303
+Ganglion Cysts|D045888
+Ganglioneuroblastoma|D018305
+Ganglioneuroma|D005729
+Gangliosidoses|D005733
+Gangliosidoses, GM2|D020143
+Gangliosidosis, GM1|D016537
+Gangrene|D005734
+Gardner Syndrome|D005736
+Gas Gangrene|D005738
+Gas Poisoning|D005739
+Gastric Antral Vascular Ectasia|D020252
+Gastric Dilatation|D013271
+Gastric Fistula|D005747
+Gastric Outlet Obstruction|D017219
+Gastrinoma|D015408
+Gastritis|D005756
+Gastritis, Atrophic|D005757
+Gastritis, Hypertrophic|D005758
+Gastroenteritis|D005759
+Gastroenteritis, Transmissible, of Swine|D005761
+Gastroesophageal Reflux|D005764
+Gastrointestinal Diseases|D005767
+Gastrointestinal Hemorrhage|D006471
+Gastrointestinal Neoplasms|D005770
+Gastrointestinal Stromal Tumors|D046152
+Gastroparesis|D018589
+Gastroschisis|D020139
+Gaucher Disease|D005776
+Genetic Diseases, Inborn|D030342
+Genetic Diseases, X-Linked|D040181
+Genetic Diseases, Y-Linked|D050174
+Genetic Predisposition to Disease|D020022
+Genital Diseases, Female|D005831
+Genital Diseases, Male|D005832
+Genital Neoplasms, Female|D005833
+Genital Neoplasms, Male|D005834
+Genomic Instability|D042822
+Genu Valgum|D056304
+Genu Varum|D056305
+Geographic Atrophy|D057092
+Geotrichosis|D005847
+Germinoma|D018237
+Gerstmann Syndrome|D005862
+Gerstmann-Straussler-Scheinker Disease|D016098
+Gestational Trophoblastic Disease|D031901
+Giant Axonal Neuropathy|D056768
+Giant Cell Arteritis|D013700
+Giant Cell Tumor of Bone|D018212
+Giant Cell Tumors|D005870
+Giant Lymph Node Hyperplasia|D005871
+Giardiasis|D005873
+Gigantism|D005877
+Gilbert Disease|D005878
+Gingival Diseases|D005882
+Gingival Hemorrhage|D005884
+Gingival Hyperplasia|D005885
+Gingival Hypertrophy|D005886
+Gingival Neoplasms|D005887
+Gingival Overgrowth|D019214
+Gingival Pocket|D005888
+Gingival Recession|D005889
+Gingivitis|D005891
+Gingivitis, Necrotizing Ulcerative|D005892
+Gitelman Syndrome|D053579
+Glanders|D005896
+Glaucoma|D005901
+Glaucoma, Angle-Closure|D015812
+Glaucoma, Neovascular|D015355
+Glaucoma, Open-Angle|D005902
+Glioblastoma|D005909
+Glioma|D005910
+Glioma, Subependymal|D018315
+Gliosarcoma|D018316
+Gliosis|D005911
+Glomerulonephritis|D005921
+Glomerulonephritis, IGA|D005922
+Glomerulonephritis, Membranoproliferative|D015432
+Glomerulonephritis, Membranous|D015433
+Glomerulosclerosis, Focal Segmental|D005923
+Glomus Jugulare Tumor|D005925
+Glomus Tumor|D005918
+Glomus Tympanicum Tumor|D043604
+Glossalgia|D005926
+Glossitis|D005928
+Glossitis, Benign Migratory|D005929
+Glossopharyngeal Nerve Diseases|D020435
+Glossopharyngeal Nerve Injuries|D061287
+Glossoptosis|D065710
+Glucagonoma|D005935
+Glucose Intolerance|D018149
+Glucose Metabolism Disorders|D044882
+Glucosephosphate Dehydrogenase Deficiency|D005955
+Glycogen Storage Disease|D006008
+Glycogen Storage Disease Type I|D005953
+Glycogen Storage Disease Type II|D006009
+Glycogen Storage Disease Type III|D006010
+Glycogen Storage Disease Type IIb|D052120
+Glycogen Storage Disease Type IV|D006011
+Glycogen Storage Disease Type V|D006012
+Glycogen Storage Disease Type VI|D006013
+Glycogen Storage Disease Type VII|D006014
+Glycogen Storage Disease Type VIII|D006015
+Glycosuria|D006029
+Glycosuria, Renal|D006030
+Gnathostomiasis|D058429
+Goat Diseases|D015511
+Goiter|D006042
+Goiter, Endemic|D006043
+Goiter, Nodular|D006044
+Goiter, Substernal|D006045
+Goldenhar Syndrome|D006053
+Gonadal Disorders|D006058
+Gonadal Dysgenesis|D006059
+Gonadal Dysgenesis, 46,XX|D023961
+Gonadal Dysgenesis, 46,XY|D006061
+Gonadal Dysgenesis, Mixed|D006060
+Gonadoblastoma|D018238
+Gonorrhea|D006069
+Gout|D006073
+Graft Occlusion, Vascular|D006083
+Graft vs Host Disease|D006086
+Gram-Negative Bacterial Infections|D016905
+Gram-Positive Bacterial Infections|D016908
+Granular Cell Tumor|D016586
+Granuloma|D006099
+Granuloma Annulare|D016460
+Granuloma Inguinale|D006100
+Granuloma, Foreign-Body|D015745
+Granuloma, Giant Cell|D006101
+Granuloma, Laryngeal|D006102
+Granuloma, Lethal Midline|D006103
+Granuloma, Plasma Cell|D006104
+Granuloma, Pyogenic|D017789
+Granuloma, Respiratory Tract|D015769
+Granulomatosis with Polyangiitis|D014890
+Granulomatosis, Orofacial|D051261
+Granulomatous Disease, Chronic|D006105
+Granulomatous Mastitis|D058890
+Granulosa Cell Tumor|D006106
+Graves Disease|D006111
+Graves Ophthalmopathy|D049970
+Gray Platelet Syndrome|D055652
+Growth Disorders|D006130
+Growth Hormone-Secreting Pituitary Adenoma|D049912
+Guillain-Barre Syndrome|D020275
+Gynatresia|D006175
+Gynecomastia|D006177
+Gyrate Atrophy|D015799
+HELLP Syndrome|D017359
+HIV Enteropathy|D019053
+HIV Infections|D015658
+HIV Seropositivity|D006679
+HIV Wasting Syndrome|D019247
+HIV-Associated Lipodystrophy Syndrome|D039682
+HTLV-I Infections|D015490
+HTLV-II Infections|D015491
+Haemonchiasis|D006188
+Haemophilus Infections|D006192
+Hair Diseases|D006201
+Hajdu-Cheney Syndrome|D031845
+Halitosis|D006209
+Hallermann's Syndrome|D006210
+Hallucinations|D006212
+Hallux Limitus|D020857
+Hallux Rigidus|D020859
+Hallux Valgus|D006215
+Hallux Varus|D050488
+Hamartoma|D006222
+Hamartoma Syndrome, Multiple|D006223
+Hammer Toe Syndrome|D037801
+Hand Deformities|D006226
+Hand Deformities, Acquired|D006227
+Hand Deformities, Congenital|D006228
+Hand Dermatoses|D006229
+Hand Injuries|D006230
+Hand, Foot and Mouth Disease|D006232
+Hand-Arm Vibration Syndrome|D053421
+Hand-Foot Syndrome|D060831
+Hantavirus Infections|D018778
+Hantavirus Pulmonary Syndrome|D018804
+Hartnup Disease|D006250
+Hashimoto Disease|D050031
+Head Injuries, Closed|D016489
+Head Injuries, Penetrating|D020197
+Head and Neck Neoplasms|D006258
+Headache|D006261
+Headache Disorders|D020773
+Headache Disorders, Primary|D051270
+Headache Disorders, Secondary|D051271
+Hearing Disorders|D006311
+Hearing Loss|D034381
+Hearing Loss, Bilateral|D006312
+Hearing Loss, Central|D006313
+Hearing Loss, Conductive|D006314
+Hearing Loss, Functional|D006315
+Hearing Loss, High-Frequency|D006316
+Hearing Loss, Mixed Conductive-Sensorineural|D046089
+Hearing Loss, Noise-Induced|D006317
+Hearing Loss, Sensorineural|D006319
+Hearing Loss, Sudden|D003639
+Hearing Loss, Unilateral|D046088
+Heart Aneurysm|D006322
+Heart Arrest|D006323
+Heart Block|D006327
+Heart Defects, Congenital|D006330
+Heart Diseases|D006331
+Heart Failure|D006333
+Heart Failure, Diastolic|D054144
+Heart Failure, Systolic|D054143
+Heart Injuries|D006335
+Heart Murmurs|D006337
+Heart Neoplasms|D006338
+Heart Rupture|D006341
+Heart Rupture, Post-Infarction|D006342
+Heart Septal Defects|D006343
+Heart Septal Defects, Atrial|D006344
+Heart Septal Defects, Ventricular|D006345
+Heart Valve Diseases|D006349
+Heart Valve Prolapse|D016127
+Heartburn|D006356
+Heartwater Disease|D006357
+Heat Exhaustion|D006359
+Heat Stress Disorders|D018882
+Heat Stroke|D018883
+Heavy Chain Disease|D006362
+Heavy Metal Poisoning, Nervous System|D020260
+Heel Spur|D036982
+Helicobacter Infections|D016481
+Helminthiasis|D006373
+Helminthiasis, Animal|D006374
+Hemangioblastoma|D018325
+Hemangioendothelioma|D006390
+Hemangioendothelioma, Epithelioid|D018323
+Hemangioma|D006391
+Hemangioma, Capillary|D018324
+Hemangioma, Cavernous|D006392
+Hemangioma, Cavernous, Central Nervous System|D020786
+Hemangiopericytoma|D006393
+Hemangiosarcoma|D006394
+Hemarthrosis|D006395
+Hematemesis|D006396
+Hematocele|D006398
+Hematocolpos|D006399
+Hematologic Diseases|D006402
+Hematologic Neoplasms|D019337
+Hematoma|D006406
+Hematoma, Epidural, Cranial|D006407
+Hematoma, Epidural, Spinal|D046748
+Hematoma, Subdural|D006408
+Hematoma, Subdural, Acute|D020199
+Hematoma, Subdural, Chronic|D020200
+Hematoma, Subdural, Intracranial|D046648
+Hematoma, Subdural, Spinal|D046649
+Hematometra|D006409
+Hematuria|D006417
+Hemianopsia|D006423
+Hemic and Lymphatic Diseases|D006425
+Hemifacial Spasm|D019569
+Hemimegalencephaly|D065705
+Hemiplegia|D006429
+Hemobilia|D006431
+Hemochromatosis|D006432
+Hemoglobin C Disease|D006445
+Hemoglobin SC Disease|D006450
+Hemoglobinopathies|D006453
+Hemoglobinuria|D006456
+Hemoglobinuria, Paroxysmal|D006457
+Hemolysis|D006461
+Hemolytic-Uremic Syndrome|D006463
+Hemoperitoneum|D006465
+Hemophilia A|D006467
+Hemophilia B|D002836
+Hemopneumothorax|D006468
+Hemoptysis|D006469
+Hemorrhage|D006470
+Hemorrhagic Disorders|D006474
+Hemorrhagic Fever with Renal Syndrome|D006480
+Hemorrhagic Fever, American|D006478
+Hemorrhagic Fever, Crimean|D006479
+Hemorrhagic Fever, Ebola|D019142
+Hemorrhagic Fever, Omsk|D006481
+Hemorrhagic Fevers, Viral|D006482
+Hemorrhagic Septicemia|D006483
+Hemorrhagic Septicemia, Viral|D031941
+Hemorrhagic Syndrome, Bovine|D030243
+Hemorrhoids|D006484
+Hemosiderosis|D006486
+Hemospermia|D051516
+Hemostatic Disorders|D020141
+Hemothorax|D006491
+Henipavirus Infections|D045464
+Hepadnaviridae Infections|D018347
+Hepatic Encephalopathy|D006501
+Hepatic Insufficiency|D048550
+Hepatic Veno-Occlusive Disease|D006504
+Hepatitis|D006505
+Hepatitis A|D006506
+Hepatitis B|D006509
+Hepatitis B, Chronic|D019694
+Hepatitis C|D006526
+Hepatitis C, Chronic|D019698
+Hepatitis D|D003699
+Hepatitis D, Chronic|D019701
+Hepatitis E|D016751
+Hepatitis, Alcoholic|D006519
+Hepatitis, Animal|D006520
+Hepatitis, Autoimmune|D019693
+Hepatitis, Chronic|D006521
+Hepatitis, Infectious Canine|D006522
+Hepatitis, Viral, Animal|D006524
+Hepatitis, Viral, Human|D006525
+Hepatoblastoma|D018197
+Hepatolenticular Degeneration|D006527
+Hepatomegaly|D006529
+Hepatopulmonary Syndrome|D020065
+Hepatorenal Syndrome|D006530
+Hereditary Angioedema Type III|D056828
+Hereditary Angioedema Types I and II|D056829
+Hereditary Autoinflammatory Diseases|D056660
+Hereditary Breast and Ovarian Cancer Syndrome|D061325
+Hereditary Central Nervous System Demyelinating Diseases|D020279
+Hereditary Sensory and Autonomic Neuropathies|D009477
+Hereditary Sensory and Motor Neuropathy|D015417
+Heredodegenerative Disorders, Nervous System|D020271
+Hermanski-Pudlak Syndrome|D022861
+Hernia|D006547
+Hernia, Abdominal|D046449
+Hernia, Diaphragmatic|D006548
+Hernia, Diaphragmatic, Traumatic|D006549
+Hernia, Femoral|D006550
+Hernia, Hiatal|D006551
+Hernia, Inguinal|D006552
+Hernia, Obturator|D006553
+Hernia, Umbilical|D006554
+Hernia, Ventral|D006555
+Hernias, Diaphragmatic, Congenital|D065630
+Heroin Dependence|D006556
+Herpangina|D006557
+Herpes Genitalis|D006558
+Herpes Labialis|D006560
+Herpes Simplex|D006561
+Herpes Zoster|D006562
+Herpes Zoster Ophthalmicus|D006563
+Herpes Zoster Oticus|D016697
+Herpesviridae Infections|D006566
+Heterotaxy Syndrome|D059446
+Hiccup|D006606
+Hidradenitis|D016575
+Hidradenitis Suppurativa|D017497
+Hidrocystoma|D018251
+High Pressure Neurological Syndrome|D006610
+Hip Contracture|D006616
+Hip Dislocation|D006617
+Hip Dislocation, Congenital|D006618
+Hip Dysplasia, Canine|D006619
+Hip Fractures|D006620
+Hip Injuries|D025981
+Hirschsprung Disease|D006627
+Hirsutism|D006628
+Histiocytic Disorders, Malignant|D015620
+Histiocytic Necrotizing Lymphadenitis|D020042
+Histiocytic Sarcoma|D054747
+Histiocytoma|D051642
+Histiocytoma, Benign Fibrous|D018219
+Histiocytoma, Malignant Fibrous|D051677
+Histiocytosis|D015614
+Histiocytosis, Langerhans-Cell|D006646
+Histiocytosis, Non-Langerhans-Cell|D015616
+Histiocytosis, Sinus|D015618
+Histoplasmosis|D006660
+Hoarseness|D006685
+Hodgkin Disease|D006689
+Holocarboxylase Synthetase Deficiency|D028922
+Holoprosencephaly|D016142
+Homocystinuria|D006712
+Hookworm Infections|D006725
+Hordeolum|D006726
+Horner Syndrome|D006732
+Horse Diseases|D006734
+Hot Flashes|D019584
+Humeral Fractures|D006810
+Huntington Disease|D006816
+Hutchinson's Melanotic Freckle|D018327
+Hyaline Membrane Disease|D006819
+Hyalinosis, Systemic|D057770
+Hyalohyphomycosis|D060605
+Hydatidiform Mole|D006828
+Hydatidiform Mole, Invasive|D002820
+Hydranencephaly|D006832
+Hydrarthrosis|D006833
+Hydroa Vacciniforme|D006837
+Hydrocephalus|D006849
+Hydrocephalus, Normal Pressure|D006850
+Hydrocolpos|D052202
+Hydronephrosis|D006869
+Hydrophthalmos|D006871
+Hydropneumothorax|D006872
+Hydrops Fetalis|D015160
+Hydrothorax|D006876
+Hymenolepiasis|D006925
+Hyper-IgM Immunodeficiency Syndrome|D053306
+Hyper-IgM Immunodeficiency Syndrome, Type 1|D053307
+Hyperacusis|D012001
+Hyperaldosteronism|D006929
+Hyperalgesia|D006930
+Hyperammonemia|D022124
+Hyperamylasemia|D034321
+Hyperandrogenism|D017588
+Hyperargininemia|D020162
+Hyperbilirubinemia|D006932
+Hyperbilirubinemia, Hereditary|D006933
+Hyperbilirubinemia, Neonatal|D051556
+Hypercalcemia|D006934
+Hypercalciuria|D053565
+Hypercapnia|D006935
+Hypercementosis|D006936
+Hypercholesterolemia|D006937
+Hyperemesis Gravidarum|D006939
+Hyperemia|D006940
+Hypereosinophilic Syndrome|D017681
+Hyperesthesia|D006941
+Hypergammaglobulinemia|D006942
+Hyperglycemia|D006943
+Hyperglycemic Hyperosmolar Nonketotic Coma|D006944
+Hyperglycinemia, Nonketotic|D020158
+Hyperhidrosis|D006945
+Hyperhomocysteinemia|D020138
+Hyperinsulinism|D006946
+Hyperkalemia|D006947
+Hyperkeratosis, Epidermolytic|D017488
+Hyperkinesis|D006948
+Hyperlactatemia|D065906
+Hyperlipidemia, Familial Combined|D006950
+Hyperlipidemias|D006949
+Hyperlipoproteinemia Type I|D008072
+Hyperlipoproteinemia Type II|D006938
+Hyperlipoproteinemia Type III|D006952
+Hyperlipoproteinemia Type IV|D006953
+Hyperlipoproteinemia Type V|D006954
+Hyperlipoproteinemias|D006951
+Hyperlysinemias|D020167
+Hypernatremia|D006955
+Hyperopia|D006956
+Hyperostosis|D015576
+Hyperostosis Frontalis Interna|D006957
+Hyperostosis, Cortical, Congenital|D006958
+Hyperostosis, Diffuse Idiopathic Skeletal|D004057
+Hyperostosis, Sternocostoclavicular|D015218
+Hyperoxaluria|D006959
+Hyperoxaluria, Primary|D006960
+Hyperoxia|D018496
+Hyperparathyroidism|D006961
+Hyperparathyroidism, Primary|D049950
+Hyperparathyroidism, Secondary|D006962
+Hyperphagia|D006963
+Hyperphosphatemia|D054559
+Hyperpigmentation|D017495
+Hyperpituitarism|D006964
+Hyperplasia|D006965
+Hyperprolactinemia|D006966
+Hypersensitivity|D006967
+Hypersensitivity, Delayed|D006968
+Hypersensitivity, Immediate|D006969
+Hypersomnolence, Idiopathic|D020177
+Hypersplenism|D006971
+Hypertelorism|D006972
+Hypertension|D006973
+Hypertension, Malignant|D006974
+Hypertension, Portal|D006975
+Hypertension, Pregnancy-Induced|D046110
+Hypertension, Pulmonary|D006976
+Hypertension, Renal|D006977
+Hypertension, Renovascular|D006978
+Hypertensive Encephalopathy|D020343
+Hypertensive Retinopathy|D058437
+Hyperthyroidism|D006980
+Hyperthyroxinemia|D006981
+Hyperthyroxinemia, Familial Dysalbuminemic|D050010
+Hypertrichosis|D006983
+Hypertriglyceridemia|D015228
+Hypertriglyceridemic Waist|D064250
+Hypertrophy|D006984
+Hypertrophy, Left Ventricular|D017379
+Hypertrophy, Right Ventricular|D017380
+Hyperuricemia|D033461
+Hyperventilation|D006985
+Hypervitaminosis A|D006986
+Hypesthesia|D006987
+Hyphema|D006988
+Hypoalbuminemia|D034141
+Hypoaldosteronism|D006994
+Hypoalphalipoproteinemias|D052456
+Hypobetalipoproteinemia, Familial, Apolipoprotein B|D052476
+Hypobetalipoproteinemias|D006995
+Hypocalcemia|D006996
+Hypocapnia|D016857
+Hypodermyiasis|D007000
+Hypoglossal Nerve Diseases|D020437
+Hypoglossal Nerve Injuries|D061228
+Hypoglycemia|D007003
+Hypogonadism|D007006
+Hypohidrosis|D007007
+Hypokalemia|D007008
+Hypokalemic Periodic Paralysis|D020514
+Hypokinesia|D018476
+Hypolipoproteinemias|D007009
+Hyponatremia|D007010
+Hypoparathyroidism|D007011
+Hypopharyngeal Neoplasms|D007012
+Hypophosphatasia|D007014
+Hypophosphatemia|D017674
+Hypophosphatemia, Familial|D007015
+Hypopigmentation|D017496
+Hypopituitarism|D007018
+Hypoplastic Left Heart Syndrome|D018636
+Hypoproteinemia|D007019
+Hypoprothrombinemias|D007020
+Hypospadias|D007021
+Hypotension|D007022
+Hypotension, Orthostatic|D007024
+Hypothalamic Diseases|D007027
+Hypothalamic Neoplasms|D007029
+Hypothermia|D007035
+Hypothyroidism|D007037
+Hypotrichosis|D007039
+Hypoventilation|D007040
+Hypovolemia|D020896
+Hypoxia, Brain|D002534
+Hypoxia-Ischemia, Brain|D020925
+Iatrogenic Disease|D007049
+Ichthyosiform Erythroderma, Congenital|D016113
+Ichthyosis|D007057
+Ichthyosis Bullosa of Siemens|D053560
+Ichthyosis Vulgaris|D016112
+Ichthyosis, Lamellar|D017490
+Ichthyosis, X-Linked|D016114
+Idiopathic Interstitial Pneumonias|D054988
+Idiopathic Pulmonary Fibrosis|D054990
+IgA Deficiency|D017098
+IgG Deficiency|D017099
+Ileal Diseases|D007077
+Ileal Neoplasms|D007078
+Ileitis|D007079
+Ileus|D045823
+Iliac Aneurysm|D017543
+Iliotibial Band Syndrome|D058745
+Illusions|D007088
+Immersion Foot|D007102
+Immune Complex Diseases|D007105
+Immune Reconstitution Inflammatory Syndrome|D054019
+Immune System Diseases|D007154
+Immunoblastic Lymphadenopathy|D007119
+Immunologic Deficiency Syndromes|D007153
+Immunoproliferative Disorders|D007160
+Immunoproliferative Small Intestinal Disease|D007161
+Impetigo|D007169
+Implant Capsular Contracture|D057910
+Impotence, Vasculogenic|D018783
+Inappropriate ADH Syndrome|D007177
+Incontinentia Pigmenti|D007184
+Inert Gas Narcosis|D007222
+Infant Death|D066088
+Infant Nutrition Disorders|D007228
+Infant, Newborn, Diseases|D007232
+Infant, Premature, Diseases|D007235
+Infantile Apparent Life-Threatening Event|D057768
+Infarction|D007238
+Infarction, Anterior Cerebral Artery|D020243
+Infarction, Middle Cerebral Artery|D020244
+Infarction, Posterior Cerebral Artery|D020762
+Infection|D007239
+Infectious Bovine Rhinotracheitis|D007241
+Infectious Mononucleosis|D007244
+Inferior Wall Myocardial Infarction|D056989
+Infertility|D007246
+Infertility, Female|D007247
+Infertility, Male|D007248
+Inflammation|D007249
+Inflammatory Bowel Diseases|D015212
+Inflammatory Breast Neoplasms|D058922
+Influenza in Birds|D005585
+Influenza, Human|D007251
+Infratentorial Neoplasms|D015192
+Inhalant Abuse|D058545
+Insect Bites and Stings|D007299
+Insomnia, Fatal Familial|D034062
+Insulin Coma|D007331
+Insulin Resistance|D007333
+Insulinoma|D007340
+Intellectual Disability|D008607
+Intermittent Claudication|D007383
+Intertrigo|D007402
+Intervertebral Disc Degeneration|D055959
+Intervertebral Disc Displacement|D007405
+Intestinal Atresia|D007409
+Intestinal Diseases|D007410
+Intestinal Diseases, Parasitic|D007411
+Intestinal Fistula|D007412
+Intestinal Neoplasms|D007414
+Intestinal Obstruction|D007415
+Intestinal Perforation|D007416
+Intestinal Polyposis|D044483
+Intestinal Polyps|D007417
+Intestinal Pseudo-Obstruction|D007418
+Intestinal Volvulus|D045822
+Intra-Abdominal Hypertension|D059325
+Intra-Articular Fractures|D057072
+Intraabdominal Infections|D059413
+Intracranial Aneurysm|D002532
+Intracranial Arterial Diseases|D020765
+Intracranial Arteriosclerosis|D002537
+Intracranial Arteriovenous Malformations|D002538
+Intracranial Embolism|D020766
+Intracranial Embolism and Thrombosis|D002542
+Intracranial Hemorrhage, Hypertensive|D020299
+Intracranial Hemorrhage, Traumatic|D020198
+Intracranial Hemorrhages|D020300
+Intracranial Hypertension|D019586
+Intracranial Hypotension|D019585
+Intracranial Thrombosis|D020767
+Intraocular Lymphoma|D064090
+Intraoperative Awareness|D058926
+Intraoperative Complications|D007431
+Intrauterine Device Migration|D058736
+Intussusception|D007443
+Invasive Pulmonary Aspergillosis|D055744
+Iridocorneal Endothelial Syndrome|D057129
+Iridocyclitis|D015863
+Iris Diseases|D007499
+Iris Neoplasms|D015811
+Iritis|D007500
+Iron Metabolism Disorders|D019189
+Iron Overload|D019190
+Irritable Bowel Syndrome|D043183
+Isaacs Syndrome|D020386
+Ischemia|D007511
+Ischemic Attack, Transient|D002546
+Ischemic Contracture|D054061
+Isochromosomes|D018404
+Isolated Noncompaction of the Ventricular Myocardium|D056830
+Isosporiasis|D021865
+Jacobsen Distal 11q Deletion Syndrome|D054868
+Jaundice|D007565
+Jaundice, Chronic Idiopathic|D007566
+Jaundice, Neonatal|D007567
+Jaundice, Obstructive|D041781
+Jaw Abnormalities|D007569
+Jaw Cysts|D007570
+Jaw Diseases|D007571
+Jaw Fractures|D007572
+Jaw Neoplasms|D007573
+Jaw, Edentulous|D007575
+Jaw, Edentulous, Partially|D007576
+Jejunal Diseases|D007579
+Jejunal Neoplasms|D007580
+Jervell-Lange Nielsen Syndrome|D029593
+Jet Lag Syndrome|D020179
+Job Syndrome|D007589
+Joint Deformities, Acquired|D016916
+Joint Diseases|D007592
+Joint Instability|D007593
+Joint Loose Bodies|D007594
+Kallmann Syndrome|D017436
+Kaposi Varicelliform Eruption|D007617
+Karoshi Death|D065907
+Kartagener Syndrome|D007619
+Kasabach-Merritt Syndrome|D059885
+Kashin-Beck Disease|D057767
+Kearns-Sayre Syndrome|D007625
+Keloid|D007627
+Keratitis|D007634
+Keratitis, Dendritic|D007635
+Keratitis, Herpetic|D016849
+Keratoacanthoma|D007636
+Keratoconjunctivitis|D007637
+Keratoconjunctivitis Sicca|D007638
+Keratoconjunctivitis, Infectious|D007639
+Keratoconus|D007640
+Keratoderma, Palmoplantar|D007645
+Keratoderma, Palmoplantar, Diffuse|D015776
+Keratoderma, Palmoplantar, Epidermolytic|D053546
+Keratosis|D007642
+Keratosis, Actinic|D055623
+Keratosis, Seborrheic|D017492
+Kernicterus|D007647
+Ketosis|D007662
+Kidney Calculi|D007669
+Kidney Cortex Necrosis|D007673
+Kidney Diseases|D007674
+Kidney Diseases, Cystic|D052177
+Kidney Failure, Chronic|D007676
+Kidney Neoplasms|D007680
+Kidney Papillary Necrosis|D007681
+Kidney Tubular Necrosis, Acute|D007683
+King's Evil|D018601
+Klatskin's Tumor|D018285
+Klebsiella Infections|D007710
+Kleine-Levin Syndrome|D017593
+Klinefelter Syndrome|D007713
+Klippel-Feil Syndrome|D007714
+Klippel-Trenaunay-Weber Syndrome|D007715
+Kluver-Bucy Syndrome|D020232
+Knee Dislocation|D031221
+Knee Injuries|D007718
+Korsakoff Syndrome|D020915
+Krukenberg Tumor|D007725
+Kuru|D007729
+Kwashiorkor|D007732
+Kyasanur Forest Disease|D007733
+Kyphosis|D007738
+LEOPARD Syndrome|D044542
+Labor Pain|D048949
+Laboratory Infection|D007757
+Labyrinth Diseases|D007759
+Labyrinthitis|D007762
+Lacerations|D022125
+Lacrimal Apparatus Diseases|D007766
+Lacrimal Duct Obstruction|D007767
+Lactation Disorders|D007775
+Lactose Intolerance|D007787
+Lafora Disease|D020192
+Lambert-Eaton Myasthenic Syndrome|D015624
+Lameness, Animal|D007794
+Landau-Kleffner Syndrome|D018887
+Langer-Giedion Syndrome|D015826
+Langerhans Cell Sarcoma|D054752
+Language Development Disorders|D007805
+Language Disorders|D007806
+Laron Syndrome|D046150
+Larva Migrans|D007815
+Larva Migrans, Visceral|D007816
+Laryngeal Diseases|D007818
+Laryngeal Edema|D007819
+Laryngeal Neoplasms|D007822
+Laryngeal Nerve Injuries|D061224
+Laryngismus|D007826
+Laryngitis|D007827
+Laryngocele|D059608
+Laryngomalacia|D055092
+Laryngopharyngeal Reflux|D057045
+Laryngostenosis|D007829
+Lassa Fever|D007835
+Latent Tuberculosis|D055985
+Lateral Medullary Syndrome|D014854
+Lateral Sinus Thrombosis|D020227
+Latex Hypersensitivity|D020315
+Lathyrism|D007842
+Laurence-Moon Syndrome|D007849
+Lead Poisoning|D007855
+Lead Poisoning, Nervous System|D020263
+Lead Poisoning, Nervous System, Adult|D020265
+Lead Poisoning, Nervous System, Childhood|D020264
+Learning Disorders|D007859
+Leber Congenital Amaurosis|D057130
+Lecithin Acyltransferase Deficiency|D007863
+Leg Dermatoses|D007868
+Leg Injuries|D007869
+Leg Length Inequality|D007870
+Leg Ulcer|D007871
+Legg-Calve-Perthes Disease|D007873
+Legionellosis|D007876
+Legionnaires' Disease|D007877
+Leigh Disease|D007888
+Leiomyoma|D007889
+Leiomyoma, Epithelioid|D018230
+Leiomyomatosis|D018231
+Leiomyosarcoma|D007890
+Leishmaniasis|D007896
+Leishmaniasis, Cutaneous|D016773
+Leishmaniasis, Diffuse Cutaneous|D016774
+Leishmaniasis, Mucocutaneous|D007897
+Leishmaniasis, Visceral|D007898
+Lemierre Syndrome|D057831
+Lennox Gastaut Syndrome|D065768
+Lens Diseases|D007905
+Lens Subluxation|D007906
+Lentigo|D007911
+Lentivirus Infections|D016180
+Leprosy|D007918
+Leprosy, Borderline|D015439
+Leprosy, Lepromatous|D015440
+Leprosy, Multibacillary|D056006
+Leprosy, Paucibacillary|D056005
+Leprosy, Tuberculoid|D015441
+Leptospirosis|D007922
+Leriche Syndrome|D007925
+Lesch-Nyhan Syndrome|D007926
+Lethargy|D053609
+Leukemia|D007938
+Leukemia L1210|D007939
+Leukemia L5178|D007940
+Leukemia P388|D007941
+Leukemia, B-Cell|D015448
+Leukemia, Basophilic, Acute|D015471
+Leukemia, Biphenotypic, Acute|D015456
+Leukemia, Eosinophilic, Acute|D015472
+Leukemia, Erythroblastic, Acute|D004915
+Leukemia, Experimental|D007942
+Leukemia, Feline|D016582
+Leukemia, Hairy Cell|D007943
+Leukemia, Large Granular Lymphocytic|D054066
+Leukemia, Lymphocytic, Chronic, B-Cell|D015451
+Leukemia, Lymphoid|D007945
+Leukemia, Mast-Cell|D007946
+Leukemia, Megakaryoblastic, Acute|D007947
+Leukemia, Monocytic, Acute|D007948
+Leukemia, Myelogenous, Chronic, BCR-ABL Positive|D015464
+Leukemia, Myeloid|D007951
+Leukemia, Myeloid, Accelerated Phase|D015465
+Leukemia, Myeloid, Acute|D015470
+Leukemia, Myeloid, Chronic, Atypical, BCR-ABL Negative|D054438
+Leukemia, Myeloid, Chronic-Phase|D015466
+Leukemia, Myelomonocytic, Acute|D015479
+Leukemia, Myelomonocytic, Chronic|D015477
+Leukemia, Myelomonocytic, Juvenile|D054429
+Leukemia, Neutrophilic, Chronic|D015467
+Leukemia, Plasma Cell|D007952
+Leukemia, Prolymphocytic|D015463
+Leukemia, Prolymphocytic, B-Cell|D054403
+Leukemia, Prolymphocytic, T-Cell|D015461
+Leukemia, Promyelocytic, Acute|D015473
+Leukemia, Radiation-Induced|D007953
+Leukemia, T-Cell|D015458
+Leukemia-Lymphoma, Adult T-Cell|D015459
+Leukemic Infiltration|D017254
+Leukemoid Reaction|D007955
+Leukoaraiosis|D049292
+Leukocyte Disorders|D007960
+Leukocyte-Adhesion Deficiency Syndrome|D018370
+Leukocytosis|D007964
+Leukodystrophy, Globoid Cell|D007965
+Leukodystrophy, Metachromatic|D007966
+Leukoedema, Oral|D007967
+Leukoencephalitis, Acute Hemorrhagic|D004684
+Leukoencephalopathies|D056784
+Leukoencephalopathy, Progressive Multifocal|D007968
+Leukokeratosis, Hereditary Mucosal|D053529
+Leukomalacia, Periventricular|D007969
+Leukopenia|D007970
+Leukoplakia|D007971
+Leukoplakia, Hairy|D017733
+Leukoplakia, Oral|D007972
+Leukorrhea|D007973
+Leukostasis|D018921
+Levocardia|D007979
+Lewy Body Disease|D020961
+Leydig Cell Tumor|D007984
+Li-Fraumeni Syndrome|D016864
+Lice Infestations|D010373
+Lichen Nitidus|D017513
+Lichen Planus|D008010
+Lichen Planus, Oral|D017676
+Lichen Sclerosus et Atrophicus|D018459
+Lichenoid Eruptions|D017512
+Liddle Syndrome|D056929
+Lightning Injuries|D015168
+Limb Deformities, Congenital|D017880
+Limbic Encephalitis|D020363
+Linear IgA Bullous Dermatosis|D062027
+Lingual Goiter|D047268
+Lingual Nerve Injuries|D061222
+Lingual Thyroid|D046151
+Linitis Plastica|D008039
+Lip Diseases|D008047
+Lip Neoplasms|D008048
+Lipedema|D065134
+Lipid Metabolism Disorders|D052439
+Lipid Metabolism, Inborn Errors|D008052
+Lipidoses|D008064
+Lipoblastoma|D062689
+Lipodystrophy|D008060
+Lipodystrophy, Congenital Generalized|D052497
+Lipodystrophy, Familial Partial|D052496
+Lipoid Proteinosis of Urbach and Wiethe|D008065
+Lipoma|D008067
+Lipomatosis|D008068
+Lipomatosis, Multiple Symmetrical|D008069
+Liposarcoma|D008080
+Liposarcoma, Myxoid|D018208
+Lissencephaly|D054082
+Listeriosis|D008088
+Lithiasis|D020347
+Livedo Reticularis|D054068
+Liver Abscess|D008100
+Liver Abscess, Amebic|D008101
+Liver Abscess, Pyogenic|D046290
+Liver Cirrhosis|D008103
+Liver Cirrhosis, Alcoholic|D008104
+Liver Cirrhosis, Biliary|D008105
+Liver Cirrhosis, Experimental|D008106
+Liver Diseases|D008107
+Liver Diseases, Alcoholic|D008108
+Liver Diseases, Parasitic|D008109
+Liver Failure|D017093
+Liver Failure, Acute|D017114
+Liver Neoplasms|D008113
+Liver Neoplasms, Experimental|D008114
+Lobomycosis|D060368
+Loeys-Dietz Syndrome|D055947
+Loiasis|D008118
+Long QT Syndrome|D008133
+Loose Anagen Hair Syndrome|D058247
+Lordosis|D008141
+Louping Ill|D008146
+Low Back Pain|D017116
+Low Tension Glaucoma|D057066
+Lower Extremity Deformities, Congenital|D038061
+Lower Urinary Tract Symptoms|D059411
+Lown-Ganong-Levine Syndrome|D008151
+Ludwig's Angina|D008158
+Lumpy Skin Disease|D008166
+Lung Abscess|D008169
+Lung Diseases|D008171
+Lung Diseases, Fungal|D008172
+Lung Diseases, Interstitial|D017563
+Lung Diseases, Obstructive|D008173
+Lung Diseases, Parasitic|D008174
+Lung Injury|D055370
+Lung Neoplasms|D008175
+Lung, Hyperlucent|D019568
+Lupus Erythematosus, Cutaneous|D008178
+Lupus Erythematosus, Discoid|D008179
+Lupus Erythematosus, Systemic|D008180
+Lupus Nephritis|D008181
+Lupus Vasculitis, Central Nervous System|D020945
+Lupus Vulgaris|D008177
+Lutembacher Syndrome|D008185
+Luteoma|D018311
+Lyme Disease|D008193
+Lyme Neuroborreliosis|D020852
+Lymphadenitis|D008199
+Lymphangiectasis|D008200
+Lymphangiectasis, Intestinal|D008201
+Lymphangioleiomyomatosis|D018192
+Lymphangioma|D008202
+Lymphangioma, Cystic|D018191
+Lymphangiomyoma|D008203
+Lymphangiosarcoma|D008204
+Lymphangitis|D008205
+Lymphatic Abnormalities|D044148
+Lymphatic Diseases|D008206
+Lymphatic Metastasis|D008207
+Lymphatic Vessel Tumors|D018190
+Lymphedema|D008209
+Lymphocele|D008210
+Lymphocytic Choriomeningitis|D008216
+Lymphocytosis|D008218
+Lymphogranuloma Venereum|D008219
+Lymphohistiocytosis, Hemophagocytic|D051359
+Lymphoma|D008223
+Lymphoma, AIDS-Related|D016483
+Lymphoma, B-Cell|D016393
+Lymphoma, B-Cell, Marginal Zone|D018442
+Lymphoma, Extranodal NK-T-Cell|D054391
+Lymphoma, Follicular|D008224
+Lymphoma, Large B-Cell, Diffuse|D016403
+Lymphoma, Large-Cell, Anaplastic|D017728
+Lymphoma, Large-Cell, Immunoblastic|D016400
+Lymphoma, Mantle-Cell|D020522
+Lymphoma, Non-Hodgkin|D008228
+Lymphoma, Primary Cutaneous Anaplastic Large Cell|D054446
+Lymphoma, Primary Effusion|D054685
+Lymphoma, T-Cell|D016399
+Lymphoma, T-Cell, Cutaneous|D016410
+Lymphoma, T-Cell, Peripheral|D016411
+Lymphomatoid Granulomatosis|D008230
+Lymphomatoid Papulosis|D017731
+Lymphopenia|D008231
+Lymphoproliferative Disorders|D008232
+Lynch Syndrome II|D055847
+Lysosomal Storage Diseases|D016464
+Lysosomal Storage Diseases, Nervous System|D020140
+MELAS Syndrome|D017241
+MERRF Syndrome|D017243
+MPTP Poisoning|D020267
+Machado-Joseph Disease|D017827
+Macroglossia|D008260
+Macrophage Activation Syndrome|D055501
+Macrostomia|D008265
+Macular Degeneration|D008268
+Macular Edema|D008269
+Magnesium Deficiency|D008275
+Malabsorption Syndromes|D008286
+Malacoplakia|D008287
+Malaria|D008288
+Malaria, Avian|D008289
+Malaria, Cerebral|D016779
+Malaria, Falciparum|D016778
+Malaria, Vivax|D016780
+Male Urogenital Diseases|D052801
+Malformations of Cortical Development|D054220
+Malformations of Cortical Development, Group I|D065703
+Malformations of Cortical Development, Group II|D054081
+Malformations of Cortical Development, Group III|D065704
+Malignant Atrophic Papulosis|D054853
+Malignant Carcinoid Syndrome|D008303
+Malignant Catarrh|D008304
+Malignant Hyperthermia|D008305
+Mallory-Weiss Syndrome|D008309
+Malnutrition|D044342
+Malocclusion|D008310
+Malocclusion, Angle Class I|D008311
+Malocclusion, Angle Class II|D008312
+Malocclusion, Angle Class III|D008313
+Mammary Neoplasms, Animal|D015674
+Mammary Neoplasms, Experimental|D008325
+Mandibular Diseases|D008336
+Mandibular Fractures|D008337
+Mandibular Injuries|D008338
+Mandibular Neoplasms|D008339
+Mandibulofacial Dysostosis|D008342
+Manganese Poisoning|D020149
+Mannosidase Deficiency Diseases|D044904
+Mansonelliasis|D008368
+Maple Syrup Urine Disease|D008375
+Marburg Virus Disease|D008379
+Marchiafava-Bignami Disease|D054319
+Marek Disease|D008380
+Marfan Syndrome|D008382
+Marijuana Abuse|D002189
+Masked Hypertension|D059468
+Massive Hepatic Necrosis|D047508
+Mast-Cell Sarcoma|D012515
+Mastitis|D008413
+Mastitis, Bovine|D008414
+Mastocytoma|D034801
+Mastocytoma, Skin|D054705
+Mastocytosis|D008415
+Mastocytosis, Cutaneous|D034701
+Mastocytosis, Systemic|D034721
+Mastodynia|D059373
+Mastoiditis|D008417
+Maternal Death|D063130
+Maxillary Diseases|D008439
+Maxillary Fractures|D008440
+Maxillary Neoplasms|D008441
+Maxillary Sinus Neoplasms|D008444
+Maxillary Sinusitis|D015523
+Maxillofacial Abnormalities|D019767
+Maxillofacial Injuries|D008446
+May-Thurner Syndrome|D062108
+Measles|D008457
+Meckel Diverticulum|D008467
+Meconium Aspiration Syndrome|D008471
+Medial Tibial Stress Syndrome|D058923
+Median Neuropathy|D020423
+Mediastinal Cyst|D008476
+Mediastinal Diseases|D008477
+Mediastinal Emphysema|D008478
+Mediastinal Neoplasms|D008479
+Mediastinitis|D008480
+Medullary Sponge Kidney|D007691
+Medulloblastoma|D008527
+Megacolon|D008531
+Megacolon, Toxic|D008532
+Megalencephaly|D058627
+Meige Syndrome|D008538
+Meigs Syndrome|D008539
+Melanoma|D008545
+Melanoma, Amelanotic|D018328
+Melanoma, Experimental|D008546
+Melanosis|D008548
+Melena|D008551
+Melioidosis|D008554
+Melkersson-Rosenthal Syndrome|D008556
+Melorheostosis|D008557
+Memory Disorders|D008569
+Meniere Disease|D008575
+Meningeal Carcinomatosis|D055756
+Meningeal Neoplasms|D008577
+Meningioma|D008579
+Meningism|D008580
+Meningitis|D008581
+Meningitis, Aseptic|D008582
+Meningitis, Bacterial|D016920
+Meningitis, Cryptococcal|D016919
+Meningitis, Escherichia coli|D020814
+Meningitis, Fungal|D016921
+Meningitis, Haemophilus|D008583
+Meningitis, Listeria|D008584
+Meningitis, Meningococcal|D008585
+Meningitis, Pneumococcal|D008586
+Meningitis, Viral|D008587
+Meningocele|D008588
+Meningococcal Infections|D008589
+Meningoencephalitis|D008590
+Meningomyelocele|D008591
+Menkes Kinky Hair Syndrome|D007706
+Menopause, Premature|D008594
+Menorrhagia|D008595
+Menstruation Disturbances|D008599
+Mental Fatigue|D005222
+Mental Retardation, X-Linked|D038901
+Mercury Poisoning|D008630
+Mercury Poisoning, Nervous System|D020262
+Mesenchymoma|D008637
+Mesenteric Cyst|D008639
+Mesenteric Ischemia|D065666
+Mesenteric Lymphadenitis|D008640
+Mesenteric Vascular Occlusion|D008641
+Mesial Movement of Teeth|D008644
+Mesomycetozoea Infections|D050738
+Mesonephroma|D008649
+Mesothelioma|D008654
+Mesothelioma, Cystic|D018261
+Metabolic Diseases|D008659
+Metabolic Side Effects of Drugs and Substances|D065606
+Metabolic Syndrome X|D024821
+Metabolism, Inborn Errors|D008661
+Metal Metabolism, Inborn Errors|D008664
+Metaplasia|D008679
+Metatarsalgia|D037061
+Methemoglobinemia|D008708
+Metrorrhagia|D008796
+Mevalonate Kinase Deficiency|D054078
+Microcephaly|D008831
+Micrognathism|D008844
+Micronuclei, Chromosome-Defective|D048629
+Microphthalmos|D008850
+Microsatellite Instability|D053842
+Microscopic Polyangiitis|D055953
+Microsporidiosis|D016881
+Microstomia|D008865
+Microvascular Angina|D017566
+Middle Lobe Syndrome|D008878
+Migraine Disorders|D008881
+Migraine with Aura|D020325
+Migraine without Aura|D020326
+Mikulicz' Disease|D008882
+Miliaria|D008883
+Milk Hypersensitivity|D016269
+Milk Sickness|D018602
+Miller Fisher Syndrome|D019846
+Mineralocorticoid Excess Syndrome, Apparent|D043204
+Mink Viral Enteritis|D053489
+Miosis|D015877
+Mirizzi Syndrome|D057792
+Mite Infestations|D008924
+Mitochondrial Diseases|D028361
+Mitochondrial Encephalomyopathies|D017237
+Mitochondrial Myopathies|D017240
+Mitral Valve Insufficiency|D008944
+Mitral Valve Prolapse|D008945
+Mitral Valve Stenosis|D008946
+Mixed Connective Tissue Disease|D008947
+Mixed Tumor, Malignant|D018198
+Mixed Tumor, Mesodermal|D018199
+Mixed Tumor, Mullerian|D018200
+Mobility Limitation|D051346
+Mobius Syndrome|D020331
+Molluscum Contagiosum|D008976
+Monckeberg Medial Calcific Sclerosis|D050380
+Mongolian Spot|D049328
+Monieziasis|D008989
+Monilethrix|D056734
+Monkey Diseases|D008992
+Monkeypox|D045908
+Monoclonal Gammopathy of Undetermined Significance|D008998
+Mononegavirales Infections|D018701
+Mononeuropathies|D020422
+Monosomy|D009006
+Monteggia's Fracture|D009011
+Moraxellaceae Infections|D045828
+Morbillivirus Infections|D018185
+Morgellons Disease|D055535
+Morning Sickness|D048968
+Morphine Dependence|D009021
+Morphological and Microscopic Findings|D065308
+Motion Sickness|D009041
+Motor Neuron Disease|D016472
+Mouth Abnormalities|D009056
+Mouth Breathing|D009058
+Mouth Diseases|D009059
+Mouth Neoplasms|D009062
+Mouth, Edentulous|D009066
+Movement Disorders|D009069
+Moyamoya Disease|D009072
+Mucinoses|D017520
+Mucinosis, Follicular|D000507
+Mucocele|D009078
+Mucocutaneous Lymph Node Syndrome|D009080
+Mucoepidermoid Tumor|D018298
+Mucolipidoses|D009081
+Mucopolysaccharidoses|D009083
+Mucopolysaccharidosis I|D008059
+Mucopolysaccharidosis II|D016532
+Mucopolysaccharidosis III|D009084
+Mucopolysaccharidosis IV|D009085
+Mucopolysaccharidosis VI|D009087
+Mucopolysaccharidosis VII|D016538
+Mucormycosis|D009091
+Mucositis|D052016
+Muir-Torre Syndrome|D055653
+Mulibrey Nanism|D050336
+Multicystic Dysplastic Kidney|D021782
+Multiple Acyl Coenzyme A Dehydrogenase Deficiency|D054069
+Multiple Carboxylase Deficiency|D009100
+Multiple Chemical Sensitivity|D018777
+Multiple Endocrine Neoplasia|D009377
+Multiple Endocrine Neoplasia Type 1|D018761
+Multiple Endocrine Neoplasia Type 2a|D018813
+Multiple Endocrine Neoplasia Type 2b|D018814
+Multiple Myeloma|D009101
+Multiple Organ Failure|D009102
+Multiple Pulmonary Nodules|D055613
+Multiple Sclerosis|D009103
+Multiple Sclerosis, Chronic Progressive|D020528
+Multiple Sclerosis, Relapsing-Remitting|D020529
+Multiple Sulfatase Deficiency Disease|D052517
+Multiple System Atrophy|D019578
+Multiple Trauma|D009104
+Mumps|D009107
+Murine Acquired Immunodeficiency Syndrome|D016183
+Muscle Cramp|D009120
+Muscle Hypertonia|D009122
+Muscle Hypotonia|D009123
+Muscle Neoplasms|D019042
+Muscle Rigidity|D009127
+Muscle Spasticity|D009128
+Muscle Weakness|D018908
+Muscular Atrophy|D009133
+Muscular Atrophy, Spinal|D009134
+Muscular Diseases|D009135
+Muscular Disorders, Atrophic|D020966
+Muscular Dystrophies|D009136
+Muscular Dystrophies, Limb-Girdle|D049288
+Muscular Dystrophy, Animal|D009137
+Muscular Dystrophy, Duchenne|D020388
+Muscular Dystrophy, Emery-Dreifuss|D020389
+Muscular Dystrophy, Facioscapulohumeral|D020391
+Muscular Dystrophy, Oculopharyngeal|D039141
+Musculoskeletal Abnormalities|D009139
+Musculoskeletal Diseases|D009140
+Musculoskeletal Pain|D059352
+Mushroom Poisoning|D009145
+Mutism|D009155
+Myalgia|D063806
+Myasthenia Gravis|D009157
+Myasthenia Gravis, Autoimmune, Experimental|D020720
+Myasthenia Gravis, Neonatal|D020941
+Myasthenic Syndromes, Congenital|D020294
+Mycetoma|D008271
+Mycobacterium Infections|D009164
+Mycobacterium Infections, Nontuberculous|D009165
+Mycobacterium avium-intracellulare Infection|D015270
+Mycoplasma Infections|D009175
+Mycoplasmatales Infections|D009180
+Mycoses|D009181
+Mycosis Fungoides|D009182
+Mycotoxicosis|D015651
+Mydriasis|D015878
+Myelinolysis, Central Pontine|D017590
+Myelitis|D009187
+Myelitis, Transverse|D009188
+Myelodysplastic Syndromes|D009190
+Myelodysplastic-Myeloproliferative Diseases|D054437
+Myelolipoma|D018209
+Myeloproliferative Disorders|D009196
+Myiasis|D009198
+Myocardial Bridging|D054084
+Myocardial Infarction|D009203
+Myocardial Ischemia|D017202
+Myocardial Reperfusion Injury|D015428
+Myocardial Stunning|D017682
+Myocarditis|D009205
+Myoclonic Cerebellar Dyssynergia|D002527
+Myoclonic Epilepsies, Progressive|D020191
+Myoclonic Epilepsy, Juvenile|D020190
+Myoclonus|D009207
+Myoepithelioma|D009208
+Myofascial Pain Syndromes|D009209
+Myofibroma|D047708
+Myofibromatosis|D018224
+Myoglobinuria|D009212
+Myokymia|D020385
+Myoma|D009214
+Myopathies, Nemaline|D017696
+Myopathies, Structural, Congenital|D020914
+Myopathy, Central Core|D020512
+Myopia|D009216
+Myopia, Degenerative|D047728
+Myosarcoma|D009217
+Myositis|D009220
+Myositis Ossificans|D009221
+Myositis, Inclusion Body|D018979
+Myotonia|D009222
+Myotonia Congenita|D009224
+Myotonic Disorders|D020967
+Myotonic Dystrophy|D009223
+Myringosclerosis|D063371
+Myxedema|D009230
+Myxoma|D009232
+Myxomatosis, Infectious|D009234
+Myxosarcoma|D009236
+Nail Diseases|D009260
+Nail-Patella Syndrome|D009261
+Nails, Ingrown|D009263
+Nails, Malformed|D009264
+Nairobi Sheep Disease|D009265
+Narcolepsy|D009290
+Nasal Obstruction|D015508
+Nasal Polyps|D009298
+Nasal Septal Perforation|D061270
+Nasopharyngeal Diseases|D009302
+Nasopharyngeal Neoplasms|D009303
+Nasopharyngitis|D009304
+Nausea|D009325
+Near Drowning|D015701
+Necatoriasis|D009332
+Neck Injuries|D019838
+Neck Pain|D019547
+Necrobiosis Lipoidica|D009335
+Necrobiotic Disorders|D017441
+Necrobiotic Xanthogranuloma|D058252
+Necrolytic Migratory Erythema|D058568
+Necrosis|D009336
+Needlestick Injuries|D016602
+Neglected Diseases|D058069
+Neisseriaceae Infections|D016870
+Nelson Syndrome|D009347
+Nematode Infections|D009349
+Neointima|D058426
+Neonatal Abstinence Syndrome|D009357
+Neoplasm Invasiveness|D009361
+Neoplasm Metastasis|D009362
+Neoplasm Micrometastasis|D061206
+Neoplasm Recurrence, Local|D009364
+Neoplasm Regression, Spontaneous|D009365
+Neoplasm Seeding|D009366
+Neoplasm, Residual|D018365
+Neoplasms|D009369
+Neoplasms by Histologic Type|D009370
+Neoplasms by Site|D009371
+Neoplasms, Adipose Tissue|D018205
+Neoplasms, Adnexal and Skin Appendage|D018294
+Neoplasms, Basal Cell|D018295
+Neoplasms, Bone Tissue|D018213
+Neoplasms, Complex and Mixed|D018193
+Neoplasms, Connective Tissue|D009372
+Neoplasms, Connective and Soft Tissue|D018204
+Neoplasms, Cystic, Mucinous, and Serous|D018297
+Neoplasms, Ductal, Lobular, and Medullary|D018299
+Neoplasms, Experimental|D009374
+Neoplasms, Fibroepithelial|D018225
+Neoplasms, Fibrous Tissue|D018218
+Neoplasms, Germ Cell and Embryonal|D009373
+Neoplasms, Glandular and Epithelial|D009375
+Neoplasms, Gonadal Tissue|D018309
+Neoplasms, Hormone-Dependent|D009376
+Neoplasms, Mesothelial|D018301
+Neoplasms, Multiple Primary|D009378
+Neoplasms, Muscle Tissue|D009379
+Neoplasms, Nerve Tissue|D009380
+Neoplasms, Neuroepithelial|D018302
+Neoplasms, Plasma Cell|D054219
+Neoplasms, Post-Traumatic|D017169
+Neoplasms, Radiation-Induced|D009381
+Neoplasms, Second Primary|D016609
+Neoplasms, Squamous Cell|D018307
+Neoplasms, Unknown Primary|D009382
+Neoplasms, Vascular Tissue|D009383
+Neoplastic Cells, Circulating|D009360
+Neoplastic Processes|D009385
+Neoplastic Syndromes, Hereditary|D009386
+Neovascularization, Pathologic|D009389
+Nephritis|D009393
+Nephritis, Hereditary|D009394
+Nephritis, Interstitial|D009395
+Nephrocalcinosis|D009397
+Nephrogenic Fibrosing Dermopathy|D054989
+Nephrolithiasis|D053040
+Nephroma, Mesoblastic|D018201
+Nephrosclerosis|D009400
+Nephrosis|D009401
+Nephrosis, Lipoid|D009402
+Nephrotic Syndrome|D009404
+Nerve Compression Syndromes|D009408
+Nerve Degeneration|D009410
+Nerve Sheath Neoplasms|D018317
+Nervous System Autoimmune Disease, Experimental|D020721
+Nervous System Diseases|D009422
+Nervous System Malformations|D009421
+Nervous System Neoplasms|D009423
+Nesidioblastosis|D046768
+Netherton Syndrome|D056770
+Neural Tube Defects|D009436
+Neuralgia|D009437
+Neuralgia, Postherpetic|D051474
+Neurilemmoma|D009442
+Neuritis|D009443
+Neuritis, Autoimmune, Experimental|D009444
+Neuroacanthocytosis|D054546
+Neuroaspergillosis|D020953
+Neuroaxonal Dystrophies|D019150
+Neurobehavioral Manifestations|D019954
+Neuroblastoma|D009447
+Neurocutaneous Syndromes|D020752
+Neurocysticercosis|D020019
+Neurocytoma|D018306
+Neurodegenerative Diseases|D019636
+Neurodermatitis|D009450
+Neuroectodermal Tumor, Melanotic|D017600
+Neuroectodermal Tumors|D017599
+Neuroectodermal Tumors, Primitive|D018242
+Neuroectodermal Tumors, Primitive, Peripheral|D018241
+Neuroendocrine Tumors|D018358
+Neurofibroma|D009455
+Neurofibroma, Plexiform|D018318
+Neurofibromatoses|D017253
+Neurofibromatosis 1|D009456
+Neurofibromatosis 2|D016518
+Neurofibrosarcoma|D018319
+Neurogenic Bowel|D055496
+Neurogenic Inflammation|D020078
+Neuroleptic Malignant Syndrome|D009459
+Neurologic Manifestations|D009461
+Neuroma|D009463
+Neuroma, Acoustic|D009464
+Neuromuscular Diseases|D009468
+Neuromuscular Junction Diseases|D020511
+Neuromuscular Manifestations|D020879
+Neuromyelitis Optica|D009471
+Neuronal Ceroid-Lipofuscinoses|D009472
+Neuroschistosomiasis|D020818
+Neurosyphilis|D009494
+Neurothekeoma|D018321
+Neurotoxicity Syndromes|D020258
+Neutropenia|D009503
+Nevi and Melanomas|D018326
+Nevus|D009506
+Nevus of Ota|D009507
+Nevus, Blue|D018329
+Nevus, Epithelioid and Spindle Cell|D018332
+Nevus, Halo|D055882
+Nevus, Intradermal|D018330
+Nevus, Pigmented|D009508
+Nevus, Sebaceous of Jadassohn|D054000
+Nevus, Spindle Cell|D018331
+Newcastle Disease|D009521
+Nicolau Syndrome|D065148
+Nidovirales Infections|D030341
+Niemann-Pick Disease, Type A|D052536
+Niemann-Pick Disease, Type B|D052537
+Niemann-Pick Disease, Type C|D052556
+Niemann-Pick Diseases|D009542
+Night Blindness|D009755
+Night Terrors|D020184
+Nijmegen Breakage Syndrome|D049932
+No-Reflow Phenomenon|D054318
+Nocardia Infections|D009617
+Nociceptive Pain|D059226
+Nocturia|D053158
+Nocturnal Enuresis|D053206
+Nocturnal Myoclonus Syndrome|D020189
+Nocturnal Paroxysmal Dystonia|D020183
+Nodding Syndrome|D064128
+Noma|D009625
+Non-Filarial Lymphedema|D062846
+Non-alcoholic Fatty Liver Disease|D065626
+Nondisjunction, Genetic|D009630
+Nonodontogenic Cysts|D009631
+Noonan Syndrome|D009634
+Nose Deformities, Acquired|D009667
+Nose Diseases|D009668
+Nose Neoplasms|D009669
+Nuchal Cord|D053589
+Nut Hypersensitivity|D021184
+Nutrition Disorders|D009748
+Nutritional and Metabolic Diseases|D009750
+Nystagmus, Congenital|D020417
+Nystagmus, Pathologic|D009759
+Obesity|D009765
+Obesity Hypoventilation Syndrome|D010845
+Obesity, Abdominal|D056128
+Obesity, Morbid|D009767
+Obstetric Labor Complications|D007744
+Obstetric Labor, Premature|D007752
+Occupational Diseases|D009784
+Occupational Injuries|D060051
+Ochronosis|D009794
+Ocular Hypertension|D009798
+Ocular Hypotension|D015814
+Ocular Motility Disorders|D015835
+Oculocerebrorenal Syndrome|D009800
+Oculomotor Nerve Diseases|D015840
+Oculomotor Nerve Injuries|D061220
+Odontodysplasia|D018126
+Odontogenic Cyst, Calcifying|D018333
+Odontogenic Cysts|D009807
+Odontogenic Tumor, Squamous|D051527
+Odontogenic Tumors|D009808
+Odontoma|D009810
+Oesophagostomiasis|D009814
+Olfaction Disorders|D000857
+Olfactory Nerve Diseases|D020431
+Olfactory Nerve Injuries|D061219
+Oligodendroglioma|D009837
+Oligohydramnios|D016104
+Oligomenorrhea|D009839
+Oligospermia|D009845
+Oliguria|D009846
+Olivopontocerebellar Atrophies|D009849
+Onchocerciasis|D009855
+Onchocerciasis, Ocular|D015827
+Onycholysis|D054039
+Onychomycosis|D014009
+Oophoritis|D009869
+Open Bite|D024343
+Ophthalmia Neonatorum|D009878
+Ophthalmia, Sympathetic|D009879
+Ophthalmoplegia|D009886
+Ophthalmoplegia, Chronic Progressive External|D017246
+Ophthalmoplegic Migraine|D060486
+Opioid-Related Disorders|D009293
+Opisthorchiasis|D009889
+Opportunistic Infections|D009894
+Opsoclonus-Myoclonus Syndrome|D053578
+Optic Atrophies, Hereditary|D015418
+Optic Atrophy|D009896
+Optic Atrophy, Autosomal Dominant|D029241
+Optic Atrophy, Hereditary, Leber|D029242
+Optic Disk Drusen|D015594
+Optic Nerve Diseases|D009901
+Optic Nerve Glioma|D020339
+Optic Nerve Injuries|D020221
+Optic Nerve Neoplasms|D019574
+Optic Neuritis|D009902
+Optic Neuropathy, Ischemic|D018917
+Oral Fistula|D016155
+Oral Hemorrhage|D006472
+Oral Manifestations|D009912
+Oral Submucous Fibrosis|D009914
+Oral Ulcer|D019226
+Orbital Cellulitis|D054517
+Orbital Diseases|D009916
+Orbital Fractures|D009917
+Orbital Myositis|D055622
+Orbital Neoplasms|D009918
+Orbital Pseudotumor|D016727
+Orchitis|D009920
+Organophosphate Poisoning|D062025
+Ornithine Carbamoyltransferase Deficiency Disease|D020163
+Oroantral Fistula|D009957
+Orofaciodigital Syndromes|D009958
+Oropharyngeal Neoplasms|D009959
+Orthomyxoviridae Infections|D009976
+Orthostatic Intolerance|D054971
+Ossification of Posterior Longitudinal Ligament|D017887
+Ossification, Heterotopic|D009999
+Osteitis|D010000
+Osteitis Deformans|D010001
+Osteitis Fibrosa Cystica|D010002
+Osteoarthritis|D010003
+Osteoarthritis, Hip|D015207
+Osteoarthritis, Knee|D020370
+Osteoarthritis, Spine|D055013
+Osteoarthropathy, Primary Hypertrophic|D010004
+Osteoarthropathy, Secondary Hypertrophic|D010005
+Osteoblastoma|D018215
+Osteochondritis|D010007
+Osteochondritis Dissecans|D010008
+Osteochondrodysplasias|D010009
+Osteochondroma|D015831
+Osteochondromatosis|D018216
+Osteochondrosis|D055034
+Osteogenesis Imperfecta|D010013
+Osteolysis|D010014
+Osteolysis, Essential|D010015
+Osteoma|D010016
+Osteoma, Osteoid|D010017
+Osteomalacia|D010018
+Osteomyelitis|D010019
+Osteonecrosis|D010020
+Osteopetrosis|D010022
+Osteophyte|D054850
+Osteopoikilosis|D010023
+Osteoporosis|D010024
+Osteoporosis, Postmenopausal|D015663
+Osteoporotic Fractures|D058866
+Osteoradionecrosis|D010025
+Osteosarcoma|D012516
+Osteosarcoma, Juxtacortical|D018217
+Osteosclerosis|D010026
+Ostertagiasis|D010029
+Otitis|D010031
+Otitis Externa|D010032
+Otitis Media|D010033
+Otitis Media with Effusion|D010034
+Otitis Media, Suppurative|D010035
+Otomycosis|D059249
+Otorhinolaryngologic Diseases|D010038
+Otorhinolaryngologic Neoplasms|D010039
+Otosclerosis|D010040
+Out-of-Hospital Cardiac Arrest|D058687
+Ovarian Cysts|D010048
+Ovarian Diseases|D010049
+Ovarian Hyperstimulation Syndrome|D016471
+Ovarian Neoplasms|D010051
+Overbite|D057887
+Overnutrition|D044343
+Overweight|D050177
+Ovotesticular Disorders of Sex Development|D050090
+Oxyuriasis|D010123
+Oxyurida Infections|D017194
+POEMS Syndrome|D016878
+Pachyonychia Congenita|D053549
+Paget Disease, Extramammary|D010145
+Paget's Disease, Mammary|D010144
+Pagetoid Reticulosis|D056267
+Pain|D010146
+Pain Insensitivity, Congenital|D000699
+Pain, Intractable|D010148
+Pain, Postoperative|D010149
+Pain, Referred|D053591
+Palatal Neoplasms|D010157
+Pallister-Hall Syndrome|D054975
+Pallor|D010167
+Pancoast Syndrome|D010178
+Pancreatic Cyst|D010181
+Pancreatic Diseases|D010182
+Pancreatic Fistula|D010185
+Pancreatic Neoplasms|D010190
+Pancreatic Pseudocyst|D010192
+Pancreatitis|D010195
+Pancreatitis, Acute Necrotizing|D019283
+Pancreatitis, Alcoholic|D019512
+Pancreatitis, Chronic|D050500
+Pancreatitis, Graft|D055589
+Pancytopenia|D010198
+Panniculitis|D015434
+Panniculitis, Lupus Erythematosus|D015435
+Panniculitis, Nodular Nonsuppurative|D010201
+Panniculitis, Peritoneal|D015436
+Panophthalmitis|D010202
+Pantothenate Kinase-Associated Neurodegeneration|D006211
+Panuveitis|D015864
+Papilledema|D010211
+Papilloma|D010212
+Papilloma, Choroid Plexus|D020288
+Papilloma, Intraductal|D018300
+Papilloma, Inverted|D018308
+Papillomavirus Infections|D030361
+Papillon-Lefevre Disease|D010214
+Paracoccidioidomycosis|D010229
+Paraganglioma|D010235
+Paraganglioma, Extra-Adrenal|D010236
+Paragonimiasis|D010237
+Parakeratosis|D010241
+Paralyses, Familial Periodic|D010245
+Paralysis|D010243
+Paralysis, Hyperkalemic Periodic|D020513
+Paralysis, Obstetric|D010246
+Parametritis|D010249
+Paramyxoviridae Infections|D018184
+Paranasal Sinus Diseases|D010254
+Paranasal Sinus Neoplasms|D010255
+Paraneoplastic Cerebellar Degeneration|D020362
+Paraneoplastic Endocrine Syndromes|D009384
+Paraneoplastic Polyneuropathy|D020364
+Paraneoplastic Syndromes|D010257
+Paraneoplastic Syndromes, Nervous System|D020361
+Paraneoplastic Syndromes, Ocular|D059545
+Paraparesis|D020335
+Paraparesis, Spastic|D020336
+Paraparesis, Tropical Spastic|D015493
+Paraphimosis|D010263
+Paraplegia|D010264
+Paraproteinemias|D010265
+Parapsoriasis|D010267
+Parasitemia|D018512
+Parasitic Diseases|D010272
+Parasitic Diseases, Animal|D010273
+Parasomnias|D020447
+Parasystole|D017574
+Parathyroid Diseases|D010279
+Parathyroid Neoplasms|D010282
+Paratuberculosis|D010283
+Paratyphoid Fever|D010284
+Parental Death|D063129
+Paresis|D010291
+Paresthesia|D010292
+Parkinson Disease|D010300
+Parkinson Disease, Postencephalitic|D010301
+Parkinson Disease, Secondary|D010302
+Parkinsonian Disorders|D020734
+Paronychia|D010304
+Parotid Diseases|D010305
+Parotid Neoplasms|D010307
+Parotitis|D010309
+Parovarian Cyst|D010310
+Paroxysmal Hemicrania|D051302
+Pars Planitis|D015868
+Parturient Paresis|D010319
+Parvoviridae Infections|D010322
+Pasteurella Infections|D010326
+Pasteurellaceae Infections|D016871
+Pasteurellosis, Pneumonic|D012766
+Patellar Dislocation|D031222
+Patellofemoral Pain Syndrome|D046788
+Pathologic Processes|D010335
+Pathological Conditions, Anatomical|D020763
+Pathological Conditions, Signs and Symptoms|D013568
+Peanut Hypersensitivity|D021183
+Pectus Carinatum|D066166
+Pediatric Obesity|D063766
+Pelger-Huet Anomaly|D010381
+Peliosis Hepatis|D010382
+Pelizaeus-Merzbacher Disease|D020371
+Pellagra|D010383
+Pelvic Floor Disorders|D059952
+Pelvic Girdle Pain|D059388
+Pelvic Infection|D034161
+Pelvic Inflammatory Disease|D000292
+Pelvic Neoplasms|D010386
+Pelvic Organ Prolapse|D056887
+Pelvic Pain|D017699
+Pemphigoid Gestationis|D006559
+Pemphigoid, Benign Mucous Membrane|D010390
+Pemphigoid, Bullous|D010391
+Pemphigus|D010392
+Pemphigus, Benign Familial|D016506
+Penile Diseases|D010409
+Penile Induration|D010411
+Penile Neoplasms|D010412
+Pentalogy of Cantrell|D058502
+Peptic Ulcer|D010437
+Peptic Ulcer Hemorrhage|D010438
+Peptic Ulcer Perforation|D010439
+Perceptual Disorders|D010468
+Peri-Implantitis|D057873
+Periapical Abscess|D010482
+Periapical Diseases|D010483
+Periapical Granuloma|D010484
+Periapical Periodontitis|D010485
+Periarthritis|D010489
+Pericardial Effusion|D010490
+Pericarditis|D010493
+Pericarditis, Constrictive|D010494
+Pericarditis, Tuberculous|D010495
+Pericoronitis|D010497
+Perimeningeal Infections|D020819
+Perinatal Death|D066087
+Perinephritis|D010501
+Periodontal Abscess|D010508
+Periodontal Atrophy|D055093
+Periodontal Attachment Loss|D017622
+Periodontal Cyst|D010509
+Periodontal Diseases|D010510
+Periodontal Pocket|D010514
+Periodontitis|D010518
+Periostitis|D010522
+Peripheral Arterial Disease|D058729
+Peripheral Nerve Injuries|D059348
+Peripheral Nervous System Diseases|D010523
+Peripheral Nervous System Neoplasms|D010524
+Peripheral Vascular Diseases|D016491
+Periprosthetic Fractures|D057068
+Peritoneal Diseases|D010532
+Peritoneal Fibrosis|D056627
+Peritoneal Neoplasms|D010534
+Peritonitis|D010538
+Peritonitis, Tuberculous|D014395
+Peritonsillar Abscess|D000039
+Perivascular Epithelioid Cell Neoplasms|D054973
+Periventricular Nodular Heterotopia|D054091
+Peroneal Neuropathies|D020427
+Peroxisomal Disorders|D018901
+Persian Gulf Syndrome|D018923
+Persistent Fetal Circulation Syndrome|D010547
+Persistent Hyperplastic Primary Vitreous|D054514
+Persistent Vegetative State|D018458
+Peste-des-Petits-Ruminants|D029021
+Pestivirus Infections|D018182
+Petrositis|D059270
+Peutz-Jeghers Syndrome|D010580
+Phaeohyphomycosis|D060446
+Phagocyte Bactericidal Dysfunction|D010585
+Phantom Limb|D010591
+Pharyngeal Diseases|D010608
+Pharyngeal Neoplasms|D010610
+Pharyngitis|D010612
+Phencyclidine Abuse|D010623
+Phenylketonuria, Maternal|D017042
+Phenylketonurias|D010661
+Pheochromocytoma|D010673
+Philadelphia Chromosome|D010677
+Phimosis|D010688
+Phlebitis|D010689
+Phlebotomus Fever|D010217
+Phosphorus Metabolism Disorders|D010760
+Photophobia|D020795
+Photosensitivity Disorders|D010787
+Phyllodes Tumor|D003557
+Pick Disease of the Brain|D020774
+Picornaviridae Infections|D010850
+Piebaldism|D016116
+Piedra|D010854
+Pierre Robin Syndrome|D010855
+Pigmentation Disorders|D010859
+Pilomatrixoma|D018296
+Pilonidal Sinus|D010864
+Pinealoma|D010871
+Pinguecula|D059407
+Pinta|D010874
+Piriformis Muscle Syndrome|D055958
+Piscirickettsiaceae Infections|D044225
+Pituitary ACTH Hypersecretion|D047748
+Pituitary Apoplexy|D010899
+Pituitary Diseases|D010900
+Pituitary Neoplasms|D010911
+Pityriasis|D010915
+Pityriasis Lichenoides|D017514
+Pityriasis Rosea|D017515
+Pityriasis Rubra Pilaris|D010916
+Placenta Accreta|D010921
+Placenta Diseases|D010922
+Placenta Previa|D010923
+Placenta, Retained|D018457
+Placental Insufficiency|D010927
+Plagiocephaly|D059041
+Plagiocephaly, Nonsynostotic|D049068
+Plague|D010930
+Plant Poisoning|D010939
+Plaque, Amyloid|D058225
+Plaque, Atherosclerotic|D058226
+Plasma Cell Granuloma, Pulmonary|D016726
+Plasmacytoma|D010954
+Platelet Storage Pool Deficiency|D010981
+Platybasia|D010985
+Pleural Diseases|D010995
+Pleural Effusion|D010996
+Pleural Effusion, Malignant|D016066
+Pleural Neoplasms|D010997
+Pleurisy|D010998
+Pleurodynia, Epidemic|D011000
+Pleuropneumonia|D011001
+Pleuropneumonia, Contagious|D011002
+Plummer-Vinson Syndrome|D011004
+Pneumatosis Cystoides Intestinalis|D011006
+Pneumocephalus|D011007
+Pneumococcal Infections|D011008
+Pneumoconiosis|D011009
+Pneumocystis Infections|D016720
+Pneumonia|D011014
+Pneumonia of Calves, Enzootic|D048089
+Pneumonia of Swine, Mycoplasmal|D045729
+Pneumonia, Aspiration|D011015
+Pneumonia, Atypical Interstitial, of Cattle|D011016
+Pneumonia, Bacterial|D018410
+Pneumonia, Lipid|D011017
+Pneumonia, Mycoplasma|D011019
+Pneumonia, Pneumococcal|D011018
+Pneumonia, Pneumocystis|D011020
+Pneumonia, Progressive Interstitial, of Sheep|D011021
+Pneumonia, Rickettsial|D011022
+Pneumonia, Staphylococcal|D011023
+Pneumonia, Ventilator-Associated|D053717
+Pneumonia, Viral|D011024
+Pneumopericardium|D011026
+Pneumoperitoneum|D011027
+Pneumorrhachis|D063205
+Pneumothorax|D011030
+Pneumovirus Infections|D018186
+Poisoning|D011041
+Poland Syndrome|D011045
+Poliomyelitis|D011051
+Poliomyelitis, Bulbar|D011052
+Polyarteritis Nodosa|D010488
+Polychondritis, Relapsing|D011081
+Polycystic Kidney Diseases|D007690
+Polycystic Kidney, Autosomal Dominant|D016891
+Polycystic Kidney, Autosomal Recessive|D017044
+Polycystic Ovary Syndrome|D011085
+Polycythemia|D011086
+Polycythemia Vera|D011087
+Polydactyly|D017689
+Polydipsia|D059606
+Polydipsia, Psychogenic|D059607
+Polyendocrinopathies, Autoimmune|D016884
+Polyhydramnios|D006831
+Polymicrogyria|D065706
+Polymyalgia Rheumatica|D011111
+Polymyositis|D017285
+Polyneuropathies|D011115
+Polyomavirus Infections|D027601
+Polyploidy|D011123
+Polyps|D011127
+Polyradiculoneuropathy|D011129
+Polyradiculoneuropathy, Chronic Inflammatory Demyelinating|D020277
+Polyradiculopathy|D011128
+Polyuria|D011141
+Popliteal Cyst|D011151
+Porcine Postweaning Multisystemic Wasting Syndrome|D053570
+Porcine Reproductive and Respiratory Syndrome|D019318
+Porencephaly|D065708
+Porokeratosis|D017499
+Poroma|D057091
+Porphyria Cutanea Tarda|D017119
+Porphyria, Acute Intermittent|D017118
+Porphyria, Erythropoietic|D017092
+Porphyria, Hepatoerythropoietic|D017121
+Porphyria, Variegate|D046350
+Porphyrias|D011164
+Porphyrias, Hepatic|D017094
+Port-Wine Stain|D019339
+Positive-Pressure Respiration, Intrinsic|D018467
+Post-Concussion Syndrome|D038223
+Post-Dural Puncture Headache|D051299
+Post-Exercise Hypotension|D057774
+Post-Traumatic Headache|D051298
+Postcholecystectomy Syndrome|D017562
+Posterior Capsular Rupture, Ocular|D057851
+Posterior Cervical Sympathetic Syndrome|D055010
+Posterior Leukoencephalopathy Syndrome|D054038
+Posterior Tibial Tendon Dysfunction|D037081
+Postgastrectomy Syndromes|D011178
+Postmortem Changes|D011180
+Postoperative Complications|D011183
+Postoperative Hemorrhage|D019106
+Postoperative Nausea and Vomiting|D020250
+Postpartum Hemorrhage|D006473
+Postpartum Thyroiditis|D050032
+Postpericardiotomy Syndrome|D011185
+Postphlebitic Syndrome|D011186
+Postpoliomyelitis Syndrome|D016262
+Postthrombotic Syndrome|D054070
+Postural Orthostatic Tachycardia Syndrome|D054972
+Potassium Deficiency|D011191
+Pott Puffy Tumor|D059369
+Pouchitis|D019449
+Poult Enteritis Mortality Syndrome|D031261
+Poultry Diseases|D011201
+Poxviridae Infections|D011213
+Prader-Willi Syndrome|D011218
+Pre-Eclampsia|D011225
+Pre-Excitation Syndromes|D011226
+Pre-Excitation, Mahaim-Type|D011227
+Precancerous Conditions|D011230
+Preconception Injuries|D047489
+Precursor B-Cell Lymphoblastic Leukemia-Lymphoma|D015452
+Precursor Cell Lymphoblastic Leukemia-Lymphoma|D054198
+Precursor T-Cell Lymphoblastic Leukemia-Lymphoma|D054218
+Prediabetic State|D011236
+Pregnancy Complications|D011248
+Pregnancy Complications, Cardiovascular|D011249
+Pregnancy Complications, Hematologic|D011250
+Pregnancy Complications, Infectious|D011251
+Pregnancy Complications, Neoplastic|D011252
+Pregnancy Complications, Parasitic|D015597
+Pregnancy in Diabetics|D011254
+Pregnancy, Abdominal|D011269
+Pregnancy, Angular|D065170
+Pregnancy, Cornual|D065173
+Pregnancy, Ectopic|D011271
+Pregnancy, Heterotopic|D063192
+Pregnancy, Interstitial|D065167
+Pregnancy, Ovarian|D065172
+Pregnancy, Prolonged|D011273
+Pregnancy, Tubal|D011274
+Prehypertension|D058246
+Preleukemia|D011289
+Premature Birth|D047928
+Premature Ejaculation|D061686
+Premenstrual Dysphoric Disorder|D065446
+Premenstrual Syndrome|D011293
+Prenatal Exposure Delayed Effects|D011297
+Prenatal Injuries|D049188
+Presbycusis|D011304
+Presbyopia|D011305
+Pressure Ulcer|D003668
+Priapism|D011317
+Primary Dysautonomias|D054969
+Primary Graft Dysfunction|D055031
+Primary Myelofibrosis|D055728
+Primary Ovarian Insufficiency|D016649
+Primary Progressive Nonfluent Aphasia|D057178
+Primate Diseases|D018419
+Prion Diseases|D017096
+Proctitis|D011349
+Proctocolitis|D011350
+Prodromal Symptoms|D062706
+Progeria|D011371
+Prognathism|D011378
+Prolactinoma|D015175
+Prolapse|D011391
+Prolidase Deficiency|D056732
+Propionic Acidemia|D056693
+Prosopagnosia|D020238
+Prostatic Diseases|D011469
+Prostatic Hyperplasia|D011470
+Prostatic Intraepithelial Neoplasia|D019048
+Prostatic Neoplasms|D011471
+Prostatic Neoplasms, Castration-Resistant|D064129
+Prostatism|D053448
+Prostatitis|D011472
+Prosthesis Failure|D011475
+Prosthesis-Related Infections|D016459
+Protein Aggregation, Pathological|D066263
+Protein C Deficiency|D020151
+Protein Deficiency|D011488
+Protein S Deficiency|D018455
+Protein-Energy Malnutrition|D011502
+Protein-Losing Enteropathies|D011504
+Proteinuria|D011507
+Proteostasis Deficiencies|D057165
+Proteus Infections|D011512
+Proteus Syndrome|D016715
+Protoporphyria, Erythropoietic|D046351
+Protozoan Infections|D011528
+Protozoan Infections, Animal|D011529
+Prune Belly Syndrome|D011535
+Prurigo|D011536
+Pruritus|D011537
+Pruritus Ani|D011538
+Pruritus Vulvae|D011539
+Pseudarthrosis|D011542
+Pseudobulbar Palsy|D020828
+Pseudohypoaldosteronism|D011546
+Pseudohypoparathyroidism|D011547
+Pseudolymphoma|D019310
+Pseudomonas Infections|D011552
+Pseudomyxoma Peritonei|D011553
+Pseudophakia|D019591
+Pseudopseudohypoparathyroidism|D011556
+Pseudorabies|D011557
+Pseudotumor Cerebri|D011559
+Pseudoxanthoma Elasticum|D011561
+Psittacosis|D009956
+Psoas Abscess|D016659
+Psoriasis|D011565
+Psychomotor Agitation|D011595
+Psychomotor Disorders|D011596
+Psychophysiologic Disorders|D011602
+Psychoses, Alcoholic|D011604
+Psychoses, Substance-Induced|D011605
+Pterygium|D011625
+Puberty, Delayed|D011628
+Puberty, Precocious|D011629
+Pubic Symphysis Diastasis|D046548
+Pudendal Neuralgia|D060545
+Puerperal Disorders|D011644
+Puerperal Infection|D011645
+Pulmonary Adenomatosis, Ovine|D011648
+Pulmonary Alveolar Proteinosis|D011649
+Pulmonary Aspergillosis|D055732
+Pulmonary Atelectasis|D001261
+Pulmonary Atresia|D018633
+Pulmonary Blastoma|D018202
+Pulmonary Disease, Chronic Obstructive|D029424
+Pulmonary Edema|D011654
+Pulmonary Embolism|D011655
+Pulmonary Emphysema|D011656
+Pulmonary Eosinophilia|D011657
+Pulmonary Fibrosis|D011658
+Pulmonary Heart Disease|D011660
+Pulmonary Infarction|D054060
+Pulmonary Sclerosing Hemangioma|D047868
+Pulmonary Subvalvular Stenosis|D011662
+Pulmonary Valve Insufficiency|D011665
+Pulmonary Valve Stenosis|D011666
+Pulmonary Veno-Occlusive Disease|D011668
+Pulpitis|D011671
+Pupil Disorders|D011681
+Pure Autonomic Failure|D054970
+Purine-Pyrimidine Metabolism, Inborn Errors|D011686
+Purpura|D011693
+Purpura Fulminans|D055665
+Purpura, Hyperglobulinemic|D011694
+Purpura, Schoenlein-Henoch|D011695
+Purpura, Thrombocytopenic|D011696
+Purpura, Thrombocytopenic, Idiopathic|D016553
+Purpura, Thrombotic Thrombocytopenic|D011697
+Putaminal Hemorrhage|D020146
+Pycnodysostosis|D058631
+Pyelectasis|D058536
+Pyelitis|D011702
+Pyelocystitis|D053653
+Pyelonephritis|D011704
+Pyelonephritis, Xanthogranulomatous|D011705
+Pyloric Stenosis|D011707
+Pyloric Stenosis, Hypertrophic|D046248
+Pyoderma|D011711
+Pyoderma Gangrenosum|D017511
+Pyometra|D055112
+Pyomyositis|D052880
+Pyonephrosis|D053018
+Pyruvate Carboxylase Deficiency Disease|D015324
+Pyruvate Dehydrogenase Complex Deficiency Disease|D015325
+Pyruvate Metabolism, Inborn Errors|D015323
+Pythiosis|D058968
+Pyuria|D011776
+Q Fever|D011778
+Quadriplegia|D011782
+REM Sleep Behavior Disorder|D020187
+REM Sleep Parasomnias|D020923
+RNA Virus Infections|D012327
+Rabies|D011818
+Radial Neuropathy|D020425
+Radiation Injuries|D011832
+Radiation Injuries, Experimental|D011833
+Radiation Pneumonitis|D017564
+Radicular Cyst|D011842
+Radiculopathy|D011843
+Radiodermatitis|D011855
+Radius Fractures|D011885
+Ranula|D011900
+Rare Diseases|D035583
+Rat-Bite Fever|D011906
+Raynaud Disease|D011928
+Rectal Diseases|D012002
+Rectal Fistula|D012003
+Rectal Neoplasms|D012004
+Rectal Prolapse|D012005
+Rectocele|D020047
+Rectovaginal Fistula|D012006
+Recurrence|D012008
+Recurrent Laryngeal Nerve Injuries|D061226
+Red-Cell Aplasia, Pure|D012010
+Refeeding Syndrome|D055677
+Reflex Sympathetic Dystrophy|D012019
+Reflex, Abnormal|D012021
+Refractive Errors|D012030
+Refsum Disease|D012035
+Refsum Disease, Infantile|D052919
+Relapsing Fever|D012061
+Remission, Spontaneous|D012075
+Renal Aminoacidurias|D000608
+Renal Artery Obstruction|D012078
+Renal Colic|D056844
+Renal Insufficiency|D051437
+Renal Insufficiency, Chronic|D051436
+Renal Nutcracker Syndrome|D059228
+Renal Osteodystrophy|D012080
+Renal Tubular Transport, Inborn Errors|D015499
+Reoviridae Infections|D012088
+Reperfusion Injury|D015427
+Reproductive Tract Infections|D060737
+Respiration Disorders|D012120
+Respiratory Aspiration|D053120
+Respiratory Aspiration of Gastric Contents|D063466
+Respiratory Distress Syndrome, Adult|D012128
+Respiratory Distress Syndrome, Newborn|D012127
+Respiratory Hypersensitivity|D012130
+Respiratory Insufficiency|D012131
+Respiratory Paralysis|D012133
+Respiratory Sounds|D012135
+Respiratory Syncytial Virus Infections|D018357
+Respiratory System Abnormalities|D015619
+Respiratory Tract Diseases|D012140
+Respiratory Tract Fistula|D016156
+Respiratory Tract Infections|D012141
+Respiratory Tract Neoplasms|D012142
+Respirovirus Infections|D010253
+Restless Legs Syndrome|D012148
+Reticulocytosis|D045262
+Reticuloendotheliosis, Avian|D055761
+Retinal Artery Occlusion|D015356
+Retinal Degeneration|D012162
+Retinal Detachment|D012163
+Retinal Diseases|D012164
+Retinal Drusen|D015593
+Retinal Dysplasia|D015792
+Retinal Dystrophies|D058499
+Retinal Hemorrhage|D012166
+Retinal Necrosis Syndrome, Acute|D015882
+Retinal Neoplasms|D019572
+Retinal Neovascularization|D015861
+Retinal Perforations|D012167
+Retinal Telangiectasis|D058456
+Retinal Vasculitis|D031300
+Retinal Vein Occlusion|D012170
+Retinitis|D012173
+Retinitis Pigmentosa|D012174
+Retinoblastoma|D012175
+Retinopathy of Prematurity|D012178
+Retinoschisis|D041441
+Retrobulbar Hemorrhage|D019315
+Retrocaval Ureter|D064749
+Retrocochlear Diseases|D012181
+Retrognathia|D063173
+Retrograde Degeneration|D012183
+Retroperitoneal Fibrosis|D012185
+Retroperitoneal Neoplasms|D012186
+Retropharyngeal Abscess|D017703
+Retropneumoperitoneum|D012188
+Retroviridae Infections|D012192
+Rett Syndrome|D015518
+Reye Syndrome|D012202
+Rhabditida Infections|D017196
+Rhabdoid Tumor|D018335
+Rhabdomyolysis|D012206
+Rhabdomyoma|D012207
+Rhabdomyosarcoma|D012208
+Rhabdomyosarcoma, Alveolar|D018232
+Rhabdomyosarcoma, Embryonal|D018233
+Rhabdoviridae Infections|D018353
+Rheumatic Diseases|D012216
+Rheumatic Fever|D012213
+Rheumatic Heart Disease|D012214
+Rheumatic Nodule|D012215
+Rheumatoid Nodule|D012218
+Rheumatoid Vasculitis|D056653
+Rhinitis|D012220
+Rhinitis, Allergic|D065631
+Rhinitis, Allergic, Perennial|D012221
+Rhinitis, Allergic, Seasonal|D006255
+Rhinitis, Atrophic|D012222
+Rhinitis, Vasomotor|D012223
+Rhinophyma|D012224
+Rhinoscleroma|D012226
+Rhinosporidiosis|D012227
+Rib Fractures|D012253
+Riboflavin Deficiency|D012257
+Rickets|D012279
+Rickets, Hypophosphatemic|D063730
+Rickettsia Infections|D012282
+Rickettsiaceae Infections|D012288
+Rift Valley Fever|D012295
+Rigor Mortis|D012298
+Rinderpest|D012301
+Ring Chromosomes|D012303
+Rocky Mountain Spotted Fever|D012373
+Rodent Diseases|D012376
+Romano-Ward Syndrome|D029597
+Root Caries|D017213
+Root Resorption|D012391
+Rosacea|D012393
+Roseolovirus Infections|D019349
+Rotavirus Infections|D012400
+Rothmund-Thomson Syndrome|D011038
+Rubella|D012409
+Rubella Syndrome, Congenital|D012410
+Rubinstein-Taybi Syndrome|D012415
+Rubivirus Infections|D018355
+Rubulavirus Infections|D019351
+Rupture|D012421
+Rupture, Spontaneous|D012422
+SUNCT Syndrome|D050798
+Sacroiliitis|D058566
+Sagittal Sinus Thrombosis|D020225
+Salivary Calculi|D020792
+Salivary Duct Calculi|D012465
+Salivary Gland Calculi|D015494
+Salivary Gland Diseases|D012466
+Salivary Gland Fistula|D012467
+Salivary Gland Neoplasms|D012468
+Salmonella Food Poisoning|D012478
+Salmonella Infections|D012480
+Salmonella Infections, Animal|D012481
+Salpingitis|D012488
+Sandhoff Disease|D012497
+Sarcocystosis|D012523
+Sarcoglycanopathies|D058088
+Sarcoidosis|D012507
+Sarcoidosis, Pulmonary|D017565
+Sarcoma|D012509
+Sarcoma 180|D012510
+Sarcoma 37|D012511
+Sarcoma, Alveolar Soft Part|D018234
+Sarcoma, Avian|D001357
+Sarcoma, Clear Cell|D018227
+Sarcoma, Endometrial Stromal|D018203
+Sarcoma, Ewing|D012512
+Sarcoma, Experimental|D012513
+Sarcoma, Kaposi|D012514
+Sarcoma, Myeloid|D023981
+Sarcoma, Small Cell|D018228
+Sarcoma, Synovial|D013584
+Sarcoma, Yoshida|D012517
+Sarcopenia|D055948
+Scabies|D012532
+Scalp Dermatoses|D012536
+Scarlet Fever|D012541
+Scheuermann Disease|D012544
+Schistosomiasis|D012552
+Schistosomiasis haematobia|D012553
+Schistosomiasis japonica|D012554
+Schistosomiasis mansoni|D012555
+Schizencephaly|D065707
+Schnitzler Syndrome|D019873
+Sciatic Neuropathy|D020426
+Sciatica|D012585
+Scimitar Syndrome|D012587
+Scleral Diseases|D015422
+Scleredema Adultorum|D012592
+Sclerema Neonatorum|D012593
+Scleritis|D015423
+Scleroderma, Diffuse|D045743
+Scleroderma, Limited|D045745
+Scleroderma, Localized|D012594
+Scleroderma, Systemic|D012595
+Scleromyxedema|D053718
+Sclerosis|D012598
+Scoliosis|D012600
+Scorpion Stings|D065008
+Scotoma|D012607
+Scrapie|D012608
+Screw Worm Infection|D012610
+Scrub Typhus|D012612
+Scurvy|D012614
+Sea-Blue Histiocyte Syndrome|D012618
+Sebaceous Gland Diseases|D012625
+Sebaceous Gland Neoplasms|D012626
+Secernentea Infections|D017190
+Seizures|D012640
+Seizures, Febrile|D003294
+Self Mutilation|D012652
+Seminoma|D018239
+Sensation Disorders|D012678
+Sepsis|D018805
+Sepsis-Associated Encephalopathy|D065166
+Septo-Optic Dysplasia|D025962
+Seroma|D049291
+Serositis|D012700
+Serotonin Syndrome|D020230
+Serratia Infections|D016868
+Sertoli Cell Tumor|D012707
+Sertoli Cell-Only Syndrome|D054331
+Sertoli-Leydig Cell Tumor|D018310
+Serum Sickness|D012713
+Setariasis|D012719
+Severe Acute Respiratory Syndrome|D045169
+Severe Combined Immunodeficiency|D016511
+Severe Dengue|D019595
+Sex Chromosome Aberrations|D012729
+Sex Chromosome Disorders|D025064
+Sex Chromosome Disorders of Sex Development|D058533
+Sex Cord-Gonadal Stromal Tumors|D018312
+Sexual Dysfunction, Physiological|D012735
+Sexual Infantilism|D050035
+Sexually Transmitted Diseases|D012749
+Sexually Transmitted Diseases, Bacterial|D015231
+Sexually Transmitted Diseases, Viral|D015229
+Sezary Syndrome|D012751
+Shaken Baby Syndrome|D038642
+Sheep Diseases|D012757
+Shellfish Poisoning|D057096
+Shock|D012769
+Shock, Cardiogenic|D012770
+Shock, Hemorrhagic|D012771
+Shock, Septic|D012772
+Shock, Surgical|D012773
+Shock, Traumatic|D012774
+Short Bowel Syndrome|D012778
+Short Rib-Polydactyly Syndrome|D012779
+Shoulder Dislocation|D012783
+Shoulder Fractures|D012784
+Shoulder Impingement Syndrome|D019534
+Shoulder Pain|D020069
+Shwartzman Phenomenon|D012790
+Shy-Drager Syndrome|D012791
+Sialadenitis|D012793
+Sialic Acid Storage Disease|D029461
+Sialometaplasia, Necrotizing|D012797
+Sialorrhea|D012798
+Sick Building Syndrome|D018877
+Sick Sinus Syndrome|D012804
+Sickle Cell Trait|D012805
+Siderosis|D012806
+Sigmoid Diseases|D012810
+Sigmoid Neoplasms|D012811
+Signs and Symptoms|D012816
+Signs and Symptoms, Digestive|D012817
+Signs and Symptoms, Respiratory|D012818
+Silicosis|D012829
+Silicotuberculosis|D012830
+Silo Filler's Disease|D012832
+Silver-Russell Syndrome|D056730
+Simian Acquired Immunodeficiency Syndrome|D016097
+Single Umbilical Artery|D058529
+Sinoatrial Block|D012848
+Sinus Arrest, Cardiac|D054138
+Sinus Pericranii|D020779
+Sinus Thrombosis, Intracranial|D012851
+Sinusitis|D012852
+Sister Mary Joseph's Nodule|D058288
+Situs Inversus|D012857
+Sjogren's Syndrome|D012859
+Sjogren-Larsson Syndrome|D016111
+Skin Abnormalities|D012868
+Skin Diseases|D012871
+Skin Diseases, Bacterial|D017192
+Skin Diseases, Eczematous|D017443
+Skin Diseases, Genetic|D012873
+Skin Diseases, Infectious|D012874
+Skin Diseases, Metabolic|D012875
+Skin Diseases, Papulosquamous|D017444
+Skin Diseases, Parasitic|D012876
+Skin Diseases, Vascular|D017445
+Skin Diseases, Vesiculobullous|D012872
+Skin Diseases, Viral|D017193
+Skin Manifestations|D012877
+Skin Neoplasms|D012878
+Skin Ulcer|D012883
+Skin and Connective Tissue Diseases|D017437
+Skull Base Neoplasms|D019292
+Skull Fracture, Basilar|D020205
+Skull Fracture, Depressed|D020204
+Skull Fractures|D012887
+Skull Neoplasms|D012888
+Sleep Apnea Syndromes|D012891
+Sleep Apnea, Central|D020182
+Sleep Apnea, Obstructive|D020181
+Sleep Arousal Disorders|D020921
+Sleep Bruxism|D020186
+Sleep Deprivation|D012892
+Sleep Disorders|D012893
+Sleep Disorders, Circadian Rhythm|D020178
+Sleep Disorders, Intrinsic|D020919
+Sleep Initiation and Maintenance Disorders|D007319
+Sleep Paralysis|D020188
+Sleep-Wake Transition Disorders|D020922
+Slipped Capital Femoral Epiphyses|D060048
+Slit Ventricle Syndrome|D056124
+Slow Virus Diseases|D012897
+Small Cell Lung Carcinoma|D055752
+Smallpox|D012899
+Smear Layer|D016369
+Smith-Lemli-Opitz Syndrome|D019082
+Smith-Magenis Syndrome|D058496
+Smoke Inhalation Injury|D015208
+Smooth Muscle Tumor|D018235
+Snake Bites|D012909
+Sneddon Syndrome|D018860
+Sneezing|D012912
+Snoring|D012913
+Soft Tissue Infections|D018461
+Soft Tissue Injuries|D017695
+Soft Tissue Neoplasms|D012983
+Solitary Fibrous Tumor, Pleural|D054363
+Solitary Fibrous Tumors|D054364
+Solitary Pulmonary Nodule|D003074
+Somatosensory Disorders|D020886
+Somatostatinoma|D013005
+Somnambulism|D013009
+Sotos Syndrome|D058495
+Space Motion Sickness|D018489
+Sparganosis|D013031
+Spasm|D013035
+Spasms, Infantile|D013036
+Spastic Paraplegia, Hereditary|D015419
+Speech Disorders|D013064
+Spermatic Cord Torsion|D013086
+Spermatocele|D013088
+Sphenoid Sinusitis|D015524
+Spherocytosis, Hereditary|D013103
+Sphincter of Oddi Dysfunction|D046628
+Sphingolipidoses|D013106
+Spider Bites|D001098
+Spina Bifida Cystica|D016137
+Spina Bifida Occulta|D016136
+Spinal Cord Compression|D013117
+Spinal Cord Diseases|D013118
+Spinal Cord Injuries|D013119
+Spinal Cord Ischemia|D020760
+Spinal Cord Neoplasms|D013120
+Spinal Cord Vascular Diseases|D020758
+Spinal Curvatures|D013121
+Spinal Diseases|D013122
+Spinal Dysraphism|D016135
+Spinal Fractures|D016103
+Spinal Injuries|D013124
+Spinal Muscular Atrophies of Childhood|D014897
+Spinal Neoplasms|D013125
+Spinal Osteochondrosis|D055035
+Spinal Osteophytosis|D013128
+Spinal Stenosis|D013130
+Spinocerebellar Ataxias|D020754
+Spinocerebellar Degenerations|D013132
+Spirochaetales Infections|D013145
+Spirurida Infections|D017205
+Splenic Diseases|D013158
+Splenic Infarction|D013159
+Splenic Neoplasms|D013160
+Splenic Rupture|D013161
+Splenomegaly|D013163
+Splenosis|D017890
+Spondylarthritis|D025241
+Spondylarthropathies|D025242
+Spondylitis|D013166
+Spondylitis, Ankylosing|D013167
+Spondylolisthesis|D013168
+Spondylolysis|D013169
+Spondylosis|D055009
+Sporotrichosis|D013174
+Sprains and Strains|D013180
+Sprue, Tropical|D013182
+Squamous Intraepithelial Lesions of the Cervix|D065310
+Staphylococcal Food Poisoning|D013202
+Staphylococcal Infections|D013203
+Staphylococcal Scalded Skin Syndrome|D013206
+Staphylococcal Skin Infections|D013207
+Starvation|D013217
+Status Asthmaticus|D013224
+Status Epilepticus|D013226
+Steatitis|D013231
+Steatocystoma Multiplex|D062685
+Steatorrhea|D045602
+Steroid Metabolism, Inborn Errors|D043202
+Stevens-Johnson Syndrome|D013262
+Stiff-Person Syndrome|D016750
+Still's Disease, Adult-Onset|D016706
+Stillbirth|D050497
+Stomach Diseases|D013272
+Stomach Neoplasms|D013274
+Stomach Rupture|D013275
+Stomach Ulcer|D013276
+Stomach Volvulus|D013277
+Stomatitis|D013280
+Stomatitis, Aphthous|D013281
+Stomatitis, Denture|D013282
+Stomatitis, Herpetic|D013283
+Stomatognathic Diseases|D009057
+Stomatognathic System Abnormalities|D018640
+Strabismus|D013285
+Streptococcal Infections|D013290
+Striae Distensae|D057896
+Striatonigral Degeneration|D020955
+Stroke|D020521
+Stroke, Lacunar|D059409
+Strongyle Infections, Equine|D013319
+Strongylida Infections|D017206
+Strongyloidiasis|D013322
+Struma Ovarii|D013330
+Stupor|D053608
+Sturge-Weber Syndrome|D013341
+Stuttering|D013342
+Subacute Combined Degeneration|D052879
+Subacute Sclerosing Panencephalitis|D013344
+Subarachnoid Hemorrhage|D013345
+Subarachnoid Hemorrhage, Traumatic|D020206
+Subclavian Steal Syndrome|D013349
+Subcutaneous Emphysema|D013352
+Subdural Effusion|D013353
+Sublingual Gland Neoplasms|D013362
+Submandibular Gland Diseases|D013364
+Submandibular Gland Neoplasms|D013365
+Subphrenic Abscess|D013369
+Substance Abuse, Intravenous|D015819
+Substance Withdrawal Syndrome|D013375
+Substance-Related Disorders|D019966
+Sudden Infant Death|D013398
+Sulfatidosis|D052516
+Sulfhemoglobinemia|D013436
+Sunburn|D013471
+Sunstroke|D013474
+Superinfection|D015163
+Superior Mesenteric Artery Syndrome|D013478
+Superior Vena Cava Syndrome|D013479
+Suppuration|D013492
+Supraglottitis|D059525
+Supranuclear Palsy, Progressive|D013494
+Supratentorial Neoplasms|D015173
+Surgical Wound Dehiscence|D013529
+Surgical Wound Infection|D013530
+Susac Syndrome|D055955
+Swayback|D013540
+Sweat Gland Diseases|D013543
+Sweat Gland Neoplasms|D013544
+Sweating Sickness|D018614
+Sweating, Gustatory|D013547
+Sweet Syndrome|D016463
+Swine Diseases|D013553
+Swine Erysipelas|D013554
+Swine Vesicular Disease|D013555
+Syncope|D013575
+Syncope, Vasovagal|D019462
+Syndactyly|D013576
+Syndrome|D013577
+Synkinesis|D046608
+Synostosis|D013580
+Synovial Cyst|D013581
+Synovitis|D013585
+Synovitis, Pigmented Villonodular|D013586
+Syphilis|D013587
+Syphilis, Cardiovascular|D013589
+Syphilis, Congenital|D013590
+Syphilis, Cutaneous|D013591
+Syphilis, Latent|D013592
+Syringoma|D018252
+Syringomyelia|D013595
+Systemic Inflammatory Response Syndrome|D018746
+Systemic Vasculitis|D056647
+Systolic Murmurs|D054160
+T-Lymphocytopenia, Idiopathic CD4-Positive|D018344
+TDP-43 Proteinopathies|D057177
+Tabes Dorsalis|D013606
+Tachycardia|D013610
+Tachycardia, Atrioventricular Nodal Reentry|D013611
+Tachycardia, Ectopic Atrial|D013612
+Tachycardia, Ectopic Junctional|D013613
+Tachycardia, Paroxysmal|D013614
+Tachycardia, Reciprocating|D054139
+Tachycardia, Sinoatrial Nodal Reentry|D013615
+Tachycardia, Sinus|D013616
+Tachycardia, Supraventricular|D013617
+Tachycardia, Ventricular|D017180
+Tachypnea|D059246
+Taeniasis|D013622
+Takayasu Arteritis|D013625
+Takotsubo Cardiomyopathy|D054549
+Tangier Disease|D013631
+Tarlov Cysts|D052958
+Tarsal Tunnel Syndrome|D013641
+Taste Disorders|D013651
+Tauopathies|D024801
+Tay-Sachs Disease|D013661
+Tay-Sachs Disease, AB Variant|D049290
+Telangiectasia, Hereditary Hemorrhagic|D013683
+Telangiectasis|D013684
+Temporomandibular Joint Disorders|D013705
+Temporomandibular Joint Dysfunction Syndrome|D013706
+Tendinopathy|D052256
+Tendon Entrapment|D053682
+Tendon Injuries|D013708
+Tennis Elbow|D013716
+Tenosynovitis|D013717
+Tension-Type Headache|D018781
+Teratocarcinoma|D018243
+Teratogenesis|D064793
+Teratoma|D013724
+Testicular Diseases|D013733
+Testicular Hydrocele|D006848
+Testicular Neoplasms|D013736
+Tetanus|D013742
+Tetany|D013746
+Tetralogy of Fallot|D013771
+Tetraploidy|D057891
+Tetrasomy|D058670
+Thalamic Diseases|D013786
+Thalassemia|D013789
+Thanatophoric Dysplasia|D013796
+Thecoma|D013798
+Theileriasis|D013801
+Thiamine Deficiency|D013832
+Thinness|D013851
+Thoracic Diseases|D013896
+Thoracic Injuries|D013898
+Thoracic Neoplasms|D013899
+Thoracic Outlet Syndrome|D013901
+Thrombasthenia|D013915
+Thromboangiitis Obliterans|D013919
+Thrombocythemia, Essential|D013920
+Thrombocytopenia|D013921
+Thrombocytopenia, Neonatal Alloimmune|D054098
+Thrombocytosis|D013922
+Thromboembolism|D013923
+Thrombophilia|D019851
+Thrombophlebitis|D013924
+Thrombosis|D013927
+Thrombotic Microangiopathies|D057049
+Thymoma|D013945
+Thymus Hyperplasia|D013952
+Thymus Neoplasms|D013953
+Thyroglossal Cyst|D013955
+Thyroid Carcinoma, Anaplastic|D065646
+Thyroid Crisis|D013958
+Thyroid Diseases|D013959
+Thyroid Dysgenesis|D050033
+Thyroid Hormone Resistance Syndrome|D018382
+Thyroid Neoplasms|D013964
+Thyroid Nodule|D016606
+Thyroiditis|D013966
+Thyroiditis, Autoimmune|D013967
+Thyroiditis, Subacute|D013968
+Thyroiditis, Suppurative|D013969
+Thyrotoxicosis|D013971
+Tibial Fractures|D013978
+Tibial Neuropathy|D020429
+Tic Disorders|D013981
+Tick Bites|D064927
+Tick Infestations|D013984
+Tick Paralysis|D013985
+Tick Toxicoses|D013986
+Tick-Borne Diseases|D017282
+Tics|D020323
+Tietze's Syndrome|D013991
+Tinea|D014005
+Tinea Capitis|D014006
+Tinea Favosa|D014007
+Tinea Pedis|D014008
+Tinea Versicolor|D014010
+Tinnitus|D014012
+Tissue Adhesions|D000267
+Tobacco Use Disorder|D014029
+Togaviridae Infections|D014036
+Tolosa-Hunt Syndrome|D020333
+Tongue Diseases|D014060
+Tongue Neoplasms|D014062
+Tongue, Fissured|D014063
+Tongue, Hairy|D014064
+Tonic Pupil|D015845
+Tonsillar Neoplasms|D014067
+Tonsillitis|D014069
+Tooth Abnormalities|D014071
+Tooth Abrasion|D014072
+Tooth Ankylosis|D020254
+Tooth Attrition|D019217
+Tooth Avulsion|D014084
+Tooth Demineralization|D017001
+Tooth Discoloration|D014075
+Tooth Diseases|D014076
+Tooth Erosion|D014077
+Tooth Eruption, Ectopic|D014079
+Tooth Fractures|D014082
+Tooth Injuries|D018677
+Tooth Loss|D016388
+Tooth Migration|D014085
+Tooth Mobility|D014086
+Tooth Resorption|D014091
+Tooth Wear|D057085
+Tooth, Impacted|D014095
+Tooth, Nonvital|D019553
+Tooth, Supernumerary|D014096
+Tooth, Unerupted|D014097
+Toothache|D014098
+Torovirus Infections|D018176
+Torsades de Pointes|D016171
+Torsion Abnormality|D014102
+Torticollis|D014103
+Tourette Syndrome|D005879
+Toxascariasis|D017227
+Toxemia|D014115
+Toxocariasis|D014120
+Toxoplasmosis|D014123
+Toxoplasmosis, Animal|D014124
+Toxoplasmosis, Cerebral|D016781
+Toxoplasmosis, Congenital|D014125
+Toxoplasmosis, Ocular|D014126
+Tracheal Diseases|D014133
+Tracheal Neoplasms|D014134
+Tracheal Stenosis|D014135
+Tracheitis|D014136
+Tracheobronchomalacia|D055089
+Tracheobronchomegaly|D014137
+Tracheoesophageal Fistula|D014138
+Tracheomalacia|D055090
+Trachoma|D014141
+Transfusion Reaction|D065227
+Transient Tachypnea of the Newborn|D059245
+Translocation, Genetic|D014178
+Transposition of Great Vessels|D014188
+Trauma, Nervous System|D020196
+Trematode Infections|D014201
+Tremor|D014202
+Trench Fever|D014205
+Treponemal Infections|D014211
+Trichiasis|D058457
+Trichinellosis|D014235
+Trichomonas Infections|D014245
+Trichomonas Vaginitis|D014247
+Trichosporonosis|D060586
+Trichostrongyloidiasis|D014252
+Trichostrongylosis|D014253
+Trichothiodystrophy Syndromes|D054463
+Trichuriasis|D014257
+Tricuspid Atresia|D018785
+Tricuspid Valve Insufficiency|D014262
+Tricuspid Valve Prolapse|D014263
+Tricuspid Valve Stenosis|D014264
+Trigeminal Autonomic Cephalalgias|D051303
+Trigeminal Nerve Diseases|D020433
+Trigeminal Nerve Injuries|D061221
+Trigeminal Neuralgia|D014277
+Trigger Finger Disorder|D052582
+Trilogy of Fallot|D014286
+Triple Negative Breast Neoplasms|D064726
+Triploidy|D057885
+Trismus|D014313
+Trisomy|D014314
+Trochlear Nerve Diseases|D020432
+Trochlear Nerve Injuries|D061247
+Trombiculiasis|D014323
+Trophoblastic Neoplasms|D014328
+Trophoblastic Tumor, Placental Site|D018245
+Truncus Arteriosus, Persistent|D014339
+Trypanosomiasis|D014352
+Trypanosomiasis, African|D014353
+Trypanosomiasis, Bovine|D014354
+Tuberculoma|D014375
+Tuberculoma, Intracranial|D016862
+Tuberculosis|D014376
+Tuberculosis, Avian|D014379
+Tuberculosis, Bovine|D014380
+Tuberculosis, Cardiovascular|D014381
+Tuberculosis, Central Nervous System|D020306
+Tuberculosis, Cutaneous|D014382
+Tuberculosis, Endocrine|D014383
+Tuberculosis, Female Genital|D014384
+Tuberculosis, Gastrointestinal|D014385
+Tuberculosis, Hepatic|D014386
+Tuberculosis, Laryngeal|D014387
+Tuberculosis, Lymph Node|D014388
+Tuberculosis, Male Genital|D014389
+Tuberculosis, Meningeal|D014390
+Tuberculosis, Miliary|D014391
+Tuberculosis, Multidrug-Resistant|D018088
+Tuberculosis, Ocular|D014392
+Tuberculosis, Oral|D014393
+Tuberculosis, Osteoarticular|D014394
+Tuberculosis, Pleural|D014396
+Tuberculosis, Pulmonary|D014397
+Tuberculosis, Renal|D014398
+Tuberculosis, Spinal|D014399
+Tuberculosis, Splenic|D014400
+Tuberculosis, Urogenital|D014401
+Tuberous Sclerosis|D014402
+Tularemia|D014406
+Tumor Lysis Syndrome|D015275
+Tumor Virus Infections|D014412
+Tungiasis|D058285
+Turner Syndrome|D014424
+Twins, Conjoined|D014428
+Tympanic Membrane Perforation|D018058
+Typhlitis|D053706
+Typhoid Fever|D014435
+Typhus, Endemic Flea-Borne|D014437
+Typhus, Epidemic Louse-Borne|D014438
+Tyrosinemias|D020176
+Ulcer|D014456
+Ulna Fractures|D014458
+Ulnar Nerve Compression Syndromes|D017769
+Ulnar Neuropathies|D020424
+Unconsciousness|D014474
+Uniparental Disomy|D024182
+Unverricht-Lundborg Syndrome|D020194
+Upper Extremity Deep Vein Thrombosis|D056824
+Upper Extremity Deformities, Congenital|D038062
+Urachal Cyst|D014496
+Urea Cycle Disorders, Inborn|D056806
+Ureaplasma Infections|D016869
+Uremia|D014511
+Ureteral Calculi|D014514
+Ureteral Diseases|D014515
+Ureteral Neoplasms|D014516
+Ureteral Obstruction|D014517
+Ureterocele|D014518
+Ureterolithiasis|D053039
+Urethral Diseases|D014522
+Urethral Neoplasms|D014523
+Urethral Obstruction|D014524
+Urethral Stricture|D014525
+Urethritis|D014526
+Urinary Bladder Calculi|D001744
+Urinary Bladder Diseases|D001745
+Urinary Bladder Fistula|D001747
+Urinary Bladder Neck Obstruction|D001748
+Urinary Bladder Neoplasms|D001749
+Urinary Bladder, Neurogenic|D001750
+Urinary Bladder, Overactive|D053201
+Urinary Calculi|D014545
+Urinary Fistula|D014548
+Urinary Incontinence|D014549
+Urinary Incontinence, Stress|D014550
+Urinary Incontinence, Urge|D053202
+Urinary Retention|D016055
+Urinary Tract Infections|D014552
+Urination Disorders|D014555
+Urinoma|D053584
+Urogenital Abnormalities|D014564
+Urogenital Neoplasms|D014565
+Urolithiasis|D052878
+Urologic Diseases|D014570
+Urologic Neoplasms|D014571
+Urological Manifestations|D020924
+Urticaria|D014581
+Urticaria Pigmentosa|D014582
+Usher Syndromes|D052245
+Uterine Cervical Diseases|D002577
+Uterine Cervical Dysplasia|D002578
+Uterine Cervical Erosion|D002579
+Uterine Cervical Incompetence|D002581
+Uterine Cervical Neoplasms|D002583
+Uterine Cervicitis|D002575
+Uterine Diseases|D014591
+Uterine Hemorrhage|D014592
+Uterine Inertia|D014593
+Uterine Inversion|D019687
+Uterine Neoplasms|D014594
+Uterine Perforation|D014595
+Uterine Prolapse|D014596
+Uterine Retroversion|D060725
+Uterine Rupture|D014597
+Uveal Diseases|D014603
+Uveal Neoplasms|D014604
+Uveitis|D014605
+Uveitis, Anterior|D014606
+Uveitis, Intermediate|D015867
+Uveitis, Posterior|D015866
+Uveitis, Suppurative|D015829
+Uveomeningoencephalitic Syndrome|D014607
+Uveoparotid Fever|D014608
+Vaccinia|D014615
+Vaginal Discharge|D019522
+Vaginal Diseases|D014623
+Vaginal Fistula|D014624
+Vaginal Neoplasms|D014625
+Vaginismus|D052065
+Vaginitis|D014627
+Vaginosis, Bacterial|D016585
+Vagus Nerve Diseases|D020421
+Vagus Nerve Injuries|D061223
+Varicocele|D014646
+Varicose Ulcer|D014647
+Varicose Veins|D014648
+Vasa Previa|D055949
+Vascular Calcification|D061205
+Vascular Diseases|D014652
+Vascular Fistula|D016157
+Vascular Headaches|D014653
+Vascular Malformations|D054079
+Vascular Neoplasms|D019043
+Vascular Remodeling|D066253
+Vascular System Injuries|D057772
+Vasculitis|D014657
+Vasculitis, Central Nervous System|D020293
+Vasculitis, Leukocytoclastic, Cutaneous|D018366
+Vasoplegia|D056987
+Vasospasm, Intracranial|D020301
+Vein of Galen Malformations|D054080
+Velopharyngeal Insufficiency|D014681
+Venereal Tumors, Veterinary|D014685
+Venous Insufficiency|D014689
+Venous Thromboembolism|D054556
+Venous Thrombosis|D020246
+Ventilator-Induced Lung Injury|D055397
+Ventricular Dysfunction|D018754
+Ventricular Dysfunction, Left|D018487
+Ventricular Dysfunction, Right|D018497
+Ventricular Fibrillation|D014693
+Ventricular Flutter|D054141
+Ventricular Outflow Obstruction|D014694
+Ventricular Premature Complexes|D018879
+Ventricular Remodeling|D020257
+Ventricular Septal Rupture|D018658
+Vertebral Artery Dissection|D020217
+Vertebrobasilar Insufficiency|D014715
+Vertigo|D014717
+Vesico-Ureteral Reflux|D014718
+Vesicovaginal Fistula|D014719
+Vesicular Exanthema of Swine|D014720
+Vesicular Stomatitis|D054243
+Vestibular Diseases|D015837
+Vestibular Neuronitis|D020338
+Vestibulocochlear Nerve Diseases|D000160
+Vestibulocochlear Nerve Injuries|D061285
+Vibrio Infections|D014735
+Vipoma|D003969
+Viremia|D014766
+Virilism|D014770
+Virus Diseases|D014777
+Visceral Pain|D059265
+Visceral Prolapse|D014782
+Vision Disorders|D014786
+Vision, Low|D015354
+Visna|D016182
+Vitamin A Deficiency|D014802
+Vitamin B 12 Deficiency|D014806
+Vitamin B 6 Deficiency|D026681
+Vitamin B Deficiency|D014804
+Vitamin D Deficiency|D014808
+Vitamin E Deficiency|D014811
+Vitamin K Deficiency|D014813
+Vitamin K Deficiency Bleeding|D006475
+Vitelliform Macular Dystrophy|D057826
+Vitiligo|D014820
+Vitreoretinopathy, Proliferative|D018630
+Vitreous Detachment|D020255
+Vitreous Hemorrhage|D014823
+Vocal Cord Dysfunction|D064706
+Vocal Cord Paralysis|D014826
+Voice Disorders|D014832
+Vomiting|D014839
+Vomiting, Anticipatory|D014840
+Vulvar Diseases|D014845
+Vulvar Lichen Sclerosus|D007724
+Vulvar Neoplasms|D014846
+Vulvar Vestibulitis|D054515
+Vulvitis|D014847
+Vulvodynia|D056650
+Vulvovaginitis|D014848
+WAGR Syndrome|D017624
+Waardenburg Syndrome|D014849
+Waldenstrom Macroglobulinemia|D008258
+Walker-Warburg Syndrome|D058494
+Wallerian Degeneration|D014855
+Wandering Spleen|D050805
+Warts|D014860
+Wasting Disease, Chronic|D034081
+Wasting Syndrome|D019282
+Water Intoxication|D014869
+Water-Electrolyte Imbalance|D014883
+Waterhouse-Friderichsen Syndrome|D014884
+Weight Gain|D015430
+Weight Loss|D015431
+Weil Disease|D014895
+Weill-Marchesani Syndrome|D056846
+Werner Syndrome|D014898
+Wernicke Encephalopathy|D014899
+West Nile Fever|D014901
+Wet Macular Degeneration|D057135
+Wheat Hypersensitivity|D021182
+Whiplash Injuries|D014911
+Whipple Disease|D008061
+White Coat Hypertension|D059466
+White Heifer Disease|D050072
+White Muscle Disease|D014912
+Whooping Cough|D014917
+Williams Syndrome|D018980
+Wilms Tumor|D009396
+Wiskott-Aldrich Syndrome|D014923
+Wissler's Syndrome|D014924
+Wolf-Hirschhorn Syndrome|D054877
+Wolff-Parkinson-White Syndrome|D014927
+Wolfram Syndrome|D014929
+Wolman Disease|D015223
+Wound Infection|D014946
+Wounds and Injuries|D014947
+Wounds, Gunshot|D014948
+Wounds, Nonpenetrating|D014949
+Wounds, Penetrating|D014950
+Wounds, Stab|D014951
+Wrist Injuries|D014954
+X-Linked Combined Immunodeficiency Diseases|D053632
+XYY Karyotype|D014997
+Xanthogranuloma, Juvenile|D014972
+Xanthomatosis|D014973
+Xanthomatosis, Cerebrotendinous|D019294
+Xeroderma Pigmentosum|D014983
+Xerophthalmia|D014985
+Xerostomia|D014987
+Yang Deficiency|D016711
+Yaws|D015001
+Yellow Fever|D015004
+Yellow Nail Syndrome|D056684
+Yersinia Infections|D015009
+Yersinia pseudotuberculosis Infections|D015012
+Yin Deficiency|D016710
+Zellweger Syndrome|D015211
+Zenker Diverticulum|D016672
+Zollinger-Ellison Syndrome|D015043
+Zoonoses|D015047
+Zoster Sine Herpete|D031368
+Zygomatic Fractures|D015051
+Zygomycosis|D020096
+alpha 1-Antitrypsin Deficiency|D019896
+alpha-Mannosidosis|D008363
+alpha-Thalassemia|D017085
+beta-Mannosidosis|D044905
+beta-Thalassemia|D017086
+delta-Thalassemia|D055538
+von Hippel-Lindau Disease|D006623
+von Willebrand Disease, Type 1|D056725
+von Willebrand Disease, Type 2|D056728
+von Willebrand Disease, Type 3|D056729
+von Willebrand Diseases|D014842

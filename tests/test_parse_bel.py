@@ -2,7 +2,7 @@ import logging
 
 from pybel.parser.canonicalize import decanonicalize_node
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
-from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
+from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel
 
 log = logging.getLogger(__name__)
@@ -1660,7 +1660,7 @@ class TestTransformation(TestTokenParserBase):
     def test_translocation_invalid(self):
         """Fail on an improperly written single argument translocation"""
         statement = 'tloc(a(NS:"T-Lymphocytes"))'
-        with self.assertRaises(IllegalTranslocationException):
+        with self.assertRaises(MalformedTranslocationWarning):
             self.parser.translocation.parseString(statement)
 
     def test_translocation_secretion(self):
@@ -2127,7 +2127,7 @@ class TestRelations(TestTokenParserBase):
         3.1 \
         Test nested statement"""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
-        with self.assertRaises(NestedRelationNotSupportedException):
+        with self.assertRaises(NestedRelationWarning):
             self.parser.relation.parseString(statement)
 
     def test_nested_lenient(self):

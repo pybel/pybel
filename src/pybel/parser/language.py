@@ -8,20 +8,22 @@ import logging
 
 from pyparsing import *
 
-from .parse_exceptions import PlaceholderAminoAcidException
+from .parse_exceptions import PlaceholderAminoAcidWarning
 
 log = logging.getLogger('pybel')
 
 document_keys = {
-    'Authors',
-    'ContactInfo',
-    'Copyright',
-    'Description',
-    'Disclaimer',
-    'Licenses',
-    'Name',
-    'Version'
+    'Authors': 'authors',
+    'ContactInfo': 'contact',
+    'Copyright': 'copyright',
+    'Description': 'description',
+    'Disclaimer': 'disclaimer',
+    'Licenses': 'licenses',
+    'Name': 'name',
+    'Version': 'version'
 }
+
+inv_document_keys = {v: k for k, v in document_keys.items()}
 
 activity_labels = {
     'catalyticActivity': 'CatalyticActivity',
@@ -146,7 +148,7 @@ aa_placeholder = Keyword('X')
 
 
 def handle_aa_placeholder(s, l, tokens):
-    raise PlaceholderAminoAcidException('Placeholder amino acid X found')
+    raise PlaceholderAminoAcidWarning('Placeholder amino acid X found')
 
 
 aa_placeholder.setParseAction(handle_aa_placeholder)

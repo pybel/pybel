@@ -1,8 +1,8 @@
 PyBEL
 =====
 
-:code:`PyBEL` is a Python software package that parses BEL statements, validates their semantics, applies common graph
-algorithms, and allows for data interchange between common formats and database systems like JSON, CSV, SQL, and Neo4J.
+:code:`PyBEL` is a Python software package that parses BEL scripts, validates their semantics, applies common graph
+algorithms, and facilitates data interchange between common formats and database systems like JSON, CSV, SQL, and Neo4J.
 
 Development:
 
@@ -40,27 +40,29 @@ Development |develop_build| |develop_coverage| |develop_documentation|
     :target: https://codeclimate.com/github/pybel/pybel
     :alt: Code Climate
 
-.. |python_versions| image::  https://img.shields.io/pypi/pyversions/PyBEL.svg
+.. |python_versions| image:: https://img.shields.io/pypi/pyversions/PyBEL.svg
     :alt: Stable Supported Python Versions
 	
 .. |pypi_version| image:: https://img.shields.io/pypi/v/PyBEL.svg
+    :alt: Current version on PyPI
 
 .. |pypi_license| image:: https://img.shields.io/pypi/l/PyBEL.svg
-	
+    :alt: Apache 2.0 License
+
 
 Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
 complex disease networks with several thousands of relationships.
 
-PyBEL provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily use it to
-interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.
+:code:`PyBEL` provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily
+use it to interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.
 
 .. code-block:: python
 
    >>> import pybel, networkx
    >>> g = pybel.from_url('http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel')
-   >>> networkx.draw(g)
+   >>> networkx.draw(g)  # NOTE: requires matplotlib as a dependency, which isn't automatically installed
 
 Command Line Interface
 ----------------------
@@ -128,14 +130,17 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 Acknowledgements
 ----------------
 
-- This software is proudly built with Paul McGuire's PyParsing package.
-- Scott Colby designed our logo and provided sage advice
-- Core Team: Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling
+- This software is proudly built with Paul McGuire's `PyParsing <http://pyparsing.wikispaces.com/>`_ package.
+- `Scott Colby <https://github.com/scolby33>`_ designed our `logo <https://github.com/pybel/pybel-art>`_ and provided sage advice
+- Core Team: `Charles Tapley Hoyt <https://github.com/cthoyt>`_, `Andrej Konotopez <https://github.com/lekono>`_, and `Christian Ebeling <https://github.com/cebel>`_
 
-Find Us
--------
+Links
+-----
 
-- `Read the Docs <http://pybel.readthedocs.io/>`_
-- `GitHub <https://github.com/pybel/pybel>`_
-- `PyPI <https://pypi.python.org/pypi/pybel>`_
-- `Chat on Gitter <https://gitter.im/pybel/Lobby>`_
+- Specified by `BEL 1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
+  `BEL 2.0 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_
+- Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
+- Versioned on `GitHub <https://github.com/pybel/pybel>`_
+- Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
+- Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
+- Chat on `Gitter <https://gitter.im/pybel/Lobby>`_

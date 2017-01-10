@@ -38,7 +38,10 @@ INSTALL_REQUIRES = [
     'ontospy'
 ]
 EXTRAS_REQUIRE = {}
-TESTS_REQUIRE = ['tox']
+TESTS_REQUIRE = [
+    'tox',
+    'mock'
+]
 ENTRY_POINTS = {
     'console_scripts': [
         'pybel = pybel.cli:main',

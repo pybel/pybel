@@ -10,8 +10,8 @@ syntatic/semantic problem. These are logged at the CRITICAL level.
 .. automodule:: pybel.exceptions
     :members:
 
-Exceptions
-----------
+Warnings
+--------
 
 A message for "General Parser Failure" is displayed when a problem was caused due to an unforseen error. The line
 number and original statement are printed for the user to debug.
@@ -43,8 +43,6 @@ and are logged at the TRACE level with :code:`PyBEL0XX` number will be output to
 +------+---------------------------+------------------------------------------------------------------------------------+
 | 009  | Legacy sub()              | Attribute sub() in g() has been deprecated in favor of variant() and HGVS style.   |
 |      |                           | Old gene substitutions are convert automatically to the new HGVS style.            |
-+------+---------------------------+------------------------------------------------------------------------------------+
-| 024  | Missing Key               | Tried to UNSET annotation that is not set                                          |
 +------+---------------------------+------------------------------------------------------------------------------------+
 | 025  | Legacy trunc()            | Attribute trunc() in p() has been deprecated in favor of variant() and HGVS style. |
 +------+---------------------------+------------------------------------------------------------------------------------+

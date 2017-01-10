@@ -1,21 +1,19 @@
 ##################################################################################
 # Document Properties Section
 
-SET DOCUMENT Name = "PyBEL Test Document"
+SET DOCUMENT Name = "PyBEL Test Document 1"
 SET DOCUMENT Description = "Made for testing PyBEL parsing"
 SET DOCUMENT Version = "1.6"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
-SET DOCUMENT Licenses = "Other / Proprietary"
+SET DOCUMENT Licenses = "WTF License"
 SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
-
 
 ##################################################################################
 # Definitions Section
 
-DEFINE NAMESPACE CHEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"
-DEFINE NAMESPACE HGNC AS URL "http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns"
-DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"
+DEFINE NAMESPACE CHEBI AS URL "http://resources.openbel.org/belframework/20150611/namespace/chebi.belns"
+DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns"
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
 DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
@@ -24,8 +22,8 @@ DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
 SET STATEMENT_GROUP = "Group 1"
 
-SET TESTAN1 = "1"
 SET Citation = {"Pubmed","That one article from last week","123455"}
+SET TESTAN1 = "1"
 
 SET Evidence = "Evidence 1 \
 w extra notes"
