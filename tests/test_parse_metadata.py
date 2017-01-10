@@ -5,8 +5,8 @@ from pybel.manager.cache import CacheManager
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
-from tests.constants import CELL_LINE_KEYWORD, CELL_LINE_URL, HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, \
-    MESH_DISEASES_URL, help_check_hgnc, CHEBI_URL, CHEBI_KEYWORD
+from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, \
+    MESH_DISEASES_URL, help_check_hgnc
 from tests.constants import test_an_1, test_ns_1, test_bel, mock_bel_resources
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -73,7 +73,6 @@ class TestParseMetadata(unittest.TestCase):
         s = 'DEFINE ANNOTATION Text_Location AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
         self.assertIn('Text_Location', self.parser.annotations_dict)
-
 
     @mock_bel_resources
     def test_control_compound(self, mock_get):

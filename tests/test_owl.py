@@ -2,16 +2,14 @@ import logging
 import unittest
 
 import requests.exceptions
-from sqlalchemy import Table, MetaData
 
 import pybel
 from pybel.manager.cache import CacheManager
-from pybel.manager.models import OWL_TABLE_NAME
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3, \
-    expected_test_bel_4_metadata, assertHasNode, assertHasEdge, mock_bel_resources, HGNC_KEYWORD, HGNC_URL
+    expected_test_bel_4_metadata, assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
 
 log = logging.getLogger('pybel')
 
