@@ -19,7 +19,7 @@ bel_dir_path = os.path.join(dir_path, 'bel')
 belns_dir_path = os.path.join(dir_path, 'belns')
 belanno_dir_path = os.path.join(dir_path, 'belanno')
 
-test_bel_1 = os.path.join(bel_dir_path, 'test_bel.bel')
+test_bel = os.path.join(bel_dir_path, 'test_bel.bel')
 test_bel_4 = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 
@@ -38,11 +38,11 @@ test_evidence_text = 'I read it on Twitter'
 test_evidence_bel = 'SET Evidence = "{}"'.format(test_evidence_text)
 
 CHEBI_KEYWORD = 'CHEBI'
-CHEBI_URL = 'http://resource.belframework.org/belframework/1.0/namespace/chebi.belns'
+CHEBI_URL = 'http://resources.openbel.org/belframework/20150611/namespace/chebi.belns'
 CELL_LINE_KEYWORD = 'CellLine'
-CELL_LINE_URL = 'http://resources.openbel.org/belframework/20150611/annotation//cell-line.belanno'
+CELL_LINE_URL = 'http://resources.openbel.org/belframework/20150611/annotation/cell-line.belanno'
 HGNC_KEYWORD = 'HGNC'
-HGNC_URL = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
+HGNC_URL = 'http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
 MESH_DISEASES_URL = "http://resources.openbel.org/belframework/20150611/annotation/mesh-diseases.belanno"
 
@@ -96,7 +96,7 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         # FIXME this doesn't work for GraphML IO
         if check_metadata:
-            self.assertEqual(expected_test_bel_1_metadata, g.document)
+            self.assertEqual(expected_test_bel_metadata, g.document)
 
         assertHasNode(self, AKT1, g, type='Protein', namespace='HGNC', name='AKT1')
         assertHasNode(self, EGFR, g, type='Protein', namespace='HGNC', name='EGFR')
@@ -110,7 +110,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, AKT1, CASP8, g, relation='association', TESTAN1="2")
 
 
-expected_test_bel_1_metadata = {
+expected_test_bel_metadata = {
     'name': "PyBEL Test Document 1",
     "description": "Made for testing PyBEL parsing",
     'version': "1.6",
@@ -153,6 +153,10 @@ class MockResponse:
             self.path = os.path.join(belns_dir_path, name)
         elif mock_url.endswith('.belanno'):
             self.path = os.path.join(belanno_dir_path, name)
+        elif mock_url == wine_iri:
+            self.path = test_owl_2
+        elif mock_url == pizza_iri:
+            self.path = test_owl_1
         else:
             raise ValueError('Invalid extension')
 

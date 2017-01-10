@@ -9,8 +9,7 @@ from click.testing import CliRunner
 import pybel
 from pybel import cli
 from pybel.graph import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel_1, test_bel_slushy, BelReconstitutionMixin, expected_test_bel_1_metadata, \
-    mock_bel_resources
+from tests.constants import test_bel, test_bel_slushy, BelReconstitutionMixin, expected_test_bel_metadata, mock_bel_resources
 
 log = logging.getLogger(__name__)
 
@@ -18,44 +17,6 @@ log = logging.getLogger(__name__)
 class TestCli(BelReconstitutionMixin, unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
-
-    @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
-    def test_neo4j_remote(self):
-        test_context = 'PYBEL_TEST_CTX'
-        neo_path = os.environ['NEO_PATH']
-
-        try:
-            neo = py2neo.Graph(neo_path)
-            neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
-        except py2neo.database.status.GraphError:
-            self.skipTest("Can't connect to neo4j")
-        else:
-            self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--neo',
-                                          neo_path, '--neo-context', test_context, '--complete-origin'])
-
-            q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
-            count = neo.data(q)[0]['count']
-            self.assertEqual(14, count)
-
-    @mock_bel_resources
-    def test_csv(self, mock_get):
-        test_edge_file = 'myedges.csv'
-
-        with self.runner.isolated_filesystem():
-            abs_test_edge_file = os.path.abspath(test_edge_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--csv', abs_test_edge_file])
-            self.assertEqual(0, result.exit_code, msg=result.exc_info)
-            self.assertTrue(os.path.exists(abs_test_edge_file))
-
-    @mock_bel_resources
-    def test_database(self, mock_get):
-        with self.runner.isolated_filesystem():
-            conn = 'sqlite:///' + os.path.abspath('test.db')
-            result = self.runner.invoke(cli.main,
-                                        ['convert', '--path', test_bel_1, '--store', conn, '--complete-origin'])
-            self.assertEqual(0, result.exit_code, msg=result.exc_info)
-            g = pybel.from_database(expected_test_bel_1_metadata['name'], connection=conn)
-            self.bel_1_reconstituted(g)
 
     @mock_bel_resources
     def test_slushy(self, mock_get):
@@ -65,52 +26,54 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             self.assertEqual(-1, result.exit_code, msg=result.exc_info)
 
     @mock_bel_resources
-    def test_pickle(self, mock_get):
-        test_file = 'mygraph.gpickle'
+    def test_convert(self, mock_get):
 
         with self.runner.isolated_filesystem():
-            abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--pickle', abs_test_file,
-                                                   '--complete-origin'])
-            self.assertEqual(0, result.exit_code)
-            self.assertTrue(os.path.exists(abs_test_file))
-            g = pybel.from_pickle(abs_test_file)
-            self.bel_1_reconstituted(g)
+            test_csv = os.path.abspath('test.csv')
+            test_gpickle = os.path.abspath('test.gpickle')
+            test_graphml = os.path.abspath('test.graphml')
+            test_json = os.path.abspath('test.json')
+            test_canon = os.path.abspath('test.bel')
 
-    @mock_bel_resources
-    def test_graphml(self, mock_get):
-        test_file = 'mygraph.graphml'
+            conn = 'sqlite:///' + os.path.abspath('test.db')
 
-        with self.runner.isolated_filesystem():
-            abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--graphml', abs_test_file,
-                                                   '--complete-origin'])
-            self.assertEqual(0, result.exit_code)
-            self.assertTrue(os.path.exists(abs_test_file))
-            g = pybel.from_graphml(abs_test_file)
-            self.bel_1_reconstituted(g, check_metadata=False)
+            args = [
+                'convert',
+                '--path', test_bel,
+                '--csv', test_csv,
+                '--pickle', test_gpickle,
+                '--graphml', test_graphml,
+                '--json', test_json,
+                '--bel', test_canon,
+                '--store', conn
+            ]
 
-    @mock_bel_resources
-    def test_json(self, mock_get):
-        test_file = 'mygraph.json'
-
-        with self.runner.isolated_filesystem():
-            abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--json', abs_test_file,
-                                                   '--complete-origin'])
+            result = self.runner.invoke(cli.main, args)
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
-            self.assertTrue(os.path.exists(abs_test_file))
-            g = pybel.from_json(abs_test_file)
-            self.bel_1_reconstituted(g)
 
+            self.assertTrue(os.path.exists(test_csv))
+
+            self.bel_1_reconstituted(pybel.from_pickle(test_gpickle))
+            self.bel_1_reconstituted(pybel.from_graphml(test_graphml), check_metadata=False)
+            self.bel_1_reconstituted(pybel.from_json(test_json))
+            self.bel_1_reconstituted(pybel.from_path(test_canon))
+            self.bel_1_reconstituted(pybel.from_database(expected_test_bel_metadata['name'], connection=conn))
+
+    @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     @mock_bel_resources
-    def test_bel(self, mock_get):
-        test_file = 'mygraph.bel'
+    def test_neo4j_remote(self, mock_get):
+        test_context = 'PYBEL_TEST_CTX'
+        neo_path = os.environ['NEO_PATH']
 
-        with self.runner.isolated_filesystem():
-            abs_test_file = os.path.abspath(test_file)
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_1, '--bel', abs_test_file,
-                                                   '--complete-origin'])
-            self.assertEqual(0, result.exit_code, msg=result.exc_info)
-            g = pybel.from_path(abs_test_file)
-            self.bel_1_reconstituted(g)
+        try:
+            neo = py2neo.Graph(neo_path)
+            neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
+        except py2neo.database.status.GraphError:
+            self.skipTest("Can't connect to neo4j")
+        else:
+            self.runner.invoke(cli.main, ['convert', '--path', test_bel, '--neo',
+                                          neo_path, '--neo-context', test_context, '--complete-origin'])
+
+            q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
+            count = neo.data(q)[0]['count']
+            self.assertEqual(14, count)

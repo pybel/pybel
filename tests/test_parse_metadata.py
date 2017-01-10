@@ -7,14 +7,14 @@ from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
 from tests.constants import CELL_LINE_KEYWORD, CELL_LINE_URL, HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, \
     MESH_DISEASES_URL, help_check_hgnc, CHEBI_URL, CHEBI_KEYWORD
-from tests.constants import test_an_1, test_ns_1, test_bel_1, mock_bel_resources
+from tests.constants import test_an_1, test_ns_1, test_bel, mock_bel_resources
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 class TestSplitLines(unittest.TestCase):
     def test_parts(self):
-        with open(test_bel_1) as f:
+        with open(test_bel) as f:
             docs, definitions, statements = split_file_to_annotations_and_definitions(f)
 
         self.assertEqual(7, len(docs))
@@ -74,24 +74,18 @@ class TestParseMetadata(unittest.TestCase):
         self.parser.parseString(s)
         self.assertIn('Text_Location', self.parser.annotations_dict)
 
+
     @mock_bel_resources
-    def test_control_compound_1(self, mock_get):
+    def test_control_compound(self, mock_get):
         lines = [
-            'DEFINE NAMESPACE {} AS URL "{}"'.format(CHEBI_KEYWORD, CHEBI_URL),
-            'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, HGNC_URL)
+            'DEFINE ANNOTATION {} AS URL "{}"'.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL),
+            'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, HGNC_URL),
+            'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         ]
         self.parser.parse_lines(lines)
-        help_check_hgnc(self, self.parser.namespace_dict)
-
-    @mock_bel_resources
-    def test_control_compound_2(self, mock_get):
-        s1 = 'DEFINE ANNOTATION {} AS URL "{}"'.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL)
-        s2 = 'DEFINE ANNOTATION {} AS URL "{}"'.format(CELL_LINE_KEYWORD, CELL_LINE_URL)
-        s3 = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
-        self.parser.parse_lines([s1, s2, s3])
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
-        self.assertIn(CELL_LINE_KEYWORD, self.parser.annotations_dict)
+        self.assertIn(HGNC_KEYWORD, self.parser.namespace_dict)
         self.assertIn('TextLocation', self.parser.annotations_dict)
 
     def test_document_metadata_exception(self):

@@ -5,35 +5,25 @@ import pybel
 from pybel.manager.cache import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import InvalidFunctionSemantic, MissingCitationException
-from tests.constants import BelReconstitutionMixin, test_bel_1, TestTokenParserBase, test_citation_bel, \
+from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
     test_citation_dict, test_evidence_bel, mock_bel_resources
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
 
 class TestImport(BelReconstitutionMixin, unittest.TestCase):
-    @mock_bel_resources
-    def test_cached_winning(self, mock_get):
-        cm = CacheManager('sqlite://')
-
-        with open(test_bel_1) as f:
-            g = pybel.BELGraph(f, cache_manager=cm)
-        self.bel_1_reconstituted(g)
-
-    @mock_bel_resources
-    def test_from_path(self, mock_get):
-        g = pybel.from_path(test_bel_1, complete_origin=True)
-        self.bel_1_reconstituted(g)
 
     @mock_bel_resources
     def test_bytes_io(self, mock_get):
-        g = pybel.from_path(test_bel_1, complete_origin=True)
+        g = pybel.from_path(test_bel, complete_origin=True)
+        self.bel_1_reconstituted(g)
+
         g_reloaded = pybel.from_bytes(pybel.to_bytes(g))
         self.bel_1_reconstituted(g_reloaded)
 
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
-        g = pybel.from_url('file://{}'.format(test_bel_1), complete_origin=True)
+        g = pybel.from_url('file://{}'.format(test_bel), complete_origin=True)
         self.bel_1_reconstituted(g)
 
 

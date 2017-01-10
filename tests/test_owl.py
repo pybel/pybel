@@ -11,7 +11,7 @@ from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3, \
-    expected_test_bel_4_metadata, assertHasNode, assertHasEdge, mock_bel_resources
+    expected_test_bel_4_metadata, assertHasNode, assertHasEdge, mock_bel_resources, HGNC_KEYWORD, HGNC_URL
 
 log = logging.getLogger('pybel')
 
@@ -352,11 +352,11 @@ class TestIntegration(TestOwlBase):
     def test_from_path(self, mock_get):
         g = pybel.from_path(test_bel_4)
 
-        expected_definitions = dict(
-            HGNC="http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns",
-            PIZZA="http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl",
-            WINE="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
-        )
+        expected_definitions = {
+            HGNC_KEYWORD: HGNC_URL,
+            'PIZZA': pizza_iri,
+            'WINE': wine_iri
+        }
 
         self.assertEqual(expected_test_bel_4_metadata, g.document)
 
