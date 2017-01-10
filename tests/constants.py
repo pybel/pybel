@@ -37,6 +37,15 @@ test_citation_bel = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(
 test_evidence_text = 'I read it on Twitter'
 test_evidence_bel = 'SET Evidence = "{}"'.format(test_evidence_text)
 
+CHEBI_KEYWORD = 'CHEBI'
+CHEBI_URL = 'http://resource.belframework.org/belframework/1.0/namespace/chebi.belns'
+CELL_LINE_KEYWORD = 'CellLine'
+CELL_LINE_URL = 'http://resources.openbel.org/belframework/20150611/annotation//cell-line.belanno'
+HGNC_KEYWORD = 'HGNC'
+HGNC_URL = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
+MESH_DISEASES_KEYWORD = 'MeSHDisease'
+MESH_DISEASES_URL = "http://resources.openbel.org/belframework/20150611/annotation/mesh-diseases.belanno"
+
 pizza_iri = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
 wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
 
@@ -170,4 +179,17 @@ class MockSession:
         return MockResponse(url)
 
 
-patch_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)
+mock_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)
+
+
+def help_check_hgnc(self, namespace_dict):
+    self.assertIn(HGNC_KEYWORD, namespace_dict)
+
+    self.assertIn('MHS2', namespace_dict[HGNC_KEYWORD])
+    self.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD]['MHS2']))
+
+    self.assertIn('MIATNB', namespace_dict[HGNC_KEYWORD])
+    self.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD]['MIATNB']))
+
+    self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
+    self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))

@@ -11,7 +11,7 @@ from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3, \
-    expected_test_bel_4_metadata, assertHasNode, assertHasEdge
+    expected_test_bel_4_metadata, assertHasNode, assertHasEdge, mock_bel_resources
 
 log = logging.getLogger('pybel')
 
@@ -348,7 +348,8 @@ class TestOwlManager(unittest.TestCase):
 
 
 class TestIntegration(TestOwlBase):
-    def test_from_path(self):
+    @mock_bel_resources
+    def test_from_path(self, mock_get):
         g = pybel.from_path(test_bel_4)
 
         expected_definitions = dict(

@@ -9,7 +9,7 @@ from requests.exceptions import ConnectionError
 import pybel
 from pybel.constants import GOCC_LATEST
 from pybel.parser.canonicalize import to_bel
-from tests.constants import test_bel_1, test_bel_4, patch_bel_resources
+from tests.constants import test_bel_1, test_bel_4, mock_bel_resources
 
 log = logging.getLogger('pybel')
 
@@ -66,7 +66,7 @@ class TestCanonicalize(unittest.TestCase):
 
                 self.assertTrue(x, msg="Nodes with problem: {}, {}".format(u, v))
 
-    @patch_bel_resources
+    @mock_bel_resources
     def test_canonicalize_1(self, mock_get):
         self.canonicalize_tester_helper(test_bel_1)
 
@@ -75,4 +75,3 @@ class TestCanonicalize(unittest.TestCase):
             self.canonicalize_tester_helper(test_bel_4)
         except ConnectionError as e:
             log.warning('Connection error: %s', e)
-

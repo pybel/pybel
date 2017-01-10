@@ -9,7 +9,8 @@ from click.testing import CliRunner
 import pybel
 from pybel import cli
 from pybel.graph import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel_1, test_bel_slushy, BelReconstitutionMixin, expected_test_bel_1_metadata, mock, MockSession
+from tests.constants import test_bel_1, test_bel_slushy, BelReconstitutionMixin, expected_test_bel_1_metadata, \
+    mock_bel_resources
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,8 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             count = neo.data(q)[0]['count']
             self.assertEqual(14, count)
 
-    def test_csv(self):
+    @mock_bel_resources
+    def test_csv(self, mock_get):
         test_edge_file = 'myedges.csv'
 
         with self.runner.isolated_filesystem():
@@ -45,7 +47,8 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
             self.assertTrue(os.path.exists(abs_test_edge_file))
 
-    def test_database(self):
+    @mock_bel_resources
+    def test_database(self, mock_get):
         with self.runner.isolated_filesystem():
             conn = 'sqlite:///' + os.path.abspath('test.db')
             result = self.runner.invoke(cli.main,
@@ -54,13 +57,15 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             g = pybel.from_database(expected_test_bel_1_metadata['name'], connection=conn)
             self.bel_1_reconstituted(g)
 
-    def test_slushy(self):
+    @mock_bel_resources
+    def test_slushy(self, mock_get):
         """Tests that slushy document doesn't even make it to warning counting"""
         with self.runner.isolated_filesystem():
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_slushy])
             self.assertEqual(-1, result.exit_code, msg=result.exc_info)
 
-    def test_pickle(self):
+    @mock_bel_resources
+    def test_pickle(self, mock_get):
         test_file = 'mygraph.gpickle'
 
         with self.runner.isolated_filesystem():
@@ -72,7 +77,8 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             g = pybel.from_pickle(abs_test_file)
             self.bel_1_reconstituted(g)
 
-    def test_graphml(self):
+    @mock_bel_resources
+    def test_graphml(self, mock_get):
         test_file = 'mygraph.graphml'
 
         with self.runner.isolated_filesystem():
@@ -84,7 +90,8 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             g = pybel.from_graphml(abs_test_file)
             self.bel_1_reconstituted(g, check_metadata=False)
 
-    def test_json(self):
+    @mock_bel_resources
+    def test_json(self, mock_get):
         test_file = 'mygraph.json'
 
         with self.runner.isolated_filesystem():
@@ -96,7 +103,8 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             g = pybel.from_json(abs_test_file)
             self.bel_1_reconstituted(g)
 
-    def test_bel(self):
+    @mock_bel_resources
+    def test_bel(self, mock_get):
         test_file = 'mygraph.bel'
 
         with self.runner.isolated_filesystem():

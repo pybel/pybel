@@ -1,18 +1,15 @@
 import logging
-import os
 import unittest
 
 from pybel.manager.cache import CacheManager
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
-from tests.constants import test_an_1, test_ns_1, test_bel_1
+from tests.constants import CELL_LINE_KEYWORD, CELL_LINE_URL, HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, \
+    MESH_DISEASES_URL, help_check_hgnc, CHEBI_URL, CHEBI_KEYWORD
+from tests.constants import test_an_1, test_ns_1, test_bel_1, mock_bel_resources
 
 logging.getLogger("requests").setLevel(logging.WARNING)
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-mgi_url = 'http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns'
-rgd_url = 'http://resources.openbel.org/belframework/20150611/namespace/rgd-rat-genes.belns'
 
 
 class TestSplitLines(unittest.TestCase):
@@ -35,62 +32,30 @@ class TestParseMetadata(unittest.TestCase):
     def setUp(self):
         self.parser = MetadataParser(cache_manager=CacheManager(self.connection))
 
-    def check_mgi(self):
-        self.assertIn('MGI', self.parser.namespace_dict)
-        self.assertIn('Oprk1', self.parser.namespace_dict['MGI'])
-        self.assertEqual(set('GRP'), self.parser.namespace_dict['MGI']['Oprk1'])
-        self.assertIn('Gm16328', self.parser.namespace_dict['MGI'])
-        self.assertEqual(set('GR'), self.parser.namespace_dict['MGI']['Gm16328'])
-
-    def test_namespace_name_persistience(self):
+    @mock_bel_resources
+    def test_namespace_name_persistience(self, mock_get):
         """Tests that a namespace defined by a URL can't be overwritten by a definition by another URL"""
-
-        s = 'DEFINE NAMESPACE MGI AS URL "{}"'.format(mgi_url)
-
+        s = 'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, HGNC_URL)
         self.parser.parseString(s)
-        self.check_mgi()
+        help_check_hgnc(self, self.parser.namespace_dict)
 
         # Test doesn't overwrite
-        s = 'DEFINE NAMESPACE MGI AS URL "{}"'.format(rgd_url)
+        s = 'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, 'XXXXX')
         self.parser.parseString(s)
-        self.assertIn('MGI', self.parser.namespace_dict)
-        self.assertNotIn('2310ex4-5', self.parser.namespace_dict['MGI'])
+        help_check_hgnc(self, self.parser.namespace_dict)
 
-    '''
-    def test_control_annotation_lexicographyException(self):
-        """Asserts an error is thrown when the preferred name for an annotation is not used"""
-        s = 'DEFINE ANNOTATION CELLSTRUCTURE AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
-        self.parser.parseString(s)
-
-    def test_control_namespace_lexicographyException(self):
-        """Asserts an error is thrown when the preferred name for an namespace is not used"""
-        s = 'DEFINE NAMESPACE mgi AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"'
-        # with self.assertRaises(LexicographyException):
-        self.parser.parseString(s)
-
-    def test_parse_namespace_url_mismatch(self):
-        path = os.path.join(dir_path, 'bel', 'test_ns_1.belns')
-        s = 'DEFINE NAMESPACE TEST AS URL "file://{}"'.format(path)
-        # with self.assertRaises(NamespaceMismatch):
-        self.parser.parseString(s)
-
-    def test_parse_annotation_url_failure(self):
-        path = os.path.join(dir_path, 'bel', 'test_an_1.belanno')
-        s = 'DEFINE ANNOTATION Test AS URL "file://{}"'.format(path)
-        # with self.assertRaises(AnnotationMismatch):
-        self.parser.parseString(s)
-    '''
-
-    def test_annotation_name_persistience_1(self):
+    @mock_bel_resources
+    def test_annotation_name_persistience_1(self, mock_get):
         """Tests that an annotation defined by a URL can't be overwritten by a definition by a list"""
-        s = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
-        self.parser.parseString(s)
-        self.assertIn('CellStructure', self.parser.annotations_dict)
 
-        s = 'DEFINE ANNOTATION CellStructure AS LIST {"A","B","C"}'
+        s = 'DEFINE ANNOTATION {} AS URL "{}"'.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL)
         self.parser.parseString(s)
-        self.assertIn('CellStructure', self.parser.annotations_dict)
-        self.assertNotIn('A', self.parser.annotations_dict['CellStructure'])
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
+
+        s = 'DEFINE ANNOTATION {} AS LIST {{"A","B","C"}}'.format(MESH_DISEASES_KEYWORD)
+        self.parser.parseString(s)
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
+        self.assertNotIn('A', self.parser.annotations_dict[MESH_DISEASES_KEYWORD])
 
     def test_annotation_name_persistience_2(self):
         """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
@@ -98,7 +63,7 @@ class TestParseMetadata(unittest.TestCase):
         self.parser.parseString(s)
         self.assertIn('TextLocation', self.parser.annotations_dict)
 
-        s = 'DEFINE ANNOTATION TextLocation AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
+        s = 'DEFINE ANNOTATION TextLocation AS URL "{}"'.format(MESH_DISEASES_URL)
         self.parser.parseString(s)
         self.assertIn('TextLocation', self.parser.annotations_dict)
         self.assertIn('Abstract', self.parser.annotations_dict['TextLocation'])
@@ -109,23 +74,24 @@ class TestParseMetadata(unittest.TestCase):
         self.parser.parseString(s)
         self.assertIn('Text_Location', self.parser.annotations_dict)
 
-    def test_control_compound_1(self):
+    @mock_bel_resources
+    def test_control_compound_1(self, mock_get):
         lines = [
-            'DEFINE NAMESPACE MGI AS URL "http://resource.belframework.org/belframework/1.0/namespace/mgi-approved-symbols.belns"',
-            'DEFINE NAMESPACE CHEBI AS URL "http://resource.belframework.org/belframework/1.0/namespace/chebi-names.belns"'
+            'DEFINE NAMESPACE {} AS URL "{}"'.format(CHEBI_KEYWORD, CHEBI_URL),
+            'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, HGNC_URL)
         ]
-
         self.parser.parse_lines(lines)
-        self.check_mgi()
+        help_check_hgnc(self, self.parser.namespace_dict)
 
-    def test_control_compound_2(self):
-        s1 = 'DEFINE ANNOTATION CellStructure AS URL "http://resource.belframework.org/belframework/1.0/annotation/mesh-cell-structure.belanno"'
-        s2 = 'DEFINE ANNOTATION CellLine AS URL "http://resource.belframework.org/belframework/1.0/annotation/atcc-cell-line.belanno"'
+    @mock_bel_resources
+    def test_control_compound_2(self, mock_get):
+        s1 = 'DEFINE ANNOTATION {} AS URL "{}"'.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL)
+        s2 = 'DEFINE ANNOTATION {} AS URL "{}"'.format(CELL_LINE_KEYWORD, CELL_LINE_URL)
         s3 = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parse_lines([s1, s2, s3])
 
-        self.assertIn('CellStructure', self.parser.annotations_dict)
-        self.assertIn('CellLine', self.parser.annotations_dict)
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
+        self.assertIn(CELL_LINE_KEYWORD, self.parser.annotations_dict)
         self.assertIn('TextLocation', self.parser.annotations_dict)
 
     def test_document_metadata_exception(self):
