@@ -1,6 +1,8 @@
+import io
 import logging
+import os
+import tempfile
 import unittest
-from io import StringIO
 
 from requests.exceptions import ConnectionError
 
@@ -13,12 +15,21 @@ log = logging.getLogger('pybel')
 
 
 class TestCanonicalize(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.path = os.path.join(self.dir, 'test.bel')
+
+    def tearDown(self):
+        os.remove(self.path)
+        os.rmdir(self.dir)
+
     def canonicalize_helper(self, test_path):
         original = pybel.from_path(test_path)
 
-        sio = StringIO()
-        to_bel(original, sio)
-        reloaded = pybel.BELGraph(lines=sio.getvalue().split('\n'))
+        with open(self.path, 'w') as f:
+            to_bel(original, f)
+
+        reloaded = pybel.from_path(self.path)
 
         original.namespace_url['GOCC'] = GOCC_LATEST
 
