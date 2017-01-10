@@ -276,14 +276,11 @@ class TestWine(TestOwlBase):
 
     def test_metadata_parser(self):
         cm = CacheManager('sqlite://')
-        metadata = MetaData(cm.engine)
-        table = Table(OWL_TABLE_NAME, metadata, autoload=True)
-        self.assertIsNotNone(table)
 
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
 
-        parser = MetadataParser(cm)
+        parser = MetadataParser(cache_manager=cm)
 
         try:
             parser.parseString(s)
@@ -348,8 +345,7 @@ class TestOwlManager(unittest.TestCase):
 
 
 class TestIntegration(TestOwlBase):
-    @mock_bel_resources
-    def test_from_path(self, mock_get):
+    def test_from_path(self):
         g = pybel.from_path(test_bel_4)
 
         expected_definitions = {
