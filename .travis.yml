@@ -57,6 +57,6 @@ deploy:
         secure: NZSOV7O3swDgUZOX93nXrnvW6O4yRiUUDJQxatPtqNiJS59NQSc11i8uo9zcpLwTmx/6k9VobzcLNLJzMv2u2s7U23fMDURFmhsuGGLZ8qJtcrHyX0QxGRpveZM4RgieWy+RHctQsS6441You+seRowDRr7M3oLOiAylWLJRcAVkG04DyxqWzAL4j+9jrjVM1cKJ8AdvYsc40goYWs3dOddzMUR9f9ik+1aSpZQAjTlCId+mdHhVfDglllnSZWtwBU6RMqknKotQsSC8dmCD87BsUm9m+UP4LMyqjXVqowHZ9BhCPsKAd1ENa6gh69ZvGEgf1qm/qkrTZ9iG3FSQF9WWeqLnvecPf13jl9uZlZGT3NrO8o9nOnRTjpPEsSPFJBPovF3YjoYgNSqjezeAhXs74BKkQaWmvpVorr8zWfSn74pL4+uoDchmwZhw3QGUdfgJZox+pGWDEqtQPfdJTng+H7l6uBWRVCogPwtIRaQqMigMQhGJnpe8BC9KnS7gkOawzA9DZPfUbMPqUTg5RgvHhOYmNtQMvpMQPJYOXe+4028xrJebXBIJVyNGRY+mltCkr4uh8zio+UIOIsmS97zC47xfK06M4nVNvge24EZ0byvbn2qgEHz4gkXz/NjTLi8Uaz9mhHhVMoBxa6u7AQ6DkrT4TEFENShd4yc8qHA=
     on:
         tags: true
-        distributions: sdist bdist_wheel
+        distributions: "sdist bdist_wheel"
         repo: pybel/pybel
         branch: master

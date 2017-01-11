@@ -10,7 +10,7 @@ from .manager.graph_cache import to_database, from_database
 
 __all__ = ['SMALL_CORPUS_URL', 'LARGE_CORPUS_URL', 'to_database', 'from_database'] + graph.__all__
 
-__version__ = '0.3.1-dev'
+__version__ = '0.3.2-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'

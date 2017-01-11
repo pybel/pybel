@@ -2,31 +2,10 @@ import os
 import tempfile
 import unittest
 
-from sqlalchemy import MetaData, Table
-
 import tests.constants
-from pybel.manager import defaults
 from pybel.manager.cache import CacheManager
-from pybel.manager.models import OWL_TABLE_NAME
-from tests.constants import wine_iri
-
-MGI_NAMESPACE = 'http://resource.belframework.org/belframework/20150611/namespace/mgi-mouse-genes.belns'
-HGNC_NAMESPACE = 'http://resource.belframework.org/belframework/20150611/namespace/hgnc-human-genes.belns'
-
-CELLSTRUCTURE_ANNOTATION = 'http://resource.belframework.org/belframework/20150611/annotation/cell-structure.belanno'
-CELL_ANNOTATION = 'http://resource.belframework.org/belframework/20150611/annotation/cell.belanno'
-
-defaults.default_namespaces = [
-    MGI_NAMESPACE,
-    HGNC_NAMESPACE
-]
-
-defaults.default_annotations = [
-    CELLSTRUCTURE_ANNOTATION,
-    CELL_ANNOTATION
-]
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
+from tests.constants import HGNC_URL, help_check_hgnc, CELL_LINE_URL, HGNC_KEYWORD
+from tests.constants import wine_iri, mock_bel_resources
 
 test_ns1 = 'file:///' + tests.constants.test_ns_1
 test_ns2 = 'file:///' + tests.constants.test_ns_2
@@ -43,24 +22,15 @@ class TestCachePersistient(unittest.TestCase):
         os.remove(self.db_path)
         os.rmdir(self.dir)
 
-    def test_insert_namespace(self):
+    @mock_bel_resources
+    def test_insert_namespace(self, mock_get):
         cm1 = CacheManager(connection=self.connection)
-
-        cm1.ensure_namespace(MGI_NAMESPACE)
-        self.assertIn(MGI_NAMESPACE, cm1.namespace_cache)
-        self.assertIn('Oprk1', cm1.namespace_cache[MGI_NAMESPACE])
-        self.assertEqual(set('GRP'), cm1.namespace_cache[MGI_NAMESPACE]['Oprk1'])
-        self.assertIn('Gm16328', cm1.namespace_cache[MGI_NAMESPACE])
-        self.assertEqual(set('GR'), cm1.namespace_cache[MGI_NAMESPACE]['Gm16328'])
+        cm1.ensure_namespace(HGNC_URL)
+        help_check_hgnc(self, {HGNC_KEYWORD: cm1.namespace_cache[HGNC_URL]})
 
         cm2 = CacheManager(connection=self.connection)
-
-        cm2.ensure_namespace(MGI_NAMESPACE)
-        self.assertIn(MGI_NAMESPACE, cm2.namespace_cache)
-        self.assertIn('Oprk1', cm2.namespace_cache[MGI_NAMESPACE])
-        self.assertEqual(set('GRP'), cm2.namespace_cache[MGI_NAMESPACE]['Oprk1'])
-        self.assertIn('Gm16328', cm2.namespace_cache[MGI_NAMESPACE])
-        self.assertEqual(set('GR'), cm2.namespace_cache[MGI_NAMESPACE]['Gm16328'])
+        cm2.ensure_namespace(HGNC_URL)
+        help_check_hgnc(self, {HGNC_KEYWORD: cm2.namespace_cache[HGNC_URL]})
 
 
 class TestCache(unittest.TestCase):
@@ -68,24 +38,17 @@ class TestCache(unittest.TestCase):
         self.connection = 'sqlite:///'
         self.cm = CacheManager(connection=self.connection)
 
-    def test_existence(self):
-        metadata = MetaData(self.cm.engine)
-        table = Table(OWL_TABLE_NAME, metadata, autoload=True)
-        self.assertIsNotNone(table)
+    @mock_bel_resources
+    def test_insert_namespace(self, mock_get):
+        self.cm.ensure_namespace(HGNC_URL)
+        help_check_hgnc(self, {HGNC_KEYWORD: self.cm.namespace_cache[HGNC_URL]})
 
-    def test_insert_namespace(self):
-        self.cm.ensure_namespace(MGI_NAMESPACE)
-        self.assertIn(MGI_NAMESPACE, self.cm.namespace_cache)
-        self.assertIn('Oprk1', self.cm.namespace_cache[MGI_NAMESPACE])
-        self.assertEqual(set('GRP'), self.cm.namespace_cache[MGI_NAMESPACE]['Oprk1'])
-        self.assertIn('Gm16328', self.cm.namespace_cache[MGI_NAMESPACE])
-        self.assertEqual(set('GR'), self.cm.namespace_cache[MGI_NAMESPACE]['Gm16328'])
-
-    def test_insert_annotation(self):
-        self.cm.ensure_annotation(CELL_ANNOTATION)
-        self.assertIn(CELL_ANNOTATION, self.cm.annotation_cache)
-        self.assertIn('B cell', self.cm.annotation_cache[CELL_ANNOTATION])
-        self.assertEqual('CL_0000236', self.cm.annotation_cache[CELL_ANNOTATION]['B cell'])
+    @mock_bel_resources
+    def test_insert_annotation(self, mock_get):
+        self.cm.ensure_annotation(CELL_LINE_URL)
+        self.assertIn(CELL_LINE_URL, self.cm.annotation_cache)
+        self.assertIn('1321N1 cell', self.cm.annotation_cache[CELL_LINE_URL])
+        self.assertEqual('CLO_0001072', self.cm.annotation_cache[CELL_LINE_URL]['1321N1 cell'])
 
     def test_insert_owl(self):
         self.cm.ensure_owl(wine_iri)
