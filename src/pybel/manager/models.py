@@ -16,9 +16,16 @@ ANNOTATION_TABLE_NAME = 'pybel_annotations'
 ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntries'
 
 NETWORK_TABLE_NAME = 'pybel_network'
+CITATION_TABLE_NAME = 'pybel_citation'
+EVIDENCE_TABLE_NAME = 'pybel_evidence'
+EDGE_TABLE_NAME = 'pybel_edge'
+NODE_TABLE_NAME = 'pybel_node'
+EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntries'
+NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
 
 OWL_TABLE_NAME = 'Owl'
 OWL_ENTRY_TABLE_NAME = 'OwlEntry'
+OWL_RELATIONSHIP_TABLE_NAME = 'OwlRelationship'
 
 Base = declarative_base()
 
@@ -120,9 +127,9 @@ class AnnotationEntry(Base):
 
 
 owl_relationship = Table(
-    'owl_relationship', Base.metadata,
-    Column('left_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True),
-    Column('right_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True)
+    OWL_RELATIONSHIP_TABLE_NAME, Base.metadata,
+    Column('left_id', Integer, ForeignKey('{}.id'.format(OWL_ENTRY_TABLE_NAME)), primary_key=True),
+    Column('right_id', Integer, ForeignKey('{}.id'.format(OWL_ENTRY_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -158,6 +165,35 @@ class OwlEntry(Base):
         return 'OwlEntry({}:{})'.format(self.owl, self.entry)
 
 
+network_edge = Table(
+    NETWORK_EDGE_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
+)
+
+edge_annotation = Table(
+    EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
+    Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
+)
+
+'''
+class network_edge(Base):
+    __tablename__ = NETWORK_EDGE_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+
+    network_id = Column(Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)))
+    edge_id = Column(Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)))
+
+
+class edge_annotation(Base):
+    __tablename__ = EDGE_ANNOTATION_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+
+    edge_id = Column(Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)))
+    annotation_id = Column(Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)))
+'''
+
 class Network(Base):
     __tablename__ = NETWORK_TABLE_NAME
     id = Column(Integer, primary_key=True)
@@ -175,6 +211,64 @@ class Network(Base):
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(Binary)
 
+    edges = relationship('Edge', secondary=network_edge)
+
     __table_args__ = (
         UniqueConstraint("name", "version"),
     )
+
+
+class Node(Base):
+    __tablename__ = NODE_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+    bel = Column(String, nullable=False)
+
+    def __repr__(self):
+        return self.bel
+
+
+class Citation(Base):
+    __tablename__ = CITATION_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+    type = Column(String(16), nullable=False)
+    name = Column(String, nullable=False)
+    reference = Column(String, nullable=False)
+    date = Column(Date, nullable=True)
+    authors = Column(String, nullable=False)
+    comments = Column(String, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("type", "reference"),
+    )
+
+
+class Evidence(Base):
+    __tablename__ = EVIDENCE_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+    text = Column(String, nullable=False)
+
+    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+    citation = relationship('Citation')
+
+
+class Edge(Base):
+    __tablename__ = EDGE_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+    bel = Column(String, nullable=False)
+
+    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
+    source = relationship('Node', foreign_keys=[source_id])
+
+    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
+    target = relationship('Node', foreign_keys=[target_id])
+
+    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+    citation = relationship('Citation')
+
+    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)))
+    evidence = relationship("Evidence")
+
+    annotations = relationship('AnnotationEntry', secondary=edge_annotation)
+
+    def __repr__(self):
+        return self.bel
