@@ -66,6 +66,8 @@ def decanonicalize_variant(tokens):
             return 'frag({})'.format(''.join(map(str, tokens[1:])))
         else:
             return 'frag({}, {})'.format(''.join(map(str, tokens[1:])), tokens[-1])
+    elif tokens[0] == 'GeneModification':
+        return 'gmod({})'.format(tokens[1])
     else:
         raise NotImplementedError('prob with :{}'.format(tokens))
 

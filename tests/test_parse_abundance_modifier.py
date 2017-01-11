@@ -1,7 +1,7 @@
 import unittest
 
 from pybel.parser.parse_abundance_modifier import *
-from pybel.parser.parse_pmod import PmodParser
+from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser
 
 log = logging.getLogger(__name__)
 
@@ -85,8 +85,6 @@ class TestPmod(unittest.TestCase):
         expected = ['ProteinModification', 'Ph', 'Ser', 473]
         self.assertEqual(expected, result.asList())
 
-        expected_bel = 'pmod(Ph, Ser, 473)'
-
     def test_pmod2(self):
         statement = 'pmod(Ph, Ser)'
         result = self.parser.parseString(statement)
@@ -113,6 +111,29 @@ class TestPmod(unittest.TestCase):
         result = self.parser.parseString(statement)
 
         expected = ['ProteinModification', ['MOD', 'PhosRes'], 'Ser', 473]
+        self.assertEqual(expected, result.asList())
+
+
+class TestGmod(unittest.TestCase):
+    def setUp(self):
+        self.parser = GmodParser()
+
+    def test_gmod_short(self):
+        statement = 'gmod(M)'
+        result = self.parser.parseString(statement)
+        expected = ['GeneModification', 'Me']
+        self.assertEqual(expected, result.asList())
+
+    def test_gmod_unabbreviated(self):
+        statement = 'gmod(Me)'
+        result = self.parser.parseString(statement)
+        expected = ['GeneModification', 'Me']
+        self.assertEqual(expected, result.asList())
+
+    def test_gmod_long(self):
+        statement = 'geneModification(methylation)'
+        result = self.parser.parseString(statement)
+        expected = ['GeneModification', 'Me']
         self.assertEqual(expected, result.asList())
 
 
