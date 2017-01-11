@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary, \
-    UniqueConstraint
-
 import datetime
+
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary, \
+    UniqueConstraint, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -53,6 +53,8 @@ class Namespace(Base):
 
     entries = relationship('NamespaceEntry', back_populates="namespace")
 
+    has_equivalences = Column(Boolean, default=False)
+
     def __repr__(self):
         return 'Namespace({})'.format(self.keyword)
 
@@ -67,25 +69,22 @@ class NamespaceEntry(Base):
     namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), index=True)
     namespace = relationship('Namespace', back_populates='entries')
 
+    equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
+    equivalence = relationship('NamespaceEntryEquivalence', back_populates='members')
+
     def __repr__(self):
-        return 'NamespaceEntry({}, {})'.format(self.name, self.encoding)
+        return 'NSEntry({}, {}, {})'.format(self.name, ''.join(sorted(self.encoding)), self.equivalence)
 
 
-class NamespaceEquivalenceClass(Base):
+class NamespaceEntryEquivalence(Base):
     __tablename__ = NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME
     id = Column(Integer, primary_key=True)
-    label = Column(String(255), nullable=True)
+    label = Column(String(255), nullable=False, unique=True)
 
-    members = relationship('NamespaceEquivalence', back_populates='namespace_equivalence_class')
+    members = relationship('NamespaceEntry', back_populates='equivalence')
 
-
-class NamespaceEquivalence(Base):
-    __tablename__ = NAMESPACE_EQUIVALENCE_TABLE_NAME
-    namespace_equivalence_class_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)),
-                                            primary_key=True)
-    namespace_equivalence_class = relationship('NamespaceEquivalenceClass', back_populates='members')
-
-    namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True)
+    def __repr__(self):
+        return 'NsEquivalence({})'.format(self.label)
 
 
 class Annotation(Base):

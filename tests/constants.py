@@ -157,6 +157,8 @@ class MockResponse:
             self.path = os.path.join(belns_dir_path, name)
         elif mock_url.endswith('.belanno'):
             self.path = os.path.join(belanno_dir_path, name)
+        elif mock_url.endswith('.beleq'):
+            self.path = os.path.join(beleq_dir_path, name)
         elif mock_url == wine_iri:
             self.path = test_owl_2
         elif mock_url == pizza_iri:

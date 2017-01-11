@@ -352,3 +352,55 @@ class CacheManager(BaseCacheManager):
 
     def ls(self):
         return itt.chain(self.ls_namespaces(), self.ls_annotations(), self.ls_owl())
+
+    # Manage Equivalences
+
+    def ensure_equivalence_class(self, label):
+        try:
+            result = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=label).one()
+        except NoResultFound:
+            result = models.NamespaceEntryEquivalence(label=label)
+            self.session.add(result)
+            self.session.commit()
+        return result
+
+    def insert_equivalences(self, url, namespace_url):
+        """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
+        self.ensure_namespace(namespace_url)
+
+        log.info('Caching equivalences: %s', url)
+
+        config = download_url(url)
+        values = config['Values']
+
+        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
+
+        for entry in ns.entries:
+            equivalence_label = values[entry.name]
+            equivalence = self.ensure_equivalence_class(equivalence_label)
+            entry.equivalence_id = equivalence.id
+
+        ns.has_equivalences = True
+
+        self.session.commit()
+
+    def ensure_equivalences(self, url, namespace_url):
+        """Check if the equivalence file is already loaded, and if not, load it"""
+        self.ensure_namespace(namespace_url)
+
+        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
+
+        if not ns.has_equivalences:
+            self.insert_equivalences(url, namespace_url)
+
+    def get_equivalence_by_entry(self, namespace_url, name):
+        """Gets the equivalence class
+
+        :param namespace_url: the URL of the namespace
+        :param name: the name of the entry in the namespace
+        :return: the equivalence class of the entry in the given namespace
+        """
+        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
+        ns_entry = self.session.query(models.NamespaceEntry).filter(models.NamespaceEntry.namespace_id == ns.id,
+                                                                    models.NamespaceEntry.name == name).one()
+        return ns_entry.equivalence
