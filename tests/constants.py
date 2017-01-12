@@ -19,7 +19,7 @@ bel_dir_path = os.path.join(dir_path, 'bel')
 belns_dir_path = os.path.join(dir_path, 'belns')
 belanno_dir_path = os.path.join(dir_path, 'belanno')
 
-test_bel_1 = os.path.join(bel_dir_path, 'test_bel.bel')
+test_bel = os.path.join(bel_dir_path, 'test_bel.bel')
 test_bel_4 = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 
@@ -36,6 +36,15 @@ test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')
 test_citation_bel = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(**test_citation_dict)
 test_evidence_text = 'I read it on Twitter'
 test_evidence_bel = 'SET Evidence = "{}"'.format(test_evidence_text)
+
+CHEBI_KEYWORD = 'CHEBI'
+CHEBI_URL = 'http://resources.openbel.org/belframework/20150611/namespace/chebi.belns'
+CELL_LINE_KEYWORD = 'CellLine'
+CELL_LINE_URL = 'http://resources.openbel.org/belframework/20150611/annotation/cell-line.belanno'
+HGNC_KEYWORD = 'HGNC'
+HGNC_URL = 'http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns'
+MESH_DISEASES_KEYWORD = 'MeSHDisease'
+MESH_DISEASES_URL = "http://resources.openbel.org/belframework/20150611/annotation/mesh-diseases.belanno"
 
 pizza_iri = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
 wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
@@ -87,7 +96,7 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         # FIXME this doesn't work for GraphML IO
         if check_metadata:
-            self.assertEqual(expected_test_bel_1_metadata, g.document)
+            self.assertEqual(expected_test_bel_metadata, g.document)
 
         assertHasNode(self, AKT1, g, type='Protein', namespace='HGNC', name='AKT1')
         assertHasNode(self, EGFR, g, type='Protein', namespace='HGNC', name='EGFR')
@@ -101,7 +110,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, AKT1, CASP8, g, relation='association', TESTAN1="2")
 
 
-expected_test_bel_1_metadata = {
+expected_test_bel_metadata = {
     'name': "PyBEL Test Document 1",
     "description": "Made for testing PyBEL parsing",
     'version': "1.6",
@@ -144,6 +153,10 @@ class MockResponse:
             self.path = os.path.join(belns_dir_path, name)
         elif mock_url.endswith('.belanno'):
             self.path = os.path.join(belanno_dir_path, name)
+        elif mock_url == wine_iri:
+            self.path = test_owl_2
+        elif mock_url == pizza_iri:
+            self.path = test_owl_1
         else:
             raise ValueError('Invalid extension')
 
@@ -170,4 +183,17 @@ class MockSession:
         return MockResponse(url)
 
 
-patch_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)
+mock_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)
+
+
+def help_check_hgnc(self, namespace_dict):
+    self.assertIn(HGNC_KEYWORD, namespace_dict)
+
+    self.assertIn('MHS2', namespace_dict[HGNC_KEYWORD])
+    self.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD]['MHS2']))
+
+    self.assertIn('MIATNB', namespace_dict[HGNC_KEYWORD])
+    self.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD]['MIATNB']))
+
+    self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
+    self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))

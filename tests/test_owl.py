@@ -2,16 +2,14 @@ import logging
 import unittest
 
 import requests.exceptions
-from sqlalchemy import Table, MetaData
 
 import pybel
 from pybel.manager.cache import CacheManager
-from pybel.manager.models import OWL_TABLE_NAME
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3, \
-    expected_test_bel_4_metadata, assertHasNode, assertHasEdge
+    expected_test_bel_4_metadata, assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
 
 log = logging.getLogger('pybel')
 
@@ -276,14 +274,11 @@ class TestWine(TestOwlBase):
 
     def test_metadata_parser(self):
         cm = CacheManager('sqlite://')
-        metadata = MetaData(cm.engine)
-        table = Table(OWL_TABLE_NAME, metadata, autoload=True)
-        self.assertIsNotNone(table)
 
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
 
-        parser = MetadataParser(cm)
+        parser = MetadataParser(cache_manager=cm)
 
         try:
             parser.parseString(s)
@@ -351,11 +346,11 @@ class TestIntegration(TestOwlBase):
     def test_from_path(self):
         g = pybel.from_path(test_bel_4)
 
-        expected_definitions = dict(
-            HGNC="http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns",
-            PIZZA="http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl",
-            WINE="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
-        )
+        expected_definitions = {
+            HGNC_KEYWORD: HGNC_URL,
+            'PIZZA': pizza_iri,
+            'WINE': wine_iri
+        }
 
         self.assertEqual(expected_test_bel_4_metadata, g.document)
 
