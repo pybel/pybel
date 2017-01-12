@@ -404,3 +404,13 @@ class CacheManager(BaseCacheManager):
         ns_entry = self.session.query(models.NamespaceEntry).filter(models.NamespaceEntry.namespace_id == ns.id,
                                                                     models.NamespaceEntry.name == name).one()
         return ns_entry.equivalence
+
+    def get_equivalence_members(self, equivalence_class):
+        """Gets all members of the given equivalence class
+
+        :param equivalence_class: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
+                                    for Alzheimer's Disease
+        :return: a list of members of the class
+        """
+        eq = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=equivalence_class).one()
+        return eq.members

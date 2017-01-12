@@ -79,7 +79,7 @@ class NamespaceEntry(Base):
 class NamespaceEntryEquivalence(Base):
     __tablename__ = NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME
     id = Column(Integer, primary_key=True)
-    label = Column(String(255), nullable=False, unique=True)
+    label = Column(String(255), nullable=False, unique=True, index=True)
 
     members = relationship('NamespaceEntry', back_populates='equivalence')
 
