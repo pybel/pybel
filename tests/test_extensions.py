@@ -16,3 +16,7 @@ class TestExtensions(unittest.TestCase):
         from pybel.ext import test
 
         assert test.an_extension_function() == 42
+
+    def test_import_extension_4(self):
+        with self.assertRaises(ImportError):
+            from pybel.ext import not_an_extension
