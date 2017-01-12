@@ -308,7 +308,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_gene_fusion_legacy_1(self):
-        statement = "g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        statement = 'g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
@@ -330,7 +330,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_gene_fusion_legacy_2(self):
-        statement = "g(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'g(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
@@ -682,7 +682,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_protein_fusion_legacy_2(self):
-        statement = "p(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'p(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.protein.parseString(statement)
 
         expected_dict = {
@@ -1174,7 +1174,7 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_rna_fusion_legacy_1(self):
-        statement = "r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        statement = 'r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -1196,7 +1196,7 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_rna_fusion_legacy_2(self):
-        statement = "r(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'r(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
