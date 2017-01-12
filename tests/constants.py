@@ -18,6 +18,7 @@ owl_dir_path = os.path.join(dir_path, 'owl')
 bel_dir_path = os.path.join(dir_path, 'bel')
 belns_dir_path = os.path.join(dir_path, 'belns')
 belanno_dir_path = os.path.join(dir_path, 'belanno')
+beleq_dir_path = os.path.join(dir_path, 'beleq')
 
 test_bel = os.path.join(bel_dir_path, 'test_bel.bel')
 test_bel_4 = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
@@ -31,6 +32,9 @@ test_an_1 = os.path.join(belanno_dir_path, 'test_an_1.belanno')
 
 test_ns_1 = os.path.join(belns_dir_path, 'test_ns_1.belns')
 test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
+
+test_eq_1 = os.path.join(beleq_dir_path, 'disease-ontology.beleq')
+test_eq_2 = os.path.join(beleq_dir_path, 'mesh-diseases.beleq')
 
 test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')
 test_citation_bel = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(**test_citation_dict)
@@ -153,6 +157,8 @@ class MockResponse:
             self.path = os.path.join(belns_dir_path, name)
         elif mock_url.endswith('.belanno'):
             self.path = os.path.join(belanno_dir_path, name)
+        elif mock_url.endswith('.beleq'):
+            self.path = os.path.join(beleq_dir_path, name)
         elif mock_url == wine_iri:
             self.path = test_owl_2
         elif mock_url == pizza_iri:
