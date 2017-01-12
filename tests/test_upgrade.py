@@ -1,4 +1,3 @@
-import io
 import logging
 import os
 import tempfile
@@ -8,10 +7,30 @@ from requests.exceptions import ConnectionError
 
 import pybel
 from pybel.constants import GOCC_LATEST
-from pybel.parser.canonicalize import to_bel
+from pybel.parser.canonicalize import to_bel, decanonicalize_variant, postpend_location, decanonicalize_node
 from tests.constants import test_bel, test_bel_4, mock_bel_resources
 
 log = logging.getLogger('pybel')
+
+
+class TestCanonicalizeHelper(unittest.TestCase):
+    def test_postpend_location_failure(self):
+        with self.assertRaises(ValueError):
+            postpend_location('', dict(name='failure'))
+
+    def test_decanonicalize_variant_failure(self):
+        with self.assertRaises(ValueError):
+            decanonicalize_variant('rmod(lol)')
+
+    def test_decanonicalize_node_failure(self):
+        with self.assertRaises(ValueError):
+            class NotGraph:
+                node = None
+
+            x = NotGraph()
+            x.node = {'test_node': {'type': 'nope'}}
+
+            decanonicalize_node(x, 'test_node')
 
 
 class TestCanonicalize(unittest.TestCase):

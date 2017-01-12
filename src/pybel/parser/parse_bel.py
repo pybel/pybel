@@ -10,12 +10,11 @@ from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWi
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
-    LocationParser, TruncParser
+    LocationParser, TruncParser, PmodParser, GmodParser
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
-from .parse_pmod import PmodParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
 
 log = logging.getLogger('pybel')
@@ -69,6 +68,7 @@ class BelParser(BaseParser):
         self.psub = PsubParser().get_language()
         self.gsub = GsubParser().get_language()
         self.trunc = TruncParser().get_language()
+        self.gmod = GmodParser().get_language()
 
         # 2.6 Other Functions
 
@@ -85,8 +85,8 @@ class BelParser(BaseParser):
         gene_tag = one_of_tags(['g', 'geneAbundance'], 'Gene', 'function')
         self.gene_simple = nest(identifier + opt_location)
 
-        self.gene_modified = nest(identifier + WCW + delimitedList(Group(self.variant | self.gsub))('variants') +
-                                  opt_location)
+        self.gene_modified = nest(
+            identifier + WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))('variants') + opt_location)
 
         self.gene_fusion = nest(Group(self.fusion)('fusion') + opt_location)
 

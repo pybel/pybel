@@ -166,6 +166,35 @@ class TestGene(TestTokenParserBase):
         self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
         self.assertHasEdge(parent, expected_node, relation='hasVariant')
 
+    def test_gmod(self):
+        """Test Gene Modification"""
+        statement = 'geneAbundance(HGNC:AKT1,gmod(M))'
+        result = self.parser.gene.parseString(statement)
+
+        expected_result = {
+            'function': 'Gene',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'AKT1'
+            },
+            'variants': [
+                ['GeneModification', 'Me']
+            ]
+        }
+        self.assertEqual(expected_result, result.asDict())
+
+        expected_node = canonicalize_node(result)
+        self.assertHasNode(expected_node, type='GeneVariant')
+
+        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
+        expected_canonical_bel = 'g(HGNC:AKT1, gmod(Me))'
+        self.assertEqual(expected_canonical_bel, canonical_bel)
+
+        # parent = 'Gene', 'HGNC', 'AKT1'
+        # self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
+
+        # self.assertHasEdge(parent, expected_node, relation='hasVariant')
+
     def test_214d(self):
         """Test BEL 1.0 gene substitution"""
         statement = 'g(HGNC:AKT1,sub(G,308,A))'
@@ -279,7 +308,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_gene_fusion_legacy_1(self):
-        statement = "g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        statement = 'g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
@@ -301,7 +330,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_gene_fusion_legacy_2(self):
-        statement = "g(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'g(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
@@ -653,7 +682,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_protein_fusion_legacy_2(self):
-        statement = "p(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'p(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.protein.parseString(statement)
 
         expected_dict = {
@@ -1145,7 +1174,7 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_rna_fusion_legacy_1(self):
-        statement = "r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        statement = 'r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -1167,7 +1196,7 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_rna_fusion_legacy_2(self):
-        statement = "r(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'r(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -2404,7 +2433,8 @@ class TestWrite(TestTokenParserBase):
             ('reaction(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"oxygen"),a(CHEBI:"hydrogen peroxide")))',
              'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
             ('rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))',
-             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))')
+             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
+            ('g(HGNC:AKT1, geneModification(M))', 'g(HGNC:AKT1, gmod(Me))')
         ]
 
         for source_bel, expected_bel in cases:

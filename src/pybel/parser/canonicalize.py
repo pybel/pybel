@@ -12,6 +12,8 @@ from ..constants import GOCC_LATEST
 # TODO extract from .parse_control
 CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
 
+BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
+
 variant_parent_dict = {
     'GeneVariant': 'g',
     'RNAVariant': 'r',
@@ -26,6 +28,14 @@ fusion_parent_dict = {
 
 
 def get_neighbors_by_path_type(g, v, relation):
+    """Gets the set of neighbors of a given node that have a relation of the given type
+
+    :param g: A BEL network
+    :type g: :class:`pybel.BELGraph`
+    :param v: a node from the BEL network
+    :param relation: the relation to follow from the given node
+    :return:
+    """
     result = []
     for neighbor in g.edge[v]:
         for data in g.edge[v][neighbor].values():
@@ -47,7 +57,7 @@ def postpend_location(s, location_model):
 
     if all(k in location_model for k in {'namespace', 'name'}):
         return "loc({}:{})".format(location_model['namespace'], ensure_quotes(location_model['name']))
-    raise ValueError('Confused! {}'.format(location_model))
+    raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
 
 
 def decanonicalize_variant(tokens):
@@ -66,8 +76,10 @@ def decanonicalize_variant(tokens):
             return 'frag({})'.format(''.join(map(str, tokens[1:])))
         else:
             return 'frag({}, {})'.format(''.join(map(str, tokens[1:])), tokens[-1])
+    elif tokens[0] == 'GeneModification':
+        return 'gmod({})'.format(tokens[1])
     else:
-        raise NotImplementedError('prob with :{}'.format(tokens))
+        raise ValueError('Invalid variant: {}'.format(tokens))
 
 
 def decanonicalize_fusion_range(tokens):
@@ -78,6 +90,10 @@ def decanonicalize_fusion_range(tokens):
 
 def decanonicalize_node(g, v):
     """Returns a node from a graph as a BEL string
+
+    :param g: a BEL network
+    :type g: :class:`pybel.BELGraph`
+    :param v: a node from the BEL graph
     """
     tokens = g.node[v]
 
@@ -114,7 +130,7 @@ def decanonicalize_node(g, v):
             decanonicalize_fusion_range(tokens['range_3p'])
         )
 
-    raise NotImplementedError('unknown node data: {} {}'.format(v, tokens))
+    raise ValueError('Unknown node data: {} {}'.format(v, tokens))
 
 
 def decanonicalize_edge_node(g, node, edge_data, node_position):
@@ -167,12 +183,13 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
 def decanonicalize_edge(g, u, v, k):
     """Takes two nodes and gives back a BEL string representing the statement
 
-    :param g: The graph
-    :type g: BELGraph
+    :param g: A BEL graph
+    :type g: :class:`BELGraph`
     :param u: The edge's source node
     :param v: The edge's target node
-    :param k: The edge key
-    :return:
+    :param k: The edge's key
+    :return: The canonical BEL for this edge
+    :rtype: str
     """
 
     ed = g.edge[u][v][k]
@@ -183,16 +200,14 @@ def decanonicalize_edge(g, u, v, k):
     return "{} {} {}".format(u_str, ed['relation'], v_str)
 
 
-blacklist_features = ['relation', 'subject', 'object', 'citation', 'SupportingText']
-
-
 def flatten_citation(citation):
     return ','.join('"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)])
 
 
 def sort_edges(d):
     return (flatten_citation(d['citation']), d['SupportingText']) + tuple(
-        itt.chain.from_iterable((k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in blacklist_features))
+        itt.chain.from_iterable(
+            (k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in BLACKLIST_EDGE_ATTRIBUTES))
 
 
 def to_bel(g, file=sys.stdout):
@@ -234,7 +249,7 @@ def to_bel(g, file=sys.stdout):
             print('SET SupportingText = "{}"'.format(evidence), file=file)
 
             for u, v, k, d in evidence_edges:
-                dkeys = sorted(dk for dk in d if dk not in blacklist_features)
+                dkeys = sorted(dk for dk in d if dk not in BLACKLIST_EDGE_ATTRIBUTES)
                 for dk in dkeys:
                     print('SET {} = "{}"'.format(dk, d[dk]), file=file)
                 print(decanonicalize_edge(g, u, v, k), file=file)

@@ -252,6 +252,12 @@ pmod_legacy_labels = {
     'U': 'Ub',
 }
 
+gmod_namespace = {
+    'methylation': 'Me',
+    'Me': 'Me',
+    'M': 'Me'
+}
+
 unqualified_edges = [
     'hasReactant',
     'hasProduct',
