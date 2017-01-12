@@ -3,11 +3,10 @@ import os
 import tempfile
 import unittest
 
-from requests.exceptions import ConnectionError
-
 import pybel
 from pybel.constants import GOCC_LATEST
 from pybel.parser.canonicalize import to_bel, decanonicalize_variant, postpend_location, decanonicalize_node
+from tests import constants
 from tests.constants import test_bel, test_bel_4, mock_bel_resources
 
 log = logging.getLogger('pybel')
@@ -79,8 +78,8 @@ class TestCanonicalize(unittest.TestCase):
     def test_canonicalize_1(self, mock_get):
         self.canonicalize_helper(test_bel)
 
-    def test_canonicalize_4(self):
-        try:
-            self.canonicalize_helper(test_bel_4)
-        except ConnectionError as e:
-            log.warning('Connection error: %s', e)
+    @mock_bel_resources
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_canonicalize_4(self, m1, m2, m3):
+        self.canonicalize_helper(test_bel_4)

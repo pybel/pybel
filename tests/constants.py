@@ -2,9 +2,12 @@ import logging
 import os
 import unittest
 
+import networkx as nx
+import ontospy
 from requests.compat import urlparse
 
 from pybel import BELGraph
+from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
 
@@ -50,8 +53,8 @@ HGNC_URL = 'http://resources.openbel.org/belframework/20150611/namespace/hgnc-hu
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
 MESH_DISEASES_URL = "http://resources.openbel.org/belframework/20150611/annotation/mesh-diseases.belanno"
 
-pizza_iri = "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
-wine_iri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
+pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
+wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
 
 AKT1 = ('Protein', 'HGNC', 'AKT1')
 EGFR = ('Protein', 'HGNC', 'EGFR')
@@ -145,13 +148,17 @@ expected_test_bel_4_metadata = {
 }
 
 
+def get_uri_name(url):
+    url_parsed = urlparse(url)
+    url_parts = url_parsed.path.split('/')
+    return url_parts[-1]
+
+
 class MockResponse:
     """See http://stackoverflow.com/questions/15753390/python-mock-requests-and-the-response"""
 
     def __init__(self, mock_url):
-        url_parsed = urlparse(mock_url)
-        url_parts = url_parsed.path.split('/')
-        name = url_parts[-1]
+        name = get_uri_name(mock_url)
 
         if mock_url.endswith('.belns'):
             self.path = os.path.join(belns_dir_path, name)
@@ -203,3 +210,37 @@ def help_check_hgnc(self, namespace_dict):
 
     self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
     self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
+
+
+def parse_owl_pybel_resolver(iri):
+    path = os.path.join(owl_dir_path, get_uri_name(iri))
+
+    if not os.path.exists(path) and '.' not in path:
+        path = '{}.owl'.format(path)
+
+    return OWLParser(file=path)
+
+
+mock_parse_owl_pybel = mock.patch('pybel.manager.utils.parse_owl_pybel', side_effect=parse_owl_pybel_resolver)
+
+
+def parse_owl_ontospy_resolver(iri):
+    path = os.path.join(owl_dir_path, get_uri_name(iri))
+    o = ontospy.Ontospy(path)
+
+    g = nx.DiGraph(IRI=iri)
+
+    for cls in o.classes:
+        g.add_node(cls.locale, type='Class')
+
+        for parent in cls.parents():
+            g.add_edge(cls.locale, parent.locale, type='SubClassOf')
+
+        for instance in cls.instances():
+            _, frag = urldefrag(instance)
+            g.add_edge(frag, cls.locale, type='ClassAssertion')
+
+    return g
+
+
+mock_parse_owl_ontospy = mock.patch('pybel.manager.utils.parse_owl_ontospy', side_effect=parse_owl_ontospy_resolver)
