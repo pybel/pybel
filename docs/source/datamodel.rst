@@ -1,8 +1,8 @@
 Data Model
 ==========
 
-Node
-----
+Nodes
+-----
 The relevant data about a node is stored in its associated dictionary in NetworkX. After parsing, :code:`p(HGNC:GSK3B)`
 becomes:
 
@@ -16,8 +16,8 @@ becomes:
         }
     }
 
-With the addition of a variant (:code:`var()`), post-translational modification (:code:`pmod()`), or gene modification
-(:code:`gmod()`) to a BEL statement, an additional entry called :code:`variants` is added. It is a list of all of the
+With the addition of a variant :code:`var()`, post-translational modification :code:`pmod()`, or gene modification
+:code:`gmod()` to a BEL statement, an additional entry called :code:`variants` is added. It is a list of all of the
 modifications and variants (in alphabetical order) on the node. Under this schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9))`
 becomes:
 
@@ -25,7 +25,10 @@ becomes:
 
     {
         'function': 'Protein',
-        'identifier': dict(namespace='HGNC', name='GSK3B'),
+        'identifier': {
+            'namespace': 'HGNC',
+            'name': 'GSK3B'
+        },
         'variants': [
             {
                 'code': 'Ser',
@@ -35,6 +38,8 @@ becomes:
         ]
     }
 
+Nomenclature
+~~~~~~~~~~~~
 
 Mapping for BEL functions to PyBEL functions is done based on the following dictionary
 (:code:`pybel.parser.language.abundance_labels`)
@@ -55,12 +60,32 @@ Mapping for BEL functions to PyBEL functions is done based on the following dict
         'biologicalProcess': 'BiologicalProcess',
         'bp': 'BiologicalProcess',
         'pathology': 'Pathology',
-        'path': 'Pathology'
+        'path': 'Pathology',
+        'complex': 'Complex'
+        'complexAbundance': 'Complex',
+        'composite': 'Composite'
+        'compositeAbundance': 'Composite'
     }
 
+But these terms can be more readily accessed by :code:`pybel.parser.language.PROTEIN`,
+:code:`pybel.parser.language.GENE`, and so on.
 
-Edge
-----
+List Abundances
+~~~~~~~~~~~~~~~
+Complexes and composites that are defined by lists do not recieve information about the identifier, and are only
+described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
+
+.. code::
+
+    {
+        'function': 'Composite'
+    }
+
+The remaining information is encoded in the edges to the resulting protein nodes from :code:`p(HGNC:FOS)` and
+:code:`p(HGNC:JUN)` with connections having the relation :code:`hasMember`.
+
+Edges
+-----
 Modifiers are added to this structure as well. Under this schema,
 :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
 
