@@ -1,8 +1,8 @@
 import logging
 
-from pybel.parser.canonicalize import decanonicalize_node
+from pybel.canonicalize import decanonicalize_node
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
-from pybel.parser.parse_exceptions import NestedRelationNotSupportedException, IllegalTranslocationException
+from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel
 
 log = logging.getLogger(__name__)
@@ -166,6 +166,35 @@ class TestGene(TestTokenParserBase):
         self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
         self.assertHasEdge(parent, expected_node, relation='hasVariant')
 
+    def test_gmod(self):
+        """Test Gene Modification"""
+        statement = 'geneAbundance(HGNC:AKT1,gmod(M))'
+        result = self.parser.gene.parseString(statement)
+
+        expected_result = {
+            'function': 'Gene',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'AKT1'
+            },
+            'variants': [
+                ['GeneModification', 'Me']
+            ]
+        }
+        self.assertEqual(expected_result, result.asDict())
+
+        expected_node = canonicalize_node(result)
+        self.assertHasNode(expected_node, type='GeneVariant')
+
+        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
+        expected_canonical_bel = 'g(HGNC:AKT1, gmod(Me))'
+        self.assertEqual(expected_canonical_bel, canonical_bel)
+
+        # parent = 'Gene', 'HGNC', 'AKT1'
+        # self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
+
+        # self.assertHasEdge(parent, expected_node, relation='hasVariant')
+
     def test_214d(self):
         """Test BEL 1.0 gene substitution"""
         statement = 'g(HGNC:AKT1,sub(G,308,A))'
@@ -279,7 +308,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_gene_fusion_legacy_1(self):
-        statement = "g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        statement = 'g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
@@ -301,7 +330,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_gene_fusion_legacy_2(self):
-        statement = "g(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'g(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
@@ -653,7 +682,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_protein_fusion_legacy_2(self):
-        statement = "p(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'p(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.protein.parseString(statement)
 
         expected_dict = {
@@ -1145,7 +1174,7 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_rna_fusion_legacy_1(self):
-        statement = "r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))"
+        statement = 'r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -1167,7 +1196,7 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_rna_fusion_legacy_2(self):
-        statement = "r(HGNC:CHCHD4, fusion(HGNC:AIFM1))"
+        statement = 'r(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -1660,7 +1689,7 @@ class TestTransformation(TestTokenParserBase):
     def test_translocation_invalid(self):
         """Fail on an improperly written single argument translocation"""
         statement = 'tloc(a(NS:"T-Lymphocytes"))'
-        with self.assertRaises(IllegalTranslocationException):
+        with self.assertRaises(MalformedTranslocationWarning):
             self.parser.translocation.parseString(statement)
 
     def test_translocation_secretion(self):
@@ -2127,7 +2156,7 @@ class TestRelations(TestTokenParserBase):
         3.1 \
         Test nested statement"""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
-        with self.assertRaises(NestedRelationNotSupportedException):
+        with self.assertRaises(NestedRelationWarning):
             self.parser.relation.parseString(statement)
 
     def test_nested_lenient(self):
@@ -2404,7 +2433,8 @@ class TestWrite(TestTokenParserBase):
             ('reaction(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"oxygen"),a(CHEBI:"hydrogen peroxide")))',
              'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
             ('rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))',
-             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))')
+             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
+            ('g(HGNC:AKT1, geneModification(M))', 'g(HGNC:AKT1, gmod(Me))')
         ]
 
         for source_bel, expected_bel in cases:

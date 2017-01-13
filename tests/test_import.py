@@ -4,37 +4,26 @@ import unittest
 import pybel
 from pybel.manager.cache import CacheManager
 from pybel.parser import BelParser
-from pybel.parser.parse_exceptions import IllegalFunctionSemantic, MissingCitationException
-from tests.constants import TestTokenParserBase, test_bel_3, test_bel_1, test_citation_bel, test_citation_dict, \
-    test_evidence_bel, BelReconstitutionMixin, expected_test_bel_3_metadata, expected_test_bel_1_metadata
+from pybel.parser.parse_exceptions import InvalidFunctionSemantic, MissingCitationException
+from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
+    test_citation_dict, test_evidence_bel, mock_bel_resources
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
 
-class TestCacheIntegration(unittest.TestCase):
-    def test_cached_winning(self):
-        cm = CacheManager('sqlite://')
-
-        with open(test_bel_3) as f:
-            g = pybel.BELGraph(f, cache_manager=cm)
-
-        self.assertEqual(expected_test_bel_3_metadata, g.metadata_parser.document_metadata)
-
-
 class TestImport(BelReconstitutionMixin, unittest.TestCase):
-    def test_from_path(self):
-        g = pybel.from_path(test_bel_1, complete_origin=True)
-        self.assertEqual(expected_test_bel_1_metadata, g.metadata_parser.document_metadata)
+
+    @mock_bel_resources
+    def test_bytes_io(self, mock_get):
+        g = pybel.from_path(test_bel, complete_origin=True)
         self.bel_1_reconstituted(g)
 
-    def test_bytes_io(self):
-        g = pybel.from_path(test_bel_1, complete_origin=True)
         g_reloaded = pybel.from_bytes(pybel.to_bytes(g))
         self.bel_1_reconstituted(g_reloaded)
 
-    def test_from_fileUrl(self):
-        g = pybel.from_url('file://{}'.format(test_bel_1), complete_origin=True)
-        self.assertEqual(expected_test_bel_1_metadata, g.metadata_parser.document_metadata)
+    @mock_bel_resources
+    def test_from_fileUrl(self, mock_get):
+        g = pybel.from_url('file://{}'.format(test_bel), complete_origin=True)
         self.bel_1_reconstituted(g)
 
 
@@ -57,7 +46,7 @@ class TestFull(TestTokenParserBase):
 
     def test_semantic_failure(self):
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
-        with self.assertRaises(IllegalFunctionSemantic):
+        with self.assertRaises(InvalidFunctionSemantic):
             self.parser.parseString(statement)
 
     def test_missing_citation(self):

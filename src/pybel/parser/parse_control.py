@@ -76,7 +76,7 @@ class ControlParser(BaseParser):
     def handle_annotation_key(self, s, l, tokens):
         key = tokens['key']
         if key not in self.valid_annotations:
-            raise InvalidAnnotationKeyException("Illegal annotation: {}".format(key))
+            raise UndefinedAnnotationWarning("Illegal annotation: {}".format(key))
         return tokens
 
     def handle_citation(self, s, l, tokens):
@@ -106,7 +106,7 @@ class ControlParser(BaseParser):
         value = tokens['value']
 
         if value not in self.valid_annotations[key]:
-            raise IllegalAnnotationValueExeption('Illegal annotation value for {}: {}'.format(key, value))
+            raise IllegalAnnotationValueWarning('Illegal annotation value for {}: {}'.format(key, value))
 
         self.annotations[key] = value
         return tokens
@@ -117,7 +117,7 @@ class ControlParser(BaseParser):
 
         for value in values:
             if value not in self.valid_annotations[key]:
-                raise IllegalAnnotationValueExeption('Illegal annotation value for {}: {}'.format(key, value))
+                raise IllegalAnnotationValueWarning('Illegal annotation value for {}: {}'.format(key, value))
 
         self.annotations[key] = set(values)
         return tokens
@@ -145,7 +145,7 @@ class ControlParser(BaseParser):
 
         # TODO refactor to own function
         if key not in self.annotations:
-            raise MissingAnnotationKeyException("Can't unset missing key: {}".format(key))
+            raise MissingAnnotationKeyWarning("Can't unset missing key: {}".format(key))
 
         del self.annotations[key]
         return tokens
@@ -168,7 +168,7 @@ class ControlParser(BaseParser):
         elif key in {'SupportingText', 'Evidence'}:
             del self.annotations['SupportingText']
         elif key not in self.annotations:
-            raise MissingAnnotationKeyException("Can't unset missing key: {}".format(key))
+            raise MissingAnnotationKeyWarning("Can't unset missing key: {}".format(key))
         else:
             del self.annotations[key]
 
@@ -176,11 +176,17 @@ class ControlParser(BaseParser):
         return self.commands
 
     def get_annotations(self):
+        """
+
+        :return: The currently stored BEL annotations
+        :rtype: dict
+        """
         annotations = self.annotations.copy()
         annotations['citation'] = self.citation.copy()
         return annotations
 
     def clear(self):
+        """Clears the annotations, citation, and statement group"""
         self.annotations.clear()
         self.citation.clear()
         self.statement_group = None

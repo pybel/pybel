@@ -8,7 +8,7 @@ import logging
 
 from pyparsing import *
 
-from .parse_exceptions import PlaceholderAminoAcidException
+from .parse_exceptions import PlaceholderAminoAcidWarning
 
 log = logging.getLogger('pybel')
 
@@ -74,45 +74,59 @@ activity_ns = {
 
 activities = list(activity_labels.keys())
 
+ABUNDANCE = 'Abundance'
+GENE = 'Gene'
+MIRNA = 'miRNA'
+PROTEIN = 'Protein'
+RNA = 'RNA'
+BIOPROCESS = 'BiologicalProcess'
+PATHOLOGY = 'Pathology'
+COMPOSITE = 'Composite'
+COMPLEX = 'Complex'
+
 abundance_labels = {
-    'abundance': 'Abundance',
-    'a': 'Abundance',
-    'geneAbundance': 'Gene',
-    'g': 'Gene',
-    'microRNAAbundance': 'miRNA',
-    'm': 'miRNA',
-    'proteinAbundance': 'Protein',
-    'p': 'Protein',
-    'rnaAbundance': 'RNA',
-    'r': 'RNA',
-    'biologicalProcess': 'BiologicalProcess',
-    'bp': 'BiologicalProcess',
-    'pathology': 'Pathology',
-    'path': 'Pathology'
+    'abundance': ABUNDANCE,
+    'a': ABUNDANCE,
+    'geneAbundance': GENE,
+    'g': GENE,
+    'microRNAAbundance': MIRNA,
+    'm': MIRNA,
+    'proteinAbundance': PROTEIN,
+    'p': PROTEIN,
+    'rnaAbundance': RNA,
+    'r': RNA,
+    'biologicalProcess': BIOPROCESS,
+    'bp': BIOPROCESS,
+    'pathology': PATHOLOGY,
+    'path': PATHOLOGY,
+    'composite': COMPOSITE,
+    'compositeAbundance': COMPOSITE,
+    'complex': COMPLEX,
+    'complexAbundance': COMPLEX
 }
 
 rev_abundance_labels = {
-    'Abundance': 'a',
-    'Gene': 'g',
-    'miRNA': 'm',
-    'Protein': 'p',
-    'RNA': 'r',
-    'BiologicalProcess': 'bp',
-    'Pathology': 'path',
-    'Complex': 'complex',
-    'Composite': 'composite'
+    ABUNDANCE: 'a',
+    GENE: 'g',
+    MIRNA: 'm',
+    PROTEIN: 'p',
+    RNA: 'r',
+    BIOPROCESS: 'bp',
+    PATHOLOGY: 'path',
+    COMPLEX: 'complex',
+    COMPOSITE: 'composite'
 }
 
 #: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
 value_map = {
-    'G': {'Gene'},
-    'R': {'miRNA', 'RNA'},
-    'P': {'Protein'},
-    'M': {'miRNA'},
-    'A': {'Abundance', 'RNA', 'miRNA', 'Protein', 'Gene', 'Complex'},
-    'B': {'Pathology', 'BiologicalProcess'},
-    'O': {'Pathology'},
-    'C': {'Complex'}
+    'G': {GENE},
+    'R': {RNA, MIRNA},
+    'P': {PROTEIN},
+    'M': {MIRNA},
+    'A': {ABUNDANCE, RNA, MIRNA, PROTEIN, GENE, COMPLEX},
+    'B': {PATHOLOGY, BIOPROCESS},
+    'O': {PATHOLOGY},
+    'C': {COMPLEX}
 }
 
 # rev_value_map = {v: k for k, v in value_map.items()}
@@ -148,7 +162,7 @@ aa_placeholder = Keyword('X')
 
 
 def handle_aa_placeholder(s, l, tokens):
-    raise PlaceholderAminoAcidException('Placeholder amino acid X found')
+    raise PlaceholderAminoAcidWarning('Placeholder amino acid X found')
 
 
 aa_placeholder.setParseAction(handle_aa_placeholder)
@@ -250,6 +264,12 @@ pmod_legacy_labels = {
     'R': 'ADPRib',
     'S': 'Sumo',
     'U': 'Ub',
+}
+
+gmod_namespace = {
+    'methylation': 'Me',
+    'Me': 'Me',
+    'M': 'Me'
 }
 
 unqualified_edges = [

@@ -2,16 +2,15 @@ import logging
 import unittest
 
 import requests.exceptions
-from sqlalchemy import Table, MetaData
 
 import pybel
 from pybel.manager.cache import CacheManager
-from pybel.manager.models import OWL_TABLE_NAME
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
-from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, test_owl_3, \
-    expected_test_bel_4_metadata, assertHasNode, assertHasEdge
+from tests import constants
+from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, expected_test_bel_4_metadata, \
+    assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
 
 log = logging.getLogger('pybel')
 
@@ -63,14 +62,18 @@ class TestParsePizza(TestOwlBase):
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
-    def test_url(self):
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_url(self, m1, m2):
         owl = parse_owl(pizza_iri)
 
         self.assertEqual(pizza_iri, owl.iri)
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
-    def test_metadata_parser(self):
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_metadata_parser(self, m1, m2):
         functions = set('A')
         s = 'DEFINE NAMESPACE Pizza AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
         parser = MetadataParser(CacheManager('sqlite:///'))
@@ -86,7 +89,9 @@ class TestParsePizza(TestOwlBase):
             self.assertIn(node, names)
             self.assertEqual(functions, parser.namespace_dict['Pizza'][node])
 
-    def test_metadata_parser_no_function(self):
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_metadata_parser_no_function(self, m1, m2):
         s = 'DEFINE NAMESPACE Pizza AS OWL "{}"'.format(pizza_iri)
         parser = MetadataParser(CacheManager('sqlite:///'))
 
@@ -107,12 +112,12 @@ class TestWine(TestOwlBase):
     def setUp(self):
         self.iri = wine_iri
 
-        self.expected_prefixes = {
+        self.wine_expected_prefixes = {
             'owl': "http://www.w3.org/2002/07/owl#",
             'rdf': "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
         }
 
-        self.expected_classes = {
+        self.wine_expected_classes = {
             'Region',
             'Vintage',
             'VintageYear',
@@ -126,7 +131,7 @@ class TestWine(TestOwlBase):
             'Winery'
         }
 
-        self.expected_individuals = {
+        self.wine_expected_individuals = {
             'Red',
             'Rose',
             'White',
@@ -188,7 +193,7 @@ class TestWine(TestOwlBase):
             # Wines
         }
 
-        self.expected_nodes = self.expected_classes | self.expected_individuals
+        self.expected_nodes = self.wine_expected_classes | self.wine_expected_individuals
 
         self.expected_subclasses = {
 
@@ -262,10 +267,10 @@ class TestWine(TestOwlBase):
     def test_file(self):
         owl = parse_owl('file://' + test_owl_2)
 
-        for node in sorted(self.expected_classes):
+        for node in sorted(self.wine_expected_classes):
             self.assertHasNode(owl, node)
 
-        for node in sorted(self.expected_individuals):
+        for node in sorted(self.wine_expected_individuals):
             self.assertHasNode(owl, node)
 
         for u, v in sorted(self.expected_subclasses):
@@ -274,16 +279,15 @@ class TestWine(TestOwlBase):
         for u, v in sorted(self.expected_membership):
             self.assertHasEdge(owl, u, v)
 
-    def test_metadata_parser(self):
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_metadata_parser(self, m1, m2):
         cm = CacheManager('sqlite://')
-        metadata = MetaData(cm.engine)
-        table = Table(OWL_TABLE_NAME, metadata, autoload=True)
-        self.assertIsNotNone(table)
 
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
 
-        parser = MetadataParser(cm)
+        parser = MetadataParser(cache_manager=cm)
 
         try:
             parser.parseString(s)
@@ -299,24 +303,34 @@ class TestWine(TestOwlBase):
 
 
 class TestAdo(TestOwlBase):
-    expected_nodes_subset = {
+    ado_expected_nodes_subset = {
         'immunotherapy',
         'In_vitro_models',
         'white',
         'ProcessualEntity'
     }
-    expected_edges_subset = {
+    ado_expected_edges_subset = {
         ('control_trials_study_arm', 'Study_arm'),
         ('copper', 'MaterialEntity'),
         ('curcumin_plant', 'plant'),
         ('cytokine', 'cell_signalling')  # Line 12389 of ado.owl
     }
 
-    def test_ado(self):
-        owl = parse_owl('file://' + test_owl_3)
+    def test_ado_local(self):
+        ado_path = 'file://' + constants.test_owl_3
+        owl = parse_owl(ado_path)
 
-        self.assertLessEqual(self.expected_nodes_subset, set(owl.nodes_iter()))
-        self.assertLessEqual(self.expected_edges_subset, set(owl.edges_iter()))
+        self.assertLessEqual(self.ado_expected_nodes_subset, set(owl.nodes_iter()))
+        self.assertLessEqual(self.ado_expected_edges_subset, set(owl.edges_iter()))
+
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_ado(self, mock1, mock2):
+        ado_path = 'http://mock.com/ado.owl'
+        owl = parse_owl(ado_path)
+
+        self.assertLessEqual(self.ado_expected_nodes_subset, set(owl.nodes_iter()))
+        self.assertLessEqual(self.ado_expected_edges_subset, set(owl.edges_iter()))
 
 
 class TestOwlManager(unittest.TestCase):
@@ -325,7 +339,9 @@ class TestOwlManager(unittest.TestCase):
         self.manager.drop_database()
         self.manager.create_database()
 
-    def test_ensure(self):
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_ensure(self, m1, m2):
         self.manager.ensure_owl(pizza_iri)
         entries = self.manager.get_owl_terms(pizza_iri)
         self.assertEqual(TestParsePizza.expected_nodes, entries)
@@ -348,14 +364,17 @@ class TestOwlManager(unittest.TestCase):
 
 
 class TestIntegration(TestOwlBase):
-    def test_from_path(self):
+    @constants.mock_bel_resources
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_from_path(self, m1, m2, m3):
         g = pybel.from_path(test_bel_4)
 
-        expected_definitions = dict(
-            HGNC="http://resource.belframework.org/belframework/1.0/namespace/hgnc-approved-symbols.belns",
-            PIZZA="http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl",
-            WINE="http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
-        )
+        expected_definitions = {
+            HGNC_KEYWORD: HGNC_URL,
+            'PIZZA': pizza_iri,
+            'WINE': wine_iri
+        }
 
         self.assertEqual(expected_test_bel_4_metadata, g.document)
 

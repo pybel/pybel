@@ -92,26 +92,32 @@ class OWLParser(nx.DiGraph):
 
 
 def parse_owl(url):
-    session = requests.Session()
-    if url.startswith('file://'):
-        session.mount('file://', FileAdapter())
-    res = session.get(url)
-
     try:
-        owl = OWLParser(content=res.content)
-        return owl
+        return parse_owl_pybel(url)
     except:
-        g = nx.DiGraph(IRI=url)
-        o = ontospy.Ontospy(url)
+        return parse_owl_ontospy(url)
 
-        for cls in o.classes:
-            g.add_node(cls.locale, type='Class')
 
-            for parent in cls.parents():
-                g.add_edge(cls.locale, parent.locale, type='SubClassOf')
+def parse_owl_pybel(url):
+    session = requests.Session()
+    session.mount('file://', FileAdapter())
+    res = session.get(url)
+    owl = OWLParser(content=res.content)
+    return owl
 
-            for instance in cls.instances():
-                _, frag = urldefrag(instance)
-                g.add_edge(frag, cls.locale, type='ClassAssertion')
 
-        return g
+def parse_owl_ontospy(iri):
+    g = nx.DiGraph(IRI=iri)
+    o = ontospy.Ontospy(iri)
+
+    for cls in o.classes:
+        g.add_node(cls.locale, type='Class')
+
+        for parent in cls.parents():
+            g.add_edge(cls.locale, parent.locale, type='SubClassOf')
+
+        for instance in cls.instances():
+            _, frag = urldefrag(instance)
+            g.add_edge(frag, cls.locale, type='ClassAssertion')
+
+    return g

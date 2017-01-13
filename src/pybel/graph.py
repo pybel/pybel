@@ -1,82 +1,33 @@
-import json
 import logging
-import os
 import sys
 import time
-from ast import literal_eval
 from collections import defaultdict
 
 import networkx as nx
-import py2neo
-import requests
-from networkx.readwrite import GraphMLReader
-from networkx.readwrite import json_graph
 from pyparsing import ParseException
-from requests_file import FileAdapter
 
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
-from .parser.canonicalize import decanonicalize_node, to_bel
 from .parser.parse_bel import BelParser
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
-from .utils import flatten, flatten_graph_data, expand_dict
+from .utils import expand_dict
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-__all__ = ['BELGraph', 'from_url', 'from_path', 'from_pickle', 'from_graphml', 'to_graphml', 'to_json', 'to_neo4j',
-           'to_pickle', 'from_json', 'to_bel', 'from_bytes', 'to_bytes']
+__all__ = ['BELGraph']
 
 log = logging.getLogger('pybel')
-
-PYBEL_CONTEXT_TAG = 'pybel_context'
-
-
-def from_url(url, **kwargs):
-    """Loads a BEL graph from a URL resource
-
-    :param url: a valid URL pointing to a BEL resource
-    :type url: str
-    :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
-    :return: a parsed BEL graph
-    :rtype: BELGraph
-    """
-    log.info('Loading from url: %s', url)
-
-    session = requests.session()
-    if url.startswith('file://'):
-        session.mount('file://', FileAdapter())
-    response = session.get(url)
-    response.raise_for_status()
-
-    lines = (line.decode('utf-8') for line in response.iter_lines())
-
-    return BELGraph(lines=lines, **kwargs)
-
-
-def from_path(path, **kwargs):
-    """Loads a BEL graph from a file resource
-
-    :param path: a file path
-    :type path: str
-    :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
-    :return: a parsed BEL graph
-    :rtype: BELGraph"""
-
-    log.info('Loading from path: %s', path)
-    with open(os.path.expanduser(path)) as f:
-        return BELGraph(lines=f, **kwargs)
 
 
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
     def __init__(self, lines=None, context=None, lenient=False, complete_origin=False, cache_manager=None,
-                 log_stream=None,
-                 *attrs, **kwargs):
+                 log_stream=None, *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
         :param lines: iterable over lines of BEL data file
@@ -272,143 +223,6 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph['annotation_list']
 
 
-def to_neo4j(graph, neo_graph, context=None):
-    """Uploads a BEL graph to Neo4J graph database using `py2neo`
-
-    :param graph: a BEL Graph
-    :type graph: BELGraph
-    :param neo_graph: a py2neo graph object, Refer to the
-                        `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_
-                        for how to build this object.
-    :type neo_graph: py2neo.Graph
-    :param context: a disease context to allow for multiple disease models in one neo4j instance.
-                    Each edge will be assigned an attribute :code:`pybel_context` with this value
-    :type context: str
-    """
-
-    if graph.context is not None:
-        context = graph.context
-
-    tx = neo_graph.begin()
-
-    node_map = {}
-    for node, data in graph.nodes(data=True):
-        node_type = data['type']
-        attrs = {k: v for k, v in data.items() if k != 'type'}
-
-        if 'name' in data:
-            attrs['value'] = data['name']
-
-        node_map[node] = py2neo.Node(node_type, bel=decanonicalize_node(graph, node), **attrs)
-
-        tx.create(node_map[node])
-
-    for u, v, data in graph.edges(data=True):
-        neo_u = node_map[u]
-        neo_v = node_map[v]
-        rel_type = data['relation']
-        attrs = flatten(data)
-        if context is not None:
-            attrs[PYBEL_CONTEXT_TAG] = str(context)
-        rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
-        tx.create(rel)
-
-    tx.commit()
-
-
-def to_pickle(graph, output):
-    """Writes this graph to a pickle object with nx.write_gpickle
-
-    Cast as a nx.MultiDiGraph before outputting because the pickle serializer can't handle the PyParsing elements
-    within the BELGraph class.
-
-    :param graph: a BEL graph
-    :type graph: BELGraph
-    :param output: a file or filename to write to
-    """
-    nx.write_gpickle(nx.MultiDiGraph(graph), output)
-
-
-def from_pickle(path):
-    """Reads a graph from a gpickle file
-
-    :param path: File or filename to write. Filenames ending in .gz or .bz2 will be uncompressed.
-    :type path: file or list
-    :rtype: BELGraph
-    """
-    return BELGraph(data=nx.read_gpickle(path))
-
-
-def to_json(graph, output):
-    """Writes this graph to a node-link JSON object
-
-    :param graph: a BEL graph
-    :type graph: BELGraph
-    :param output: a write-supporting filelike object
-    """
-    data = json_graph.node_link_data(graph)
-    data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph']['annotation_list'].items()}
-    json.dump(data, output, ensure_ascii=False)
-
-
-def from_json(path):
-    """Reads graph from node-link JSON Object"""
-    with open(os.path.expanduser(path)) as f:
-        data = json.load(f)
-
-    for i, node in enumerate(data['nodes']):
-        data['nodes'][i]['id'] = tuple(node['id'])
-
-    g = json_graph.node_link_graph(data, directed=True, multigraph=True)
-    return BELGraph(data=g)
-
-
-def to_graphml(graph, output):
-    """Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it
-
-    :param graph: a BEL graph
-    :type graph: BELGraph
-    :param output: a file or filelike object
-    """
-
-    g = nx.MultiDiGraph()
-
-    for node, data in graph.nodes(data=True):
-        g.add_node(node, json=json.dumps(data))
-
-    for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten(data))
-
-    nx.write_graphml(g, output)
-
-
-def from_graphml(path):
-    """Reads a graph from a graphml file
-
-    :param path: File or filename to write
-    :type path: file or str
-    :rtype: networkx.MultiDiGraph
-    """
-    reader = GraphMLReader(node_type=str)
-    reader.multigraph = True
-    g = list(reader(path=path))[0]
-    g = expand_edges(g)
-    for n in g:
-        g.node[n] = json.loads(g.node[n]['json'])
-    nx.relabel_nodes(g, literal_eval, copy=False)  # shh don't tell anyone
-    return g
-
-
-def to_csv(graph, output):
-    """Writes graph to edge list csv
-
-    :param graph: a BEL graph
-    :type graph: BELGraph
-    :param output: a file or filelike object
-    """
-    nx.write_edgelist(flatten_graph_data(graph), output, data=True)
-
-
 def expand_edges(graph):
     """Returns a new graph with expanded edge data dictionaries
 
@@ -416,7 +230,6 @@ def expand_edges(graph):
     :type graph: BELGraph
     :rtype: BELGraph
     """
-
     g = BELGraph()
 
     for node, data in graph.nodes(data=True):
@@ -426,22 +239,3 @@ def expand_edges(graph):
         g.add_edge(u, v, key=key, attr_dict=expand_dict(data))
 
     return g
-
-
-def to_bytes(graph):
-    """Converts a graph to bytes (as BytesIO object)
-
-    :param graph: a BEL graph
-    :type graph: BELGraph
-    """
-    return pickle.dumps(nx.MultiDiGraph(graph), protocol=pickle.HIGHEST_PROTOCOL)
-
-
-def from_bytes(bytes_graph):
-    """Reads a graph from bytes (BytesIO objet)
-
-    :param bytes_graph: File or filename to write
-    :type bytes_graph: bytes
-    :rtype: BELGraph
-    """
-    return BELGraph(data=pickle.loads(bytes_graph))

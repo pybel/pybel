@@ -19,8 +19,10 @@ Installation is as easy as getting the code from PyPI with :code:`pip install py
 
    installation
    overview
+   datamodel
    cookbook
    reference
+   io
    logging
    roadmap
 

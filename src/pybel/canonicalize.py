@@ -4,13 +4,17 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
-from . import language
-from .language import rev_activity_labels, inv_document_keys
-from .utils import ensure_quotes
-from ..constants import GOCC_LATEST
+from .parser import language
+from .parser.language import rev_activity_labels, inv_document_keys
+from .parser.utils import ensure_quotes
+from .constants import GOCC_LATEST
+
+__all__ = ['to_bel']
 
 # TODO extract from .parse_control
 CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
+
+BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
 
 variant_parent_dict = {
     'GeneVariant': 'g',
@@ -26,6 +30,14 @@ fusion_parent_dict = {
 
 
 def get_neighbors_by_path_type(g, v, relation):
+    """Gets the set of neighbors of a given node that have a relation of the given type
+
+    :param g: A BEL network
+    :type g: :class:`pybel.BELGraph`
+    :param v: a node from the BEL network
+    :param relation: the relation to follow from the given node
+    :return:
+    """
     result = []
     for neighbor in g.edge[v]:
         for data in g.edge[v][neighbor].values():
@@ -47,7 +59,7 @@ def postpend_location(s, location_model):
 
     if all(k in location_model for k in {'namespace', 'name'}):
         return "loc({}:{})".format(location_model['namespace'], ensure_quotes(location_model['name']))
-    raise ValueError('Confused! {}'.format(location_model))
+    raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
 
 
 def decanonicalize_variant(tokens):
@@ -66,8 +78,10 @@ def decanonicalize_variant(tokens):
             return 'frag({})'.format(''.join(map(str, tokens[1:])))
         else:
             return 'frag({}, {})'.format(''.join(map(str, tokens[1:])), tokens[-1])
+    elif tokens[0] == 'GeneModification':
+        return 'gmod({})'.format(tokens[1])
     else:
-        raise NotImplementedError('prob with :{}'.format(tokens))
+        raise ValueError('Invalid variant: {}'.format(tokens))
 
 
 def decanonicalize_fusion_range(tokens):
@@ -78,6 +92,10 @@ def decanonicalize_fusion_range(tokens):
 
 def decanonicalize_node(g, v):
     """Returns a node from a graph as a BEL string
+
+    :param g: a BEL network
+    :type g: :class:`pybel.BELGraph`
+    :param v: a node from the BEL graph
     """
     tokens = g.node[v]
 
@@ -114,7 +132,7 @@ def decanonicalize_node(g, v):
             decanonicalize_fusion_range(tokens['range_3p'])
         )
 
-    raise NotImplementedError('unknown node data: {} {}'.format(v, tokens))
+    raise ValueError('Unknown node data: {} {}'.format(v, tokens))
 
 
 def decanonicalize_edge_node(g, node, edge_data, node_position):
@@ -167,12 +185,13 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
 def decanonicalize_edge(g, u, v, k):
     """Takes two nodes and gives back a BEL string representing the statement
 
-    :param g: The graph
-    :type g: BELGraph
+    :param g: A BEL graph
+    :type g: :class:`BELGraph`
     :param u: The edge's source node
     :param v: The edge's target node
-    :param k: The edge key
-    :return:
+    :param k: The edge's key
+    :return: The canonical BEL for this edge
+    :rtype: str
     """
 
     ed = g.edge[u][v][k]
@@ -183,39 +202,44 @@ def decanonicalize_edge(g, u, v, k):
     return "{} {} {}".format(u_str, ed['relation'], v_str)
 
 
-blacklist_features = ['relation', 'subject', 'object', 'citation', 'SupportingText']
-
-
 def flatten_citation(citation):
     return ','.join('"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)])
 
 
 def sort_edges(d):
     return (flatten_citation(d['citation']), d['SupportingText']) + tuple(
-        itt.chain.from_iterable((k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in blacklist_features))
+        itt.chain.from_iterable(
+            (k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in BLACKLIST_EDGE_ATTRIBUTES))
 
 
-def to_bel(g, file=sys.stdout):
-    for k in sorted(g.document):
-        print('SET DOCUMENT {} = "{}"'.format(inv_document_keys[k], g.document[k]), file=file)
+def to_bel(graph, file=sys.stdout):
+    """Outputs the BEL graph as a canonical BEL Script (.bel)
+
+    :param graph: the BEL Graph to output as a BEL Script
+    :type graph: BELGraph
+    :param file: a filelike object
+    :type file: file
+    """
+    for k in sorted(graph.document):
+        print('SET DOCUMENT {} = "{}"'.format(inv_document_keys[k], graph.document[k]), file=file)
 
     print('###############################################\n', file=file)
 
-    if 'GOCC' not in g.namespace_url:
-        g.namespace_url['GOCC'] = GOCC_LATEST
+    if 'GOCC' not in graph.namespace_url:
+        graph.namespace_url['GOCC'] = GOCC_LATEST
 
-    for namespace, url in sorted(g.namespace_url.items(), key=itemgetter(0)):
+    for namespace, url in sorted(graph.namespace_url.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS URL "{}"'.format(namespace, url), file=file)
 
-    for namespace, url in sorted(g.namespace_owl.items(), key=itemgetter(0)):
+    for namespace, url in sorted(graph.namespace_owl.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url), file=file)
 
     print('###############################################\n', file=file)
 
-    for annotation, url in sorted(g.annotation_url.items(), key=itemgetter(0)):
+    for annotation, url in sorted(graph.annotation_url.items(), key=itemgetter(0)):
         print('DEFINE ANNOTATION {} AS URL "{}"'.format(annotation, url), file=file)
 
-    for annotation, an_list in sorted(g.annotation_list.items(), key=itemgetter(0)):
+    for annotation, an_list in sorted(graph.annotation_list.items(), key=itemgetter(0)):
         an_list_str = ', '.join('"{}"'.format(e) for e in an_list)
         print('DEFINE ANNOTATION {} AS LIST {{{}}}'.format(annotation, an_list_str), file=file)
 
@@ -223,7 +247,7 @@ def to_bel(g, file=sys.stdout):
 
     # sort by citation, then supporting text
     qualified_edges = filter(lambda u_v_k_d: 'citation' in u_v_k_d[3] and 'SupportingText' in u_v_k_d[3],
-                             g.edges_iter(data=True, keys=True))
+                             graph.edges_iter(data=True, keys=True))
     qualified_edges = sorted(qualified_edges, key=lambda u_v_k_d: sort_edges(u_v_k_d[3]))
 
     for citation, citation_edges in itt.groupby(qualified_edges,
@@ -234,10 +258,10 @@ def to_bel(g, file=sys.stdout):
             print('SET SupportingText = "{}"'.format(evidence), file=file)
 
             for u, v, k, d in evidence_edges:
-                dkeys = sorted(dk for dk in d if dk not in blacklist_features)
+                dkeys = sorted(dk for dk in d if dk not in BLACKLIST_EDGE_ATTRIBUTES)
                 for dk in dkeys:
                     print('SET {} = "{}"'.format(dk, d[dk]), file=file)
-                print(decanonicalize_edge(g, u, v, k), file=file)
+                print(decanonicalize_edge(graph, u, v, k), file=file)
                 if dkeys:
                     print('UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys)), file=file)
             print('UNSET SupportingText', file=file)
@@ -248,12 +272,12 @@ def to_bel(g, file=sys.stdout):
     print('SET Citation = {"PyBEL","",""}', file=file)
     print('SET Evidence = "Automatically added by PyBEL"', file=file)
 
-    for u in g.nodes_iter():
-        if any(d['relation'] not in language.unqualified_edges for v in g.adj[u] for d in g.edge[u][v].values()):
+    for u in graph.nodes_iter():
+        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
             continue
 
-        print(decanonicalize_node(g, u), file=file)
+        print(decanonicalize_node(graph, u), file=file)
 
     # Can't infer hasMember relationships, but it's not due to specific evidence or citation
-    for u, v in g.edges_iter(relation='hasMember'):
-        print("{} hasMember {}".format(decanonicalize_node(g, u), decanonicalize_node(g, v)), file=file)
+    for u, v in graph.edges_iter(relation='hasMember'):
+        print("{} hasMember {}".format(decanonicalize_node(graph, u), decanonicalize_node(graph, v)), file=file)

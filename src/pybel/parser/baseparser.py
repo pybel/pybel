@@ -28,6 +28,20 @@ def nest(*content):
 
 
 def one_of_tags(tags, canonical_tag, identifier):
+    """This is a convenience method for defining the tags usable in the :class:`BelParser`. For example,
+    statements like g(HGNC:SNCA) can be expressed also as geneAbundance(HGNC:SNCA). The language
+    must define multiple different tags that get normalized to the same thing.
+
+    :param tags: a list of strings that are the tags for a function. For example, ['g', 'geneAbundance'] for the
+                    abundance of a gene
+    :type tags: list of str
+    :param canonical_tag: the preferred tag name. Does not have to be one of the tags. For example, 'GeneAbundance'
+                            (note capitalization) is used for the abundance of a gene
+    :type canonical_tag: str
+    :param identifier: this is the key under which the value for this tag is put in the PyParsing framework.
+    :return: a PyParsing :class:`ParseElement`
+    :rtype: :class:`ParseElement`
+    """
     return oneOf(tags).setParseAction(replaceWith(canonical_tag)).setResultsName(identifier)
 
 
