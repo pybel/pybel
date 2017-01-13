@@ -12,6 +12,7 @@ Current Features
 - Caching system for downloaded namespace and annotations
 - Fully BEL 1.0 and BEL 2.0 support
 - Node and edge filtering API
+- Usage of OWL documents as namespaces
 
 Issues
 ------
@@ -33,7 +34,6 @@ Roadmap
 Performance
 ~~~~~~~~~~~
 
-- Packrat Parsing
 - Parallelization of BEL tokenization
 
 Knowledge Assembly
