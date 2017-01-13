@@ -11,7 +11,7 @@ from networkx import GraphMLReader
 from networkx.readwrite import json_graph
 from requests_file import FileAdapter
 
-from pybel.canonicalize import decanonicalize_node
+from .canonicalize import decanonicalize_node
 from .constants import PYBEL_CONTEXT_TAG
 from .graph import BELGraph, expand_edges
 from .utils import flatten, flatten_graph_data
