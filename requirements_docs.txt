@@ -1,0 +1,8 @@
+networkx
+requests
+requests_file
+pyparsing
+configparser
+py2neo
+click
+sqlalchemy
