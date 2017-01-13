@@ -176,11 +176,17 @@ class ControlParser(BaseParser):
         return self.commands
 
     def get_annotations(self):
+        """
+
+        :return: The currently stored BEL annotations
+        :rtype: dict
+        """
         annotations = self.annotations.copy()
         annotations['citation'] = self.citation.copy()
         return annotations
 
     def clear(self):
+        """Clears the annotations, citation, and statement group"""
         self.annotations.clear()
         self.citation.clear()
         self.statement_group = None

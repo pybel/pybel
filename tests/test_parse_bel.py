@@ -1,6 +1,6 @@
 import logging
 
-from pybel.parser.canonicalize import decanonicalize_node
+from pybel.canonicalize import decanonicalize_node
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel

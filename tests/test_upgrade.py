@@ -4,8 +4,8 @@ import tempfile
 import unittest
 
 import pybel
+from pybel.canonicalize import to_bel, decanonicalize_variant, postpend_location, decanonicalize_node
 from pybel.constants import GOCC_LATEST
-from pybel.parser.canonicalize import to_bel, decanonicalize_variant, postpend_location, decanonicalize_node
 from tests import constants
 from tests.constants import test_bel, test_bel_4, mock_bel_resources
 

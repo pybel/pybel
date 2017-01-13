@@ -4,10 +4,12 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
-from . import language
-from .language import rev_activity_labels, inv_document_keys
-from .utils import ensure_quotes
-from ..constants import GOCC_LATEST
+from pybel.parser import language
+from pybel.parser.language import rev_activity_labels, inv_document_keys
+from pybel.parser.utils import ensure_quotes
+from pybel.constants import GOCC_LATEST
+
+__all__ = ['to_bel']
 
 # TODO extract from .parse_control
 CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'

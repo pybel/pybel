@@ -20,8 +20,10 @@ import time
 import click
 import py2neo
 
-from . import graph
+from . import io
+from .canonicalize import to_bel
 from .constants import PYBEL_DIR
+from .graph import BELGraph
 from .manager.cache import DEFAULT_CACHE_LOCATION, CacheManager
 from .manager.graph_cache import GraphCacheManager, to_database, from_database
 
@@ -68,31 +70,31 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
 
     if url:
-        g = graph.from_url(url, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
+        g = io.from_url(url, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
     elif database_name:
         g = from_database(database_name, connection=database_connection)
     else:
-        g = graph.BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
+        g = BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
 
     if csv:
         log.info('Outputting csv to %s', csv)
-        graph.to_csv(g, csv)
+        io.to_csv(g, csv)
 
     if graphml:
         log.info('Outputting graphml to %s', graphml)
-        graph.to_graphml(g, graphml)
+        io.to_graphml(g, graphml)
 
     if json:
         log.info('Outputting json to %s', json)
-        graph.to_json(g, json)
+        io.to_json(g, json)
 
     if pickle:
         log.info('Outputting pickle to %s', pickle)
-        graph.to_pickle(g, pickle)
+        io.to_pickle(g, pickle)
 
     if bel:
         log.info('Outputting BEL to %s', bel)
-        graph.to_bel(g, bel)
+        to_bel(g, bel)
 
     if store_default:
         to_database(g)
@@ -104,7 +106,7 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         log.info('Uploading to neo4j with context %s', neo_context)
         neo_graph = py2neo.Graph(neo)
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
-        graph.to_neo4j(g, neo_graph, neo_context)
+        io.to_neo4j(g, neo_graph, neo_context)
 
     sys.exit(0 if 0 == sum(g.last_parse_errors.values()) else 1)
 
