@@ -4,10 +4,10 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
-from pybel.parser import language
-from pybel.parser.language import rev_activity_labels, inv_document_keys
-from pybel.parser.utils import ensure_quotes
-from pybel.constants import GOCC_LATEST
+from .parser import language
+from .parser.language import rev_activity_labels, inv_document_keys
+from .parser.utils import ensure_quotes
+from .constants import GOCC_LATEST
 
 __all__ = ['to_bel']
 
@@ -212,27 +212,34 @@ def sort_edges(d):
             (k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in BLACKLIST_EDGE_ATTRIBUTES))
 
 
-def to_bel(g, file=sys.stdout):
-    for k in sorted(g.document):
-        print('SET DOCUMENT {} = "{}"'.format(inv_document_keys[k], g.document[k]), file=file)
+def to_bel(graph, file=sys.stdout):
+    """Outputs the BEL graph as a canonical BEL Script (.bel)
+
+    :param graph: the BEL Graph to output as a BEL Script
+    :type graph: BELGraph
+    :param file: a filelike object
+    :type file: file
+    """
+    for k in sorted(graph.document):
+        print('SET DOCUMENT {} = "{}"'.format(inv_document_keys[k], graph.document[k]), file=file)
 
     print('###############################################\n', file=file)
 
-    if 'GOCC' not in g.namespace_url:
-        g.namespace_url['GOCC'] = GOCC_LATEST
+    if 'GOCC' not in graph.namespace_url:
+        graph.namespace_url['GOCC'] = GOCC_LATEST
 
-    for namespace, url in sorted(g.namespace_url.items(), key=itemgetter(0)):
+    for namespace, url in sorted(graph.namespace_url.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS URL "{}"'.format(namespace, url), file=file)
 
-    for namespace, url in sorted(g.namespace_owl.items(), key=itemgetter(0)):
+    for namespace, url in sorted(graph.namespace_owl.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url), file=file)
 
     print('###############################################\n', file=file)
 
-    for annotation, url in sorted(g.annotation_url.items(), key=itemgetter(0)):
+    for annotation, url in sorted(graph.annotation_url.items(), key=itemgetter(0)):
         print('DEFINE ANNOTATION {} AS URL "{}"'.format(annotation, url), file=file)
 
-    for annotation, an_list in sorted(g.annotation_list.items(), key=itemgetter(0)):
+    for annotation, an_list in sorted(graph.annotation_list.items(), key=itemgetter(0)):
         an_list_str = ', '.join('"{}"'.format(e) for e in an_list)
         print('DEFINE ANNOTATION {} AS LIST {{{}}}'.format(annotation, an_list_str), file=file)
 
@@ -240,7 +247,7 @@ def to_bel(g, file=sys.stdout):
 
     # sort by citation, then supporting text
     qualified_edges = filter(lambda u_v_k_d: 'citation' in u_v_k_d[3] and 'SupportingText' in u_v_k_d[3],
-                             g.edges_iter(data=True, keys=True))
+                             graph.edges_iter(data=True, keys=True))
     qualified_edges = sorted(qualified_edges, key=lambda u_v_k_d: sort_edges(u_v_k_d[3]))
 
     for citation, citation_edges in itt.groupby(qualified_edges,
@@ -254,7 +261,7 @@ def to_bel(g, file=sys.stdout):
                 dkeys = sorted(dk for dk in d if dk not in BLACKLIST_EDGE_ATTRIBUTES)
                 for dk in dkeys:
                     print('SET {} = "{}"'.format(dk, d[dk]), file=file)
-                print(decanonicalize_edge(g, u, v, k), file=file)
+                print(decanonicalize_edge(graph, u, v, k), file=file)
                 if dkeys:
                     print('UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys)), file=file)
             print('UNSET SupportingText', file=file)
@@ -265,12 +272,12 @@ def to_bel(g, file=sys.stdout):
     print('SET Citation = {"PyBEL","",""}', file=file)
     print('SET Evidence = "Automatically added by PyBEL"', file=file)
 
-    for u in g.nodes_iter():
-        if any(d['relation'] not in language.unqualified_edges for v in g.adj[u] for d in g.edge[u][v].values()):
+    for u in graph.nodes_iter():
+        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
             continue
 
-        print(decanonicalize_node(g, u), file=file)
+        print(decanonicalize_node(graph, u), file=file)
 
     # Can't infer hasMember relationships, but it's not due to specific evidence or citation
-    for u, v in g.edges_iter(relation='hasMember'):
-        print("{} hasMember {}".format(decanonicalize_node(g, u), decanonicalize_node(g, v)), file=file)
+    for u, v in graph.edges_iter(relation='hasMember'):
+        print("{} hasMember {}".format(decanonicalize_node(graph, u), decanonicalize_node(graph, v)), file=file)
