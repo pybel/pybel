@@ -5,7 +5,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from . import models
 from .cache import BaseCacheManager
-from ..parser.canonicalize import decanonicalize_node, decanonicalize_edge
+from ..canonicalize import decanonicalize_node, decanonicalize_edge
 from .. import io
 
 try:
