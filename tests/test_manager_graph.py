@@ -14,6 +14,7 @@ from tests.constants import BelReconstitutionMixin, test_bel, mock_bel_resources
 TEST_BEL_NAME = 'PyBEL Test Document 1'
 TEST_BEL_VERSION = '1.6'
 
+
 class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
