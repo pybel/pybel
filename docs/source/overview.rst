@@ -6,7 +6,8 @@ Background on Biological Expression Language (BEL)
 Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
-complex disease networks with several thousands of relationships.
+complex disease networks with several thousands of relationships. For a detailed explanation, see the
+`BEL 1.0 Specification <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_.
 
 Design Choices
 --------------
@@ -16,13 +17,13 @@ Do All Statements Need Supporting Text?
 
 Yes! All statements must be minimally qualified with a citation and evidence (now called SupportingText in BEL 2.0) to
 maintain provenance. Statements without evidence can't be traced to their source or evaluated independently from the
-curator, so they will be excluded from the analysis.
+curator, so they are excluded.
 
 Missing Namespaces and Improper Names
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The use of controlled vocabularies (namespaces) within BEL facilitates the exchange and consistiency of information.
 The OpenBEL Framework provides a variety of `namespaces <https://wiki.openbel.org/display/BELNA/Namespaces+Overview>`_
-covering each of the BEL function types. The *identifier* for an entitiy encoded in BEL must be written as a
+covering each of the BEL function types. The *identifier* for an entity encoded in BEL must be written as a
 :code:`namespace:name` pair.
 
 Often, finding the correct identifier is difficult. Due to the huge number of terms across many namespaces, it's

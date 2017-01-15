@@ -8,7 +8,7 @@ recursive-include docs Makefile
 global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store
 
 exclude .bumpversion.cfg
-include *.rst *.txt LICENSE tox.ini .travis.yml docs/Makefile .coveragerc .codecov.yml .codeclimate.yml
+include *.rst *.txt *.yml LICENSE tox.ini docs/Makefile .coveragerc
 
 recursive-include notebooks *.ipynb
 global-exclude notebooks/.ipynb_checkpoints/*

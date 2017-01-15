@@ -14,6 +14,7 @@
 
 import os
 import re
+import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -67,7 +68,7 @@ author = u'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.3.2-dev'
+release = '0.3.3-dev'
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -366,3 +367,28 @@ autoclass_content = 'init'
 
 if os.environ.get('READTHEDOCS', None):
     tags.add('readthedocs')
+
+# Mock ontospy because it's got C dependencies. See:
+# http://docs.readthedocs.io/en/latest/faq.html#i-get-import-errors-on-libraries-that-depend-on-c-modules
+
+
+try:
+    from unittest import mock
+
+
+    class ReadTheDocsMock(mock.MagicMock):
+        @classmethod
+        def __getattr__(cls, name):
+            return mock.MagicMock()
+
+except ImportError:
+    import mock
+
+
+    class ReadTheDocsMock(mock.Mock):
+        @classmethod
+        def __getattr__(cls, name):
+            return mock.Mock()
+
+MOCK_MODULES = ['ontospy']
+sys.modules.update((mod_name, ReadTheDocsMock()) for mod_name in MOCK_MODULES)

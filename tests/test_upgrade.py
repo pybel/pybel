@@ -3,14 +3,33 @@ import os
 import tempfile
 import unittest
 
-from requests.exceptions import ConnectionError
-
 import pybel
+from pybel.canonicalize import decanonicalize_variant, postpend_location, decanonicalize_node
 from pybel.constants import GOCC_LATEST
-from pybel.parser.canonicalize import to_bel
+from tests import constants
 from tests.constants import test_bel, test_bel_4, mock_bel_resources
 
 log = logging.getLogger('pybel')
+
+
+class TestCanonicalizeHelper(unittest.TestCase):
+    def test_postpend_location_failure(self):
+        with self.assertRaises(ValueError):
+            postpend_location('', dict(name='failure'))
+
+    def test_decanonicalize_variant_failure(self):
+        with self.assertRaises(ValueError):
+            decanonicalize_variant('rmod(lol)')
+
+    def test_decanonicalize_node_failure(self):
+        with self.assertRaises(ValueError):
+            class NotGraph:
+                node = None
+
+            x = NotGraph()
+            x.node = {'test_node': {'type': 'nope'}}
+
+            decanonicalize_node(x, 'test_node')
 
 
 class TestCanonicalize(unittest.TestCase):
@@ -26,7 +45,7 @@ class TestCanonicalize(unittest.TestCase):
         original = pybel.from_path(test_path)
 
         with open(self.path, 'w') as f:
-            to_bel(original, f)
+            pybel.to_bel(original, f)
 
         reloaded = pybel.from_path(self.path)
 
@@ -59,8 +78,8 @@ class TestCanonicalize(unittest.TestCase):
     def test_canonicalize_1(self, mock_get):
         self.canonicalize_helper(test_bel)
 
-    def test_canonicalize_4(self):
-        try:
-            self.canonicalize_helper(test_bel_4)
-        except ConnectionError as e:
-            log.warning('Connection error: %s', e)
+    @mock_bel_resources
+    @constants.mock_parse_owl_ontospy
+    @constants.mock_parse_owl_pybel
+    def test_canonicalize_4(self, m1, m2, m3):
+        self.canonicalize_helper(test_bel_4)

@@ -7,6 +7,7 @@ from . import models
 from .cache import BaseCacheManager
 from ..graph import to_bytes, from_bytes
 from ..parser.canonicalize import decanonicalize_node, decanonicalize_edge
+from .. import io
 
 try:
     import cPickle as pickle
@@ -27,10 +28,8 @@ class GraphCacheManager(BaseCacheManager):
         :param store_parts: Store the nodes, edges, citation, evidence, and annotations to the cache
         :type store_parts: bool
         """
-
         t = time.time()
-
-        network = models.Network(blob=to_bytes(graph), **graph.document)
+        network = models.Network(blob=io.to_bytes(graph), **graph.document)
 
         if store_parts:
             self.store_graph_parts(network, graph)
@@ -94,7 +93,7 @@ class GraphCacheManager(BaseCacheManager):
             n = self.session.query(models.Network).filter(models.Network.name == name).order_by(
                 models.Network.created.desc()).limit(1).one()
 
-        return from_bytes(n.blob)
+        return io.from_bytes(n.blob)
 
     def ls(self):
         return [(network.name, network.version) for network in self.session.query(models.Network).all()]
