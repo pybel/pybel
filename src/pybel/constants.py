@@ -14,3 +14,4 @@ if not os.path.exists(PYBEL_DATA):
     os.mkdir(PYBEL_DATA)
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
+PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'

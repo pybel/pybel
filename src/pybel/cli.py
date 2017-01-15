@@ -29,15 +29,6 @@ from .manager.graph_cache import GraphCacheManager, to_database, from_database
 
 log = logging.getLogger('pybel')
 
-formatter = logging.Formatter('%(name)s:%(levelname)s - %(message)s')
-logging.basicConfig(format=formatter)
-
-fh_path = os.path.join(PYBEL_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
-fh = logging.FileHandler(fh_path)
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
-log.addHandler(fh)
-
 
 @click.group(help="PyBEL Command Line Utilities on {}".format(sys.executable))
 @click.version_option()
@@ -57,14 +48,14 @@ def main():
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Context for neo4j upload")
-@click.option('--store-default', is_flag=True, help="Stores to default cache at {}".format(DEFAULT_CACHE_LOCATION))
-@click.option('--store', help="Database connection string")
+@click.option('--cache', is_flag=True, help='Output to cache')
+@click.option('--cache-connection', help="Output cache location. Defaults to {}".format(DEFAULT_CACHE_LOCATION))
 @click.option('--lenient', is_flag=True, help="Enable lenient parsing")
 @click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
 @click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
 def convert(path, url, database_name, database_connection, csv, graphml, json, pickle, bel, neo, neo_context,
-            store_default, store, lenient, complete_origin, log_file, verbose):
+            cache, cache_connection, lenient, complete_origin, log_file, verbose):
     """Options for multiple outputs/conversions"""
 
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
@@ -96,11 +87,8 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         log.info('Outputting BEL to %s', bel)
         to_bel(g, bel)
 
-    if store_default:
-        to_database(g)
-
-    if store:
-        to_database(g, store)
+    if cache:
+        to_database(g, connection=cache_connection)
 
     if neo:
         log.info('Uploading to neo4j with context %s', neo_context)
@@ -176,4 +164,13 @@ def ls_graphs(path):
 
 
 if __name__ == '__main__':
+    formatter = logging.Formatter('%(name)s:%(levelname)s - %(message)s')
+    logging.basicConfig(format=formatter)
+
+    fh_path = os.path.join(PYBEL_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
+    fh = logging.FileHandler(fh_path)
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
     main()

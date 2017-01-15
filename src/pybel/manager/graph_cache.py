@@ -5,8 +5,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from . import models
 from .cache import BaseCacheManager
-from ..canonicalize import decanonicalize_node, decanonicalize_edge
 from .. import io
+from ..canonicalize import decanonicalize_node, decanonicalize_edge
+from ..constants import PYBEL_AUTOEVIDENCE
 
 try:
     import cPickle as pickle
@@ -19,7 +20,7 @@ log = logging.getLogger('pybel')
 
 
 class GraphCacheManager(BaseCacheManager):
-    def store_graph(self, graph, store_parts=False):
+    def store_graph(self, graph, store_parts=True):
         """Stores a graph in the database
 
         :param graph: a BEL network
@@ -54,6 +55,10 @@ class GraphCacheManager(BaseCacheManager):
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
             source, target = nc[u], nc[v]
             edge_bel = decanonicalize_edge(graph, u, v, k)
+
+            if 'citation' not in data and 'SupportingText' not in data:  # have to assume it's a valid graph at this point
+                data['citation'] = dict(type='Other', name=PYBEL_AUTOEVIDENCE, reference='0')
+                data['SupportingText'] = PYBEL_AUTOEVIDENCE
 
             citation = self.get_or_create_citation(**data['citation'])
             evidence = self.get_or_create_evidence(citation, data['SupportingText'])

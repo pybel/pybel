@@ -214,6 +214,9 @@ class Network(Base):
         UniqueConstraint("name", "version"),
     )
 
+    def __repr__(self):
+        return 'Network(name={}, version={})'.format(self.name, self.version)
+
 
 class Node(Base):
     __tablename__ = NODE_TABLE_NAME
@@ -238,6 +241,9 @@ class Citation(Base):
         UniqueConstraint("type", "reference"),
     )
 
+    def __repr__(self):
+        return '{} {} {}'.format(self.type, self.name, self.reference)
+
 
 class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
@@ -246,6 +252,9 @@ class Evidence(Base):
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation')
+
+    def __repr__(self):
+        return '{}'.format(self.text)
 
 
 class Edge(Base):
@@ -266,4 +275,4 @@ class Edge(Base):
     annotations = relationship('AnnotationEntry', secondary=edge_annotation)
 
     def __repr__(self):
-        return self.bel
+        return 'Edge(bel={})'.format(self.bel)

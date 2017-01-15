@@ -46,7 +46,7 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
                 '--graphml', test_graphml,
                 '--json', test_json,
                 '--bel', test_canon,
-                '--store', conn
+                '--cache', conn
             ]
 
             result = self.runner.invoke(cli.main, args)

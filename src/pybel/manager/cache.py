@@ -43,8 +43,8 @@ class BaseCacheManager:
     """Creates a connection to database and a persistient session using SQLAlchemy"""
 
     def __init__(self, connection=None, echo=False):
-        connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
-        self.engine = create_engine(connection, echo=echo)
+        self.connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
+        self.engine = create_engine(self.connection, echo=echo)
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
         self.session = scoped_session(self.sessionmaker)()
         self.create_database()
