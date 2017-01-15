@@ -4,10 +4,10 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
+from .constants import GOCC_LATEST
 from .parser import language
 from .parser.language import rev_activity_labels, inv_document_keys
 from .parser.utils import ensure_quotes
-from .constants import GOCC_LATEST
 
 __all__ = ['to_bel']
 
@@ -273,7 +273,8 @@ def to_bel(graph, file=sys.stdout):
     print('SET Evidence = "Automatically added by PyBEL"', file=file)
 
     for u in graph.nodes_iter():
-        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
+        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in
+               graph.edge[u][v].values()):
             continue
 
         print(decanonicalize_node(graph, u), file=file)

@@ -1,6 +1,7 @@
 """Import hook for PyBEL Extensions"""
-from pkg_resources import iter_entry_points
 import sys
+
+from pkg_resources import iter_entry_points
 
 
 class ExtensionImporter(object):
@@ -9,6 +10,7 @@ class ExtensionImporter(object):
     args:
         group: a string representing the package resources entry_points group that will be used
     """
+
     def __init__(self, group):
         self.group = group
 
