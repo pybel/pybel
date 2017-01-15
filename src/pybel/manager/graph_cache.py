@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.orm.exc import NoResultFound
 
 from . import models
@@ -10,7 +12,9 @@ try:
 except ImportError:
     import pickle
 
-ANNOTATION_KEY_BLACKLIST = {'citation', 'SupportingText', 'subject', 'object'}
+ANNOTATION_KEY_BLACKLIST = {'citation', 'SupportingText', 'subject', 'object', 'relation'}
+
+log = logging.getLogger('pybel')
 
 
 class GraphCacheManager(BaseCacheManager):
@@ -34,6 +38,14 @@ class GraphCacheManager(BaseCacheManager):
         return network
 
     def store_graph_parts(self, network, graph):
+        """
+
+        :param network:
+        :type network: models.Network
+        :param graph:
+        :type graph: BELGraph
+        :return:
+        """
         nc = {node: self.get_or_create_node(decanonicalize_node(graph, node)) for node in graph}
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
@@ -43,12 +55,17 @@ class GraphCacheManager(BaseCacheManager):
             citation = self.get_or_create_citation(**data['citation'])
             evidence = self.get_or_create_evidence(citation, data['SupportingText'])
 
-            edge = models.Edge(source=source, target=target, citation=citation, evidence=evidence, bel=edge_bel)
+            edge = models.Edge(source=source, target=target, evidence=evidence, bel=edge_bel, relation=data['relation'])
 
             for key, value in data.items():
                 if key in ANNOTATION_KEY_BLACKLIST:
                     continue
-                edge.annotations.append(self.get_or_create_annotation(key, value))
+
+                if key not in graph.annotation_url:
+                    # FIXME not sure how to handle local annotations. Maybe show warning that can't be cached?
+                    continue
+
+                edge.annotations.append(self.get_or_create_annotation(graph.annotation_url[key], value))
 
             network.edges.append(edge)
 
@@ -90,6 +107,7 @@ class GraphCacheManager(BaseCacheManager):
         except NoResultFound:
             result = models.Node(bel=bel)
             self.session.add(result)
+            self.session.commit()  # TODO remove?
         return result
 
     def get_or_create_citation(self, type, name, reference, date=None, authors=None, comments=None):
@@ -105,6 +123,14 @@ class GraphCacheManager(BaseCacheManager):
         :rtype: models.Citation
         """
 
+        try:
+            result = self.session.query(models.Citation).filter_by(type=type, reference=reference).one()
+        except NoResultFound:
+            result = models.Citation(type=type, name=name, reference=reference)
+            self.session.add(result)
+            self.session.commit()  # TODO remove?
+        return result
+
     def get_or_create_evidence(self, citation, evidence):
         """
 
@@ -115,6 +141,13 @@ class GraphCacheManager(BaseCacheManager):
         :return:
         :rtype: models.Evidence
         """
+        try:
+            result = self.session.query(models.Evidence).filter_by(text=evidence).one()
+        except NoResultFound:
+            result = models.Evidence(text=evidence, citation=citation)
+            self.session.add(result)
+            self.session.commit()  # TODO remove?
+        return result
 
     def get_or_create_annotation(self, anno_key, anno_val):
         """
@@ -124,6 +157,12 @@ class GraphCacheManager(BaseCacheManager):
         :return:
         :rtype: models.AnnotationEntry
         """
+        annotation = self.session.query(models.Annotation).filter_by(url=anno_key).one()
+
+        # FIXME - needs to be implemented server side with better search algorithm and indexing
+        for entry in annotation.entries:
+            if anno_val == entry.name:
+                return entry
 
 
 def to_database(graph, connection=None):

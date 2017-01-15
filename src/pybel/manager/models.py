@@ -177,22 +177,6 @@ edge_annotation = Table(
     Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
 )
 
-'''
-class network_edge(Base):
-    __tablename__ = NETWORK_EDGE_TABLE_NAME
-    id = Column(Integer, primary_key=True)
-
-    network_id = Column(Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)))
-    edge_id = Column(Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)))
-
-
-class edge_annotation(Base):
-    __tablename__ = EDGE_ANNOTATION_TABLE_NAME
-    id = Column(Integer, primary_key=True)
-
-    edge_id = Column(Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)))
-    annotation_id = Column(Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)))
-'''
 
 class Network(Base):
     __tablename__ = NETWORK_TABLE_NAME
@@ -234,8 +218,8 @@ class Citation(Base):
     name = Column(String, nullable=False)
     reference = Column(String, nullable=False)
     date = Column(Date, nullable=True)
-    authors = Column(String, nullable=False)
-    comments = Column(String, nullable=False)
+    authors = Column(String, nullable=True)
+    comments = Column(String, nullable=True)
 
     __table_args__ = (
         UniqueConstraint("type", "reference"),
@@ -245,7 +229,7 @@ class Citation(Base):
 class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
     id = Column(Integer, primary_key=True)
-    text = Column(String, nullable=False)
+    text = Column(String, nullable=False, index=True)
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation')
@@ -255,15 +239,13 @@ class Edge(Base):
     __tablename__ = EDGE_TABLE_NAME
     id = Column(Integer, primary_key=True)
     bel = Column(String, nullable=False)
+    relation = Column(String, nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
     source = relationship('Node', foreign_keys=[source_id])
 
     target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
     target = relationship('Node', foreign_keys=[target_id])
-
-    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
-    citation = relationship('Citation')
 
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)))
     evidence = relationship("Evidence")
