@@ -23,9 +23,9 @@ NODE_TABLE_NAME = 'pybel_node'
 EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntries'
 NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
 
-OWL_TABLE_NAME = 'Owl'
-OWL_ENTRY_TABLE_NAME = 'OwlEntry'
-OWL_RELATIONSHIP_TABLE_NAME = 'OwlRelationship'
+OWL_TABLE_NAME = 'pybel_owl'
+OWL_ENTRY_TABLE_NAME = 'pybel_owlEntry'
+OWL_RELATIONSHIP_TABLE_NAME = 'pybel_owlRelationship'
 
 Base = declarative_base()
 
@@ -148,12 +148,12 @@ class Owl(Base):
 class OwlEntry(Base):
     __tablename__ = OWL_ENTRY_TABLE_NAME
 
-    id = Column(Integer, Sequence('OwlEntry_id_seq'), primary_key=True)
+    id = Column(Integer, primary_key=True)
 
     entry = Column(String(255))
     encoding = Column(String(50))
 
-    owl_id = Column(Integer, ForeignKey('Owl.id'), index=True)
+    owl_id = Column(Integer, ForeignKey('{}.id'.format(OWL_TABLE_NAME)), index=True)
     owl = relationship('Owl', back_populates='entries')
 
     children = relationship('OwlEntry',
