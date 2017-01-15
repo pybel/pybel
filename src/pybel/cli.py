@@ -87,7 +87,7 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         log.info('Outputting BEL to %s', bel)
         to_bel(g, bel)
 
-    if cache:
+    if cache or cache_connection:
         to_database(g, connection=cache_connection)
 
     if neo:
