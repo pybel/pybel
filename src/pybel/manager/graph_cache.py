@@ -1,4 +1,5 @@
 import logging
+import time
 
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -27,6 +28,8 @@ class GraphCacheManager(BaseCacheManager):
         :type store_parts: bool
         """
 
+        t = time.time()
+
         network = models.Network(blob=to_bytes(graph), **graph.document)
 
         if store_parts:
@@ -34,6 +37,8 @@ class GraphCacheManager(BaseCacheManager):
 
         self.session.add(network)
         self.session.commit()
+
+        log.info('Stored graph %s in %s seconds', network.name, time.time() - t)
 
         return network
 
