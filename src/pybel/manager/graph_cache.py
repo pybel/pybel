@@ -5,7 +5,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from . import models
 from .cache import BaseCacheManager
-from ..graph import to_bytes, from_bytes
 from ..parser.canonicalize import decanonicalize_node, decanonicalize_edge
 from .. import io
 
