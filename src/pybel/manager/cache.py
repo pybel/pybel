@@ -17,7 +17,7 @@ from ..utils import download_url
 
 log = logging.getLogger('pybel')
 
-DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
+DEFAULT_DEFINITION_CACHE_NAME = 'cache.db'
 DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA, DEFAULT_DEFINITION_CACHE_NAME)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(language.value_map))
