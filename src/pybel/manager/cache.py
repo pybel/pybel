@@ -43,8 +43,8 @@ class BaseCacheManager:
     """Creates a connection to database and a persistient session using SQLAlchemy"""
 
     def __init__(self, connection=None, echo=False):
-        connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
-        self.engine = create_engine(connection, echo=echo)
+        self.connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
+        self.engine = create_engine(self.connection, echo=echo)
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
         self.session = scoped_session(self.sessionmaker)()
         self.create_database()
@@ -168,6 +168,7 @@ class CacheManager(BaseCacheManager):
 
         try:
             results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
+            log.info('Loaded namespace from %s', url)
         except NoResultFound:
             results = self.insert_namespace(url)
 
@@ -244,6 +245,7 @@ class CacheManager(BaseCacheManager):
 
         try:
             results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one()
+            log.info('Loaded annotation from %s', url)
         except NoResultFound:
             results = self.insert_annotation(url)
 
