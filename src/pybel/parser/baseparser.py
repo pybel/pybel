@@ -2,7 +2,6 @@
 
 import itertools as itt
 import logging
-from abc import ABC, abstractmethod
 
 from pyparsing import Suppress, ZeroOrMore, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
     delimitedList, replaceWith, Group, And
@@ -50,7 +49,7 @@ def triple(subject, relation, obj):
     return And([Group(subject)('subject'), relation('relation'), Group(obj)('object')])
 
 
-class BaseParser(ABC):
+class BaseParser:
     """This abstract class represents a language backed by a PyParsing statement
 
     Multiple parsers can be easily chained together when they are all inheriting from this base class
@@ -67,6 +66,8 @@ class BaseParser(ABC):
         """
         return self.get_language().parseString(s)
 
-    @abstractmethod
     def get_language(self):
         """Gets the language represented by this parser"""
+        if not hasattr(self, 'language'):
+            raise Exception('Language not defined')
+        return self.language
