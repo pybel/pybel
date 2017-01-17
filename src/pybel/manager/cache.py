@@ -164,6 +164,7 @@ class CacheManager(BaseCacheManager):
         :type url: str
         """
         if url in self.namespace_cache:
+            log.info('Already cached %s', url)
             return
 
         try:
@@ -241,6 +242,7 @@ class CacheManager(BaseCacheManager):
         :type url: str
         """
         if url in self.annotation_cache:
+            log.info('Already cached %s', url)
             return
 
         try:
