@@ -56,7 +56,7 @@ class TruncParser(BaseParser):
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     def handle_trunc_legacy(self, s, l, tokens):
         upgraded = 'p.{}*'.format(tokens['position'])
-        log.warning(5, 'trunc() is deprecated. Please look up reference terminal amino acid, and encode with HGVS: {}'.format(s))
+        log.warning('trunc() is deprecated. Please look up reference terminal amino acid, and encode with HGVS: {}'.format(s))
         return ['Variant', upgraded]
 
     def get_language(self):
