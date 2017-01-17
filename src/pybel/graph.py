@@ -164,7 +164,7 @@ class BELGraph(nx.MultiDiGraph):
                 self.last_parse_errors[e.__class__.__name__] += 1
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
-                self.warnings.append((line_number, line, e.__class__.__name__, e.args[0]))
+                self.warnings.append((line_number, line, e.__class__.__name__, ', '.join(e.args)))
                 self.last_parse_errors[e.__class__.__name__] += 1
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
