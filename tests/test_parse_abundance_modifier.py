@@ -1,76 +1,75 @@
+import logging
 import unittest
 
-from pybel.parser.parse_abundance_modifier import *
-from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser
+from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser, PsubParser, GsubParser, TruncParser, \
+    FusionParser, LocationParser, FragmentParser
+from pybel.parser.parse_abundance_modifier import VariantParser
 
 log = logging.getLogger(__name__)
 
 
-class TestHgvsParser(unittest.TestCase):
+class TestVariantParser(unittest.TestCase):
+    def setUp(self):
+        self.parser = VariantParser()
+
     def test_protein_del(self):
-        statement = 'p.Phe508del'
-        expected = ['p.', 'Phe', 508, 'del']
-        result = hgvs_protein_del.parseString(statement)
+        statement = 'variant(p.Phe508del)'
+        expected = ['Variant', 'p.Phe508del']
+        result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_protein_mut(self):
-        statement = 'p.Gly576Ala'
-        expected = ['p.', 'Gly', 576, 'Ala']
-        result = hgvs_protein_mut.parseString(statement)
+        statement = 'var(p.Gly576Ala)'
+        expected = ['Variant', 'p.Gly576Ala']
+        result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_unspecified(self):
-        statement = '='
-        expected = ['=']
-        result = hgvs.parseString(statement)
+        statement = 'var(=)'
+        expected = ['Variant', '=']
+        result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_frameshift(self):
-        statement = 'p.Thr1220Lysfs'
-        expected = ['p.', 'Thr', 1220, 'Lys', 'fs']
-        result = hgvs_protein_fs.parseString(statement)
+        statement = 'variant(p.Thr1220Lysfs)'
+        expected = ['Variant', 'p.Thr1220Lysfs']
+        result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_snp(self):
-        statement = 'delCTT'
-        expected = ['del', 'CTT']
-        result = hgvs_snp.parseString(statement)
+        statement = 'var(delCTT)'
+        expected = ['Variant', 'delCTT']
+        result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_chromosome_1(self):
-        statement = 'g.117199646_117199648delCTT'
-        expected = ['g.', 117199646, '_', 117199648, 'del', 'CTT']
-        result = hgvs_chromosome.parseString(statement)
+        statement = 'variant(g.117199646_117199648delCTT)'
+        expected = ['Variant', 'g.117199646_117199648delCTT']
+        result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_chromosome_2(self):
-        statement = 'c.1521_1523delCTT'
-        expected = ['c.', 1521, '_', 1523, 'del', 'CTT']
-        result = hgvs_dna_del.parseString(statement)
+        statement = 'var(c.1521_1523delCTT)'
+        expected = ['Variant', 'c.1521_1523delCTT']
+        result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_rna_del(self):
-        statement = 'r.1653_1655delcuu'
-        expected = ['r.', 1653, '_', 1655, 'del', 'cuu']
-        result = hgvs_rna_del.parseString(statement)
-        self.assertEqual(expected, result.asList())
-
-    def test_protein_trunc_single(self):
-        statement = 'p.C65*'
-        result = hgvs_protein_truncation.parseString(statement)
-        expected = ['p.', 'Cys', 65, '*']
+        statement = 'var(r.1653_1655delcuu)'
+        expected = ['Variant', 'r.1653_1655delcuu']
+        result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asList())
 
     def test_protein_trunc_triple(self):
-        statement = 'p.Cys65*'
-        result = hgvs_protein_truncation.parseString(statement)
-        expected = ['p.', 'Cys', 65, '*']
+        statement = 'var(p.Cys65*)'
+        result = self.parser.parseString(statement)
+        expected = ['Variant', 'p.Cys65*']
         self.assertEqual(expected, result.asList())
 
     def test_protein_trunc_legacy(self):
-        statement = 'p.65*'
-        result = hgvs_protein_truncation.parseString(statement)
-        expected = ['p.', 65, '*']
+        statement = 'var(p.65*)'
+        result = self.parser.parseString(statement)
+        expected = ['Variant', 'p.65*']
         self.assertEqual(expected, result.asList())
 
 
