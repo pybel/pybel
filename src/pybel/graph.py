@@ -161,15 +161,15 @@ class BELGraph(nx.MultiDiGraph):
             except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
                 self.warnings.append((line_number, line, e.__class__.__name__, 'General parser exception'))
-                self.last_parse_errors['general parser failure'] += 1
+                self.last_parse_errors[e.__class__.__name__] += 1
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
                 self.warnings.append((line_number, line, e.__class__.__name__, e.args[0]))
                 self.last_parse_errors[e.__class__.__name__] += 1
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
-                self.warnings.append((line_number, line, e.__class__.__name__, e))
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
+                self.warnings.append((line_number, line, e.__class__.__name__, e))
                 self.last_parse_errors[e.__class__.__name__] += 1
 
         log.info('Finished parsing statements section in %.02f seconds with %d warnings', time.time() - t,
