@@ -144,14 +144,14 @@ class TestPsub(unittest.TestCase):
         statement = 'sub(A, 127, Y)'
         result = self.parser.parseString(statement)
 
-        expected_list = ['Variant', 'p.', 'Ala', 127, 'Tyr']
+        expected_list = ['Variant', 'p.Ala127Tyr']
         self.assertEqual(expected_list, result.asList())
 
     def test_psub_2(self):
         statement = 'sub(Ala, 127, Tyr)'
         result = self.parser.parseString(statement)
 
-        expected_list = ['Variant', 'p.', 'Ala', 127, 'Tyr']
+        expected_list = ['Variant', 'p.Ala127Tyr']
         self.assertEqual(expected_list, result.asList())
 
 
@@ -163,7 +163,7 @@ class TestGsubParser(unittest.TestCase):
         statement = 'sub(G,308,A)'
         result = self.parser.parseString(statement)
 
-        expected_dict = ['Variant', 'g.', 308, 'G', '>', 'A']
+        expected_dict = ['Variant', 'g.308G>A']
         self.assertEqual(expected_dict, result.asList())
 
 
@@ -222,7 +222,7 @@ class TestTruncationParser(unittest.TestCase):
         statement = 'trunc(40)'
         result = self.parser.parseString(statement)
 
-        expected = ['Variant', 'p.', 40, '*']
+        expected = ['Variant', 'p.40*']
         self.assertEqual(expected, result.asList())
 
 

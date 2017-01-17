@@ -77,7 +77,7 @@ class GsubParser(BaseParser):
 
     def handle_gsub(self, s, l, tokens):
         upgraded = 'g.{}{}{}{}'.format(tokens['position'], tokens['reference'], '>', tokens['variant'])
-        log.warning(5, 'sub() in g() is deprecated: %s. Upgraded to %s', s, upgraded)
+        log.warning('sub() in g() is deprecated: %s. Upgraded to %s', s, upgraded)
         return ['Variant', upgraded]
 
     def get_language(self):
