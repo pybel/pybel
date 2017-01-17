@@ -2,7 +2,6 @@ import logging
 import unittest
 
 import pybel
-from pybel.manager.cache import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import InvalidFunctionSemantic, MissingCitationException
 from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
@@ -12,7 +11,6 @@ logging.getLogger('requests').setLevel(logging.WARNING)
 
 
 class TestImport(BelReconstitutionMixin, unittest.TestCase):
-
     @mock_bel_resources
     def test_bytes_io(self, mock_get):
         g = pybel.from_path(test_bel, complete_origin=True)
