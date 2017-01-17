@@ -4,7 +4,7 @@ import time
 from sqlalchemy.orm.exc import NoResultFound
 
 from . import models
-from .cache import BaseCacheManager
+from .cache import BaseCacheManager, CacheManager
 from .. import io
 from ..canonicalize import decanonicalize_node, decanonicalize_edge
 from ..constants import PYBEL_AUTOEVIDENCE
@@ -50,7 +50,10 @@ class GraphCacheManager(BaseCacheManager):
         :type graph: BELGraph
         :return:
         """
-        nc = {node: self.get_or_create_node(decanonicalize_node(graph, node)) for node in graph}
+        # nc = {node: self.get_or_create_node(decanonicalize_node(graph, node)) for node in graph}
+
+        self.cache_manager = CacheManager(connection=self.connection)
+        nc = {node: self.get_or_create_node(graph, node) for node in graph}
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
             source, target = nc[u], nc[v]
@@ -73,7 +76,9 @@ class GraphCacheManager(BaseCacheManager):
                     # FIXME not sure how to handle local annotations. Maybe show warning that can't be cached?
                     continue
 
-                edge.annotations.append(self.get_or_create_annotation(graph.annotation_url[key], value))
+                annotation_url = graph.annotation_url[key]
+                annotation_id = self.cache_manager.annotation_id_cache[annotation_url][value]
+                edge.annotations.append(self.get_annotation(annotation_id))
 
             network.edges.append(edge)
 
@@ -102,7 +107,7 @@ class GraphCacheManager(BaseCacheManager):
     def ls(self):
         return [(network.name, network.version) for network in self.session.query(models.Network).all()]
 
-    def get_or_create_node(self, bel):
+    def get_or_create_node(self, graph, node):  #bel):
         """
 
         :param bel:
@@ -110,13 +115,76 @@ class GraphCacheManager(BaseCacheManager):
         :return:
         :rtype: models.Node
         """
+        bel = decanonicalize_node(graph, node)
+        node_data = graph.node[node]
+
         try:
             result = self.session.query(models.Node).filter_by(bel=bel).one()
         except NoResultFound:
-            result = models.Node(bel=bel)
+            namespaceEntry = None
+            type = node_data['type']
+            modifications = None
+
+            if 'namespace' in node_data:
+                url = graph.namespace_url[node_data['namespace']]
+                name_id = self.cache_manager.namespace_id_cache[url][node_data['name']]
+                namespaceEntry = self.get_name(name_id)
+
+            result = models.Node(bel=bel, namespaceEntry=namespaceEntry, type=type)
+
+            if type in ('ProteinVariant', 'ProteinFusion'):
+                result.modifications = self.get_or_create_modification(graph, node_data)
+
             self.session.add(result)
             self.session.commit()  # TODO remove?
         return result
+
+    def get_or_create_modification(self, graph, node_data):
+        """
+
+        :return:
+        """
+        modifications = []
+        for variant in node_data['variants']:
+            modType = variant[0]
+            if modType == 'Variant':
+                modifications.append(models.Modification(
+                    modType=modType,
+                    variantString=variant[1]
+                ))
+            elif modType == 'ProteinModificaiton':
+                modifications.append(models.Modification(
+                    modType=modType,
+                    pmodName=variant[1] if len(variant) > 1 else None,
+                    aminoA=variant[2] if len(variant) > 2 else None,
+                    position=variant[3] if len(variant) > 3 else None
+                ))
+            elif modType == 'ProteinFusion':
+                p3namespace_url = graph.namespace_url[node_data['partner_3p']['namespace']]
+                p3name_id = self.cache_manager.namespace_id_cache[p3namespace_url][node_data['partner_3p']['name']]
+                p3namespaceEntry = self.get_name(p3name_id)
+
+                p5namespace_url = graph.namespace_url[node_data['partner_5p']['namespace']]
+                p5name_id = self.cache_manager.namespace_id_cache[p5namespace_url][node_data['partner_5p']['name']]
+                p5namespaceEntry = self.get_name(p5name_id)
+
+                modifications.append(models.Modification(
+                    modType=modType,
+                    p3Partner=p3namespaceEntry,
+                    p3Range=node_data['range_3p'],
+                    p5Partner=p5namespaceEntry,
+                    p5Range=node_data['range_5p'],
+                ))
+            elif modType == 'GeneModification':
+                # ToDo: Do GeneModifications look like ProteinModifications?
+                modifications.append(models.Modification(
+                    modType=modType,
+                    variantString=str(variant)
+                ))
+
+                # ToDo: What are the possible modifications?
+
+        return modifications
 
     def get_or_create_citation(self, type, name, reference, date=None, authors=None, comments=None):
         """
@@ -157,21 +225,17 @@ class GraphCacheManager(BaseCacheManager):
             self.session.commit()  # TODO remove?
         return result
 
-    def get_or_create_annotation(self, anno_key, anno_val):
+    def get_annotation(self, anno_id):
         """
 
         :param anno_key:
-        :param anno_val:
         :return:
         :rtype: models.AnnotationEntry
         """
-        annotation = self.session.query(models.Annotation).filter_by(url=anno_key).one()
+        return self.session.query(models.Annotation).filter_by(id=anno_id).one()
 
-        # FIXME - needs to be implemented server side with better search algorithm and indexing
-        for entry in annotation.entries:
-            if anno_val == entry.name:
-                return entry
-
+    def get_name(self, name_id):
+        return self.session.query(models.NamespaceEntry).filter_by(id=name_id).one()
 
 def to_database(graph, connection=None):
     """Stores a graph in a database

@@ -17,6 +17,8 @@ CITATION_TABLE_NAME = 'pybel_citation'
 EVIDENCE_TABLE_NAME = 'pybel_evidence'
 EDGE_TABLE_NAME = 'pybel_edge'
 NODE_TABLE_NAME = 'pybel_node'
+MODIFICATION_TABLE_NAME = 'pybel_modification'
+NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
 EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntries'
 NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
 
@@ -218,14 +220,44 @@ class Network(Base):
         return 'Network(name={}, version={})'.format(self.name, self.version)
 
 
+node_modification = Table(
+    NODE_MODIFICATION_TABLE_NAME, Base.metadata,
+    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME))),
+    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)))
+)
+
+
 class Node(Base):
     __tablename__ = NODE_TABLE_NAME
     id = Column(Integer, primary_key=True)
+    type = Column(String, nullable=False)
+    namespaceEntry_id = Column(ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     bel = Column(String, nullable=False)
+
+    modifications = relationship("Modification", secondary=node_modification)
 
     def __repr__(self):
         return self.bel
 
+
+class Modification(Base):
+    __tablename__ = MODIFICATION_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+
+    modType = Column(String(255))
+    variantString = Column(String(255), nullable=True)
+    p3PartnerName_id = Column(ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    p3Partner = relationship("NamespaceEntry", foreign_keys=[p3PartnerName_id])
+    p3Range = Column(String(255), nullable=True)
+    p5PartnerName_id = Column(ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    p5Partner = relationship("NamespaceEntry", foreign_keys=[p5PartnerName_id])
+    p5Range = Column(String(255), nullable=True)
+    pmodName = Column(String(255), nullable=True)
+    aminoA = Column(String(3), nullable=True)
+    #    aminoB = Column(String(3), nullable=True)
+    position = Column(Integer, nullable=True)
+
+    nodes = relationship("Node", secondary=node_modification)
 
 class Citation(Base):
     __tablename__ = CITATION_TABLE_NAME

@@ -1,6 +1,7 @@
 import itertools as itt
 import logging
 import os
+from collections import defaultdict
 from datetime import datetime
 
 import networkx as nx
@@ -107,8 +108,10 @@ class CacheManager(BaseCacheManager):
 
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
-        self.namespace_cache = {}
-        self.annotation_cache = {}
+        self.namespace_cache = defaultdict(dict)
+        self.namespace_id_cache = defaultdict(dict)
+        self.annotation_cache = defaultdict(dict)
+        self.annotation_id_cache = defaultdict(dict)
 
         self.term_cache = {}
         self.edge_cache = {}
@@ -176,7 +179,11 @@ class CacheManager(BaseCacheManager):
         elif not results.entries:
             raise ValueError('No entries for {}'.format(url))
 
-        self.namespace_cache[url] = {entry.name: set(entry.encoding) for entry in results.entries}
+        # self.namespace_cache[url] = {entry.name: set(entry.encoding) for entry in results.entries}
+        for entry in results.entries:
+            self.namespace_cache[url][entry.name] = set(entry.encoding)
+            self.namespace_id_cache[url][entry.name] = entry.id
+
 
     def get_namespace(self, url):
         """Returns a dict of names and their encodings for the given namespace file
@@ -247,7 +254,12 @@ class CacheManager(BaseCacheManager):
         except NoResultFound:
             results = self.insert_annotation(url)
 
-        self.annotation_cache[url] = {entry.name: entry.label for entry in results.entries}
+        # self.annotation_cache[url] = {entry.name: entry.label for entry in results.entries}
+        self.annotation_cache[url] = {}
+        self.annotation_id_cache[url] = {}
+        for entry in results.entries:
+            self.annotation_cache[url][entry.name] = entry.label
+            self.annotation_id_cache[url][entry.name] = entry.id
 
     def get_annotation(self, url):
         """Returns a dict of annotations and their labels for the given annotation file
