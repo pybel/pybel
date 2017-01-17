@@ -45,7 +45,7 @@ class BELGraph(nx.MultiDiGraph):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self.last_parse_errors = defaultdict(int)
-        self.context = None
+        self.context = context
         self.metadata_parser = None
         self.bel_parser = None
         self.warnings = []
@@ -74,7 +74,8 @@ class BELGraph(nx.MultiDiGraph):
             sh.setFormatter(logging.Formatter('%(name)s:%(levelname)s - %(message)s'))
             log.addHandler(sh)
 
-        self.context = context
+        if context is not None:
+            self.context = context
 
         docs, definitions, states = split_file_to_annotations_and_definitions(lines)
 
