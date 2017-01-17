@@ -12,8 +12,7 @@ re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+AN
 def sanitize_file_lines(f):
     """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned"""
     it = (line.strip() for line in f)
-    it = filter(lambda i_l: i_l[1] and not i_l[1].startswith('#'), enumerate(it, start=1))
-    it = iter(it)
+    it = ((line_number, line) for line_number, line in enumerate(it, start=1) if line and not line.startswith('#'))
 
     for line_number, line in it:
         if line.endswith('\\'):
