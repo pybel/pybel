@@ -18,6 +18,8 @@ EVIDENCE_TABLE_NAME = 'pybel_evidence'
 EDGE_TABLE_NAME = 'pybel_edge'
 NODE_TABLE_NAME = 'pybel_node'
 MODIFICATION_TABLE_NAME = 'pybel_modification'
+PROPERTY_TABLE_NAME = 'pybel_property'
+EDGE_PROPERTY_TABLE_NAME = 'pybel_edge_property'
 NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
 EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntries'
 NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
@@ -230,9 +232,10 @@ node_modification = Table(
 class Node(Base):
     __tablename__ = NODE_TABLE_NAME
     id = Column(Integer, primary_key=True)
-    type = Column(String, nullable=False)
-    namespaceEntry_id = Column(ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
-    bel = Column(String, nullable=False)
+    type = Column(String(255), nullable=False)
+    namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
+    bel = Column(String(255), nullable=False)
 
     modifications = relationship("Modification", secondary=node_modification)
 
@@ -246,10 +249,10 @@ class Modification(Base):
 
     modType = Column(String(255))
     variantString = Column(String(255), nullable=True)
-    p3PartnerName_id = Column(ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    p3PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     p3Partner = relationship("NamespaceEntry", foreign_keys=[p3PartnerName_id])
     p3Range = Column(String(255), nullable=True)
-    p5PartnerName_id = Column(ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    p5PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     p5Partner = relationship("NamespaceEntry", foreign_keys=[p5PartnerName_id])
     p5Range = Column(String(255), nullable=True)
     pmodName = Column(String(255), nullable=True)
@@ -263,11 +266,11 @@ class Citation(Base):
     __tablename__ = CITATION_TABLE_NAME
     id = Column(Integer, primary_key=True)
     type = Column(String(16), nullable=False)
-    name = Column(String, nullable=False)
-    reference = Column(String, nullable=False)
+    name = Column(String(255), nullable=False)
+    reference = Column(String(255), nullable=False)
     date = Column(Date, nullable=True)
-    authors = Column(String, nullable=True)
-    comments = Column(String, nullable=True)
+    authors = Column(String(255), nullable=True)
+    comments = Column(String(255), nullable=True)
 
     __table_args__ = (
         UniqueConstraint("type", "reference"),
@@ -280,7 +283,7 @@ class Citation(Base):
 class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
     id = Column(Integer, primary_key=True)
-    text = Column(String, nullable=False, index=True)
+    text = Column(String(255), nullable=False, index=True)
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation')
@@ -289,10 +292,17 @@ class Evidence(Base):
         return '{}'.format(self.text)
 
 
+edge_property = Table(
+    EDGE_PROPERTY_TABLE_NAME, Base.metadata,
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME))),
+    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)))
+)
+
+
 class Edge(Base):
     __tablename__ = EDGE_TABLE_NAME
     id = Column(Integer, primary_key=True)
-    bel = Column(String, nullable=False)
+    bel = Column(String(255), nullable=False)
     relation = Column(String, nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
@@ -305,6 +315,21 @@ class Edge(Base):
     evidence = relationship("Evidence")
 
     annotations = relationship('AnnotationEntry', secondary=edge_annotation)
+    properties = relationship('Property', secondary=edge_property)
 
     def __repr__(self):
         return 'Edge(bel={})'.format(self.bel)
+
+
+class Property(Base):
+    __tablename__ = PROPERTY_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+
+    participant = Column(String(255))
+    modifier = Column(String(255))
+    relativeKey = Column(String(255), nullable=True)
+    propValue = Column(String(255), nullable=True)
+    namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    namespaceEntry = relationship('NamespaceEntry')
+
+    edges = relationship("Edge", secondary=edge_property)

@@ -53,6 +53,16 @@ class GraphCacheManager(BaseCacheManager):
         # nc = {node: self.get_or_create_node(decanonicalize_node(graph, node)) for node in graph}
 
         self.cache_manager = CacheManager(connection=self.connection)
+        for key, ns_url in graph.namespace_url.items():
+            self.cache_manager.ensure_namespace(ns_url)
+        for key, anno_url in graph.annotation_url.items():
+            self.cache_manager.ensure_annotation(anno_url)
+
+        # FIXME add GOCC ensurement to creation of graph.namespace_url ?
+        GOCC = 'http://resource.belframework.org/belframework/20150611/namespace/go-cellular-component.belns'
+        self.cache_manager.ensure_namespace(GOCC)
+        graph.namespace_url['GOCC'] = GOCC
+
         nc = {node: self.get_or_create_node(graph, node) for node in graph}
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
@@ -65,8 +75,9 @@ class GraphCacheManager(BaseCacheManager):
 
             citation = self.get_or_create_citation(**data['citation'])
             evidence = self.get_or_create_evidence(citation, data['SupportingText'])
+            edge = self.get_or_create_edge(source, target, evidence, edge_bel, data['relation'])
 
-            edge = models.Edge(source=source, target=target, evidence=evidence, bel=edge_bel, relation=data['relation'])
+            edge.properties = self.get_or_create_property(graph, data)
 
             for key, value in data.items():
                 if key in ANNOTATION_KEY_BLACKLIST:
@@ -81,6 +92,8 @@ class GraphCacheManager(BaseCacheManager):
                 edge.annotations.append(self.get_annotation(annotation_id))
 
             network.edges.append(edge)
+
+        self.session.commit()
 
     def get_graph_versions(self, name):
         """Returns all of the versions of a graph with the given name"""
@@ -107,12 +120,35 @@ class GraphCacheManager(BaseCacheManager):
     def ls(self):
         return [(network.name, network.version) for network in self.session.query(models.Network).all()]
 
-    def get_or_create_node(self, graph, node):  #bel):
-        """
+    def get_or_create_edge(self, source, target, evidence, bel, relation):
+        """Creates entry for given edge if it does not exist.
 
-        :param bel:
+        :param source: Source node of the relation
+        :type source: models.Node
+        :param target: Target node of the relation
+        :type target: models.Node
+        :param evidence: Evidence object that proves the given relation
+        :type evidence: models.Evidence
+        :param bel: BEL statement that describes the relation
         :type bel: str
-        :return:
+        :param relation: Type of the relation between source and target node
+        :type relation: str
+        :rtype: models.Edge
+        """
+        try:
+            result = self.session.query(models.Edge).filter_by(bel=bel).one()
+        except:
+            result = models.Edge(source=source, target=target, evidence=evidence, bel=bel, relation=relation)
+
+        return result
+
+    def get_or_create_node(self, graph, node):
+        """Creates entry for given node if it does not exist.
+
+        :param graph: A BEL network
+        :type graph: :class:`pybel.BELGraph`
+        :param node: Key for the node to insert.
+        :type node: tuple
         :rtype: models.Node
         """
         bel = decanonicalize_node(graph, node)
@@ -123,7 +159,6 @@ class GraphCacheManager(BaseCacheManager):
         except NoResultFound:
             namespaceEntry = None
             type = node_data['type']
-            modifications = None
 
             if 'namespace' in node_data:
                 url = graph.namespace_url[node_data['namespace']]
@@ -136,65 +171,80 @@ class GraphCacheManager(BaseCacheManager):
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
-            self.session.commit()  # TODO remove?
+            self.session.flush()
+
         return result
 
     def get_or_create_modification(self, graph, node_data):
-        """
+        """Creates a list of modification object (models.Modification) that belong to the node described by
+        node_data.
 
+        :param graph: a BEL network
+        :type graph: :class:`pybel.BELGraph`
+        :param node_data: Describes the given node and contains modification information
+        :type node_data: dict
         :return:
+        :rtype: list
         """
         modifications = []
-        for variant in node_data['variants']:
-            modType = variant[0]
-            if modType == 'Variant':
-                modifications.append(models.Modification(
-                    modType=modType,
-                    variantString=variant[1]
-                ))
-            elif modType == 'ProteinModificaiton':
-                modifications.append(models.Modification(
-                    modType=modType,
-                    pmodName=variant[1] if len(variant) > 1 else None,
-                    aminoA=variant[2] if len(variant) > 2 else None,
-                    position=variant[3] if len(variant) > 3 else None
-                ))
-            elif modType == 'ProteinFusion':
-                p3namespace_url = graph.namespace_url[node_data['partner_3p']['namespace']]
-                p3name_id = self.cache_manager.namespace_id_cache[p3namespace_url][node_data['partner_3p']['name']]
-                p3namespaceEntry = self.get_name(p3name_id)
+        if node_data['type'] == 'ProteinFusion':
+            modType = 'ProteinFusion'
+            p3namespace_url = graph.namespace_url[node_data['partner_3p']['namespace']]
+            p3name_id = self.cache_manager.namespace_id_cache[p3namespace_url][node_data['partner_3p']['name']]
+            p3namespaceEntry = self.get_name(p3name_id)
 
-                p5namespace_url = graph.namespace_url[node_data['partner_5p']['namespace']]
-                p5name_id = self.cache_manager.namespace_id_cache[p5namespace_url][node_data['partner_5p']['name']]
-                p5namespaceEntry = self.get_name(p5name_id)
+            p5namespace_url = graph.namespace_url[node_data['partner_5p']['namespace']]
+            p5name_id = self.cache_manager.namespace_id_cache[p5namespace_url][node_data['partner_5p']['name']]
+            p5namespaceEntry = self.get_name(p5name_id)
 
-                modifications.append(models.Modification(
-                    modType=modType,
-                    p3Partner=p3namespaceEntry,
-                    p3Range=node_data['range_3p'],
-                    p5Partner=p5namespaceEntry,
-                    p5Range=node_data['range_5p'],
-                ))
-            elif modType == 'GeneModification':
-                # ToDo: Do GeneModifications look like ProteinModifications?
-                modifications.append(models.Modification(
-                    modType=modType,
-                    variantString=str(variant)
-                ))
+            modifications.append(models.Modification(
+                modType=modType,
+                p3Partner=p3namespaceEntry,
+                p3Range=node_data['range_3p'][0],
+                p5Partner=p5namespaceEntry,
+                p5Range=node_data['range_5p'][0],
+            ))
+        else:
+            for variant in node_data['variants']:
+                modType = variant[0]
+                if modType == 'Variant':
+                    modifications.append(models.Modification(
+                        modType=modType,
+                        variantString=variant[1]
+                    ))
+                elif modType == 'ProteinModification':
+                    modifications.append(models.Modification(
+                        modType=modType,
+                        pmodName=variant[1] if len(variant) > 1 else None,
+                        aminoA=variant[2] if len(variant) > 2 else None,
+                        position=variant[3] if len(variant) > 3 else None
+                    ))
+                elif modType == 'GeneModification':
+                    # ToDo: Do GeneModifications look like ProteinModifications?
+                    modifications.append(models.Modification(
+                        modType=modType,
+                        variantString=str(variant)
+                    ))
 
-                # ToDo: What are the possible modifications?
+                    # ToDo: What are the possible modifications?
 
         return modifications
 
     def get_or_create_citation(self, type, name, reference, date=None, authors=None, comments=None):
-        """
+        """Creates entry for given citation if it does not exist.
 
-        :param type:
-        :param name:
-        :param reference:
-        :param date:
-        :param authors:
-        :param comments:
+        :param type: Citation type (e.g. PubMed)
+        :type type: str
+        :param name: Title of the publication that is cited
+        :type name: str
+        :param reference: Identifier of the given citation (e.g. PubMed id)
+        :type reference: str
+        :param date: Date of publication
+        :type date: date
+        :param authors: List of authors separated by |
+        :type authors: str
+        :param comments: Comments on the citation
+        :type comments: str
         :return:
         :rtype: models.Citation
         """
@@ -204,15 +254,16 @@ class GraphCacheManager(BaseCacheManager):
         except NoResultFound:
             result = models.Citation(type=type, name=name, reference=reference)
             self.session.add(result)
-            self.session.commit()  # TODO remove?
+            self.session.flush()
+            # self.session.commit()  # TODO remove?
         return result
 
     def get_or_create_evidence(self, citation, evidence):
-        """
+        """Creates entry for given evidence if it does not exist.
 
-        :param citation:
+        :param citation: Citation object obtained from get_or_create_citation()
         :type citation: models.Citation
-        :param evidence:
+        :param evidence: Evidence text
         :type evidence: str
         :return:
         :rtype: models.Evidence
@@ -222,8 +273,52 @@ class GraphCacheManager(BaseCacheManager):
         except NoResultFound:
             result = models.Evidence(text=evidence, citation=citation)
             self.session.add(result)
-            self.session.commit()  # TODO remove?
+            self.session.flush()
+            #self.session.commit()  # TODO remove?
         return result
+
+    def get_or_create_property(self, graph, edge_data):
+        """Creates a list of all subject and object related properties of the edge.
+
+        :param graph: A BEL network
+        :type graph: :class:`pybel.BELGraph`
+        :param edge_data: Describes the context of the given edge.
+        :type edge_data: dict
+        :return:
+        :rtype: list
+        """
+        properties = []
+
+        for participant in ('subject', 'object'):
+            property_list = []
+            if participant in edge_data:
+                participant_data = edge_data[participant]
+                modifier = participant_data['modifier']
+                property_dict = {
+                    'participant': participant,
+                    'modifier': modifier
+                }
+
+                if modifier in ('Activity', 'Translocation'):
+                    for effect_type, effect_value in participant_data['effect'].items():
+                        property_dict['relativeKey'] = effect_type
+                        if 'namespace' in effect_value:
+                            namespace_url = graph.namespace_url[effect_value['namespace']]
+                            namespaceEntry_id = self.cache_manager.namespace_id_cache[namespace_url][
+                                effect_value['name']]
+                            property_dict['namespaceEntry'] = self.get_name(namespaceEntry_id)
+                        else:
+                            property_dict['propValue'] = effect_value
+
+                        property_list.append(property_dict)
+
+                else:
+                    property_list.append(property_dict)
+
+            # ToDo: Make entries in Property-table unique?
+            properties = [models.Property(**property_def) for property_def in property_list]
+
+        return properties
 
     def get_annotation(self, anno_id):
         """
@@ -232,10 +327,11 @@ class GraphCacheManager(BaseCacheManager):
         :return:
         :rtype: models.AnnotationEntry
         """
-        return self.session.query(models.Annotation).filter_by(id=anno_id).one()
+        return self.session.query(models.AnnotationEntry).filter_by(id=anno_id).one()
 
     def get_name(self, name_id):
         return self.session.query(models.NamespaceEntry).filter_by(id=name_id).one()
+
 
 def to_database(graph, connection=None):
     """Stores a graph in a database
