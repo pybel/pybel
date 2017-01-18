@@ -10,6 +10,14 @@ log = logging.getLogger(__name__)
 TEST_GENE_VARIANT = 'g.308G>A'
 TEST_PROTEIN_VARIANT = 'p.Phe508del'
 
+KIND = 'kind'
+HGVS = 'hgvs'
+PMOD = 'pmod'
+GMOD = 'gmod'
+
+#: for the function of an entity
+FUNCTION = 'function'
+
 class TestAbundance(TestTokenParserBase):
     """2.1.1"""
 
@@ -149,7 +157,10 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['Variant', TEST_PROTEIN_VARIANT]
+                {
+                    KIND: HGVS,
+                    HGVS: TEST_PROTEIN_VARIANT
+                }
             ]
 
         }
@@ -180,7 +191,10 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['GeneModification', 'Me']
+                {
+                    KIND: GMOD,
+                    GMOD: 'Me'
+                }
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -188,14 +202,12 @@ class TestGene(TestTokenParserBase):
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node, type='GeneVariant')
 
-        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'g(HGNC:AKT1, gmod(Me))'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('g(HGNC:AKT1, gmod(Me))', decanonicalize_node(self.parser.graph, expected_node))
 
-        # parent = 'Gene', 'HGNC', 'AKT1'
-        # self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
+        parent = 'Gene', 'HGNC', 'AKT1'
+        self.assertHasNode(parent, type='Gene', namespace='HGNC', name='AKT1')
 
-        # self.assertHasEdge(parent, expected_node, relation='hasVariant')
+        self.assertHasEdge(parent, expected_node, relation='hasVariant')
 
     def test_214d(self):
         """Test BEL 1.0 gene substitution"""
@@ -209,7 +221,10 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['Variant', TEST_GENE_VARIANT]
+                {
+                    KIND: HGVS,
+                    HGVS: TEST_GENE_VARIANT
+                }
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -238,7 +253,9 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['Variant', TEST_GENE_VARIANT]
+                {
+                    KIND: HGVS,
+                    HGVS: TEST_GENE_VARIANT}
             ],
             'location': {
                 'namespace': 'GOCC',
@@ -271,9 +288,18 @@ class TestGene(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['Variant', TEST_PROTEIN_VARIANT],
-                ['Variant', TEST_GENE_VARIANT],
-                ['Variant', 'delCTT']
+                {
+                    KIND: HGVS,
+                    HGVS: TEST_PROTEIN_VARIANT
+                },
+                {
+                    KIND: HGVS,
+                    HGVS: TEST_GENE_VARIANT
+                },
+                {
+                    KIND: HGVS,
+                    HGVS: 'delCTT'
+                }
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -493,7 +519,10 @@ class TestMiRNA(TestTokenParserBase):
                 'name': 'MIR21'
             },
             'variants': [
-                ['Variant', TEST_PROTEIN_VARIANT],
+                {
+                    KIND: HGVS,
+                    HGVS: TEST_PROTEIN_VARIANT
+                },
             ]
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -519,7 +548,10 @@ class TestMiRNA(TestTokenParserBase):
                 'name': 'MIR21'
             },
             'variants': [
-                ['Variant', 'p.Phe508del'],
+                {
+                    KIND: HGVS,
+                    HGVS: 'p.Phe508del'
+                },
             ],
             'location': {
                 'namespace': 'GOCC',
@@ -615,8 +647,12 @@ class TestProtein(TestTokenParserBase):
                 'name': 'intracellular'
             },
             'variants': [
-                ['Variant', 'p.Ala127Tyr'],
                 {
+                    KIND: HGVS,
+                    HGVS: 'p.Ala127Tyr'
+                },
+                {
+                    KIND: PMOD,
                     'identifier': 'Ph',
                     'code': 'Ser'
                 }
@@ -1128,8 +1164,14 @@ class TestRna(TestTokenParserBase):
                 'name': 'AKT1'
             },
             'variants': [
-                ['Variant', TEST_PROTEIN_VARIANT],
-                ['Variant', 'delCTT']
+                {
+                    KIND: HGVS,
+                    HGVS: TEST_PROTEIN_VARIANT
+                },
+                {
+                    KIND: HGVS,
+                    HGVS: 'delCTT'
+                }
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -2081,7 +2123,10 @@ class TestRelations(TestTokenParserBase):
                 'function': 'Gene',
                 'identifier': dict(namespace='HGNC', name='APP'),
                 'variants': [
-                    ['Variant', 'g.275341G>C']
+                    {
+                        KIND: HGVS,
+                        HGVS: 'g.275341G>C'
+                    }
                 ]
             },
             'relation': 'causesNoChange',
@@ -2198,6 +2243,7 @@ class TestRelations(TestTokenParserBase):
                 'identifier': dict(namespace='HGNC', name='MAPT'),
                 'variants': [
                     {
+                        KIND: PMOD,
                         'identifier': 'Ph',
                     }
                 ]
@@ -2227,6 +2273,7 @@ class TestRelations(TestTokenParserBase):
                 'identifier': dict(namespace='HGNC', name='GSK3B'),
                 'variants': [
                     {
+                        KIND: PMOD,
                         'code': 'Ser',
                         'identifier': 'Ph',
                         'pos': 9
