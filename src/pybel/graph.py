@@ -45,9 +45,10 @@ class BELGraph(nx.MultiDiGraph):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self.last_parse_errors = defaultdict(int)
-        self.context = None
+        self.context = context
         self.metadata_parser = None
         self.bel_parser = None
+        self.warnings = []
 
         if lines is not None:
             self.parse_lines(lines, context, lenient, complete_origin, cache_manager, log_stream)
@@ -73,7 +74,8 @@ class BELGraph(nx.MultiDiGraph):
             sh.setFormatter(logging.Formatter('%(name)s:%(levelname)s - %(message)s'))
             log.addHandler(sh)
 
-        self.context = context
+        if context is not None:
+            self.context = context
 
         docs, definitions, states = split_file_to_annotations_and_definitions(lines)
 
@@ -88,11 +90,15 @@ class BELGraph(nx.MultiDiGraph):
 
         self.parse_definitions(definitions)
 
-        self.bel_parser = BelParser(graph=self,
-                                    valid_namespaces=self.metadata_parser.namespace_dict,
-                                    valid_annotations=self.metadata_parser.annotations_dict,
-                                    lenient=lenient,
-                                    complete_origin=complete_origin)
+        self.bel_parser = BelParser(
+            graph=self,
+            valid_namespaces=self.metadata_parser.namespace_dict,
+            valid_annotations=self.metadata_parser.annotations_dict,
+            lenient=lenient,
+            complete_origin=complete_origin
+        )
+
+        self.streamline()
 
         self.parse_statements(states)
 
@@ -140,28 +146,30 @@ class BELGraph(nx.MultiDiGraph):
 
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
-    def parse_statements(self, statements):
+    def streamline(self):
         t = time.time()
-
         self.bel_parser.language.streamline()
         log.info('Finished streamlining BEL parser in %.02fs', time.time() - t)
 
+    def parse_statements(self, statements):
         t = time.time()
-
         self.last_parse_errors = defaultdict(int)
 
         for line_number, line in statements:
             try:
                 self.bel_parser.parseString(line)
-            except ParseException:
+            except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
-                self.last_parse_errors['general parser failure'] += 1
+                self.warnings.append((line_number, line, e.__class__.__name__, 'General parser exception'))
+                self.last_parse_errors[e.__class__.__name__] += 1
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
+                self.warnings.append((line_number, line, e.__class__.__name__, ', '.join(e.args)))
                 self.last_parse_errors[e.__class__.__name__] += 1
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
+                self.warnings.append((line_number, line, e.__class__.__name__, e))
                 self.last_parse_errors[e.__class__.__name__] += 1
 
         log.info('Finished parsing statements section in %.02f seconds with %d warnings', time.time() - t,

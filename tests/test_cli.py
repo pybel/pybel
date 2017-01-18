@@ -23,7 +23,7 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
         """Tests that slushy document doesn't even make it to warning counting"""
         with self.runner.isolated_filesystem():
             result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_slushy])
-            self.assertEqual(-1, result.exit_code, msg=result.exc_info)
+            self.assertLess(0, result.exit_code, msg=result.exc_info)
 
     @mock_bel_resources
     def test_convert(self, mock_get):

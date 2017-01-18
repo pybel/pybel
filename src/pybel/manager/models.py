@@ -14,8 +14,6 @@ NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalences'
 
 NETWORK_TABLE_NAME = 'pybel_network'
 
-NETWORK_TABLE_NAME = 'pybel_network'
-
 OWL_TABLE_NAME = 'Owl'
 OWL_ENTRY_TABLE_NAME = 'OwlEntry'
 

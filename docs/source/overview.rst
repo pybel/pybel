@@ -9,12 +9,19 @@ successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <h
 complex disease networks with several thousands of relationships. For a detailed explanation, see the
 `BEL 1.0 Specification <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_.
 
-Design Choices
---------------
+OpenBEL Links
+~~~~~~~~~~~~~
+
+- OpenBEL on `Google Groups <https://groups.google.com/forum/#!forum/openbel-discuss>`_
+- OpenBEL `Wiki <https://wiki.openbel.org/>`_
+- OpenBEL on `GitHub <https://github.com/OpenBEL>`_
+- Chat on `Gitter <https://gitter.im/OpenBEL/chat>`_
+
+Design Choices and BEL Specificaiton Variants
+---------------------------------------------
 
 Do All Statements Need Supporting Text?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Yes! All statements must be minimally qualified with a citation and evidence (now called SupportingText in BEL 2.0) to
 maintain provenance. Statements without evidence can't be traced to their source or evaluated independently from the
 curator, so they are excluded.
@@ -43,20 +50,29 @@ using statements like :code:`DEFINE NAMESPACE OMIT as OWL http://purl.obolibrary
 Ontologies can also provide immediate access to hierarchical knowledge like subclass relationships that can provide
 better context in analysis.
 
-Additionally, as a tool for curators, the Ontology Lookup Service allows for semantic searching. Simple queries for the
-terms 'mitochondrial dysfunction' and 'amyloid beta-peptides' immediately returned results from relevant ontologies,
-and ended a long debate over how to represent these objects within BEL. EMBL-EBI also provides a programmatic API to
-the OLS service, for searching terms (http://www.ebi.ac.uk/ols/api/search?q=folic%20acid) and
+Additionally, as a tool for curators, the EMBL Ontology Lookup Service (OLS) allows for semantic searching. Simple
+queries for the terms 'mitochondrial dysfunction' and 'amyloid beta-peptides' immediately returned results from
+relevant ontologies, and ended a long debate over how to represent these objects within BEL. EMBL-EBI also provides a
+programmatic API to the OLS service, for searching terms (http://www.ebi.ac.uk/ols/api/search?q=folic%20acid) and
 suggesting resolutions (http://www.ebi.ac.uk/ols/api/suggest?q=folic+acid)
 
-Finally, the different formats of ontology syntax can be interconverted using the University of Manchester
-`OWL Syntax Converter <http://owl.cs.manchester.ac.uk/converter>`_ to convert OWL ontologies encoded in RDF/XML, OBO,
-and other formats to the ammenable OWL/XML Format with calls to their API like:
+PyBEL uses the `OntoSpy <https://github.com/lambdamusic/OntoSpy>`_ package to parse OWL documents in many different
+formats, including OWL/XML, RDF/XML, and RDF. The University of Manchester
+`OWL Syntax Converter <http://owl.cs.manchester.ac.uk/converter>`_ can be used to convert other formats such as OBO.
+They also provide a RESTful API for conversion with calls like:
 http://owl.cs.manchester.ac.uk/converter/convert?format=OWL/XML&ontology=http://www.co-ode.org/ontologies/pizza/pizza.owl
+
+Gene Modifications
+~~~~~~~~~~~~~~~~~~
+BEL allows for the expression of sequence variants by deferring to the HGVS nomenclature with the :code:`var()` function
+and structural modificaitons to proteins with the :code:`pmod()` function. Genes also have physical modifications, such
+as methylation, which are possible to encode to encode with the :code:`gmod()` function in PyBEL's variant of BEL. The
+addition of this function does not perclude the use of all other standard functions in BEL; however, other compilers
+probably won't support these standards. If you agree that this is useful, please contribute to discussion in the OpenBEL
+community.
 
 Implementation
 --------------
-
 PyBEL is implemented using the PyParsing module. It provides flexibility and incredible speed in parsing compared
 to regular expression implementation. It also allows for the addition of parsing action hooks, which allow
 the graph to be checked semantically at compile-time.
@@ -65,15 +81,6 @@ It uses SQLite to provide a consistent and lightweight caching system for extern
 namespaces, annotations, ontologies, and SQLAlchemy to provide a cross-platform interface. The same data management
 system is used to store graphs for high-performance querying.
 
-In-Memory Data Model
-~~~~~~~~~~~~~~~~~~~~
-Molecular biology is a directed graph; not a table. BEL expresses how biological entities interact within many
-different contexts, with descriptive annotations. PyBEL represents data as a logical MultiDiGraph using the NetworkX
-package. Each node and edge has an associated data dictionary for storing relevant/contextual information.
-
-This allows for much easier programmatic access to answer more complicated questions, which can be written with python
-code. Because the data structure is the same in Neo4J, the data can be directly exported with :code:`pybel.to_neo4j`.
-Neo4J supports the Cypher querying language so that the same queries can be written in an elegant and simple way.
 
 Why Not RDF?
 ~~~~~~~~~~~~
