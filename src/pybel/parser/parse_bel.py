@@ -444,6 +444,7 @@ class BelParser(BaseParser):
 
         self.statement = self.relation | self.bel_term.setParseAction(self.handle_term)
         self.language = self.control_parser.get_language() | self.statement
+        self.language.setName('BEL')
 
     def get_language(self):
         """Get language defined by this parser"""
