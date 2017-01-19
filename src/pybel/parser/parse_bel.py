@@ -16,7 +16,7 @@ from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarni
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
-from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS
+from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE
 
 log = logging.getLogger('pybel')
 
@@ -216,14 +216,19 @@ class BelParser(BaseParser):
 
         molecular_activity_tag = Suppress(oneOf(['ma', 'molecularActivity']))
 
-        self.molecular_activities_default_ns = oneOf(language.activities)
-        self.molecular_activities_default_ns.setParseAction(lambda s, l, t: [language.activity_labels[t[0]]])
 
         # backwards compatibility with BEL v1.0
-        molecular_activity_default = nest(self.molecular_activities_default_ns('MolecularActivity'))
-        molecular_activity_custom = nest(identifier('MolecularActivity'))
 
-        self.molecular_activity = molecular_activity_tag + (molecular_activity_default | molecular_activity_custom)
+        def handle_molecular_activity_default(s, l, tokens):
+            upgraded = language.activity_labels[tokens[0]]
+            log.debug('upgraded molecular activity to %s', upgraded)
+            tokens[NAMESPACE] = PYBEL_DEFAULT_NAMESPACE
+            tokens[NAME] = upgraded
+            return tokens
+
+        molecular_activity_default = oneOf(language.activity_labels.keys()).setParseAction(handle_molecular_activity_default)
+
+        self.molecular_activity = molecular_activity_tag + nest(molecular_activity_default | self.identifier_parser.get_language())
         """2.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA"""
 
         # 2.3 Process Functions
@@ -247,7 +252,8 @@ class BelParser(BaseParser):
             legacy_cls = language.activity_labels[tokens['modifier']]
             tokens['modifier'] = 'Activity'
             tokens['effect'] = {
-                'MolecularActivity': legacy_cls
+                NAME: legacy_cls,
+                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
             return tokens
 

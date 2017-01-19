@@ -4,12 +4,11 @@ from pybel.canonicalize import decanonicalize_node
 from pybel.constants import HGVS, PMOD, GMOD, KIND, FRAGMENT, FUNCTION, NAMESPACE, NAME
 from pybel.constants import PYBEL_DEFAULT_NAMESPACE
 from pybel.parser.language import GENE, RNA
+from pybel.parser.parse_abundance_modifier import GmodParser, PmodParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from pybel.utils import default_identifier
 from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel
-from pybel.parser.parse_abundance_modifier import GmodParser, PmodParser
-
 
 log = logging.getLogger(__name__)
 
@@ -818,7 +817,6 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(Ph, S, 473))'
         result = self.parser.protein.parseString(statement)
 
-
         expected_node = ('ProteinVariant', 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: 'ProteinVariant', NAMESPACE: 'HGNC', NAME: 'AKT1'})
@@ -1043,9 +1041,6 @@ class TestProtein(TestTokenParserBase):
         """2.2.3 fragment with unknown start/stop and a descriptor"""
         statement = 'p(HGNC:YFG, frag(?, 55kD))'
         result = self.parser.protein.parseString(statement)
-
-        #expected_result = ['Protein', ['HGNC', 'YFG'], ['Fragment', '?', '55kD']]
-        #self.assertEqual(expected_result, result.asList())
 
         expected_node = 'ProteinVariant', 'HGNC', 'YFG', (FRAGMENT, '?', '55kD')
         self.assertEqual(expected_node, canonicalize_node(result))
@@ -1518,7 +1513,8 @@ class TestActivity(TestTokenParserBase):
         expected_dict = {
             'modifier': 'Activity',
             'effect': {
-                'MolecularActivity': 'KinaseActivity'
+                NAME: 'KinaseActivity',
+                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
             'target': {
                 FUNCTION: 'Protein',
@@ -1531,7 +1527,8 @@ class TestActivity(TestTokenParserBase):
         expected_mod = {
             'modifier': 'Activity',
             'effect': {
-                'MolecularActivity': 'KinaseActivity'
+                NAME: 'KinaseActivity',
+                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -1544,7 +1541,8 @@ class TestActivity(TestTokenParserBase):
         expected_dict = {
             'modifier': 'Activity',
             'effect': {
-                'MolecularActivity': 'CatalyticActivity'
+                NAME: 'CatalyticActivity',
+                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
             'target': {
                 FUNCTION: 'Protein',
@@ -1557,7 +1555,8 @@ class TestActivity(TestTokenParserBase):
         expected_mod = {
             'modifier': 'Activity',
             'effect': {
-                'MolecularActivity': 'CatalyticActivity'
+                NAME: 'CatalyticActivity',
+                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -1570,7 +1569,8 @@ class TestActivity(TestTokenParserBase):
         expected_dict = {
             'modifier': 'Activity',
             'effect': {
-                'MolecularActivity': {NAMESPACE: 'GOMF', NAME: 'catalytic activity'}
+                NAMESPACE: 'GOMF',
+                NAME: 'catalytic activity'
             },
             'target': {
                 FUNCTION: 'Protein',
@@ -1583,7 +1583,8 @@ class TestActivity(TestTokenParserBase):
         expected_mod = {
             'modifier': 'Activity',
             'effect': {
-                'MolecularActivity': {NAMESPACE: 'GOMF', NAME: 'catalytic activity'}
+                NAMESPACE: 'GOMF',
+                NAME: 'catalytic activity'
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -1596,7 +1597,8 @@ class TestActivity(TestTokenParserBase):
         expected_dict = {
             'modifier': 'Activity',
             'effect': {
-                'MolecularActivity': 'KinaseActivity'
+                NAME: 'KinaseActivity',
+                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
             'target': {
                 FUNCTION: 'Protein',
@@ -1609,7 +1611,8 @@ class TestActivity(TestTokenParserBase):
         expected_mod = {
             'modifier': 'Activity',
             'effect': {
-                'MolecularActivity': 'KinaseActivity'
+                NAME: 'KinaseActivity',
+                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -1967,7 +1970,9 @@ class TestRelations(TestTokenParserBase):
                     'identifier': {'namespace': 'SFAM', 'name': 'CAPN Family'},
                     'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
                 },
-                'effect': {'MolecularActivity': 'PeptidaseActivity'},
+                'effect': {
+                    NAME: 'PeptidaseActivity',
+                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE},
             },
             'relation': 'decreases',
             'object': {
@@ -2002,7 +2007,10 @@ class TestRelations(TestTokenParserBase):
             'relation': 'decreases',
             'subject': {
                 'modifier': 'Activity',
-                'effect': {'MolecularActivity': 'PeptidaseActivity'},
+                'effect': {
+                    NAME: 'PeptidaseActivity',
+                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                },
                 'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             }
         }
@@ -2099,7 +2107,8 @@ class TestRelations(TestTokenParserBase):
                     'identifier': {NAMESPACE: 'HGNC', NAME: 'HMGCR'}
                 },
                 'effect': {
-                    'MolecularActivity': 'CatalyticActivity'
+                    NAME: 'CatalyticActivity',
+                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
             },
             'relation': 'rateLimitingStepOf',
@@ -2164,7 +2173,8 @@ class TestRelations(TestTokenParserBase):
             'subject': {
                 'modifier': 'Activity',
                 'effect': {
-                    'MolecularActivity': 'PeptidaseActivity'
+                    NAME: 'PeptidaseActivity',
+                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
                 'target': {
                     FUNCTION: 'Complex',
@@ -2178,7 +2188,8 @@ class TestRelations(TestTokenParserBase):
             'object': {
                 'modifier': 'Activity',
                 'effect': {
-                    'MolecularActivity': 'PeptidaseActivity'
+                    NAME: 'PeptidaseActivity',
+                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
                 'target': {
                     FUNCTION: 'Protein',
@@ -2238,7 +2249,8 @@ class TestRelations(TestTokenParserBase):
             'subject': {
                 'modifier': 'Activity',
                 'effect': {
-                    'MolecularActivity': 'KinaseActivity'
+                    NAME: 'KinaseActivity',
+                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
                 'target': {
                     FUNCTION: 'Protein',
@@ -2296,7 +2308,8 @@ class TestRelations(TestTokenParserBase):
                     'identifier': {NAMESPACE: 'HGNC', NAME: 'GSK3B'}
                 },
                 'effect': {
-                    'MolecularActivity': 'KinaseActivity'
+                    NAME: 'KinaseActivity',
+                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 }
             },
         }

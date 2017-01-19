@@ -11,6 +11,7 @@ from tests.constants import test_bel, test_bel_4, mock_bel_resources
 
 log = logging.getLogger('pybel')
 
+pd_path = os.path.expanduser('~/dev/bms/aetionomy/parkinsons.bel')
 
 class TestCanonicalizeHelper(unittest.TestCase):
     def test_postpend_location_failure(self):
@@ -79,3 +80,7 @@ class TestCanonicalize(unittest.TestCase):
     @constants.mock_parse_owl_pybel
     def test_canonicalize_4(self, m1, m2, m3):
         self.canonicalize_helper(test_bel_4)
+
+    @unittest.skipUnless(os.path.exists(pd_path), 'PD Test File Missing')
+    def test_parkinsons(self):
+        self.canonicalize_helper(pd_path)
