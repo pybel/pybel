@@ -14,6 +14,7 @@ from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, Fra
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
+from .parse_identifier import DIRTY
 from .parse_identifier import IdentifierParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
 from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE
@@ -216,7 +217,6 @@ class BelParser(BaseParser):
 
         molecular_activity_tag = Suppress(oneOf(['ma', 'molecularActivity']))
 
-
         # backwards compatibility with BEL v1.0
 
         def handle_molecular_activity_default(s, l, tokens):
@@ -226,9 +226,11 @@ class BelParser(BaseParser):
             tokens[NAME] = upgraded
             return tokens
 
-        molecular_activity_default = oneOf(language.activity_labels.keys()).setParseAction(handle_molecular_activity_default)
+        molecular_activity_default = oneOf(language.activity_labels.keys()).setParseAction(
+            handle_molecular_activity_default)
 
-        self.molecular_activity = molecular_activity_tag + nest(molecular_activity_default | self.identifier_parser.get_language())
+        self.molecular_activity = molecular_activity_tag + nest(
+            molecular_activity_default | self.identifier_parser.get_language())
         """2.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA"""
 
         # 2.3 Process Functions
@@ -473,18 +475,23 @@ class BelParser(BaseParser):
         return tokens
 
     def check_function_semantics(self, s, l, tokens):
-        if self.identifier_parser.namespace_dict is None or 'identifier' not in tokens:
+        if self.identifier_parser.namespace_dict is None or IDENTIFIER not in tokens:
             return tokens
 
-        namespace, name = tokens['identifier']['namespace'], tokens['identifier']['name']
+        namespace, name = tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
+
+        if self.lenient and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
+            return tokens
 
         valid_function_codes = set(itt.chain.from_iterable(
             language.value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
 
         if tokens['function'] not in valid_function_codes:
-            valid_list = ','.join(self.identifier_parser.namespace_dict[namespace][name])
-            fmt = "Invalid function ({}) for identifier {}:{}. Valid are: [{}]"
-            raise InvalidFunctionSemantic(fmt.format(tokens['function'], namespace, name, valid_list))
+            valid = set(itt.chain.from_iterable(
+                language.value_map[k] for k in self.identifier_parser.namespace_dict[namespace][name]))
+            fmt = "{}:{} should be encoded as one of: {}"
+            raise InvalidFunctionSemantic(fmt.format(namespace, name, ', '.join(valid)))
+
         return tokens
 
     def handle_fusion_legacy(self, s, l, tokens):

@@ -169,7 +169,7 @@ class CacheManager(BaseCacheManager):
 
         try:
             results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
-            log.info('Loaded namespace from %s', url)
+            log.info('Loaded namespace from %s (%d)', url, len(results.entries))
         except NoResultFound:
             results = self.insert_namespace(url)
 
@@ -247,7 +247,7 @@ class CacheManager(BaseCacheManager):
 
         try:
             results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one()
-            log.info('Loaded annotation from %s', url)
+            log.info('Loaded annotation from %s (%d)', url, len(results.entries))
         except NoResultFound:
             results = self.insert_annotation(url)
 
