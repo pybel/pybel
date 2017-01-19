@@ -99,6 +99,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
 
         terms = self.cache_manager.get_namespace(url)
 
@@ -144,6 +145,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
 
         self.annotations_dict[name] = self.cache_manager.get_annotation(url)
         self.annotation_url_dict[name] = url
