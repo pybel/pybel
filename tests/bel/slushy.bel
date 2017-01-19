@@ -8,7 +8,7 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 DEFINE NAMESPACE CHEBI AS URL "http://resources.openbel.org/belframework/20150611/namespace/chebi.belns"
 DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns"
 DEFINE NAMESPACE MESHD AS URL "http://resources.openbel.org/belframework/20150611/namespace/mesh-diseases.belns"
-DEFINE NAMESPACE GO AS URL "http://resources.openbel.org/belframework/20150611/go-biological-process.belns"
+DEFINE NAMESPACE GO AS URL "http://resources.openbel.org/belframework/20150611/namespace/go-biological-process.belns"
 
 DEFINE ANNOTATION CellLine AS  URL "http://resources.openbel.org/belframework/20150611/annotation/cell-line.belanno"
 DEFINE ANNOTATION TextLocation AS  LIST {"Abstract","Results","Legend","Review"}
