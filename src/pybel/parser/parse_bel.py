@@ -7,10 +7,11 @@ from copy import deepcopy
 import networkx as nx
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, pyparsing_common, MatchFirst
 
+from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
-    LocationParser, TruncParser, PmodParser, GmodParser
+    LocationParser, TruncParser, PmodParser, GmodParser, canonicalize_variant
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
@@ -38,6 +39,12 @@ translocation_tag = one_of_tags(['translocation', 'tloc'], 'Translocation', 'mod
 degradation_tags = one_of_tags(['deg', 'degradation'], 'Degradation', 'modifier')
 reaction_tags = one_of_tags(['reaction', 'rxn'], 'Reaction', 'transformation')
 
+function_variant_map = {
+    language.GENE: 'GeneVariant',
+    language.RNA: 'RNAVariant',
+    language.PROTEIN: 'ProteinVariant',
+    language.MIRNA: 'miRNAVariant'
+}
 
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
@@ -572,8 +579,7 @@ class BelParser(BaseParser):
             return name
 
         if 'transformation' in tokens:
-            if name not in self.graph:
-                self.graph.add_node(name, type=tokens['transformation'])
+            self.graph.add_node(name, **{FUNCTION: tokens['transformation']})
 
             for reactant_tokens in tokens['reactants']:
                 reactant_name = self.ensure_node(s, l, reactant_tokens)
@@ -585,62 +591,58 @@ class BelParser(BaseParser):
 
             return name
 
-        elif 'function' in tokens and 'members' in tokens:
-            if name not in self.graph:
-                self.graph.add_node(name, type=tokens['function'])
+        elif FUNCTION in tokens and 'members' in tokens:
+            self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
 
             for token in tokens['members']:
                 member_name = self.ensure_node(s, l, token)
                 self.add_unqualified_edge(name, member_name, relation='hasComponent')
             return name
 
-        elif 'function' in tokens and 'variants' in tokens:
-            cls, ns, val = name[:3]
-            variants = tuple(name[3:])
-            if name not in self.graph:
-                self.graph.add_node(name,
-                                    type=cls,
-                                    namespace=ns,
-                                    name=val,
-                                    variants=variants)
+        elif FUNCTION in tokens and VARIANTS in tokens:
+            self.graph.add_node(name, {
+                FUNCTION: function_variant_map[tokens[FUNCTION]],
+                NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
+                NAME: tokens[IDENTIFIER][NAME],
+                VARIANTS: [variant.asDict() for variant in tokens[VARIANTS]]
+            })
 
             c = {
-                'function': tokens['function'],
-                'identifier': tokens['identifier']
+                FUNCTION: tokens[FUNCTION],
+                IDENTIFIER: tokens[IDENTIFIER]
             }
 
             parent = self.ensure_node(s, l, c)
             self.add_unqualified_edge(parent, name, relation='hasVariant')
             return name
 
-        elif 'function' in tokens and 'fusion' in tokens:
-            if name not in self.graph:
-                f = tokens['fusion']
-                cls = '{}Fusion'.format(tokens['function'])
-                d = {
-                    'partner_5p': dict(namespace=f['partner_5p']['namespace'], name=f['partner_5p']['name']),
-                    'range_5p': tuple(f['range_5p']),
-                    'partner_3p': dict(namespace=f['partner_3p']['namespace'], name=f['partner_3p']['name']),
-                    'range_3p': tuple(f['range_3p'])
-                }
-                self.graph.add_node(name, type=cls, **d)
+        elif FUNCTION in tokens and 'fusion' in tokens:
+            f = tokens['fusion']
+            d = {
+                FUNCTION: '{}Fusion'.format(tokens[FUNCTION]),
+                'partner_5p': {NAMESPACE: f['partner_5p']['namespace'], NAME:f['partner_5p']['name']},
+                'range_5p': tuple(f['range_5p']),
+                'partner_3p': {NAMESPACE: f['partner_3p']['namespace'], NAME:f['partner_3p']['name']},
+                'range_3p': tuple(f['range_3p'])
+            }
+            self.graph.add_node(name, **d)
             return name
 
-        elif 'function' in tokens and 'identifier' in tokens:
+        elif FUNCTION in tokens and 'identifier' in tokens:
             if tokens['function'] in ('Gene', 'miRNA', 'Pathology', 'BiologicalProcess', 'Abundance', 'Complex'):
-                if name not in self.graph:
-                    self.graph.add_node(name,
-                                        type=tokens['function'],
-                                        namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'])
+                self.graph.add_node(name, {
+                    FUNCTION: tokens['function'],
+                    NAMESPACE: tokens['identifier']['namespace'],
+                    NAME: tokens['identifier']['name']
+                })
                 return name
 
             elif tokens['function'] == 'RNA':
-                if name not in self.graph:
-                    self.graph.add_node(name,
-                                        type=tokens['function'],
-                                        namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'])
+                self.graph.add_node(name, {
+                    FUNCTION: tokens['function'],
+                    NAMESPACE: tokens['identifier']['namespace'],
+                    NAME: tokens['identifier']['name']
+                })
 
                 if not self.complete_origin:
                     return name
@@ -653,11 +655,11 @@ class BelParser(BaseParser):
                 return name
 
             elif tokens['function'] == 'Protein':
-                if name not in self.graph:
-                    self.graph.add_node(name,
-                                        type=tokens['function'],
-                                        namespace=tokens['identifier']['namespace'],
-                                        name=tokens['identifier']['name'])
+                self.graph.add_node(name, {
+                    FUNCTION: tokens['function'],
+                    NAMESPACE: tokens['identifier']['namespace'],
+                    NAME: tokens['identifier']['name']
+                })
 
                 if not self.complete_origin:
                     return name
@@ -675,13 +677,12 @@ def canonicalize_node(tokens):
 
     :param tokens: tokens ParseObject or dict
     """
-    if 'function' in tokens and 'variants' in tokens:
-        type_name = '{}Variant'.format(tokens['function'])
-        name = type_name, tokens['identifier']['namespace'], tokens['identifier']['name']
-        variants = list2tuple(sorted(tokens['variants'].asList()))
-        return name + variants
+    if FUNCTION in tokens and 'variants' in tokens:
+        type_name = function_variant_map[tokens[FUNCTION]]
+        variants = tuple(sorted(canonicalize_variant(token.asDict()) for token in tokens['variants']))
+        return (type_name, tokens['identifier']['namespace'], tokens['identifier']['name']) + variants
 
-    elif 'function' in tokens and 'members' in tokens:
+    elif FUNCTION in tokens and 'members' in tokens:
         return (tokens['function'],) + tuple(sorted(canonicalize_node(member) for member in tokens['members']))
 
     elif 'transformation' in tokens and tokens['transformation'] == 'Reaction':
@@ -689,9 +690,9 @@ def canonicalize_node(tokens):
         products = tuple(sorted(list2tuple(tokens['products'].asList())))
         return (tokens['transformation'],) + (reactants,) + (products,)
 
-    elif 'function' in tokens and tokens['function'] in ('Gene', 'RNA', 'Protein') and 'fusion' in tokens:
+    elif 'fusion' in tokens:
+        cls = '{}Fusion'.format(tokens[FUNCTION])
         f = tokens['fusion']
-        cls = '{}Fusion'.format(tokens['function'])
         return cls, (f['partner_5p']['namespace'], f['partner_5p']['name']), tuple(f['range_5p']), (
             f['partner_3p']['namespace'], f['partner_3p']['name']), tuple(f['range_3p'])
 

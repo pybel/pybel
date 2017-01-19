@@ -4,22 +4,25 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
+from .constants import BLACKLIST_EDGE_ATTRIBUTES
+from .constants import CITATION_ENTRIES
+from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT,FUNCTION, NAMESPACE, NAME, PYBEL_DEFAULT_NAMESPACE
+from .constants import GOCC_LATEST
 from .parser import language
 from .parser.language import rev_activity_labels, inv_document_keys
+from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
+from .parser.parse_bel import NAMESPACE, NAME
 from .parser.utils import ensure_quotes
-from .constants import GOCC_LATEST
 
 __all__ = ['to_bel']
-
-# TODO extract from .parse_control
-CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
-
-BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
 
 variant_parent_dict = {
     'GeneVariant': 'g',
     'RNAVariant': 'r',
-    'ProteinVariant': 'p'
+    'ProteinVariant': 'p',
+    'Gene': 'g',
+    'RNA': 'r',
+    'Protein': 'p'
 }
 
 fusion_parent_dict = {
@@ -57,29 +60,38 @@ def postpend_location(s, location_model):
     :return:
     """
 
-    if all(k in location_model for k in {'namespace', 'name'}):
-        return "loc({}:{})".format(location_model['namespace'], ensure_quotes(location_model['name']))
+    if all(k in location_model for k in {NAMESPACE, NAME}):
+        return "loc({}:{})".format(location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
     raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
 
 
 def decanonicalize_variant(tokens):
-    if tokens[0] == 'ProteinModification':
-        if isinstance(tokens[1], str):
-            return 'pmod({})'.format(', '.join(map(str, tokens[1:])))
-        return 'pmod({}:{}{})'.format(tokens[1][0], tokens[1][1], ''.join(', {}'.format(t) for t in tokens[2:]))
-    elif tokens[0] == 'Variant':
-        return 'var({})'.format(''.join(map(str, tokens[1:])))
-    elif tokens[0] == 'Fragment':
-        if '?' == tokens[1] and len(tokens) == 2:
-            return 'frag(?)'
-        elif '?' == tokens[1] and len(tokens) == 3:  # has description
-            return 'frag(?, {})'.format(tokens[2])
-        elif len(tokens) == 4:
-            return 'frag({})'.format(''.join(map(str, tokens[1:])))
+    if tokens[KIND] == PMOD:
+        if tokens[PmodParser.IDENTIFIER][NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
+            name = tokens[PmodParser.IDENTIFIER][NAME]
         else:
-            return 'frag({}, {})'.format(''.join(map(str, tokens[1:])), tokens[-1])
-    elif tokens[0] == 'GeneModification':
-        return 'gmod({})'.format(tokens[1])
+            name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE],tokens[PmodParser.IDENTIFIER][NAME])
+        return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PmodParser.ORDER[2:] if x in tokens))
+    elif tokens[KIND] == GMOD:
+        if tokens[GmodParser.IDENTIFIER][NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
+            name = tokens[GmodParser.IDENTIFIER][NAME]
+        else:
+            name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE],tokens[PmodParser.IDENTIFIER][NAME])
+        return 'gmod({})'.format(name)
+    elif tokens[KIND] == HGVS:
+        return 'var({})'.format(tokens[HGVS])
+    elif tokens[KIND] == FRAGMENT:
+        if FragmentParser.MISSING in tokens:
+            res = 'frag(?'
+        else:
+            res = 'frag({}_{}'.format(tokens[FragmentParser.RANGE][FragmentParser.START],
+                                      tokens[FragmentParser.RANGE][FragmentParser.STOP])
+
+        if FragmentParser.DESCRIPTION in tokens:
+            res += ', {}'.format(tokens[FragmentParser.DESCRIPTION])
+
+        return res + ')'
+
     else:
         raise ValueError('Invalid variant: {}'.format(tokens))
 
@@ -97,42 +109,43 @@ def decanonicalize_node(g, v):
     :type g: :class:`pybel.BELGraph`
     :param v: a node from the BEL graph
     """
-    tokens = g.node[v]
+    data = g.node[v]
 
-    if tokens['type'] == 'Reaction':
+    if data[FUNCTION] == 'Reaction':
         reactants = get_neighbors_by_path_type(g, v, 'hasReactant')
         reactants_canon = map(lambda n: decanonicalize_node(g, n), sorted(reactants))
         products = get_neighbors_by_path_type(g, v, 'hasProduct')
         products_canon = map(lambda n: decanonicalize_node(g, n), sorted(products))
         return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
 
-    if tokens['type'] in ('Composite', 'Complex') and 'namespace' not in tokens:
+    if data[FUNCTION] in ('Composite', 'Complex') and 'namespace' not in data:
         members_canon = map(lambda n: decanonicalize_node(g, n), v[1:])
-        return '{}({})'.format(language.rev_abundance_labels[tokens['type']], ', '.join(members_canon))
+        return '{}({})'.format(language.rev_abundance_labels[data[FUNCTION]], ', '.join(members_canon))
 
-    if 'type' in tokens and 'variants' in tokens:
-        variants = ', '.join(map(decanonicalize_variant, sorted(tokens['variants'])))
-        return "{}({}:{}, {})".format(variant_parent_dict[tokens['type']],
-                                      tokens['namespace'],
-                                      ensure_quotes(tokens['name']),
+    if 'variants' in data:
+        variants = ', '.join(sorted(map(decanonicalize_variant, data['variants'])))
+        return "{}({}:{}, {})".format(variant_parent_dict[data[FUNCTION]],
+                                      data['namespace'],
+                                      ensure_quotes(data['name']),
                                       variants)
 
-    if tokens['type'] in ('Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
-        return "{}({}:{})".format(language.rev_abundance_labels[tokens['type']], tokens['namespace'],
-                                  ensure_quotes(tokens['name']))
+    if data[FUNCTION] in ('Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
+        return "{}({}:{})".format(language.rev_abundance_labels[data[FUNCTION]],
+                                  data['namespace'],
+                                  ensure_quotes(data['name']))
 
-    if tokens['type'].endswith('Fusion'):
+    if data[FUNCTION].endswith('Fusion'):
         return "{}(fus({}:{}, {}, {}:{}, {}))".format(
-            fusion_parent_dict[tokens['type']],
-            tokens['partner_5p']['namespace'],
-            tokens['partner_5p']['name'],
-            decanonicalize_fusion_range(tokens['range_5p']),
-            tokens['partner_3p']['namespace'],
-            tokens['partner_3p']['name'],
-            decanonicalize_fusion_range(tokens['range_3p'])
+            fusion_parent_dict[data[FUNCTION]],
+            data['partner_5p']['namespace'],
+            data['partner_5p']['name'],
+            decanonicalize_fusion_range(data['range_5p']),
+            data['partner_3p']['namespace'],
+            data['partner_3p']['name'],
+            decanonicalize_fusion_range(data['range_3p'])
         )
 
-    raise ValueError('Unknown node data: {} {}'.format(v, tokens))
+    raise ValueError('Unknown node data: {} {}'.format(v, data))
 
 
 def decanonicalize_edge_node(g, node, edge_data, node_position):
@@ -273,7 +286,8 @@ def to_bel(graph, file=sys.stdout):
     print('SET Evidence = "Automatically added by PyBEL"', file=file)
 
     for u in graph.nodes_iter():
-        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
+        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in
+               graph.edge[u][v].values()):
             continue
 
         print(decanonicalize_node(graph, u), file=file)

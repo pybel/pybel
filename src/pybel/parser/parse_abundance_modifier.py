@@ -5,12 +5,12 @@ import logging
 from pyparsing import Word, oneOf, replaceWith, Optional, Keyword, Suppress, Group, alphanums, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
-from pybel.constants import KIND, PMOD, GMOD, HGVS, PYBEL_DEFAULT_NAMESPACE
-from pybel.parser.language import pmod_namespace, pmod_legacy_labels
 from . import language
 from .baseparser import BaseParser, WCW, word, nest, one_of_tags
 from .language import amino_acid, dna_nucleotide, dna_nucleotide_labels, rna_nucleotide_labels
+from .language import pmod_namespace, pmod_legacy_labels
 from .parse_identifier import IdentifierParser
+from ..constants import KIND, PMOD, GMOD, HGVS, PYBEL_DEFAULT_NAMESPACE, FRAGMENT, NAMESPACE, NAME
 
 log = logging.getLogger('pybel')
 
@@ -116,10 +116,12 @@ class GsubParser(BaseParser):
 
 # Molecular modifications
 
+
 class PmodParser(BaseParser):
     IDENTIFIER = 'identifier'
     CODE = 'code'
     POSITION = 'pos'
+    ORDER = [KIND, IDENTIFIER, CODE, POSITION]
 
     def __init__(self, namespace_parser=None):
         """
@@ -130,7 +132,6 @@ class PmodParser(BaseParser):
         """
 
         self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
-
 
         pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, identifier=KIND)
 
@@ -143,13 +144,12 @@ class PmodParser(BaseParser):
             Group(pmod_legacy_ns)
         ])
 
-        pmod_1 = pmod_tag + nest(pmod_identifier(self.IDENTIFIER) +
-                                 Optional(WCW + amino_acid(self.CODE) + Optional(WCW + ppc.integer(self.POSITION))))
-
-        self.language = pmod_1  # | pmod_2 | pmod_3
+        self.language = pmod_tag + nest(pmod_identifier(self.IDENTIFIER) +
+                                        Optional(
+                                            WCW + amino_acid(self.CODE) + Optional(WCW + ppc.integer(self.POSITION))))
 
     def handle_pmod_default_ns(self, s, l, tokens):
-        tokens['namespace'] = PYBEL_DEFAULT_NAMESPACE
+        tokens[NAMESPACE] = PYBEL_DEFAULT_NAMESPACE
         tokens['name'] = language.pmod_namespace[tokens[0]]
         return tokens
 
@@ -164,8 +164,34 @@ class PmodParser(BaseParser):
         return self.language
 
 
+class FragmentParser(BaseParser):
+    """
+    2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
+    """
+    RANGE = 'range'
+    START = 'start'
+    STOP = 'stop'
+    MISSING = 'missing'
+    DESCRIPTION = 'description'
+
+    def __init__(self):
+        self.fragment_range = (ppc.integer | '?')(self.START) + '_' + (ppc.integer | '?' | '*')(self.STOP)
+        self.missing_fragment = Keyword('?')(self.MISSING)
+
+        # fragment_tag = oneOf(['frag', 'fragment']).setParseAction(replaceWith('Fragment'))
+        fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, identifier=KIND)
+
+        self.language = fragment_tag + nest(
+            (self.fragment_range(self.RANGE) | self.missing_fragment(self.MISSING)) + Optional(
+                WCW + word(self.DESCRIPTION)))
+
+    def get_language(self):
+        return self.language
+
+
 class GmodParser(BaseParser):
     IDENTIFIER = 'identifier'
+    ORDER = [KIND, IDENTIFIER]
 
     def __init__(self, namespace_parser=None):
         """
@@ -196,20 +222,42 @@ class GmodParser(BaseParser):
         return self.language
 
 
-class FragmentParser(BaseParser):
-    """
-    2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
-    """
+def canonicalize_hgvs(tokens):
+    return tokens[KIND], tokens[HGVS]
 
-    def __init__(self):
-        self.fragment_range = (ppc.integer | '?')('start') + '_' + (ppc.integer | '?' | '*')('stop')
-        self.missing_fragment = Keyword('?')('missing')
-        fragment_tag = oneOf(['frag', 'fragment']).setParseAction(replaceWith('Fragment'))
-        self.language = fragment_tag + nest(
-            (self.fragment_range | self.missing_fragment) + Optional(WCW + word('description')))
 
-    def get_language(self):
-        return self.language
+def canonicalize_pmod(tokens):
+    return (PMOD, (tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])) + tuple(
+        tokens[key] for key in PmodParser.ORDER[2:] if key in tokens)
+
+
+def canonicalize_gmod(tokens):
+    return (GMOD, (tokens[GmodParser.IDENTIFIER][NAMESPACE], tokens[GmodParser.IDENTIFIER][NAME])) + tuple(
+        tokens[key] for key in GmodParser.ORDER[2:] if key in tokens)
+
+
+def canonicalize_frag(tokens):
+    if FragmentParser.MISSING in tokens:
+        result = FRAGMENT, '?'
+    elif FragmentParser.RANGE in tokens:
+        result = FRAGMENT, (
+            tokens[FragmentParser.RANGE][FragmentParser.START], tokens[FragmentParser.RANGE][FragmentParser.STOP])
+
+    if FragmentParser.DESCRIPTION in tokens:
+        return result + (tokens[FragmentParser.DESCRIPTION],)
+
+    return result
+
+
+def canonicalize_variant(tokens):
+    if tokens[KIND] == HGVS:
+        return canonicalize_hgvs(tokens)
+    elif tokens[KIND] == PMOD:
+        return canonicalize_pmod(tokens)
+    elif tokens[KIND] == GMOD:
+        return canonicalize_gmod(tokens)
+    elif tokens[KIND] == FRAGMENT:
+        return canonicalize_frag(tokens)
 
 
 class FusionParser(BaseParser):

@@ -9,8 +9,10 @@ from pyparsing import ParseException
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
 from .parser.parse_bel import BelParser
+from .constants import FUNCTION, NAMESPACE
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
+
 from .utils import expand_dict
 
 try:
@@ -107,7 +109,7 @@ class BELGraph(nx.MultiDiGraph):
         counter = defaultdict(lambda: defaultdict(int))
 
         for n, d in self.nodes_iter(data=True):
-            counter[d['type']][d['namespace'] if 'namespace' in d else 'DEFAULT'] += 1
+            counter[d[FUNCTION]][d[NAMESPACE] if NAMESPACE in d else 'DEFAULT'] += 1
 
         for fn, nss in sorted(counter.items()):
             log.debug(' %s: %d', fn, sum(nss.values()))

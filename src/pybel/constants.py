@@ -21,3 +21,12 @@ KIND = 'kind'
 HGVS = 'hgvs'
 PMOD = 'pmod'
 GMOD = 'gmod'
+FRAGMENT = 'frag'
+FUNCTION = 'function'
+NAMESPACE = 'namespace'
+NAME = 'name'
+IDENTIFIER = 'identifier'
+VARIANTS = 'variants'
+
+CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
+BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}

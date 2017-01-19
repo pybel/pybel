@@ -12,7 +12,7 @@ from networkx.readwrite import json_graph
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
-from .constants import PYBEL_CONTEXT_TAG
+from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME
 from .graph import BELGraph, expand_edges
 from .utils import flatten, flatten_graph_data
 
@@ -221,11 +221,11 @@ def to_neo4j(graph, neo_graph, context=None):
 
     node_map = {}
     for node, data in graph.nodes(data=True):
-        node_type = data['type']
-        attrs = {k: v for k, v in data.items() if k != 'type'}
+        node_type = data[FUNCTION]
+        attrs = {k: v for k, v in data.items() if k != FUNCTION}
 
-        if 'name' in data:
-            attrs['value'] = data['name']
+        if NAME in data:
+            attrs['value'] = data[NAME]
 
         node_map[node] = py2neo.Node(node_type, bel=decanonicalize_node(graph, node), **attrs)
 

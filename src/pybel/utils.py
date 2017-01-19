@@ -7,6 +7,8 @@ import networkx as nx
 import requests
 from requests_file import FileAdapter
 
+from .constants import PYBEL_DEFAULT_NAMESPACE
+
 log = logging.getLogger('pybel')
 
 
@@ -99,3 +101,7 @@ def flatten_graph_data(graph):
         g.add_edge(u, v, key=key, attr_dict=flatten(data))
 
     return g
+
+
+def default_identifier(s):
+    return dict(namespace=PYBEL_DEFAULT_NAMESPACE, name=s)
