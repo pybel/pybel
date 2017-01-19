@@ -2,12 +2,13 @@
 
 import logging
 
-from pyparsing import Word, oneOf, replaceWith, Optional, Keyword, Suppress, Group, alphanums
+from pyparsing import Word, oneOf, replaceWith, Optional, Keyword, Suppress, Group, alphanums, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
+from pybel.constants import KIND, PMOD, GMOD, HGVS, PYBEL_DEFAULT_NAMESPACE
 from pybel.parser.language import pmod_namespace, pmod_legacy_labels
 from . import language
-from .baseparser import BaseParser, WCW, word, nest
+from .baseparser import BaseParser, WCW, word, nest, one_of_tags
 from .language import amino_acid, dna_nucleotide, dna_nucleotide_labels, rna_nucleotide_labels
 from .parse_identifier import IdentifierParser
 
@@ -17,6 +18,12 @@ dna_nucleotide_seq = Word(''.join(dna_nucleotide_labels.keys()))
 rna_nucleotide_seq = Word(''.join(rna_nucleotide_labels.keys()))
 
 
+def build_variant_dict(variant):
+    return {KIND: HGVS, HGVS: variant}
+
+
+# Structural variants
+
 class VariantParser(BaseParser):
     """Parsers variants
 
@@ -24,40 +31,55 @@ class VariantParser(BaseParser):
     """
 
     def __init__(self):
-        variant_tags = oneOf(['var', 'variant']).setParseAction(replaceWith('Variant'))
+        variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)
         variant_characters = Word(alphanums + '._*=?>')
-        self.language = variant_tags + nest(variant_characters)
+        self.language = variant_tags + nest(variant_characters.setResultsName(HGVS))
 
     def get_language(self):
         return self.language
 
 
 class PsubParser(BaseParser):
+    REFERENCE = 'reference'
+    POSITION = 'position'
+    VARIANT = 'variant'
+
     def __init__(self):
-        psub_tag = oneOf(['sub', 'substitution']).setParseAction(replaceWith('Variant'))
-        self.language = psub_tag + nest(amino_acid('reference'), ppc.integer('position'), amino_acid('variant'))
+        psub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
+        self.language = psub_tag + nest(amino_acid(self.REFERENCE),
+                                        ppc.integer(self.POSITION),
+                                        amino_acid(self.VARIANT))
         self.language.setParseAction(self.handle_psub)
 
     def handle_psub(self, s, l, tokens):
-        upgraded = 'p.{}{}{}'.format(tokens['reference'], tokens['position'], tokens['variant'])
+        upgraded = 'p.{}{}{}'.format(tokens[self.REFERENCE], tokens[self.POSITION], tokens[self.VARIANT])
         log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', s, upgraded)
-        return ['Variant', upgraded]
+        tokens[HGVS] = upgraded
+        del tokens[self.REFERENCE]
+        del tokens[self.POSITION]
+        del tokens[self.VARIANT]
+        return tokens
 
     def get_language(self):
         return self.language
 
 
 class TruncParser(BaseParser):
+    POSITION = 'position'
+
     def __init__(self):
-        trunc_tag = oneOf(['trunc', 'truncation']).setParseAction(replaceWith('Variant'))
-        self.language = trunc_tag + nest(ppc.integer('position'))
+        trunc_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, identifier=KIND)
+        self.language = trunc_tag + nest(ppc.integer(self.POSITION))
         self.language.setParseAction(self.handle_trunc_legacy)
 
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     def handle_trunc_legacy(self, s, l, tokens):
-        upgraded = 'p.{}*'.format(tokens['position'])
-        log.warning('trunc() is deprecated. Please look up reference terminal amino acid, and encode with HGVS: {}'.format(s))
-        return ['Variant', upgraded]
+        upgraded = 'p.{}*'.format(tokens[self.POSITION])
+        log.warning(
+            'trunc() is deprecated. Please look up reference terminal amino acid and encode with HGVS: {}'.format(s))
+        tokens[HGVS] = upgraded
+        del tokens[self.POSITION]
+        return tokens
 
     def get_language(self):
         return self.language
@@ -69,16 +91,106 @@ class GsubParser(BaseParser):
     Variant()
     """
 
+    REFERENCE = 'reference'
+    POSITION = 'position'
+    VARIANT = 'variant'
+
     def __init__(self):
-        gsub_tag = oneOf(['sub', 'substitution']).setParseAction(replaceWith('Variant'))
-        self.language = gsub_tag + nest(dna_nucleotide('reference'), ppc.integer('position'),
-                                        dna_nucleotide('variant'))
+        gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
+        self.language = gsub_tag + nest(dna_nucleotide(self.REFERENCE), ppc.integer(self.POSITION),
+                                        dna_nucleotide(self.VARIANT))
         self.language.setParseAction(self.handle_gsub)
 
     def handle_gsub(self, s, l, tokens):
-        upgraded = 'g.{}{}{}{}'.format(tokens['position'], tokens['reference'], '>', tokens['variant'])
+        upgraded = 'g.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
         log.warning('sub() in g() is deprecated: %s. Upgraded to %s', s, upgraded)
-        return ['Variant', upgraded]
+        tokens[HGVS] = upgraded
+        del tokens[self.POSITION]
+        del tokens[self.REFERENCE]
+        del tokens[self.VARIANT]
+        return tokens
+
+    def get_language(self):
+        return self.language
+
+
+# Molecular modifications
+
+class PmodParser(BaseParser):
+    IDENTIFIER = 'identifier'
+    CODE = 'code'
+    POSITION = 'pos'
+
+    def __init__(self, namespace_parser=None):
+        """
+
+        :param namespace_parser:
+        :type namespace_parser: IdentifierParser
+        :return:
+        """
+
+        self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
+
+
+        pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, identifier=KIND)
+
+        pmod_default_ns = oneOf(pmod_namespace.keys()).setParseAction(self.handle_pmod_default_ns)
+        pmod_legacy_ns = oneOf(pmod_legacy_labels.keys()).setParseAction(self.handle_pmod_legacy_ns)
+
+        pmod_identifier = MatchFirst([
+            Group(self.namespace_parser.identifier_qualified),
+            Group(pmod_default_ns),
+            Group(pmod_legacy_ns)
+        ])
+
+        pmod_1 = pmod_tag + nest(pmod_identifier(self.IDENTIFIER) +
+                                 Optional(WCW + amino_acid(self.CODE) + Optional(WCW + ppc.integer(self.POSITION))))
+
+        self.language = pmod_1  # | pmod_2 | pmod_3
+
+    def handle_pmod_default_ns(self, s, l, tokens):
+        tokens['namespace'] = PYBEL_DEFAULT_NAMESPACE
+        tokens['name'] = language.pmod_namespace[tokens[0]]
+        return tokens
+
+    def handle_pmod_legacy_ns(self, s, l, tokens):
+        upgraded = language.pmod_legacy_labels[tokens[0]]
+        log.log(5, 'PyBEL016 legacy pmod() values: %s. Upgraded to %s.', s, upgraded)
+        tokens['namespace'] = PYBEL_DEFAULT_NAMESPACE
+        tokens['name'] = upgraded
+        return tokens
+
+    def get_language(self):
+        return self.language
+
+
+class GmodParser(BaseParser):
+    IDENTIFIER = 'identifier'
+
+    def __init__(self, namespace_parser=None):
+        """
+
+        :param namespace_parser:
+        :type namespace_parser: IdentifierParser
+        :return:
+        """
+
+        self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
+
+        gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, identifier=KIND)
+
+        gmod_default_ns = oneOf(language.gmod_namespace.keys()).setParseAction(self.handle_gmod_default)
+
+        gmod_identifier = Group(self.namespace_parser.identifier_qualified) | Group(gmod_default_ns)
+
+        gmod_1 = gmod_tag + nest(gmod_identifier(self.IDENTIFIER))
+
+        self.language = gmod_1
+
+    def handle_gmod_default(self, s, l, tokens):
+        tokens['namespace'] = PYBEL_DEFAULT_NAMESPACE
+        tokens['name'] = language.gmod_namespace[tokens[0]]
+        return tokens
 
     def get_language(self):
         return self.language
@@ -136,77 +248,6 @@ class LocationParser(BaseParser):
         identifier = self.identifier_parser.get_language()
         location_tag = Suppress(oneOf(['loc', 'location']))
         self.language = Group(location_tag + nest(identifier))('location')
-
-    def get_language(self):
-        return self.language
-
-
-class PmodParser(BaseParser):
-    def __init__(self, namespace_parser=None):
-        """
-
-        :param namespace_parser:
-        :type namespace_parser: IdentifierParser
-        :return:
-        """
-
-        self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
-
-        pmod_tag = oneOf(['pmod', 'proteinModification'])
-        pmod_tag.addParseAction(replaceWith('ProteinModification'))
-
-        pmod_default_ns = oneOf(pmod_namespace.keys()).setParseAction(self.handle_pmod_default_ns)
-        pmod_legacy_ns = oneOf(pmod_legacy_labels.keys()).setParseAction(self.handle_pmod_legacy_ns)
-
-        pmod_identifier = Group(self.namespace_parser.identifier_qualified) | pmod_default_ns | pmod_legacy_ns
-
-        pmod_1 = pmod_tag + nest(pmod_identifier('identifier'), amino_acid('code'), ppc.integer('pos'))
-        pmod_2 = pmod_tag + nest(pmod_identifier('identifier'), amino_acid('code'))
-        pmod_3 = pmod_tag + nest(pmod_identifier('identifier'))
-
-        self.language = pmod_1 | pmod_2 | pmod_3
-        self.language.setParseAction(self.handle_protein_modification)
-
-    def handle_protein_modification(self, s, l, tokens):
-        return tokens
-
-    def handle_pmod_default_ns(self, s, l, tokens):
-        return [language.pmod_namespace[tokens[0]]]
-
-    def handle_pmod_legacy_ns(self, s, l, tokens):
-        upgraded = language.pmod_legacy_labels[tokens[0]]
-        log.log(5, 'PyBEL016 legacy pmod() values: %s. Upgraded to %s.', s, upgraded)
-        return [upgraded]
-
-    def get_language(self):
-        return self.language
-
-
-class GmodParser(BaseParser):
-    def __init__(self, namespace_parser=None):
-        """
-
-        :param namespace_parser:
-        :type namespace_parser: IdentifierParser
-        :return:
-        """
-
-        self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
-
-        gmod_tag = oneOf(['gmod', 'geneModification'])
-        gmod_tag.addParseAction(replaceWith('GeneModification'))
-
-        gmod_default_ns = oneOf(language.gmod_namespace.keys()).setParseAction(self.handle_gmod)
-
-        gmod_identifier = Group(self.namespace_parser.identifier_qualified) | gmod_default_ns
-
-        # pmod_1 = gmod_tag + nest(pmod_identifier('identifier'), amino_acid('code'), ppc.integer('pos'))
-        gmod_1 = gmod_tag + nest(gmod_identifier)
-
-        self.language = gmod_1
-
-    def handle_gmod(self, s, l, tokens):
-        return [language.gmod_namespace[tokens[0]]]
 
     def get_language(self):
         return self.language

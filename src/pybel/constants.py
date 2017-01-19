@@ -14,3 +14,10 @@ if not os.path.exists(PYBEL_DATA):
     os.mkdir(PYBEL_DATA)
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
+
+PYBEL_DEFAULT_NAMESPACE = 'PYBEL'
+
+KIND = 'kind'
+HGVS = 'hgvs'
+PMOD = 'pmod'
+GMOD = 'gmod'

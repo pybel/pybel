@@ -1,22 +1,21 @@
 import logging
 
 from pybel.canonicalize import decanonicalize_node
+from pybel.constants import HGVS, PMOD, GMOD, KIND
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel
+
+from pybel.parser.parse_abundance_modifier import build_variant_dict
 
 log = logging.getLogger(__name__)
 
 TEST_GENE_VARIANT = 'g.308G>A'
 TEST_PROTEIN_VARIANT = 'p.Phe508del'
 
-KIND = 'kind'
-HGVS = 'hgvs'
-PMOD = 'pmod'
-GMOD = 'gmod'
-
 #: for the function of an entity
 FUNCTION = 'function'
+
 
 class TestAbundance(TestTokenParserBase):
     """2.1.1"""
