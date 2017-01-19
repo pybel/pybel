@@ -6,13 +6,12 @@ from collections import defaultdict
 import networkx as nx
 from pyparsing import ParseException
 
+from .constants import FUNCTION, NAMESPACE
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
 from .parser.parse_bel import BelParser
-from .constants import FUNCTION, NAMESPACE
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
-
 from .utils import expand_dict
 
 try:

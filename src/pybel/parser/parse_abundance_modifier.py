@@ -168,7 +168,6 @@ class FragmentParser(BaseParser):
     """
     2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
     """
-    RANGE = 'range'
     START = 'start'
     STOP = 'stop'
     MISSING = 'missing'
@@ -182,7 +181,7 @@ class FragmentParser(BaseParser):
         fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, identifier=KIND)
 
         self.language = fragment_tag + nest(
-            (self.fragment_range(self.RANGE) | self.missing_fragment(self.MISSING)) + Optional(
+            (self.fragment_range | self.missing_fragment(self.MISSING)) + Optional(
                 WCW + word(self.DESCRIPTION)))
 
     def get_language(self):
@@ -239,9 +238,8 @@ def canonicalize_gmod(tokens):
 def canonicalize_frag(tokens):
     if FragmentParser.MISSING in tokens:
         result = FRAGMENT, '?'
-    elif FragmentParser.RANGE in tokens:
-        result = FRAGMENT, (
-            tokens[FragmentParser.RANGE][FragmentParser.START], tokens[FragmentParser.RANGE][FragmentParser.STOP])
+    else:
+        result = FRAGMENT, (tokens[FragmentParser.START], tokens[FragmentParser.STOP])
 
     if FragmentParser.DESCRIPTION in tokens:
         return result + (tokens[FragmentParser.DESCRIPTION],)

@@ -7,7 +7,6 @@ from copy import deepcopy
 import networkx as nx
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, pyparsing_common, MatchFirst
 
-from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
@@ -17,6 +16,7 @@ from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarni
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
+from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS
 
 log = logging.getLogger('pybel')
 
@@ -45,6 +45,7 @@ function_variant_map = {
     language.PROTEIN: 'ProteinVariant',
     language.MIRNA: 'miRNAVariant'
 }
+
 
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
@@ -620,9 +621,9 @@ class BelParser(BaseParser):
             f = tokens['fusion']
             d = {
                 FUNCTION: '{}Fusion'.format(tokens[FUNCTION]),
-                'partner_5p': {NAMESPACE: f['partner_5p']['namespace'], NAME:f['partner_5p']['name']},
+                'partner_5p': {NAMESPACE: f['partner_5p']['namespace'], NAME: f['partner_5p']['name']},
                 'range_5p': tuple(f['range_5p']),
-                'partner_3p': {NAMESPACE: f['partner_3p']['namespace'], NAME:f['partner_3p']['name']},
+                'partner_3p': {NAMESPACE: f['partner_3p']['namespace'], NAME: f['partner_3p']['name']},
                 'range_3p': tuple(f['range_3p'])
             }
             self.graph.add_node(name, **d)

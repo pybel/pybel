@@ -6,7 +6,7 @@ from operator import itemgetter
 
 from .constants import BLACKLIST_EDGE_ATTRIBUTES
 from .constants import CITATION_ENTRIES
-from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT,FUNCTION, NAMESPACE, NAME, PYBEL_DEFAULT_NAMESPACE
+from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
 from .constants import GOCC_LATEST
 from .parser import language
 from .parser.language import rev_activity_labels, inv_document_keys
@@ -70,13 +70,13 @@ def decanonicalize_variant(tokens):
         if tokens[PmodParser.IDENTIFIER][NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
             name = tokens[PmodParser.IDENTIFIER][NAME]
         else:
-            name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE],tokens[PmodParser.IDENTIFIER][NAME])
+            name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])
         return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PmodParser.ORDER[2:] if x in tokens))
     elif tokens[KIND] == GMOD:
         if tokens[GmodParser.IDENTIFIER][NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
             name = tokens[GmodParser.IDENTIFIER][NAME]
         else:
-            name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE],tokens[PmodParser.IDENTIFIER][NAME])
+            name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])
         return 'gmod({})'.format(name)
     elif tokens[KIND] == HGVS:
         return 'var({})'.format(tokens[HGVS])
@@ -84,16 +84,12 @@ def decanonicalize_variant(tokens):
         if FragmentParser.MISSING in tokens:
             res = 'frag(?'
         else:
-            res = 'frag({}_{}'.format(tokens[FragmentParser.RANGE][FragmentParser.START],
-                                      tokens[FragmentParser.RANGE][FragmentParser.STOP])
+            res = 'frag({}_{}'.format(tokens[FragmentParser.START], tokens[FragmentParser.STOP])
 
         if FragmentParser.DESCRIPTION in tokens:
             res += ', {}'.format(tokens[FragmentParser.DESCRIPTION])
 
         return res + ')'
-
-    else:
-        raise ValueError('Invalid variant: {}'.format(tokens))
 
 
 def decanonicalize_fusion_range(tokens):

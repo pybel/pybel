@@ -5,7 +5,7 @@ from pybel.constants import PYBEL_DEFAULT_NAMESPACE
 from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser, PsubParser, GsubParser, TruncParser, \
     FusionParser, LocationParser, FragmentParser
 from pybel.parser.parse_abundance_modifier import VariantParser
-from pybel.parser.parse_abundance_modifier import build_variant_dict, KIND, PMOD, GMOD
+from pybel.parser.parse_abundance_modifier import build_variant_dict, KIND, PMOD, GMOD, FRAGMENT
 
 log = logging.getLogger(__name__)
 
@@ -204,8 +204,9 @@ class TestFragmentParser(unittest.TestCase):
         s = 'frag(5_20)'
         result = self.parser.parseString(s)
         expected = {
-            'start': 5,
-            'stop': 20
+            KIND: FRAGMENT,
+            FragmentParser.START: 5,
+            FragmentParser.STOP: 20
         }
         self.assertEqual(expected, result.asDict())
 
@@ -214,8 +215,9 @@ class TestFragmentParser(unittest.TestCase):
         s = 'frag(1_?)'
         result = self.parser.parseString(s)
         expected = {
-            'start': 1,
-            'stop': '?'
+            KIND: FRAGMENT,
+            FragmentParser.START: 1,
+            FragmentParser.STOP: '?'
         }
         self.assertEqual(expected, result.asDict())
 
@@ -224,8 +226,9 @@ class TestFragmentParser(unittest.TestCase):
         s = 'frag(?_*)'
         result = self.parser.parseString(s)
         expected = {
-            'start': '?',
-            'stop': '*'
+            KIND: FRAGMENT,
+            FragmentParser.START: '?',
+            FragmentParser.STOP: '*'
         }
         self.assertEqual(expected, result.asDict())
 
@@ -234,8 +237,9 @@ class TestFragmentParser(unittest.TestCase):
         s = 'frag(?, 55kD)'
         result = self.parser.parseString(s)
         expected = {
-            'missing': '?',
-            'description': '55kD'
+            KIND: FRAGMENT,
+            FragmentParser.MISSING: '?',
+            FragmentParser.DESCRIPTION: '55kD'
         }
         self.assertEqual(expected, result.asDict())
 

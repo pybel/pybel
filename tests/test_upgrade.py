@@ -5,7 +5,7 @@ import unittest
 
 import pybel
 from pybel.canonicalize import decanonicalize_variant, postpend_location, decanonicalize_node
-from pybel.constants import GOCC_LATEST
+from pybel.constants import GOCC_LATEST, FUNCTION
 from tests import constants
 from tests.constants import test_bel, test_bel_4, mock_bel_resources
 
@@ -17,17 +17,13 @@ class TestCanonicalizeHelper(unittest.TestCase):
         with self.assertRaises(ValueError):
             postpend_location('', dict(name='failure'))
 
-    def test_decanonicalize_variant_failure(self):
-        with self.assertRaises(ValueError):
-            decanonicalize_variant('rmod(lol)')
-
     def test_decanonicalize_node_failure(self):
         with self.assertRaises(ValueError):
             class NotGraph:
                 node = None
 
             x = NotGraph()
-            x.node = {'test_node': {'type': 'nope'}}
+            x.node = {'test_node': {FUNCTION: 'nope'}}
 
             decanonicalize_node(x, 'test_node')
 

@@ -6,4 +6,3 @@ class PyBelWarning(Exception):
 
     def __str__(self):
         return '{} - {}'.format(self.__class__.__name__, self.message)
-
