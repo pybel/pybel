@@ -4,6 +4,7 @@ SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/
 LARGE_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/large_corpus.bel'
 
 GOCC_LATEST = 'http://resources.openbel.org/belframework/20150611/namespace/go-cellular-component.belns'
+GOCC_KEYWORD = 'GOCC'
 
 PYBEL_DIR = os.path.expanduser('~/.pybel')
 if not os.path.exists(PYBEL_DIR):
@@ -27,6 +28,9 @@ NAMESPACE = 'namespace'
 NAME = 'name'
 IDENTIFIER = 'identifier'
 VARIANTS = 'variants'
+RELATION = 'relation'
+CITATION = 'citation'
+EVIDENCE = 'SupportingText'
 
 CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
 BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}

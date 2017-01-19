@@ -4,10 +4,9 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
-from .constants import BLACKLIST_EDGE_ATTRIBUTES
-from .constants import CITATION_ENTRIES
+from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
-from .constants import GOCC_LATEST
+from .constants import GOCC_LATEST, GOCC_KEYWORD
 from .parser import language
 from .parser.language import rev_activity_labels, inv_document_keys
 from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
@@ -159,14 +158,13 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
         node_str = "deg({})".format(node_str)
     elif 'modifier' in node_edge_data and 'Activity' == node_edge_data['modifier']:
         node_str = "act({}".format(node_str)
-        # switch missing, default, and dict
-        if 'effect' in node_edge_data and 'MolecularActivity' in node_edge_data['effect']:
-            ma = node_edge_data['effect']['MolecularActivity']
+        if 'effect' in node_edge_data and node_edge_data['effect']:
+            ma = node_edge_data['effect']
 
-            if isinstance(ma, str):
-                node_str = "{}, ma({}))".format(node_str, rev_activity_labels[ma])
-            elif isinstance(ma, dict):
-                node_str = "{}, ma({}:{}))".format(node_str, ma['namespace'], ensure_quotes(ma['name']))
+            if ma[NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
+                node_str = "{}, ma({}))".format(node_str, rev_activity_labels[ma[NAME]])
+            else:
+                node_str = "{}, ma({}:{}))".format(node_str, ma[NAMESPACE], ensure_quotes(ma[NAME]))
         else:
             node_str = "{})".format(node_str)
 
@@ -234,8 +232,8 @@ def to_bel(graph, file=sys.stdout):
 
     print('###############################################\n', file=file)
 
-    if 'GOCC' not in graph.namespace_url:
-        graph.namespace_url['GOCC'] = GOCC_LATEST
+    if GOCC_KEYWORD not in graph.namespace_url:
+        graph.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
 
     for namespace, url in sorted(graph.namespace_url.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS URL "{}"'.format(namespace, url), file=file)
