@@ -6,7 +6,11 @@ from ..exceptions import PyBelWarning
 
 class NakedNameWarning(PyBelWarning):
     """Raised when there is an identifier without a namespace. Enable lenient mode to suppress"""
+    def __init__(self, name):
+        self.name = name
 
+    def __str__(self):
+        return '"{}" should be qualified with a valid namespace'.format(self.name)
 
 class MissingDefaultNameWarning(PyBelWarning):
     """Raised if reference to value not in default namespace"""
@@ -18,7 +22,12 @@ class UndefinedNamespaceWarning(PyBelWarning):
 
 class MissingNamespaceNameWarning(PyBelWarning):
     """Raised if reference to value not in namespace"""
+    def __init__(self, name, namespace):
+        self.name = name
+        self.namespace = namespace
 
+    def __str__(self):
+        return '"{}" is not in the {} namespace'.format(self.name, self.namespace)
 
 class UndefinedAnnotationWarning(PyBelWarning):
     """Raised when an undefined annotation is used"""

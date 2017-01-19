@@ -56,7 +56,7 @@ class IdentifierParser(BaseParser):
 
         name = tokens[NAME]
         if name not in self.namespace_dict[namespace]:
-            raise MissingNamespaceNameWarning('"{}" is not in the {} namespace'.format(name, namespace))
+            raise MissingNamespaceNameWarning(name, namespace)
 
         return tokens
 
@@ -72,7 +72,7 @@ class IdentifierParser(BaseParser):
         return tokens
 
     def handle_namespace_invalid(self, s, l, tokens):
-        raise NakedNameWarning('"{}" should be qualified with a valid namespace'.format(tokens[NAME]))
+        raise NakedNameWarning(tokens[NAME])
 
     def get_language(self):
         return self.language
