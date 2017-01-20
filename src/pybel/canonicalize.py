@@ -4,7 +4,7 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
-from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES
+from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
 from .constants import GOCC_LATEST, GOCC_KEYWORD
 from .parser import language
@@ -253,15 +253,14 @@ def to_bel(graph, file=sys.stdout):
     print('###############################################\n', file=file)
 
     # sort by citation, then supporting text
-    qualified_edges = filter(lambda u_v_k_d: 'citation' in u_v_k_d[3] and 'SupportingText' in u_v_k_d[3],
+    qualified_edges = filter(lambda u_v_k_d: 'citation' in u_v_k_d[3] and EVIDENCE in u_v_k_d[3],
                              graph.edges_iter(data=True, keys=True))
     qualified_edges = sorted(qualified_edges, key=lambda u_v_k_d: sort_edges(u_v_k_d[3]))
 
-    for citation, citation_edges in itt.groupby(qualified_edges,
-                                                key=lambda u_v_k_d: flatten_citation(u_v_k_d[3]['citation'])):
+    for citation, citation_edges in itt.groupby(qualified_edges, key=lambda t: flatten_citation(t[3]['citation'])):
         print('SET Citation = {{{}}}'.format(citation), file=file)
 
-        for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3]['SupportingText']):
+        for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3][EVIDENCE]):
             print('SET SupportingText = "{}"'.format(evidence), file=file)
 
             for u, v, k, d in evidence_edges:
@@ -276,16 +275,18 @@ def to_bel(graph, file=sys.stdout):
 
     print('###############################################\n', file=file)
 
-    print('SET Citation = {"PyBEL","",""}', file=file)
+    print('SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}', file=file)
     print('SET Evidence = "Automatically added by PyBEL"', file=file)
 
     for u in graph.nodes_iter():
-        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in
-               graph.edge[u][v].values()):
+        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
             continue
 
         print(decanonicalize_node(graph, u), file=file)
 
     # Can't infer hasMember relationships, but it's not due to specific evidence or citation
-    for u, v in graph.edges_iter(relation='hasMember'):
+    for u, v, d in graph.edges_iter(relation='hasMember', data=True):
+        if EVIDENCE in d:
+            continue
+
         print("{} hasMember {}".format(decanonicalize_node(graph, u), decanonicalize_node(graph, v)), file=file)
