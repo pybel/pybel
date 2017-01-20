@@ -133,15 +133,15 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_supporting_text(self, s, l, tokens):
-        if 'SupportingText' not in self.annotations:
-            log.debug("PyBEL024 Can't unset missing key: %s", 'SupportingText')
+        if EVIDENCE not in self.annotations:
+            raise MissingAnnotationKeyWarning(EVIDENCE)
         else:
             del self.annotations[EVIDENCE]
         return tokens
 
     def handle_unset_citation(self, s, l, tokens):
         if 0 == len(self.citation):
-            log.debug("PyBEL024 Can't unset missing key: %s", 'Citation')
+            raise MissingAnnotationKeyWarning('Citation')
         else:
             self.citation.clear()
         return tokens
@@ -153,9 +153,8 @@ class ControlParser(BaseParser):
     def handle_unset_command(self, s, l, tokens):
         key = tokens['key']
 
-        # TODO refactor to own function
         if key not in self.annotations:
-            raise MissingAnnotationKeyWarning("Can't unset missing key: {}".format(key))
+            raise MissingAnnotationKeyWarning(key)
 
         del self.annotations[key]
         return tokens
@@ -178,7 +177,7 @@ class ControlParser(BaseParser):
         elif key in {'SupportingText', 'Evidence'}:
             del self.annotations[EVIDENCE]
         elif key not in self.annotations:
-            raise MissingAnnotationKeyWarning("Can't unset missing key: {}".format(key))
+            raise MissingAnnotationKeyWarning(key)
         else:
             del self.annotations[key]
 

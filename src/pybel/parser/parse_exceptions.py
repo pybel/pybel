@@ -115,7 +115,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
         self.reference = reference
 
     def __str__(self):
-        return '{} is not a valid PMID'
+        return '{} is not a valid PMID'.format(self.reference)
 
 
 # BEL Syntax Warnings
