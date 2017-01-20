@@ -181,7 +181,8 @@ class TestParseControl(unittest.TestCase):
             test_citation_bel,
             'UNSET Evidence'
         ]
-        self.parser.parse_lines(s)
+        with self.assertEqual(MissingAnnotationKeyWarning):
+            self.parser.parse_lines(s)
 
     def test_unset_missing_command(self):
         s = 'UNSET Custom1'
