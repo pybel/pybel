@@ -30,12 +30,6 @@ class TestCanonicalizeHelper(unittest.TestCase):
 
             decanonicalize_node(x, 'test_node')
 
-    def test_members(self):
-        s = 'p(SFAM:"ETS Family") hasMembers list (p(HGNC:GABPA),p(HGNC:NRF1))'
-        #: this string is failing
-        self.fail('need to write tests against the canonicalization and decanonicalization of this statement')
-
-
 class TestCanonicalize(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
