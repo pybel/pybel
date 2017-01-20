@@ -13,7 +13,7 @@ from tests.constants import test_bel, test_bel_4, mock_bel_resources
 log = logging.getLogger('pybel')
 
 pd_path = os.path.expanduser('~/dev/bms/aetionomy/parkinsons.bel')
-
+small_corpus_path = os.path.expanduser('~/dev/bms/selventa/small_corpus.bel')
 
 class TestCanonicalizeHelper(unittest.TestCase):
     def test_postpend_location_failure(self):
@@ -29,6 +29,11 @@ class TestCanonicalizeHelper(unittest.TestCase):
             x.node = {'test_node': {FUNCTION: 'nope'}}
 
             decanonicalize_node(x, 'test_node')
+
+    def test_members(self):
+        s = 'p(SFAM:"ETS Family") hasMembers list (p(HGNC:GABPA),p(HGNC:NRF1))'
+        #: this string is failing
+        self.fail('need to write tests against the canonicalization and decanonicalization of this statement')
 
 
 class TestCanonicalize(unittest.TestCase):
@@ -85,6 +90,11 @@ class TestCanonicalize(unittest.TestCase):
     @constants.mock_parse_owl_pybel
     def test_canonicalize_4(self, m1, m2, m3):
         self.canonicalize_helper(test_bel_4)
+
+    @unittest.skipUnless(os.path.exists(small_corpus_path), 'Small Corpus Missing')
+    def test_small_corpus(self):
+        self.maxDiff = None
+        self.canonicalize_helper(small_corpus_path)
 
     @unittest.skipUnless(os.path.exists(pd_path), 'PD Test File Missing')
     def test_parkinsons(self):
