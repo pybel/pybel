@@ -167,3 +167,11 @@ def ensure_quotes(s):
     :rtype: str
     """
     return '"{}"'.format(s) if not s.isalnum() else s
+
+
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
