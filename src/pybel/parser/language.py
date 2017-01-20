@@ -250,7 +250,11 @@ pmod_namespace = {
     'UbMono': 'UbMono',
     'monoubiquitination': 'UbMono',
     'UbPoly': 'UbPoly',
-    'polyubiquitination': 'UbPoly'
+    'polyubiquitination': 'UbPoly',
+
+    # BEL VARIANTS
+    'Ox': "Ox",
+    'oxidation': 'Ox',
 }
 
 #: dictionary of legacy (BEL 1.0) default namespace protein modifications to their BEL 2.0 preferred value
@@ -264,6 +268,7 @@ pmod_legacy_labels = {
     'R': 'ADPRib',
     'S': 'Sumo',
     'U': 'Ub',
+    'O': 'Ox'
 }
 
 gmod_namespace = {
