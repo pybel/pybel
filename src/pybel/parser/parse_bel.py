@@ -557,15 +557,14 @@ class BelParser(BaseParser):
         return tokens
 
     def add_reverse_edge(self, sub, obj, attrs, **single_annotation):
+        new_attrs = {k:v for k,v in attrs.items() if k not in {'subject', 'object'}}
         attrs_subject, attrs_object = attrs.get('subject'), attrs.get('object')
         if attrs_subject:
-            del attrs['subject']
-            attrs['object'] = attrs_subject
+            new_attrs['object'] = attrs_subject
         if attrs_object:
-            del attrs['object']
-            attrs['subject'] = attrs_object
+            new_attrs['subject'] = attrs_object
 
-        self.graph.add_edge(obj, sub, attr_dict=attrs, **single_annotation)
+        self.graph.add_edge(obj, sub, attr_dict=new_attrs, **single_annotation)
 
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
