@@ -15,6 +15,7 @@ log = logging.getLogger('pybel')
 pd_path = os.path.expanduser('~/dev/bms/aetionomy/parkinsons.bel')
 small_corpus_path = os.path.expanduser('~/dev/bms/selventa/small_corpus.bel')
 
+
 class TestCanonicalizeHelper(unittest.TestCase):
     def test_postpend_location_failure(self):
         with self.assertRaises(ValueError):
@@ -29,6 +30,7 @@ class TestCanonicalizeHelper(unittest.TestCase):
             x.node = {'test_node': {FUNCTION: 'nope'}}
 
             decanonicalize_node(x, 'test_node')
+
 
 class TestCanonicalize(unittest.TestCase):
     def setUp(self):

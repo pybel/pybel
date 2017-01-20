@@ -557,7 +557,7 @@ class BelParser(BaseParser):
         return tokens
 
     def add_reverse_edge(self, sub, obj, attrs, **single_annotation):
-        new_attrs = {k:v for k,v in attrs.items() if k not in {'subject', 'object'}}
+        new_attrs = {k: v for k, v in attrs.items() if k not in {'subject', 'object'}}
         attrs_subject, attrs_object = attrs.get('subject'), attrs.get('object')
         if attrs_subject:
             new_attrs['object'] = attrs_subject

@@ -1,5 +1,4 @@
 import logging
-import sys
 import time
 from collections import defaultdict
 
