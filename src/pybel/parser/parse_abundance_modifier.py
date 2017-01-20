@@ -103,7 +103,7 @@ class GsubParser(BaseParser):
 
     def handle_gsub(self, s, l, tokens):
         upgraded = 'g.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
-        log.warning('sub() in g() is deprecated: %s. Upgraded to %s', s, upgraded)
+        log.warning('legacy sub() %s upgraded to %s', s, upgraded)
         tokens[HGVS] = upgraded
         del tokens[self.POSITION]
         del tokens[self.REFERENCE]
@@ -155,7 +155,7 @@ class PmodParser(BaseParser):
 
     def handle_pmod_legacy_ns(self, s, l, tokens):
         upgraded = language.pmod_legacy_labels[tokens[0]]
-        log.log(5, 'PyBEL016 legacy pmod() values: %s. Upgraded to %s.', s, upgraded)
+        log.debug('legacy pmod() value %s upgraded to %s', s, upgraded)
         tokens['namespace'] = PYBEL_DEFAULT_NAMESPACE
         tokens['name'] = upgraded
         return tokens

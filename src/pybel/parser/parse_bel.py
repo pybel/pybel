@@ -14,14 +14,18 @@ from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, Fra
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
-from .parse_identifier import DIRTY
 from .parse_identifier import IdentifierParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
-from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE
+from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE
 
 log = logging.getLogger('pybel')
 
 TWO_WAY_RELATIONS = {'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'}
+ACTIVITY = 'Activity'
+DEGRADATION = 'Degradation'
+TRANSLOCATION = 'Translocation'
+CELL_SECRETION = 'CellSecretion'
+CELL_SURFACE_EXPRESSION = 'CellSurfaceExpression'
 
 general_abundance_tags = one_of_tags(['a', 'abundance'], language.ABUNDANCE, 'function')
 gene_tag = one_of_tags(['g', 'geneAbundance'], language.GENE, 'function')
@@ -33,12 +37,12 @@ complex_tag = one_of_tags(['complex', 'complexAbundance'], language.COMPLEX, 'fu
 composite_abundance_tag = one_of_tags(['composite', 'compositeAbundance'], language.COMPOSITE, 'function')
 biological_process_tag = one_of_tags(['bp', 'biologicalProcess'], language.BIOPROCESS, 'function')
 pathology_tag = one_of_tags(['path', 'pathology'], language.PATHOLOGY, 'function')
-activity_tag = one_of_tags(['act', 'activity'], 'Activity', 'modifier')
-cell_secretion_tag = one_of_tags(['sec', 'cellSecretion'], 'CellSecretion', 'modifier')
-cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], 'CellSurfaceExpression', 'modifier')
-translocation_tag = one_of_tags(['translocation', 'tloc'], 'Translocation', 'modifier')
-degradation_tags = one_of_tags(['deg', 'degradation'], 'Degradation', 'modifier')
-reaction_tags = one_of_tags(['reaction', 'rxn'], 'Reaction', 'transformation')
+activity_tag = one_of_tags(['act', 'activity'], ACTIVITY, 'modifier')
+cell_secretion_tag = one_of_tags(['sec', 'cellSecretion'], CELL_SECRETION, 'modifier')
+cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], CELL_SURFACE_EXPRESSION, 'modifier')
+translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, 'modifier')
+degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, 'modifier')
+reaction_tags = one_of_tags(['reaction', 'rxn'], language.REACTION, 'transformation')
 
 function_variant_map = {
     language.GENE: 'GeneVariant',
@@ -46,6 +50,8 @@ function_variant_map = {
     language.PROTEIN: 'ProteinVariant',
     language.MIRNA: 'miRNAVariant'
 }
+
+
 
 
 class BelParser(BaseParser):
@@ -511,7 +517,7 @@ class BelParser(BaseParser):
         if not self.control_parser.citation:
             raise MissingCitationException('unable to add relation {}'.format(s))
 
-        if 'SupportingText' not in self.control_parser.annotations:
+        if EVIDENCE not in self.control_parser.annotations:
             raise MissingSupportWarning('unable to add relation {}'.format(s))
 
     def build_attrs(self, attrs=None, list_attrs=None):
@@ -643,7 +649,8 @@ class BelParser(BaseParser):
             return name
 
         elif FUNCTION in tokens and 'identifier' in tokens:
-            if tokens['function'] in ('Gene', 'miRNA', 'Pathology', 'BiologicalProcess', 'Abundance', 'Complex'):
+            if tokens['function'] in {language.GENE, language.MIRNA, language.PATHOLOGY, language.BIOPROCESS,
+                                      language.ABUNDANCE, language.COMPLEX}:
                 self.graph.add_node(name, {
                     FUNCTION: tokens['function'],
                     NAMESPACE: tokens['identifier']['namespace'],
@@ -651,7 +658,7 @@ class BelParser(BaseParser):
                 })
                 return name
 
-            elif tokens['function'] == 'RNA':
+            elif tokens['function'] == language.RNA:
                 self.graph.add_node(name, {
                     FUNCTION: tokens['function'],
                     NAMESPACE: tokens['identifier']['namespace'],
@@ -668,7 +675,7 @@ class BelParser(BaseParser):
                 self.add_unqualified_edge(gene_name, name, relation='transcribedTo')
                 return name
 
-            elif tokens['function'] == 'Protein':
+            elif tokens['function'] == language.PROTEIN:
                 self.graph.add_node(name, {
                     FUNCTION: tokens['function'],
                     NAMESPACE: tokens['identifier']['namespace'],
@@ -679,7 +686,7 @@ class BelParser(BaseParser):
                     return name
 
                 rna_tokens = deepcopy(tokens)
-                rna_tokens['function'] = 'RNA'
+                rna_tokens['function'] = language.RNA
                 rna_name = self.ensure_node(s, l, rna_tokens)
 
                 self.add_unqualified_edge(rna_name, name, relation='translatedTo')
@@ -699,7 +706,7 @@ def canonicalize_node(tokens):
     elif FUNCTION in tokens and 'members' in tokens:
         return (tokens['function'],) + tuple(sorted(canonicalize_node(member) for member in tokens['members']))
 
-    elif 'transformation' in tokens and tokens['transformation'] == 'Reaction':
+    elif 'transformation' in tokens and tokens['transformation'] == language.REACTION:
         reactants = tuple(sorted(list2tuple(tokens['reactants'].asList())))
         products = tuple(sorted(list2tuple(tokens['products'].asList())))
         return (tokens['transformation'],) + (reactants,) + (products,)
@@ -710,13 +717,13 @@ def canonicalize_node(tokens):
         return cls, (f['partner_5p']['namespace'], f['partner_5p']['name']), tuple(f['range_5p']), (
             f['partner_3p']['namespace'], f['partner_3p']['name']), tuple(f['range_3p'])
 
-    elif 'function' in tokens and tokens['function'] in (
-            'Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
+    elif 'function' in tokens and tokens['function'] in {language.GENE, language.RNA, language.MIRNA, language.PROTEIN,
+                                                         language.ABUNDANCE, language.COMPLEX, language.PATHOLOGY,
+                                                         language.BIOPROCESS}:
         if 'identifier' in tokens:
             return tokens['function'], tokens['identifier']['namespace'], tokens['identifier']['name']
 
-    if 'modifier' in tokens and tokens['modifier'] in (
-            'Activity', 'Degradation', 'Translocation', 'CellSecretion', 'CellSurfaceExpression'):
+    if 'modifier' in tokens and tokens['modifier'] in (ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, CELL_SURFACE_EXPRESSION):
         return canonicalize_node(tokens['target'])
 
 
@@ -738,34 +745,34 @@ def canonicalize_modifier(tokens):
     if 'location' in tokens['target']:
         attrs['location'] = tokens['target']['location'].asDict()
 
-    if tokens['modifier'] == 'Degradation':
-        attrs['modifier'] = 'Degradation'
+    if tokens['modifier'] == DEGRADATION:
+        attrs['modifier'] = DEGRADATION
 
     elif tokens['modifier'] == 'Activity' and 'effect' not in tokens:
         attrs['modifier'] = tokens['modifier']
         attrs['effect'] = {}
 
-    elif tokens['modifier'] == 'Activity' and 'effect' in tokens:
+    elif tokens['modifier'] == ACTIVITY and 'effect' in tokens:
         attrs['modifier'] = tokens['modifier']
-        attrs['effect'] = tokens['effect'].asDict() if hasattr(tokens['effect'], 'asDict') else dict(
-            tokens['effect'])
+        # TODO reinvestigate this
+        attrs['effect'] = tokens['effect'].asDict() if hasattr(tokens['effect'], 'asDict') else dict(tokens['effect'])
 
-    elif tokens['modifier'] == 'Translocation':
+    elif tokens['modifier'] == TRANSLOCATION:
         attrs['modifier'] = tokens['modifier']
         attrs['effect'] = tokens['effect'].asDict()
 
-    elif tokens['modifier'] == 'CellSecretion':
-        attrs['modifier'] = 'Translocation'
+    elif tokens['modifier'] == CELL_SECRETION:
+        attrs['modifier'] = TRANSLOCATION
         attrs['effect'] = {
-            'fromLoc': dict(namespace='GOCC', name='intracellular'),
-            'toLoc': dict(namespace='GOCC', name='extracellular space')
+            'fromLoc': {NAMESPACE: 'GOCC', NAME: 'intracellular'},
+            'toLoc': {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
         }
 
-    elif tokens['modifier'] == 'CellSurfaceExpression':
-        attrs['modifier'] = 'Translocation'
+    elif tokens['modifier'] == CELL_SURFACE_EXPRESSION:
+        attrs['modifier'] = TRANSLOCATION
         attrs['effect'] = {
-            'fromLoc': dict(namespace='GOCC', name='intracellular'),
-            'toLoc': dict(namespace='GOCC', name='cell surface')
+            'fromLoc': {NAMESPACE: 'GOCC', NAME: 'intracellular'},
+            'toLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'}
         }
 
     return attrs

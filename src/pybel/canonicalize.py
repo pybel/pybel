@@ -12,6 +12,7 @@ from .parser.language import rev_activity_labels, inv_document_keys
 from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
 from .parser.parse_bel import NAMESPACE, NAME
 from .parser.utils import ensure_quotes
+from .parser.parse_bel import ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SURFACE_EXPRESSION, CELL_SECRETION
 
 __all__ = ['to_bel']
 
@@ -154,9 +155,9 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
     if 'location' in node_edge_data:
         node_str = postpend_location(node_str, node_edge_data['location'])
 
-    if 'modifier' in node_edge_data and 'Degradation' == node_edge_data['modifier']:
+    if 'modifier' in node_edge_data and DEGRADATION == node_edge_data['modifier']:
         node_str = "deg({})".format(node_str)
-    elif 'modifier' in node_edge_data and 'Activity' == node_edge_data['modifier']:
+    elif 'modifier' in node_edge_data and ACTIVITY == node_edge_data['modifier']:
         node_str = "act({}".format(node_str)
         if 'effect' in node_edge_data and node_edge_data['effect']:
             ma = node_edge_data['effect']
@@ -168,7 +169,7 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
         else:
             node_str = "{})".format(node_str)
 
-    elif 'modifier' in node_edge_data and 'Translocation' == node_edge_data['modifier']:
+    elif 'modifier' in node_edge_data and TRANSLOCATION == node_edge_data['modifier']:
         fromLoc = "fromLoc("
         toLoc = "toLoc("
 

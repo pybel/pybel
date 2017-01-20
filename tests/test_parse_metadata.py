@@ -7,7 +7,7 @@ from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, \
     MESH_DISEASES_URL, help_check_hgnc
-from tests.constants import test_an_1, test_ns_1, test_bel, mock_bel_resources
+from tests.constants import test_an_1, test_ns_1, test_bel, mock_bel_resources, test_citation_bel
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -177,8 +177,11 @@ class TestParseControl(unittest.TestCase):
         self.assertIsNone(self.parser.statement_group)
 
     def test_unset_missing_evidence(self):
-        s = 'UNSET Evidence'
-        self.parser.parseString(s)
+        s = [
+            test_citation_bel,
+            'UNSET Evidence'
+        ]
+        self.parser.parse_lines(l)
 
     def test_unset_missing_command(self):
         s = 'UNSET Custom1'
@@ -191,8 +194,11 @@ class TestParseControl(unittest.TestCase):
             self.parser.parseString(s)
 
     def test_unset_missing_citation(self):
-        s = 'UNSET Citation'
-        self.parser.parseString(s)
+        s = [
+            test_citation_bel,
+            'UNSET Citation'
+        ]
+        self.parser.parse_lines(s)
 
     def test_set_missing_statement(self):
         s = 'SET MissingKey = "lol"'

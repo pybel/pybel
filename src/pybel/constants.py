@@ -33,4 +33,6 @@ CITATION = 'citation'
 EVIDENCE = 'SupportingText'
 
 CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
+CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
 BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
+DIRTY = 'dirty'

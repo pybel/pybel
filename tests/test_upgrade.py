@@ -6,7 +6,7 @@ import unittest
 
 import pybel
 from pybel.canonicalize import postpend_location, decanonicalize_node
-from pybel.constants import GOCC_LATEST, FUNCTION
+from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD
 from tests import constants
 from tests.constants import test_bel, test_bel_4, mock_bel_resources
 
@@ -49,7 +49,7 @@ class TestCanonicalize(unittest.TestCase):
 
         reloaded = pybel.from_path(self.path)
 
-        original.namespace_url['GOCC'] = GOCC_LATEST
+        original.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
 
         self.assertEqual(original.document, reloaded.document)
         self.assertEqual(original.namespace_owl, reloaded.namespace_owl)

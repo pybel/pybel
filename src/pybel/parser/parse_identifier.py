@@ -4,13 +4,13 @@ import logging
 
 from pyparsing import *
 
+from ..constants import DIRTY
 from .baseparser import BaseParser, word, quote
 from .parse_exceptions import UndefinedNamespaceWarning, NakedNameWarning, MissingNamespaceNameWarning, \
     MissingDefaultNameWarning
 from ..constants import NAMESPACE, NAME
 
 log = logging.getLogger('pybel')
-DIRTY = 'dirty'
 
 
 class IdentifierParser(BaseParser):

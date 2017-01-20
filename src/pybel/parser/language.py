@@ -83,6 +83,7 @@ BIOPROCESS = 'BiologicalProcess'
 PATHOLOGY = 'Pathology'
 COMPOSITE = 'Composite'
 COMPLEX = 'Complex'
+REACTION = 'Reaction'
 
 abundance_labels = {
     'abundance': ABUNDANCE,
