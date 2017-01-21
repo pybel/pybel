@@ -258,7 +258,7 @@ class TestParseControl(unittest.TestCase):
 
     def test_citation_error(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine"}'
-        with self.assertRaises(Exception):
+        with self.assertRaises(InvalidCitationException):
             self.parser.parseString(s)
 
     def test_evidence(self):
@@ -299,12 +299,12 @@ class TestParseControl(unittest.TestCase):
 
     def test_custom_key_failure(self):
         s = 'SET FAILURE = "never gonna happen"'
-        with self.assertRaises(Exception):
+        with self.assertRaises(UndefinedAnnotationWarning):
             self.parser.parseString(s)
 
     def test_custom_value_failure(self):
         s = 'SET Custom1 = "Custom1_C"'
-        with self.assertRaises(Exception):
+        with self.assertRaises(IllegalAnnotationValueWarning):
             self.parser.parseString(s)
 
     def test_reset_annotation(self):
