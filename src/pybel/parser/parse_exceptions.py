@@ -76,6 +76,9 @@ See also: http://openbel.org/language/web/version_1.0/bel_specification_version_
     """
 
 
+class MissingMetadataException(PyBelWarning):
+    """BEL Script is missing critical metadata"""
+
 class InvalidCitationException(PyBelWarning):
     """Raised when the format for a citation is wrong. It should have either {type, name, reference}; or
         {type, name, reference, date, authors, comments}"""

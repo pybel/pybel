@@ -8,7 +8,9 @@ from pyparsing import ParseException
 from .constants import FUNCTION, NAMESPACE
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
+from .parser import language
 from .parser.parse_bel import BelParser
+from .parser.parse_exceptions import MissingMetadataException
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import expand_dict
@@ -21,6 +23,14 @@ except ImportError:
 __all__ = ['BELGraph']
 
 log = logging.getLogger('pybel')
+
+REQUIRED_METADATA = [
+    'name',
+    'version',
+    'description',
+    'authors',
+    'contact'
+]
 
 
 class BELGraph(nx.MultiDiGraph):
@@ -123,6 +133,14 @@ class BELGraph(nx.MultiDiGraph):
             except Exception as e:
                 log.error('Line %07d - Critical Failure - %s', line_number, line)
                 raise e
+
+        for required in REQUIRED_METADATA:
+            if required not in self.metadata_parser.document_metadata:
+                self.warnings.append((0, '', MissingMetadataException(language.inv_document_keys[required])))
+                log.error('Missing required document metadata: %s', language.inv_document_keys[required])
+            elif not self.metadata_parser.document_metadata[required]:
+                self.warnings.append((0, '', MissingMetadataException(language.inv_document_keys[required])))
+                log.error('Missing required document metadata not filled: %s', language.inv_document_keys[required])
 
         self.graph['document_metadata'] = self.metadata_parser.document_metadata
 
