@@ -4,12 +4,13 @@ import logging
 
 from pyparsing import *
 
+from ..constants import DIRTY
 from .baseparser import BaseParser, word, quote
 from .parse_exceptions import UndefinedNamespaceWarning, NakedNameWarning, MissingNamespaceNameWarning, \
     MissingDefaultNameWarning
+from ..constants import NAMESPACE, NAME
 
 log = logging.getLogger('pybel')
-DIRTY = 'dirty'
 
 
 class IdentifierParser(BaseParser):
@@ -29,12 +30,12 @@ class IdentifierParser(BaseParser):
         self.namespace_dict = valid_namespaces
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
 
-        self.identifier_qualified = word('namespace') + Suppress(':') + (word | quote)('name')
+        self.identifier_qualified = word(NAMESPACE) + Suppress(':') + (word | quote)(NAME)
 
         if self.namespace_dict is not None:
             self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
 
-        self.identifier_bare = (word | quote)('name')
+        self.identifier_bare = (word | quote)(NAME)
         if self.default_namespace is not None:
             self.identifier_bare.setParseAction(self.handle_identifier_default)
         elif lenient:
@@ -49,29 +50,29 @@ class IdentifierParser(BaseParser):
         self.language = self.identifier_qualified | self.identifier_bare
 
     def handle_identifier_qualified(self, s, l, tokens):
-        namespace = tokens['namespace']
+        namespace = tokens[NAMESPACE]
         if namespace not in self.namespace_dict:
-            raise UndefinedNamespaceWarning('Invalid namespace: {}'.format(namespace))
+            raise UndefinedNamespaceWarning('"{}" is not defined as a namespace'.format(namespace))
 
-        name = tokens['name']
+        name = tokens[NAME]
         if name not in self.namespace_dict[namespace]:
-            raise MissingNamespaceNameWarning('Invalid {} name: {}'.format(namespace, name))
+            raise MissingNamespaceNameWarning(name, namespace)
 
         return tokens
 
     def handle_identifier_default(self, s, l, tokens):
-        name = tokens['name']
+        name = tokens[NAME]
         if name not in self.default_namespace:
-            raise MissingDefaultNameWarning('Default namespace missing name: {}'.format(name))
+            raise MissingDefaultNameWarning('"{}" is not in the default namespace'.format(name))
         return tokens
 
     def handle_namespace_lenient(self, s, l, tokens):
-        tokens['namespace'] = DIRTY
+        tokens[NAMESPACE] = DIRTY
         log.debug('Naked namespace: %s', s)
         return tokens
 
     def handle_namespace_invalid(self, s, l, tokens):
-        raise NakedNameWarning('Missing valid namespace: {} {} {}'.format(s, l, tokens))
+        raise NakedNameWarning(tokens[NAME])
 
     def get_language(self):
         return self.language

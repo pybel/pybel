@@ -48,5 +48,6 @@ def setup():
     importer = ExtensionImporter(GROUP_NAME)
     importer.install()
 
+
 setup()
 del setup  # Do a bit of cleanup. Not sure if it's necessary, but Flask did...

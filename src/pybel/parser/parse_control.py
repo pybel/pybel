@@ -6,9 +6,19 @@ from pyparsing import Suppress, pyparsing_common, MatchFirst
 
 from .baseparser import BaseParser, quote, delimitedSet, And, oneOf
 from .parse_exceptions import *
+from .utils import is_int
+from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES
 
 log = logging.getLogger('pybel')
 
+
+BEL_KEYWORD_SET = 'SET'
+BEL_KEYWORD_UNSET = 'UNSET'
+BEL_KEYWORD_STATEMENT_GROUP = 'STATEMENT_GROUP'
+BEL_KEYWORD_CITATION = 'Citation'
+BEL_KEYWORD_EVIDENCE = 'Evidence'
+BEL_KEYWORD_SUPPORT = 'SupportingText'
+BEL_KEYWORD_ALL = 'ALL'
 
 class ControlParser(BaseParser):
     def __init__(self, valid_annotations=None):
@@ -27,16 +37,16 @@ class ControlParser(BaseParser):
         annotation_key = pyparsing_common.identifier.setResultsName('key')
         annotation_key.setParseAction(self.handle_annotation_key)
 
-        set_tag = Suppress('SET')
-        unset_tag = Suppress('UNSET')
+        set_tag = Suppress(BEL_KEYWORD_SET)
+        unset_tag = Suppress(BEL_KEYWORD_UNSET)
 
-        self.set_statement_group = And([set_tag, Suppress('STATEMENT_GROUP'), Suppress('='), quote('group')])
+        self.set_statement_group = And([set_tag, Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), quote('group')])
         self.set_statement_group.setParseAction(self.handle_statement_group)
 
-        self.set_citation = And([set_tag, Suppress('Citation'), Suppress('='), delimitedSet('values')])
+        self.set_citation = And([set_tag, Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
         self.set_citation.setParseAction(self.handle_citation)
 
-        supporting_text_tags = oneOf(['Evidence', 'SupportingText'])
+        supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
         self.set_evidence = And([set_tag, Suppress(supporting_text_tags), Suppress('='), quote('value')])
         self.set_evidence.setParseAction(self.handle_supporting_text)
 
@@ -53,16 +63,16 @@ class ControlParser(BaseParser):
         self.unset_evidence = unset_tag + Suppress(supporting_text_tags)
         self.unset_evidence.setParseAction(self.handle_unset_supporting_text)
 
-        self.unset_citation = unset_tag + Suppress('Citation')
+        self.unset_citation = unset_tag + Suppress(BEL_KEYWORD_CITATION)
         self.unset_citation.setParseAction(self.handle_unset_citation)
 
-        self.unset_statement_group = unset_tag + Suppress('STATEMENT_GROUP')
+        self.unset_statement_group = unset_tag + Suppress(BEL_KEYWORD_STATEMENT_GROUP)
         self.unset_statement_group.setParseAction(self.handle_unset_statement_group)
 
         self.unset_list = unset_tag + delimitedSet('values')
         self.unset_list.setParseAction(self.handle_unset_list)
 
-        self.unset_all = unset_tag + Suppress("ALL")
+        self.unset_all = unset_tag + Suppress(BEL_KEYWORD_ALL)
         self.unset_all.setParseAction(self.handle_unset_all)
 
         self.unset_statements = MatchFirst([
@@ -88,13 +98,19 @@ class ControlParser(BaseParser):
         if not (3 <= len(values) <= 6):
             raise InvalidCitationException('Invalid citation: {}'.format(s))
 
-        self.citation = dict(zip(('type', 'name', 'reference', 'date', 'authors', 'comments'), values))
+        if values[0] not in CITATION_TYPES:
+            raise InvalidCitationType(values[0])
+
+        if values[0] == 'PubMed' and not is_int(values[2]):
+            raise InvalidPubMedIdentifierWarning(values[2])
+
+        self.citation = dict(zip(CITATION_ENTRIES, values))
 
         return tokens
 
     def handle_supporting_text(self, s, l, tokens):
         value = tokens['value']
-        self.annotations['SupportingText'] = value
+        self.annotations[EVIDENCE] = value
         return tokens
 
     def handle_statement_group(self, s, l, tokens):
@@ -106,7 +122,7 @@ class ControlParser(BaseParser):
         value = tokens['value']
 
         if value not in self.valid_annotations[key]:
-            raise IllegalAnnotationValueWarning('Illegal annotation value for {}: {}'.format(key, value))
+            raise IllegalAnnotationValueWarning(value, key)
 
         self.annotations[key] = value
         return tokens
@@ -117,21 +133,21 @@ class ControlParser(BaseParser):
 
         for value in values:
             if value not in self.valid_annotations[key]:
-                raise IllegalAnnotationValueWarning('Illegal annotation value for {}: {}'.format(key, value))
+                raise IllegalAnnotationValueWarning(value, key)
 
         self.annotations[key] = set(values)
         return tokens
 
     def handle_unset_supporting_text(self, s, l, tokens):
-        if 'SupportingText' not in self.annotations:
-            log.debug("PyBEL024 Can't unset missing key: %s", 'SupportingText')
+        if EVIDENCE not in self.annotations:
+            raise MissingAnnotationKeyWarning(EVIDENCE)
         else:
-            del self.annotations['SupportingText']
+            del self.annotations[EVIDENCE]
         return tokens
 
     def handle_unset_citation(self, s, l, tokens):
         if 0 == len(self.citation):
-            log.debug("PyBEL024 Can't unset missing key: %s", 'Citation')
+            raise MissingAnnotationKeyWarning('Citation')
         else:
             self.citation.clear()
         return tokens
@@ -143,9 +159,8 @@ class ControlParser(BaseParser):
     def handle_unset_command(self, s, l, tokens):
         key = tokens['key']
 
-        # TODO refactor to own function
         if key not in self.annotations:
-            raise MissingAnnotationKeyWarning("Can't unset missing key: {}".format(key))
+            raise MissingAnnotationKeyWarning(key)
 
         del self.annotations[key]
         return tokens
@@ -160,15 +175,15 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset(self, key):
-        if key == 'Citation':
+        if key == BEL_KEYWORD_CITATION:
             self.citation.clear()
             self.annotations.clear()
-        elif key == 'STATEMENT_GROUP':
+        elif key == BEL_KEYWORD_STATEMENT_GROUP:
             self.statement_group = None
-        elif key in {'SupportingText', 'Evidence'}:
-            del self.annotations['SupportingText']
+        elif key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
+            del self.annotations[EVIDENCE]
         elif key not in self.annotations:
-            raise MissingAnnotationKeyWarning("Can't unset missing key: {}".format(key))
+            raise MissingAnnotationKeyWarning(key)
         else:
             del self.annotations[key]
 
