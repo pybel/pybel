@@ -13,6 +13,17 @@ log = logging.getLogger('pybel')
 
 __all__ = ['MetadataParser']
 
+BEL_KEYWORD_AS = 'AS'
+BEL_KEYWORD_URL = 'URL'
+BEL_KEYWORD_LIST = 'LIST'
+BEL_KEYWORD_OWL = 'OWL'
+BEL_KEYWORD_SET = 'SET'
+BEL_KEYWORD_DEFINE = 'DEFINE'
+BEL_KEYWORD_NAMESPACE = 'NAMESPACE'
+BEL_KEYWORD_ANNOTATION = 'ANNOTATION'
+BEL_KEYWORD_DOCUMENT = 'DOCUMENT'
+BEL_KEYWORD_PATTERN = 'PATTERN'
+
 
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document.
@@ -41,27 +52,27 @@ class MetadataParser(BaseParser):
         self.annotation_url_dict = {}
         self.annotation_list_list = []
 
-        as_tag = Suppress('AS')
-        url_tag = Suppress('URL')
-        list_tag = Suppress('LIST')
-        owl_tag = Suppress('OWL')
-        set_tag = Suppress('SET')
-        define_tag = Suppress('DEFINE')
+        as_tag = Suppress(BEL_KEYWORD_AS)
+        url_tag = Suppress(BEL_KEYWORD_URL)
+        list_tag = Suppress(BEL_KEYWORD_LIST)
+        owl_tag = Suppress(BEL_KEYWORD_OWL)
+        set_tag = Suppress(BEL_KEYWORD_SET)
+        define_tag = Suppress(BEL_KEYWORD_DEFINE)
 
         function_tags = Word(''.join(language.value_map))
 
         value = quote | ppc.identifier
 
-        self.document = And([set_tag, Suppress('DOCUMENT'), word('key'), Suppress('='), value('value')])
+        self.document = And([set_tag, Suppress(BEL_KEYWORD_DOCUMENT), word('key'), Suppress('='), value('value')])
 
-        namespace_tag = And([define_tag, Suppress('NAMESPACE'), ppc.identifier('name'), as_tag])
+        namespace_tag = And([define_tag, Suppress(BEL_KEYWORD_NAMESPACE), ppc.identifier('name'), as_tag])
         self.namespace_url = And([namespace_tag, url_tag, quote('url')])
         self.namespace_owl = And([namespace_tag, owl_tag, Optional(function_tags('functions')), quote('url')])
 
-        annotation_tag = And([define_tag, Suppress('ANNOTATION'), ppc.identifier('name'), as_tag])
+        annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ppc.identifier('name'), as_tag])
         self.annotation_url = And([annotation_tag, url_tag, quote('url')])
         self.annotation_list = And([annotation_tag, list_tag, delimitedSet('values')])
-        self.annotation_pattern = And([annotation_tag, Suppress('PATTERN'), quote('value')])
+        self.annotation_pattern = And([annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote('value')])
 
         self.document.setParseAction(self.handle_document)
         self.namespace_url.setParseAction(self.handle_namespace_url)
@@ -99,6 +110,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
 
         terms = self.cache_manager.get_namespace(url)
 
@@ -144,6 +156,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
+        url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
 
         self.annotations_dict[name] = self.cache_manager.get_annotation(url)
         self.annotation_url_dict[name] = url

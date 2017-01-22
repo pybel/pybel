@@ -9,7 +9,8 @@ from click.testing import CliRunner
 import pybel
 from pybel import cli
 from pybel.constants import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel, test_bel_slushy, BelReconstitutionMixin, expected_test_bel_metadata, mock_bel_resources
+from tests.constants import test_bel, test_bel_slushy, BelReconstitutionMixin, expected_test_bel_metadata, \
+    mock_bel_resources
 
 log = logging.getLogger(__name__)
 

@@ -7,6 +7,7 @@ import ontospy
 from requests.compat import urlparse
 
 from pybel import BELGraph
+from pybel.constants import FUNCTION, NAMESPACE, NAME
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
@@ -39,7 +40,7 @@ test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
 test_eq_1 = os.path.join(beleq_dir_path, 'disease-ontology.beleq')
 test_eq_2 = os.path.join(beleq_dir_path, 'mesh-diseases.beleq')
 
-test_citation_dict = dict(type='TestType', name='TestName', reference='TestRef')
+test_citation_dict = dict(type='PubMed', name='TestName', reference='1235813')
 test_citation_bel = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(**test_citation_dict)
 test_evidence_text = 'I read it on Twitter'
 test_evidence_bel = 'SET Evidence = "{}"'.format(test_evidence_text)
@@ -67,6 +68,8 @@ log = logging.getLogger('pybel')
 def assertHasNode(self, member, graph, **kwargs):
     self.assertTrue(graph.has_node(member), msg='{} not found in {}'.format(member, graph))
     if kwargs:
+        missing = set(kwargs) - set(graph.node[member])
+        self.assertFalse(missing, msg="Missing {} in node data".format(', '.join(sorted(missing))))
         self.assertTrue(all(kwarg in graph.node[member] for kwarg in kwargs),
                         msg="Missing kwarg in node data")
         self.assertEqual(kwargs, {k: graph.node[member][k] for k in kwargs},
@@ -105,10 +108,10 @@ class BelReconstitutionMixin(unittest.TestCase):
         if check_metadata:
             self.assertEqual(expected_test_bel_metadata, g.document)
 
-        assertHasNode(self, AKT1, g, type='Protein', namespace='HGNC', name='AKT1')
-        assertHasNode(self, EGFR, g, type='Protein', namespace='HGNC', name='EGFR')
-        assertHasNode(self, FADD, g, type='Protein', namespace='HGNC', name='FADD')
-        assertHasNode(self, CASP8, g, type='Protein', namespace='HGNC', name='CASP8')
+        assertHasNode(self, AKT1, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        assertHasNode(self, EGFR, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'EGFR'})
+        assertHasNode(self, FADD, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'FADD'})
+        assertHasNode(self, CASP8, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'CASP8'})
 
         assertHasEdge(self, AKT1, EGFR, g, relation='increases', TESTAN1="1")
         assertHasEdge(self, EGFR, FADD, g, relation='decreases', TESTAN1="1", TESTAN2="3")

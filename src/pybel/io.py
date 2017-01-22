@@ -1,3 +1,4 @@
+import codecs
 import json
 import logging
 import os
@@ -12,7 +13,7 @@ from networkx.readwrite import json_graph
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
-from .constants import PYBEL_CONTEXT_TAG
+from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME
 from .graph import BELGraph, expand_edges
 from .utils import flatten, flatten_graph_data
 
@@ -48,17 +49,21 @@ def from_lines(lines, **kwargs):
     return BELGraph(lines=lines, **kwargs)
 
 
-def from_path(path, **kwargs):
+def from_path(path, encoding='utf-8', **kwargs):
     """Loads a BEL graph from a file resource
 
     :param path: a file path
     :type path: str
+    :param encoding: the encoding to use when reading this file. Is passed to codecs.open.
+                     See https://docs.python.org/3/library/codecs.html#standard-encodings for a list of standard
+                     encodings. For example, files starting with a UTF-8 BOM should use 'utf_8_sig'
+    :type encoding: str
     :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
     :rtype: :class:`BELGraph`
     """
     log.info('Loading from path: %s', path)
-    with open(os.path.expanduser(path)) as f:
+    with codecs.open(os.path.expanduser(path), encoding=encoding) as f:
         return BELGraph(lines=f, **kwargs)
 
 
@@ -221,11 +226,11 @@ def to_neo4j(graph, neo_graph, context=None):
 
     node_map = {}
     for node, data in graph.nodes(data=True):
-        node_type = data['type']
-        attrs = {k: v for k, v in data.items() if k != 'type'}
+        node_type = data[FUNCTION]
+        attrs = {k: v for k, v in data.items() if k != FUNCTION}
 
-        if 'name' in data:
-            attrs['value'] = data['name']
+        if NAME in data:
+            attrs['value'] = data[NAME]
 
         node_map[node] = py2neo.Node(node_type, bel=decanonicalize_node(graph, node), **attrs)
 

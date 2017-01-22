@@ -1,14 +1,16 @@
 import logging
-import sys
 import time
 from collections import defaultdict
 
 import networkx as nx
 from pyparsing import ParseException
 
+from .constants import FUNCTION, NAMESPACE
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
+from .parser import language
 from .parser.parse_bel import BelParser
+from .parser.parse_exceptions import MissingMetadataException
 from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import expand_dict
@@ -21,6 +23,14 @@ except ImportError:
 __all__ = ['BELGraph']
 
 log = logging.getLogger('pybel')
+
+REQUIRED_METADATA = [
+    'name',
+    'version',
+    'description',
+    'authors',
+    'contact'
+]
 
 
 class BELGraph(nx.MultiDiGraph):
@@ -107,7 +117,7 @@ class BELGraph(nx.MultiDiGraph):
         counter = defaultdict(lambda: defaultdict(int))
 
         for n, d in self.nodes_iter(data=True):
-            counter[d['type']][d['namespace'] if 'namespace' in d else 'DEFAULT'] += 1
+            counter[d[FUNCTION]][d[NAMESPACE] if NAMESPACE in d else 'DEFAULT'] += 1
 
         for fn, nss in sorted(counter.items()):
             log.debug(' %s: %d', fn, sum(nss.values()))
@@ -123,6 +133,14 @@ class BELGraph(nx.MultiDiGraph):
             except Exception as e:
                 log.error('Line %07d - Critical Failure - %s', line_number, line)
                 raise e
+
+        for required in REQUIRED_METADATA:
+            if required not in self.metadata_parser.document_metadata:
+                self.warnings.append((0, '', MissingMetadataException(language.inv_document_keys[required])))
+                log.error('Missing required document metadata: %s', language.inv_document_keys[required])
+            elif not self.metadata_parser.document_metadata[required]:
+                self.warnings.append((0, '', MissingMetadataException(language.inv_document_keys[required])))
+                log.error('Missing required document metadata not filled: %s', language.inv_document_keys[required])
 
         self.graph['document_metadata'] = self.metadata_parser.document_metadata
 
@@ -160,16 +178,15 @@ class BELGraph(nx.MultiDiGraph):
                 self.bel_parser.parseString(line)
             except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
-                self.warnings.append((line_number, line, e.__class__.__name__, 'General parser exception'))
+                self.warnings.append((line_number, line, e))
                 self.last_parse_errors[e.__class__.__name__] += 1
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
-                self.warnings.append((line_number, line, e.__class__.__name__, ', '.join(e.args)))
+                self.warnings.append((line_number, line, e))
                 self.last_parse_errors[e.__class__.__name__] += 1
             except Exception as e:
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                log.error('Line %07d - general failure: %s - %s: %s', line_number, line, exc_type, exc_value)
-                self.warnings.append((line_number, line, e.__class__.__name__, e))
+                log.exception('Line %07d - general failure: %s - %s: %s', line_number, line)
+                self.warnings.append((line_number, line, e))
                 self.last_parse_errors[e.__class__.__name__] += 1
 
         log.info('Finished parsing statements section in %.02f seconds with %d warnings', time.time() - t,

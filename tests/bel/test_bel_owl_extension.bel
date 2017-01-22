@@ -21,7 +21,7 @@ DEFINE NAMESPACE WINE AS OWL A "http://www.w3.org/TR/2003/PR-owl-guide-20031209/
 
 SET STATEMENT_GROUP = "Group 1"
 
-SET Citation = {"Pubmed","That one article from last week","123455"}
+SET Citation = {"PubMed","That one article from last week","123455"}
 SET SupportingText = "Made up support, not even qualifying as evidence"
 
 # Standard namespace setup

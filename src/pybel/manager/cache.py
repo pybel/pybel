@@ -24,6 +24,7 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(language.value_map))
 
 CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
 PUBLISHED_DATE_FMT = '%Y-%m-%d'
+PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
 
 
 def parse_datetime(s):
@@ -36,7 +37,11 @@ def parse_datetime(s):
             dt = datetime.strptime(s, PUBLISHED_DATE_FMT)
             return dt
         except:
-            raise ValueError('Incorrect datetime format for {}'.format(s))
+            try:
+                dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
+                return dt
+            except:
+               raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
 class BaseCacheManager:
@@ -169,7 +174,7 @@ class CacheManager(BaseCacheManager):
 
         try:
             results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
-            log.info('Loaded namespace from %s', url)
+            log.info('Loaded namespace from %s (%d)', url, len(results.entries))
         except NoResultFound:
             results = self.insert_namespace(url)
 
@@ -247,7 +252,7 @@ class CacheManager(BaseCacheManager):
 
         try:
             results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one()
-            log.info('Loaded annotation from %s', url)
+            log.info('Loaded annotation from %s (%d)', url, len(results.entries))
         except NoResultFound:
             results = self.insert_annotation(url)
 

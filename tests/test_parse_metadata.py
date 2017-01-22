@@ -7,7 +7,7 @@ from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, \
     MESH_DISEASES_URL, help_check_hgnc
-from tests.constants import test_an_1, test_ns_1, test_bel, mock_bel_resources
+from tests.constants import test_an_1, test_ns_1, test_bel, mock_bel_resources, test_citation_bel
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -135,6 +135,20 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('TESTAN1', self.parser.annotations_dict)
         self.assertEqual(expected_values, self.parser.annotations_dict['TESTAN1'])
 
+    # FIXME
+    '''
+    def test_lexicography_namespace(self):
+        s = 'DEFINE NAMESPACE hugo AS URL "{}"'.format(HGNC_URL)
+        with self.assertRaises(LexicographyWarning):
+            self.parser.parseString(s)
+
+    def test_lexicography_annotation(self):
+        s = 'DEFINE ANNOTATION mesh AS URL "{}"'.format(MESH_DISEASES_URL)
+        with self.assertRaises(LexicographyWarning):
+            self.parser.parseString(s)
+
+    '''
+
     def test_parse_annotation_pattern(self):
         s = 'DEFINE ANNOTATION Test AS PATTERN "\w+"'
         with self.assertRaises(NotImplementedError):
@@ -163,8 +177,12 @@ class TestParseControl(unittest.TestCase):
         self.assertIsNone(self.parser.statement_group)
 
     def test_unset_missing_evidence(self):
-        s = 'UNSET Evidence'
-        self.parser.parseString(s)
+        s = [
+            test_citation_bel,
+            'UNSET Evidence'
+        ]
+        with self.assertRaises(MissingAnnotationKeyWarning):
+            self.parser.parse_lines(s)
 
     def test_unset_missing_command(self):
         s = 'UNSET Custom1'
@@ -177,13 +195,24 @@ class TestParseControl(unittest.TestCase):
             self.parser.parseString(s)
 
     def test_unset_missing_citation(self):
-        s = 'UNSET Citation'
-        self.parser.parseString(s)
+        s = [
+            test_citation_bel,
+            'UNSET Citation'
+        ]
+        self.parser.parse_lines(s)
 
     def test_set_missing_statement(self):
         s = 'SET MissingKey = "lol"'
         with self.assertRaises(UndefinedAnnotationWarning):
             self.parser.parseString(s)
+
+    def test_invalid_citation_type(self):
+        with self.assertRaises(InvalidCitationType):
+            self.parser.parseString('SET Citation = {"PubMedCentral","Trends in molecular medicine","12928037"}')
+
+    def test_invalid_pmid(self):
+        with self.assertRaises(InvalidPubMedIdentifierWarning):
+            self.parser.parseString('SET Citation = {"PubMed","Trends in molecular medicine","NOT VALID NUMBER"}')
 
     def test_citation_short(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037"}'
@@ -229,7 +258,7 @@ class TestParseControl(unittest.TestCase):
 
     def test_citation_error(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine"}'
-        with self.assertRaises(Exception):
+        with self.assertRaises(InvalidCitationException):
             self.parser.parseString(s)
 
     def test_evidence(self):
@@ -270,12 +299,12 @@ class TestParseControl(unittest.TestCase):
 
     def test_custom_key_failure(self):
         s = 'SET FAILURE = "never gonna happen"'
-        with self.assertRaises(Exception):
+        with self.assertRaises(UndefinedAnnotationWarning):
             self.parser.parseString(s)
 
     def test_custom_value_failure(self):
         s = 'SET Custom1 = "Custom1_C"'
-        with self.assertRaises(Exception):
+        with self.assertRaises(IllegalAnnotationValueWarning):
             self.parser.parseString(s)
 
     def test_reset_annotation(self):
@@ -306,10 +335,10 @@ class TestParseControl(unittest.TestCase):
         self.assertEqual({}, self.parser.annotations)
 
     def test_reset_citation(self):
-        s1 = 'SET Citation = {"a","b","c"}'
+        s1 = 'SET Citation = {"PubMed","Test Reference 1","11111"}'
         s2 = 'SET Evidence = "d"'
 
-        s3 = 'SET Citation = {"e","f","g"}'
+        s3 = 'SET Citation = {"PubMed","Test Reference 2","22222"}'
         s4 = 'SET Evidence = "h"'
         s5 = 'SET Custom1 = "Custom1_A"'
         s6 = 'SET Custom2 = "Custom2_A"'
@@ -317,9 +346,9 @@ class TestParseControl(unittest.TestCase):
         self.parser.parse_lines([s1, s2, s3, s4, s5, s6])
 
         self.assertEqual('h', self.parser.annotations['SupportingText'])
-        self.assertEqual('e', self.parser.citation['type'])
-        self.assertEqual('f', self.parser.citation['name'])
-        self.assertEqual('g', self.parser.citation['reference'])
+        self.assertEqual('PubMed', self.parser.citation['type'])
+        self.assertEqual('Test Reference 2', self.parser.citation['name'])
+        self.assertEqual('22222', self.parser.citation['reference'])
 
         self.parser.parseString('UNSET {"Custom1","Evidence"}')
         self.assertNotIn('Custom1', self.parser.annotations)
