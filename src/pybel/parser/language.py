@@ -26,50 +26,37 @@ document_keys = {
 inv_document_keys = {v: k for k, v in document_keys.items()}
 
 activity_labels = {
-    'catalyticActivity': 'CatalyticActivity',
-    'cat': 'CatalyticActivity',
-    'chaperoneActivity': 'ChaperoneActivity',
-    'chap': 'ChaperoneActivity',
-    'gtpBoundActivity': 'GTPBoundActivity',
-    'gtp': 'GTPBoundActivity',
-    'kinaseActivity': 'KinaseActivity',
-    'kin': 'KinaseActivity',
-    'peptidaseActivity': 'PeptidaseActivity',
-    'pep': 'PeptidaseActivity',
-    'phosphataseActivity': 'PhosphotaseActivity',
-    'phos': 'PhosphotaseActivity',
-    'ribosylationActivity': 'RibosylationActivity',
-    'ribo': 'RibosylationActivity',
-    'transcriptionalActivity': 'TranscriptionalActivity',
-    'tscript': 'TranscriptionalActivity',
-    'transportActivity': 'TransportActivity',
-    'tport': 'TransportActivity',
-    'molecularActivity': 'MolecularActivity'
-}
-
-rev_activity_labels = {
-    'CatalyticActivity': 'cat',
-    'ChaperoneActivity': 'chap',
-    'GTPBoundActivity': 'gtp',
-    'KinaseActivity': 'kin',
-    'PeptidaseActivity': 'pep',
-    'PhosphotaseActivity': 'phos',
-    'RibosylationActivity': 'ribo',
-    'TranscriptionalActivity': 'tscript',
-    'TransportActivity': 'tport',
-    'MolecularActivity': 'molecularActivity'
+    'catalyticActivity': 'cat',
+    'cat': 'cat',
+    'chaperoneActivity': 'chap',
+    'chap': 'chap',
+    'gtpBoundActivity': 'gtp',
+    'gtp': 'gtp',
+    'kinaseActivity': 'kin',
+    'kin': 'kin',
+    'peptidaseActivity': 'pep',
+    'pep': 'pep',
+    'phosphataseActivity': 'phos',
+    'phos': 'phos',
+    'ribosylationActivity': 'ribo',
+    'ribo': 'ribo',
+    'transcriptionalActivity': 'tscript',
+    'tscript': 'tscript',
+    'transportActivity': 'tport',
+    'tport': 'tport',
+    'molecularActivity': 'molecularActivity'
 }
 
 # TODO fill out
 activity_ns = {
-    'CatalyticActivity': dict(namespace='GOMF', name='catalytic activity'),
-    'ChaperoneActivity': dict(namespace='GOMF', name=''),
-    'GTPBoundActivity': dict(namespace='GOMF', name='GTP binding'),
-    'PeptidaseActivity': dict(namespace='GOMF', name='peptidase activity'),
-    'PhosphotaseActivity': dict(namespace='GOMF', name=''),
-    'RibosylationActivity': dict(namespace='GOMF', name=''),
-    'TranscriptionalActivity': dict(namespace='GOMF', name='nucleic acid binding transcription factor activity'),
-    'TransportActivity': dict(namespace='GOMF', name='transporter activity')
+    'cat': dict(namespace='GOMF', name='catalytic activity'),
+    'gtp': dict(namespace='GOMF', name='GTP binding'),
+    'pep': dict(namespace='GOMF', name='peptidase activity'),
+    'tscript': dict(namespace='GOMF', name='nucleic acid binding transcription factor activity'),
+    'tport': dict(namespace='GOMF', name='transporter activity'),
+    # 'chap': dict(namespace='GOMF', name=''),
+    # 'phos': dict(namespace='GOMF', name=''),
+    # 'ribo': dict(namespace='GOMF', name=''),
 }
 
 activities = list(activity_labels.keys())
