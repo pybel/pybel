@@ -52,8 +52,6 @@ function_variant_map = {
 }
 
 
-
-
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
                  lenient=False, complete_origin=False):
@@ -723,7 +721,8 @@ def canonicalize_node(tokens):
         if 'identifier' in tokens:
             return tokens['function'], tokens['identifier']['namespace'], tokens['identifier']['name']
 
-    if 'modifier' in tokens and tokens['modifier'] in (ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, CELL_SURFACE_EXPRESSION):
+    if 'modifier' in tokens and tokens['modifier'] in {ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION,
+                                                       CELL_SURFACE_EXPRESSION}:
         return canonicalize_node(tokens['target'])
 
 
@@ -748,7 +747,7 @@ def canonicalize_modifier(tokens):
     if tokens['modifier'] == DEGRADATION:
         attrs['modifier'] = DEGRADATION
 
-    elif tokens['modifier'] == 'Activity' and 'effect' not in tokens:
+    elif tokens['modifier'] == ACTIVITY and 'effect' not in tokens:
         attrs['modifier'] = tokens['modifier']
         attrs['effect'] = {}
 
