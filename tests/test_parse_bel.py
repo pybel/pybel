@@ -2009,7 +2009,7 @@ class TestRelations(TestTokenParserBase):
             'subject': {
                 'modifier': ACTIVITY,
                 'effect': {
-                    NAME: 'PeptidaseActivity',
+                    NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
                 'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
@@ -2108,7 +2108,7 @@ class TestRelations(TestTokenParserBase):
                     'identifier': {NAMESPACE: 'HGNC', NAME: 'HMGCR'}
                 },
                 'effect': {
-                    NAME: 'CatalyticActivity',
+                    NAME: 'cat',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
             },
