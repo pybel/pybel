@@ -3,8 +3,9 @@ import logging
 from pybel.canonicalize import decanonicalize_node
 from pybel.constants import HGVS, PMOD, GMOD, KIND, FRAGMENT, FUNCTION, NAMESPACE, NAME
 from pybel.constants import PYBEL_DEFAULT_NAMESPACE
-from pybel.parser.language import GENE, RNA
+from pybel.parser.language import GENE, RNA, ABUNDANCE, PATHOLOGY, BIOPROCESS
 from pybel.parser.parse_abundance_modifier import GmodParser, PmodParser
+from pybel.parser.parse_bel import ACTIVITY
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from pybel.utils import default_identifier
@@ -30,14 +31,14 @@ class TestAbundance(TestTokenParserBase):
         result = self.parser.general_abundance.parseString(statement)
 
         expected_result = {
-            FUNCTION: 'Abundance',
+            FUNCTION: ABUNDANCE,
             'identifier': {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'}
         }
 
         self.assertEqual(expected_result, result.asDict())
 
         node = canonicalize_node(result)
-        expected_node = cls, ns, val = 'Abundance', 'CHEBI', 'oxygen atom'
+        expected_node = cls, ns, val = ABUNDANCE, 'CHEBI', 'oxygen atom'
         self.assertEqual(expected_node, node)
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
@@ -56,7 +57,7 @@ class TestAbundance(TestTokenParserBase):
         result = self.parser.general_abundance.parseString(statement)
 
         expected_result = {
-            FUNCTION: 'Abundance',
+            FUNCTION: ABUNDANCE,
             'identifier': {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'},
             'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
         }
@@ -64,7 +65,7 @@ class TestAbundance(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         node = canonicalize_node(result)
-        expected_node = cls, ns, val = 'Abundance', 'CHEBI', 'oxygen atom'
+        expected_node = cls, ns, val = ABUNDANCE, 'CHEBI', 'oxygen atom'
         self.assertEqual(expected_node, node)
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
@@ -1432,19 +1433,19 @@ class TestBiologicalProcess(TestTokenParserBase):
         statement = 'bp(GOBP:"cell cycle arrest")'
         result = self.parser.biological_process.parseString(statement)
 
-        expected_result = ['BiologicalProcess', ['GOBP', 'cell cycle arrest']]
+        expected_result = [BIOPROCESS, ['GOBP', 'cell cycle arrest']]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
-            FUNCTION: 'BiologicalProcess',
+            FUNCTION: BIOPROCESS,
             'identifier': {NAMESPACE: 'GOBP', NAME: 'cell cycle arrest'}
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = 'BiologicalProcess', 'GOBP', 'cell cycle arrest'
+        expected_node = BIOPROCESS, 'GOBP', 'cell cycle arrest'
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{
-            FUNCTION: 'BiologicalProcess',
+            FUNCTION: BIOPROCESS,
             NAMESPACE: 'GOBP',
             NAME: 'cell cycle arrest'
         })
@@ -1463,19 +1464,19 @@ class TestPathology(TestTokenParserBase):
         statement = 'pathology(MESHD:adenocarcinoma)'
         result = self.parser.pathology.parseString(statement)
 
-        expected_result = ['Pathology', ['MESHD', 'adenocarcinoma']]
+        expected_result = [PATHOLOGY, ['MESHD', 'adenocarcinoma']]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
-            FUNCTION: 'Pathology',
+            FUNCTION: PATHOLOGY,
             'identifier': {NAMESPACE: 'MESHD', NAME: 'adenocarcinoma'}
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = 'Pathology', 'MESHD', 'adenocarcinoma'
+        expected_node = PATHOLOGY, 'MESHD', 'adenocarcinoma'
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{
-            FUNCTION: 'Pathology',
+            FUNCTION: PATHOLOGY,
             NAMESPACE: 'MESHD',
             NAME: 'adenocarcinoma'
         })
@@ -1495,12 +1496,12 @@ class TestActivity(TestTokenParserBase):
         statement = 'act(p(HGNC:AKT1))'
         result = self.parser.activity.parseString(statement)
 
-        expected_result = ['Activity', ['Protein', ['HGNC', 'AKT1']]]
+        expected_result = [ACTIVITY, ['Protein', ['HGNC', 'AKT1']]]
         self.assertEqual(expected_result, result.asList())
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {}
         }
         self.assertEqual(expected_mod, mod)
@@ -1511,9 +1512,9 @@ class TestActivity(TestTokenParserBase):
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {
-                NAME: 'KinaseActivity',
+                NAME: 'kin',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
             'target': {
@@ -1525,9 +1526,9 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {
-                NAME: 'KinaseActivity',
+                NAME: 'kin',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
         }
@@ -1539,9 +1540,9 @@ class TestActivity(TestTokenParserBase):
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {
-                NAME: 'CatalyticActivity',
+                NAME: 'cat',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
             'target': {
@@ -1553,9 +1554,9 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {
-                NAME: 'CatalyticActivity',
+                NAME: 'cat',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
         }
@@ -1567,7 +1568,7 @@ class TestActivity(TestTokenParserBase):
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {
                 NAMESPACE: 'GOMF',
                 NAME: 'catalytic activity'
@@ -1581,7 +1582,7 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {
                 NAMESPACE: 'GOMF',
                 NAME: 'catalytic activity'
@@ -1595,9 +1596,9 @@ class TestActivity(TestTokenParserBase):
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {
-                NAME: 'KinaseActivity',
+                NAME: 'kin',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
             'target': {
@@ -1609,9 +1610,9 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': 'Activity',
+            'modifier': ACTIVITY,
             'effect': {
-                NAME: 'KinaseActivity',
+                NAME: 'kin',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
         }
@@ -1797,8 +1798,8 @@ class TestTransformation(TestTokenParserBase):
 
         expected_result = [
             'Reaction',
-            [['Abundance', ['CHEBI', 'superoxide']]],
-            [['Abundance', ['CHEBI', 'hydrogen peroxide']], ['Abundance', ['CHEBI', 'oxygen']]]
+            [[ABUNDANCE, ['CHEBI', 'superoxide']]],
+            [[ABUNDANCE, ['CHEBI', 'hydrogen peroxide']], [ABUNDANCE, ['CHEBI', 'oxygen']]]
         ]
         self.assertEqual(expected_result, result.asList())
 
@@ -1806,17 +1807,17 @@ class TestTransformation(TestTokenParserBase):
             'transformation': 'Reaction',
             'reactants': [
                 {
-                    FUNCTION: 'Abundance',
+                    FUNCTION: ABUNDANCE,
                     'identifier': {NAMESPACE: 'CHEBI', NAME: 'superoxide'}
                 }
             ],
             'products': [
                 {
-                    FUNCTION: 'Abundance',
+                    FUNCTION: ABUNDANCE,
                     'identifier': {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
                 }, {
 
-                    FUNCTION: 'Abundance',
+                    FUNCTION: ABUNDANCE,
                     'identifier': {NAMESPACE: 'CHEBI', NAME: 'oxygen'}
                 }
 
@@ -1824,8 +1825,8 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = 'Reaction', (('Abundance', ('CHEBI', 'superoxide')),), (
-            ('Abundance', ('CHEBI', 'hydrogen peroxide')), ('Abundance', ('CHEBI', 'oxygen')))
+        expected_node = 'Reaction', ((ABUNDANCE, ('CHEBI', 'superoxide')),), (
+            (ABUNDANCE, ('CHEBI', 'hydrogen peroxide')), (ABUNDANCE, ('CHEBI', 'oxygen')))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node)
 
@@ -1833,14 +1834,14 @@ class TestTransformation(TestTokenParserBase):
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
-        self.assertHasNode(('Abundance', 'CHEBI', 'superoxide'))
-        self.assertHasEdge(expected_node, ('Abundance', 'CHEBI', 'superoxide'))
+        self.assertHasNode((ABUNDANCE, 'CHEBI', 'superoxide'))
+        self.assertHasEdge(expected_node, (ABUNDANCE, 'CHEBI', 'superoxide'))
 
-        self.assertHasNode(('Abundance', 'CHEBI', 'hydrogen peroxide'))
-        self.assertHasEdge(expected_node, ('Abundance', 'CHEBI', 'hydrogen peroxide'))
+        self.assertHasNode((ABUNDANCE, 'CHEBI', 'hydrogen peroxide'))
+        self.assertHasEdge(expected_node, (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'))
 
-        self.assertHasNode(('Abundance', 'CHEBI', 'oxygen'))
-        self.assertHasEdge(expected_node, ('Abundance', 'CHEBI', 'oxygen'))
+        self.assertHasNode((ABUNDANCE, 'CHEBI', 'oxygen'))
+        self.assertHasEdge(expected_node, (ABUNDANCE, 'CHEBI', 'oxygen'))
 
     def test_clearance(self):
         """Tests that after adding things, the graph and parser can be cleared properly"""
@@ -1878,9 +1879,9 @@ class TestRelations(TestTokenParserBase):
 
         expected = [
             ['Composite', ['Protein', ['HGNC', 'CASP8']], ['Protein', ['HGNC', 'FADD']],
-             ['Abundance', ['ADO', 'Abeta_42']]],
+             [ABUNDANCE, ['ADO', 'Abeta_42']]],
             'increases',
-            ['BiologicalProcess', ['GOBP', 'neuron apoptotic process']]
+            [BIOPROCESS, ['GOBP', 'neuron apoptotic process']]
         ]
         self.assertEqual(expected, result.asList())
 
@@ -1896,7 +1897,7 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(sub, sub_member_1, relation='hasComponent')
         self.assertHasEdge(sub, sub_member_2, relation='hasComponent')
 
-        obj = 'BiologicalProcess', 'GOBP', 'neuron apoptotic process'
+        obj = BIOPROCESS, 'GOBP', 'neuron apoptotic process'
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation='increases')
@@ -1912,7 +1913,7 @@ class TestRelations(TestTokenParserBase):
 
         expected_dict = {
             'subject': {
-                FUNCTION: 'Abundance',
+                FUNCTION: ABUNDANCE,
                 'identifier': {
                     'namespace': 'ADO',
                     'name': 'Abeta_42'
@@ -1921,7 +1922,7 @@ class TestRelations(TestTokenParserBase):
             'relation': 'directlyIncreases',
             'object': {
                 'target': {
-                    FUNCTION: 'Abundance',
+                    FUNCTION: ABUNDANCE,
                     'identifier': {
                         'namespace': 'CHEBI',
                         'name': 'calcium(2+)'
@@ -1936,10 +1937,10 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = 'Abundance', 'ADO', 'Abeta_42'
+        sub = ABUNDANCE, 'ADO', 'Abeta_42'
         self.assertHasNode(sub)
 
-        obj = 'Abundance', 'CHEBI', 'calcium(2+)'
+        obj = ABUNDANCE, 'CHEBI', 'calcium(2+)'
         self.assertHasNode(obj)
 
         expected_annotations = {
@@ -1964,14 +1965,14 @@ class TestRelations(TestTokenParserBase):
 
         expected_dict = {
             'subject': {
-                'modifier': 'Activity',
+                'modifier': ACTIVITY,
                 'target': {
                     FUNCTION: 'Protein',
                     'identifier': {'namespace': 'SFAM', 'name': 'CAPN Family'},
                     'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
                 },
                 'effect': {
-                    NAME: 'PeptidaseActivity',
+                    NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE},
             },
             'relation': 'decreases',
@@ -2006,9 +2007,9 @@ class TestRelations(TestTokenParserBase):
         expected_edge_attributes = {
             'relation': 'decreases',
             'subject': {
-                'modifier': 'Activity',
+                'modifier': ACTIVITY,
                 'effect': {
-                    NAME: 'PeptidaseActivity',
+                    NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
                 'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
@@ -2031,7 +2032,7 @@ class TestRelations(TestTokenParserBase):
             },
             'relation': 'directlyDecreases',
             'object': {
-                FUNCTION: 'Abundance',
+                FUNCTION: ABUNDANCE,
                 'identifier': {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
             }
         }
@@ -2040,7 +2041,7 @@ class TestRelations(TestTokenParserBase):
         sub = 'Protein', 'HGNC', 'CAT'
         self.assertHasNode(sub)
 
-        obj = 'Abundance', 'CHEBI', 'hydrogen peroxide'
+        obj = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
         self.assertHasNode(obj)
 
         expected_attrs = {
@@ -2072,7 +2073,7 @@ class TestRelations(TestTokenParserBase):
             },
             'relation': 'directlyDecreases',
             'object': {
-                FUNCTION: 'Abundance',
+                FUNCTION: ABUNDANCE,
                 'identifier': {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
             }
         }
@@ -2081,7 +2082,7 @@ class TestRelations(TestTokenParserBase):
         sub = 'Gene', 'HGNC', 'CAT'
         self.assertHasNode(sub)
 
-        obj = 'Abundance', 'CHEBI', 'hydrogen peroxide'
+        obj = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
         self.assertHasNode(obj)
 
         expected_attrs = {
@@ -2101,19 +2102,19 @@ class TestRelations(TestTokenParserBase):
 
         expected_dict = {
             'subject': {
-                'modifier': 'Activity',
+                'modifier': ACTIVITY,
                 'target': {
                     FUNCTION: 'Protein',
                     'identifier': {NAMESPACE: 'HGNC', NAME: 'HMGCR'}
                 },
                 'effect': {
-                    NAME: 'CatalyticActivity',
+                    NAME: 'cat',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
             },
             'relation': 'rateLimitingStepOf',
             'object': {
-                FUNCTION: 'BiologicalProcess',
+                FUNCTION: BIOPROCESS,
                 'identifier': {NAMESPACE: 'GOBP', NAME: 'cholesterol biosynthetic process'}
             }
         }
@@ -2122,7 +2123,7 @@ class TestRelations(TestTokenParserBase):
         sub = 'Protein', 'HGNC', 'HMGCR'
         self.assertHasNode(sub)
 
-        obj = 'BiologicalProcess', 'GOBP', 'cholesterol biosynthetic process'
+        obj = BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
@@ -2148,7 +2149,7 @@ class TestRelations(TestTokenParserBase):
             },
             'relation': 'causesNoChange',
             'object': {
-                FUNCTION: 'Pathology',
+                FUNCTION: PATHOLOGY,
                 'identifier': {NAMESPACE: 'MESHD', NAME: 'Alzheimer Disease'}
             }
         }
@@ -2157,7 +2158,7 @@ class TestRelations(TestTokenParserBase):
         sub = 'GeneVariant', 'HGNC', 'APP', (HGVS, 'g.275341G>C')
         self.assertHasNode(sub)
 
-        obj = 'Pathology', 'MESHD', 'Alzheimer Disease'
+        obj = PATHOLOGY, 'MESHD', 'Alzheimer Disease'
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
@@ -2171,9 +2172,9 @@ class TestRelations(TestTokenParserBase):
 
         expected_dict = {
             'subject': {
-                'modifier': 'Activity',
+                'modifier': ACTIVITY,
                 'effect': {
-                    NAME: 'PeptidaseActivity',
+                    NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
                 'target': {
@@ -2186,9 +2187,9 @@ class TestRelations(TestTokenParserBase):
             },
             'relation': 'regulates',
             'object': {
-                'modifier': 'Activity',
+                'modifier': ACTIVITY,
                 'effect': {
-                    NAME: 'PeptidaseActivity',
+                    NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
                 'target': {
@@ -2232,9 +2233,9 @@ class TestRelations(TestTokenParserBase):
 
         result = self.parser.relation.parseString(statement)
 
-        self.assertHasEdge(('Protein', 'HGNC', 'CAT'), ('Abundance', 'CHEBI', "hydrogen peroxide"))
-        self.assertHasEdge(('Abundance', 'CHEBI', "hydrogen peroxide"),
-                           ('BiologicalProcess', 'GO', "apoptotic process"))
+        self.assertHasEdge(('Protein', 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', "hydrogen peroxide"))
+        self.assertHasEdge((ABUNDANCE, 'CHEBI', "hydrogen peroxide"),
+                           (BIOPROCESS, 'GO', "apoptotic process"))
 
         self.parser.lenient = False
 
@@ -2247,9 +2248,9 @@ class TestRelations(TestTokenParserBase):
 
         expected_dict = {
             'subject': {
-                'modifier': 'Activity',
+                'modifier': ACTIVITY,
                 'effect': {
-                    NAME: 'KinaseActivity',
+                    NAME: 'kin',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
                 'target': {
@@ -2302,13 +2303,13 @@ class TestRelations(TestTokenParserBase):
             },
             'relation': 'positiveCorrelation',
             'object': {
-                'modifier': 'Activity',
+                'modifier': ACTIVITY,
                 'target': {
                     FUNCTION: 'Protein',
                     'identifier': {NAMESPACE: 'HGNC', NAME: 'GSK3B'}
                 },
                 'effect': {
-                    NAME: 'KinaseActivity',
+                    NAME: 'kin',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 }
             },
@@ -2423,13 +2424,13 @@ class TestRelations(TestTokenParserBase):
         statement = 'pathology(MESH:Psoriasis) isA pathology(MESH:"Skin Diseases")'
         result = self.parser.relation.parseString(statement)
 
-        expected_result = [['Pathology', ['MESH', 'Psoriasis']], 'isA', ['Pathology', ['MESH', 'Skin Diseases']]]
+        expected_result = [[PATHOLOGY, ['MESH', 'Psoriasis']], 'isA', [PATHOLOGY, ['MESH', 'Skin Diseases']]]
         self.assertEqual(expected_result, result.asList())
 
-        sub = 'Pathology', 'MESH', 'Psoriasis'
+        sub = PATHOLOGY, 'MESH', 'Psoriasis'
         self.assertHasNode(sub)
 
-        obj = 'Pathology', 'MESH', 'Skin Diseases'
+        obj = PATHOLOGY, 'MESH', 'Skin Diseases'
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation='isA')
@@ -2443,27 +2444,27 @@ class TestRelations(TestTokenParserBase):
             subProcessOf bp(GOBP:"cholesterol biosynthetic process")'
         result = self.parser.relation.parseString(statement)
         expected_result = [['Reaction',
-                            [['Abundance', ['CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA']],
-                             ['Abundance', ['CHEBI', 'NADPH']],
-                             ['Abundance', ['CHEBI', 'hydron']],
+                            [[ABUNDANCE, ['CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA']],
+                             [ABUNDANCE, ['CHEBI', 'NADPH']],
+                             [ABUNDANCE, ['CHEBI', 'hydron']],
                              ],
-                            [['Abundance', ['CHEBI', 'mevalonate']],
-                             ['Abundance', ['CHEBI', 'CoA-SH']],
-                             ['Abundance', ['CHEBI', 'NADP(+)']]
+                            [[ABUNDANCE, ['CHEBI', 'mevalonate']],
+                             [ABUNDANCE, ['CHEBI', 'CoA-SH']],
+                             [ABUNDANCE, ['CHEBI', 'NADP(+)']]
                              ]],
                            'subProcessOf',
-                           ['BiologicalProcess', ['GOBP', 'cholesterol biosynthetic process']]]
+                           [BIOPROCESS, ['GOBP', 'cholesterol biosynthetic process']]]
         self.assertEqual(expected_result, result.asList())
 
         sub = canonicalize_node(result['subject'])
         self.assertHasNode(sub)
 
-        sub_reactant_1 = 'Abundance', 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
-        sub_reactant_2 = 'Abundance', 'CHEBI', 'NADPH'
-        sub_reactant_3 = 'Abundance', 'CHEBI', 'hydron'
-        sub_product_1 = 'Abundance', 'CHEBI', 'mevalonate'
-        sub_product_2 = 'Abundance', 'CHEBI', 'CoA-SH'
-        sub_product_3 = 'Abundance', 'CHEBI', 'NADP(+)'
+        sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
+        sub_reactant_2 = ABUNDANCE, 'CHEBI', 'NADPH'
+        sub_reactant_3 = ABUNDANCE, 'CHEBI', 'hydron'
+        sub_product_1 = ABUNDANCE, 'CHEBI', 'mevalonate'
+        sub_product_2 = ABUNDANCE, 'CHEBI', 'CoA-SH'
+        sub_product_3 = ABUNDANCE, 'CHEBI', 'NADP(+)'
 
         self.assertHasNode(sub_reactant_1)
         self.assertHasNode(sub_reactant_2)
@@ -2479,7 +2480,7 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(sub, sub_product_2, relation='hasProduct')
         self.assertHasEdge(sub, sub_product_3, relation='hasProduct')
 
-        obj = cls, ns, val = 'BiologicalProcess', 'GOBP', 'cholesterol biosynthetic process'
+        obj = cls, ns, val = BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'
         self.assertHasNode(obj, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
 
         self.assertHasEdge(sub, obj, relation='subProcessOf')

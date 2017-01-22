@@ -40,7 +40,10 @@ becomes:
         'variants': [
             {
                 'code': 'Ser',
-                'identifier': 'Ph',
+                'identifier': {
+                    'name': 'Ph',
+                    'namespace': 'PYBEL'
+                },
                 'pos': 9
             }
         ]
@@ -109,7 +112,10 @@ Modifiers are added to this structure as well. Under this schema,
             'variants': [
                 {
                     'code': 'Ser',
-                    'identifier': 'Ph',
+                    'identifier': {
+                        'name': 'Ph',
+                        'namespace': 'PYBEL'
+                    },
                     'pos': 9
                 }
             ]
@@ -125,7 +131,8 @@ Modifiers are added to this structure as well. Under this schema,
                 }
             },
             'effect': {
-                'MolecularActivity': 'KinaseActivity'
+                'name': 'kin'
+                'namespace': 'PYBEL'
             }
         },
     }
@@ -145,7 +152,10 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
             'variants': [
                 {
                     'code': 'Ser',
-                    'identifier': 'Ph',
+                    'identifier': {
+                        'name': 'Ph',
+                        'namespace': 'PYBEL'
+                    },
                     'pos': 9
                 }
             ],
@@ -165,7 +175,8 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
                 }
             },
             'effect': {
-                'MolecularActivity': 'KinaseActivity'
+                'name': 'kin',
+                'namespace': 'PYBEL'
             }
         },
     }

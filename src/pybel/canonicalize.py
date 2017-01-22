@@ -8,11 +8,11 @@ from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
 from .constants import GOCC_LATEST, GOCC_KEYWORD
 from .parser import language
-from .parser.language import rev_activity_labels, inv_document_keys
+from .parser.language import inv_document_keys
 from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
+from .parser.parse_bel import ACTIVITY, DEGRADATION, TRANSLOCATION
 from .parser.parse_bel import NAMESPACE, NAME
 from .parser.utils import ensure_quotes
-from .parser.parse_bel import ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SURFACE_EXPRESSION, CELL_SECRETION
 
 __all__ = ['to_bel']
 
@@ -163,7 +163,7 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
             ma = node_edge_data['effect']
 
             if ma[NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
-                node_str = "{}, ma({}))".format(node_str, rev_activity_labels[ma[NAME]])
+                node_str = "{}, ma({}))".format(node_str, ma[NAME])
             else:
                 node_str = "{}, ma({}:{}))".format(node_str, ma[NAMESPACE], ensure_quotes(ma[NAME]))
         else:
