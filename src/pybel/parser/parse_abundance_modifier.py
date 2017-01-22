@@ -103,7 +103,7 @@ class GsubParser(BaseParser):
 
     def handle_gsub(self, s, l, tokens):
         upgraded = 'g.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
-        log.warning('legacy sub() %s upgraded to %s', s, upgraded)
+        log.debug('legacy sub() %s upgraded to %s', s, upgraded)
         tokens[HGVS] = upgraded
         del tokens[self.POSITION]
         del tokens[self.REFERENCE]
