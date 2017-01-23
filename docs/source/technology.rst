@@ -29,9 +29,9 @@ Unit Testing
 ~~~~~~~~~~~~
 Unit tests check that the functionality of the different parts of PyBEL work independently.
 
-An example unit test can be found in tests.test_parse_bel.TestAbundance.test_short_abundance. It ensures that the
-parser is able to handle a given string describing the abundance of a chemical/other entitiy in BEl. It tests that the
-parser produces the correct output, that the BEL statement is converted to the correct internal representation. In
+An example unit test can be found in :code:`tests.test_parse_bel.TestAbundance.test_short_abundance`. It ensures that
+the parser is able to handle a given string describing the abundance of a chemical/other entity in BEL. It tests that
+the parser produces the correct output, that the BEL statement is converted to the correct internal representation. In
 this example, this is a tuple describing the abundance of oxygen atoms. Finally, it tests that this representation
 is added as a node in the underlying BEL graph with the appropriate attributes added.
 
@@ -49,7 +49,8 @@ While IDEs like PyCharm provide excellent testing tools, they are not programmat
 a CLI interface to run automated testing procedures (as well as other build functions, that aren't important to explain
 here). In PyBEL, it is used to run the unit tests in the :code:`tests` folder with the :code:`py.test` harness. It also
 runs :code:`check-manifest`, builds the documentation with :code:`sphinx`, and computes the code coverage of the tests.
-The entire procedure is defined in tox.ini. Tox also allows test to be done on many different versions of python.
+The entire procedure is defined in :code:`tox.ini`. Tox also allows test to be done on many different versions of
+Python.
 
 Continuous Integration
 ~~~~~~~~~~~~~~~~~~~~~~

@@ -105,7 +105,7 @@ Modifiers are added to this structure as well. Under this schema,
     {
         'subject': {
             'function': 'Protein',
-            'identifier': 'identifier': {
+            'identifier': {
                     'namespace': 'HGNC',
                     'name': 'GSK3B'
             },
@@ -178,5 +178,65 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
                 'name': 'kin',
                 'namespace': 'PYBEL'
             }
+        },
+    }
+
+Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:YFG2))` becomes:
+
+.. code::
+
+    {
+        'subject': {
+            'function': 'Protein',
+            'identifier': 'identifier': {
+                    'namespace': 'HGNC',
+                    'name': 'YFG1'
+            }
+        },
+        'relation': 'increases',
+        'object': {
+            'modifier': 'Translocation',
+            'target': {
+                'function': 'Protein',
+                'identifier': {
+                    'namespace': 'HGNC',
+                    'name': 'YFG2'
+                }
+            },
+            'effect': {
+                'fromLoc': {
+                    'namespace': 'GOMF',
+                    'name': 'intracellular'
+                },
+                'toLoc': {
+                    'namespace': 'GOMF',
+                    'name': 'extracellular space'
+                }
+            }
+        },
+    }
+
+Degradations are more simple, because there's no 'effect' entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
+
+.. code::
+
+    {
+        'subject': {
+            'function': 'Protein',
+            'identifier': 'identifier': {
+                    'namespace': 'HGNC',
+                    'name': 'YFG1'
+            }
+        },
+        'relation': 'increases',
+        'object': {
+            'modifier': 'Degradation',
+            'target': {
+                'function': 'Protein',
+                'identifier': {
+                    'namespace': 'HGNC',
+                    'name': 'YFG2'
+                }
+            },
         },
     }
