@@ -4,8 +4,6 @@ PyBEL
 :code:`PyBEL` is a Python software package that parses BEL scripts, validates their semantics, applies common graph
 algorithms, and facilitates data interchange between common formats and database systems like JSON, CSV, SQL, and Neo4J.
 
-Development:
-
 =========== =============== ================== =======================
 Stable      |stable_build|  |stable_coverage|  |stable_documentation| 
 Development |develop_build| |develop_coverage| |develop_documentation|
@@ -119,7 +117,8 @@ your favorite terminal:
 
    pip install pybel
 
-See the `documentation <http://pybel.readthedocs.io/>`_ for more advanced instructions.
+See the `documentation <http://pybel.readthedocs.io/>`_ for more advanced instructions. Also, check the change log
+at :code:`CHANGELOG.rst`.
 
 Contributing
 ------------

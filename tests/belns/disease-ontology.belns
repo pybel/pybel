@@ -1,0 +1,6614 @@
+[Namespace]
+NameString=Disease Ontology Names
+Keyword=DO
+DomainString=Biological Process
+SpeciesString=all
+DescriptionString=Disease names from the Disease Ontology (DO). These names may be used to specify pathologies. 
+VersionString=20150611
+CreatedDateTime=2015-06-11T19:51:16
+
+[Author]
+NameString=OpenBEL
+CopyrightString=Copyright (c) 2015, OpenBEL Project. This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+ContactInfoString=info@openbel.org
+
+[Citation]
+NameString=Disease Ontology (DO)
+DescriptionString=The Disease Ontology has been developed as a standardized ontology for human disease with the purpose of providing the biomedical community with consistent, reusable and sustainable descriptions of human disease terms, phenotype characteristics and related medical vocabulary disease concepts through collaborative efforts of researchers at Northwestern University, Center for Genetic Medicine and the University of Maryland School of Medicine, Institute for Genome Sciences.
+PublishedVersionString=2015-06-11
+PublishedDate=2015-06-11
+ReferenceURL=http://disease-ontology.org/
+
+[Processing]
+CaseSensitiveFlag=yes
+DelimiterString=|
+CacheableFlag=yes
+
+[Values]
+2-hydroxyglutaric aciduria|O
+3-M syndrome|O
+3-Methylcrotonyl-CoA carboxylase deficiency|O
+3-methylglutaconic aciduria|O
+3MC syndrome|O
+46 XX gonadal dysgenesis|O
+46 XY gonadal dysgenesis|O
+ABCD syndrome|O
+ACTH-secreting pituitary adenoma|O
+ADULT syndrome|O
+AGAT deficiency|O
+AIDS phobia|O
+ARC syndrome|O
+Aagenaes syndrome|O
+Aarskog-Scott syndrome|O
+Achard syndrome|O
+Achenbach syndrome|O
+Adams-Oliver syndrome|O
+Addison's disease|O
+Adie syndrome|O
+African histoplasmosis|O
+African tick-bite fever|O
+Aicardi syndrome|O
+Aicardi-Goutieres syndrome|O
+Alagille syndrome|O
+Aland Island eye disease|O
+Albright's hereditary osteodystrophy|O
+Alexander disease|O
+Alkhurma hemorrhagic fever|O
+Allan-Herndon-Dudley syndrome|O
+Alpers syndrome|O
+Alport syndrome|O
+Alstrom syndrome|O
+Alzheimer's disease|O
+American histoplasmosis|O
+Andersen-Tawil syndrome|O
+Angelman syndrome|O
+Angelucci's syndrome|O
+Antley-Bixler syndrome|O
+Argentine hemorrhagic fever|O
+Argyll Robertson pupil|O
+Armfield syndrome|O
+Arts syndrome|O
+Askin's tumor|O
+Asperger syndrome|O
+Astrakhan spotted fever|O
+Athabaskan brainstem dysgenesis syndrome|O
+Axenfeld-Rieger syndrome|O
+B cell deficiency|O
+B cell linker protein deficiency|O
+B- and T-cell mixed leukemia|O
+B-cell lymphoma|O
+Baastrup's syndrome|O
+Balkan hemorrhagic fever|O
+Balkan nephropathy|O
+Baller-Gerold syndrome|O
+Balo concentric sclerosis|O
+Bamforth-Lazarus syndrome|O
+Bannayan-Riley-Ruvalcaba syndrome|O
+Baraitser-Winter syndrome|O
+Bardet-Biedl syndrome|O
+Barmah Forest virus disease|O
+Barre-Lieou syndrome|O
+Barrett's adenocarcinoma|O
+Barrett's esophagus|O
+Bart-Pumphrey syndrome|O
+Barth syndrome|O
+Bartholin's duct cyst|O
+Bartholin's gland adenocarcinoma|O
+Bartholin's gland adenoid cystic carcinoma|O
+Bartholin's gland adenoma|O
+Bartholin's gland adenomyoma|O
+Bartholin's gland adenosquamous carcinoma|O
+Bartholin's gland carcinoma|O
+Bartholin's gland neoplasm|O
+Bartholin's gland small cell carcinoma|O
+Bartholin's gland squamous cell carcinoma|O
+Bartholin's gland transitional cell carcinoma|O
+Bartter disease|O
+Batten disease|O
+Beare-Stevenson cutis gyrata syndrome|O
+Becker muscular dystrophy|O
+Beckwith-Wiedemann syndrome|O
+Beemer-Langer syndrome|O
+Behcet's disease|O
+Behcet's syndrome arthropathy|O
+Bell's palsy|O
+Bernard-Soulier syndrome|O
+Bethlem myopathy|O
+Bietti crystalline corneoretinal dystrophy|O
+Binder syndrome|O
+Birk-Barel syndrome|O
+Birt-Hogg-Dube syndrome|O
+Bjornstad syndrome|O
+Blau syndrome|O
+Blessig's cysts|O
+Bloch-Sulzberger syndrome|O
+Blount's disease|O
+Bolivian hemorrhagic fever|O
+Boomerang dysplasia|O
+Bordetella parapertussis whooping cough|O
+Borjeson-Forssman-Lehmann syndrome|O
+Borst-Jadassohn intraepidermal carcinoma|O
+Bothnia retinal dystrophy|O
+Bowen-Conradi syndrome|O
+Bowman's membrane folds or rupture|O
+Brazilian hemorrhagic fever|O
+Brill-Zinsser disease|O
+Brody myopathy|O
+Brooke-Spiegler syndrome|O
+Brown's tendon sheath syndrome|O
+Brown-Sequard syndrome|O
+Brown-Vialetto-Van Laere syndrome|O
+Brucella abortus brucellosis|O
+Brucella canis brucellosis|O
+Brucella melitensis brucellosis|O
+Brucella suis brucellosis|O
+Bruck syndrome|O
+Brugada syndrome|O
+Bruton-type agammaglobulinemia|O
+Burkitt lymphoma|O
+Buruli ulcer disease|O
+C-P angle neurinoma|O
+C1 inhibitor deficiency|O
+CD3delta deficiency|O
+CD3epsilon deficiency|O
+CD3gamma deficiency|O
+CD3zeta deficiency|O
+CD40 deficiency|O
+CD40 ligand deficiency|O
+CD45 deficiency|O
+CEDNIK syndrome|O
+CHARGE syndrome|O
+CLL/SLL|O
+CREST syndrome|O
+Caffey disease|O
+Camurati-Engelmann disease|O
+Canavan disease|O
+Capgras syndrome|O
+Caplan's syndrome|O
+Carney complex|O
+Caroli disease|O
+Carpenter syndrome|O
+Carrion's Disease|O
+Cauda equina syndrome|O
+Chagas disease|O
+Chandler syndrome|O
+Chapare hemorrhagic fever|O
+Charcot-Marie-Tooth disease|O
+Charcot-Marie-Tooth disease intermediate type|O
+Charcot-Marie-Tooth disease type 1|O
+Charcot-Marie-Tooth disease type 2|O
+Charcot-Marie-Tooth disease type 3|O
+Charcot-Marie-Tooth disease type 4|O
+Charcot-Marie-Tooth disease type X|O
+Chediak-Higashi syndrome|O
+Churg-Strauss syndrome|O
+Clostridium difficile colitis|O
+Clouston syndrome|O
+Coats disease|O
+Cockayne syndrome|O
+Coffin-Lowry syndrome|O
+Coffin-Siris syndrome|O
+Cogan syndrome|O
+Cogan-Reese syndrome|O
+Colorado tick fever|O
+Conn's syndrome|O
+Cor pulmonale|O
+Cornelia de Lange syndrome|O
+Costello syndrome|O
+Cowden disease|O
+Creutzfeldt-Jakob disease|O
+Cri-Du-Chat syndrome|O
+Crigler-Najjar syndrome|O
+Crimean-Congo hemorrhagic fever|O
+Crohn's colitis|O
+Crohn's disease|O
+Cronkhite-Canada syndrome|O
+Crouzon syndrome|O
+Cushing's syndrome|O
+D-2-hydroxyglutaric aciduria|O
+DIC in newborn|O
+DNA ligase IV deficiency|O
+Dandy-Walker syndrome|O
+Danon disease|O
+De Quervain disease|O
+Dent disease|O
+Denys-Drash syndrome|O
+DiGeorge syndrome|O
+Diamond-Blackfan anemia|O
+Dieulafoy lesion|O
+Donohue Syndrome|O
+Dowling-Degos disease|O
+Down syndrome|O
+Dravet Syndrome|O
+Dressler's syndrome|O
+Duane retraction syndrome|O
+Dubin-Johnson syndrome|O
+Dubowitz Syndrome|O
+Duchenne muscular dystrophy|O
+Eastern equine encephalitis|O
+Ebola hemorrhagic fever|O
+Ebstein anomaly|O
+Edwards syndrome|O
+Ehlers-Danlos syndrome|O
+Ehlers-Danlos syndrome progeroid type|O
+Ellis-Van Creveld syndrome|O
+Emery-Dreifuss muscular dystrophy|O
+Epstein-Barr virus hepatitis|O
+Erdheim-Chester disease|O
+Evans' syndrome|O
+FG syndrome|O
+FTDALS1|O
+FTDALS2|O
+Fabry disease|O
+Fanconi syndrome|O
+Fanconi's anemia|O
+Far Eastern spotted fever|O
+Farber lipogranulomatosis|O
+Felty's syndrome|O
+Ferguson-Smith tumor|O
+Finnish type amyloidosis|O
+Flinders Island spotted fever|O
+Foster-Kennedy syndrome|O
+Frasier syndrome|O
+Frey Syndrome|O
+Friedreich ataxia|O
+Froelich's syndrome|O
+Fuchs' endothelial dystrophy|O
+Fuchs' heterochromic uveitis|O
+Fukuyama congenital muscular dystrophy|O
+GABA aminotransferase deficiency|O
+Gamstorp-Wohlfart syndrome|O
+Gaucher's disease|O
+Gerstmann syndrome|O
+Gerstmann-Straussler-Scheinker syndrome|O
+Gilbert syndrome|O
+Gilles de la Tourette syndrome|O
+Gitelman syndrome|O
+Glanzmann's thrombasthenia|O
+Goldenhar syndrome|O
+Good syndrome|O
+Goodpasture syndrome|O
+Gorham's disease|O
+Graves' disease|O
+Greig cephalopolysyndactyly syndrome|O
+Guillain-Barre syndrome|O
+HCL-V|O
+HELLP syndrome|O
+Hailey-Hailey disease|O
+Hajdu-Cheney syndrome|O
+Hallermann-Streiff syndrome|O
+Hartnup disease|O
+Haverhill fever|O
+Henoch-Schoenlein purpura|O
+Her2-receptor negative breast cancer|O
+Her2-receptor positive breast cancer|O
+Hermansky-Pudlak syndrome|O
+Hirschsprung's disease|O
+Hodgkin's granuloma|O
+Hodgkin's lymphoma|O
+Hodgkin's lymphoma, lymphocytic depletion|O
+Hodgkin's lymphoma, lymphocytic-histiocytic predominance|O
+Hodgkin's lymphoma, mixed cellularity|O
+Hodgkin's lymphoma, nodular sclerosis|O
+Hodgkin's paragranuloma|O
+Horner's syndrome|O
+Human immunodeficiency virus infectious disease|O
+Huntington's disease|O
+IMAGe syndrome|O
+IgA glomerulonephritis|O
+Indian tick typhus|O
+Israeli tick typhus|O
+JMP syndrome|O
+Jaccoud's syndrome|O
+Jansen's metaphyseal chondrodysplasia|O
+Japanese encephalitis|O
+Japanese spotted fever|O
+Jensen syndrome|O
+Jervell-Lange Nielsen syndrome|O
+Jewett-Marshall bladder cancer|O
+Job's syndrome|O
+Johanson-Blizzard syndrome|O
+Joubert syndrome|O
+KBG syndrome|O
+Kahrizi syndrome|O
+Kallmann syndrome|O
+Kaposi's sarcoma|O
+Kartagener syndrome|O
+Kawasaki disease|O
+Kearns-Sayre syndrome|O
+Kennedy's disease|O
+Keshan disease|O
+Kimura disease|O
+Klatskin's tumor|O
+Kleine-Levin syndrome|O
+Klinefelter's syndrome|O
+Klippel-Feil syndrome|O
+Klippel-Trenaunay syndrome|O
+Kluver-Bucy syndrome|O
+Kniest dysplasia|O
+Kohler's disease|O
+Koolen de Vries syndrome|O
+Korean hemorrhagic fever|O
+Krabbe disease|O
+Krukenberg carcinoma|O
+Kuhnt-Junius degeneration|O
+Kummell's disease|O
+Kunjin encephalitis|O
+Kyasanur forest disease|O
+L-2-hydroxyglutaric aciduria|O
+L-cell glucagon-like peptide producing tumor|O
+LADD syndrome|O
+LEOPARD syndrome|O
+La Crosse encephalitis|O
+Lafora disease|O
+Lambert-Eaton myasthenic syndrome|O
+Landau-Kleffner syndrome|O
+Langerhans cell sarcoma|O
+Langerhans-cell histiocytosis|O
+Laron syndrome|O
+Larsen syndrome|O
+Lassa fever|O
+Laurence-Moon syndrome|O
+Leber congenital amaurosis|O
+Legg-Calve-Perthes Disease|O
+Legionnaires' disease|O
+Leigh disease|O
+Lemierre's syndrome|O
+Lennox-Gastaut syndrome|O
+Lesch-Nyhan syndrome|O
+Lewy body dementia|O
+Leydig cell tumor|O
+Li-Fraumeni syndrome|O
+Liddle syndrome|O
+Listeria meningitis|O
+Loeffler endocarditis|O
+Loeffler syndrome|O
+Loeys-Dietz syndrome|O
+Lown-Ganong-Levine syndrome|O
+Ludwig's angina|O
+Lutembacher's syndrome|O
+Lyme disease|O
+Lynch syndrome|O
+MALT lymphoma|O
+MASA syndrome|O
+MELAS syndrome|O
+MERRF syndrome|O
+MHC class I deficiency|O
+MHC class II deficiency|O
+Machado-Joseph disease|O
+Maffucci syndrome|O
+Marburg hemorrhagic fever|O
+Marfan syndrome|O
+Marshall-Smith syndrome|O
+Mast syndrome|O
+Masters-Allen syndrome|O
+Matthew-Wood syndrome|O
+McCune Albright syndrome|O
+McKusick type metaphyseal dysplasia|O
+Meckel syndrome|O
+Meckel's diverticulitis|O
+Meckel's diverticulum|O
+Meckel's diverticulum cancer|O
+Meier-Gorlin syndrome|O
+Meige syndrome|O
+Melkersson-Rosenthal syndrome|O
+Meniere's disease|O
+Menkes disease|O
+Merkel cell carcinoma|O
+Mikulicz disease|O
+Miller Fisher syndrome|O
+Mobitz type II atrioventricular block|O
+Mobius syndrome|O
+Monckeberg arteriosclerosis|O
+Mooren's ulcer|O
+Morgagni cataract|O
+Moyamoya disease|O
+Muckle-Wells syndrome|O
+Muir-Torre syndrome|O
+Munchausen by proxy|O
+Murray Valley encephalitis|O
+Mycobacterium avium complex disease|O
+N syndrome|O
+Nager acrofacial dysostosis|O
+Native American myopathy|O
+Nelson syndrome|O
+Netherton syndrome|O
+Newcastle disease|O
+Nezelof syndrome|O
+Niemann-Pick disease|O
+Nijmegen breakage syndrome|O
+Noonan syndrome|O
+Norum disease|O
+O'nyong'nyong fever|O
+Ogden syndrome|O
+Ohdo syndrome|O
+Ohtahara syndrome|O
+Ollier disease|O
+Omenn syndrome|O
+Omsk hemorrhagic fever|O
+Opitz-GBBB syndrome|O
+Oropouche fever|O
+Osgood-Schlatter's disease|O
+PHGDH deficiency|O
+POEMS syndrome|O
+PSAT deficiency|O
+PSPH deficiency|O
+Pacinian tumor|O
+Paget's disease of bone|O
+Pallister-Hall syndrome|O
+Pancoast tumor|O
+Papillon-Lefevre disease|O
+Parkinson's disease|O
+Partington syndrome|O
+Patau syndrome|O
+Pearson syndrome|O
+Pediculus humanus capitis infestation|O
+Pediculus humanus corporis infestation|O
+Pelger-Huet anomaly|O
+Pelizaeus-Merzbacher disease|O
+Perrault syndrome|O
+Peutz-Jeghers syndrome|O
+Peyronie's disease|O
+Pfeiffer syndrome|O
+Phlebotomus fever|O
+Phlegmonous dacryocystitis|O
+Pick's disease|O
+Plasmodium falciparum malaria|O
+Plasmodium malariae malaria|O
+Plasmodium ovale malaria|O
+Plasmodium vivax malaria|O
+Plica syndrome|O
+Plummer's disease|O
+Poland syndrome|O
+Pontiac fever|O
+Potter's syndrome|O
+Powassan encephalitis|O
+Prader-Willi syndrome|O
+Proteus syndrome|O
+Pthirus pubis infestation|O
+Q fever|O
+Qazi Markouizos syndrome|O
+Queensland tick typhus|O
+REM sleep behavior disorder|O
+Rapp-Hodgkin syndrome|O
+Raynaud disease|O
+Refsum disease|O
+Renpenning syndrome|O
+Rett syndrome|O
+Reye syndrome|O
+Rh deficiency syndrome|O
+Rh isoimmunization|O
+Richter's syndrome|O
+Rickettsia parkeri spotted fever|O
+Riedel's fibrosing thyroiditis|O
+Rift Valley fever|O
+Riley-Day syndrome|O
+Ritter's disease|O
+Roberts syndrome|O
+Robinow syndrome|O
+Rocky Mountain spotted fever|O
+Ross River fever|O
+Rothmund-Thomson syndrome|O
+Rubinstein-Taybi syndrome|O
+SAPHO syndrome|O
+SC phocomelia syndrome|O
+SM-AHNMD|O
+SOST-related sclerosing bone dysplasia|O
+Saethre-Chotzen syndrome|O
+Saldino-Noonan syndrome|O
+Sandhoff disease|O
+Scheie syndrome|O
+Scheuermann's disease|O
+Schmid metaphyseal chondrodysplasia|O
+Schneiderian carcinoma|O
+Schnitzler syndrome|O
+Schwachman Diamond type metaphyseal dysplasia|O
+Schwannian stroma-rich and stroma-poor composite ganglioneuroblastoma|O
+Schwannoma of ureter|O
+Sclerosing liposarcoma|O
+Seckel syndrome|O
+Senile atrophy of choroid|O
+Senior-Loken syndrome|O
+Sensenbrenner syndrome|O
+Sertoli cell tumor|O
+Sertoli cell-only syndrome|O
+Sertoli-Leydig cell tumor|O
+Sezary's disease|O
+Sheehan syndrome|O
+Shwartzman phenomenon|O
+Siberian tick typhus|O
+Silver-Russell syndrome|O
+Simpson-Golabi-Behmel syndrome|O
+Sjogren's syndrome|O
+Sjogren-Larsson syndrome|O
+Sly syndrome|O
+Smith-Lemli-Opitz syndrome|O
+Smith-McCort dysplasia|O
+Sneddon syndrome|O
+Sotos syndrome|O
+St. Louis encephalitis|O
+Stargardt disease|O
+Stevens-Johnson syndrome|O
+Stickler syndrome|O
+Stiff-Person syndrome|O
+Sugio-Kajii syndrome|O
+T cell deficiency|O
+T lymphocyte deficiency|O
+T-cell adult acute lymphocytic leukemia|O
+T-cell large granular lymphocyte leukemia|O
+T-cell leukemia|O
+TSH producing pituitary tumor|O
+Takayasu's arteritis|O
+Tangier disease|O
+Tay-Sachs disease|O
+Tay-Sachs disease AB variant|O
+Taylor's syndrome|O
+Thomsen disease|O
+Tietze's syndrome|O
+Timothy syndrome|O
+Townes-Brocks syndrome|O
+Treacher Collins syndrome|O
+Troyer syndrome|O
+Turner syndrome|O
+UV-sensitive syndrome|O
+Ullrich congenital muscular dystrophy|O
+Unverricht-Lundborg syndrome|O
+Usher syndrome|O
+VACTERL association|O
+VIPoma|O
+Vagus nerve disease|O
+Van Maldergem syndrome|O
+Van der Woude syndrome|O
+Venezuelan equine encephalitis|O
+Venezuelan hemorrhagic fever|O
+Vogt-Koyanagi-Harada disease|O
+Volkmann contracture|O
+WAGR syndrome|O
+Waardenburg's syndrome|O
+Waldeyer's ring cancer|O
+Walker-Warburg syndrome|O
+Warburg micro syndrome|O
+Waterhouse-Friderichsen syndrome|O
+Weaver syndrome|O
+Wegener's granulomatosis|O
+Weill-Marchesani syndrome|O
+Weissenbacher-Zweymüller syndrome|O
+Werdnig-Hoffmann disease|O
+Werner syndrome|O
+Wernicke encephalopathy|O
+Wernicke-Korsakoff syndrome|O
+West Nile encephalitis|O
+West Nile fever|O
+West syndrome|O
+Western equine encephalitis|O
+Whipple disease|O
+Whitewater Arroyo hemorrhagic fever|O
+Williams-Beuren syndrome|O
+Wilson disease|O
+Wiskott-Aldrich syndrome|O
+Wissler's syndrome|O
+Wolf-Hirschhorn syndrome|O
+Wolff-Parkinson-White syndrome|O
+Wolffian adnexal neoplasm|O
+Wolffian duct adenocarcinoma|O
+Wolffian duct adenoma|O
+Wolfram syndrome|O
+Wolman disease|O
+Worth's syndrome|O
+X-linked chondrodysplasia punctata|O
+X-linked disease|O
+X-linked hyper IgM syndrome|O
+X-linked hypophosphatemia|O
+X-linked ichthyosis|O
+X-linked myopathy with excessive autophagy|O
+X-linked nonsyndromic deafness|O
+X-linked sideroblastic anemia|O
+X-linked sideroblastic anemia with ataxia|O
+Y-linked disease|O
+Zellweger syndrome|O
+Zollinger-Ellison Syndrome|O
+abdominal aortic aneurysm|O
+abdominal tuberculosis|O
+abducens nerve disease|O
+abducens nerve neoplasm|O
+abetalipoproteinemia|O
+abnormal pupillary function|O
+abnormal retinal correspondence|O
+abnormal threshold of rods|O
+abnormality of glucagon secretion|O
+acalculous cholecystitis|O
+acanthocephaliasis|O
+acantholytic acanthoma|O
+acantholytic squamous cell skin carcinoma|O
+acantholytic variant squamous cell breast carcinoma|O
+acanthoma|O
+acanthosis nigricans|O
+acatalasia|O
+accessory nerve disease|O
+accommodative esotropia|O
+accommodative spasm|O
+aceruloplasminemia|O
+achalasia|O
+achalasia microcephaly syndrome|O
+acheiropody|O
+achilles bursitis|O
+achondrogenesis|O
+achondrogenesis type IA|O
+achondrogenesis type IB|O
+achondrogenesis type II|O
+achondroplasia|O
+achromatopsia|O
+acidophil adenoma|O
+acinar cell carcinoma|O
+acinar cell cystadenocarcinoma|O
+acinic cell breast carcinoma|O
+acne|O
+acneiform dermatitis|O
+acoustic neuroma|O
+acquired color blindness|O
+acquired gastric outlet stenosis|O
+acquired hemangioma|O
+acquired hyperkeratosis|O
+acquired immunodeficiency syndrome|O
+acquired metabolic disease|O
+acquired night blindness|O
+acquired polycythemia|O
+acquired tear duct stenosis|O
+acquired thrombocytopenia|O
+acral lentiginous melanoma|O
+acrocallosal syndrome|O
+acrocapitofemoral dysplasia|O
+acrocephalosyndactylia|O
+acrodermatitis|O
+acrodermatitis chronica atrophicans|O
+acrodermatitis enteropathica|O
+acrodysostosis|O
+acrofrontofacionasal dysostosis|O
+acrokeratosis verruciformis|O
+acromegaly|O
+acromelic frontonasal dysostosis|O
+acromesomelic dysplasia|O
+acromesomelic dysplasia, Grebe type|O
+acromesomelic dysplasia, Hunter-Thompson type|O
+acromesomelic dysplasia, Maroteaux type|O
+acrorenal syndrome|O
+actinic keratosis|O
+actinobacillosis|O
+actinomycosis|O
+active cochlear Meniere's disease|O
+active cochleovestibular Meniere's disease|O
+active peptic ulcer disease|O
+active vestibular Meniere's disease|O
+acute T cell leukemia|O
+acute allergic mucoid otitis media|O
+acute allergic sanguinous otitis media|O
+acute allergic serous otitis media|O
+acute anterolateral myocardial infarction|O
+acute apical periodontitis|O
+acute canaliculitis|O
+acute cervicitis|O
+acute chest syndrome|O
+acute cholangitis|O
+acute closed-angle glaucoma|O
+acute conjunctivitis|O
+acute contagious conjunctivitis|O
+acute cor pulmonale|O
+acute cystitis|O
+acute dacryoadenitis|O
+acute dacryocystitis|O
+acute diarrhea|O
+acute diffuse nephritis|O
+acute disseminated encephalomyelitis|O
+acute endometritis|O
+acute endophthalmitis|O
+acute ethmoiditis|O
+acute eustachian salpingitis|O
+acute female pelvic peritonitis|O
+acute frontal sinusitis|O
+acute gonococcal cervicitis|O
+acute gonococcal cystitis|O
+acute gonococcal endometritis|O
+acute gonococcal epididymo-orchitis|O
+acute gonococcal prostatitis|O
+acute gonococcal salpingitis|O
+acute hemorrhagic conjunctivitis|O
+acute hemorrhagic encephalitis|O
+acute hemorrhagic leukoencephalitis|O
+acute hydrops keratoconus|O
+acute infection of pinna|O
+acute inferolateral myocardial infarction|O
+acute inferoposterior infarction|O
+acute inflammation of lacrimal passage|O
+acute intermittent porphyria|O
+acute interstitial pneumonia|O
+acute kidney failure|O
+acute kidney tubular necrosis|O
+acute laryngitis|O
+acute laryngopharyngitis|O
+acute leukemia|O
+acute lymphocytic leukemia|O
+acute maxillary sinusitis|O
+acute monocytic leukemia|O
+acute myeloid leukemia|O
+acute myocardial infarction|O
+acute myocarditis|O
+acute necrotizing encephalitis|O
+acute orbital inflammation|O
+acute pancreatitis|O
+acute pericementitis|O
+acute perichondritis of pinna|O
+acute porphyria|O
+acute poststreptococcal glomerulonephritis|O
+acute proliferative glomerulonephritis|O
+acute promyelocytic leukemia|O
+acute pulmonary heart disease|O
+acute pyelonephritis|O
+acute retinal necrosis syndrome|O
+acute retrobulbar neuritis|O
+acute salpingitis|O
+acute salpingo-oophoritis|O
+acute sanguinous otitis media|O
+acute serous otitis media|O
+acute sphenoidal sinusitis|O
+acute stress disorder|O
+acute thyroiditis|O
+acute transudative otitis media|O
+acute tympanitis|O
+acute urate nephropathy|O
+acute vascular insufficiency of intestine|O
+adamantinoid basal cell epithelioma|O
+adamantinoma|O
+adamantinous craniopharyngioma|O
+adenocarcinoma|O
+adenocarcinoma in situ|O
+adenofibroma|O
+adenoid basal cell carcinoma|O
+adenoid hypertrophy|O
+adenoid squamous cell carcinoma|O
+adenoiditis|O
+adenoma|O
+adenomatoid tumor|O
+adenomyoma|O
+adenomyoma of uterine corpus|O
+adenosarcoma|O
+adenosine deaminase deficiency|O
+adenosquamous bile duct carcinoma|O
+adenosquamous breast carcinoma|O
+adenosquamous carcinoma|O
+adenosquamous cell lung carcinoma|O
+adenosquamous colon carcinoma|O
+adenosquamous gallbladder carcinoma|O
+adenosquamous pancreas carcinoma|O
+adenosquamous prostate carcinoma|O
+adenylosuccinase lyase deficiency|O
+adhesions of uterus|O
+adiaspiromycosis|O
+adiposis dolorosa|O
+adjustment disorder|O
+adolescence-adult electroclinical syndrome|O
+adrenal adenoma|O
+adrenal carcinoma|O
+adrenal cortex cancer|O
+adrenal cortex disease|O
+adrenal cortical adenocarcinoma|O
+adrenal cortical adenoma|O
+adrenal cortical hypofunction|O
+adrenal gland cancer|O
+adrenal gland disease|O
+adrenal gland ganglioneuroblastoma|O
+adrenal gland hyperfunction|O
+adrenal gland pheochromocytoma|O
+adrenal medulla cancer|O
+adrenal medulla carcinoma|O
+adrenal neuroblastoma|O
+adrenal rest tumor|O
+adrenocortical carcinoma|O
+adrenoleukodystrophy|O
+adult T-cell leukemia|O
+adult acute lymphocytic leukemia|O
+adult astrocytic tumour|O
+adult botryoid rhabdomyosarcoma|O
+adult brain ependymoma|O
+adult brain medulloblastoma|O
+adult brain stem glioma|O
+adult brainstem astrocytoma|O
+adult brainstem gliosarcoma|O
+adult brainstem mixed glioma|O
+adult central nervous system choriocarcinoma|O
+adult central nervous system embryonal carcinoma|O
+adult central nervous system germinoma|O
+adult central nervous system immature teratoma|O
+adult central nervous system mature teratoma|O
+adult central nervous system mixed germ cell tumor|O
+adult central nervous system primitive neuroectodermal neoplasm|O
+adult central nervous system teratoma|O
+adult cerebellar neoplasm|O
+adult choroid plexus cancer|O
+adult cystic teratoma|O
+adult dermatomyositis|O
+adult endodermal sinus tumor|O
+adult ependymoblastoma|O
+adult epithelioid sarcoma|O
+adult extraosseous chondrosarcoma|O
+adult extraosseous osteosarcoma|O
+adult fibrosarcoma|O
+adult infiltrating astrocytic neoplasm|O
+adult intracranial malignant hemangiopericytoma|O
+adult leptomeningeal melanoma|O
+adult liposarcoma|O
+adult lymphoma|O
+adult malignant hemangiopericytoma|O
+adult malignant mesenchymoma|O
+adult malignant schwannoma|O
+adult medulloblastoma|O
+adult mesenchymal chondrosarcoma|O
+adult mesoblastic nephroma|O
+adult myxoid chondrosarcoma|O
+adult oligodendroglioma|O
+adult papillary meningioma|O
+adult pineal parenchymal tumor|O
+adult pineoblastoma|O
+adult pleomorphic rhabdomyosarcoma|O
+adult respiratory distress syndrome|O
+adult spinal cord ependymoma|O
+adult spinal cord glioblastoma multiforme|O
+adult spinal muscular atrophy|O
+adult teratoma|O
+adult type testicular granulosa cell tumor|O
+adult vagina botryoid rhabdomyosarcoma|O
+adult xanthogranuloma|O
+adult-onset Still's disease|O
+advanced sleep phase syndrome|O
+afferent loop syndrome|O
+aflatoxins-related hepatocellular carcinoma|O
+agammaglobulinemia|O
+age related macular degeneration|O
+aggressive digital papillary adenocarcinoma|O
+aggressive periodontitis|O
+aggressive systemic mastocytosis|O
+agnathia-otocephaly complex|O
+agnosia|O
+agoraphobia|O
+agranulocytosis|O
+agraphia|O
+ainhum|O
+akinetic mutism|O
+akinetopsia|O
+alcohol abuse|O
+alcohol dependence|O
+alcohol-induced mental disorder|O
+alcohol-related birth defect|O
+alcohol-related neurodevelopmental disorder|O
+alcoholic cardiomyopathy|O
+alcoholic gastritis|O
+alcoholic hepatitis|O
+alcoholic liver cirrhosis|O
+alcoholic neuropathy|O
+alcoholic pancreatitis|O
+alcoholic psychosis|O
+aleukemic leukemia|O
+aleukemic leukemia cutis|O
+aleukemic monocytic leukemia cutis|O
+aleutian mink disease|O
+alexia|O
+alexithymia|O
+algoneurodystrophy|O
+alkaptonuria|O
+allergic asthma|O
+allergic bronchopulmonary aspergillosis|O
+allergic conjunctivitis|O
+allergic contact dermatitis|O
+allergic contact dermatitis of eyelid|O
+allergic cutaneous vasculitis|O
+allergic rhinitis|O
+allergic urticaria|O
+allescheriosis|O
+alopecia|O
+alopecia areata|O
+alopecia universalis|O
+alpha 1-antitrypsin deficiency|O
+alpha chain disease|O
+alpha thalassemia|O
+alpha-mannosidosis|O
+alternating esotropia|O
+alternating exotropia|O
+alternating hemiplegia of childhood|O
+alveolar echinococcosis|O
+alveolar periostitis|O
+alveolar rhabdomyosarcoma|O
+alveolar soft part sarcoma|O
+alveoli adenoma|O
+amblyopia|O
+amebiasis|O
+amelanotic melanoma|O
+ameloblastoma|O
+amelogenesis imperfecta|O
+amenorrhea|O
+ametropic amblyopia|O
+amino acid metabolic disorder|O
+amnestic disorder|O
+amphetamine abuse|O
+ampulla of Vater adenocarcinoma|O
+ampulla of Vater adenosquamous carcinoma|O
+ampulla of Vater cancer|O
+ampulla of Vater carcinoma|O
+ampulla of Vater clear cell adenocarcinoma|O
+ampulla of Vater mucinous adenocarcinoma|O
+ampulla of Vater small cell carcinoma|O
+ampulla of Vater squamous cell carcinoma|O
+ampulla of vater neoplasm|O
+ampullary signet ring cell adenocarcinoma|O
+amusia|O
+amyloid tumor|O
+amyloidosis|O
+amyotrophic lateral sclerosis|O
+amyotrophic lateral sclerosis type 1|O
+amyotrophic lateral sclerosis type 10|O
+amyotrophic lateral sclerosis type 11|O
+amyotrophic lateral sclerosis type 12|O
+amyotrophic lateral sclerosis type 13|O
+amyotrophic lateral sclerosis type 14|O
+amyotrophic lateral sclerosis type 15|O
+amyotrophic lateral sclerosis type 16|O
+amyotrophic lateral sclerosis type 17|O
+amyotrophic lateral sclerosis type 18|O
+amyotrophic lateral sclerosis type 19|O
+amyotrophic lateral sclerosis type 2|O
+amyotrophic lateral sclerosis type 20|O
+amyotrophic lateral sclerosis type 21|O
+amyotrophic lateral sclerosis type 3|O
+amyotrophic lateral sclerosis type 4|O
+amyotrophic lateral sclerosis type 5|O
+amyotrophic lateral sclerosis type 6|O
+amyotrophic lateral sclerosis type 7|O
+amyotrophic lateral sclerosis type 8|O
+amyotrophic lateral sclerosis type 9|O
+amyotrophic neuralgia|O
+anaerobic meningitis|O
+anaerobic pneumonia|O
+anal Buschke-Lowenstein tumor|O
+anal Paget's disease|O
+anal canal Paget's disease|O
+anal canal adenocarcinoma|O
+anal canal cancer|O
+anal canal carcinoma|O
+anal canal squamous cell carcinoma|O
+anal carcinoma|O
+anal carcinoma in situ|O
+anal colloid adenocarcinoma|O
+anal fistula|O
+anal gland adenocarcinoma|O
+anal gland neoplasm|O
+anal margin basal cell carcinoma|O
+anal margin carcinoma|O
+anal margin squamous cell carcinoma|O
+anal neuroendocrine tumor|O
+anal spasm|O
+anal squamous cell carcinoma|O
+anaplastic large cell lymphoma|O
+anatomical narrow angle borderline glaucoma|O
+anauxetic dysplasia|O
+ancylostomiasis|O
+androgen insensitivity syndrome|O
+androgenic alopecia|O
+anemia|O
+anemia of prematurity|O
+aneruptive fever|O
+angiodysplasia|O
+angiodysplasia of intestine|O
+angioedema|O
+angioid streaks|O
+angioid streaks of choroid|O
+angiokeratoma|O
+angiokeratoma circumscriptum|O
+angiokeratoma of Fordyce|O
+angiokeratoma of mibelli|O
+angiolipoma|O
+angioma serpiginosum|O
+angiomatous meningioma|O
+angiomyolipoma|O
+angiomyoma|O
+angiosarcoma|O
+angiostrongyliasis|O
+angle-closure glaucoma|O
+angular blepharoconjunctivitis|O
+angular cheilitis|O
+anhidrosis|O
+animal phobia|O
+aniridia|O
+anisakiasis|O
+aniseikonia|O
+anismus|O
+anisometropia|O
+ankylosing spondylitis|O
+ankylosis|O
+anodontia|O
+anogenital venereal wart|O
+anonychia congenita|O
+anorectal stricture|O
+anorexia nervosa|O
+anosognosia|O
+anovulation|O
+anterior cerebral artery infarction|O
+anterior compartment syndrome|O
+anterior corneal pigmentation|O
+anterior cranial fossa meningioma|O
+anterior dislocation of lens|O
+anterior foramen magnum meningioma|O
+anterior horn cell disease|O
+anterior ischemic optic neuropathy|O
+anterior optic tract meningioma|O
+anterior scleritis|O
+anterior spinal artery syndrome|O
+anterior urethra cancer|O
+anterior uveitis|O
+anterograde amnesia|O
+anterolateral myocardial infarction|O
+anteroseptal myocardial infarction|O
+anthracosilicosis|O
+anthracosis|O
+anthrax disease|O
+anti-basement membrane glomerulonephritis|O
+antidepressant type abuse|O
+antiphospholipid syndrome|O
+antisocial personality disorder|O
+antithrombin III deficiency|O
+anuria|O
+anus adenocarcinoma|O
+anus basaloid carcinoma|O
+anus cancer|O
+anus disease|O
+anus leiomyoma|O
+anus leiomyosarcoma|O
+anus lymphoma|O
+anus neoplasm|O
+anus rhabdomyosarcoma|O
+anus sarcoma|O
+anxiety disorder|O
+aorta angiosarcoma|O
+aorta atresia|O
+aortic aneurysm|O
+aortic atherosclerosis|O
+aortic disease|O
+aortic malignant tumor|O
+aortic valve disease|O
+aortic valve insufficiency|O
+aortic valve prolapse|O
+aortic valve stenosis|O
+aortitis|O
+aphasia|O
+aphthous stomatitis|O
+apical myocardial infarction|O
+aplastic anemia|O
+apocrine adenocarcinoma|O
+apocrine adenoma|O
+apocrine adenosis of breast|O
+apocrine sweat gland cancer|O
+apocrine sweat gland neoplasm|O
+apparent mineralocorticoid excess syndrome|O
+appendiceal L-cell glucagon-like peptide producing tumor|O
+appendiceal neoplasm|O
+appendicitis|O
+appendix adenocarcinoma|O
+appendix cancer|O
+appendix carcinoid tumor|O
+appendix carcinoma|O
+appendix leiomyoma|O
+appendix lymphoma|O
+appendix mucinous cystadenocarcinoma|O
+apperceptive agnosia|O
+apraxia|O
+aqueous misdirection|O
+arachnoiditis|O
+arcus senilis|O
+argininosuccinic aciduria|O
+ariboflavinosis|O
+arrhythmogenic right ventricular cardiomyopathy|O
+artemis deficiency|O
+arterial calcification of infancy|O
+arterial tortuosity syndrome|O
+arteriolosclerosis|O
+arteriosclerosis|O
+arteriosclerosis obliterans|O
+arteriosclerotic cardiovascular disease|O
+arteriovenous malformation|O
+arteritic anterior ischemic optic neuropathy|O
+artery disease|O
+arthritis|O
+arthropathy|O
+arthus reaction|O
+articular cartilage disease|O
+articulation disorder|O
+aryepiglottic fold cancer|O
+asbestos-related lung carcinoma|O
+asbestosis|O
+ascariasis|O
+ascaridiasis|O
+ascending cholangitis|O
+ascending colon cancer|O
+aseptic meningitis|O
+aspartylglucosaminuria|O
+aspergillosis|O
+asphyxia neonatorum|O
+asphyxiating thoracic dystrophy|O
+aspiration pneumonia|O
+aspiration pneumonitis|O
+associative agnosia|O
+astereognosia|O
+asthenopia|O
+asthma|O
+astigmatism|O
+astroblastoma|O
+astrocytoma|O
+asymmetric motor neuropathy|O
+asymptomatic dengue|O
+asymptomatic neurosyphilis|O
+asynchronous multifocal osteogenic sarcoma|O
+ataxia telangiectasia|O
+ataxia with oculomotor apraxia type 1|O
+ataxia with oculomotor apraxia type 2|O
+ataxic cerebral palsy|O
+atelosteogenesis|O
+atheroembolism of kidney|O
+atherosclerosis|O
+atopic dermatitis|O
+atransferrinemia|O
+atrial fibrillation|O
+atrial heart septal defect|O
+atrioventricular block|O
+atrioventricular septal defect|O
+atrophic flaccid tympanic membrane|O
+atrophic gastritis|O
+atrophic glossitis|O
+atrophic muscular disease|O
+atrophic nonflaccid tympanic membrane|O
+atrophic rhinitis|O
+atrophic vulva|O
+atrophy of prostate|O
+atrophy of testis|O
+attention deficit hyperactivity disorder|O
+atypical autism|O
+atypical breast papilloma|O
+atypical choroid plexus papilloma|O
+atypical depressive disorder|O
+atypical follicular adenoma|O
+atypical lipomatous tumor|O
+atypical neurofibroma|O
+atypical polypoid adenomyoma|O
+atypical teratoid rhabdoid tumor|O
+auditory agnosia|O
+auditory system cancer|O
+auditory system disease|O
+auricular cancer|O
+autism spectrum disorder|O
+autistic disorder|O
+autoimmune disease of blood|O
+autoimmune disease of cardiovascular system|O
+autoimmune disease of central nervous system|O
+autoimmune disease of endocrine system|O
+autoimmune disease of exocrine system|O
+autoimmune disease of eyes, ear, nose and throat|O
+autoimmune disease of gastrointestinal tract|O
+autoimmune disease of musculoskeletal system|O
+autoimmune disease of peripheral nervous system|O
+autoimmune disease of skin and connective tissue|O
+autoimmune disease of the nervous system|O
+autoimmune disease of urogenital tract|O
+autoimmune hemolytic anemia|O
+autoimmune hepatitis|O
+autoimmune lymphoproliferative syndrome|O
+autoimmune polyendocrine syndrome|O
+autoimmune polyendocrine syndrome type 1|O
+autoimmune polyendocrine syndrome type 2|O
+autoimmune thrombocytopenic purpura|O
+autoimmune thyroiditis|O
+autonomic nervous system disease|O
+autonomic nervous system neoplasm|O
+autonomic neuropathy|O
+autonomic peripheral neuropathy|O
+autosomal dominant chondrodysplasia punctata|O
+autosomal dominant disease|O
+autosomal dominant microcephaly|O
+autosomal dominant non-syndromic intellectual disability|O
+autosomal dominant nonsyndromic deafness|O
+autosomal dominant sideroblastic anemia|O
+autosomal dominant type IV Ehlers-Danlos syndrome|O
+autosomal genetic disease|O
+autosomal recessive disease|O
+autosomal recessive non-syndromic intellectual disability|O
+autosomal recessive nonsyndromic deafness|O
+autosomal recessive type IV Ehlers-Danlos syndrome|O
+autotopagnosia|O
+avian influenza|O
+avoidant personality disorder|O
+axial osteomalacia|O
+axillary adenitis|O
+axillary lipoma|O
+axonal neuropathy|O
+azoospermia|O
+babesiosis|O
+bacillary angiomatosis|O
+background diabetic retinopathy|O
+bacterial conjunctivitis|O
+bacterial esophagitis|O
+bacterial exanthem|O
+bacterial gastritis|O
+bacterial infectious disease|O
+bacterial meningitis|O
+bacterial pneumonia|O
+bacterial vaginosis|O
+bacteriuria|O
+bagassosis|O
+balanitis|O
+balanitis xerotica obliterans|O
+balanoposthitis|O
+balantidiasis|O
+balloon cell malignant melanoma|O
+band keratopathy|O
+barbiturate abuse|O
+barbiturate dependence|O
+baritosis|O
+bartonellosis|O
+basal cell carcinoma|O
+basal ganglia calcification|O
+basal ganglia cerebrovascular disease|O
+basal ganglia disease|O
+basaloid lung carcinoma|O
+basaloid squamous cell carcinoma|O
+basaloid squamous cell skin carcinoma|O
+basidiobolomycosis|O
+basilar artery insufficiency|O
+basilar artery occlusion|O
+basophil adenoma|O
+basophilic carcinoma|O
+basosquamous carcinoma|O
+baylisascariasis|O
+beach ear|O
+bejel|O
+benign breast adenomyoepithelioma|O
+benign breast phyllodes tumor|O
+benign deep fibrous histiocytoma|O
+benign dermal neurilemmoma|O
+benign eccrine breast spiradenoma|O
+benign ependymoma|O
+benign epilepsy with centrotemporal spikes|O
+benign essential hypertension|O
+benign familial infantile epilepsy|O
+benign familial neonatal epilepsy|O
+benign fibrous mesothelioma|O
+benign glioma|O
+benign hypertensive renal disease|O
+benign intermediate mesothelioma|O
+benign lymphoepithelial lesion of salivary gland|O
+benign mammary dysplasia|O
+benign mastocytoma|O
+benign mediastinal neurilemmoma|O
+benign mediastinal psammomatous neurilemmoma|O
+benign meningioma|O
+benign mesenchymoma|O
+benign mesothelioma|O
+benign neonatal seizures|O
+benign neoplasm|O
+benign neurilemmoma|O
+benign paroxysmal positional nystagmus|O
+benign pericardial teratoma|O
+benign peritoneal mesothelioma|O
+benign perivascular tumor|O
+benign pleural mesothelioma|O
+benign prostate phyllodes tumor|O
+benign renovascular hypertension|O
+benign secondary hypertension|O
+benign shuddering attacks|O
+benign struma ovarii|O
+benign vaginal carcinosarcoma|O
+beriberi|O
+berylliosis|O
+bestiality|O
+bestrophinopathy|O
+beta thalassemia|O
+beta-ketothiolase deficiency|O
+beta-mannosidosis|O
+bicipital tenosynovitis|O
+bilateral breast cancer|O
+bilateral hyperactive labyrinth|O
+bilateral hypoactive labyrinth|O
+bilateral meningioma of optic nerve|O
+bilateral retinoblastoma|O
+bile duct adenocarcinoma|O
+bile duct adenoma|O
+bile duct cancer|O
+bile duct carcinoma|O
+bile duct carcinoma in situ|O
+bile duct clear cell adenocarcinoma|O
+bile duct cystadenocarcinoma|O
+bile duct cystadenoma|O
+bile duct disease|O
+bile duct mucinous adenocarcinoma|O
+bile duct mucoepidermoid carcinoma|O
+bile duct rhabdomyosarcoma|O
+bile duct sarcoma|O
+bile duct signet ring cell carcinoma|O
+bile reflux|O
+biliary atresia|O
+biliary dyskinesia|O
+biliary papillomatosis|O
+biliary tract cancer|O
+biliary tract disease|O
+biliary tract intraductal papillary mucinous neoplasm|O
+biliary tract neoplasm|O
+bilirubin metabolic disorder|O
+binocular vision disease|O
+biotin deficiency|O
+biotin-responsive basal ganglia disease|O
+biotinidase deficiency|O
+biphasic synovial sarcoma|O
+bipolar I disorder|O
+bipolar disorder|O
+bipolar ll disorder|O
+bird fancier's lung|O
+bizarre leiomyoma|O
+black piedra|O
+blackwater fever|O
+bladder adenocarcinoma|O
+bladder benign neoplasm|O
+bladder calculus|O
+bladder carcinoma|O
+bladder carcinoma in situ|O
+bladder clear cell adenocarcinoma|O
+bladder colloid adenocarcinoma|O
+bladder colonic type adenocarcinoma|O
+bladder diffuse clear cell adenocarcinoma|O
+bladder disease|O
+bladder diverticulum|O
+bladder dome cancer|O
+bladder flat intraepithelial lesion|O
+bladder hepatoid adenocarcinoma|O
+bladder lateral wall cancer|O
+bladder leiomyoma|O
+bladder lymphoma|O
+bladder mixed adenocarcinoma|O
+bladder neck cancer|O
+bladder neck obstruction|O
+bladder papillary clear cell adenocarcinoma|O
+bladder papillary transitional cell neoplasm|O
+bladder sarcoma|O
+bladder signet ring cell adenocarcinoma|O
+bladder squamous cell carcinoma|O
+bladder squamous papilloma|O
+bladder transitional cell carcinoma|O
+bladder transitional cell papilloma|O
+bladder trigone cancer|O
+bladder tuberculosis|O
+bladder tubulo-cystic clear cell adenocarcinoma|O
+bladder urachal adenocarcinoma|O
+bladder urachal carcinoma|O
+bladder urachal squamous cell carcinoma|O
+bladder urachal urothelial carcinoma|O
+bladder urothelial papillary carcinoma|O
+bladder verrucous squamous cell carcinoma|O
+blastema predominant kidney Wilms' tumor|O
+blastoma|O
+blastomycosis|O
+blepharitis|O
+blepharochalasis|O
+blepharoconjunctivitis|O
+blepharophimosis|O
+blepharophimosis, ptosis, and epicanthus inversus syndrome|O
+blepharophimosis-intellectual disability syndrome, SBBYS type|O
+blepharospasm|O
+blind hypertensive eye|O
+blind hypotensive eye|O
+blind loop syndrome|O
+blindness|O
+blood coagulation disease|O
+blood group incompatibility|O
+blood platelet disease|O
+blood protein disease|O
+bloom syndrome|O
+blue color blindness|O
+blue cone monochromacy|O
+blue drum syndrome|O
+blue toe syndrome|O
+blunt duct adenosis of breast|O
+body dysmorphic disorder|O
+bone Ewing's sarcoma|O
+bone ameloblastoma|O
+bone angioendothelial sarcoma|O
+bone benign neoplasm|O
+bone cancer|O
+bone carcinoma|O
+bone chondrosarcoma|O
+bone deterioration disease|O
+bone development disease|O
+bone disease|O
+bone epithelioid hemangioma|O
+bone giant cell sarcoma|O
+bone giant cell tumor|O
+bone inflammation disease|O
+bone leiomyosarcoma|O
+bone lymphoma|O
+bone marrow cancer|O
+bone marrow disease|O
+bone osteosarcoma|O
+bone peripheral neuroepithelioma|O
+bone remodeling disease|O
+bone resorption disease|O
+bone squamous cell carcinoma|O
+bone structure disease|O
+borderline glaucoma|O
+borderline leprosy|O
+borderline personality disorder|O
+borna disease|O
+botryoid rhabdomyosarcoma|O
+botulism|O
+boutonneuse fever|O
+bowel dysfunction|O
+brachial plexus lesion|O
+brachial plexus neoplasm|O
+brachial plexus neuritis|O
+brachial plexus neuropathy|O
+brachydactyly|O
+brachydactyly-syndactyly syndrome|O
+brachyolmia|O
+bradyopsia|O
+brain angioma|O
+brain cancer|O
+brain compression|O
+brain disease|O
+brain edema|O
+brain ependymoma|O
+brain germinoma|O
+brain glioblastoma multiforme|O
+brain glioma|O
+brain infarction|O
+brain ischemia|O
+brain medulloblastoma|O
+brain meningioma|O
+brain oligodendroglioma|O
+brain sarcoma|O
+brain stem angioblastoma|O
+brain stem astrocytic neoplasm|O
+brain stem cancer|O
+brain stem ependymoma|O
+brain stem glioma|O
+brain stem infarction|O
+brain stem medulloblastoma|O
+brainstem intraparenchymal clear cell meningioma|O
+branch retinal artery occlusion|O
+branchiooculofacial syndrome|O
+branchiootic syndrome|O
+branchiootorenal syndrome|O
+brawny scleritis|O
+breast abscess|O
+breast adenocarcinoma|O
+breast adenoid cystic carcinoma|O
+breast adenoma|O
+breast adenomyoepithelial adenosis|O
+breast adenomyoepithelioma|O
+breast angiomatosis|O
+breast angiosarcoma|O
+breast apocrine adenoma|O
+breast apocrine carcinoma|O
+breast apocrine carcinoma in situ|O
+breast benign neoplasm|O
+breast cancer|O
+breast capillary hemangioma|O
+breast carcinoma|O
+breast carcinoma in situ|O
+breast columnar cell mucinous carcinoma|O
+breast cyst|O
+breast cystic hypersecretory carcinoma|O
+breast disease|O
+breast duct papilloma|O
+breast ductal adenoma|O
+breast ductal carcinoma|O
+breast epithelioid hemangioma|O
+breast fibroadenoma|O
+breast fibroadenosis|O
+breast fibrocystic disease|O
+breast fibrosarcoma|O
+breast giant fibroadenoma|O
+breast granular cell tumor|O
+breast hemangioma|O
+breast hemangiopericytoma|O
+breast intracanalicular fibroadenoma|O
+breast intraductal papillomatosis|O
+breast intraductal proliferative lesion|O
+breast juvenile papillomatosis|O
+breast large cell neuroendocrine carcinoma|O
+breast leiomyoma|O
+breast leiomyosarcoma|O
+breast lipoma|O
+breast liposarcoma|O
+breast lobular carcinoma|O
+breast lymphoma|O
+breast malignant eccrine spiradenoma|O
+breast malignant phyllodes tumor|O
+breast medullary carcinoma|O
+breast metaplastic carcinoma|O
+breast mucinous carcinoma|O
+breast mucinous cystadenocarcinoma|O
+breast mucoepidermoid carcinoma|O
+breast myoepithelial carcinoma|O
+breast myoepithelial neoplasm|O
+breast myoepitheliosis|O
+breast myofibroblastoma|O
+breast neuroendocrine neoplasm|O
+breast osteosarcoma|O
+breast papillary carcinoma|O
+breast papillomatosis|O
+breast pericanalicular fibroadenoma|O
+breast rhabdomyosarcoma|O
+breast sarcoma|O
+breast scirrhous carcinoma|O
+breast secretory carcinoma|O
+breast signet ring cell adenocarcinoma|O
+breast squamous cell carcinoma|O
+broad ligament malignant neoplasm|O
+bronchial disease|O
+bronchial mucus gland adenoma|O
+bronchial neoplasm|O
+bronchiectasis|O
+bronchiolitis|O
+bronchiolitis obliterans|O
+bronchiolitis obliterans organizing pneumonia|O
+bronchiolo-alveolar adenocarcinoma|O
+bronchitis|O
+bronchogenic lung adenocarcinoma|O
+bronchopneumonia|O
+bronchus adenoma|O
+bronchus cancer|O
+bronchus carcinoma|O
+bronchus carcinoma in situ|O
+bronchus mucoepidermoid carcinoma|O
+brucellosis|O
+bruxism|O
+bubonic plague|O
+bulbar polio|O
+bulbomembranous urethral cancer|O
+bulbospinal polio|O
+bulimia nervosa|O
+bullous keratopathy|O
+bullous pemphigoid|O
+bullous retinoschisis|O
+bullous skin disease|O
+buphthalmos|O
+burning mouth syndrome|O
+bursitis|O
+byssinosis|O
+cadasil|O
+calcaneonavicular coalition|O
+calcific tendinitis|O
+calcinosis|O
+calciphylaxis|O
+calcium metabolism disease|O
+campomelic dysplasia|O
+campylobacteriosis|O
+cancer|O
+cancerophobia|O
+candidal paronychia|O
+candidiasis|O
+cannabis abuse|O
+cannabis dependence|O
+capillariasis|O
+capillary disease|O
+capillary hemangioma|O
+capillary leak syndrome|O
+capillary lymphangioma|O
+carbamoyl phosphate synthetase I deficiency disease|O
+carbohydrate metabolic disorder|O
+carbohydrate metabolism disease|O
+carbuncle|O
+carcinoma|O
+carcinoma arising in nasal papillomatosis|O
+carcinoma of supraglottis|O
+carcinosarcoma|O
+cardia cancer|O
+cardiac arrest|O
+cardiac granular cell neoplasm|O
+cardiac sarcoidosis|O
+cardiac tamponade|O
+cardiofaciocutaneous syndrome|O
+cardiomyopathy|O
+cardiovascular cancer|O
+cardiovascular organ benign neoplasm|O
+cardiovascular syphilis|O
+cardiovascular system disease|O
+carnitine palmitoyltransferase II deficiency|O
+carotenemia|O
+carotid artery disease|O
+carotid artery dissection|O
+carotid artery occlusion|O
+carotid artery thrombosis|O
+carotid body cancer|O
+carotid stenosis|O
+carpal tunnel syndrome|O
+cartilage cancer|O
+cartilage disease|O
+cartilage-hair hypoplasia|O
+cascade stomach|O
+cat-scratch disease|O
+cataract|O
+cauda equina intradural extramedullary astrocytoma|O
+cauda equina neoplasm|O
+causalgia|O
+cavernous hemangioma|O
+cavernous hemangioma of colon|O
+cavernous hemangioma of face|O
+cavernous hemangioma of orbit|O
+cavernous sinus meningioma|O
+cavernous sinus thrombosis|O
+cecal benign neoplasm|O
+cecal disease|O
+cecum adenocarcinoma|O
+cecum adenoma|O
+cecum cancer|O
+cecum carcinoma|O
+cecum lymphoma|O
+celiac disease|O
+cell type benign neoplasm|O
+cell type cancer|O
+cellular congenital mesoblastic nephroma|O
+cellular ependymoma|O
+cellular leiomyoma|O
+cellular myxoid liposarcoma|O
+cellular neurofibroma|O
+cellular phase chronic idiopathic myelofibrosis|O
+cellular schwannoma|O
+cellulitis|O
+central breast papilloma|O
+central core myopathy|O
+central corneal ulcer|O
+central epithelioid sarcoma|O
+central gyrate choroidal dystrophy|O
+central nervous system adult germ cell tumor|O
+central nervous system angiosarcoma|O
+central nervous system cancer|O
+central nervous system childhood germ cell tumor|O
+central nervous system chondroma|O
+central nervous system disease|O
+central nervous system embryonal carcinoma|O
+central nervous system endodermal sinus tumor|O
+central nervous system fibrosarcoma|O
+central nervous system germ cell tumor|O
+central nervous system germinoma|O
+central nervous system hemangioma|O
+central nervous system hematologic cancer|O
+central nervous system hereditary degenerative disease|O
+central nervous system immature teratoma|O
+central nervous system leiomyoma|O
+central nervous system leiomyosarcoma|O
+central nervous system leukemia|O
+central nervous system lipoma|O
+central nervous system lymphoma|O
+central nervous system mature teratoma|O
+central nervous system melanocytic neoplasm|O
+central nervous system mesenchymal non-meningothelial tumor|O
+central nervous system organ benign neoplasm|O
+central nervous system origin vertigo|O
+central nervous system osteosarcoma|O
+central nervous system primitive neuroectodermal neoplasm|O
+central nervous system rhabdomyosarcoma|O
+central nervous system sarcoma|O
+central nervous system teratoma|O
+central nervous system tuberculosis|O
+central nervous system vasculitis|O
+central neurocytoma|O
+central pontine myelinolysis|O
+central pterygium|O
+central retinal artery occlusion|O
+central retinal vein occlusion|O
+central sleep apnea|O
+centronuclear myopathy|O
+cercarial dermatitis|O
+cerebellar angioblastoma|O
+cerebellar astrocytoma|O
+cerebellar ataxia|O
+cerebellar disease|O
+cerebellar liponeurocytoma|O
+cerebellar medulloblastoma|O
+cerebellar vermis medulloblastoma|O
+cerebellopontine angle meningioma|O
+cerebellopontine angle primitive neuroectodermal|O
+cerebellopontine angle tumor|O
+cerebellum cancer|O
+cerebral amyloid angiopathy|O
+cerebral angioma|O
+cerebral arterial disease|O
+cerebral arteritis|O
+cerebral artery occlusion|O
+cerebral atherosclerosis|O
+cerebral convexity meningioma|O
+cerebral creatine deficiency syndrome|O
+cerebral degeneration|O
+cerebral falx meningioma|O
+cerebral folate receptor alpha deficiency|O
+cerebral hemisphere lipoma|O
+cerebral infarction|O
+cerebral lipidosis|O
+cerebral lymphoma|O
+cerebral malaria|O
+cerebral meningioma|O
+cerebral neuroblastoma|O
+cerebral palsy|O
+cerebral primitive neuroectodermal tumor|O
+cerebral sarcoidosis|O
+cerebral ventricle cancer|O
+cerebritis|O
+cerebrotendinous xanthomatosis|O
+cerebrovascular disease|O
+cerebrum cancer|O
+ceruminoma|O
+ceruminous carcinoma|O
+cervical Wilms' tumor|O
+cervical adenitis|O
+cervical adenocarcinoma|O
+cervical adenofibroma|O
+cervical adenoid basal carcinoma|O
+cervical adenoid cystic carcinoma|O
+cervical adenoma malignum|O
+cervical adenomyoma|O
+cervical adenosarcoma|O
+cervical adenosquamous carcinoma|O
+cervical alveolar soft part sarcoma|O
+cervical atypical polypoid adenomyoma|O
+cervical basaloid squamous cell carcinoma|O
+cervical benign neoplasm|O
+cervical cancer|O
+cervical carcinosarcoma|O
+cervical clear cell adenocarcinoma|O
+cervical dystonia|O
+cervical endometrial stromal sarcoma|O
+cervical endometrioid adenocarcinoma|O
+cervical incompetence|O
+cervical keratinizing squamous cell carcinoma|O
+cervical large cell neuroendocrine carcinoma|O
+cervical lymphoepithelioma-like carcinoma|O
+cervical mucinous adenocarcinoma|O
+cervical mullerian papilloma|O
+cervical neuroblastoma|O
+cervical non-keratinizing squamous cell carcinoma|O
+cervical polyp|O
+cervical serous adenocarcinoma|O
+cervical spinal canal and spinal cord meningioma|O
+cervical squamous cell carcinoma|O
+cervical verrucous carcinoma|O
+cervicitis|O
+cervicomedullary junction neoplasm|O
+cervix carcinoma|O
+cervix disease|O
+cervix endometrial stromal tumor|O
+cervix endometriosis|O
+cervix erosion|O
+cervix melanoma|O
+cervix small cell carcinoma|O
+cervix squamous papilloma|O
+cervix uteri carcinoma in situ|O
+chancroid|O
+cheek mucosa cancer|O
+cheilitis|O
+chemical colitis|O
+cherubism|O
+chest wall bone cancer|O
+chest wall lipoma|O
+chest wall lymphoma|O
+chest wall parachordoma|O
+chiasmal syndrome|O
+chickenpox|O
+chief cell adenoma|O
+chikungunya|O
+childhood absence epilepsy|O
+childhood botryoid rhabdomyosarcoma|O
+childhood brain germinoma|O
+childhood brain meningioma|O
+childhood brain stem glioma|O
+childhood brain stem neoplasm|O
+childhood brainstem astrocytoma|O
+childhood central nervous system germinoma|O
+childhood central nervous system immature teratoma|O
+childhood central nervous system mature teratoma|O
+childhood central nervous system mixed germ cell tumor|O
+childhood central nervous system primitive neuroectodermal neoplasm|O
+childhood cerebellar astrocytic neoplasm|O
+childhood cerebellar neoplasm|O
+childhood cerebral astrocytoma|O
+childhood choriocarcinoma of the ovary|O
+childhood choriocarcinoma of the testis|O
+childhood choroid plexus cancer|O
+childhood disintegrative disease|O
+childhood electroclinical syndrome|O
+childhood embryonal testis carcinoma|O
+childhood endodermal sinus tumor|O
+childhood extraosseous osteosarcoma|O
+childhood germ cell brain tumor|O
+childhood immature teratoma of ovary|O
+childhood infratentorial neoplasm|O
+childhood intracortical osteosarcoma|O
+childhood kidney angiomyolipoma|O
+childhood kidney cell carcinoma|O
+childhood kidney neoplasm|O
+childhood leukemia|O
+childhood malignant hemangiopericytoma|O
+childhood malignant mesenchymoma|O
+childhood malignant schwannoma|O
+childhood mature teratoma of the ovary|O
+childhood mediastinal neurogenic tumor|O
+childhood medulloblastoma|O
+childhood multilocular cystic kidney neoplasm|O
+childhood neoplasm of the testis|O
+childhood oligodendroglioma|O
+childhood optic nerve glioma|O
+childhood optic tract astrocytoma|O
+childhood ovarian embryonal carcinoma|O
+childhood ovarian endodermal sinus tumor|O
+childhood parosteal osteogenic sarcoma|O
+childhood pilocytic astrocytoma|O
+childhood pleomorphic rhabdomyosarcoma|O
+childhood precursor T-lymphoblastic lymphoma/leukemia|O
+childhood spinal cord tumor|O
+childhood teratocarcinoma of the testis|O
+childhood teratoma of the ovary|O
+childhood testicular mixed germ cell tumor|O
+childhood type dermatomyositis|O
+childhood vagina botryoid rhabdomyosarcoma|O
+choanal atresia|O
+cholangiocarcinoma|O
+cholangiolocellular carcinoma|O
+cholangitis|O
+cholecystitis|O
+cholecystolithiasis|O
+choledochal cyst|O
+choledocholithiasis|O
+cholelithiasis|O
+cholera|O
+cholestasis|O
+cholesteatoma|O
+cholesteatoma of attic|O
+cholesteatoma of external ear|O
+cholesteatoma of middle ear|O
+cholesterol embolism|O
+cholesterol ester storage disease|O
+choline deficiency disease|O
+cholinergic urticaria|O
+chondroblastic osteosarcoma|O
+chondroblastoma|O
+chondrocalcinosis|O
+chondrodysplasia punctata|O
+chondroid chordoma|O
+chondroid lipoma|O
+chondroid syringoma of the vulva|O
+chondroma|O
+chondromalacia|O
+chondromalacia patellae|O
+chondrosarcoma|O
+chordoid glioma|O
+chordoid meningioma|O
+chordoma|O
+chorea gravidarum|O
+chorea-acanthocytosis|O
+choreatic disease|O
+chorioamnionitis|O
+chorioangioma|O
+choriocarcinoma|O
+choriocarcinoma of ovary|O
+choriocarcinoma of the testis|O
+chorioretinal scar|O
+chorioretinitis|O
+choroid cancer|O
+choroid disease|O
+choroid epithelioid cell melanoma|O
+choroid mixed cell melanoma|O
+choroid necrotic melanoma|O
+choroid plexus cancer|O
+choroid plexus carcinoma|O
+choroid plexus meningioma|O
+choroid plexus papilloma|O
+choroid spindle cell melanoma|O
+choroidal sclerosis|O
+choroideremia|O
+choroiditis|O
+chromoblastomycosis|O
+chromophil adenoma of the kidney|O
+chromophobe adenocarcinoma|O
+chromophobe adenoma|O
+chromosomal disease|O
+chronic NK-cell lymphocytosis|O
+chronic adhesive otitis media|O
+chronic apical periodontitis|O
+chronic atrial and intestinal dysrhythmia|O
+chronic atticoantral disease|O
+chronic canaliculitis|O
+chronic cervicitis|O
+chronic cholangitis|O
+chronic closed-angle glaucoma|O
+chronic congestive splenomegaly|O
+chronic conjunctivitis|O
+chronic cystitis|O
+chronic dacryoadenitis|O
+chronic dacryocystitis|O
+chronic duodenal ileus|O
+chronic endophthalmitis|O
+chronic eosinophilic pneumonia|O
+chronic erythremia|O
+chronic ethmoiditis|O
+chronic eustachian salpingitis|O
+chronic fatigue syndrome|O
+chronic follicular conjunctivitis|O
+chronic frontal sinusitis|O
+chronic fungal otitis externa|O
+chronic gonococcal salpingitis|O
+chronic gonorrhea of cervix|O
+chronic granulomatous disease|O
+chronic inflammation of lacrimal passage|O
+chronic inflammatory demyelinating polyneuritis|O
+chronic inflammatory demyelinating polyradiculoneuropathy|O
+chronic interstitial cystitis|O
+chronic intestinal vascular insufficiency|O
+chronic kidney failure|O
+chronic lacrimal gland enlargement|O
+chronic laryngitis|O
+chronic leukemia|O
+chronic lymphocytic leukemia|O
+chronic maxillary sinusitis|O
+chronic meningitis|O
+chronic metabolic polyneuropathy|O
+chronic monocytic leukemia|O
+chronic mucocutaneous candidiasis|O
+chronic myeloid leukemia|O
+chronic myeloproliferative disease|O
+chronic obstructive pulmonary disease|O
+chronic orbital inflammation|O
+chronic perichondritis of pinna|O
+chronic polyneuropathy|O
+chronic progressive external ophthalmoplegia|O
+chronic pulmonary heart disease|O
+chronic purulent otitis media|O
+chronic pyelonephritis|O
+chronic rapidly progressive glomerulonephritis|O
+chronic rheumatic pericarditis|O
+chronic rhinitis|O
+chronic salpingitis|O
+chronic salpingo-oophoritis|O
+chronic sphenoidal sinusitis|O
+chronic subinvolution of uterus|O
+chronic tic disorder|O
+chronic toxic polyneuropathy|O
+chronic tubotympanic suppurative otitis media|O
+chronic tympanitis|O
+chronic ulcer of skin|O
+chronic venous insufficiency|O
+chronic wasting disease|O
+chronobiology disease|O
+chylocele of tunica vaginalis|O
+cicatricial ectropion|O
+cicatricial entropion|O
+cicatricial lagophthalmos|O
+cicatricial pemphigoid|O
+ciliary body cancer|O
+ciliary body disease|O
+ciliary body epithelioid cell melanoma|O
+ciliary body mixed cell melanoma|O
+ciliary body spindle cell melanoma|O
+ciliopathy|O
+citrullinemia|O
+classic congenital mesoblastic nephroma|O
+classic pulmonary blastoma|O
+classic type lipoma|O
+classic variant of chromophobe renal cell carcinoma|O
+clear cell acanthoma|O
+clear cell adenocarcinoma|O
+clear cell adenofibroma|O
+clear cell adenoma|O
+clear cell basal cell carcinoma|O
+clear cell chondrosarcoma|O
+clear cell cystadenofibroma|O
+clear cell ependymoma|O
+clear cell hidradenoma|O
+clear cell meningioma|O
+clear cell sarcoma|O
+clear cell squamous cell skin carcinoma|O
+clear cell variant infiltrating bladder urothelial carcinoma|O
+cleft lip|O
+cleft palate|O
+cleidocranial dysplasia|O
+clitoris cancer|O
+clivus chondroid chordoma|O
+clivus chordoma|O
+clivus meningioma|O
+cloacogenic carcinoma|O
+clonorchiasis|O
+clubfoot|O
+coagulation protein disease|O
+cobblestone retinal degeneration|O
+cocaine abuse|O
+cocaine dependence|O
+coccidioidomycosis|O
+coccidiosis|O
+cochlear disease|O
+coenurosis|O
+coenzyme Q10 deficiency disease|O
+cognitive disorder|O
+cold-induced sweating syndrome|O
+colitis|O
+collagen disease|O
+collagenous colitis|O
+collecting duct carcinoma|O
+colloid adenoma|O
+colloid carcinoma of the pancreas|O
+coloboma|O
+coloboma of optic nerve|O
+colon Kaposi sarcoma|O
+colon adenocarcinoma|O
+colon adenoma|O
+colon cancer|O
+colon carcinoma|O
+colon carcinoma in situ|O
+colon leiomyoma|O
+colon leiomyosarcoma|O
+colon lymphoma|O
+colon mucinous adenocarcinoma|O
+colon neuroendocrine neoplasm|O
+colon sarcoma|O
+colon signet ring adenocarcinoma|O
+colon small cell carcinoma|O
+colon squamous cell carcinoma|O
+colonic L-cell glucagon-like peptide producing tumor|O
+colonic benign neoplasm|O
+colonic disease|O
+colonic lymphangioma|O
+colonic pseudo-obstruction|O
+color agnosia|O
+color blindness|O
+colorectal adenocarcinoma|O
+colorectal adenoma|O
+colorectal cancer|O
+columnar cell variant papillary carcinoma|O
+combat disorder|O
+combined T cell and B cell immunodeficiency|O
+combined oxidative phosphorylation deficiency|O
+combined thymoma|O
+comedo carcinoma|O
+commensal bacterial infectious disease|O
+common bile duct disease|O
+common bile duct neoplasm|O
+common cold|O
+common peroneal nerve lesion|O
+common variable immunodeficiency|O
+common wart|O
+communicating hydrocephalus|O
+communication disorder|O
+compartment syndrome|O
+compensatory emphysema|O
+complement component 2 deficiency|O
+complement component 3 deficiency|O
+complement component 4a deficiency|O
+complement component 4b deficiency|O
+complement component 5 deficiency|O
+complement component 6 deficiency|O
+complement component 7 deficiency|O
+complement component 9 deficiency|O
+complement deficiency|O
+complement factor I deficiency|O
+complex partial epilepsy|O
+complex regional pain syndrome|O
+composite lymphoma|O
+conduct disorder|O
+cone dystrophy|O
+cone-rod dystrophy|O
+congenital adrenal hyperplasia|O
+congenital adrenal insufficiency|O
+congenital afibrinogenemia|O
+congenital aphakia|O
+congenital bile acid synthesis defect|O
+congenital diaphragmatic hernia|O
+congenital disorder of glycosylation|O
+congenital disorder of glycosylation type I|O
+congenital disorder of glycosylation type II|O
+congenital dyserythropoietic anemia|O
+congenital epulis|O
+congenital fibrosarcoma|O
+congenital generalized lipodystrophy|O
+congenital granular cell tumor|O
+congenital heart block|O
+congenital heart disease|O
+congenital hemolytic anemia|O
+congenital hypogammaglobulinemia|O
+congenital hypoplastic anemia|O
+congenital hypothyroidism|O
+congenital ichthyosiform erythroderma|O
+congenital intrinsic factor deficiency|O
+congenital mesoblastic nephroma|O
+congenital muscular dystrophy|O
+congenital myasthenic syndrome|O
+congenital nervous system abnormality|O
+congenital nonspherocytic hemolytic anemia|O
+congenital nystagmus|O
+congenital ptosis|O
+congenital secretory chloride diarrhea 1|O
+congenital stationary night blindness|O
+congenital structural myopathy|O
+congenital syphilis|O
+congenital toxoplasmosis|O
+congestive heart failure|O
+conidiobolomycosis|O
+conjugate gaze palsy|O
+conjunctiva squamous cell carcinoma|O
+conjunctival cancer|O
+conjunctival concretion|O
+conjunctival degeneration|O
+conjunctival deposit|O
+conjunctival disease|O
+conjunctival folliculosis|O
+conjunctival intraepithelial neoplasm|O
+conjunctival nevus|O
+conjunctival pigmentation|O
+conjunctival pterygium|O
+conjunctival vascular disease|O
+conjunctivitis|O
+conjunctivochalasis|O
+connective tissue benign neoplasm|O
+connective tissue cancer|O
+connective tissue disease|O
+constant exophthalmos|O
+constipation|O
+constrictive pericarditis|O
+contact blepharoconjunctivitis|O
+contact dermatitis|O
+contact lens corneal edema|O
+contagious pustular dermatitis|O
+conus medullaris neoplasm|O
+conventional angiosarcoma|O
+conventional central osteosarcoma|O
+conventional fibrosarcoma|O
+conventional leiomyosarcoma|O
+conventional malignant hemangiopericytoma|O
+conversion disorder|O
+cork-handlers' disease|O
+cornea cancer|O
+cornea plana|O
+cornea squamous cell carcinoma|O
+corneal abscess|O
+corneal argyrosis|O
+corneal degeneration|O
+corneal deposit|O
+corneal disease|O
+corneal dystrophy|O
+corneal ectasia|O
+corneal edema|O
+corneal granular dystrophy|O
+corneal intraepithelial neoplasm|O
+corneal neovascularization|O
+corneal staphyloma|O
+corneal ulcer|O
+coronary aneurysm|O
+coronary artery anomaly|O
+coronary artery disease|O
+coronary artery vasospasm|O
+coronary restenosis|O
+coronary stenosis|O
+coronary thrombosis|O
+coronin-1A deficiency|O
+corpus callosum lipoma|O
+corpus callosum oligodendroglioma|O
+corpus luteum cyst|O
+cortical blindness|O
+cortical deafness|O
+cortical senile cataract|O
+cortical thymoma|O
+cough variant asthma|O
+cowper gland carcinoma|O
+cowpox|O
+cranial nerve III tumor|O
+cranial nerve disease|O
+cranial nerve malignant neoplasm|O
+cranial nerve neoplasm|O
+cranial nerve palsy|O
+cranial pseudosarcomatous fasciitis|O
+cranio-facial dystonia|O
+craniodiaphyseal dysplasia|O
+craniofrontonasal syndrome|O
+craniometaphyseal dysplasia|O
+craniopharyngioma|O
+craniosynostosis|O
+crater-like holes of optic disc|O
+creatine transporter deficiency|O
+crescentic glomerulonephritis|O
+cribriform carcinoma|O
+cribriform variant testicular seminoma|O
+critical illness polyneuropathy|O
+croup|O
+cryoglobulinemia|O
+cryptococcosis|O
+cryptogenic organizing pneumonia|O
+cryptorchidism|O
+cryptosporidiosis|O
+cutaneous Paget's disease|O
+cutaneous T cell lymphoma|O
+cutaneous adenocystic carcinoma|O
+cutaneous anthrax|O
+cutaneous diphtheria|O
+cutaneous fibrous histiocytoma|O
+cutaneous ganglioneuroma|O
+cutaneous leiomyosarcoma|O
+cutaneous leishmaniasis|O
+cutaneous liposarcoma|O
+cutaneous lupus erythematosus|O
+cutaneous mastocytosis|O
+cutaneous mucoepidermoid carcinoma|O
+cutaneous mycosis|O
+cutaneous porphyria|O
+cutaneous solitary mastocytoma|O
+cutis laxa|O
+cyclic hematopoiesis|O
+cycloplegia|O
+cyclosporiasis|O
+cyclothymic disorder|O
+cyclotropia|O
+cystadenocarcinoma|O
+cystadenofibroma|O
+cystadenoma|O
+cystic basal cell carcinoma|O
+cystic echinococcosis|O
+cystic fibrosis|O
+cystic kidney|O
+cystic lymphangioma|O
+cystic nephroma|O
+cystic teratoma|O
+cysticercosis|O
+cystinosis|O
+cystinuria|O
+cystitis|O
+cystitis cystica|O
+cystoid macular edema|O
+cystoid macular retinal degeneration|O
+cystoisosporiasis|O
+cytochrome-c oxidase deficiency disease|O
+dacryoadenitis|O
+dacryocystitis|O
+dacryocystocele|O
+dartoic leiomyoma|O
+deafness dystonia syndrome|O
+decubitus ulcer|O
+deep angioma|O
+deep corneal vascularisation|O
+deep keratitis|O
+deep leiomyoma|O
+deficiency anemia|O
+degeneration of macula and posterior pole|O
+degenerative disc disease|O
+degenerative myopia|O
+dehydration polycythemia|O
+delta chain disease|O
+delusional disorder|O
+dementia|O
+demyelinating disease|O
+demyelinating polyneuropathy|O
+dendritic cell sarcoma|O
+dendritic cell thymoma|O
+dengue disease|O
+dengue hemorrhagic fever|O
+dengue shock syndrome|O
+dental abscess|O
+dental caries|O
+dental enamel hypoplasia|O
+dental fluorosis|O
+dental pulp calcification|O
+dental pulp disease|O
+dental pulp necrosis|O
+dentatorubral-pallidoluysian atrophy|O
+dentin caries|O
+dentin dysplasia|O
+dentin sensitivity|O
+dentine erosion|O
+dentinogenesis imperfecta|O
+denture stomatitis|O
+dependent personality disorder|O
+depersonalization disorder|O
+dermal unilateral segmental cavernous angioma|O
+dermatitis|O
+dermatitis herpetiformis|O
+dermatofibrosarcoma protuberans|O
+dermatographia|O
+dermatomycosis|O
+dermatomyositis|O
+dermatophytosis|O
+dermatosis papulosa nigra|O
+dermis tumor|O
+dermoid cyst|O
+dermoid cyst of ovary|O
+dermoid cyst of skin|O
+descending colon cancer|O
+desquamative interstitial pneumonia|O
+detrusor sphincter dyssynergia|O
+developmental coordination disorder|O
+developmental disorder of mental health|O
+dextrocardia|O
+diabetes insipidus|O
+diabetes mellitus|O
+diabetic angiopathy|O
+diabetic autonomic neuropathy|O
+diabetic cataract|O
+diabetic encephalopathy|O
+diabetic ketoacidosis|O
+diabetic macular edema|O
+diabetic neuropathy|O
+diabetic peripheral angiopathy|O
+diabetic polyneuropathy|O
+diabetic retinopathy|O
+diaper rash|O
+diaphragm disease|O
+diaphragma sellae meningioma|O
+diaphragmatic eventration|O
+diarrhea|O
+diastolic heart failure|O
+diastrophic dysplasia|O
+dicrocoeliasis|O
+diencephalic astrocytomas|O
+diencephalic neoplasm|O
+dientamoebiasis|O
+differentiating neuroblastoma|O
+diffuse alopecia areata|O
+diffuse cutaneous mastocytosis|O
+diffuse glomerulonephritis|O
+diffuse idiopathic skeletal hyperostosis|O
+diffuse infiltrative lymphocytosis syndrome|O
+diffuse interstitial keratitis|O
+diffuse intraductal papillomatosis|O
+diffuse large B-cell lymphoma|O
+diffuse lipomatosis|O
+diffuse meningeal melanocytosis|O
+diffuse peritoneal leiomyomatosis|O
+diffuse pulmonary fibrosis|O
+diffuse scleroderma|O
+diffuse secondary choroid atrophy|O
+dihydropyrimidine dehydrogenase deficiency|O
+dilated cardiomyopathy|O
+dioctophymiasis|O
+dipetalonemiasis|O
+diphtheria|O
+diphtheritic cystitis|O
+diphtheritic peritonitis|O
+diphyllobothriasis|O
+diplegia of upper limb|O
+dirofilariasis|O
+discharging ear|O
+discitis|O
+discoid lupus erythematosus of eyelid|O
+discrete subaortic stenosis|O
+disease|O
+disease by infectious agent|O
+disease of anatomical entity|O
+disease of cellular proliferation|O
+disease of mental health|O
+disease of metabolism|O
+dislocation of ear ossicle|O
+displacement of cardia through esophageal hiatus|O
+disseminated chorioretinitis|O
+disseminated eosinophilic collagen disease|O
+disseminated intravascular coagulation|O
+dissociated nystagmus|O
+dissociative amnesia|O
+dissociative disorder|O
+distal arthrogryposis|O
+distal biliary tract carcinoma|O
+distal hereditary motor neuropathy|O
+distal muscular dystrophy|O
+disuse amblyopia|O
+diversion colitis|O
+diverticulitis|O
+diverticulitis of colon|O
+double outlet right ventricle|O
+double pterygium|O
+dracunculiasis|O
+drug dependence|O
+drug psychosis|O
+drug-induced hepatitis|O
+drug-induced mental disorder|O
+dry eye syndrome|O
+ductal carcinoma in situ|O
+dumping syndrome|O
+duodenal benign neoplasm|O
+duodenal disease|O
+duodenal gastrinoma|O
+duodenal obstruction|O
+duodenal somatostatinoma|O
+duodenal ulcer|O
+duodenitis|O
+duodenogastric reflux|O
+duodenum adenocarcinoma|O
+duodenum adenoma|O
+duodenum cancer|O
+dysbaric osteonecrosis|O
+dyscalculia|O
+dyschromatosis symmetrica hereditaria|O
+dyschromatosis universalis hereditaria|O
+dysembryoplastic neuroepithelial tumor|O
+dysentery|O
+dysgammaglobulinemia|O
+dysgerminoma|O
+dysgerminoma of ovary|O
+dysgraphia|O
+dyshidrosis|O
+dyshormonogenic goiter|O
+dyskeratosis congenita|O
+dyskinesia of esophagus|O
+dyskinetic cerebral palsy|O
+dyslexia|O
+dysostosis|O
+dyspepsia|O
+dysplastic nevus syndrome|O
+dysthymic disorder|O
+dystonia|O
+dystrophies primarily involving the retinal pigment epithelium|O
+early congenital syphilis|O
+early invasive cervical adenocarcinoma|O
+early myoclonic encephalopathy|O
+early onset absence epilepsy|O
+early yaws|O
+eating disorder|O
+eccrine acrospiroma|O
+eccrine adenocarcinoma|O
+eccrine mixed tumor of skin|O
+eccrine papillary adenocarcinoma|O
+eccrine papillary adenoma|O
+eccrine porocarcinoma|O
+eccrine sweat gland cancer|O
+eccrine sweat gland neoplasm|O
+echinococcosis|O
+echinostomiasis|O
+echolalia|O
+eclampsia|O
+ecthyma|O
+ectomesenchymoma|O
+ectopic pregnancy|O
+ectopic thymus|O
+ectothrix infectious disease|O
+ectropion|O
+eczema herpeticum|O
+eczematous dermatitis of eyelid|O
+egg allergy|O
+ego-dystonic sexual orientation|O
+ehrlich tumor carcinoma|O
+ehrlichiosis|O
+electroclinical syndrome|O
+elephantiasis|O
+embryoma|O
+embryonal cancer|O
+embryonal carcinoma|O
+embryonal extrahepatic bile duct rhabdomyosarcoma|O
+embryonal rhabdomyosarcoma|O
+embryonal testis carcinoma|O
+emphysematous cholecystitis|O
+empty sella syndrome|O
+enamel caries|O
+enamel erosion|O
+encapsulated thymoma|O
+encephalitis|O
+encephalitozoonosis|O
+encephalomalacia|O
+encephalomyelitis|O
+end stage renal failure|O
+endemic goiter|O
+endemic typhus|O
+endobronchial leiomyoma|O
+endobronchial lipoma|O
+endocardial fibroelastosis|O
+endocarditis|O
+endocardium cancer|O
+endocardium disease|O
+endocervical adenocarcinoma|O
+endocervical carcinoma|O
+endocervical type cervical adenomyoma|O
+endocervical type cervical mucinous adenocarcinoma|O
+endocervicitis|O
+endocrine exophthalmos|O
+endocrine gland cancer|O
+endocrine organ benign neoplasm|O
+endocrine pancreas disease|O
+endocrine system disease|O
+endodermal sinus pattern testicular yolk sac tumor|O
+endodermal sinus tumor|O
+endogenous depression|O
+endolymphatic hydrops|O
+endometrial adenocarcinoma|O
+endometrial adenosquamous carcinoma|O
+endometrial cancer|O
+endometrial carcinoma|O
+endometrial clear cell adenocarcinoma|O
+endometrial disease|O
+endometrial mixed adenocarcinoma|O
+endometrial mucinous adenocarcinoma|O
+endometrial small cell carcinoma|O
+endometrial squamous cell carcinoma|O
+endometrial stromal nodule|O
+endometrial stromal sarcoma|O
+endometrial stromal tumor|O
+endometrial transitional cell carcinoma|O
+endometrial type cervical adenomyoma|O
+endometrioid ovary carcinoma|O
+endometriosis|O
+endometriosis in scar of skin|O
+endometriosis of intestine|O
+endometriosis of ovary|O
+endometriosis of pelvic peritoneum|O
+endometriosis of rectovaginal septum and vagina|O
+endometriosis of uterus|O
+endometritis|O
+endometrium carcinoma in situ|O
+endomyocardial fibrosis|O
+endophthalmitis|O
+endosalpingiosis|O
+endothrix infectious disease|O
+enlarged vestibular aqueduct|O
+enophthalmos|O
+enteric pattern testicular yolk sac tumor|O
+enterobiasis|O
+enterocele|O
+enthesopathy|O
+entropion|O
+eosinophilia|O
+eosinophilia-myalgia syndrome|O
+eosinophilic esophagitis|O
+eosinophilic gastritis|O
+eosinophilic gastroenteritis|O
+eosinophilic meningitis|O
+eosinophilic pneumonia|O
+eosinophilic variant of chromophobe renal cell carcinoma|O
+ependymoblastoma|O
+epicardium cancer|O
+epicardium lipoma|O
+epicondylitis|O
+epidemic pleurodynia|O
+epidemic typhus|O
+epidermal appendage tumor|O
+epidermodysplasia verruciformis|O
+epidermolysis bullosa|O
+epidermolysis bullosa acquisita|O
+epidermolysis bullosa dystrophica|O
+epidermolysis bullosa simplex|O
+epidermolytic acanthoma|O
+epidermolytic hyperkeratosis|O
+epididymal neoplasm|O
+epididymis adenocarcinoma|O
+epididymis adenomatoid tumor|O
+epididymis cancer|O
+epididymitis|O
+epididymo-orchitis|O
+epidural abscess|O
+epidural neoplasm|O
+epidural spinal canal angiolipoma|O
+epidural spinal canal meningioma|O
+epiglottis cancer|O
+epiglottis neoplasm|O
+epiglottitis|O
+epilepsy syndrome|O
+epilepsy with generalized tonic-clonic seizures|O
+epiphora due to excess lacrimation|O
+epiphora due to insufficient drainage|O
+episcleritis periodica fugax|O
+episodic ataxia|O
+epithelial malignant thymoma|O
+epithelial predominant Wilms' tumor|O
+epithelial predominant pulmonary blastoma|O
+epithelial-myoepithelial carcinoma|O
+epithelioid cell melanoma|O
+epithelioid cell synovial sarcoma|O
+epithelioid leiomyosarcoma|O
+epithelioid malignant peripheral nerve sheath tumor|O
+epithelioid neurofibroma|O
+epithelioid sarcoma|O
+epithelioid trophoblastic tumor|O
+epithelioid type angiomyolipoma|O
+epulis|O
+equatorial staphyloma|O
+erysipelas|O
+erysipeloid|O
+erythema infectiosum|O
+erythema multiforme|O
+erythematosquamous dermatosis|O
+erythrasma|O
+erythrokeratodermia variabilis|O
+erythromelalgia|O
+erythropoietic protoporphyria|O
+erythropoietin polycythemia|O
+esophageal adenoid cystic carcinoma|O
+esophageal adenosquamous carcinoma|O
+esophageal atresia|O
+esophageal basaloid squamous cell carcinoma|O
+esophageal cancer|O
+esophageal candidiasis|O
+esophageal carcinoma|O
+esophageal disease|O
+esophageal diverticulosis|O
+esophageal leukoplakia|O
+esophageal lipoma|O
+esophageal neuroendocrine tumor|O
+esophageal tuberculosis|O
+esophageal varix|O
+esophagitis|O
+esophagus adenocarcinoma|O
+esophagus carcinoma in situ|O
+esophagus leiomyoma|O
+esophagus leiomyosarcoma|O
+esophagus liposarcoma|O
+esophagus lymphoma|O
+esophagus melanoma|O
+esophagus sarcoma|O
+esophagus small cell carcinoma|O
+esophagus squamous cell carcinoma|O
+esophagus squamous cell papilloma|O
+esophagus verrucous carcinoma|O
+esotropia|O
+essential hypertension|O
+essential tremor|O
+estrogen excess|O
+estrogen-receptor negative breast cancer|O
+estrogen-receptor positive breast cancer|O
+ethmoid sinus Schneiderian papilloma|O
+ethmoid sinus adenocarcinoma|O
+ethmoid sinus adenoid cystic carcinoma|O
+ethmoid sinus cancer|O
+ethmoid sinus ectopic meningioma|O
+ethmoid sinus inverted papilloma|O
+ethmoid sinus squamous cell carcinoma|O
+ethmoid sinusitis|O
+ethmoidal sinus neoplasm|O
+eumycotic mycetoma|O
+eunuchism|O
+eustachian tube disease|O
+euthyroid sick syndrome|O
+eversion of lacrimal punctum|O
+exanthem|O
+exanthema subitum|O
+excessive tearing|O
+exfoliation syndrome|O
+exhibitionism|O
+exocervical carcinoma|O
+exocrine pancreatic insufficiency|O
+exophthalmic ophthalmoplegia|O
+exophthalmos|O
+exostosis|O
+exotropia|O
+exposure keratitis|O
+expressive language disorder|O
+external auditory meatus lipoma|O
+external ear basal cell carcinoma|O
+external ear cancer|O
+external ear carcinoma|O
+external ear disease|O
+external ear squamous cell carcinoma|O
+external pathological resorption|O
+extra-adrenal pheochromocytoma|O
+extracranial neuroblastoma|O
+extracutaneous mastocytoma|O
+extragonadal germ cell cancer|O
+extragonadal nonseminomatous germ cell tumor|O
+extragonadal seminoma|O
+extrahepatic bile duct adenocarcinoma|O
+extrahepatic bile duct adenoma|O
+extrahepatic bile duct carcinoma|O
+extrahepatic bile duct cystadenoma|O
+extrahepatic bile duct leiomyoma|O
+extrahepatic bile duct leiomyosarcoma|O
+extrahepatic bile duct lipoma|O
+extrahepatic bile duct papillary adenoma|O
+extrahepatic bile duct small cell adenocarcinoma|O
+extrahepatic biliary papillomatosis|O
+extrahepatic cholestasis|O
+extramedullary plasmacytoma|O
+extraocular retinoblastoma|O
+extraosseous Ewing's sarcoma|O
+extraosseous Ewings sarcoma-primitive neuroepithelial tumor|O
+extraosseous chondrosarcoma|O
+extraosseous osteosarcoma|O
+extrapulmonary tuberculosis|O
+extrapyramidal and movement disease|O
+extraskeletal chondroma|O
+extraskeletal mesenchymal chondrosarcoma|O
+extraskeletal myxoid chondrosarcoma|O
+extratemporal epilepsy|O
+extrinsic allergic alveolitis|O
+extrinsic cardiomyopathy|O
+exudative glomerulonephritis|O
+exudative vitreoretinopathy|O
+eye accommodation disease|O
+eye adnexa disease|O
+eye and adnexa disease|O
+eye carcinoma|O
+eye carcinoma in situ|O
+eye degenerative disease|O
+eye disease|O
+eye lymphoma|O
+eyelid carcinoma|O
+eyelid degenerative disease|O
+eyelid disease|O
+eyelid neoplasm|O
+facial dermatosis|O
+facial hemiatrophy|O
+facial nerve disease|O
+facial nerve neoplasm|O
+facial neuralgia|O
+facial paralysis|O
+facioscapulohumeral muscular dystrophy|O
+factitious disorder|O
+factor V deficiency|O
+factor VII deficiency|O
+factor VIII deficiency|O
+factor X deficiency|O
+factor XI deficiency|O
+factor XII deficiency|O
+factor XIII deficiency|O
+fallopian tube adenocarcinoma|O
+fallopian tube adenofibroma|O
+fallopian tube adenomatoid tumor|O
+fallopian tube adenosarcoma|O
+fallopian tube benign neoplasm|O
+fallopian tube cancer|O
+fallopian tube carcinoma|O
+fallopian tube carcinosarcoma|O
+fallopian tube clear cell adenocarcinoma|O
+fallopian tube cystadenofibroma|O
+fallopian tube disease|O
+fallopian tube endometrioid adenocarcinoma|O
+fallopian tube endometriosis|O
+fallopian tube germ cell cancer|O
+fallopian tube gestational choriocarcinoma|O
+fallopian tube leiomyoma|O
+fallopian tube leiomyosarcoma|O
+fallopian tube mucinous adenocarcinoma|O
+fallopian tube mucinous tumor|O
+fallopian tube papillary adenocarcinoma|O
+fallopian tube serous adenocarcinoma|O
+fallopian tube serous papilloma|O
+fallopian tube squamous cell carcinoma|O
+fallopian tube teratoma|O
+fallopian tube transitional cell carcinoma|O
+familial Mediterranean fever|O
+familial adenomatous polyposis|O
+familial atrial fibrillation|O
+familial combined hyperlipidemia|O
+familial encephalopathy with neuroserpin inclusion bodies|O
+familial glomangioma|O
+familial hemiplegic migraine|O
+familial hypercholesterolemia|O
+familial hyperlipidemia|O
+familial hypertriglyceridemia|O
+familial juvenile hyperuricemic nephropathy|O
+familial lipoprotein lipase deficiency|O
+familial medullary thyroid carcinoma|O
+familial melanoma|O
+familial meningioma|O
+familial nephrotic syndrome|O
+familial partial lipodystrophy|O
+familial periodic paralysis|O
+familial renal oncocytoma|O
+familial renal papillary carcinoma|O
+familial retinoblastoma|O
+familial visceral amyloidosis|O
+familiar fallopian tube carcinoma|O
+familiar ovarian carcinoma|O
+farmer's lung|O
+fasciitis|O
+fascioliasis|O
+fascioloidiasis|O
+fasciolopsiasis|O
+fat necrosis of breast|O
+fatal familial insomnia|O
+fatal infantile encephalocardiomyopathy|O
+fatty liver disease|O
+female breast axillary tail cancer|O
+female breast cancer|O
+female breast carcinoma|O
+female breast central part cancer|O
+female breast lower-inner quadrant cancer|O
+female breast lower-outer quadrant cancer|O
+female breast nipple and areola cancer|O
+female breast upper-inner quadrant cancer|O
+female breast upper-outer quadrant cancer|O
+female infertility of uterine origin|O
+female reproductive endometrioid cancer|O
+female reproductive organ benign neoplasm|O
+female reproductive organ cancer|O
+female reproductive system disease|O
+female stress incontinence|O
+female urethral cancer|O
+femoral cancer|O
+femoral neuropathy|O
+femoral vein thrombophlebitis|O
+fetal adenoma|O
+fetal alcohol spectrum disorder|O
+fetal alcohol syndrome|O
+fetal erythroblastosis|O
+fetishism|O
+fibrillary astrocytoma|O
+fibroblastic liposarcoma|O
+fibrodysplasia ossificans progressiva|O
+fibroepithelial basal cell carcinoma|O
+fibroepithelial polyp of the anus|O
+fibroepithelial polyp of urethra|O
+fibrogenesis imperfecta ossium|O
+fibroma|O
+fibromyalgia|O
+fibroosseous pseudotumor of digits|O
+fibrosarcoma|O
+fibrosarcoma of bone|O
+fibrosarcomatous osteosarcoma|O
+fibrosclerosis of breast|O
+fibrous dysplasia|O
+fibrous histiocytoma|O
+fibrous meningioma|O
+fibrous synovial sarcoma|O
+fibular collateral ligament bursitis|O
+fibular hypoplasia and complex brachydactyly|O
+fiedler's myocarditis|O
+filamentary keratitis|O
+filarial elephantiasis|O
+filariasis|O
+finger agnosia|O
+first-degree atrioventricular block|O
+fissured tongue|O
+flat ductal epithelial atypia|O
+flat retinoschisis|O
+flying phobia|O
+focal chorioretinitis|O
+focal dermal hypoplasia|O
+focal dystonia|O
+focal embolic glomerulonephritis|O
+focal epilepsy|O
+focal epithelial hyperplasia|O
+focal hand dystonia|O
+focal labyrinthitis|O
+focal segmental glomerulosclerosis|O
+folic acid deficiency anemia|O
+follicular adenoma|O
+follicular basal cell carcinoma|O
+follicular dendritic cell sarcoma|O
+follicular infundibulum tumor|O
+follicular lymphoma|O
+follicular mucinosis|O
+follicular thyroid carcinoma|O
+folliculitis|O
+food allergy|O
+foodborne botulism|O
+foramen magnum meningioma|O
+form agnosia|O
+fourth cranial nerve palsy|O
+fox fordyce disease|O
+fragile X syndrome|O
+fragile X-associated tremor/ataxia syndrome|O
+freemartinism|O
+frontal convexity meningioma|O
+frontal lobe epilepsy|O
+frontal lobe neoplasm|O
+frontal sinus Schneiderian papilloma|O
+frontal sinus cancer|O
+frontal sinus inverted papilloma|O
+frontal sinus neoplasm|O
+frontal sinus squamous cell carcinoma|O
+frontal sinusitis|O
+frontotemporal dementia|O
+frozen shoulder|O
+fructose-1,6-bisphosphatase deficiency|O
+fucosidosis|O
+functional colonic disease|O
+functional diarrhea|O
+functional gastric disease|O
+functioning pituitary adenoma|O
+functionless pituitary adenoma|O
+fundus albipunctatus|O
+fundus dystrophy|O
+fungal esophagitis|O
+fungal gastritis|O
+fungal infectious disease|O
+fungal meningitis|O
+funisitis|O
+fusariosis|O
+gait apraxia|O
+galactokinase deficiency|O
+galactosemia|O
+gall bladder carcinoma in situ|O
+gallbladder adenocarcinoma|O
+gallbladder adenoma|O
+gallbladder angiosarcoma|O
+gallbladder cancer|O
+gallbladder carcinoma|O
+gallbladder disease|O
+gallbladder leiomyoma|O
+gallbladder leiomyosarcoma|O
+gallbladder lipoma|O
+gallbladder lymphoma|O
+gallbladder melanoma|O
+gallbladder mucinous carcinoma|O
+gallbladder papillary carcinoma|O
+gallbladder papillomatosis|O
+gallbladder pleomorphic giant cell adenocarcinoma|O
+gallbladder rhabdomyosarcoma|O
+gallbladder sarcoma|O
+gallbladder signet ring cell adenocarcinoma|O
+gallbladder small cell carcinoma|O
+gallbladder squamous cell carcinoma|O
+gamma chain deficiency|O
+gamma heavy chain disease|O
+gamma-amino butyric acid metabolism disorder|O
+gangliocytoma|O
+ganglioglioma|O
+ganglion or cyst of synovium/tendon/bursa|O
+ganglioneuroblastoma|O
+ganglioneuroma|O
+gangliosidosis|O
+gangliosidosis GM1|O
+gangliosidosis GM2|O
+gas gangrene|O
+gasserian ganglion meningioma|O
+gastric adenocarcinoma|O
+gastric adenosquamous carcinoma|O
+gastric antral vascular ectasia|O
+gastric body carcinoma|O
+gastric cardia adenocarcinoma|O
+gastric cardia carcinoma|O
+gastric diffuse adenocarcinoma|O
+gastric dilatation|O
+gastric fundus cancer|O
+gastric fundus carcinoma|O
+gastric gastrinoma|O
+gastric hemangioma|O
+gastric leiomyoma|O
+gastric leiomyosarcoma|O
+gastric liposarcoma|O
+gastric lymphoma|O
+gastric mucosal hypertrophy|O
+gastric neuroendocrine neoplasm|O
+gastric outlet obstruction|O
+gastric papillary adenocarcinoma|O
+gastric pylorus carcinoma|O
+gastric signet ring cell adenocarcinoma|O
+gastric small cell carcinoma|O
+gastric squamous cell carcinoma|O
+gastric teratoma|O
+gastric tubular adenocarcinoma|O
+gastric ulcer|O
+gastrin secretion abnormality|O
+gastrinoma|O
+gastritis|O
+gastroduodenal Crohn's disease|O
+gastroduodenitis|O
+gastroenteritis|O
+gastroesophageal junction adenocarcinoma|O
+gastroesophageal reflux disease|O
+gastrointestinal adenoma|O
+gastrointestinal anthrax|O
+gastrointestinal carcinoma|O
+gastrointestinal lymphoma|O
+gastrointestinal neuroendocrine benign tumor|O
+gastrointestinal neuroendocrine tumor|O
+gastrointestinal stromal tumor|O
+gastrointestinal system benign neoplasm|O
+gastrointestinal system cancer|O
+gastrointestinal system disease|O
+gastrointestinal tuberculosis|O
+gastrointestinal tularemia|O
+gastrojejunal ulcer|O
+gastroparesis|O
+gastroschisis|O
+gemistocytic astrocytoma|O
+gender identity disorder|O
+generalized anxiety disorder|O
+generalized atherosclerosis|O
+generalized dystonia|O
+generalized epilepsy with febrile seizures plus|O
+genetic disease|O
+geniculate ganglionitis|O
+geniculate herpes zoster|O
+genital herpes|O
+geographic tongue|O
+geotrichosis|O
+germ cell and embryonal cancer|O
+germ cell cancer|O
+germinoma|O
+gestational choriocarcinoma|O
+gestational diabetes|O
+gestational ovarian choriocarcinoma|O
+gestational trophoblastic neoplasm|O
+gestational uterine corpus choriocarcinoma|O
+giant cell glioblastoma|O
+giant cell reparative granuloma|O
+giant cell tumor|O
+giant hemangioma|O
+giant papillary conjunctivitis|O
+giardiasis|O
+gingival disease|O
+gingival hypertrophy|O
+gingival overgrowth|O
+gingival recession|O
+gingivitis|O
+glanders|O
+glandular cystitis|O
+glandular pattern ovarian yolk sac tumor|O
+glandular tularemia|O
+glandular-alveolar pattern testicular yolk sac tumor|O
+glans penis cancer|O
+glassy cell variant cervical adenosquamous carcinoma|O
+glaucoma|O
+glaucomatocyclitic crisis|O
+glaucomatous atrophy of optic disc|O
+glioblastoma classical subtype|O
+glioblastoma mesenchymal subtype|O
+glioblastoma multiforme|O
+glioblastoma neural subtype|O
+glioblastoma proneural subtype|O
+gliofibroma|O
+gliomatosis cerebri|O
+gliosarcoma|O
+globe disease|O
+glomangioma|O
+glomangiomatosis|O
+glomangiomyoma|O
+glomangiosarcoma|O
+glomeruloid hemangioma|O
+glomerulonephritis|O
+glomerulosclerosis|O
+glomus tumor|O
+glossitis|O
+glossopharyngeal motor neuropathy|O
+glossopharyngeal nerve disease|O
+glossopharyngeal nerve neoplasm|O
+glossopharyngeal nerve paralysis|O
+glossopharyngeal neuralgia|O
+glottis cancer|O
+glottis carcinoma|O
+glottis neoplasm|O
+glottis squamous cell carcinoma|O
+glottis verrucous carcinoma|O
+glucocorticoid-induced osteoporosis|O
+glucocorticoid-remediable aldosteronism|O
+glucose intolerance|O
+glucose metabolism disease|O
+glucose-6-phosphate dehydrogenase deficiency|O
+glucosephosphate dehydrogenase deficiency|O
+gluten allergic reaction|O
+glycine encephalopathy|O
+glycogen metabolism disorder|O
+glycogen storage disease|O
+glycogen storage disease I|O
+glycogen storage disease II|O
+glycogen storage disease III|O
+glycogen storage disease IV|O
+glycogen storage disease IX|O
+glycogen storage disease V|O
+glycogen storage disease VI|O
+glycogen storage disease VII|O
+glycogen storage disease VIII|O
+glycogen storage disease XV|O
+glycogen-rich clear cell breast carcinoma|O
+gnathomiasis|O
+goiter|O
+gonadal disease|O
+gonadal dysgenesis|O
+gonadoblastoma|O
+gonococcal bursitis|O
+gonococcal endophthalmia|O
+gonococcal iridocyclitis|O
+gonococcal keratitis|O
+gonococcal seminal vesiculitis|O
+gonococcal spondylitis|O
+gonococcal synovitis|O
+gonorrhea|O
+gout|O
+grade III astrocytoma|O
+granular cell carcinoma|O
+granular cell leiomyosarcoma|O
+granular cell tumor|O
+granuloma annulare|O
+granuloma inguinale|O
+granulomatous amebic encephalitis|O
+granulomatous angiitis|O
+granulomatous dermatitis|O
+granulomatous endometritis|O
+granulomatous gastritis|O
+granulomatous hepatitis|O
+granulomatous myositis|O
+granulomatous orchitis|O
+granulosa cell tumor|O
+gray zone lymphoma|O
+growth hormone secreting pituitary adenoma|O
+guanidinoacetate methyltransferase deficiency|O
+gum cancer|O
+gummatous syphilis|O
+gynatresia|O
+gynecomastia|O
+gyrate atrophy|O
+haemonchiasis|O
+hair disease|O
+hair follicle neoplasm|O
+hairy cell leukemia|O
+hairy cell leukemia of spleen|O
+hairy tongue|O
+hallucinogen abuse|O
+hallucinogen dependence|O
+hand dermatosis|O
+hand, foot and mouth disease|O
+hantavirus pulmonary syndrome|O
+hard palate cancer|O
+head and neck cancer|O
+head and neck carcinoma|O
+head and neck squamous cell carcinoma|O
+heart aneurysm|O
+heart cancer|O
+heart conduction disease|O
+heart disease|O
+heart fibrosarcoma|O
+heart leiomyosarcoma|O
+heart lipoma|O
+heart lymphoma|O
+heart malignant hemangiopericytoma|O
+heart sarcoma|O
+heart septal defect|O
+heart valve disease|O
+heavy chain disease|O
+heel spur|O
+hemangioblastoma|O
+hemangioma|O
+hemangioma of intra-abdominal structure|O
+hemangioma of liver|O
+hemangioma of lung|O
+hemangioma of orbit|O
+hemangioma of peripheral nerve|O
+hemangioma of spleen|O
+hemangioma of subcutaneous tissue|O
+hemangiopericytic tumor|O
+hemangiopericytoma|O
+hemarthrosis|O
+hematocele of tunica vaginalis testis|O
+hematologic cancer|O
+hematopoietic system disease|O
+hemidystonia|O
+hemiplegia|O
+hemochromatosis|O
+hemoglobin C disease|O
+hemoglobin D disease|O
+hemoglobin E disease|O
+hemoglobinopathy|O
+hemoglobinuria|O
+hemolytic anemia|O
+hemolytic-uremic syndrome|O
+hemometra|O
+hemopericardium|O
+hemophagocytic lymphohistiocytosis|O
+hemophilia B|O
+hemopneumothorax|O
+hemorrhagic cystitis|O
+hemorrhagic disease|O
+hemorrhagic fever with renal syndrome|O
+hemorrhagic thrombocythemia|O
+hemorrhoid|O
+hemosiderosis|O
+hepatic angiomyolipoma|O
+hepatic coma|O
+hepatic encephalopathy|O
+hepatic flexure cancer|O
+hepatic osteogenic sarcoma|O
+hepatic tuberculosis|O
+hepatic vascular disease|O
+hepatic vein thrombosis|O
+hepatitis|O
+hepatitis A|O
+hepatitis B|O
+hepatitis C|O
+hepatitis D|O
+hepatitis E|O
+hepatobiliary benign neoplasm|O
+hepatobiliary disease|O
+hepatoblastoma|O
+hepatocellular adenoma|O
+hepatocellular carcinoma|O
+hepatocellular clear cell carcinoma|O
+hepatocellular fibrolamellar carcinoma|O
+hepatoerythropoietic porphyria|O
+hepatoid pattern ovarian yolk sac tumor|O
+hepatoid pattern testicular yolk sac tumor|O
+hepatopulmonary syndrome|O
+hepatorenal syndrome|O
+hereditary Wilms' tumor|O
+hereditary angioedema|O
+hereditary breast ovarian cancer|O
+hereditary choroidal atrophy|O
+hereditary conventional renal cell carcinoma|O
+hereditary coproporphyria|O
+hereditary elliptocytosis|O
+hereditary fructose intolerance syndrome|O
+hereditary hemorrhagic telangiectasia|O
+hereditary lymphedema|O
+hereditary mucosal leukokeratosis|O
+hereditary multiple exostoses|O
+hereditary night blindness|O
+hereditary renal cell carcinoma|O
+hereditary retinal dystrophy|O
+hereditary sensory neuropathy|O
+hereditary spastic paraplegia|O
+hereditary spherocytosis|O
+hermaphroditism|O
+hernia of ovary and fallopian tube|O
+heroin dependence|O
+herpangina|O
+herpes gestationis|O
+herpes simplex|O
+herpes zoster|O
+herpetic gastritis|O
+herpetic whitlow|O
+heterophyiasis|O
+hiatus hernia|O
+hidradenitis|O
+hidradenitis suppurativa|O
+hidradenoma|O
+hidrocystoma|O
+high pressure neurological syndrome|O
+hilar cholangiocellular carcinoma|O
+hilar lung carcinoma|O
+hilar lung neoplasm|O
+histidine metabolism disease|O
+histidinemia|O
+histiocytic and dendritic cell cancer|O
+histiocytoid hemangioma|O
+histiocytoma|O
+histiocytosis|O
+histoplasmosis|O
+histoplasmosis meningitis|O
+histoplasmosis pericarditis|O
+histoplasmosis retinitis|O
+histrionic personality disorder|O
+hobnail hemangioma|O
+hole retinal cyst|O
+holocarboxylase synthetase deficiency|O
+holoprosencephaly|O
+homocarnosinosis|O
+homocystinuria|O
+hordeolum|O
+hordeolum externum|O
+hormone producing pituitary cancer|O
+human granulocytic anaplasmosis|O
+human monocytic ehrlichiosis|O
+hydranencephaly|O
+hydrarthrosis|O
+hydrocele|O
+hydrocephalus|O
+hydrolethalus syndrome|O
+hydronephrosis|O
+hydrophthalmos|O
+hydrops of gallbladder|O
+hymenolepiasis|O
+hyperaldosteronism|O
+hyperandrogenism|O
+hyperargininemia|O
+hypercalcemia|O
+hypercalcemic sarcoidosis|O
+hypercalcemic type ovarian small cell carcinoma|O
+hypercementosis|O
+hyperglobulinemic purpura|O
+hyperglycemia|O
+hyperhomocysteinemia|O
+hyperimmunoglobulin syndrome|O
+hyperinsulinemic hypoglycemia|O
+hyperinsulinism|O
+hyperkalemic periodic paralysis|O
+hyperlipoproteinemia type III|O
+hyperlipoproteinemia type IV|O
+hyperlipoproteinemia type V|O
+hyperlucent lung|O
+hyperlysinemia|O
+hypermethioninemia|O
+hypermobility of coccyx|O
+hypermobility syndrome|O
+hyperopia|O
+hyperostosis|O
+hyperparathyroidism|O
+hyperphosphatemia|O
+hyperpigmentation of eyelid|O
+hyperpituitarism|O
+hyperprolactinemia|O
+hypersecretion glaucoma|O
+hypersensitivity reaction disease|O
+hypersensitivity reaction type I disease|O
+hypersensitivity reaction type II disease|O
+hypersensitivity reaction type III disease|O
+hypersensitivity reaction type IV disease|O
+hypersensitivity vasculitis|O
+hypersplenism|O
+hypertelorism, microtia, facial clefting syndrome|O
+hypertension|O
+hypertensive encephalopathy|O
+hypertensive heart disease|O
+hypertensive retinopathy|O
+hyperthyroidism|O
+hyperthyroxinemia|O
+hypertrichosis|O
+hypertrichosis of eyelid|O
+hypertrophic cardiomyopathy|O
+hypertrophic elongation of cervix|O
+hypertrophic pyloric stenosis|O
+hypertrophy of breast|O
+hypertrophy of tongue papillae|O
+hypertropia|O
+hyperuricemia|O
+hypervitaminosis A|O
+hypervitaminosis D|O
+hypoactive sexual desire disorder|O
+hypobetalipoproteinemia|O
+hypochondriasis|O
+hypochondrogenesis|O
+hypochondroplasia|O
+hypochromic anemia|O
+hypochromic microcytic anemia|O
+hypodermyiasis|O
+hypoglossal nerve disease|O
+hypoglossal nerve neoplasm|O
+hypoglycemia|O
+hypoglycemic coma|O
+hypogonadism|O
+hypogonadotropism|O
+hypohidrosis|O
+hypohidrotic ectodermal dysplasia|O
+hypokalemia|O
+hypokalemic periodic paralysis|O
+hypolipoproteinemia|O
+hypoparathyroidism|O
+hypopharynx cancer|O
+hypophosphatasia|O
+hypophosphatemia|O
+hypopigmentation of eyelid|O
+hypopituitarism|O
+hypoplastic left heart syndrome|O
+hypopyon|O
+hypopyon ulcer|O
+hypospadias|O
+hypothalamic disease|O
+hypothalamic neoplasm|O
+hypothyroidism|O
+hypotrichosis|O
+hypotrichosis of eyelid|O
+hypotropia|O
+ichthyosis vulgaris|O
+ideomotor apraxia|O
+idiopathic CD4-positive T-lymphocytopenia|O
+idiopathic corneal edema|O
+idiopathic generalized epilepsy|O
+idiopathic interstitial pneumonia|O
+idiopathic juvenile osteoporosis|O
+idiopathic peripheral autonomic neuropathy|O
+idiopathic progressive polyneuropathy|O
+idiopathic pulmonary fibrosis|O
+idiopathic scoliosis|O
+ileal neoplasm|O
+ileitis|O
+ileocolitis|O
+ileum cancer|O
+ileus|O
+iliac vein thrombophlebitis|O
+immature cataract|O
+immature teratoma of ovary|O
+immune system cancer|O
+immune system disease|O
+immune system organ benign neoplasm|O
+immune-complex glomerulonephritis|O
+immunoglobulin alpha deficiency|O
+immunoglobulin beta deficiency|O
+impaired renal function disease|O
+imperforate anus|O
+impetigo|O
+impetigo herpetiformis|O
+impotence|O
+impulse control disorder|O
+in situ carcinoma|O
+in situ pulmonary adenocarcinoma|O
+inappropriate ADH syndrome|O
+inclusion body myopathy with Paget disease of bone and frontotemporal dementia|O
+inclusion body myositis|O
+inclusion conjunctivitis|O
+incontinentia pigmenti achromians|O
+indeterminate leprosy|O
+indolent myeloma|O
+indolent systemic mastocytosis|O
+infancy electroclinical syndrome|O
+infant botulism|O
+infant gynecomastia|O
+infantile cerebellar-retinal degeneration|O
+infantile epileptic encephalopathy|O
+infantile onset spinocerebellar ataxia|O
+infantile refsum disease|O
+infarct of liver|O
+infected hydrocele|O
+infectious anterior uveitis|O
+infectious mononucleosis|O
+infective endocarditis|O
+infective urethral stricture|O
+inferior myocardial infarction|O
+inferolateral myocardial infarct|O
+infertility|O
+infertility due to extratesticular cause|O
+infiltrating angiolipoma|O
+infiltrating bladder lymphoepithelioma-like carcinoma|O
+infiltrating bladder urothelial carcinoma sarcomatoid variant|O
+infiltrating lipoma|O
+infiltrating nipple syringomatous adenoma|O
+infiltrating renal pelvis transitional cell carcinoma|O
+infiltrating ureter transitional cell carcinoma|O
+infiltrative basal cell carcinoma|O
+inflamed seborrheic keratosis|O
+inflammatory MFH|O
+inflammatory and toxic neuropathy|O
+inflammatory bowel disease|O
+inflammatory breast carcinoma|O
+inflammatory diarrhea|O
+inflammatory leiomyosarcoma|O
+inflammatory liposarcoma|O
+inflammatory myofibroblastic tumor|O
+inflammatory spondylopathy|O
+influenza|O
+infratentorial cancer|O
+infundibulocystic basal cell carcinoma|O
+inguinal hernia|O
+inhalation anthrax|O
+inherited blood coagulation disease|O
+inherited metabolic disorder|O
+inhibited female orgasm|O
+inhibited male orgasm|O
+inner ear cancer|O
+inner ear disease|O
+insulinoma|O
+integrative agnosia|O
+integumentary system benign neoplasm|O
+integumentary system cancer|O
+integumentary system disease|O
+intellectual disability|O
+interdigitating dendritic cell sarcoma|O
+interleukin-7 receptor alpha deficiency|O
+intermediate cell type choroid melanoma|O
+intermediate cell type ciliary body melanoma|O
+intermediate coronary syndrome|O
+intermediate malignant teratoma|O
+intermediate spinal muscular atrophy|O
+intermediate uveitis|O
+intermittent claudication|O
+intermittent explosive disorder|O
+intermittent proptosis|O
+intermittent squint|O
+intermixed schwannian stroma-rich ganglioneuroblastoma|O
+internal auditory canal lipoma|O
+internal auditory canal meningioma|O
+internal hemorrhoid|O
+internal hordeolum|O
+internal pathological resorption|O
+internuclear ophthalmoplegia|O
+interstitial cystitis|O
+interstitial emphysema|O
+interstitial keratitis|O
+interstitial lung disease|O
+interstitial myocarditis|O
+interstitial nephritis|O
+interval angle-closure glaucoma|O
+intestinal atresia|O
+intestinal benign neoplasm|O
+intestinal botulism|O
+intestinal cancer|O
+intestinal disaccharidase deficiency|O
+intestinal disease|O
+intestinal impaction|O
+intestinal infectious disease|O
+intestinal neuroendocrine benign tumor|O
+intestinal obstruction|O
+intestinal perforation|O
+intestinal pseudo-obstruction|O
+intestinal schistosomiasis|O
+intestinal tuberculosis|O
+intestinal variant cervical mucinous adenocarcinoma|O
+intestinal volvulus|O
+intestine carcinoma in situ|O
+intra-abdominal lymph node mast cell malignancy|O
+intracerebral cystic meningioma|O
+intracortical osteogenic sarcoma|O
+intracranial abscess|O
+intracranial aneurysm|O
+intracranial arterial disease|O
+intracranial arteriosclerosis|O
+intracranial berry aneurysm|O
+intracranial cavernous angioma|O
+intracranial chondrosarcoma|O
+intracranial embolism|O
+intracranial hypertension|O
+intracranial hypotension|O
+intracranial liposarcoma|O
+intracranial primitive neuroectodermal tumor|O
+intracranial sinus thrombosis|O
+intracranial structure hemangioma|O
+intracranial thrombosis|O
+intracranial vasospasm|O
+intracystic papillary adenoma|O
+intraductal breast myoepitheliosis|O
+intraductal breast neoplasm|O
+intraductal papillary breast neoplasm|O
+intraductal papilloma|O
+intrahepatic bile duct adenoma|O
+intrahepatic bile duct cystadenoma|O
+intrahepatic biliary papillomatosis|O
+intrahepatic cholangiocarcinoma|O
+intrahepatic cholestasis|O
+intrahepatic gall duct cancer|O
+intramuscular hemangioma|O
+intraneural perineurioma|O
+intraocular lymphoma|O
+intraocular mixed cell type melanoma|O
+intraocular retinoblastoma|O
+intraorbital meningioma|O
+intrapelvic lymph node leukemic reticuloendotheliosis|O
+intratubular embryonal carcinoma|O
+intravascular angioleiomyoma|O
+intravascular fasciitis|O
+intravenous leiomyomatosis|O
+intraventricular meningioma|O
+intrinsic asthma|O
+intrinsic cardiomyopathy|O
+intussusception|O
+invasive aspergillosis|O
+invasive bladder transitional cell carcinoma|O
+invasive ductal carcinoma|O
+invasive lobular carcinoma|O
+invasive malignant thymoma|O
+invasive tubular breast carcinoma|O
+inverted follicular keratosis|O
+inverted papilloma|O
+inverted transitional papilloma|O
+iodine hypothyroidism|O
+iridocyclitis|O
+iridogoniodysgenesis syndrome|O
+iris cancer|O
+iris disease|O
+iris mixed cell melanoma|O
+iris spindle cell melanoma|O
+iritis|O
+iron deficiency anemia|O
+iron metabolism disease|O
+irregular astigmatism|O
+irritable bowel syndrome|O
+irritant dermatitis|O
+ischemia|O
+ischemic bone disease|O
+ischemic colitis|O
+ischemic fasciitis|O
+ischemic neuropathy|O
+islet cell tumor|O
+isovaleric acidemia|O
+isthmus cancer|O
+janus kinase-3 deficiency|O
+jaw cancer|O
+jaw-winking syndrome|O
+jejunal adenocarcinoma|O
+jejunal cancer|O
+jejunal neoplasm|O
+jejunal somatostatinoma|O
+jejunoileitis|O
+jugular foramen meningioma|O
+junctional epidermolysis bullosa|O
+juvenile absence epilepsy|O
+juvenile astrocytoma|O
+juvenile dermatitis herpetiformis|O
+juvenile glaucoma|O
+juvenile myelomonocytic leukemia|O
+juvenile myoclonic epilepsy|O
+juvenile pilocytic astrocytoma|O
+juvenile polyposis syndrome|O
+juvenile rheumatoid arthritis|O
+juvenile spinal muscular atrophy|O
+juvenile type testicular granulosa cell tumor|O
+juvenile xanthogranuloma|O
+juxtacortical chondroma|O
+juxtacortical chondrosarcoma|O
+juxtacortical osteosarcoma|O
+kaolin pneumoconiosis|O
+keratinizing squamous cell carcinoma|O
+keratitis|O
+keratoacanthoma|O
+keratoconjunctivitis|O
+keratoconjunctivitis sicca|O
+keratoconus|O
+keratomalacia|O
+keratopathy|O
+keratosis|O
+keratosis follicularis|O
+kernicterus|O
+kernicterus due to isoimmunization|O
+kidney angiomyolipoma|O
+kidney benign neoplasm|O
+kidney cancer|O
+kidney carcinoma in situ|O
+kidney clear cell sarcoma|O
+kidney cortex necrosis|O
+kidney disease|O
+kidney failure|O
+kidney fibrosarcoma|O
+kidney hemangiopericytoma|O
+kidney hypertrophy|O
+kidney leiomyosarcoma|O
+kidney lipoma|O
+kidney liposarcoma|O
+kidney osteogenic sarcoma|O
+kidney papillary necrosis|O
+kidney pelvis papillary carcinoma|O
+kidney pelvis sarcomatoid transitional cell carcinoma|O
+kidney rhabdoid cancer|O
+kidney sarcoma|O
+kleptomania|O
+kuru|O
+kwashiorkor|O
+kyphoscoliotic heart disease|O
+labia majora carcinoma|O
+labia minora cancer|O
+labia minora carcinoma|O
+labium majus cancer|O
+labyrinthine bilateral reactive loss|O
+labyrinthine disease|O
+labyrinthine dysfunction|O
+labyrinthine unilateral reactive loss|O
+labyrinthitis|O
+lacrimal apparatus disease|O
+lacrimal duct cancer|O
+lacrimal duct obstruction|O
+lacrimal gland adenocarcinoma|O
+lacrimal gland adenoid cystic carcinoma|O
+lacrimal gland cancer|O
+lacrimal gland carcinoma|O
+lacrimal gland mucoepidermoid carcinoma|O
+lacrimal gland squamous cell carcinoma|O
+lacrimal passage granuloma|O
+lacrimal system cancer|O
+lactic acidosis|O
+lactocele|O
+lactose intolerance|O
+lagophthalmos|O
+lambda 5 deficiency|O
+language disorder|O
+large bowel leiomyoma|O
+large cell acanthoma|O
+large cell carcinoma|O
+large cell carcinoma with rhabdoid phenotype|O
+large cell keratinizing variant squamous cell breast carcinoma|O
+large cell medulloblastoma|O
+large cell neuroendocrine carcinoma|O
+large intestine adenocarcinoma|O
+large intestine adenoma|O
+large intestine cancer|O
+large intestine lipoma|O
+laryngeal adenoid cystic carcinoma|O
+laryngeal benign neoplasm|O
+laryngeal carcinoma|O
+laryngeal cartilage cancer|O
+laryngeal disease|O
+laryngeal mucoepidermoid carcinoma|O
+laryngeal neuroendocrine tumor|O
+laryngeal small cell carcinoma|O
+laryngeal squamous cell carcinoma|O
+laryngeal tuberculosis|O
+laryngitis|O
+laryngostenosis|O
+laryngotracheitis|O
+larynx cancer|O
+larynx carcinoma in situ|O
+larynx leiomyoma|O
+larynx leiomyosarcoma|O
+larynx liposarcoma|O
+larynx sarcoma|O
+larynx squamous papilloma|O
+larynx verrucous carcinoma|O
+late congenital syphilis|O
+late yaws|O
+latent syphilis|O
+lateral cystocele|O
+lateral displacement of eye|O
+lateral medullary syndrome|O
+lateral myocardial infarction|O
+lateral sclerosis|O
+lateral sinus thrombosis|O
+lateral ventricle meningioma|O
+lattice corneal dystrophy|O
+learning disability|O
+leber hereditary optic neuropathy|O
+leech infestation|O
+left bundle branch hemiblock|O
+leg dermatosis|O
+legionellosis|O
+leiomyoma|O
+leiomyoma cutis|O
+leiomyomatosis|O
+leiomyosarcoma|O
+leishmaniasis|O
+lens disease|O
+lens subluxation|O
+lens-induced iridocyclitis|O
+lepromatous leprosy|O
+leprosy|O
+leptomeninges sarcoma|O
+leptospirosis|O
+lesion of sciatic nerve|O
+lethal midline granuloma|O
+leukemia|O
+leukemoid reaction|O
+leukocoria|O
+leukocyte adhesion deficiency|O
+leukocyte disease|O
+leukocyte-adhesion deficiency syndrome|O
+leukodystrophy|O
+leukopenia|O
+leukoplakia of penis|O
+leukoplakia of vagina|O
+leukorrhea|O
+leukostasis|O
+lice infestation|O
+lichen disease|O
+lichen nitidus|O
+lichen planus|O
+limb ischemia|O
+limb-girdle muscular dystrophy|O
+limited scleroderma|O
+lingual goiter|O
+lingual-facial-buccal dyskinesia|O
+linitis plastica|O
+lip cancer|O
+lip carcinoma in situ|O
+lip disease|O
+lipid metabolism disorder|O
+lipid pneumonia|O
+lipid storage disease|O
+lipid-cell variant infiltrating bladder urothelial carcinoma|O
+lipid-rich breast carcinoma|O
+lipid-rich carcinoma|O
+lipoadenoma|O
+lipoatrophic diabetes|O
+lipodystrophy|O
+lipoid nephrosis|O
+lipoid proteinosis|O
+lipoma|O
+lipoma of colon|O
+lipoma of spermatic cord|O
+lipoma of the rectum|O
+lipomatosis|O
+lipomatous cancer|O
+liposarcoma|O
+liposarcoma of bone|O
+liposarcoma of the ovary|O
+lissencephaly|O
+listeriosis|O
+littre gland carcinoma|O
+liver angiosarcoma|O
+liver cancer|O
+liver carcinoma|O
+liver carcinoma in situ|O
+liver cirrhosis|O
+liver disease|O
+liver fibroma|O
+liver fibrosarcoma|O
+liver inflammatory pseudotumor|O
+liver leiomyoma|O
+liver leiomyosarcoma|O
+liver lipoma|O
+liver lymphoma|O
+liver neoplasm|O
+liver rhabdomyosarcoma|O
+liver sarcoma|O
+lobomycosis|O
+lobular neoplasia|O
+localized Intraductal papillomatosis|O
+localized anterior staphyloma|O
+localized chondrosarcoma|O
+localized osteosarcoma|O
+localized pulmonary fibrosis|O
+localized scleroderma|O
+locked-in syndrome|O
+loiasis|O
+long QT syndrome|O
+long bone adamantinoma|O
+long bones of lower limb cancer|O
+louping ill|O
+louse-borne relapsing fever|O
+low compliance bladder|O
+low implantation of placenta|O
+low tension glaucoma|O
+lower clivus meningioma|O
+lower gum cancer|O
+lower lip cancer|O
+lower respiratory tract disease|O
+lower urinary tract calculus|O
+lujo hemorrhagic fever|O
+lumbar plexus neoplasm|O
+lumbar spinal canal and spinal cord meningioma|O
+lumbosacral lipoma|O
+lumbosacral plexus lesion|O
+lung abscess|O
+lung acinar adenocarcinoma|O
+lung adenocarcinoma|O
+lung adenoid cystic carcinoma|O
+lung adenoma|O
+lung benign neoplasm|O
+lung cancer|O
+lung carcinoma|O
+lung carcinoma in situ|O
+lung clear cell carcinoma|O
+lung clear cell-sugar-tumor|O
+lung combined large cell neuroendocrine carcinoma|O
+lung combined type small cell adenocarcinoma|O
+lung combined type small cell carcinoma|O
+lung disease|O
+lung giant cell carcinoma|O
+lung hilum cancer|O
+lung large cell carcinoma|O
+lung leiomyoma|O
+lung leiomyosarcoma|O
+lung lymphoma|O
+lung meningioma|O
+lung mixed small cell and squamous cell carcinoma|O
+lung mucoepidermoid carcinoma|O
+lung oat cell carcinoma|O
+lung occult adenocarcinoma|O
+lung occult large cell carcinoma|O
+lung occult small cell carcinoma|O
+lung occult squamous cell carcinoma|O
+lung papillary adenocarcinoma|O
+lung sarcoma|O
+lung small cell carcinoma|O
+lung squamous cell carcinoma|O
+lung superior sulcus carcinoma|O
+lupus erythematosus|O
+luteoma|O
+luxation of globe|O
+lymph node adenoid cystic carcinoma|O
+lymph node cancer|O
+lymph node disease|O
+lymph node palisaded myofibroblastoma|O
+lymph node tuberculosis|O
+lymphadenitis|O
+lymphangioleiomyomatosis|O
+lymphangioma|O
+lymphangiosarcoma|O
+lymphangitis|O
+lymphatic system cancer|O
+lymphatic system disease|O
+lymphedema|O
+lymphoblastic leukemia|O
+lymphocele|O
+lymphocytic choriomeningitis|O
+lymphocytic colitis|O
+lymphocytic gastritis|O
+lymphoepithelioma-like acinar prostate adenocarcinoma|O
+lymphoepithelioma-like carcinoma|O
+lymphoepithelioma-like thymic carcinoma|O
+lymphogranuloma venereum|O
+lymphohistiocytoid mesothelioma|O
+lymphoid interstitial pneumonia|O
+lymphoid leukemia|O
+lymphoma|O
+lymphoma-like variant infiltrating bladder urothelial carcinoma|O
+lymphopenia|O
+lymphoplasmacyte-rich meningioma|O
+lymphoplasmacytic lymphoma|O
+lymphosarcoma|O
+lysosomal storage disease|O
+macrocystic neurilemmoma|O
+macrocystic pattern testicular yolk sac tumor|O
+macrocytic anemia|O
+macroglobulinemia|O
+macrotrabecular hepatoblastoma|O
+macular corneal dystrophy|O
+macular degeneration|O
+macular holes|O
+macular keratitis|O
+macular retinal edema|O
+main bronchus cancer|O
+major depressive disorder|O
+malaria|O
+male breast cancer|O
+male genital organ stricture|O
+male genital organ vascular disease|O
+male infertility|O
+male reproductive organ benign neoplasm|O
+male reproductive organ cancer|O
+male reproductive system disease|O
+male urethral cancer|O
+malignant ACTH producing neoplasm of pituitary gland|O
+malignant Leydig cell tumor|O
+malignant Sertoli cell tumor|O
+malignant Sertoli-Leydig cell tumor|O
+malignant acrospiroma|O
+malignant adenofibroma|O
+malignant adult ependymoma|O
+malignant anus melanoma|O
+malignant biphasic mesothelioma|O
+malignant breast melanoma|O
+malignant cardiac germ cell tumor|O
+malignant cardiac peripheral nerve sheath neoplasm|O
+malignant childhood germ cell neoplasm|O
+malignant choroid melanoma|O
+malignant ciliary body melanoma|O
+malignant conjunctiva melanoma|O
+malignant cornea melanoma|O
+malignant cystic nephroma|O
+malignant dermis tumor|O
+malignant ependymoma|O
+malignant epithelial mesothelioma|O
+malignant essential hypertension|O
+malignant eyelid melanoma|O
+malignant fibrous histiocytoma of bone|O
+malignant fibroxanthoma|O
+malignant gastric germ cell tumor|O
+malignant gastric granular cell tumor|O
+malignant gastric teratoma|O
+malignant giant cell tumor|O
+malignant giant cell tumor of soft parts|O
+malignant giant cell tumor of the tendon sheath|O
+malignant glandular tumor of peripheral nerve sheath|O
+malignant glioma|O
+malignant granular cell esophageal tumor|O
+malignant granular cell myoblastoma|O
+malignant granular cell skin tumor|O
+malignant growth hormone secreting neoplasm of pituitary|O
+malignant histiocytic disease|O
+malignant histiocytosis|O
+malignant hypertension|O
+malignant hypertensive renal disease|O
+malignant hyperthermia|O
+malignant iris melanoma|O
+malignant leptomeningeal tumor|O
+malignant mediastinal neurogenic neoplasm|O
+malignant mediastinum hemangiopericytoma|O
+malignant melanocytic neoplasm of the peripheral nerve sheath|O
+malignant melanocytic peripheral nerve sheath tumor of mediastinum|O
+malignant mesenchymoma|O
+malignant mesothelioma|O
+malignant neoplasm of acoustic nerve|O
+malignant neoplasm of short bones of lower limb|O
+malignant oculomotor nerve tumor|O
+malignant otitis externa|O
+malignant ovarian Brenner tumor|O
+malignant ovarian cyst|O
+malignant ovarian germ cell neoplasm|O
+malignant ovarian mixed epithelial neoplasm|O
+malignant ovarian surface epithelial-stromal neoplasm|O
+malignant parietal pleura tumor|O
+malignant peripheral nerve sheath tumor|O
+malignant peritoneal solitary fibrous tumor|O
+malignant pineal area germ cell neoplasm|O
+malignant pleural mesothelioma|O
+malignant pleural solitary fibrous tumor|O
+malignant renovascular hypertension|O
+malignant secondary hypertension|O
+malignant skin fibrous histiocytoma|O
+malignant spindle cell melanoma|O
+malignant spiradenoma|O
+malignant struma ovarii|O
+malignant syringoma|O
+malignant teratoma|O
+malignant testicular Leydig cell tumor|O
+malignant thyroid stimulating hormone producing neoplasm of pituitary gland|O
+malignant triton tumor|O
+malignant tumor of undescended testis|O
+malignant type A thymoma|O
+malignant type AB thymoma|O
+malignant visceral pleura tumor|O
+malt worker's lung|O
+mammary Paget's disease|O
+mandibular cancer|O
+mansonelliasis|O
+mantle cell lymphoma|O
+maple bark strippers' lung|O
+maple syrup urine disease|O
+marantic endocarditis|O
+marasmus|O
+marginal corneal ulcer|O
+marginal zone B-cell lymphoma|O
+mast cell neoplasm|O
+mast-cell leukemia|O
+mast-cell sarcoma|O
+mastitis|O
+mastocytosis|O
+mastoiditis|O
+mature B-cell neoplasm|O
+mature T-cell and NK-cell lymphoma|O
+mature cataract|O
+mature gastric teratoma|O
+mature teratoma|O
+mature teratoma of the ovary|O
+maturity-onset diabetes of the young|O
+maxillary neoplasm|O
+maxillary sinus Schneiderian papilloma|O
+maxillary sinus adenocarcinoma|O
+maxillary sinus adenoid cystic carcinoma|O
+maxillary sinus cancer|O
+maxillary sinus cholesteatoma|O
+maxillary sinus inverted papilloma|O
+maxillary sinus neoplasm|O
+maxillary sinus squamous cell carcinoma|O
+maxillary sinusitis|O
+measles|O
+mechanical ectropion|O
+mechanical entropion|O
+mechanical lagophthalmos|O
+mechanical strabismus|O
+meconium aspiration syndrome|O
+median arcuate ligament syndrome|O
+median neuropathy|O
+median rhomboid glossitis|O
+mediastinal cancer|O
+mediastinal granular cell myoblastoma|O
+mediastinal gray zone lymphoma|O
+mediastinal lipomatosis|O
+mediastinal malignant lymphoma|O
+mediastinal melanocytic neurilemmoma|O
+mediastinal mesenchymal tumor|O
+mediastinal neurilemmoma|O
+mediastinal osteogenic sarcoma|O
+mediastinitis|O
+mediastinum angiosarcoma|O
+mediastinum ganglioneuroblastoma|O
+mediastinum leiomyoma|O
+mediastinum leiomyosarcoma|O
+mediastinum liposarcoma|O
+mediastinum neuroblastoma|O
+mediastinum neurofibroma|O
+mediastinum rhabdomyosarcoma|O
+mediastinum sarcoma|O
+mediastinum seminoma|O
+mediastinum synovial sarcoma|O
+mediastinum teratoma|O
+medulloadrenal hyperfunction|O
+medulloblastoma|O
+medulloepithelioma|O
+medullomyoblastoma|O
+megacolon|O
+megaesophagus|O
+megakaryocytic leukemia|O
+megakaryocytic tumor|O
+megaloblastic anemia|O
+megalocornea|O
+meibomian cyst|O
+melancholia|O
+melanoacanthoma|O
+melanocytic psammomatous MPNST|O
+melanoma|O
+melanomatosis|O
+melanotic medulloblastoma|O
+melanotic neurilemmoma|O
+melanotic neuroectodermal tumor|O
+melioidosis|O
+melorheostosis|O
+membranoproliferative glomerulonephritis|O
+membranous glomerulonephritis|O
+meningeal melanocytoma|O
+meningeal melanoma|O
+meningeal melanomatosis|O
+meninges hemangiopericytoma|O
+meninges sarcoma|O
+meningioma|O
+meningitis|O
+meningocele|O
+meningoencephalitis|O
+meningothelial meningioma|O
+meningovascular neurosyphilis|O
+mental depression|O
+mesangial proliferative glomerulonephritis|O
+mesenchymal cell neoplasm|O
+mesenchymal chondrosarcoma|O
+mesenchymoma|O
+mesenteric lymphadenitis|O
+mesenteric vascular occlusion|O
+mesoblastic nephroma|O
+mesocestoidiasis|O
+metabolic acidosis|O
+metabolic syndrome X|O
+metachromatic leukodystrophy|O
+metachronous kidney Wilms' tumor|O
+metachronous osteosarcoma of the bone|O
+metagonimiasis|O
+metal metabolism disorder|O
+metanephric adenoma|O
+metaphyseal dysplasia|O
+metatypical basal cell carcinoma|O
+methemoglobinemia|O
+methotrexate-associated lymphoproliferation|O
+methylmalonic acidemia|O
+methylmalonic aciduria and homocystinuria type cblC|O
+methylmalonic aciduria and homocystinuria type cblD|O
+methylmalonic aciduria and homocystinuria type cblE|O
+methylmalonic aciduria and homocystinuria type cblF|O
+methylmalonic aciduria and homocystinuria type cblG|O
+mevalonic aciduria|O
+microcephaly|O
+microcystic adenoma|O
+microcystic meningioma|O
+microcystic variant infiltrating bladder urothelial carcinoma|O
+microcytic anemia|O
+microglandular adenosis|O
+microglandular adenosis of breast|O
+microinvasive cervical squamous cell carcinoma|O
+microinvasive gastric cancer|O
+micronodular basal cell carcinoma|O
+micropapillary variant infiltrating bladder urothelial carcinoma|O
+micropapillomatosis labialis|O
+microphthalmia|O
+microscopic breast papilloma|O
+microscopic colitis|O
+microsporidiosis|O
+middle cerebral artery infarction|O
+middle cranial fossa meningioma|O
+middle ear adenocarcinoma|O
+middle ear adenoma|O
+middle ear cancer|O
+middle ear carcinoma|O
+middle ear cholesteatoma|O
+middle ear cholesterol granuloma|O
+middle ear disease|O
+middle ear squamous cell carcinoma|O
+middle lobe syndrome|O
+midface dysplasia|O
+midline cystocele|O
+migraine|O
+migraine with aura|O
+migraine without aura|O
+mild pre-eclampsia|O
+miliaria|O
+miliaria rubra|O
+miliary tuberculosis|O
+milk allergic reaction|O
+milker's nodule|O
+mineral metabolism disease|O
+minor vestibular glands adenoma|O
+mirror agnosia|O
+mite infestation|O
+mitochondrial complex V (ATP synthase) deficiency nuclear type 2|O
+mitochondrial complex V (ATP synthase) deficiency nuclear type 3|O
+mitochondrial complex V (ATP synthase) deficiency nuclear type 4|O
+mitochondrial complex V (ATP synthase) deficiency, nuclear type 1|O
+mitochondrial encephalomyopathy|O
+mitochondrial metabolism disease|O
+mitochondrial myopathy|O
+mitral valve disease|O
+mitral valve insufficiency|O
+mitral valve prolapse|O
+mitral valve stenosis|O
+mixed astrocytoma-ependymoma|O
+mixed astrocytoma-ependymoma-oligodendroglioma|O
+mixed cell adenoma|O
+mixed cell type adenoma of parathyroid|O
+mixed cell type cancer|O
+mixed cell type kidney Wilms' tumor|O
+mixed cell uveal melanoma|O
+mixed cerebral palsy|O
+mixed connective tissue disease|O
+mixed ductal-endocrine carcinoma|O
+mixed endometrial stromal and smooth muscle tumor|O
+mixed eosinophil-basophil adenoma|O
+mixed epithelial stromal tumour|O
+mixed epithelial tumor of ovary|O
+mixed epithelial/mesenchymal metaplastic breast carcinoma|O
+mixed extragonadal germ cell cancer|O
+mixed germ cell cancer|O
+mixed germ cell-sex cord neoplasm|O
+mixed glioma|O
+mixed gonadal dysgenesis|O
+mixed hepatoblastoma|O
+mixed lacrimal gland cancer|O
+mixed liposarcoma|O
+mixed malaria|O
+mixed mineral dust pneumoconiosis|O
+mixed oligodendroglioma-astrocytoma|O
+mixed receptive-expressive language disorder|O
+mixed testicular germ cell tumor|O
+mixed type rhabdomyosarcoma|O
+mixed type thymoma|O
+mixed-type liposarcoma|O
+molluscum contagiosum|O
+mongolian spot|O
+monieziasis|O
+monilethrix|O
+monkeypox|O
+monoclonal gammopathy of uncertain significance|O
+monoclonal paraproteinemia|O
+monocular esotropia|O
+monocular exotropia|O
+monocytic leukemia|O
+monodermal teratoma|O
+monofixation syndrome|O
+monogenic disease|O
+mononeuritis|O
+mononeuritis multiplex|O
+mononeuritis of lower limb|O
+mononeuritis of upper limb|O
+mononeuritis of upper limb and mononeuritis multiplex|O
+mononeuropathy|O
+monophasic synovial sarcoma|O
+mood disorder|O
+morbid obesity|O
+morpheaform basal cell carcinoma|O
+morphine dependence|O
+motility-related diarrhea|O
+motion sickness|O
+motor neuritis|O
+motor neuron disease|O
+motor peripheral neuropathy|O
+mouth disease|O
+movement disease|O
+mu chain disease|O
+mucin-rich endometrial endometrioid adenocarcinoma|O
+mucinoses|O
+mucinous adenocarcinoma|O
+mucinous adenofibroma|O
+mucinous cystadenocarcinoma|O
+mucinous cystadenofibroma|O
+mucinous intrahepatic cholangiocarcinoma|O
+mucinous ovarian cystadenoma|O
+mucinous stomach adenocarcinoma|O
+mucinous tubular and spindle renal cell carcinoma|O
+mucocele of appendix|O
+mucocele of salivary gland|O
+mucocutaneous leishmaniasis|O
+mucoepidermoid carcinoma|O
+mucoepidermoid esophageal carcinoma|O
+mucoepidermoid thyroid carcinoma|O
+mucolipidosis|O
+mucopolysaccharidosis|O
+mucopolysaccharidosis I|O
+mucopolysaccharidosis II|O
+mucopolysaccharidosis III|O
+mucopolysaccharidosis IV|O
+mucopolysaccharidosis IX|O
+mucopolysaccharidosis VI|O
+mucosal melanoma|O
+mucosulfatidosis|O
+mulibrey nanism|O
+multicentric papillary thyroid carcinoma|O
+multicentric reticulohistiocytosis|O
+multidrug-resistant tuberculosis|O
+multifocal dystonia|O
+multifocal osteogenic sarcoma|O
+multilocular clear cell renal cell carcinoma|O
+multinodular goiter|O
+multiple carboxylase deficiency|O
+multiple chemical sensitivity|O
+multiple cranial nerve palsy|O
+multiple cutaneous and mucosal venous malformations|O
+multiple endocrine neoplasia type 1|O
+multiple endocrine neoplasia type 2A|O
+multiple endocrine neoplasia type 2B|O
+multiple epiphyseal dysplasia|O
+multiple intestinal atresia|O
+multiple mucosal neuroma|O
+multiple myeloma|O
+multiple personality disorder|O
+multiple sclerosis|O
+multiple skull base meningioma|O
+multiple spinal canal and spinal cord meningioma|O
+multiple symmetric lipomatosis|O
+multiple symmetrical lipomatosis|O
+multiple synostoses syndrome|O
+multiple system atrophy|O
+mumps|O
+muscle benign neoplasm|O
+muscle cancer|O
+muscle tissue disease|O
+muscular atrophy|O
+muscular disease|O
+muscular dystrophy|O
+muscular dystrophy-dystroglycanopathy|O
+musculoskeletal system benign neoplasm|O
+musculoskeletal system cancer|O
+musculoskeletal system disease|O
+mushroom workers' lung|O
+mutism|O
+myasthenia gravis|O
+mycosis fungoides|O
+mycotic corneal ulcer|O
+myelitis|O
+myelodysplastic myeloproliferative cancer|O
+myelodysplastic syndrome|O
+myelofibrosis|O
+myeloid leukemia|O
+myeloid sarcoma|O
+myeloma|O
+myelomeningocele|O
+myelophthisic anemia|O
+myiasis|O
+myoblastoma|O
+myocardial infarction|O
+myocardial stunning|O
+myocarditis|O
+myocardium cancer|O
+myoclonic cerebellar dyssynergia|O
+myoepithelial carcinoma|O
+myoepithelioma|O
+myofascial pain syndrome|O
+myofibroma|O
+myoma|O
+myopathy|O
+myopathy of extraocular muscle|O
+myopia|O
+myositis|O
+myositis fibrosa|O
+myositis ossificans|O
+myotonic cataract|O
+myotonic disease|O
+myotonic dystrophy type 1|O
+myotonic dystrophy type 2|O
+myringitis bullosa hemorrhagica|O
+myxedema|O
+myxoid chondrosarcoma|O
+myxoid leiomyosarcoma|O
+myxoid liposarcoma|O
+myxoid liposarcoma of the ovary|O
+myxomatous pattern testicular yolk sac tumor|O
+myxopapillary ependymoma|O
+myxosarcoma|O
+nail disease|O
+nail-patella syndrome|O
+narcissistic personality disorder|O
+narcolepsy|O
+nasal cavity adenocarcinoma|O
+nasal cavity cancer|O
+nasal cavity carcinoma|O
+nasal cavity carcinoma in situ|O
+nasal cavity disease|O
+nasal cavity inverting papilloma|O
+nasal cavity lymphoma|O
+nasal cavity neoplasm|O
+nasal cavity olfactory neuroblastoma|O
+nasal cavity squamous cell carcinoma|O
+nasal vestibule papilloma|O
+nasopharyngeal disease|O
+nasopharyngitis|O
+nasopharynx carcinoma|O
+natural killer cell leukemia|O
+necatoriasis|O
+necrobiosis lipoidica|O
+necrosis of ear ossicle|O
+necrosis of pituitary|O
+necrotic uveal melanoma|O
+necrotizing fasciitis|O
+necrotizing gastritis|O
+necrotizing sialometaplasia|O
+necrotizing ulcerative gingivitis|O
+nemaline myopathy|O
+neonatal abstinence syndrome|O
+neonatal anemia|O
+neonatal candidiasis|O
+neonatal diabetes mellitus|O
+neonatal infective mastitis|O
+neonatal jaundice|O
+neonatal leukemia|O
+neonatal myasthenia gravis|O
+neonatal period electroclinical syndrome|O
+neonatal respiratory failure|O
+neonatal thyrotoxicosis|O
+neonatal urinary tract infectious disease|O
+neovascular glaucoma|O
+nephritis|O
+nephroblastoma|O
+nephrocalcinosis|O
+nephrogenic adenofibroma|O
+nephrogenic adenoma|O
+nephrogenic adenoma of the urethra|O
+nephrogenic adenoma of urinary bladder|O
+nephrogenic diabetes insipidus|O
+nephrolithiasis|O
+nephronophthisis|O
+nephropathia epidemica|O
+nephrosclerosis|O
+nephrosis|O
+nephrotic syndrome|O
+nerve compression syndrome|O
+nerve fibre bundle defect|O
+nerve plexus neoplasm|O
+nerve root neoplasm|O
+nervous system benign neoplasm|O
+nervous system cancer|O
+nervous system disease|O
+nervous system hibernoma|O
+nested variant infiltrating bladder urothelial carcinoma|O
+neurilemmoma|O
+neurilemmoma of the fifth cranial nerve|O
+neurilemmoma of the pleura|O
+neurilemmomatosis|O
+neuritis|O
+neuroacanthocytosis|O
+neuroaspergillosis|O
+neuroaxonal dystrophy|O
+neuroblastoma|O
+neurocirculatory asthenia|O
+neurodegenerative disease|O
+neurodermatitis|O
+neuroectodermal tumor|O
+neuroendocrine carcinoma|O
+neuroendocrine tumor|O
+neurofibroma|O
+neurofibroma of gallbladder|O
+neurofibroma of spinal cord|O
+neurofibroma of the esophagus|O
+neurofibroma of the heart|O
+neurofibromatosis|O
+neurofibrosarcoma|O
+neurogenic arthropathy|O
+neurogenic bladder|O
+neurogenic bowel|O
+neurohypophyseal diabetes insipidus|O
+neurohypophysis granular cell tumor|O
+neuroleptic malignant syndrome|O
+neuroma|O
+neuromuscular disease|O
+neuromuscular junction disease|O
+neuromyelitis optica|O
+neuronal ceroid lipofuscinosis|O
+neuronitis|O
+neuropathy|O
+neuroretinitis|O
+neuroschistosomiasis|O
+neurotic disorder|O
+neurotic excoriation|O
+neurotrophic keratoconjunctivitis|O
+neutral lipid storage disease|O
+neutropenia|O
+nevoid basal cell carcinoma syndrome|O
+newborn respiratory distress syndrome|O
+nicotine dependence|O
+night blindness|O
+nipple carcinoma|O
+nipple duct carcinoma|O
+nipple neoplasm|O
+nocardiosis|O
+nodular basal cell carcinoma|O
+nodular degeneration of cornea|O
+nodular episcleritis|O
+nodular ganglioneuroblastoma|O
+nodular goiter|O
+nodular hidradenoma|O
+nodular malignant melanoma|O
+nodular medulloblastoma|O
+nodular nonsuppurative panniculitis|O
+nodular prostate|O
+nodular tenosynovitis|O
+noma|O
+nominal aphasia|O
+non specific chronic endometritis|O
+non-Hodgkin lymphoma|O
+non-arteritic anterior ischemic optic neuropathy|O
+non-congenital cyst of kidney|O
+non-functioning pancreatic endocrine tumor|O
+non-gestational choriocarcinoma|O
+non-gestational ovarian choriocarcinoma|O
+non-invasive bladder papillary urothelial neoplasm|O
+non-invasive bladder urothelial carcinoma|O
+non-langerhans-cell histiocytosis|O
+non-proliferative fibrocystic change of the breast|O
+non-renal secondary hyperparathyroidism|O
+non-secretory myeloma|O
+non-small cell lung carcinoma|O
+non-suppurative otitis media|O
+non-syndromic X-linked intellectual disability|O
+non-syndromic intellectual disability|O
+nonencapsulated sclerosing carcinoma|O
+nonepidermolytic palmoplantar keratoderma|O
+noninfectious dermatoses of eyelid|O
+noninvasive malignant thymoma|O
+nonossifying fibromyxoid tumor|O
+nonpapillary renal cell carcinoma|O
+nonparalytic poliomyelitis|O
+nonphotosensitive trichothiodystrophy|O
+nonspecific interstitial pneumonia|O
+nonsyndromic deafness|O
+nontoxic goiter|O
+normal pressure hydrocephalus|O
+normocytic anemia|O
+norwegian scabies|O
+nose disease|O
+nosophobia|O
+notochordal cancer|O
+nuclear senile cataract|O
+null-cell leukemia|O
+nut allergic reaction|O
+nutmeg liver|O
+nutrition disease|O
+nutritional deficiency disease|O
+nutritional optic neuropathy|O
+obesity|O
+obsessive-compulsive disorder|O
+obsessive-compulsive personality disorder|O
+obstructive hydrocephalus|O
+obstructive jaundice|O
+obstructive lung disease|O
+obstructive sleep apnea|O
+occipital lobe neoplasm|O
+occlusion of gallbladder|O
+occlusion precerebral artery|O
+occult macular dystrophy|O
+occupational dermatitis|O
+ochronosis|O
+ocular albinism|O
+ocular cancer|O
+ocular hyperemia|O
+ocular hypertension|O
+ocular hypotension|O
+ocular melanoma|O
+ocular motility disease|O
+oculocerebrorenal syndrome|O
+oculocutaneous albinism|O
+oculodentodigital dysplasia|O
+oculoglandular tularemia|O
+oculogyric crisis|O
+oculomotor nerve paralysis|O
+oculopharyngeal muscular dystrophy|O
+odontoclasia|O
+oesophagostomiasis|O
+olecranon bursitis|O
+olfactory groove meningioma|O
+olfactory nerve disease|O
+olfactory nerve neoplasm|O
+olfactory neural tumor|O
+olfactory neuroblastoma|O
+oligodendroglioma|O
+oligohydramnios|O
+oligospermia|O
+olivopontocerebellar atrophy|O
+omodysplasia|O
+omphalocele|O
+onchocerciasis|O
+oncocytic breast carcinoma|O
+oophoritis|O
+open-angle glaucoma|O
+ophthalmia neonatorum|O
+ophthalmia nodosa|O
+ophthalmomyiasis|O
+ophthalmoplegia|O
+opiate dependence|O
+opioid abuse|O
+opisthorchiasis|O
+opportunistic bacterial infectious disease|O
+opportunistic mycosis|O
+oppositional defiant disorder|O
+optic atrophy|O
+optic disk drusen|O
+optic nerve astrocytoma|O
+optic nerve disease|O
+optic nerve glioma|O
+optic nerve neoplasm|O
+optic nerve sheath meningioma|O
+optic neuritis|O
+optic papillitis|O
+oral candidiasis|O
+oral cavity cancer|O
+oral cavity carcinoma in situ|O
+oral hairy leukoplakia|O
+oral leukoedema|O
+oral mucosa leukoplakia|O
+oral squamous cell carcinoma|O
+oral submucous fibrosis|O
+oral tuberculosis|O
+orbit alveolar rhabdomyosarcoma|O
+orbit embryonal rhabdomyosarcoma|O
+orbit lymphoma|O
+orbit rhabdomyosarcoma|O
+orbit sarcoma|O
+orbital cancer|O
+orbital cellulitis|O
+orbital cyst|O
+orbital disease|O
+orbital granuloma|O
+orbital osteomyelitis|O
+orbital periostitis|O
+orbital plasma cell granuloma|O
+orbital tenonitis|O
+orchitis|O
+organ system benign neoplasm|O
+organ system cancer|O
+organic acidemia|O
+ornithine carbamoyltransferase deficiency|O
+ornithine translocase deficiency|O
+ornithosis|O
+orofacial cleft|O
+orofaciodigital syndrome|O
+orofaciodigital syndrome type I|O
+oromandibular dystonia|O
+oropharyngeal anthrax|O
+oropharynx cancer|O
+orotic aciduria|O
+orthostatic proteinuria|O
+osmotic diarrhea|O
+ossifying fibroma|O
+ossifying fibromyxoid tumor|O
+osteitis fibrosa|O
+osteoarthritis|O
+osteoblastoma|O
+osteochondritis dissecans|O
+osteochondrodysplasia|O
+osteochondrosis|O
+osteoclast-like giant cell neoplasm of the pancreas|O
+osteogenesis imperfecta|O
+osteomalacia|O
+osteomyelitis|O
+osteonecrosis|O
+osteopetrosis|O
+osteopoikilosis|O
+osteoporosis|O
+osteosarcoma|O
+osteosarcoma arising in bone Paget's disease|O
+osteosclerosis|O
+osteosclerotic myeloma|O
+ostertagiasis|O
+otitis externa|O
+otitis interna|O
+otitis media|O
+otomycosis|O
+otosalpingitis|O
+otosclerosis|O
+otospondylomegaepiphyseal dysplasia|O
+outlet dysfunction constipation|O
+ovarian Brenner tumor|O
+ovarian Wilms' cancer|O
+ovarian angiosarcoma|O
+ovarian benign neoplasm|O
+ovarian biphasic or triphasic teratoma|O
+ovarian cancer|O
+ovarian carcinoma|O
+ovarian carcinosarcoma|O
+ovarian clear cell adenocarcinoma|O
+ovarian clear cell adenofibroma|O
+ovarian clear cell carcinoma|O
+ovarian clear cell cystadenocarcinoma|O
+ovarian clear cell cystadenofibroma|O
+ovarian clear cell malignant adenofibroma|O
+ovarian cyst|O
+ovarian cystadenocarcinoma|O
+ovarian cystadenoma|O
+ovarian cystic teratoma|O
+ovarian disease|O
+ovarian dysfunction|O
+ovarian embryonal carcinoma|O
+ovarian endodermal sinus tumor|O
+ovarian endometrial cancer|O
+ovarian endometrioid adenofibroma|O
+ovarian endometrioid cystadenofibroma|O
+ovarian endometrioid cystadenoma|O
+ovarian endometrioid malignant adenofibroma|O
+ovarian endometrioid stromal sarcoma|O
+ovarian fetiform teratoma|O
+ovarian germ cell cancer|O
+ovarian germ cell monodermal and highly specialized teratoma|O
+ovarian germ cell teratoma|O
+ovarian gonadoblastoma|O
+ovarian hyperstimulation syndrome|O
+ovarian large-cell neuroendocrine carcinoma|O
+ovarian lymphoma|O
+ovarian malignant mesothelioma|O
+ovarian melanoma|O
+ovarian mesodermal adenosarcoma|O
+ovarian mixed germ cell neoplasm|O
+ovarian mucinous adenocarcinoma|O
+ovarian mucinous adenofibroma|O
+ovarian mucinous cystadenocarcinoma|O
+ovarian mucinous cystadenofibroma|O
+ovarian mucinous malignant adenofibroma|O
+ovarian mucinous neoplasm|O
+ovarian papillary cystadenoma|O
+ovarian papillary neoplasm|O
+ovarian primitive germ cell tumor|O
+ovarian serous adenofibroma|O
+ovarian serous carcinoma|O
+ovarian serous cystadenocarcinoma|O
+ovarian serous cystadenofibroma|O
+ovarian small cell carcinoma|O
+ovarian solid teratoma|O
+ovarian squamous cell carcinoma|O
+ovarian squamous cell neoplasm|O
+ovarian stromal hyperthecosis|O
+ovarian surface papilloma|O
+ovary adenocarcinoma|O
+ovary epithelial cancer|O
+ovary leiomyosarcoma|O
+ovary mixed epithelial carcinoma|O
+ovary neuroendocrine neoplasm|O
+ovary papillary carcinoma|O
+ovary rhabdomyosarcoma|O
+ovary sarcoma|O
+ovary serous adenocarcinoma|O
+ovary transitional cell carcinoma|O
+overnutrition|O
+oxyphilic adenoma|O
+oxyphilic endometrial endometrioid adenocarcinoma|O
+pachyonychia congenita|O
+pain agnosia|O
+pain disorder|O
+palindromic rheumatism|O
+palmoplantar keratosis|O
+pancreas adenocarcinoma|O
+pancreas disease|O
+pancreas lymphoma|O
+pancreas sarcoma|O
+pancreatic ACTH hormone producing tumor|O
+pancreatic acinar cell adenocarcinoma|O
+pancreatic agenesis|O
+pancreatic cancer|O
+pancreatic carcinoma|O
+pancreatic cholera|O
+pancreatic colloid cystadenocarcinoma|O
+pancreatic colloid cystadenoma|O
+pancreatic cystadenocarcinoma|O
+pancreatic cystadenoma|O
+pancreatic delta cell neoplasm|O
+pancreatic ductal adenocarcinoma|O
+pancreatic ductal carcinoma|O
+pancreatic endocrine carcinoma|O
+pancreatic foamy gland adenocarcinoma|O
+pancreatic gastrinoma|O
+pancreatic intraductal papillary-colloid carcinoma|O
+pancreatic intraductal papillary-mucinous adenoma|O
+pancreatic intraductal papillary-mucinous neoplasm|O
+pancreatic invasive intraductal papillary-mucinous carcinoma|O
+pancreatic invasive mucinous cystadenocarcinoma|O
+pancreatic mucinous cystadenoma|O
+pancreatic mucinous ductal ectasia|O
+pancreatic non-functioning delta cell tumor|O
+pancreatic non-invasive intraductal papillary-mucinous carcinoma|O
+pancreatic non-invasive mucinous cystadenocarcinoma|O
+pancreatic serous cystadenocarcinoma|O
+pancreatic serous cystadenoma|O
+pancreatic serous cystic neoplasm|O
+pancreatic signet ring cell adenocarcinoma|O
+pancreatic solid pseudopapillary carcinoma|O
+pancreatic somatostatinoma|O
+pancreatic steatorrhea|O
+pancreatic vasoactive intestinal peptide producing tumor|O
+pancreatitis|O
+pancreatoblastoma|O
+pancytopenia|O
+panhypopituitarism|O
+panic disorder|O
+panniculitis|O
+panophthalmitis|O
+pantothenate kinase-associated neurodegeneration|O
+panuveitis|O
+papillary adenocarcinoma|O
+papillary adenofibroma|O
+papillary adenoma|O
+papillary carcinoma|O
+papillary conjunctivitis|O
+papillary craniopharyngioma|O
+papillary cystadenocarcinoma|O
+papillary ependymoma|O
+papillary extrahepatic bile duct adenocarcinoma|O
+papillary follicular thyroid adenocarcinoma|O
+papillary hidradenoma|O
+papillary meningioma of the cerebellum|O
+papillary pattern testicular yolk sac tumor|O
+papillary renal cell carcinoma|O
+papillary serous adenocarcinoma|O
+papillary squamous carcinoma|O
+papillary thymic adenocarcinoma|O
+papillary thyroid carcinoma|O
+papillary transitional carcinoma|O
+papilledema|O
+papilloma|O
+parachordoma|O
+paracoccidioidomycosis|O
+paraganglioma|O
+paragonimiasis|O
+paralytic ileus|O
+paralytic lagophthalmos|O
+paralytic poliomyelitis|O
+paralytic squint|O
+parameningeal embryonal rhabdomyosarcoma|O
+parametritis|O
+parametrium malignant neoplasm|O
+paramyloidosis|O
+paranasal sinus cancer|O
+paranasal sinus disease|O
+paranasal sinus lymphoma|O
+paranasal sinus neoplasm|O
+paranasal sinus sarcoma|O
+paraneoplastic polyneuropathy|O
+paranoid personality disorder|O
+paranoid schizophrenia|O
+parapharyngeal meningioma|O
+paraphilia disorder|O
+paraphimosis|O
+paraplegia|O
+parapsoriasis|O
+parasagittal meningioma|O
+parasitic Ichthyosporea infectious disease|O
+parasitic conjunctivitis|O
+parasitic ectoparasitic infectious disease|O
+parasitic eyelid infestation|O
+parasitic helminthiasis infectious disease|O
+parasitic infectious disease|O
+parasitic protozoa infectious disease|O
+paratesticular lipoma|O
+parathyroid adenoma|O
+parathyroid carcinoma|O
+parathyroid gland disease|O
+parathyroid oncocytic adenoma|O
+parathyroid transitional clear cell adenoma|O
+paratyphoid fever|O
+paraurethral gland cancer|O
+paraurethral gland neoplasm|O
+parenchymatous neurosyphilis|O
+parietal foramina|O
+parietal lobe ependymoma|O
+parietal lobe neoplasm|O
+paronychia|O
+parotid disease|O
+parotid gland adenoid cystic carcinoma|O
+parotid gland cancer|O
+parotitis|O
+parovarian cyst|O
+paroxysmal nocturnal hemoglobinuria|O
+pars planitis|O
+partial arterial retinal occlusion|O
+partial central choroid dystrophy|O
+partial circumpapillary choroid dystrophy|O
+partial fetal alcohol syndrome|O
+partial motor epilepsy|O
+partial of retinal vein occlusion|O
+partial optic atrophy|O
+partial sensory epilepsy|O
+partial third-nerve palsy|O
+pasteurellosis|O
+patellar tendinitis|O
+patellofemoral pain syndrome|O
+patent ductus arteriosus|O
+patent foramen ovale|O
+pathologic nystagmus|O
+pathological gambling|O
+patulous eustachian tube|O
+peanut allergic reaction|O
+pediatric CNS choriocarcinoma|O
+pediatric CNS embryonal cell carcinoma|O
+pediatric Intraocular retinoblastoma|O
+pediatric angiosarcoma|O
+pediatric cerebral ependymoblastoma|O
+pediatric ependymoma|O
+pediatric epithelioid sarcoma|O
+pediatric extraocular retinoblastoma|O
+pediatric fibrosarcoma|O
+pediatric germ cell cancer|O
+pediatric infratentorial ependymoblastoma|O
+pediatric infratentorial ependymoma|O
+pediatric leptomeningeal melanoma|O
+pediatric liposarcoma|O
+pediatric lymphoma|O
+pediatric meningioma|O
+pediatric mesenchymal chondrosarcoma|O
+pediatric myxoid chondrosarcoma|O
+pediatric osteosarcoma|O
+pediatric ovarian dysgerminoma|O
+pediatric ovarian germ cell tumor|O
+pediatric supratentorial ependymoma|O
+pediatric testicular germ cell tumor|O
+pedophilia|O
+peeling skin syndrome|O
+peliosis hepatis|O
+pellagra|O
+pelvic inflammatory disease|O
+pelvic lipomatosis|O
+pelvic muscle wasting|O
+pelvic varices|O
+pemphigus|O
+penicilliosis|O
+penile cancer|O
+penile disease|O
+penile neoplasm|O
+penile urethral cancer|O
+penis Paget's disease|O
+penis basal cell carcinoma|O
+penis basaloid carcinoma|O
+penis carcinoma|O
+penis carcinoma in situ|O
+penis mixed squamous cell carcinoma|O
+penis non-invasive verrucous carcinoma|O
+penis papillary carcinoma|O
+penis sarcoma|O
+penis squamous cell carcinoma|O
+penis verrucous carcinoma|O
+peptic esophagitis|O
+peptic ulcer disease|O
+peptic ulcer perforation|O
+perforated corneal ulcer|O
+perforation of bile duct|O
+periampullary adenocarcinoma|O
+periampullary adenoma|O
+perianal hematoma|O
+perianal skin Paget's disease|O
+periapical granuloma|O
+periapical periodontitis|O
+periarthritis|O
+pericardial effusion|O
+pericardial mesothelioma|O
+pericardial tuberculosis|O
+pericarditis|O
+pericardium cancer|O
+pericardium disease|O
+pericardium leiomyoma|O
+pericholangitis|O
+perichondritis of auricle|O
+pericoronitis|O
+periductal breast myoepitheliosis|O
+perinatal intestinal perforation|O
+perinatal jaundice due to hepatocellular damage|O
+perinatal necrotizing enterocolitis|O
+perineocele|O
+perinephritis|O
+perineural angioma|O
+perineurioma|O
+periocular meningioma|O
+periodic limb movement disorder|O
+periodontal disease|O
+periodontitis|O
+periodontosis|O
+periosteal chondrosarcoma|O
+periosteal osteogenic sarcoma|O
+periostitis|O
+peripartum cardiomyopathy|O
+peripheral T-cell lymphoma|O
+peripheral artery disease|O
+peripheral degeneration of cornea|O
+peripheral epithelioid sarcoma|O
+peripheral focal chorioretinitis|O
+peripheral nerve schwannoma|O
+peripheral nerve sheath neoplasm|O
+peripheral nervous system disease|O
+peripheral nervous system ganglioneuroblastoma|O
+peripheral nervous system neoplasm|O
+peripheral neuropathy|O
+peripheral osteosarcoma|O
+peripheral primitive neuroectodermal tumor|O
+peripheral retinal degeneration|O
+peripheral scars of retina|O
+peripheral vascular disease|O
+peripheral vertigo|O
+peritoneal benign neoplasm|O
+peritoneal carcinoma|O
+peritoneal mesothelioma|O
+peritoneal serous adenocarcinoma|O
+peritoneal serous papillary adenocarcinoma|O
+peritoneum cancer|O
+peritonitis|O
+perivascular epithelioid cell tumor|O
+perivascular tumor|O
+periventricular leukomalacia|O
+periventricular nodular heterotopia|O
+pernicious anemia|O
+peroneal nerve paralysis|O
+peroneal neuropathy|O
+peroxisomal acyl-CoA oxidase deficiency|O
+peroxisomal disease|O
+persian gulf syndrome|O
+persistent fetal circulation syndrome|O
+persistent generalized lymphadenopathy|O
+persistent hyperplastic primary vitreous|O
+persistent mullerian duct syndrome|O
+personality disorder|O
+pertussis|O
+pervasive developmental disorder|O
+pes anserinus tendinitis or bursitis|O
+pestis minor|O
+petroclival meningioma|O
+petrositis|O
+petrous apex meningioma|O
+phacogenic glaucoma|O
+phacolytic glaucoma|O
+phaeochromocytoma|O
+phaeohyphomycosis|O
+phagocyte bactericidal dysfunction|O
+phalanx chondroma|O
+pharyngitis|O
+pharyngoconjunctival fever|O
+pharynx cancer|O
+pharynx carcinoma in situ|O
+pharynx squamous cell carcinoma|O
+phencyclidine abuse|O
+phenylketonuria|O
+philophthalmiasis|O
+phimosis|O
+phlebitis|O
+phlyctenulosis|O
+phobic disorder|O
+phonagnosia|O
+phosphorus metabolism disease|O
+photoallergic dermatitis|O
+photokeratitis|O
+photosensitive epilepsy|O
+photosensitive trichothiodystrophy|O
+photosensitivity disease|O
+phototoxic dermatitis|O
+phthisical cornea|O
+physical disorder|O
+physical urticaria|O
+physiological polycythemia|O
+pica disease|O
+piebaldism|O
+pigmentation disease|O
+pigmented basal cell carcinoma|O
+pigmented villonodular synovitis|O
+pilar sheath acanthoma|O
+pilocytic astrocytoma|O
+pilocytic astrocytoma of cerebellum|O
+pilomatrixoma|O
+pilomyxoid astrocytoma|O
+pineal dysgerminoma|O
+pineal gland astrocytoma|O
+pineal gland cancer|O
+pineal parenchymal tumor of intermediate differentiation|O
+pineal region choriocarcinoma|O
+pineal region germinoma|O
+pineal region immature teratoma|O
+pineal region mature teratoma|O
+pineal region meningioma|O
+pineal region teratoma|O
+pineal region yolk sac tumor|O
+pineoblastoma|O
+pinguecula|O
+pinta disease|O
+pituitary adenoma|O
+pituitary apoplexy|O
+pituitary cancer|O
+pituitary carcinoma|O
+pituitary gland disease|O
+pituitary hypoplasia|O
+pituitary infarct|O
+pituitary stalk meningioma|O
+pituitary-dependent Cushing's disease|O
+pityriasis rosea|O
+pityriasis rubra pilaris|O
+pityriasis versicolor|O
+placenta accreta|O
+placenta cancer|O
+placenta disease|O
+placenta praevia|O
+placental abruption|O
+placental choriocarcinoma|O
+placental insufficiency|O
+placental site trophoblastic tumor|O
+plague|O
+plantar fascial fibromatosis|O
+plantar fasciitis|O
+plantar nerve lesion|O
+plantar verrucous skin carcinoma|O
+plantar wart|O
+plasma cell neoplasm|O
+plasma protein metabolism disease|O
+plasmacytic leukemia|O
+plasmacytoid variant infiltrating bladder urothelial carcinoma|O
+plasmacytoma|O
+platelet storage pool deficiency|O
+pleomorphic adenoma|O
+pleomorphic adenoma carcinoma|O
+pleomorphic carcinoma|O
+pleomorphic lipoma|O
+pleomorphic liposarcoma|O
+pleomorphic rhabdomyosarcoma|O
+pleomorphic xanthoastrocytoma|O
+plethora of newborn|O
+pleural cancer|O
+pleural disease|O
+pleural empyema|O
+pleural lipoma|O
+pleural tuberculosis|O
+pleurisy|O
+pleuropneumonia|O
+pleuropulmonary blastoma|O
+plexiform neurofibroma|O
+plexiform schwannoma|O
+plexopathy|O
+pneumatosis cystoides intestinalis|O
+pneumoconiosis|O
+pneumoconiosis due to talc|O
+pneumocystosis|O
+pneumonia|O
+pneumonic plague|O
+pneumonic tularemia|O
+pneumothorax|O
+podoconiosis|O
+poliomyelitis|O
+polyarteritis nodosa|O
+polyclonal hypergammaglobulinemia|O
+polycystic echinococcosis|O
+polycystic kidney disease|O
+polycystic liver disease|O
+polycystic ovary syndrome|O
+polycythemia|O
+polycythemia due to hypoxia|O
+polycythemia vera|O
+polydactyly|O
+polyembryoma of the ovary|O
+polyhydramnios|O
+polymyalgia rheumatica|O
+polyneuropathy|O
+polyneuropathy due to drug|O
+polyneuropathy in collagen vascular disease|O
+polyp of corpus uteri|O
+polyp of middle ear|O
+polyradiculoneuropathy|O
+polyradiculopathy|O
+polyvesicular vitelline pattern ovarian yolk sac tumor|O
+polyvesicular vitelline pattern testicular yolk sac tumor|O
+pontocerebellar hypoplasia|O
+pontocerebellar hypoplasia type 10|O
+pontocerebellar hypoplasia type 1A|O
+pontocerebellar hypoplasia type 1B|O
+pontocerebellar hypoplasia type 2A|O
+pontocerebellar hypoplasia type 2B|O
+pontocerebellar hypoplasia type 2C|O
+pontocerebellar hypoplasia type 2D|O
+pontocerebellar hypoplasia type 2E|O
+pontocerebellar hypoplasia type 3|O
+pontocerebellar hypoplasia type 4|O
+pontocerebellar hypoplasia type 5|O
+pontocerebellar hypoplasia type 6|O
+pontocerebellar hypoplasia type 7|O
+pontocerebellar hypoplasia type 8|O
+pontocerebellar hypoplasia type 9|O
+popliteal pterygium syndrome|O
+porencephaly|O
+porokeratosis|O
+porphyria|O
+porphyria cutanea tarda|O
+portal hypertension|O
+portal vein thrombosis|O
+post-surgical hypoinsulinemia|O
+post-thrombotic syndrome|O
+post-traumatic stress disorder|O
+post-vaccinal encephalitis|O
+postauricular lymphadenitis|O
+postcholecystectomy syndrome|O
+postcricoid region cancer|O
+postencephalitic Parkinson disease|O
+posterior cerebral artery infarction|O
+posterior corneal pigmentation|O
+posterior cranial fossa meningioma|O
+posterior dislocation of lens|O
+posterior foramen magnum meningioma|O
+posterior mediastinum cancer|O
+posterior myocardial infarction|O
+posterior pituitary gland neoplasm|O
+posterior polar cataract|O
+posterior scleritis|O
+posterior urethra cancer|O
+posterior uveal melanoma|O
+posterior uveitis|O
+posteroinferior myocardial infarction|O
+posterolateral myocardial infarction|O
+postgastrectomy syndrome|O
+postgerminal center chronic lymphocytic leukemia/small lymphocytic lymphoma|O
+postinflammatory pulmonary fibrosis|O
+postmenopausal atrophic vaginitis|O
+postpartum depression|O
+postpoliomyelitis syndrome|O
+postsurgical hypothyroidism|O
+pre-eclampsia|O
+pre-malignant neoplasm|O
+precursor B lymphoblastic lymphoma/leukemia|O
+precursor T-lymphoblastic lymphoma/leukemia|O
+precursor T-lymphoblastic lymphoma/leukemia refractory|O
+precursor lymphoblastic lymphoma/leukemia|O
+prediabetes syndrome|O
+predominantly cortical thymoma|O
+pregerminal center chronic lymphocytic leukemia/small lymphocytic lymphoma|O
+pregnancy adenoma|O
+premature ejaculation|O
+premature menopause|O
+premature ovarian failure|O
+premenstrual tension|O
+prepuce cancer|O
+preretinal fibrosis|O
+presbyopia|O
+priapism|O
+primary amebic meningoencephalitis|O
+primary angle-closure glaucoma|O
+primary bacterial infectious disease|O
+primary biliary cirrhosis|O
+primary cerebellar degeneration|O
+primary ciliary dyskinesia|O
+primary congenital glaucoma|O
+primary cutaneous amyloidosis|O
+primary eye hypotony|O
+primary hyperoxaluria|O
+primary hyperparathyroidism|O
+primary hypertrophic osteoarthropathy|O
+primary immunodeficiency disease|O
+primary lacrimal atrophy|O
+primary open angle glaucoma|O
+primary optic atrophy|O
+primary pigmented nodular adrenocortical disease|O
+primary polycythemia|O
+primary progressive multiple sclerosis|O
+primary pulmonary hypertension|O
+primary syphilis|O
+primary systemic mycosis|O
+primary thrombocytopenia|O
+prion disease|O
+proctitis|O
+progeria|O
+progesterone-receptor negative breast cancer|O
+progesterone-receptor positive breast cancer|O
+progressive bulbar palsy|O
+progressive multifocal leukoencephalopathy|O
+progressive muscular atrophy|O
+progressive myoclonus epilepsy|O
+progressive peripheral pterygium|O
+progressive relapsing multiple sclerosis|O
+progressive supranuclear palsy|O
+prolactin producing pituitary tumor|O
+prolactinoma|O
+prolapse of female genital organ|O
+prolapse of lacrimal gland|O
+prolapse of urethra|O
+proliferative diabetic retinopathy|O
+proliferative fasciitis|O
+proliferative glomerulonephritis|O
+proliferative type fibrocystic change of breast|O
+proliferative vitreoretinopathy|O
+prolymphocytic leukemia|O
+propionic acidemia|O
+prosopagnosia|O
+prostate adenocarcinoma|O
+prostate adenoid cystic carcinoma|O
+prostate angiosarcoma|O
+prostate calculus|O
+prostate cancer|O
+prostate carcinoma|O
+prostate carcinoma in situ|O
+prostate colloid adenocarcinoma|O
+prostate disease|O
+prostate embryonal rhabdomyosarcoma|O
+prostate leiomyoma|O
+prostate leiomyosarcoma|O
+prostate lymphoma|O
+prostate malignant phyllodes tumor|O
+prostate neuroendocrine neoplasm|O
+prostate rhabdomyosarcoma|O
+prostate sarcoma|O
+prostate signet ring cell adenocarcinoma|O
+prostate small cell carcinoma|O
+prostate squamous cell carcinoma|O
+prostate stromal sarcoma|O
+prostate transitional cell carcinoma|O
+prostatic acinar adenocarcinoma|O
+prostatic adenoma|O
+prostatic cyst|O
+prostatic hypertrophy|O
+prostatic urethra urothelial carcinoma|O
+prostatic urethral cancer|O
+prostatitis|O
+prostatocystitis|O
+protein C deficiency|O
+protein S deficiency|O
+protein-deficiency anemia|O
+protein-energy malnutrition|O
+protein-losing enteropathy|O
+proteinuria|O
+prothrombin deficiency|O
+protoplasmic astrocytoma|O
+protozoal dysentery|O
+proximal symphalangism|O
+psammomatous meningioma|O
+pseudo-TORCH syndrome|O
+pseudoachondroplasia|O
+pseudobulbar palsy|O
+pseudoglandular variant testicular seminoma|O
+pseudohermaphroditism|O
+pseudohypoaldosteronism|O
+pseudohypoparathyroidism|O
+pseudomembranous conjunctivitis|O
+pseudomyxoma peritonei|O
+pseudopapilledema|O
+pseudopseudohypoparathyroidism|O
+pseudopterygium|O
+pseudoretinitis pigmentosa|O
+pseudosarcomatous fibromatosis|O
+pseudotumor cerebri|O
+pseudovascular skin squamous cell carcinoma|O
+pseudoxanthoma elasticum|O
+psoriasis|O
+psoriatic arthritis|O
+psychologic dyspareunia|O
+psychologic vaginismus|O
+psychosexual disorder|O
+psychotic disorder|O
+pterygium|O
+ptosis|O
+puerperal pulmonary embolism|O
+pulmonary alveolar microlithiasis|O
+pulmonary alveolar proteinosis|O
+pulmonary artery choriocarcinoma|O
+pulmonary artery leiomyosarcoma|O
+pulmonary aspergilloma|O
+pulmonary blastoma|O
+pulmonary coin lesion|O
+pulmonary edema|O
+pulmonary embolism|O
+pulmonary embolism and infarction|O
+pulmonary emphysema|O
+pulmonary eosinophilia|O
+pulmonary fibrosis|O
+pulmonary hemosiderosis|O
+pulmonary hypertension|O
+pulmonary immaturity|O
+pulmonary large cell neuroendocrine carcinoma|O
+pulmonary neuroendocrine tumor|O
+pulmonary plasma cell granuloma|O
+pulmonary sarcoidosis|O
+pulmonary sclerosing hemangioma|O
+pulmonary subvalvular stenosis|O
+pulmonary systemic sclerosis|O
+pulmonary tuberculosis|O
+pulmonary type ovarian small cell carcinoma|O
+pulmonary valve disease|O
+pulmonary valve insufficiency|O
+pulmonary valve stenosis|O
+pulmonary vein leiomyosarcoma|O
+pulmonary venoocclusive disease|O
+pulp degeneration|O
+pulp erosion|O
+pulpitis|O
+pulsating exophthalmos|O
+punctate epithelial keratoconjunctivitis|O
+pupil disease|O
+pure red-cell aplasia|O
+purine nucleoside phosphorylase deficiency|O
+purine-pyrimidine metabolic disorder|O
+purpura|O
+purulent acute otitis media|O
+purulent endophthalmitis|O
+purulent labyrinthitis|O
+pustulosis of palm and sole|O
+pycnodysostosis|O
+pyelitis|O
+pyelonephritis|O
+pyeloureteritis cystica|O
+pyloric antrum cancer|O
+pyloric stenosis|O
+pylorospasm|O
+pylorus cancer|O
+pyoderma|O
+pyoderma gangrenosum|O
+pyometritis|O
+pyomyositis|O
+pyosalpinx|O
+pyoureter|O
+pyridoxine deficiency anemia|O
+pyridoxine-refractory autosomal recessive sideroblastic anemia|O
+pyridoxine-responsive sideroblastic anemia|O
+pyriform sinus cancer|O
+pyrimidine metabolic disorder|O
+pyromania|O
+pyruvate carboxylase deficiency disease|O
+pyruvate decarboxylase deficiency|O
+pyuria|O
+quadriplegia|O
+qualitative platelet defect|O
+rabies|O
+radial nerve lesion|O
+radial neuropathy|O
+radiation cystitis|O
+radiculopathy|O
+radioulnar synostosis|O
+rapadilino syndrome|O
+rapidly progressive glomerulonephritis|O
+reactive arthritis|O
+reactive cutaneous fibrous lesion|O
+reading disorder|O
+recombinase activating gene 1 deficiency|O
+recombinase activating gene 2 deficiency|O
+rectal cloacogenic carcinoma|O
+rectal disease|O
+rectal neoplasm|O
+rectal prolapse|O
+rectosigmoid cancer|O
+rectosigmoid junction cancer|O
+rectosigmoid junction neoplasm|O
+rectum Kaposi's sarcoma|O
+rectum adenocarcinoma|O
+rectum adenoma|O
+rectum cancer|O
+rectum carcinoma in situ|O
+rectum leiomyoma|O
+rectum leiomyosarcoma|O
+rectum lymphoma|O
+rectum malignant melanoma|O
+rectum mucinous adenocarcinoma|O
+rectum neuroendocrine neoplasm|O
+rectum rhabdomyosarcoma|O
+rectum sarcoma|O
+rectum sarcomatoid carcinoma|O
+rectum signet ring adenocarcinoma|O
+rectum squamous cell carcinoma|O
+recurrent corneal erosion|O
+recurrent hypersomnia|O
+red color blindness|O
+red-green color blindness|O
+reflex epilepsy|O
+reflex sympathetic dystrophy|O
+refractive error|O
+refractory hairy cell leukemia|O
+refractory hematologic cancer|O
+refractory plasma cell neoplasm|O
+regional ureteric cancer|O
+regular astigmatism|O
+relapsing fever|O
+relapsing polychondritis|O
+relapsing-remitting multiple sclerosis|O
+renal Wilms' tumor|O
+renal adenoma|O
+renal agenesis|O
+renal artery atheroma|O
+renal artery disease|O
+renal artery obstruction|O
+renal carcinoma|O
+renal cell carcinoma|O
+renal clear cell carcinoma|O
+renal fibrosis|O
+renal glycosuria|O
+renal hypertension|O
+renal infectious disease|O
+renal oncocytoma|O
+renal osteodystrophy|O
+renal pelvis adenocarcinoma|O
+renal pelvis carcinoma|O
+renal pelvis inverted papilloma|O
+renal pelvis neoplasm|O
+renal pelvis papillary tumor|O
+renal pelvis squamous cell carcinoma|O
+renal pelvis transitional cell carcinoma|O
+renal pelvis urothelial papilloma|O
+renal tuberculosis|O
+renal tubular acidosis|O
+renal tubular transport disease|O
+renal-hepatic-pancreatic dysplasia|O
+renovascular hypertension|O
+reproductive organ benign neoplasm|O
+reproductive organ cancer|O
+reproductive system disease|O
+residual stage angle-closure glaucoma|O
+residual stage corticosteroid-induced glaucoma|O
+residual stage of open angle glaucoma|O
+respiratory failure|O
+respiratory syncytial virus infectious disease|O
+respiratory system benign neoplasm|O
+respiratory system cancer|O
+respiratory system disease|O
+restless legs syndrome|O
+restrictive cardiomyopathy|O
+rete ovarii adenocarcinoma|O
+rete ovarii adenoma|O
+rete ovarii cystadenofibroma|O
+rete ovarii cystadenoma|O
+rete ovarii neoplasm|O
+rete testis adenocarcinoma|O
+rete testis adenoma|O
+rete testis neoplasm|O
+reticular dysgenesis|O
+reticular pattern testicular yolk sac tumor|O
+reticulate acropigmentation of Kitamura|O
+reticulohistiocytic granuloma|O
+reticulosarcoma|O
+retina lymphoma|O
+retinal artery occlusion|O
+retinal cancer|O
+retinal cell cancer|O
+retinal degeneration|O
+retinal detachment|O
+retinal disease|O
+retinal drusen|O
+retinal dystrophies primarily involving Bruch's membrane|O
+retinal dystrophy in systemic or cerebroretinal lipidoses|O
+retinal edema|O
+retinal hemangioblastoma|O
+retinal ischemia|O
+retinal lattice degeneration|O
+retinal melanoma|O
+retinal microaneurysm|O
+retinal perforation|O
+retinal telangiectasia|O
+retinal vascular disease|O
+retinal vascular occlusion|O
+retinal vasculitis|O
+retinal vein occlusion|O
+retinitis|O
+retinitis pigmentosa|O
+retinoblastoma|O
+retinopathy of prematurity|O
+retinoschisis|O
+retrocochlear disease|O
+retrograde amnesia|O
+retromolar area cancer|O
+retroperitoneal cancer|O
+retroperitoneal germ cell neoplasm|O
+retroperitoneal hemangiopericytoma|O
+retroperitoneal leiomyosarcoma|O
+retroperitoneal lymphoma|O
+retroperitoneal neuroblastoma|O
+retroperitoneal sarcoma|O
+retroperitoneum carcinoma|O
+rhabdoid cancer|O
+rhabdoid meningioma|O
+rhabdomyosarcoma|O
+rheumatic congestive heart failure|O
+rheumatic disease|O
+rheumatic fever|O
+rheumatic heart disease|O
+rheumatic myocarditis|O
+rheumatic pulmonary valve disease|O
+rheumatoid arthritis|O
+rheumatoid lung disease|O
+rhinitis|O
+rhinoscleroma|O
+rhinosporidiosis|O
+rhinotracheitis|O
+rhizomelic chondrodysplasia punctata|O
+rickets|O
+rickettsialpox|O
+right bundle branch block|O
+ring corneal ulcer|O
+ring staphyloma|O
+rippling muscle disease|O
+root caries|O
+root resorption|O
+rosacea|O
+rosacea conjunctivitis|O
+round ligament malignant neoplasm|O
+rubella|O
+rubeosis iridis|O
+rumination disorder|O
+sacral spinal canal and spinal cord meningioma|O
+sacrum chordoma|O
+sagittal sinus thrombosis|O
+salivary gland adenoid cystic carcinoma|O
+salivary gland cancer|O
+salivary gland carcinoma|O
+salivary gland disease|O
+salpingitis|O
+salpingitis isthmica nodosa|O
+salpingo-oophoritis|O
+sarcocystosis|O
+sarcoid meningitis|O
+sarcoidosis|O
+sarcoma|O
+sarcomatoid basal cell carcinoma|O
+sarcomatoid mesothelioma|O
+sarcomatoid penile squamous cell carcinoma|O
+sarcomatoid renal cell carcinoma|O
+sarcomatoid squamous cell skin carcinoma|O
+sarcomatoid transitional cell carcinoma|O
+sarcomatoid uterine corpus endometrioid adenocarcinoma|O
+sarcomatosis|O
+sarcomatosis of the meninges|O
+sarcomatous intrahepatic cholangiocarcinoma|O
+scabies|O
+scalp dermatosis|O
+scapuloperoneal myopathy|O
+scarlet fever|O
+schistosomiasis|O
+schizoaffective disorder|O
+schizoid personality disorder|O
+schizophrenia|O
+schizophreniform disorder|O
+schizotypal personality disorder|O
+schneckenbecken dysplasia|O
+schwannoma of jugular foramen|O
+schwannoma of twelfth cranial nerve|O
+sciatic neuropathy|O
+scimitar syndrome|O
+scirrhous adenocarcinoma|O
+scleral disease|O
+scleral staphyloma|O
+scleredema adultorum|O
+scleritis|O
+sclerocornea|O
+scleroderma|O
+scleromalacia perforans|O
+scleroperikeratitis|O
+sclerosing adenosis of breast|O
+sclerosing breast papilloma|O
+sclerosing cholangitis|O
+sclerosing hemangioma|O
+sclerosing hepatic carcinoma|O
+sclerosing keratitis|O
+sclerosteosis|O
+scoliosis|O
+scotoma|O
+scrapie|O
+screw worm infectious disease|O
+scrotal angioma|O
+scrotal carcinoma|O
+scrotum Paget's disease|O
+scrotum basal cell carcinoma|O
+scrotum melanoma|O
+scrotum neoplasm|O
+scrotum squamous cell carcinoma|O
+scrub typhus|O
+scurvy|O
+sea-blue histiocyte syndrome|O
+seasonal affective disorder|O
+sebaceous adenocarcinoma|O
+sebaceous adenoma|O
+sebaceous basal cell carcinoma|O
+sebaceous breast carcinoma|O
+sebaceous carcinoma|O
+sebaceous gland disease|O
+sebaceous gland neoplasm|O
+seborrheic dermatitis|O
+seborrheic infantile dermatitis|O
+seborrheic keratosis|O
+second-degree atrioventricular block|O
+secondary Parkinson disease|O
+secondary corneal edema|O
+secondary hyperparathyroidism|O
+secondary hyperparathyroidism of renal origin|O
+secondary hypertension|O
+secondary hypertrophic osteoarthropathy|O
+secondary lacrimal atrophy|O
+secondary progressive multiple sclerosis|O
+secondary syphilis|O
+secondary vitreoretinal degeneration|O
+secretory diarrhea|O
+secretory meningioma|O
+secretory uterine corpus endometrioid adenocarcinoma|O
+segmental dystonia|O
+selective IgA deficiency disease|O
+selective IgD deficiency disease|O
+selective IgE deficiency disease|O
+selective IgG deficiency disease|O
+selective IgM deficiency disease|O
+selective immunoglobulin deficiency disease|O
+sella turcica neoplasm|O
+semantic agnosia|O
+seminal vesicle acute gonorrhea|O
+seminal vesicle adenocarcinoma|O
+seminal vesicle chronic gonorrhea|O
+seminal vesicle cystadenoma|O
+seminal vesicle tumor|O
+seminoma|O
+senile angioma|O
+senile cataract|O
+senile degeneration of brain|O
+senile ectropion|O
+senile entropion|O
+senile reticular retinal degeneration|O
+sennetsu fever|O
+sensorineural hearing loss|O
+sensory organ benign neoplasm|O
+sensory peripheral neuropathy|O
+sensory system cancer|O
+sensory system disease|O
+separation anxiety disorder|O
+septal myocardial infarction|O
+septic arthritis|O
+septic myocarditis|O
+septicemic plague|O
+serine deficiency|O
+serous conjunctivitis except viral|O
+serous cystadenocarcinoma|O
+serous glue ear|O
+serous labyrinthitis|O
+serous surface papilloma|O
+setariasis|O
+severe acute respiratory syndrome|O
+severe combined immunodeficiency|O
+severe congenital neutropenia|O
+severe nonproliferative diabetic retinopathy|O
+severe pre-eclampsia|O
+sex cord-gonadal stromal tumor|O
+sex cord-stromal neoplasm|O
+sex differentiation disease|O
+sexual disorder|O
+sexual dysfunction|O
+sexual masochism|O
+sexual sadism|O
+shigellosis|O
+shipyard eye|O
+short QT syndrome|O
+short bowel syndrome|O
+shoulder impingement syndrome|O
+sialadenitis|O
+sialolithiasis|O
+sialuria|O
+sick building syndrome|O
+sick sinus syndrome|O
+sickle cell anemia|O
+sideroblastic anemia|O
+sideroblastic anemia with spinocerebellar ataxia|O
+siderosis|O
+siderosis of eye|O
+sigmoid colon cancer|O
+sigmoid disease|O
+sigmoid neoplasm|O
+signet ring basal cell carcinoma|O
+signet ring cell adenocarcinoma|O
+signet ring cell intrahepatic cholangiocarcinoma|O
+signet ring cell variant cervical mucinous adenocarcinoma|O
+silent myocardial infarction|O
+silicosis|O
+silo filler's disease|O
+simple chronic conjunctivitis|O
+simple partial epilepsy|O
+simultanagnosia|O
+sinoatrial node disease|O
+sinusitis|O
+situs inversus|O
+skeletal muscle cancer|O
+skeletal muscle neoplasm|O
+skeletal tuberculosis|O
+skene gland carcinoma|O
+skin amelanotic melanoma|O
+skin angiosarcoma|O
+skin atrophy|O
+skin benign neoplasm|O
+skin cancer|O
+skin carcinoma|O
+skin carcinoma in situ|O
+skin disease|O
+skin epithelioid hemangioma|O
+skin glomangioma|O
+skin glomus tumor|O
+skin granular cell tumor|O
+skin hemangioma|O
+skin lipoma|O
+skin melanoma|O
+skin meningioma|O
+skin papilloma|O
+skin pilomatrix carcinoma|O
+skin sarcoidosis|O
+skin sarcoma|O
+skin squamous cell carcinoma|O
+skin tag|O
+skull base chordoma|O
+skull base meningioma|O
+skull base neoplasm|O
+skull cancer|O
+slate pneumoconiosis|O
+sleep apnea|O
+sleep disorder|O
+sleeping sickness|O
+small bowel fibrosarcoma|O
+small cell carcinoma|O
+small cell neuroendocrine carcinoma|O
+small cell osteogenic sarcoma|O
+small cell sarcoma|O
+small intestinal L-cell glucagon-like peptide producing tumor|O
+small intestinal sarcoma|O
+small intestinal vasoactive intestinal peptide producing tumor|O
+small intestine adenocarcinoma|O
+small intestine cancer|O
+small intestine carcinoid neuroendocrine tumor|O
+small intestine carcinoma|O
+small intestine diverticulitis|O
+small intestine leiomyoma|O
+small intestine leiomyosarcoma|O
+small intestine lymphoma|O
+small intestine neoplasm|O
+small intestine neuroendocrine neoplasm|O
+smallpox|O
+smoldering myeloma|O
+smooth muscle cancer|O
+smooth muscle tumor|O
+social emotional agnosia|O
+social phobia|O
+sodoku disease|O
+soft palate cancer|O
+soft tissue peripheral neuroepithelioma|O
+solar retinopathy|O
+solid pattern testicular yolk sac tumor|O
+solitary cyst of breast|O
+solitary osseous plasmacytoma|O
+solitary plasmacytoma of chest wall|O
+somatization disorder|O
+somatoform disorder|O
+somatostatinoma|O
+space motion sickness|O
+sparganosis|O
+spasmodic dystonia|O
+spastic cerebral palsy|O
+spastic diplegia|O
+spastic ectropion|O
+spastic entropion|O
+spastic hemiplegia|O
+spastic monoplegia|O
+spastic quadriplegia|O
+specific bursitis often of occupational origin|O
+specific developmental disorder|O
+specific language impairment|O
+specific phobia|O
+speech disorder|O
+spermatic cord cancer|O
+spermatic cord torsion|O
+spermatocele|O
+spermatocytoma|O
+sphenocavernous meningioma|O
+sphenoid sinus Schneiderian papilloma|O
+sphenoid sinus inverted papilloma|O
+sphenoid sinus squamous cell carcinoma|O
+sphenoid sinusitis|O
+sphenoidal sinus cancer|O
+sphenoidal sinus neoplasm|O
+sphenoorbital meningioma|O
+sphingolipidosis|O
+spina bifida|O
+spinal accessory nerve neoplasm|O
+spinal canal and spinal cord meningioma|O
+spinal canal intradural extramedullary neoplasm|O
+spinal cancer|O
+spinal chordoma|O
+spinal cord astrocytoma|O
+spinal cord dermoid cyst|O
+spinal cord disease|O
+spinal cord ependymoma|O
+spinal cord glioma|O
+spinal cord intramedullary teratoma|O
+spinal cord lipoma|O
+spinal cord lymphoma|O
+spinal cord melanoma|O
+spinal cord neuroblastoma|O
+spinal cord oligodendroglioma|O
+spinal cord primitive neuroectodermal neoplasm|O
+spinal cord sarcoma|O
+spinal meninges cancer|O
+spinal meningioma|O
+spinal multifocal clear cell meningioma|O
+spinal muscular atrophy|O
+spinal polio|O
+spinal stenosis|O
+spindle cell Liposarcoma|O
+spindle cell carcinoma|O
+spindle cell hemangioma|O
+spindle cell intraocular melanoma|O
+spindle cell lipoma|O
+spindle cell rhabdomyosarcoma|O
+spindle cell sarcoma|O
+spindle cell synovial sarcoma|O
+spindle cell thymoma|O
+spindle cell variant squamous cell breast carcinoma|O
+spindle epithelial tumor with thymus-like differentiation tumor|O
+spinocerebellar ataxia|O
+spinocerebellar ataxia type 5|O
+spinocerebellar degeneration|O
+spiradenoma|O
+spleen angiosarcoma|O
+spleen cancer|O
+splenic abscess|O
+splenic artery aneurysm|O
+splenic disease|O
+splenic flexure cancer|O
+splenic infarction|O
+splenic manifestation of hairy cell leukemia|O
+splenic manifestation of leukemia|O
+splenic manifestation of prolymphocytic leukemia|O
+splenic marginal zone lymphoma|O
+splenic sequestration|O
+splenic tuberculosis|O
+spondylitis|O
+spondyloarthropathy|O
+spondylocostal dysostosis|O
+spondyloepimetaphyseal dysplasia|O
+spondyloepimetaphyseal dysplasia, Missouri type|O
+spondyloepimetaphyseal dysplasia, Pakistani type|O
+spondyloepimetaphyseal dysplasia, Sponastrime type|O
+spondyloepimetaphyseal dysplasia, Strudwick type|O
+spondyloepiphyseal dysplasia congenita|O
+spondyloepiphyseal dysplasia with congenital joint dislocations|O
+spondylolisthesis|O
+spondylolysis|O
+spondylosis|O
+spongiotic dermatitis|O
+spontaneous ocular nystagmus|O
+spontaneous tension pneumothorax|O
+sporadic breast cancer|O
+sporotrichosis|O
+spotted fever|O
+squamous blepharitis|O
+squamous cell bile duct carcinoma|O
+squamous cell carcinoma|O
+squamous cell neoplasm|O
+squamous cell papilloma|O
+squamous cell papilloma of skin|O
+squamous papillomatosis|O
+stable condition keratoconus|O
+staphyloenterotoxemia|O
+staphyloma posticum|O
+status asthmaticus|O
+status epilepticus|O
+steatitis|O
+steatorrhea|O
+stenosis of lacrimal passage|O
+stenosis of lacrimal punctum|O
+stenosis of lacrimal sac|O
+stereotypic movement disorder|O
+sternum cancer|O
+sternum lymphoma|O
+steroid inherited metabolic disorder|O
+steroid lipomatosis|O
+steroid-induced glaucoma|O
+steroid-induced glaucoma - borderline|O
+stomach cancer|O
+stomach carcinoma|O
+stomach carcinoma in situ|O
+stomach disease|O
+stomach diverticulosis|O
+stomatitis|O
+stone in bladder diverticulum|O
+stork bite|O
+strabismus|O
+strawberry gallbladder|O
+streptococcal meningitis|O
+stress polycythemia|O
+striated muscle rhabdoid tumor|O
+striatonigral degeneration|O
+strictly posterior acute myocardial infarction|O
+stricture or kinking of ureter|O
+stroma-dominant and stroma-poor composite ganglioneuroblastoma|O
+stromal corneal pigmentation|O
+stromal predominant kidney Wilms' tumor|O
+strongyloidiasis|O
+struma ovarii|O
+stuttering|O
+subacute bacterial endocarditis|O
+subacute delirium|O
+subacute glomerulonephritis|O
+subacute leukemia|O
+subacute lymphocytic thyroiditis|O
+subacute monocytic leukemia|O
+subacute myeloid leukemia|O
+subacute sclerosing panencephalitis|O
+subacute thyroiditis|O
+subareolar duct papillomatosis|O
+subclavian artery aneurysm|O
+subclavian steal syndrome|O
+subcorneal pustular dermatosis|O
+subcutaneous mycosis|O
+subdural empyema|O
+subendocardial infarction acute myocardial infarction|O
+subendocardial myocardial infarction|O
+subependymal giant cell astrocytoma|O
+subependymal glioma|O
+subglottic angioma|O
+subglottis cancer|O
+subglottis carcinoma|O
+subglottis neoplasm|O
+subglottis squamous cell carcinoma|O
+subglottis verrucous carcinoma|O
+subleukemic leukemia|O
+sublingual gland adenoid cystic carcinoma|O
+sublingual gland cancer|O
+submandibular adenitis|O
+submandibular gland cancer|O
+submandibular gland disease|O
+submucosal invasive colon adenocarcinoma|O
+submucous uterine fibroid|O
+subserous uterine fibroid|O
+substance abuse|O
+substance dependence|O
+substance-induced psychosis|O
+substance-related disorder|O
+substernal goiter|O
+subungual glomus tumor|O
+subvalvular aortic stenosis|O
+succinic semialdehyde dehydrogenase deficiency|O
+sudden infant death syndrome|O
+sulfhemoglobinemia|O
+superficial basal cell carcinoma|O
+superficial keratitis|O
+superficial mycosis|O
+superficial urinary bladder cancer|O
+superior mesenteric artery syndrome|O
+superior vena cava angiosarcoma|O
+superior vena cava leiomyosarcoma|O
+supine hypotensive syndrome|O
+suppression amblyopia|O
+suppurative cholangitis|O
+suppurative lymphadenitis|O
+suppurative otitis media|O
+suppurative periapical periodontitis|O
+suppurative thyroiditis|O
+suppurative uveitis|O
+supraglottis cancer|O
+supraglottis neoplasm|O
+supraglottis squamous cell carcinoma|O
+supraglottis verrucous carcinoma|O
+suprasellar meningioma|O
+supratentorial cancer|O
+supratentorial primitive neuroectodermal tumor|O
+supravalvular aortic stenosis|O
+survival motor neuron spinal muscular atrophy|O
+swayback|O
+sweat gland cancer|O
+sweat gland carcinoma|O
+sweat gland disease|O
+sweat gland neoplasm|O
+swine influenza|O
+sympathetic neurilemmoma|O
+sympathetic ophthalmia|O
+synchronous bilateral breast carcinoma|O
+synchronous multifocal osteogenic sarcoma|O
+syndactyly|O
+syndrome|O
+syndromic X-linked intellectual disability|O
+syndromic intellectual disability|O
+synostosis|O
+synovial angioma|O
+synovial sarcoma|O
+synovitis|O
+synovium cancer|O
+synovium neoplasm|O
+synpolydactyly|O
+synucleinopathy|O
+syphilis|O
+syphilitic encephalitis|O
+syphilitic meningitis|O
+syringocystadenoma papilliferum|O
+syringoma|O
+syringomyelia|O
+systemic lupus erythematosus|O
+systemic mastocytosis|O
+systemic mycosis|O
+systemic primary carnitine deficiency disease|O
+systemic scleroderma|O
+systolic heart failure|O
+tabes dorsalis|O
+tactile agnosia|O
+tactile epilepsy|O
+taeniasis|O
+tall cell variant papillary carcinoma|O
+tamoxifen-Related endometrial Lesion|O
+tanycytic ependymoma|O
+tarsal tunnel syndrome|O
+tarsal-carpal coalition syndrome|O
+tauopathy|O
+teeth hard tissue disease|O
+telangiectasis|O
+telangiectatic glomangioma|O
+telangiectatic osteogenic sarcoma|O
+telogen effluvium|O
+temporal arteritis|O
+temporal lobe epilepsy|O
+temporal lobe neoplasm|O
+temtamy preaxial brachydactyly syndrome|O
+tendinitis|O
+tendon sheath lipoma|O
+tenosynovial giant cell tumor|O
+tenosynovitis|O
+tenosynovitis of foot and ankle|O
+teratocarcinoma|O
+teratoma|O
+tertiary neurosyphilis|O
+tertiary syphilis|O
+testicular Brenner tumor|O
+testicular Leydig cell tumor|O
+testicular cancer|O
+testicular disease|O
+testicular fibroma|O
+testicular germ cell cancer|O
+testicular germ cell tumor non-seminomatous|O
+testicular gonadoblastoma|O
+testicular granulosa cell tumor|O
+testicular infarct|O
+testicular leukemia|O
+testicular lymphoma|O
+testicular malignant germ cell cancer|O
+testicular monophasic choriocarcinoma|O
+testicular non-seminomatous germ cell cancer|O
+testicular pure germ cell tumor|O
+testicular spermatocytic seminoma|O
+testicular thecoma|O
+testicular trophoblastic tumor|O
+testicular yolk sac tumor|O
+testis polyembryoma|O
+testis refractory cancer|O
+testis rhabdomyosarcoma|O
+testis sarcoma|O
+testis seminoma|O
+tetanic cataract|O
+tetanus|O
+tetanus neonatorum|O
+tethered spinal cord syndrome|O
+tetralogy of Fallot|O
+thalamic disease|O
+thalamic neoplasm|O
+thalassemia|O
+thanatophoric dysplasia|O
+theileriasis|O
+thelaziasis|O
+third cranial nerve disease|O
+third ventricle chordoid glioma|O
+third-degree atrioventricular block|O
+thoracic aortic aneurysm|O
+thoracic benign neoplasm|O
+thoracic cancer|O
+thoracic disease|O
+thoracic outlet syndrome|O
+thoracic spinal canal and spinal cord meningioma|O
+thromboangiitis obliterans|O
+thrombocytopenia|O
+thrombocytopenia due to platelet alloimmunization|O
+thrombocytopenia-absent radius syndrome|O
+thrombocytosis|O
+thrombophilia|O
+thrombophlebitis|O
+thrombophlebitis migrans|O
+thrombotic thrombocytopenic purpura|O
+thymic carcinoma|O
+thymic dysplasia|O
+thymoma|O
+thymus adenocarcinoma|O
+thymus adenosquamous carcinoma|O
+thymus basaloid carcinoma|O
+thymus cancer|O
+thymus clear cell carcinoma|O
+thymus gland disease|O
+thymus large cell carcinoma|O
+thymus lipoma|O
+thymus lymphoma|O
+thymus mucoepidermoid carcinoma|O
+thymus sarcomatoid carcinoma|O
+thymus small cell carcinoma|O
+thymus squamous cell carcinoma|O
+thyrocalcitonin secretion disease|O
+thyroid adenoma|O
+thyroid angiosarcoma|O
+thyroid cancer|O
+thyroid carcinoma|O
+thyroid crisis|O
+thyroid gland disease|O
+thyroid hormone resistance syndrome|O
+thyroid hurthle cell adenoma|O
+thyroid hurthle cell carcinoma|O
+thyroid hyalinizing trabecular adenoma|O
+thyroid lymphoma|O
+thyroid malformation|O
+thyroid medullary carcinoma|O
+thyroid sarcoma|O
+thyroiditis|O
+thyrotoxic exophthalmos|O
+thyrotoxicosis|O
+tibial adamantinoma|O
+tibial collateral ligament bursitis|O
+tibial nerve palsy|O
+tibial neuropathy|O
+tibialis tendinitis|O
+tic disorder|O
+tick infestation|O
+tick paralysis|O
+tick-borne encephalitis|O
+tick-borne relapsing fever|O
+time agnosia|O
+tinea barbae|O
+tinea capitis|O
+tinea corporis|O
+tinea cruris|O
+tinea favosa|O
+tinea imbricata|O
+tinea manuum|O
+tinea nigra|O
+tinea pedis|O
+tinea profunda|O
+tinea unguium|O
+tolosa-hunt syndrome|O
+tongue cancer|O
+tongue disease|O
+tongue squamous cell carcinoma|O
+tonsil cancer|O
+tonsil squamous cell carcinoma|O
+tonsillar fossa cancer|O
+tonsillar pillar cancer|O
+tonsillitis|O
+tooth agenesis|O
+tooth and nail syndrome|O
+tooth ankylosis|O
+tooth disease|O
+tooth erosion|O
+tooth resorption|O
+topographical agnosia|O
+total circumpapillary dystrophy of choroid|O
+total internal ophthalmoplegia|O
+total third-nerve palsy|O
+toxascariasis|O
+toxic diffuse goiter|O
+toxic encephalopathy|O
+toxic labyrinthitis|O
+toxic maculopathy|O
+toxic megacolon|O
+toxic myocarditis|O
+toxic optic neuropathy|O
+toxic pneumonitis|O
+toxic shock syndrome|O
+toxicodendron dermatitis|O
+toxocariasis|O
+toxoplasmosis|O
+trabecular follicular adenocarcinoma|O
+trachea adenoid cystic carcinoma|O
+trachea carcinoma|O
+trachea carcinoma in situ|O
+trachea leiomyoma|O
+trachea mucoepidermoid carcinoma|O
+trachea sarcoma|O
+trachea squamous cell carcinoma|O
+tracheal calcification|O
+tracheal cancer|O
+tracheal disease|O
+tracheal lymphoma|O
+tracheal stenosis|O
+tracheitis|O
+tracheomalacia|O
+trachoma|O
+transcobalamin II deficiency|O
+transient arthritis|O
+transient arthropathy|O
+transient cerebral ischemia|O
+transient global amnesia|O
+transient hypogammaglobulinemia|O
+transient hypogammaglobulinemia of infancy|O
+transient neonatal diabetes mellitus|O
+transient neonatal neutropenia|O
+transient neonatal thrombocytopenia|O
+transient refractive change|O
+transient retinal arterial occlusion|O
+transient tic disorder|O
+transitional cell carcinoma|O
+transitional meningioma|O
+transitional papilloma|O
+transsexualism|O
+transthyretin amyloidosis|O
+transverse colon cancer|O
+transvestism|O
+traumatic glaucoma|O
+trench fever|O
+trichinosis|O
+trichomoniasis|O
+trichorhinophalangeal syndrome type I|O
+trichorhinophalangeal syndrome type II|O
+trichosporonosis|O
+trichostrongyloidiasis|O
+trichostrongylosis|O
+trichotillomania|O
+trichuriasis|O
+tricuspid valve disease|O
+tricuspid valve insufficiency|O
+tricuspid valve prolapse|O
+tricuspid valve stenosis|O
+trigeminal nerve disease|O
+trigeminal nerve neoplasm|O
+trigeminal neuralgia|O
+trigonitis|O
+trilateral retinoblastoma|O
+triosephosphate isomerase deficiency|O
+triple-A syndrome|O
+triple-receptor negative breast cancer|O
+trochlear nerve disease|O
+trochlear nerve neoplasm|O
+trombiculiasis|O
+trophoblastic neoplasm|O
+tropical spastic paraparesis|O
+tropical sprue|O
+trypanosomiasis|O
+tuberculoid leprosy|O
+tuberculosis|O
+tuberculous empyema|O
+tuberculous epididymitis|O
+tuberculous oophoritis|O
+tuberculous peritonitis|O
+tuberculous pneumothorax|O
+tuberculous salpingitis|O
+tuberculum sellae meningioma|O
+tuberous sclerosis|O
+tubular adenocarcinoma|O
+tubular variant testicular seminoma|O
+tularemia|O
+tumor of exocrine pancreas|O
+tungiasis|O
+twin-to-twin transfusion syndrome|O
+tympanic membrane disease|O
+tympanosclerosis|O
+type 1 diabetes mellitus|O
+type 1 papillary adenoma of the kidney|O
+type 2 diabetes mellitus|O
+type 2 papillary adenoma of the kidney|O
+type C thymoma|O
+type I Ehlers-Danlos syndrome|O
+type I complement component 8 deficiency|O
+type II complement component 8 deficiency|O
+type III Ehlers-Danlos syndrome|O
+type VI Ehlers-Danlos syndrome|O
+typhoid fever|O
+typhoidal tularemia|O
+typhus|O
+tyrosinemia|O
+tyrosinemia type I|O
+tyrosinemia type II|O
+tyrosinemia type III|O
+ulcer of anus and rectum|O
+ulcer of lower limbs|O
+ulceration of vulva|O
+ulcerative blepharitis|O
+ulcerative colitis|O
+ulcerative stomatitis|O
+ulceroglandular tularemia|O
+ulnar nerve lesion|O
+ulnar neuropathy|O
+umbilical hernia|O
+unilateral hyperactive labyrinth|O
+unilateral hypoactive labyrinth|O
+unilateral retinoblastoma|O
+upper clivus meningioma|O
+upper gum cancer|O
+upper lip cancer|O
+upper respiratory tract disease|O
+urachus cancer|O
+urea cycle disorder|O
+uremia|O
+uremic neuropathy|O
+ureter adenocarcinoma|O
+ureter cancer|O
+ureter carcinoma|O
+ureter inverted papilloma|O
+ureter leiomyoma|O
+ureter small cell carcinoma|O
+ureter squamous cell carcinoma|O
+ureter transitional cell carcinoma|O
+ureter tuberculosis|O
+ureter urothelial papilloma|O
+ureteral benign neoplasm|O
+ureteral disease|O
+ureteral lymphoma|O
+ureteral obstruction|O
+ureteric orifice cancer|O
+ureterocele|O
+ureterolithiasis|O
+urethra adenocarcinoma|O
+urethra cancer|O
+urethra clear cell adenocarcinoma|O
+urethra inverted papilloma|O
+urethra leiomyoma|O
+urethra squamous cell carcinoma|O
+urethra transitional cell carcinoma|O
+urethral benign neoplasm|O
+urethral calculus|O
+urethral disease|O
+urethral diverticulum|O
+urethral false passage|O
+urethral gland abscess|O
+urethral intrinsic sphincter deficiency|O
+urethral obstruction|O
+urethral stricture|O
+urethral syndrome|O
+urethral urothelial papilloma|O
+urethral verrucous carcinoma|O
+urethral villous adenoma|O
+urethritis|O
+urinary bladder anterior wall cancer|O
+urinary bladder cancer|O
+urinary bladder inverted papilloma|O
+urinary bladder posterior wall cancer|O
+urinary bladder small cell neuroendocrine carcinoma|O
+urinary bladder villous adenoma|O
+urinary schistosomiasis|O
+urinary system benign neoplasm|O
+urinary system cancer|O
+urinary system disease|O
+urinary tract non-invasive transitional cell neoplasm|O
+urinary tract obstruction|O
+urinary tract papillary transitional cell benign neoplasm|O
+urofacial syndrome|O
+urogenital tuberculosis|O
+urticaria|O
+urticaria pigmentosa|O
+uterine adnexa cancer|O
+uterine benign neoplasm|O
+uterine body mixed cancer|O
+uterine cancer|O
+uterine carcinosarcoma|O
+uterine cervix leukoplakia|O
+uterine corpus adenocarcinofibroma|O
+uterine corpus adenofibroma|O
+uterine corpus adenomatoid tumor|O
+uterine corpus adenosarcoma|O
+uterine corpus apoplectic leiomyoma|O
+uterine corpus atypical polypoid adenomyoma|O
+uterine corpus bizarre leiomyoma|O
+uterine corpus cancer|O
+uterine corpus cellular leiomyoma|O
+uterine corpus choriocarcinoma|O
+uterine corpus diffuse leiomyomatosis|O
+uterine corpus dissecting leiomyoma|O
+uterine corpus endometrial carcinoma|O
+uterine corpus endometrial stromal sarcoma|O
+uterine corpus epithelioid leiomyoma|O
+uterine corpus epithelioid leiomyosarcoma|O
+uterine corpus leiomyomatosis|O
+uterine corpus lipoleiomyoma|O
+uterine corpus myxoid leiomyoma|O
+uterine corpus myxoid leiomyosarcoma|O
+uterine corpus sarcoma|O
+uterine corpus serous adenocarcinoma|O
+uterine disease|O
+uterine fibroid|O
+uterine inflammatory disease|O
+uterine inversion|O
+uterine ligament adenocarcinoma|O
+uterine ligament cancer|O
+uterine ligament clear cell adenocarcinoma|O
+uterine ligament endometrioid adenocarcinoma|O
+uterine ligament mucinous adenocarcinoma|O
+uterine ligament papillary cystadenoma|O
+uterine ligament serous adenocarcinoma|O
+uterus carcinoma in situ|O
+uterus interstitial leiomyoma|O
+uterus intravascular leiomyomatosis|O
+uterus leiomyosarcoma|O
+uterus perivascular epithelioid cell tumor|O
+uveal cancer|O
+uveal disease|O
+uveal epithelioid cell melanoma|O
+uveal melanoma|O
+uveitis|O
+uveoparotid fever|O
+uvula cancer|O
+uvulitis|O
+vaccinia|O
+vagina botryoid rhabdomyosarcoma|O
+vagina leiomyoma|O
+vagina leiomyosarcoma|O
+vagina sarcoma|O
+vagina squamous papilloma|O
+vaginal adenoma|O
+vaginal adenosarcoma|O
+vaginal benign neoplasm|O
+vaginal cancer|O
+vaginal carcinoma|O
+vaginal carcinosarcoma|O
+vaginal discharge|O
+vaginal disease|O
+vaginal endometrial stromal sarcoma|O
+vaginal endometrial stromal tumor|O
+vaginal glandular tumor|O
+vaginal mullerian papilloma|O
+vaginal spindle cell epithelioma|O
+vaginal squamous tumor|O
+vaginal tubular adenoma|O
+vaginal tubulovillous adenoma|O
+vaginal villous adenoma|O
+vaginal yolk sac tumor|O
+vaginitis|O
+vagus nerve neoplasm|O
+vallecula cancer|O
+variable age at onset electroclinical syndrome|O
+variant Creutzfeldt-Jakob disease|O
+varicocele|O
+varicose veins|O
+variegate porphyria|O
+variola major|O
+variola minor|O
+vascular cancer|O
+vascular dementia|O
+vascular disease|O
+vascular hemostatic disease|O
+vascular myelopathy|O
+vascular skin disease|O
+vasculitis|O
+vasculogenic impotence|O
+vasomotor rhinitis|O
+vein disease|O
+velocardiofacial syndrome|O
+venous hemangioma|O
+venous insufficiency|O
+venous tributary occlusion of retina|O
+ventilation pneumonitis|O
+ventricular septal defect|O
+verbal auditory agnosia|O
+vernal conjunctivitis|O
+verruciform xanthoma of skin|O
+verrucous carcinoma|O
+verrucous keratotic hemangioma|O
+verrucous papilloma|O
+vertebral artery insufficiency|O
+vertebral artery occlusion|O
+vertebrobasilar insufficiency|O
+vesicoureteral reflux|O
+vesiculitis|O
+vesiculobullous skin disease|O
+vestibular disease|O
+vestibular gland benign neoplasm|O
+vestibular neuronitis|O
+vestibular nystagmus|O
+vestibule of mouth cancer|O
+vestibulocochlear nerve disease|O
+vibratory urticaria|O
+villoglandular endometrial endometrioid adenocarcinoma|O
+villoglandular variant cervical mucinous adenocarcinoma|O
+villonodular synovitis|O
+villous adenocarcinoma|O
+villous adenoma|O
+viral encephalitis|O
+viral esophagitis|O
+viral exanthem|O
+viral gastritis|O
+viral hepatitis|O
+viral infectious disease|O
+viral labyrinthitis|O
+viral laryngitis|O
+viral meningitis|O
+viral pneumonia|O
+visceral heterotaxy|O
+visceral leishmaniasis|O
+visual agnosia|O
+visual cortex disease|O
+visual epilepsy|O
+visual pathway disease|O
+visual verbal agnosia|O
+vitamin B12 deficiency|O
+vitamin K deficiency hemorrhagic disease|O
+vitamin metabolic disorder|O
+vitelliform macular dystrophy|O
+vitiligo|O
+vitreoretinal dystrophy|O
+vitreous abscess|O
+vitreous detachment|O
+vitreous disease|O
+vitreous syneresis|O
+von Economo's disease|O
+von Hippel-Lindau disease|O
+von Willebrand's disease|O
+voyeurism|O
+vulva adenocarcinoma|O
+vulva basal cell carcinoma|O
+vulva cancer|O
+vulva carcinoma|O
+vulva fibroepithelial polyp|O
+vulva squamous cell carcinoma|O
+vulva verrucous carcinoma|O
+vulval Paget's disease|O
+vulvar alveolar soft part sarcoma|O
+vulvar angiokeratoma|O
+vulvar apocrine adenocarcinoma|O
+vulvar basaloid squamous cell carcinoma|O
+vulvar benign neoplasm|O
+vulvar childhood botryoid-type embryonal rhabdomyosarcoma|O
+vulvar clear cell hidradenocarcinoma|O
+vulvar disease|O
+vulvar dystrophy|O
+vulvar eccrine adenocarcinoma|O
+vulvar eccrine porocarcinoma|O
+vulvar glandular tumor|O
+vulvar granular cell tumor|O
+vulvar inverted follicular keratosis|O
+vulvar keratinizing squamous cell carcinoma|O
+vulvar keratoacanthoma-like carcinoma|O
+vulvar leiomyoma|O
+vulvar leiomyosarcoma|O
+vulvar liposarcoma|O
+vulvar melanoma|O
+vulvar nodular hidradenoma|O
+vulvar non-keratinizing squamous cell carcinoma|O
+vulvar proximal-type epithelioid sarcoma|O
+vulvar sarcoma|O
+vulvar sebaceous carcinoma|O
+vulvar seborrheic keratosis|O
+vulvar squamous papilloma|O
+vulvar squamous tumor|O
+vulvar syringoma|O
+vulvar trichoepithelioma|O
+vulvitis|O
+vulvovaginal candidiasis|O
+vulvovaginitis|O
+water-clear cell adenoma|O
+wheat allergic reaction|O
+white piedra|O
+withdrawal disorder|O
+wound botulism|O
+writing disorder|O
+xanthinuria|O
+xanthogranulomatous cholecystitis|O
+xanthogranulomatous pyelonephritis|O
+xanthomatosis|O
+xeroderma of eyelid|O
+xeroderma pigmentosum|O
+xerophthalmia|O
+yaws|O
+yellow fever|O
+yellow nail syndrome|O

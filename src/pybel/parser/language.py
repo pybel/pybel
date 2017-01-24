@@ -26,93 +26,95 @@ document_keys = {
 inv_document_keys = {v: k for k, v in document_keys.items()}
 
 activity_labels = {
-    'catalyticActivity': 'CatalyticActivity',
-    'cat': 'CatalyticActivity',
-    'chaperoneActivity': 'ChaperoneActivity',
-    'chap': 'ChaperoneActivity',
-    'gtpBoundActivity': 'GTPBoundActivity',
-    'gtp': 'GTPBoundActivity',
-    'kinaseActivity': 'KinaseActivity',
-    'kin': 'KinaseActivity',
-    'peptidaseActivity': 'PeptidaseActivity',
-    'pep': 'PeptidaseActivity',
-    'phosphataseActivity': 'PhosphotaseActivity',
-    'phos': 'PhosphotaseActivity',
-    'ribosylationActivity': 'RibosylationActivity',
-    'ribo': 'RibosylationActivity',
-    'transcriptionalActivity': 'TranscriptionalActivity',
-    'tscript': 'TranscriptionalActivity',
-    'transportActivity': 'TransportActivity',
-    'tport': 'TransportActivity',
-    'molecularActivity': 'MolecularActivity'
-}
-
-rev_activity_labels = {
-    'CatalyticActivity': 'cat',
-    'ChaperoneActivity': 'chap',
-    'GTPBoundActivity': 'gtp',
-    'KinaseActivity': 'kin',
-    'PeptidaseActivity': 'pep',
-    'PhosphotaseActivity': 'phos',
-    'RibosylationActivity': 'ribo',
-    'TranscriptionalActivity': 'tscript',
-    'TransportActivity': 'tport',
-    'MolecularActivity': 'molecularActivity'
+    'catalyticActivity': 'cat',
+    'cat': 'cat',
+    'chaperoneActivity': 'chap',
+    'chap': 'chap',
+    'gtpBoundActivity': 'gtp',
+    'gtp': 'gtp',
+    'kinaseActivity': 'kin',
+    'kin': 'kin',
+    'peptidaseActivity': 'pep',
+    'pep': 'pep',
+    'phosphataseActivity': 'phos',
+    'phos': 'phos',
+    'ribosylationActivity': 'ribo',
+    'ribo': 'ribo',
+    'transcriptionalActivity': 'tscript',
+    'tscript': 'tscript',
+    'transportActivity': 'tport',
+    'tport': 'tport',
+    'molecularActivity': 'molecularActivity'
 }
 
 # TODO fill out
 activity_ns = {
-    'CatalyticActivity': dict(namespace='GOMF', name='catalytic activity'),
-    'ChaperoneActivity': dict(namespace='GOMF', name=''),
-    'GTPBoundActivity': dict(namespace='GOMF', name='GTP binding'),
-    'PeptidaseActivity': dict(namespace='GOMF', name='peptidase activity'),
-    'PhosphotaseActivity': dict(namespace='GOMF', name=''),
-    'RibosylationActivity': dict(namespace='GOMF', name=''),
-    'TranscriptionalActivity': dict(namespace='GOMF', name='nucleic acid binding transcription factor activity'),
-    'TransportActivity': dict(namespace='GOMF', name='transporter activity')
+    'cat': dict(namespace='GOMF', name='catalytic activity'),
+    'gtp': dict(namespace='GOMF', name='GTP binding'),
+    'pep': dict(namespace='GOMF', name='peptidase activity'),
+    'tscript': dict(namespace='GOMF', name='nucleic acid binding transcription factor activity'),
+    'tport': dict(namespace='GOMF', name='transporter activity'),
+    # 'chap': dict(namespace='GOMF', name=''),
+    # 'phos': dict(namespace='GOMF', name=''),
+    # 'ribo': dict(namespace='GOMF', name=''),
 }
 
 activities = list(activity_labels.keys())
 
+ABUNDANCE = 'Abundance'
+GENE = 'Gene'
+MIRNA = 'miRNA'
+PROTEIN = 'Protein'
+RNA = 'RNA'
+BIOPROCESS = 'BiologicalProcess'
+PATHOLOGY = 'Pathology'
+COMPOSITE = 'Composite'
+COMPLEX = 'Complex'
+REACTION = 'Reaction'
+
 abundance_labels = {
-    'abundance': 'Abundance',
-    'a': 'Abundance',
-    'geneAbundance': 'Gene',
-    'g': 'Gene',
-    'microRNAAbundance': 'miRNA',
-    'm': 'miRNA',
-    'proteinAbundance': 'Protein',
-    'p': 'Protein',
-    'rnaAbundance': 'RNA',
-    'r': 'RNA',
-    'biologicalProcess': 'BiologicalProcess',
-    'bp': 'BiologicalProcess',
-    'pathology': 'Pathology',
-    'path': 'Pathology'
+    'abundance': ABUNDANCE,
+    'a': ABUNDANCE,
+    'geneAbundance': GENE,
+    'g': GENE,
+    'microRNAAbundance': MIRNA,
+    'm': MIRNA,
+    'proteinAbundance': PROTEIN,
+    'p': PROTEIN,
+    'rnaAbundance': RNA,
+    'r': RNA,
+    'biologicalProcess': BIOPROCESS,
+    'bp': BIOPROCESS,
+    'pathology': PATHOLOGY,
+    'path': PATHOLOGY,
+    'composite': COMPOSITE,
+    'compositeAbundance': COMPOSITE,
+    'complex': COMPLEX,
+    'complexAbundance': COMPLEX
 }
 
 rev_abundance_labels = {
-    'Abundance': 'a',
-    'Gene': 'g',
-    'miRNA': 'm',
-    'Protein': 'p',
-    'RNA': 'r',
-    'BiologicalProcess': 'bp',
-    'Pathology': 'path',
-    'Complex': 'complex',
-    'Composite': 'composite'
+    ABUNDANCE: 'a',
+    GENE: 'g',
+    MIRNA: 'm',
+    PROTEIN: 'p',
+    RNA: 'r',
+    BIOPROCESS: 'bp',
+    PATHOLOGY: 'path',
+    COMPLEX: 'complex',
+    COMPOSITE: 'composite'
 }
 
 #: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
 value_map = {
-    'G': {'Gene'},
-    'R': {'miRNA', 'RNA'},
-    'P': {'Protein'},
-    'M': {'miRNA'},
-    'A': {'Abundance', 'RNA', 'miRNA', 'Protein', 'Gene', 'Complex'},
-    'B': {'Pathology', 'BiologicalProcess'},
-    'O': {'Pathology'},
-    'C': {'Complex'}
+    'G': {GENE},
+    'R': {RNA, MIRNA},
+    'P': {PROTEIN},
+    'M': {MIRNA},
+    'A': {ABUNDANCE, RNA, MIRNA, PROTEIN, GENE, COMPLEX},
+    'B': {PATHOLOGY, BIOPROCESS},
+    'O': {PATHOLOGY},
+    'C': {COMPLEX}
 }
 
 # rev_value_map = {v: k for k, v in value_map.items()}
@@ -236,7 +238,11 @@ pmod_namespace = {
     'UbMono': 'UbMono',
     'monoubiquitination': 'UbMono',
     'UbPoly': 'UbPoly',
-    'polyubiquitination': 'UbPoly'
+    'polyubiquitination': 'UbPoly',
+
+    # BEL VARIANTS
+    'Ox': "Ox",
+    'oxidation': 'Ox',
 }
 
 #: dictionary of legacy (BEL 1.0) default namespace protein modifications to their BEL 2.0 preferred value
@@ -250,6 +256,7 @@ pmod_legacy_labels = {
     'R': 'ADPRib',
     'S': 'Sumo',
     'U': 'Ub',
+    'O': 'Ox'
 }
 
 gmod_namespace = {

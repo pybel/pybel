@@ -1,77 +1,78 @@
+import logging
 import unittest
 
-from pybel.parser.parse_abundance_modifier import *
-from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser
+from pybel.constants import PYBEL_DEFAULT_NAMESPACE
+from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser, PsubParser, GsubParser, TruncParser, \
+    FusionParser, LocationParser, FragmentParser
+from pybel.parser.parse_abundance_modifier import VariantParser
+from pybel.parser.parse_abundance_modifier import build_variant_dict, KIND, PMOD, GMOD, FRAGMENT
 
 log = logging.getLogger(__name__)
 
 
-class TestHgvsParser(unittest.TestCase):
+class TestVariantParser(unittest.TestCase):
+    def setUp(self):
+        self.parser = VariantParser()
+
     def test_protein_del(self):
-        statement = 'p.Phe508del'
-        expected = ['p.', 'Phe', 508, 'del']
-        result = hgvs_protein_del.parseString(statement)
-        self.assertEqual(expected, result.asList())
+        statement = 'variant(p.Phe508del)'
+        expected = build_variant_dict('p.Phe508del')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
 
     def test_protein_mut(self):
-        statement = 'p.Gly576Ala'
-        expected = ['p.', 'Gly', 576, 'Ala']
-        result = hgvs_protein_mut.parseString(statement)
-        self.assertEqual(expected, result.asList())
+        statement = 'var(p.Gly576Ala)'
+        expected = build_variant_dict('p.Gly576Ala')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
 
     def test_unspecified(self):
-        statement = '='
-        expected = ['=']
-        result = hgvs.parseString(statement)
-        self.assertEqual(expected, result.asList())
+        statement = 'var(=)'
+        expected = build_variant_dict('=')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
 
     def test_frameshift(self):
-        statement = 'p.Thr1220Lysfs'
-        expected = ['p.', 'Thr', 1220, 'Lys', 'fs']
-        result = hgvs_protein_fs.parseString(statement)
-        self.assertEqual(expected, result.asList())
+        statement = 'variant(p.Thr1220Lysfs)'
+        expected = build_variant_dict('p.Thr1220Lysfs')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
 
     def test_snp(self):
-        statement = 'delCTT'
-        expected = ['del', 'CTT']
-        result = hgvs_snp.parseString(statement)
-        self.assertEqual(expected, result.asList())
+        statement = 'var(delCTT)'
+        expected = build_variant_dict('delCTT')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
 
     def test_chromosome_1(self):
-        statement = 'g.117199646_117199648delCTT'
-        expected = ['g.', 117199646, '_', 117199648, 'del', 'CTT']
-        result = hgvs_chromosome.parseString(statement)
-        self.assertEqual(expected, result.asList())
+        statement = 'variant(g.117199646_117199648delCTT)'
+        expected = build_variant_dict('g.117199646_117199648delCTT')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
 
     def test_chromosome_2(self):
-        statement = 'c.1521_1523delCTT'
-        expected = ['c.', 1521, '_', 1523, 'del', 'CTT']
-        result = hgvs_dna_del.parseString(statement)
-        self.assertEqual(expected, result.asList())
+        statement = 'var(c.1521_1523delCTT)'
+        expected = build_variant_dict('c.1521_1523delCTT')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
 
     def test_rna_del(self):
-        statement = 'r.1653_1655delcuu'
-        expected = ['r.', 1653, '_', 1655, 'del', 'cuu']
-        result = hgvs_rna_del.parseString(statement)
-        self.assertEqual(expected, result.asList())
-
-    def test_protein_trunc_single(self):
-        statement = 'p.C65*'
-        result = hgvs_protein_truncation.parseString(statement)
-        expected = ['p.', 'Cys', 65, '*']
-        self.assertEqual(expected, result.asList())
+        statement = 'var(r.1653_1655delcuu)'
+        expected = build_variant_dict('r.1653_1655delcuu')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
 
     def test_protein_trunc_triple(self):
-        statement = 'p.Cys65*'
-        result = hgvs_protein_truncation.parseString(statement)
-        expected = ['p.', 'Cys', 65, '*']
-        self.assertEqual(expected, result.asList())
+        statement = 'var(p.Cys65*)'
+        result = self.parser.parseString(statement)
+        expected = build_variant_dict('p.Cys65*')
+        self.assertEqual(expected, result.asDict())
 
     def test_protein_trunc_legacy(self):
-        statement = 'p.65*'
-        result = hgvs_protein_truncation.parseString(statement)
-        expected = ['p.', 65, '*']
-        self.assertEqual(expected, result.asList())
+        statement = 'var(p.65*)'
+        result = self.parser.parseString(statement)
+        expected = build_variant_dict('p.65*')
+        self.assertEqual(expected, result.asDict())
 
 
 class TestPmod(unittest.TestCase):
@@ -82,59 +83,83 @@ class TestPmod(unittest.TestCase):
         statement = 'pmod(Ph, Ser, 473)'
         result = self.parser.parseString(statement)
 
-        expected = ['ProteinModification', 'Ph', 'Ser', 473]
-        self.assertEqual(expected, result.asList())
+        expected = {
+            KIND: PMOD,
+            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            PmodParser.CODE: 'Ser',
+            PmodParser.POSITION: 473
+        }
+        self.assertEqual(expected, result.asDict())
 
     def test_pmod2(self):
         statement = 'pmod(Ph, Ser)'
         result = self.parser.parseString(statement)
 
-        expected = ['ProteinModification', 'Ph', 'Ser']
-        self.assertEqual(expected, result.asList())
+        expected = {
+            KIND: PMOD,
+            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            PmodParser.CODE: 'Ser',
+        }
+        self.assertEqual(expected, result.asDict())
 
     def test_pmod3(self):
         statement = 'pmod(Ph)'
         result = self.parser.parseString(statement)
 
-        expected = ['ProteinModification', 'Ph']
-        self.assertEqual(expected, result.asList())
+        expected = {
+            KIND: PMOD,
+            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+        }
+        self.assertEqual(expected, result.asDict())
 
     def test_pmod4(self):
-        statement = 'pmod(P, S, 9)'
+        statement = 'pmod(P, S, 473)'
         result = self.parser.parseString(statement)
 
-        expected = ['ProteinModification', 'Ph', 'Ser', 9]
-        self.assertEqual(expected, result.asList())
+        expected = {
+            KIND: PMOD,
+            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            PmodParser.CODE: 'Ser',
+            PmodParser.POSITION: 473
+        }
+        self.assertEqual(expected, result.asDict())
 
     def test_pmod5(self):
         statement = 'pmod(MOD:PhosRes, Ser, 473)'
         result = self.parser.parseString(statement)
 
-        expected = ['ProteinModification', ['MOD', 'PhosRes'], 'Ser', 473]
-        self.assertEqual(expected, result.asList())
+        expected = {
+            KIND: PMOD,
+            PmodParser.IDENTIFIER: dict(namespace='MOD', name='PhosRes'),
+            PmodParser.CODE: 'Ser',
+            PmodParser.POSITION: 473
+        }
+        self.assertEqual(expected, result.asDict())
 
 
 class TestGmod(unittest.TestCase):
     def setUp(self):
         self.parser = GmodParser()
 
+        self.expected = {
+            KIND: GMOD,
+            GmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Me')
+        }
+
     def test_gmod_short(self):
         statement = 'gmod(M)'
         result = self.parser.parseString(statement)
-        expected = ['GeneModification', 'Me']
-        self.assertEqual(expected, result.asList())
+        self.assertEqual(self.expected, result.asDict())
 
     def test_gmod_unabbreviated(self):
         statement = 'gmod(Me)'
         result = self.parser.parseString(statement)
-        expected = ['GeneModification', 'Me']
-        self.assertEqual(expected, result.asList())
+        self.assertEqual(self.expected, result.asDict())
 
     def test_gmod_long(self):
         statement = 'geneModification(methylation)'
         result = self.parser.parseString(statement)
-        expected = ['GeneModification', 'Me']
-        self.assertEqual(expected, result.asList())
+        self.assertEqual(self.expected, result.asDict())
 
 
 class TestPsub(unittest.TestCase):
@@ -145,15 +170,15 @@ class TestPsub(unittest.TestCase):
         statement = 'sub(A, 127, Y)'
         result = self.parser.parseString(statement)
 
-        expected_list = ['Variant', 'p.', 'Ala', 127, 'Tyr']
-        self.assertEqual(expected_list, result.asList())
+        expected_list = build_variant_dict('p.Ala127Tyr')
+        self.assertEqual(expected_list, result.asDict())
 
     def test_psub_2(self):
         statement = 'sub(Ala, 127, Tyr)'
         result = self.parser.parseString(statement)
 
-        expected_list = ['Variant', 'p.', 'Ala', 127, 'Tyr']
-        self.assertEqual(expected_list, result.asList())
+        expected_list = build_variant_dict('p.Ala127Tyr')
+        self.assertEqual(expected_list, result.asDict())
 
 
 class TestGsubParser(unittest.TestCase):
@@ -164,8 +189,8 @@ class TestGsubParser(unittest.TestCase):
         statement = 'sub(G,308,A)'
         result = self.parser.parseString(statement)
 
-        expected_dict = ['Variant', 'g.', 308, 'G', '>', 'A']
-        self.assertEqual(expected_dict, result.asList())
+        expected_dict = build_variant_dict('g.308G>A')
+        self.assertEqual(expected_dict, result.asDict())
 
 
 class TestFragmentParser(unittest.TestCase):
@@ -179,8 +204,9 @@ class TestFragmentParser(unittest.TestCase):
         s = 'frag(5_20)'
         result = self.parser.parseString(s)
         expected = {
-            'start': 5,
-            'stop': 20
+            KIND: FRAGMENT,
+            FragmentParser.START: 5,
+            FragmentParser.STOP: 20
         }
         self.assertEqual(expected, result.asDict())
 
@@ -189,8 +215,9 @@ class TestFragmentParser(unittest.TestCase):
         s = 'frag(1_?)'
         result = self.parser.parseString(s)
         expected = {
-            'start': 1,
-            'stop': '?'
+            KIND: FRAGMENT,
+            FragmentParser.START: 1,
+            FragmentParser.STOP: '?'
         }
         self.assertEqual(expected, result.asDict())
 
@@ -199,8 +226,9 @@ class TestFragmentParser(unittest.TestCase):
         s = 'frag(?_*)'
         result = self.parser.parseString(s)
         expected = {
-            'start': '?',
-            'stop': '*'
+            KIND: FRAGMENT,
+            FragmentParser.START: '?',
+            FragmentParser.STOP: '*'
         }
         self.assertEqual(expected, result.asDict())
 
@@ -209,8 +237,9 @@ class TestFragmentParser(unittest.TestCase):
         s = 'frag(?, 55kD)'
         result = self.parser.parseString(s)
         expected = {
-            'missing': '?',
-            'description': '55kD'
+            KIND: FRAGMENT,
+            FragmentParser.MISSING: '?',
+            FragmentParser.DESCRIPTION: '55kD'
         }
         self.assertEqual(expected, result.asDict())
 
@@ -223,8 +252,8 @@ class TestTruncationParser(unittest.TestCase):
         statement = 'trunc(40)'
         result = self.parser.parseString(statement)
 
-        expected = ['Variant', 'p.', 40, '*']
-        self.assertEqual(expected, result.asList())
+        expected = build_variant_dict('p.40*')
+        self.assertEqual(expected, result.asDict())
 
 
 class TestFusionParser(unittest.TestCase):

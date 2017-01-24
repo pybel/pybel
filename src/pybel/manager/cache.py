@@ -24,6 +24,7 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(language.value_map))
 
 CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
 PUBLISHED_DATE_FMT = '%Y-%m-%d'
+PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
 
 
 def parse_datetime(s):
@@ -36,15 +37,19 @@ def parse_datetime(s):
             dt = datetime.strptime(s, PUBLISHED_DATE_FMT)
             return dt
         except:
-            raise ValueError('Incorrect datetime format for {}'.format(s))
+            try:
+                dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
+                return dt
+            except:
+               raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
 class BaseCacheManager:
     """Creates a connection to database and a persistient session using SQLAlchemy"""
 
     def __init__(self, connection=None, echo=False):
-        connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
-        self.engine = create_engine(connection, echo=echo)
+        self.connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
+        self.engine = create_engine(self.connection, echo=echo)
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
         self.session = scoped_session(self.sessionmaker)()
         self.create_database()
@@ -164,10 +169,12 @@ class CacheManager(BaseCacheManager):
         :type url: str
         """
         if url in self.namespace_cache:
+            log.info('Already cached %s', url)
             return
 
         try:
             results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
+            log.info('Loaded namespace from %s (%d)', url, len(results.entries))
         except NoResultFound:
             results = self.insert_namespace(url)
 
@@ -240,10 +247,12 @@ class CacheManager(BaseCacheManager):
         :type url: str
         """
         if url in self.annotation_cache:
+            log.info('Already cached %s', url)
             return
 
         try:
             results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one()
+            log.info('Loaded annotation from %s (%d)', url, len(results.entries))
         except NoResultFound:
             results = self.insert_annotation(url)
 
@@ -352,3 +361,65 @@ class CacheManager(BaseCacheManager):
 
     def ls(self):
         return itt.chain(self.ls_namespaces(), self.ls_annotations(), self.ls_owl())
+
+    # Manage Equivalences
+
+    def ensure_equivalence_class(self, label):
+        try:
+            result = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=label).one()
+        except NoResultFound:
+            result = models.NamespaceEntryEquivalence(label=label)
+            self.session.add(result)
+            self.session.commit()
+        return result
+
+    def insert_equivalences(self, url, namespace_url):
+        """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
+        self.ensure_namespace(namespace_url)
+
+        log.info('Caching equivalences: %s', url)
+
+        config = download_url(url)
+        values = config['Values']
+
+        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
+
+        for entry in ns.entries:
+            equivalence_label = values[entry.name]
+            equivalence = self.ensure_equivalence_class(equivalence_label)
+            entry.equivalence_id = equivalence.id
+
+        ns.has_equivalences = True
+
+        self.session.commit()
+
+    def ensure_equivalences(self, url, namespace_url):
+        """Check if the equivalence file is already loaded, and if not, load it"""
+        self.ensure_namespace(namespace_url)
+
+        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
+
+        if not ns.has_equivalences:
+            self.insert_equivalences(url, namespace_url)
+
+    def get_equivalence_by_entry(self, namespace_url, name):
+        """Gets the equivalence class
+
+        :param namespace_url: the URL of the namespace
+        :param name: the name of the entry in the namespace
+        :return: the equivalence class of the entry in the given namespace
+        """
+        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
+        ns_entry = self.session.query(models.NamespaceEntry).filter(models.NamespaceEntry.namespace_id == ns.id,
+                                                                    models.NamespaceEntry.name == name).one()
+        return ns_entry.equivalence
+
+    def get_equivalence_members(self, equivalence_class):
+        """Gets all members of the given equivalence class
+
+        :param equivalence_class: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
+                                    for Alzheimer's Disease
+        :return: a list of members of the class
+        """
+        eq = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=equivalence_class).one()
+        return eq.members

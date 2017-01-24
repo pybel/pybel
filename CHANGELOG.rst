@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+
+[0.3.4] - 2017-01-22
+--------------------
+Added
+~~~~~
+- Codec support for opening files by path
+
+Changed
+~~~~~~~
+- Protein modifications, gene modifications, and variants are now stored as dictionaries in the latent data structure
+- Many constants have been externalized
+- BEL default names, like kinaseActivity are automatically assigned a sentinel value as a namespace
+
+[0.3.3] - 2017-01-18
+--------------------
+Added
+~~~~~
+- Make HGVS parsing less complicated by storing as strings
+- add warning tracking
+
+[0.3.2] - 2017-01-13
+--------------------
+Added
+~~~~~
+- Gene modification support
+- Namespace equivalence mapping data models and manager
+- Extension loading
+
+Changed
+~~~~~~~
+- Better testing (local files only with mocks)
+- Better names for exceptions and warnings
+
 [0.3.1] - 2017-01-03
 --------------------
 Added
@@ -119,7 +152,10 @@ Added
 Diffs
 -----
 
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.1...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.4...HEAD
+- [0.3.4]: https://github.com/pybel/pybel/compare/v0.3.3...v0.3.4
+- [0.3.3]: https://github.com/pybel/pybel/compare/v0.3.2...v0.3.3
+- [0.3.2]: https://github.com/pybel/pybel/compare/v0.3.1...v0.3.2
 - [0.3.1]: https://github.com/pybel/pybel/compare/v0.3.0...v0.3.1
 - [0.3.0]: https://github.com/pybel/pybel/compare/v0.2.6...v0.3.0
 - [0.2.6]: https://github.com/pybel/pybel/compare/v0.2.5...v0.2.6

@@ -1,11 +1,6 @@
 Reference
 =========
 
-Top-Level API
--------------
-.. automodule:: pybel
-    :members:
-
 Parsers
 -------
 PyBEL makes extensive use of the PyParsing module. The code is organized to different modules to reflect

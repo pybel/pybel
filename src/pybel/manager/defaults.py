@@ -5,8 +5,7 @@ and URLs to load into a new PyBEL namespace store.
 See: https://wiki.openbel.org/display/BELNA/Namespaces+Overview
 """
 
-default_namespaces = [
-    # 1.0 Release
+default_namespaces_1 = [
     'http://resources.openbel.org/belframework/1.0/namespace/affy-hg-u133-plus2.belns',
     'http://resources.openbel.org/belframework/1.0/namespace/affy-hg-u133ab.belns',
     'http://resources.openbel.org/belframework/1.0/namespace/affy-hg-u95av2.belns',
@@ -39,8 +38,8 @@ default_namespaces = [
     'http://resources.openbel.org/belframework/1.0/namespace/selventa-named-rat-protein-families.belns',
     'http://resources.openbel.org/belframework/1.0/namespace/swissprot-accession-numbers.belns',
     'http://resources.openbel.org/belframework/1.0/namespace/swissprot-entry-names.belns',
-
-    # 2013 Release
+]
+default_namespaces_2013 = [
     'http://resources.openbel.org/belframework/20131211/namespace/affy-probeset-ids.belns',
     'http://resources.openbel.org/belframework/20131211/namespace/chebi-ids.belns',
     'http://resources.openbel.org/belframework/20131211/namespace/chebi.belns',
@@ -63,8 +62,9 @@ default_namespaces = [
     'http://resources.openbel.org/belframework/20131211/namespace/selventa-protein-families.belns',
     'http://resources.openbel.org/belframework/20131211/namespace/swissprot-ids.belns',
     'http://resources.openbel.org/belframework/20131211/namespace/swissprot.belns',
+]
 
-    # 2015 Release
+default_namespaces_2015 = [
     'http://resource.belframework.org/belframework/20150611/namespace/affy-probeset-ids.belns',
     'http://resource.belframework.org/belframework/20150611/namespace/chebi-ids.belns',
     'http://resource.belframework.org/belframework/20150611/namespace/chebi.belns',
@@ -94,8 +94,9 @@ default_namespaces = [
     'http://resource.belframework.org/belframework/20150611/namespace/swissprot.belns'
 ]
 
-default_annotations = [
-    # 1.0  Release
+default_namespaces = default_namespaces_1 + default_namespaces_2013 + default_namespaces_2015
+
+default_annotations_1 = [
     'http://resource.belframework.org/belframework/1.0/annotation/atcc-cell-line.belanno',
     'http://resource.belframework.org/belframework/1.0/annotation/mesh-body-region.belanno',
     'http://resource.belframework.org/belframework/1.0/annotation/mesh-cardiovascular-system.belanno',
@@ -116,8 +117,9 @@ default_annotations = [
     'http://resource.belframework.org/belframework/1.0/annotation/mesh-tissue.belanno',
     'http://resource.belframework.org/belframework/1.0/annotation/mesh-urogenital-system.belanno',
     'http://resource.belframework.org/belframework/1.0/annotation/species-taxonomy-id.belanno',
+]
 
-    # 2013 Release
+default_annotations_2013 = [
     'http://resource.belframework.org/belframework/20131211/annotation/anatomy.belanno',
     'http://resource.belframework.org/belframework/20131211/annotation/cell-line.belanno',
     'http://resource.belframework.org/belframework/20131211/annotation/cell-structure.belanno',
@@ -126,8 +128,9 @@ default_annotations = [
     'http://resource.belframework.org/belframework/20131211/annotation/mesh-anatomy.belanno',
     'http://resource.belframework.org/belframework/20131211/annotation/mesh-diseases.belanno',
     'http://resource.belframework.org/belframework/20131211/annotation/species-taxonomy-id.belanno',
+]
 
-    # 2015 Release
+default_annotations_2015 = [
     'http://resource.belframework.org/belframework/20150611/annotation/anatomy.belanno',
     'http://resource.belframework.org/belframework/20150611/annotation/cell-line.belanno',
     'http://resource.belframework.org/belframework/20150611/annotation/cell-structure.belanno',
@@ -137,6 +140,99 @@ default_annotations = [
     'http://resource.belframework.org/belframework/20150611/annotation/mesh-diseases.belanno',
     'http://resource.belframework.org/belframework/20150611/annotation/species-taxonomy-id.belanno'
 ]
+
+default_annotations = default_annotations_1 + default_annotations_2013 + default_annotations_2015
+
+default_equivalences_1 = [
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-hg-u133-plus2.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-hg-u133ab.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-hg-u95av2.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-mg-u74abc.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-moe430ab.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-mouse430-2.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-mouse430a-2.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-rae230ab-2.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/affy-rat230-2.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/chebi-ids.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/chebi-names.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/entrez-gene-ids-hmr.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/go-biological-processes-accession-numbers.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/go-biological-processes-names.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/go-cellular-component-accession-numbers.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/go-cellular-component-terms.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/hgnc-approved-symbols.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/mesh-biological-processes.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/mesh-cellular-locations.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/mesh-diseases.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/mgi-approved-symbols.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/rgd-approved-symbols.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/selventa-named-human-complexes.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/selventa-named-human-protein-families.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/selventa-named-mouse-complexes.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/selventa-named-mouse-protein-families.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/selventa-named-rat-complexes.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/selventa-named-rat-protein-families.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/swissprot-accession-numbers.beleq',
+    'http://resources.openbel.org/belframework/1.0/equivalence/swissprot-entry-names.beleq'
+]
+
+default_equivalences_2013 = [
+    'http://resources.openbel.org/belframework/20131211/equivalence/affy-probeset-ids.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/chebi-ids.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/chebi.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/disease-ontology-ids.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/disease-ontology.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/entrez-gene-ids.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/go-biological-process-ids.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/go-biological-process.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/go-cellular-component-ids.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/go-cellular-component.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/hgnc-human-genes.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/mesh-cellular-structures.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/mesh-diseases.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/mesh-processes.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/mgi-mouse-genes.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/rgd-rat-genes.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/selventa-legacy-chemicals.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/selventa-legacy-diseases.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/selventa-named-complexes.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/selventa-protein-families.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/swissprot-ids.beleq',
+    'http://resources.openbel.org/belframework/20131211/equivalence/swissprot.beleq'
+
+]
+
+default_equivalences_2015 = [
+    'http://resources.openbel.org/belframework/20150611/equivalence/affy-probeset-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/chebi-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/chebi.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/disease-ontology-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/disease-ontology.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/entrez-gene-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/go-biological-process-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/go-biological-process.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/go-cellular-component-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/go-cellular-component.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/hgnc-human-genes.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mesh-cellular-structures-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mesh-cellular-structures.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mesh-chemicals-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mesh-chemicals.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mesh-diseases-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mesh-diseases.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mesh-processes-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mesh-processes.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/mgi-mouse-genes.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/rgd-rat-genes.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/selventa-legacy-chemicals.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/selventa-legacy-diseases.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/selventa-named-complexes.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/selventa-protein-families.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/swissprot-ids.beleq',
+    'http://resources.openbel.org/belframework/20150611/equivalence/swissprot.beleq'
+]
+
+default_equivalences = default_equivalences_1 + default_equivalences_2013 + default_equivalences_2015
 
 default_owl = [
     'http://purl.obolibrary.org/obo/hp/releases/2016-09-03/hp.owl',  # Human Phenotype Ontology
