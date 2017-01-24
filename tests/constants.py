@@ -7,8 +7,9 @@ import ontospy
 from requests.compat import urlparse
 
 from pybel import BELGraph
-from pybel.constants import FUNCTION, NAMESPACE, NAME
+from pybel.constants import FUNCTION, NAMESPACE, NAME, GMOD, HGVS
 from pybel.manager.utils import urldefrag, OWLParser
+from pybel.parser.language import GENE, ABUNDANCE, PROTEIN, MIRNA
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
 
@@ -58,10 +59,10 @@ MESH_DISEASES_URL = "http://resources.openbel.org/belframework/20150611/annotati
 pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
 wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
 
-AKT1 = ('Protein', 'HGNC', 'AKT1')
-EGFR = ('Protein', 'HGNC', 'EGFR')
-FADD = ('Protein', 'HGNC', 'FADD')
-CASP8 = ('Protein', 'HGNC', 'CASP8')
+AKT1 = (PROTEIN, 'HGNC', 'AKT1')
+EGFR = (PROTEIN, 'HGNC', 'EGFR')
+FADD = (PROTEIN, 'HGNC', 'FADD')
+CASP8 = (PROTEIN, 'HGNC', 'CASP8')
 
 log = logging.getLogger('pybel')
 
@@ -98,27 +99,6 @@ class TestTokenParserBase(unittest.TestCase):
 
     def assertHasEdge(self, u, v, **kwargs):
         assertHasEdge(self, u, v, self.parser.graph, **kwargs)
-
-
-class BelReconstitutionMixin(unittest.TestCase):
-    def bel_1_reconstituted(self, g, check_metadata=True):
-        self.assertIsNotNone(g)
-        self.assertIsInstance(g, BELGraph)
-
-        # FIXME this doesn't work for GraphML IO
-        if check_metadata:
-            self.assertEqual(expected_test_bel_metadata, g.document)
-
-        assertHasNode(self, AKT1, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'AKT1'})
-        assertHasNode(self, EGFR, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'EGFR'})
-        assertHasNode(self, FADD, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'FADD'})
-        assertHasNode(self, CASP8, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'CASP8'})
-
-        assertHasEdge(self, AKT1, EGFR, g, relation='increases', TESTAN1="1")
-        assertHasEdge(self, EGFR, FADD, g, relation='decreases', TESTAN1="1", TESTAN2="3")
-        assertHasEdge(self, EGFR, CASP8, g, relation='directlyDecreases', TESTAN1="1", TESTAN2="3")
-        assertHasEdge(self, FADD, CASP8, g, relation='increases', TESTAN1="2")
-        assertHasEdge(self, AKT1, CASP8, g, relation='association', TESTAN1="2")
 
 
 expected_test_bel_metadata = {
@@ -249,11 +229,44 @@ def parse_owl_ontospy_resolver(iri):
 
 mock_parse_owl_ontospy = mock.patch('pybel.manager.utils.parse_owl_ontospy', side_effect=parse_owl_ontospy_resolver)
 
-class BelThoroughTestMixin(unittest.TestCase):
+
+class BelReconstitutionMixin(unittest.TestCase):
+    def bel_1_reconstituted(self, g, check_metadata=True):
+        self.assertIsNotNone(g)
+        self.assertIsInstance(g, BELGraph)
+
+        # FIXME this doesn't work for GraphML IO
+        if check_metadata:
+            self.assertEqual(expected_test_bel_metadata, g.document)
+
+        assertHasNode(self, AKT1, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        assertHasNode(self, EGFR, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'EGFR'})
+        assertHasNode(self, FADD, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'FADD'})
+        assertHasNode(self, CASP8, g, **{FUNCTION: 'Protein', NAMESPACE: 'HGNC', NAME: 'CASP8'})
+
+        assertHasEdge(self, AKT1, EGFR, g, relation='increases', TESTAN1="1")
+        assertHasEdge(self, EGFR, FADD, g, relation='decreases', TESTAN1="1", TESTAN2="3")
+        assertHasEdge(self, EGFR, CASP8, g, relation='directlyDecreases', TESTAN1="1", TESTAN2="3")
+        assertHasEdge(self, FADD, CASP8, g, relation='increases', TESTAN1="2")
+        assertHasEdge(self, AKT1, CASP8, g, relation='association', TESTAN1="2")
+
     def bel_thorough_reconstituted(self, g, check_metadata=True):
         self.assertIsNotNone(g)
         self.assertIsInstance(g, BELGraph)
 
-        assertHasNode(self, ('Abundance', 'CHEBI', 'oxygen atom'), g)
+        # assertHasNode(self, (), g)
 
-        self.fail('Thorough testing is not implemented yet! Trust nothing!')
+        assertHasNode(self, (ABUNDANCE, 'CHEBI', 'oxygen atom'), g)
+        assertHasNode(self, (GENE, 'HGNC', 'AKT1', (GMOD, 'Me')), g)
+        assertHasNode(self, (GENE, 'HGNC', 'AKT1'), g)
+        assertHasNode(self, (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), g)
+        assertHasNode(self, (GENE, 'HGNC', 'AKT1', (HGVS, 'g.308G>A')), g)
+        assertHasNode(self, (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del'), (HGVS, 'g.308G>A'), (HGVS, 'delCTT')), g)
+
+        assertHasNode(self, (MIRNA, 'HGNC', 'MIR21'), g)
+
+        assertHasNode(self, (GENE, 'HGNC', 'CFTR'), g)
+
+        assertHasNode(self, (GENE, ('HGNC', 'BCR'), (1875, '?'), ('HGNC', 'JAK2'), ('?', '2626')), g)
+
+        assertHasNode(self, (PROTEIN, 'HGNC', 'AKT1'), g)

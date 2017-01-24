@@ -4,6 +4,7 @@ import unittest
 import pybel
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import InvalidFunctionSemantic, MissingCitationException
+from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
     test_citation_dict, test_evidence_bel, mock_bel_resources, test_bel_thorough
 
@@ -28,6 +29,14 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
     def test_thorough(self, mock_get):
         g = pybel.from_path(test_bel_thorough)
         self.bel_thorough_reconstituted(g)
+        self.fail('Thorough testing is not implemented yet! Trust nothing!')
+
+    @mock_bel_resources
+    def test_slushy(self, mock_get):
+        g = pybel.from_path(constants.test_bel_slushy)
+        self.assertIsNotNone(g)
+        self.assertEqual(12, len(g.warnings))
+        self.fail('not implemented testing of slushy warnings yet')
 
 
 class TestFull(TestTokenParserBase):

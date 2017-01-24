@@ -125,6 +125,6 @@ p(PKC:a) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRK
 
 pathology(MESHD:Psoriasis) isA pathology(MESHD:"Skin Diseases")
 
-rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
+rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
 
 a(CHEBI:"nitric oxide") increases surf(complex(p(HGNC:ITGAV),p(HGNC:ITGB3)))
