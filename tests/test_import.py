@@ -37,8 +37,6 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
     def test_slushy(self, mock_get):
         g = pybel.from_path(constants.test_bel_slushy)
         self.assertIsNotNone(g)
-        # self.assertEqual(12, len(g.warnings))
-        # c = Counter(type(e) for n, l, e in g.warnings)
 
         self.assertEqual(25, g.warnings[0][0])
         self.assertIsInstance(g.warnings[0][2], NakedNameWarning)

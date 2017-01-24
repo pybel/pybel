@@ -18,6 +18,7 @@ from .parse_identifier import IdentifierParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
 from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
     GOCC_KEYWORD
+from ..constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT
 from ..constants import GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
     CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
@@ -41,11 +42,6 @@ cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], CEL
 translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFIER)
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
 reaction_tags = one_of_tags(['reaction', 'rxn'], language.REACTION, TRANSFORMATION)
-
-GENEVARIANT = language.GENE
-RNAVARIANT = language.RNA
-PROTEINVARIANT = language.PROTEIN
-MIRNAVARIANT = language.MIRNA
 
 function_variant_map = {
     language.GENE: GENEVARIANT,

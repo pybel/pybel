@@ -1,8 +1,8 @@
 import unittest
 
+from pybel.constants import DIRTY
 from pybel.parser import parse_exceptions
 from pybel.parser.parse_identifier import IdentifierParser
-from pybel.constants import DIRTY
 
 
 class TestIdentifierParser(unittest.TestCase):

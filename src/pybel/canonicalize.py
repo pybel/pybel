@@ -12,8 +12,9 @@ from .parser import language
 from .parser.language import GENE, PROTEIN, MIRNA, RNA, REACTION, COMPLEX, COMPOSITE, ABUNDANCE, PATHOLOGY, BIOPROCESS
 from .parser.language import inv_document_keys
 from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
-from .parser.parse_bel import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT, RELATION, PARTNER_3P, PARTNER_5P, \
+from .parser.parse_bel import RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT, RELATION, PARTNER_3P, PARTNER_5P, \
     RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, LOCATION
+from pybel.constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT
 from .parser.parse_bel import NAMESPACE, NAME
 from .parser.utils import ensure_quotes
 
