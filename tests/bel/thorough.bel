@@ -22,17 +22,19 @@ DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
 ##################################################################################
 # Statements Section
+##################################################################################
 
-SET Citation = {"Pubmed","That one article from last week","123455"}
+SET Citation = {"PubMed","That one article from last week","123455"}
 SET Evidence = "These are mostly made up"
 
 a(CHEBI:"oxygen atom") -> geneAbundance(HGNC:AKT1,gmod(M))
+
 g(HGNC:AKT1, loc(GOCC:intracellular)) -| abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))
 g(HGNC:AKT1, var(p.Phe508del)) =| p(HGNC:AKT1)
 g(HGNC:AKT1,sub(G,308,A)) cnc g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))
 g(HGNC:AKT1,sub(G,308,A),loc(GOCC:intracellular)) -> g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(delCTT))
-m(HGNC:MIR21) => g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
 
+m(HGNC:MIR21) => g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
 
 g(HGNC:CFTR, var(delCTT)) -> deg(p(HGNC:AKT1))
 g(HGNC:CFTR, var(g.117199646_117199648delCTT)) -> g(HGNC:CFTR, var(c.1521_1523delCTT))
@@ -48,56 +50,81 @@ g(HGNC:CHCHD4, fusion(HGNC:AIFM1)) -> p(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.31
 p(HGNC:AKT1, var(p.Arg1851*)) -> p(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
 p(HGNC:AKT1, trunc(40)) -> p(HGNC:CHCHD4, fusion(HGNC:AIFM1))
 
-
 p(HGNC:CFTR, var(=)) -> surf(p(HGNC:EGFR)) -> p(HGNC:MIA, frag(?_*))
 p(HGNC:CFTR, var(?)) -> pathology(MESHD:Adenocarcinoma)
 p(HGNC:CFTR, var(p.Phe508del))
-p(HGNC:MIA, frag(5_20)) -> tloc(a(NS:"T-Lymphocytes"))
+
+p(HGNC:MIA, frag(5_20)) -> sec(complex(GOCC:"interleukin-23 complex"))
+
 p(HGNC:MIA, frag(1_?)) -> tloc(p(HGNC:EGFR), GOCC:"cell surface", GOCC:endosome)
 
 deg(p(HGNC:AKT1)) -> p(HGNC:MIA, frag(?))
-p(HGNC:MIA, frag(?, 55kD))
-p(HGNC:AKT1) -> p(HGNC:CFTR, var(p.Gly576Ala))
-r(HGNC:AKT1) -> tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))
-r(HGNC:AKT1, var(p.Phe508del), var(delCTT)) => r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))
-r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?)) -> complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))
-r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
-r(HGNC:CHCHD4, fusion(HGNC:AIFM1)) -> complex(p(HGNC:FOS), p(HGNC:JUN))
-act(p(HGNC:AKT1), ma(kin)) -> r(HGNC:CFTR, var(r.1521_1523delcuu))
-act(p(HGNC:AKT1)) -> r(HGNC:CFTR, var(r.1653_1655delcuu))
-complex(SCOMP:"AP-1 Complex") -> p(HGNC:HRAS, pmod(Palm))
 
+p(HGNC:MIA, frag(?, 55kD))
+
+p(HGNC:AKT1) -> p(HGNC:CFTR, var(p.Gly576Ala))
+
+r(HGNC:AKT1) -> tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))
+
+r(HGNC:AKT1, var(p.Phe508del), var(delCTT)) => r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))
+
+r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?)) -> complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))
+
+r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
+
+r(HGNC:CHCHD4, fusion(HGNC:AIFM1)) -> complex(p(HGNC:FOS), p(HGNC:JUN))
+
+act(p(HGNC:AKT1), ma(kin)) -> r(HGNC:CFTR, var(r.1521_1523delcuu))
+
+act(p(HGNC:AKT1)) -> r(HGNC:CFTR, var(r.1653_1655delcuu))
+
+complex(SCOMP:"AP-1 Complex") -> p(HGNC:HRAS, pmod(Palm))
 
 composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex")) -| bp(GOBP:"cell cycle arrest")
 
-
-
-
-
 act(p(HGNC:AKT1), ma(catalyticActivity)) -> deg(p(HGNC:EGFR))
-
 
 kin(p(HGNC:AKT1)) -> sec(p(HGNC:EGFR))
 
-SET Citation = {"Pubmed","That one article from last week #2","123456"}
+################################################################################################################
+
+SET Citation = {"PubMed","That one article from last week #2","123456"}
 SET Evidence = "These were all explicitly stated in the BEL 2.0 Specification"
 
 rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:dioxygen)))
+
 composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")
+
 pep(p(SFAM:"CAPN Family", location(GOCC:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))
+
 proteinAbundance(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")
+
 g(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")
+
 act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GOBP:"cholesterol biosynthetic process")
+
 g(HGNC:APP,sub(G,275341,C)) cnc path(MESHD:"Alzheimer Disease")
+
 pep(complex(p(HGNC:F3),p(HGNC:F7))) regulates pep(p(HGNC:F9))
+
 p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))
+
 p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))
+
 kin(p(SFAM:"GSK3 Family")) neg p(HGNC:MAPT,pmod(P))
+
 p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))
+
 g(HGNC:AKT1) orthologous g(MGI:AKT1)
+
 g(HGNC:AKT1) :> r(HGNC:AKT1)
+
 r(HGNC:AKT1) >> p(HGNC:AKT1)
+
 p(PKC:a) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))
+
 pathology(MESHD:Psoriasis) isA pathology(MESHD:"Skin Diseases")
+
 rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
-abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))
+
+a(CHEBI:"nitric oxide") increases surf(complex(p(HGNC:ITGAV),p(HGNC:ITGB3)))

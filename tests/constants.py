@@ -22,6 +22,7 @@ belanno_dir_path = os.path.join(dir_path, 'belanno')
 test_bel = os.path.join(bel_dir_path, 'test_bel.bel')
 test_bel_4 = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
+test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
 
 test_owl_1 = os.path.join(owl_dir_path, 'pizza_onto.owl')
 test_owl_2 = os.path.join(owl_dir_path, 'wine.owl')
@@ -197,3 +198,13 @@ def help_check_hgnc(self, namespace_dict):
 
     self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
     self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
+
+
+class BelThoroughTestMixin(unittest.TestCase):
+    def bel_thorough_reconstituted(self, g, check_metadata=True):
+        self.assertIsNotNone(g)
+        self.assertIsInstance(g, BELGraph)
+
+        assertHasNode(self, ('Abundance', 'CHEBI', 'oxygen atom'), g)
+
+        self.fail('Thorough testing is not implemented yet! Trust nothing!')
