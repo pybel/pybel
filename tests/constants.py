@@ -7,11 +7,11 @@ import ontospy
 from requests.compat import urlparse
 
 from pybel import BELGraph
-from pybel.constants import FUNCTION, NAMESPACE, NAME, GMOD, HGVS
+from pybel.constants import FUNCTION, NAMESPACE, NAME, GMOD, HGVS, GENE_FUSION
 from pybel.constants import PYBEL_DEFAULT_NAMESPACE
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.language import GENE, ABUNDANCE, PROTEIN, MIRNA
-from pybel.parser.parse_bel import BelParser
+from pybel.parser.parse_bel import BelParser, GENE_FUSION
 from pybel.parser.utils import any_subdict_matches
 
 try:
@@ -271,6 +271,6 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         assertHasNode(self, (GENE, 'HGNC', 'CFTR'), g)
 
-        assertHasNode(self, (GENE, ('HGNC', 'BCR'), ('c', '?', 1875,), ('HGNC', 'JAK2'), ('c', '2626', '?')), g)
+        assertHasNode(self, (GENE_FUSION, ('HGNC', 'BCR'), ('c', '?', 1875,), ('HGNC', 'JAK2'), ('c', '2626', '?')), g)
 
         assertHasNode(self, (PROTEIN, 'HGNC', 'AKT1'), g)

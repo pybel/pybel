@@ -4,16 +4,17 @@ import itertools as itt
 import sys
 from operator import itemgetter
 
+from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION
 from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
-from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS
+from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
 from .parser import language
 from .parser.language import GENE, PROTEIN, MIRNA, RNA, REACTION, COMPLEX, COMPOSITE, ABUNDANCE, PATHOLOGY, BIOPROCESS
 from .parser.language import inv_document_keys
 from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
-from .parser.parse_bel import ACTIVITY, DEGRADATION, TRANSLOCATION, NAMESPACE, NAME
 from .parser.parse_bel import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT, RELATION, PARTNER_3P, PARTNER_5P, \
     RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, LOCATION
+from .parser.parse_bel import NAMESPACE, NAME
 from .parser.utils import ensure_quotes
 
 __all__ = ['to_bel']
@@ -30,9 +31,9 @@ variant_parent_dict = {
 }
 
 fusion_parent_dict = {
-    'GeneFusion': 'g',
-    'RNAFusion': 'r',
-    'ProteinFusion': 'p'
+    GENE_FUSION: 'g',
+    RNA_FUSION: 'r',
+    PROTEIN_FUSION: 'p'
 }
 
 
@@ -129,7 +130,7 @@ def decanonicalize_node(g, v):
                                       ensure_quotes(data[NAME]),
                                       variants)
 
-    if data[FUNCTION] in (GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX,PATHOLOGY, BIOPROCESS):
+    if data[FUNCTION] in (GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY, BIOPROCESS):
         return "{}({}:{})".format(language.rev_abundance_labels[data[FUNCTION]],
                                   data[NAMESPACE],
                                   ensure_quotes(data[NAME]))

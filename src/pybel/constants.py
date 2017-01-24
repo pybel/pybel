@@ -36,3 +36,35 @@ CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
 CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
 BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
 DIRTY = 'dirty'
+
+TWO_WAY_RELATIONS = {'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'}
+
+ACTIVITY = 'Activity'
+DEGRADATION = 'Degradation'
+TRANSLOCATION = 'Translocation'
+CELL_SECRETION = 'CellSecretion'
+CELL_SURFACE_EXPRESSION = 'CellSurfaceExpression'
+
+PARTNER_3P = 'partner_3p'
+PARTNER_5P = 'partner_5p'
+RANGE_3P = 'range_3p'
+RANGE_5P = 'range_5p'
+
+FUSION = 'fusion'
+MODIFIER = 'modifier'
+EFFECT = 'effect'
+TARGET = 'target'
+TRANSFORMATION = 'transformation'
+FROM_LOC = 'fromLoc'
+TO_LOC = 'toLoc'
+MEMBERS = 'members'
+REACTANTS = 'reactants'
+PRODUCTS = 'products'
+LOCATION = 'location'
+
+SUBJECT = 'subject'
+OBJECT = 'object'
+
+GENE_FUSION = 'GeneFusion'
+RNA_FUSION = 'RNAFusion'
+PROTEIN_FUSION = 'ProteinFusion'

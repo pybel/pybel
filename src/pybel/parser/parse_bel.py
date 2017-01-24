@@ -18,37 +18,12 @@ from .parse_identifier import IdentifierParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
 from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
     GOCC_KEYWORD
+from ..constants import GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
+from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
+    CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
+    TRANSFORMATION, FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
 
 log = logging.getLogger('pybel')
-
-TWO_WAY_RELATIONS = {'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'}
-ACTIVITY = 'Activity'
-DEGRADATION = 'Degradation'
-TRANSLOCATION = 'Translocation'
-CELL_SECRETION = 'CellSecretion'
-CELL_SURFACE_EXPRESSION = 'CellSurfaceExpression'
-
-PARTNER_3P = 'partner_3p'
-PARTNER_5P = 'partner_5p'
-RANGE_3P = 'range_3p'
-RANGE_5P = 'range_5p'
-FUSION = 'fusion'
-
-MODIFIER = 'modifier'
-EFFECT = 'effect'
-TARGET = 'target'
-TRANSFORMATION = 'transformation'
-FROM_LOC = 'fromLoc'
-TO_LOC = 'toLoc'
-
-MEMBERS = 'members'
-REACTANTS = 'reactants'
-PRODUCTS = 'products'
-LOCATION = 'location'
-
-SUBJECT = 'subject'
-OBJECT = 'object'
-RELATION = 'relation'
 
 general_abundance_tags = one_of_tags(['a', 'abundance'], language.ABUNDANCE, FUNCTION)
 gene_tag = one_of_tags(['g', 'geneAbundance'], language.GENE, FUNCTION)
@@ -67,10 +42,10 @@ translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFI
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
 reaction_tags = one_of_tags(['reaction', 'rxn'], language.REACTION, TRANSFORMATION)
 
-GENEVARIANT = 'GeneVariant'
-RNAVARIANT = 'RNAVariant'
-PROTEINVARIANT = 'ProteinVariant'
-MIRNAVARIANT = 'miRNAVariant'
+GENEVARIANT = language.GENE
+RNAVARIANT = language.RNA
+PROTEINVARIANT = language.PROTEIN
+MIRNAVARIANT = language.MIRNA
 
 function_variant_map = {
     language.GENE: GENEVARIANT,
@@ -80,9 +55,9 @@ function_variant_map = {
 }
 
 fusion_map = {
-    language.GENE: 'GeneFusion',
-    language.RNA: 'RNAFusion',
-    language.PROTEIN: 'ProteinFusion'
+    language.GENE: GENE_FUSION,
+    language.RNA: RNA_FUSION,
+    language.PROTEIN: PROTEIN_FUSION
 }
 
 

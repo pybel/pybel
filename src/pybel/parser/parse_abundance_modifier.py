@@ -11,6 +11,7 @@ from .language import amino_acid, dna_nucleotide, dna_nucleotide_labels, rna_nuc
 from .language import pmod_namespace, pmod_legacy_labels
 from .parse_identifier import IdentifierParser
 from ..constants import KIND, PMOD, GMOD, HGVS, PYBEL_DEFAULT_NAMESPACE, FRAGMENT, NAMESPACE, NAME
+from ..constants import PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P
 
 log = logging.getLogger('pybel')
 
@@ -272,8 +273,8 @@ class FusionParser(BaseParser):
         range_coordinate = (Group(oneOf(['r', 'p', 'c']) + Suppress('.') + ppc.integer +
                                   Suppress('_') + ppc.integer) | '?')
 
-        self.language = fusion_tags + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
-                                           Group(identifier)('partner_3p'), range_coordinate('range_3p'))
+        self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), range_coordinate(RANGE_5P),
+                                           Group(identifier)(PARTNER_3P), range_coordinate(RANGE_3P))
 
     def get_language(self):
         return self.language
