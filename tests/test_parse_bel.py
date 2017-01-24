@@ -1,12 +1,11 @@
 import logging
 
 from pybel.canonicalize import decanonicalize_node
-from pybel.constants import HGVS, PMOD, GMOD, KIND, FRAGMENT, FUNCTION, NAMESPACE, NAME, ACTIVITY
-from pybel.constants import PYBEL_DEFAULT_NAMESPACE
-from pybel.parser.language import GENE, RNA, ABUNDANCE, PATHOLOGY, BIOPROCESS, PROTEIN, MIRNA, COMPLEX, REACTION, \
-    COMPOSITE
+from pybel.constants import HGVS, PMOD, GMOD, KIND, FRAGMENT, FUNCTION, NAMESPACE, NAME, ACTIVITY, GENE, RNA, ABUNDANCE, \
+    PATHOLOGY, BIOPROCESS, PROTEIN, MIRNA, COMPLEX, REACTION, COMPOSITE
+from pybel.constants import PYBEL_DEFAULT_NAMESPACE, PROTEINVARIANT, GENEVARIANT, RNAVARIANT, DEGRADATION, \
+    TRANSFORMATION, TRANSLOCATION
 from pybel.parser.parse_abundance_modifier import GmodParser, PmodParser
-from pybel.parser.parse_bel import PROTEINVARIANT, GENEVARIANT, RNAVARIANT, DEGRADATION, TRANSFORMATION, TRANSLOCATION
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from pybel.utils import default_identifier

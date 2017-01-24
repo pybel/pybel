@@ -18,6 +18,7 @@ from .parse_identifier import IdentifierParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
 from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
     GOCC_KEYWORD
+from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOLOGY, REACTION, COMPLEX, COMPOSITE
 from ..constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT
 from ..constants import GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
@@ -26,34 +27,34 @@ from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION,
 
 log = logging.getLogger('pybel')
 
-general_abundance_tags = one_of_tags(['a', 'abundance'], language.ABUNDANCE, FUNCTION)
-gene_tag = one_of_tags(['g', 'geneAbundance'], language.GENE, FUNCTION)
+general_abundance_tags = one_of_tags(['a', 'abundance'], ABUNDANCE, FUNCTION)
+gene_tag = one_of_tags(['g', 'geneAbundance'], GENE, FUNCTION)
 fusion_tag = oneOf(['fus', 'fusion']).setParseAction(replaceWith('Fusion'))
-mirna_tag = one_of_tags(['m', 'microRNAAbundance'], language.MIRNA, FUNCTION)
-protein_tag = one_of_tags(['p', 'proteinAbundance'], language.PROTEIN, FUNCTION)
-rna_tag = one_of_tags(['r', 'rnaAbundance'], language.RNA, FUNCTION)
-complex_tag = one_of_tags(['complex', 'complexAbundance'], language.COMPLEX, FUNCTION)
-composite_abundance_tag = one_of_tags(['composite', 'compositeAbundance'], language.COMPOSITE, FUNCTION)
-biological_process_tag = one_of_tags(['bp', 'biologicalProcess'], language.BIOPROCESS, FUNCTION)
-pathology_tag = one_of_tags(['o', 'path', 'pathology'], language.PATHOLOGY, FUNCTION)
+mirna_tag = one_of_tags(['m', 'microRNAAbundance'], MIRNA, FUNCTION)
+protein_tag = one_of_tags(['p', 'proteinAbundance'], PROTEIN, FUNCTION)
+rna_tag = one_of_tags(['r', 'rnaAbundance'], RNA, FUNCTION)
+complex_tag = one_of_tags(['complex', 'complexAbundance'], COMPLEX, FUNCTION)
+composite_abundance_tag = one_of_tags(['composite', 'compositeAbundance'], COMPOSITE, FUNCTION)
+biological_process_tag = one_of_tags(['bp', 'biologicalProcess'], BIOPROCESS, FUNCTION)
+pathology_tag = one_of_tags(['o', 'path', 'pathology'], PATHOLOGY, FUNCTION)
 activity_tag = one_of_tags(['act', 'activity'], ACTIVITY, MODIFIER)
 cell_secretion_tag = one_of_tags(['sec', 'cellSecretion'], CELL_SECRETION, MODIFIER)
 cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], CELL_SURFACE_EXPRESSION, MODIFIER)
 translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFIER)
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
-reaction_tags = one_of_tags(['reaction', 'rxn'], language.REACTION, TRANSFORMATION)
+reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, TRANSFORMATION)
 
 function_variant_map = {
-    language.GENE: GENEVARIANT,
-    language.RNA: RNAVARIANT,
-    language.PROTEIN: PROTEINVARIANT,
-    language.MIRNA: MIRNAVARIANT
+    GENE: GENEVARIANT,
+    RNA: RNAVARIANT,
+    PROTEIN: PROTEINVARIANT,
+    MIRNA: MIRNAVARIANT
 }
 
 fusion_map = {
-    language.GENE: GENE_FUSION,
-    language.RNA: RNA_FUSION,
-    language.PROTEIN: PROTEIN_FUSION
+    GENE: GENE_FUSION,
+    RNA: RNA_FUSION,
+    PROTEIN: PROTEIN_FUSION
 }
 
 
@@ -651,8 +652,9 @@ class BelParser(BaseParser):
             return name
 
         elif FUNCTION in tokens and IDENTIFIER in tokens:
-            if tokens[FUNCTION] in {language.GENE, language.MIRNA, language.PATHOLOGY, language.BIOPROCESS,
-                                    language.ABUNDANCE, language.COMPLEX}:
+            if tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY,
+                                    BIOPROCESS,
+                                    ABUNDANCE, COMPLEX}:
                 self.graph.add_node(name, {
                     FUNCTION: tokens[FUNCTION],
                     NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
@@ -660,7 +662,7 @@ class BelParser(BaseParser):
                 })
                 return name
 
-            elif tokens[FUNCTION] == language.RNA:
+            elif tokens[FUNCTION] == RNA:
                 self.graph.add_node(name, {
                     FUNCTION: tokens[FUNCTION],
                     NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
@@ -671,13 +673,13 @@ class BelParser(BaseParser):
                     return name
 
                 gene_tokens = deepcopy(tokens)
-                gene_tokens[FUNCTION] = language.GENE
+                gene_tokens[FUNCTION] = GENE
                 gene_name = self.ensure_node(s, l, gene_tokens)
 
                 self.add_unqualified_edge(gene_name, name, relation='transcribedTo')
                 return name
 
-            elif tokens[FUNCTION] == language.PROTEIN:
+            elif tokens[FUNCTION] == PROTEIN:
                 self.graph.add_node(name, {
                     FUNCTION: tokens[FUNCTION],
                     NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
@@ -688,7 +690,7 @@ class BelParser(BaseParser):
                     return name
 
                 rna_tokens = deepcopy(tokens)
-                rna_tokens[FUNCTION] = language.RNA
+                rna_tokens[FUNCTION] = RNA
                 rna_name = self.ensure_node(s, l, rna_tokens)
 
                 self.add_unqualified_edge(rna_name, name, relation='translatedTo')
@@ -708,7 +710,7 @@ def canonicalize_node(tokens):
     elif FUNCTION in tokens and MEMBERS in tokens:
         return (tokens[FUNCTION],) + tuple(sorted(canonicalize_node(member) for member in tokens[MEMBERS]))
 
-    elif TRANSFORMATION in tokens and tokens[TRANSFORMATION] == language.REACTION:
+    elif TRANSFORMATION in tokens and tokens[TRANSFORMATION] == REACTION:
         reactants = tuple(sorted(list2tuple(tokens[REACTANTS].asList())))
         products = tuple(sorted(list2tuple(tokens[PRODUCTS].asList())))
         return (tokens[TRANSFORMATION],) + (reactants,) + (products,)
@@ -719,9 +721,11 @@ def canonicalize_node(tokens):
         return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), tuple(f[RANGE_5P]), (
             f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), tuple(f[RANGE_3P])
 
-    elif FUNCTION in tokens and tokens[FUNCTION] in {language.GENE, language.RNA, language.MIRNA, language.PROTEIN,
-                                                     language.ABUNDANCE, language.COMPLEX, language.PATHOLOGY,
-                                                     language.BIOPROCESS}:
+    elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA,
+                                                     PROTEIN,
+                                                     ABUNDANCE, COMPLEX,
+                                                     PATHOLOGY,
+                                                     BIOPROCESS}:
         if IDENTIFIER in tokens:
             return tokens[FUNCTION], tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 

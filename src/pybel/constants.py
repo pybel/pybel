@@ -1,7 +1,5 @@
 import os
 
-from .parser import language
-
 SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
 LARGE_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/large_corpus.bel'
 
@@ -71,7 +69,17 @@ GENE_FUSION = 'GeneFusion'
 RNA_FUSION = 'RNAFusion'
 PROTEIN_FUSION = 'ProteinFusion'
 
-GENEVARIANT = language.GENE
-RNAVARIANT = language.RNA
-PROTEINVARIANT = language.PROTEIN
-MIRNAVARIANT = language.MIRNA
+GENE = 'Gene'
+GENEVARIANT = GENE
+RNA = 'RNA'
+RNAVARIANT = RNA
+PROTEIN = 'Protein'
+PROTEINVARIANT = PROTEIN
+MIRNA = 'miRNA'
+MIRNAVARIANT = MIRNA
+ABUNDANCE = 'Abundance'
+BIOPROCESS = 'BiologicalProcess'
+PATHOLOGY = 'Pathology'
+COMPOSITE = 'Composite'
+COMPLEX = 'Complex'
+REACTION = 'Reaction'

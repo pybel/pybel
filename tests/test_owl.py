@@ -8,7 +8,7 @@ from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
 from pybel.parser.parse_metadata import MetadataParser
-from tests import constants
+from tests.constants import mock_parse_owl_ontospy, mock_bel_resources, mock_parse_owl_pybel, test_owl_3
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, expected_test_bel_4_metadata, \
     assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
 
@@ -62,8 +62,8 @@ class TestParsePizza(TestOwlBase):
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_url(self, m1, m2):
         owl = parse_owl(pizza_iri)
 
@@ -71,8 +71,8 @@ class TestParsePizza(TestOwlBase):
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_metadata_parser(self, m1, m2):
         functions = set('A')
         s = 'DEFINE NAMESPACE Pizza AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
@@ -89,8 +89,8 @@ class TestParsePizza(TestOwlBase):
             self.assertIn(node, names)
             self.assertEqual(functions, parser.namespace_dict['Pizza'][node])
 
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_metadata_parser_no_function(self, m1, m2):
         s = 'DEFINE NAMESPACE Pizza AS OWL "{}"'.format(pizza_iri)
         parser = MetadataParser(CacheManager('sqlite:///'))
@@ -279,8 +279,8 @@ class TestWine(TestOwlBase):
         for u, v in sorted(self.expected_membership):
             self.assertHasEdge(owl, u, v)
 
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_metadata_parser(self, m1, m2):
         cm = CacheManager('sqlite://')
 
@@ -317,14 +317,14 @@ class TestAdo(TestOwlBase):
     }
 
     def test_ado_local(self):
-        ado_path = 'file://' + constants.test_owl_3
+        ado_path = 'file://' + test_owl_3
         owl = parse_owl(ado_path)
 
         self.assertLessEqual(self.ado_expected_nodes_subset, set(owl.nodes_iter()))
         self.assertLessEqual(self.ado_expected_edges_subset, set(owl.edges_iter()))
 
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_ado(self, mock1, mock2):
         ado_path = 'http://mock.com/ado.owl'
         owl = parse_owl(ado_path)
@@ -339,8 +339,8 @@ class TestOwlManager(unittest.TestCase):
         self.manager.drop_database()
         self.manager.create_database()
 
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_ensure(self, m1, m2):
         self.manager.ensure_owl(pizza_iri)
         entries = self.manager.get_owl_terms(pizza_iri)
@@ -364,9 +364,9 @@ class TestOwlManager(unittest.TestCase):
 
 
 class TestIntegration(TestOwlBase):
-    @constants.mock_bel_resources
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_bel_resources
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_from_path(self, m1, m2, m3):
         g = pybel.from_path(test_bel_4)
 

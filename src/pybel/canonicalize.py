@@ -6,16 +6,14 @@ from operator import itemgetter
 
 from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION
 from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
+from .constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT, ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, \
+    BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX, REACTION
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
 from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
-from .parser import language
-from .parser.language import GENE, PROTEIN, MIRNA, RNA, REACTION, COMPLEX, COMPOSITE, ABUNDANCE, PATHOLOGY, BIOPROCESS
-from .parser.language import inv_document_keys
+from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
+    LOCATION, NAME, NAMESPACE
+from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
 from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
-from .parser.parse_bel import RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT, RELATION, PARTNER_3P, PARTNER_5P, \
-    RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, LOCATION
-from pybel.constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT
-from .parser.parse_bel import NAMESPACE, NAME
 from .parser.utils import ensure_quotes
 
 __all__ = ['to_bel']
@@ -122,7 +120,7 @@ def decanonicalize_node(g, v):
 
     if data[FUNCTION] in (COMPOSITE, COMPLEX) and NAMESPACE not in data:
         members_canon = map(lambda n: decanonicalize_node(g, n), v[1:])
-        return '{}({})'.format(language.rev_abundance_labels[data[FUNCTION]], ', '.join(members_canon))
+        return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members_canon))
 
     if 'variants' in data:
         variants = ', '.join(sorted(map(decanonicalize_variant, data[VARIANTS])))
@@ -132,7 +130,7 @@ def decanonicalize_node(g, v):
                                       variants)
 
     if data[FUNCTION] in (GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY, BIOPROCESS):
-        return "{}({}:{})".format(language.rev_abundance_labels[data[FUNCTION]],
+        return "{}({}:{})".format(rev_abundance_labels[data[FUNCTION]],
                                   data[NAMESPACE],
                                   ensure_quotes(data[NAME]))
 
@@ -286,7 +284,7 @@ def to_bel(graph, file=sys.stdout):
     print('SET Evidence = "Automatically added by PyBEL"', file=file)
 
     for u in graph.nodes_iter():
-        if any(d[RELATION] not in language.unqualified_edges for v in graph.adj[u] for d in
+        if any(d[RELATION] not in unqualified_edges for v in graph.adj[u] for d in
                graph.edge[u][v].values()):
             continue
 

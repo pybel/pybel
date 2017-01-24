@@ -5,7 +5,7 @@ from pyparsing import ParseException
 
 import pybel
 from pybel.parser import BelParser
-from pybel.parser.language import GENE
+from pybel.constants import GENE
 from pybel.parser.parse_exceptions import *
 from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
