@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 
 SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'

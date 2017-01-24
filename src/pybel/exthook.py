@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Import hook for PyBEL Extensions"""
 import sys
 
