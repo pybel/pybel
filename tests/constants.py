@@ -10,6 +10,7 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import FUNCTION, NAMESPACE, NAME
+from pybel.constants import PROTEIN
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
@@ -18,8 +19,6 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-
-PROTEIN = 'Protein'
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 owl_dir_path = os.path.join(dir_path, 'owl')
