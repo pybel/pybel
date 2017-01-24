@@ -230,12 +230,14 @@ node_modification = Table(
 
 
 class Node(Base):
+    """This table contains node information. """
+
     __tablename__ = NODE_TABLE_NAME
     id = Column(Integer, primary_key=True)
     type = Column(String(255), nullable=False)
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
-    bel = Column(String(255), nullable=False)
+    bel = Column(String, nullable=False)
 
     modifications = relationship("Modification", secondary=node_modification)
 
@@ -244,11 +246,13 @@ class Node(Base):
 
 
 class Modification(Base):
+    """The modifications that are present in the network are stored in this table."""
+
     __tablename__ = MODIFICATION_TABLE_NAME
     id = Column(Integer, primary_key=True)
 
     modType = Column(String(255))
-    variantString = Column(String(255), nullable=True)
+    variantString = Column(String, nullable=True)
     p3PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     p3Partner = relationship("NamespaceEntry", foreign_keys=[p3PartnerName_id])
     p3Range = Column(String(255), nullable=True)
@@ -263,6 +267,8 @@ class Modification(Base):
     nodes = relationship("Node", secondary=node_modification)
 
 class Citation(Base):
+    """The information about the citations that are used to prove a specific relation are stored in this table."""
+
     __tablename__ = CITATION_TABLE_NAME
     id = Column(Integer, primary_key=True)
     type = Column(String(16), nullable=False)
@@ -281,9 +287,11 @@ class Citation(Base):
 
 
 class Evidence(Base):
+    """This table contains the evidence text that proves a specific relationship and refers the source that is cited."""
+
     __tablename__ = EVIDENCE_TABLE_NAME
     id = Column(Integer, primary_key=True)
-    text = Column(String(255), nullable=False, index=True)
+    text = Column(String, nullable=False, index=True)
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation')
@@ -300,9 +308,12 @@ edge_property = Table(
 
 
 class Edge(Base):
+    """Relationships are represented in this table. It shows the nodes that are in a relation to eachother and provides
+    information about the context of the relation by refaring to the annotation, property and evidence tables."""
+
     __tablename__ = EDGE_TABLE_NAME
     id = Column(Integer, primary_key=True)
-    bel = Column(String(255), nullable=False)
+    bel = Column(String, nullable=False)
     relation = Column(String, nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
@@ -322,13 +333,14 @@ class Edge(Base):
 
 
 class Property(Base):
+    """The property table contains additional information that is used to describe the context of a relation."""
     __tablename__ = PROPERTY_TABLE_NAME
     id = Column(Integer, primary_key=True)
 
     participant = Column(String(255))
     modifier = Column(String(255))
     relativeKey = Column(String(255), nullable=True)
-    propValue = Column(String(255), nullable=True)
+    propValue = Column(String, nullable=True)
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry')
 

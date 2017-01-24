@@ -58,7 +58,7 @@ class GraphCacheManager(BaseCacheManager):
         for key, anno_url in graph.annotation_url.items():
             self.cache_manager.ensure_annotation(anno_url)
 
-        # FIXME add GOCC ensurement to creation of graph.namespace_url ?
+        # FIXME add GOCC ensurement to creation of graph.namespace_url ? --> Extract to constans!!!!
         GOCC = 'http://resource.belframework.org/belframework/20150611/namespace/go-cellular-component.belns'
         self.cache_manager.ensure_namespace(GOCC)
         graph.namespace_url['GOCC'] = GOCC
@@ -77,7 +77,12 @@ class GraphCacheManager(BaseCacheManager):
             evidence = self.get_or_create_evidence(citation, data['SupportingText'])
             edge = self.get_or_create_edge(source, target, evidence, edge_bel, data['relation'])
 
-            edge.properties = self.get_or_create_property(graph, data)
+            # edge.properties = self.get_or_create_property(graph, data)
+            properties = self.get_or_create_property(graph, data)
+            for property in properties:
+                if property not in edge.properties:
+                    edge.properties.append(property)
+
 
             for key, value in data.items():
                 if key in ANNOTATION_KEY_BLACKLIST:
@@ -89,11 +94,13 @@ class GraphCacheManager(BaseCacheManager):
 
                 annotation_url = graph.annotation_url[key]
                 annotation_id = self.cache_manager.annotation_id_cache[annotation_url][value]
-                edge.annotations.append(self.get_annotation(annotation_id))
+                if self.get_annotation(annotation_id) not in edge.annotations:
+                    edge.annotations.append(self.get_annotation(annotation_id))
 
-            network.edges.append(edge)
+            if edge not in network.edges:
+                network.edges.append(edge)
 
-        self.session.commit()
+                #self.session.commit()
 
     def get_graph_versions(self, name):
         """Returns all of the versions of a graph with the given name"""
@@ -157,7 +164,6 @@ class GraphCacheManager(BaseCacheManager):
         try:
             result = self.session.query(models.Node).filter_by(bel=bel).one()
         except NoResultFound:
-            namespaceEntry = None
             type = node_data['type']
 
             if 'namespace' in node_data:
@@ -165,7 +171,10 @@ class GraphCacheManager(BaseCacheManager):
                 name_id = self.cache_manager.namespace_id_cache[url][node_data['name']]
                 namespaceEntry = self.get_name(name_id)
 
-            result = models.Node(bel=bel, namespaceEntry=namespaceEntry, type=type)
+                result = models.Node(bel=bel, namespaceEntry=namespaceEntry, type=type)
+
+            else:
+                result = models.Node(bel=bel, type=type)
 
             if type in ('ProteinVariant', 'ProteinFusion'):
                 result.modifications = self.get_or_create_modification(graph, node_data)
@@ -186,7 +195,7 @@ class GraphCacheManager(BaseCacheManager):
         :return:
         :rtype: list
         """
-        modifications = []
+        modification_list = []
         if node_data['type'] == 'ProteinFusion':
             modType = 'ProteinFusion'
             p3namespace_url = graph.namespace_url[node_data['partner_3p']['namespace']]
@@ -197,36 +206,43 @@ class GraphCacheManager(BaseCacheManager):
             p5name_id = self.cache_manager.namespace_id_cache[p5namespace_url][node_data['partner_5p']['name']]
             p5namespaceEntry = self.get_name(p5name_id)
 
-            modifications.append(models.Modification(
-                modType=modType,
-                p3Partner=p3namespaceEntry,
-                p3Range=node_data['range_3p'][0],
-                p5Partner=p5namespaceEntry,
-                p5Range=node_data['range_5p'][0],
-            ))
+            modification_list.append({
+                'modType': modType,
+                'p3Partner': p3namespaceEntry,
+                'p3Range': node_data['range_3p'][0],
+                'p5Partner': p5namespaceEntry,
+                'p5Range': node_data['range_5p'][0],
+            })
         else:
             for variant in node_data['variants']:
                 modType = variant[0]
                 if modType == 'Variant':
-                    modifications.append(models.Modification(
-                        modType=modType,
-                        variantString=variant[1]
-                    ))
+                    modification_list.append({
+                        'modType': modType,
+                        'variantString': variant[1]
+                    })
                 elif modType == 'ProteinModification':
-                    modifications.append(models.Modification(
-                        modType=modType,
-                        pmodName=variant[1] if len(variant) > 1 else None,
-                        aminoA=variant[2] if len(variant) > 2 else None,
-                        position=variant[3] if len(variant) > 3 else None
-                    ))
+                    modification_list.append({
+                        'modType': modType,
+                        'pmodName': variant[1] if len(variant) > 1 else None,
+                        'aminoA': variant[2] if len(variant) > 2 else None,
+                        'position': variant[3] if len(variant) > 3 else None
+                    })
                 elif modType == 'GeneModification':
                     # ToDo: Do GeneModifications look like ProteinModifications?
-                    modifications.append(models.Modification(
-                        modType=modType,
-                        variantString=str(variant)
-                    ))
+                    modification_list.append({
+                        'modType': modType,
+                        'variantString': str(variant)
+                    })
 
                     # ToDo: What are the possible modifications?
+
+        modifications = []
+        for modification in modification_list:
+            mod = self.session.query(models.Modification).filter_by(**modification).first()
+            if not mod:
+                mod = models.Modification(**modification)
+            modifications.append(mod)
 
         return modifications
 
@@ -288,9 +304,8 @@ class GraphCacheManager(BaseCacheManager):
         :rtype: list
         """
         properties = []
-
+        property_list = []
         for participant in ('subject', 'object'):
-            property_list = []
             if participant in edge_data:
                 participant_data = edge_data[participant]
                 modifier = participant_data['modifier']
@@ -315,8 +330,12 @@ class GraphCacheManager(BaseCacheManager):
                 else:
                     property_list.append(property_dict)
 
-            # ToDo: Make entries in Property-table unique?
-            properties = [models.Property(**property_def) for property_def in property_list]
+        for property_def in property_list:
+            property = self.session.query(models.Property).filter_by(**property_def).first()
+            if not property:
+                property = models.Property(**property_def)
+            properties.append(property)
+            #properties = [models.Property(**property_def) for property_def in property_list]
 
         return properties
 
