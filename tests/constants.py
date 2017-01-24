@@ -8,6 +8,7 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import FUNCTION, NAMESPACE, NAME, GMOD, HGVS
+from pybel.constants import PYBEL_DEFAULT_NAMESPACE
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.language import GENE, ABUNDANCE, PROTEIN, MIRNA
 from pybel.parser.parse_bel import BelParser
@@ -257,16 +258,19 @@ class BelReconstitutionMixin(unittest.TestCase):
         # assertHasNode(self, (), g)
 
         assertHasNode(self, (ABUNDANCE, 'CHEBI', 'oxygen atom'), g)
-        assertHasNode(self, (GENE, 'HGNC', 'AKT1', (GMOD, 'Me')), g)
+
+        print(*g.nodes(), sep='\n')
+        assertHasNode(self, (GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))), g)
+
         assertHasNode(self, (GENE, 'HGNC', 'AKT1'), g)
         assertHasNode(self, (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), g)
         assertHasNode(self, (GENE, 'HGNC', 'AKT1', (HGVS, 'g.308G>A')), g)
-        assertHasNode(self, (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del'), (HGVS, 'g.308G>A'), (HGVS, 'delCTT')), g)
+        assertHasNode(self, (GENE, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, 'g.308G>A'), (HGVS, 'p.Phe508del')), g)
 
         assertHasNode(self, (MIRNA, 'HGNC', 'MIR21'), g)
 
         assertHasNode(self, (GENE, 'HGNC', 'CFTR'), g)
 
-        assertHasNode(self, (GENE, ('HGNC', 'BCR'), (1875, '?'), ('HGNC', 'JAK2'), ('?', '2626')), g)
+        assertHasNode(self, (GENE, ('HGNC', 'BCR'), ('c', '?', 1875,), ('HGNC', 'JAK2'), ('c', '2626', '?')), g)
 
         assertHasNode(self, (PROTEIN, 'HGNC', 'AKT1'), g)

@@ -16,8 +16,8 @@ from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarni
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
 from .utils import handle_debug, list2tuple, cartesian_dictionary
-from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, GOCC_KEYWORD
-
+from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
+    GOCC_KEYWORD
 
 log = logging.getLogger('pybel')
 
@@ -42,7 +42,6 @@ FROM_LOC = 'fromLoc'
 TO_LOC = 'toLoc'
 
 MEMBERS = 'members'
-VARIANT = 'variants'
 REACTANTS = 'reactants'
 PRODUCTS = 'products'
 LOCATION = 'location'
@@ -68,11 +67,16 @@ translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFI
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
 reaction_tags = one_of_tags(['reaction', 'rxn'], language.REACTION, TRANSFORMATION)
 
+GENEVARIANT = 'GeneVariant'
+RNAVARIANT = 'RNAVariant'
+PROTEINVARIANT = 'ProteinVariant'
+MIRNAVARIANT = 'miRNAVariant'
+
 function_variant_map = {
-    language.GENE: 'GeneVariant',
-    language.RNA: 'RNAVariant',
-    language.PROTEIN: 'ProteinVariant',
-    language.MIRNA: 'miRNAVariant'
+    language.GENE: GENEVARIANT,
+    language.RNA: RNAVARIANT,
+    language.PROTEIN: PROTEINVARIANT,
+    language.MIRNA: MIRNAVARIANT
 }
 
 fusion_map = {
@@ -80,6 +84,7 @@ fusion_map = {
     language.RNA: 'RNAFusion',
     language.PROTEIN: 'ProteinFusion'
 }
+
 
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
@@ -676,7 +681,7 @@ class BelParser(BaseParser):
 
         elif FUNCTION in tokens and IDENTIFIER in tokens:
             if tokens[FUNCTION] in {language.GENE, language.MIRNA, language.PATHOLOGY, language.BIOPROCESS,
-                                      language.ABUNDANCE, language.COMPLEX}:
+                                    language.ABUNDANCE, language.COMPLEX}:
                 self.graph.add_node(name, {
                     FUNCTION: tokens[FUNCTION],
                     NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
@@ -744,12 +749,13 @@ def canonicalize_node(tokens):
             f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), tuple(f[RANGE_3P])
 
     elif FUNCTION in tokens and tokens[FUNCTION] in {language.GENE, language.RNA, language.MIRNA, language.PROTEIN,
-                                                         language.ABUNDANCE, language.COMPLEX, language.PATHOLOGY,
-                                                         language.BIOPROCESS}:
+                                                     language.ABUNDANCE, language.COMPLEX, language.PATHOLOGY,
+                                                     language.BIOPROCESS}:
         if IDENTIFIER in tokens:
             return tokens[FUNCTION], tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 
-    if MODIFIER in tokens and tokens[MODIFIER] in {ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, CELL_SURFACE_EXPRESSION}:
+    if MODIFIER in tokens and tokens[MODIFIER] in {ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION,
+                                                   CELL_SURFACE_EXPRESSION}:
         return canonicalize_node(tokens[TARGET])
 
 

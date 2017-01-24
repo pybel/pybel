@@ -3,6 +3,7 @@ import unittest
 
 import pybel
 from pybel.parser import BelParser
+from pybel.parser.language import GENE
 from pybel.parser.parse_exceptions import InvalidFunctionSemantic, MissingCitationException
 from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
@@ -82,8 +83,8 @@ class TestFull(TestTokenParserBase):
         ]
         self.parser.parse_lines(statements)
 
-        test_node_1 = 'Gene', 'TESTNS', '1'
-        test_node_2 = 'Gene', 'TESTNS', '2'
+        test_node_1 = GENE, 'TESTNS', '1'
+        test_node_2 = GENE, 'TESTNS', '2'
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
         self.assertHasNode(test_node_1)
@@ -108,8 +109,8 @@ class TestFull(TestTokenParserBase):
         ]
         self.parser.parse_lines(statements)
 
-        test_node_1 = 'Gene', 'TESTNS', '1'
-        test_node_2 = 'Gene', 'TESTNS', '2'
+        test_node_1 = GENE, 'TESTNS', '1'
+        test_node_2 = GENE, 'TESTNS', '2'
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
         self.assertHasNode(test_node_1)
@@ -132,8 +133,8 @@ class TestFull(TestTokenParserBase):
         ]
         self.parser.parse_lines(statements)
 
-        test_node_1 = 'Gene', 'TESTNS', '1'
-        test_node_2 = 'Gene', 'TESTNS', '2'
+        test_node_1 = GENE, 'TESTNS', '1'
+        test_node_2 = GENE, 'TESTNS', '2'
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
         self.assertHasNode(test_node_1)
