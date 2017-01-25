@@ -35,16 +35,23 @@ REQUIRED_METADATA = [
 ]
 
 
+def build_metadata_parser(cache_manager):
+    if isinstance(cache_manager, CacheManager):
+        return MetadataParser(cache_manager)
+    elif isinstance(cache_manager, str):
+        return MetadataParser(CacheManager(connection=cache_manager))
+    else:
+        return MetadataParser(CacheManager())
+
+
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines=None, context=None, complete_origin=False, cache_manager=None,
-                 log_stream=None, allow_naked_names=False, allow_nested=False, *attrs, **kwargs):
+    def __init__(self, lines=None, complete_origin=False, cache_manager=None, allow_naked_names=False,
+                 allow_nested=False, *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
         :param lines: iterable over lines of BEL data file
-        :param context: disease context string
-        :type context: str
         :param cache_manager: database connection string to cache, pre-built cache manager,
                     or True to use the default
         :type cache_manager: str or pybel.manager.CacheManager
@@ -58,52 +65,32 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.context = context
         self.metadata_parser = None
         self.bel_parser = None
         self.warnings = []
 
         if lines is not None:
-            self.parse_lines(lines, context=context, complete_origin=complete_origin,
-                             cache_manager=cache_manager, log_stream=log_stream,
+            self.parse_lines(lines, complete_origin=complete_origin, cache_manager=cache_manager,
                              allow_naked_names=allow_naked_names, allow_nested=allow_nested)
 
-    def parse_lines(self, lines, context=None, complete_origin=False, cache_manager=None,
-                    log_stream=None, allow_naked_names=False, allow_nested=False):
+    def parse_lines(self, lines, cache_manager=None,complete_origin=False,
+                    allow_naked_names=False, allow_nested=False):
         """Parses an iterable of lines into this graph
 
-
         :param lines: iterable over lines of BEL data file
-        :param context: disease context string
-        :type context: str
-        :param lenient: if true, allow naked namespaces
-        :type lenient: bool
-        :param complete_origin: add corresponding DNA and RNA entities for all proteins
         :param cache_manager: database connection string to cache or pre-built namespace namspace_cache manager
-        :type cache_manager: str or pybel.mangager.NamespaceCache
-        :param log_stream: a stream to write debug logging to
+        :type cache_manager: str or :class:`pybel.manager.cache.CacheManager`
+        :param complete_origin: add corresponding DNA and RNA entities for all proteins
+        :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
         :type allow_nested: bool
         """
-        if log_stream is not None:
-            sh = logging.StreamHandler(stream=log_stream)
-            sh.setLevel(5)
-            sh.setFormatter(logging.Formatter('%(name)s:%(levelname)s - %(message)s'))
-            log.addHandler(sh)
-
-        if context is not None:
-            self.context = context
 
         docs, definitions, states = split_file_to_annotations_and_definitions(lines)
 
-        if isinstance(cache_manager, CacheManager):
-            self.metadata_parser = MetadataParser(cache_manager)
-        elif isinstance(cache_manager, str):
-            self.metadata_parser = MetadataParser(CacheManager(connection=cache_manager))
-        else:
-            self.metadata_parser = MetadataParser(CacheManager())
+        self.metadata_parser = build_metadata_parser(cache_manager)
 
         self.parse_document(docs)
 
@@ -163,7 +150,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except Exception as e:
-                log.critical('Line %07d - Critical Failure - %s', line_number, line)
+                log.exception('Line %07d - Critical Failure - %s', line_number, line)
                 raise e
 
         self.graph['namespace_owl'] = self.metadata_parser.namespace_owl_dict

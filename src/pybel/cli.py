@@ -58,16 +58,15 @@ def main():
 @click.option('--pickle', help='Output path for NetworkX *.gpickle')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
-@click.option('--neo-context', help="Context for neo4j upload")
+@click.option('--neo-context', help="Optional context for neo4j upload")
 @click.option('--store-default', is_flag=True, help="Stores to default cache at {}".format(DEFAULT_CACHE_LOCATION))
 @click.option('--store', help="Database connection string")
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
-@click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
 def convert(path, url, database_name, database_connection, csv, graphml, json, pickle, bel, neo, neo_context,
-            store_default, store, allow_naked_names, allow_nested, complete_origin, log_file, verbose):
+            store_default, store, allow_naked_names, allow_nested, complete_origin, verbose):
     """Options for multiple outputs/conversions"""
 
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
@@ -76,13 +75,12 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         g = from_database(database_name, connection=database_connection)
     else:
         params = dict(complete_origin=complete_origin,
-                      log_stream=log_file,
                       allow_nested=allow_nested,
                       allow_naked_names=allow_naked_names)
         if url:
             g = io.from_url(url, **params)
         else:
-            g = BELGraph(path, **params)
+            g = io.from_lines(path, **params)
 
     if csv:
         log.info('Outputting csv to %s', csv)

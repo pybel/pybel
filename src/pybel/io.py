@@ -15,7 +15,7 @@ from networkx.readwrite import json_graph
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
-from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME
+from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION
 from .graph import BELGraph, expand_edges
 from .utils import flatten, flatten_graph_data
 
@@ -221,9 +221,6 @@ def to_neo4j(graph, neo_graph, context=None):
                     Each edge will be assigned an attribute :code:`pybel_context` with this value
     :type context: str
     """
-    if graph.context is not None:
-        context = graph.context
-
     tx = neo_graph.begin()
 
     node_map = {}
@@ -241,7 +238,7 @@ def to_neo4j(graph, neo_graph, context=None):
     for u, v, data in graph.edges(data=True):
         neo_u = node_map[u]
         neo_v = node_map[v]
-        rel_type = data['relation']
+        rel_type = data[RELATION]
         attrs = flatten(data)
         if context is not None:
             attrs[PYBEL_CONTEXT_TAG] = str(context)
