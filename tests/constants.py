@@ -263,8 +263,7 @@ class BelReconstitutionMixin(unittest.TestCase):
     def bel_thorough_reconstituted(self, g, check_metadata=True):
         self.assertIsNotNone(g)
         self.assertIsInstance(g, BELGraph)
-
-        # assertHasNode(self, (), g)
+        self.assertEqual(0, len(g.warnings), msg='Document warnings:\n{}'.format('\n'.join(map(str,g.warnings))))
 
         x = {
             ('Abundance', 'CHEBI', 'oxygen atom'),
@@ -354,7 +353,31 @@ class BelReconstitutionMixin(unittest.TestCase):
             ('Abundance', 'CHEBI', 'nitric oxide'),
             ('Complex', (PROTEIN, 'HGNC', 'ITGAV'), (PROTEIN, 'HGNC', 'ITGB3')),
             (PROTEIN, 'HGNC', 'ITGAV'),
-            (PROTEIN, 'HGNC', 'ITGB3')
+            (PROTEIN, 'HGNC', 'ITGB3'),
+            ('Protein', 'HGNC', 'FADD'),
+            ('Abundance', 'TESTNS2', 'Abeta_42'),
+            ('Protein', 'TESTNS2', 'GSK3 Family'),
+            ('Protein', 'HGNC', 'PRKCA'),
+            ('Protein', 'HGNC', 'CDK5'),
+            ('Protein', 'HGNC', 'CASP8'),
+            ('Protein', 'HGNC', 'AKT1', ('pmod', ('TESTNS2', 'PhosRes'), 'Ser', 473)),
+            ('Protein', 'HGNC', 'HRAS', ('pmod', ('PYBEL', 'Palm'))),
+            ('BiologicalProcess', 'GOBP', 'apoptotic process'),
+            ('Composite', ('Abundance', 'TESTNS2', 'Abeta_42'), ('Protein', 'HGNC', 'CASP8'),
+             ('Protein', 'HGNC', 'FADD')),
+            ('Reaction', (('Protein', ('HGNC', 'CDK5R1')),), (('Protein', ('HGNC', 'CDK5')),)),
+            ('Protein', 'HGNC', 'PRKCB'),
+            ('Complex', 'TESTNS2', 'AP-1 Complex'),
+            ('Protein', 'HGNC', 'PRKCE'),
+            ('Protein', 'HGNC', 'PRKCD'),
+            ('Protein', 'TESTNS2', 'CAPN Family'),
+            ('Gene', 'TESTNS2', 'AKT1 ortholog'),
+            ('Protein', 'HGNC', 'HRAS'),
+            ('Protein', 'HGNC', 'CDK5R1'),
+            ('Protein', 'TESTNS2', 'PRKC'),
+            ('BiologicalProcess', 'GOBP', 'neuron apoptotic process'),
+            ('Protein', 'HGNC', 'MAPT', ('pmod', ('PYBEL', 'Ph'))),
+            ('Protein', 'HGNC', 'MAPT')
         }
 
         self.assertEqual(x, set(g.nodes()))

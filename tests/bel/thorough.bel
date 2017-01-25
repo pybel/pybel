@@ -2,7 +2,7 @@
 # Document Properties Section
 
 SET DOCUMENT Name = "PyBEL Test Document 3"
-SET DOCUMENT Description = "Statements made up to contain many conveivable variants of nodes from BEL"
+SET DOCUMENT Description = "Statements made up to contain many conceivable variants of nodes from BEL"
 SET DOCUMENT Version = "1.0"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
@@ -17,6 +17,9 @@ DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611
 DEFINE NAMESPACE GOBP AS URL "http://resources.openbel.org/belframework/20150611/namespace/go-biological-process.belns"
 DEFINE NAMESPACE GOCC AS URL "http://resources.openbel.org/belframework/20150611/namespace/go-cellular-component.belns"
 DEFINE NAMESPACE MESHD AS URL "http://resource.belframework.org/belframework/20150611/namespace/mesh-diseases.belns"
+
+DEFINE NAMESPACE TESTNS2 AS URL "file://examples/test_ns_2.belns"
+
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
 DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
@@ -39,7 +42,7 @@ m(HGNC:MIR21) => g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
 g(HGNC:CFTR, var(delCTT)) -> deg(p(HGNC:AKT1))
 g(HGNC:CFTR, var(g.117199646_117199648delCTT)) -> g(HGNC:CFTR, var(c.1521_1523delCTT))
 
-microRNAAbundance(HGNC:MIR21) -| p(HGNC:AKT1, pmod(MOD:PhosRes, Ser, 473))
+microRNAAbundance(HGNC:MIR21) -| p(HGNC:AKT1, pmod(TESTNS2:PhosRes, Ser, 473))
 m(HGNC:MIR21,loc(GOCC:intracellular)) -| p(HGNC:AKT1, pmod(Ph, Ser, 473))
 m(HGNC:MIR21,var(p.Phe508del)) - |p(HGNC:AKT1, pmod(Ph, S, 473))
 
@@ -78,7 +81,7 @@ act(p(HGNC:AKT1), ma(kin)) -> r(HGNC:CFTR, var(r.1521_1523delcuu))
 
 act(p(HGNC:AKT1)) -> r(HGNC:CFTR, var(r.1653_1655delcuu))
 
-complex(SCOMP:"AP-1 Complex") -> p(HGNC:HRAS, pmod(Palm))
+complex(TESTNS2:"AP-1 Complex") -> p(HGNC:HRAS, pmod(Palm))
 
 composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex")) -| bp(GOBP:"cell cycle arrest")
 
@@ -93,9 +96,9 @@ SET Evidence = "These were all explicitly stated in the BEL 2.0 Specification"
 
 rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:dioxygen)))
 
-composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")
+composite(p(HGNC:CASP8),p(HGNC:FADD),a(TESTNS2:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")
 
-pep(p(SFAM:"CAPN Family", location(GOCC:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))
+pep(p(TESTNS2:"CAPN Family", location(GOCC:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))
 
 proteinAbundance(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")
 
@@ -107,21 +110,21 @@ g(HGNC:APP,sub(G,275341,C)) cnc path(MESHD:"Alzheimer Disease")
 
 pep(complex(p(HGNC:F3),p(HGNC:F7))) regulates pep(p(HGNC:F9))
 
-p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))
+p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GOBP:"apoptotic process"))
 
-p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))
+p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GOBP:"apoptotic process"))
 
-kin(p(SFAM:"GSK3 Family")) neg p(HGNC:MAPT,pmod(P))
+kin(p(TESTNS2:"GSK3 Family")) neg p(HGNC:MAPT,pmod(P))
 
 p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))
 
-g(HGNC:AKT1) orthologous g(MGI:AKT1)
+g(HGNC:AKT1) orthologous g(TESTNS2:"AKT1 ortholog")
 
 g(HGNC:AKT1) :> r(HGNC:AKT1)
 
 r(HGNC:AKT1) >> p(HGNC:AKT1)
 
-p(PKC:a) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))
+p(TESTNS2:PRKC) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))
 
 pathology(MESHD:Psoriasis) isA pathology(MESHD:"Skin Diseases")
 

@@ -6,8 +6,8 @@ import unittest
 from pyparsing import ParseException
 
 import pybel
-from pybel.parser import BelParser
 from pybel.constants import GENE
+from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
@@ -32,7 +32,7 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
 
     @mock_bel_resources
     def test_thorough(self, mock_get):
-        g = pybel.from_path(test_bel_thorough)
+        g = pybel.from_path(test_bel_thorough, allow_nested=True)
         self.bel_thorough_reconstituted(g)
 
     @mock_bel_resources

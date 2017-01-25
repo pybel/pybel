@@ -9,6 +9,7 @@ from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWi
 
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
+from .language import value_map
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser, TruncParser, PmodParser, GmodParser, canonicalize_variant
 from .parse_control import ControlParser
@@ -21,6 +22,7 @@ from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_D
 from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOLOGY, REACTION, COMPLEX, COMPOSITE
 from ..constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT
 from ..constants import GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
+from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_MEMBER, TRANSCRIBED_TO, TRANSLATED_TO
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
     CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
     TRANSFORMATION, FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
@@ -60,7 +62,7 @@ fusion_map = {
 
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
-                 lenient=False, complete_origin=False):
+                 complete_origin=False, allow_naked_names=False, allow_nested=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: the graph to put the network in. Constructs new :class:`nx.MultiDiGraph` if None
@@ -71,19 +73,23 @@ class BelParser(BaseParser):
         :type valid_annotations: dict
         :param namespace_mapping: a dict of {name: {value: (other_namepace, other_name)}}
         :type namespace_mapping: dict
-        :param lenient: if true, turn off naked namespace failures
-        :type lenient: bool
+
         :param complete_origin: if true, add the gene and RNA origin of proteins to the network during compilation
         :type complete_origin: bool
+        :param allow_naked_names: if true, turn off naked namespace failures
+        :type allow_naked_names: bool
+        :param allow_nested: if true, turn off nested statement failures
+        :type allow_nested: bool
         """
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
-        self.lenient = lenient
+        self.allow_naked_names = allow_naked_names
+        self.allow_nested = allow_nested
         self.complete_origin = complete_origin
         self.control_parser = ControlParser(valid_annotations=valid_annotations)
         self.identifier_parser = IdentifierParser(valid_namespaces=valid_namespaces,
                                                   mapping=namespace_mapping,
-                                                  lenient=self.lenient)
+                                                  allow_naked_names=self.allow_naked_names)
 
         identifier = Group(self.identifier_parser.get_language())(IDENTIFIER)
 
@@ -472,16 +478,20 @@ class BelParser(BaseParser):
         self.control_parser.clear()
 
     def handle_nested_relation(self, s, l, tokens):
-        if not self.lenient:
-            raise NestedRelationWarning('Nesting unsupported: {}'.format(s))
+        if not self.allow_nested:
+            raise NestedRelationWarning(s)
 
-        self.handle_relation(s, l, dict(subject=tokens[SUBJECT],
-                                        relation=tokens[RELATION],
-                                        object=tokens[OBJECT][SUBJECT]))
+        self.handle_relation(s, l, {
+            SUBJECT: tokens[SUBJECT],
+            RELATION:tokens[RELATION],
+            OBJECT:tokens[OBJECT][SUBJECT]
+        })
 
-        self.handle_relation(s, l, dict(subject=tokens[OBJECT][SUBJECT],
-                                        relation=tokens[OBJECT][RELATION],
-                                        object=tokens[OBJECT][OBJECT]))
+        self.handle_relation(s, l, {
+            SUBJECT: tokens[OBJECT][SUBJECT],
+            RELATION: tokens[OBJECT][RELATION],
+            OBJECT:tokens[OBJECT][OBJECT]
+        })
         return tokens
 
     def check_function_semantics(self, s, l, tokens):
@@ -490,17 +500,16 @@ class BelParser(BaseParser):
 
         namespace, name = tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 
-        if self.lenient and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
+        if self.allow_naked_names and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
         valid_function_codes = set(itt.chain.from_iterable(
-            language.value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
+            value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
 
         if tokens[FUNCTION] not in valid_function_codes:
             valid = set(itt.chain.from_iterable(
-                language.value_map[k] for k in self.identifier_parser.namespace_dict[namespace][name]))
-            fmt = "{}:{} should be encoded as one of: {}"
-            raise InvalidFunctionSemantic(fmt.format(namespace, name, ', '.join(valid)))
+                value_map[k] for k in self.identifier_parser.namespace_dict[namespace][name]))
+            raise InvalidFunctionSemantic(tokens[FUNCTION], namespace, name, valid)
 
         return tokens
 
@@ -537,7 +546,7 @@ class BelParser(BaseParser):
         parent = self.ensure_node(s, l, tokens[0])
         for child_tokens in tokens[2]:
             child = self.ensure_node(s, l, child_tokens)
-            self.graph.add_edge(parent, child, relation='hasMember')
+            self.graph.add_edge(parent, child, **{RELATION: HAS_MEMBER})
         return tokens
 
     def handle_relation(self, s, l, tokens):
@@ -584,7 +593,7 @@ class BelParser(BaseParser):
         """
         key = language.unqualified_edge_code[relation]
         if not self.graph.has_edge(u, v, key):
-            self.graph.add_edge(u, v, key=key, relation=relation)
+            self.graph.add_edge(u, v, key=key, **{RELATION: relation})
 
     def ensure_node(self, s, l, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
@@ -606,11 +615,11 @@ class BelParser(BaseParser):
 
             for reactant_tokens in tokens[REACTANTS]:
                 reactant_name = self.ensure_node(s, l, reactant_tokens)
-                self.add_unqualified_edge(name, reactant_name, relation='hasReactant')
+                self.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
 
             for product_tokens in tokens[PRODUCTS]:
                 product_name = self.ensure_node(s, l, product_tokens)
-                self.add_unqualified_edge(name, product_name, relation='hasProduct')
+                self.add_unqualified_edge(name, product_name, HAS_PRODUCT)
 
             return name
 
@@ -619,7 +628,7 @@ class BelParser(BaseParser):
 
             for token in tokens[MEMBERS]:
                 member_name = self.ensure_node(s, l, token)
-                self.add_unqualified_edge(name, member_name, relation='hasComponent')
+                self.add_unqualified_edge(name, member_name, HAS_COMPONENT)
             return name
 
         elif FUNCTION in tokens and VARIANTS in tokens:
@@ -636,7 +645,7 @@ class BelParser(BaseParser):
             }
 
             parent = self.ensure_node(s, l, c)
-            self.add_unqualified_edge(parent, name, relation='hasVariant')
+            self.add_unqualified_edge(parent, name, HAS_VARIANT)
             return name
 
         elif FUNCTION in tokens and FUSION in tokens:
@@ -652,9 +661,7 @@ class BelParser(BaseParser):
             return name
 
         elif FUNCTION in tokens and IDENTIFIER in tokens:
-            if tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY,
-                                    BIOPROCESS,
-                                    ABUNDANCE, COMPLEX}:
+            if tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY, BIOPROCESS, ABUNDANCE, COMPLEX}:
                 self.graph.add_node(name, {
                     FUNCTION: tokens[FUNCTION],
                     NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
@@ -676,7 +683,7 @@ class BelParser(BaseParser):
                 gene_tokens[FUNCTION] = GENE
                 gene_name = self.ensure_node(s, l, gene_tokens)
 
-                self.add_unqualified_edge(gene_name, name, relation='transcribedTo')
+                self.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
                 return name
 
             elif tokens[FUNCTION] == PROTEIN:
@@ -693,7 +700,7 @@ class BelParser(BaseParser):
                 rna_tokens[FUNCTION] = RNA
                 rna_name = self.ensure_node(s, l, rna_tokens)
 
-                self.add_unqualified_edge(rna_name, name, relation='translatedTo')
+                self.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
                 return name
 
 
@@ -721,11 +728,8 @@ def canonicalize_node(tokens):
         return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), tuple(f[RANGE_5P]), (
             f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), tuple(f[RANGE_3P])
 
-    elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA,
-                                                     PROTEIN,
-                                                     ABUNDANCE, COMPLEX,
-                                                     PATHOLOGY,
-                                                     BIOPROCESS}:
+    elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE,
+                                                     COMPLEX, PATHOLOGY, BIOPROCESS}:
         if IDENTIFIER in tokens:
             return tokens[FUNCTION], tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 

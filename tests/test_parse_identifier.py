@@ -102,7 +102,7 @@ class TestNamespaceParserLenient(unittest.TestCase):
             'B': {'4', '5', '6'}
         }
 
-        self.parser = IdentifierParser(valid_namespaces=nsd, lenient=True)
+        self.parser = IdentifierParser(valid_namespaces=nsd, allow_naked_names=True)
 
     def test_valid_1(self):
         s = 'A:3'

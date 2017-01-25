@@ -2231,7 +2231,7 @@ class TestRelations(TestTokenParserBase):
     def test_nested_lenient(self):
         """ 3.1 \ Test nested statement"""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
-        self.parser.lenient = True
+        self.parser.allow_nested = True
 
         result = self.parser.relation.parseString(statement)
 

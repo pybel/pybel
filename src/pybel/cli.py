@@ -61,22 +61,28 @@ def main():
 @click.option('--neo-context', help="Context for neo4j upload")
 @click.option('--store-default', is_flag=True, help="Stores to default cache at {}".format(DEFAULT_CACHE_LOCATION))
 @click.option('--store', help="Database connection string")
-@click.option('--lenient', is_flag=True, help="Enable lenient parsing")
+@click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
+@click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
 @click.option('--log-file', type=click.File('w'), help="Optional path for verbose log output")
 @click.option('-v', '--verbose', count=True)
 def convert(path, url, database_name, database_connection, csv, graphml, json, pickle, bel, neo, neo_context,
-            store_default, store, lenient, complete_origin, log_file, verbose):
+            store_default, store, allow_naked_names, allow_nested, complete_origin, log_file, verbose):
     """Options for multiple outputs/conversions"""
 
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
 
-    if url:
-        g = io.from_url(url, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
-    elif database_name:
+    if database_name:
         g = from_database(database_name, connection=database_connection)
     else:
-        g = BELGraph(path, lenient=lenient, complete_origin=complete_origin, log_stream=log_file)
+        params = dict(complete_origin=complete_origin,
+                      log_stream=log_file,
+                      allow_nested=allow_nested,
+                      allow_naked_names=allow_naked_names)
+        if url:
+            g = io.from_url(url, **params)
+        else:
+            g = BELGraph(path, **params)
 
     if csv:
         log.info('Outputting csv to %s', csv)
@@ -110,7 +116,7 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
         io.to_neo4j(g, neo_graph, neo_context)
 
-    sys.exit(0 if 0 == sum(g.last_parse_errors.values()) else 1)
+    sys.exit(0 if 0 == len(g.warnings) else 1)
 
 
 @main.group(help="PyBEL Data Manager Utilities")

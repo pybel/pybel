@@ -135,6 +135,11 @@ class PlaceholderAminoAcidWarning(PyBelWarning):
 class NestedRelationWarning(PyBelWarning):
     """Raised when encountering a nested statement. See our the docs for an explanation of why we explicitly
         do not support nested statements."""
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return 'Nesting is not supported. Split this statement: {}'.format(self.message)
 
 
 class LexicographyWarning(PyBelWarning):
@@ -145,3 +150,13 @@ class LexicographyWarning(PyBelWarning):
 
 class InvalidFunctionSemantic(PyBelWarning):
     """Used an identifier in a semantically invalid function"""
+    def __init__(self, function, namespace, name, allowed_functions):
+        self.function = function
+        self.namespace = namespace
+        self.name = name
+        self.allowed_functions = allowed_functions
+
+    def __str__(self):
+        return "{}:{} should be encoded as one of: {}".format(self.namespace,
+                                                              self.name,
+                                                              ', '.join(self.allowed_functions))
