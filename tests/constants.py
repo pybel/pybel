@@ -81,6 +81,21 @@ def assertHasEdge(self, u, v, graph, **kwargs):
                         msg=msg_format.format(u, v, kwargs, graph.edge[u][v]))
 
 
+def help_compare_graphs(self, original, reloaded):
+    for u, v, d in original.edges_iter(data=True):
+        if d['relation'] == 'hasMember':
+            continue
+
+        for d1 in original.edge[u][v].values():
+            x = False
+
+            for d2 in reloaded.edge[u][v].values():
+                if set(d1.keys()) == set(d2.keys()) and all(d1[k] == d2[k] for k in d1):
+                    x = True
+
+            self.assertTrue(x, msg="Nodes with problem: {}, {}".format(u, v))
+
+
 class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

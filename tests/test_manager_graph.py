@@ -9,7 +9,7 @@ import pybel
 from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants
-from tests.constants import BelReconstitutionMixin, test_bel, mock_bel_resources
+from tests.constants import BelReconstitutionMixin, test_bel, mock_bel_resources, help_compare_graphs
 
 TEST_BEL_NAME = 'PyBEL Test Document 1'
 TEST_BEL_VERSION = '1.6'
@@ -106,3 +106,27 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
 
         g2 = self.gcm.get_graph(TEST_BEL_NAME, TEST_BEL_VERSION)
         self.bel_1_reconstituted(g2)
+
+    @mock_bel_resources
+    def test_database_edge_filter(self, mock_get):
+        """Tests that a graph can be reconstructed from the edge and node relational tables in the database
+
+        1. Load graph (test BEL 1 or test thorough)
+        2. Add sentinel annotation to ALL edges
+        3. Store graph
+        4. Query for all edges with sentinel annotation
+        5. Compare to original graph
+        """
+        SENTINEL_ANNOTATION = 'MeSHDisease'
+        SENTINEL_VALUE = 'Arm Injuries'
+
+        original = pybel.from_path(test_bel)
+
+        for u, v, k in original.edges_iter(key=True):
+            original.edge[u][v][k][SENTINEL_ANNOTATION] = SENTINEL_VALUE
+
+        self.gcm.store_graph(original, store_parts=True)
+
+        reloaded = self.gcm.get_by_edge_filter(**{SENTINEL_ANNOTATION: SENTINEL_VALUE})
+
+        help_compare_graphs(self, original, reloaded)

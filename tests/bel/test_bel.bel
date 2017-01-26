@@ -14,6 +14,7 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 
 DEFINE NAMESPACE CHEBI AS URL "http://resources.openbel.org/belframework/20150611/namespace/chebi.belns"
 DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns"
+DEFINE ANNOTATION MeSHDisease AS URL "http://resources.openbel.org/belframework/20150611/annotation/mesh-diseases.belanno"
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
 DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 

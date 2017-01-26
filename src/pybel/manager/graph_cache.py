@@ -83,7 +83,6 @@ class GraphCacheManager(BaseCacheManager):
                 if property not in edge.properties:
                     edge.properties.append(property)
 
-
             for key, value in data.items():
                 if key in ANNOTATION_KEY_BLACKLIST:
                     continue
@@ -100,7 +99,7 @@ class GraphCacheManager(BaseCacheManager):
             if edge not in network.edges:
                 network.edges.append(edge)
 
-                #self.session.commit()
+                # self.session.commit()
 
     def get_graph_versions(self, name):
         """Returns all of the versions of a graph with the given name"""
@@ -290,7 +289,7 @@ class GraphCacheManager(BaseCacheManager):
             result = models.Evidence(text=evidence, citation=citation)
             self.session.add(result)
             self.session.flush()
-            #self.session.commit()  # TODO remove?
+            # self.session.commit()  # TODO remove?
         return result
 
     def get_or_create_property(self, graph, edge_data):
@@ -335,7 +334,7 @@ class GraphCacheManager(BaseCacheManager):
             if not property:
                 property = models.Property(**property_def)
             properties.append(property)
-            #properties = [models.Property(**property_def) for property_def in property_list]
+            # properties = [models.Property(**property_def) for property_def in property_list]
 
         return properties
 
@@ -350,6 +349,20 @@ class GraphCacheManager(BaseCacheManager):
 
     def get_name(self, name_id):
         return self.session.query(models.NamespaceEntry).filter_by(id=name_id).one()
+
+    def get_by_edge_filter(**kwargs):
+        """Gets all edges matching the given query annotation values
+
+        :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
+                           where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
+                           of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
+                           of URL.
+        :type connection: str
+        :param kwargs: annotation/value pairs to filter edges
+        :return: A graph composed of the filtered edges
+        :rtype: BELGraph
+        """
+        pass
 
 
 def to_database(graph, connection=None):
@@ -386,3 +399,5 @@ def from_database(name, version=None, connection=None):
     :rtype: BELGraph
     """
     return GraphCacheManager(connection).get_graph(name, version)
+
+
