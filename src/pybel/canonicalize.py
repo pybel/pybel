@@ -13,7 +13,7 @@ from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, GENE_FUSION, RNA_FUS
 from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
     LOCATION, NAME, NAMESPACE
 from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
-from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
+from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser, VariantParser
 from .parser.utils import ensure_quotes
 
 __all__ = ['to_bel']
@@ -83,7 +83,7 @@ def decanonicalize_variant(tokens):
             name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])
         return 'gmod({})'.format(name)
     elif tokens[KIND] == HGVS:
-        return 'var({})'.format(tokens[HGVS])
+        return 'var({})'.format(tokens[VariantParser.IDENTIFIER])
     elif tokens[KIND] == FRAGMENT:
         if FragmentParser.MISSING in tokens:
             res = 'frag(?'

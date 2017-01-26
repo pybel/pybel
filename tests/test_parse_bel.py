@@ -7,7 +7,7 @@ from pybel.constants import HGVS, PMOD, GMOD, KIND, FRAGMENT, FUNCTION, NAMESPAC
     PATHOLOGY, BIOPROCESS, PROTEIN, MIRNA, COMPLEX, REACTION, COMPOSITE
 from pybel.constants import PYBEL_DEFAULT_NAMESPACE, PROTEINVARIANT, GENEVARIANT, RNAVARIANT, DEGRADATION, \
     TRANSFORMATION, TRANSLOCATION
-from pybel.parser.parse_abundance_modifier import GmodParser, PmodParser
+from pybel.parser.parse_abundance_modifier import GmodParser, PmodParser, VariantParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from pybel.utils import default_identifier
@@ -160,7 +160,7 @@ class TestGene(TestTokenParserBase):
             'variants': [
                 {
                     KIND: HGVS,
-                    HGVS: TEST_PROTEIN_VARIANT
+                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
                 }
             ]
 
@@ -175,7 +175,10 @@ class TestGene(TestTokenParserBase):
             NAMESPACE: 'HGNC',
             NAME: 'AKT1',
             'variants': [
-                {KIND: HGVS, HGVS: 'p.Phe508del'}
+                {
+                    KIND: HGVS,
+                    VariantParser.IDENTIFIER: 'p.Phe508del'
+                }
             ]
         })
 
@@ -232,7 +235,7 @@ class TestGene(TestTokenParserBase):
             'variants': [
                 {
                     KIND: HGVS,
-                    HGVS: TEST_GENE_VARIANT
+                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT
                 }
             ]
         }
@@ -264,7 +267,7 @@ class TestGene(TestTokenParserBase):
             'variants': [
                 {
                     KIND: HGVS,
-                    HGVS: TEST_GENE_VARIANT}
+                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT}
             ],
             'location': {
                 'namespace': 'GOCC',
@@ -299,15 +302,15 @@ class TestGene(TestTokenParserBase):
             'variants': [
                 {
                     KIND: HGVS,
-                    HGVS: TEST_PROTEIN_VARIANT
+                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
                 },
                 {
                     KIND: HGVS,
-                    HGVS: TEST_GENE_VARIANT
+                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT
                 },
                 {
                     KIND: HGVS,
-                    HGVS: 'delCTT'
+                    VariantParser.IDENTIFIER: 'delCTT'
                 }
             ]
         }
@@ -433,7 +436,7 @@ class TestGene(TestTokenParserBase):
             FUNCTION: GENE,
             'identifier': {NAMESPACE: 'HGNC', NAME: 'CFTR'},
             'variants': [
-                {KIND: HGVS, HGVS: 'c.1521_1523delCTT'}
+                {KIND: HGVS, VariantParser.IDENTIFIER: 'c.1521_1523delCTT'}
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -539,7 +542,7 @@ class TestMiRNA(TestTokenParserBase):
             'variants': [
                 {
                     KIND: HGVS,
-                    HGVS: TEST_PROTEIN_VARIANT
+                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
                 },
             ]
         }
@@ -568,7 +571,7 @@ class TestMiRNA(TestTokenParserBase):
             'variants': [
                 {
                     KIND: HGVS,
-                    HGVS: 'p.Phe508del'
+                    VariantParser.IDENTIFIER: 'p.Phe508del'
                 },
             ],
             'location': {
@@ -667,7 +670,7 @@ class TestProtein(TestTokenParserBase):
             'variants': [
                 {
                     KIND: HGVS,
-                    HGVS: 'p.Ala127Tyr'
+                    VariantParser.IDENTIFIER: 'p.Ala127Tyr'
                 },
                 {
                     KIND: PMOD,
@@ -1166,11 +1169,11 @@ class TestRna(TestTokenParserBase):
             'variants': [
                 {
                     KIND: HGVS,
-                    HGVS: TEST_PROTEIN_VARIANT
+                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
                 },
                 {
                     KIND: HGVS,
-                    HGVS: 'delCTT'
+                    VariantParser.IDENTIFIER: 'delCTT'
                 }
             ]
         }
@@ -2145,7 +2148,7 @@ class TestRelations(TestTokenParserBase):
                 'variants': [
                     {
                         KIND: HGVS,
-                        HGVS: 'g.275341G>C'
+                        VariantParser.IDENTIFIER: 'g.275341G>C'
                     }
                 ]
             },

@@ -20,7 +20,7 @@ rna_nucleotide_seq = Word(''.join(rna_nucleotide_labels.keys()))
 
 
 def build_variant_dict(variant):
-    return {KIND: HGVS, HGVS: variant}
+    return {KIND: HGVS, VariantParser.IDENTIFIER: variant}
 
 
 # Structural variants
@@ -30,11 +30,12 @@ class VariantParser(BaseParser):
 
     See HVGS for conventions http://www.hgvs.org/mutnomen/recs.html
     """
+    IDENTIFIER = 'identifier'
 
     def __init__(self):
         variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)
         variant_characters = Word(alphanums + '._*=?>')
-        self.language = variant_tags + nest(variant_characters.setResultsName(HGVS))
+        self.language = variant_tags + nest(variant_characters(self.IDENTIFIER))
 
     def get_language(self):
         return self.language
@@ -55,7 +56,7 @@ class PsubParser(BaseParser):
     def handle_psub(self, s, l, tokens):
         upgraded = 'p.{}{}{}'.format(tokens[self.REFERENCE], tokens[self.POSITION], tokens[self.VARIANT])
         log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', s, upgraded)
-        tokens[HGVS] = upgraded
+        tokens[VariantParser.IDENTIFIER] = upgraded
         del tokens[self.REFERENCE]
         del tokens[self.POSITION]
         del tokens[self.VARIANT]
@@ -78,7 +79,7 @@ class TruncParser(BaseParser):
         upgraded = 'p.{}*'.format(tokens[self.POSITION])
         log.warning(
             'trunc() is deprecated. Please look up reference terminal amino acid and encode with HGVS: {}'.format(s))
-        tokens[HGVS] = upgraded
+        tokens[VariantParser.IDENTIFIER] = upgraded
         del tokens[self.POSITION]
         return tokens
 
@@ -105,7 +106,7 @@ class GsubParser(BaseParser):
     def handle_gsub(self, s, l, tokens):
         upgraded = 'g.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
         log.debug('legacy sub() %s upgraded to %s', s, upgraded)
-        tokens[HGVS] = upgraded
+        tokens[VariantParser.IDENTIFIER] = upgraded
         del tokens[self.POSITION]
         del tokens[self.REFERENCE]
         del tokens[self.VARIANT]
@@ -223,7 +224,7 @@ class GmodParser(BaseParser):
 
 
 def canonicalize_hgvs(tokens):
-    return tokens[KIND], tokens[HGVS]
+    return tokens[KIND], tokens[VariantParser.IDENTIFIER]
 
 
 def canonicalize_pmod(tokens):
