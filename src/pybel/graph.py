@@ -128,7 +128,7 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 self.metadata_parser.parseString(line)
             except Exception as e:
-                log.error('Line %07d - Critical Failure - %s', line_number, line)
+                log.exception('Line %07d - Critical Failure - %s', line_number, line)
                 raise e
 
         for required in REQUIRED_METADATA:
