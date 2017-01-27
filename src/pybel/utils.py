@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import collections
 import logging
 from collections import defaultdict
@@ -7,7 +9,7 @@ import networkx as nx
 import requests
 from requests_file import FileAdapter
 
-from .constants import PYBEL_DEFAULT_NAMESPACE
+from .constants import PYBEL_DEFAULT_NAMESPACE, NAMESPACE, NAME
 
 log = logging.getLogger('pybel')
 
@@ -104,4 +106,5 @@ def flatten_graph_data(graph):
 
 
 def default_identifier(s):
-    return dict(namespace=PYBEL_DEFAULT_NAMESPACE, name=s)
+    """Convenience function for building a default namespace/name pair"""
+    return {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: s}

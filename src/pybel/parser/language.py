@@ -9,6 +9,8 @@ import logging
 from pyparsing import *
 
 from .parse_exceptions import PlaceholderAminoAcidWarning
+from ..constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX
+from ..constants import HAS_REACTANT, HAS_PRODUCT, HAS_COMPONENT, HAS_VARIANT, TRANSCRIBED_TO, TRANSLATED_TO, HAS_MEMBER
 
 log = logging.getLogger('pybel')
 
@@ -60,17 +62,6 @@ activity_ns = {
 }
 
 activities = list(activity_labels.keys())
-
-ABUNDANCE = 'Abundance'
-GENE = 'Gene'
-MIRNA = 'miRNA'
-PROTEIN = 'Protein'
-RNA = 'RNA'
-BIOPROCESS = 'BiologicalProcess'
-PATHOLOGY = 'Pathology'
-COMPOSITE = 'Composite'
-COMPLEX = 'Complex'
-REACTION = 'Reaction'
 
 abundance_labels = {
     'abundance': ABUNDANCE,
@@ -266,12 +257,13 @@ gmod_namespace = {
 }
 
 unqualified_edges = [
-    'hasReactant',
-    'hasProduct',
-    'hasComponent',
-    'hasVariant',
-    'transcribedTo',
-    'translatedTo'
+    HAS_REACTANT,
+    HAS_PRODUCT,
+    HAS_COMPONENT,
+    HAS_VARIANT,
+    TRANSCRIBED_TO,
+    TRANSLATED_TO,
+    HAS_MEMBER,
 ]
 
 unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}

@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 
+from pybel.constants import DIRTY
 from pybel.parser import parse_exceptions
 from pybel.parser.parse_identifier import IdentifierParser
-from pybel.constants import DIRTY
 
 
 class TestIdentifierParser(unittest.TestCase):
@@ -100,7 +102,7 @@ class TestNamespaceParserLenient(unittest.TestCase):
             'B': {'4', '5', '6'}
         }
 
-        self.parser = IdentifierParser(valid_namespaces=nsd, lenient=True)
+        self.parser = IdentifierParser(valid_namespaces=nsd, allow_naked_names=True)
 
     def test_valid_1(self):
         s = 'A:3'

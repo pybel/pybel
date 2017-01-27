@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import logging
 import unittest
 
-from pybel.constants import PYBEL_DEFAULT_NAMESPACE
+from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, PYBEL_DEFAULT_NAMESPACE
 from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser, PsubParser, GsubParser, TruncParser, \
     FusionParser, LocationParser, FragmentParser
-from pybel.parser.parse_abundance_modifier import VariantParser
-from pybel.parser.parse_abundance_modifier import build_variant_dict, KIND, PMOD, GMOD, FRAGMENT
+from pybel.parser.parse_abundance_modifier import VariantParser, build_variant_dict
 
 log = logging.getLogger(__name__)
 

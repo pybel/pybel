@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 import logging
 import os
@@ -7,8 +9,7 @@ import unittest
 import pybel
 from pybel.canonicalize import postpend_location, decanonicalize_node
 from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD
-from tests import constants
-from tests.constants import test_bel, test_bel_4, mock_bel_resources
+from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_ontospy, mock_parse_owl_pybel
 
 log = logging.getLogger('pybel')
 
@@ -38,7 +39,8 @@ class TestCanonicalize(unittest.TestCase):
         self.path = os.path.join(self.dir, 'test.bel')
 
     def tearDown(self):
-        os.remove(self.path)
+        if os.path.exists(self.path):
+            os.remove(self.path)
         os.rmdir(self.dir)
 
     def canonicalize_helper(self, test_path):
@@ -82,17 +84,17 @@ class TestCanonicalize(unittest.TestCase):
         self.canonicalize_helper(test_bel)
 
     @mock_bel_resources
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_canonicalize_4(self, m1, m2, m3):
         self.canonicalize_helper(test_bel_4)
 
-    @unittest.skipUnless(os.path.exists(small_corpus_path), 'Small Corpus Missing')
+    @unittest.skipUnless(os.path.exists(small_corpus_path), 'Small Corpus is missing')
     def test_small_corpus(self):
         self.maxDiff = None
         self.canonicalize_helper(small_corpus_path)
 
-    @unittest.skipUnless(os.path.exists(pd_path), 'PD Test File Missing')
+    @unittest.skipUnless(os.path.exists(pd_path), 'PD Assembly is missing')
     def test_parkinsons(self):
         self.maxDiff = None
         self.canonicalize_helper(pd_path)

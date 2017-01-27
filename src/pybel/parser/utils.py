@@ -170,6 +170,12 @@ def ensure_quotes(s):
 
 
 def is_int(s):
+    """Determines if an object can be cast to an int
+
+    :param s: any object
+    :return: true if argument can be cast to an int:
+    :rtype: bool
+    """
     try:
         int(s)
         return True

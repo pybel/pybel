@@ -6,6 +6,8 @@ import logging
 from pyparsing import Suppress, ZeroOrMore, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
     delimitedList, replaceWith, Group, And
 
+from ..constants import SUBJECT, RELATION, OBJECT
+
 log = logging.getLogger(__name__)
 
 W = Suppress(ZeroOrMore(White()))
@@ -46,7 +48,7 @@ def one_of_tags(tags, canonical_tag, identifier):
 
 
 def triple(subject, relation, obj):
-    return And([Group(subject)('subject'), relation('relation'), Group(obj)('object')])
+    return And([Group(subject)(SUBJECT), relation(RELATION), Group(obj)(OBJECT)])
 
 
 class BaseParser:
