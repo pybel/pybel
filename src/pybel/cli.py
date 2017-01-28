@@ -20,13 +20,11 @@ import sys
 import time
 
 import click
-import py2neo
 
 from . import io
 from .canonicalize import to_bel
-from .constants import PYBEL_DIR
-from .manager.cache import DEFAULT_CACHE_LOCATION, CacheManager
-from .manager.graph_cache import GraphCacheManager, to_database, from_database
+from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
+from .manager import CacheManager, GraphCacheManager, to_database, from_database
 
 log = logging.getLogger('pybel')
 
@@ -108,6 +106,7 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         to_database(g, store)
 
     if neo:
+        import py2neo
         log.info('Uploading to neo4j with context %s', neo_context)
         neo_graph = py2neo.Graph(neo)
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None

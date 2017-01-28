@@ -9,7 +9,7 @@ from pyparsing import ParseException
 
 from .constants import FUNCTION, NAMESPACE
 from .exceptions import PyBelWarning
-from .manager.cache import CacheManager
+from .manager import CacheManager
 from .parser import language
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import MissingMetadataException

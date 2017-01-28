@@ -1,6 +1,5 @@
 import itertools as itt
 import logging
-import os
 from datetime import datetime
 
 import networkx as nx
@@ -11,14 +10,11 @@ from sqlalchemy.orm.exc import NoResultFound
 from . import defaults
 from . import models
 from .utils import parse_owl
-from ..constants import PYBEL_DATA
+from ..constants import DEFAULT_CACHE_LOCATION
 from ..parser import language
 from ..utils import download_url
 
 log = logging.getLogger('pybel')
-
-DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
-DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA, DEFAULT_DEFINITION_CACHE_NAME)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(language.value_map))
 

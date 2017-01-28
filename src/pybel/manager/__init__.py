@@ -7,6 +7,6 @@ downloading and parsing upon each compilation.
 """
 
 from .cache import CacheManager
-from .graph_cache import GraphCacheManager
+from .graph_cache import GraphCacheManager, to_database, from_database
 
-__all__ = ['CacheManager', 'GraphCacheManager']
+__all__ = ['CacheManager', 'GraphCacheManager', 'to_database', 'from_database']

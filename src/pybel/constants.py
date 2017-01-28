@@ -16,6 +16,9 @@ PYBEL_DATA = os.path.join(PYBEL_DIR, 'data')
 if not os.path.exists(PYBEL_DATA):
     os.mkdir(PYBEL_DATA)
 
+DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
+DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA, DEFAULT_DEFINITION_CACHE_NAME)
+
 PYBEL_CONTEXT_TAG = 'pybel_context'
 
 PYBEL_DEFAULT_NAMESPACE = 'PYBEL'
