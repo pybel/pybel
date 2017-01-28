@@ -11,19 +11,35 @@ from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
-    test_citation_dict, test_evidence_bel, mock_bel_resources, test_bel_thorough
+    test_citation_dict, test_evidence_bel, mock_bel_resources, test_bel_thorough, test_bel_slushy
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
 
 class TestImport(BelReconstitutionMixin, unittest.TestCase):
     @mock_bel_resources
-    def test_bytes_io(self, mock_get):
+    def test_bytes_io_test(self, mock_get):
         g = pybel.from_path(test_bel, complete_origin=True)
         self.bel_1_reconstituted(g)
 
-        g_reloaded = pybel.from_bytes(pybel.to_bytes(g))
+        g_bytes = pybel.to_bytes(g)
+        g_reloaded = pybel.from_bytes(g_bytes)
         self.bel_1_reconstituted(g_reloaded)
+
+    @mock_bel_resources
+    def test_bytes_io_slushy(self, mock_get):
+        g = pybel.from_path(test_bel_slushy, complete_origin=True)
+        g_bytes = pybel.to_bytes(g)
+        pybel.from_bytes(g_bytes)
+
+    @mock_bel_resources
+    def test_bytes_io_thorough(self, mock_get):
+        g = pybel.from_path(test_bel_thorough, complete_origin=False, allow_nested=True)
+        self.bel_thorough_reconstituted(g)
+
+        g_bytes = pybel.to_bytes(g)
+        g_reloaded = pybel.from_bytes(g_bytes)
+        self.bel_thorough_reconstituted(g_reloaded)
 
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
@@ -83,10 +99,10 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
         self.assertIsInstance(g.warnings[13][2], InvalidFunctionSemantic)
 
         self.assertEqual(74, g.warnings[14][0])
-        self.assertIsInstance(g.warnings[14][2], ParseException)
+        self.assertIsInstance(g.warnings[14][2], Exception)
 
         self.assertEqual(77, g.warnings[15][0])
-        self.assertIsInstance(g.warnings[15][2], ParseException)
+        self.assertIsInstance(g.warnings[15][2], Exception)
 
         self.assertEqual(80, g.warnings[16][0])
         self.assertIsInstance(g.warnings[16][2], InvalidCitationType)
