@@ -3,8 +3,6 @@
 import logging
 import unittest
 
-from pyparsing import ParseException
-
 import pybel
 from pybel.constants import GENE
 from pybel.parser import BelParser

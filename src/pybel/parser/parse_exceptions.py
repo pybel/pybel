@@ -79,6 +79,7 @@ See also: http://openbel.org/language/web/version_1.0/bel_specification_version_
 class MissingMetadataException(PyBelWarning):
     """BEL Script is missing critical metadata"""
 
+
 class InvalidCitationException(PyBelWarning):
     """Raised when the format for a citation is wrong. It should have either {type, name, reference}; or
         {type, name, reference, date, authors, comments}"""
@@ -135,6 +136,7 @@ class PlaceholderAminoAcidWarning(PyBelWarning):
 class NestedRelationWarning(PyBelWarning):
     """Raised when encountering a nested statement. See our the docs for an explanation of why we explicitly
         do not support nested statements."""
+
     def __init__(self, message):
         self.message = message
 
@@ -150,6 +152,7 @@ class LexicographyWarning(PyBelWarning):
 
 class InvalidFunctionSemantic(PyBelWarning):
     """Used an identifier in a semantically invalid function"""
+
     def __init__(self, function, namespace, name, allowed_functions):
         self.function = function
         self.namespace = namespace

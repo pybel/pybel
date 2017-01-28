@@ -25,7 +25,6 @@ import py2neo
 from . import io
 from .canonicalize import to_bel
 from .constants import PYBEL_DIR
-from .graph import BELGraph
 from .manager.cache import DEFAULT_CACHE_LOCATION, CacheManager
 from .manager.graph_cache import GraphCacheManager, to_database, from_database
 

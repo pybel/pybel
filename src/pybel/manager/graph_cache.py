@@ -2,11 +2,6 @@ from . import models
 from .cache import BaseCacheManager
 from .. import io
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
 
 class GraphCacheManager(BaseCacheManager):
     def store_graph(self, graph):

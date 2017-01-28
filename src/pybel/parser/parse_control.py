@@ -11,7 +11,6 @@ from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES
 
 log = logging.getLogger('pybel')
 
-
 BEL_KEYWORD_SET = 'SET'
 BEL_KEYWORD_UNSET = 'UNSET'
 BEL_KEYWORD_STATEMENT_GROUP = 'STATEMENT_GROUP'
@@ -19,6 +18,7 @@ BEL_KEYWORD_CITATION = 'Citation'
 BEL_KEYWORD_EVIDENCE = 'Evidence'
 BEL_KEYWORD_SUPPORT = 'SupportingText'
 BEL_KEYWORD_ALL = 'ALL'
+
 
 class ControlParser(BaseParser):
     def __init__(self, valid_annotations=None):

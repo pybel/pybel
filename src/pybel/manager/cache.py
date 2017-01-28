@@ -41,7 +41,7 @@ def parse_datetime(s):
                 dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
                 return dt
             except:
-               raise ValueError('Incorrect datetime format for {}'.format(s))
+                raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
 class BaseCacheManager:
