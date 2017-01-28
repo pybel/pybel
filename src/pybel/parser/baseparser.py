@@ -2,6 +2,7 @@
 
 import itertools as itt
 import logging
+import time
 
 from pyparsing import Suppress, ZeroOrMore, oneOf, White, dblQuotedString, removeQuotes, Word, alphanums, \
     delimitedList, replaceWith, Group, And
@@ -73,3 +74,8 @@ class BaseParser:
         if not hasattr(self, 'language'):
             raise Exception('Language not defined')
         return self.language
+
+    def streamline(self):
+        t = time.time()
+        self.get_language().streamline()
+        log.info('Finished streamlining parser in %.02fs', time.time() - t)
