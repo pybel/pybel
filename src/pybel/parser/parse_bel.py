@@ -71,9 +71,8 @@ class BelParser(BaseParser):
         :type valid_namespaces: dict
         :param valid_annotations: a dict of {annotation: set of values}
         :type valid_annotations: dict
-        :param namespace_mapping: a dict of {name: {value: (other_namepace, other_name)}}
+        :param namespace_mapping: a dict of {name: {value: (other_namespace, other_name)}}
         :type namespace_mapping: dict
-
         :param complete_origin: if true, add the gene and RNA origin of proteins to the network during compilation
         :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
@@ -371,18 +370,18 @@ class BelParser(BaseParser):
         is_a_tag = oneOf(['isA'])
 
         self.bel_to_bel_relations = [
+            association_tag,
             increases_tag,
             decreases_tag,
+            positive_correlation_tag,
+            negative_correlation_tag,
+            causes_no_change_tag,
+            orthologous_tag,
+            is_a_tag,
             directly_increases_tag,
             directly_decreases_tag,
             analogous_tag,
-            causes_no_change_tag,
             regulates_tag,
-            negative_correlation_tag,
-            positive_correlation_tag,
-            association_tag,
-            orthologous_tag,
-            is_a_tag
         ]
         self.bel_to_bel = triple(self.bel_term, MatchFirst(self.bel_to_bel_relations), self.bel_term)
 
@@ -434,13 +433,13 @@ class BelParser(BaseParser):
 
         self.relation = MatchFirst([
             self.bel_to_bel,
-            self.transcribed,
-            self.translated,
             self.has_member,
             self.has_component,
             self.subprocess_of,
             self.rate_limit,
             self.biomarker,
+            self.transcribed,
+            self.translated,
         ])
 
         self.relation.setParseAction(self.handle_relation)
