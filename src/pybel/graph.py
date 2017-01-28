@@ -133,10 +133,10 @@ class BELGraph(nx.MultiDiGraph):
 
         for required in REQUIRED_METADATA:
             if required not in self.metadata_parser.document_metadata:
-                self.warnings.append((0, '', MissingMetadataException(language.inv_document_keys[required])))
+                self.add_warning(0, '', MissingMetadataException(language.inv_document_keys[required]))
                 log.error('Missing required document metadata: %s', language.inv_document_keys[required])
             elif not self.metadata_parser.document_metadata[required]:
-                self.warnings.append((0, '', MissingMetadataException(language.inv_document_keys[required])))
+                self.add_warning(0, '', MissingMetadataException(language.inv_document_keys[required]))
                 log.error('Missing required document metadata not filled: %s', language.inv_document_keys[required])
 
         self.graph['document_metadata'] = self.metadata_parser.document_metadata
@@ -174,17 +174,17 @@ class BELGraph(nx.MultiDiGraph):
                 self.bel_parser.parseString(line)
             except ParseException as e:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
-                self.warnings.append((line_number, line, e))
+                self.add_warning(line_number, line, e, self.bel_parser.get_annotations())
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
-                self.warnings.append((line_number, line, e))
+                self.add_warning(line_number, line, e, self.bel_parser.get_annotations())
             except Exception as e:
                 log.exception('Line %07d - general failure: %s - %s: %s', line_number, line)
-                self.warnings.append((line_number, line, e))
+                self.add_warning(line_number, line, e, self.bel_parser.get_annotations())
 
         log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(self.warnings))
 
-        for k, v in sorted(Counter(e.__class__.__name__ for _, _, e in self.warnings).items(), reverse=True):
+        for k, v in sorted(Counter(e.__class__.__name__ for _, _, e, _ in self.warnings).items(), reverse=True):
             log.debug('  %s: %d', k, v)
 
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
@@ -242,6 +242,10 @@ class BELGraph(nx.MultiDiGraph):
     def annotation_list(self):
         """A dictionary mapping the keyword of locally defined annotations to a set of their values"""
         return self.graph['annotation_list']
+
+    def add_warning(self, line_number, line, exception, context=None):
+        """Adds a warning to the internal warning log in the graph, with optional context information"""
+        self.warnings.append((line_number, line, exception, {} if context is None else context))
 
 
 def expand_edges(graph):
