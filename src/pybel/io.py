@@ -16,7 +16,7 @@ from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION
-from .graph import BELGraph, expand_edges
+from .graph import BELGraph, expand_edges, GRAPH_ANNOTATION_LIST
 from .utils import flatten, flatten_graph_data
 
 __all__ = [
@@ -100,7 +100,7 @@ def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
     :type protocol: int
     :rtype: bytes
     """
-    return pickle.dumps(nx.MultiDiGraph(graph), protocol=protocol)
+    return pickle.dumps(graph, protocol=protocol)
 
 
 def from_bytes(bytes_graph):
@@ -126,7 +126,7 @@ def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
     :param protocol: Pickling protocol to use
     :type protocol: int
     """
-    nx.write_gpickle(nx.MultiDiGraph(graph), output, protocol=protocol)
+    nx.write_gpickle(graph, output, protocol=protocol)
 
 
 def from_pickle(path):
@@ -147,7 +147,7 @@ def to_json(graph, output):
     :param output: a write-supporting file-like object
     """
     data = json_graph.node_link_data(graph)
-    data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph']['annotation_list'].items()}
+    data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
     json.dump(data, output, ensure_ascii=False)
 
 
