@@ -4,7 +4,6 @@ import codecs
 import json
 import logging
 import os
-import pickle
 from ast import literal_eval
 
 import networkx as nx
@@ -18,6 +17,11 @@ from .canonicalize import decanonicalize_node
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION
 from .graph import BELGraph, expand_edges, GRAPH_ANNOTATION_LIST
 from .utils import flatten, flatten_graph_data
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 __all__ = [
     'from_lines',
@@ -110,7 +114,7 @@ def from_bytes(bytes_graph):
     :type bytes_graph: bytes
     :rtype: :class:`BELGraph`
     """
-    return BELGraph(data=pickle.loads(bytes_graph))
+    return pickle.loads(bytes_graph)
 
 
 def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
@@ -136,7 +140,7 @@ def from_pickle(path):
     :type path: file or str
     :rtype: :class:`BELGraph`
     """
-    return BELGraph(data=nx.read_gpickle(path))
+    return nx.read_gpickle(path)
 
 
 def to_json(graph, output):
