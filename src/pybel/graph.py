@@ -34,6 +34,12 @@ REQUIRED_METADATA = [
     'contact'
 ]
 
+GRAPH_METADATA = 'document_metadata'
+GRAPH_NAMESPACE_URL = 'namespace_url'
+GRAPH_NAMESPACE_OWL = 'namespace_owl'
+GRAPH_ANNOTATION_URL = 'annotation_url'
+GRAPH_ANNOTATION_LIST = 'annotation_list'
+
 
 def build_metadata_parser(cache_manager):
     if isinstance(cache_manager, CacheManager):
@@ -65,15 +71,18 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.metadata_parser = None
-        self.bel_parser = None
         self.warnings = []
 
         if lines is not None:
-            self.parse_lines(lines, complete_origin=complete_origin, cache_manager=cache_manager,
-                             allow_naked_names=allow_naked_names, allow_nested=allow_nested)
+            self.parse_lines(
+                lines,
+                complete_origin=complete_origin,
+                cache_manager=cache_manager,
+                allow_naked_names=allow_naked_names,
+                allow_nested=allow_nested
+            )
 
-    def parse_lines(self, lines, cache_manager=None,complete_origin=False,
+    def parse_lines(self, lines, cache_manager=None, complete_origin=False,
                     allow_naked_names=False, allow_nested=False):
         """Parses an iterable of lines into this graph
 
@@ -90,24 +99,23 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, definitions, states = split_file_to_annotations_and_definitions(lines)
 
-        self.metadata_parser = build_metadata_parser(cache_manager)
+        metadata_parser = build_metadata_parser(cache_manager)
 
-        self.parse_document(docs)
+        self.parse_document(docs, metadata_parser)
 
-        self.parse_definitions(definitions)
+        self.parse_definitions(definitions, metadata_parser)
 
-        self.bel_parser = BelParser(
+        bel_parser = BelParser(
             graph=self,
-            valid_namespaces=self.metadata_parser.namespace_dict,
-            valid_annotations=self.metadata_parser.annotations_dict,
+            valid_namespaces=metadata_parser.namespace_dict,
+            valid_annotations=metadata_parser.annotations_dict,
             complete_origin=complete_origin,
             allow_naked_names=allow_naked_names,
-            allow_nested=allow_nested
+            allow_nested=allow_nested,
+            autostreamline=True
         )
 
-        self.streamline()
-
-        self.parse_statements(states)
+        self.parse_statements(states, bel_parser)
 
         log.info('Network has %d nodes and %d edges', self.number_of_nodes(), self.number_of_edges())
 
@@ -121,66 +129,61 @@ class BELGraph(nx.MultiDiGraph):
             for ns, count in sorted(nss.items()):
                 log.debug('   %s: %d', ns, count)
 
-    def parse_document(self, document_metadata):
+    def parse_document(self, document_metadata, metadata_parser):
         t = time.time()
 
         for line_number, line in document_metadata:
             try:
-                self.metadata_parser.parseString(line)
+                metadata_parser.parseString(line)
             except Exception as e:
                 log.exception('Line %07d - Critical Failure - %s', line_number, line)
                 raise e
 
         for required in REQUIRED_METADATA:
-            if required not in self.metadata_parser.document_metadata:
+            if required not in metadata_parser.document_metadata:
                 self.add_warning(0, '', MissingMetadataException(language.inv_document_keys[required]))
                 log.error('Missing required document metadata: %s', language.inv_document_keys[required])
-            elif not self.metadata_parser.document_metadata[required]:
+            elif not metadata_parser.document_metadata[required]:
                 self.add_warning(0, '', MissingMetadataException(language.inv_document_keys[required]))
                 log.error('Missing required document metadata not filled: %s', language.inv_document_keys[required])
 
-        self.graph['document_metadata'] = self.metadata_parser.document_metadata
+        self.graph[GRAPH_METADATA] = metadata_parser.document_metadata
 
         log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
-    def parse_definitions(self, definitions):
+    def parse_definitions(self, definitions, metadata_parser):
         t = time.time()
 
         for line_number, line in definitions:
             try:
-                self.metadata_parser.parseString(line)
+                metadata_parser.parseString(line)
             except Exception as e:
                 log.exception('Line %07d - Critical Failure - %s', line_number, line)
                 raise e
 
-        self.graph['namespace_owl'] = self.metadata_parser.namespace_owl_dict
-        self.graph['namespace_url'] = self.metadata_parser.namespace_url_dict
-        self.graph['annotation_url'] = self.metadata_parser.annotation_url_dict
-        self.graph['annotation_list'] = {e: self.metadata_parser.annotations_dict[e] for e in
-                                         self.metadata_parser.annotation_list_list}
+        self.graph[GRAPH_NAMESPACE_OWL] = metadata_parser.namespace_owl_dict.copy()
+        self.graph[GRAPH_NAMESPACE_URL] = metadata_parser.namespace_url_dict.copy()
+        self.graph[GRAPH_ANNOTATION_URL] = metadata_parser.annotation_url_dict.copy()
+        self.graph[GRAPH_ANNOTATION_LIST] = {e: metadata_parser.annotations_dict[e] for e in
+                                             metadata_parser.annotation_list_list}
 
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
-    def streamline(self):
-        t = time.time()
-        self.bel_parser.language.streamline()
-        log.info('Finished streamlining BEL parser in %.02fs', time.time() - t)
-
-    def parse_statements(self, statements):
+    def parse_statements(self, statements, bel_parser):
         t = time.time()
 
         for line_number, line in statements:
             try:
-                self.bel_parser.parseString(line)
-            except ParseException as e:
+                bel_parser.parseString(line)
+            except ParseException:
                 log.error('Line %07d - general parser failure: %s', line_number, line)
-                self.add_warning(line_number, line, e, self.bel_parser.get_annotations())
+                self.add_warning(line_number, line, PyBelWarning('ParseException'), bel_parser.get_annotations())
             except PyBelWarning as e:
                 log.warning('Line %07d - %s', line_number, e)
-                self.add_warning(line_number, line, e, self.bel_parser.get_annotations())
+                self.add_warning(line_number, line, e, bel_parser.get_annotations())
             except Exception as e:
                 log.exception('Line %07d - general failure: %s - %s: %s', line_number, line)
-                self.add_warning(line_number, line, e, self.bel_parser.get_annotations())
+                self.add_warning(line_number, line, e, bel_parser.get_annotations())
 
         log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(self.warnings))
 
@@ -221,27 +224,27 @@ class BELGraph(nx.MultiDiGraph):
         :return: metadata derived from the BEL "Document" section
         :rtype: dict
         """
-        return self.graph['document_metadata']
+        return self.graph[GRAPH_METADATA]
 
     @property
     def namespace_url(self):
         """A dictionary mapping the keywords used in the creation of this graph to the URLs of the BELNS file"""
-        return self.graph['namespace_url']
+        return self.graph[GRAPH_NAMESPACE_URL]
 
     @property
     def namespace_owl(self):
         """A dictionary mapping the keywords used in the creation of this graph to the URLs of the OWL file"""
-        return self.graph['namespace_owl']
+        return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
     def annotation_url(self):
         """A dictionary mapping the keywords used in the creation of this graph to the URLs of the BELANNO file"""
-        return self.graph['annotation_url']
+        return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
     def annotation_list(self):
         """A dictionary mapping the keyword of locally defined annotations to a set of their values"""
-        return self.graph['annotation_list']
+        return self.graph[GRAPH_ANNOTATION_LIST]
 
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
