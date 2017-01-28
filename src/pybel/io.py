@@ -91,14 +91,16 @@ def from_url(url, **kwargs):
     return BELGraph(lines=lines, **kwargs)
 
 
-def to_bytes(graph):
+def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
     """Converts a graph to bytes (as BytesIO object)
 
     :param graph: a BEL graph
     :type graph: BELGraph
+    :param protocol: Pickling protocol to use
+    :type protocol: int
     :rtype: bytes
     """
-    return pickle.dumps(nx.MultiDiGraph(graph), protocol=pickle.HIGHEST_PROTOCOL)
+    return pickle.dumps(nx.MultiDiGraph(graph), protocol=protocol)
 
 
 def from_bytes(bytes_graph):
@@ -111,7 +113,7 @@ def from_bytes(bytes_graph):
     return BELGraph(data=pickle.loads(bytes_graph))
 
 
-def to_pickle(graph, output):
+def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
     """Writes this graph to a pickle object with nx.write_gpickle
 
     Cast as a nx.MultiDiGraph before outputting because the pickle serializer can't handle the PyParsing elements
@@ -120,8 +122,11 @@ def to_pickle(graph, output):
     :param graph: a BEL graph
     :type graph: BELGraph
     :param output: a file or filename to write to
+    :type output: file or file-like
+    :param protocol: Pickling protocol to use
+    :type protocol: int
     """
-    nx.write_gpickle(nx.MultiDiGraph(graph), output)
+    nx.write_gpickle(nx.MultiDiGraph(graph), output, protocol=protocol)
 
 
 def from_pickle(path):
