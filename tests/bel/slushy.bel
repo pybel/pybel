@@ -78,3 +78,12 @@ p(HGNC:TP53,sub(Q,R,248)) directlyDecreases transcriptionalActivity(proteinAbund
 
 # InvalidCitationType
 SET Citation = {"Pubmed", "Incomplete", "1234"}
+
+
+######## The following statements have no errors #############
+
+SET STATEMENT_GROUP = "Group 1"
+
+SET Citation = {"PubMed","That one article from last week","123455"}
+SET Evidence = "Evidence 1"
+p(HGNC:AKT1) -> p(HGNC:EGFR)
