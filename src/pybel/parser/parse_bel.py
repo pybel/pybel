@@ -62,7 +62,7 @@ fusion_map = {
 
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
-                 complete_origin=False, allow_naked_names=False, allow_nested=False):
+                 complete_origin=False, allow_naked_names=False, allow_nested=False, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: the graph to put the network in. Constructs new :class:`nx.MultiDiGraph` if None
@@ -461,6 +461,9 @@ class BelParser(BaseParser):
         self.language = self.control_parser.get_language() | self.statement
         self.language.setName('BEL')
 
+        if autostreamline:
+            self.streamline()
+
     def get_language(self):
         """Get language defined by this parser"""
         return self.language
@@ -483,14 +486,14 @@ class BelParser(BaseParser):
 
         self.handle_relation(s, l, {
             SUBJECT: tokens[SUBJECT],
-            RELATION:tokens[RELATION],
-            OBJECT:tokens[OBJECT][SUBJECT]
+            RELATION: tokens[RELATION],
+            OBJECT: tokens[OBJECT][SUBJECT]
         })
 
         self.handle_relation(s, l, {
             SUBJECT: tokens[OBJECT][SUBJECT],
             RELATION: tokens[OBJECT][RELATION],
-            OBJECT:tokens[OBJECT][OBJECT]
+            OBJECT: tokens[OBJECT][OBJECT]
         })
         return tokens
 
