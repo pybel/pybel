@@ -5,10 +5,11 @@ import logging
 import os
 import tempfile
 import unittest
+from collections import Counter
 
 import pybel
 from pybel.canonicalize import postpend_location, decanonicalize_node
-from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD
+from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD, HAS_MEMBER, RELATION
 from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_ontospy, mock_parse_owl_pybel, test_bel_thorough
 
 log = logging.getLogger('pybel')
@@ -65,7 +66,7 @@ class TestCanonicalize(unittest.TestCase):
 
         fmt = "Nodes with problem: {}, {}.\nOld Data:\n{}\nNew Data:\{}"
         for u, v, d in original.edges_iter(data=True):
-            if d['relation'] == 'hasMember':
+            if d[RELATION] == HAS_MEMBER:
                 continue
 
             for d1 in original.edge[u][v].values():
