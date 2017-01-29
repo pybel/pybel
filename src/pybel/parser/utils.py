@@ -146,19 +146,6 @@ def cartesian_dictionary(d):
     return res
 
 
-def handle_debug(fmt):
-    """logging hook for pyparsing
-
-    :param fmt: a format string with {s} for string, {l} for location, and {t} for tokens
-    """
-
-    def handle(s, l, t):
-        log.log(5, fmt.format(s=s, location=l, tokens=t))
-        return t
-
-    return handle
-
-
 def ensure_quotes(s):
     """Quote a string that isn't solely alphanumeric
 

@@ -5,7 +5,8 @@ import logging
 from copy import deepcopy
 
 import networkx as nx
-from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, pyparsing_common, MatchFirst
+from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
+from pyparsing import pyparsing_common as ppc
 
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
@@ -16,7 +17,7 @@ from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
-from .utils import handle_debug, list2tuple, cartesian_dictionary
+from .utils import list2tuple, cartesian_dictionary
 from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
     GOCC_KEYWORD
 from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOLOGY, REACTION, COMPLEX, COMPOSITE
@@ -46,6 +47,8 @@ translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFI
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
 reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, TRANSFORMATION)
 
+coor = ppc.integer | '?'
+
 function_variant_map = {
     GENE: GENEVARIANT,
     RNA: RNAVARIANT,
@@ -58,6 +61,28 @@ fusion_map = {
     RNA: RNA_FUSION,
     PROTEIN: PROTEIN_FUSION
 }
+
+
+def fusion_handler_wrapper(reference, start):
+    def fusion_handler(s, l, tokens):
+
+        if tokens[0] == '?':
+            tokens[FusionParser.MISSING] = '?'
+            return tokens
+
+        tokens[FusionParser.REF] = reference
+        log.critical('REFERENCE: %s, START: %s', reference, start)
+
+        if start:
+            tokens[FusionParser.LEFT] = '?'
+            tokens[FusionParser.RIGHT] = int(tokens[0])
+        else:
+            tokens[FusionParser.LEFT] = int(tokens[0])
+            tokens[FusionParser.RIGHT] = '?'
+
+        return tokens
+
+    return fusion_handler
 
 
 class BelParser(BaseParser):
@@ -132,27 +157,25 @@ class BelParser(BaseParser):
         #: 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
         self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
 
-        self.gene_simple = nest(identifier + opt_location)
+        # self.gene_simple = nest(identifier + opt_location)
 
         self.gene_modified = nest(
-            identifier + WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS) + opt_location)
+            identifier + Optional(
+                WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS)) + opt_location)
 
         self.gene_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
 
-        gene_break_start = pyparsing_common.integer()
-        gene_break_start.setParseAction(lambda s, l, t: [['c', '?', int(t[0])]])
-
-        gene_break_end = pyparsing_common.integer()
-        gene_break_end.setParseAction(lambda s, l, t: [['c', int(t[0]), '?']])
+        gene_break_5p = coor.setParseAction(fusion_handler_wrapper('c', start=True))
+        gene_break_3p = coor.setParseAction(fusion_handler_wrapper('c', start=False))
 
         self.gene_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
             identifier(PARTNER_3P) + Optional(
-                WCW + gene_break_start(RANGE_5P) + WCW + gene_break_end(RANGE_3P))))(FUSION))
+                WCW + Group(gene_break_5p)(RANGE_5P) + WCW + Group(gene_break_3p)(RANGE_3P))))(FUSION))
 
-        self.gene_fusion_legacy.setParseAction(self.handle_fusion_legacy)
+        #self.gene_fusion_legacy.setParseAction(self.handle_fusion_legacy)
 
         self.gene = gene_tag + MatchFirst(
-            [self.gene_fusion, self.gene_fusion_legacy, self.gene_modified, self.gene_simple])
+            [self.gene_fusion, self.gene_fusion_legacy, self.gene_modified])
         """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA"""
 
         self.mirna_simple = (identifier + opt_location)
@@ -171,17 +194,12 @@ class BelParser(BaseParser):
 
         self.protein_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
 
-        protein_break_start = pyparsing_common.integer()
-        protein_break_start.setParseAction(lambda s, l, t: [['p', '?', int(t[0])]])
-
-        protein_break_end = pyparsing_common.integer()
-        protein_break_end.setParseAction(lambda s, l, t: [['p', int(t[0]), '?']])
+        protein_break_5p = coor.setParseAction(fusion_handler_wrapper('p', start=True))
+        protein_break_3p = coor.setParseAction(fusion_handler_wrapper('p', start=False))
 
         self.protein_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
             identifier(PARTNER_3P) + Optional(
-                WCW + protein_break_start(RANGE_5P) + WCW + protein_break_end(RANGE_3P))))(FUSION))
-
-        self.protein_fusion_legacy.setParseAction(self.handle_fusion_legacy)
+                WCW + Group(protein_break_5p)(RANGE_5P) + WCW + Group(protein_break_3p)(RANGE_3P))))(FUSION))
 
         self.protein = protein_tag + MatchFirst(
             [self.protein_fusion, self.protein_fusion_legacy, self.protein_modified, self.protein_simple])
@@ -193,17 +211,12 @@ class BelParser(BaseParser):
 
         self.rna_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
 
-        rna_break_start = pyparsing_common.integer()
-        rna_break_start.setParseAction(lambda s, l, t: [['r', '?', int(t[0])]])
-
-        rna_break_end = pyparsing_common.integer()
-        rna_break_end.setParseAction(lambda s, l, t: [['r', int(t[0]), '?']])
+        rna_break_start = coor.setParseAction(fusion_handler_wrapper('r', start=True))
+        rna_break_end = coor.setParseAction(fusion_handler_wrapper('r', start=False))
 
         self.rna_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
             identifier(PARTNER_3P) + Optional(
-                WCW + rna_break_start(RANGE_5P) + WCW + rna_break_end(RANGE_3P))))(FUSION))
-
-        self.rna_fusion_legacy.setParseAction(self.handle_fusion_legacy)
+                WCW + Group(rna_break_start)(RANGE_5P) + WCW + Group(rna_break_end)(RANGE_3P))))(FUSION))
 
         self.rna = rna_tag + MatchFirst([self.rna_fusion, self.rna_fusion_legacy, self.rna_modified, self.rna_simple])
         """2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA"""
@@ -297,9 +310,14 @@ class BelParser(BaseParser):
         self.translocation_legacy = nest(
             Group(self.simple_abundance)(TARGET) + WCW + Group(identifier(FROM_LOC) + WCW + identifier(TO_LOC))(
                 EFFECT))
-        self.translocation_legacy.addParseAction(
-            handle_debug('PyBEL005 legacy translocation statement. use fromLoc() and toLoc(). {s}'))
 
+        def handle_legacy_tloc(s, l, tokens):
+            log.debug('Legacy translocation statement: %s', s)
+            return tokens
+
+        self.translocation_legacy.addParseAction(handle_legacy_tloc)
+
+        # TODO deprecate
         self.translocation_illegal = nest(self.simple_abundance)
 
         def handle_translocation_illegal(s, l, t):
@@ -515,14 +533,6 @@ class BelParser(BaseParser):
 
         return tokens
 
-    def handle_fusion_legacy(self, s, l, tokens):
-        if RANGE_5P in tokens[FUSION]:
-            return tokens
-
-        tokens[FUSION][RANGE_5P] = '?'
-        tokens[FUSION][RANGE_3P] = '?'
-        return tokens
-
     def handle_term(self, s, l, tokens):
         self.ensure_node(s, l, tokens)
         return tokens
@@ -655,9 +665,9 @@ class BelParser(BaseParser):
             d = {
                 FUNCTION: fusion_map[tokens[FUNCTION]],
                 PARTNER_5P: {NAMESPACE: f[PARTNER_5P][NAMESPACE], NAME: f[PARTNER_5P][NAME]},
-                RANGE_5P: tuple(f[RANGE_5P]),
+                RANGE_5P: f[RANGE_5P] if RANGE_5P in f else '?',
                 PARTNER_3P: {NAMESPACE: f[PARTNER_3P][NAMESPACE], NAME: f[PARTNER_3P][NAME]},
-                RANGE_3P: tuple(f[RANGE_3P])
+                RANGE_3P: f[RANGE_3P] if RANGE_3P in f else '?'
             }
             self.graph.add_node(name, **d)
             return name
@@ -706,6 +716,13 @@ class BelParser(BaseParser):
                 return name
 
 
+def canonicalize_fusion_range(tokens, tag):
+    if tag in tokens and FusionParser.MISSING not in tokens[tag]:
+        return tokens[tag][FusionParser.REF], tokens[tag][FusionParser.LEFT], tokens[tag][FusionParser.RIGHT]
+    else:
+        return '?',
+
+
 def canonicalize_node(tokens):
     """Given tokens, returns node name
 
@@ -727,11 +744,14 @@ def canonicalize_node(tokens):
     elif FUSION in tokens:
         cls = fusion_map[tokens[FUNCTION]]
         f = tokens[FUSION]
-        return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), tuple(f[RANGE_5P]), (
-            f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), tuple(f[RANGE_3P])
 
-    elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE,
-                                                     COMPLEX, PATHOLOGY, BIOPROCESS}:
+        range5pt = canonicalize_fusion_range(f, RANGE_5P)
+        range3pt = canonicalize_fusion_range(f, RANGE_3P)
+
+        return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), range5pt, (f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), range3pt
+
+    elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY,
+                                                     BIOPROCESS}:
         if IDENTIFIER in tokens:
             return tokens[FUNCTION], tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 
@@ -772,6 +792,7 @@ def canonicalize_modifier(tokens):
             attrs[EFFECT] = tokens[EFFECT].asDict()
         else:
             attrs[EFFECT] = dict(tokens[EFFECT])
+            # raise ValueError("Shouldn't be handling dicts this way")
 
     elif tokens[MODIFIER] == TRANSLOCATION:
         attrs[MODIFIER] = tokens[MODIFIER]

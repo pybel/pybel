@@ -1,6 +1,5 @@
 import itertools as itt
 import logging
-from datetime import datetime
 
 import networkx as nx
 from sqlalchemy import create_engine
@@ -9,35 +8,14 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from . import defaults
 from . import models
-from .utils import parse_owl
+from .utils import parse_owl, parse_datetime
 from ..constants import DEFAULT_CACHE_LOCATION
-from ..parser import language
+from ..parser.language import value_map
 from ..utils import download_url
 
 log = logging.getLogger('pybel')
 
-DEFAULT_BELNS_ENCODING = ''.join(sorted(language.value_map))
-
-CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
-PUBLISHED_DATE_FMT = '%Y-%m-%d'
-PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
-
-
-def parse_datetime(s):
-    """Tries to parse a datetime object from a standard datetime format or date format"""
-    try:
-        dt = datetime.strptime(s, CREATION_DATE_FMT)
-        return dt
-    except:
-        try:
-            dt = datetime.strptime(s, PUBLISHED_DATE_FMT)
-            return dt
-        except:
-            try:
-                dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
-                return dt
-            except:
-                raise ValueError('Incorrect datetime format for {}'.format(s))
+DEFAULT_BELNS_ENCODING = ''.join(sorted(value_map))
 
 
 class BaseCacheManager:

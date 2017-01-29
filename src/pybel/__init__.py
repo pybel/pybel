@@ -5,7 +5,7 @@ from . import io
 from .canonicalize import to_bel
 from .graph import *
 from .io import *
-from .manager import to_database, from_database
+from .manager.graph_cache import  to_database, from_database
 
 __all__ = ['to_database', 'from_database', 'to_bel'] + graph.__all__ + io.__all__
 

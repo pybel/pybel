@@ -2,12 +2,12 @@
 
 import logging
 
-from pybel.canonicalize import decanonicalize_node
+from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import HGVS, PMOD, GMOD, KIND, FRAGMENT, FUNCTION, NAMESPACE, NAME, ACTIVITY, GENE, RNA, ABUNDANCE, \
-    PATHOLOGY, BIOPROCESS, PROTEIN, MIRNA, COMPLEX, REACTION, COMPOSITE
+    PATHOLOGY, BIOPROCESS, PROTEIN, MIRNA, COMPLEX, REACTION, COMPOSITE, VARIANTS, PROTEIN_FUSION
 from pybel.constants import PYBEL_DEFAULT_NAMESPACE, PROTEINVARIANT, GENEVARIANT, RNAVARIANT, DEGRADATION, \
-    TRANSFORMATION, TRANSLOCATION
-from pybel.parser.parse_abundance_modifier import GmodParser, PmodParser, VariantParser
+    TRANSFORMATION, TRANSLOCATION, IDENTIFIER, FUSION, RANGE_3P, RANGE_5P, PARTNER_3P, PARTNER_5P
+from pybel.parser.parse_abundance_modifier import GmodParser, PmodParser, VariantParser, FusionParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from pybel.utils import default_identifier
@@ -34,7 +34,7 @@ class TestAbundance(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: ABUNDANCE,
-            'identifier': {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'}
+            IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'}
         }
 
         self.assertEqual(expected_result, result.asDict())
@@ -60,7 +60,7 @@ class TestAbundance(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: ABUNDANCE,
-            'identifier': {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'},
+            IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'},
             'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
         }
 
@@ -99,9 +99,9 @@ class TestGene(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: GENE,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -124,13 +124,13 @@ class TestGene(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: GENE,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'location': {
-                'namespace': 'GOCC',
-                'name': 'intracellular'
+                NAMESPACE: 'GOCC',
+                NAME: 'intracellular'
             }
         }
 
@@ -153,9 +153,9 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'variants': [
                 {
@@ -197,9 +197,9 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'variants': [
                 {
@@ -228,9 +228,9 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'variants': [
                 {
@@ -260,9 +260,9 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'variants': [
                 {
@@ -270,8 +270,8 @@ class TestGene(TestTokenParserBase):
                     VariantParser.IDENTIFIER: TEST_GENE_VARIANT}
             ],
             'location': {
-                'namespace': 'GOCC',
-                'name': 'intracellular'
+                NAMESPACE: 'GOCC',
+                NAME: 'intracellular'
             }
         }
         self.assertEqual(expected_result, result.asDict())
@@ -295,9 +295,9 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'variants': [
                 {
@@ -333,11 +333,20 @@ class TestGene(TestTokenParserBase):
         result = self.parser.gene.parseString(statement)
         expected_dict = {
             FUNCTION: GENE,
-            'fusion': {
-                'partner_5p': {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
-                'partner_3p': {NAMESPACE: 'HGNC', NAME: 'ERG'},
-                'range_5p': ['c', 1, 79],
-                'range_3p': ['c', 312, 5034]
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FusionParser.REF: 'c',
+                    FusionParser.LEFT: 1,
+                    FusionParser.RIGHT: 79
+
+                },
+                RANGE_3P: {
+                    FusionParser.REF: 'c',
+                    FusionParser.LEFT: 312,
+                    FusionParser.RIGHT: 5034
+                }
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -350,16 +359,26 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_gene_fusion_legacy_1(self):
+        self.maxDiff = None
         statement = 'g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
             FUNCTION: GENE,
-            'fusion': {
-                'partner_5p': {NAMESPACE: 'HGNC', NAME: 'BCR'},
-                'partner_3p': {NAMESPACE: 'HGNC', NAME: 'JAK2'},
-                'range_5p': ['c', '?', 1875],
-                'range_3p': ['c', 2626, '?']
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
+                RANGE_5P: {
+                    FusionParser.REF: 'c',
+                    FusionParser.LEFT: '?',
+                    FusionParser.RIGHT: 1875
+
+                },
+                RANGE_3P: {
+                    FusionParser.REF: 'c',
+                    FusionParser.LEFT: 2626,
+                    FusionParser.RIGHT: '?'
+                }
             }
         }
 
@@ -377,11 +396,11 @@ class TestGene(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: GENE,
-            'fusion': {
-                'partner_5p': {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
-                'partner_3p': {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
-                'range_5p': '?',
-                'range_3p': '?'
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
+                #RANGE_5P: {FusionParser.MISSING: '?'},
+                #RANGE_3P: {FusionParser.MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -434,7 +453,7 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            'identifier': {NAMESPACE: 'HGNC', NAME: 'CFTR'},
+            IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CFTR'},
             'variants': [
                 {KIND: HGVS, VariantParser.IDENTIFIER: 'c.1521_1523delCTT'}
             ]
@@ -470,9 +489,9 @@ class TestMiRNA(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: MIRNA,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'MIR21'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'MIR21'
             }
         }
 
@@ -492,9 +511,9 @@ class TestMiRNA(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: MIRNA,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'MIR21'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'MIR21'
             }
         }
 
@@ -512,13 +531,13 @@ class TestMiRNA(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: MIRNA,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'MIR21'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'MIR21'
             },
             'location': {
-                'namespace': 'GOCC',
-                'name': 'intracellular'
+                NAMESPACE: 'GOCC',
+                NAME: 'intracellular'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -535,9 +554,9 @@ class TestMiRNA(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: MIRNA,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'MIR21'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'MIR21'
             },
             'variants': [
                 {
@@ -564,9 +583,9 @@ class TestMiRNA(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: MIRNA,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'MIR21'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'MIR21'
             },
             'variants': [
                 {
@@ -575,8 +594,8 @@ class TestMiRNA(TestTokenParserBase):
                 },
             ],
             'location': {
-                'namespace': 'GOCC',
-                'name': 'intracellular'
+                NAMESPACE: 'GOCC',
+                NAME: 'intracellular'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -608,9 +627,9 @@ class TestProtein(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: PROTEIN,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -631,13 +650,13 @@ class TestProtein(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: PROTEIN,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'location': {
-                'namespace': 'GOCC',
-                'name': 'intracellular'
+                NAMESPACE: 'GOCC',
+                NAME: 'intracellular'
             }
         }
 
@@ -659,13 +678,13 @@ class TestProtein(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: PROTEIN,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'location': {
-                'namespace': 'GOCC',
-                'name': 'intracellular'
+                NAMESPACE: 'GOCC',
+                NAME: 'intracellular'
             },
             'variants': [
                 {
@@ -674,7 +693,7 @@ class TestProtein(TestTokenParserBase):
                 },
                 {
                     KIND: PMOD,
-                    'identifier': default_identifier('Ph'),
+                    IDENTIFIER: default_identifier('Ph'),
                     'code': 'Ser'
                 }
             ]
@@ -699,11 +718,21 @@ class TestProtein(TestTokenParserBase):
         result = self.parser.protein.parseString(statement)
         expected_dict = {
             FUNCTION: PROTEIN,
-            'fusion': {
-                'partner_5p': {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
-                'partner_3p': {NAMESPACE: 'HGNC', NAME: 'ERG'},
-                'range_5p': ['p', 1, 79],
-                'range_3p': ['p', 312, 5034]
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FusionParser.REF: 'p',
+                    FusionParser.LEFT: 1,
+                    FusionParser.RIGHT: 79
+
+                },
+                RANGE_3P: {
+                    FusionParser.REF: 'p',
+                    FusionParser.LEFT: 312,
+                    FusionParser.RIGHT: 5034
+
+                }
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -717,16 +746,27 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
     def test_protein_fusion_legacy_1(self):
+        self.maxDiff = None
         statement = 'p(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
         result = self.parser.protein.parseString(statement)
 
         expected_dict = {
             FUNCTION: PROTEIN,
-            'fusion': {
-                'partner_5p': {NAMESPACE: 'HGNC', NAME: 'BCR'},
-                'partner_3p': {NAMESPACE: 'HGNC', NAME: 'JAK2'},
-                'range_5p': ['p', '?', 1875],
-                'range_3p': ['p', 2626, '?']
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
+                RANGE_5P: {
+                    FusionParser.REF: 'p',
+                    FusionParser.LEFT: '?',
+                    FusionParser.RIGHT: 1875
+
+                },
+                RANGE_3P: {
+                    FusionParser.REF: 'p',
+                    FusionParser.LEFT: 2626,
+                    FusionParser.RIGHT: '?'
+
+                }
             }
         }
 
@@ -744,16 +784,14 @@ class TestProtein(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: PROTEIN,
-            'fusion': {
-                'partner_5p': {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
-                'partner_3p': {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
-                'range_5p': '?',
-                'range_3p': '?'
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
             }
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = 'ProteinFusion', ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)
+        expected_node = PROTEIN_FUSION, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node)
 
@@ -1140,9 +1178,9 @@ class TestRna(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: RNA,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1162,9 +1200,9 @@ class TestRna(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: RNA,
-            'identifier': {
-                'namespace': 'HGNC',
-                'name': 'AKT1'
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             },
             'variants': [
                 {
@@ -1197,8 +1235,25 @@ class TestRna(TestTokenParserBase):
         statement = 'r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))'
         result = self.parser.rna.parseString(statement)
 
-        expected_result = [RNA, ['Fusion', ['HGNC', 'TMPRSS2'], ['r', 1, 79], ['HGNC', 'ERG'], ['r', 312, 5034]]]
-        self.assertEqual(expected_result, result.asList())
+        expected_dict = {
+            FUNCTION: RNA,
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FusionParser.REF: 'r',
+                    FusionParser.LEFT: 1,
+                    FusionParser.RIGHT: 79
+
+                },
+                RANGE_3P: {
+                    FusionParser.REF: 'r',
+                    FusionParser.LEFT: 312,
+                    FusionParser.RIGHT: 5034
+                }
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
 
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node)
@@ -1212,8 +1267,21 @@ class TestRna(TestTokenParserBase):
         statement = 'r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))'
         result = self.parser.rna.parseString(statement)
 
-        expected_result = [RNA, ['Fusion', ['HGNC', 'TMPRSS2'], '?', ['HGNC', 'ERG'], '?']]
-        self.assertEqual(expected_result, result.asList())
+        expected_dict = {
+            FUNCTION: RNA,
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FusionParser.MISSING: '?',
+                },
+                RANGE_3P: {
+                    FusionParser.MISSING: '?',
+                }
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
 
         expected_node = canonicalize_node(result)
 
@@ -1227,12 +1295,22 @@ class TestRna(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: RNA,
-            'fusion': {
-                'partner_5p': {NAMESPACE: 'HGNC', NAME: 'BCR'},
-                'partner_3p': {NAMESPACE: 'HGNC', NAME: 'JAK2'},
-                'range_5p': ['r', '?', 1875],
-                'range_3p': ['r', 2626, '?']
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
+                RANGE_5P: {
+                    FusionParser.REF: 'r',
+                    FusionParser.LEFT: '?',
+                    FusionParser.RIGHT: 1875
+
+                },
+                RANGE_3P: {
+                    FusionParser.REF: 'r',
+                    FusionParser.LEFT: 2626,
+                    FusionParser.RIGHT: '?'
+                }
             }
+
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1249,11 +1327,9 @@ class TestRna(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: RNA,
-            'fusion': {
-                'partner_5p': {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
-                'partner_3p': {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
-                'range_5p': '?',
-                'range_3p': '?'
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1270,28 +1346,20 @@ class TestRna(TestTokenParserBase):
         statement = 'r(HGNC:CFTR, var(r.1521_1523delcuu))'
         result = self.parser.rna.parseString(statement)
 
-        expected_result = [RNA, ['HGNC', 'CFTR'], [HGVS, 'r.1521_1523delcuu']]
-        self.assertEqual(expected_result, result.asList())
-
-        expected_node = canonicalize_node(result)
-        self.assertHasNode(expected_node)
-
-        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, canonical_bel)
-
-        rna_node = RNA, 'HGNC', 'CFTR'
-        self.assertHasNode(rna_node, **{FUNCTION: RNA, NAMESPACE: 'HGNC', NAME: 'CFTR'})
-
-        self.assertHasEdge(rna_node, expected_node, relation='hasVariant')
-
-    def test_rna_variant_reference(self):
-        """2.2.2 RNA reference sequence"""
-        statement = 'r(HGNC:CFTR, var(r.1653_1655delcuu))'
-        result = self.parser.rna.parseString(statement)
-
-        expected_result = [RNA, ['HGNC', 'CFTR'], [HGVS, 'r.1653_1655delcuu']]
-        self.assertEqual(expected_result, result.asList())
+        expected_dict = {
+            FUNCTION: RNA,
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'CFTR'
+            },
+            VARIANTS: [
+                {
+                    KIND: HGVS,
+                    VariantParser.IDENTIFIER: 'r.1521_1523delcuu'
+                }
+            ]
+        }
+        self.assertEqual(expected_dict, result.asDict())
 
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node)
@@ -1322,9 +1390,9 @@ class TestComplex(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: COMPLEX,
-            'identifier': {
-                'namespace': 'SCOMP',
-                'name': 'AP-1 Complex'
+            IDENTIFIER: {
+                NAMESPACE: 'SCOMP',
+                NAME: 'AP-1 Complex'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1349,10 +1417,10 @@ class TestComplex(TestTokenParserBase):
             'members': [
                 {
                     FUNCTION: PROTEIN,
-                    'identifier': {NAMESPACE: 'HGNC', NAME: 'FOS'}
+                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'FOS'}
                 }, {
                     FUNCTION: PROTEIN,
-                    'identifier': {NAMESPACE: 'HGNC', NAME: 'JUN'}
+                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'JUN'}
                 }
             ]
         }
@@ -1398,10 +1466,10 @@ class TestComposite(TestTokenParserBase):
             'members': [
                 {
                     FUNCTION: PROTEIN,
-                    'identifier': {NAMESPACE: 'HGNC', NAME: 'IL6'}
+                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'IL6'}
                 }, {
                     FUNCTION: COMPLEX,
-                    'identifier': {NAMESPACE: 'GOCC', NAME: 'interleukin-23 complex'}
+                    IDENTIFIER: {NAMESPACE: 'GOCC', NAME: 'interleukin-23 complex'}
                 }
             ]
         }
@@ -1443,7 +1511,7 @@ class TestBiologicalProcess(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: BIOPROCESS,
-            'identifier': {NAMESPACE: 'GOBP', NAME: 'cell cycle arrest'}
+            IDENTIFIER: {NAMESPACE: 'GOBP', NAME: 'cell cycle arrest'}
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1474,7 +1542,7 @@ class TestPathology(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: PATHOLOGY,
-            'identifier': {NAMESPACE: 'MESHD', NAME: 'adenocarcinoma'}
+            IDENTIFIER: {NAMESPACE: 'MESHD', NAME: 'adenocarcinoma'}
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1524,7 +1592,7 @@ class TestActivity(TestTokenParserBase):
             },
             'target': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1552,7 +1620,7 @@ class TestActivity(TestTokenParserBase):
             },
             'target': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1580,7 +1648,7 @@ class TestActivity(TestTokenParserBase):
             },
             'target': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1608,7 +1676,7 @@ class TestActivity(TestTokenParserBase):
             },
             'target': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1644,7 +1712,7 @@ class TestTransformation(TestTokenParserBase):
             'modifier': DEGRADATION,
             'target': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1667,7 +1735,7 @@ class TestTransformation(TestTokenParserBase):
             'modifier': DEGRADATION,
             'target': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'EGFR'}
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1691,7 +1759,7 @@ class TestTransformation(TestTokenParserBase):
             'modifier': TRANSLOCATION,
             'target': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'EGFR'}
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
             },
             'effect': {
                 'fromLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'},
@@ -1724,7 +1792,7 @@ class TestTransformation(TestTokenParserBase):
             'modifier': TRANSLOCATION,
             'target': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'EGFR'}
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
             },
             'effect': {
                 'fromLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'},
@@ -1813,17 +1881,17 @@ class TestTransformation(TestTokenParserBase):
             'reactants': [
                 {
                     FUNCTION: ABUNDANCE,
-                    'identifier': {NAMESPACE: 'CHEBI', NAME: 'superoxide'}
+                    IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'superoxide'}
                 }
             ],
             'products': [
                 {
                     FUNCTION: ABUNDANCE,
-                    'identifier': {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
+                    IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
                 }, {
 
                     FUNCTION: ABUNDANCE,
-                    'identifier': {NAMESPACE: 'CHEBI', NAME: 'oxygen'}
+                    IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'oxygen'}
                 }
 
             ]
@@ -1919,24 +1987,24 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             'subject': {
                 FUNCTION: ABUNDANCE,
-                'identifier': {
-                    'namespace': 'ADO',
-                    'name': 'Abeta_42'
+                IDENTIFIER: {
+                    NAMESPACE: 'ADO',
+                    NAME: 'Abeta_42'
                 }
             },
             'relation': 'directlyIncreases',
             'object': {
                 'target': {
                     FUNCTION: ABUNDANCE,
-                    'identifier': {
-                        'namespace': 'CHEBI',
-                        'name': 'calcium(2+)'
+                    IDENTIFIER: {
+                        NAMESPACE: 'CHEBI',
+                        NAME: 'calcium(2+)'
                     }
                 },
                 'modifier': TRANSLOCATION,
                 'effect': {
-                    'fromLoc': {'namespace': 'MESHCS', 'name': 'Cell Membrane'},
-                    'toLoc': {'namespace': 'MESHCS', 'name': 'Intracellular Space'}
+                    'fromLoc': {NAMESPACE: 'MESHCS', NAME: 'Cell Membrane'},
+                    'toLoc': {NAMESPACE: 'MESHCS', NAME: 'Intracellular Space'}
                 }
             }
         }
@@ -1953,13 +2021,14 @@ class TestRelations(TestTokenParserBase):
             'object': {
                 'modifier': TRANSLOCATION,
                 'effect': {
-                    'fromLoc': {'namespace': 'MESHCS', 'name': 'Cell Membrane'},
-                    'toLoc': {'namespace': 'MESHCS', 'name': 'Intracellular Space'}
+                    'fromLoc': {NAMESPACE: 'MESHCS', NAME: 'Cell Membrane'},
+                    'toLoc': {NAMESPACE: 'MESHCS', NAME: 'Intracellular Space'}
                 }
             }
         }
 
         self.assertHasEdge(sub, obj, **expected_annotations)
+
 
     def test_decreases(self):
         """
@@ -1973,7 +2042,7 @@ class TestRelations(TestTokenParserBase):
                 'modifier': ACTIVITY,
                 'target': {
                     FUNCTION: PROTEIN,
-                    'identifier': {'namespace': 'SFAM', 'name': 'CAPN Family'},
+                    IDENTIFIER: {NAMESPACE: 'SFAM', NAME: 'CAPN Family'},
                     'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
                 },
                 'effect': {
@@ -1984,10 +2053,10 @@ class TestRelations(TestTokenParserBase):
             'object': {
                 TRANSFORMATION: REACTION,
                 'reactants': [
-                    {FUNCTION: PROTEIN, 'identifier': {NAMESPACE: 'HGNC', NAME: 'CDK5R1'}}
+                    {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5R1'}}
                 ],
                 'products': [
-                    {FUNCTION: PROTEIN, 'identifier': {NAMESPACE: 'HGNC', NAME: 'CDK5'}}
+                    {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5'}}
                 ]
 
             }
@@ -2032,13 +2101,13 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             'subject': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'CAT'},
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CAT'},
                 'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
             'relation': 'directlyDecreases',
             'object': {
                 FUNCTION: ABUNDANCE,
-                'identifier': {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
+                IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -2073,13 +2142,13 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             'subject': {
                 FUNCTION: GENE,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'CAT'},
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CAT'},
                 'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
             'relation': 'directlyDecreases',
             'object': {
                 FUNCTION: ABUNDANCE,
-                'identifier': {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
+                IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -2110,7 +2179,7 @@ class TestRelations(TestTokenParserBase):
                 'modifier': ACTIVITY,
                 'target': {
                     FUNCTION: PROTEIN,
-                    'identifier': {NAMESPACE: 'HGNC', NAME: 'HMGCR'}
+                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'HMGCR'}
                 },
                 'effect': {
                     NAME: 'cat',
@@ -2120,7 +2189,7 @@ class TestRelations(TestTokenParserBase):
             'relation': 'rateLimitingStepOf',
             'object': {
                 FUNCTION: BIOPROCESS,
-                'identifier': {NAMESPACE: 'GOBP', NAME: 'cholesterol biosynthetic process'}
+                IDENTIFIER: {NAMESPACE: 'GOBP', NAME: 'cholesterol biosynthetic process'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -2144,7 +2213,7 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             'subject': {
                 FUNCTION: GENE,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'APP'},
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'APP'},
                 'variants': [
                     {
                         KIND: HGVS,
@@ -2155,7 +2224,7 @@ class TestRelations(TestTokenParserBase):
             'relation': 'causesNoChange',
             'object': {
                 FUNCTION: PATHOLOGY,
-                'identifier': {NAMESPACE: 'MESHD', NAME: 'Alzheimer Disease'}
+                IDENTIFIER: {NAMESPACE: 'MESHD', NAME: 'Alzheimer Disease'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -2185,8 +2254,8 @@ class TestRelations(TestTokenParserBase):
                 'target': {
                     FUNCTION: COMPLEX,
                     'members': [
-                        {FUNCTION: PROTEIN, 'identifier': {NAMESPACE: 'HGNC', NAME: 'F3'}},
-                        {FUNCTION: PROTEIN, 'identifier': {NAMESPACE: 'HGNC', NAME: 'F7'}}
+                        {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'F3'}},
+                        {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'F7'}}
                     ]
                 }
             },
@@ -2199,7 +2268,7 @@ class TestRelations(TestTokenParserBase):
                 },
                 'target': {
                     FUNCTION: PROTEIN,
-                    'identifier': {NAMESPACE: 'HGNC', NAME: 'F9'}
+                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'F9'}
                 }
 
             }
@@ -2260,17 +2329,17 @@ class TestRelations(TestTokenParserBase):
                 },
                 'target': {
                     FUNCTION: PROTEIN,
-                    'identifier': {NAMESPACE: 'SFAM', NAME: 'GSK3 Family'}
+                    IDENTIFIER: {NAMESPACE: 'SFAM', NAME: 'GSK3 Family'}
                 }
             },
             'relation': 'negativeCorrelation',
             'object': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'MAPT'},
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'MAPT'},
                 'variants': [
                     {
                         KIND: PMOD,
-                        'identifier': {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
+                        IDENTIFIER: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
                     }
                 ]
             }
@@ -2296,7 +2365,7 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             'subject': {
                 FUNCTION: PROTEIN,
-                'identifier': {NAMESPACE: 'HGNC', NAME: 'GSK3B'},
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'GSK3B'},
                 'variants': [
                     {
                         KIND: PMOD,
@@ -2311,7 +2380,7 @@ class TestRelations(TestTokenParserBase):
                 'modifier': ACTIVITY,
                 'target': {
                     FUNCTION: PROTEIN,
-                    'identifier': {NAMESPACE: 'HGNC', NAME: 'GSK3B'}
+                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'GSK3B'}
                 },
                 'effect': {
                     NAME: 'kin',
@@ -2370,11 +2439,32 @@ class TestRelations(TestTokenParserBase):
         """
         3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto
         """
-        statement = 'r(HGNC:AKT1) >> p(HGNC:AKT1)'
+        statement = 'r(HGNC:AKT1,loc(GOCC:intracellular)) >> p(HGNC:AKT1)'
         result = self.parser.relation.parseString(statement)
 
-        expected_result = [[RNA, ['HGNC', 'AKT1']], 'translatedTo', [PROTEIN, ['HGNC', 'AKT1']]]
-        self.assertEqual(expected_result, result.asList())
+        # [[RNA, ['HGNC', 'AKT1']], 'translatedTo', [PROTEIN, ['HGNC', 'AKT1']]]
+        expected_result = {
+            'subject': {
+                FUNCTION: RNA,
+                IDENTIFIER: {
+                    NAMESPACE: 'HGNC',
+                    NAME:'AKT1'
+                },
+                'location': {
+                    NAMESPACE: 'GOCC',
+                    NAME:'intracellular'
+                }
+            },
+            'relation': 'translatedTo',
+            'object':{
+                FUNCTION: PROTEIN,
+                IDENTIFIER: {
+                    NAMESPACE: 'HGNC',
+                    NAME:'AKT1'
+                }
+            }
+        }
+        self.assertEqual(expected_result, result.asDict())
 
         sub = RNA, 'HGNC', 'AKT1'
         self.assertHasNode(sub)
@@ -2383,6 +2473,9 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation='translatedTo')
+
+        self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
+                         decanonicalize_edge(self.parser.graph, sub, obj, 1))
 
     def test_member_list(self):
         """

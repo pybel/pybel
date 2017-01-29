@@ -10,7 +10,7 @@ from .baseparser import BaseParser, WCW, word, nest, one_of_tags
 from .language import amino_acid, dna_nucleotide, dna_nucleotide_labels, rna_nucleotide_labels
 from .language import pmod_namespace, pmod_legacy_labels
 from .parse_identifier import IdentifierParser
-from ..constants import KIND, PMOD, GMOD, HGVS, PYBEL_DEFAULT_NAMESPACE, FRAGMENT, NAMESPACE, NAME
+from ..constants import KIND, PMOD, GMOD, HGVS, PYBEL_DEFAULT_NAMESPACE, FRAGMENT, NAMESPACE, NAME, FUSION, LOCATION
 from ..constants import PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P
 
 log = logging.getLogger('pybel')
@@ -265,17 +265,26 @@ class FusionParser(BaseParser):
     2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
     """
 
+    REF = 'reference'
+    LEFT = 'left'
+    RIGHT = 'right'
+    MISSING = 'missing'
+
     def __init__(self, namespace_parser=None):
-        fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith('Fusion'))
+        fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
 
         self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
         # sequence coordinates?
-        range_coordinate = (Group(oneOf(['r', 'p', 'c']) + Suppress('.') + ppc.integer +
-                                  Suppress('_') + ppc.integer) | '?')
 
-        self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), range_coordinate(RANGE_5P),
-                                           Group(identifier)(PARTNER_3P), range_coordinate(RANGE_3P))
+        reference_seq = oneOf(['r', 'p', 'c'])
+        coordinate = ppc.integer | Keyword('?')
+        missing = Keyword('?')
+
+        range_coordinate = (reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT)) | missing(self.MISSING)
+
+        self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
+                                           Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
 
     def get_language(self):
         return self.language
@@ -295,7 +304,7 @@ class LocationParser(BaseParser):
         self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
         location_tag = Suppress(oneOf(['loc', 'location']))
-        self.language = Group(location_tag + nest(identifier))('location')
+        self.language = Group(location_tag + nest(identifier))(LOCATION)
 
     def get_language(self):
         return self.language

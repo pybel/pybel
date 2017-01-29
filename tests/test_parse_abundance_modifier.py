@@ -3,7 +3,8 @@
 import logging
 import unittest
 
-from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, PYBEL_DEFAULT_NAMESPACE
+from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, PYBEL_DEFAULT_NAMESPACE, PARTNER_3P, PARTNER_5P, RANGE_3P, \
+    RANGE_5P, NAMESPACE, NAME, LOCATION
 from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser, PsubParser, GsubParser, TruncParser, \
     FusionParser, LocationParser, FragmentParser
 from pybel.parser.parse_abundance_modifier import VariantParser, build_variant_dict
@@ -261,17 +262,88 @@ class TestFusionParser(unittest.TestCase):
     def setUp(self):
         self.parser = FusionParser()
 
-    def test_261a(self):
+    def test_rna_fusion_known_breakpoints(self):
         """RNA abundance of fusion with known breakpoints"""
         statement = 'fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034)'
-        result = ['Fusion', ['HGNC', 'TMPRSS2'], ['r', 1, 79], ['HGNC', 'ERG'], ['r', 312, 5034]]
-        self.assertEqual(result, self.parser.parseString(statement).asList())
+        result = self.parser.parseString(statement)
 
-    def test_261b(self):
+        expected = {
+            PARTNER_5P: {
+                NAMESPACE: 'HGNC',
+                NAME: 'TMPRSS2'
+            },
+            RANGE_5P: {
+                FusionParser.REF: 'r',
+                FusionParser.LEFT: 1,
+                FusionParser.RIGHT: 79
+
+            },
+            PARTNER_3P: {
+                NAMESPACE: 'HGNC',
+                NAME: 'ERG'
+            },
+            RANGE_3P: {
+                FusionParser.REF: 'r',
+                FusionParser.LEFT: 312,
+                FusionParser.RIGHT: 5034
+            }
+        }
+
+        self.assertEqual(expected, result.asDict())
+
+    def test_rna_fusion_unspecified_breakpoints(self):
         """RNA abundance of fusion with unspecified breakpoints"""
         statement = 'fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?)'
-        expected = ['Fusion', ['HGNC', 'TMPRSS2'], '?', ['HGNC', 'ERG'], '?']
-        self.assertEqual(expected, self.parser.parseString(statement).asList())
+        result = self.parser.parseString(statement)
+
+        expected = {
+            PARTNER_5P: {
+                NAMESPACE: 'HGNC',
+                NAME: 'TMPRSS2'
+            },
+            RANGE_5P: {
+                FusionParser.MISSING: '?'
+
+            },
+            PARTNER_3P: {
+                NAMESPACE: 'HGNC',
+                NAME: 'ERG'
+            },
+            RANGE_3P: {
+                FusionParser.MISSING: '?'
+            }
+        }
+
+        self.assertEqual(expected, result.asDict())
+
+    def test_rna_fusion_specified_fuzzy_breakpoints(self):
+        """RNA abundance of fusion with unspecified breakpoints"""
+        statement = 'fus(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.?_1)'
+        result = self.parser.parseString(statement)
+
+        expected = {
+            PARTNER_5P: {
+                NAMESPACE: 'HGNC',
+                NAME: 'TMPRSS2'
+            },
+            RANGE_5P: {
+                FusionParser.REF: 'r',
+                FusionParser.LEFT: 1,
+                FusionParser.RIGHT: '?'
+
+            },
+            PARTNER_3P: {
+                NAMESPACE: 'HGNC',
+                NAME: 'ERG'
+            },
+            RANGE_3P: {
+                FusionParser.REF: 'r',
+                FusionParser.LEFT: '?',
+                FusionParser.RIGHT: 1
+            }
+        }
+
+        self.assertEqual(expected, result.asDict())
 
 
 class TestLocation(unittest.TestCase):
@@ -282,6 +354,6 @@ class TestLocation(unittest.TestCase):
         statement = 'loc(GOCC:intracellular)'
         result = self.parser.parseString(statement)
         expected = {
-            'location': dict(namespace='GOCC', name='intracellular')
+            LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
         }
         self.assertEqual(expected, result.asDict())

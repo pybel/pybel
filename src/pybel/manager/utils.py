@@ -1,3 +1,4 @@
+from datetime import datetime
 from xml.etree import ElementTree as ET
 
 import networkx as nx
@@ -121,3 +122,25 @@ def parse_owl_ontospy(iri):
             g.add_edge(frag, cls.locale, type='ClassAssertion')
 
     return g
+
+
+CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
+PUBLISHED_DATE_FMT = '%Y-%m-%d'
+PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
+
+
+def parse_datetime(s):
+    """Tries to parse a datetime object from a standard datetime format or date format"""
+    try:
+        dt = datetime.strptime(s, CREATION_DATE_FMT)
+        return dt
+    except:
+        try:
+            dt = datetime.strptime(s, PUBLISHED_DATE_FMT)
+            return dt
+        except:
+            try:
+                dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
+                return dt
+            except:
+                raise ValueError('Incorrect datetime format for {}'.format(s))

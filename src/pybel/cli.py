@@ -24,7 +24,8 @@ import click
 from . import io
 from .canonicalize import to_bel
 from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
-from .manager import CacheManager, GraphCacheManager, to_database, from_database
+from .manager.cache import CacheManager
+from .manager.graph_cache import GraphCacheManager, to_database, from_database
 
 log = logging.getLogger('pybel')
 
