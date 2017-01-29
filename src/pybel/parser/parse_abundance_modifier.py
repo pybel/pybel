@@ -278,10 +278,10 @@ class FusionParser(BaseParser):
         # sequence coordinates?
 
         reference_seq = oneOf(['r', 'p', 'c'])
-        coordinate = ppc.integer | Keyword('?')
+        coordinate = Keyword('?') | ppc.integer
         missing = Keyword('?')
 
-        range_coordinate = (reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT)) | missing(self.MISSING)
+        range_coordinate = missing(self.MISSING) | (reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT))
 
         self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
                                            Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))

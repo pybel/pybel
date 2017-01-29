@@ -47,8 +47,6 @@ translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFI
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
 reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, TRANSFORMATION)
 
-coor = ppc.integer | '?'
-
 function_variant_map = {
     GENE: GENEVARIANT,
     RNA: RNAVARIANT,
@@ -65,13 +63,11 @@ fusion_map = {
 
 def fusion_handler_wrapper(reference, start):
     def fusion_handler(s, l, tokens):
-
         if tokens[0] == '?':
             tokens[FusionParser.MISSING] = '?'
             return tokens
 
         tokens[FusionParser.REF] = reference
-        log.critical('REFERENCE: %s, START: %s', reference, start)
 
         if start:
             tokens[FusionParser.LEFT] = '?'
@@ -79,7 +75,6 @@ def fusion_handler_wrapper(reference, start):
         else:
             tokens[FusionParser.LEFT] = int(tokens[0])
             tokens[FusionParser.RIGHT] = '?'
-
         return tokens
 
     return fusion_handler
@@ -165,17 +160,14 @@ class BelParser(BaseParser):
 
         self.gene_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
 
-        gene_break_5p = coor.setParseAction(fusion_handler_wrapper('c', start=True))
-        gene_break_3p = coor.setParseAction(fusion_handler_wrapper('c', start=False))
+        gene_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=True))
+        gene_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=False))
 
         self.gene_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
             identifier(PARTNER_3P) + Optional(
                 WCW + Group(gene_break_5p)(RANGE_5P) + WCW + Group(gene_break_3p)(RANGE_3P))))(FUSION))
 
-        #self.gene_fusion_legacy.setParseAction(self.handle_fusion_legacy)
-
-        self.gene = gene_tag + MatchFirst(
-            [self.gene_fusion, self.gene_fusion_legacy, self.gene_modified])
+        self.gene = gene_tag + MatchFirst([self.gene_fusion, self.gene_fusion_legacy, self.gene_modified])
         """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA"""
 
         self.mirna_simple = (identifier + opt_location)
@@ -194,8 +186,8 @@ class BelParser(BaseParser):
 
         self.protein_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
 
-        protein_break_5p = coor.setParseAction(fusion_handler_wrapper('p', start=True))
-        protein_break_3p = coor.setParseAction(fusion_handler_wrapper('p', start=False))
+        protein_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=True))
+        protein_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=False))
 
         self.protein_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
             identifier(PARTNER_3P) + Optional(
@@ -211,8 +203,8 @@ class BelParser(BaseParser):
 
         self.rna_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
 
-        rna_break_start = coor.setParseAction(fusion_handler_wrapper('r', start=True))
-        rna_break_end = coor.setParseAction(fusion_handler_wrapper('r', start=False))
+        rna_break_start = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=True))
+        rna_break_end = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=False))
 
         self.rna_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
             identifier(PARTNER_3P) + Optional(
@@ -748,7 +740,8 @@ def canonicalize_node(tokens):
         range5pt = canonicalize_fusion_range(f, RANGE_5P)
         range3pt = canonicalize_fusion_range(f, RANGE_3P)
 
-        return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), range5pt, (f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), range3pt
+        return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), range5pt, (
+            f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), range3pt
 
     elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY,
                                                      BIOPROCESS}:
