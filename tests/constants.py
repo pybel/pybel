@@ -10,7 +10,8 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import FUNCTION, NAMESPACE, NAME
-from pybel.constants import PROTEIN, ABUNDANCE, GENE, RNA, PROTEIN_FUSION, GENE_FUSION, RNA_FUSION, MIRNA, COMPLEX, COMPOSITE, BIOPROCESS, PATHOLOGY, REACTION, PMOD, HGVS, GMOD, PYBEL_DEFAULT_NAMESPACE
+from pybel.constants import PROTEIN, ABUNDANCE, GENE, RNA, PROTEIN_FUSION, GENE_FUSION, RNA_FUSION, MIRNA, COMPLEX, \
+    COMPOSITE, BIOPROCESS, PATHOLOGY, REACTION, PMOD, HGVS, GMOD, PYBEL_DEFAULT_NAMESPACE
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
@@ -263,7 +264,7 @@ class BelReconstitutionMixin(unittest.TestCase):
     def bel_thorough_reconstituted(self, g, check_metadata=True):
         self.assertIsNotNone(g)
         self.assertIsInstance(g, BELGraph)
-        self.assertEqual(0, len(g.warnings), msg='Document warnings:\n{}'.format('\n'.join(map(str,g.warnings))))
+        self.assertEqual(0, len(g.warnings), msg='Document warnings:\n{}'.format('\n'.join(map(str, g.warnings))))
 
         x = {
             (ABUNDANCE, 'CHEBI', 'oxygen atom'),
@@ -381,16 +382,17 @@ class BelReconstitutionMixin(unittest.TestCase):
         }
 
         self.assertEqual(x, set(g.nodes()))
-        
+
         citation_1 = {'type': 'PubMed', 'name': 'That one article from last week', 'reference': '123455'}
         citation_2 = {'type': 'PubMed', 'name': 'That one article from last week #2', 'reference': '123456'}
-        
+
         e = [
             ((ABUNDANCE, 'CHEBI', 'oxygen atom'), (GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))),
              {'SupportingText': 'These are mostly made up',
               'citation': citation_1,
               'relation': 'increases'}),
-            ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))), {'relation': 'hasVariant'}),
+            ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))),
+             {'relation': 'hasVariant'}),
             ((GENE, 'HGNC', 'AKT1'), (ABUNDANCE, 'CHEBI', 'oxygen atom'),
              {'SupportingText': 'These are mostly made up',
               'citation': citation_1,
@@ -556,15 +558,15 @@ class BelReconstitutionMixin(unittest.TestCase):
                                                   'effect': {'fromLoc': {'namespace': 'GOCC', 'name': 'cell surface'},
                                                              'toLoc': {'namespace': 'GOCC', 'name': 'endosome'}}}}),
             ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'EGFR'), {'SupportingText': 'These are mostly made up',
-                                                                    'citation': {'type': 'PubMed',
-                                                                                 'name': 'That one article from last week',
-                                                                                 'reference': '123455'},
-                                                                    'relation': 'increases',
-                                                                    'object': {'modifier': 'Translocation', 'effect': {
-                                                                        'fromLoc': {'namespace': 'GOCC',
-                                                                                    'name': 'cell surface'},
-                                                                        'toLoc': {'namespace': 'GOCC',
-                                                                                  'name': 'endosome'}}}}),
+                                                                'citation': {'type': 'PubMed',
+                                                                             'name': 'That one article from last week',
+                                                                             'reference': '123455'},
+                                                                'relation': 'increases',
+                                                                'object': {'modifier': 'Translocation', 'effect': {
+                                                                    'fromLoc': {'namespace': 'GOCC',
+                                                                                'name': 'cell surface'},
+                                                                    'toLoc': {'namespace': 'GOCC',
+                                                                              'name': 'endosome'}}}}),
             ((RNA, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, 'p.Phe508del')),
              {'relation': 'hasVariant'}),
             ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1'),
@@ -604,10 +606,10 @@ class BelReconstitutionMixin(unittest.TestCase):
              (COMPLEX, 'GOCC', 'interleukin-23 complex'), {'relation': 'hasComponent'}),
             ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')),
              (BIOPROCESS, 'GOBP', 'cell cycle arrest'), {'SupportingText': 'These are mostly made up',
-                                                                  'citation': {'type': 'PubMed',
-                                                                               'name': 'That one article from last week',
-                                                                               'reference': '123455'},
-                                                                  'relation': 'decreases'}),
+                                                         'citation': {'type': 'PubMed',
+                                                                      'name': 'That one article from last week',
+                                                                      'reference': '123455'},
+                                                         'relation': 'decreases'}),
             ((REACTION, ((ABUNDANCE, ('CHEBI', 'superoxide')),),
               ((ABUNDANCE, ('CHEBI', 'dioxygen')), (ABUNDANCE, ('CHEBI', 'hydrogen peroxide')))),
              (ABUNDANCE, 'CHEBI', 'superoxide'), {'relation': 'hasReactant'}),
