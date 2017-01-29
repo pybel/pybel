@@ -39,6 +39,7 @@ fusion_parent_dict = {
 }
 
 
+# FIXME remove this, replace with edges_iter
 def get_neighbors_by_path_type(g, v, relation):
     """Gets the set of neighbors of a given node that have a relation of the given type
 
