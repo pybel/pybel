@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import codecs
 import json
 import logging
 import os
-import pickle
 from ast import literal_eval
 
 import networkx as nx
@@ -13,9 +14,14 @@ from networkx.readwrite import json_graph
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
-from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME
-from .graph import BELGraph, expand_edges
+from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION
+from .graph import BELGraph, expand_edges, GRAPH_ANNOTATION_LIST
 from .utils import flatten, flatten_graph_data
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 __all__ = [
     'from_lines',
@@ -89,14 +95,16 @@ def from_url(url, **kwargs):
     return BELGraph(lines=lines, **kwargs)
 
 
-def to_bytes(graph):
+def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
     """Converts a graph to bytes (as BytesIO object)
 
     :param graph: a BEL graph
     :type graph: BELGraph
+    :param protocol: Pickling protocol to use
+    :type protocol: int
     :rtype: bytes
     """
-    return pickle.dumps(nx.MultiDiGraph(graph), protocol=pickle.HIGHEST_PROTOCOL)
+    return pickle.dumps(graph, protocol=protocol)
 
 
 def from_bytes(bytes_graph):
@@ -106,10 +114,10 @@ def from_bytes(bytes_graph):
     :type bytes_graph: bytes
     :rtype: :class:`BELGraph`
     """
-    return BELGraph(data=pickle.loads(bytes_graph))
+    return pickle.loads(bytes_graph)
 
 
-def to_pickle(graph, output):
+def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
     """Writes this graph to a pickle object with nx.write_gpickle
 
     Cast as a nx.MultiDiGraph before outputting because the pickle serializer can't handle the PyParsing elements
@@ -118,8 +126,11 @@ def to_pickle(graph, output):
     :param graph: a BEL graph
     :type graph: BELGraph
     :param output: a file or filename to write to
+    :type output: file or file-like
+    :param protocol: Pickling protocol to use
+    :type protocol: int
     """
-    nx.write_gpickle(nx.MultiDiGraph(graph), output)
+    nx.write_gpickle(graph, output, protocol=protocol)
 
 
 def from_pickle(path):
@@ -129,7 +140,7 @@ def from_pickle(path):
     :type path: file or str
     :rtype: :class:`BELGraph`
     """
-    return BELGraph(data=nx.read_gpickle(path))
+    return nx.read_gpickle(path)
 
 
 def to_json(graph, output):
@@ -140,7 +151,7 @@ def to_json(graph, output):
     :param output: a write-supporting file-like object
     """
     data = json_graph.node_link_data(graph)
-    data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph']['annotation_list'].items()}
+    data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
     json.dump(data, output, ensure_ascii=False)
 
 
@@ -219,9 +230,6 @@ def to_neo4j(graph, neo_graph, context=None):
                     Each edge will be assigned an attribute :code:`pybel_context` with this value
     :type context: str
     """
-    if graph.context is not None:
-        context = graph.context
-
     tx = neo_graph.begin()
 
     node_map = {}
@@ -239,7 +247,7 @@ def to_neo4j(graph, neo_graph, context=None):
     for u, v, data in graph.edges(data=True):
         neo_u = node_map[u]
         neo_v = node_map[v]
-        rel_type = data['relation']
+        rel_type = data[RELATION]
         attrs = flatten(data)
         if context is not None:
             attrs[PYBEL_CONTEXT_TAG] = str(context)

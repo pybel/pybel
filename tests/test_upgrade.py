@@ -1,19 +1,18 @@
+# -*- coding: utf-8 -*-
+
 import json
 import logging
 import os
 import tempfile
 import unittest
+from collections import Counter
 
 import pybel
 from pybel.canonicalize import postpend_location, decanonicalize_node
-from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD
-from tests import constants
-from tests.constants import test_bel, test_bel_4, mock_bel_resources
+from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD, HAS_MEMBER, RELATION
+from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_ontospy, mock_parse_owl_pybel, test_bel_thorough
 
 log = logging.getLogger('pybel')
-
-pd_path = os.path.expanduser('~/dev/bms/aetionomy/parkinsons.bel')
-small_corpus_path = os.path.expanduser('~/dev/bms/selventa/small_corpus.bel')
 
 
 class TestCanonicalizeHelper(unittest.TestCase):
@@ -38,11 +37,14 @@ class TestCanonicalize(unittest.TestCase):
         self.path = os.path.join(self.dir, 'test.bel')
 
     def tearDown(self):
-        os.remove(self.path)
+        if os.path.exists(self.path):
+            os.remove(self.path)
         os.rmdir(self.dir)
 
-    def canonicalize_helper(self, test_path):
-        original = pybel.from_path(test_path)
+    def canonicalize_helper(self, test_path, **kwargs):
+        original = pybel.from_path(test_path, **kwargs)
+
+        self.assertEqual(0, len(original.warnings))
 
         with open(self.path, 'w') as f:
             pybel.to_bel(original, f)
@@ -64,7 +66,7 @@ class TestCanonicalize(unittest.TestCase):
 
         fmt = "Nodes with problem: {}, {}.\nOld Data:\n{}\nNew Data:\{}"
         for u, v, d in original.edges_iter(data=True):
-            if d['relation'] == 'hasMember':
+            if d[RELATION] == HAS_MEMBER:
                 continue
 
             for d1 in original.edge[u][v].values():
@@ -82,17 +84,11 @@ class TestCanonicalize(unittest.TestCase):
         self.canonicalize_helper(test_bel)
 
     @mock_bel_resources
-    @constants.mock_parse_owl_ontospy
-    @constants.mock_parse_owl_pybel
+    @mock_parse_owl_ontospy
+    @mock_parse_owl_pybel
     def test_canonicalize_4(self, m1, m2, m3):
         self.canonicalize_helper(test_bel_4)
 
-    @unittest.skipUnless(os.path.exists(small_corpus_path), 'Small Corpus Missing')
-    def test_small_corpus(self):
-        self.maxDiff = None
-        self.canonicalize_helper(small_corpus_path)
-
-    @unittest.skipUnless(os.path.exists(pd_path), 'PD Test File Missing')
-    def test_parkinsons(self):
-        self.maxDiff = None
-        self.canonicalize_helper(pd_path)
+    @mock_bel_resources
+    def test_thorough(self, mock_get):
+        self.canonicalize_helper(test_bel_thorough, allow_nested=True)

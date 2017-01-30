@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import logging
 import os
 import unittest
@@ -9,7 +11,7 @@ from click.testing import CliRunner
 import pybel
 from pybel import cli
 from pybel.constants import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel, test_bel_slushy, BelReconstitutionMixin, expected_test_bel_metadata, \
+from tests.constants import test_bel, BelReconstitutionMixin, expected_test_bel_metadata, \
     mock_bel_resources
 
 log = logging.getLogger(__name__)
@@ -18,13 +20,6 @@ log = logging.getLogger(__name__)
 class TestCli(BelReconstitutionMixin, unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
-
-    @mock_bel_resources
-    def test_slushy(self, mock_get):
-        """Tests that slushy document doesn't even make it to warning counting"""
-        with self.runner.isolated_filesystem():
-            result = self.runner.invoke(cli.main, ['convert', '--path', test_bel_slushy])
-            self.assertLess(0, result.exit_code, msg=result.exc_info)
 
     @mock_bel_resources
     def test_convert(self, mock_get):

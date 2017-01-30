@@ -1,37 +1,45 @@
 from __future__ import print_function
 
 import itertools as itt
+import logging
 import sys
 from operator import itemgetter
 
+from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION
 from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
+from .constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT, ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, \
+    BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX, REACTION, CITATION
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
-from .constants import GOCC_LATEST, GOCC_KEYWORD
-from .parser import language
-from .parser.language import inv_document_keys
-from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser
-from .parser.parse_bel import ACTIVITY, DEGRADATION, TRANSLOCATION
-from .parser.parse_bel import NAMESPACE, NAME
+from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
+from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
+    LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER
+from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
+from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser, VariantParser, FusionParser
 from .parser.utils import ensure_quotes
 
 __all__ = ['to_bel']
 
+log = logging.getLogger(__name__)
+
 variant_parent_dict = {
-    'GeneVariant': 'g',
-    'RNAVariant': 'r',
-    'ProteinVariant': 'p',
-    'Gene': 'g',
-    'RNA': 'r',
-    'Protein': 'p'
+    GENEVARIANT: 'g',
+    RNAVARIANT: 'r',
+    PROTEINVARIANT: 'p',
+    MIRNAVARIANT: 'm',
+    GENE: 'g',
+    RNA: 'r',
+    PROTEIN: 'p',
+    MIRNA: 'm'
 }
 
 fusion_parent_dict = {
-    'GeneFusion': 'g',
-    'RNAFusion': 'r',
-    'ProteinFusion': 'p'
+    GENE_FUSION: 'g',
+    RNA_FUSION: 'r',
+    PROTEIN_FUSION: 'p'
 }
 
 
+# FIXME remove this, replace with edges_iter
 def get_neighbors_by_path_type(g, v, relation):
     """Gets the set of neighbors of a given node that have a relation of the given type
 
@@ -44,7 +52,7 @@ def get_neighbors_by_path_type(g, v, relation):
     result = []
     for neighbor in g.edge[v]:
         for data in g.edge[v][neighbor].values():
-            if data['relation'] == relation:
+            if data[RELATION] == relation:
                 result.append(neighbor)
     return set(result)
 
@@ -61,7 +69,7 @@ def postpend_location(s, location_model):
     """
 
     if all(k in location_model for k in {NAMESPACE, NAME}):
-        return "loc({}:{})".format(location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
+        return "{}, loc({}:{}))".format(s[:-1], location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
     raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
 
 
@@ -79,7 +87,7 @@ def decanonicalize_variant(tokens):
             name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])
         return 'gmod({})'.format(name)
     elif tokens[KIND] == HGVS:
-        return 'var({})'.format(tokens[HGVS])
+        return 'var({})'.format(tokens[VariantParser.IDENTIFIER])
     elif tokens[KIND] == FRAGMENT:
         if FragmentParser.MISSING in tokens:
             res = 'frag(?'
@@ -93,9 +101,11 @@ def decanonicalize_variant(tokens):
 
 
 def decanonicalize_fusion_range(tokens):
-    if '?' == tokens[0]:
-        return '?'
-    return '{}.{}_{}'.format(tokens[0], tokens[1], tokens[2])
+    if FusionParser.REF in tokens:
+        return '{}.{}_{}'.format(tokens[FusionParser.REF],
+                                 tokens[FusionParser.LEFT],
+                                 tokens[FusionParser.RIGHT])
+    return '?'
 
 
 def decanonicalize_node(g, v):
@@ -107,38 +117,38 @@ def decanonicalize_node(g, v):
     """
     data = g.node[v]
 
-    if data[FUNCTION] == 'Reaction':
-        reactants = get_neighbors_by_path_type(g, v, 'hasReactant')
+    if data[FUNCTION] == REACTION:
+        reactants = get_neighbors_by_path_type(g, v, HAS_REACTANT)
         reactants_canon = map(lambda n: decanonicalize_node(g, n), sorted(reactants))
-        products = get_neighbors_by_path_type(g, v, 'hasProduct')
+        products = get_neighbors_by_path_type(g, v, HAS_PRODUCT)
         products_canon = map(lambda n: decanonicalize_node(g, n), sorted(products))
         return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
 
-    if data[FUNCTION] in ('Composite', 'Complex') and 'namespace' not in data:
+    if data[FUNCTION] in (COMPOSITE, COMPLEX) and NAMESPACE not in data:
         members_canon = map(lambda n: decanonicalize_node(g, n), v[1:])
-        return '{}({})'.format(language.rev_abundance_labels[data[FUNCTION]], ', '.join(members_canon))
+        return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members_canon))
 
-    if 'variants' in data:
-        variants = ', '.join(sorted(map(decanonicalize_variant, data['variants'])))
+    if VARIANTS in data:
+        variants = ', '.join(sorted(map(decanonicalize_variant, data[VARIANTS])))
         return "{}({}:{}, {})".format(variant_parent_dict[data[FUNCTION]],
-                                      data['namespace'],
-                                      ensure_quotes(data['name']),
+                                      data[NAMESPACE],
+                                      ensure_quotes(data[NAME]),
                                       variants)
 
-    if data[FUNCTION] in ('Gene', 'RNA', 'miRNA', 'Protein', 'Abundance', 'Complex', 'Pathology', 'BiologicalProcess'):
-        return "{}({}:{})".format(language.rev_abundance_labels[data[FUNCTION]],
-                                  data['namespace'],
-                                  ensure_quotes(data['name']))
+    if data[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY, BIOPROCESS}:
+        return "{}({}:{})".format(rev_abundance_labels[data[FUNCTION]],
+                                  data[NAMESPACE],
+                                  ensure_quotes(data[NAME]))
 
-    if data[FUNCTION].endswith('Fusion'):
+    if data[FUNCTION] in {GENE_FUSION, RNA_FUSION, PROTEIN_FUSION}:
         return "{}(fus({}:{}, {}, {}:{}, {}))".format(
             fusion_parent_dict[data[FUNCTION]],
-            data['partner_5p']['namespace'],
-            data['partner_5p']['name'],
-            decanonicalize_fusion_range(data['range_5p']),
-            data['partner_3p']['namespace'],
-            data['partner_3p']['name'],
-            decanonicalize_fusion_range(data['range_3p'])
+            data[PARTNER_5P][NAMESPACE],
+            data[PARTNER_5P][NAME],
+            decanonicalize_fusion_range(data[RANGE_5P]),
+            data[PARTNER_3P][NAMESPACE],
+            data[PARTNER_3P][NAME],
+            decanonicalize_fusion_range(data[RANGE_3P])
         )
 
     raise ValueError('Unknown node data: {} {}'.format(v, data))
@@ -152,15 +162,15 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
 
     node_edge_data = edge_data[node_position]
 
-    if 'location' in node_edge_data:
-        node_str = postpend_location(node_str, node_edge_data['location'])
+    if LOCATION in node_edge_data:
+        node_str = postpend_location(node_str, node_edge_data[LOCATION])
 
-    if 'modifier' in node_edge_data and DEGRADATION == node_edge_data['modifier']:
+    if MODIFIER in node_edge_data and DEGRADATION == node_edge_data[MODIFIER]:
         node_str = "deg({})".format(node_str)
-    elif 'modifier' in node_edge_data and ACTIVITY == node_edge_data['modifier']:
+    elif MODIFIER in node_edge_data and ACTIVITY == node_edge_data[MODIFIER]:
         node_str = "act({}".format(node_str)
-        if 'effect' in node_edge_data and node_edge_data['effect']:
-            ma = node_edge_data['effect']
+        if EFFECT in node_edge_data and node_edge_data[EFFECT]:
+            ma = node_edge_data[EFFECT]
 
             if ma[NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
                 node_str = "{}, ma({}))".format(node_str, ma[NAME])
@@ -169,21 +179,13 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
         else:
             node_str = "{})".format(node_str)
 
-    elif 'modifier' in node_edge_data and TRANSLOCATION == node_edge_data['modifier']:
-        fromLoc = "fromLoc("
-        toLoc = "toLoc("
+    elif MODIFIER in node_edge_data and TRANSLOCATION == node_edge_data[MODIFIER]:
 
-        if not isinstance(node_edge_data['effect']['fromLoc'], dict):
-            raise ValueError()
+        fromLoc = "fromLoc({}:{})".format(node_edge_data[EFFECT][FROM_LOC][NAMESPACE],
+                                          ensure_quotes(node_edge_data[EFFECT][FROM_LOC][NAME]))
 
-        fromLoc += "{}:{})".format(node_edge_data['effect']['fromLoc']['namespace'],
-                                   ensure_quotes(node_edge_data['effect']['fromLoc']['name']))
-
-        if not isinstance(node_edge_data['effect']['toLoc'], dict):
-            raise ValueError()
-
-        toLoc += "{}:{})".format(node_edge_data['effect']['toLoc']['namespace'],
-                                 ensure_quotes(node_edge_data['effect']['toLoc']['name']))
+        toLoc = "toLoc({}:{})".format(node_edge_data[EFFECT][TO_LOC][NAMESPACE],
+                                      ensure_quotes(node_edge_data[EFFECT][TO_LOC][NAME]))
 
         node_str = "tloc({}, {}, {})".format(node_str, fromLoc, toLoc)
 
@@ -204,10 +206,10 @@ def decanonicalize_edge(g, u, v, k):
 
     ed = g.edge[u][v][k]
 
-    u_str = decanonicalize_edge_node(g, u, ed, node_position='subject')
-    v_str = decanonicalize_edge_node(g, v, ed, node_position='object')
+    u_str = decanonicalize_edge_node(g, u, ed, node_position=SUBJECT)
+    v_str = decanonicalize_edge_node(g, v, ed, node_position=OBJECT)
 
-    return "{} {} {}".format(u_str, ed['relation'], v_str)
+    return "{} {} {}".format(u_str, ed[RELATION], v_str)
 
 
 def flatten_citation(citation):
@@ -215,7 +217,7 @@ def flatten_citation(citation):
 
 
 def sort_edges(d):
-    return (flatten_citation(d['citation']), d['SupportingText']) + tuple(
+    return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
         itt.chain.from_iterable(
             (k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in BLACKLIST_EDGE_ATTRIBUTES))
 
@@ -254,11 +256,11 @@ def to_bel(graph, file=sys.stdout):
     print('###############################################\n', file=file)
 
     # sort by citation, then supporting text
-    qualified_edges = filter(lambda u_v_k_d: 'citation' in u_v_k_d[3] and EVIDENCE in u_v_k_d[3],
+    qualified_edges = filter(lambda u_v_k_d: CITATION in u_v_k_d[3] and EVIDENCE in u_v_k_d[3],
                              graph.edges_iter(data=True, keys=True))
     qualified_edges = sorted(qualified_edges, key=lambda u_v_k_d: sort_edges(u_v_k_d[3]))
 
-    for citation, citation_edges in itt.groupby(qualified_edges, key=lambda t: flatten_citation(t[3]['citation'])):
+    for citation, citation_edges in itt.groupby(qualified_edges, key=lambda t: flatten_citation(t[3][CITATION])):
         print('SET Citation = {{{}}}'.format(citation), file=file)
 
         for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3][EVIDENCE]):
@@ -280,14 +282,13 @@ def to_bel(graph, file=sys.stdout):
     print('SET Evidence = "Automatically added by PyBEL"', file=file)
 
     for u in graph.nodes_iter():
-        if any(d['relation'] not in language.unqualified_edges for v in graph.adj[u] for d in
-               graph.edge[u][v].values()):
+        if any(d[RELATION] not in unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
             continue
 
         print(decanonicalize_node(graph, u), file=file)
 
     # Can't infer hasMember relationships, but it's not due to specific evidence or citation
-    for u, v, d in graph.edges_iter(relation='hasMember', data=True):
+    for u, v, d in graph.edges_iter(data=True, **{RELATION: HAS_MEMBER}):
         if EVIDENCE in d:
             continue
 

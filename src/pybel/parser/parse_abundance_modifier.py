@@ -10,7 +10,8 @@ from .baseparser import BaseParser, WCW, word, nest, one_of_tags
 from .language import amino_acid, dna_nucleotide, dna_nucleotide_labels, rna_nucleotide_labels
 from .language import pmod_namespace, pmod_legacy_labels
 from .parse_identifier import IdentifierParser
-from ..constants import KIND, PMOD, GMOD, HGVS, PYBEL_DEFAULT_NAMESPACE, FRAGMENT, NAMESPACE, NAME
+from ..constants import KIND, PMOD, GMOD, HGVS, PYBEL_DEFAULT_NAMESPACE, FRAGMENT, NAMESPACE, NAME, FUSION, LOCATION
+from ..constants import PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P
 
 log = logging.getLogger('pybel')
 
@@ -19,7 +20,7 @@ rna_nucleotide_seq = Word(''.join(rna_nucleotide_labels.keys()))
 
 
 def build_variant_dict(variant):
-    return {KIND: HGVS, HGVS: variant}
+    return {KIND: HGVS, VariantParser.IDENTIFIER: variant}
 
 
 # Structural variants
@@ -29,11 +30,12 @@ class VariantParser(BaseParser):
 
     See HVGS for conventions http://www.hgvs.org/mutnomen/recs.html
     """
+    IDENTIFIER = 'identifier'
 
     def __init__(self):
         variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)
         variant_characters = Word(alphanums + '._*=?>')
-        self.language = variant_tags + nest(variant_characters.setResultsName(HGVS))
+        self.language = variant_tags + nest(variant_characters(self.IDENTIFIER))
 
     def get_language(self):
         return self.language
@@ -54,7 +56,7 @@ class PsubParser(BaseParser):
     def handle_psub(self, s, l, tokens):
         upgraded = 'p.{}{}{}'.format(tokens[self.REFERENCE], tokens[self.POSITION], tokens[self.VARIANT])
         log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', s, upgraded)
-        tokens[HGVS] = upgraded
+        tokens[VariantParser.IDENTIFIER] = upgraded
         del tokens[self.REFERENCE]
         del tokens[self.POSITION]
         del tokens[self.VARIANT]
@@ -77,7 +79,7 @@ class TruncParser(BaseParser):
         upgraded = 'p.{}*'.format(tokens[self.POSITION])
         log.warning(
             'trunc() is deprecated. Please look up reference terminal amino acid and encode with HGVS: {}'.format(s))
-        tokens[HGVS] = upgraded
+        tokens[VariantParser.IDENTIFIER] = upgraded
         del tokens[self.POSITION]
         return tokens
 
@@ -104,7 +106,7 @@ class GsubParser(BaseParser):
     def handle_gsub(self, s, l, tokens):
         upgraded = 'g.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
         log.debug('legacy sub() %s upgraded to %s', s, upgraded)
-        tokens[HGVS] = upgraded
+        tokens[VariantParser.IDENTIFIER] = upgraded
         del tokens[self.POSITION]
         del tokens[self.REFERENCE]
         del tokens[self.VARIANT]
@@ -222,7 +224,7 @@ class GmodParser(BaseParser):
 
 
 def canonicalize_hgvs(tokens):
-    return tokens[KIND], tokens[HGVS]
+    return tokens[KIND], tokens[VariantParser.IDENTIFIER]
 
 
 def canonicalize_pmod(tokens):
@@ -263,17 +265,26 @@ class FusionParser(BaseParser):
     2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
     """
 
-    def __init__(self, namespace_parser=None):
-        fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith('Fusion'))
+    REF = 'reference'
+    LEFT = 'left'
+    RIGHT = 'right'
+    MISSING = 'missing'
+    fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
 
+    def __init__(self, namespace_parser=None):
         self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
         # sequence coordinates?
-        range_coordinate = (Group(oneOf(['r', 'p', 'c']) + Suppress('.') + ppc.integer +
-                                  Suppress('_') + ppc.integer) | '?')
 
-        self.language = fusion_tags + nest(Group(identifier)('partner_5p'), range_coordinate('range_5p'),
-                                           Group(identifier)('partner_3p'), range_coordinate('range_3p'))
+        reference_seq = oneOf(['r', 'p', 'c'])
+        coordinate = ppc.integer | '?'
+        missing = Keyword('?')
+
+        range_coordinate = missing(self.MISSING) | (
+        reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT))
+
+        self.language = self.fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
+                                                Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
 
     def get_language(self):
         return self.language
@@ -293,7 +304,7 @@ class LocationParser(BaseParser):
         self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
         location_tag = Suppress(oneOf(['loc', 'location']))
-        self.language = Group(location_tag + nest(identifier))('location')
+        self.language = Group(location_tag + nest(identifier))(LOCATION)
 
     def get_language(self):
         return self.language

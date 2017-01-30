@@ -8,6 +8,7 @@ class NakedNameWarning(PyBelWarning):
     """Raised when there is an identifier without a namespace. Enable lenient mode to suppress"""
 
     def __init__(self, name):
+        PyBelWarning.__init__(self, name)
         self.name = name
 
     def __str__(self):
@@ -26,6 +27,7 @@ class MissingNamespaceNameWarning(PyBelWarning):
     """Raised if reference to value not in namespace"""
 
     def __init__(self, name, namespace):
+        PyBelWarning.__init__(self, name, namespace)
         self.name = name
         self.namespace = namespace
 
@@ -41,6 +43,7 @@ class MissingAnnotationKeyWarning(PyBelWarning):
     """Raised when trying to unset an annotation that is not set"""
 
     def __init__(self, annotation):
+        PyBelWarning.__init__(self, annotation)
         self.annotation = annotation
 
     def __str__(self):
@@ -51,6 +54,7 @@ class IllegalAnnotationValueWarning(PyBelWarning):
     """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
 
     def __init__(self, value, annotation):
+        PyBelWarning.__init__(self, value, annotation)
         self.value = value
         self.annotation = annotation
 
@@ -79,6 +83,7 @@ See also: http://openbel.org/language/web/version_1.0/bel_specification_version_
 class MissingMetadataException(PyBelWarning):
     """BEL Script is missing critical metadata"""
 
+
 class InvalidCitationException(PyBelWarning):
     """Raised when the format for a citation is wrong. It should have either {type, name, reference}; or
         {type, name, reference, date, authors, comments}"""
@@ -105,6 +110,7 @@ See also: https://wiki.openbel.org/display/BELNA/Citation
     """
 
     def __init__(self, citation_type):
+        PyBelWarning.__init__(self, citation_type)
         self.citation_type = citation_type
 
     def __str__(self):
@@ -115,6 +121,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
     """Tried to make a citation to PubMed that's not a legal PMID"""
 
     def __init__(self, reference):
+        PyBelWarning.__init__(self, reference)
         self.reference = reference
 
     def __str__(self):
@@ -136,6 +143,13 @@ class NestedRelationWarning(PyBelWarning):
     """Raised when encountering a nested statement. See our the docs for an explanation of why we explicitly
         do not support nested statements."""
 
+    def __init__(self, message):
+        PyBelWarning.__init__(self, message)
+        self.message = message
+
+    def __str__(self):
+        return 'Nesting is not supported. Split this statement: {}'.format(self.message)
+
 
 class LexicographyWarning(PyBelWarning):
     """Improper capitalization"""
@@ -145,3 +159,15 @@ class LexicographyWarning(PyBelWarning):
 
 class InvalidFunctionSemantic(PyBelWarning):
     """Used an identifier in a semantically invalid function"""
+
+    def __init__(self, function, namespace, name, allowed_functions):
+        PyBelWarning.__init__(self, function, namespace, name, allowed_functions)
+        self.function = function
+        self.namespace = namespace
+        self.name = name
+        self.allowed_functions = allowed_functions
+
+    def __str__(self):
+        return "{}:{} should be encoded as one of: {}".format(self.namespace,
+                                                              self.name,
+                                                              ', '.join(self.allowed_functions))

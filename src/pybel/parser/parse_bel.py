@@ -5,56 +5,84 @@ import logging
 from copy import deepcopy
 
 import networkx as nx
-from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, pyparsing_common, MatchFirst
+from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
+from pyparsing import pyparsing_common as ppc
 
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
+from .language import value_map
 from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
     LocationParser, TruncParser, PmodParser, GmodParser, canonicalize_variant
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
-from .utils import handle_debug, list2tuple, cartesian_dictionary
-from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE
+from .utils import list2tuple, cartesian_dictionary
+from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
+    GOCC_KEYWORD
+from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOLOGY, REACTION, COMPLEX, COMPOSITE
+from ..constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT
+from ..constants import GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
+from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_MEMBER, TRANSCRIBED_TO, TRANSLATED_TO
+from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
+    CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
+    TRANSFORMATION, FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
 
 log = logging.getLogger('pybel')
 
-TWO_WAY_RELATIONS = {'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'}
-ACTIVITY = 'Activity'
-DEGRADATION = 'Degradation'
-TRANSLOCATION = 'Translocation'
-CELL_SECRETION = 'CellSecretion'
-CELL_SURFACE_EXPRESSION = 'CellSurfaceExpression'
-
-general_abundance_tags = one_of_tags(['a', 'abundance'], language.ABUNDANCE, 'function')
-gene_tag = one_of_tags(['g', 'geneAbundance'], language.GENE, 'function')
-fusion_tag = oneOf(['fus', 'fusion']).setParseAction(replaceWith('Fusion'))
-mirna_tag = one_of_tags(['m', 'microRNAAbundance'], language.MIRNA, 'function')
-protein_tag = one_of_tags(['p', 'proteinAbundance'], language.PROTEIN, 'function')
-rna_tag = one_of_tags(['r', 'rnaAbundance'], language.RNA, 'function')
-complex_tag = one_of_tags(['complex', 'complexAbundance'], language.COMPLEX, 'function')
-composite_abundance_tag = one_of_tags(['composite', 'compositeAbundance'], language.COMPOSITE, 'function')
-biological_process_tag = one_of_tags(['bp', 'biologicalProcess'], language.BIOPROCESS, 'function')
-pathology_tag = one_of_tags(['path', 'pathology'], language.PATHOLOGY, 'function')
-activity_tag = one_of_tags(['act', 'activity'], ACTIVITY, 'modifier')
-cell_secretion_tag = one_of_tags(['sec', 'cellSecretion'], CELL_SECRETION, 'modifier')
-cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], CELL_SURFACE_EXPRESSION, 'modifier')
-translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, 'modifier')
-degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, 'modifier')
-reaction_tags = one_of_tags(['reaction', 'rxn'], language.REACTION, 'transformation')
+general_abundance_tags = one_of_tags(['a', 'abundance'], ABUNDANCE, FUNCTION)
+gene_tag = one_of_tags(['g', 'geneAbundance'], GENE, FUNCTION)
+mirna_tag = one_of_tags(['m', 'microRNAAbundance'], MIRNA, FUNCTION)
+protein_tag = one_of_tags(['p', 'proteinAbundance'], PROTEIN, FUNCTION)
+rna_tag = one_of_tags(['r', 'rnaAbundance'], RNA, FUNCTION)
+complex_tag = one_of_tags(['complex', 'complexAbundance'], COMPLEX, FUNCTION)
+composite_abundance_tag = one_of_tags(['composite', 'compositeAbundance'], COMPOSITE, FUNCTION)
+biological_process_tag = one_of_tags(['bp', 'biologicalProcess'], BIOPROCESS, FUNCTION)
+pathology_tag = one_of_tags(['o', 'path', 'pathology'], PATHOLOGY, FUNCTION)
+activity_tag = one_of_tags(['act', 'activity'], ACTIVITY, MODIFIER)
+cell_secretion_tag = one_of_tags(['sec', 'cellSecretion'], CELL_SECRETION, MODIFIER)
+cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], CELL_SURFACE_EXPRESSION, MODIFIER)
+translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFIER)
+degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
+reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, TRANSFORMATION)
+molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 function_variant_map = {
-    language.GENE: 'GeneVariant',
-    language.RNA: 'RNAVariant',
-    language.PROTEIN: 'ProteinVariant',
-    language.MIRNA: 'miRNAVariant'
+    GENE: GENEVARIANT,
+    RNA: RNAVARIANT,
+    PROTEIN: PROTEINVARIANT,
+    MIRNA: MIRNAVARIANT
 }
+
+fusion_map = {
+    GENE: GENE_FUSION,
+    RNA: RNA_FUSION,
+    PROTEIN: PROTEIN_FUSION
+}
+
+
+def fusion_handler_wrapper(reference, start):
+    def fusion_handler(s, l, tokens):
+        if tokens[0] == '?':
+            tokens[FusionParser.MISSING] = '?'
+            return tokens
+
+        tokens[FusionParser.REF] = reference
+
+        if start:
+            tokens[FusionParser.LEFT] = '?'
+            tokens[FusionParser.RIGHT] = int(tokens[0])
+        else:
+            tokens[FusionParser.LEFT] = int(tokens[0])
+            tokens[FusionParser.RIGHT] = '?'
+        return tokens
+
+    return fusion_handler
 
 
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
-                 lenient=False, complete_origin=False):
+                 complete_origin=False, allow_naked_names=False, allow_nested=False, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: the graph to put the network in. Constructs new :class:`nx.MultiDiGraph` if None
@@ -63,23 +91,26 @@ class BelParser(BaseParser):
         :type valid_namespaces: dict
         :param valid_annotations: a dict of {annotation: set of values}
         :type valid_annotations: dict
-        :param namespace_mapping: a dict of {name: {value: (other_namepace, other_name)}}
+        :param namespace_mapping: a dict of {name: {value: (other_namespace, other_name)}}
         :type namespace_mapping: dict
-        :param lenient: if true, turn off naked namespace failures
-        :type lenient: bool
         :param complete_origin: if true, add the gene and RNA origin of proteins to the network during compilation
         :type complete_origin: bool
+        :param allow_naked_names: if true, turn off naked namespace failures
+        :type allow_naked_names: bool
+        :param allow_nested: if true, turn off nested statement failures
+        :type allow_nested: bool
         """
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
-        self.lenient = lenient
+        self.allow_naked_names = allow_naked_names
+        self.allow_nested = allow_nested
         self.complete_origin = complete_origin
         self.control_parser = ControlParser(valid_annotations=valid_annotations)
         self.identifier_parser = IdentifierParser(valid_namespaces=valid_namespaces,
                                                   mapping=namespace_mapping,
-                                                  lenient=self.lenient)
+                                                  allow_naked_names=self.allow_naked_names)
 
-        identifier = Group(self.identifier_parser.get_language())('identifier')
+        identifier = Group(self.identifier_parser.get_language())(IDENTIFIER)
 
         # 2.2 Abundance Modifier Functions
 
@@ -121,80 +152,64 @@ class BelParser(BaseParser):
         #: 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
         self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
 
-        self.gene_simple = nest(identifier + opt_location)
+        self.gene_modified = identifier + Optional(
+                WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
 
-        self.gene_modified = nest(
-            identifier + WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))('variants') + opt_location)
+        self.gene_fusion = Group(self.fusion)(FUSION)
 
-        self.gene_fusion = nest(Group(self.fusion)('fusion') + opt_location)
+        gene_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=True))
+        gene_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=False))
 
-        gene_break_start = pyparsing_common.integer()
-        gene_break_start.setParseAction(lambda s, l, t: [['c', '?', int(t[0])]])
+        self.gene_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+            identifier(PARTNER_3P) + Optional(
+                WCW + Group(gene_break_5p)(RANGE_5P) + WCW + Group(gene_break_3p)(RANGE_3P))))(FUSION)
 
-        gene_break_end = pyparsing_common.integer()
-        gene_break_end.setParseAction(lambda s, l, t: [['c', int(t[0]), '?']])
-
-        self.gene_fusion_legacy = nest(Group(identifier('partner_5p') + WCW + fusion_tag + nest(
-            identifier('partner_3p') + Optional(
-                WCW + gene_break_start('range_5p') + WCW + gene_break_end('range_3p'))))('fusion'))
-
-        self.gene_fusion_legacy.setParseAction(self.handle_fusion_legacy)
-
-        self.gene = gene_tag + MatchFirst(
-            [self.gene_fusion, self.gene_fusion_legacy, self.gene_modified, self.gene_simple])
+        self.gene = gene_tag + nest(MatchFirst([
+            self.gene_fusion,
+            self.gene_fusion_legacy,
+            self.gene_modified
+        ]) + opt_location)
         """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA"""
 
-        self.mirna_simple = (identifier + opt_location)
+        self.mirna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS)) + opt_location
 
-        self.mirna_modified = (identifier + WCW + delimitedList(Group(self.variant))('variants') + opt_location)
-
-        self.mirna = mirna_tag + nest(self.mirna_modified | self.mirna_simple)
+        self.mirna = mirna_tag + nest(self.mirna_modified)
         """2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA"""
 
-        self.protein_simple = nest(identifier + opt_location)
+        self.protein_modified = identifier + Optional(WCW + delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(VARIANTS))
 
-        self.protein_modified = nest(
-            identifier,
-            delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(
-                'variants') + opt_location)
+        self.protein_fusion = Group(self.fusion)(FUSION)
 
-        self.protein_fusion = nest(Group(self.fusion)('fusion') + opt_location)
+        protein_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=True))
+        protein_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=False))
 
-        protein_break_start = pyparsing_common.integer()
-        protein_break_start.setParseAction(lambda s, l, t: [['p', '?', int(t[0])]])
+        self.protein_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+            identifier(PARTNER_3P) + Optional(
+                WCW + Group(protein_break_5p)(RANGE_5P) + WCW + Group(protein_break_3p)(RANGE_3P))))(FUSION)
 
-        protein_break_end = pyparsing_common.integer()
-        protein_break_end.setParseAction(lambda s, l, t: [['p', int(t[0]), '?']])
-
-        self.protein_fusion_legacy = nest(Group(identifier('partner_5p') + WCW + fusion_tag + nest(
-            identifier('partner_3p') + Optional(
-                WCW + protein_break_start('range_5p') + WCW + protein_break_end('range_3p'))))('fusion'))
-
-        self.protein_fusion_legacy.setParseAction(self.handle_fusion_legacy)
-
-        self.protein = protein_tag + MatchFirst(
-            [self.protein_fusion, self.protein_fusion_legacy, self.protein_modified, self.protein_simple])
+        self.protein = protein_tag + nest(MatchFirst([
+            self.protein_fusion,
+            self.protein_fusion_legacy,
+            self.protein_modified,
+        ]) + opt_location)
         """2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA"""
 
-        self.rna_simple = nest(identifier + opt_location)
+        self.rna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS))
 
-        self.rna_modified = nest(identifier, delimitedList(Group(self.variant))('variants') + opt_location)
+        self.rna_fusion = Group(self.fusion)(FUSION)
 
-        self.rna_fusion = nest(Group(self.fusion)('fusion') + opt_location)
+        rna_break_start = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=True))
+        rna_break_end = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=False))
 
-        rna_break_start = pyparsing_common.integer()
-        rna_break_start.setParseAction(lambda s, l, t: [['r', '?', int(t[0])]])
+        self.rna_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+            identifier(PARTNER_3P) + Optional(
+                WCW + Group(rna_break_start)(RANGE_5P) + WCW + Group(rna_break_end)(RANGE_3P))))(FUSION)
 
-        rna_break_end = pyparsing_common.integer()
-        rna_break_end.setParseAction(lambda s, l, t: [['r', int(t[0]), '?']])
-
-        self.rna_fusion_legacy = nest(Group(identifier('partner_5p') + WCW + fusion_tag + nest(
-            identifier('partner_3p') + Optional(
-                WCW + rna_break_start('range_5p') + WCW + rna_break_end('range_3p'))))('fusion'))
-
-        self.rna_fusion_legacy.setParseAction(self.handle_fusion_legacy)
-
-        self.rna = rna_tag + MatchFirst([self.rna_fusion, self.rna_fusion_legacy, self.rna_modified, self.rna_simple])
+        self.rna = rna_tag + nest(MatchFirst([
+            self.rna_fusion,
+            self.rna_fusion_legacy,
+            self.rna_modified,
+        ]) + opt_location)
         """2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA"""
 
         self.single_abundance = MatchFirst([self.general_abundance, self.gene, self.mirna, self.protein, self.rna])
@@ -203,7 +218,7 @@ class BelParser(BaseParser):
         self.complex_singleton = complex_tag + nest(identifier + opt_location)
 
         self.complex_list = complex_tag + nest(
-            delimitedList(Group(self.single_abundance | self.complex_singleton))('members') + opt_location)
+            delimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location)
 
         self.complex_abundances = self.complex_list | self.complex_singleton
 
@@ -213,14 +228,11 @@ class BelParser(BaseParser):
 
         #: 2.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA
         self.composite_abundance = composite_abundance_tag + nest(
-            delimitedList(Group(self.simple_abundance))('members') + opt_location)
+            delimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location)
 
         self.abundance = self.simple_abundance | self.composite_abundance
 
         # 2.4 Process Modifier Function
-
-        molecular_activity_tag = Suppress(oneOf(['ma', 'molecularActivity']))
-
         # backwards compatibility with BEL v1.0
 
         def handle_molecular_activity_default(s, l, tokens):
@@ -233,7 +245,7 @@ class BelParser(BaseParser):
         molecular_activity_default = oneOf(language.activity_labels.keys()).setParseAction(
             handle_molecular_activity_default)
 
-        self.molecular_activity = molecular_activity_tag + nest(
+        self.molecular_activity = molecular_activity_tags + nest(
             molecular_activity_default | self.identifier_parser.get_language())
         """2.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA"""
 
@@ -249,23 +261,22 @@ class BelParser(BaseParser):
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
-            Group(self.abundance)('target') + Optional(WCW + Group(self.molecular_activity)('effect')))
+            Group(self.abundance)(TARGET) + Optional(WCW + Group(self.molecular_activity)(EFFECT)))
 
-        activity_legacy_tags = oneOf(language.activities)('modifier')
-        self.activity_legacy = activity_legacy_tags + nest(Group(self.abundance)('target'))
+        activity_legacy_tags = oneOf(language.activities)(MODIFIER)
+        self.activity_legacy = activity_legacy_tags + nest(Group(self.abundance)(TARGET))
 
         def handle_activity_legacy(s, l, tokens):
-            legacy_cls = language.activity_labels[tokens['modifier']]
-            tokens['modifier'] = 'Activity'
-            tokens['effect'] = {
+            legacy_cls = language.activity_labels[tokens[MODIFIER]]
+            tokens[MODIFIER] = ACTIVITY
+            tokens[EFFECT] = {
                 NAME: legacy_cls,
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
+            log.debug('upgraded legacy activity to %s', legacy_cls)
             return tokens
 
         self.activity_legacy.setParseAction(handle_activity_legacy)
-        self.activity_legacy.addParseAction(
-            handle_debug('PyBEL001 legacy activity statement. Use activity() instead. {s}'))
 
         self.activity = self.activity_standard | self.activity_legacy
         """2.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xactivity"""
@@ -274,22 +285,27 @@ class BelParser(BaseParser):
 
         # 2.5 Transformation Functions
 
-        from_loc = Suppress('fromLoc') + nest(identifier('fromLoc'))
-        to_loc = Suppress('toLoc') + nest(identifier('toLoc'))
+        from_loc = Suppress(FROM_LOC) + nest(identifier(FROM_LOC))
+        to_loc = Suppress(TO_LOC) + nest(identifier(TO_LOC))
 
-        self.cell_secretion = cell_secretion_tag + nest(Group(self.simple_abundance)('target'))
+        self.cell_secretion = cell_secretion_tag + nest(Group(self.simple_abundance)(TARGET))
 
-        self.cell_surface_expression = cell_surface_expression_tag + nest(Group(self.simple_abundance)('target'))
+        self.cell_surface_expression = cell_surface_expression_tag + nest(Group(self.simple_abundance)(TARGET))
 
         self.translocation_standard = nest(
-            Group(self.simple_abundance)('target') + WCW + Group(from_loc + WCW + to_loc)('effect'))
+            Group(self.simple_abundance)(TARGET) + WCW + Group(from_loc + WCW + to_loc)(EFFECT))
 
         self.translocation_legacy = nest(
-            Group(self.simple_abundance)('target') + WCW + Group(identifier('fromLoc') + WCW + identifier('toLoc'))(
-                'effect'))
-        self.translocation_legacy.addParseAction(
-            handle_debug('PyBEL005 legacy translocation statement. use fromLoc() and toLoc(). {s}'))
+            Group(self.simple_abundance)(TARGET) + WCW + Group(identifier(FROM_LOC) + WCW + identifier(TO_LOC))(
+                EFFECT))
 
+        def handle_legacy_tloc(s, l, tokens):
+            log.debug('Legacy translocation statement: %s', s)
+            return tokens
+
+        self.translocation_legacy.addParseAction(handle_legacy_tloc)
+
+        # TODO deprecate
         self.translocation_illegal = nest(self.simple_abundance)
 
         def handle_translocation_illegal(s, l, t):
@@ -302,13 +318,13 @@ class BelParser(BaseParser):
         """2.5.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translocations"""
 
         #: 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
-        self.degradation = degradation_tags + nest(Group(self.simple_abundance)('target'))
+        self.degradation = degradation_tags + nest(Group(self.simple_abundance)(TARGET))
 
         #: 2.5.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
-        self.reactants = Suppress('reactants') + nest(delimitedList(Group(self.simple_abundance)))
-        self.products = Suppress('products') + nest(delimitedList(Group(self.simple_abundance)))
+        self.reactants = Suppress(REACTANTS) + nest(delimitedList(Group(self.simple_abundance)))
+        self.products = Suppress(PRODUCTS) + nest(delimitedList(Group(self.simple_abundance)))
 
-        self.reaction = reaction_tags + nest(Group(self.reactants)('reactants'), Group(self.products)('products'))
+        self.reaction = reaction_tags + nest(Group(self.reactants)(REACTANTS), Group(self.products)(PRODUCTS))
 
         self.transformation = MatchFirst(
             [self.cell_secretion, self.cell_surface_expression, self.translocation, self.degradation, self.reaction])
@@ -360,18 +376,18 @@ class BelParser(BaseParser):
         is_a_tag = oneOf(['isA'])
 
         self.bel_to_bel_relations = [
+            association_tag,
             increases_tag,
             decreases_tag,
+            positive_correlation_tag,
+            negative_correlation_tag,
+            causes_no_change_tag,
+            orthologous_tag,
+            is_a_tag,
             directly_increases_tag,
             directly_decreases_tag,
             analogous_tag,
-            causes_no_change_tag,
             regulates_tag,
-            negative_correlation_tag,
-            positive_correlation_tag,
-            association_tag,
-            orthologous_tag,
-            is_a_tag
         ]
         self.bel_to_bel = triple(self.bel_term, MatchFirst(self.bel_to_bel_relations), self.bel_term)
 
@@ -423,13 +439,13 @@ class BelParser(BaseParser):
 
         self.relation = MatchFirst([
             self.bel_to_bel,
-            self.transcribed,
-            self.translated,
             self.has_member,
             self.has_component,
             self.subprocess_of,
             self.rate_limit,
             self.biomarker,
+            self.transcribed,
+            self.translated,
         ])
 
         self.relation.setParseAction(self.handle_relation)
@@ -450,6 +466,9 @@ class BelParser(BaseParser):
         self.language = self.control_parser.get_language() | self.statement
         self.language.setName('BEL')
 
+        if autostreamline:
+            self.streamline()
+
     def get_language(self):
         """Get language defined by this parser"""
         return self.language
@@ -467,16 +486,20 @@ class BelParser(BaseParser):
         self.control_parser.clear()
 
     def handle_nested_relation(self, s, l, tokens):
-        if not self.lenient:
-            raise NestedRelationWarning('Nesting unsupported: {}'.format(s))
+        if not self.allow_nested:
+            raise NestedRelationWarning(s)
 
-        self.handle_relation(s, l, dict(subject=tokens['subject'],
-                                        relation=tokens['relation'],
-                                        object=tokens['object']['subject']))
+        self.handle_relation(s, l, {
+            SUBJECT: tokens[SUBJECT],
+            RELATION: tokens[RELATION],
+            OBJECT: tokens[OBJECT][SUBJECT]
+        })
 
-        self.handle_relation(s, l, dict(subject=tokens['object']['subject'],
-                                        relation=tokens['object']['relation'],
-                                        object=tokens['object']['object']))
+        self.handle_relation(s, l, {
+            SUBJECT: tokens[OBJECT][SUBJECT],
+            RELATION: tokens[OBJECT][RELATION],
+            OBJECT: tokens[OBJECT][OBJECT]
+        })
         return tokens
 
     def check_function_semantics(self, s, l, tokens):
@@ -485,26 +508,17 @@ class BelParser(BaseParser):
 
         namespace, name = tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 
-        if self.lenient and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
+        if self.allow_naked_names and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
         valid_function_codes = set(itt.chain.from_iterable(
-            language.value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
+            value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
 
-        if tokens['function'] not in valid_function_codes:
+        if tokens[FUNCTION] not in valid_function_codes:
             valid = set(itt.chain.from_iterable(
-                language.value_map[k] for k in self.identifier_parser.namespace_dict[namespace][name]))
-            fmt = "{}:{} should be encoded as one of: {}"
-            raise InvalidFunctionSemantic(fmt.format(namespace, name, ', '.join(valid)))
+                value_map[k] for k in self.identifier_parser.namespace_dict[namespace][name]))
+            raise InvalidFunctionSemantic(tokens[FUNCTION], namespace, name, valid)
 
-        return tokens
-
-    def handle_fusion_legacy(self, s, l, tokens):
-        if 'range_5p' in tokens['fusion']:
-            return tokens
-
-        tokens['fusion']['range_5p'] = '?'
-        tokens['fusion']['range_3p'] = '?'
         return tokens
 
     def handle_term(self, s, l, tokens):
@@ -532,41 +546,41 @@ class BelParser(BaseParser):
         parent = self.ensure_node(s, l, tokens[0])
         for child_tokens in tokens[2]:
             child = self.ensure_node(s, l, child_tokens)
-            self.graph.add_edge(parent, child, relation='hasMember')
+            self.graph.add_edge(parent, child, **{RELATION: HAS_MEMBER})
         return tokens
 
     def handle_relation(self, s, l, tokens):
         self.check_required_annotations(s)
 
-        sub = self.ensure_node(s, l, tokens['subject'])
-        obj = self.ensure_node(s, l, tokens['object'])
+        sub = self.ensure_node(s, l, tokens[SUBJECT])
+        obj = self.ensure_node(s, l, tokens[OBJECT])
 
         attrs, list_attrs = self.build_attrs()
 
-        attrs['relation'] = tokens['relation']
+        attrs[RELATION] = tokens[RELATION]
 
-        sub_mod = canonicalize_modifier(tokens['subject'])
+        sub_mod = canonicalize_modifier(tokens[SUBJECT])
         if sub_mod:
-            attrs['subject'] = sub_mod
+            attrs[SUBJECT] = sub_mod
 
-        obj_mod = canonicalize_modifier(tokens['object'])
+        obj_mod = canonicalize_modifier(tokens[OBJECT])
         if obj_mod:
-            attrs['object'] = obj_mod
+            attrs[OBJECT] = obj_mod
 
         for single_annotation in cartesian_dictionary(list_attrs):
             self.graph.add_edge(sub, obj, attr_dict=attrs, **single_annotation)
-            if tokens['relation'] in TWO_WAY_RELATIONS:
+            if tokens[RELATION] in TWO_WAY_RELATIONS:
                 self.add_reverse_edge(sub, obj, attrs, **single_annotation)
 
         return tokens
 
     def add_reverse_edge(self, sub, obj, attrs, **single_annotation):
-        new_attrs = {k: v for k, v in attrs.items() if k not in {'subject', 'object'}}
-        attrs_subject, attrs_object = attrs.get('subject'), attrs.get('object')
+        new_attrs = {k: v for k, v in attrs.items() if k not in {SUBJECT, OBJECT}}
+        attrs_subject, attrs_object = attrs.get(SUBJECT), attrs.get(OBJECT)
         if attrs_subject:
-            new_attrs['object'] = attrs_subject
+            new_attrs[OBJECT] = attrs_subject
         if attrs_object:
-            new_attrs['subject'] = attrs_object
+            new_attrs[SUBJECT] = attrs_object
 
         self.graph.add_edge(obj, sub, attr_dict=new_attrs, **single_annotation)
 
@@ -579,7 +593,7 @@ class BelParser(BaseParser):
         """
         key = language.unqualified_edge_code[relation]
         if not self.graph.has_edge(u, v, key):
-            self.graph.add_edge(u, v, key=key, relation=relation)
+            self.graph.add_edge(u, v, key=key, **{RELATION: relation})
 
     def ensure_node(self, s, l, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
@@ -588,33 +602,33 @@ class BelParser(BaseParser):
         :rtype: str
         """
 
-        if 'modifier' in tokens:
-            return self.ensure_node(s, l, tokens['target'])
+        if MODIFIER in tokens:
+            return self.ensure_node(s, l, tokens[TARGET])
 
         name = canonicalize_node(tokens)
 
         if name in self.graph:
             return name
 
-        if 'transformation' in tokens:
-            self.graph.add_node(name, **{FUNCTION: tokens['transformation']})
+        if TRANSFORMATION in tokens:
+            self.graph.add_node(name, **{FUNCTION: tokens[TRANSFORMATION]})
 
-            for reactant_tokens in tokens['reactants']:
+            for reactant_tokens in tokens[REACTANTS]:
                 reactant_name = self.ensure_node(s, l, reactant_tokens)
-                self.add_unqualified_edge(name, reactant_name, relation='hasReactant')
+                self.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
 
-            for product_tokens in tokens['products']:
+            for product_tokens in tokens[PRODUCTS]:
                 product_name = self.ensure_node(s, l, product_tokens)
-                self.add_unqualified_edge(name, product_name, relation='hasProduct')
+                self.add_unqualified_edge(name, product_name, HAS_PRODUCT)
 
             return name
 
-        elif FUNCTION in tokens and 'members' in tokens:
+        elif FUNCTION in tokens and MEMBERS in tokens:
             self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
 
-            for token in tokens['members']:
+            for token in tokens[MEMBERS]:
                 member_name = self.ensure_node(s, l, token)
-                self.add_unqualified_edge(name, member_name, relation='hasComponent')
+                self.add_unqualified_edge(name, member_name, HAS_COMPONENT)
             return name
 
         elif FUNCTION in tokens and VARIANTS in tokens:
@@ -631,64 +645,70 @@ class BelParser(BaseParser):
             }
 
             parent = self.ensure_node(s, l, c)
-            self.add_unqualified_edge(parent, name, relation='hasVariant')
+            self.add_unqualified_edge(parent, name, HAS_VARIANT)
             return name
 
-        elif FUNCTION in tokens and 'fusion' in tokens:
-            f = tokens['fusion']
+        elif FUNCTION in tokens and FUSION in tokens:
+            f = tokens[FUSION]
             d = {
-                FUNCTION: '{}Fusion'.format(tokens[FUNCTION]),
-                'partner_5p': {NAMESPACE: f['partner_5p']['namespace'], NAME: f['partner_5p']['name']},
-                'range_5p': tuple(f['range_5p']),
-                'partner_3p': {NAMESPACE: f['partner_3p']['namespace'], NAME: f['partner_3p']['name']},
-                'range_3p': tuple(f['range_3p'])
+                FUNCTION: fusion_map[tokens[FUNCTION]],
+                PARTNER_5P: {NAMESPACE: f[PARTNER_5P][NAMESPACE], NAME: f[PARTNER_5P][NAME]},
+                RANGE_5P: f[RANGE_5P] if RANGE_5P in f else '?',
+                PARTNER_3P: {NAMESPACE: f[PARTNER_3P][NAMESPACE], NAME: f[PARTNER_3P][NAME]},
+                RANGE_3P: f[RANGE_3P] if RANGE_3P in f else '?'
             }
             self.graph.add_node(name, **d)
             return name
 
-        elif FUNCTION in tokens and 'identifier' in tokens:
-            if tokens['function'] in {language.GENE, language.MIRNA, language.PATHOLOGY, language.BIOPROCESS,
-                                      language.ABUNDANCE, language.COMPLEX}:
+        elif FUNCTION in tokens and IDENTIFIER in tokens:
+            if tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY, BIOPROCESS, ABUNDANCE, COMPLEX}:
                 self.graph.add_node(name, {
-                    FUNCTION: tokens['function'],
-                    NAMESPACE: tokens['identifier']['namespace'],
-                    NAME: tokens['identifier']['name']
+                    FUNCTION: tokens[FUNCTION],
+                    NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
+                    NAME: tokens[IDENTIFIER][NAME]
                 })
                 return name
 
-            elif tokens['function'] == language.RNA:
+            elif tokens[FUNCTION] == RNA:
                 self.graph.add_node(name, {
-                    FUNCTION: tokens['function'],
-                    NAMESPACE: tokens['identifier']['namespace'],
-                    NAME: tokens['identifier']['name']
+                    FUNCTION: tokens[FUNCTION],
+                    NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
+                    NAME: tokens[IDENTIFIER][NAME]
                 })
 
                 if not self.complete_origin:
                     return name
 
                 gene_tokens = deepcopy(tokens)
-                gene_tokens['function'] = 'Gene'
+                gene_tokens[FUNCTION] = GENE
                 gene_name = self.ensure_node(s, l, gene_tokens)
 
-                self.add_unqualified_edge(gene_name, name, relation='transcribedTo')
+                self.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
                 return name
 
-            elif tokens['function'] == language.PROTEIN:
+            elif tokens[FUNCTION] == PROTEIN:
                 self.graph.add_node(name, {
-                    FUNCTION: tokens['function'],
-                    NAMESPACE: tokens['identifier']['namespace'],
-                    NAME: tokens['identifier']['name']
+                    FUNCTION: tokens[FUNCTION],
+                    NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
+                    NAME: tokens[IDENTIFIER][NAME]
                 })
 
                 if not self.complete_origin:
                     return name
 
                 rna_tokens = deepcopy(tokens)
-                rna_tokens['function'] = language.RNA
+                rna_tokens[FUNCTION] = RNA
                 rna_name = self.ensure_node(s, l, rna_tokens)
 
-                self.add_unqualified_edge(rna_name, name, relation='translatedTo')
+                self.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
                 return name
+
+
+def canonicalize_fusion_range(tokens, tag):
+    if tag in tokens and FusionParser.MISSING not in tokens[tag]:
+        return tokens[tag][FusionParser.REF], tokens[tag][FusionParser.LEFT], tokens[tag][FusionParser.RIGHT]
+    else:
+        return '?',
 
 
 def canonicalize_node(tokens):
@@ -696,34 +716,37 @@ def canonicalize_node(tokens):
 
     :param tokens: tokens ParseObject or dict
     """
-    if FUNCTION in tokens and 'variants' in tokens:
+    if FUNCTION in tokens and VARIANTS in tokens:
         type_name = function_variant_map[tokens[FUNCTION]]
-        variants = tuple(sorted(canonicalize_variant(token.asDict()) for token in tokens['variants']))
-        return (type_name, tokens['identifier']['namespace'], tokens['identifier']['name']) + variants
+        variants = tuple(sorted(canonicalize_variant(token.asDict()) for token in tokens[VARIANTS]))
+        return (type_name, tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]) + variants
 
-    elif FUNCTION in tokens and 'members' in tokens:
-        return (tokens['function'],) + tuple(sorted(canonicalize_node(member) for member in tokens['members']))
+    elif FUNCTION in tokens and MEMBERS in tokens:
+        return (tokens[FUNCTION],) + tuple(sorted(canonicalize_node(member) for member in tokens[MEMBERS]))
 
-    elif 'transformation' in tokens and tokens['transformation'] == language.REACTION:
-        reactants = tuple(sorted(list2tuple(tokens['reactants'].asList())))
-        products = tuple(sorted(list2tuple(tokens['products'].asList())))
-        return (tokens['transformation'],) + (reactants,) + (products,)
+    elif TRANSFORMATION in tokens and tokens[TRANSFORMATION] == REACTION:
+        reactants = tuple(sorted(list2tuple(tokens[REACTANTS].asList())))
+        products = tuple(sorted(list2tuple(tokens[PRODUCTS].asList())))
+        return (tokens[TRANSFORMATION],) + (reactants,) + (products,)
 
-    elif 'fusion' in tokens:
-        cls = '{}Fusion'.format(tokens[FUNCTION])
-        f = tokens['fusion']
-        return cls, (f['partner_5p']['namespace'], f['partner_5p']['name']), tuple(f['range_5p']), (
-            f['partner_3p']['namespace'], f['partner_3p']['name']), tuple(f['range_3p'])
+    elif FUSION in tokens:
+        cls = fusion_map[tokens[FUNCTION]]
+        f = tokens[FUSION]
 
-    elif 'function' in tokens and tokens['function'] in {language.GENE, language.RNA, language.MIRNA, language.PROTEIN,
-                                                         language.ABUNDANCE, language.COMPLEX, language.PATHOLOGY,
-                                                         language.BIOPROCESS}:
-        if 'identifier' in tokens:
-            return tokens['function'], tokens['identifier']['namespace'], tokens['identifier']['name']
+        range5pt = canonicalize_fusion_range(f, RANGE_5P)
+        range3pt = canonicalize_fusion_range(f, RANGE_3P)
 
-    if 'modifier' in tokens and tokens['modifier'] in {ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION,
-                                                       CELL_SURFACE_EXPRESSION}:
-        return canonicalize_node(tokens['target'])
+        return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), range5pt, (
+            f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), range3pt
+
+    elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY,
+                                                     BIOPROCESS}:
+        if IDENTIFIER in tokens:
+            return tokens[FUNCTION], tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
+
+    if MODIFIER in tokens and tokens[MODIFIER] in {ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION,
+                                                   CELL_SURFACE_EXPRESSION}:
+        return canonicalize_node(tokens[TARGET])
 
 
 def canonicalize_modifier(tokens):
@@ -735,43 +758,47 @@ def canonicalize_modifier(tokens):
 
     attrs = {}
 
-    if 'location' in tokens:
-        attrs['location'] = tokens['location'].asDict()
+    if LOCATION in tokens:
+        attrs[LOCATION] = tokens[LOCATION].asDict()
 
-    if 'modifier' not in tokens:
+    if MODIFIER not in tokens:
         return attrs
 
-    if 'location' in tokens['target']:
-        attrs['location'] = tokens['target']['location'].asDict()
+    if LOCATION in tokens[TARGET]:
+        attrs[LOCATION] = tokens[TARGET][LOCATION].asDict()
 
-    if tokens['modifier'] == DEGRADATION:
-        attrs['modifier'] = DEGRADATION
+    if tokens[MODIFIER] == DEGRADATION:
+        attrs[MODIFIER] = DEGRADATION
 
-    elif tokens['modifier'] == ACTIVITY and 'effect' not in tokens:
-        attrs['modifier'] = tokens['modifier']
-        attrs['effect'] = {}
+    elif tokens[MODIFIER] == ACTIVITY and EFFECT not in tokens:
+        attrs[MODIFIER] = tokens[MODIFIER]
+        attrs[EFFECT] = {}
 
-    elif tokens['modifier'] == ACTIVITY and 'effect' in tokens:
-        attrs['modifier'] = tokens['modifier']
+    elif tokens[MODIFIER] == ACTIVITY and EFFECT in tokens:
+        attrs[MODIFIER] = tokens[MODIFIER]
         # TODO reinvestigate this
-        attrs['effect'] = tokens['effect'].asDict() if hasattr(tokens['effect'], 'asDict') else dict(tokens['effect'])
+        if hasattr(tokens[EFFECT], 'asDict'):
+            attrs[EFFECT] = tokens[EFFECT].asDict()
+        else:
+            attrs[EFFECT] = dict(tokens[EFFECT])
+            # raise ValueError("Shouldn't be handling dicts this way")
 
-    elif tokens['modifier'] == TRANSLOCATION:
-        attrs['modifier'] = tokens['modifier']
-        attrs['effect'] = tokens['effect'].asDict()
+    elif tokens[MODIFIER] == TRANSLOCATION:
+        attrs[MODIFIER] = tokens[MODIFIER]
+        attrs[EFFECT] = tokens[EFFECT].asDict()
 
-    elif tokens['modifier'] == CELL_SECRETION:
-        attrs['modifier'] = TRANSLOCATION
-        attrs['effect'] = {
-            'fromLoc': {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-            'toLoc': {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
+    elif tokens[MODIFIER] == CELL_SECRETION:
+        attrs[MODIFIER] = TRANSLOCATION
+        attrs[EFFECT] = {
+            FROM_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'intracellular'},
+            TO_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'extracellular space'}
         }
 
-    elif tokens['modifier'] == CELL_SURFACE_EXPRESSION:
-        attrs['modifier'] = TRANSLOCATION
-        attrs['effect'] = {
-            'fromLoc': {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-            'toLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'}
+    elif tokens[MODIFIER] == CELL_SURFACE_EXPRESSION:
+        attrs[MODIFIER] = TRANSLOCATION
+        attrs[EFFECT] = {
+            FROM_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'intracellular'},
+            TO_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'cell surface'}
         }
 
     return attrs

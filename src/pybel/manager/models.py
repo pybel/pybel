@@ -1,7 +1,7 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, Text, Table, Date, Binary, \
-    UniqueConstraint, Boolean
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
+from sqlalchemy import Integer, String, DateTime, Text, Date, Binary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -142,7 +142,7 @@ owl_relationship = Table(
 class Owl(Base):
     __tablename__ = OWL_TABLE_NAME
 
-    id = Column(Integer, Sequence('Owl_id_seq'), primary_key=True)
+    id = Column(Integer, primary_key=True)
     iri = Column(Text, unique=True)
 
     entries = relationship("OwlEntry", back_populates='owl')
@@ -154,7 +154,7 @@ class Owl(Base):
 class OwlEntry(Base):
     __tablename__ = OWL_ENTRY_TABLE_NAME
 
-    id = Column(Integer, Sequence('OwlEntry_id_seq'), primary_key=True)
+    id = Column(Integer, primary_key=True)
 
     entry = Column(String(255))
     encoding = Column(String(50))

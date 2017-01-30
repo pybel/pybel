@@ -4,17 +4,16 @@ import logging
 
 from pyparsing import *
 
-from ..constants import DIRTY
 from .baseparser import BaseParser, word, quote
 from .parse_exceptions import UndefinedNamespaceWarning, NakedNameWarning, MissingNamespaceNameWarning, \
     MissingDefaultNameWarning
-from ..constants import NAMESPACE, NAME
+from ..constants import DIRTY, NAMESPACE, NAME
 
 log = logging.getLogger('pybel')
 
 
 class IdentifierParser(BaseParser):
-    def __init__(self, valid_namespaces=None, default_namespace=None, mapping=None, lenient=False):
+    def __init__(self, valid_namespaces=None, default_namespace=None, mapping=None, allow_naked_names=False):
         """Builds a namespace parser.
         :param valid_namespaces: dictionary of {namespace: set of names}
         :type valid_namespaces: dict
@@ -22,8 +21,8 @@ class IdentifierParser(BaseParser):
         :type default_namespace: set
         :param mapping: dictionary of {namespace: {name: (mapped_ns, mapped_name)}}
         :type mapping
-        :param lenient: if true, turn off naked namespace failures
-        :type lenient: bool
+        :param allow_naked_names: if true, turn off naked namespace failures
+        :type allow_naked_names: bool
         :return:
         """
 
@@ -38,7 +37,7 @@ class IdentifierParser(BaseParser):
         self.identifier_bare = (word | quote)(NAME)
         if self.default_namespace is not None:
             self.identifier_bare.setParseAction(self.handle_identifier_default)
-        elif lenient:
+        elif allow_naked_names:
             self.identifier_bare.setParseAction(self.handle_namespace_lenient)
         else:
             self.identifier_bare.setParseAction(self.handle_namespace_invalid)
