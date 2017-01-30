@@ -8,6 +8,7 @@ class NakedNameWarning(PyBelWarning):
     """Raised when there is an identifier without a namespace. Enable lenient mode to suppress"""
 
     def __init__(self, name):
+        PyBelWarning.__init__(self, name)
         self.name = name
 
     def __str__(self):
@@ -26,6 +27,7 @@ class MissingNamespaceNameWarning(PyBelWarning):
     """Raised if reference to value not in namespace"""
 
     def __init__(self, name, namespace):
+        PyBelWarning.__init__(self, name, namespace)
         self.name = name
         self.namespace = namespace
 
@@ -41,6 +43,7 @@ class MissingAnnotationKeyWarning(PyBelWarning):
     """Raised when trying to unset an annotation that is not set"""
 
     def __init__(self, annotation):
+        PyBelWarning.__init__(self, annotation)
         self.annotation = annotation
 
     def __str__(self):
@@ -51,6 +54,7 @@ class IllegalAnnotationValueWarning(PyBelWarning):
     """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
 
     def __init__(self, value, annotation):
+        PyBelWarning.__init__(self, value, annotation)
         self.value = value
         self.annotation = annotation
 
@@ -106,6 +110,7 @@ See also: https://wiki.openbel.org/display/BELNA/Citation
     """
 
     def __init__(self, citation_type):
+        PyBelWarning.__init__(self, citation_type)
         self.citation_type = citation_type
 
     def __str__(self):
@@ -116,6 +121,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
     """Tried to make a citation to PubMed that's not a legal PMID"""
 
     def __init__(self, reference):
+        PyBelWarning.__init__(self, reference)
         self.reference = reference
 
     def __str__(self):
@@ -138,6 +144,7 @@ class NestedRelationWarning(PyBelWarning):
         do not support nested statements."""
 
     def __init__(self, message):
+        PyBelWarning.__init__(self, message)
         self.message = message
 
     def __str__(self):
@@ -154,6 +161,7 @@ class InvalidFunctionSemantic(PyBelWarning):
     """Used an identifier in a semantically invalid function"""
 
     def __init__(self, function, namespace, name, allowed_functions):
+        PyBelWarning.__init__(self, function, namespace, name, allowed_functions)
         self.function = function
         self.namespace = namespace
         self.name = name
