@@ -68,13 +68,9 @@ def fusion_handler_wrapper(reference, start):
             return tokens
 
         tokens[FusionParser.REF] = reference
+        tokens[FusionParser.LEFT if start else FusionParser.RIGHT] = '?'
+        tokens[FusionParser.RIGHT if start else FusionParser.LEFT] = int(tokens[0])
 
-        if start:
-            tokens[FusionParser.LEFT] = '?'
-            tokens[FusionParser.RIGHT] = int(tokens[0])
-        else:
-            tokens[FusionParser.LEFT] = int(tokens[0])
-            tokens[FusionParser.RIGHT] = '?'
         return tokens
 
     return fusion_handler
