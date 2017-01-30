@@ -328,7 +328,35 @@ class TestFusionParser(unittest.TestCase):
 
         self.assertEqual(expected, result.asDict())
 
-    @unittest.skip("Can't figure out fuzzy breakpoints yet")
+    def test_rna_fusion_specified_one_fuzzy_breakpoint(self):
+        """RNA abundance of fusion with unspecified breakpoints"""
+        statement = 'fusion(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.?_1)'
+        result = self.parser.parseString(statement)
+
+        expected = {
+            PARTNER_5P: {
+                NAMESPACE: 'HGNC',
+                NAME: 'TMPRSS2'
+            },
+            RANGE_5P: {
+                FusionParser.REF: 'r',
+                FusionParser.LEFT: 1,
+                FusionParser.RIGHT: 79
+
+            },
+            PARTNER_3P: {
+                NAMESPACE: 'HGNC',
+                NAME: 'ERG'
+            },
+            RANGE_3P: {
+                FusionParser.REF: 'r',
+                FusionParser.LEFT: '?',
+                FusionParser.RIGHT: 1
+            }
+        }
+
+        self.assertEqual(expected, result.asDict())
+
     def test_rna_fusion_specified_fuzzy_breakpoints(self):
         """RNA abundance of fusion with unspecified breakpoints"""
         statement = 'fusion(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.?_1)'
@@ -2955,17 +2983,14 @@ class TestWrite(TestTokenParserBase):
             ('rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))',
              'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
             ('g(HGNC:AKT1, geneModification(M))', 'g(HGNC:AKT1, gmod(Me))'),
-            'p(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))',
-            'r(fus(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.312_5034))',
-            'r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.?_5034))',
+            'g(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))',
+            'g(fus(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.312_5034))',
+            'g(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.?_5034))',
             ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))')
         ]
 
         for case in cases:
-            if 2 == len(case):
-                source_bel, expected_bel = case
-            else:
-                source_bel, expected_bel = case, case
+            source_bel, expected_bel = case if 2 == len(case) else (case, case)
 
             result = self.parser.parseString(source_bel)
             bel = decanonicalize_node(self.parser.graph, canonicalize_node(result))

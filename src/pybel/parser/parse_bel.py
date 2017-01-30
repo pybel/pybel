@@ -32,7 +32,6 @@ log = logging.getLogger('pybel')
 
 general_abundance_tags = one_of_tags(['a', 'abundance'], ABUNDANCE, FUNCTION)
 gene_tag = one_of_tags(['g', 'geneAbundance'], GENE, FUNCTION)
-fusion_tag = oneOf(['fus', 'fusion']).setParseAction(replaceWith('Fusion'))
 mirna_tag = one_of_tags(['m', 'microRNAAbundance'], MIRNA, FUNCTION)
 protein_tag = one_of_tags(['p', 'proteinAbundance'], PROTEIN, FUNCTION)
 rna_tag = one_of_tags(['r', 'rnaAbundance'], RNA, FUNCTION)
@@ -163,7 +162,7 @@ class BelParser(BaseParser):
         gene_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=True))
         gene_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=False))
 
-        self.gene_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
+        self.gene_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
                 WCW + Group(gene_break_5p)(RANGE_5P) + WCW + Group(gene_break_3p)(RANGE_3P))))(FUSION))
 
@@ -189,7 +188,7 @@ class BelParser(BaseParser):
         protein_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=True))
         protein_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=False))
 
-        self.protein_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
+        self.protein_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
                 WCW + Group(protein_break_5p)(RANGE_5P) + WCW + Group(protein_break_3p)(RANGE_3P))))(FUSION))
 
@@ -206,7 +205,7 @@ class BelParser(BaseParser):
         rna_break_start = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=True))
         rna_break_end = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=False))
 
-        self.rna_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + fusion_tag + nest(
+        self.rna_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
                 WCW + Group(rna_break_start)(RANGE_5P) + WCW + Group(rna_break_end)(RANGE_3P))))(FUSION))
 

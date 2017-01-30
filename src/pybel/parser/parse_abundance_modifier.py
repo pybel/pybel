@@ -269,22 +269,22 @@ class FusionParser(BaseParser):
     LEFT = 'left'
     RIGHT = 'right'
     MISSING = 'missing'
+    fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
 
     def __init__(self, namespace_parser=None):
-        fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
-
         self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
         # sequence coordinates?
 
         reference_seq = oneOf(['r', 'p', 'c'])
-        coordinate = Keyword('?') | ppc.integer
+        coordinate = ppc.integer | '?'
         missing = Keyword('?')
 
-        range_coordinate = missing(self.MISSING) | (reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT))
+        range_coordinate = missing(self.MISSING) | (
+        reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT))
 
-        self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
-                                           Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
+        self.language = self.fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
+                                                Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
 
     def get_language(self):
         return self.language
