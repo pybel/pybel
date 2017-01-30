@@ -45,6 +45,7 @@ cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], CEL
 translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFIER)
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
 reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, TRANSFORMATION)
+molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 function_variant_map = {
     GENE: GENEVARIANT,
@@ -151,65 +152,64 @@ class BelParser(BaseParser):
         #: 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
         self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
 
-        # self.gene_simple = nest(identifier + opt_location)
+        self.gene_modified = identifier + Optional(
+                WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
 
-        self.gene_modified = nest(
-            identifier + Optional(
-                WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS)) + opt_location)
-
-        self.gene_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
+        self.gene_fusion = Group(self.fusion)(FUSION)
 
         gene_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=True))
         gene_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=False))
 
-        self.gene_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+        self.gene_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
-                WCW + Group(gene_break_5p)(RANGE_5P) + WCW + Group(gene_break_3p)(RANGE_3P))))(FUSION))
+                WCW + Group(gene_break_5p)(RANGE_5P) + WCW + Group(gene_break_3p)(RANGE_3P))))(FUSION)
 
-        self.gene = gene_tag + MatchFirst([self.gene_fusion, self.gene_fusion_legacy, self.gene_modified])
+        self.gene = gene_tag + nest(MatchFirst([
+            self.gene_fusion,
+            self.gene_fusion_legacy,
+            self.gene_modified
+        ]) + opt_location)
         """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA"""
 
-        self.mirna_simple = (identifier + opt_location)
+        self.mirna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS)) + opt_location
 
-        self.mirna_modified = (identifier + WCW + delimitedList(Group(self.variant))(VARIANTS) + opt_location)
-
-        self.mirna = mirna_tag + nest(self.mirna_modified | self.mirna_simple)
+        self.mirna = mirna_tag + nest(self.mirna_modified)
         """2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA"""
 
-        self.protein_simple = nest(identifier + opt_location)
+        self.protein_modified = identifier + Optional(WCW + delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(VARIANTS))
 
-        self.protein_modified = nest(
-            identifier,
-            delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(
-                VARIANTS) + opt_location)
-
-        self.protein_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
+        self.protein_fusion = Group(self.fusion)(FUSION)
 
         protein_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=True))
         protein_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=False))
 
-        self.protein_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+        self.protein_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
-                WCW + Group(protein_break_5p)(RANGE_5P) + WCW + Group(protein_break_3p)(RANGE_3P))))(FUSION))
+                WCW + Group(protein_break_5p)(RANGE_5P) + WCW + Group(protein_break_3p)(RANGE_3P))))(FUSION)
 
-        self.protein = protein_tag + MatchFirst(
-            [self.protein_fusion, self.protein_fusion_legacy, self.protein_modified, self.protein_simple])
+        self.protein = protein_tag + nest(MatchFirst([
+            self.protein_fusion,
+            self.protein_fusion_legacy,
+            self.protein_modified,
+        ]) + opt_location)
         """2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA"""
 
-        self.rna_simple = nest(identifier + opt_location)
+        self.rna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS))
 
-        self.rna_modified = nest(identifier, delimitedList(Group(self.variant))(VARIANTS) + opt_location)
-
-        self.rna_fusion = nest(Group(self.fusion)(FUSION) + opt_location)
+        self.rna_fusion = Group(self.fusion)(FUSION)
 
         rna_break_start = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=True))
         rna_break_end = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=False))
 
-        self.rna_fusion_legacy = nest(Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+        self.rna_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
-                WCW + Group(rna_break_start)(RANGE_5P) + WCW + Group(rna_break_end)(RANGE_3P))))(FUSION))
+                WCW + Group(rna_break_start)(RANGE_5P) + WCW + Group(rna_break_end)(RANGE_3P))))(FUSION)
 
-        self.rna = rna_tag + MatchFirst([self.rna_fusion, self.rna_fusion_legacy, self.rna_modified, self.rna_simple])
+        self.rna = rna_tag + nest(MatchFirst([
+            self.rna_fusion,
+            self.rna_fusion_legacy,
+            self.rna_modified,
+        ]) + opt_location)
         """2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA"""
 
         self.single_abundance = MatchFirst([self.general_abundance, self.gene, self.mirna, self.protein, self.rna])
@@ -233,9 +233,6 @@ class BelParser(BaseParser):
         self.abundance = self.simple_abundance | self.composite_abundance
 
         # 2.4 Process Modifier Function
-
-        molecular_activity_tag = Suppress(oneOf(['ma', 'molecularActivity']))
-
         # backwards compatibility with BEL v1.0
 
         def handle_molecular_activity_default(s, l, tokens):
@@ -248,7 +245,7 @@ class BelParser(BaseParser):
         molecular_activity_default = oneOf(language.activity_labels.keys()).setParseAction(
             handle_molecular_activity_default)
 
-        self.molecular_activity = molecular_activity_tag + nest(
+        self.molecular_activity = molecular_activity_tags + nest(
             molecular_activity_default | self.identifier_parser.get_language())
         """2.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA"""
 
