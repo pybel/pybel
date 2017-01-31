@@ -368,12 +368,11 @@ autoclass_content = 'init'
 if os.environ.get('READTHEDOCS', None):
     tags.add('readthedocs')
 
+# autodoc_mock_imports = [
+#     'ontospy',
+# ]
 
-autodoc_mock_imports = [
-    'ontospy',
-]
 
-'''
 # Mock ontospy because it's got C dependencies. See:
 # http://docs.readthedocs.io/en/latest/faq.html#i-get-import-errors-on-libraries-that-depend-on-c-modules
 
@@ -398,4 +397,3 @@ except ImportError:
 
 MOCK_MODULES = ['ontospy']
 sys.modules.update((mod_name, ReadTheDocsMock()) for mod_name in MOCK_MODULES)
-'''
