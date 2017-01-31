@@ -20,7 +20,7 @@ from ..constants import DEFAULT_CACHE_LOCATION
 from ..parser.language import value_map
 from ..utils import download_url
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(value_map))
 

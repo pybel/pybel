@@ -71,6 +71,7 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
+        #: Stores warnings as 4-tuples with (line number, line text, exception instance, context dictionary)
         self.warnings = []
 
         if lines is not None:
