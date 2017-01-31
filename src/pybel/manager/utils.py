@@ -4,10 +4,15 @@ from datetime import datetime
 from xml.etree import ElementTree as ET
 
 import networkx as nx
-import ontospy
 import requests
-from rdflib.term import urldefrag
 from requests_file import FileAdapter
+
+import ontospy
+
+try:
+    from urlparse import urldefrag
+except ImportError:
+    from urllib.parse import urldefrag
 
 owl_ns = {
     'owl': 'http://www.w3.org/2002/07/owl#',
