@@ -14,21 +14,12 @@ from pyparsing import pyparsing_common as ppc
 from . import language
 from .baseparser import BaseParser, word, quote, delimitedSet
 from .parse_exceptions import InvalidMetadataException
+from ..constants import BEL_KEYWORD_AS, BEL_KEYWORD_URL, BEL_KEYWORD_LIST, BEL_KEYWORD_OWL, BEL_KEYWORD_SET, \
+    BEL_KEYWORD_DEFINE, BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_ANNOTATION, BEL_KEYWORD_DOCUMENT, BEL_KEYWORD_PATTERN
 
 log = logging.getLogger('pybel')
 
 __all__ = ['MetadataParser']
-
-BEL_KEYWORD_AS = 'AS'
-BEL_KEYWORD_URL = 'URL'
-BEL_KEYWORD_LIST = 'LIST'
-BEL_KEYWORD_OWL = 'OWL'
-BEL_KEYWORD_SET = 'SET'
-BEL_KEYWORD_DEFINE = 'DEFINE'
-BEL_KEYWORD_NAMESPACE = 'NAMESPACE'
-BEL_KEYWORD_ANNOTATION = 'ANNOTATION'
-BEL_KEYWORD_DOCUMENT = 'DOCUMENT'
-BEL_KEYWORD_PATTERN = 'PATTERN'
 
 
 class MetadataParser(BaseParser):
