@@ -11,25 +11,12 @@ of these parsers.
 
 See: https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BEL2.md
 
-Control Parser
-~~~~~~~~~~~~~~
-This module handles parsing control statement, which add annotations and namespaces to the document.
-
-See: https://wiki.openbel.org/display/BLD/Control+Records
-
 .. autoclass:: pybel.parser.parse_control.ControlParser
     :members:
 
-Relation Parser
-~~~~~~~~~~~~~~~
-This module handles parsing BEL relations and validation of semantics.
 
 .. autoclass:: pybel.parser.parse_bel.BelParser
     :members:
-
-Metadata Parser
-~~~~~~~~~~~~~~~
-This module supports the relation parser by handling statements.
 
 .. autoclass:: pybel.parser.parse_metadata.MetadataParser
     :members:
@@ -37,13 +24,12 @@ This module supports the relation parser by handling statements.
 Data Management
 ---------------
 
-Under the hood, PyBEL caches namespace and annotation files for quick recall on later use. The user doesn't need to
-enable this option, but can specifiy a specific database location if they choose.
+
 
 Managers
 ~~~~~~~~
 
-.. automethod:: pybel.manager.cache.CacheManager.__init__
+.. automethod:: pybel.manager.cache
 
 Utilities
 ---------

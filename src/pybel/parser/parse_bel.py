@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""
+Relation Parser
+~~~~~~~~~~~~~~~
+This module handles parsing BEL relations and validation of semantics.
+"""
+
 import itertools as itt
 import logging
 from copy import deepcopy

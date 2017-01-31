@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 from xml.etree import ElementTree as ET
 
@@ -144,3 +146,41 @@ def parse_datetime(s):
                 return dt
             except:
                 raise ValueError('Incorrect datetime format for {}'.format(s))
+
+
+def extract_shared_required(config, definition_header='Namespace'):
+    """
+
+    :param config:
+    :param definition_header: 'Namespace' or 'AnnotationDefinition'
+    :return:
+    """
+    return {
+        'keyword': config[definition_header]['Keyword'],
+        'created': parse_datetime(config[definition_header]['CreatedDateTime']),
+        'author': config['Author']['NameString'],
+        'citation': config['Citation']['NameString']
+    }
+
+
+def extract_shared_optional(config, definition_header='Namespace'):
+    s = {
+        'description': (definition_header, 'DescriptionString'),
+        'version': (definition_header, 'VersionString'),
+        'license': ('Author', 'CopyrightString'),
+        'contact': ('Author', 'ContactInfoString'),
+        'citation_description': ('Citation', 'DescriptionString'),
+        'citation_version': ('Citation', 'PublishedVersionString'),
+        'citation_url': ('Citation', 'ReferenceURL')
+    }
+
+    x = {}
+
+    for database_column, (section, key) in s.items():
+        if section in config and key in config[section]:
+            x[database_column] = config[section][key]
+
+    if 'PublishedDate' in config['Citation']:
+        x['citation_published'] = parse_datetime(config['Citation']['PublishedDate'])
+
+    return x

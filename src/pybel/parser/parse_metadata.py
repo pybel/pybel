@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""
+Metadata Parser
+~~~~~~~~~~~~~~~
+This module supports the relation parser by handling statements.
+"""
+
 import logging
 
 from pyparsing import Suppress, And, Word, Optional

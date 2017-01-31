@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""
+Control Parser
+~~~~~~~~~~~~~~
+This module handles parsing control statement, which add annotations and namespaces to the document.
+
+See: https://wiki.openbel.org/display/BLD/Control+Records
+"""
+
 import logging
 
 from pyparsing import Suppress, pyparsing_common, MatchFirst
