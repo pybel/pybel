@@ -24,12 +24,8 @@ See: https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BE
 Data Management
 ---------------
 
-
-
-Managers
-~~~~~~~~
-
-.. automethod:: pybel.manager.cache
+.. autoclass:: pybel.manager.cache.CacheManager
+    :members:
 
 Utilities
 ---------
