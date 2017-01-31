@@ -47,6 +47,8 @@ ENTRY_POINTS = {
         'pybel = pybel.cli:main',
     ]
 }
+DEPENDENCY_LINKS = [
+]
 
 #################################################################
 
@@ -99,5 +101,6 @@ if __name__ == '__main__':
         install_requires=INSTALL_REQUIRES,
         extras_require=EXTRAS_REQUIRE,
         tests_require=TESTS_REQUIRE,
-        entry_points=ENTRY_POINTS
+        entry_points=ENTRY_POINTS,
+        dependency_links=DEPENDENCY_LINKS,
     )
