@@ -2,17 +2,18 @@
 
 import os
 import unittest
+from pathlib import Path
 
 from pybel.manager import models
 from pybel.manager.cache import CacheManager
 from tests.constants import test_eq_1, test_eq_2, belns_dir_path, mock_bel_resources
 
-ns1 = 'file://' + os.path.join(belns_dir_path, 'disease-ontology.belns')
-ns1_eq = 'file://' + test_eq_1
+ns1 = Path(os.path.join(belns_dir_path, 'disease-ontology.belns')).as_uri()
+ns1_eq = Path(test_eq_1).as_uri()
 ns1_url = 'http://resources.openbel.org/belframework/20150611/namespace/disease-ontology-ids.belns'
 
-ns2 = 'file://' + os.path.join(belns_dir_path, 'mesh-diseases.belns')
-ns2_eq = 'file://' + test_eq_2
+ns2 = Path(os.path.join(belns_dir_path, 'mesh-diseases.belns')).as_uri()
+ns2_eq = Path(test_eq_2).as_uri()
 ns2_url = 'http://resources.openbel.org/belframework/20150611/namespace/mesh-diseases.belns'
 
 
@@ -33,7 +34,7 @@ class TestMapperManager(unittest.TestCase):
         ns = self.mm.session.query(models.Namespace).filter_by(url=ns1).one()
         self.assertFalse(ns.has_equivalences)
 
-        self.mm.insert_equivalences('file://' + test_eq_1, ns1)
+        self.mm.insert_equivalences(Path(test_eq_1).as_uri(), ns1)
 
         ns = self.mm.session.query(models.Namespace).filter_by(url=ns1).one()
         self.assertTrue(ns.has_equivalences)

@@ -2,10 +2,10 @@
 
 import logging
 import unittest
-
-import requests.exceptions
+from pathlib import Path
 
 import pybel
+import requests.exceptions
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
@@ -60,7 +60,7 @@ class TestParsePizza(TestOwlBase):
     }
 
     def test_file(self):
-        owl = parse_owl('file://' + test_owl_1)
+        owl = parse_owl(Path(test_owl_1).as_uri())
         self.assertEqual(self.expected_nodes, set(owl.nodes()))
         self.assertEqual(self.expected_edges, set(owl.edges()))
 
@@ -267,7 +267,7 @@ class TestWine(TestOwlBase):
         self.expected_edges = self.expected_subclasses | self.expected_membership
 
     def test_file(self):
-        owl = parse_owl('file://' + test_owl_2)
+        owl = parse_owl(Path(test_owl_2).as_uri())
 
         for node in sorted(self.wine_expected_classes):
             self.assertHasNode(owl, node)
@@ -319,7 +319,7 @@ class TestAdo(TestOwlBase):
     }
 
     def test_ado_local(self):
-        ado_path = 'file://' + test_owl_3
+        ado_path = Path(test_owl_3).as_uri()
         owl = parse_owl(ado_path)
 
         self.assertLessEqual(self.ado_expected_nodes_subset, set(owl.nodes_iter()))
