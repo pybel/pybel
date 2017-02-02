@@ -7,7 +7,7 @@ import networkx as nx
 import requests
 from requests_file import FileAdapter
 
-import ontospy
+from ontospy import Ontospy
 
 try:
     from urlparse import urldefrag
@@ -116,7 +116,7 @@ def parse_owl_pybel(url):
 
 def parse_owl_ontospy(iri):
     g = nx.DiGraph(IRI=iri)
-    o = ontospy.Ontospy(iri)
+    o = Ontospy(iri)
 
     for cls in o.classes:
         g.add_node(cls.locale, type='Class')

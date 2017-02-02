@@ -5,7 +5,7 @@ import os
 import unittest
 
 import networkx as nx
-import ontospy
+from ontospy import Ontospy
 from requests.compat import urlparse
 
 from pybel import BELGraph
@@ -221,7 +221,7 @@ mock_parse_owl_pybel = mock.patch('pybel.manager.utils.parse_owl_pybel', side_ef
 
 def parse_owl_ontospy_resolver(iri):
     path = os.path.join(owl_dir_path, get_uri_name(iri))
-    o = ontospy.Ontospy(path)
+    o = Ontospy(path)
 
     g = nx.DiGraph(IRI=iri)
 
