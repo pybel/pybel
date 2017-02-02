@@ -242,7 +242,7 @@ class Node(Base):
     type = Column(String(255), nullable=False)
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
-    modification = Column(Boolean)
+    modification = Column(Boolean, default=False)
     bel = Column(String, nullable=False)
 
     modifications = relationship("Modification", secondary=node_modification)

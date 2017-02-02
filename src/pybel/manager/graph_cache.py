@@ -179,6 +179,7 @@ class GraphCacheManager(BaseCacheManager):
                 result = models.Node(bel=bel, type=type)
 
             if 'variants' in node_data:
+                result.modification = True
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
@@ -199,6 +200,7 @@ class GraphCacheManager(BaseCacheManager):
         """
         modification_list = []
         if node_data['type'] == 'ProteinFusion':
+            # Are fusions still the same?
             modType = 'ProteinFusion'
             p3namespace_url = graph.namespace_url[node_data['partner_3p']['namespace']]
             p3name_id = self.cache_manager.namespace_id_cache[p3namespace_url][node_data['partner_3p']['name']]
@@ -218,23 +220,22 @@ class GraphCacheManager(BaseCacheManager):
         else:
             for variant in node_data['variants']:
                 modType = variant['kind']
-                if modType == 'Variant':
+                if modType in ('gmod', 'hgnvs'):
                     modification_list.append({
                         'modType': modType,
-                        #'variantString': variant[1]
+                        'variantString': variant['identifier']['name']
                     })
-                elif modType == 'ProteinModification':
+                # if modType == 'Variant':
+                #    modification_list.append({
+                #        'modType': modType,
+                #        #'variantString': variant[1]
+                #    })
+                elif modType == 'pmod':
                     modification_list.append({
                         'modType': modType,
-                        'pmodName': variant[1] if len(variant) > 1 else None,
-                        'aminoA': variant[2] if len(variant) > 2 else None,
-                        'position': variant[3] if len(variant) > 3 else None
-                    })
-                elif modType == 'GeneModification':
-                    # ToDo: Do GeneModifications look like ProteinModifications?
-                    modification_list.append({
-                        'modType': modType,
-                        'variantString': str(variant)
+                        'pmodName': variant['identifier']['name'],
+                        'aminoA': variant['code'] if 'code' in variant else None,
+                        'position': variant['pos'] if 'pos' in variant else None
                     })
 
         modifications = []
