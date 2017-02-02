@@ -40,7 +40,8 @@ INSTALL_REQUIRES = [
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = [
     'tox',
-    'mock'
+    'mock',
+    'pathlib'
 ]
 ENTRY_POINTS = {
     'console_scripts': [
