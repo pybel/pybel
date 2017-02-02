@@ -39,6 +39,7 @@ becomes:
         },
         'variants': [
             {
+                'kind': 'pmod',
                 'code': 'Ser',
                 'identifier': {
                     'name': 'Ph',
@@ -111,6 +112,7 @@ Modifiers are added to this structure as well. Under this schema,
             },
             'variants': [
                 {
+                    'kind': 'pmod',
                     'code': 'Ser',
                     'identifier': {
                         'name': 'Ph',
@@ -151,6 +153,7 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
             },
             'variants': [
                 {
+                    'kind': 'pmod',
                     'code': 'Ser',
                     'identifier': {
                         'name': 'Ph',

@@ -28,7 +28,9 @@ def build_variant_dict(variant):
 class VariantParser(BaseParser):
     """Parsers variants
 
-    See HVGS for conventions http://www.hgvs.org/mutnomen/recs.html
+
+    .. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
+    .. seealso:: HVGS for conventions http://www.hgvs.org/mutnomen/recs.html
     """
     IDENTIFIER = 'identifier'
 
@@ -120,6 +122,42 @@ class GsubParser(BaseParser):
 
 
 class PmodParser(BaseParser):
+    """
+
+    The addition of a post-translational modification (PTM) tag results in an entry called 'variants'
+    in the data dictionary associated with a given node. This entry is a list with dictionaries
+    describing each of the variants. All variants have the entry 'kind' to identify whether it is
+    a PTM, gene modification, fragment, or HGVS variant. The 'kind' value for PTM is 'pmod'.
+
+    Each PMOD contains an identifier, which is a dictionary with the namespace and name, and can
+    optionally include the position ('pos') and/or amino acid code ('code').
+
+    For example, the node :code:`p(HGNC:GSK3B, pmod(P, S, 9))` is represented with the following:
+
+    .. code::
+
+        {
+            'function': 'Protein',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'GSK3B'
+            },
+            'variants': [
+                {
+                    'kind': 'pmod',
+                    'code': 'Ser',
+                    'identifier': {
+                        'name': 'Ph',
+                        'namespace': 'PYBEL'
+                    },
+                    'pos': 9
+                }
+            ]
+        }
+
+    .. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod
+    """
+
     IDENTIFIER = 'identifier'
     CODE = 'code'
     POSITION = 'pos'
@@ -168,7 +206,58 @@ class PmodParser(BaseParser):
 
 class FragmentParser(BaseParser):
     """
-    2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
+
+    The addition of a fragment results in an entry called 'variants'
+    in the data dictionary associated with a given node. This entry is a list with dictionaries
+    describing each of the variants. All variants have the entry 'kind' to identify whether it is
+    a PTM, gene modification, fragment, or HGVS variant. The 'kind' value for a fragment is 'frag'.
+
+    Each fragment contains an identifier, which is a dictionary with the namespace and name, and can
+    optionally include the position ('pos') and/or amino acid code ('code').
+
+    For example, the node :code:`p(HGNC:GSK3B, frag(45_129))` is represented with the following:
+
+    .. code::
+
+        {
+            'function': 'Protein',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'GSK3B'
+            },
+            'variants': [
+                {
+                    'kind': 'frag',
+                    'start': 45,
+                    'stop': 129
+                }
+            ]
+        }
+
+    Additionally, nodes can have an asterick (*) or question mark (?) representing unbound
+    or unknown fragments, respectively.
+
+    A fragment may also be unknown, such as in the node :code:`p(HGNC:GSK3B, frag(?))`. This
+    is represented with the key 'missing' and the value of '?' like:
+
+
+    .. code::
+
+        {
+            'function': 'Protein',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'GSK3B'
+            },
+            'variants': [
+                {
+                    'kind': 'frag',
+                    'missing': '?',
+                }
+            ]
+        }
+
+    .. seealso:: 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
     """
     START = 'start'
     STOP = 'stop'
@@ -281,7 +370,7 @@ class FusionParser(BaseParser):
         missing = Keyword('?')
 
         range_coordinate = missing(self.MISSING) | (
-        reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT))
+            reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT))
 
         self.language = self.fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
                                                 Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
