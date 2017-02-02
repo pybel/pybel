@@ -35,7 +35,7 @@ INSTALL_REQUIRES = [
     'py2neo',
     'click',
     'sqlalchemy',
-    'ontospy',
+    'onto2nx',
 ]
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = [
