@@ -184,7 +184,6 @@ class CacheManager(BaseCacheManager):
             self.namespace_cache[url][entry.name] = set(entry.encoding)
             self.namespace_id_cache[url][entry.name] = entry.id
 
-
     def get_namespace(self, url):
         """Returns a dict of names and their encodings for the given namespace file
 
@@ -271,8 +270,12 @@ class CacheManager(BaseCacheManager):
         return self.annotation_cache[url]
 
     def ls_annotations(self):
-        """Returns a list of the locations of the stored namespaces and annotations"""
+        """Returns a list of the locations of the stored annotations"""
         return [definition.url for definition in self.session.query(models.Annotation).all()]
+
+    def dict_annotations(self):
+        """Returns a dictionary with the keyword:locations of the stored annotations"""
+        return {definition.keyword: definition.url for definition in self.session.query(models.Annotation).all()}
 
     def load_default_annotations(self):
         """Caches the default set of annotations"""

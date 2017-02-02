@@ -3,9 +3,8 @@ import tempfile
 import unittest
 from collections import Counter
 
-import sqlalchemy.exc
-
 import pybel
+import sqlalchemy.exc
 from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants
@@ -127,6 +126,6 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
 
         self.gcm.store_graph(original, store_parts=True)
 
-        reloaded = self.gcm.get_by_edge_filter(**{SENTINEL_ANNOTATION: SENTINEL_VALUE})
+        reloaded = self.gcm.get_by_edge_filter({SENTINEL_ANNOTATION: SENTINEL_VALUE})
 
         help_compare_graphs(self, original, reloaded)

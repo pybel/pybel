@@ -5,12 +5,12 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Sequence, 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-NAMESPACE_TABLE_NAME = 'pybel_namespaces'
-NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntries'
-ANNOTATION_TABLE_NAME = 'pybel_annotations'
-ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntries'
-NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClasses'
-NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalences'
+NAMESPACE_TABLE_NAME = 'pybel_namespace'
+NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
+ANNOTATION_TABLE_NAME = 'pybel_annotation'
+ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntry'
+NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
+NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalence'
 
 NETWORK_TABLE_NAME = 'pybel_network'
 CITATION_TABLE_NAME = 'pybel_citation'
@@ -19,9 +19,11 @@ EDGE_TABLE_NAME = 'pybel_edge'
 NODE_TABLE_NAME = 'pybel_node'
 MODIFICATION_TABLE_NAME = 'pybel_modification'
 PROPERTY_TABLE_NAME = 'pybel_property'
+AUTHOR_TABLE_NAME = 'pybel_author'
+AUTHOR_CITATION_TABLE_NAME = 'pybel_author_citation'
 EDGE_PROPERTY_TABLE_NAME = 'pybel_edge_property'
 NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
-EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntries'
+EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntry'
 NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
 
 OWL_TABLE_NAME = 'pybel_owl'
@@ -85,6 +87,9 @@ class NamespaceEntry(Base):
 
     def __repr__(self):
         return 'NSEntry({}, {}, {})'.format(self.name, ''.join(sorted(self.encoding)), self.equivalence)
+
+    def forGraph(self):
+        return {'namespace': self.namespace.keyword, 'name': self.name}
 
 
 class NamespaceEntryEquivalence(Base):
@@ -237,12 +242,22 @@ class Node(Base):
     type = Column(String(255), nullable=False)
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
+    modification = Column(Boolean)
     bel = Column(String, nullable=False)
 
     modifications = relationship("Modification", secondary=node_modification)
 
     def __repr__(self):
         return self.bel
+
+    def forGraph(self):
+        namespace_entry = self.namespaceEntry.forGraph()
+        node_data = {'function': self.type, 'identifier': namespace_entry}
+        node_key = (self.type, namespace_entry['namespace'], namespace_entry['name'])
+        if self.modification:
+            node_data['variants'] = [modification.forGraph() for modification in self.modifications]
+
+        return (node_key, node_data)
 
 
 class Modification(Base):
@@ -266,6 +281,38 @@ class Modification(Base):
 
     nodes = relationship("Node", secondary=node_modification)
 
+    def forGraph(self):
+        mod_dict = {'kind': self.modType}
+        if self.pmodName:
+            mod_dict['identifier'] = {
+                'namespace': 'PYBEL',
+                'name': self.pmodName
+            }
+        if self.aminoA:
+            mod_dict['code'] = self.aminoA
+        if self.position:
+            mod_dict['pos'] = self.position
+
+        return mod_dict
+
+
+author_citation = Table(
+    AUTHOR_CITATION_TABLE_NAME, Base.metadata,
+    Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME))),
+    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+)
+
+
+class Author(Base):
+    """Contains all author names."""
+
+    __tablename__ = AUTHOR_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+
+    citations = relationship("Citation", secondary=author_citation)
+
+
 class Citation(Base):
     """The information about the citations that are used to prove a specific relation are stored in this table."""
 
@@ -275,8 +322,9 @@ class Citation(Base):
     name = Column(String(255), nullable=False)
     reference = Column(String(255), nullable=False)
     date = Column(Date, nullable=True)
-    authors = Column(String(255), nullable=True)
     comments = Column(String(255), nullable=True)
+
+    authors = relationship("Author", secondary=author_citation)
 
     __table_args__ = (
         UniqueConstraint("type", "reference"),
@@ -313,6 +361,7 @@ class Edge(Base):
 
     __tablename__ = EDGE_TABLE_NAME
     id = Column(Integer, primary_key=True)
+    graphIdentifier = Column(Integer)
     bel = Column(String, nullable=False)
     relation = Column(String, nullable=False)
 
@@ -330,6 +379,10 @@ class Edge(Base):
 
     def __repr__(self):
         return 'Edge(bel={})'.format(self.bel)
+
+    def forGraph(self):
+        pass
+        # return(source, )
 
 
 class Property(Base):

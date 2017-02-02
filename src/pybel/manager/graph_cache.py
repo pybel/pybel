@@ -8,6 +8,7 @@ from .cache import BaseCacheManager, CacheManager
 from .. import io
 from ..canonicalize import decanonicalize_node, decanonicalize_edge
 from ..constants import PYBEL_AUTOEVIDENCE
+from ..graph import BELGraph
 
 try:
     import cPickle as pickle
@@ -19,6 +20,7 @@ ANNOTATION_KEY_BLACKLIST = {'citation', 'SupportingText', 'subject', 'object', '
 log = logging.getLogger('pybel')
 
 
+# ToDo: Use PyBEL.constants after merge
 class GraphCacheManager(BaseCacheManager):
     def store_graph(self, graph, store_parts=True):
         """Stores a graph in the database
@@ -75,7 +77,7 @@ class GraphCacheManager(BaseCacheManager):
 
             citation = self.get_or_create_citation(**data['citation'])
             evidence = self.get_or_create_evidence(citation, data['SupportingText'])
-            edge = self.get_or_create_edge(source, target, evidence, edge_bel, data['relation'])
+            edge = self.get_or_create_edge(k, source, target, evidence, edge_bel, data['relation'])
 
             # edge.properties = self.get_or_create_property(graph, data)
             properties = self.get_or_create_property(graph, data)
@@ -126,7 +128,7 @@ class GraphCacheManager(BaseCacheManager):
     def ls(self):
         return [(network.name, network.version) for network in self.session.query(models.Network).all()]
 
-    def get_or_create_edge(self, source, target, evidence, bel, relation):
+    def get_or_create_edge(self, in_graph_id, source, target, evidence, bel, relation):
         """Creates entry for given edge if it does not exist.
 
         :param source: Source node of the relation
@@ -144,7 +146,8 @@ class GraphCacheManager(BaseCacheManager):
         try:
             result = self.session.query(models.Edge).filter_by(bel=bel).one()
         except:
-            result = models.Edge(source=source, target=target, evidence=evidence, bel=bel, relation=relation)
+            result = models.Edge(graphIdentifier=in_graph_id, source=source, target=target, evidence=evidence, bel=bel,
+                                 relation=relation)
 
         return result
 
@@ -175,7 +178,7 @@ class GraphCacheManager(BaseCacheManager):
             else:
                 result = models.Node(bel=bel, type=type)
 
-            if type in ('ProteinVariant', 'ProteinFusion'):
+            if 'variants' in node_data:
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
@@ -214,11 +217,11 @@ class GraphCacheManager(BaseCacheManager):
             })
         else:
             for variant in node_data['variants']:
-                modType = variant[0]
+                modType = variant['kind']
                 if modType == 'Variant':
                     modification_list.append({
                         'modType': modType,
-                        'variantString': variant[1]
+                        #'variantString': variant[1]
                     })
                 elif modType == 'ProteinModification':
                     modification_list.append({
@@ -233,8 +236,6 @@ class GraphCacheManager(BaseCacheManager):
                         'modType': modType,
                         'variantString': str(variant)
                     })
-
-                    # ToDo: What are the possible modifications?
 
         modifications = []
         for modification in modification_list:
@@ -268,10 +269,34 @@ class GraphCacheManager(BaseCacheManager):
             result = self.session.query(models.Citation).filter_by(type=type, reference=reference).one()
         except NoResultFound:
             result = models.Citation(type=type, name=name, reference=reference)
+
+            if authors:
+                citation_authors = self.get_or_create_author(authors_string=authors)
+                for author in citation_authors:
+                    if author not in result.authors:
+                        result.authors.append(author)
+
             self.session.add(result)
             self.session.flush()
-            # self.session.commit()  # TODO remove?
+
         return result
+
+    def get_or_create_author(self, authors_string):
+        """Gets or creates entries in the pybel_author table.
+
+        :param authors: List of authors separated by pipe symbol (|)
+        :type authors: String
+        :return: List of author instances (models.Author).
+        :rtype: list
+        """
+        authors = []
+        authors_list = authors_string.split("|")
+        for author in authors_list:
+            instance = self.session.query(models.Citation).filter_by(name=author).first()
+            if not instance:
+                instance = models.Author(name=author)
+            authors.append(instance)
+        return authors
 
     def get_or_create_evidence(self, citation, evidence):
         """Creates entry for given evidence if it does not exist.
@@ -350,20 +375,31 @@ class GraphCacheManager(BaseCacheManager):
     def get_name(self, name_id):
         return self.session.query(models.NamespaceEntry).filter_by(id=name_id).one()
 
-    def get_by_edge_filter(**kwargs):
+    def get_by_edge_filter(self, annotation_dict):
         """Gets all edges matching the given query annotation values
 
-        :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
-                           where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
-                           of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
-                           of URL.
-        :type connection: str
-        :param kwargs: annotation/value pairs to filter edges
+        :param annotation_dict: annotation/value pairs to filter edges
+        :type annotation_dict: dict
         :return: A graph composed of the filtered edges
         :rtype: BELGraph
         """
-        pass
-
+        belGraph = BELGraph()
+        for annotation_key, annotation_value in annotation_dict.items():
+            annotation_def = self.session.query(models.Annotation).filter_by(keyword=annotation_key).first()
+            annotation = self.session.query(models.AnnotationEntry).filter_by(annotation=annotation_def,
+                                                                              name=annotation_value).first()
+            # Add Annotations to belGraph.annotation_url
+            # Add Namespaces to belGraph.namespace_url
+            # What about meta information?
+            edges = self.session.query(models.Edge).filter(models.Edge.annotations.contains(annotation)).all()
+            for edge in edges:
+                source_node_data = edge.source.forGraph()
+                belGraph.add_node(source_node_data[0], source_node_data[1])
+                target_node_data = edge.target.forGraph()
+                belGraph.add_node(target_node_data[0], target_node_data[1])
+                # compose edge_data_dict!
+                belGraph.add_edge(source_node_data[0], edge.relation, target_node_data[0])
+        return belGraph
 
 def to_database(graph, connection=None):
     """Stores a graph in a database
@@ -399,5 +435,3 @@ def from_database(name, version=None, connection=None):
     :rtype: BELGraph
     """
     return GraphCacheManager(connection).get_graph(name, version)
-
-
