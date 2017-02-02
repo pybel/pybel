@@ -2,6 +2,7 @@
 
 import logging
 import unittest
+from pathlib import Path
 
 from pybel.manager.cache import CacheManager
 from pybel.parser import ControlParser, MetadataParser
@@ -103,7 +104,7 @@ class TestParseMetadata(unittest.TestCase):
 
     def test_parse_namespace_url_file(self):
         """Tests parsing a namespace by file URL"""
-        s = 'DEFINE NAMESPACE TESTNS1 AS URL "file://{}"'.format(test_ns_1)
+        s = 'DEFINE NAMESPACE TESTNS1 AS URL "{}"'.format(Path(test_ns_1).as_uri())
         self.parser.parseString(s)
 
         expected_values = {
@@ -122,7 +123,7 @@ class TestParseMetadata(unittest.TestCase):
 
     def test_parse_annotation_url_file(self):
         """Tests parsing an annotation by file URL"""
-        s = '''DEFINE ANNOTATION TESTAN1 AS URL "file://{}"'''.format(test_an_1)
+        s = '''DEFINE ANNOTATION TESTAN1 AS URL "{}"'''.format(Path(test_an_1).as_uri())
         self.parser.parseString(s)
 
         expected_values = {
