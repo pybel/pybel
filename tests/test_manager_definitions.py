@@ -7,7 +7,7 @@ import unittest
 from pybel.manager.cache import CacheManager
 from tests.constants import HGNC_URL, help_check_hgnc, CELL_LINE_URL, HGNC_KEYWORD
 from tests.constants import test_ns_1, test_ns_2, test_an_1
-from tests.constants import wine_iri, mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_ontospy
+from tests.constants import wine_iri, mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_rdf
 
 test_ns1 = 'file:///' + test_ns_1
 test_ns2 = 'file:///' + test_ns_2
@@ -52,7 +52,7 @@ class TestCache(unittest.TestCase):
         self.assertIn('1321N1 cell', self.cm.annotation_cache[CELL_LINE_URL])
         self.assertEqual('CLO_0001072', self.cm.annotation_cache[CELL_LINE_URL]['1321N1 cell'])
 
-    @mock_parse_owl_ontospy
+    @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_insert_owl(self, m1, m2):
         self.cm.ensure_owl(wine_iri)

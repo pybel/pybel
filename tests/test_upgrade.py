@@ -10,7 +10,7 @@ from collections import Counter
 import pybel
 from pybel.canonicalize import postpend_location, decanonicalize_node
 from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD, HAS_MEMBER, RELATION
-from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_ontospy, mock_parse_owl_pybel, test_bel_thorough
+from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_pybel, test_bel_thorough
 
 log = logging.getLogger('pybel')
 
@@ -84,7 +84,7 @@ class TestCanonicalize(unittest.TestCase):
         self.canonicalize_helper(test_bel)
 
     @mock_bel_resources
-    @mock_parse_owl_ontospy
+    @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_canonicalize_4(self, m1, m2, m3):
         self.canonicalize_helper(test_bel_4)
