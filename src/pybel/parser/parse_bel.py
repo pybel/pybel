@@ -33,6 +33,7 @@ from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, H
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
     CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
     TRANSFORMATION, FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
+from ..constants import EQUIVALENT_TO
 
 log = logging.getLogger('pybel')
 
@@ -377,6 +378,9 @@ class BelParser(BaseParser):
         #: 3.4.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa
         is_a_tag = oneOf(['isA'])
 
+        #: PyBEL Variant
+        equivalent_tag = oneOf(['eq', EQUIVALENT_TO]).setParseAction(replaceWith(EQUIVALENT_TO))
+
         self.bel_to_bel_relations = [
             association_tag,
             increases_tag,
@@ -386,6 +390,7 @@ class BelParser(BaseParser):
             causes_no_change_tag,
             orthologous_tag,
             is_a_tag,
+            equivalent_tag,
             directly_increases_tag,
             directly_decreases_tag,
             analogous_tag,

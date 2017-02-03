@@ -10,6 +10,7 @@ from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, PYBEL_DEFAULT_NAMESPACE,
     RANGE_5P, NAMESPACE, NAME, LOCATION
 from pybel.constants import PROTEINVARIANT, GENEVARIANT, RNAVARIANT, DEGRADATION, \
     TRANSFORMATION, TRANSLOCATION, IDENTIFIER, FUSION
+from pybel.constants import RELATION, EQUIVALENT_TO, SUBJECT, OBJECT
 from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser, PsubParser, GsubParser, TruncParser, \
     FusionParser, LocationParser, FragmentParser
 from pybel.parser.parse_abundance_modifier import VariantParser, build_variant_dict
@@ -2911,6 +2912,44 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation='isA')
+
+    def test_equivalentTo(self):
+        statement = 'g(dbSNP:"rs123456") eq g(HGNC:YFG, var(c.123G>A))'
+        result = self.parser.relation.parseString(statement)
+
+        expected_result = {
+            SUBJECT: {
+                FUNCTION: GENE,
+                IDENTIFIER: {
+                    NAMESPACE: 'dbSNP',
+                    NAME: 'rs123456'
+                }
+            },
+            RELATION: EQUIVALENT_TO,
+            OBJECT: {
+                FUNCTION: GENE,
+                IDENTIFIER: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'YFG',
+                },
+                VARIANTS: [
+                    {
+                        KIND: HGVS,
+                        VariantParser.IDENTIFIER: 'c.123G>A'
+                    }
+                ]
+            }
+        }
+        self.assertEqual(expected_result, result.asDict())
+
+        sub = GENE, 'dbSNP', 'rs123456'
+        self.assertHasNode(sub)
+
+        obj = GENE, 'HGNC', 'YFG', (HGVS, 'c.123G>A')
+        self.assertHasNode(obj)
+
+        self.assertHasEdge(sub, obj, **{RELATION: EQUIVALENT_TO})
+        self.assertHasEdge(obj, sub, **{RELATION: EQUIVALENT_TO})
 
     def test_subProcessOf(self):
         """

@@ -131,3 +131,6 @@ pathology(MESHD:Psoriasis) isA pathology(MESHD:"Skin Diseases")
 rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
 
 a(CHEBI:"nitric oxide") increases surf(complex(p(HGNC:ITGAV),p(HGNC:ITGB3)))
+
+# Test that the equivalentTo relation works
+g(HGNC:ARRDC2) eq g(HGNC:ARRDC3)
