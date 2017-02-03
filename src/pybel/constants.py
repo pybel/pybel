@@ -68,18 +68,10 @@ LOCATION = 'location'
 SUBJECT = 'subject'
 OBJECT = 'object'
 
-GENE_FUSION = 'GeneFusion'
-RNA_FUSION = 'RNAFusion'
-PROTEIN_FUSION = 'ProteinFusion'
-
 GENE = 'Gene'
-GENEVARIANT = GENE
 RNA = 'RNA'
-RNAVARIANT = RNA
 PROTEIN = 'Protein'
-PROTEINVARIANT = PROTEIN
 MIRNA = 'miRNA'
-MIRNAVARIANT = MIRNA
 ABUNDANCE = 'Abundance'
 BIOPROCESS = 'BiologicalProcess'
 PATHOLOGY = 'Pathology'

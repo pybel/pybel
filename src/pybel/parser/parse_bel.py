@@ -24,16 +24,14 @@ from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarni
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
 from .utils import list2tuple, cartesian_dictionary
+from ..constants import EQUIVALENT_TO
 from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
     GOCC_KEYWORD
 from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOLOGY, REACTION, COMPLEX, COMPOSITE
-from ..constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT
-from ..constants import GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
 from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_MEMBER, TRANSCRIBED_TO, TRANSLATED_TO
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
     CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
     TRANSFORMATION, FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
-from ..constants import EQUIVALENT_TO
 
 log = logging.getLogger('pybel')
 
@@ -53,19 +51,6 @@ translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFI
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
 reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, TRANSFORMATION)
 molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
-
-function_variant_map = {
-    GENE: GENEVARIANT,
-    RNA: RNAVARIANT,
-    PROTEIN: PROTEINVARIANT,
-    MIRNA: MIRNAVARIANT
-}
-
-fusion_map = {
-    GENE: GENE_FUSION,
-    RNA: RNA_FUSION,
-    PROTEIN: PROTEIN_FUSION
-}
 
 
 def fusion_handler_wrapper(reference, start):
@@ -642,7 +627,7 @@ class BelParser(BaseParser):
 
         elif FUNCTION in tokens and VARIANTS in tokens:
             self.graph.add_node(name, {
-                FUNCTION: function_variant_map[tokens[FUNCTION]],
+                FUNCTION: tokens[FUNCTION],
                 NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
                 NAME: tokens[IDENTIFIER][NAME],
                 VARIANTS: [variant.asDict() for variant in tokens[VARIANTS]]
@@ -660,11 +645,13 @@ class BelParser(BaseParser):
         elif FUNCTION in tokens and FUSION in tokens:
             f = tokens[FUSION]
             d = {
-                FUNCTION: fusion_map[tokens[FUNCTION]],
-                PARTNER_5P: {NAMESPACE: f[PARTNER_5P][NAMESPACE], NAME: f[PARTNER_5P][NAME]},
-                RANGE_5P: f[RANGE_5P] if RANGE_5P in f else '?',
-                PARTNER_3P: {NAMESPACE: f[PARTNER_3P][NAMESPACE], NAME: f[PARTNER_3P][NAME]},
-                RANGE_3P: f[RANGE_3P] if RANGE_3P in f else '?'
+                FUNCTION: tokens[FUNCTION],
+                FUSION: {
+                    PARTNER_5P: {NAMESPACE: f[PARTNER_5P][NAMESPACE], NAME: f[PARTNER_5P][NAME]},
+                    RANGE_5P: f[RANGE_5P] if RANGE_5P in f else '?',
+                    PARTNER_3P: {NAMESPACE: f[PARTNER_3P][NAMESPACE], NAME: f[PARTNER_3P][NAME]},
+                    RANGE_3P: f[RANGE_3P] if RANGE_3P in f else '?'
+                }
             }
             self.graph.add_node(name, **d)
             return name
@@ -726,7 +713,7 @@ def canonicalize_node(tokens):
     :param tokens: tokens ParseObject or dict
     """
     if FUNCTION in tokens and VARIANTS in tokens:
-        type_name = function_variant_map[tokens[FUNCTION]]
+        type_name = tokens[FUNCTION]
         variants = tuple(sorted(canonicalize_variant(token.asDict()) for token in tokens[VARIANTS]))
         return (type_name, tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]) + variants
 
@@ -739,7 +726,7 @@ def canonicalize_node(tokens):
         return (tokens[TRANSFORMATION],) + (reactants,) + (products,)
 
     elif FUSION in tokens:
-        cls = fusion_map[tokens[FUNCTION]]
+        cls = tokens[FUNCTION]
         f = tokens[FUSION]
 
         range5pt = canonicalize_fusion_range(f, RANGE_5P)
