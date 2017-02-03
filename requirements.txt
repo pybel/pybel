@@ -6,4 +6,4 @@ configparser
 py2neo
 click
 sqlalchemy
-ontospy
+onto2nx

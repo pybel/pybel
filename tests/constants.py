@@ -5,9 +5,9 @@ import os
 import unittest
 
 import networkx as nx
+from onto2nx.ontospy import Ontospy
 from requests.compat import urlparse
 
-import ontospy
 from pybel import BELGraph
 from pybel.constants import FUNCTION, NAMESPACE, NAME
 from pybel.constants import PROTEIN, ABUNDANCE, GENE, RNA, PROTEIN_FUSION, GENE_FUSION, RNA_FUSION, MIRNA, COMPLEX, \
@@ -220,9 +220,9 @@ def parse_owl_pybel_resolver(iri):
 mock_parse_owl_pybel = mock.patch('pybel.manager.utils.parse_owl_pybel', side_effect=parse_owl_pybel_resolver)
 
 
-def parse_owl_ontospy_resolver(iri):
+def parse_owl_rdf_resolver(iri):
     path = os.path.join(owl_dir_path, get_uri_name(iri))
-    o = ontospy.Ontospy(path)
+    o = Ontospy(path)
 
     g = nx.DiGraph(IRI=iri)
 
@@ -239,7 +239,7 @@ def parse_owl_ontospy_resolver(iri):
     return g
 
 
-mock_parse_owl_ontospy = mock.patch('pybel.manager.utils.parse_owl_ontospy', side_effect=parse_owl_ontospy_resolver)
+mock_parse_owl_rdf = mock.patch('pybel.manager.utils.parse_owl_rdf', side_effect=parse_owl_rdf_resolver)
 
 
 class BelReconstitutionMixin(unittest.TestCase):

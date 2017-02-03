@@ -156,7 +156,7 @@ class BelParser(BaseParser):
         self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
 
         self.gene_modified = identifier + Optional(
-                WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
+            WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
 
         self.gene_fusion = Group(self.fusion)(FUSION)
 
@@ -179,7 +179,9 @@ class BelParser(BaseParser):
         self.mirna = mirna_tag + nest(self.mirna_modified)
         """2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA"""
 
-        self.protein_modified = identifier + Optional(WCW + delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(VARIANTS))
+        self.protein_modified = identifier + Optional(
+            WCW + delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(
+                VARIANTS))
 
         self.protein_fusion = Group(self.fusion)(FUSION)
 

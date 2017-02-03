@@ -35,12 +35,13 @@ INSTALL_REQUIRES = [
     'py2neo',
     'click',
     'sqlalchemy',
-    'ontospy',
+    'onto2nx',
 ]
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = [
     'tox',
-    'mock'
+    'mock',
+    'pathlib'
 ]
 ENTRY_POINTS = {
     'console_scripts': [

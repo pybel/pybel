@@ -5,9 +5,8 @@ from xml.etree import ElementTree as ET
 
 import networkx as nx
 import requests
+from onto2nx.ontospy import Ontospy
 from requests_file import FileAdapter
-
-import ontospy
 
 try:
     from urlparse import urldefrag
@@ -103,7 +102,7 @@ def parse_owl(url):
     try:
         return parse_owl_pybel(url)
     except:
-        return parse_owl_ontospy(url)
+        return parse_owl_rdf(url)
 
 
 def parse_owl_pybel(url):
@@ -114,9 +113,9 @@ def parse_owl_pybel(url):
     return owl
 
 
-def parse_owl_ontospy(iri):
+def parse_owl_rdf(iri):
     g = nx.DiGraph(IRI=iri)
-    o = ontospy.Ontospy(iri)
+    o = Ontospy(iri)
 
     for cls in o.classes:
         g.add_node(cls.locale, type='Class')
