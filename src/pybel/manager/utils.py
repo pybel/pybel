@@ -5,9 +5,8 @@ from xml.etree import ElementTree as ET
 
 import networkx as nx
 import requests
-from requests_file import FileAdapter
-
 from onto2nx.ontospy import Ontospy
+from requests_file import FileAdapter
 
 try:
     from urlparse import urldefrag

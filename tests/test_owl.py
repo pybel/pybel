@@ -4,8 +4,9 @@ import logging
 import unittest
 from pathlib import Path
 
-import pybel
 import requests.exceptions
+
+import pybel
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map

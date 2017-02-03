@@ -5,12 +5,12 @@ import logging
 import os
 import tempfile
 import unittest
-from collections import Counter
 
 import pybel
 from pybel.canonicalize import postpend_location, decanonicalize_node
 from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD, HAS_MEMBER, RELATION
-from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_pybel, test_bel_thorough
+from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_pybel, \
+    test_bel_thorough
 
 log = logging.getLogger('pybel')
 

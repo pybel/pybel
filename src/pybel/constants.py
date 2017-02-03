@@ -42,7 +42,6 @@ CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
 BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
 DIRTY = 'dirty'
 
-
 ACTIVITY = 'Activity'
 DEGRADATION = 'Degradation'
 TRANSLOCATION = 'Translocation'
