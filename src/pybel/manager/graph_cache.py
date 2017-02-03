@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from . import models
 from .cache import BaseCacheManager
 from ..io import to_bytes, from_bytes

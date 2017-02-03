@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+
+"""
+Under the hood, PyBEL caches namespace and annotation files for quick recall on later use. The user doesn't need to
+enable this option, but can specifiy a specific database location if they choose.
+"""
+
 import itertools as itt
 import logging
 
@@ -8,12 +15,12 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from . import defaults
 from . import models
-from .utils import parse_owl, parse_datetime
+from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..constants import DEFAULT_CACHE_LOCATION
 from ..parser.language import value_map
 from ..utils import download_url
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(value_map))
 
@@ -33,44 +40,6 @@ class BaseCacheManager:
 
     def drop_database(self):
         models.Base.metadata.drop_all(self.engine)
-
-
-def extract_shared_required(config, definition_header='Namespace'):
-    """
-
-    :param config:
-    :param definition_header: 'Namespace' or 'AnnotationDefinition'
-    :return:
-    """
-    return {
-        'keyword': config[definition_header]['Keyword'],
-        'created': parse_datetime(config[definition_header]['CreatedDateTime']),
-        'author': config['Author']['NameString'],
-        'citation': config['Citation']['NameString']
-    }
-
-
-def extract_shared_optional(config, definition_header='Namespace'):
-    s = {
-        'description': (definition_header, 'DescriptionString'),
-        'version': (definition_header, 'VersionString'),
-        'license': ('Author', 'CopyrightString'),
-        'contact': ('Author', 'ContactInfoString'),
-        'citation_description': ('Citation', 'DescriptionString'),
-        'citation_version': ('Citation', 'PublishedVersionString'),
-        'citation_url': ('Citation', 'ReferenceURL')
-    }
-
-    x = {}
-
-    for database_column, (section, key) in s.items():
-        if section in config and key in config[section]:
-            x[database_column] = config[section][key]
-
-    if 'PublishedDate' in config['Citation']:
-        x['citation_published'] = parse_datetime(config['Citation']['PublishedDate'])
-
-    return x
 
 
 class CacheManager(BaseCacheManager):

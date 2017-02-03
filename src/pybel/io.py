@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+PyBEL provides functions for input and output to several formats. This includes:
+
+- BEL Script (*.bel)
+- Pickle object (*.pickle)
+- GraphML (*.graphml)
+- JSON (*.json)
+- Edge list (*.csv)
+- Relational database
+- Neo4J graph database
+
+It also includes utilities to handle bytes, line iterators, and fetching data from URL.
+
+"""
+
 import codecs
 import json
 import logging
@@ -96,7 +112,7 @@ def from_url(url, **kwargs):
 
 
 def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
-    """Converts a graph to bytes (as BytesIO object)
+    """Converts a graph to bytes with pickle
 
     :param graph: a BEL graph
     :type graph: BELGraph
@@ -108,7 +124,7 @@ def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
 
 
 def from_bytes(bytes_graph):
-    """Reads a graph from bytes (BytesIO objet)
+    """Reads a graph from bytes (the result of pickling the graph)
 
     :param bytes_graph: File or filename to write
     :type bytes_graph: bytes
@@ -120,13 +136,10 @@ def from_bytes(bytes_graph):
 def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
     """Writes this graph to a pickle object with nx.write_gpickle
 
-    Cast as a nx.MultiDiGraph before outputting because the pickle serializer can't handle the PyParsing elements
-    within the BELGraph class.
-
     :param graph: a BEL graph
     :type graph: BELGraph
     :param output: a file or filename to write to
-    :type output: file or file-like
+    :type output: file or file-like or str
     :param protocol: Pickling protocol to use
     :type protocol: int
     """
@@ -151,7 +164,7 @@ def to_json(graph, output):
     :param output: a write-supporting file-like object
     """
     data = json_graph.node_link_data(graph)
-    data['graph']['annotation_list'] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
+    data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
     json.dump(data, output, ensure_ascii=False)
 
 

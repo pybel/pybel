@@ -2,6 +2,7 @@
 
 import logging
 import unittest
+from pathlib import Path
 
 import pybel
 from pybel.constants import GENE
@@ -41,7 +42,7 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
 
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
-        g = pybel.from_url('file://{}'.format(test_bel), complete_origin=True)
+        g = pybel.from_url(Path(test_bel).as_uri(), complete_origin=True)
         self.bel_1_reconstituted(g)
 
     @mock_bel_resources

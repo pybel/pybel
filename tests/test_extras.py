@@ -2,6 +2,7 @@
 
 import os
 import unittest
+from pathlib import Path
 
 from pybel.parser.baseparser import nest, BaseParser
 from pybel.parser.language import amino_acid
@@ -41,7 +42,7 @@ class TestRandom(unittest.TestCase):
             IdentifierParser(mapping={})
 
     def test_download_url(self):
-        res = download_url('file://{}'.format(test_an_1))
+        res = download_url(Path(test_an_1).as_uri())
 
         expected_values = {
             'TestAnnot1': 'O',

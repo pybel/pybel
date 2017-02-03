@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+[0.3.5] - 2017-01-30
+--------------------
+Added
+~~~~~
+- Add thorough testing of BEL document
+
+Changed
+~~~~~~~
+- Improved string externalization
+- Update to data model for fusions
+- Improved parser performance
 
 [0.3.4] - 2017-01-22
 --------------------
@@ -152,7 +163,8 @@ Added
 Diffs
 -----
 
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.4...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.5...HEAD
+- [0.3.5]: https://github.com/pybel/pybel/compare/v0.3.4...v0.3.5
 - [0.3.4]: https://github.com/pybel/pybel/compare/v0.3.3...v0.3.4
 - [0.3.3]: https://github.com/pybel/pybel/compare/v0.3.2...v0.3.3
 - [0.3.2]: https://github.com/pybel/pybel/compare/v0.3.1...v0.3.2

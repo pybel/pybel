@@ -12,12 +12,12 @@ PYBEL_DIR = os.path.expanduser('~/.pybel')
 if not os.path.exists(PYBEL_DIR):
     os.mkdir(PYBEL_DIR)
 
-PYBEL_DATA = os.path.join(PYBEL_DIR, 'data')
-if not os.path.exists(PYBEL_DATA):
-    os.mkdir(PYBEL_DATA)
+PYBEL_DATA_DIR = os.path.join(PYBEL_DIR, 'data')
+if not os.path.exists(PYBEL_DATA_DIR):
+    os.mkdir(PYBEL_DATA_DIR)
 
 DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
-DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA, DEFAULT_DEFINITION_CACHE_NAME)
+DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_DEFINITION_CACHE_NAME)
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
 
@@ -41,8 +41,6 @@ CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
 CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
 BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
 DIRTY = 'dirty'
-
-TWO_WAY_RELATIONS = {'negativeCorrelation', 'positiveCorrelation', 'association', 'orthologous', 'analogousTo'}
 
 ACTIVITY = 'Activity'
 DEGRADATION = 'Degradation'
@@ -96,3 +94,30 @@ HAS_VARIANT = 'hasVariant'
 HAS_MEMBER = 'hasMember'
 TRANSCRIBED_TO = 'transcribedTo'
 TRANSLATED_TO = 'translatedTo'
+
+NEGATIVE_CORRELATION = 'negativeCorrelation'
+POSITIVE_CORRELATION = 'positiveCorrelation'
+ASSOCIATION = 'association'
+ORTHOLOGOUS = 'orthologous'
+ANALOGOUS_TO = 'analogousTo'
+
+TWO_WAY_RELATIONS = {
+    NEGATIVE_CORRELATION,
+    POSITIVE_CORRELATION,
+    ASSOCIATION,
+    ORTHOLOGOUS,
+    ANALOGOUS_TO
+}
+
+BEL_KEYWORD_AS = 'AS'
+BEL_KEYWORD_URL = 'URL'
+BEL_KEYWORD_LIST = 'LIST'
+BEL_KEYWORD_OWL = 'OWL'
+BEL_KEYWORD_SET = 'SET'
+BEL_KEYWORD_DEFINE = 'DEFINE'
+BEL_KEYWORD_NAMESPACE = 'NAMESPACE'
+BEL_KEYWORD_ANNOTATION = 'ANNOTATION'
+BEL_KEYWORD_DOCUMENT = 'DOCUMENT'
+BEL_KEYWORD_PATTERN = 'PATTERN'
+BEL_KEYWORD_CITATION = 'Citation'
+BEL_KEYWORD_SUPPORT = 'SupportingText'

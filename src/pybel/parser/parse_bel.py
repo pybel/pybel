@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""
+Relation Parser
+~~~~~~~~~~~~~~~
+This module handles parsing BEL relations and validation of semantics.
+"""
+
 import itertools as itt
 import logging
 from copy import deepcopy
@@ -68,13 +74,9 @@ def fusion_handler_wrapper(reference, start):
             return tokens
 
         tokens[FusionParser.REF] = reference
+        tokens[FusionParser.LEFT if start else FusionParser.RIGHT] = '?'
+        tokens[FusionParser.RIGHT if start else FusionParser.LEFT] = int(tokens[0])
 
-        if start:
-            tokens[FusionParser.LEFT] = '?'
-            tokens[FusionParser.RIGHT] = int(tokens[0])
-        else:
-            tokens[FusionParser.LEFT] = int(tokens[0])
-            tokens[FusionParser.RIGHT] = '?'
         return tokens
 
     return fusion_handler
@@ -153,7 +155,7 @@ class BelParser(BaseParser):
         self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
 
         self.gene_modified = identifier + Optional(
-                WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
+            WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
 
         self.gene_fusion = Group(self.fusion)(FUSION)
 
@@ -176,7 +178,9 @@ class BelParser(BaseParser):
         self.mirna = mirna_tag + nest(self.mirna_modified)
         """2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA"""
 
-        self.protein_modified = identifier + Optional(WCW + delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(VARIANTS))
+        self.protein_modified = identifier + Optional(
+            WCW + delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(
+                VARIANTS))
 
         self.protein_fusion = Group(self.fusion)(FUSION)
 

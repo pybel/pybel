@@ -1,11 +1,17 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 from xml.etree import ElementTree as ET
 
 import networkx as nx
-import ontospy
 import requests
-from rdflib.term import urldefrag
+from onto2nx.ontospy import Ontospy
 from requests_file import FileAdapter
+
+try:
+    from urlparse import urldefrag
+except ImportError:
+    from urllib.parse import urldefrag
 
 owl_ns = {
     'owl': 'http://www.w3.org/2002/07/owl#',
@@ -96,7 +102,7 @@ def parse_owl(url):
     try:
         return parse_owl_pybel(url)
     except:
-        return parse_owl_ontospy(url)
+        return parse_owl_rdf(url)
 
 
 def parse_owl_pybel(url):
@@ -107,9 +113,9 @@ def parse_owl_pybel(url):
     return owl
 
 
-def parse_owl_ontospy(iri):
+def parse_owl_rdf(iri):
     g = nx.DiGraph(IRI=iri)
-    o = ontospy.Ontospy(iri)
+    o = Ontospy(iri)
 
     for cls in o.classes:
         g.add_node(cls.locale, type='Class')
@@ -144,3 +150,41 @@ def parse_datetime(s):
                 return dt
             except:
                 raise ValueError('Incorrect datetime format for {}'.format(s))
+
+
+def extract_shared_required(config, definition_header='Namespace'):
+    """
+
+    :param config:
+    :param definition_header: 'Namespace' or 'AnnotationDefinition'
+    :return:
+    """
+    return {
+        'keyword': config[definition_header]['Keyword'],
+        'created': parse_datetime(config[definition_header]['CreatedDateTime']),
+        'author': config['Author']['NameString'],
+        'citation': config['Citation']['NameString']
+    }
+
+
+def extract_shared_optional(config, definition_header='Namespace'):
+    s = {
+        'description': (definition_header, 'DescriptionString'),
+        'version': (definition_header, 'VersionString'),
+        'license': ('Author', 'CopyrightString'),
+        'contact': ('Author', 'ContactInfoString'),
+        'citation_description': ('Citation', 'DescriptionString'),
+        'citation_version': ('Citation', 'PublishedVersionString'),
+        'citation_url': ('Citation', 'ReferenceURL')
+    }
+
+    x = {}
+
+    for database_column, (section, key) in s.items():
+        if section in config and key in config[section]:
+            x[database_column] = config[section][key]
+
+    if 'PublishedDate' in config['Citation']:
+        x['citation_published'] = parse_datetime(config['Citation']['PublishedDate'])
+
+    return x

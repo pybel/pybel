@@ -1,8 +1,13 @@
-"""
-This file contains a dictionary of the default namespaces
-and URLs to load into a new PyBEL namespace store.
+# -*- coding: utf-8 -*-
 
-See: https://wiki.openbel.org/display/BELNA/Namespaces+Overview
+"""
+This file contains a listing of the default namespaces released in each version of OpenBEL, and other
+common namespaces used to load into a new PyBEL namespace store.
+
+Resources:
+
+.. seealso:: Overview on OpenBEL namespaces https://wiki.openbel.org/display/BELNA/Namespaces+Overview>
+.. seealso:: Building custom namespaces http://openbel-framework.readthedocs.io/en/latest/tutorials/building_custom_namespaces.html>
 """
 
 default_namespaces_1 = [

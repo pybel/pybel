@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+
+"""
+A message for "General Parser Failure" is displayed when a problem was caused due to an unforseen error. The line
+number and original statement are printed for the user to debug.
+
+When errors in the statement leave the term or relation as nonsense, these errors are thrown and the statement is
+excluded. These are logged at the ERROR level with code :code:`PyBEL1XX`.
+"""
+
 from ..exceptions import PyBelWarning
 
 
