@@ -25,7 +25,7 @@ except ImportError:
 
 __all__ = ['BELGraph']
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 REQUIRED_METADATA = [
     'name',

@@ -79,8 +79,8 @@ Mapping for BEL functions to PyBEL functions is done based on the following dict
         'compositeAbundance': 'Composite'
     }
 
-But these terms can be more readily accessed by :code:`pybel.parser.language.PROTEIN`,
-:code:`pybel.parser.language.GENE`, and so on.
+But these terms can be more readily accessed by :code:`pybel.constants.PROTEIN`,
+:code:`pybel.constants.GENE`, and so on.
 
 List Abundances
 ~~~~~~~~~~~~~~~

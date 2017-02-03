@@ -10,10 +10,12 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import FUNCTION, NAMESPACE, NAME
+from pybel.constants import KIND
 from pybel.constants import PROTEIN, ABUNDANCE, GENE, RNA, MIRNA, COMPLEX, \
     COMPOSITE, BIOPROCESS, PATHOLOGY, REACTION, PMOD, HGVS, GMOD, PYBEL_DEFAULT_NAMESPACE, FRAGMENT
 from pybel.constants import RELATION, EQUIVALENT_TO, HAS_VARIANT, HAS_REACTANT, HAS_PRODUCT, SUBJECT, OBJECT
 from pybel.manager.utils import urldefrag, OWLParser
+from pybel.parser import VariantParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
 
@@ -142,6 +144,10 @@ expected_test_bel_4_metadata = {
     'licenses': "WTF License",
     'contact': "charles.hoyt@scai.fraunhofer.de"
 }
+
+
+def build_variant_dict(variant):
+    return {KIND: HGVS, VariantParser.IDENTIFIER: variant}
 
 
 def get_uri_name(url):
@@ -273,9 +279,9 @@ class BelReconstitutionMixin(unittest.TestCase):
             (GENE, 'HGNC', 'AKT1'),
             (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')),
             (PROTEIN, 'HGNC', 'AKT1'),
-            (GENE, 'HGNC', 'AKT1', (HGVS, 'g.308G>A')),
+            (GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
             (GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)),
-            (GENE, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, 'g.308G>A'), (HGVS, 'p.Phe508del')),
+            (GENE, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, 'c.308G>A'), (HGVS, 'p.Phe508del')),
             (MIRNA, 'HGNC', 'MIR21'),
             (GENE, ('HGNC', 'BCR'), ('c', '?', 1875), ('HGNC', 'JAK2'), ('c', 2626, '?')),
             (GENE, 'HGNC', 'CFTR', (HGVS, 'delCTT')),
@@ -332,7 +338,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             (GENE, 'HGNC', 'CAT'),
             (PROTEIN, 'HGNC', 'HMGCR'),
             (BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'),
-            (GENE, 'HGNC', 'APP', (HGVS, 'g.275341G>C')),
+            (GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')),
             (GENE, 'HGNC', 'APP'),
             (PATHOLOGY, 'MESHD', 'Alzheimer Disease'),
             (COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')),
@@ -402,9 +408,9 @@ class BelReconstitutionMixin(unittest.TestCase):
               RELATION: 'decreases', SUBJECT: {'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
               OBJECT: {'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}}}),
             ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), {RELATION: HAS_VARIANT}),
-            ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (HGVS, 'g.308G>A')), {RELATION: HAS_VARIANT}),
+            ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')), {RELATION: HAS_VARIANT}),
             ((GENE, 'HGNC', 'AKT1'),
-             (GENE, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, 'g.308G>A'), (HGVS, 'p.Phe508del')),
+             (GENE, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, 'c.308G>A'), (HGVS, 'p.Phe508del')),
              {RELATION: HAS_VARIANT}),
             ((GENE, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1'),
              {'SupportingText': 'These were all explicitly stated in the BEL 2.0 Specification',
@@ -471,13 +477,13 @@ class BelReconstitutionMixin(unittest.TestCase):
                                          NAME: 'intracellular'},
                              'toLoc': {NAMESPACE: 'GOCC',
                                        NAME: 'extracellular space'}}}}),
-            ((GENE, 'HGNC', 'AKT1', (HGVS, 'g.308G>A')),
+            ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
              (GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)),
              {'SupportingText': 'These are mostly made up',
               'citation': citation_1,
               RELATION: 'causesNoChange'}),
-            ((GENE, 'HGNC', 'AKT1', (HGVS, 'g.308G>A')),
-             (GENE, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, 'g.308G>A'), (HGVS, 'p.Phe508del')),
+            ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
+             (GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A'), (HGVS, 'delCTT'), (HGVS, 'p.Phe508del')),
              {'SupportingText': 'These are mostly made up',
               'citation': citation_1,
               RELATION: 'increases', SUBJECT: {'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}}}),
@@ -637,11 +643,11 @@ class BelReconstitutionMixin(unittest.TestCase):
               'citation': citation_2,
               RELATION: 'rateLimitingStepOf',
               SUBJECT: {'modifier': 'Activity', 'effect': {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'cat'}}}),
-            ((GENE, 'HGNC', 'APP', (HGVS, 'g.275341G>C')), (PATHOLOGY, 'MESHD', 'Alzheimer Disease'),
+            ((GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')), (PATHOLOGY, 'MESHD', 'Alzheimer Disease'),
              {'SupportingText': 'These were all explicitly stated in the BEL 2.0 Specification',
               'citation': citation_2,
               RELATION: 'causesNoChange'}),
-            ((GENE, 'HGNC', 'APP'), (GENE, 'HGNC', 'APP', (HGVS, 'g.275341G>C')), {RELATION: HAS_VARIANT}),
+            ((GENE, 'HGNC', 'APP'), (GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')), {RELATION: HAS_VARIANT}),
             ((COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')), (PROTEIN, 'HGNC', 'F3'),
              {RELATION: 'hasComponent'}),
             ((COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')), (PROTEIN, 'HGNC', 'F7'),

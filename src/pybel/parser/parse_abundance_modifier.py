@@ -19,14 +19,33 @@ dna_nucleotide_seq = Word(''.join(dna_nucleotide_labels.keys()))
 rna_nucleotide_seq = Word(''.join(rna_nucleotide_labels.keys()))
 
 
-def build_variant_dict(variant):
-    return {KIND: HGVS, VariantParser.IDENTIFIER: variant}
-
-
 # Structural variants
 
 class VariantParser(BaseParser):
-    """Parsers variants
+    """
+    The addition of a variant tag results in an entry called 'variants' in the data dictionary associated with a given
+    node. This entry is a list with dictionaries describing each of the variants. All variants have the entry 'kind' to
+    identify whether it is a PTM, gene modification, fragment, or HGVS variant. The 'kind' value for a variant
+    is 'hgvs', but best descirbed by :code:`pybel.constants.HGVS`
+
+
+    For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented with the following:
+
+    .. code::
+
+        {
+            'function': 'Protein',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'GSK3B'
+            },
+            'variants': [
+                {
+                    'kind': 'hgvs',
+                    'identifier': 'p.Gly123Arg'
+                }
+            ]
+        }
 
 
     .. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
@@ -69,6 +88,35 @@ class PsubParser(BaseParser):
 
 
 class TruncParser(BaseParser):
+    """
+    Truncations in the legacy BEL 1.0 specification are automatically translated to BEL 2.0 with HGVS nomenclature.
+    :code:`p(HGNC:AKT1, trunc(40))` becomes :code:`p(HGNC:AKT1, var(p.40*))` and is represented with the following
+    dictionary:
+
+    .. code::
+
+        {
+            'function': 'Protein',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'AKT1'
+            },
+            'variants': [
+                {
+                    'kind': 'hgvs',
+                    'identifier': 'p.40*'
+                }
+            ]
+        }
+
+
+    Unfortunately, the HGVS nomenclature requires the encoding of the terminal amino acid which is exchanged
+    for a stop codon, and this information is not required by BEL 1.0. For this example, the proper encoding
+    of the truncation at position also includes the information that the 40th amino acid in the AKT1 is Cys. Its
+    BEL encoding should be :code:`p(HGNC:AKT1, var(p.Cys40*))`. Temporary support has been added to
+    compile these statements, but it's recommended they are upgraded by reexamining the supporting text, or
+    looking up the amino acid sequence.
+    """
     POSITION = 'position'
 
     def __init__(self):
@@ -91,10 +139,28 @@ class TruncParser(BaseParser):
 
 class GsubParser(BaseParser):
     """
-    This is a deprecated method from BEL 1.0 that had gene substitutions. Now, use the HGVS commands in
-    Variant()
-    """
+    Gene substitutions are legacy statements defined in BEL 1.0. BEL 2.0 reccomends using HGVS strings. Luckily,
+    the information contained in a BEL 1.0 encoding, such as :code:`g(HGNC:APP,sub(G,275341,C))` can be
+    automatically translated to the appropriate HGVS :code:`g(HGNC:APP, var(c.275341G>C))`, assuming that all
+    substitutions are using the reference coding gene sequence for numbering and not the genomic reference.
+    The previous statements both produce the underlying data:
 
+    .. code::
+
+        {
+            'function': 'Gene',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'APP'
+            },
+            'variants': [
+                {
+                    'kind': 'hgvs',
+                    'identifier': 'c.275341G>C'
+                }
+            ]
+        }
+    """
     REFERENCE = 'reference'
     POSITION = 'position'
     VARIANT = 'variant'
@@ -106,7 +172,7 @@ class GsubParser(BaseParser):
         self.language.setParseAction(self.handle_gsub)
 
     def handle_gsub(self, s, l, tokens):
-        upgraded = 'g.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
+        upgraded = 'c.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
         log.debug('legacy sub() %s upgraded to %s', s, upgraded)
         tokens[VariantParser.IDENTIFIER] = upgraded
         del tokens[self.POSITION]
@@ -123,7 +189,6 @@ class GsubParser(BaseParser):
 
 class PmodParser(BaseParser):
     """
-
     The addition of a post-translational modification (PTM) tag results in an entry called 'variants'
     in the data dictionary associated with a given node. This entry is a list with dictionaries
     describing each of the variants. All variants have the entry 'kind' to identify whether it is
@@ -206,7 +271,6 @@ class PmodParser(BaseParser):
 
 class FragmentParser(BaseParser):
     """
-
     The addition of a fragment results in an entry called 'variants'
     in the data dictionary associated with a given node. This entry is a list with dictionaries
     describing each of the variants. All variants have the entry 'kind' to identify whether it is
@@ -268,7 +332,6 @@ class FragmentParser(BaseParser):
         self.fragment_range = (ppc.integer | '?')(self.START) + '_' + (ppc.integer | '?' | '*')(self.STOP)
         self.missing_fragment = Keyword('?')(self.MISSING)
 
-        # fragment_tag = oneOf(['frag', 'fragment']).setParseAction(replaceWith('Fragment'))
         fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, identifier=KIND)
 
         self.language = fragment_tag + nest(
@@ -280,6 +343,36 @@ class FragmentParser(BaseParser):
 
 
 class GmodParser(BaseParser):
+    """
+    PyBEL introduces the gene modification tag, gmod(), to allow for the encoding of epigenetic modifications.
+    Its syntax follows the same style s the pmod() tags for proteins, and can include the following values:
+
+    - M
+    - Me
+    - methylation
+    - A
+    - Ac
+    - acetylation
+
+    For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the following:
+
+    .. code::
+
+        {
+            'function': 'Gene',
+            'identifier': {
+                'namespace': 'HGNC',
+                'name': 'GSK3B'
+            },
+            'variants': [
+                {
+                    'kind': 'gmod',
+                    'identifier': 'Me'
+                }
+            ]
+        }
+
+    """
     IDENTIFIER = 'identifier'
     ORDER = [KIND, IDENTIFIER]
 
@@ -351,7 +444,33 @@ def canonicalize_variant(tokens):
 
 class FusionParser(BaseParser):
     """
-    2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
+    Gene, RNA, protein, and miRNA fusions are all represented with the same underlying data structure. Below
+    it is shown with uppercase letters referring to entries in :code:`pybel.constants` and
+    :class:`pybel.parser.FusionParser`. For example, :code:`g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))` is represented as:
+
+    .. code::
+
+        {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
+                RANGE_5P: {
+                    FusionParser.REF: 'c',
+                    FusionParser.LEFT: '?',
+                    FusionParser.RIGHT: 1875
+
+                },
+                RANGE_3P: {
+                    FusionParser.REF: 'c',
+                    FusionParser.LEFT: 2626,
+                    FusionParser.RIGHT: '?'
+                }
+            }
+        }
+
+
+    .. seealso:: 2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
     """
 
     REF = 'reference'
@@ -380,8 +499,8 @@ class FusionParser(BaseParser):
 
 
 class LocationParser(BaseParser):
-    """
-    2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
+    """Parses loc() elements
+    .. seealso:: 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
     """
 
     def __init__(self, identifier_parser=None):

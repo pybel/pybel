@@ -33,6 +33,8 @@ from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION,
     CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
     TRANSFORMATION, FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
 
+from .. import constants as pbc
+
 log = logging.getLogger('pybel')
 
 general_abundance_tags = one_of_tags(['a', 'abundance'], ABUNDANCE, FUNCTION)
@@ -326,35 +328,35 @@ class BelParser(BaseParser):
         # BEL Term to BEL Term Relationships
 
         #: 3.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases
-        increases_tag = oneOf(['->', '→', 'increases']).setParseAction(replaceWith('increases'))
+        increases_tag = oneOf(['->', '→', 'increases']).setParseAction(replaceWith(pbc.INCREASES))
 
         #: 3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
         directly_increases_tag = oneOf(['=>', '⇒', 'directlyIncreases']).setParseAction(
-            replaceWith('directlyIncreases'))
+            replaceWith(pbc.DIRECTLY_INCREASES))
 
         #: 3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
-        decreases_tag = oneOf(['-|', 'decreases']).setParseAction(replaceWith('decreases'))
+        decreases_tag = oneOf(['-|', 'decreases']).setParseAction(replaceWith(pbc.DECREASES))
 
         #: 3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
         directly_decreases_tag = oneOf(['=|', 'directlyDecreases']).setParseAction(
-            replaceWith('directlyDecreases'))
+            replaceWith(pbc.DIRECTLY_DECREASES))
 
         #: 3.5.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_analogous
         analogous_tag = oneOf(['analogousTo'])
 
         #: 3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
-        causes_no_change_tag = oneOf(['cnc', 'causesNoChange']).setParseAction(replaceWith('causesNoChange'))
+        causes_no_change_tag = oneOf(['cnc', 'causesNoChange']).setParseAction(replaceWith(pbc.CAUSES_NO_CHANGE))
 
         #: 3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
         regulates_tag = oneOf(['reg', 'regulates']).setParseAction(replaceWith('regulates'))
 
         #: 3.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor
         negative_correlation_tag = oneOf(['neg', 'negativeCorrelation']).setParseAction(
-            replaceWith('negativeCorrelation'))
+            replaceWith(pbc.NEGATIVE_CORRELATION))
 
         #: 3.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XposCor
         positive_correlation_tag = oneOf(['pos', 'positiveCorrelation']).setParseAction(
-            replaceWith('positiveCorrelation'))
+            replaceWith(pbc.POSITIVE_CORRELATION))
 
         #: 3.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xassociation
         association_tag = oneOf(['--', 'association']).setParseAction(replaceWith('association'))
@@ -398,11 +400,11 @@ class BelParser(BaseParser):
                                     self.process)
 
         #: 3.3.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_transcribedto
-        transcribed_tag = oneOf([':>', 'transcribedTo']).setParseAction(replaceWith('transcribedTo'))
+        transcribed_tag = oneOf([':>', 'transcribedTo']).setParseAction(replaceWith(pbc.TRANSCRIBED_TO))
         self.transcribed = triple(self.gene, transcribed_tag, self.rna)
 
         #: 3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto
-        translated_tag = oneOf(['>>', 'translatedTo']).setParseAction(replaceWith('translatedTo'))
+        translated_tag = oneOf(['>>', 'translatedTo']).setParseAction(replaceWith(pbc.TRANSLATED_TO))
         self.translated = triple(self.rna, translated_tag, self.protein)
 
         #: 3.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmember
