@@ -5,6 +5,7 @@ import time
 from collections import defaultdict, Counter
 
 import networkx as nx
+from pkg_resources import get_distribution
 from pyparsing import ParseException
 
 from .constants import FUNCTION, NAMESPACE
@@ -39,6 +40,7 @@ GRAPH_NAMESPACE_URL = 'namespace_url'
 GRAPH_NAMESPACE_OWL = 'namespace_owl'
 GRAPH_ANNOTATION_URL = 'annotation_url'
 GRAPH_ANNOTATION_LIST = 'annotation_list'
+GRAPH_PYBEL_VERSION = 'pybel_version'
 
 
 def build_metadata_parser(cache_manager):
@@ -73,6 +75,7 @@ class BELGraph(nx.MultiDiGraph):
 
         #: Stores warnings as 4-tuples with (line number, line text, exception instance, context dictionary)
         self.warnings = []
+        self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
 
         if lines is not None:
             self.parse_lines(
@@ -246,6 +249,11 @@ class BELGraph(nx.MultiDiGraph):
     def annotation_list(self):
         """A dictionary mapping the keyword of locally defined annotations to a set of their values"""
         return self.graph[GRAPH_ANNOTATION_LIST]
+
+    @property
+    def pybel_version(self):
+        """Stores the version of PyBEL with which this graph was produced"""
+        return self.graph[GRAPH_PYBEL_VERSION]
 
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
