@@ -699,11 +699,11 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         expected_node = (
-            GENE, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, TEST_GENE_VARIANT), (HGVS, TEST_PROTEIN_VARIANT))
+            GENE, 'HGNC', 'AKT1', (HGVS, TEST_GENE_VARIANT), (HGVS, 'delCTT'), (HGVS, TEST_PROTEIN_VARIANT))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, function=GENE)
         self.assertEqual(decanonicalize_node(self.parser.graph, expected_node),
-                         'g(HGNC:AKT1, var(delCTT), var(c.308G>A), var(p.Phe508del))')
+                         'g(HGNC:AKT1, var(c.308G>A), var(delCTT), var(p.Phe508del))')
 
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
