@@ -58,9 +58,13 @@ class CacheManager(BaseCacheManager):
         self.namespace_cache = {}
         self.annotation_cache = {}
 
-        self.term_cache = {}
-        self.edge_cache = {}
-        self.graph_cache = {}
+        self.namespace_term_cache = {}
+        self.namespace_edge_cache = {}
+        self.namespace_graph_cache = {}
+
+        self.annotation_term_cache = {}
+        self.annotation_edge_cache = {}
+        self.annotation_graph_cache = {}
 
     # NAMESPACE MANAGEMENT
 
@@ -221,7 +225,7 @@ class CacheManager(BaseCacheManager):
 
     # NAMESPACE OWL MANAGEMENT
 
-    def insert_namespace_owl(self, iri):
+    def insert_owl(self, iri, owl_model, owl_entry_model):
         """Caches an ontology at the given IRI
 
         :param iri: the location of the ontology
@@ -231,9 +235,9 @@ class CacheManager(BaseCacheManager):
 
         graph = parse_owl(iri)
 
-        owl = models.OwlNamespace(iri=iri)
+        owl = owl_model(iri=iri)
 
-        entries = {node: models.OwlNamespaceEntry(entry=node) for node in graph.nodes_iter()}
+        entries = {node: owl_entry_model(entry=node) for node in graph.nodes_iter()}
 
         owl.entries = list(entries.values())
 
@@ -245,26 +249,57 @@ class CacheManager(BaseCacheManager):
 
         return owl
 
+    def insert_namespace_owl(self, iri):
+        """Caches an ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
+        return self.insert_owl(iri, models.OwlNamespace, models.OwlNamespaceEntry)
+
+    def insert_annotation_owl(self, iri):
+        """Caches an ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
+
+        return self.insert_owl(iri, models.OwlAnnotation, models.OwlAnnotationEntry)
+
     def ensure_namespace_owl(self, iri):
         """Caches an ontology at the given IRI if it is not already in the cache
 
         :param iri: the location of the ontology
         :type iri: str
         """
-
-        if iri in self.term_cache:
+        if iri in self.namespace_term_cache:
             return
         try:
             results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one()
         except NoResultFound:
             results = self.insert_namespace_owl(iri)
 
-        self.term_cache[iri] = set(entry.entry for entry in results.entries)
-        self.edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
+        self.namespace_term_cache[iri] = set(entry.entry for entry in results.entries)
+        self.namespace_edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
 
         graph = nx.DiGraph()
-        graph.add_edges_from(self.edge_cache[iri])
-        self.graph_cache[iri] = graph
+        graph.add_edges_from(self.namespace_edge_cache[iri])
+        self.namespace_graph_cache[iri] = graph
+
+    def ensure_annotation_owl(self, iri):
+        if iri in self.annotation_term_cache:
+            return
+        try:
+            results = self.session.query(models.OwlAnnotation).filter(models.OwlAnnotation.iri == iri).one()
+        except NoResultFound:
+            results = self.insert_annotation_owl(iri)
+
+        self.annotation_term_cache[iri] = set(entry.entry for entry in results.entries)
+        self.annotation_edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
+
+        graph = nx.DiGraph()
+        graph.add_edges_from(self.annotation_edge_cache[iri])
+        self.annotation_graph_cache[iri] = graph
 
     def get_namespace_owl_terms(self, iri):
         """Gets a set of classes and individuals in the ontology at the given IRI
@@ -273,7 +308,16 @@ class CacheManager(BaseCacheManager):
         :type iri: str
         """
         self.ensure_namespace_owl(iri)
-        return self.term_cache[iri]
+        return self.namespace_term_cache[iri]
+
+    def get_annotation_owl_terms(self, iri):
+        """Gets a set of classes and individuals in the ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
+        self.ensure_annotation_owl(iri)
+        return self.annotation_term_cache[iri]
 
     def get_namespace_owl_edges(self, iri):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
@@ -282,7 +326,16 @@ class CacheManager(BaseCacheManager):
         :type iri: str
         """
         self.ensure_namespace_owl(iri)
-        return self.edge_cache[iri]
+        return self.namespace_edge_cache[iri]
+
+    def get_annotation_owl_edges(self, iri):
+        """Gets a set of classes and individuals in the ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
+        self.ensure_annotation_owl(iri)
+        return self.annotation_edge_cache[iri]
 
     def get_namespace_owl_graph(self, iri):
         """Gets the graph representing the ontology at the given IRI
@@ -291,7 +344,16 @@ class CacheManager(BaseCacheManager):
         :type iri: str
         """
         self.ensure_namespace_owl(iri)
-        return self.graph_cache[iri]
+        return self.namespace_graph_cache[iri]
+
+    def get_annotation_owl_graph(self, iri):
+        """Gets the graph representing the ontology at the given IRI
+
+        :param iri: the location of the ontology
+        :type iri: str
+        """
+        self.ensure_annotation_owl(iri)
+        return self.annotation_graph_cache[iri]
 
     def ls_namespace_owl(self):
         """Returns a list of the locations of the stored ontologies"""

@@ -4,9 +4,8 @@ import logging
 import unittest
 from pathlib import Path
 
-import requests.exceptions
-
 import pybel
+from pybel.constants import ABUNDANCE, PROTEIN
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import value_map
@@ -19,11 +18,11 @@ log = logging.getLogger('pybel')
 
 
 class TestOwlBase(unittest.TestCase):
-    def assertHasNode(self, g, n):
-        assertHasNode(self, n, g)
+    def assertHasNode(self, g, n, **kwargs):
+        assertHasNode(self, n, g, **kwargs)
 
-    def assertHasEdge(self, g, u, v):
-        assertHasEdge(self, u, v, g)
+    def assertHasEdge(self, g, u, v, **kwargs):
+        assertHasEdge(self, u, v, g, **kwargs)
 
 
 class TestOwlUtils(unittest.TestCase):
@@ -36,6 +35,23 @@ class TestOwlUtils(unittest.TestCase):
             parse_owl('http://example.com/not_owl')
 
 
+EXPECTED_PIZZA_NODES = {
+    'Pizza',
+    'Topping',
+    'CheeseTopping',
+    'FishTopping',
+    'MeatTopping',
+    'TomatoTopping'
+}
+
+EXPECTED_PIZZA_EDGES = {
+    ('CheeseTopping', 'Topping'),
+    ('FishTopping', 'Topping'),
+    ('MeatTopping', 'Topping'),
+    ('TomatoTopping', 'Topping')
+}
+
+
 class TestParsePizza(TestOwlBase):
     expected_prefixes = {
         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -44,71 +60,58 @@ class TestParsePizza(TestOwlBase):
         "owl": "http://www.w3.org/2002/07/owl#"
     }
 
-    expected_nodes = {
-        'Pizza',
-        'Topping',
-        'CheeseTopping',
-        'FishTopping',
-        'MeatTopping',
-        'TomatoTopping'
-    }
-
-    expected_edges = {
-        ('CheeseTopping', 'Topping'),
-        ('FishTopping', 'Topping'),
-        ('MeatTopping', 'Topping'),
-        ('TomatoTopping', 'Topping')
-    }
-
     def test_file(self):
         owl = parse_owl(Path(test_owl_1).as_uri())
-        self.assertEqual(self.expected_nodes, set(owl.nodes()))
-        self.assertEqual(self.expected_edges, set(owl.edges()))
+        self.assertEqual(EXPECTED_PIZZA_NODES, set(owl.nodes()))
+        self.assertEqual(EXPECTED_PIZZA_EDGES, set(owl.edges()))
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_url(self, m1, m2):
         owl = parse_owl(pizza_iri)
-
         self.assertEqual(pizza_iri, owl.iri)
-        self.assertEqual(self.expected_nodes, set(owl.nodes()))
-        self.assertEqual(self.expected_edges, set(owl.edges()))
+        self.assertEqual(EXPECTED_PIZZA_NODES, set(owl.nodes()))
+        self.assertEqual(EXPECTED_PIZZA_EDGES, set(owl.edges()))
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parser(self, m1, m2):
         functions = set('A')
-        s = 'DEFINE NAMESPACE Pizza AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
+        s = 'DEFINE NAMESPACE PIZZA AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
         parser = MetadataParser(CacheManager('sqlite:///'))
+        parser.parseString(s)
 
-        try:
-            parser.parseString(s)
-        except requests.exceptions.ConnectionError as e:
-            log.warning('Connection Error %s', e)
-            return
+        self.assertIn('PIZZA', parser.namespace_dict)
 
-        names = set(parser.namespace_dict['Pizza'].keys())
-        for node in self.expected_nodes:
+        names = set(parser.namespace_dict['PIZZA'].keys())
+        for node in EXPECTED_PIZZA_NODES:
             self.assertIn(node, names)
-            self.assertEqual(functions, parser.namespace_dict['Pizza'][node])
+            self.assertEqual(functions, parser.namespace_dict['PIZZA'][node])
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parser_no_function(self, m1, m2):
-        s = 'DEFINE NAMESPACE Pizza AS OWL "{}"'.format(pizza_iri)
+        s = 'DEFINE NAMESPACE PIZZA AS OWL "{}"'.format(pizza_iri)
         parser = MetadataParser(CacheManager('sqlite:///'))
+        parser.parseString(s)
 
-        try:
-            parser.parseString(s)
-        except requests.exceptions.ConnectionError as e:
-            log.warning('Connection Error %s', e)
-            return
+        self.assertIn('PIZZA', parser.namespace_dict)
 
         functions = set(value_map.keys())
-        names = set(parser.namespace_dict['Pizza'].keys())
-        for node in self.expected_nodes:
+        names = set(parser.namespace_dict['PIZZA'].keys())
+        for node in EXPECTED_PIZZA_NODES:
             self.assertIn(node, names)
-            self.assertEqual(functions, parser.namespace_dict['Pizza'][node])
+            self.assertEqual(functions, parser.namespace_dict['PIZZA'][node])
+
+    @mock_parse_owl_rdf
+    @mock_parse_owl_pybel
+    def test_metadata_parser_annotation(self, m1, m2):
+        s = 'DEFINE ANNOTATION Pizza AS OWL "{}"'.format(pizza_iri)
+        parser = MetadataParser(CacheManager('sqlite:///'))
+        parser.parseString(s)
+
+        self.assertIn('Pizza', parser.annotations_dict)
+        self.assertEqual(EXPECTED_PIZZA_NODES, set(parser.annotations_dict['Pizza']))
 
 
 class TestWine(TestOwlBase):
@@ -284,25 +287,32 @@ class TestWine(TestOwlBase):
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_metadata_parser(self, m1, m2):
+    def test_metadata_parser_namespace(self, m1, m2):
         cm = CacheManager('sqlite://')
 
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
 
         parser = MetadataParser(cache_manager=cm)
-
-        try:
-            parser.parseString(s)
-        except ConnectionError as e:
-            log.warning('Connection Error %s', e)
-            return
+        parser.parseString(s)
 
         self.assertIn('Wine', parser.namespace_dict)
-        names = sorted(parser.namespace_dict['Wine'].keys())
+        self.assertLessEqual(self.expected_nodes, set(parser.namespace_dict['Wine']))
+
         for node in sorted(self.expected_nodes):
-            self.assertIn(node, names)
             self.assertEqual(functions, ''.join(sorted(parser.namespace_dict['Wine'][node])))
+
+    @mock_parse_owl_rdf
+    @mock_parse_owl_pybel
+    def test_metadata_parser_annotation(self, m1, m2):
+        cm = CacheManager('sqlite://')
+        s = 'DEFINE ANNOTATION Wine AS OWL "{}"'.format(wine_iri)
+
+        parser = MetadataParser(cache_manager=cm)
+        parser.parseString(s)
+
+        self.assertIn('Wine', parser.annotations_dict)
+        self.assertLessEqual(self.expected_nodes, set(parser.annotations_dict['Wine']))
 
 
 class TestAdo(TestOwlBase):
@@ -344,26 +354,45 @@ class TestOwlManager(unittest.TestCase):
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_ensure(self, m1, m2):
+    def test_ensure_namespace(self, m1, m2):
         self.manager.ensure_namespace_owl(pizza_iri)
         entries = self.manager.get_namespace_owl_terms(pizza_iri)
-        self.assertEqual(TestParsePizza.expected_nodes, entries)
+        self.assertEqual(EXPECTED_PIZZA_NODES, entries)
 
-        # get edges out
         edges = self.manager.get_namespace_owl_edges(pizza_iri)
-
-        self.assertEqual(TestParsePizza.expected_edges, edges)
+        self.assertEqual(EXPECTED_PIZZA_EDGES, edges)
 
         # check nothing bad happens on second insert
         self.manager.ensure_namespace_owl(pizza_iri)
 
-    def test_missing(self):
+    @mock_parse_owl_rdf
+    @mock_parse_owl_pybel
+    def test_ensure_annotation(self, m1, m2):
+        self.manager.ensure_annotation_owl(pizza_iri)
+        entries = self.manager.get_annotation_owl_terms(pizza_iri)
+        self.assertEqual(EXPECTED_PIZZA_NODES, entries)
+
+        edges = self.manager.get_annotation_owl_edges(pizza_iri)
+        self.assertEqual(EXPECTED_PIZZA_EDGES, edges)
+
+        # check nothing bad happens on second insert
+        self.manager.ensure_annotation_owl(pizza_iri)
+
+    def test_missing_namespace(self):
         with self.assertRaises(Exception):
             self.manager.ensure_namespace_owl('http://example.com/not_owl.owl')
 
-    def test_insert_missing(self):
+    def test_insert_missing_namespace(self):
         with self.assertRaises(Exception):
             self.manager.insert_namespace_owl('http://cthoyt.com/not_owl.owl')
+
+    def test_missing_annotation(self):
+        with self.assertRaises(Exception):
+            self.manager.ensure_annotation_owl('http://example.com/not_owl.owl')
+
+    def test_insert_missing_annotation(self):
+        with self.assertRaises(Exception):
+            self.manager.insert_annotation_owl('http://cthoyt.com/not_owl.owl')
 
 
 class TestIntegration(TestOwlBase):
@@ -372,6 +401,9 @@ class TestIntegration(TestOwlBase):
     @mock_parse_owl_pybel
     def test_from_path(self, m1, m2, m3):
         g = pybel.from_path(test_bel_4)
+        self.assertEqual(0, len(g.warnings))
+
+        self.assertEqual(expected_test_bel_4_metadata, g.document)
 
         expected_definitions = {
             HGNC_KEYWORD: HGNC_URL,
@@ -379,20 +411,29 @@ class TestIntegration(TestOwlBase):
             'WINE': wine_iri
         }
 
-        self.assertEqual(expected_test_bel_4_metadata, g.document)
-
         actual_definitions = {}
         actual_definitions.update(g.namespace_url)
         actual_definitions.update(g.namespace_owl)
 
         self.assertEqual(expected_definitions, actual_definitions)
 
-        a = 'Protein', 'HGNC', 'AKT1'
-        b = 'Protein', 'HGNC', 'EGFR'
+        expected_annotations = {
+            'Wine': wine_iri
+        }
+
+        actual_annotations = {}
+        actual_annotations.update(g.annotation_url)
+        actual_annotations.update(g.annotation_owl)
+
+        self.assertEqual(expected_annotations, actual_annotations)
+
+        a = PROTEIN, 'HGNC', 'AKT1'
+        b = PROTEIN, 'HGNC', 'EGFR'
         self.assertHasNode(g, a)
         self.assertHasNode(g, b)
         self.assertHasEdge(g, a, b)
 
-        self.assertHasEdge(g, ('Abundance', "PIZZA", "MeatTopping"), ('Abundance', 'WINE', 'Wine'))
-        self.assertHasEdge(g, ('Abundance', "PIZZA", "TomatoTopping"), ('Abundance', 'WINE', 'Wine'))
-        self.assertHasEdge(g, ('Abundance', 'WINE', 'WhiteWine'), ('Abundance', "PIZZA", "FishTopping"))
+        annots = {'Wine': 'Cotturi'}
+        self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
+        self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "TomatoTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
+        self.assertHasEdge(g, (ABUNDANCE, 'WINE', 'WhiteWine'), (ABUNDANCE, "PIZZA", "FishTopping"), **annots)

@@ -56,6 +56,6 @@ class TestCache(unittest.TestCase):
     @mock_parse_owl_pybel
     def test_insert_owl(self, m1, m2):
         self.cm.ensure_namespace_owl(wine_iri)
-        self.assertIn(wine_iri, self.cm.term_cache)
-        self.assertIn('ChateauMorgon', self.cm.term_cache[wine_iri])
-        self.assertIn('Winery', self.cm.term_cache[wine_iri])
+        self.assertIn(wine_iri, self.cm.namespace_term_cache)
+        self.assertIn('ChateauMorgon', self.cm.namespace_term_cache[wine_iri])
+        self.assertIn('Winery', self.cm.namespace_term_cache[wine_iri])

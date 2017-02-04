@@ -232,6 +232,9 @@ def to_bel(graph, file=sys.stdout):
     for annotation, url in sorted(graph.annotation_url.items(), key=itemgetter(0)):
         print('DEFINE ANNOTATION {} AS URL "{}"'.format(annotation, url), file=file)
 
+    for annotation, url in sorted(graph.annotation_owl.items(), key=itemgetter(0)):
+        print('DEFINE ANNOTATION {} AS OWL "{}"'.format(annotation, url), file=file)
+
     for annotation, an_list in sorted(graph.annotation_list.items(), key=itemgetter(0)):
         an_list_str = ', '.join('"{}"'.format(e) for e in an_list)
         print('DEFINE ANNOTATION {} AS LIST {{{}}}'.format(annotation, an_list_str), file=file)

@@ -8,7 +8,7 @@ This module supports the relation parser by handling statements.
 
 import logging
 
-from pyparsing import Suppress, And, Word, Optional
+from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
 from . import language
@@ -47,6 +47,7 @@ class MetadataParser(BaseParser):
         self.namespace_url_dict = {}
         self.namespace_owl_dict = {}
         self.annotation_url_dict = {}
+        self.annotations_owl_dict = {}
         self.annotation_list_list = []
 
         as_tag = Suppress(BEL_KEYWORD_AS)
@@ -68,6 +69,7 @@ class MetadataParser(BaseParser):
 
         annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ppc.identifier('name'), as_tag])
         self.annotation_url = And([annotation_tag, url_tag, quote('url')])
+        self.annotation_owl = And([annotation_tag, owl_tag, quote('url')])
         self.annotation_list = And([annotation_tag, list_tag, delimitedSet('values')])
         self.annotation_pattern = And([annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote('value')])
 
@@ -75,11 +77,19 @@ class MetadataParser(BaseParser):
         self.namespace_url.setParseAction(self.handle_namespace_url)
         self.namespace_owl.setParseAction(self.handle_namespace_owl)
         self.annotation_url.setParseAction(self.handle_annotations_url)
+        self.annotation_owl.setParseAction(self.handle_annotation_owl)
         self.annotation_list.setParseAction(self.handle_annotation_list)
         self.annotation_pattern.setParseAction(self.handle_annotation_pattern)
 
-        self.language = (self.document | self.namespace_url | self.namespace_owl |
-                         self.annotation_url | self.annotation_list | self.annotation_pattern)
+        self.language = MatchFirst([
+            self.document,
+            self.namespace_url,
+            self.namespace_owl,
+            self.annotation_url,
+            self.annotation_list,
+            self.annotation_owl,
+            self.annotation_pattern
+        ])
 
     def get_language(self):
         return self.language
@@ -142,6 +152,25 @@ class MetadataParser(BaseParser):
 
         self.namespace_dict[name] = {term: functions for term in terms}
         self.namespace_owl_dict[name] = url
+
+        return tokens
+
+    def handle_annotation_owl(self, s, l, tokens):
+        name = tokens['name']
+
+        if name in self.annotations_dict:
+            log.warning('Tried to overwrite owl annotation: {}'.format(name))
+            return tokens
+
+        url = tokens['url']
+
+        terms = self.cache_manager.get_annotation_owl_terms(url)
+
+        if 0 == len(terms):
+            raise ValueError("Empty ontology: {}".format(url))
+
+        self.annotations_dict[name] = set(terms)
+        self.annotations_owl_dict[name] = url
 
         return tokens
 

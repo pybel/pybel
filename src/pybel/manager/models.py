@@ -136,7 +136,7 @@ class AnnotationEntry(Base):
         return 'AnnotationEntry({}, {})'.format(self.name, self.label)
 
 
-owl_relationship = Table(
+owl_namespace_relationship = Table(
     'owl_namespace_relationship', Base.metadata,
     Column('left_id', Integer, ForeignKey('{}.id'.format(OWL_NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True),
     Column('right_id', Integer, ForeignKey('{}.id'.format(OWL_NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True)
@@ -152,7 +152,7 @@ class OwlNamespace(Base):
     entries = relationship('OwlNamespaceEntry', back_populates='owl')
 
     def __repr__(self):
-        return "Owl(iri={})>".format(self.iri)
+        return "OwlNamespace(iri={})>".format(self.iri)
 
 
 class OwlNamespaceEntry(Base):
@@ -167,12 +167,51 @@ class OwlNamespaceEntry(Base):
     owl = relationship('OwlNamespace', back_populates='entries')
 
     children = relationship('OwlNamespaceEntry',
-                            secondary=owl_relationship,
-                            primaryjoin=id == owl_relationship.c.left_id,
-                            secondaryjoin=id == owl_relationship.c.right_id)
+                            secondary=owl_namespace_relationship,
+                            primaryjoin=id == owl_namespace_relationship.c.left_id,
+                            secondaryjoin=id == owl_namespace_relationship.c.right_id)
 
     def __repr__(self):
         return 'OwlNamespaceEntry({}:{})'.format(self.owl, self.entry)
+
+
+owl_annotation_relationship = Table(
+    'owl_annotation_relationship', Base.metadata,
+    Column('left_id', Integer, ForeignKey('{}.id'.format(OWL_ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True),
+    Column('right_id', Integer, ForeignKey('{}.id'.format(OWL_ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
+)
+
+
+class OwlAnnotation(Base):
+    __tablename__ = OWL_ANNOTATION_TABLE_NAME
+
+    id = Column(Integer, primary_key=True)
+    iri = Column(Text, unique=True)
+
+    entries = relationship('OwlAnnotationEntry', back_populates='owl')
+
+    def __repr__(self):
+        return "OwlAnnotation(iri={})>".format(self.iri)
+
+
+class OwlAnnotationEntry(Base):
+    __tablename__ = OWL_ANNOTATION_ENTRY_TABLE_NAME
+
+    id = Column(Integer, primary_key=True)
+
+    entry = Column(String(255))
+    label = Column(String(255))
+
+    owl_id = Column(Integer, ForeignKey('{}.id'.format(OWL_ANNOTATION_TABLE_NAME)), index=True)
+    owl = relationship('OwlAnnotation', back_populates='entries')
+
+    children = relationship('OwlAnnotationEntry',
+                            secondary=owl_annotation_relationship,
+                            primaryjoin=id == owl_annotation_relationship.c.left_id,
+                            secondaryjoin=id == owl_annotation_relationship.c.right_id)
+
+    def __repr__(self):
+        return 'OwlAnnotationEntry({}:{})'.format(self.owl, self.entry)
 
 
 class Network(Base):

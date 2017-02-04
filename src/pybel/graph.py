@@ -39,6 +39,7 @@ GRAPH_METADATA = 'document_metadata'
 GRAPH_NAMESPACE_URL = 'namespace_url'
 GRAPH_NAMESPACE_OWL = 'namespace_owl'
 GRAPH_ANNOTATION_URL = 'annotation_url'
+GRAPH_ANNOTATION_OWL = 'annotation_owl'
 GRAPH_ANNOTATION_LIST = 'annotation_list'
 GRAPH_PYBEL_VERSION = 'pybel_version'
 
@@ -168,6 +169,7 @@ class BELGraph(nx.MultiDiGraph):
         self.graph[GRAPH_NAMESPACE_OWL] = metadata_parser.namespace_owl_dict.copy()
         self.graph[GRAPH_NAMESPACE_URL] = metadata_parser.namespace_url_dict.copy()
         self.graph[GRAPH_ANNOTATION_URL] = metadata_parser.annotation_url_dict.copy()
+        self.graph[GRAPH_ANNOTATION_OWL] = metadata_parser.annotations_owl_dict.copy()
         self.graph[GRAPH_ANNOTATION_LIST] = {e: metadata_parser.annotations_dict[e] for e in
                                              metadata_parser.annotation_list_list}
 
@@ -244,6 +246,11 @@ class BELGraph(nx.MultiDiGraph):
     def annotation_url(self):
         """A dictionary mapping the keywords used in the creation of this graph to the URLs of the BELANNO file"""
         return self.graph[GRAPH_ANNOTATION_URL]
+
+    @property
+    def annotation_owl(self):
+        """A dictionary mapping the keywords to the URL of the OWL file"""
+        return self.graph[GRAPH_ANNOTATION_OWL]
 
     @property
     def annotation_list(self):
