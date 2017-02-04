@@ -231,9 +231,9 @@ class CacheManager(BaseCacheManager):
 
         graph = parse_owl(iri)
 
-        owl = models.Owl(iri=iri)
+        owl = models.OwlNamespace(iri=iri)
 
-        entries = {node: models.OwlEntry(entry=node) for node in graph.nodes_iter()}
+        entries = {node: models.OwlNamespaceEntry(entry=node) for node in graph.nodes_iter()}
 
         owl.entries = list(entries.values())
 
@@ -255,7 +255,7 @@ class CacheManager(BaseCacheManager):
         if iri in self.term_cache:
             return
         try:
-            results = self.session.query(models.Owl).filter(models.Owl.iri == iri).one()
+            results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one()
         except NoResultFound:
             results = self.insert_owl(iri)
 
@@ -295,7 +295,7 @@ class CacheManager(BaseCacheManager):
 
     def ls_owl(self):
         """Returns a list of the locations of the stored ontologies"""
-        return [owl.iri for owl in self.session.query(models.Owl).all()]
+        return [owl.iri for owl in self.session.query(models.OwlNamespace).all()]
 
     def load_default_owl(self):
         """Caches the default set of ontologies"""

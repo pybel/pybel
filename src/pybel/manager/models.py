@@ -16,8 +16,10 @@ NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalences'
 
 NETWORK_TABLE_NAME = 'pybel_network'
 
-OWL_TABLE_NAME = 'Owl'
-OWL_ENTRY_TABLE_NAME = 'OwlEntry'
+OWL_NAMESPACE_TABLE_NAME = 'pybel_owlNamespace'
+OWL_NAMESPACE_ENTRY_TABLE_NAME = 'pybel_owlNamespaceEntry'
+OWL_ANNOTATION_TABLE_NAME = 'pybel_owlAnnotation'
+OWL_ANNOTATION_ENTRY_TABLE_NAME = 'pybel_owlAnnotationEntry'
 
 Base = declarative_base()
 
@@ -135,42 +137,42 @@ class AnnotationEntry(Base):
 
 
 owl_relationship = Table(
-    'owl_relationship', Base.metadata,
-    Column('left_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True),
-    Column('right_id', Integer, ForeignKey('OwlEntry.id'), primary_key=True)
+    'owl_namespace_relationship', Base.metadata,
+    Column('left_id', Integer, ForeignKey('{}.id'.format(OWL_NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True),
+    Column('right_id', Integer, ForeignKey('{}.id'.format(OWL_NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True)
 )
 
 
-class Owl(Base):
-    __tablename__ = OWL_TABLE_NAME
+class OwlNamespace(Base):
+    __tablename__ = OWL_NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
     iri = Column(Text, unique=True)
 
-    entries = relationship("OwlEntry", back_populates='owl')
+    entries = relationship('OwlNamespaceEntry', back_populates='owl')
 
     def __repr__(self):
         return "Owl(iri={})>".format(self.iri)
 
 
-class OwlEntry(Base):
-    __tablename__ = OWL_ENTRY_TABLE_NAME
+class OwlNamespaceEntry(Base):
+    __tablename__ = OWL_NAMESPACE_ENTRY_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
 
     entry = Column(String(255))
     encoding = Column(String(50))
 
-    owl_id = Column(Integer, ForeignKey('Owl.id'), index=True)
-    owl = relationship('Owl', back_populates='entries')
+    owl_id = Column(Integer, ForeignKey('{}.id'.format(OWL_NAMESPACE_TABLE_NAME)), index=True)
+    owl = relationship('OwlNamespace', back_populates='entries')
 
-    children = relationship('OwlEntry',
+    children = relationship('OwlNamespaceEntry',
                             secondary=owl_relationship,
                             primaryjoin=id == owl_relationship.c.left_id,
                             secondaryjoin=id == owl_relationship.c.right_id)
 
     def __repr__(self):
-        return 'OwlEntry({}:{})'.format(self.owl, self.entry)
+        return 'OwlNamespaceEntry({}:{})'.format(self.owl, self.entry)
 
 
 class Network(Base):
