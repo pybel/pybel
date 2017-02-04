@@ -49,6 +49,8 @@ class TestCanonicalize(unittest.TestCase):
         with open(self.path, 'w') as f:
             pybel.to_bel(original, f)
 
+        log.info('reloading BEL')
+
         reloaded = pybel.from_path(self.path)
 
         original.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
@@ -56,7 +58,9 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual(original.document, reloaded.document)
         self.assertEqual(original.namespace_owl, reloaded.namespace_owl)
         self.assertEqual(original.namespace_url, reloaded.namespace_url)
+        self.assertEqual(original.namespace_pattern, reloaded.namespace_pattern)
         self.assertEqual(original.annotation_url, reloaded.annotation_url)
+        self.assertEqual(original.annotation_owl, reloaded.annotation_owl)
         self.assertEqual(original.annotation_list, reloaded.annotation_list)
 
         self.assertEqual(set(original.nodes()), set(reloaded.nodes()))

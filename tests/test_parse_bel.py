@@ -158,7 +158,7 @@ class TestGmod(unittest.TestCase):
 
         self.expected = {
             KIND: GMOD,
-            GmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Me')
+            GmodParser.IDENTIFIER: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Me'}
         }
 
     def test_gmod_short(self):
@@ -1187,7 +1187,7 @@ class TestProtein(TestTokenParserBase):
 
         expected_node = PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, function=PROTEIN)
+        self.assertHasNode(expected_node, **{FUNCTION:PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, var(p.40*))'

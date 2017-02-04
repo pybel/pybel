@@ -7,6 +7,7 @@ This module supports the relation parser by handling statements.
 """
 
 import logging
+import re
 
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
@@ -50,6 +51,8 @@ class MetadataParser(BaseParser):
         self.annotations_owl_dict = {}
         self.annotation_list_list = []
 
+        self.namespace_re = {}
+
         as_tag = Suppress(BEL_KEYWORD_AS)
         url_tag = Suppress(BEL_KEYWORD_URL)
         list_tag = Suppress(BEL_KEYWORD_LIST)
@@ -66,6 +69,7 @@ class MetadataParser(BaseParser):
         namespace_tag = And([define_tag, Suppress(BEL_KEYWORD_NAMESPACE), ppc.identifier('name'), as_tag])
         self.namespace_url = And([namespace_tag, url_tag, quote('url')])
         self.namespace_owl = And([namespace_tag, owl_tag, Optional(function_tags('functions')), quote('url')])
+        self.namespace_pattern = And([namespace_tag, Suppress(BEL_KEYWORD_PATTERN), quote('value')])
 
         annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ppc.identifier('name'), as_tag])
         self.annotation_url = And([annotation_tag, url_tag, quote('url')])
@@ -76,6 +80,7 @@ class MetadataParser(BaseParser):
         self.document.setParseAction(self.handle_document)
         self.namespace_url.setParseAction(self.handle_namespace_url)
         self.namespace_owl.setParseAction(self.handle_namespace_owl)
+        self.namespace_pattern.setParseAction(self.handle_namespace_pattern)
         self.annotation_url.setParseAction(self.handle_annotations_url)
         self.annotation_owl.setParseAction(self.handle_annotation_owl)
         self.annotation_list.setParseAction(self.handle_annotation_list)
@@ -88,7 +93,8 @@ class MetadataParser(BaseParser):
             self.annotation_url,
             self.annotation_list,
             self.annotation_owl,
-            self.annotation_pattern
+            self.annotation_pattern,
+            self.namespace_pattern
         ])
 
     def get_language(self):
@@ -206,3 +212,8 @@ class MetadataParser(BaseParser):
     def handle_annotation_pattern(self, s, l, tokens):
         # TODO implement
         raise NotImplementedError('Custom annotation regex matching not yet implemented')
+
+    def handle_namespace_pattern(self, s, l, tokens):
+        name = tokens['name']
+        self.namespace_re[name] = tokens['value']
+        return tokens

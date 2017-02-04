@@ -275,6 +275,12 @@ class BelReconstitutionMixin(unittest.TestCase):
         self.assertIsInstance(g, BELGraph)
         self.assertEqual(0, len(g.warnings), msg='Document warnings:\n{}'.format('\n'.join(map(str, g.warnings))))
 
+        self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(g.namespace_url))
+        self.assertEqual(set(), set(g.namespace_owl))
+        self.assertEqual({'dbSNP'}, set(g.namespace_pattern))
+        self.assertEqual(set(), set(g.annotation_owl))
+        self.assertEqual({'TESTAN1', 'TESTAN2'}, set(g.annotation_list))
+
         x = {
             (ABUNDANCE, 'CHEBI', 'oxygen atom'),
             (GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))),
@@ -390,6 +396,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             (PROTEIN, 'HGNC', 'MAPT'),
             (GENE, 'HGNC', 'ARRDC2'),
             (GENE, 'HGNC', 'ARRDC3'),
+            (GENE, 'dbSNP', 'rs123456')
         }
 
         self.assertEqual(x, set(g.nodes()))
@@ -722,6 +729,8 @@ class BelReconstitutionMixin(unittest.TestCase):
              {RELATION: 'hasComponent'}),
             ((GENE, 'HGNC', 'ARRDC2'), (GENE, 'HGNC', 'ARRDC3'), {RELATION: EQUIVALENT_TO}),
             ((GENE, 'HGNC', 'ARRDC3'), (GENE, 'HGNC', 'ARRDC2'), {RELATION: EQUIVALENT_TO}),
+            ((GENE, 'dbSNP', '123456'), (GENE, 'HGNC', 'CFTR', (HGVS, 'delCTT')), {RELATION: EQUIVALENT_TO}),
+            ((GENE, 'HGNC', 'CFTR', (HGVS, 'delCTT')), (GENE, 'dbSNP', '123456'), {RELATION: EQUIVALENT_TO}),
         ]
 
         for u, v, d in e:

@@ -227,6 +227,9 @@ def to_bel(graph, file=sys.stdout):
     for namespace, url in sorted(graph.namespace_owl.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url), file=file)
 
+    for namespace, pattern in sorted(graph.namespace_pattern.items(), key=itemgetter(0)):
+        print('DEFINE NAMESPACE {} AS PATTERN "{}"'.format(namespace, pattern), file=file)
+
     print('###############################################\n', file=file)
 
     for annotation, url in sorted(graph.annotation_url.items(), key=itemgetter(0)):

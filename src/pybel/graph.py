@@ -38,6 +38,7 @@ REQUIRED_METADATA = [
 GRAPH_METADATA = 'document_metadata'
 GRAPH_NAMESPACE_URL = 'namespace_url'
 GRAPH_NAMESPACE_OWL = 'namespace_owl'
+GRAPH_NAMESPACE_PATTERN = 'namespace_pattern'
 GRAPH_ANNOTATION_URL = 'annotation_url'
 GRAPH_ANNOTATION_OWL = 'annotation_owl'
 GRAPH_ANNOTATION_LIST = 'annotation_list'
@@ -114,6 +115,7 @@ class BELGraph(nx.MultiDiGraph):
             graph=self,
             valid_namespaces=metadata_parser.namespace_dict,
             valid_annotations=metadata_parser.annotations_dict,
+            namespace_re=metadata_parser.namespace_re,
             complete_origin=complete_origin,
             allow_naked_names=allow_naked_names,
             allow_nested=allow_nested,
@@ -168,6 +170,7 @@ class BELGraph(nx.MultiDiGraph):
 
         self.graph[GRAPH_NAMESPACE_OWL] = metadata_parser.namespace_owl_dict.copy()
         self.graph[GRAPH_NAMESPACE_URL] = metadata_parser.namespace_url_dict.copy()
+        self.graph[GRAPH_NAMESPACE_PATTERN] = metadata_parser.namespace_re.copy()
         self.graph[GRAPH_ANNOTATION_URL] = metadata_parser.annotation_url_dict.copy()
         self.graph[GRAPH_ANNOTATION_OWL] = metadata_parser.annotations_owl_dict.copy()
         self.graph[GRAPH_ANNOTATION_LIST] = {e: metadata_parser.annotations_dict[e] for e in
@@ -241,6 +244,11 @@ class BELGraph(nx.MultiDiGraph):
     def namespace_owl(self):
         """A dictionary mapping the keywords used in the creation of this graph to the URLs of the OWL file"""
         return self.graph[GRAPH_NAMESPACE_OWL]
+
+    @property
+    def namespace_pattern(self):
+        """A dictionary mapping the keywords used in the creation of this graph to their regex patterns"""
+        return self.graph[GRAPH_NAMESPACE_PATTERN]
 
     @property
     def annotation_url(self):

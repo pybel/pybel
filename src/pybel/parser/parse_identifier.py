@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import re
 
 from pyparsing import *
 
 from .baseparser import BaseParser, word, quote
 from .parse_exceptions import UndefinedNamespaceWarning, NakedNameWarning, MissingNamespaceNameWarning, \
-    MissingDefaultNameWarning
+    MissingDefaultNameWarning, MissingNamespaceRegexWarning
 from ..constants import DIRTY, NAMESPACE, NAME
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 
 class IdentifierParser(BaseParser):
-    def __init__(self, valid_namespaces=None, default_namespace=None, mapping=None, allow_naked_names=False):
+    def __init__(self, valid_namespaces=None, default_namespace=None, namespace_re=None, mapping=None,
+                 allow_naked_names=False):
         """Builds a namespace parser.
         :param valid_namespaces: dictionary of {namespace: set of names}
         :type valid_namespaces: dict
@@ -27,6 +29,7 @@ class IdentifierParser(BaseParser):
         """
 
         self.namespace_dict = valid_namespaces
+        self.namespace_re = {k: re.compile(v) for k, v in namespace_re.items()} if namespace_re is not None else {}
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
 
         self.identifier_qualified = word(NAMESPACE) + Suppress(':') + (word | quote)(NAME)
@@ -50,12 +53,15 @@ class IdentifierParser(BaseParser):
 
     def handle_identifier_qualified(self, s, l, tokens):
         namespace = tokens[NAMESPACE]
-        if namespace not in self.namespace_dict:
+
+        if namespace not in self.namespace_dict and namespace not in self.namespace_re:
             raise UndefinedNamespaceWarning('"{}" is not defined as a namespace'.format(namespace))
 
         name = tokens[NAME]
-        if name not in self.namespace_dict[namespace]:
+        if namespace in self.namespace_dict and name not in self.namespace_dict[namespace]:
             raise MissingNamespaceNameWarning(name, namespace)
+        elif namespace in self.namespace_re and not self.namespace_re[namespace].search(name):
+            raise MissingNamespaceRegexWarning(name, namespace)
 
         return tokens
 

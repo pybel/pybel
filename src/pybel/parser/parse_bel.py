@@ -24,6 +24,7 @@ from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarni
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
 from .utils import list2tuple, cartesian_dictionary
+from .. import constants as pbc
 from ..constants import EQUIVALENT_TO
 from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
     GOCC_KEYWORD
@@ -32,8 +33,6 @@ from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, H
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
     CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
     TRANSFORMATION, FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
-
-from .. import constants as pbc
 
 log = logging.getLogger('pybel')
 
@@ -72,7 +71,8 @@ def fusion_handler_wrapper(reference, start):
 
 class BelParser(BaseParser):
     def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
-                 complete_origin=False, allow_naked_names=False, allow_nested=False, autostreamline=False):
+                 namespace_re=None, complete_origin=False, allow_naked_names=False, allow_nested=False,
+                 autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: the graph to put the network in. Constructs new :class:`nx.MultiDiGraph` if None
@@ -81,6 +81,8 @@ class BelParser(BaseParser):
         :type valid_namespaces: dict
         :param valid_annotations: a dict of {annotation: set of values}
         :type valid_annotations: dict
+        :param namespace_re: a dictionary {namespace: regular expression strings}
+        :type namespace_re: dict
         :param namespace_mapping: a dict of {name: {value: (other_namespace, other_name)}}
         :type namespace_mapping: dict
         :param complete_origin: if true, add the gene and RNA origin of proteins to the network during compilation
@@ -96,9 +98,12 @@ class BelParser(BaseParser):
         self.allow_nested = allow_nested
         self.complete_origin = complete_origin
         self.control_parser = ControlParser(valid_annotations=valid_annotations)
-        self.identifier_parser = IdentifierParser(valid_namespaces=valid_namespaces,
-                                                  mapping=namespace_mapping,
-                                                  allow_naked_names=self.allow_naked_names)
+        self.identifier_parser = IdentifierParser(
+            valid_namespaces=valid_namespaces,
+            namespace_re=namespace_re,
+            mapping=namespace_mapping,
+            allow_naked_names=self.allow_naked_names
+        )
 
         identifier = Group(self.identifier_parser.get_language())(IDENTIFIER)
 
@@ -503,6 +508,9 @@ class BelParser(BaseParser):
             return tokens
 
         namespace, name = tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
+
+        if namespace in self.identifier_parser.namespace_re:
+            return tokens
 
         if self.allow_naked_names and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
             return tokens

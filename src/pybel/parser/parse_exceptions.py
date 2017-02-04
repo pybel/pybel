@@ -44,6 +44,18 @@ class MissingNamespaceNameWarning(PyBelWarning):
         return '"{}" is not in the {} namespace'.format(self.name, self.namespace)
 
 
+class MissingNamespaceRegexWarning(PyBelWarning):
+    """Raised if reference not matching regex"""
+
+    def __init__(self, name, namespace):
+        PyBelWarning.__init__(self, name, namespace)
+        self.name = name
+        self.namespace = namespace
+
+    def __str__(self):
+        return '''"{}" doesn't match the regex for {} namespace'''.format(self.name, self.namespace)
+
+
 class UndefinedAnnotationWarning(PyBelWarning):
     """Raised when an undefined annotation is used"""
 
