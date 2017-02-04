@@ -345,25 +345,25 @@ class TestOwlManager(unittest.TestCase):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_ensure(self, m1, m2):
-        self.manager.ensure_owl(pizza_iri)
-        entries = self.manager.get_owl_terms(pizza_iri)
+        self.manager.ensure_namespace_owl(pizza_iri)
+        entries = self.manager.get_namespace_owl_terms(pizza_iri)
         self.assertEqual(TestParsePizza.expected_nodes, entries)
 
         # get edges out
-        edges = self.manager.get_owl_edges(pizza_iri)
+        edges = self.manager.get_namespace_owl_edges(pizza_iri)
 
         self.assertEqual(TestParsePizza.expected_edges, edges)
 
         # check nothing bad happens on second insert
-        self.manager.ensure_owl(pizza_iri)
+        self.manager.ensure_namespace_owl(pizza_iri)
 
     def test_missing(self):
         with self.assertRaises(Exception):
-            self.manager.ensure_owl('http://example.com/not_owl.owl')
+            self.manager.ensure_namespace_owl('http://example.com/not_owl.owl')
 
     def test_insert_missing(self):
         with self.assertRaises(Exception):
-            self.manager.insert_owl('http://cthoyt.com/not_owl.owl')
+            self.manager.insert_namespace_owl('http://cthoyt.com/not_owl.owl')
 
 
 class TestIntegration(TestOwlBase):

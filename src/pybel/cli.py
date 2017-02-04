@@ -133,7 +133,7 @@ def setup(path, skip_namespaces, skip_annotations, skip_owl):
     if not skip_annotations:
         cm.load_default_annotations()
     if not skip_owl:
-        cm.load_default_owl()
+        cm.load_default_namespace_owl()
 
 
 @manage.command(help='Remove default definition cache at {}'.format(DEFAULT_CACHE_LOCATION))
@@ -152,7 +152,7 @@ def insert(url, path):
     elif url.endswith('.belanno'):
         dcm.ensure_annotation(url)
     else:
-        dcm.ensure_owl(url)
+        dcm.ensure_namespace_owl(url)
 
 
 @manage.command(help='List URLs of cached resources, or contents of a specific resource')
@@ -169,7 +169,7 @@ def ls(url, path):
         elif url.endswith('.belanno'):
             res = dcm.get_annotation(url)
         else:
-            res = dcm.get_owl_terms(url)
+            res = dcm.get_namespace_owl_terms(url)
         click.echo_via_pager('\n'.join(res))
 
 

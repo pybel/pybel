@@ -135,7 +135,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        terms = self.cache_manager.get_owl_terms(url)
+        terms = self.cache_manager.get_namespace_owl_terms(url)
 
         if 0 == len(terms):
             raise ValueError("Empty ontology: {}".format(url))

@@ -221,7 +221,7 @@ class CacheManager(BaseCacheManager):
 
     # NAMESPACE OWL MANAGEMENT
 
-    def insert_owl(self, iri):
+    def insert_namespace_owl(self, iri):
         """Caches an ontology at the given IRI
 
         :param iri: the location of the ontology
@@ -245,7 +245,7 @@ class CacheManager(BaseCacheManager):
 
         return owl
 
-    def ensure_owl(self, iri):
+    def ensure_namespace_owl(self, iri):
         """Caches an ontology at the given IRI if it is not already in the cache
 
         :param iri: the location of the ontology
@@ -257,7 +257,7 @@ class CacheManager(BaseCacheManager):
         try:
             results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one()
         except NoResultFound:
-            results = self.insert_owl(iri)
+            results = self.insert_namespace_owl(iri)
 
         self.term_cache[iri] = set(entry.entry for entry in results.entries)
         self.edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
@@ -266,44 +266,44 @@ class CacheManager(BaseCacheManager):
         graph.add_edges_from(self.edge_cache[iri])
         self.graph_cache[iri] = graph
 
-    def get_owl_terms(self, iri):
+    def get_namespace_owl_terms(self, iri):
         """Gets a set of classes and individuals in the ontology at the given IRI
 
         :param iri: the location of the ontology
         :type iri: str
         """
-        self.ensure_owl(iri)
+        self.ensure_namespace_owl(iri)
         return self.term_cache[iri]
 
-    def get_owl_edges(self, iri):
+    def get_namespace_owl_edges(self, iri):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
 
         :param iri: the location of the ontology
         :type iri: str
         """
-        self.ensure_owl(iri)
+        self.ensure_namespace_owl(iri)
         return self.edge_cache[iri]
 
-    def get_owl_graph(self, iri):
+    def get_namespace_owl_graph(self, iri):
         """Gets the graph representing the ontology at the given IRI
 
         :param iri: the location of the ontology
         :type iri: str
         """
-        self.ensure_owl(iri)
+        self.ensure_namespace_owl(iri)
         return self.graph_cache[iri]
 
-    def ls_owl(self):
+    def ls_namespace_owl(self):
         """Returns a list of the locations of the stored ontologies"""
         return [owl.iri for owl in self.session.query(models.OwlNamespace).all()]
 
-    def load_default_owl(self):
+    def load_default_namespace_owl(self):
         """Caches the default set of ontologies"""
         for url in defaults.default_owl:
-            self.ensure_owl(url)
+            self.ensure_namespace_owl(url)
 
     def ls(self):
-        return itt.chain(self.ls_namespaces(), self.ls_annotations(), self.ls_owl())
+        return itt.chain(self.ls_namespaces(), self.ls_annotations(), self.ls_namespace_owl())
 
     # Manage Equivalences
 
