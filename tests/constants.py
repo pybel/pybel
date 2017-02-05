@@ -20,7 +20,7 @@ from pybel.constants import PROTEIN, ABUNDANCE, GENE, RNA, MIRNA, COMPLEX, \
     COMPOSITE, BIOPROCESS, PATHOLOGY, REACTION, PMOD, HGVS, GMOD, PYBEL_DEFAULT_NAMESPACE, FRAGMENT
 from pybel.constants import RELATION, EQUIVALENT_TO, HAS_VARIANT, HAS_REACTANT, HAS_PRODUCT, SUBJECT, OBJECT
 from pybel.manager.utils import urldefrag, OWLParser
-from pybel.parser import VariantParser
+from pybel.parser.modifiers import VariantParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
 

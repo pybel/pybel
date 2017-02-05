@@ -11,9 +11,8 @@ from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, PYBEL_DEFAULT_NAMESPACE,
 from pybel.constants import PROTEIN, GENE, RNA, DEGRADATION, \
     TRANSFORMATION, TRANSLOCATION, IDENTIFIER, FUSION, FROM_LOC, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO
 from pybel.constants import RELATION, EQUIVALENT_TO, SUBJECT, OBJECT, MODIFIER, TARGET, EFFECT, HAS_MEMBER
-from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser, PsubParser, GsubParser, TruncParser, \
-    FusionParser, LocationParser, FragmentParser
-from pybel.parser.parse_abundance_modifier import VariantParser
+from pybel.parser.modifiers import FusionParser, LocationParser, GmodParser, FragmentParser, PmodParser
+from pybel.parser.modifiers import GsubParser, TruncParser, PsubParser, VariantParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from pybel.utils import default_identifier
@@ -1178,7 +1177,7 @@ class TestProtein(TestTokenParserBase):
 
         expected_node = PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION:PROTEIN})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, var(p.40*))'
@@ -1816,7 +1815,7 @@ class TestComplex(TestTokenParserBase):
 
     def test_complex_list_long(self):
         statement = 'complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))'
-        result = self.parser.parseString(statement)
+        self.parser.parseString(statement)
 
 
 class TestComposite(TestTokenParserBase):

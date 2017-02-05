@@ -14,7 +14,10 @@ from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS
 from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
     LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER, FUSION
 from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
-from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser, VariantParser, FusionParser
+from .parser.modifiers import VariantParser, FusionParser
+from .parser.modifiers.fragment import FragmentParser
+from .parser.modifiers.gene_modification import GmodParser
+from .parser.modifiers.protein_modification import PmodParser
 from .parser.utils import ensure_quotes
 
 __all__ = ['to_bel']

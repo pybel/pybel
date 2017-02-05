@@ -17,8 +17,8 @@ from pyparsing import pyparsing_common as ppc
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .language import value_map
-from .parse_abundance_modifier import VariantParser, PsubParser, GsubParser, FragmentParser, FusionParser, \
-    LocationParser, TruncParser, PmodParser, GmodParser, canonicalize_variant
+from .modifiers import FusionParser, VariantParser, canonicalize_variant, FragmentParser, GmodParser, GsubParser, \
+    LocationParser, PmodParser, PsubParser, TruncParser
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
