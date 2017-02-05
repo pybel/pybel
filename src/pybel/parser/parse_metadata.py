@@ -7,7 +7,6 @@ This module supports the relation parser by handling statements.
 """
 
 import logging
-import re
 
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
@@ -22,6 +21,17 @@ log = logging.getLogger('pybel')
 
 __all__ = ['MetadataParser']
 
+as_tag = Suppress(BEL_KEYWORD_AS)
+url_tag = Suppress(BEL_KEYWORD_URL)
+list_tag = Suppress(BEL_KEYWORD_LIST)
+owl_tag = Suppress(BEL_KEYWORD_OWL)
+set_tag = Suppress(BEL_KEYWORD_SET)
+define_tag = Suppress(BEL_KEYWORD_DEFINE)
+
+function_tags = Word(''.join(language.value_map))
+
+value = quote | ppc.identifier
+
 
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document.
@@ -29,7 +39,7 @@ class MetadataParser(BaseParser):
     See: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define
     """
 
-    def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, ):
+    def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, namespace_re=None):
         """
         :param cache_manager: a namespace namespace_cache manager
         :type cache_manager: pybel.manager.CacheManager
@@ -37,32 +47,23 @@ class MetadataParser(BaseParser):
         :type valid_namespaces: dict
         :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
         :type valid_annotations: dict
+        :param namespace_re: a dictionary of pre-loaded namespace regular expressions {name: regex string}
+        :type namespace_re: dict
         """
 
         self.cache_manager = cache_manager
 
-        self.document_metadata = {}
         self.namespace_dict = {} if valid_namespaces is None else valid_namespaces
         self.annotations_dict = {} if valid_annotations is None else valid_annotations
+        self.namespace_re = {} if namespace_re is None else namespace_re
+
+        self.document_metadata = {}
 
         self.namespace_url_dict = {}
         self.namespace_owl_dict = {}
         self.annotation_url_dict = {}
         self.annotations_owl_dict = {}
         self.annotation_list_list = []
-
-        self.namespace_re = {}
-
-        as_tag = Suppress(BEL_KEYWORD_AS)
-        url_tag = Suppress(BEL_KEYWORD_URL)
-        list_tag = Suppress(BEL_KEYWORD_LIST)
-        owl_tag = Suppress(BEL_KEYWORD_OWL)
-        set_tag = Suppress(BEL_KEYWORD_SET)
-        define_tag = Suppress(BEL_KEYWORD_DEFINE)
-
-        function_tags = Word(''.join(language.value_map))
-
-        value = quote | ppc.identifier
 
         self.document = And([set_tag, Suppress(BEL_KEYWORD_DOCUMENT), word('key'), Suppress('='), value('value')])
 
