@@ -89,6 +89,9 @@ The remaining information is encoded in the edges to the resulting protein nodes
 
 Edges
 -----
+
+Activities
+~~~~~~~~~~
 Modifiers are added to this structure as well. Under this schema,
 :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
 
@@ -130,51 +133,12 @@ Modifiers are added to this structure as well. Under this schema,
         },
     }
 
-Location data also is added into the information in the edge for the node (subject or object) for which it was
-annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
 
-.. code::
+.. automodule:: pybel.parser.modifiers.location
 
-    {
-        'subject': {
-            'function': 'Protein',
-            'identifier': 'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'GSK3B'
-            },
-            'variants': [
-                {
-                    'kind': 'pmod',
-                    'code': 'Ser',
-                    'identifier': {
-                        'name': 'Ph',
-                        'namespace': 'PYBEL'
-                    },
-                    'pos': 9
-                }
-            ],
-            'location': {
-                'namespace': 'GOCC',
-                'name': 'lysozome'
-            }
-        },
-        'relation': 'positiveCorrelation',
-        'object': {
-            'modifier': 'Activity',
-            'target': {
-                'function': 'Protein',
-                'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'GSK3B'
-                }
-            },
-            'effect': {
-                'name': 'kin',
-                'namespace': 'PYBEL'
-            }
-        },
-    }
 
+Translocations
+~~~~~~~~~~~~~~
 Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:YFG2))` becomes:
 
 .. code::
@@ -210,6 +174,8 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
         },
     }
 
+Degradations
+~~~~~~~~~~~~
 Degradations are more simple, because there's no 'effect' entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
 
 .. code::

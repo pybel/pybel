@@ -1,10 +1,53 @@
 # -*- coding: utf-8 -*-
 
 """
-Location
-~~~~~~~~
+Locations
+~~~~~~~~~
 
-Parses loc() elements
+Location data also is added into the information in the edge for the node (subject or object) for which it was
+annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
+
+.. code::
+
+    {
+        'subject': {
+            'function': 'Protein',
+            'identifier': 'identifier': {
+                    'namespace': 'HGNC',
+                    'name': 'GSK3B'
+            },
+            'variants': [
+                {
+                    'kind': 'pmod',
+                    'code': 'Ser',
+                    'identifier': {
+                        'name': 'Ph',
+                        'namespace': 'PYBEL'
+                    },
+                    'pos': 9
+                }
+            ],
+            'location': {
+                'namespace': 'GOCC',
+                'name': 'lysozome'
+            }
+        },
+        'relation': 'positiveCorrelation',
+        'object': {
+            'modifier': 'Activity',
+            'target': {
+                'function': 'Protein',
+                'identifier': {
+                    'namespace': 'HGNC',
+                    'name': 'GSK3B'
+                }
+            },
+            'effect': {
+                'name': 'kin',
+                'namespace': 'PYBEL'
+            }
+        },
+    }
 
 .. seealso:: 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
 """
