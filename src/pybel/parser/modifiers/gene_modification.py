@@ -32,6 +32,9 @@ For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the fol
         ]
     }
 
+The addition of this function does not preclude the use of all other standard functions in BEL; however, other
+compilers probably won't support these standards. If you agree that this is useful, please contribute to discussion in
+the OpenBEL community.
 """
 
 from pyparsing import oneOf, Group
