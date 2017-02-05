@@ -39,7 +39,8 @@ class MetadataParser(BaseParser):
     See: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define
     """
 
-    def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, namespace_re=None):
+    def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, namespace_re=None,
+                 annotations_re=None):
         """
         :param cache_manager: a namespace namespace_cache manager
         :type cache_manager: pybel.manager.CacheManager
@@ -49,6 +50,8 @@ class MetadataParser(BaseParser):
         :type valid_annotations: dict
         :param namespace_re: a dictionary of pre-loaded namespace regular expressions {name: regex string}
         :type namespace_re: dict
+        :param annotations_re: a dictionary of pre-loaded annotation regular expressions {name: regex string}
+        :type annotations_re: dict
         """
 
         self.cache_manager = cache_manager
@@ -56,6 +59,7 @@ class MetadataParser(BaseParser):
         self.namespace_dict = {} if valid_namespaces is None else valid_namespaces
         self.annotations_dict = {} if valid_annotations is None else valid_annotations
         self.namespace_re = {} if namespace_re is None else namespace_re
+        self.annotations_re = {} if annotations_re is None else annotations_re
 
         self.document_metadata = {}
 
@@ -218,3 +222,16 @@ class MetadataParser(BaseParser):
         name = tokens['name']
         self.namespace_re[name] = tokens['value']
         return tokens
+
+    def dump(self):
+        """Dumps the contents of this metadata parser to a dictionary
+
+        :return: The contents of this metadata parser as a dictionary
+        :rtype: dict
+        """
+        return {
+            'namespace': self.namespace_dict.copy(),
+            'namespace_re': self.namespace_re.copy(),
+            'annotations': self.annotations_dict.copy(),
+            'annotations_re': self.annotations_re.copy(),
+        }
