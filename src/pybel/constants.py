@@ -16,8 +16,8 @@ PYBEL_DATA_DIR = os.path.join(PYBEL_DIR, 'data')
 if not os.path.exists(PYBEL_DATA_DIR):
     os.mkdir(PYBEL_DATA_DIR)
 
-DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
-DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_DEFINITION_CACHE_NAME)
+DEFAULT_CACHE_NAME = 'pybel_cache.db'
+DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
 
@@ -37,9 +37,16 @@ RELATION = 'relation'
 CITATION = 'citation'
 EVIDENCE = 'SupportingText'
 
-CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
+CITATION_TYPE = 'type'
+CITATION_NAME = 'name'
+CITATION_REFERENCE = 'reference'
+CITATION_DATE = 'date'
+CITATION_AUTHORS = 'authors'
+CITATION_COMMENTS = 'comments'
+
+CITATION_ENTRIES = CITATION_TYPE, CITATION_NAME, CITATION_REFERENCE, CITATION_DATE, CITATION_AUTHORS, CITATION_COMMENTS
 CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
-BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
+
 DIRTY = 'dirty'
 
 ACTIVITY = 'Activity'
@@ -120,3 +127,5 @@ BEL_KEYWORD_DOCUMENT = 'DOCUMENT'
 BEL_KEYWORD_PATTERN = 'PATTERN'
 BEL_KEYWORD_CITATION = 'Citation'
 BEL_KEYWORD_SUPPORT = 'SupportingText'
+
+BLACKLIST_EDGE_ATTRIBUTES = {RELATION, SUBJECT, OBJECT, CITATION, EVIDENCE}

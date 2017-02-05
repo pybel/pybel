@@ -10,7 +10,7 @@ import pybel
 from pybel.canonicalize import postpend_location, decanonicalize_node
 from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD, HAS_MEMBER, RELATION
 from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_pybel, \
-    test_bel_thorough
+    test_bel_thorough, BelReconstitutionMixin
 
 log = logging.getLogger('pybel')
 
@@ -31,7 +31,7 @@ class TestCanonicalizeHelper(unittest.TestCase):
             decanonicalize_node(x, 'test_node')
 
 
-class TestCanonicalize(unittest.TestCase):
+class TestCanonicalize(BelReconstitutionMixin, unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
         self.path = os.path.join(self.dir, 'test.bel')
@@ -41,7 +41,7 @@ class TestCanonicalize(unittest.TestCase):
             os.remove(self.path)
         os.rmdir(self.dir)
 
-    def canonicalize_helper(self, test_path, **kwargs):
+    def canonicalize_helper(self, test_path, reconstituted=None, **kwargs):
         original = pybel.from_path(test_path, **kwargs)
 
         self.assertEqual(0, len(original.warnings))
@@ -65,6 +65,10 @@ class TestCanonicalize(unittest.TestCase):
 
         self.assertEqual(set(original.nodes()), set(reloaded.nodes()))
         self.assertEqual(set(original.edges()), set(reloaded.edges()))
+
+        if reconstituted:
+            reconstituted(reloaded)
+            return
 
         # Really test everything is exactly the same, down to the edge data
 
@@ -95,4 +99,4 @@ class TestCanonicalize(unittest.TestCase):
 
     @mock_bel_resources
     def test_thorough(self, mock_get):
-        self.canonicalize_helper(test_bel_thorough, allow_nested=True)
+        self.canonicalize_helper(test_bel_thorough, reconstituted=self.bel_thorough_reconstituted, allow_nested=True)

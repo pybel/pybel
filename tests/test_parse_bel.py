@@ -54,8 +54,8 @@ class TestVariantParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_snp(self):
-        statement = 'var(delCTT)'
-        expected = build_variant_dict('delCTT')
+        statement = 'var(c.1521_1523delCTT)'
+        expected = build_variant_dict('c.1521_1523delCTT')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
@@ -672,7 +672,7 @@ class TestGene(TestTokenParserBase):
 
     def test_multiple_variants(self):
         """Test multiple variants"""
-        statement = 'g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(delCTT))'
+        statement = 'g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))'
         result = self.parser.gene.parseString(statement)
 
         expected_result = {
@@ -682,28 +682,19 @@ class TestGene(TestTokenParserBase):
                 NAME: 'AKT1'
             },
             VARIANTS: [
-                {
-                    KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
-                },
-                {
-                    KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT
-                },
-                {
-                    KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'delCTT'
-                }
+                build_variant_dict(TEST_PROTEIN_VARIANT),
+                build_variant_dict(TEST_GENE_VARIANT),
+                build_variant_dict('c.1521_1523delCTT')
             ]
         }
         self.assertEqual(expected_result, result.asDict())
 
         expected_node = (
-            GENE, 'HGNC', 'AKT1', (HGVS, TEST_GENE_VARIANT), (HGVS, 'delCTT'), (HGVS, TEST_PROTEIN_VARIANT))
+            GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, TEST_GENE_VARIANT), (HGVS, TEST_PROTEIN_VARIANT))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, function=GENE)
         self.assertEqual(decanonicalize_node(self.parser.graph, expected_node),
-                         'g(HGNC:AKT1, var(c.308G>A), var(delCTT), var(p.Phe508del))')
+                         'g(HGNC:AKT1, var(c.1521_1523delCTT), var(c.308G>A), var(p.Phe508del))')
 
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
@@ -795,17 +786,17 @@ class TestGene(TestTokenParserBase):
 
     def test_gene_variant_snp(self):
         """2.2.2 SNP"""
-        statement = 'g(SNP:rs113993960, var(delCTT))'
+        statement = 'g(SNP:rs113993960, var(c.1521_1523delCTT))'
         result = self.parser.gene.parseString(statement)
 
-        expected_result = [GENE, ['SNP', 'rs113993960'], [HGVS, 'delCTT']]
+        expected_result = [GENE, ['SNP', 'rs113993960'], [HGVS, 'c.1521_1523delCTT']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node)
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'g(SNP:rs113993960, var(delCTT))'
+        expected_canonical_bel = 'g(SNP:rs113993960, var(c.1521_1523delCTT))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
         gene_node = GENE, 'SNP', 'rs113993960'
@@ -1577,7 +1568,7 @@ class TestRna(TestTokenParserBase):
 
     def test_214e(self):
         """Test multiple variants"""
-        statement = 'r(HGNC:AKT1, var(p.Phe508del), var(delCTT))'
+        statement = 'r(HGNC:AKT1, var(p.Phe508del), var(c.1521_1523delCTT))'
         result = self.parser.rna.parseString(statement)
 
         expected_result = {
@@ -1593,18 +1584,18 @@ class TestRna(TestTokenParserBase):
                 },
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'delCTT'
+                    VariantParser.IDENTIFIER: 'c.1521_1523delCTT'
                 }
             ]
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = (RNA, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, TEST_PROTEIN_VARIANT))
+        expected_node = (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, TEST_PROTEIN_VARIANT))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: RNA})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'r(HGNC:AKT1, var(delCTT), var(p.Phe508del))'  # sorted
+        expected_canonical_bel = 'r(HGNC:AKT1, var(c.1521_1523delCTT), var(p.Phe508del))'  # sorted
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
         parent = RNA, 'HGNC', 'AKT1'
@@ -3011,8 +3002,8 @@ class TestWrite(TestTokenParserBase):
         cases = [
             ('abundance(CHEBI:"superoxide")', 'a(CHEBI:superoxide)'),
             ('g(HGNC:AKT1,var(p.Phe508del))', 'g(HGNC:AKT1, var(p.Phe508del))'),
-            ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(delCTT))',
-             'g(HGNC:AKT1, var(c.308G>A), var(delCTT), var(p.Phe508del))'),
+            ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))',
+             'g(HGNC:AKT1, var(c.1521_1523delCTT), var(c.308G>A), var(p.Phe508del))'),
             ('p(HGNC:MAPT,proteinModification(P))', 'p(HGNC:MAPT, pmod(Ph))'),
             ('proteinAbundance(HGNC:SFN)', 'p(HGNC:SFN)'),
             ('complex(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'complex(p(HGNC:SFN), p(HGNC:YWHAB))'),

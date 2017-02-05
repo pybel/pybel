@@ -46,11 +46,6 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
         self.bel_1_reconstituted(g)
 
     @mock_bel_resources
-    def test_thorough(self, mock_get):
-        g = pybel.from_path(test_bel_thorough, allow_nested=True)
-        self.bel_thorough_reconstituted(g)
-
-    @mock_bel_resources
     def test_slushy(self, mock_get):
         g = pybel.from_path(constants.test_bel_slushy)
         self.assertIsNotNone(g)
