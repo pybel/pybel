@@ -46,11 +46,6 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
         self.bel_1_reconstituted(g)
 
     @mock_bel_resources
-    def test_thorough(self, mock_get):
-        g = pybel.from_path(test_bel_thorough, allow_nested=True)
-        self.bel_thorough_reconstituted(g)
-
-    @mock_bel_resources
     def test_slushy(self, mock_get):
         g = pybel.from_path(constants.test_bel_slushy)
         self.assertIsNotNone(g)
@@ -105,6 +100,31 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
 
         self.assertEqual(80, g.warnings[16][0])
         self.assertIsInstance(g.warnings[16][2], InvalidCitationType)
+
+
+class TestRegex(unittest.TestCase):
+    def setUp(self):
+        self.parser = BelParser(valid_namespaces={}, namespace_re={'dbSNP': 'rs[0-9]*'})
+
+    def test_match(self):
+        lines = [
+            test_citation_bel,
+            test_evidence_bel,
+            'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
+        ]
+        self.parser.parse_lines(lines)
+        self.assertIn((GENE, 'dbSNP', 'rs10234'), self.parser.graph)
+        self.assertIn((GENE, 'dbSNP', 'rs10235'), self.parser.graph)
+
+    def test_no_match(self):
+        lines = [
+            test_citation_bel,
+            test_evidence_bel,
+            'g(dbSNP:10234) -- g(dbSNP:rr10235)'
+        ]
+
+        with self.assertRaises(MissingNamespaceRegexWarning):
+            self.parser.parse_lines(lines)
 
 
 class TestFull(TestTokenParserBase):

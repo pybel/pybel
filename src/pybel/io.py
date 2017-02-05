@@ -27,6 +27,7 @@ import py2neo
 import requests
 from networkx import GraphMLReader
 from networkx.readwrite import json_graph
+from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
@@ -56,6 +57,18 @@ __all__ = [
 ]
 
 log = logging.getLogger('pybel')
+
+
+def ensure_version(graph, check_version=True):
+    """Ensure that the graph was produced on this version of python
+
+    TODO: in the future, just check that the minor versions are the same,
+    because development won't be changing the data structure so much
+    """
+    version = get_distribution('pybel').version
+    if check_version and version != graph.pybel_version:
+        raise ValueError('Using version {}, tried importing from version {}'.format(version, graph.pybel_version))
+    return graph
 
 
 def from_lines(lines, **kwargs):
@@ -123,14 +136,16 @@ def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
     return pickle.dumps(graph, protocol=protocol)
 
 
-def from_bytes(bytes_graph):
+def from_bytes(bytes_graph, check_version=True):
     """Reads a graph from bytes (the result of pickling the graph)
 
     :param bytes_graph: File or filename to write
     :type bytes_graph: bytes
+    :param check_version: Checks if the graph was produced by this version of PyBEL
+    :type check_version: bool
     :rtype: :class:`BELGraph`
     """
-    return pickle.loads(bytes_graph)
+    return ensure_version(pickle.loads(bytes_graph), check_version)
 
 
 def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
@@ -146,14 +161,16 @@ def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
     nx.write_gpickle(graph, output, protocol=protocol)
 
 
-def from_pickle(path):
+def from_pickle(path, check_version=True):
     """Reads a graph from a gpickle file
 
     :param path: File or filename to read. Filenames ending in .gz or .bz2 will be uncompressed.
     :type path: file or str
+    :param check_version: Checks if the graph was produced by this version of PyBEL
+    :type check_version: bool
     :rtype: :class:`BELGraph`
     """
-    return nx.read_gpickle(path)
+    return ensure_version(nx.read_gpickle(path), check_version=check_version)
 
 
 def to_json(graph, output):
@@ -168,11 +185,13 @@ def to_json(graph, output):
     json.dump(data, output, ensure_ascii=False)
 
 
-def from_json(path):
+def from_json(path, check_version=True):
     """Reads graph from node-link JSON Object
 
     :param path: file path to read
     :type path: str
+    :param check_version: Checks if the graph was produced by this version of PyBEL
+    :type check_version: bool
     :rtype: :class:`BELGraph`
     """
     with open(os.path.expanduser(path)) as f:
@@ -182,7 +201,7 @@ def from_json(path):
         data['nodes'][i]['id'] = tuple(node['id'])
 
     g = json_graph.node_link_graph(data, directed=True, multigraph=True)
-    return BELGraph(data=g)
+    return ensure_version(BELGraph(data=g), check_version=check_version)
 
 
 def to_graphml(graph, output):
@@ -203,11 +222,13 @@ def to_graphml(graph, output):
     nx.write_graphml(g, output)
 
 
-def from_graphml(path):
+def from_graphml(path, check_version=True):
     """Reads a graph from a graphml file
 
     :param path: File or filename to write
     :type path: file or str
+    :param check_version: Checks if the graph was produced by this version of PyBEL
+    :type check_version: bool
     :rtype: :class:`BELGraph`
     """
     reader = GraphMLReader(node_type=str)
@@ -217,7 +238,7 @@ def from_graphml(path):
     for n in g.nodes_iter():
         g.node[n] = json.loads(g.node[n]['json'])
     nx.relabel_nodes(g, literal_eval, copy=False)  # shh don't tell anyone
-    return BELGraph(data=g)
+    return ensure_version(BELGraph(data=g), check_version=check_version)
 
 
 def to_csv(graph, output):

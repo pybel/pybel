@@ -16,6 +16,8 @@ DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611
 DEFINE NAMESPACE PIZZA AS OWL A "http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl"
 DEFINE NAMESPACE WINE AS OWL A "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
 
+DEFINE ANNOTATION Wine AS OWL "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine"
+
 ##################################################################################
 # Statements Section
 
@@ -29,6 +31,7 @@ p(HGNC:AKT1) -> p(HGNC:EGFR)
 
 # OWL Namespace setup
 
+SET Wine = "Cotturi"
 a(PIZZA:"MeatTopping") -> a(WINE:Wine)
 a(PIZZA:"TomatoTopping") -> a(WINE:Wine)
 a(WINE:WhiteWine) -| a(PIZZA:"FishTopping")
