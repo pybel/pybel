@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Gene Modifications
+~~~~~~~~~~~~~~~~~~
+
 PyBEL introduces the gene modification tag, gmod(), to allow for the encoding of epigenetic modifications.
 Its syntax follows the same style s the pmod() tags for proteins, and can include the following values:
 

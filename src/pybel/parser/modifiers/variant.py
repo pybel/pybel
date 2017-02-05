@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Variants
+~~~~~~~~
+
 The addition of a variant tag results in an entry called 'variants' in the data dictionary associated with a given
 node. This entry is a list with dictionaries describing each of the variants. All variants have the entry 'kind' to
 identify whether it is a PTM, gene modification, fragment, or HGVS variant. The 'kind' value for a variant
@@ -26,8 +29,10 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
    }
 
 
-.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
-.. seealso:: HVGS for conventions http://www.hgvs.org/mutnomen/recs.html
+.. seealso::
+
+    - http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
+    - HVGS for conventions http://www.hgvs.org/mutnomen/recs.html
 """
 
 from pyparsing import Word, alphanums

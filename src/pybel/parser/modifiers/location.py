@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""Parses loc() elements
+"""
+Location
+~~~~~~~~
+
+Parses loc() elements
+
 .. seealso:: 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
 """
 

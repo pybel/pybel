@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Fragments
+~~~~~~~~~
+
 The addition of a fragment results in an entry called 'variants'
 in the data dictionary associated with a given node. This entry is a list with dictionaries
 describing each of the variants. All variants have the entry 'kind' to identify whether it is

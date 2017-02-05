@@ -9,49 +9,8 @@ This allows for much easier programmatic access to answer more complicated quest
 code. Because the data structure is the same in Neo4J, the data can be directly exported with :code:`pybel.to_neo4j`.
 Neo4J supports the Cypher querying language so that the same queries can be written in an elegant and simple way.
 
-Nodes
------
-The relevant data about a node is stored in its associated dictionary in NetworkX. After parsing, :code:`p(HGNC:GSK3B)`
-becomes:
-
-.. code::
-
-    {
-        'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        }
-    }
-
-With the addition of a variant :code:`var()`, post-translational modification :code:`pmod()`, or gene modification
-:code:`gmod()` to a BEL statement, an additional entry called :code:`variants` is added. It is a list of all of the
-modifications and variants (in alphabetical order) on the node. Under this schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9))`
-becomes:
-
-.. code::
-
-    {
-        'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        },
-        'variants': [
-            {
-                'kind': 'pmod',
-                'code': 'Ser',
-                'identifier': {
-                    'name': 'Ph',
-                    'namespace': 'PYBEL'
-                },
-                'pos': 9
-            }
-        ]
-    }
-
 Nomenclature
-~~~~~~~~~~~~
+------------
 
 Mapping for BEL functions to PyBEL functions is done based on the following dictionary
 (:code:`pybel.parser.language.abundance_labels`)
@@ -82,8 +41,40 @@ Mapping for BEL functions to PyBEL functions is done based on the following dict
 But these terms can be more readily accessed by :code:`pybel.constants.PROTEIN`,
 :code:`pybel.constants.GENE`, and so on.
 
+Simple Abundances
+-----------------
+The relevant data about a node is stored in its associated dictionary in NetworkX. After parsing, :code:`p(HGNC:GSK3B)`
+becomes:
+
+.. code::
+
+    {
+        'function': 'Protein',
+        'identifier': {
+            'namespace': 'HGNC',
+            'name': 'GSK3B'
+        }
+    }
+
+.. automodule:: pybel.parser.modifiers.variant
+
+.. automodule:: pybel.parser.modifiers.gene_substitution
+
+.. automodule:: pybel.parser.modifiers.protein_substitution
+
+.. automodule:: pybel.parser.modifiers.truncation
+
+.. automodule:: pybel.parser.modifiers.fragment
+
+.. automodule:: pybel.parser.modifiers.gene_modification
+
+.. automodule:: pybel.parser.modifiers.protein_modification
+
+.. automodule:: pybel.parser.modifiers.fusion
+
+
 List Abundances
-~~~~~~~~~~~~~~~
+---------------
 Complexes and composites that are defined by lists do not recieve information about the identifier, and are only
 described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 

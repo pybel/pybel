@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Protein Substitutions
+~~~~~~~~~~~~~~~~~~~~~
+
 Protein substitutions are legacy statements defined in BEL 1.0. BEL 2.0 recommends using HGVS strings. Luckily,
 the information contained in a BEL 1.0 encoding, such as :code:`p(HGNC:APP,sub(R,275,H))` can be
 automatically translated to the appropriate HGVS :code:`p(HGNC:APP, var(p.Arg275His))`, assuming that all
@@ -22,6 +25,8 @@ The previous statements both produce the underlying data:
             }
         ]
     }
+
+.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2
 """
 
 import logging

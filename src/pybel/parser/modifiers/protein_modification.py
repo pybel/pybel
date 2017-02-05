@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Protein Modifications
+~~~~~~~~~~~~~~~~~~~~~
+
 The addition of a post-translational modification (PTM) tag results in an entry called 'variants'
 in the data dictionary associated with a given node. This entry is a list with dictionaries
 describing each of the variants. All variants have the entry 'kind' to identify whether it is

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Gene Substitutions
+~~~~~~~~~~~~~~~~~~
+
 Gene substitutions are legacy statements defined in BEL 1.0. BEL 2.0 reccomends using HGVS strings. Luckily,
 the information contained in a BEL 1.0 encoding, such as :code:`g(HGNC:APP,sub(G,275341,C))` can be
 automatically translated to the appropriate HGVS :code:`g(HGNC:APP, var(c.275341G>C))`, assuming that all
@@ -22,6 +25,8 @@ The previous statements both produce the underlying data:
             }
         ]
     }
+
+.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2
 """
 
 import logging

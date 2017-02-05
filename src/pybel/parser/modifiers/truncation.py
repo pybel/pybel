@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Truncations
+~~~~~~~~~~~
+
 Truncations in the legacy BEL 1.0 specification are automatically translated to BEL 2.0 with HGVS nomenclature.
 :code:`p(HGNC:AKT1, trunc(40))` becomes :code:`p(HGNC:AKT1, var(p.40*))` and is represented with the following
 dictionary:
@@ -28,6 +31,8 @@ of the truncation at position also includes the information that the 40th amino 
 BEL encoding should be :code:`p(HGNC:AKT1, var(p.Cys40*))`. Temporary support has been added to
 compile these statements, but it's recommended they are upgraded by reexamining the supporting text, or
 looking up the amino acid sequence.
+
+.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2
 """
 
 import logging

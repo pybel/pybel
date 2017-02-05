@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Fusions
+~~~~~~~
+
 Gene, RNA, protein, and miRNA fusions are all represented with the same underlying data structure. Below
 it is shown with uppercase letters referring to entries in :code:`pybel.constants` and
 :class:`pybel.parser.FusionParser`. For example, :code:`g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))` is represented as:
