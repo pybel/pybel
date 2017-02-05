@@ -508,7 +508,7 @@ class BelReconstitutionMixin(unittest.TestCase):
               CITATION: citation_1,
               RELATION: 'causesNoChange'}),
             ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
-             (GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'c.308G>A'),(HGVS, 'p.Phe508del')),
+             (GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'c.308G>A'), (HGVS, 'p.Phe508del')),
              {EVIDENCE: 'These are mostly made up',
               CITATION: citation_1,
               RELATION: INCREASES, SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}}}),
