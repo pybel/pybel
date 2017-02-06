@@ -59,6 +59,13 @@ class MissingNamespaceRegexWarning(PyBelWarning):
 class UndefinedAnnotationWarning(PyBelWarning):
     """Raised when an undefined annotation is used"""
 
+    def __init__(self, annotation):
+        PyBelWarning.__init__(self, annotation)
+        self.annotation = annotation
+
+    def __str__(self):
+        return '''"{}" is not defined'''.format(self.annotation)
+
 
 class MissingAnnotationKeyWarning(PyBelWarning):
     """Raised when trying to unset an annotation that is not set"""
@@ -109,13 +116,34 @@ class InvalidCitationException(PyBelWarning):
     """Raised when the format for a citation is wrong. It should have either {type, name, reference}; or
         {type, name, reference, date, authors, comments}"""
 
+    def __init__(self, citation):
+        PyBelWarning.__init__(self, citation)
+        self.citation = citation
+
+    def __str__(self):
+        return "Invalid citation, missing required fields: {}".format(self.citation)
+
 
 class MissingCitationException(PyBelWarning):
     """Tried to add an edge, but no citation present. Most likely due to previous improperly formatted citation"""
 
+    def __init__(self, citation):
+        PyBelWarning.__init__(self, citation)
+        self.citation = citation
+
+    def __str__(self):
+        return "Missing citation; can't add: {}".format(self.citation)
+
 
 class MissingSupportWarning(PyBelWarning):
     """All BEL statements must be qualified with evidence"""
+
+    def __init__(self, string):
+        PyBelWarning.__init__(self, string)
+        self.string = string
+
+    def __str__(self):
+        return "Missing evidence; can't add: {}".format(self.string)
 
 
 class InvalidCitationType(PyBelWarning):

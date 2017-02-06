@@ -531,10 +531,10 @@ class BelParser(BaseParser):
 
     def check_required_annotations(self, s):
         if not self.control_parser.citation:
-            raise MissingCitationException('unable to add relation {}'.format(s))
+            raise MissingCitationException(s)
 
         if EVIDENCE not in self.control_parser.annotations:
-            raise MissingSupportWarning('unable to add relation {}'.format(s))
+            raise MissingSupportWarning(s)
 
     def build_attrs(self, attrs=None, list_attrs=None):
         attrs = {} if attrs is None else attrs
