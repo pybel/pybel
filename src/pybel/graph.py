@@ -27,12 +27,18 @@ __all__ = ['BELGraph']
 
 log = logging.getLogger(__name__)
 
+METADATA_NAME = 'name'
+METADATA_VERSION = 'version'
+METADATA_DESCRIPTION = 'description'
+METADATA_AUTHORS = 'authors'
+METADATA_CONTACT = 'contact'
+
 REQUIRED_METADATA = [
-    'name',
-    'version',
-    'description',
-    'authors',
-    'contact'
+    METADATA_NAME,
+    METADATA_VERSION,
+    METADATA_DESCRIPTION,
+    METADATA_AUTHORS,
+    METADATA_CONTACT
 ]
 
 GRAPH_METADATA = 'document_metadata'
