@@ -156,6 +156,14 @@ class TestParseMetadata(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             self.parser.parseString(s)
 
+    def test_define_namespace_regex(self):
+        s = 'DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"'
+        self.parser.parseString(s)
+
+        self.assertNotIn('dbSNP', self.parser.namespace_dict)
+        self.assertIn('dbSNP', self.parser.namespace_re)
+        self.assertEqual('rs[0-9]*', self.parser.namespace_re['dbSNP'])
+
 
 class TestParseControl(unittest.TestCase):
     def setUp(self):

@@ -1,5 +1,14 @@
 Input and Output
 ================
 
-.. automodule:: pybel
-    :members: from_lines, from_path, from_url, to_pickle, to_bytes, from_bytes, from_pickle, to_json, from_json, to_graphml, from_graphml, to_csv, to_neo4j, to_bel
+.. autofunction:: pybel.from_lines
+.. autofunction:: pybel.from_url
+.. autofunction:: pybel.to_pickle
+.. autofunction:: pybel.from_pickle
+.. autofunction:: pybel.to_json
+.. autofunction:: pybel.from_json
+.. autofunction:: pybel.to_graphml
+.. autofunction:: pybel.from_graphml
+.. autofunction:: pybel.to_csv
+.. autofunction:: pybel.to_neo4j
+.. autofunction:: pybel.to_bel

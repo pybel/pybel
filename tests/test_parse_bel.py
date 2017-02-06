@@ -4,23 +4,23 @@ import logging
 import unittest
 
 from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
-from pybel.constants import HGVS, FUNCTION, ACTIVITY, GENE, RNA, ABUNDANCE, \
-    PATHOLOGY, BIOPROCESS, PROTEIN, MIRNA, COMPLEX, REACTION, COMPOSITE, VARIANTS, PROTEIN_FUSION
+from pybel.constants import HGVS, FUNCTION, ACTIVITY, ABUNDANCE, \
+    PATHOLOGY, BIOPROCESS, MIRNA, COMPLEX, REACTION, COMPOSITE, VARIANTS
 from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, PYBEL_DEFAULT_NAMESPACE, PARTNER_3P, PARTNER_5P, RANGE_3P, \
     RANGE_5P, NAMESPACE, NAME, LOCATION
-from pybel.constants import PROTEINVARIANT, GENEVARIANT, RNAVARIANT, DEGRADATION, \
-    TRANSFORMATION, TRANSLOCATION, IDENTIFIER, FUSION
-from pybel.parser.parse_abundance_modifier import PmodParser, GmodParser, PsubParser, GsubParser, TruncParser, \
-    FusionParser, LocationParser, FragmentParser
-from pybel.parser.parse_abundance_modifier import VariantParser, build_variant_dict
+from pybel.constants import PROTEIN, GENE, RNA, DEGRADATION, \
+    TRANSFORMATION, TRANSLOCATION, IDENTIFIER, FUSION, FROM_LOC, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO
+from pybel.constants import RELATION, EQUIVALENT_TO, SUBJECT, OBJECT, MODIFIER, TARGET, EFFECT, HAS_MEMBER
+from pybel.parser.modifiers import FusionParser, LocationParser, GmodParser, FragmentParser, PmodParser
+from pybel.parser.modifiers import GsubParser, TruncParser, PsubParser, VariantParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from pybel.utils import default_identifier
-from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel
+from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel, build_variant_dict
 
 log = logging.getLogger(__name__)
 
-TEST_GENE_VARIANT = 'g.308G>A'
+TEST_GENE_VARIANT = 'c.308G>A'
 TEST_PROTEIN_VARIANT = 'p.Phe508del'
 
 
@@ -53,8 +53,8 @@ class TestVariantParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_snp(self):
-        statement = 'var(delCTT)'
-        expected = build_variant_dict('delCTT')
+        statement = 'var(c.1521_1523delCTT)'
+        expected = build_variant_dict('c.1521_1523delCTT')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
@@ -157,7 +157,7 @@ class TestGmod(unittest.TestCase):
 
         self.expected = {
             KIND: GMOD,
-            GmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Me')
+            GmodParser.IDENTIFIER: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Me'}
         }
 
     def test_gmod_short(self):
@@ -203,7 +203,7 @@ class TestGsubParser(unittest.TestCase):
         statement = 'sub(G,308,A)'
         result = self.parser.parseString(statement)
 
-        expected_dict = build_variant_dict('g.308G>A')
+        expected_dict = build_variant_dict('c.308G>A')
         self.assertEqual(expected_dict, result.asDict())
 
 
@@ -442,7 +442,7 @@ class TestAbundance(TestTokenParserBase):
         expected_result = {
             FUNCTION: ABUNDANCE,
             IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'},
-            'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+            LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
         }
 
         self.assertEqual(expected_result, result.asDict())
@@ -457,7 +457,7 @@ class TestAbundance(TestTokenParserBase):
 
         modifier = canonicalize_modifier(result)
         expected_modifier = {
-            'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+            LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
         }
         self.assertEqual(expected_modifier, modifier)
 
@@ -509,7 +509,7 @@ class TestGene(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'location': {
+            LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
             }
@@ -538,7 +538,7 @@ class TestGene(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: HGVS,
                     VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
@@ -548,14 +548,14 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = GENEVARIANT, 'HGNC', 'AKT1', (HGVS, TEST_PROTEIN_VARIANT)
+        expected_node = GENE, 'HGNC', 'AKT1', (HGVS, TEST_PROTEIN_VARIANT)
         self.assertEqual(expected_node, canonicalize_node(result))
 
         self.assertEqual(self.parser.graph.node[expected_node], {
-            FUNCTION: GENEVARIANT,
+            FUNCTION: GENE,
             NAMESPACE: 'HGNC',
             NAME: 'AKT1',
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: HGVS,
                     VariantParser.IDENTIFIER: 'p.Phe508del'
@@ -582,7 +582,7 @@ class TestGene(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: GMOD,
                     GmodParser.IDENTIFIER: default_identifier('Me')
@@ -591,9 +591,9 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = GENEVARIANT, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))
+        expected_node = GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: GENEVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: GENE})
 
         self.assertEqual('g(HGNC:AKT1, gmod(Me))', decanonicalize_node(self.parser.graph, expected_node))
 
@@ -613,7 +613,7 @@ class TestGene(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: HGVS,
                     VariantParser.IDENTIFIER: TEST_GENE_VARIANT
@@ -623,10 +623,10 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         expected_node = canonicalize_node(result)
-        self.assertHasNode(expected_node, **{FUNCTION: GENEVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: GENE})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'g(HGNC:AKT1, var(g.308G>A))'
+        expected_canonical_bel = 'g(HGNC:AKT1, var(c.308G>A))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
         parent = GENE, 'HGNC', 'AKT1'
@@ -645,12 +645,12 @@ class TestGene(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: HGVS,
                     VariantParser.IDENTIFIER: TEST_GENE_VARIANT}
             ],
-            'location': {
+            LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
             }
@@ -658,10 +658,10 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         expected_node = canonicalize_node(result)
-        self.assertHasNode(expected_node, **{FUNCTION: GENEVARIANT, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        self.assertHasNode(expected_node, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'g(HGNC:AKT1, var(g.308G>A))'
+        expected_canonical_bel = 'g(HGNC:AKT1, var(c.308G>A))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
         parent = GENE, 'HGNC', 'AKT1'
@@ -671,7 +671,7 @@ class TestGene(TestTokenParserBase):
 
     def test_multiple_variants(self):
         """Test multiple variants"""
-        statement = 'g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(delCTT))'
+        statement = 'g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))'
         result = self.parser.gene.parseString(statement)
 
         expected_result = {
@@ -680,29 +680,20 @@ class TestGene(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'variants': [
-                {
-                    KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
-                },
-                {
-                    KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT
-                },
-                {
-                    KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'delCTT'
-                }
+            VARIANTS: [
+                build_variant_dict(TEST_PROTEIN_VARIANT),
+                build_variant_dict(TEST_GENE_VARIANT),
+                build_variant_dict('c.1521_1523delCTT')
             ]
         }
         self.assertEqual(expected_result, result.asDict())
 
         expected_node = (
-            GENEVARIANT, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, TEST_GENE_VARIANT), (HGVS, TEST_PROTEIN_VARIANT))
+            GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, TEST_GENE_VARIANT), (HGVS, TEST_PROTEIN_VARIANT))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, function=GENEVARIANT)
+        self.assertHasNode(expected_node, function=GENE)
         self.assertEqual(decanonicalize_node(self.parser.graph, expected_node),
-                         'g(HGNC:AKT1, var(delCTT), var(g.308G>A), var(p.Phe508del))')
+                         'g(HGNC:AKT1, var(c.1521_1523delCTT), var(c.308G>A), var(p.Phe508del))')
 
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
@@ -794,17 +785,17 @@ class TestGene(TestTokenParserBase):
 
     def test_gene_variant_snp(self):
         """2.2.2 SNP"""
-        statement = 'g(SNP:rs113993960, var(delCTT))'
+        statement = 'g(SNP:rs113993960, var(c.1521_1523delCTT))'
         result = self.parser.gene.parseString(statement)
 
-        expected_result = [GENE, ['SNP', 'rs113993960'], [HGVS, 'delCTT']]
+        expected_result = [GENE, ['SNP', 'rs113993960'], [HGVS, 'c.1521_1523delCTT']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node)
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'g(SNP:rs113993960, var(delCTT))'
+        expected_canonical_bel = 'g(SNP:rs113993960, var(c.1521_1523delCTT))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
         gene_node = GENE, 'SNP', 'rs113993960'
@@ -824,7 +815,7 @@ class TestGene(TestTokenParserBase):
         expected_node = canonicalize_node(result)
 
         self.assertHasNode(gene_node, **{FUNCTION: GENE, NAMESPACE: 'REF', NAME: 'NC_000007.13'})
-        self.assertHasNode(expected_node, function=GENEVARIANT)
+        self.assertHasNode(expected_node, function=GENE)
         self.assertHasEdge(gene_node, expected_node, relation='hasVariant')
 
     def test_gene_variant_deletion(self):
@@ -835,15 +826,15 @@ class TestGene(TestTokenParserBase):
         expected_result = {
             FUNCTION: GENE,
             IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CFTR'},
-            'variants': [
+            VARIANTS: [
                 {KIND: HGVS, VariantParser.IDENTIFIER: 'c.1521_1523delCTT'}
             ]
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = (GENEVARIANT, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT'))
+        expected_node = (GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT'))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, function=GENEVARIANT)
+        self.assertHasNode(expected_node, function=GENE)
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -916,7 +907,7 @@ class TestMiRNA(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'MIR21'
             },
-            'location': {
+            LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
             }
@@ -939,7 +930,7 @@ class TestMiRNA(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'MIR21'
             },
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: HGVS,
                     VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
@@ -968,13 +959,13 @@ class TestMiRNA(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'MIR21'
             },
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: HGVS,
                     VariantParser.IDENTIFIER: 'p.Phe508del'
                 },
             ],
-            'location': {
+            LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
             }
@@ -1035,7 +1026,7 @@ class TestProtein(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'location': {
+            LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
             }
@@ -1063,11 +1054,11 @@ class TestProtein(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'location': {
+            LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
             },
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: HGVS,
                     VariantParser.IDENTIFIER: 'p.Ala127Tyr'
@@ -1082,9 +1073,9 @@ class TestProtein(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = (PROTEINVARIANT, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser'))
+        node = (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser'))
         self.assertEqual(node, canonicalize_node(result))
-        self.assertHasNode(node, function=PROTEINVARIANT)
+        self.assertHasNode(node, function=PROTEIN)
 
         canonical_bel = decanonicalize_node(self.parser.graph, node)
         expected_canonical_bel = 'p(HGNC:AKT1, pmod(Ph, Ser), var(p.Ala127Tyr))'
@@ -1118,7 +1109,7 @@ class TestProtein(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = 'ProteinFusion', ('HGNC', 'TMPRSS2'), ('p', 1, 79), ('HGNC', 'ERG'), ('p', 312, 5034)
+        expected_node = PROTEIN, ('HGNC', 'TMPRSS2'), ('p', 1, 79), ('HGNC', 'ERG'), ('p', 312, 5034)
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node)
 
@@ -1172,7 +1163,7 @@ class TestProtein(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = PROTEIN_FUSION, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)
+        expected_node = PROTEIN, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node)
 
@@ -1184,9 +1175,9 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, trunc(40))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'AKT1', (HGVS, 'p.40*')
+        expected_node = PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, function=PROTEINVARIANT)
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, var(p.40*))'
@@ -1204,9 +1195,9 @@ class TestProtein(TestTokenParserBase):
         expected_result = [PROTEIN, ['HGNC', 'AKT1'], [HGVS, 'p.Cys40*']]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'AKT1', (HGVS, 'p.Cys40*')
+        expected_node = PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Cys40*')
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, var(p.Cys40*))'
@@ -1224,9 +1215,9 @@ class TestProtein(TestTokenParserBase):
         expected_result = [PROTEIN, ['HGNC', 'AKT1'], [HGVS, 'p.Arg1851*']]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')
+        expected_node = PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1242,9 +1233,9 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(Ph, S, 473))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = (PROTEINVARIANT, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473))
+        expected_node = (PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
@@ -1259,9 +1250,9 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)
+        expected_node = PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
@@ -1277,7 +1268,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(MOD:PhosRes, Ser, 473))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'AKT1', (PMOD, ('MOD', 'PhosRes'), 'Ser', 473)
+        expected_node = PROTEIN, 'HGNC', 'AKT1', (PMOD, ('MOD', 'PhosRes'), 'Ser', 473)
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node)
 
@@ -1295,9 +1286,9 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:HRAS, pmod(Palm))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'HRAS', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Palm'))
+        expected_node = PROTEIN, 'HGNC', 'HRAS', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Palm'))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1315,9 +1306,9 @@ class TestProtein(TestTokenParserBase):
         expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, '=']]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'CFTR', (HGVS, '=')
+        expected_node = PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1336,9 +1327,9 @@ class TestProtein(TestTokenParserBase):
         expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, '?']]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'CFTR', (HGVS, '?')
+        expected_node = PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1357,7 +1348,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         expected_node = canonicalize_node(result)
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1393,9 +1384,9 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:YFG, frag(5_20))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'YFG', (FRAGMENT, (5, 20))
+        expected_node = PROTEIN, 'HGNC', 'YFG', (FRAGMENT, (5, 20))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1411,9 +1402,9 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:YFG, frag(1_?))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'YFG', (FRAGMENT, (1, '?'))
+        expected_node = PROTEIN, 'HGNC', 'YFG', (FRAGMENT, (1, '?'))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1429,9 +1420,9 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:YFG, frag(?_*))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'YFG', (FRAGMENT, ('?', '*'))
+        expected_node = PROTEIN, 'HGNC', 'YFG', (FRAGMENT, ('?', '*'))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1451,7 +1442,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         expected_node = canonicalize_node(result)
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1467,9 +1458,9 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:YFG, frag(?, 55kD))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEINVARIANT, 'HGNC', 'YFG', (FRAGMENT, '?', '55kD')
+        expected_node = PROTEIN, 'HGNC', 'YFG', (FRAGMENT, '?', '55kD')
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: PROTEINVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1501,7 +1492,7 @@ class TestProtein(TestTokenParserBase):
         self.assertHasEdge(gene, rna, relation='transcribedTo')
         self.assertEqual(1, self.parser.graph.number_of_edges(gene, rna))
 
-        self.assertHasEdge(rna, protein, relation='translatedTo')
+        self.assertHasEdge(rna, protein, relation=TRANSLATED_TO)
         self.assertEqual(1, self.parser.graph.number_of_edges(rna, protein))
 
     def test_ensure_no_dup_nodes(self):
@@ -1539,7 +1530,7 @@ class TestProtein(TestTokenParserBase):
         self.assertHasEdge(gene, rna, relation='transcribedTo')
         self.assertEqual(1, self.parser.graph.number_of_edges(gene, rna))
 
-        self.assertHasEdge(rna, protein, relation='translatedTo')
+        self.assertHasEdge(rna, protein, relation=TRANSLATED_TO)
         self.assertEqual(1, self.parser.graph.number_of_edges(rna, protein))
 
 
@@ -1576,7 +1567,7 @@ class TestRna(TestTokenParserBase):
 
     def test_214e(self):
         """Test multiple variants"""
-        statement = 'r(HGNC:AKT1, var(p.Phe508del), var(delCTT))'
+        statement = 'r(HGNC:AKT1, var(p.Phe508del), var(c.1521_1523delCTT))'
         result = self.parser.rna.parseString(statement)
 
         expected_result = {
@@ -1585,25 +1576,25 @@ class TestRna(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
-            'variants': [
+            VARIANTS: [
                 {
                     KIND: HGVS,
                     VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
                 },
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'delCTT'
+                    VariantParser.IDENTIFIER: 'c.1521_1523delCTT'
                 }
             ]
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = (RNAVARIANT, 'HGNC', 'AKT1', (HGVS, 'delCTT'), (HGVS, TEST_PROTEIN_VARIANT))
+        expected_node = (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, TEST_PROTEIN_VARIANT))
         self.assertEqual(expected_node, canonicalize_node(result))
-        self.assertHasNode(expected_node, **{FUNCTION: RNAVARIANT})
+        self.assertHasNode(expected_node, **{FUNCTION: RNA})
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'r(HGNC:AKT1, var(delCTT), var(p.Phe508del))'  # sorted
+        expected_canonical_bel = 'r(HGNC:AKT1, var(c.1521_1523delCTT), var(p.Phe508del))'  # sorted
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
         parent = RNA, 'HGNC', 'AKT1'
@@ -1824,7 +1815,7 @@ class TestComplex(TestTokenParserBase):
 
     def test_complex_list_long(self):
         statement = 'complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))'
-        result = self.parser.parseString(statement)
+        self.parser.parseString(statement)
 
 
 class TestComposite(TestTokenParserBase):
@@ -1954,8 +1945,8 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': ACTIVITY,
-            'effect': {}
+            MODIFIER: ACTIVITY,
+            EFFECT: {}
         }
         self.assertEqual(expected_mod, mod)
 
@@ -1965,12 +1956,12 @@ class TestActivity(TestTokenParserBase):
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
-            'modifier': ACTIVITY,
-            'effect': {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
                 NAME: 'kin',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
-            'target': {
+            TARGET: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
@@ -1979,8 +1970,8 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': ACTIVITY,
-            'effect': {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
                 NAME: 'kin',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
@@ -1993,12 +1984,12 @@ class TestActivity(TestTokenParserBase):
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
-            'modifier': ACTIVITY,
-            'effect': {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
                 NAME: 'cat',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
-            'target': {
+            TARGET: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
@@ -2007,8 +1998,8 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': ACTIVITY,
-            'effect': {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
                 NAME: 'cat',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
@@ -2021,12 +2012,12 @@ class TestActivity(TestTokenParserBase):
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
-            'modifier': ACTIVITY,
-            'effect': {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
                 NAMESPACE: 'GOMF',
                 NAME: 'catalytic activity'
             },
-            'target': {
+            TARGET: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
@@ -2035,8 +2026,8 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': ACTIVITY,
-            'effect': {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
                 NAMESPACE: 'GOMF',
                 NAME: 'catalytic activity'
             }
@@ -2049,12 +2040,12 @@ class TestActivity(TestTokenParserBase):
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
-            'modifier': ACTIVITY,
-            'effect': {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
                 NAME: 'kin',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             },
-            'target': {
+            TARGET: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
@@ -2063,8 +2054,8 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': ACTIVITY,
-            'effect': {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
                 NAME: 'kin',
                 NAMESPACE: PYBEL_DEFAULT_NAMESPACE
             }
@@ -2089,8 +2080,8 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
-            'modifier': DEGRADATION,
-            'target': {
+            MODIFIER: DEGRADATION,
+            TARGET: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
             }
@@ -2099,7 +2090,7 @@ class TestTransformation(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': DEGRADATION,
+            MODIFIER: DEGRADATION,
         }
         self.assertEqual(expected_mod, mod)
 
@@ -2112,8 +2103,8 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
-            'modifier': DEGRADATION,
-            'target': {
+            MODIFIER: DEGRADATION,
+            TARGET: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
             }
@@ -2122,7 +2113,7 @@ class TestTransformation(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': DEGRADATION,
+            MODIFIER: DEGRADATION,
         }
         self.assertEqual(expected_mod, mod)
 
@@ -2136,14 +2127,14 @@ class TestTransformation(TestTokenParserBase):
         result = self.parser.transformation.parseString(statement)
 
         expected_dict = {
-            'modifier': TRANSLOCATION,
-            'target': {
+            MODIFIER: TRANSLOCATION,
+            TARGET: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
             },
-            'effect': {
-                'fromLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                'toLoc': {NAMESPACE: 'GOCC', NAME: 'endosome'}
+            EFFECT: {
+                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
             }
         }
 
@@ -2151,10 +2142,10 @@ class TestTransformation(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': TRANSLOCATION,
-            'effect': {
-                'fromLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                'toLoc': {NAMESPACE: 'GOCC', NAME: 'endosome'}
+            MODIFIER: TRANSLOCATION,
+            EFFECT: {
+                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -2169,24 +2160,24 @@ class TestTransformation(TestTokenParserBase):
         result = self.parser.transformation.parseString(statement)
 
         expected_dict = {
-            'modifier': TRANSLOCATION,
-            'target': {
+            MODIFIER: TRANSLOCATION,
+            TARGET: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
             },
-            'effect': {
-                'fromLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                'toLoc': {NAMESPACE: 'GOCC', NAME: 'endosome'}
+            EFFECT: {
+                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': TRANSLOCATION,
-            'effect': {
-                'fromLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                'toLoc': {NAMESPACE: 'GOCC', NAME: 'endosome'}
+            MODIFIER: TRANSLOCATION,
+            EFFECT: {
+                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -2211,10 +2202,10 @@ class TestTransformation(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            'modifier': TRANSLOCATION,
-            'effect': {
-                'fromLoc': {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                'toLoc': {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
+            MODIFIER: TRANSLOCATION,
+            EFFECT: {
+                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -2232,10 +2223,10 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         expected_mod = {
-            'modifier': TRANSLOCATION,
-            'effect': {
-                'fromLoc': {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                'toLoc': {NAMESPACE: 'GOCC', NAME: 'cell surface'}
+            MODIFIER: TRANSLOCATION,
+            EFFECT: {
+                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'}
             }
         }
         self.assertEqual(expected_mod, canonicalize_modifier(result))
@@ -2338,7 +2329,7 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = canonicalize_node(result['subject'])
+        sub = canonicalize_node(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
@@ -2365,26 +2356,26 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
+            SUBJECT: {
                 FUNCTION: ABUNDANCE,
                 IDENTIFIER: {
                     NAMESPACE: 'ADO',
                     NAME: 'Abeta_42'
                 }
             },
-            'relation': 'directlyIncreases',
-            'object': {
-                'target': {
+            RELATION: 'directlyIncreases',
+            OBJECT: {
+                TARGET: {
                     FUNCTION: ABUNDANCE,
                     IDENTIFIER: {
                         NAMESPACE: 'CHEBI',
                         NAME: 'calcium(2+)'
                     }
                 },
-                'modifier': TRANSLOCATION,
-                'effect': {
-                    'fromLoc': {NAMESPACE: 'MESHCS', NAME: 'Cell Membrane'},
-                    'toLoc': {NAMESPACE: 'MESHCS', NAME: 'Intracellular Space'}
+                MODIFIER: TRANSLOCATION,
+                EFFECT: {
+                    FROM_LOC: {NAMESPACE: 'MESHCS', NAME: 'Cell Membrane'},
+                    TO_LOC: {NAMESPACE: 'MESHCS', NAME: 'Intracellular Space'}
                 }
             }
         }
@@ -2397,12 +2388,12 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         expected_annotations = {
-            'relation': 'directlyIncreases',
-            'object': {
-                'modifier': TRANSLOCATION,
-                'effect': {
-                    'fromLoc': {NAMESPACE: 'MESHCS', NAME: 'Cell Membrane'},
-                    'toLoc': {NAMESPACE: 'MESHCS', NAME: 'Intracellular Space'}
+            RELATION: 'directlyIncreases',
+            OBJECT: {
+                MODIFIER: TRANSLOCATION,
+                EFFECT: {
+                    FROM_LOC: {NAMESPACE: 'MESHCS', NAME: 'Cell Membrane'},
+                    TO_LOC: {NAMESPACE: 'MESHCS', NAME: 'Intracellular Space'}
                 }
             }
         }
@@ -2417,19 +2408,19 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
-                'modifier': ACTIVITY,
-                'target': {
+            SUBJECT: {
+                MODIFIER: ACTIVITY,
+                TARGET: {
                     FUNCTION: PROTEIN,
                     IDENTIFIER: {NAMESPACE: 'SFAM', NAME: 'CAPN Family'},
-                    'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                    LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
                 },
-                'effect': {
+                EFFECT: {
                     NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE},
             },
-            'relation': 'decreases',
-            'object': {
+            RELATION: 'decreases',
+            OBJECT: {
                 TRANSFORMATION: REACTION,
                 'reactants': [
                     {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5R1'}}
@@ -2445,7 +2436,7 @@ class TestRelations(TestTokenParserBase):
         sub = PROTEIN, 'SFAM', 'CAPN Family'
         self.assertHasNode(sub)
 
-        obj = canonicalize_node(result['object'])
+        obj = canonicalize_node(result[OBJECT])
         self.assertHasNode(obj)
 
         obj_member_1 = PROTEIN, 'HGNC', 'CDK5R1'
@@ -2458,14 +2449,14 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(obj, obj_member_2, relation='hasProduct')
 
         expected_edge_attributes = {
-            'relation': 'decreases',
-            'subject': {
-                'modifier': ACTIVITY,
-                'effect': {
+            RELATION: 'decreases',
+            SUBJECT: {
+                MODIFIER: ACTIVITY,
+                EFFECT: {
                     NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
-                'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             }
         }
         self.assertHasEdge(sub, obj, **expected_edge_attributes)
@@ -2478,13 +2469,13 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
+            SUBJECT: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CAT'},
-                'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
-            'relation': 'directlyDecreases',
-            'object': {
+            RELATION: 'directlyDecreases',
+            OBJECT: {
                 FUNCTION: ABUNDANCE,
                 IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
             }
@@ -2498,10 +2489,10 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         expected_attrs = {
-            'subject': {
-                'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+            SUBJECT: {
+                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
-            'relation': 'directlyDecreases',
+            RELATION: 'directlyDecreases',
         }
         self.assertHasEdge(sub, obj, **expected_attrs)
 
@@ -2519,13 +2510,13 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
+            SUBJECT: {
                 FUNCTION: GENE,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CAT'},
-                'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
-            'relation': 'directlyDecreases',
-            'object': {
+            RELATION: 'directlyDecreases',
+            OBJECT: {
                 FUNCTION: ABUNDANCE,
                 IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
             }
@@ -2539,10 +2530,10 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         expected_attrs = {
-            'subject': {
-                'location': {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+            SUBJECT: {
+                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
-            'relation': 'directlyDecreases',
+            RELATION: 'directlyDecreases',
         }
         self.assertEqual(2, self.parser.graph.number_of_edges())
         self.assertHasEdge(sub, obj, ListAnnotation='a', ScalarAnnotation='c', **expected_attrs)
@@ -2554,19 +2545,19 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
-                'modifier': ACTIVITY,
-                'target': {
+            SUBJECT: {
+                MODIFIER: ACTIVITY,
+                TARGET: {
                     FUNCTION: PROTEIN,
                     IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'HMGCR'}
                 },
-                'effect': {
+                EFFECT: {
                     NAME: 'cat',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
             },
-            'relation': 'rateLimitingStepOf',
-            'object': {
+            RELATION: 'rateLimitingStepOf',
+            OBJECT: {
                 FUNCTION: BIOPROCESS,
                 IDENTIFIER: {NAMESPACE: 'GOBP', NAME: 'cholesterol biosynthetic process'}
             }
@@ -2579,7 +2570,7 @@ class TestRelations(TestTokenParserBase):
         obj = BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
+        self.assertHasEdge(sub, obj, relation=expected_dict[RELATION])
 
     def test_cnc_withSubjectVariant(self):
         """
@@ -2590,31 +2581,31 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
+            SUBJECT: {
                 FUNCTION: GENE,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'APP'},
-                'variants': [
+                VARIANTS: [
                     {
                         KIND: HGVS,
-                        VariantParser.IDENTIFIER: 'g.275341G>C'
+                        VariantParser.IDENTIFIER: 'c.275341G>C'
                     }
                 ]
             },
-            'relation': 'causesNoChange',
-            'object': {
+            RELATION: 'causesNoChange',
+            OBJECT: {
                 FUNCTION: PATHOLOGY,
                 IDENTIFIER: {NAMESPACE: 'MESHD', NAME: 'Alzheimer Disease'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = GENEVARIANT, 'HGNC', 'APP', (HGVS, 'g.275341G>C')
+        sub = GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')
         self.assertHasNode(sub)
 
         obj = PATHOLOGY, 'MESHD', 'Alzheimer Disease'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
+        self.assertHasEdge(sub, obj, relation=expected_dict[RELATION])
 
     def test_regulates_multipleAnnotations(self):
         """
@@ -2624,13 +2615,13 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
-                'modifier': ACTIVITY,
-                'effect': {
+            SUBJECT: {
+                MODIFIER: ACTIVITY,
+                EFFECT: {
                     NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
-                'target': {
+                TARGET: {
                     FUNCTION: COMPLEX,
                     'members': [
                         {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'F3'}},
@@ -2638,14 +2629,14 @@ class TestRelations(TestTokenParserBase):
                     ]
                 }
             },
-            'relation': 'regulates',
-            'object': {
-                'modifier': ACTIVITY,
-                'effect': {
+            RELATION: 'regulates',
+            OBJECT: {
+                MODIFIER: ACTIVITY,
+                EFFECT: {
                     NAME: 'pep',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
-                'target': {
+                TARGET: {
                     FUNCTION: PROTEIN,
                     IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'F9'}
                 }
@@ -2654,7 +2645,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = canonicalize_node(result['subject'])
+        sub = canonicalize_node(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_member_1 = PROTEIN, 'HGNC', 'F3'
@@ -2669,7 +2660,7 @@ class TestRelations(TestTokenParserBase):
         obj = PROTEIN, 'HGNC', 'F9'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
+        self.assertHasEdge(sub, obj, relation=expected_dict[RELATION])
 
     def test_nested_failure(self):
         """
@@ -2700,22 +2691,22 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
-                'modifier': ACTIVITY,
-                'effect': {
+            SUBJECT: {
+                MODIFIER: ACTIVITY,
+                EFFECT: {
                     NAME: 'kin',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 },
-                'target': {
+                TARGET: {
                     FUNCTION: PROTEIN,
                     IDENTIFIER: {NAMESPACE: 'SFAM', NAME: 'GSK3 Family'}
                 }
             },
-            'relation': 'negativeCorrelation',
-            'object': {
+            RELATION: 'negativeCorrelation',
+            OBJECT: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'MAPT'},
-                'variants': [
+                VARIANTS: [
                     {
                         KIND: PMOD,
                         IDENTIFIER: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
@@ -2728,11 +2719,11 @@ class TestRelations(TestTokenParserBase):
         sub = PROTEIN, 'SFAM', 'GSK3 Family'
         self.assertHasNode(sub)
 
-        obj = PROTEINVARIANT, 'HGNC', 'MAPT', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'))
+        obj = PROTEIN, 'HGNC', 'MAPT', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'))
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation=expected_dict['relation'])
-        self.assertHasEdge(obj, sub, relation=expected_dict['relation'])
+        self.assertHasEdge(sub, obj, relation=expected_dict[RELATION])
+        self.assertHasEdge(obj, sub, relation=expected_dict[RELATION])
 
     def test_positiveCorrelation_withSelfReferential(self):
         """
@@ -2742,10 +2733,10 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            'subject': {
+            SUBJECT: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'GSK3B'},
-                'variants': [
+                VARIANTS: [
                     {
                         KIND: PMOD,
                         PmodParser.CODE: 'Ser',
@@ -2754,14 +2745,14 @@ class TestRelations(TestTokenParserBase):
                     }
                 ]
             },
-            'relation': 'positiveCorrelation',
-            'object': {
-                'modifier': ACTIVITY,
-                'target': {
+            RELATION: 'positiveCorrelation',
+            OBJECT: {
+                MODIFIER: ACTIVITY,
+                TARGET: {
                     FUNCTION: PROTEIN,
                     IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'GSK3B'}
                 },
-                'effect': {
+                EFFECT: {
                     NAME: 'kin',
                     NAMESPACE: PYBEL_DEFAULT_NAMESPACE
                 }
@@ -2769,14 +2760,14 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        subject_node = PROTEINVARIANT, 'HGNC', 'GSK3B', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)
+        subject_node = PROTEIN, 'HGNC', 'GSK3B', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)
         self.assertHasNode(subject_node)
 
         object_node = PROTEIN, 'HGNC', 'GSK3B'
         self.assertHasNode(object_node)
 
-        self.assertHasEdge(subject_node, object_node, relation=expected_dict['relation'])
-        self.assertHasEdge(object_node, subject_node, relation=expected_dict['relation'])
+        self.assertHasEdge(subject_node, object_node, relation=expected_dict[RELATION])
+        self.assertHasEdge(object_node, subject_node, relation=expected_dict[RELATION])
 
     def test_orthologous(self):
         """
@@ -2812,7 +2803,7 @@ class TestRelations(TestTokenParserBase):
         obj = RNA, 'HGNC', 'AKT1'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation='transcribedTo')
+        self.assertHasEdge(sub, obj, **{RELATION: TRANSCRIBED_TO})
 
     def test_translation(self):
         """
@@ -2821,21 +2812,21 @@ class TestRelations(TestTokenParserBase):
         statement = 'r(HGNC:AKT1,loc(GOCC:intracellular)) >> p(HGNC:AKT1)'
         result = self.parser.relation.parseString(statement)
 
-        # [[RNA, ['HGNC', 'AKT1']], 'translatedTo', [PROTEIN, ['HGNC', 'AKT1']]]
+        # [[RNA, ['HGNC', 'AKT1']], TRANSLATED_TO, [PROTEIN, ['HGNC', 'AKT1']]]
         expected_result = {
-            'subject': {
+            SUBJECT: {
                 FUNCTION: RNA,
                 IDENTIFIER: {
                     NAMESPACE: 'HGNC',
                     NAME: 'AKT1'
                 },
-                'location': {
+                LOCATION: {
                     NAMESPACE: 'GOCC',
                     NAME: 'intracellular'
                 }
             },
-            'relation': 'translatedTo',
-            'object': {
+            RELATION: TRANSLATED_TO,
+            OBJECT: {
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {
                     NAMESPACE: 'HGNC',
@@ -2851,7 +2842,7 @@ class TestRelations(TestTokenParserBase):
         obj = PROTEIN, 'HGNC', 'AKT1'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation='translatedTo')
+        self.assertHasEdge(sub, obj, relation=TRANSLATED_TO)
 
         self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
                          decanonicalize_edge(self.parser.graph, sub, obj, 1))
@@ -2883,16 +2874,16 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(sub)
 
         self.assertHasNode(obj1)
-        self.assertHasEdge(sub, obj1, relation='hasMember')
+        self.assertHasEdge(sub, obj1, relation=HAS_MEMBER)
 
         self.assertHasNode(obj2)
-        self.assertHasEdge(sub, obj2, relation='hasMember')
+        self.assertHasEdge(sub, obj2, relation=HAS_MEMBER)
 
         self.assertHasNode(obj3)
-        self.assertHasEdge(sub, obj3, relation='hasMember')
+        self.assertHasEdge(sub, obj3, relation=HAS_MEMBER)
 
         self.assertHasNode(obj4)
-        self.assertHasEdge(sub, obj4, relation='hasMember')
+        self.assertHasEdge(sub, obj4, relation=HAS_MEMBER)
 
     def test_isA(self):
         """
@@ -2911,6 +2902,44 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation='isA')
+
+    def test_equivalentTo(self):
+        statement = 'g(dbSNP:"rs123456") eq g(HGNC:YFG, var(c.123G>A))'
+        result = self.parser.relation.parseString(statement)
+
+        expected_result = {
+            SUBJECT: {
+                FUNCTION: GENE,
+                IDENTIFIER: {
+                    NAMESPACE: 'dbSNP',
+                    NAME: 'rs123456'
+                }
+            },
+            RELATION: EQUIVALENT_TO,
+            OBJECT: {
+                FUNCTION: GENE,
+                IDENTIFIER: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'YFG',
+                },
+                VARIANTS: [
+                    {
+                        KIND: HGVS,
+                        VariantParser.IDENTIFIER: 'c.123G>A'
+                    }
+                ]
+            }
+        }
+        self.assertEqual(expected_result, result.asDict())
+
+        sub = GENE, 'dbSNP', 'rs123456'
+        self.assertHasNode(sub)
+
+        obj = GENE, 'HGNC', 'YFG', (HGVS, 'c.123G>A')
+        self.assertHasNode(obj)
+
+        self.assertHasEdge(sub, obj, **{RELATION: EQUIVALENT_TO})
+        self.assertHasEdge(obj, sub, **{RELATION: EQUIVALENT_TO})
 
     def test_subProcessOf(self):
         """
@@ -2933,7 +2962,7 @@ class TestRelations(TestTokenParserBase):
                            [BIOPROCESS, ['GOBP', 'cholesterol biosynthetic process']]]
         self.assertEqual(expected_result, result.asList())
 
-        sub = canonicalize_node(result['subject'])
+        sub = canonicalize_node(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
@@ -2972,8 +3001,8 @@ class TestWrite(TestTokenParserBase):
         cases = [
             ('abundance(CHEBI:"superoxide")', 'a(CHEBI:superoxide)'),
             ('g(HGNC:AKT1,var(p.Phe508del))', 'g(HGNC:AKT1, var(p.Phe508del))'),
-            ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(delCTT))',
-             'g(HGNC:AKT1, var(delCTT), var(g.308G>A), var(p.Phe508del))'),
+            ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))',
+             'g(HGNC:AKT1, var(c.1521_1523delCTT), var(c.308G>A), var(p.Phe508del))'),
             ('p(HGNC:MAPT,proteinModification(P))', 'p(HGNC:MAPT, pmod(Ph))'),
             ('proteinAbundance(HGNC:SFN)', 'p(HGNC:SFN)'),
             ('complex(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'complex(p(HGNC:SFN), p(HGNC:YWHAB))'),

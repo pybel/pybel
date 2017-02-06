@@ -17,7 +17,7 @@ OpenBEL Links
 - OpenBEL on `GitHub <https://github.com/OpenBEL>`_
 - Chat on `Gitter <https://gitter.im/OpenBEL/chat>`_
 
-Design Choices and BEL Specificaiton Variants
+Design Choices and BEL Specification Variants
 ---------------------------------------------
 
 Do All Statements Need Supporting Text?
@@ -57,19 +57,7 @@ programmatic API to the OLS service, for searching terms (http://www.ebi.ac.uk/o
 suggesting resolutions (http://www.ebi.ac.uk/ols/api/suggest?q=folic+acid)
 
 PyBEL uses the `OntoSpy <https://github.com/lambdamusic/OntoSpy>`_ package to parse OWL documents in many different
-formats, including OWL/XML, RDF/XML, and RDF. The University of Manchester
-`OWL Syntax Converter <http://owl.cs.manchester.ac.uk/converter>`_ can be used to convert other formats such as OBO.
-They also provide a RESTful API for conversion with calls like:
-http://owl.cs.manchester.ac.uk/converter/convert?format=OWL/XML&ontology=http://www.co-ode.org/ontologies/pizza/pizza.owl
-
-Gene Modifications
-~~~~~~~~~~~~~~~~~~
-BEL allows for the expression of sequence variants by deferring to the HGVS nomenclature with the :code:`var()` function
-and structural modificaitons to proteins with the :code:`pmod()` function. Genes also have physical modifications, such
-as methylation, which are possible to encode to encode with the :code:`gmod()` function in PyBEL's variant of BEL. The
-addition of this function does not perclude the use of all other standard functions in BEL; however, other compilers
-probably won't support these standards. If you agree that this is useful, please contribute to discussion in the OpenBEL
-community.
+formats, including OWL/XML, RDF/XML, and RDF.
 
 Implementation
 --------------
@@ -98,40 +86,6 @@ itself as a node. RDF was not intended to represent this type of information, bu
 difficult to understand or work with. Later, writing queries in SPARQL becomes very difficult because the data format
 is complicated and the language is limited. For example, it would be incredibly complicated to write a query in SPARQL
 to get the objects of statements from publications by a certain author.
-
-Representation of Events and Modifiers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
-degradations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
-of the edge. In reality, an edge like :code:`sec(p(HGNC:A)) -> activity(p(HGNC:B), ma(kinaseActivity))` represents
-a connection between :code:`HGNC:A` and :code:`HGNC:B`. Each of these modifiers explains the context of the relationship
-between these physical entities. Further, querying a network where these modifiers are part of a relationship
-is much more straightforward. For example, finding all proteins that are upregulated by the kinase activity of another
-protein now can be directly queried by filtering all edges for those with a subject modifier whose modification is
-molecular activity, and whose effect is kinase activity. Having fewer nodes also allows for a much easier display
-and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
-as a color coded source and terminus of the connecting edge.
-
-The compiler in OpenBEL framework created nodes for molecular activities like :code:`kin(p(HGNC:YFG))` and induced an
-edge like :code:`p(HGNC:YFG) actsIn kin(p(HGNC:YFG))`. For transformations, a statement like
-:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")` also induced
-:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane") translocates p(HGNC:YFG)`.
-
-In PyBEL, we recognize that these modifications are actually annotations to the type of relationship between the
-subject's entity and the object's entity. :code:`p(HGNC:ABC) -> tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")`
-is about the relationship between :code:`p(HGNC:ABC)` and :code:`p(HGNC:YFG)`, while
-the information about the translocation qualifies that the object is undergoing an event, and not just the abundance.
-This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
-just the keyword :code:`p`
-
-This also begs the question of what statements mean. BEL 2.0 introduced the :code:`location()` element that can be
-inside any abundances. This means that it's possible to unambiguously express the differences between the process of
-:code:`HGNC:A` moving from one place to another and the existence of :code:`HGNC:A` in a specific location having
-different effects. In BEL 1.0, this action had its own node, but this introduced unnecessary complexity to the network
-and made querying more difficult. Consider the difference between the following two statements:
-
-- :code:`tloc(p(HGNC:A), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell membrane")) -> p(HGNC:B)`
-- :code:`p(HGNC:A, location(GOCC:"cell membrane")) -> p(HGNC:B)`
 
 Things to Consider
 ------------------

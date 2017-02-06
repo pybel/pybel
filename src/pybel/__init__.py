@@ -4,21 +4,21 @@ For end users:
 
 .. code-block:: sh
 
-   pip install pybel
+   $ pip install pybel
 
 For the latest and greatest:
 
 .. code-block:: sh
 
-   pip install git+https://github.com/pybel/pybel.git@develop
+   $ pip install git+https://github.com/pybel/pybel.git@develop
 
 For development:
 
 .. code-block:: sh
 
-   git clone https://github.com/pybel/pybel.git@develop
-   cd pybel
-   pip install -e .
+   $ git clone https://github.com/pybel/pybel.git@develop
+   $ cd pybel
+   $ pip install -e .
 
 Caveats
 -------
@@ -36,8 +36,6 @@ programmatic access to the database with SQLAlchemy unstable. If you have any pr
 try to remove the database either by running :code:`pybel manage remove` from the command line.
 
 Future versions of PyBEL will include database integrity checks and provide upgrade procedures/scripts.
-
-
 """
 
 from . import graph
@@ -49,7 +47,7 @@ from .manager.graph_cache import to_database, from_database
 
 __all__ = ['to_database', 'from_database', 'to_bel'] + graph.__all__ + io.__all__
 
-__version__ = '0.3.6'
+__version__ = '0.3.7-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'

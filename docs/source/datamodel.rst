@@ -9,48 +9,8 @@ This allows for much easier programmatic access to answer more complicated quest
 code. Because the data structure is the same in Neo4J, the data can be directly exported with :code:`pybel.to_neo4j`.
 Neo4J supports the Cypher querying language so that the same queries can be written in an elegant and simple way.
 
-Nodes
------
-The relevant data about a node is stored in its associated dictionary in NetworkX. After parsing, :code:`p(HGNC:GSK3B)`
-becomes:
-
-.. code::
-
-    {
-        'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        }
-    }
-
-With the addition of a variant :code:`var()`, post-translational modification :code:`pmod()`, or gene modification
-:code:`gmod()` to a BEL statement, an additional entry called :code:`variants` is added. It is a list of all of the
-modifications and variants (in alphabetical order) on the node. Under this schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9))`
-becomes:
-
-.. code::
-
-    {
-        'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        },
-        'variants': [
-            {
-                'code': 'Ser',
-                'identifier': {
-                    'name': 'Ph',
-                    'namespace': 'PYBEL'
-                },
-                'pos': 9
-            }
-        ]
-    }
-
 Nomenclature
-~~~~~~~~~~~~
+------------
 
 Mapping for BEL functions to PyBEL functions is done based on the following dictionary
 (:code:`pybel.parser.language.abundance_labels`)
@@ -78,11 +38,43 @@ Mapping for BEL functions to PyBEL functions is done based on the following dict
         'compositeAbundance': 'Composite'
     }
 
-But these terms can be more readily accessed by :code:`pybel.parser.language.PROTEIN`,
-:code:`pybel.parser.language.GENE`, and so on.
+But these terms can be more readily accessed by :code:`pybel.constants.PROTEIN`,
+:code:`pybel.constants.GENE`, and so on.
+
+Simple Abundances
+-----------------
+The relevant data about a node is stored in its associated dictionary in NetworkX. After parsing, :code:`p(HGNC:GSK3B)`
+becomes:
+
+.. code::
+
+    {
+        'function': 'Protein',
+        'identifier': {
+            'namespace': 'HGNC',
+            'name': 'GSK3B'
+        }
+    }
+
+.. automodule:: pybel.parser.modifiers.variant
+
+.. automodule:: pybel.parser.modifiers.gene_substitution
+
+.. automodule:: pybel.parser.modifiers.protein_substitution
+
+.. automodule:: pybel.parser.modifiers.truncation
+
+.. automodule:: pybel.parser.modifiers.fragment
+
+.. automodule:: pybel.parser.modifiers.gene_modification
+
+.. automodule:: pybel.parser.modifiers.protein_modification
+
+.. automodule:: pybel.parser.modifiers.fusion
+
 
 List Abundances
-~~~~~~~~~~~~~~~
+---------------
 Complexes and composites that are defined by lists do not recieve information about the identifier, and are only
 described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 
@@ -97,6 +89,40 @@ The remaining information is encoded in the edges to the resulting protein nodes
 
 Edges
 -----
+In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
+degradations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
+of the edge. In reality, an edge like :code:`sec(p(HGNC:A)) -> activity(p(HGNC:B), ma(kinaseActivity))` represents
+a connection between :code:`HGNC:A` and :code:`HGNC:B`. Each of these modifiers explains the context of the relationship
+between these physical entities. Further, querying a network where these modifiers are part of a relationship
+is much more straightforward. For example, finding all proteins that are upregulated by the kinase activity of another
+protein now can be directly queried by filtering all edges for those with a subject modifier whose modification is
+molecular activity, and whose effect is kinase activity. Having fewer nodes also allows for a much easier display
+and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
+as a color coded source and terminus of the connecting edge.
+
+The compiler in OpenBEL framework created nodes for molecular activities like :code:`kin(p(HGNC:YFG))` and induced an
+edge like :code:`p(HGNC:YFG) actsIn kin(p(HGNC:YFG))`. For transformations, a statement like
+:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")` also induced
+:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane") translocates p(HGNC:YFG)`.
+
+In PyBEL, we recognize that these modifications are actually annotations to the type of relationship between the
+subject's entity and the object's entity. :code:`p(HGNC:ABC) -> tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")`
+is about the relationship between :code:`p(HGNC:ABC)` and :code:`p(HGNC:YFG)`, while
+the information about the translocation qualifies that the object is undergoing an event, and not just the abundance.
+This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
+just the keyword :code:`p`
+
+This also begs the question of what statements mean. BEL 2.0 introduced the :code:`location()` element that can be
+inside any abundances. This means that it's possible to unambiguously express the differences between the process of
+:code:`HGNC:A` moving from one place to another and the existence of :code:`HGNC:A` in a specific location having
+different effects. In BEL 1.0, this action had its own node, but this introduced unnecessary complexity to the network
+and made querying more difficult. Consider the difference between the following two statements:
+
+- :code:`tloc(p(HGNC:A), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell membrane")) -> p(HGNC:B)`
+- :code:`p(HGNC:A, location(GOCC:"cell membrane")) -> p(HGNC:B)`
+
+Activities
+~~~~~~~~~~
 Modifiers are added to this structure as well. Under this schema,
 :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
 
@@ -111,6 +137,7 @@ Modifiers are added to this structure as well. Under this schema,
             },
             'variants': [
                 {
+                    'kind': 'pmod',
                     'code': 'Ser',
                     'identifier': {
                         'name': 'Ph',
@@ -137,50 +164,12 @@ Modifiers are added to this structure as well. Under this schema,
         },
     }
 
-Location data also is added into the information in the edge for the node (subject or object) for which it was
-annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
 
-.. code::
+.. automodule:: pybel.parser.modifiers.location
 
-    {
-        'subject': {
-            'function': 'Protein',
-            'identifier': 'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'GSK3B'
-            },
-            'variants': [
-                {
-                    'code': 'Ser',
-                    'identifier': {
-                        'name': 'Ph',
-                        'namespace': 'PYBEL'
-                    },
-                    'pos': 9
-                }
-            ],
-            'location': {
-                'namespace': 'GOCC',
-                'name': 'lysozome'
-            }
-        },
-        'relation': 'positiveCorrelation',
-        'object': {
-            'modifier': 'Activity',
-            'target': {
-                'function': 'Protein',
-                'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'GSK3B'
-                }
-            },
-            'effect': {
-                'name': 'kin',
-                'namespace': 'PYBEL'
-            }
-        },
-    }
 
+Translocations
+~~~~~~~~~~~~~~
 Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:YFG2))` becomes:
 
 .. code::
@@ -216,6 +205,8 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
         },
     }
 
+Degradations
+~~~~~~~~~~~~
 Degradations are more simple, because there's no 'effect' entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
 
 .. code::

@@ -18,6 +18,8 @@ DEFINE NAMESPACE GOBP AS URL "http://resources.openbel.org/belframework/20150611
 DEFINE NAMESPACE GOCC AS URL "http://resources.openbel.org/belframework/20150611/namespace/go-cellular-component.belns"
 DEFINE NAMESPACE MESHD AS URL "http://resource.belframework.org/belframework/20150611/namespace/mesh-diseases.belns"
 
+DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"
+
 DEFINE NAMESPACE TESTNS2 AS URL "file://examples/test_ns_2.belns"
 
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
@@ -35,11 +37,11 @@ a(CHEBI:"oxygen atom") -> geneAbundance(HGNC:AKT1,gmod(M))
 g(HGNC:AKT1, loc(GOCC:intracellular)) -| abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))
 g(HGNC:AKT1, var(p.Phe508del)) =| p(HGNC:AKT1)
 g(HGNC:AKT1,sub(G,308,A)) cnc g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))
-g(HGNC:AKT1,sub(G,308,A),loc(GOCC:intracellular)) -> g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(delCTT))
+g(HGNC:AKT1,sub(G,308,A),loc(GOCC:intracellular)) -> g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))
 
 m(HGNC:MIR21) => g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
 
-g(HGNC:CFTR, var(delCTT)) -> deg(p(HGNC:AKT1))
+g(HGNC:CFTR, var(c.1521_1523delCTT)) -> deg(p(HGNC:AKT1))
 g(HGNC:CFTR, var(g.117199646_117199648delCTT)) -> g(HGNC:CFTR, var(c.1521_1523delCTT))
 
 microRNAAbundance(HGNC:MIR21) -| p(HGNC:AKT1, pmod(TESTNS2:PhosRes, Ser, 473))
@@ -69,7 +71,7 @@ p(HGNC:AKT1) -> p(HGNC:CFTR, var(p.Gly576Ala))
 
 r(HGNC:AKT1) -> tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))
 
-r(HGNC:AKT1, var(p.Phe508del), var(delCTT)) => r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))
+r(HGNC:AKT1, var(p.Phe508del), var(c.1521_1523delCTT)) => r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))
 
 r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?)) -> complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))
 
@@ -131,3 +133,8 @@ pathology(MESHD:Psoriasis) isA pathology(MESHD:"Skin Diseases")
 rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
 
 a(CHEBI:"nitric oxide") increases surf(complex(p(HGNC:ITGAV),p(HGNC:ITGB3)))
+
+# Test that the equivalentTo relation works
+g(HGNC:ARRDC2) eq g(HGNC:ARRDC3)
+
+g(HGNC:CFTR, var(c.1521_1523delCTT)) -- g(dbSNP:rs123456)

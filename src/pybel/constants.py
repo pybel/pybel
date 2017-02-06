@@ -16,8 +16,8 @@ PYBEL_DATA_DIR = os.path.join(PYBEL_DIR, 'data')
 if not os.path.exists(PYBEL_DATA_DIR):
     os.mkdir(PYBEL_DATA_DIR)
 
-DEFAULT_DEFINITION_CACHE_NAME = 'definitions.db'
-DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_DEFINITION_CACHE_NAME)
+DEFAULT_CACHE_NAME = 'pybel_cache.db'
+DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
 
@@ -37,9 +37,16 @@ RELATION = 'relation'
 CITATION = 'citation'
 EVIDENCE = 'SupportingText'
 
-CITATION_ENTRIES = 'type', 'name', 'reference', 'date', 'authors', 'comments'
+CITATION_TYPE = 'type'
+CITATION_NAME = 'name'
+CITATION_REFERENCE = 'reference'
+CITATION_DATE = 'date'
+CITATION_AUTHORS = 'authors'
+CITATION_COMMENTS = 'comments'
+
+CITATION_ENTRIES = CITATION_TYPE, CITATION_NAME, CITATION_REFERENCE, CITATION_DATE, CITATION_AUTHORS, CITATION_COMMENTS
 CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
-BLACKLIST_EDGE_ATTRIBUTES = {'relation', 'subject', 'object', 'citation', 'SupportingText'}
+
 DIRTY = 'dirty'
 
 ACTIVITY = 'Activity'
@@ -68,18 +75,10 @@ LOCATION = 'location'
 SUBJECT = 'subject'
 OBJECT = 'object'
 
-GENE_FUSION = 'GeneFusion'
-RNA_FUSION = 'RNAFusion'
-PROTEIN_FUSION = 'ProteinFusion'
-
 GENE = 'Gene'
-GENEVARIANT = GENE
 RNA = 'RNA'
-RNAVARIANT = RNA
 PROTEIN = 'Protein'
-PROTEINVARIANT = PROTEIN
 MIRNA = 'miRNA'
-MIRNAVARIANT = MIRNA
 ABUNDANCE = 'Abundance'
 BIOPROCESS = 'BiologicalProcess'
 PATHOLOGY = 'Pathology'
@@ -95,18 +94,25 @@ HAS_MEMBER = 'hasMember'
 TRANSCRIBED_TO = 'transcribedTo'
 TRANSLATED_TO = 'translatedTo'
 
+INCREASES = 'increases'
+DIRECTLY_INCREASES = 'directlyIncreases'
+DECREASES = 'decreases'
+DIRECTLY_DECREASES = 'directlyDecreases'
+CAUSES_NO_CHANGE = 'causesNoChange'
 NEGATIVE_CORRELATION = 'negativeCorrelation'
 POSITIVE_CORRELATION = 'positiveCorrelation'
 ASSOCIATION = 'association'
 ORTHOLOGOUS = 'orthologous'
 ANALOGOUS_TO = 'analogousTo'
+EQUIVALENT_TO = 'equivalentTo'
 
 TWO_WAY_RELATIONS = {
     NEGATIVE_CORRELATION,
     POSITIVE_CORRELATION,
     ASSOCIATION,
     ORTHOLOGOUS,
-    ANALOGOUS_TO
+    ANALOGOUS_TO,
+    EQUIVALENT_TO,
 }
 
 BEL_KEYWORD_AS = 'AS'
@@ -121,3 +127,5 @@ BEL_KEYWORD_DOCUMENT = 'DOCUMENT'
 BEL_KEYWORD_PATTERN = 'PATTERN'
 BEL_KEYWORD_CITATION = 'Citation'
 BEL_KEYWORD_SUPPORT = 'SupportingText'
+
+BLACKLIST_EDGE_ATTRIBUTES = {RELATION, SUBJECT, OBJECT, CITATION, EVIDENCE}

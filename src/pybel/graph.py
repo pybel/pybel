@@ -5,6 +5,7 @@ import time
 from collections import defaultdict, Counter
 
 import networkx as nx
+from pkg_resources import get_distribution
 from pyparsing import ParseException
 
 from .constants import FUNCTION, NAMESPACE
@@ -24,21 +25,30 @@ except ImportError:
 
 __all__ = ['BELGraph']
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
+
+METADATA_NAME = 'name'
+METADATA_VERSION = 'version'
+METADATA_DESCRIPTION = 'description'
+METADATA_AUTHORS = 'authors'
+METADATA_CONTACT = 'contact'
 
 REQUIRED_METADATA = [
-    'name',
-    'version',
-    'description',
-    'authors',
-    'contact'
+    METADATA_NAME,
+    METADATA_VERSION,
+    METADATA_DESCRIPTION,
+    METADATA_AUTHORS,
+    METADATA_CONTACT
 ]
 
 GRAPH_METADATA = 'document_metadata'
 GRAPH_NAMESPACE_URL = 'namespace_url'
 GRAPH_NAMESPACE_OWL = 'namespace_owl'
+GRAPH_NAMESPACE_PATTERN = 'namespace_pattern'
 GRAPH_ANNOTATION_URL = 'annotation_url'
+GRAPH_ANNOTATION_OWL = 'annotation_owl'
 GRAPH_ANNOTATION_LIST = 'annotation_list'
+GRAPH_PYBEL_VERSION = 'pybel_version'
 
 
 def build_metadata_parser(cache_manager):
@@ -73,6 +83,7 @@ class BELGraph(nx.MultiDiGraph):
 
         #: Stores warnings as 4-tuples with (line number, line text, exception instance, context dictionary)
         self.warnings = []
+        self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
 
         if lines is not None:
             self.parse_lines(
@@ -110,6 +121,7 @@ class BELGraph(nx.MultiDiGraph):
             graph=self,
             valid_namespaces=metadata_parser.namespace_dict,
             valid_annotations=metadata_parser.annotations_dict,
+            namespace_re=metadata_parser.namespace_re,
             complete_origin=complete_origin,
             allow_naked_names=allow_naked_names,
             allow_nested=allow_nested,
@@ -164,7 +176,9 @@ class BELGraph(nx.MultiDiGraph):
 
         self.graph[GRAPH_NAMESPACE_OWL] = metadata_parser.namespace_owl_dict.copy()
         self.graph[GRAPH_NAMESPACE_URL] = metadata_parser.namespace_url_dict.copy()
+        self.graph[GRAPH_NAMESPACE_PATTERN] = metadata_parser.namespace_re.copy()
         self.graph[GRAPH_ANNOTATION_URL] = metadata_parser.annotation_url_dict.copy()
+        self.graph[GRAPH_ANNOTATION_OWL] = metadata_parser.annotations_owl_dict.copy()
         self.graph[GRAPH_ANNOTATION_LIST] = {e: metadata_parser.annotations_dict[e] for e in
                                              metadata_parser.annotation_list_list}
 
@@ -238,14 +252,29 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
+    def namespace_pattern(self):
+        """A dictionary mapping the keywords used in the creation of this graph to their regex patterns"""
+        return self.graph[GRAPH_NAMESPACE_PATTERN]
+
+    @property
     def annotation_url(self):
         """A dictionary mapping the keywords used in the creation of this graph to the URLs of the BELANNO file"""
         return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
+    def annotation_owl(self):
+        """A dictionary mapping the keywords to the URL of the OWL file"""
+        return self.graph[GRAPH_ANNOTATION_OWL]
+
+    @property
     def annotation_list(self):
         """A dictionary mapping the keyword of locally defined annotations to a set of their values"""
         return self.graph[GRAPH_ANNOTATION_LIST]
+
+    @property
+    def pybel_version(self):
+        """Stores the version of PyBEL with which this graph was produced"""
+        return self.graph[GRAPH_PYBEL_VERSION]
 
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""

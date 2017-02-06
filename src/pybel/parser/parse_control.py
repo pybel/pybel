@@ -94,7 +94,7 @@ class ControlParser(BaseParser):
     def handle_annotation_key(self, s, l, tokens):
         key = tokens['key']
         if key not in self.valid_annotations:
-            raise UndefinedAnnotationWarning("Illegal annotation: {}".format(key))
+            raise UndefinedAnnotationWarning(key)
         return tokens
 
     def handle_citation(self, s, l, tokens):
@@ -104,7 +104,7 @@ class ControlParser(BaseParser):
         values = tokens['values']
 
         if not (3 <= len(values) <= 6):
-            raise InvalidCitationException('Invalid citation: {}'.format(s))
+            raise InvalidCitationException(s)
 
         if values[0] not in CITATION_TYPES:
             raise InvalidCitationType(values[0])
@@ -155,7 +155,7 @@ class ControlParser(BaseParser):
 
     def handle_unset_citation(self, s, l, tokens):
         if 0 == len(self.citation):
-            raise MissingAnnotationKeyWarning('Citation')
+            raise MissingAnnotationKeyWarning(BEL_KEYWORD_CITATION)
         else:
             self.citation.clear()
         return tokens

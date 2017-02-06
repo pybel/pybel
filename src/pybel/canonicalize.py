@@ -5,38 +5,24 @@ import logging
 import sys
 from operator import itemgetter
 
+from .constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, \
+    BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX, REACTION, CITATION
 from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION
 from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
-from .constants import GENEVARIANT, RNAVARIANT, PROTEINVARIANT, MIRNAVARIANT, ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, \
-    BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX, REACTION, CITATION
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
-from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, GENE_FUSION, RNA_FUSION, PROTEIN_FUSION
+from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS
 from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
-    LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER
+    LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER, FUSION
 from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
-from .parser.parse_abundance_modifier import PmodParser, GmodParser, FragmentParser, VariantParser, FusionParser
+from .parser.modifiers import VariantParser, FusionParser
+from .parser.modifiers.fragment import FragmentParser
+from .parser.modifiers.gene_modification import GmodParser
+from .parser.modifiers.protein_modification import PmodParser
 from .parser.utils import ensure_quotes
 
 __all__ = ['to_bel']
 
 log = logging.getLogger(__name__)
-
-variant_parent_dict = {
-    GENEVARIANT: 'g',
-    RNAVARIANT: 'r',
-    PROTEINVARIANT: 'p',
-    MIRNAVARIANT: 'm',
-    GENE: 'g',
-    RNA: 'r',
-    PROTEIN: 'p',
-    MIRNA: 'm'
-}
-
-fusion_parent_dict = {
-    GENE_FUSION: 'g',
-    RNA_FUSION: 'r',
-    PROTEIN_FUSION: 'p'
-}
 
 
 # FIXME remove this, replace with edges_iter
@@ -130,26 +116,26 @@ def decanonicalize_node(g, v):
 
     if VARIANTS in data:
         variants = ', '.join(sorted(map(decanonicalize_variant, data[VARIANTS])))
-        return "{}({}:{}, {})".format(variant_parent_dict[data[FUNCTION]],
+        return "{}({}:{}, {})".format(rev_abundance_labels[data[FUNCTION]],
                                       data[NAMESPACE],
                                       ensure_quotes(data[NAME]),
                                       variants)
+
+    if FUSION in data:
+        return "{}(fus({}:{}, {}, {}:{}, {}))".format(
+            rev_abundance_labels[data[FUNCTION]],
+            data[FUSION][PARTNER_5P][NAMESPACE],
+            data[FUSION][PARTNER_5P][NAME],
+            decanonicalize_fusion_range(data[FUSION][RANGE_5P]),
+            data[FUSION][PARTNER_3P][NAMESPACE],
+            data[FUSION][PARTNER_3P][NAME],
+            decanonicalize_fusion_range(data[FUSION][RANGE_3P])
+        )
 
     if data[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY, BIOPROCESS}:
         return "{}({}:{})".format(rev_abundance_labels[data[FUNCTION]],
                                   data[NAMESPACE],
                                   ensure_quotes(data[NAME]))
-
-    if data[FUNCTION] in {GENE_FUSION, RNA_FUSION, PROTEIN_FUSION}:
-        return "{}(fus({}:{}, {}, {}:{}, {}))".format(
-            fusion_parent_dict[data[FUNCTION]],
-            data[PARTNER_5P][NAMESPACE],
-            data[PARTNER_5P][NAME],
-            decanonicalize_fusion_range(data[RANGE_5P]),
-            data[PARTNER_3P][NAMESPACE],
-            data[PARTNER_3P][NAME],
-            decanonicalize_fusion_range(data[RANGE_3P])
-        )
 
     raise ValueError('Unknown node data: {} {}'.format(v, data))
 
@@ -244,10 +230,16 @@ def to_bel(graph, file=sys.stdout):
     for namespace, url in sorted(graph.namespace_owl.items(), key=itemgetter(0)):
         print('DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url), file=file)
 
+    for namespace, pattern in sorted(graph.namespace_pattern.items(), key=itemgetter(0)):
+        print('DEFINE NAMESPACE {} AS PATTERN "{}"'.format(namespace, pattern), file=file)
+
     print('###############################################\n', file=file)
 
     for annotation, url in sorted(graph.annotation_url.items(), key=itemgetter(0)):
         print('DEFINE ANNOTATION {} AS URL "{}"'.format(annotation, url), file=file)
+
+    for annotation, url in sorted(graph.annotation_owl.items(), key=itemgetter(0)):
+        print('DEFINE ANNOTATION {} AS OWL "{}"'.format(annotation, url), file=file)
 
     for annotation, an_list in sorted(graph.annotation_list.items(), key=itemgetter(0)):
         an_list_str = ', '.join('"{}"'.format(e) for e in an_list)
