@@ -15,7 +15,6 @@ from pybel.parser.modifiers import FusionParser, LocationParser, GmodParser, Fra
 from pybel.parser.modifiers import GsubParser, TruncParser, PsubParser, VariantParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
-from pybel.utils import default_identifier
 from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel, build_variant_dict
 
 log = logging.getLogger(__name__)
@@ -26,6 +25,11 @@ TEST_PROTEIN_VARIANT = 'p.Phe508del'
 
 def identifier(namespace, name):
     return {NAMESPACE: namespace, NAME: name}
+
+
+def default_identifier(name):
+    """Convenience function for building a default namespace/name pair"""
+    return identifier(BEL_DEFAULT_NAMESPACE, name)
 
 
 class TestVariantParser(unittest.TestCase):
@@ -2677,7 +2681,7 @@ class TestRelations(TestTokenParserBase):
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
         self.parser.allow_nested = True
 
-        result = self.parser.relation.parseString(statement)
+        self.parser.relation.parseString(statement)
 
         self.assertHasEdge((PROTEIN, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', "hydrogen peroxide"))
         self.assertHasEdge((ABUNDANCE, 'CHEBI', "hydrogen peroxide"),
@@ -2995,7 +2999,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
-        result = self.parser.parseString(statement)
+        self.parser.parseString(statement)
 
 
 class TestWrite(TestTokenParserBase):

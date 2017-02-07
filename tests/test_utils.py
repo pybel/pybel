@@ -47,7 +47,7 @@ class TestUtils(unittest.TestCase):
             'C_D': 'd',
             'C_E': 'e'
         }
-        self.assertEqual(expected, pybel.utils.flatten(d))
+        self.assertEqual(expected, pybel.utils.flatten_dict(d))
 
     def test_flatten_dict_withLists(self):
         d = {
@@ -65,7 +65,7 @@ class TestUtils(unittest.TestCase):
             'C_D': 'd,delta',
             'C_E': 'e'
         }
-        self.assertEqual(expected, pybel.utils.flatten(d))
+        self.assertEqual(expected, pybel.utils.flatten_dict(d))
 
     def test_flatten_edges(self):
         g = nx.MultiDiGraph()

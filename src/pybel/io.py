@@ -33,7 +33,7 @@ from requests_file import FileAdapter
 from .canonicalize import decanonicalize_node
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION
 from .graph import BELGraph, expand_edges, GRAPH_ANNOTATION_LIST
-from .utils import flatten, flatten_graph_data
+from .utils import flatten_dict, flatten_graph_data
 
 try:
     import cPickle as pickle
@@ -249,7 +249,7 @@ def to_graphml(graph, output):
         g.add_node(node, json=json.dumps(data))
 
     for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten(data))
+        g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
 
     nx.write_graphml(g, output)
 
@@ -317,7 +317,7 @@ def to_neo4j(graph, neo_graph, context=None):
         neo_u = node_map[u]
         neo_v = node_map[v]
         rel_type = data[RELATION]
-        attrs = flatten(data)
+        attrs = flatten_dict(data)
         if context is not None:
             attrs[PYBEL_CONTEXT_TAG] = str(context)
         rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
