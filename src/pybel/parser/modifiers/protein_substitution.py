@@ -14,10 +14,8 @@ The previous statements both produce the underlying data:
 
     {
         'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'APP'
-        },
+        'namespace': 'HGNC',
+        'name': 'APP',
         'variants': [
             {
                 'kind': 'hgvs',

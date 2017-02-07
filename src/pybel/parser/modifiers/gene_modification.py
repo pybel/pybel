@@ -20,10 +20,8 @@ For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the fol
 
     {
         'function': 'Gene',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        },
+        'namespace': 'HGNC',
+        'name': 'GSK3B',
         'variants': [
             {
                 'kind': 'gmod',

@@ -18,10 +18,8 @@ For example, the node :code:`p(HGNC:GSK3B, pmod(P, S, 9))` is represented with t
 
     {
         'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        },
+        'namespace': 'HGNC',
+        'name': 'GSK3B',
         'variants': [
             {
                 'kind': 'pmod',

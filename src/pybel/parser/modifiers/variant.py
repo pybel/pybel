@@ -16,10 +16,8 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
 
    {
        'function': 'Protein',
-       'identifier': {
-           'namespace': 'HGNC',
-           'name': 'GSK3B'
-       },
+       'namespace': 'HGNC',
+       'name': 'GSK3B',
        'variants': [
            {
                'kind': 'hgvs',

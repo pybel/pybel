@@ -49,10 +49,8 @@ becomes:
 
     {
         'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        }
+        'namespace': 'HGNC',
+        'name': 'GSK3B'
     }
 
 .. automodule:: pybel.parser.modifiers.variant

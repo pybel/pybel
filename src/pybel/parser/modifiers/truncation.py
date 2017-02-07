@@ -12,10 +12,8 @@ dictionary:
 
     {
         'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'AKT1'
-        },
+        'namespace': 'HGNC',
+        'name': 'AKT1',
         'variants': [
             {
                 'kind': 'hgvs',

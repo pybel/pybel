@@ -18,10 +18,8 @@ For example, the node :code:`p(HGNC:GSK3B, frag(45_129))` is represented with th
 
     {
         'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        },
+        'namespace': 'HGNC',
+        'name': 'GSK3B',
         'variants': [
             {
                 'kind': 'frag',
@@ -42,10 +40,8 @@ is represented with the key 'missing' and the value of '?' like:
 
     {
         'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'GSK3B'
-        },
+        'namespace': 'HGNC',
+        'name': 'GSK3B',
         'variants': [
             {
                 'kind': 'frag',
