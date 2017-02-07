@@ -16,7 +16,7 @@ from pyparsing import pyparsing_common as ppc
 
 from . import language
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
-from .language import value_map
+from .language import belns_encodings
 from .modifiers import FusionParser, VariantParser, canonicalize_variant, FragmentParser, GmodParser, GsubParser, \
     LocationParser, PmodParser, PsubParser, TruncParser
 from .parse_control import ControlParser
@@ -516,11 +516,11 @@ class BelParser(BaseParser):
             return tokens
 
         valid_function_codes = set(itt.chain.from_iterable(
-            value_map[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
+            belns_encodings[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
 
         if tokens[FUNCTION] not in valid_function_codes:
             valid = set(itt.chain.from_iterable(
-                value_map[k] for k in self.identifier_parser.namespace_dict[namespace][name]))
+                belns_encodings[k] for k in self.identifier_parser.namespace_dict[namespace][name]))
             raise InvalidFunctionSemantic(tokens[FUNCTION], namespace, name, valid)
 
         return tokens

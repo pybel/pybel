@@ -28,7 +28,7 @@ owl_tag = Suppress(BEL_KEYWORD_OWL)
 set_tag = Suppress(BEL_KEYWORD_SET)
 define_tag = Suppress(BEL_KEYWORD_DEFINE)
 
-function_tags = Word(''.join(language.value_map))
+function_tags = Word(''.join(language.belns_encodings))
 
 value = quote | ppc.identifier
 
@@ -148,8 +148,8 @@ class MetadataParser(BaseParser):
             return tokens
 
         if 'functions' not in tokens:
-            functions = set(language.value_map)
-        elif not all(x in language.value_map for x in tokens['functions']):
+            functions = set(language.belns_encodings)
+        elif not all(x in language.belns_encodings for x in tokens['functions']):
             raise ValueError("Illegal semantic definition: {}".format(tokens['functions']))
         else:
             functions = set(tokens['functions'])

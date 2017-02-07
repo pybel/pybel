@@ -15,17 +15,11 @@ from pyparsing import Suppress, pyparsing_common, MatchFirst
 from .baseparser import BaseParser, quote, delimitedSet, And, oneOf
 from .parse_exceptions import *
 from .utils import is_int
-from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES
+from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT, \
+    BEL_KEYWORD_ALL
+from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET
 
 log = logging.getLogger('pybel')
-
-BEL_KEYWORD_SET = 'SET'
-BEL_KEYWORD_UNSET = 'UNSET'
-BEL_KEYWORD_STATEMENT_GROUP = 'STATEMENT_GROUP'
-BEL_KEYWORD_CITATION = 'Citation'
-BEL_KEYWORD_EVIDENCE = 'Evidence'
-BEL_KEYWORD_SUPPORT = 'SupportingText'
-BEL_KEYWORD_ALL = 'ALL'
 
 
 class ControlParser(BaseParser):

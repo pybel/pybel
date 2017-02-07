@@ -17,12 +17,12 @@ from . import defaults
 from . import models
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..constants import DEFAULT_CACHE_LOCATION
-from ..parser.language import value_map
+from ..parser.language import belns_encodings
 from ..utils import download_url
 
 log = logging.getLogger(__name__)
 
-DEFAULT_BELNS_ENCODING = ''.join(sorted(value_map))
+DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
 class BaseCacheManager:

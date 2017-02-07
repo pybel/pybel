@@ -8,6 +8,9 @@ import logging
 
 from pyparsing import *
 
+from ..constants import BEL_KEYWORD_METADATA_AUTHORS, BEL_KEYWORD_METADATA_CONTACT, BEL_KEYWORD_METADATA_COPYRIGHT, \
+    BEL_KEYWORD_METADATA_DESCRIPTION, BEL_KEYWORD_METADATA_DISCLAIMER, BEL_KEYWORD_METADATA_LICENSES, \
+    BEL_KEYWORD_METADATA_NAME, BEL_KEYWORD_METADATA_VERSION
 from .parse_exceptions import PlaceholderAminoAcidWarning
 from ..constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX
 from ..constants import HAS_REACTANT, HAS_PRODUCT, HAS_COMPONENT, HAS_VARIANT, TRANSCRIBED_TO, TRANSLATED_TO, HAS_MEMBER
@@ -15,14 +18,14 @@ from ..constants import HAS_REACTANT, HAS_PRODUCT, HAS_COMPONENT, HAS_VARIANT, T
 log = logging.getLogger('pybel')
 
 document_keys = {
-    'Authors': 'authors',
-    'ContactInfo': 'contact',
-    'Copyright': 'copyright',
-    'Description': 'description',
-    'Disclaimer': 'disclaimer',
-    'Licenses': 'licenses',
-    'Name': 'name',
-    'Version': 'version'
+    BEL_KEYWORD_METADATA_AUTHORS: 'authors',
+    BEL_KEYWORD_METADATA_CONTACT: 'contact',
+    BEL_KEYWORD_METADATA_COPYRIGHT: 'copyright',
+    BEL_KEYWORD_METADATA_DESCRIPTION: 'description',
+    BEL_KEYWORD_METADATA_DISCLAIMER: 'disclaimer',
+    BEL_KEYWORD_METADATA_LICENSES: 'licenses',
+    BEL_KEYWORD_METADATA_NAME: 'name',
+    BEL_KEYWORD_METADATA_VERSION: 'version'
 }
 
 inv_document_keys = {v: k for k, v in document_keys.items()}
@@ -96,8 +99,8 @@ rev_abundance_labels = {
     COMPOSITE: 'composite'
 }
 
-#: See https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
-value_map = {
+#: ..seealso:: https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
+belns_encodings = {
     'G': {GENE},
     'R': {RNA, MIRNA},
     'P': {PROTEIN},
@@ -108,7 +111,6 @@ value_map = {
     'C': {COMPLEX}
 }
 
-# rev_value_map = {v: k for k, v in value_map.items()}
 
 amino_acid_dict = {
     'A': 'Ala',

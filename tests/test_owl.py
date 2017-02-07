@@ -8,7 +8,7 @@ import pybel
 from pybel.constants import ABUNDANCE, PROTEIN
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
-from pybel.parser.language import value_map
+from pybel.parser.language import belns_encodings
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_3
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, expected_test_bel_4_metadata, \
@@ -97,7 +97,7 @@ class TestParsePizza(TestOwlBase):
 
         self.assertIn('PIZZA', parser.namespace_dict)
 
-        functions = set(value_map.keys())
+        functions = set(belns_encodings.keys())
         names = set(parser.namespace_dict['PIZZA'].keys())
         for node in EXPECTED_PIZZA_NODES:
             self.assertIn(node, names)
