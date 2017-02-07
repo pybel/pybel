@@ -57,9 +57,6 @@ class Namespace(Base):
 
     has_equivalences = Column(Boolean, default=False)
 
-    def __repr__(self):
-        return 'Namespace({})'.format(self.keyword)
-
 
 class NamespaceEntry(Base):
     __tablename__ = NAMESPACE_ENTRY_TABLE_NAME
@@ -74,9 +71,6 @@ class NamespaceEntry(Base):
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
     equivalence = relationship('NamespaceEntryEquivalence', back_populates='members')
 
-    def __repr__(self):
-        return 'NSEntry({}, {}, {})'.format(self.name, ''.join(sorted(self.encoding)), self.equivalence)
-
 
 class NamespaceEntryEquivalence(Base):
     __tablename__ = NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME
@@ -84,9 +78,6 @@ class NamespaceEntryEquivalence(Base):
     label = Column(String(255), nullable=False, unique=True, index=True)
 
     members = relationship('NamespaceEntry', back_populates='equivalence')
-
-    def __repr__(self):
-        return 'NsEquivalence({})'.format(self.label)
 
 
 class Annotation(Base):
@@ -115,9 +106,6 @@ class Annotation(Base):
 
     entries = relationship('AnnotationEntry', back_populates="annotation")
 
-    def __repr__(self):
-        return 'Annotation({})'.format(self.keyword)
-
 
 class AnnotationEntry(Base):
     __tablename__ = ANNOTATION_ENTRY_TABLE_NAME
@@ -128,9 +116,6 @@ class AnnotationEntry(Base):
 
     annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
     annotation = relationship('Annotation', back_populates='entries')
-
-    def __repr__(self):
-        return 'AnnotationEntry({}, {})'.format(self.name, self.label)
 
 
 owl_namespace_relationship = Table(
@@ -147,9 +132,6 @@ class OwlNamespace(Base):
     iri = Column(Text, unique=True)
 
     entries = relationship('OwlNamespaceEntry', back_populates='owl')
-
-    def __repr__(self):
-        return "OwlNamespace(iri={})>".format(self.iri)
 
 
 class OwlNamespaceEntry(Base):
@@ -168,9 +150,6 @@ class OwlNamespaceEntry(Base):
                             primaryjoin=id == owl_namespace_relationship.c.left_id,
                             secondaryjoin=id == owl_namespace_relationship.c.right_id)
 
-    def __repr__(self):
-        return 'OwlNamespaceEntry({}:{})'.format(self.owl, self.entry)
-
 
 owl_annotation_relationship = Table(
     'owl_annotation_relationship', Base.metadata,
@@ -186,9 +165,6 @@ class OwlAnnotation(Base):
     iri = Column(Text, unique=True)
 
     entries = relationship('OwlAnnotationEntry', back_populates='owl')
-
-    def __repr__(self):
-        return "OwlAnnotation(iri={})>".format(self.iri)
 
 
 class OwlAnnotationEntry(Base):
@@ -206,9 +182,6 @@ class OwlAnnotationEntry(Base):
                             secondary=owl_annotation_relationship,
                             primaryjoin=id == owl_annotation_relationship.c.left_id,
                             secondaryjoin=id == owl_annotation_relationship.c.right_id)
-
-    def __repr__(self):
-        return 'OwlAnnotationEntry({}:{})'.format(self.owl, self.entry)
 
 
 class Network(Base):
