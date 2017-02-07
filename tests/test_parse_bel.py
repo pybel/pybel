@@ -2315,9 +2315,6 @@ class TestRelations(TestTokenParserBase):
         self.parser.parseString(test_citation_bel)
         self.parser.parseString(test_evidence_bel)
 
-    def test_language(self):
-        self.assertIsNotNone(self.parser.get_language())
-
     def test_increases(self):
         """
         3.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases
