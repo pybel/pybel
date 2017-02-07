@@ -14,13 +14,12 @@ from pybel.constants import CITATION_TYPE, CITATION_NAME, CITATION_REFERENCE
 from pybel.constants import DEGRADATION, FROM_LOC, TO_LOC, HAS_COMPONENT
 from pybel.constants import FUNCTION, NAMESPACE, NAME
 from pybel.constants import INCREASES, DECREASES, ASSOCIATION, MODIFIER, EFFECT, ACTIVITY
-from pybel.constants import KIND, TRANSLOCATION
+from pybel.constants import KIND, TRANSLOCATION, IDENTIFIER
 from pybel.constants import LOCATION, CITATION, EVIDENCE
 from pybel.constants import PROTEIN, ABUNDANCE, GENE, RNA, MIRNA, COMPLEX, \
     COMPOSITE, BIOPROCESS, PATHOLOGY, REACTION, PMOD, HGVS, GMOD, BEL_DEFAULT_NAMESPACE, FRAGMENT
 from pybel.constants import RELATION, EQUIVALENT_TO, HAS_VARIANT, HAS_REACTANT, HAS_PRODUCT, SUBJECT, OBJECT
 from pybel.manager.utils import urldefrag, OWLParser
-from pybel.parser.modifiers import VariantParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
 
@@ -157,7 +156,7 @@ expected_test_bel_4_metadata = {
 
 
 def build_variant_dict(variant):
-    return {KIND: HGVS, VariantParser.IDENTIFIER: variant}
+    return {KIND: HGVS, IDENTIFIER: variant}
 
 
 def get_uri_name(url):

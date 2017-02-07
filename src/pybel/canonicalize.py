@@ -7,16 +7,15 @@ from operator import itemgetter
 
 from .constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, \
     BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX, REACTION, CITATION
-from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION
+from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION, IDENTIFIER
 from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, BEL_DEFAULT_NAMESPACE
-from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS
+from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, HAS_MEMBER
 from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
-    LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER, FUSION
+    LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER, FUSION, PYBEL_AUTOEVIDENCE
 from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
-from .parser.modifiers import VariantParser, FusionParser
+from .parser.modifiers import FusionParser
 from .parser.modifiers.fragment import FragmentParser
-from .parser.modifiers.gene_modification import GmodParser
 from .parser.modifiers.protein_modification import PmodParser
 from .parser.utils import ensure_quotes
 
@@ -61,19 +60,19 @@ def postpend_location(s, location_model):
 
 def decanonicalize_variant(tokens):
     if tokens[KIND] == PMOD:
-        if tokens[PmodParser.IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-            name = tokens[PmodParser.IDENTIFIER][NAME]
+        if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
+            name = tokens[IDENTIFIER][NAME]
         else:
-            name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])
+            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])
         return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PmodParser.ORDER[2:] if x in tokens))
     elif tokens[KIND] == GMOD:
-        if tokens[GmodParser.IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-            name = tokens[GmodParser.IDENTIFIER][NAME]
+        if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
+            name = tokens[IDENTIFIER][NAME]
         else:
-            name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])
+            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])
         return 'gmod({})'.format(name)
     elif tokens[KIND] == HGVS:
-        return 'var({})'.format(tokens[VariantParser.IDENTIFIER])
+        return 'var({})'.format(tokens[IDENTIFIER])
     elif tokens[KIND] == FRAGMENT:
         if FragmentParser.MISSING in tokens:
             res = 'frag(?'
@@ -87,10 +86,10 @@ def decanonicalize_variant(tokens):
 
 
 def decanonicalize_fusion_range(tokens):
-    if FusionParser.REF in tokens:
-        return '{}.{}_{}'.format(tokens[FusionParser.REF],
-                                 tokens[FusionParser.LEFT],
-                                 tokens[FusionParser.RIGHT])
+    if FusionParser.REFERENCE in tokens:
+        return '{}.{}_{}'.format(tokens[FusionParser.REFERENCE],
+                                 tokens[FusionParser.START],
+                                 tokens[FusionParser.STOP])
     return '?'
 
 
@@ -167,13 +166,13 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
 
     elif MODIFIER in node_edge_data and TRANSLOCATION == node_edge_data[MODIFIER]:
 
-        fromLoc = "fromLoc({}:{})".format(node_edge_data[EFFECT][FROM_LOC][NAMESPACE],
-                                          ensure_quotes(node_edge_data[EFFECT][FROM_LOC][NAME]))
+        from_loc = "fromLoc({}:{})".format(node_edge_data[EFFECT][FROM_LOC][NAMESPACE],
+                                           ensure_quotes(node_edge_data[EFFECT][FROM_LOC][NAME]))
 
-        toLoc = "toLoc({}:{})".format(node_edge_data[EFFECT][TO_LOC][NAMESPACE],
-                                      ensure_quotes(node_edge_data[EFFECT][TO_LOC][NAME]))
+        to_loc = "toLoc({}:{})".format(node_edge_data[EFFECT][TO_LOC][NAMESPACE],
+                                       ensure_quotes(node_edge_data[EFFECT][TO_LOC][NAME]))
 
-        node_str = "tloc({}, {}, {})".format(node_str, fromLoc, toLoc)
+        node_str = "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
 
     return node_str
 
@@ -274,7 +273,7 @@ def to_bel(graph, file=None):
     print('###############################################\n', file=file)
 
     print('SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}', file=file)
-    print('SET Evidence = "Automatically added by PyBEL"', file=file)
+    print('SET Evidence = "{}"'.format(PYBEL_AUTOEVIDENCE), file=file)
 
     for u in graph.nodes_iter():
         if any(d[RELATION] not in unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
@@ -287,4 +286,5 @@ def to_bel(graph, file=None):
         if EVIDENCE in d:
             continue
 
-        print("{} hasMember {}".format(decanonicalize_node(graph, u), decanonicalize_node(graph, v)), file=file)
+        print("{} {} {}".format(decanonicalize_node(graph, u), HAS_MEMBER,
+                                decanonicalize_node(graph, v)), file=file)

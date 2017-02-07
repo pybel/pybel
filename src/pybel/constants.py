@@ -20,6 +20,7 @@ DEFAULT_CACHE_NAME = 'pybel_cache.db'
 DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
+PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'
 
 BEL_DEFAULT_NAMESPACE = 'bel'
 

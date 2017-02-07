@@ -15,14 +15,14 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
 .. code::
 
    {
-       'function': 'Protein',
-       'namespace': 'HGNC',
-       'name': 'GSK3B',
-       'variants': [
-           {
-               'kind': 'hgvs',
-               'identifier': 'p.Gly123Arg'
-           }
+        pbc.FUNCTION: pbc.PROTEIN,
+        pbc.NAMESPACE: 'HGNC',
+        pbc.NAME: 'GSK3B',
+        pbc.VARIANTS:  [
+            {
+               pbc.KIND: pbc.HGVS,
+               pbc.IDENTIFIER: 'p.Gly123Arg'
+            }
        ]
    }
 
@@ -36,16 +36,15 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
 from pyparsing import Word, alphanums
 
 from ..baseparser import BaseParser, one_of_tags, nest
-from ...constants import HGVS, KIND
+from ...constants import HGVS, KIND, IDENTIFIER
+
+variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)
+variant_characters = Word(alphanums + '._*=?>')
 
 
 class VariantParser(BaseParser):
-    IDENTIFIER = 'identifier'
-
     def __init__(self):
-        variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)
-        variant_characters = Word(alphanums + '._*=?>')
-        self.language = variant_tags + nest(variant_characters(self.IDENTIFIER))
+        self.language = variant_tags + nest(variant_characters(IDENTIFIER))
 
     def get_language(self):
         return self.language

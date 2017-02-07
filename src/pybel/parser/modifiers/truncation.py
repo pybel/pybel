@@ -16,8 +16,8 @@ dictionary:
         'name': 'AKT1',
         'variants': [
             {
-                'kind': 'hgvs',
-                'identifier': 'p.40*'
+                pbc.KIND: pbc.HGVS,
+                pbc.IDENTIFIER: 'p.40*'
             }
         ]
     }
@@ -38,18 +38,18 @@ import logging
 
 from pyparsing import pyparsing_common as ppc
 
-from .variant import VariantParser
 from ..baseparser import BaseParser, one_of_tags, nest
-from ...constants import HGVS, KIND
+from ...constants import HGVS, KIND, IDENTIFIER
 
 log = logging.getLogger(__name__)
+
+trunc_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, identifier=KIND)
 
 
 class TruncParser(BaseParser):
     POSITION = 'position'
 
     def __init__(self):
-        trunc_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, identifier=KIND)
         self.language = trunc_tag + nest(ppc.integer(self.POSITION))
         self.language.setParseAction(self.handle_trunc_legacy)
 
@@ -58,7 +58,7 @@ class TruncParser(BaseParser):
         upgraded = 'p.{}*'.format(tokens[self.POSITION])
         log.warning(
             'trunc() is deprecated. Please look up reference terminal amino acid and encode with HGVS: {}'.format(s))
-        tokens[VariantParser.IDENTIFIER] = upgraded
+        tokens[IDENTIFIER] = upgraded
         del tokens[self.POSITION]
         return tokens
 

@@ -19,13 +19,16 @@ For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the fol
 .. code::
 
     {
-        'function': 'Gene',
-        'namespace': 'HGNC',
-        'name': 'GSK3B',
-        'variants': [
+        pbc.FUNCTION: pbc.GENE,
+        pbc.NAMESPACE: 'HGNC',
+        pbc.NAME: 'GSK3B',
+        pbc.VARIANTS: [
             {
-                'kind': 'gmod',
-                'identifier': 'Me'
+                pbc.KIND: pbc.GMOD,
+                GmodParser.IDENTIFIER: {
+                    pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE,
+                    pbc.NAME: 'Me'
+                }
             }
         ]
     }
@@ -40,11 +43,12 @@ from pyparsing import oneOf, Group
 from .. import language
 from ..baseparser import BaseParser, one_of_tags, nest
 from ..parse_identifier import IdentifierParser
-from ...constants import KIND, GMOD, BEL_DEFAULT_NAMESPACE
+from ...constants import KIND, GMOD, BEL_DEFAULT_NAMESPACE, IDENTIFIER, NAME, NAMESPACE
+
+gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, identifier=KIND)
 
 
 class GmodParser(BaseParser):
-    IDENTIFIER = 'identifier'
     ORDER = [KIND, IDENTIFIER]
 
     def __init__(self, namespace_parser=None):
@@ -57,19 +61,15 @@ class GmodParser(BaseParser):
 
         self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
 
-        gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, identifier=KIND)
-
         gmod_default_ns = oneOf(language.gmod_namespace.keys()).setParseAction(self.handle_gmod_default)
 
         gmod_identifier = Group(self.namespace_parser.identifier_qualified) | Group(gmod_default_ns)
 
-        gmod_1 = gmod_tag + nest(gmod_identifier(self.IDENTIFIER))
-
-        self.language = gmod_1
+        self.language = gmod_tag + nest(gmod_identifier(IDENTIFIER))
 
     def handle_gmod_default(self, s, l, tokens):
-        tokens['namespace'] = BEL_DEFAULT_NAMESPACE
-        tokens['name'] = language.gmod_namespace[tokens[0]]
+        tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
+        tokens[NAME] = language.gmod_namespace[tokens[0]]
         return tokens
 
     def get_language(self):

@@ -5,26 +5,26 @@ Fusions
 ~~~~~~~
 
 Gene, RNA, protein, and miRNA fusions are all represented with the same underlying data structure. Below
-it is shown with uppercase letters referring to entries in :code:`pybel.constants` and
+it is shown with uppercase letters referring to constants from :code:`pybel.constants` and
 :class:`pybel.parser.FusionParser`. For example, :code:`g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))` is represented as:
 
 .. code::
 
     {
-        FUNCTION: GENE,
-        FUSION: {
-            PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
-            PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
-            RANGE_5P: {
-                FusionParser.REF: 'c',
-                FusionParser.LEFT: '?',
-                FusionParser.RIGHT: 1875
+        pbc.FUNCTION: pbc.GENE,
+        pbc.FUSION: {
+            pbc.PARTNER_5P: {pbc.NAMESPACE: 'HGNC', pbc.NAME: 'BCR'},
+            pbc.PARTNER_3P: {pbc.NAMESPACE: 'HGNC', pbc.NAME: 'JAK2'},
+            pbc.RANGE_5P: {
+                FusionParser.REFERENCE: 'c',
+                FusionParser.START: '?',
+                FusionParser.STOP: 1875
 
             },
-            RANGE_3P: {
-                FusionParser.REF: 'c',
-                FusionParser.LEFT: 2626,
-                FusionParser.RIGHT: '?'
+            pbc.RANGE_3P: {
+                FusionParser.REFERENCE: 'c',
+                FusionParser.START: 2626,
+                FusionParser.STOP: '?'
             }
         }
     }
@@ -41,13 +41,14 @@ from ..baseparser import BaseParser, nest
 from ..parse_identifier import IdentifierParser
 from ...constants import FUSION, PARTNER_5P, RANGE_5P, PARTNER_3P, RANGE_3P
 
+fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
+
 
 class FusionParser(BaseParser):
-    REF = 'reference'
-    LEFT = 'left'
-    RIGHT = 'right'
+    REFERENCE = 'reference'
+    START = 'left'
+    STOP = 'right'
     MISSING = 'missing'
-    fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
 
     def __init__(self, namespace_parser=None):
         self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
@@ -57,11 +58,10 @@ class FusionParser(BaseParser):
         coordinate = pyparsing_common.integer | '?'
         missing = Keyword('?')
 
-        range_coordinate = missing(self.MISSING) | (
-            reference_seq(self.REF) + Suppress('.') + coordinate(self.LEFT) + Suppress('_') + coordinate(self.RIGHT))
+        range_coordinate = missing(self.MISSING) | (reference_seq(self.REFERENCE) + Suppress('.') + coordinate(self.START) + Suppress('_') + coordinate(self.STOP))
 
-        self.language = self.fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
-                                                Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
+        self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
+                                           Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
 
     def get_language(self):
         return self.language

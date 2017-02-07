@@ -8,20 +8,22 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
 .. code::
 
     {
-        'subject': {
-            'location': {
-                'namespace': 'GOCC',
-                'name': 'lysozome'
+        pbc.SUBJECT: {
+            pbc.LOCATION: {
+                pbc.NAMESPACE: 'GOCC',
+                pbc.NAME: 'lysozome'
             }
         },
-        'relation': 'positiveCorrelation',
-        'object': {
-            'modifier': 'Activity',
-            'effect': {
-                'name': 'kin',
-                'namespace': 'bel'
+        pbc.RELATION: 'positiveCorrelation',
+        pbc.OBJECT: {
+            pbc.MODIFIER: pbc.ACTIVITY,
+            pbc.EFFECT: {
+                pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
+                pbc.NAME: 'kin',
             }
         },
+        pbc.EVIDENCE: '...',
+        pbc.CITATION: { ... }
     }
 
 
@@ -45,6 +47,8 @@ from ..baseparser import BaseParser, nest
 from ..parse_identifier import IdentifierParser
 from ...constants import LOCATION
 
+location_tag = Suppress(oneOf(['loc', 'location']))
+
 
 class LocationParser(BaseParser):
     def __init__(self, identifier_parser=None):
@@ -55,7 +59,7 @@ class LocationParser(BaseParser):
         """
         self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.get_language()
-        location_tag = Suppress(oneOf(['loc', 'location']))
+
         self.language = Group(location_tag + nest(identifier))(LOCATION)
 
     def get_language(self):

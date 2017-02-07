@@ -13,13 +13,13 @@ The previous statements both produce the underlying data:
 .. code::
 
     {
-        'function': 'Gene',
-        'namespace': 'HGNC',
-        'name': 'APP',
-        'variants': [
+        pbc.FUNCTION: pbc.GENE,
+        pbc.NAMESPACE: 'HGNC',
+        pbc.NAME: 'APP',
+        pbc.VARIANTS: [
             {
-                'kind': 'hgvs',
-                'identifier': 'c.275341G>C'
+                pbc.KIND: pbc.HGVS,
+                pbc.IDENTIFIER: 'c.275341G>C'
             }
         ]
     }
@@ -33,12 +33,13 @@ import logging
 
 from pyparsing import pyparsing_common as ppc
 
-from .variant import VariantParser
 from ..baseparser import BaseParser, one_of_tags, nest
 from ..language import dna_nucleotide
-from ...constants import HGVS, KIND
+from ...constants import HGVS, KIND, IDENTIFIER
 
 log = logging.getLogger(__name__)
+
+gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
 
 
 class GsubParser(BaseParser):
@@ -47,19 +48,19 @@ class GsubParser(BaseParser):
     VARIANT = 'variant'
 
     def __init__(self):
-        gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
-        self.language = gsub_tag + nest(dna_nucleotide(self.REFERENCE), ppc.integer(self.POSITION),
+        self.language = gsub_tag + nest(dna_nucleotide(self.REFERENCE),
+                                        ppc.integer(self.POSITION),
                                         dna_nucleotide(self.VARIANT))
         self.language.setParseAction(self.handle_gsub)
 
     def handle_gsub(self, s, l, tokens):
         upgraded = 'c.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
         log.debug('legacy sub() %s upgraded to %s', s, upgraded)
-        tokens[VariantParser.IDENTIFIER] = upgraded
+        tokens[IDENTIFIER] = upgraded
         del tokens[self.POSITION]
         del tokens[self.REFERENCE]
         del tokens[self.VARIANT]
         return tokens
 
-    def get_language(self):
-        return self.language
+    #def get_language(self):
+    #    return self.language

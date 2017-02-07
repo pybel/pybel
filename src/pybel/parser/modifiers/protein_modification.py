@@ -17,18 +17,19 @@ For example, the node :code:`p(HGNC:GSK3B, pmod(P, S, 9))` is represented with t
 .. code::
 
     {
-        'function': 'Protein',
-        'namespace': 'HGNC',
-        'name': 'GSK3B',
-        'variants': [
+        pbc.FUNCTION: pbc.PROTEIN,
+        pbc.NAMESPACE: 'HGNC',
+        pbc.NAME: 'GSK3B',
+        pbc.VARIANTS: [
             {
-                'kind': 'pmod',
-                'code': 'Ser',
-                'identifier': {
-                    'name': 'Ph',
-                    'namespace': 'bel'
+                pbc.KIND: pbc.PMOD,
+                pbc.IDENTIFIER: {
+                    pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
+                    pbc.NAME: 'Ph',
+
                 },
-                'pos': 9
+                PmodParser.CODE: 'Ser',
+                PmodParser.POSITION: 9
             }
         ]
     }
@@ -47,13 +48,14 @@ from .. import language
 from ..baseparser import BaseParser, one_of_tags, nest, WCW
 from ..language import pmod_namespace, pmod_legacy_labels, amino_acid
 from ..parse_identifier import IdentifierParser
-from ...constants import KIND, PMOD, NAMESPACE, BEL_DEFAULT_NAMESPACE
+from ...constants import KIND, PMOD, NAMESPACE, BEL_DEFAULT_NAMESPACE, IDENTIFIER
 
 log = logging.getLogger(__name__)
 
+pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, identifier=KIND)
+
 
 class PmodParser(BaseParser):
-    IDENTIFIER = 'identifier'
     CODE = 'code'
     POSITION = 'pos'
     ORDER = [KIND, IDENTIFIER, CODE, POSITION]
@@ -68,8 +70,6 @@ class PmodParser(BaseParser):
 
         self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
 
-        pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, identifier=KIND)
-
         pmod_default_ns = oneOf(pmod_namespace.keys()).setParseAction(self.handle_pmod_default_ns)
         pmod_legacy_ns = oneOf(pmod_legacy_labels.keys()).setParseAction(self.handle_pmod_legacy_ns)
 
@@ -79,9 +79,8 @@ class PmodParser(BaseParser):
             Group(pmod_legacy_ns)
         ])
 
-        self.language = pmod_tag + nest(pmod_identifier(self.IDENTIFIER) +
-                                        Optional(
-                                            WCW + amino_acid(self.CODE) + Optional(WCW + ppc.integer(self.POSITION))))
+        self.language = pmod_tag + nest(pmod_identifier(IDENTIFIER) + Optional(
+            WCW + amino_acid(self.CODE) + Optional(WCW + ppc.integer(self.POSITION))))
 
     def handle_pmod_default_ns(self, s, l, tokens):
         tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE

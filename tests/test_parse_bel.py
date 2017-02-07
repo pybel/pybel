@@ -24,6 +24,10 @@ TEST_GENE_VARIANT = 'c.308G>A'
 TEST_PROTEIN_VARIANT = 'p.Phe508del'
 
 
+def identifier(namespace, name):
+    return {NAMESPACE: namespace, NAME: name}
+
+
 class TestVariantParser(unittest.TestCase):
     def setUp(self):
         self.parser = VariantParser()
@@ -99,7 +103,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=BEL_DEFAULT_NAMESPACE, name='Ph'),
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
             PmodParser.CODE: 'Ser',
             PmodParser.POSITION: 473
         }
@@ -111,7 +115,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=BEL_DEFAULT_NAMESPACE, name='Ph'),
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
             PmodParser.CODE: 'Ser',
         }
         self.assertEqual(expected, result.asDict())
@@ -122,7 +126,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=BEL_DEFAULT_NAMESPACE, name='Ph'),
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
         }
         self.assertEqual(expected, result.asDict())
 
@@ -132,7 +136,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=BEL_DEFAULT_NAMESPACE, name='Ph'),
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
             PmodParser.CODE: 'Ser',
             PmodParser.POSITION: 473
         }
@@ -144,7 +148,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace='MOD', name='PhosRes'),
+            IDENTIFIER: identifier('MOD', 'PhosRes'),
             PmodParser.CODE: 'Ser',
             PmodParser.POSITION: 473
         }
@@ -157,7 +161,7 @@ class TestGmod(unittest.TestCase):
 
         self.expected = {
             KIND: GMOD,
-            GmodParser.IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Me'}
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Me')
         }
 
     def test_gmod_short(self):
@@ -285,9 +289,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: 1,
-                FusionParser.RIGHT: 79
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: 1,
+                FusionParser.STOP: 79
 
             },
             PARTNER_3P: {
@@ -295,9 +299,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: 312,
-                FusionParser.RIGHT: 5034
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: 312,
+                FusionParser.STOP: 5034
             }
         }
 
@@ -339,9 +343,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: 1,
-                FusionParser.RIGHT: 79
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: 1,
+                FusionParser.STOP: 79
 
             },
             PARTNER_3P: {
@@ -349,9 +353,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: '?',
-                FusionParser.RIGHT: 1
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: '?',
+                FusionParser.STOP: 1
             }
         }
 
@@ -368,9 +372,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: 1,
-                FusionParser.RIGHT: '?'
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: 1,
+                FusionParser.STOP: '?'
 
             },
             PARTNER_3P: {
@@ -378,9 +382,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: '?',
-                FusionParser.RIGHT: 1
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: '?',
+                FusionParser.STOP: 1
             }
         }
 
@@ -541,7 +545,7 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
+                    IDENTIFIER: TEST_PROTEIN_VARIANT
                 }
             ]
 
@@ -558,7 +562,7 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'p.Phe508del'
+                    IDENTIFIER: 'p.Phe508del'
                 }
             ]
         })
@@ -585,7 +589,7 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: GMOD,
-                    GmodParser.IDENTIFIER: default_identifier('Me')
+                    IDENTIFIER: default_identifier('Me')
                 }
             ]
         }
@@ -616,7 +620,7 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT
+                    IDENTIFIER: TEST_GENE_VARIANT
                 }
             ]
         }
@@ -648,7 +652,8 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT}
+                    IDENTIFIER: TEST_GENE_VARIANT
+                }
             ],
             LOCATION: {
                 NAMESPACE: 'GOCC',
@@ -709,15 +714,15 @@ class TestGene(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REF: 'c',
-                    FusionParser.LEFT: 1,
-                    FusionParser.RIGHT: 79
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 1,
+                    FusionParser.STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'c',
-                    FusionParser.LEFT: 312,
-                    FusionParser.RIGHT: 5034
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 312,
+                    FusionParser.STOP: 5034
                 }
             }
         }
@@ -741,15 +746,15 @@ class TestGene(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REF: 'c',
-                    FusionParser.LEFT: '?',
-                    FusionParser.RIGHT: 1875
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: '?',
+                    FusionParser.STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'c',
-                    FusionParser.LEFT: 2626,
-                    FusionParser.RIGHT: '?'
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 2626,
+                    FusionParser.STOP: '?'
                 }
             }
         }
@@ -827,7 +832,7 @@ class TestGene(TestTokenParserBase):
             FUNCTION: GENE,
             IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CFTR'},
             VARIANTS: [
-                {KIND: HGVS, VariantParser.IDENTIFIER: 'c.1521_1523delCTT'}
+                {KIND: HGVS, IDENTIFIER: 'c.1521_1523delCTT'}
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -933,7 +938,7 @@ class TestMiRNA(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
+                    IDENTIFIER: TEST_PROTEIN_VARIANT
                 },
             ]
         }
@@ -962,7 +967,7 @@ class TestMiRNA(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'p.Phe508del'
+                    IDENTIFIER: 'p.Phe508del'
                 },
             ],
             LOCATION: {
@@ -1061,7 +1066,7 @@ class TestProtein(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'p.Ala127Tyr'
+                    IDENTIFIER: 'p.Ala127Tyr'
                 },
                 {
                     KIND: PMOD,
@@ -1094,15 +1099,15 @@ class TestProtein(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REF: 'p',
-                    FusionParser.LEFT: 1,
-                    FusionParser.RIGHT: 79
+                    FusionParser.REFERENCE: 'p',
+                    FusionParser.START: 1,
+                    FusionParser.STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'p',
-                    FusionParser.LEFT: 312,
-                    FusionParser.RIGHT: 5034
+                    FusionParser.REFERENCE: 'p',
+                    FusionParser.START: 312,
+                    FusionParser.STOP: 5034
 
                 }
             }
@@ -1128,15 +1133,15 @@ class TestProtein(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REF: 'p',
-                    FusionParser.LEFT: '?',
-                    FusionParser.RIGHT: 1875
+                    FusionParser.REFERENCE: 'p',
+                    FusionParser.START: '?',
+                    FusionParser.STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'p',
-                    FusionParser.LEFT: 2626,
-                    FusionParser.RIGHT: '?'
+                    FusionParser.REFERENCE: 'p',
+                    FusionParser.START: 2626,
+                    FusionParser.STOP: '?'
 
                 }
             }
@@ -1579,11 +1584,11 @@ class TestRna(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
+                    IDENTIFIER: TEST_PROTEIN_VARIANT
                 },
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'c.1521_1523delCTT'
+                    IDENTIFIER: 'c.1521_1523delCTT'
                 }
             ]
         }
@@ -1613,15 +1618,15 @@ class TestRna(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REF: 'r',
-                    FusionParser.LEFT: 1,
-                    FusionParser.RIGHT: 79
+                    FusionParser.REFERENCE: 'r',
+                    FusionParser.START: 1,
+                    FusionParser.STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'r',
-                    FusionParser.LEFT: 312,
-                    FusionParser.RIGHT: 5034
+                    FusionParser.REFERENCE: 'r',
+                    FusionParser.START: 312,
+                    FusionParser.STOP: 5034
                 }
             }
         }
@@ -1670,15 +1675,15 @@ class TestRna(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REF: 'r',
-                    FusionParser.LEFT: '?',
-                    FusionParser.RIGHT: 1875
+                    FusionParser.REFERENCE: 'r',
+                    FusionParser.START: '?',
+                    FusionParser.STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'r',
-                    FusionParser.LEFT: 2626,
-                    FusionParser.RIGHT: '?'
+                    FusionParser.REFERENCE: 'r',
+                    FusionParser.START: 2626,
+                    FusionParser.STOP: '?'
                 }
             }
 
@@ -1726,7 +1731,7 @@ class TestRna(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'r.1521_1523delcuu'
+                    IDENTIFIER: 'r.1521_1523delcuu'
                 }
             ]
         }
@@ -2587,7 +2592,7 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [
                     {
                         KIND: HGVS,
-                        VariantParser.IDENTIFIER: 'c.275341G>C'
+                        IDENTIFIER: 'c.275341G>C'
                     }
                 ]
             },
@@ -2739,8 +2744,8 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [
                     {
                         KIND: PMOD,
+                        IDENTIFIER: default_identifier('Ph'),
                         PmodParser.CODE: 'Ser',
-                        PmodParser.IDENTIFIER: default_identifier('Ph'),
                         PmodParser.POSITION: 9
                     }
                 ]
@@ -2925,7 +2930,7 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [
                     {
                         KIND: HGVS,
-                        VariantParser.IDENTIFIER: 'c.123G>A'
+                        IDENTIFIER: 'c.123G>A'
                     }
                 ]
             }

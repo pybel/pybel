@@ -19,6 +19,7 @@ from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .language import belns_encodings
 from .modifiers import FusionParser, VariantParser, canonicalize_variant, FragmentParser, GmodParser, GsubParser, \
     LocationParser, PmodParser, PsubParser, TruncParser
+from .modifiers.fusion import fusion_tags
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
@@ -60,9 +61,9 @@ def fusion_handler_wrapper(reference, start):
             tokens[FusionParser.MISSING] = '?'
             return tokens
 
-        tokens[FusionParser.REF] = reference
-        tokens[FusionParser.LEFT if start else FusionParser.RIGHT] = '?'
-        tokens[FusionParser.RIGHT if start else FusionParser.LEFT] = int(tokens[0])
+        tokens[FusionParser.REFERENCE] = reference
+        tokens[FusionParser.START if start else FusionParser.STOP] = '?'
+        tokens[FusionParser.STOP if start else FusionParser.START] = int(tokens[0])
 
         return tokens
 
@@ -155,7 +156,7 @@ class BelParser(BaseParser):
         gene_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=True))
         gene_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=False))
 
-        self.gene_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+        self.gene_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
                 WCW + Group(gene_break_5p)(RANGE_5P) + WCW + Group(gene_break_3p)(RANGE_3P))))(FUSION)
 
@@ -180,7 +181,7 @@ class BelParser(BaseParser):
         protein_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=True))
         protein_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=False))
 
-        self.protein_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+        self.protein_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
                 WCW + Group(protein_break_5p)(RANGE_5P) + WCW + Group(protein_break_3p)(RANGE_3P))))(FUSION)
 
@@ -198,7 +199,7 @@ class BelParser(BaseParser):
         rna_break_start = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=True))
         rna_break_end = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=False))
 
-        self.rna_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + FusionParser.fusion_tags + nest(
+        self.rna_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + fusion_tags + nest(
             identifier(PARTNER_3P) + Optional(
                 WCW + Group(rna_break_start)(RANGE_5P) + WCW + Group(rna_break_end)(RANGE_3P))))(FUSION)
 
@@ -712,7 +713,7 @@ class BelParser(BaseParser):
 
 def canonicalize_fusion_range(tokens, tag):
     if tag in tokens and FusionParser.MISSING not in tokens[tag]:
-        return tokens[tag][FusionParser.REF], tokens[tag][FusionParser.LEFT], tokens[tag][FusionParser.RIGHT]
+        return tokens[tag][FusionParser.REFERENCE], tokens[tag][FusionParser.START], tokens[tag][FusionParser.STOP]
     else:
         return '?',
 
