@@ -54,7 +54,9 @@ is represented with the key 'missing' and the value of '?' like:
         ]
     }
 
-.. seealso:: 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
+.. seealso::
+
+   BEL 2.0 specification on `proteolytic fragments (2.2.3) <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
 """
 
 from pyparsing import pyparsing_common as ppc, Keyword, Optional

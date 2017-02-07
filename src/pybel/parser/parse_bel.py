@@ -26,7 +26,7 @@ from .parse_identifier import IdentifierParser
 from .utils import list2tuple, cartesian_dictionary
 from .. import constants as pbc
 from ..constants import EQUIVALENT_TO
-from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, PYBEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
+from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, BEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
     GOCC_KEYWORD
 from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOLOGY, REACTION, COMPLEX, COMPOSITE
 from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_MEMBER, TRANSCRIBED_TO, TRANSLATED_TO
@@ -235,7 +235,7 @@ class BelParser(BaseParser):
         def handle_molecular_activity_default(s, l, tokens):
             upgraded = language.activity_labels[tokens[0]]
             log.debug('upgraded molecular activity to %s', upgraded)
-            tokens[NAMESPACE] = PYBEL_DEFAULT_NAMESPACE
+            tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
             tokens[NAME] = upgraded
             return tokens
 
@@ -268,7 +268,7 @@ class BelParser(BaseParser):
             tokens[MODIFIER] = ACTIVITY
             tokens[EFFECT] = {
                 NAME: legacy_cls,
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
             log.debug('upgraded legacy activity to %s', legacy_cls)
             return tokens

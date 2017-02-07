@@ -26,7 +26,9 @@ The previous statements both produce the underlying data:
         ]
     }
 
-.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2
+.. seealso::
+
+    BEL 2.0 specification on `gene substitutions <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
 """
 
 import logging

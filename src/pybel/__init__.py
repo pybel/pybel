@@ -1,24 +1,26 @@
 """
 
-For end users:
+PyBEL is tested to work on both Python3 and legacy Python2 installations on OSX and Unix.
+
+Installing the most recent stable version from PyPI (end users):
 
 .. code-block:: sh
 
-   $ pip install pybel
+   $ pip3 install pybel
 
-For the latest and greatest:
+Installing the latest version from GitHub:
 
 .. code-block:: sh
 
-   $ pip install git+https://github.com/pybel/pybel.git@develop
+   $ pip3 install git+https://github.com/pybel/pybel.git@develop
 
-For development:
+For developers:
 
 .. code-block:: sh
 
    $ git clone https://github.com/pybel/pybel.git@develop
    $ cd pybel
-   $ pip install -e .
+   $ pip3 install -e .
 
 Caveats
 -------
@@ -33,7 +35,8 @@ Upgrading
 
 During the current development cycle, many models are being added and changed in the PyBEL schema. This might make
 programmatic access to the database with SQLAlchemy unstable. If you have any problems working with the database,
-try to remove the database either by running :code:`pybel manage remove` from the command line.
+try to remove it by running :code:`pybel manage remove` from the command line. PyBEL will build
+a new database and populate it on the next run.
 
 Future versions of PyBEL will include database integrity checks and provide upgrade procedures/scripts.
 """

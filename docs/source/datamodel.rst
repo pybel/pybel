@@ -73,8 +73,16 @@ becomes:
 .. automodule:: pybel.parser.modifiers.fusion
 
 
+Context-Free Edges
+------------------
+
+1. Variants/Modifications' relation to their reference
+2. Memberships to complexes and composities
+3. Reactions
+4. Central Dogma (transcription and translation)
+
 List Abundances
----------------
+~~~~~~~~~~~~~~~
 Complexes and composites that are defined by lists do not recieve information about the identifier, and are only
 described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 
@@ -84,11 +92,19 @@ described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
         'function': 'Composite'
     }
 
-The remaining information is encoded in the edges to the resulting protein nodes from :code:`p(HGNC:FOS)` and
-:code:`p(HGNC:JUN)` with connections having the relation :code:`hasMember`.
+Reactions
+~~~~~~~~~
+The usage of a reaction causes many nodes and edges to be created. The following example will illustrate what is
+added to the network for :code:`rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")`
+
+.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
 
 Edges
 -----
+
+
+Design Choices
+~~~~~~~~~~~~~~
 In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
 degradations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
 of the edge. In reality, an edge like :code:`sec(p(HGNC:A)) -> activity(p(HGNC:B), ma(kinaseActivity))` represents
@@ -112,14 +128,31 @@ the information about the translocation qualifies that the object is undergoing 
 This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
 just the keyword :code:`p`
 
-This also begs the question of what statements mean. BEL 2.0 introduced the :code:`location()` element that can be
-inside any abundances. This means that it's possible to unambiguously express the differences between the process of
-:code:`HGNC:A` moving from one place to another and the existence of :code:`HGNC:A` in a specific location having
-different effects. In BEL 1.0, this action had its own node, but this introduced unnecessary complexity to the network
-and made querying more difficult. Consider the difference between the following two statements:
 
-- :code:`tloc(p(HGNC:A), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell membrane")) -> p(HGNC:B)`
-- :code:`p(HGNC:A, location(GOCC:"cell membrane")) -> p(HGNC:B)`
+Example Edge Data Structure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Because this data is associated with an edge, the node data for the subject and object are not included explicitly.
+However, information about the activities, modifiers, and transformations on the subject and object are included.
+Below is the "skeleton" for the edge data model in PyBEL:
+
+.. code::
+
+    {
+        'subject': {
+            # ... modifications to the subject node
+        },
+        'relation': 'positiveCorrelation',
+        'object': {
+            # ... modifications to the object node
+        },
+        'SupportingText': '...',
+        'citation' : {
+            # ... citation information
+        }
+        # ... remaining annotation key:value pairs
+    }
+
 
 Activities
 ~~~~~~~~~~
@@ -129,41 +162,20 @@ Modifiers are added to this structure as well. Under this schema,
 .. code::
 
     {
-        'subject': {
-            'function': 'Protein',
-            'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'GSK3B'
-            },
-            'variants': [
-                {
-                    'kind': 'pmod',
-                    'code': 'Ser',
-                    'identifier': {
-                        'name': 'Ph',
-                        'namespace': 'PYBEL'
-                    },
-                    'pos': 9
-                }
-            ]
-        },
+        'subject': {},
         'relation': 'positiveCorrelation',
         'object': {
             'modifier': 'Activity',
-            'target': {
-                'function': 'Protein',
-                'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'GSK3B'
-                }
-            },
             'effect': {
                 'name': 'kin'
-                'namespace': 'PYBEL'
+                'namespace': 'bel'
             }
         },
     }
 
+
+Locations
+~~~~~~~~~
 
 .. automodule:: pybel.parser.modifiers.location
 
@@ -175,23 +187,10 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 .. code::
 
     {
-        'subject': {
-            'function': 'Protein',
-            'identifier': 'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'YFG1'
-            }
-        },
+        'subject': {},
         'relation': 'increases',
         'object': {
             'modifier': 'Translocation',
-            'target': {
-                'function': 'Protein',
-                'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'YFG2'
-                }
-            },
             'effect': {
                 'fromLoc': {
                     'namespace': 'GOMF',
@@ -205,6 +204,8 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
         },
     }
 
+.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translocations
+
 Degradations
 ~~~~~~~~~~~~
 Degradations are more simple, because there's no 'effect' entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
@@ -212,22 +213,16 @@ Degradations are more simple, because there's no 'effect' entry. :code:`p(HGNC:Y
 .. code::
 
     {
-        'subject': {
-            'function': 'Protein',
-            'identifier': 'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'YFG1'
-            }
-        },
+        'subject': {},
         'relation': 'increases',
         'object': {
-            'modifier': 'Degradation',
-            'target': {
-                'function': 'Protein',
-                'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'YFG2'
-                }
-            },
+            'modifier': 'Degradation'
         },
     }
+
+.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
+
+
+
+The remaining information is encoded in the edges to the resulting protein nodes from :code:`p(HGNC:FOS)` and
+:code:`p(HGNC:JUN)` with connections having the relation :code:`hasMember`.

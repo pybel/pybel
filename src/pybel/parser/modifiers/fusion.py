@@ -30,7 +30,9 @@ it is shown with uppercase letters referring to entries in :code:`pybel.constant
     }
 
 
-.. seealso:: 2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
+.. seealso::
+
+    BEL 2.0 specification on `fusions (2.6.1) <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
 """
 
 from pyparsing import oneOf, replaceWith, pyparsing_common, Keyword, Suppress, Group

@@ -79,7 +79,7 @@ def from_lines(lines, **kwargs):
     :type lines: iter
     :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
-    :rtype: :class:`BELGraph`
+    :rtype: pybel.BELGraph
     """
     return BELGraph(lines=lines, **kwargs)
 
@@ -95,7 +95,7 @@ def from_path(path, encoding='utf-8', **kwargs):
     :type encoding: str
     :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
-    :rtype: :class:`BELGraph`
+    :rtype: BELGraph
     """
     log.info('Loading from path: %s', path)
     with codecs.open(os.path.expanduser(path), encoding=encoding) as f:
@@ -109,7 +109,7 @@ def from_url(url, **kwargs):
     :type url: str
     :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
-    :rtype: :class:`BELGraph`
+    :rtype: BELGraph
     """
     log.info('Loading from url: %s', url)
 

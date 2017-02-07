@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-Locations
-~~~~~~~~~
 
 Location data also is added into the information in the edge for the node (subject or object) for which it was
 annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
@@ -11,22 +9,6 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
 
     {
         'subject': {
-            'function': 'Protein',
-            'identifier': 'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'GSK3B'
-            },
-            'variants': [
-                {
-                    'kind': 'pmod',
-                    'code': 'Ser',
-                    'identifier': {
-                        'name': 'Ph',
-                        'namespace': 'PYBEL'
-                    },
-                    'pos': 9
-                }
-            ],
             'location': {
                 'namespace': 'GOCC',
                 'name': 'lysozome'
@@ -35,21 +17,26 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
         'relation': 'positiveCorrelation',
         'object': {
             'modifier': 'Activity',
-            'target': {
-                'function': 'Protein',
-                'identifier': {
-                    'namespace': 'HGNC',
-                    'name': 'GSK3B'
-                }
-            },
             'effect': {
                 'name': 'kin',
-                'namespace': 'PYBEL'
+                'namespace': 'bel'
             }
         },
     }
 
-.. seealso:: 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
+
+The addition of the :code:`location()` element in BEL 2.0 allows for the unambiguous expression of the differences
+between the process of hypothetical :code:`HGNC:A` moving from one place to another and the existence of
+hypothetical :code:`HGNC:A` in a specific location having different effects. In BEL 1.0, this action had its own node,
+but this introduced unnecessary complexity to the network and made querying more difficult.
+This calls for thoughtful consideration of the following two statements:
+
+- :code:`tloc(p(HGNC:A), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell membrane")) -> p(HGNC:B)`
+- :code:`p(HGNC:A, location(GOCC:"cell membrane")) -> p(HGNC:B)`
+
+.. seealso::
+
+    BEL 2.0 specification on `cellular location (2.2.4) <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
 """
 
 from pyparsing import Suppress, oneOf, Group

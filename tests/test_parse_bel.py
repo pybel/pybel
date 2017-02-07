@@ -6,7 +6,7 @@ import unittest
 from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import HGVS, FUNCTION, ACTIVITY, ABUNDANCE, \
     PATHOLOGY, BIOPROCESS, MIRNA, COMPLEX, REACTION, COMPOSITE, VARIANTS
-from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, PYBEL_DEFAULT_NAMESPACE, PARTNER_3P, PARTNER_5P, RANGE_3P, \
+from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, BEL_DEFAULT_NAMESPACE, PARTNER_3P, PARTNER_5P, RANGE_3P, \
     RANGE_5P, NAMESPACE, NAME, LOCATION
 from pybel.constants import PROTEIN, GENE, RNA, DEGRADATION, \
     TRANSFORMATION, TRANSLOCATION, IDENTIFIER, FUSION, FROM_LOC, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO
@@ -99,7 +99,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            PmodParser.IDENTIFIER: dict(namespace=BEL_DEFAULT_NAMESPACE, name='Ph'),
             PmodParser.CODE: 'Ser',
             PmodParser.POSITION: 473
         }
@@ -111,7 +111,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            PmodParser.IDENTIFIER: dict(namespace=BEL_DEFAULT_NAMESPACE, name='Ph'),
             PmodParser.CODE: 'Ser',
         }
         self.assertEqual(expected, result.asDict())
@@ -122,7 +122,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            PmodParser.IDENTIFIER: dict(namespace=BEL_DEFAULT_NAMESPACE, name='Ph'),
         }
         self.assertEqual(expected, result.asDict())
 
@@ -132,7 +132,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            PmodParser.IDENTIFIER: dict(namespace=BEL_DEFAULT_NAMESPACE, name='Ph'),
             PmodParser.CODE: 'Ser',
             PmodParser.POSITION: 473
         }
@@ -157,7 +157,7 @@ class TestGmod(unittest.TestCase):
 
         self.expected = {
             KIND: GMOD,
-            GmodParser.IDENTIFIER: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Me'}
+            GmodParser.IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Me'}
         }
 
     def test_gmod_short(self):
@@ -591,7 +591,7 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))
+        expected_node = GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: GENE})
 
@@ -1073,7 +1073,7 @@ class TestProtein(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser'))
+        node = (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser'))
         self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node, function=PROTEIN)
 
@@ -1233,7 +1233,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(Ph, S, 473))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = (PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473))
+        expected_node = (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
@@ -1250,7 +1250,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)
+        expected_node = PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
@@ -1286,7 +1286,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:HRAS, pmod(Palm))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEIN, 'HGNC', 'HRAS', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Palm'))
+        expected_node = PROTEIN, 'HGNC', 'HRAS', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Palm'))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
@@ -1959,7 +1959,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             },
             TARGET: {
                 FUNCTION: PROTEIN,
@@ -1973,7 +1973,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -1987,7 +1987,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'cat',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             },
             TARGET: {
                 FUNCTION: PROTEIN,
@@ -2001,7 +2001,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'cat',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -2043,7 +2043,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             },
             TARGET: {
                 FUNCTION: PROTEIN,
@@ -2057,7 +2057,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -2417,7 +2417,7 @@ class TestRelations(TestTokenParserBase):
                 },
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE},
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE},
             },
             RELATION: 'decreases',
             OBJECT: {
@@ -2454,7 +2454,7 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             }
@@ -2553,7 +2553,7 @@ class TestRelations(TestTokenParserBase):
                 },
                 EFFECT: {
                     NAME: 'cat',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
             },
             RELATION: 'rateLimitingStepOf',
@@ -2619,7 +2619,7 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
                 TARGET: {
                     FUNCTION: COMPLEX,
@@ -2634,7 +2634,7 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
                 TARGET: {
                     FUNCTION: PROTEIN,
@@ -2695,7 +2695,7 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'kin',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
                 TARGET: {
                     FUNCTION: PROTEIN,
@@ -2709,7 +2709,7 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [
                     {
                         KIND: PMOD,
-                        IDENTIFIER: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
+                        IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
                     }
                 ]
             }
@@ -2719,7 +2719,7 @@ class TestRelations(TestTokenParserBase):
         sub = PROTEIN, 'SFAM', 'GSK3 Family'
         self.assertHasNode(sub)
 
-        obj = PROTEIN, 'HGNC', 'MAPT', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'))
+        obj = PROTEIN, 'HGNC', 'MAPT', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'))
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation=expected_dict[RELATION])
@@ -2754,13 +2754,13 @@ class TestRelations(TestTokenParserBase):
                 },
                 EFFECT: {
                     NAME: 'kin',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 }
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        subject_node = PROTEIN, 'HGNC', 'GSK3B', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)
+        subject_node = PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)
         self.assertHasNode(subject_node)
 
         object_node = PROTEIN, 'HGNC', 'GSK3B'

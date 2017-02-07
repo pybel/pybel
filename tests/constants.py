@@ -17,7 +17,7 @@ from pybel.constants import INCREASES, DECREASES, ASSOCIATION, MODIFIER, EFFECT,
 from pybel.constants import KIND, TRANSLOCATION
 from pybel.constants import LOCATION, CITATION, EVIDENCE
 from pybel.constants import PROTEIN, ABUNDANCE, GENE, RNA, MIRNA, COMPLEX, \
-    COMPOSITE, BIOPROCESS, PATHOLOGY, REACTION, PMOD, HGVS, GMOD, PYBEL_DEFAULT_NAMESPACE, FRAGMENT
+    COMPOSITE, BIOPROCESS, PATHOLOGY, REACTION, PMOD, HGVS, GMOD, BEL_DEFAULT_NAMESPACE, FRAGMENT
 from pybel.constants import RELATION, EQUIVALENT_TO, HAS_VARIANT, HAS_REACTANT, HAS_PRODUCT, SUBJECT, OBJECT
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.modifiers import VariantParser
@@ -79,7 +79,7 @@ EGFR = (PROTEIN, 'HGNC', 'EGFR')
 FADD = (PROTEIN, 'HGNC', 'FADD')
 CASP8 = (PROTEIN, 'HGNC', 'CASP8')
 
-log = logging.getLogger(PYBEL_DEFAULT_NAMESPACE)
+log = logging.getLogger(BEL_DEFAULT_NAMESPACE)
 
 
 def assertHasNode(self, member, graph, **kwargs):
@@ -291,7 +291,7 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         x = {
             (ABUNDANCE, 'CHEBI', 'oxygen atom'),
-            (GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))),
+            (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))),
             (GENE, 'HGNC', 'AKT1'),
             (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')),
             (PROTEIN, 'HGNC', 'AKT1'),
@@ -304,10 +304,10 @@ class BelReconstitutionMixin(unittest.TestCase):
             (GENE, 'HGNC', 'CFTR'),
             (GENE, 'HGNC', 'CFTR', (HGVS, 'g.117199646_117199648delCTT')),
             (GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')),
-            (PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
+            (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
             (MIRNA, 'HGNC', 'MIR21', (HGVS, 'p.Phe508del')),
             (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')),
-            (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')),
+            (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')),
             (GENE, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
             (PROTEIN, ('HGNC', 'TMPRSS2'), ('p', 1, 79), ('HGNC', 'ERG'), ('p', 312, 5034)),
             (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')),
@@ -361,7 +361,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             (PROTEIN, 'HGNC', 'F3'),
             (PROTEIN, 'HGNC', 'F7'),
             (PROTEIN, 'HGNC', 'F9'),
-            (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)),
+            (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)),
             (PROTEIN, 'HGNC', 'GSK3B'),
             (PATHOLOGY, 'MESHD', 'Psoriasis'),
             (PATHOLOGY, 'MESHD', 'Skin Diseases'),
@@ -385,7 +385,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             (PROTEIN, 'HGNC', 'CDK5'),
             (PROTEIN, 'HGNC', 'CASP8'),
             (PROTEIN, 'HGNC', 'AKT1', (PMOD, ('TESTNS2', 'PhosRes'), 'Ser', 473)),
-            (PROTEIN, 'HGNC', 'HRAS', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Palm'))),
+            (PROTEIN, 'HGNC', 'HRAS', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Palm'))),
             (BIOPROCESS, 'GOBP', 'apoptotic process'),
             (COMPOSITE, (ABUNDANCE, 'TESTNS2', 'Abeta_42'), (PROTEIN, 'HGNC', 'CASP8'),
              (PROTEIN, 'HGNC', 'FADD')),
@@ -400,7 +400,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             (PROTEIN, 'HGNC', 'CDK5R1'),
             (PROTEIN, 'TESTNS2', 'PRKC'),
             (BIOPROCESS, 'GOBP', 'neuron apoptotic process'),
-            (PROTEIN, 'HGNC', 'MAPT', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'))),
+            (PROTEIN, 'HGNC', 'MAPT', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'))),
             (PROTEIN, 'HGNC', 'MAPT'),
             (GENE, 'HGNC', 'ARRDC2'),
             (GENE, 'HGNC', 'ARRDC3'),
@@ -421,11 +421,11 @@ class BelReconstitutionMixin(unittest.TestCase):
         }
 
         e = [
-            ((ABUNDANCE, 'CHEBI', 'oxygen atom'), (GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))),
+            ((ABUNDANCE, 'CHEBI', 'oxygen atom'), (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))),
              {EVIDENCE: 'These are mostly made up',
               CITATION: citation_1,
               RELATION: INCREASES}),
-            ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))),
+            ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))),
              {RELATION: HAS_VARIANT}),
             ((GENE, 'HGNC', 'AKT1'), (ABUNDANCE, 'CHEBI', 'oxygen atom'),
              {EVIDENCE: 'These are mostly made up',
@@ -445,14 +445,14 @@ class BelReconstitutionMixin(unittest.TestCase):
              {EVIDENCE: 'These are mostly made up',
               CITATION: citation_1,
               RELATION: 'directlyDecreases'}),
-            ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
+            ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
              {RELATION: HAS_VARIANT}),
             ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')), {RELATION: HAS_VARIANT}),
             ((PROTEIN, 'HGNC', 'AKT1'),
-             (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')),
+             (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')),
              {RELATION: HAS_VARIANT}),
             ((PROTEIN, 'HGNC', 'AKT1'),
-             (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')),
+             (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')),
              {EVIDENCE: 'These are mostly made up',
               CITATION: citation_1,
               RELATION: 'directlyDecreases', SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
@@ -472,7 +472,7 @@ class BelReconstitutionMixin(unittest.TestCase):
              {EVIDENCE: 'These are mostly made up',
               CITATION: citation_1,
               RELATION: INCREASES,
-              SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'kin'}}}),
+              SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}}}),
             ((PROTEIN, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1653_1655delcuu')),
              {EVIDENCE: 'These are mostly made up',
               CITATION: citation_1,
@@ -484,7 +484,7 @@ class BelReconstitutionMixin(unittest.TestCase):
                 SUBJECT: {
                     MODIFIER: ACTIVITY,
                     EFFECT: {
-                        NAMESPACE: PYBEL_DEFAULT_NAMESPACE,
+                        NAMESPACE: BEL_DEFAULT_NAMESPACE,
                         NAME: 'cat'
                     }
                 },
@@ -495,7 +495,7 @@ class BelReconstitutionMixin(unittest.TestCase):
                 RELATION: INCREASES,
                 SUBJECT: {MODIFIER: ACTIVITY,
                           EFFECT: {NAME: 'kin',
-                                   NAMESPACE: PYBEL_DEFAULT_NAMESPACE}},
+                                   NAMESPACE: BEL_DEFAULT_NAMESPACE}},
                 OBJECT: {MODIFIER: TRANSLOCATION,
                          EFFECT: {
                              FROM_LOC: {NAMESPACE: 'GOCC',
@@ -517,7 +517,7 @@ class BelReconstitutionMixin(unittest.TestCase):
              {EVIDENCE: 'These are mostly made up',
               CITATION: citation_1,
               RELATION: 'directlyIncreases'}),
-            ((MIRNA, 'HGNC', 'MIR21'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
+            ((MIRNA, 'HGNC', 'MIR21'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
              {EVIDENCE: 'These are mostly made up',
               CITATION: citation_1,
               RELATION: DECREASES, SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}}}),
@@ -669,7 +669,7 @@ class BelReconstitutionMixin(unittest.TestCase):
                 EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
                 CITATION: citation_2,
                 RELATION: 'rateLimitingStepOf',
-                SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'cat'}}}),
+                SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}}}),
             ((GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')), (PATHOLOGY, 'MESHD', 'Alzheimer Disease'),
              {EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
               CITATION: citation_2,
@@ -683,20 +683,20 @@ class BelReconstitutionMixin(unittest.TestCase):
              {EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
               CITATION: citation_2,
               RELATION: 'regulates',
-              SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: PYBEL_DEFAULT_NAMESPACE}},
-              OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: PYBEL_DEFAULT_NAMESPACE}}}),
-            ((PROTEIN, 'HGNC', 'GSK3B', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), (PROTEIN, 'HGNC', 'GSK3B'),
+              SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
+              OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}}}),
+            ((PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), (PROTEIN, 'HGNC', 'GSK3B'),
              {EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
               CITATION: citation_2,
               RELATION: 'positiveCorrelation',
-              OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'kin'}}}),
-            ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)),
+              OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}}}),
+            ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)),
              {RELATION: HAS_VARIANT}),
-            ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)),
+            ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)),
              {EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
               CITATION: citation_2,
               RELATION: 'positiveCorrelation',
-              SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'kin'}}}),
+              SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}}}),
             ((PATHOLOGY, 'MESHD', 'Psoriasis'), (PATHOLOGY, 'MESHD', 'Skin Diseases'),
              {EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
               CITATION: citation_2,

@@ -9,7 +9,7 @@ from .constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, \
     BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX, REACTION, CITATION
 from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION
 from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
-from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, PYBEL_DEFAULT_NAMESPACE
+from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, BEL_DEFAULT_NAMESPACE
 from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS
 from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
     LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER, FUSION
@@ -61,13 +61,13 @@ def postpend_location(s, location_model):
 
 def decanonicalize_variant(tokens):
     if tokens[KIND] == PMOD:
-        if tokens[PmodParser.IDENTIFIER][NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
+        if tokens[PmodParser.IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             name = tokens[PmodParser.IDENTIFIER][NAME]
         else:
             name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])
         return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PmodParser.ORDER[2:] if x in tokens))
     elif tokens[KIND] == GMOD:
-        if tokens[GmodParser.IDENTIFIER][NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
+        if tokens[GmodParser.IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             name = tokens[GmodParser.IDENTIFIER][NAME]
         else:
             name = '{}:{}'.format(tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])
@@ -158,7 +158,7 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
         if EFFECT in node_edge_data and node_edge_data[EFFECT]:
             ma = node_edge_data[EFFECT]
 
-            if ma[NAMESPACE] == PYBEL_DEFAULT_NAMESPACE:
+            if ma[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
                 node_str = "{}, ma({}))".format(node_str, ma[NAME])
             else:
                 node_str = "{}, ma({}:{}))".format(node_str, ma[NAMESPACE], ensure_quotes(ma[NAME]))
@@ -208,14 +208,17 @@ def sort_edges(d):
             (k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in BLACKLIST_EDGE_ATTRIBUTES))
 
 
-def to_bel(graph, file=sys.stdout):
+def to_bel(graph, file=None):
     """Outputs the BEL graph as a canonical BEL Script (.bel)
 
     :param graph: the BEL Graph to output as a BEL Script
     :type graph: BELGraph
-    :param file: a filelike object
+    :param file: a file-like object. If None, defaults to standard out.
     :type file: file
     """
+
+    file = sys.stdout if file is None else file
+
     for k in sorted(graph.document):
         print('SET DOCUMENT {} = "{}"'.format(inv_document_keys[k], graph.document[k]), file=file)
 

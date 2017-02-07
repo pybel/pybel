@@ -28,14 +28,16 @@ For example, the node :code:`p(HGNC:GSK3B, pmod(P, S, 9))` is represented with t
                 'code': 'Ser',
                 'identifier': {
                     'name': 'Ph',
-                    'namespace': 'PYBEL'
+                    'namespace': 'bel'
                 },
                 'pos': 9
             }
         ]
     }
 
-.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod
+.. seealso::
+
+    BEL 2.0 specification on `protein modifications <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod>`_
 """
 
 import logging
@@ -47,7 +49,7 @@ from .. import language
 from ..baseparser import BaseParser, one_of_tags, nest, WCW
 from ..language import pmod_namespace, pmod_legacy_labels, amino_acid
 from ..parse_identifier import IdentifierParser
-from ...constants import KIND, PMOD, NAMESPACE, PYBEL_DEFAULT_NAMESPACE
+from ...constants import KIND, PMOD, NAMESPACE, BEL_DEFAULT_NAMESPACE
 
 log = logging.getLogger(__name__)
 
@@ -84,14 +86,14 @@ class PmodParser(BaseParser):
                                             WCW + amino_acid(self.CODE) + Optional(WCW + ppc.integer(self.POSITION))))
 
     def handle_pmod_default_ns(self, s, l, tokens):
-        tokens[NAMESPACE] = PYBEL_DEFAULT_NAMESPACE
+        tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
         tokens['name'] = language.pmod_namespace[tokens[0]]
         return tokens
 
     def handle_pmod_legacy_ns(self, s, l, tokens):
         upgraded = language.pmod_legacy_labels[tokens[0]]
         log.debug('legacy pmod() value %s upgraded to %s', s, upgraded)
-        tokens['namespace'] = PYBEL_DEFAULT_NAMESPACE
+        tokens['namespace'] = BEL_DEFAULT_NAMESPACE
         tokens['name'] = upgraded
         return tokens
 

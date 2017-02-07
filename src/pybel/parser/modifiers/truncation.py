@@ -32,7 +32,8 @@ BEL encoding should be :code:`p(HGNC:AKT1, var(p.Cys40*))`. Temporary support ha
 compile these statements, but it's recommended they are upgraded by reexamining the supporting text, or
 looking up the amino acid sequence.
 
-.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2
+.. seealso::
+    BEL 2.0 specification on `truncations <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
 """
 
 import logging

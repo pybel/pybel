@@ -42,7 +42,7 @@ from pyparsing import oneOf, Group
 from .. import language
 from ..baseparser import BaseParser, one_of_tags, nest
 from ..parse_identifier import IdentifierParser
-from ...constants import KIND, GMOD, PYBEL_DEFAULT_NAMESPACE
+from ...constants import KIND, GMOD, BEL_DEFAULT_NAMESPACE
 
 
 class GmodParser(BaseParser):
@@ -70,7 +70,7 @@ class GmodParser(BaseParser):
         self.language = gmod_1
 
     def handle_gmod_default(self, s, l, tokens):
-        tokens['namespace'] = PYBEL_DEFAULT_NAMESPACE
+        tokens['namespace'] = BEL_DEFAULT_NAMESPACE
         tokens['name'] = language.gmod_namespace[tokens[0]]
         return tokens
 
