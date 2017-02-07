@@ -1,26 +1,35 @@
 """
 
-PyBEL is tested to work on both Python3 and legacy Python2 installations on OSX and Unix.
+PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux.
 
-Installing the most recent stable version from PyPI (end users):
+.. warning:: PyBEL is not thoroughly tested on Windows.
+
+Installation
+------------
+
+Easiest
+~~~~~~~
 
 .. code-block:: sh
 
    $ pip3 install pybel
 
-Installing the latest version from GitHub:
+Get the Latest
+~~~~~~~~~~~~~~~
 
 .. code-block:: sh
 
    $ pip3 install git+https://github.com/pybel/pybel.git@develop
 
-For developers:
+For Developers
+~~~~~~~~~~~~~~
 
 .. code-block:: sh
 
    $ git clone https://github.com/pybel/pybel.git@develop
    $ cd pybel
    $ pip3 install -e .
+
 
 Caveats
 -------

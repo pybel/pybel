@@ -104,7 +104,7 @@ class InvalidMetadataException(PyBelWarning):
 - Name
 - Version
 
-See also: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section
+.. seealso:: BEL 1.0 specification on the `properties section <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section>`_
     """
 
 
@@ -149,13 +149,13 @@ class MissingSupportWarning(PyBelWarning):
 class InvalidCitationType(PyBelWarning):
     """Incorrect type of citation. Should be one of:
 
-- "Book"
-- "PubMed"
-- "Journal"
-- "Online Resource"
-- "Other"
+- Book
+- PubMed
+- Journal
+- Online Resource
+- Other
 
-See also: https://wiki.openbel.org/display/BELNA/Citation
+.. seealso:: OpenBEL wiki on `citations <https://wiki.openbel.org/display/BELNA/Citation>`_
     """
 
     def __init__(self, citation_type):
