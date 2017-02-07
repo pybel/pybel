@@ -38,8 +38,7 @@ Mapping for BEL functions to PyBEL functions is done based on the following dict
         'compositeAbundance': 'Composite'
     }
 
-But these terms can be more readily accessed by :code:`pybel.constants.PROTEIN`,
-:code:`pybel.constants.GENE`, and so on.
+But these terms can be readily accessed by :code:`pybel.constants.PROTEIN`,:code:`pybel.constants.GENE`, and so on.
 
 Simple Abundances
 -----------------
@@ -92,12 +91,27 @@ described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
         'function': 'Composite'
     }
 
+The remaining information is encoded in the edges to the resulting protein nodes from :code:`p(HGNC:FOS)` and
+:code:`p(HGNC:JUN)` with connections having the relation :code:`hasMember`.
+
+.. seealso::
+
+    BEL 2.0 specification on `complex abundances <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
+
 Reactions
 ~~~~~~~~~
 The usage of a reaction causes many nodes and edges to be created. The following example will illustrate what is
-added to the network for :code:`rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")`
+added to the network for
 
-.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
+.. code::
+
+    rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"), a(CHEBI:NADPH), a(CHEBI:hydron)),\
+        products(a(CHEBI:mevalonate), a(CHEBI:"NADP(+)"))) \
+        subProcessOf bp(GOBP:"cholesterol biosynthetic process")
+
+.. seealso::
+
+    BEL 2.0 specification on `reactions <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
 
 Edges
 -----
@@ -204,7 +218,9 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
         },
     }
 
-.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translocations
+.. seealso::
+
+    BEL 2.0 specification on `translocations <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translocations>`_
 
 Degradations
 ~~~~~~~~~~~~
@@ -220,9 +236,6 @@ Degradations are more simple, because there's no 'effect' entry. :code:`p(HGNC:Y
         },
     }
 
-.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
+.. seealso::
 
-
-
-The remaining information is encoded in the edges to the resulting protein nodes from :code:`p(HGNC:FOS)` and
-:code:`p(HGNC:JUN)` with connections having the relation :code:`hasMember`.
+    BEL 2.0 specification on `degradations <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg>`_
