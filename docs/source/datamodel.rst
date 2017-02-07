@@ -9,36 +9,47 @@ This allows for much easier programmatic access to answer more complicated quest
 code. Because the data structure is the same in Neo4J, the data can be directly exported with :code:`pybel.to_neo4j`.
 Neo4J supports the Cypher querying language so that the same queries can be written in an elegant and simple way.
 
-Nomenclature
-------------
+Constants
+---------
 
-Mapping for BEL functions to PyBEL functions is done based on the following dictionary
-(:code:`pybel.parser.language.abundance_labels`)
+These documents refer to many aspects of the data model using constants, which can be found in the top-level module
+:code:`pybel.constants`. In these examples, constants will be prefixed with :code:`pbc` such as in :code:`pbc.FUNCTION`.
+
+For normal usage, we suggest referring to values in dictionaries by these constants, in case the hard-coded
+strings behind these constants change. They can be made readily available with:
+
+.. code-block:: python
+
+    >>> from pybel import constants as pbc
+
+Abundance Nomenclature
+~~~~~~~~~~~~~~~~~~~~~~
+
+Internally, PyBEL uses the following table, :code:`pybel.parser.language.abundance_labels`, to map from BEL language
+functions to its internal constants.
 
 .. code::
 
     {
-        'abundance': 'Abundance',
-        'a': 'Abundance',
-        'geneAbundance': 'Gene',
-        'g': 'Gene',
-        'microRNAAbundance': 'miRNA',
-        'm': 'miRNA',
-        'proteinAbundance': 'Protein',
-        'p': 'Protein',
-        'rnaAbundance': 'RNA',
-        'r': 'RNA',
-        'biologicalProcess': 'BiologicalProcess',
-        'bp': 'BiologicalProcess',
-        'pathology': 'Pathology',
-        'path': 'Pathology',
-        'complex': 'Complex'
-        'complexAbundance': 'Complex',
-        'composite': 'Composite'
-        'compositeAbundance': 'Composite'
+        'abundance': pbc.ABUNDANCE,
+        'a': pbc.ABUNDANCE,
+        'geneAbundance': pbc.GENE,
+        'g': pbc.GENE,
+        'microRNAAbundance': pbc.MIRNA,
+        'm': pbc.MIRNA,
+        'proteinAbundance': pbc.PROTEIN,
+        'p': pbc.PROTEIN,
+        'rnaAbundance': pbc.RNA,
+        'r': pbc.RNA,
+        'biologicalProcess': pbc.BIOPROCESS,
+        'bp': pbc.BIOPROCESS,
+        'pathology': pbc.PATHOLOGY,
+        'path': pbc.PATHOLOGY,
+        'complex': pbc.COMPLEX
+        'complexAbundance': pbc.COMPLEX,
+        'composite': pbc.COMPOSITE
+        'compositeAbundance': pbc.COMPOSITE
     }
-
-But these terms can be readily accessed by :code:`pybel.constants.PROTEIN`,:code:`pybel.constants.GENE`, and so on.
 
 Simple Abundances
 -----------------
@@ -48,9 +59,9 @@ becomes:
 .. code::
 
     {
-        'function': 'Protein',
-        'namespace': 'HGNC',
-        'name': 'GSK3B'
+        pbc.FUNCTION: pbc.PROTEIN,
+        pbc.NAMESPACE: 'HGNC',
+        pbc.NAME: 'GSK3B'
     }
 
 .. automodule:: pybel.parser.modifiers.variant
@@ -86,7 +97,7 @@ described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 .. code::
 
     {
-        'function': 'Composite'
+        pbc.FUNCTION: pbc.COMPOSITE
     }
 
 The remaining information is encoded in the edges to the resulting protein nodes from :code:`p(HGNC:FOS)` and
@@ -151,15 +162,15 @@ Below is the "skeleton" for the edge data model in PyBEL:
 .. code::
 
     {
-        'subject': {
+        pbc.SUBJECT: {
             # ... modifications to the subject node
         },
-        'relation': 'positiveCorrelation',
-        'object': {
+        pbc.RELATION: 'positiveCorrelation',
+        pbc.OBJECT: {
             # ... modifications to the object node
         },
-        'evidence': '...',
-        'citation' : {
+        pbc.EVIDENCE: '...',
+        pbc.CITATION : {
             # ... citation information
         }
         # ... additional annotations as key:value pairs
@@ -174,17 +185,17 @@ Modifiers are added to this structure as well. Under this schema,
 .. code::
 
     {
-        'subject': {},
-        'relation': 'positiveCorrelation',
-        'object': {
-            'modifier': 'Activity',
-            'effect': {
-                'name': 'kin'
-                'namespace': 'bel'
+        pbc.SUBJECT: {},
+        pbc.RELATION: 'positiveCorrelation',
+        pbc.OBJECT: {
+            pbc.MODIFIER: pbc.ACTIVITY,
+            pbc.EFFECT: {
+                pbc.NAME: 'kin'
+                pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
             }
         },
-        'evidence': '...',
-        'citation': { ... }
+        pbc.EVIDENCE: '...',
+        pbc.CITATION: { ... }
     }
 
 
@@ -201,23 +212,23 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 .. code::
 
     {
-        'subject': {},
-        'relation': 'increases',
-        'object': {
-            'modifier': 'Translocation',
-            'effect': {
-                'fromLoc': {
-                    'namespace': 'GOMF',
-                    'name': 'intracellular'
+        pbc.SUBJECT: {},
+        pbc.RELATION: 'increases',
+        pbc.OBJECT: {
+            pbc.MODIFIER: pbc.TRANSLOCATION,
+            pbc.EFFECT: {
+                pbc.FROM_LOC: {
+                    pbc.NAMESPACE: 'GOMF',
+                    pbc.NAME: 'intracellular'
                 },
-                'toLoc': {
-                    'namespace': 'GOMF',
-                    'name': 'extracellular space'
+                pbc.TO_LOC: {
+                    pbc.NAMESPACE: 'GOMF',
+                    pbc.NAME: 'extracellular space'
                 }
             }
         },
-        'evidence': '...',
-        'citation': { ... }
+        pbc.EVIDENCE: '...',
+        pbc.CITATION: { ... }
     }
 
 .. seealso::
@@ -226,18 +237,18 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 
 Degradations
 ~~~~~~~~~~~~
-Degradations are more simple, because there's no 'effect' entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
+Degradations are more simple, because there's no pbc.EFFECT entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
 
 .. code::
 
     {
-        'subject': {},
-        'relation': 'increases',
-        'object': {
-            'modifier': 'Degradation'
+        pbc.SUBJECT: {},
+        pbc.RELATION: 'increases',
+        pbc.OBJECT: {
+            pbc.MODIFIER: pbc.DEGRADATION
         },
-        'evidence': '...',
-        'citation': { ... }
+        pbc.EVIDENCE: '...',
+        pbc.CITATION: { ... }
     }
 
 .. seealso::
