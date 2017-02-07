@@ -235,6 +235,9 @@ class CacheManager(BaseCacheManager):
 
         graph = parse_owl(iri)
 
+        if 0 == len(graph):
+            raise ValueError('Empty owl document: {}'.format(iri))
+
         owl = owl_model(iri=iri)
 
         entries = {node: owl_entry_model(entry=node) for node in graph.nodes_iter()}

@@ -107,6 +107,14 @@ class InvalidMetadataException(PyBelWarning):
 .. seealso:: BEL 1.0 specification on the `properties section <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section>`_
     """
 
+    def __init__(self, key, value):
+        PyBelWarning.__init__(self, key, value)
+        self.key = key
+        self.value = value
+
+    def __str__(self):
+        return 'Invalid document metadata key: {}'.format(self.key)
+
 
 class MissingMetadataException(PyBelWarning):
     """BEL Script is missing critical metadata"""

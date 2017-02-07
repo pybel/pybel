@@ -106,16 +106,18 @@ class MetadataParser(BaseParser):
 
     def handle_document(self, s, l, tokens):
         key = tokens['key']
+        value = tokens['value']
 
         if key not in language.document_keys:
-            raise InvalidMetadataException('Invalid document metadata key: {}'.format(key))
+            raise InvalidMetadataException(key, value)
 
         norm_key = language.document_keys[key]
 
         if norm_key in self.document_metadata:
             log.warning('Tried to overwrite metadata: {}'.format(key))
+            return tokens
 
-        self.document_metadata[norm_key] = tokens['value']
+        self.document_metadata[norm_key] = value
 
         return tokens
 
@@ -130,9 +132,6 @@ class MetadataParser(BaseParser):
         url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
 
         terms = self.cache_manager.get_namespace(url)
-
-        if 0 == len(terms):
-            raise ValueError("Empty Namespace: {}".format(url))
 
         self.namespace_dict[name] = terms
         self.namespace_url_dict[name] = url
@@ -157,9 +156,6 @@ class MetadataParser(BaseParser):
 
         terms = self.cache_manager.get_namespace_owl_terms(url)
 
-        if 0 == len(terms):
-            raise ValueError("Empty ontology: {}".format(url))
-
         self.namespace_dict[name] = {term: functions for term in terms}
         self.namespace_owl_dict[name] = url
 
@@ -175,9 +171,6 @@ class MetadataParser(BaseParser):
         url = tokens['url']
 
         terms = self.cache_manager.get_annotation_owl_terms(url)
-
-        if 0 == len(terms):
-            raise ValueError("Empty ontology: {}".format(url))
 
         self.annotations_dict[name] = set(terms)
         self.annotations_owl_dict[name] = url

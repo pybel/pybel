@@ -39,6 +39,9 @@ def download_url(url):
 
         value_dict[key] = sline[1].strip() if len(sline) == 2 else None
 
+    if not value_dict:
+        raise ValueError('Downloaded empty file: {}'.format(url))
+
     res = {}
     res.update({k: dict(v) for k, v in metadata_config.items()})
     res['Values'] = value_dict
