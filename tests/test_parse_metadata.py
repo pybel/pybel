@@ -4,6 +4,8 @@ import logging
 import unittest
 from pathlib import Path
 
+from pybel.constants import EVIDENCE, CITATION, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE, CITATION_AUTHORS, \
+    CITATION_DATE, CITATION_COMMENTS
 from pybel.manager.cache import CacheManager
 from pybel.parser import ControlParser, MetadataParser
 from pybel.parser.parse_exceptions import *
@@ -230,19 +232,19 @@ class TestParseControl(unittest.TestCase):
         self.parser.parseString(s)
 
         expected_citation = {
-            'type': 'PubMed',
-            'name': 'Trends in molecular medicine',
-            'reference': '12928037',
+            CITATION_TYPE: 'PubMed',
+            CITATION_NAME: 'Trends in molecular medicine',
+            CITATION_REFERENCE: '12928037',
         }
 
         self.assertEqual(expected_citation, self.parser.citation)
 
         annotations = self.parser.get_annotations()
         expected_annotations = {
-            'citation': {
-                'type': 'PubMed',
-                'name': 'Trends in molecular medicine',
-                'reference': '12928037'
+            CITATION: {
+                CITATION_TYPE: 'PubMed',
+                CITATION_NAME: 'Trends in molecular medicine',
+                CITATION_REFERENCE: '12928037'
             }
         }
         self.assertEqual(expected_annotations, annotations)
@@ -256,12 +258,12 @@ class TestParseControl(unittest.TestCase):
         self.parser.parseString(s)
 
         expected_citation = {
-            'type': 'PubMed',
-            'name': 'Trends in molecular medicine',
-            'reference': '12928037',
-            'date': '',
-            'authors': 'de Nigris|Lerman A|Ignarro LJ',
-            'comments': ''
+            CITATION_TYPE: 'PubMed',
+            CITATION_NAME: 'Trends in molecular medicine',
+            CITATION_REFERENCE: '12928037',
+            CITATION_DATE: '',
+            CITATION_AUTHORS: 'de Nigris|Lerman A|Ignarro LJ',
+            CITATION_COMMENTS: ''
         }
 
         self.assertEqual(expected_citation, self.parser.citation)
@@ -276,7 +278,7 @@ class TestParseControl(unittest.TestCase):
         self.parser.parseString(s)
 
         expected_annotation = {
-            'SupportingText': 'For instance, during 7-ketocholesterol-induced apoptosis of U937 cells'
+            EVIDENCE: 'For instance, during 7-ketocholesterol-induced apoptosis of U937 cells'
         }
 
         self.assertEqual(expected_annotation, self.parser.annotations)
@@ -324,7 +326,7 @@ class TestParseControl(unittest.TestCase):
         self.parser.parseString(s1)
         self.parser.parseString(s2)
 
-        self.assertEqual('b', self.parser.annotations['SupportingText'])
+        self.assertEqual('b', self.parser.annotations[EVIDENCE])
 
     def test_unset_evidence(self):
         s1 = 'SET Evidence = "a"'
@@ -355,14 +357,14 @@ class TestParseControl(unittest.TestCase):
 
         self.parser.parse_lines([s1, s2, s3, s4, s5, s6])
 
-        self.assertEqual('h', self.parser.annotations['SupportingText'])
-        self.assertEqual('PubMed', self.parser.citation['type'])
-        self.assertEqual('Test Reference 2', self.parser.citation['name'])
-        self.assertEqual('22222', self.parser.citation['reference'])
+        self.assertEqual('h', self.parser.annotations[EVIDENCE])
+        self.assertEqual('PubMed', self.parser.citation[CITATION_TYPE])
+        self.assertEqual('Test Reference 2', self.parser.citation[CITATION_NAME])
+        self.assertEqual('22222', self.parser.citation[CITATION_REFERENCE])
 
         self.parser.parseString('UNSET {"Custom1","Evidence"}')
         self.assertNotIn('Custom1', self.parser.annotations)
-        self.assertNotIn('SupportingText', self.parser.annotations)
+        self.assertNotIn(EVIDENCE, self.parser.annotations)
         self.assertIn('Custom2', self.parser.annotations)
         self.assertNotEqual(0, len(self.parser.citation))
 

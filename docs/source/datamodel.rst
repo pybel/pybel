@@ -160,11 +160,11 @@ Below is the "skeleton" for the edge data model in PyBEL:
         'object': {
             # ... modifications to the object node
         },
-        'SupportingText': '...',
+        'evidence': '...',
         'citation' : {
             # ... citation information
         }
-        # ... remaining annotation key:value pairs
+        # ... additional annotations as key:value pairs
     }
 
 
@@ -185,6 +185,8 @@ Modifiers are added to this structure as well. Under this schema,
                 'namespace': 'bel'
             }
         },
+        'evidence': '...',
+        'citation': { ... }
     }
 
 
@@ -216,6 +218,8 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
                 }
             }
         },
+        'evidence': '...',
+        'citation': { ... }
     }
 
 .. seealso::
@@ -234,6 +238,8 @@ Degradations are more simple, because there's no 'effect' entry. :code:`p(HGNC:Y
         'object': {
             'modifier': 'Degradation'
         },
+        'evidence': '...',
+        'citation': { ... }
     }
 
 .. seealso::

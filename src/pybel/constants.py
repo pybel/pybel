@@ -35,7 +35,7 @@ IDENTIFIER = 'identifier'
 VARIANTS = 'variants'
 RELATION = 'relation'
 CITATION = 'citation'
-EVIDENCE = 'SupportingText'
+EVIDENCE = 'evidence'
 
 CITATION_TYPE = 'type'
 CITATION_NAME = 'name'
