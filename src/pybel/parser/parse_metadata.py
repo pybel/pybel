@@ -102,8 +102,7 @@ class MetadataParser(BaseParser):
             self.namespace_pattern
         ])
 
-    def get_language(self):
-        return self.language
+        BaseParser.__init__(self, self.language)
 
     def handle_document(self, s, l, tokens):
         key = tokens['key']

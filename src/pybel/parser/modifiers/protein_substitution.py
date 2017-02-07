@@ -63,6 +63,3 @@ class PsubParser(BaseParser):
         del tokens[self.POSITION]
         del tokens[self.VARIANT]
         return tokens
-
-    def get_language(self):
-        return self.language

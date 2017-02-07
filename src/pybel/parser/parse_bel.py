@@ -468,12 +468,10 @@ class BelParser(BaseParser):
         self.language = self.control_parser.language | self.statement
         self.language.setName('BEL')
 
+        BaseParser.__init__(self, self.language)
+
         if autostreamline:
             self.streamline()
-
-    def get_language(self):
-        """Get language defined by this parser"""
-        return self.language
 
     def get_annotations(self):
         """Get current annotations in this parser
