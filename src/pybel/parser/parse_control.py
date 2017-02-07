@@ -17,7 +17,7 @@ from .parse_exceptions import *
 from .utils import is_int
 from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT, \
     BEL_KEYWORD_ALL
-from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET
+from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET, CITATION
 
 log = logging.getLogger('pybel')
 
@@ -185,12 +185,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset(self, key):
-        if key == BEL_KEYWORD_CITATION:
-            self.citation.clear()
-            self.annotations.clear()
-        elif key == BEL_KEYWORD_STATEMENT_GROUP:
-            self.statement_group = None
-        elif key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
+        if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
             del self.annotations[EVIDENCE]
         elif key not in self.annotations:
             raise MissingAnnotationKeyWarning(key)
@@ -204,7 +199,7 @@ class ControlParser(BaseParser):
         :rtype: dict
         """
         annotations = self.annotations.copy()
-        annotations['citation'] = self.citation.copy()
+        annotations[CITATION] = self.citation.copy()
         return annotations
 
     def clear(self):

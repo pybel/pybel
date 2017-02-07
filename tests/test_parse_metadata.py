@@ -346,6 +346,11 @@ class TestParseControl(unittest.TestCase):
 
         self.assertEqual({}, self.parser.annotations)
 
+    def test_unset_missing_annotation(self):
+        s = 'UNSET Custom1'
+        with self.assertRaises(MissingAnnotationKeyWarning):
+            self.parser.parseString(s)
+
     def test_reset_citation(self):
         s1 = 'SET Citation = {"PubMed","Test Reference 1","11111"}'
         s2 = 'SET Evidence = "d"'
