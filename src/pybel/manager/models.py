@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+This module contains the database models that support the PyBEL definition cache and graph cache
+"""
+
 import datetime
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
@@ -7,27 +11,22 @@ from sqlalchemy import Integer, String, DateTime, Text, Date, Binary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-NAMESPACE_TABLE_NAME = 'pybel_namespaces'
-NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntries'
-ANNOTATION_TABLE_NAME = 'pybel_annotations'
-ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntries'
-NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClasses'
-NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalences'
-
-NETWORK_TABLE_NAME = 'pybel_network'
+NAMESPACE_TABLE_NAME = 'pybel_namespace'
+NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
+ANNOTATION_TABLE_NAME = 'pybel_annotation'
+ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntry'
 
 OWL_NAMESPACE_TABLE_NAME = 'pybel_owlNamespace'
 OWL_NAMESPACE_ENTRY_TABLE_NAME = 'pybel_owlNamespaceEntry'
 OWL_ANNOTATION_TABLE_NAME = 'pybel_owlAnnotation'
 OWL_ANNOTATION_ENTRY_TABLE_NAME = 'pybel_owlAnnotationEntry'
 
+NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
+NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalence'
+
+NETWORK_TABLE_NAME = 'pybel_network'
+
 Base = declarative_base()
-
-NAMESPACE_DOMAIN_TYPES = {"BiologicalProcess", "Chemical", "Gene and Gene Products", "Other"}
-"""See: https://wiki.openbel.org/display/BELNA/Custom+Namespaces"""
-
-CITATION_TYPES = {"Book", "PubMed", "Journal", "Online Resource", "Other"}
-"""See: https://wiki.openbel.org/display/BELNA/Citation"""
 
 
 class Namespace(Base):
@@ -38,7 +37,6 @@ class Namespace(Base):
     keyword = Column(String(8), index=True)
     name = Column(String(255))
     domain = Column(String(255))
-    # domain = Column(Enum(*NAMESPACE_DOMAIN_TYPES, name='namespaceDomain_types'))
     species = Column(String(255), nullable=True)
     description = Column(String(255), nullable=True)
     version = Column(String(255), nullable=True)
@@ -92,7 +90,6 @@ class NamespaceEntryEquivalence(Base):
 
 
 class Annotation(Base):
-    """This table represents the metadata for a BEL Namespace or annotation"""
     __tablename__ = ANNOTATION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)

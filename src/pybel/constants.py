@@ -45,7 +45,12 @@ CITATION_AUTHORS = 'authors'
 CITATION_COMMENTS = 'comments'
 
 CITATION_ENTRIES = CITATION_TYPE, CITATION_NAME, CITATION_REFERENCE, CITATION_DATE, CITATION_AUTHORS, CITATION_COMMENTS
+
 CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
+"""See: https://wiki.openbel.org/display/BELNA/Citation"""
+
+NAMESPACE_DOMAIN_TYPES = {"BiologicalProcess", "Chemical", "Gene and Gene Products", "Other"}
+"""See: https://wiki.openbel.org/display/BELNA/Custom+Namespaces"""
 
 DIRTY = 'dirty'
 
