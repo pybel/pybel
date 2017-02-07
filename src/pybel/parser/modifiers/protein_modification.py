@@ -34,6 +34,40 @@ For example, the node :code:`p(HGNC:GSK3B, pmod(P, S, 9))` is represented with t
         ]
     }
 
+
+As an additional example, in :code:`p(HGNC:MAPK1, pmod(Ph, Thr, 202), pmod(Ph, Tyr, 204))`, MAPK is phosphorylated
+twice to become active. This results in the following:
+
+.. code::
+
+    {
+        pbc.FUNCTION: pbc.PROTEIN,
+        pbc.NAMESPACE: 'HGNC',
+        pbc.NAME: 'MAPK1',
+        pbc.VARIANTS: [
+            {
+                pbc.KIND: pbc.PMOD,
+                pbc.IDENTIFIER: {
+                    pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
+                    pbc.NAME: 'Ph',
+
+                },
+                PmodParser.CODE: 'Thr',
+                PmodParser.POSITION: 202
+            },
+            {
+                pbc.KIND: pbc.PMOD,
+                pbc.IDENTIFIER: {
+                    pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
+                    pbc.NAME: 'Ph',
+
+                },
+                PmodParser.CODE: 'Tyr',
+                PmodParser.POSITION: 204
+            }
+        ]
+    }
+
 .. seealso::
 
     BEL 2.0 specification on `protein modifications <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod>`_
