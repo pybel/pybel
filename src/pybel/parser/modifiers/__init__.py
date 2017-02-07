@@ -51,8 +51,8 @@ def canonicalize_variant(tokens):
         return canonicalize_pmod(tokens)
     elif tokens[KIND] == GMOD:
         return canonicalize_gmod(tokens)
-    elif tokens[KIND] == FRAGMENT:
-        return canonicalize_frag(tokens)
+    # elif tokens[KIND] == FRAGMENT:
+    return canonicalize_frag(tokens)
 
 
 dna_nucleotide_seq = Word(''.join(dna_nucleotide_labels.keys()))
