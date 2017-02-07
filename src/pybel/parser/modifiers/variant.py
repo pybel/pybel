@@ -46,5 +46,4 @@ class VariantParser(BaseParser):
     def __init__(self):
         self.language = variant_tags + nest(variant_characters(IDENTIFIER))
 
-    def get_language(self):
-        return self.language
+        BaseParser.__init__(self, self.language)

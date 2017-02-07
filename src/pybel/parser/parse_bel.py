@@ -106,42 +106,42 @@ class BelParser(BaseParser):
             allow_naked_names=self.allow_naked_names
         )
 
-        identifier = Group(self.identifier_parser.get_language())(IDENTIFIER)
+        identifier = Group(self.identifier_parser.language)(IDENTIFIER)
 
         # 2.2 Abundance Modifier Functions
 
         #: 2.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_protein_modifications
-        self.pmod = PmodParser(namespace_parser=self.identifier_parser).get_language()
+        self.pmod = PmodParser(namespace_parser=self.identifier_parser).language
 
         #: 2.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
-        self.variant = VariantParser().get_language()
+        self.variant = VariantParser().language
 
         #: 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
-        self.fragment = FragmentParser().get_language()
+        self.fragment = FragmentParser().language
 
         #: 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
-        self.location = LocationParser(self.identifier_parser).get_language()
+        self.location = LocationParser(self.identifier_parser).language
         opt_location = Optional(WCW + self.location)
 
         #: 2.2.X DEPRECATED
         #: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_amino_acid_substitutions
-        self.psub = PsubParser().get_language()
+        self.psub = PsubParser().language
 
         #: 2.2.X DEPRECATED
         #: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_sequence_variations
-        self.gsub = GsubParser().get_language()
+        self.gsub = GsubParser().language
 
         #: DEPRECATED
         #: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_truncated_proteins
-        self.trunc = TruncParser().get_language()
+        self.trunc = TruncParser().language
 
         #: PyBEL BEL Specification variant
-        self.gmod = GmodParser().get_language()
+        self.gmod = GmodParser().language
 
         # 2.6 Other Functions
 
         #: 2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
-        self.fusion = FusionParser(self.identifier_parser).get_language()
+        self.fusion = FusionParser(self.identifier_parser).language
 
         # 2.1 Abundance Functions
 
@@ -244,7 +244,7 @@ class BelParser(BaseParser):
             handle_molecular_activity_default)
 
         self.molecular_activity = molecular_activity_tags + nest(
-            molecular_activity_default | self.identifier_parser.get_language())
+            molecular_activity_default | self.identifier_parser.language)
         """2.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA"""
 
         # 2.3 Process Functions
@@ -465,7 +465,7 @@ class BelParser(BaseParser):
         self.relation = MatchFirst([self.has_members, self.nested_causal_relationship, self.relation])
 
         self.statement = self.relation | self.bel_term.setParseAction(self.handle_term)
-        self.language = self.control_parser.get_language() | self.statement
+        self.language = self.control_parser.language | self.statement
         self.language.setName('BEL')
 
         if autostreamline:

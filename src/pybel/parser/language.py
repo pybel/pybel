@@ -8,11 +8,11 @@ import logging
 
 from pyparsing import *
 
+from .parse_exceptions import PlaceholderAminoAcidWarning
+from ..constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX
 from ..constants import BEL_KEYWORD_METADATA_AUTHORS, BEL_KEYWORD_METADATA_CONTACT, BEL_KEYWORD_METADATA_COPYRIGHT, \
     BEL_KEYWORD_METADATA_DESCRIPTION, BEL_KEYWORD_METADATA_DISCLAIMER, BEL_KEYWORD_METADATA_LICENSES, \
     BEL_KEYWORD_METADATA_NAME, BEL_KEYWORD_METADATA_VERSION
-from .parse_exceptions import PlaceholderAminoAcidWarning
-from ..constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX
 from ..constants import HAS_REACTANT, HAS_PRODUCT, HAS_COMPONENT, HAS_VARIANT, TRANSCRIBED_TO, TRANSLATED_TO, HAS_MEMBER
 
 log = logging.getLogger('pybel')
@@ -110,7 +110,6 @@ belns_encodings = {
     'O': {PATHOLOGY},
     'C': {COMPLEX}
 }
-
 
 amino_acid_dict = {
     'A': 'Ala',

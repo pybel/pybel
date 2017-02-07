@@ -53,6 +53,8 @@ class PsubParser(BaseParser):
                                         amino_acid(self.VARIANT))
         self.language.setParseAction(self.handle_psub)
 
+        BaseParser.__init__(self, self.language)
+
     def handle_psub(self, s, l, tokens):
         upgraded = 'p.{}{}{}'.format(tokens[self.REFERENCE], tokens[self.POSITION], tokens[self.VARIANT])
         log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', s, upgraded)

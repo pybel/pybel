@@ -49,7 +49,7 @@ class IdentifierParser(BaseParser):
             # TODO implement
             raise NotImplementedError('Mapping not yet implemented')
 
-        self.language = self.identifier_qualified | self.identifier_bare
+        BaseParser.__init__(self, self.identifier_qualified | self.identifier_bare)
 
     def handle_identifier_qualified(self, s, l, tokens):
         namespace = tokens[NAMESPACE]
@@ -78,6 +78,3 @@ class IdentifierParser(BaseParser):
 
     def handle_namespace_invalid(self, s, l, tokens):
         raise NakedNameWarning(tokens[NAME])
-
-    def get_language(self):
-        return self.language

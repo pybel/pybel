@@ -53,6 +53,8 @@ class TruncParser(BaseParser):
         self.language = trunc_tag + nest(ppc.integer(self.POSITION))
         self.language.setParseAction(self.handle_trunc_legacy)
 
+        BaseParser.__init__(self, self.language)
+
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     def handle_trunc_legacy(self, s, l, tokens):
         upgraded = 'p.{}*'.format(tokens[self.POSITION])
@@ -61,6 +63,3 @@ class TruncParser(BaseParser):
         tokens[IDENTIFIER] = upgraded
         del tokens[self.POSITION]
         return tokens
-
-    def get_language(self):
-        return self.language

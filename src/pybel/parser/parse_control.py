@@ -82,8 +82,16 @@ class ControlParser(BaseParser):
             self.unset_statement_group, self.unset_command, self.unset_list
         ])
 
-        self.commands = MatchFirst([self.set_statement_group, self.set_citation, self.set_evidence,
-                                    self.set_command, self.set_command_list, self.unset_statements])
+        self.language = MatchFirst([
+            self.set_statement_group,
+            self.set_citation,
+            self.set_evidence,
+            self.set_command,
+            self.set_command_list,
+            self.unset_statements
+        ])
+
+        BaseParser.__init__(self, self.language)
 
     def handle_annotation_key(self, s, l, tokens):
         key = tokens['key']
@@ -188,9 +196,6 @@ class ControlParser(BaseParser):
             raise MissingAnnotationKeyWarning(key)
         else:
             del self.annotations[key]
-
-    def get_language(self):
-        return self.commands
 
     def get_annotations(self):
         """

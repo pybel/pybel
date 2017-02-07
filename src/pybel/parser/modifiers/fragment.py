@@ -77,5 +77,4 @@ class FragmentParser(BaseParser):
             (self.fragment_range | self.missing_fragment(self.MISSING)) + Optional(
                 WCW + word(self.DESCRIPTION)))
 
-    def get_language(self):
-        return self.language
+        BaseParser.__init__(self, self.language)

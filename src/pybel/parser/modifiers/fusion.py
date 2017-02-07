@@ -51,17 +51,18 @@ class FusionParser(BaseParser):
     MISSING = 'missing'
 
     def __init__(self, namespace_parser=None):
-        self.identifier_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
-        identifier = self.identifier_parser.get_language()
+        self.identifier_parser = IdentifierParser() if namespace_parser is None else namespace_parser
+        identifier = self.identifier_parser.language
 
         reference_seq = oneOf(['r', 'p', 'c'])
         coordinate = pyparsing_common.integer | '?'
         missing = Keyword('?')
 
-        range_coordinate = missing(self.MISSING) | (reference_seq(self.REFERENCE) + Suppress('.') + coordinate(self.START) + Suppress('_') + coordinate(self.STOP))
+        range_coordinate = missing(self.MISSING) | (
+            reference_seq(self.REFERENCE) + Suppress('.') + coordinate(self.START) + Suppress('_') + coordinate(
+                self.STOP))
 
         self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
                                            Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
 
-    def get_language(self):
-        return self.language
+        BaseParser.__init__(self, self.language)

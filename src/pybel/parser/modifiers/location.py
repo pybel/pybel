@@ -57,10 +57,5 @@ class LocationParser(BaseParser):
         :type identifier_parser: IdentifierParser
         :return:
         """
-        self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
-        identifier = self.identifier_parser.get_language()
-
-        self.language = Group(location_tag + nest(identifier))(LOCATION)
-
-    def get_language(self):
-        return self.language
+        identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
+        BaseParser.__init__(self, Group(location_tag + nest(identifier_parser.language))(LOCATION))
