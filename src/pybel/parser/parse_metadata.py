@@ -36,7 +36,9 @@ value = quote | ppc.identifier
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document.
 
-    See: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define
+    .. seealso::
+
+        BEL 1.0 Specification for the `DEFINE <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define>`_ keyword
     """
 
     def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, namespace_re=None,
