@@ -173,16 +173,54 @@ def from_pickle(path, check_version=True):
     return ensure_version(nx.read_gpickle(path), check_version=check_version)
 
 
+def to_json_dict(graph):
+    """Converts this graph to a node-link JSON object
+
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :rtype: dict
+    """
+    data = json_graph.node_link_data(graph)
+    data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
+    return data
+
+
+def to_jsons(graph):
+    """Dumps this graph as a node-link JSON object to a string
+
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :rtype: str
+    """
+    return json.dumps(to_json_dict(graph), ensure_ascii=False)
+
+
 def to_json(graph, output):
-    """Writes this graph to a node-link JSON object
+    """Writes this graph as a node-link JSON object
 
     :param graph: a BEL graph
     :type graph: BELGraph
     :param output: a write-supporting file-like object
+    :type output: file
     """
-    data = json_graph.node_link_data(graph)
-    data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
-    json.dump(data, output, ensure_ascii=False)
+    json.dump(to_json_dict(graph), output, ensure_ascii=False)
+
+
+def from_json_data(data, check_version=True):
+    """Reads graph from node-link JSON Object
+
+    :param path: file path to read
+    :type path: str
+    :param check_version: Checks if the graph was produced by this version of PyBEL
+    :type check_version: bool
+    :rtype: :class:`BELGraph`
+    """
+
+    for i, node in enumerate(data['nodes']):
+        data['nodes'][i]['id'] = tuple(node['id'])
+
+    g = json_graph.node_link_graph(data, directed=True, multigraph=True)
+    return ensure_version(BELGraph(data=g), check_version=check_version)
 
 
 def from_json(path, check_version=True):
@@ -197,11 +235,7 @@ def from_json(path, check_version=True):
     with open(os.path.expanduser(path)) as f:
         data = json.load(f)
 
-    for i, node in enumerate(data['nodes']):
-        data['nodes'][i]['id'] = tuple(node['id'])
-
-    g = json_graph.node_link_graph(data, directed=True, multigraph=True)
-    return ensure_version(BELGraph(data=g), check_version=check_version)
+    return from_json_data(data, check_version=check_version)
 
 
 def to_graphml(graph, output):
