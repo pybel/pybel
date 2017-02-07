@@ -26,7 +26,7 @@ import networkx as nx
 import py2neo
 import requests
 from networkx import GraphMLReader
-from networkx.readwrite import json_graph
+from networkx.readwrite.json_graph import node_link_data, node_link_graph
 from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
@@ -180,7 +180,7 @@ def to_json_dict(graph):
     :type graph: BELGraph
     :rtype: dict
     """
-    data = json_graph.node_link_data(graph)
+    data = node_link_data(graph)
     data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
     return data
 
@@ -209,8 +209,8 @@ def to_json(graph, output):
 def from_json_data(data, check_version=True):
     """Reads graph from node-link JSON Object
 
-    :param path: file path to read
-    :type path: str
+    :param data: json dictionary representing graph
+    :type data: dict
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
     :rtype: :class:`BELGraph`
@@ -219,8 +219,8 @@ def from_json_data(data, check_version=True):
     for i, node in enumerate(data['nodes']):
         data['nodes'][i]['id'] = tuple(node['id'])
 
-    g = json_graph.node_link_graph(data, directed=True, multigraph=True)
-    return ensure_version(BELGraph(data=g), check_version=check_version)
+    graph = BELGraph(data=node_link_graph(data, directed=True, multigraph=True))
+    return ensure_version(graph, check_version=check_version)
 
 
 def from_json(path, check_version=True):
@@ -233,9 +233,7 @@ def from_json(path, check_version=True):
     :rtype: :class:`BELGraph`
     """
     with open(os.path.expanduser(path)) as f:
-        data = json.load(f)
-
-    return from_json_data(data, check_version=check_version)
+        return from_json_data(json.load(f), check_version=check_version)
 
 
 def to_graphml(graph, output):
@@ -271,7 +269,10 @@ def from_graphml(path, check_version=True):
     g = expand_edges(g)
     for n in g.nodes_iter():
         g.node[n] = json.loads(g.node[n]['json'])
-    nx.relabel_nodes(g, literal_eval, copy=False)  # shh don't tell anyone
+
+    # Use AST to convert stringified tuples into actual tuples
+    nx.relabel_nodes(g, literal_eval, copy=False)
+
     return ensure_version(BELGraph(data=g), check_version=check_version)
 
 
