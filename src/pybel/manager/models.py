@@ -147,6 +147,9 @@ class AnnotationEntry(Base):
     def __repr__(self):
         return 'AnnotationEntry({}, {})'.format(self.name, self.label)
 
+    def forGraph(self):
+        return {self.annotation.keyword: self.name}
+
 
 owl_relationship = Table(
     OWL_RELATIONSHIP_TABLE_NAME, Base.metadata,
@@ -250,6 +253,36 @@ class Node(Base):
     def __repr__(self):
         return self.bel
 
+    def old_forGraph(self):
+        # ToDo: Delete this after merge with develop and use forGraph instead!
+        node_key = [self.type]
+        node_data = {
+            'type': self.type,
+        }
+        if self.namespaceEntry:
+            namespace_entry = self.namespaceEntry.forGraph()
+            node_data.update(namespace_entry)
+            node_key.appen(namespace_entry['namespace'])
+            node_key.append(namespace_entry['name'])
+
+        if self.type == 'ProteinFusion':
+            fus = self.modifications[0].old_forGraph()
+            node_data.update(fus[-1])
+            del (fus[-1])
+            for entry in fus:
+                node_key.append(entry)
+
+        elif self.modification:
+            node_data['variants'] = []
+            for mod in self.modifications:
+                mod_tuple = tuple(mod.old_forGraph())
+                node_data['variants'].append(mod_tuple)
+                node_key.append(mod_tuple)
+        node_data['variants'] = tuple(node_data['variants'])
+
+        return (tuple(node_key), node_data)
+
+
     def forGraph(self):
         namespace_entry = self.namespaceEntry.forGraph()
         node_data = {'function': self.type, 'identifier': namespace_entry}
@@ -276,7 +309,6 @@ class Modification(Base):
     p5Range = Column(String(255), nullable=True)
     pmodName = Column(String(255), nullable=True)
     aminoA = Column(String(3), nullable=True)
-    #    aminoB = Column(String(3), nullable=True)
     position = Column(Integer, nullable=True)
 
     nodes = relationship("Node", secondary=node_modification)
@@ -295,6 +327,38 @@ class Modification(Base):
 
         return mod_dict
 
+    def old_forGraph(self):
+        mod_array = [self.modType]
+
+        if self.modType == 'ProteinFusion':
+            mod_dict = {}
+            if self.p5Partner:
+                p5 = self.p5Partner.forGraph()
+                mod_array.append((p5['namespace'], p5['name']))
+                mod_dict['partner_5p'] = p5
+            if self.p5range:
+                mod_array.append((self.p5Range,))
+                mod_dict['range_5p'] = (self.p5Range,)
+            if self.p3Partner:
+                p3 = self.p3Partner.forGraph()
+                mod_array.append((p3['namespace'], p3['name']))
+                mod_dict['partner_3p'] = p3
+            if self.p3Range:
+                mod_array.append((self.p3Range,))
+                mod_dict['range_3p'] = (self.p3Range,)
+            mod_array.append(mod_dict)
+
+        elif self.modType == 'ProteinModification':
+            mod_array.append(self.pmodName)
+            if self.aminoA:
+                mod_array.append(self.aminoA)
+            if self.position:
+                mod_array.append(self.position)
+
+        elif self.modType in ('Variant', 'GeneModificaiton'):
+            mod_array.append(self.variantString)
+
+        return mod_array
 
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
@@ -311,6 +375,9 @@ class Author(Base):
     name = Column(String(255), nullable=False)
 
     citations = relationship("Citation", secondary=author_citation)
+
+    def __repr__(self):
+        return self.name
 
 
 class Citation(Base):
@@ -333,6 +400,16 @@ class Citation(Base):
     def __repr__(self):
         return '{} {} {}'.format(self.type, self.name, self.reference)
 
+    def forGraph(self):
+        return {
+            'authors': "|".join(self.authors),
+            'comments': self.comments,
+            'name': self.name,
+            'date': self.date,
+            'reference': self.reference,
+            'type': self.type
+        }
+
 
 class Evidence(Base):
     """This table contains the evidence text that proves a specific relationship and refers the source that is cited."""
@@ -346,6 +423,12 @@ class Evidence(Base):
 
     def __repr__(self):
         return '{}'.format(self.text)
+
+    def forGraph(self):
+        return {
+            'citation': self.citation.forGraph(),
+            'supportingText': self.text
+        }
 
 
 edge_property = Table(
@@ -381,8 +464,23 @@ class Edge(Base):
         return 'Edge(bel={})'.format(self.bel)
 
     def forGraph(self):
-        pass
-        # return(source, )
+        edge_dict = {
+            'data': {
+                'relation': self.relation,
+            },
+            'key': self.graphIdentifier
+        }
+        edge_dict['data'].update(self.evidence.forGraph())
+        for anno in self.annotations:
+            edge_dict['data'].update(anno.forGraph())
+        for prop in self.properties:
+            prop_info = prop.forGraph()
+            if prop_info['participant'] in edge_dict['data']:
+                edge_dict['data'][prop_info['participant']].update(prop_info['data'])
+            else:
+                edge_dict['data'].update(prop_info['data'])
+
+        return edge_dict
 
 
 class Property(Base):
@@ -398,3 +496,18 @@ class Property(Base):
     namespaceEntry = relationship('NamespaceEntry')
 
     edges = relationship("Edge", secondary=edge_property)
+
+    def forGraph(self):
+        prop_dict = {
+            'data': {
+                self.participant: {
+                    'modifier': self.modifier,
+                    'effect': {
+                        self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.forGraph()
+                    }
+                }
+            },
+            'participant': self.participant
+        }
+
+        return prop_dict

@@ -231,7 +231,7 @@ class GraphCacheManager(BaseCacheManager):
                     # ToDo: Do GeneModifications look like ProteinModifications?
                     modification_list.append({
                         'modType': modType,
-                        'variantString': str(variant)
+                        'variantString': str(variant[1])
                     })
 
                     # ToDo: What are the possible modifications?
@@ -350,19 +350,33 @@ class GraphCacheManager(BaseCacheManager):
     def get_name(self, name_id):
         return self.session.query(models.NamespaceEntry).filter_by(id=name_id).one()
 
-    def get_by_edge_filter(**kwargs):
+    def get_by_edge_filter(self, annotation_dict):
         """Gets all edges matching the given query annotation values
 
-        :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
-                           where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
-                           of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
-                           of URL.
-        :type connection: str
-        :param kwargs: annotation/value pairs to filter edges
+        :param annotation_dict: annotation/value pairs to filter edges
+        :type annotation_dict: dict
         :return: A graph composed of the filtered edges
         :rtype: BELGraph
         """
-        pass
+        from pybel import BELGraph
+        belGraph = BELGraph()
+        for annotation_key, annotation_value in annotation_dict.items():
+            annotation_def = self.session.query(models.Annotation).filter_by(keyword=annotation_key).first()
+            annotation = self.session.query(models.AnnotationEntry).filter_by(annotation=annotation_def,
+                                                                              name=annotation_value).first()
+            # Add Annotations to belGraph.annotation_url
+            # Add Namespaces to belGraph.namespace_url
+            # What about meta information?
+            edges = self.session.query(models.Edge).filter(models.Edge.annotations.contains(annotation)).all()
+            for edge in edges:
+                source_node_data = edge.source.old_forGraph()
+                belGraph.add_node(source_node_data[0], source_node_data[1])
+                target_node_data = edge.target.old_forGraph()
+                belGraph.add_node(target_node_data[0], target_node_data[1])
+                # compose edge_data_dict!
+                edge_data = edge.forGraph()
+                belGraph.add_edge(source_node_data[0], target_node_data[0], edge_data['key'], edge_data['data'])
+        return belGraph
 
 
 def to_database(graph, connection=None):
