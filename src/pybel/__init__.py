@@ -50,14 +50,13 @@ a new database and populate it on the next run.
 Future versions of PyBEL will include database integrity checks and provide upgrade procedures/scripts.
 """
 
-from . import graph
 from . import io
 from .canonicalize import to_bel
-from .graph import *
+from .graph import BELGraph
 from .io import *
 from .manager.graph_cache import to_database, from_database
 
-__all__ = ['to_database', 'from_database', 'to_bel'] + graph.__all__ + io.__all__
+__all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel'] + list(io.__all__)
 
 __version__ = '0.3.8-dev'
 
