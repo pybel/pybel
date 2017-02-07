@@ -207,11 +207,10 @@ class TestParseControl(unittest.TestCase):
             self.parser.parseString(s)
 
     def test_unset_missing_citation(self):
-        s = [
-            test_citation_bel,
-            'UNSET Citation'
-        ]
-        self.parser.parse_lines(s)
+        s = 'UNSET Citation'
+
+        with self.assertRaises(MissingAnnotationKeyWarning):
+            self.parser.parseString(s)
 
     def test_set_missing_statement(self):
         s = 'SET MissingKey = "lol"'
