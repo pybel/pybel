@@ -3020,7 +3020,9 @@ class TestWrite(TestTokenParserBase):
             'g(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))',
             'g(fus(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.312_5034))',
             'g(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.?_5034))',
-            ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))')
+            ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'),
+            ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1, ?, ?))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'),
+            'g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))',
         ]
 
         for case in cases:
