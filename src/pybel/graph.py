@@ -184,6 +184,11 @@ class BELGraph(nx.MultiDiGraph):
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
     def parse_statements(self, statements, bel_parser):
+        """Parses a list of statements from a BEL Script
+
+        :type statements: list of str
+        :type bel_parser: pybel.parser.parse_bel.BelParser
+        """
         t = time.time()
 
         for line_number, line in statements:
