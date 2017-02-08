@@ -10,7 +10,8 @@ See: https://wiki.openbel.org/display/BLD/Control+Records
 
 import logging
 
-from pyparsing import Suppress, pyparsing_common, MatchFirst
+from pyparsing import Suppress, MatchFirst
+from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser, quote, delimitedSet, And, oneOf
 from .parse_exceptions import *
@@ -37,60 +38,64 @@ class ControlParser(BaseParser):
         self.evidence = None
         self.annotations = {}
 
-        annotation_key = pyparsing_common.identifier.setResultsName('key')
-        annotation_key.setParseAction(self.handle_annotation_key)
+        annotation_key = ppc.identifier('key').setParseAction(self.handle_annotation_key)
 
-        set_tag = Suppress(BEL_KEYWORD_SET)
-        unset_tag = Suppress(BEL_KEYWORD_UNSET)
-
-        self.set_statement_group = And([set_tag, Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), quote('group')])
+        self.set_statement_group = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), quote('group')])
         self.set_statement_group.setParseAction(self.handle_statement_group)
 
-        self.set_citation = And([set_tag, Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
+        self.set_citation = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
         self.set_citation.setParseAction(self.handle_citation)
 
         supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
-        self.set_evidence = And([set_tag, Suppress(supporting_text_tags), Suppress('='), quote('value')])
+        self.set_evidence = And([Suppress(supporting_text_tags), Suppress('='), quote('value')])
         self.set_evidence.setParseAction(self.handle_evidence)
 
-        set_command_prefix = And([set_tag, annotation_key, Suppress('=')])
+        set_command_prefix = And([annotation_key('key'), Suppress('=')])
         self.set_command = set_command_prefix + quote('value')
         self.set_command.setParseAction(self.handle_set_command)
 
         self.set_command_list = set_command_prefix + delimitedSet('values')
         self.set_command_list.setParseAction(self.handle_set_command_list)
 
-        self.unset_command = unset_tag + annotation_key
-        self.unset_command.setParseAction(self.handle_unset_command)
+        self.unset_command = annotation_key('key')
+        self.unset_command.addParseAction(self.handle_unset_command)
 
-        self.unset_evidence = unset_tag + Suppress(supporting_text_tags)
-        self.unset_evidence.setParseAction(self.handle_unset_supporting_text)
+        self.unset_evidence = Suppress(supporting_text_tags)
+        self.unset_evidence.setParseAction(self.handle_unset_evidence)
 
-        self.unset_citation = unset_tag + Suppress(BEL_KEYWORD_CITATION)
+        self.unset_citation = Suppress(BEL_KEYWORD_CITATION)
         self.unset_citation.setParseAction(self.handle_unset_citation)
 
-        self.unset_statement_group = unset_tag + Suppress(BEL_KEYWORD_STATEMENT_GROUP)
+        self.unset_statement_group = Suppress(BEL_KEYWORD_STATEMENT_GROUP)
         self.unset_statement_group.setParseAction(self.handle_unset_statement_group)
 
-        self.unset_list = unset_tag + delimitedSet('values')
+        self.unset_list = delimitedSet('values')
         self.unset_list.setParseAction(self.handle_unset_list)
 
-        self.unset_all = unset_tag + Suppress(BEL_KEYWORD_ALL)
+        self.unset_all = Suppress(BEL_KEYWORD_ALL)
         self.unset_all.setParseAction(self.handle_unset_all)
 
-        self.unset_statements = MatchFirst([
-            self.unset_all, self.unset_citation, self.unset_evidence,
-            self.unset_statement_group, self.unset_command, self.unset_list
-        ])
+        set_tag = Suppress(BEL_KEYWORD_SET)
+        unset_tag = Suppress(BEL_KEYWORD_UNSET)
 
-        self.language = MatchFirst([
+        self.set_statements = set_tag + MatchFirst([
             self.set_statement_group,
             self.set_citation,
             self.set_evidence,
             self.set_command,
             self.set_command_list,
-            self.unset_statements
         ])
+
+        self.unset_statements = unset_tag + MatchFirst([
+            self.unset_all,
+            self.unset_citation,
+            self.unset_evidence,
+            self.unset_statement_group,
+            self.unset_command,
+            self.unset_list
+        ])
+
+        self.language = self.set_statements | self.unset_statements
 
         BaseParser.__init__(self, self.language)
 
@@ -148,49 +153,50 @@ class ControlParser(BaseParser):
         self.annotations[key] = set(values)
         return tokens
 
-    def handle_unset_supporting_text(self, s, l, tokens):
-        if self.evidence is None:
-            raise MissingAnnotationKeyWarning(EVIDENCE)
-        else:
-            self.evidence = None
-        return tokens
-
-    def handle_unset_citation(self, s, l, tokens):
-        if 0 == len(self.citation):
-            raise MissingAnnotationKeyWarning(BEL_KEYWORD_CITATION)
-        else:
-            self.citation.clear()
-        return tokens
-
     def handle_unset_statement_group(self, s, l, tokens):
         self.statement_group = None
         return tokens
 
-    def handle_unset_command(self, s, l, tokens):
-        key = tokens['key']
+    def handle_unset_citation(self, s, l, tokens):
+        if not self.citation:
+            raise MissingAnnotationKeyWarning(BEL_KEYWORD_CITATION)
+        self.citation.clear()
+        return tokens
+
+    def handle_unset_evidence(self, s, l, tokens):
+        if self.evidence is None:
+            raise MissingAnnotationKeyWarning(EVIDENCE)
+        self.evidence = None
+        return tokens
+
+    def validate_command(self, key):
+        if key not in self.valid_annotations:
+            raise UndefinedAnnotationWarning(key)
 
         if key not in self.annotations:
             raise MissingAnnotationKeyWarning(key)
 
+    def handle_unset_command(self, s, l, tokens):
+        key = tokens['key']
+        self.validate_command(key)
+
         del self.annotations[key]
+        return tokens
+
+    def handle_unset_list(self, s, l, tokens):
+        for key in tokens['values']:
+            if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
+                self.evidence = None
+            elif key not in self.annotations:
+                raise MissingAnnotationKeyWarning(key)
+            else:
+                del self.annotations[key]
+
         return tokens
 
     def handle_unset_all(self, s, l, tokens):
         self.clear()
         return tokens
-
-    def handle_unset_list(self, s, l, tokens):
-        for key in tokens['values']:
-            self.handle_unset(key)
-        return tokens
-
-    def handle_unset(self, key):
-        if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
-            self.evidence = None
-        elif key not in self.annotations:
-            raise MissingAnnotationKeyWarning(key)
-        else:
-            del self.annotations[key]
 
     def get_annotations(self):
         """
@@ -207,6 +213,7 @@ class ControlParser(BaseParser):
 
     def clear(self):
         """Clears the annotations, citation, and statement group"""
-        self.annotations.clear()
-        self.citation.clear()
         self.statement_group = None
+        self.citation.clear()
+        self.evidence = None
+        self.annotations.clear()

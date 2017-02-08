@@ -179,14 +179,12 @@ class TestParseControl(unittest.TestCase):
     def test_set_statement_group(self):
         s = 'SET STATEMENT_GROUP = "my group"'
 
-        self.assertIsNotNone(self.parser.set_statement_group.parseString(s))
-
         self.parser.parseString(s)
-        self.assertEqual('my group', self.parser.statement_group)
+        self.assertEqual('my group', self.parser.statement_group, msg='problem with integration')
 
         s = 'UNSET STATEMENT_GROUP'
         self.parser.parseString(s)
-        self.assertIsNone(self.parser.statement_group)
+        self.assertIsNone(self.parser.statement_group, msg='problem with unset')
 
     def test_unset_missing_evidence(self):
         s = [
