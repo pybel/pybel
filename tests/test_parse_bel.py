@@ -7,9 +7,8 @@ from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import HGVS, FUNCTION, ACTIVITY, ABUNDANCE, \
     PATHOLOGY, BIOPROCESS, MIRNA, COMPLEX, REACTION, COMPOSITE, VARIANTS
 from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, BEL_DEFAULT_NAMESPACE, PARTNER_3P, PARTNER_5P, RANGE_3P, \
-    RANGE_5P, NAMESPACE, NAME, LOCATION
-from pybel.constants import PROTEIN, GENE, RNA, DEGRADATION, \
-    TRANSFORMATION, TRANSLOCATION, IDENTIFIER, FUSION, FROM_LOC, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO
+    RANGE_5P, NAMESPACE, NAME, LOCATION, REACTANTS, PRODUCTS
+from pybel.constants import PROTEIN, GENE, RNA, DEGRADATION, TRANSLOCATION, IDENTIFIER, FUSION, FROM_LOC, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO
 from pybel.constants import RELATION, EQUIVALENT_TO, SUBJECT, OBJECT, MODIFIER, TARGET, EFFECT, HAS_MEMBER
 from pybel.parser.modifiers import FusionParser, LocationParser, GmodParser, FragmentParser, PmodParser
 from pybel.parser.modifiers import GsubParser, TruncParser, PsubParser, VariantParser
@@ -2257,14 +2256,14 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
-            TRANSFORMATION: REACTION,
-            'reactants': [
+            FUNCTION: REACTION,
+            REACTANTS: [
                 {
                     FUNCTION: ABUNDANCE,
                     IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'superoxide'}
                 }
             ],
-            'products': [
+            PRODUCTS: [
                 {
                     FUNCTION: ABUNDANCE,
                     IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
@@ -2427,11 +2426,11 @@ class TestRelations(TestTokenParserBase):
             },
             RELATION: 'decreases',
             OBJECT: {
-                TRANSFORMATION: REACTION,
-                'reactants': [
+                FUNCTION: REACTION,
+                REACTANTS: [
                     {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5R1'}}
                 ],
-                'products': [
+                PRODUCTS: [
                     {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5'}}
                 ]
 

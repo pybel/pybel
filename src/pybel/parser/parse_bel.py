@@ -32,7 +32,7 @@ from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOL
 from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_MEMBER, TRANSCRIBED_TO, TRANSLATED_TO
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
     CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
-    TRANSFORMATION, FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
+    FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
 
 log = logging.getLogger('pybel')
 
@@ -50,23 +50,8 @@ cell_secretion_tag = one_of_tags(['sec', 'cellSecretion'], CELL_SECRETION, MODIF
 cell_surface_expression_tag = one_of_tags(['surf', 'cellSurfaceExpression'], CELL_SURFACE_EXPRESSION, MODIFIER)
 translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFIER)
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
-reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, TRANSFORMATION)
+reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, FUNCTION)
 molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
-
-
-def fusion_handler_wrapper(reference, start):
-    def fusion_handler(s, l, tokens):
-        if tokens[0] == '?':
-            tokens[FusionParser.MISSING] = '?'
-            return tokens
-
-        tokens[FusionParser.REFERENCE] = reference
-        tokens[FusionParser.START if start else FusionParser.STOP] = '?'
-        tokens[FusionParser.STOP if start else FusionParser.START] = int(tokens[0])
-
-        return tokens
-
-    return fusion_handler
 
 
 class BelParser(BaseParser):
@@ -451,6 +436,14 @@ class BelParser(BaseParser):
         if autostreamline:
             self.streamline()
 
+    @property
+    def namespace_dict(self):
+        return self.identifier_parser.namespace_dict
+
+    @property
+    def namespace_re(self):
+        return self.identifier_parser.namespace_re
+
     def get_annotations(self):
         """Get current annotations in this parser
 
@@ -481,23 +474,23 @@ class BelParser(BaseParser):
         return tokens
 
     def check_function_semantics(self, s, l, tokens):
-        if self.identifier_parser.namespace_dict is None or IDENTIFIER not in tokens:
+        if self.namespace_dict is None or IDENTIFIER not in tokens:
             return tokens
 
         namespace, name = tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 
-        if namespace in self.identifier_parser.namespace_re:
+        if namespace in self.namespace_re:
             return tokens
 
         if self.allow_naked_names and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
         valid_function_codes = set(itt.chain.from_iterable(
-            belns_encodings[v] for v in self.identifier_parser.namespace_dict[namespace][name]))
+            belns_encodings[v] for v in self.namespace_dict[namespace][name]))
 
         if tokens[FUNCTION] not in valid_function_codes:
             valid = set(itt.chain.from_iterable(
-                belns_encodings[k] for k in self.identifier_parser.namespace_dict[namespace][name]))
+                belns_encodings[k] for k in self.namespace_dict[namespace][name]))
             raise InvalidFunctionSemantic(tokens[FUNCTION], namespace, name, valid)
 
         return tokens
@@ -591,8 +584,8 @@ class BelParser(BaseParser):
         if name in self.graph:
             return name
 
-        if TRANSFORMATION in tokens:
-            self.graph.add_node(name, **{FUNCTION: tokens[TRANSFORMATION]})
+        if REACTION == tokens[FUNCTION]:  # TRANSFORMATION in tokens:
+            self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
 
             for reactant_tokens in tokens[REACTANTS]:
                 reactant_name = self.ensure_node(s, l, reactant_tokens)
@@ -666,12 +659,28 @@ class BelParser(BaseParser):
 
 # HANDLERS
 
+def fusion_handler_wrapper(reference, start):
+    def fusion_handler(s, l, tokens):
+        if tokens[0] == '?':
+            tokens[FusionParser.MISSING] = '?'
+            return tokens
+
+        tokens[FusionParser.REFERENCE] = reference
+        tokens[FusionParser.START if start else FusionParser.STOP] = '?'
+        tokens[FusionParser.STOP if start else FusionParser.START] = int(tokens[0])
+
+        return tokens
+
+    return fusion_handler
+
+
 def handle_molecular_activity_default(s, l, tokens):
     upgraded = activity_labels[tokens[0]]
     log.debug('upgraded legacy activity to %s', upgraded)
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
     tokens[NAME] = upgraded
     return tokens
+
 
 def handle_activity_legacy(s, l, tokens):
     legacy_cls = activity_labels[tokens[MODIFIER]]
@@ -749,7 +758,7 @@ def canonicalize_fusion(tokens):
 def canonicalize_reaction(tokens):
     reactants = tuple(sorted(list2tuple(tokens[REACTANTS].asList())))
     products = tuple(sorted(list2tuple(tokens[PRODUCTS].asList())))
-    return (tokens[TRANSFORMATION],) + (reactants,) + (products,)
+    return (tokens[FUNCTION],) + (reactants,) + (products,)
 
 
 def canonicalize_simple(tokens):
@@ -774,7 +783,7 @@ def canonicalize_node(tokens):
     if MODIFIER in tokens:
         return canonicalize_node(tokens[TARGET])
 
-    elif TRANSFORMATION in tokens and REACTION == tokens[TRANSFORMATION]:
+    elif REACTION == tokens[FUNCTION]:
         return canonicalize_reaction(tokens)
 
     elif VARIANTS in tokens:
@@ -812,7 +821,7 @@ def canonicalize_modifier(tokens):
 
     elif tokens[MODIFIER] == ACTIVITY:
         attrs[MODIFIER] = tokens[MODIFIER]
-        attrs[EFFECT] = {} if EFFECT not in tokens else  dict(tokens[EFFECT])
+        attrs[EFFECT] = {} if EFFECT not in tokens else dict(tokens[EFFECT])
 
     elif tokens[MODIFIER] == TRANSLOCATION:
         attrs[MODIFIER] = tokens[MODIFIER]
