@@ -302,8 +302,8 @@ class TestWine(TestOwlBase):
             self.assertEqual(functions, ''.join(sorted(parser.namespace_dict['Wine'][node])))
 
         # Check nothing bad happens
-        with self.assertLogs('pybel', level='WARNING'):
-            parser.parseString(s)
+        # with self.assertLogs('pybel', level='WARNING'):
+        parser.parseString(s)
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
@@ -318,8 +318,8 @@ class TestWine(TestOwlBase):
         self.assertLessEqual(self.expected_nodes, set(parser.annotations_dict['Wine']))
 
         # Check nothing bad happens
-        with self.assertLogs('pybel', level='WARNING'):
-            parser.parseString(s)
+        # with self.assertLogs('pybel', level='WARNING'):
+        parser.parseString(s)
 
 
 class TestAdo(TestOwlBase):
