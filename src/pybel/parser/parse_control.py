@@ -32,9 +32,10 @@ class ControlParser(BaseParser):
 
         self.valid_annotations = dict() if valid_annotations is None else valid_annotations
 
-        self.citation = {}
-        self.annotations = {}
         self.statement_group = None
+        self.citation = {}
+        self.evidence = None
+        self.annotations = {}
 
         annotation_key = pyparsing_common.identifier.setResultsName('key')
         annotation_key.setParseAction(self.handle_annotation_key)
@@ -50,7 +51,7 @@ class ControlParser(BaseParser):
 
         supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
         self.set_evidence = And([set_tag, Suppress(supporting_text_tags), Suppress('='), quote('value')])
-        self.set_evidence.setParseAction(self.handle_supporting_text)
+        self.set_evidence.setParseAction(self.handle_evidence)
 
         set_command_prefix = And([set_tag, annotation_key, Suppress('=')])
         self.set_command = set_command_prefix + quote('value')
@@ -118,9 +119,8 @@ class ControlParser(BaseParser):
 
         return tokens
 
-    def handle_supporting_text(self, s, l, tokens):
-        value = tokens['value']
-        self.annotations[EVIDENCE] = value
+    def handle_evidence(self, s, l, tokens):
+        self.evidence = tokens['value']
         return tokens
 
     def handle_statement_group(self, s, l, tokens):
@@ -149,10 +149,10 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_supporting_text(self, s, l, tokens):
-        if EVIDENCE not in self.annotations:
+        if self.evidence is None:
             raise MissingAnnotationKeyWarning(EVIDENCE)
         else:
-            del self.annotations[EVIDENCE]
+            self.evidence = None
         return tokens
 
     def handle_unset_citation(self, s, l, tokens):
@@ -186,7 +186,7 @@ class ControlParser(BaseParser):
 
     def handle_unset(self, key):
         if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
-            del self.annotations[EVIDENCE]
+            self.evidence = None
         elif key not in self.annotations:
             raise MissingAnnotationKeyWarning(key)
         else:
@@ -198,8 +198,11 @@ class ControlParser(BaseParser):
         :return: The currently stored BEL annotations
         :rtype: dict
         """
-        annotations = self.annotations.copy()
-        annotations[CITATION] = self.citation.copy()
+        annotations = {
+            EVIDENCE: self.evidence,
+            CITATION: self.citation.copy()
+        }
+        annotations.update(self.annotations.copy())
         return annotations
 
     def clear(self):

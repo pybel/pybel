@@ -240,6 +240,7 @@ class TestParseControl(unittest.TestCase):
 
         annotations = self.parser.get_annotations()
         expected_annotations = {
+            EVIDENCE: None,
             CITATION: {
                 CITATION_TYPE: 'PubMed',
                 CITATION_NAME: 'Trends in molecular medicine',
@@ -276,11 +277,14 @@ class TestParseControl(unittest.TestCase):
         s = 'SET Evidence = "For instance, during 7-ketocholesterol-induced apoptosis of U937 cells"'
         self.parser.parseString(s)
 
+        self.assertIsNotNone(self.parser.evidence)
+
         expected_annotation = {
+            CITATION: {},
             EVIDENCE: 'For instance, during 7-ketocholesterol-induced apoptosis of U937 cells'
         }
 
-        self.assertEqual(expected_annotation, self.parser.annotations)
+        self.assertEqual(expected_annotation, self.parser.get_annotations())
 
     def test_custom_annotation(self):
         s = 'SET Custom1 = "Custom1_A"'
@@ -325,7 +329,7 @@ class TestParseControl(unittest.TestCase):
         self.parser.parseString(s1)
         self.parser.parseString(s2)
 
-        self.assertEqual('b', self.parser.annotations[EVIDENCE])
+        self.assertEqual('b', self.parser.evidence)
 
     def test_unset_evidence(self):
         s1 = 'SET Evidence = "a"'
@@ -361,7 +365,7 @@ class TestParseControl(unittest.TestCase):
 
         self.parser.parse_lines([s1, s2, s3, s4, s5, s6])
 
-        self.assertEqual('h', self.parser.annotations[EVIDENCE])
+        self.assertEqual('h', self.parser.evidence)
         self.assertEqual('PubMed', self.parser.citation[CITATION_TYPE])
         self.assertEqual('Test Reference 2', self.parser.citation[CITATION_NAME])
         self.assertEqual('22222', self.parser.citation[CITATION_REFERENCE])

@@ -503,7 +503,7 @@ class BelParser(BaseParser):
         if not self.control_parser.citation:
             raise MissingCitationException(s)
 
-        if EVIDENCE not in self.control_parser.annotations:
+        if not self.control_parser.evidence:
             raise MissingSupportWarning(s)
 
     def build_attrs(self, attrs=None, list_attrs=None):
