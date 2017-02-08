@@ -58,8 +58,11 @@ class BaseParser:
     Multiple parsers can be easily chained together when they are all inheriting from this base class
     """
 
-    def __init__(self, language):
+    def __init__(self, language, streamline=False):
         self.language = language
+
+        if streamline:
+            self.streamline()
 
     def parse_lines(self, l):
         """Parses multiple lines successively"""
