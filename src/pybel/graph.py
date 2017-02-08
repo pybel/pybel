@@ -9,6 +9,8 @@ from pkg_resources import get_distribution
 from pyparsing import ParseException
 
 from .constants import FUNCTION, NAMESPACE
+from .constants import GRAPH_METADATA, GRAPH_NAMESPACE_URL, GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_PATTERN, \
+    GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, GRAPH_ANNOTATION_LIST, GRAPH_PYBEL_VERSION, REQUIRED_METADATA
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
 from .parser import language
@@ -27,28 +29,6 @@ __all__ = ['BELGraph']
 
 log = logging.getLogger(__name__)
 
-METADATA_NAME = 'name'
-METADATA_VERSION = 'version'
-METADATA_DESCRIPTION = 'description'
-METADATA_AUTHORS = 'authors'
-METADATA_CONTACT = 'contact'
-
-GRAPH_METADATA = 'document_metadata'
-GRAPH_NAMESPACE_URL = 'namespace_url'
-GRAPH_NAMESPACE_OWL = 'namespace_owl'
-GRAPH_NAMESPACE_PATTERN = 'namespace_pattern'
-GRAPH_ANNOTATION_URL = 'annotation_url'
-GRAPH_ANNOTATION_OWL = 'annotation_owl'
-GRAPH_ANNOTATION_LIST = 'annotation_list'
-GRAPH_PYBEL_VERSION = 'pybel_version'
-
-REQUIRED_METADATA = {
-    METADATA_NAME,
-    METADATA_VERSION,
-    METADATA_DESCRIPTION,
-    METADATA_AUTHORS,
-    METADATA_CONTACT
-}
 
 def build_metadata_parser(cache_manager):
     if isinstance(cache_manager, CacheManager):
@@ -173,13 +153,15 @@ class BELGraph(nx.MultiDiGraph):
                 log.exception('Line %07d - Critical Failure - %s', line_number, line)
                 raise e
 
-        self.graph[GRAPH_NAMESPACE_OWL] = metadata_parser.namespace_owl_dict.copy()
-        self.graph[GRAPH_NAMESPACE_URL] = metadata_parser.namespace_url_dict.copy()
-        self.graph[GRAPH_NAMESPACE_PATTERN] = metadata_parser.namespace_re.copy()
-        self.graph[GRAPH_ANNOTATION_URL] = metadata_parser.annotation_url_dict.copy()
-        self.graph[GRAPH_ANNOTATION_OWL] = metadata_parser.annotations_owl_dict.copy()
-        self.graph[GRAPH_ANNOTATION_LIST] = {e: metadata_parser.annotations_dict[e] for e in
-                                             metadata_parser.annotation_list_list}
+        self.graph.update({
+            GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
+            GRAPH_NAMESPACE_URL: metadata_parser.namespace_url_dict.copy(),
+            GRAPH_NAMESPACE_PATTERN: metadata_parser.namespace_re.copy(),
+            GRAPH_ANNOTATION_URL: metadata_parser.annotation_url_dict.copy(),
+            GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
+            GRAPH_ANNOTATION_LIST: {e: metadata_parser.annotations_dict[e] for e in
+                                    metadata_parser.annotation_list_list}
+        })
 
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 

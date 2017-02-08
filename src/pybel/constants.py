@@ -150,3 +150,28 @@ BEL_KEYWORD_CITATION = 'Citation'
 BEL_KEYWORD_EVIDENCE = 'Evidence'
 BEL_KEYWORD_SUPPORT = 'SupportingText'
 BEL_KEYWORD_ALL = 'ALL'
+
+# Internal metadata representation
+
+METADATA_NAME = 'name'
+METADATA_VERSION = 'version'
+METADATA_DESCRIPTION = 'description'
+METADATA_AUTHORS = 'authors'
+METADATA_CONTACT = 'contact'
+
+REQUIRED_METADATA = {
+    METADATA_NAME,
+    METADATA_VERSION,
+    METADATA_DESCRIPTION,
+    METADATA_AUTHORS,
+    METADATA_CONTACT
+}
+
+GRAPH_METADATA = 'document_metadata'
+GRAPH_NAMESPACE_URL = 'namespace_url'
+GRAPH_NAMESPACE_OWL = 'namespace_owl'
+GRAPH_NAMESPACE_PATTERN = 'namespace_pattern'
+GRAPH_ANNOTATION_URL = 'annotation_url'
+GRAPH_ANNOTATION_OWL = 'annotation_owl'
+GRAPH_ANNOTATION_LIST = 'annotation_list'
+GRAPH_PYBEL_VERSION = 'pybel_version'

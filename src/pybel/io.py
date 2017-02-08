@@ -31,8 +31,8 @@ from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
-from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION
-from .graph import BELGraph, expand_edges, GRAPH_ANNOTATION_LIST
+from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
+from .graph import BELGraph, expand_edges
 from .utils import flatten_dict, flatten_graph_data
 
 try:
