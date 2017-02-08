@@ -116,7 +116,7 @@ class MetadataParser(BaseParser):
         norm_key = language.document_keys[key]
 
         if norm_key in self.document_metadata:
-            log.warning('Tried to overwrite metadata: {}'.format(key))
+            log.warning('Tried to overwrite metadata: %s', key)
             return tokens
 
         self.document_metadata[norm_key] = value
@@ -127,7 +127,7 @@ class MetadataParser(BaseParser):
         name = tokens['name']
 
         if name in self.namespace_dict:
-            log.warning('Tried to overwrite namespace: {}'.format(name))
+            log.warning('Tried to overwrite namespace: %s', name)
             return tokens
 
         url = tokens['url']
@@ -144,15 +144,10 @@ class MetadataParser(BaseParser):
         name = tokens['name']
 
         if name in self.namespace_dict:
-            log.warning('Tried to overwrite owl namespace: {}'.format(name))
+            log.warning('Tried to overwrite owl namespace: %s', name)
             return tokens
 
-        if 'functions' not in tokens:
-            functions = set(language.belns_encodings)
-        elif not all(x in language.belns_encodings for x in tokens['functions']):
-            raise ValueError("Illegal semantic definition: {}".format(tokens['functions']))
-        else:
-            functions = set(tokens['functions'])
+        functions = set(tokens['functions'] if 'functions' in tokens else language.belns_encodings)
 
         url = tokens['url']
 
@@ -183,7 +178,7 @@ class MetadataParser(BaseParser):
         name = tokens['name']
 
         if name in self.annotations_dict:
-            log.warning('Tried to overwrite annotation: {}'.format(name))
+            log.warning('Tried to overwrite annotation: %s', name)
             return tokens
 
         url = tokens['url']
