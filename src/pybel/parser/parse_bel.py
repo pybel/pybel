@@ -665,48 +665,52 @@ class BelParser(BaseParser):
             self.graph.add_node(name, **d)
             return name
 
-        elif FUNCTION in tokens and IDENTIFIER in tokens:
-            if tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY, BIOPROCESS, ABUNDANCE, COMPLEX}:
-                self.graph.add_node(name, {
-                    FUNCTION: tokens[FUNCTION],
-                    NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
-                    NAME: tokens[IDENTIFIER][NAME]
-                })
+        # You're just a boring abundance
+        # elif FUNCTION in tokens and IDENTIFIER in tokens:
+
+        elif tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY, BIOPROCESS, ABUNDANCE, COMPLEX}:
+            self.graph.add_node(name, {
+                FUNCTION: tokens[FUNCTION],
+                NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
+                NAME: tokens[IDENTIFIER][NAME]
+            })
+            return name
+
+        elif tokens[FUNCTION] == RNA:
+            self.graph.add_node(name, {
+                FUNCTION: tokens[FUNCTION],
+                NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
+                NAME: tokens[IDENTIFIER][NAME]
+            })
+
+            if not self.complete_origin:
                 return name
 
-            elif tokens[FUNCTION] == RNA:
-                self.graph.add_node(name, {
-                    FUNCTION: tokens[FUNCTION],
-                    NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
-                    NAME: tokens[IDENTIFIER][NAME]
-                })
+            gene_tokens = deepcopy(tokens)
+            gene_tokens[FUNCTION] = GENE
+            gene_name = self.ensure_node(s, l, gene_tokens)
 
-                if not self.complete_origin:
-                    return name
+            self.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
+            return name
 
-                gene_tokens = deepcopy(tokens)
-                gene_tokens[FUNCTION] = GENE
-                gene_name = self.ensure_node(s, l, gene_tokens)
+        # Finally, you're just a boring old protein
+        # elif tokens[FUNCTION] == PROTEIN:
 
-                self.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
-                return name
+        self.graph.add_node(name, {
+            FUNCTION: tokens[FUNCTION],
+            NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
+            NAME: tokens[IDENTIFIER][NAME]
+        })
 
-            elif tokens[FUNCTION] == PROTEIN:
-                self.graph.add_node(name, {
-                    FUNCTION: tokens[FUNCTION],
-                    NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
-                    NAME: tokens[IDENTIFIER][NAME]
-                })
+        if not self.complete_origin:
+            return name
 
-                if not self.complete_origin:
-                    return name
+        rna_tokens = deepcopy(tokens)
+        rna_tokens[FUNCTION] = RNA
+        rna_name = self.ensure_node(s, l, rna_tokens)
 
-                rna_tokens = deepcopy(tokens)
-                rna_tokens[FUNCTION] = RNA
-                rna_name = self.ensure_node(s, l, rna_tokens)
-
-                self.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
-                return name
+        self.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
+        return name
 
 
 def canonicalize_fusion_range(tokens, tag):
@@ -729,6 +733,7 @@ def canonicalize_node(tokens):
     elif FUNCTION in tokens and MEMBERS in tokens:
         return (tokens[FUNCTION],) + tuple(sorted(canonicalize_node(member) for member in tokens[MEMBERS]))
 
+    # FIXME remove transformation and replace with function
     elif TRANSFORMATION in tokens and tokens[TRANSFORMATION] == REACTION:
         reactants = tuple(sorted(list2tuple(tokens[REACTANTS].asList())))
         products = tuple(sorted(list2tuple(tokens[PRODUCTS].asList())))
@@ -744,14 +749,13 @@ def canonicalize_node(tokens):
         return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), range5pt, (
             f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), range3pt
 
-    elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY,
-                                                     BIOPROCESS}:
-        if IDENTIFIER in tokens:
-            return tokens[FUNCTION], tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
-
-    if MODIFIER in tokens and tokens[MODIFIER] in {ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION,
-                                                   CELL_SURFACE_EXPRESSION}:
+    elif MODIFIER in tokens and tokens[MODIFIER] in {ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION,
+                                                     CELL_SURFACE_EXPRESSION}:
         return canonicalize_node(tokens[TARGET])
+
+    # You're just a boring abundance
+    # elif FUNCTION in tokens and tokens[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY, BIOPROCESS}:
+    return tokens[FUNCTION], tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 
 
 def canonicalize_modifier(tokens):
@@ -773,20 +777,17 @@ def canonicalize_modifier(tokens):
         attrs[LOCATION] = tokens[TARGET][LOCATION].asDict()
 
     if tokens[MODIFIER] == DEGRADATION:
-        attrs[MODIFIER] = DEGRADATION
-
-    elif tokens[MODIFIER] == ACTIVITY and EFFECT not in tokens:
         attrs[MODIFIER] = tokens[MODIFIER]
-        attrs[EFFECT] = {}
 
-    elif tokens[MODIFIER] == ACTIVITY and EFFECT in tokens:
+    elif tokens[MODIFIER] == ACTIVITY:
         attrs[MODIFIER] = tokens[MODIFIER]
-        # TODO reinvestigate this
-        if hasattr(tokens[EFFECT], 'asDict'):
+
+        if EFFECT not in tokens:
+            attrs[EFFECT] = {}
+        elif hasattr(tokens[EFFECT], 'asDict'):  # TODO reinvestigate this
             attrs[EFFECT] = tokens[EFFECT].asDict()
         else:
             attrs[EFFECT] = dict(tokens[EFFECT])
-            # raise ValueError("Shouldn't be handling dicts this way")
 
     elif tokens[MODIFIER] == TRANSLOCATION:
         attrs[MODIFIER] = tokens[MODIFIER]
