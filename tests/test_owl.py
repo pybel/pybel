@@ -17,6 +17,22 @@ from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_ow
 log = logging.getLogger('pybel')
 
 
+EXPECTED_PIZZA_NODES = {
+    'Pizza',
+    'Topping',
+    'CheeseTopping',
+    'FishTopping',
+    'MeatTopping',
+    'TomatoTopping'
+}
+
+EXPECTED_PIZZA_EDGES = {
+    ('CheeseTopping', 'Topping'),
+    ('FishTopping', 'Topping'),
+    ('MeatTopping', 'Topping'),
+    ('TomatoTopping', 'Topping')
+}
+
 class TestOwlBase(unittest.TestCase):
     def assertHasNode(self, g, n, **kwargs):
         assertHasNode(self, n, g, **kwargs)
@@ -33,23 +49,6 @@ class TestOwlUtils(unittest.TestCase):
     def test_invalid_owl(self):
         with self.assertRaises(Exception):
             parse_owl('http://example.com/not_owl')
-
-
-EXPECTED_PIZZA_NODES = {
-    'Pizza',
-    'Topping',
-    'CheeseTopping',
-    'FishTopping',
-    'MeatTopping',
-    'TomatoTopping'
-}
-
-EXPECTED_PIZZA_EDGES = {
-    ('CheeseTopping', 'Topping'),
-    ('FishTopping', 'Topping'),
-    ('MeatTopping', 'Topping'),
-    ('TomatoTopping', 'Topping')
-}
 
 
 class TestParsePizza(TestOwlBase):
@@ -302,6 +301,10 @@ class TestWine(TestOwlBase):
         for node in sorted(self.expected_nodes):
             self.assertEqual(functions, ''.join(sorted(parser.namespace_dict['Wine'][node])))
 
+        # Check nothing bad happens
+        with self.assertLogs('pybel', level='WARNING'):
+            parser.parseString(s)
+
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parser_annotation(self, m1, m2):
@@ -313,6 +316,10 @@ class TestWine(TestOwlBase):
 
         self.assertIn('Wine', parser.annotations_dict)
         self.assertLessEqual(self.expected_nodes, set(parser.annotations_dict['Wine']))
+
+        # Check nothing bad happens
+        with self.assertLogs('pybel', level='WARNING'):
+            parser.parseString(s)
 
 
 class TestAdo(TestOwlBase):

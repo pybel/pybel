@@ -104,6 +104,10 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('name', self.parser.document_metadata)
         self.assertEqual("Alzheimer's Disease Model", self.parser.document_metadata['name'])
 
+        # Check nothing bad happens
+        with self.assertLogs('pybel', level='WARNING'):
+            self.parser.parseString(s)
+
     def test_parse_namespace_url_file(self):
         """Tests parsing a namespace by file URL"""
         s = 'DEFINE NAMESPACE TESTNS1 AS URL "{}"'.format(Path(test_ns_1).as_uri())
