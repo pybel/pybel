@@ -26,8 +26,7 @@ from .parse_identifier import IdentifierParser
 from .utils import list2tuple, cartesian_dictionary
 from .. import constants as pbc
 from ..constants import EQUIVALENT_TO
-from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, BEL_DEFAULT_NAMESPACE, DIRTY, EVIDENCE, \
-    GOCC_KEYWORD
+from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, BEL_DEFAULT_NAMESPACE, DIRTY, GOCC_KEYWORD
 from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOLOGY, REACTION, COMPLEX, COMPOSITE
 from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_MEMBER, TRANSCRIBED_TO, TRANSLATED_TO
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
@@ -496,7 +495,7 @@ class BelParser(BaseParser):
         return tokens
 
     def handle_term(self, s, l, tokens):
-        self.ensure_node(s, l, tokens)
+        self.ensure_node(tokens)
         return tokens
 
     def check_required_annotations(self, s):
@@ -517,17 +516,17 @@ class BelParser(BaseParser):
         return attrs, list_attrs
 
     def handle_has_members(self, s, l, tokens):
-        parent = self.ensure_node(s, l, tokens[0])
+        parent = self.ensure_node(tokens[0])
         for child_tokens in tokens[2]:
-            child = self.ensure_node(s, l, child_tokens)
+            child = self.ensure_node(child_tokens)
             self.graph.add_edge(parent, child, **{RELATION: HAS_MEMBER})
         return tokens
 
     def handle_relation(self, s, l, tokens):
         self.check_required_annotations(s)
 
-        sub = self.ensure_node(s, l, tokens[SUBJECT])
-        obj = self.ensure_node(s, l, tokens[OBJECT])
+        sub = self.ensure_node(tokens[SUBJECT])
+        obj = self.ensure_node(tokens[OBJECT])
 
         attrs, list_attrs = self.build_attrs()
 
@@ -569,7 +568,74 @@ class BelParser(BaseParser):
         if not self.graph.has_edge(u, v, key):
             self.graph.add_edge(u, v, key=key, **{RELATION: relation})
 
-    def ensure_node(self, s, l, tokens):
+    def _ensure_reaction(self, name, tokens):
+        self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
+
+        for reactant_tokens in tokens[REACTANTS]:
+            reactant_name = self.ensure_node(reactant_tokens)
+            self.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
+
+        for product_tokens in tokens[PRODUCTS]:
+            product_name = self.ensure_node(product_tokens)
+            self.add_unqualified_edge(name, product_name, HAS_PRODUCT)
+
+        return name
+
+    def _ensure_members(self, name, tokens):
+        self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
+
+        for token in tokens[MEMBERS]:
+            member_name = self.ensure_node(token)
+            self.add_unqualified_edge(name, member_name, HAS_COMPONENT)
+        return name
+
+    def _ensure_variants(self, name, tokens):
+        self.graph.add_node(name, **canonicalize_variant_node_to_dict(tokens))
+
+        c = {
+            FUNCTION: tokens[FUNCTION],
+            IDENTIFIER: tokens[IDENTIFIER]
+        }
+
+        parent = self.ensure_node(c)
+        self.add_unqualified_edge(parent, name, HAS_VARIANT)
+        return name
+
+    def _ensure_fusion(self, name, tokens):
+        self.graph.add_node(name, **canonicalize_fusion_to_dict(tokens))
+        return name
+
+    def _ensure_simple_abundance(self, name, tokens):
+        self.graph.add_node(name, **canonicalize_simple_to_dict(tokens))
+        return name
+
+    def _ensure_rna(self, name, tokens):
+        self._ensure_simple_abundance(name, tokens)
+
+        if not self.complete_origin:
+            return name
+
+        gene_tokens = deepcopy(tokens)
+        gene_tokens[FUNCTION] = GENE
+        gene_name = self.ensure_node(gene_tokens)
+
+        self.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
+        return name
+
+    def _ensure_protein(self, name, tokens):
+        self._ensure_simple_abundance(name, tokens)
+
+        if not self.complete_origin:
+            return name
+
+        rna_tokens = deepcopy(tokens)
+        rna_tokens[FUNCTION] = RNA
+        rna_name = self.ensure_node(rna_tokens)
+
+        self.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
+        return name
+
+    def ensure_node(self, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
 
         :return: the canonical name of the node
@@ -577,84 +643,38 @@ class BelParser(BaseParser):
         """
 
         if MODIFIER in tokens:
-            return self.ensure_node(s, l, tokens[TARGET])
+            return self.ensure_node(tokens[TARGET])
 
         name = canonicalize_node(tokens)
 
         if name in self.graph:
             return name
 
-        if REACTION == tokens[FUNCTION]:  # TRANSFORMATION in tokens:
-            self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
-
-            for reactant_tokens in tokens[REACTANTS]:
-                reactant_name = self.ensure_node(s, l, reactant_tokens)
-                self.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
-
-            for product_tokens in tokens[PRODUCTS]:
-                product_name = self.ensure_node(s, l, product_tokens)
-                self.add_unqualified_edge(name, product_name, HAS_PRODUCT)
-
-            return name
+        if REACTION == tokens[FUNCTION]:
+            return self._ensure_reaction(name, tokens)
 
         elif MEMBERS in tokens:
-            self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
-
-            for token in tokens[MEMBERS]:
-                member_name = self.ensure_node(s, l, token)
-                self.add_unqualified_edge(name, member_name, HAS_COMPONENT)
-            return name
+            return self._ensure_members(name, tokens)
 
         elif VARIANTS in tokens:
-            self.graph.add_node(name, **canonicalize_variant_node_to_dict(tokens))
-
-            c = {
-                FUNCTION: tokens[FUNCTION],
-                IDENTIFIER: tokens[IDENTIFIER]
-            }
-
-            parent = self.ensure_node(s, l, c)
-            self.add_unqualified_edge(parent, name, HAS_VARIANT)
-            return name
+            return self._ensure_variants(name, tokens)
 
         elif FUSION in tokens:
-            self.graph.add_node(name, **canonicalize_fusion_to_dict(tokens))
-            return name
+            return self._ensure_fusion(name, tokens)
 
         # You're just a boring abundance
         # elif FUNCTION in tokens and IDENTIFIER in tokens:
 
         elif tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY, BIOPROCESS, ABUNDANCE, COMPLEX}:
-            self.graph.add_node(name, **canonicalize_simple_to_dict(tokens))
-            return name
+            return self._ensure_simple_abundance(name, tokens)
 
         elif tokens[FUNCTION] == RNA:
-            self.graph.add_node(name, **canonicalize_simple_to_dict(tokens))
-
-            if not self.complete_origin:
-                return name
-
-            gene_tokens = deepcopy(tokens)
-            gene_tokens[FUNCTION] = GENE
-            gene_name = self.ensure_node(s, l, gene_tokens)
-
-            self.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
-            return name
+            return self._ensure_rna(name, tokens)
 
         # Finally, you're just a boring old protein
         # elif tokens[FUNCTION] == PROTEIN:
 
-        self.graph.add_node(name, **canonicalize_simple_to_dict(tokens))
-
-        if not self.complete_origin:
-            return name
-
-        rna_tokens = deepcopy(tokens)
-        rna_tokens[FUNCTION] = RNA
-        rna_name = self.ensure_node(s, l, rna_tokens)
-
-        self.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
-        return name
+        return self._ensure_protein(name, tokens)
 
 
 # HANDLERS
