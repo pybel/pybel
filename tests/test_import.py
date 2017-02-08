@@ -173,7 +173,7 @@ class TestFull(TestTokenParserBase):
             "bp(ABASD) -- p(ABASF)"
         ]
 
-        self.parser.allow_naked_names = True
+        self.parser = BelParser(valid_namespaces=self.namespaces, allow_naked_names=True)
         self.parser.parse_lines(statements)
 
     def test_missing_citation(self):
