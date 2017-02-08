@@ -211,16 +211,3 @@ class MetadataParser(BaseParser):
         name = tokens['name']
         self.namespace_re[name] = tokens['value']
         return tokens
-
-    def dump(self):
-        """Dumps the contents of this metadata parser to a dictionary
-
-        :return: The contents of this metadata parser as a dictionary
-        :rtype: dict
-        """
-        return {
-            'namespace': self.namespace_dict.copy(),
-            'namespace_re': self.namespace_re.copy(),
-            'annotations': self.annotations_dict.copy(),
-            'annotations_re': self.annotations_re.copy(),
-        }
