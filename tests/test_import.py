@@ -129,25 +129,52 @@ class TestRegex(unittest.TestCase):
 
 class TestFull(TestTokenParserBase):
     def setUp(self):
-        namespaces = {
+        self.namespaces = {
             'TESTNS': {
                 "1": "GRP",
                 "2": "GRP"
             }
         }
 
-        annotations = {
+        self.annotations = {
             'TestAnnotation1': {'A', 'B', 'C'},
             'TestAnnotation2': {'X', 'Y', 'Z'},
             'TestAnnotation3': {'D', 'E', 'F'}
         }
 
-        self.parser = BelParser(valid_namespaces=namespaces, valid_annotations=annotations)
+        self.parser = BelParser(valid_namespaces=self.namespaces, valid_annotations=self.annotations)
+
+    def test_no_add_duplicates(self):
+        s = 'r(TESTNS:1) -> r(TESTNS:2)'
+
+        statements = [
+            test_citation_bel,
+            test_evidence_bel,
+            s
+        ]
+
+        parser = BelParser(valid_namespaces=self.namespaces, valid_annotations=self.annotations, complete_origin=True)
+
+        parser.parse_lines(statements)
+        self.assertEqual(4, self.parser.graph.number_of_nodes())
+
+        parser.parseString(s)
+        self.assertEqual(4, self.parser.graph.number_of_nodes())
 
     def test_semantic_failure(self):
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
         with self.assertRaises(InvalidFunctionSemantic):
             self.parser.parseString(statement)
+
+    def test_lenient_semantic_no_failure(self):
+        statements = [
+            test_citation_bel,
+            test_evidence_bel,
+            "bp(ABASD) -- p(ABASF)"
+        ]
+
+        parser = BelParser(valid_namespaces=self.namespaces, allow_naked_names=True)
+        parser.parse_lines(statements)
 
     def test_missing_citation(self):
         statements = [
