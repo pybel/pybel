@@ -262,7 +262,7 @@ class Node(Base):
         if self.namespaceEntry:
             namespace_entry = self.namespaceEntry.forGraph()
             node_data.update(namespace_entry)
-            node_key.appen(namespace_entry['namespace'])
+            node_key.append(namespace_entry['namespace'])
             node_key.append(namespace_entry['name'])
 
         if self.type == 'ProteinFusion':
@@ -278,9 +278,9 @@ class Node(Base):
                 mod_tuple = tuple(mod.old_forGraph())
                 node_data['variants'].append(mod_tuple)
                 node_key.append(mod_tuple)
-        node_data['variants'] = tuple(node_data['variants'])
+            node_data['variants'] = tuple(node_data['variants'])
 
-        return (tuple(node_key), node_data)
+        return {'key': tuple(node_key), 'data': node_data}
 
 
     def forGraph(self):
@@ -437,7 +437,6 @@ edge_property = Table(
     Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)))
 )
 
-
 class Edge(Base):
     """Relationships are represented in this table. It shows the nodes that are in a relation to eachother and provides
     information about the context of the relation by refaring to the annotation, property and evidence tables."""
@@ -464,7 +463,17 @@ class Edge(Base):
         return 'Edge(bel={})'.format(self.bel)
 
     def forGraph(self):
+        source_node = self.source.old_forGraph()
+        target_node = self.target.old_forGraph()
         edge_dict = {
+            'source': {
+                'node': (source_node['key'], source_node['data']),
+                'key': source_node['key']
+            },
+            'target': {
+                'node': (target_node['key'], target_node['data']),
+                'key': target_node['key']
+            },
             'data': {
                 'relation': self.relation,
             },
@@ -476,6 +485,7 @@ class Edge(Base):
         for prop in self.properties:
             prop_info = prop.forGraph()
             if prop_info['participant'] in edge_dict['data']:
+                edge_dict['data'][prop_info['participant']].update(prop_info['data'])
                 edge_dict['data'][prop_info['participant']].update(prop_info['data'])
             else:
                 edge_dict['data'].update(prop_info['data'])
@@ -501,13 +511,14 @@ class Property(Base):
         prop_dict = {
             'data': {
                 self.participant: {
-                    'modifier': self.modifier,
-                    'effect': {
-                        self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.forGraph()
-                    }
+                    'modifier': self.modifier
                 }
             },
             'participant': self.participant
         }
+        if self.relativeKey:
+            prop_dict['data']['effect'] = {
+                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.forGraph()
+            }
 
         return prop_dict

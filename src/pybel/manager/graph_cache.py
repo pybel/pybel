@@ -75,7 +75,7 @@ class GraphCacheManager(BaseCacheManager):
 
             citation = self.get_or_create_citation(**data['citation'])
             evidence = self.get_or_create_evidence(citation, data['SupportingText'])
-            edge = self.get_or_create_edge(source, target, evidence, edge_bel, data['relation'])
+            edge = self.get_or_create_edge(k, source, target, evidence, edge_bel, data['relation'])
 
             # edge.properties = self.get_or_create_property(graph, data)
             properties = self.get_or_create_property(graph, data)
@@ -126,7 +126,7 @@ class GraphCacheManager(BaseCacheManager):
     def ls(self):
         return [(network.name, network.version) for network in self.session.query(models.Network).all()]
 
-    def get_or_create_edge(self, source, target, evidence, bel, relation):
+    def get_or_create_edge(self, key, source, target, evidence, bel, relation):
         """Creates entry for given edge if it does not exist.
 
         :param source: Source node of the relation
@@ -144,7 +144,8 @@ class GraphCacheManager(BaseCacheManager):
         try:
             result = self.session.query(models.Edge).filter_by(bel=bel).one()
         except:
-            result = models.Edge(source=source, target=target, evidence=evidence, bel=bel, relation=relation)
+            result = models.Edge(graphIdentifier=key, source=source, target=target, evidence=evidence, bel=bel,
+                                 relation=relation)
 
         return result
 
@@ -176,6 +177,7 @@ class GraphCacheManager(BaseCacheManager):
                 result = models.Node(bel=bel, type=type)
 
             if type in ('ProteinVariant', 'ProteinFusion'):
+                result.modification = True
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
@@ -369,15 +371,49 @@ class GraphCacheManager(BaseCacheManager):
             # What about meta information?
             edges = self.session.query(models.Edge).filter(models.Edge.annotations.contains(annotation)).all()
             for edge in edges:
-                source_node_data = edge.source.old_forGraph()
-                belGraph.add_node(source_node_data[0], source_node_data[1])
-                target_node_data = edge.target.old_forGraph()
-                belGraph.add_node(target_node_data[0], target_node_data[1])
-                # compose edge_data_dict!
                 edge_data = edge.forGraph()
-                belGraph.add_edge(source_node_data[0], target_node_data[0], edge_data['key'], edge_data['data'])
+
+                if len(edge_data['source']['key']) == 1:
+                    edge_data['source'] = self.help_get_list_components(edge.source)
+
+                elif len(edge_data['target']['key']) == 1:
+                    edge_data['target'] = self.help_get_list_components(edge.target)
+
+                belGraph.add_nodes_from((edge_data['source']['node'], edge_data['target']['node']))
+                belGraph.add_edge(edge_data['source']['key'], edge_data['target']['key'], edge_data['key'],
+                                  edge_data['data'])
+
         return belGraph
 
+    def help_get_list_components(self, node_object):
+        """Builds data and identifier for list node objects.
+
+        :param node_object: Node object defined in models.
+
+        :return: Dictionary with 'key' and 'node' keys.
+        """
+        print("jup")
+        node_info = node_object.old_forGraph()
+        key = list(node_info['key'])
+        data = node_info['data']
+        if node_object.type in ('Complex', 'Composite', 'List'):
+            components = self.session.query(models.Edge).filter_by(source=node_object, relation='hasComponent').all()
+            for component in components:
+                component_key = component.target.old_forGraph()['key']
+                key.append(component_key)
+
+        elif node_object.type == 'Reaction':
+            reactant_components = self.session.query(models.Edge).filter_by(source=node_object,
+                                                                            relation='hasReactant').all()
+            product_components = self.session.query(models.Edge).filter_by(source=node_object,
+                                                                           relation='hasProduct').all()
+            reactant_keys = tuple([reactant.target.old_forGraph()['key'] for reactant in reactant_components])
+            product_keys = tuple([product.target.old_forGraph()['key'] for product in product_components])
+            key.append(reactant_keys)
+            key.append(product_keys)
+
+        print(key)
+        return {'key': tuple(key), 'node': (tuple(key), data)}
 
 def to_database(graph, connection=None):
     """Stores a graph in a database
