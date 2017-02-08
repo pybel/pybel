@@ -153,12 +153,12 @@ class TestFull(TestTokenParserBase):
             s
         ]
 
-        parser = BelParser(valid_namespaces=self.namespaces, valid_annotations=self.annotations, complete_origin=True)
+        self.parser.complete_origin = True
 
-        parser.parse_lines(statements)
+        self.parser.parse_lines(statements)
         self.assertEqual(4, self.parser.graph.number_of_nodes())
 
-        parser.parseString(s)
+        self.parser.parseString(s)
         self.assertEqual(4, self.parser.graph.number_of_nodes())
 
     def test_semantic_failure(self):
@@ -173,8 +173,8 @@ class TestFull(TestTokenParserBase):
             "bp(ABASD) -- p(ABASF)"
         ]
 
-        parser = BelParser(valid_namespaces=self.namespaces, allow_naked_names=True)
-        parser.parse_lines(statements)
+        self.parser.allow_naked_names = True
+        self.parser.parse_lines(statements)
 
     def test_missing_citation(self):
         statements = [
