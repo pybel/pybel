@@ -205,6 +205,9 @@ class MetadataParser(BaseParser):
 
     def handle_annotation_pattern(self, s, l, tokens):
         name = tokens['name']
+
+            return tokens
+
         self.annotations_re[name] = tokens['value']
         return tokens
 
