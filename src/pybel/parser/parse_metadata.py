@@ -126,13 +126,11 @@ class MetadataParser(BaseParser):
     def handle_namespace_url(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.namespace_dict:
+        if self.namespace_is_defined(name):
             log.warning('Tried to overwrite namespace: %s', name)
             return tokens
 
         url = tokens['url']
-        url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
-
         terms = self.cache_manager.get_namespace(url)
 
         self.namespace_dict[name] = terms
@@ -143,7 +141,7 @@ class MetadataParser(BaseParser):
     def handle_namespace_owl(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.namespace_dict:
+        if self.namespace_is_defined(name):
             log.warning('Tried to overwrite owl namespace: %s', name)
             return tokens
 
@@ -158,11 +156,21 @@ class MetadataParser(BaseParser):
 
         return tokens
 
+    def handle_namespace_pattern(self, s, l, tokens):
+        name = tokens['name']
+
+        if self.namespace_is_defined(name):
+            log.warning('Tried to overwrite namespace: {}'.format(name))
+            return tokens
+
+        self.namespace_re[name] = tokens['value']
+        return tokens
+
     def handle_annotation_owl(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.annotations_dict:
-            log.warning('Tried to overwrite owl annotation: {}'.format(name))
+        if self.annotation_is_defined(name):
+            log.warning('Tried to overwrite annotation: {}'.format(name))
             return tokens
 
         url = tokens['url']
@@ -177,12 +185,11 @@ class MetadataParser(BaseParser):
     def handle_annotations_url(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.annotations_dict:
+        if self.annotation_is_defined(name):
             log.warning('Tried to overwrite annotation: %s', name)
             return tokens
 
         url = tokens['url']
-        url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
 
         self.annotations_dict[name] = self.cache_manager.get_annotation(url)
         self.annotation_url_dict[name] = url
@@ -192,7 +199,7 @@ class MetadataParser(BaseParser):
     def handle_annotation_list(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.annotations_dict:
+        if self.annotation_is_defined(name):
             log.warning('Tried to overwrite annotation: {}'.format(name))
             return tokens
 
@@ -206,12 +213,15 @@ class MetadataParser(BaseParser):
     def handle_annotation_pattern(self, s, l, tokens):
         name = tokens['name']
 
+        if self.annotation_is_defined(name):
+            log.warning('Tried to overwrite annotation: {}'.format(name))
             return tokens
 
         self.annotations_re[name] = tokens['value']
         return tokens
 
-    def handle_namespace_pattern(self, s, l, tokens):
-        name = tokens['name']
-        self.namespace_re[name] = tokens['value']
-        return tokens
+    def annotation_is_defined(self, key):
+        return key in self.annotations_dict or key in self.annotations_re
+
+    def namespace_is_defined(self, key):
+        return key in self.namespace_dict or key in self.namespace_re
