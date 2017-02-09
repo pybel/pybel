@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 import pybel
-from pybel.constants import ABUNDANCE, PROTEIN
+from pybel.constants import *
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import belns_encodings
@@ -440,7 +440,15 @@ class TestIntegration(TestOwlBase):
         self.assertHasNode(g, b)
         self.assertHasEdge(g, a, b)
 
-        annots = {'Wine': 'Cotturi'}
+        annots = {
+            CITATION: {
+                CITATION_NAME:'That one article from last week',
+                CITATION_REFERENCE: '123455',
+                CITATION_TYPE:'PubMed'
+            },
+            EVIDENCE: 'Made up support, not even qualifying as evidence',
+            ANNOTATIONS: {'Wine': 'Cotturi'}
+        }
         self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
         self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "TomatoTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
         self.assertHasEdge(g, (ABUNDANCE, 'WINE', 'WhiteWine'), (ABUNDANCE, "PIZZA", "FishTopping"), **annots)

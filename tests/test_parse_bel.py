@@ -4,17 +4,13 @@ import logging
 import unittest
 
 from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
-from pybel.constants import HGVS, FUNCTION, ACTIVITY, ABUNDANCE, \
-    PATHOLOGY, BIOPROCESS, MIRNA, COMPLEX, REACTION, COMPOSITE, VARIANTS
-from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, BEL_DEFAULT_NAMESPACE, PARTNER_3P, PARTNER_5P, RANGE_3P, \
-    RANGE_5P, NAMESPACE, NAME, LOCATION, REACTANTS, PRODUCTS
-from pybel.constants import PROTEIN, GENE, RNA, DEGRADATION, TRANSLOCATION, IDENTIFIER, FUSION, FROM_LOC, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO
-from pybel.constants import RELATION, EQUIVALENT_TO, SUBJECT, OBJECT, MODIFIER, TARGET, EFFECT, HAS_MEMBER
+from pybel.constants import *
 from pybel.parser.modifiers import FusionParser, LocationParser, GmodParser, FragmentParser, PmodParser
 from pybel.parser.modifiers import GsubParser, TruncParser, PsubParser, VariantParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
-from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict
+from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict, \
+    test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)
 
@@ -2507,10 +2503,12 @@ class TestRelations(TestTokenParserBase):
         Tests simple triple"""
         statement = 'g(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
 
-        self.parser.control_parser.annotations.update({
-            'ListAnnotation': set('ab'),
+        annotations = {
+            'ListAnnotation': {'a', 'b'},
             'ScalarAnnotation': 'c'
-        })
+        }
+
+        self.parser.control_parser.annotations.update(annotations)
 
         result = self.parser.relation.parseString(statement)
 
@@ -2520,7 +2518,7 @@ class TestRelations(TestTokenParserBase):
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CAT'},
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
-            RELATION: 'directlyDecreases',
+            RELATION: DIRECTLY_DECREASES,
             OBJECT: {
                 FUNCTION: ABUNDANCE,
                 IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
@@ -2538,11 +2536,22 @@ class TestRelations(TestTokenParserBase):
             SUBJECT: {
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
-            RELATION: 'directlyDecreases',
+            RELATION: DIRECTLY_DECREASES,
+            CITATION: test_citation_dict,
+            EVIDENCE: test_evidence_text
         }
-        self.assertEqual(2, self.parser.graph.number_of_edges())
-        self.assertHasEdge(sub, obj, ListAnnotation='a', ScalarAnnotation='c', **expected_attrs)
-        self.assertHasEdge(sub, obj, ListAnnotation='b', ScalarAnnotation='c', **expected_attrs)
+
+        expected_attrs[ANNOTATIONS] = {
+            'ListAnnotation': 'a',
+            'ScalarAnnotation': 'c'
+        }
+        self.assertHasEdge(sub, obj, **expected_attrs)
+
+        expected_attrs[ANNOTATIONS] = {
+            'ListAnnotation': 'b',
+            'ScalarAnnotation': 'c'
+        }
+        self.assertHasEdge(sub, obj, **expected_attrs)
 
     def test_rateLimitingStepOf_subjectActivity(self):
         """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof"""

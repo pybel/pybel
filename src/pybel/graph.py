@@ -7,7 +7,7 @@ from collections import defaultdict, Counter
 import networkx as nx
 from pkg_resources import get_distribution
 from pyparsing import ParseException
-
+import itertools as itt
 from .constants import FUNCTION, NAMESPACE
 from .constants import GRAPH_METADATA, GRAPH_NAMESPACE_URL, GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_PATTERN, \
     GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, GRAPH_ANNOTATION_LIST, GRAPH_PYBEL_VERSION, REQUIRED_METADATA, \
@@ -274,6 +274,24 @@ class BELGraph(nx.MultiDiGraph):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
+    def __eq__(self, other):
+
+        if not isinstance(other, BELGraph):
+            return False
+
+        if set(self.nodes_iter()) != set(other.nodes_iter()):
+            return False
+
+        if set(self.edges_iter()) != set(other.edges_iter()):
+            return False
+
+        for u, v in self.edges():
+            i = itt.product(self.edge[u][v].values(), other.edge[u][v].values())
+            r = list(filter(lambda q: q[0] == q[1], i))
+            if len(self.edge[u][v]) != len(r):
+                return False
+
+        return True
 
 def expand_edges(graph):
     """Returns a new graph with expanded edge data dictionaries

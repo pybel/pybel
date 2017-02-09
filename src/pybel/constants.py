@@ -37,6 +37,7 @@ VARIANTS = 'variants'
 RELATION = 'relation'
 CITATION = 'citation'
 EVIDENCE = 'evidence'
+ANNOTATIONS = 'annotations'
 
 CITATION_TYPE = 'type'
 CITATION_NAME = 'name'

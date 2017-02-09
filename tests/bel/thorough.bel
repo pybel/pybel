@@ -34,7 +34,10 @@ DEFINE ANNOTATION TestRegex AS PATTERN "[0-9]+"
 SET Citation = {"PubMed","That one article from last week","123455"}
 SET Evidence = "These are mostly made up"
 
+SET TESTAN1 = {"1", "2"}
+SET TestRegex = "9000"
 a(CHEBI:"oxygen atom") -> geneAbundance(HGNC:AKT1,gmod(M))
+UNSET {"TESTAN1", "TestRegex"}
 
 g(HGNC:AKT1, loc(GOCC:intracellular)) -| abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))
 g(HGNC:AKT1, var(p.Phe508del)) =| p(HGNC:AKT1)

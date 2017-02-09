@@ -4,11 +4,11 @@ import logging
 import unittest
 
 from pybel.constants import EVIDENCE, CITATION, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE, CITATION_AUTHORS, \
-    CITATION_DATE, CITATION_COMMENTS
+    CITATION_DATE, CITATION_COMMENTS, ANNOTATIONS
 from pybel.parser import ControlParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import sanitize_file_lines
-from tests.constants import SET_CITATION_TEST
+from tests.constants import SET_CITATION_TEST, test_citation_dict
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -125,28 +125,15 @@ class TestParseControl2(TestParseControl):
         self.assertIsNone(self.parser.statement_group, msg='problem with unset')
 
     def test_citation_short(self):
-        s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037"}'
+        self.parser.parseString(SET_CITATION_TEST)
+        self.assertEqual(test_citation_dict, self.parser.citation)
 
-        self.parser.parseString(s)
-
-        expected_citation = {
-            CITATION_TYPE: 'PubMed',
-            CITATION_NAME: 'Trends in molecular medicine',
-            CITATION_REFERENCE: '12928037',
-        }
-
-        self.assertEqual(expected_citation, self.parser.citation)
-
-        annotations = self.parser.get_annotations()
         expected_annotations = {
             EVIDENCE: None,
-            CITATION: {
-                CITATION_TYPE: 'PubMed',
-                CITATION_NAME: 'Trends in molecular medicine',
-                CITATION_REFERENCE: '12928037'
-            }
+            ANNOTATIONS: {},
+            CITATION: test_citation_dict
         }
-        self.assertEqual(expected_annotations, annotations)
+        self.assertEqual(expected_annotations, self.parser.get_annotations())
 
         self.parser.parseString('UNSET Citation')
         self.assertEqual(0, len(self.parser.citation))
@@ -167,6 +154,14 @@ class TestParseControl2(TestParseControl):
 
         self.assertEqual(expected_citation, self.parser.citation)
 
+        expected_dict = {
+            EVIDENCE: None,
+            ANNOTATIONS: {},
+            CITATION: expected_citation
+        }
+
+        self.assertEqual(expected_dict, self.parser.get_annotations())
+
     def test_citation_error(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine"}'
         with self.assertRaises(InvalidCitationException):
@@ -180,6 +175,7 @@ class TestParseControl2(TestParseControl):
 
         expected_annotation = {
             CITATION: {},
+            ANNOTATIONS: {},
             EVIDENCE: 'For instance, during 7-ketocholesterol-induced apoptosis of U937 cells'
         }
 
@@ -210,6 +206,14 @@ class TestParseControl2(TestParseControl):
         }
 
         self.assertEqual(expected_annotation, self.parser.annotations)
+
+        expected_dict = {
+            ANNOTATIONS: expected_annotation,
+            CITATION: test_citation_dict,
+            EVIDENCE: None
+        }
+
+        self.assertEqual(expected_dict, self.parser.get_annotations())
 
     def test_overwrite_evidence(self):
         s1 = 'SET Evidence = "a"'

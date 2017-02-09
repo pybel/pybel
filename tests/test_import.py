@@ -5,12 +5,12 @@ import unittest
 from pathlib import Path
 
 import pybel
-from pybel.constants import GENE
+from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, SET_CITATION_TEST, \
-    test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy
+    test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
@@ -186,9 +186,12 @@ class TestFull(TestTokenParserBase):
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
         kwargs = {
-            'TestAnnotation1': 'A',
-            'TestAnnotation2': 'X',
-            'citation': test_citation_dict
+            ANNOTATIONS: {
+                'TestAnnotation1': 'A',
+                'TestAnnotation2': 'X',
+            },
+            EVIDENCE: test_evidence_text,
+            CITATION: test_citation_dict
         }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
@@ -210,9 +213,9 @@ class TestFull(TestTokenParserBase):
         self.assertHasNode(test_node_2)
 
         self.assertEqual(2, self.parser.graph.number_of_edges())
-        kwargs = {'TestAnnotation1': 'A', 'TestAnnotation2': 'X', 'citation': test_citation_dict}
+        kwargs = {ANNOTATIONS: {'TestAnnotation1': 'A', 'TestAnnotation2': 'X'}, CITATION: test_citation_dict}
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
-        kwargs = {'TestAnnotation1': 'B', 'TestAnnotation2': 'X', 'citation': test_citation_dict}
+        kwargs = {ANNOTATIONS: {'TestAnnotation1': 'B', 'TestAnnotation2': 'X'}, CITATION: test_citation_dict}
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_withMultiList(self):
@@ -236,33 +239,41 @@ class TestFull(TestTokenParserBase):
         self.assertEqual(4, self.parser.graph.number_of_edges())
 
         kwargs = {
-            'TestAnnotation1': 'A',
-            'TestAnnotation2': 'X',
-            'TestAnnotation3': 'D',
-            'citation': test_citation_dict
+            ANNOTATIONS: {
+                'TestAnnotation1': 'A',
+                'TestAnnotation2': 'X',
+                'TestAnnotation3': 'D'
+            },
+            CITATION: test_citation_dict
         }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
         kwargs = {
-            'TestAnnotation1': 'A',
-            'TestAnnotation2': 'X',
-            'TestAnnotation3': 'E',
-            'citation': test_citation_dict
+            ANNOTATIONS: {
+                'TestAnnotation1': 'A',
+                'TestAnnotation2': 'X',
+                'TestAnnotation3': 'E'
+            },
+            CITATION: test_citation_dict
         }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
         kwargs = {
-            'TestAnnotation1': 'B',
-            'TestAnnotation2': 'X',
-            'TestAnnotation3': 'D',
-            'citation': test_citation_dict
+            ANNOTATIONS: {
+                'TestAnnotation1': 'B',
+                'TestAnnotation2': 'X',
+                'TestAnnotation3': 'D'
+            },
+            CITATION: test_citation_dict
         }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
         kwargs = {
-            'TestAnnotation1': 'B',
-            'TestAnnotation2': 'X',
-            'TestAnnotation3': 'E',
-            'citation': test_citation_dict
+            ANNOTATIONS: {
+                'TestAnnotation1': 'B',
+                'TestAnnotation2': 'X',
+                'TestAnnotation3': 'E'
+            },
+            CITATION: test_citation_dict
         }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)

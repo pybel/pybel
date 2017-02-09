@@ -31,7 +31,7 @@ from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOL
 from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_MEMBER, TRANSCRIBED_TO, TRANSLATED_TO
 from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
     CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
-    FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION
+    FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION, EVIDENCE, CITATION, ANNOTATIONS
 
 log = logging.getLogger('pybel')
 
@@ -519,22 +519,24 @@ class BelParser(BaseParser):
         if not self.control_parser.evidence:
             raise MissingSupportWarning(s)
 
-    def build_attrs(self, attrs=None, list_attrs=None):
-        attrs = {} if attrs is None else attrs
-        list_attrs = {} if list_attrs is None else list_attrs
-        for annotation_name, annotation_entry in self.get_annotations().items():
-            if isinstance(annotation_entry, set):
-                list_attrs[annotation_name] = annotation_entry
-            else:
-                attrs[annotation_name] = annotation_entry
-        return attrs, list_attrs
-
     def handle_has_members(self, s, l, tokens):
         parent = self.ensure_node(tokens[0])
         for child_tokens in tokens[2]:
             child = self.ensure_node(child_tokens)
             self.graph.add_edge(parent, child, **{RELATION: HAS_MEMBER})
         return tokens
+
+    def build_attrs(self, attrs=None, list_attrs=None):
+        attrs = {} if attrs is None else attrs
+        list_attrs = {} if list_attrs is None else list_attrs
+
+        for annotation_name, annotation_entry in self.control_parser.annotations.copy().items():
+            if isinstance(annotation_entry, set):
+                list_attrs[annotation_name] = annotation_entry
+            else:
+                attrs[annotation_name] = annotation_entry
+
+        return attrs, list_attrs
 
     def handle_relation(self, s, l, tokens):
         self.check_required_annotations(s)
@@ -544,20 +546,27 @@ class BelParser(BaseParser):
 
         attrs, list_attrs = self.build_attrs()
 
-        attrs[RELATION] = tokens[RELATION]
+        q = {
+            RELATION: tokens[RELATION],
+            EVIDENCE: self.control_parser.evidence,
+            CITATION: self.control_parser.citation.copy()
+        }
 
         sub_mod = canonicalize_modifier(tokens[SUBJECT])
         if sub_mod:
-            attrs[SUBJECT] = sub_mod
+            q[SUBJECT] = sub_mod
 
         obj_mod = canonicalize_modifier(tokens[OBJECT])
         if obj_mod:
-            attrs[OBJECT] = obj_mod
+            q[OBJECT] = obj_mod
 
         for single_annotation in cartesian_dictionary(list_attrs):
-            self.graph.add_edge(sub, obj, attr_dict=attrs, **single_annotation)
+            annots = attrs.copy()
+            annots.update(single_annotation)
+
+            self.graph.add_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
             if tokens[RELATION] in TWO_WAY_RELATIONS:
-                self.add_reverse_edge(sub, obj, attrs, **single_annotation)
+                self.add_reverse_edge(sub, obj, q, **{ANNOTATIONS: annots})
 
         return tokens
 

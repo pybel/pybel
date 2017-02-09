@@ -10,7 +10,7 @@ from .constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, \
 from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION, IDENTIFIER
 from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
 from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, BEL_DEFAULT_NAMESPACE
-from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, HAS_MEMBER
+from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, ANNOTATIONS
 from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
     LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER, FUSION, PYBEL_AUTOEVIDENCE
 from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
@@ -203,8 +203,7 @@ def flatten_citation(citation):
 
 def sort_edges(d):
     return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
-        itt.chain.from_iterable(
-            (k, v) for k, v in sorted(d.items(), key=itemgetter(0)) if k not in BLACKLIST_EDGE_ATTRIBUTES))
+        itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
 
 
 def to_bel(graph, file=None):
@@ -264,9 +263,9 @@ def to_bel(graph, file=None):
             print('SET SupportingText = "{}"'.format(evidence), file=file)
 
             for u, v, k, d in evidence_edges:
-                dkeys = sorted(dk for dk in d if dk not in BLACKLIST_EDGE_ATTRIBUTES)
+                dkeys = sorted(d[ANNOTATIONS])
                 for dk in dkeys:
-                    print('SET {} = "{}"'.format(dk, d[dk]), file=file)
+                    print('SET {} = "{}"'.format(dk, d[ANNOTATIONS][dk]), file=file)
                 print(decanonicalize_edge(graph, u, v, k), file=file)
                 if dkeys:
                     print('UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys)), file=file)

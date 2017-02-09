@@ -235,7 +235,9 @@ Below is the "skeleton" for the edge data model in PyBEL:
         pbc.CITATION : {
             # ... citation information
         }
-        # ... additional annotations as key:value pairs
+        pbc.ANNOTATIONS: {
+            # ... additional annotations as key:value pairs
+        }
     }
 
 
@@ -256,8 +258,9 @@ Modifiers are added to this structure as well. Under this schema,
                 pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
             }
         },
-        pbc.EVIDENCE: '...',
         pbc.CITATION: { ... }
+        pbc.EVIDENCE: '...',
+        pbc.ANNOTATIONS: { ... }
     }
 
 
@@ -289,8 +292,9 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
                 }
             }
         },
-        pbc.EVIDENCE: '...',
         pbc.CITATION: { ... }
+        pbc.EVIDENCE: '...',
+        pbc.ANNOTATIONS: { ... }
     }
 
 .. seealso::
@@ -309,8 +313,9 @@ Degradations are more simple, because there's no :code:`pbc.EFFECT` entry. :code
         pbc.OBJECT: {
             pbc.MODIFIER: pbc.DEGRADATION
         },
-        pbc.EVIDENCE: '...',
         pbc.CITATION: { ... }
+        pbc.EVIDENCE: '...',
+        pbc.ANNOTATIONS: { ... }
     }
 
 .. seealso::

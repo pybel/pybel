@@ -18,7 +18,7 @@ from .baseparser import BaseParser, quote, delimitedSet, And, oneOf
 from .parse_exceptions import *
 from .utils import is_int
 from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT, \
-    BEL_KEYWORD_ALL
+    BEL_KEYWORD_ALL, ANNOTATIONS
 from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET, CITATION
 
 log = logging.getLogger('pybel')
@@ -109,24 +109,12 @@ class ControlParser(BaseParser):
     def validate_annotation_key(self, key):
         if key not in self.valid_annotations and key not in self.annotations_re_compiled:
             raise UndefinedAnnotationWarning(key)
-    '''
-    def validate_annotation_enum(self, key, value):
-        if value not in self.valid_annotations[key]:
-            raise IllegalAnnotationValueWarning(value, key)
 
-    def validate_annotation_regex(self, key, value):
-        if not self.annotations_re_compiled[key].match(value):
-            raise MissingAnnotationRegexWarning(value, key)
-    '''
     def validate_value(self, key, value):
         if key in self.valid_annotations and value not in self.valid_annotations[key]:
             raise IllegalAnnotationValueWarning(value, key)
         elif key in self.annotations_re_compiled and not self.annotations_re_compiled[key].match(value):
             raise MissingAnnotationRegexWarning(value, key)
-
-
-        #validator = self.validate_annotation_enum if key in self.valid_annotations else self.validate_annotation_regex
-        #validator(key, value)
 
     def handle_annotation_key(self, s, l, tokens):
         """Called on all annotation keys before parsing to validate that it's either enumerated or as a regex"""
@@ -228,12 +216,11 @@ class ControlParser(BaseParser):
         :return: The currently stored BEL annotations
         :rtype: dict
         """
-        annotations = {
+        return {
             EVIDENCE: self.evidence,
-            CITATION: self.citation.copy()
+            CITATION: self.citation.copy(),
+            ANNOTATIONS: self.annotations.copy()
         }
-        annotations.update(self.annotations.copy())
-        return annotations
 
     def clear_citation(self):
         self.citation.clear()
