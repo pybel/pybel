@@ -33,4 +33,3 @@ Load, compile, and export to Cytoscape format:
     $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
 
 In Cytoscape, open with :code:`Import > Network > From File`.
-
