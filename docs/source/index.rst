@@ -25,6 +25,7 @@ Installation is as easy as getting the code from PyPI with :code:`pip install py
    io
    logging
    commandline
+   troubleshooting
    roadmap
    technology
 
