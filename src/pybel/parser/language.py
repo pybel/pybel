@@ -278,7 +278,8 @@ unqualified_edges = [
     'hasComponent',
     'hasVariant',
     'transcribedTo',
-    'translatedTo'
+    'translatedTo',
+    'hasMember'
 ]
 
 unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}

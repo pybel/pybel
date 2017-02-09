@@ -8,7 +8,7 @@ import sqlalchemy.exc
 from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants
-from tests.constants import BelReconstitutionMixin, test_bel, mock_bel_resources, help_compare_graphs
+from tests.constants import BelReconstitutionMixin, test_bel, mock_bel_resources
 
 TEST_BEL_NAME = 'PyBEL Test Document 1'
 TEST_BEL_VERSION = '1.6'
@@ -116,16 +116,27 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         4. Query for all edges with sentinel annotation
         5. Compare to original graph
         """
-        SENTINEL_ANNOTATION = 'MeSHDisease'
-        SENTINEL_VALUE = 'Arm Injuries'
+        self.help_database_edge_filter(test_bel, self.bel_1_reconstituted)
 
-        original = pybel.from_path(test_bel)
+    def help_database_edge_filter(self, path, compare, sentinel_annotation='MeSHDisease',
+                                  sentinel_value='Arm Injuries'):
+        """
 
-        for u, v, k in original.edges_iter(key=True):
-            original.edge[u][v][k][SENTINEL_ANNOTATION] = SENTINEL_VALUE
+        :return:
+        """
+
+        original = pybel.from_path(path)
+
+        compare(original)
+
+        for u, v, k in original.edges(keys=True):
+            original.edge[u][v][k][sentinel_annotation] = sentinel_value
 
         self.gcm.store_graph(original, store_parts=True)
 
-        reloaded = self.gcm.get_by_edge_filter({SENTINEL_ANNOTATION: SENTINEL_VALUE})
+        reloaded = self.gcm.get_by_edge_filter({sentinel_annotation: sentinel_value})
 
-        help_compare_graphs(self, original, reloaded)
+        for u, v, k in reloaded.edges(keys=True):
+            del reloaded.edge[u][v][k][sentinel_annotation]
+
+        compare(reloaded, check_metadata=False)

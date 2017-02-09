@@ -401,14 +401,19 @@ class Citation(Base):
         return '{} {} {}'.format(self.type, self.name, self.reference)
 
     def forGraph(self):
-        return {
-            'authors': "|".join(self.authors),
-            'comments': self.comments,
+        citation_dict = {
             'name': self.name,
-            'date': self.date,
             'reference': self.reference,
             'type': self.type
         }
+        if self.authors:
+            citation_dict['authors'] = "|".join([author for author in self.authors])
+        if self.date:
+            citation_dict['date'] = self.date
+        if self.comments:
+            citation_dict['comments'] = self.comments
+
+        return citation_dict
 
 
 class Evidence(Base):
@@ -427,7 +432,7 @@ class Evidence(Base):
     def forGraph(self):
         return {
             'citation': self.citation.forGraph(),
-            'supportingText': self.text
+            'SupportingText': self.text
         }
 
 
@@ -436,6 +441,7 @@ edge_property = Table(
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME))),
     Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)))
 )
+
 
 class Edge(Base):
     """Relationships are represented in this table. It shows the nodes that are in a relation to eachother and provides

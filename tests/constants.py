@@ -1,15 +1,15 @@
+import json
 import logging
 import os
 import unittest
 
 import networkx as nx
 import ontospy
-from requests.compat import urlparse
-
 from pybel import BELGraph
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
+from requests.compat import urlparse
 
 try:
     from unittest import mock
@@ -76,24 +76,10 @@ def assertHasNode(self, member, graph, **kwargs):
 def assertHasEdge(self, u, v, graph, **kwargs):
     self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph {}'.format(u, v, graph))
     if kwargs:
-        msg_format = 'No edge ({}, {}) with correct properties. expected {} but got {}'
+        msg_format = 'No edge ({}, {}) with correct properties. expected \n{} but got \n{}'
         self.assertTrue(any_subdict_matches(graph.edge[u][v], kwargs),
-                        msg=msg_format.format(u, v, kwargs, graph.edge[u][v]))
-
-
-def help_compare_graphs(self, original, reloaded):
-    for u, v, d in original.edges_iter(data=True):
-        if d['relation'] == 'hasMember':
-            continue
-
-        for d1 in original.edge[u][v].values():
-            x = False
-
-            for d2 in reloaded.edge[u][v].values():
-                if set(d1.keys()) == set(d2.keys()) and all(d1[k] == d2[k] for k in d1):
-                    x = True
-
-            self.assertTrue(x, msg="Nodes with problem: {}, {}".format(u, v))
+                        msg=msg_format.format(u, v, json.dumps(kwargs, indent=2),
+                                              json.dumps(graph.edge[u][v], indent=2)))
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -124,12 +110,32 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasNode(self, EGFR, g, type='Protein', namespace='HGNC', name='EGFR')
         assertHasNode(self, FADD, g, type='Protein', namespace='HGNC', name='FADD')
         assertHasNode(self, CASP8, g, type='Protein', namespace='HGNC', name='CASP8')
-
-        assertHasEdge(self, AKT1, EGFR, g, relation='increases', TESTAN1="1")
-        assertHasEdge(self, EGFR, FADD, g, relation='decreases', TESTAN1="1", TESTAN2="3")
-        assertHasEdge(self, EGFR, CASP8, g, relation='directlyDecreases', TESTAN1="1", TESTAN2="3")
-        assertHasEdge(self, FADD, CASP8, g, relation='increases', TESTAN1="2")
-        assertHasEdge(self, AKT1, CASP8, g, relation='association', TESTAN1="2")
+        x = {
+            'SupportingText': 'Evidence 1 w extra notes',
+            'citation': {
+                'name': 'That one article from last week',
+                'reference': '123455',
+                'type': 'PubMed'
+            }}
+        y = {
+            'SupportingText': 'Evidence 2',
+            'citation': {
+                'name': 'That one article from last week',
+                'reference': '123455',
+                'type': 'PubMed'
+            }}
+        z = {
+            'SupportingText': 'Evidence 3',
+            'citation': {
+                'name': 'That other article from last week',
+                'reference': '123456',
+                'type': 'PubMed'
+            }}
+        assertHasEdge(self, AKT1, EGFR, g, relation='increases', Species="9606", **x)
+        assertHasEdge(self, EGFR, FADD, g, relation='decreases', Species="9606", CellLine="10B9 cell", **y)
+        assertHasEdge(self, EGFR, CASP8, g, relation='directlyDecreases', Species="9606", CellLine="10B9 cell", **y)
+        assertHasEdge(self, FADD, CASP8, g, relation='increases', Species="10116", **z)
+        assertHasEdge(self, AKT1, CASP8, g, relation='association', Species="10116", **z)
 
 
 expected_test_bel_metadata = {
