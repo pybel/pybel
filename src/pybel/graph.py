@@ -180,13 +180,13 @@ class BELGraph(nx.MultiDiGraph):
             try:
                 bel_parser.parseString(line)
             except ParseException:
-                log.error('Line %07d - general parser failure: %s', line_number, line)
+                log.error('Line %07d - General Parser Failure: %s', line_number, line)
                 self.add_warning(line_number, line, PyBelWarning('ParseException'), bel_parser.get_annotations())
             except PyBelWarning as e:
-                log.warning('Line %07d - %s', line_number, e)
+                log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
                 self.add_warning(line_number, line, e, bel_parser.get_annotations())
             except Exception as e:
-                log.exception('Line %07d - general failure: %s - %s: %s', line_number, line)
+                log.exception('Line %07d - General Failure: %s', line_number, line)
                 self.add_warning(line_number, line, e, bel_parser.get_annotations())
 
         log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(self.warnings))
