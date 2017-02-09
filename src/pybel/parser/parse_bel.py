@@ -54,41 +54,49 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 
 class BelParser(BaseParser):
-    def __init__(self, graph=None, valid_namespaces=None, namespace_mapping=None, valid_annotations=None,
-                 namespace_re=None, complete_origin=False, allow_naked_names=False, allow_nested=False,
-                 autostreamline=False):
+    def __init__(self, graph=None, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
+                 namespace_expressions=None, annotation_expressions=None, complete_origin=False,
+                 allow_naked_names=False, allow_nested=False, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: the graph to put the network in. Constructs new :class:`nx.MultiDiGraph` if None
         :type graph: nx.MultiDiGraph
-        :param valid_namespaces: A dictionary of {namespace: set of members}
-        :type valid_namespaces: dict
-        :param valid_annotations: a dict of {annotation: set of values}
-        :type valid_annotations: dict
-        :param namespace_re: a dictionary {namespace: regular expression strings}
-        :type namespace_re: dict
-        :param namespace_mapping: a dict of {name: {value: (other_namespace, other_name)}}
-        :type namespace_mapping: dict
-        :param complete_origin: if true, add the gene and RNA origin of proteins to the network during compilation
+        :param namespace_dicts: A dictionary of {namespace: set of members}
+        :type namespace_dicts: dict
+        :param annotation_dicts: A dictionary of {annotation: set of values}
+        :type annotation_dicts: dict
+        :param namespace_expressions: A dictionary of {namespace: regular expression strings}
+        :type namespace_expressions: dict
+        :param annotation_expressions: A dictionary of {annotation: regular expression strings}
+        :type annotation_expressions: dict
+        :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}
+        :type namespace_mappings: dict
+        :param complete_origin: If true, infer the RNA and Gene origins of unmodified proteins
         :type complete_origin: bool
-        :param allow_naked_names: if true, turn off naked namespace failures
+        :param allow_naked_names: If true, turn off naked namespace failures
         :type allow_naked_names: bool
-        :param allow_nested: if true, turn off nested statement failures
+        :param allow_nested: If true, turn off nested statement failures
         :type allow_nested: bool
         """
 
         self.graph = graph if graph is not None else nx.MultiDiGraph()
-        self.allow_naked_names = allow_naked_names
         self.allow_nested = allow_nested
         self.complete_origin = complete_origin
-        self.control_parser = ControlParser(valid_annotations=valid_annotations)
-        self.identifier_parser = IdentifierParser(
-            valid_namespaces=valid_namespaces,
-            namespace_re=namespace_re,
-            mapping=namespace_mapping,
-            allow_naked_names=self.allow_naked_names
+
+        self.control_parser = ControlParser(
+            annotation_dicts=annotation_dicts,
+            annotation_expressions=annotation_expressions
         )
 
+        self.identifier_parser = IdentifierParser(
+            namespace_dicts=namespace_dicts,
+            namespace_expressions=namespace_expressions,
+            namespace_mappings=namespace_mappings,
+            allow_naked_names=allow_naked_names
+        )
+
+        # TODO replace with:
+        # identifier = self.identifier_parser.as_group()
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
 
         # 2.2 Abundance Modifier Functions
@@ -438,7 +446,15 @@ class BelParser(BaseParser):
 
     @property
     def namespace_re(self):
-        return self.identifier_parser.namespace_re
+        return self.identifier_parser.namespace_regex_compiled
+
+    @property
+    def annotation_re(self):
+        return self.control_parser.annotations_re
+
+    @property
+    def allow_naked_names(self):
+        return self.identifier_parser.allow_naked_names
 
     def get_annotations(self):
         """Get current annotations in this parser
@@ -496,6 +512,7 @@ class BelParser(BaseParser):
         return tokens
 
     def check_required_annotations(self, s):
+        """Checks that the control parser has a citation and evidence before adding an edge"""
         if not self.control_parser.citation:
             raise MissingCitationException(s)
 

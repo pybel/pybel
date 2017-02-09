@@ -9,8 +9,8 @@ from pybel.constants import GENE
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from tests import constants
-from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, test_citation_bel, \
-    test_citation_dict, test_evidence_bel, mock_bel_resources, test_bel_thorough, test_bel_slushy
+from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, SET_CITATION_TEST, \
+    test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
@@ -50,66 +50,45 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
         g = pybel.from_path(constants.test_bel_slushy)
         self.assertIsNotNone(g)
 
-        self.assertEqual(25, g.warnings[0][0])
-        self.assertIsInstance(g.warnings[0][2], NakedNameWarning)
+        expected_warnings = [
+            (26, MissingAnnotationKeyWarning),
+            (29, MissingAnnotationKeyWarning),
+            (34, InvalidCitationException),
+            (37, InvalidCitationType),
+            (40, InvalidPubMedIdentifierWarning),
+            (43, MissingCitationException),
+            (48, MissingAnnotationKeyWarning),
+            (51, MissingAnnotationKeyWarning),
+            (54, MissingSupportWarning),
+            (59, NakedNameWarning),
+            (62, UndefinedNamespaceWarning),
+            (65, MissingNamespaceNameWarning),
+            (68, UndefinedAnnotationWarning),
+            (71, MissingAnnotationKeyWarning),
+            (74, IllegalAnnotationValueWarning),
+            (77, MissingAnnotationRegexWarning),
+            (80, MissingNamespaceRegexWarning),
+            (83, MalformedTranslocationWarning),
+            (86, PlaceholderAminoAcidWarning),
+            (89, NestedRelationWarning),
+            (92, InvalidFunctionSemantic),
+            (95, Exception),
+            (98, Exception),
+        ]
 
-        self.assertEqual(28, g.warnings[1][0])
-        self.assertIsInstance(g.warnings[1][2], UndefinedNamespaceWarning)
-
-        self.assertEqual(31, g.warnings[2][0])
-        self.assertIsInstance(g.warnings[2][2], MissingNamespaceNameWarning)
-
-        self.assertEqual(34, g.warnings[3][0])
-        self.assertIsInstance(g.warnings[3][2], UndefinedAnnotationWarning)
-
-        self.assertEqual(37, g.warnings[4][0])
-        self.assertIsInstance(g.warnings[4][2], MissingAnnotationKeyWarning)
-
-        self.assertEqual(40, g.warnings[5][0])
-        self.assertIsInstance(g.warnings[5][2], IllegalAnnotationValueWarning)
-
-        self.assertEqual(43, g.warnings[6][0])
-        self.assertIsInstance(g.warnings[6][2], InvalidCitationException)
-
-        self.assertEqual(47, g.warnings[7][0])
-        self.assertIsInstance(g.warnings[7][2], MissingSupportWarning)
-
-        self.assertEqual(51, g.warnings[8][0])
-        self.assertIsInstance(g.warnings[8][2], MissingCitationException)
-
-        self.assertEqual(54, g.warnings[9][0])
-        self.assertIsInstance(g.warnings[9][2], InvalidPubMedIdentifierWarning)
-
-        self.assertEqual(62, g.warnings[10][0])
-        self.assertIsInstance(g.warnings[10][2], MalformedTranslocationWarning)
-
-        self.assertEqual(65, g.warnings[11][0])
-        self.assertIsInstance(g.warnings[11][2], PlaceholderAminoAcidWarning)
-
-        self.assertEqual(68, g.warnings[12][0])
-        self.assertIsInstance(g.warnings[12][2], NestedRelationWarning)
-
-        self.assertEqual(71, g.warnings[13][0])
-        self.assertIsInstance(g.warnings[13][2], InvalidFunctionSemantic)
-
-        self.assertEqual(74, g.warnings[14][0])
-        self.assertIsInstance(g.warnings[14][2], Exception)
-
-        self.assertEqual(77, g.warnings[15][0])
-        self.assertIsInstance(g.warnings[15][2], Exception)
-
-        self.assertEqual(80, g.warnings[16][0])
-        self.assertIsInstance(g.warnings[16][2], InvalidCitationType)
+        for (el, ew), (l, _, w, _) in zip(expected_warnings, g.warnings):
+            self.assertEqual(el, l)
+            self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
 
 class TestRegex(unittest.TestCase):
     def setUp(self):
-        self.parser = BelParser(valid_namespaces={}, namespace_re={'dbSNP': 'rs[0-9]*'})
+        self.parser = BelParser(namespace_dicts={}, namespace_expressions={'dbSNP': 'rs[0-9]*'})
 
     def test_match(self):
         lines = [
-            test_citation_bel,
-            test_evidence_bel,
+            SET_CITATION_TEST,
+            test_set_evidence,
             'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
         ]
         self.parser.parse_lines(lines)
@@ -118,8 +97,8 @@ class TestRegex(unittest.TestCase):
 
     def test_no_match(self):
         lines = [
-            test_citation_bel,
-            test_evidence_bel,
+            SET_CITATION_TEST,
+            test_set_evidence,
             'g(dbSNP:10234) -- g(dbSNP:rr10235)'
         ]
 
@@ -142,14 +121,14 @@ class TestFull(TestTokenParserBase):
             'TestAnnotation3': {'D', 'E', 'F'}
         }
 
-        self.parser = BelParser(valid_namespaces=self.namespaces, valid_annotations=self.annotations)
+        self.parser = BelParser(namespace_dicts=self.namespaces, annotation_dicts=self.annotations)
 
     def test_no_add_duplicates(self):
         s = 'r(TESTNS:1) -> r(TESTNS:2)'
 
         statements = [
-            test_citation_bel,
-            test_evidence_bel,
+            SET_CITATION_TEST,
+            test_set_evidence,
             s
         ]
 
@@ -168,17 +147,17 @@ class TestFull(TestTokenParserBase):
 
     def test_lenient_semantic_no_failure(self):
         statements = [
-            test_citation_bel,
-            test_evidence_bel,
+            SET_CITATION_TEST,
+            test_set_evidence,
             "bp(ABASD) -- p(ABASF)"
         ]
 
-        self.parser = BelParser(valid_namespaces=self.namespaces, allow_naked_names=True)
+        self.parser = BelParser(namespace_dicts=self.namespaces, allow_naked_names=True)
         self.parser.parse_lines(statements)
 
     def test_missing_citation(self):
         statements = [
-            test_evidence_bel,
+            test_set_evidence,
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
@@ -189,8 +168,8 @@ class TestFull(TestTokenParserBase):
 
     def test_annotations(self):
         statements = [
-            test_citation_bel,
-            test_evidence_bel,
+            SET_CITATION_TEST,
+            test_set_evidence,
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
@@ -215,8 +194,8 @@ class TestFull(TestTokenParserBase):
 
     def test_annotations_withList(self):
         statements = [
-            test_citation_bel,
-            test_evidence_bel,
+            SET_CITATION_TEST,
+            test_set_evidence,
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
@@ -238,8 +217,8 @@ class TestFull(TestTokenParserBase):
 
     def test_annotations_withMultiList(self):
         statements = [
-            test_citation_bel,
-            test_evidence_bel,
+            SET_CITATION_TEST,
+            test_set_evidence,
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'SET TestAnnotation3 = {"D","E"}',

@@ -243,6 +243,9 @@ def to_bel(graph, file=None):
     for annotation, url in sorted(graph.annotation_owl.items(), key=itemgetter(0)):
         print('DEFINE ANNOTATION {} AS OWL "{}"'.format(annotation, url), file=file)
 
+    for annotation, pattern in sorted(graph.annotation_pattern.items(), key=itemgetter(0)):
+        print('DEFINE ANNOTATION {} AS PATTERN "{}"'.format(annotation, pattern), file=file)
+
     for annotation, an_list in sorted(graph.annotation_list.items(), key=itemgetter(0)):
         an_list_str = ', '.join('"{}"'.format(e) for e in an_list)
         print('DEFINE ANNOTATION {} AS LIST {{{}}}'.format(annotation, an_list_str), file=file)

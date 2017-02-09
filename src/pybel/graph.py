@@ -10,7 +10,8 @@ from pyparsing import ParseException
 
 from .constants import FUNCTION, NAMESPACE
 from .constants import GRAPH_METADATA, GRAPH_NAMESPACE_URL, GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_PATTERN, \
-    GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, GRAPH_ANNOTATION_LIST, GRAPH_PYBEL_VERSION, REQUIRED_METADATA
+    GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, GRAPH_ANNOTATION_LIST, GRAPH_PYBEL_VERSION, REQUIRED_METADATA, \
+    GRAPH_ANNOTATION_PATTERN
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
 from .parser import language
@@ -98,9 +99,10 @@ class BELGraph(nx.MultiDiGraph):
 
         bel_parser = BelParser(
             graph=self,
-            valid_namespaces=metadata_parser.namespace_dict,
-            valid_annotations=metadata_parser.annotations_dict,
-            namespace_re=metadata_parser.namespace_re,
+            namespace_dicts=metadata_parser.namespace_dict,
+            annotation_dicts=metadata_parser.annotations_dict,
+            namespace_expressions=metadata_parser.namespace_re,
+            annotation_expressions=metadata_parser.annotations_re,
             complete_origin=complete_origin,
             allow_naked_names=allow_naked_names,
             allow_nested=allow_nested,
@@ -159,6 +161,7 @@ class BELGraph(nx.MultiDiGraph):
             GRAPH_NAMESPACE_PATTERN: metadata_parser.namespace_re.copy(),
             GRAPH_ANNOTATION_URL: metadata_parser.annotation_url_dict.copy(),
             GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
+            GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_re.copy(),
             GRAPH_ANNOTATION_LIST: {e: metadata_parser.annotations_dict[e] for e in
                                     metadata_parser.annotation_list_list}
         })
@@ -229,32 +232,37 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def namespace_url(self):
-        """A dictionary mapping the keywords used in the creation of this graph to the URLs of the BELNS file"""
+        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS file"""
         return self.graph[GRAPH_NAMESPACE_URL]
 
     @property
     def namespace_owl(self):
-        """A dictionary mapping the keywords used in the creation of this graph to the URLs of the OWL file"""
+        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL file"""
         return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
     def namespace_pattern(self):
-        """A dictionary mapping the keywords used in the creation of this graph to their regex patterns"""
+        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns"""
         return self.graph[GRAPH_NAMESPACE_PATTERN]
 
     @property
     def annotation_url(self):
-        """A dictionary mapping the keywords used in the creation of this graph to the URLs of the BELANNO file"""
+        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO file"""
         return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
     def annotation_owl(self):
-        """A dictionary mapping the keywords to the URL of the OWL file"""
+        """A dictionary mapping the annotation keywords to the URL of the OWL file"""
         return self.graph[GRAPH_ANNOTATION_OWL]
 
     @property
+    def annotation_pattern(self):
+        """A dictionary mapping the annotation keywords used in the creation of this graph to their regex patterns"""
+        return self.graph[GRAPH_ANNOTATION_PATTERN]
+
+    @property
     def annotation_list(self):
-        """A dictionary mapping the keyword of locally defined annotations to a set of their values"""
+        """A dictionary mapping the keywords of locally defined annotations to a set of their values"""
         return self.graph[GRAPH_ANNOTATION_LIST]
 
     @property

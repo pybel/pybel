@@ -25,6 +25,8 @@ DEFINE NAMESPACE TESTNS2 AS URL "file://examples/test_ns_2.belns"
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
 DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
+DEFINE ANNOTATION TestRegex AS PATTERN "[0-9]+"
+
 ##################################################################################
 # Statements Section
 ##################################################################################

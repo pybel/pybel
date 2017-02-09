@@ -204,8 +204,9 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_pattern(self, s, l, tokens):
-        # TODO implement
-        raise NotImplementedError('Custom annotation regex matching not yet implemented')
+        name = tokens['name']
+        self.annotations_re[name] = tokens['value']
+        return tokens
 
     def handle_namespace_pattern(self, s, l, tokens):
         name = tokens['name']

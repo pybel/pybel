@@ -57,9 +57,9 @@ test_citation_dict = {
     CITATION_NAME: 'TestName',
     CITATION_REFERENCE: '1235813'
 }
-test_citation_bel = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(**test_citation_dict)
+SET_CITATION_TEST = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(**test_citation_dict)
 test_evidence_text = 'I read it on Twitter'
-test_evidence_bel = 'SET Evidence = "{}"'.format(test_evidence_text)
+test_set_evidence = 'SET Evidence = "{}"'.format(test_evidence_text)
 
 CHEBI_KEYWORD = 'CHEBI'
 CHEBI_URL = 'http://resources.openbel.org/belframework/20150611/namespace/chebi.belns'
@@ -287,6 +287,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         self.assertEqual({'dbSNP'}, set(g.namespace_pattern))
         self.assertEqual(set(), set(g.annotation_owl))
         self.assertEqual({'TESTAN1', 'TESTAN2'}, set(g.annotation_list))
+        self.assertEqual({'TestRegex'}, set(g.annotation_pattern))
 
         x = {
             (ABUNDANCE, 'CHEBI', 'oxygen atom'),
