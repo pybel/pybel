@@ -89,9 +89,10 @@ def from_path(path, encoding='utf-8', **kwargs):
 
     :param path: a file path
     :type path: str
-    :param encoding: the encoding to use when reading this file. Is passed to codecs.open.
-                     See https://docs.python.org/3/library/codecs.html#standard-encodings for a list of standard
-                     encodings. For example, files starting with a UTF-8 BOM should use 'utf_8_sig'
+    :param encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`.
+                     See the python `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a
+                     list of standard encodings. For example, files starting with a UTF-8 BOM should use
+                     :code:`utf_8_sig`
     :type encoding: str
     :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
