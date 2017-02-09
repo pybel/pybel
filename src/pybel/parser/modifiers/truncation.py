@@ -11,10 +11,10 @@ dictionary:
 .. code::
 
     {
-        'function': 'Protein',
-        'namespace': 'HGNC',
-        'name': 'AKT1',
-        'variants': [
+        pbc.FUNCTION: pbc.PROTEIN,
+        pbc.NAMESPACE: 'HGNC',
+        pbc.NAME: 'AKT1',
+        pbc.VARIANTS: [
             {
                 pbc.KIND: pbc.HGVS,
                 pbc.IDENTIFIER: 'p.40*'

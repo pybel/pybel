@@ -22,8 +22,8 @@ strings behind these constants change. They can be made readily available with:
 
     >>> from pybel import constants as pbc
 
-Abundance Nomenclature
-~~~~~~~~~~~~~~~~~~~~~~
+Function Nomenclature
+~~~~~~~~~~~~~~~~~~~~~
 
 Internally, PyBEL uses the following table, :code:`pybel.parser.language.abundance_labels`, to map from BEL language
 functions to its internal constants.
@@ -81,13 +81,17 @@ becomes:
 .. automodule:: pybel.parser.modifiers.fusion
 
 
-Context-Free Edges
-------------------
+Unqualified Edges
+-----------------
 
-1. Variants/Modifications' relation to their reference
-2. Memberships to complexes and composities
-3. Reactions
-4. Central Dogma (transcription and translation)
+Unqualified edges are automatically inferred by PyBEL and do not contain citatations or supporting evidence.
+
+Variant and Modifications' Parent Relations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All variants, modifications, fragments, and truncations are connected to their parent entity with an edge having
+the relationship :code:`hasParent`
+
 
 List Abundances
 ~~~~~~~~~~~~~~~
@@ -97,15 +101,41 @@ described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 .. code::
 
     {
-        pbc.FUNCTION: pbc.COMPOSITE
+        pbc.FUNCTION: pbc.COMPLEX
     }
 
-The remaining information is encoded in the edges to the resulting protein nodes from :code:`p(HGNC:FOS)` and
-:code:`p(HGNC:JUN)` with connections having the relation :code:`hasMember`.
+The following edges are inferred:
+
+.. code::
+
+    complex(p(HGNC:FOS), p(HGNC:JUN)) hasMember p(HGNC:FOS)
+    complex(p(HGNC:FOS), p(HGNC:JUN)) hasMember p(HGNC:JUN)
+
 
 .. seealso::
 
     BEL 2.0 specification on `complex abundances <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
+
+Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
+
+.. code::
+
+    {
+        pbc.FUNCTION: pbc.COMPOSITE
+    }
+
+The following edges are inferred:
+
+.. code::
+
+    composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent a(CHEBI:malonate)
+    composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent p(HGNC:JUN)
+
+
+.. seealso::
+
+    BEL 2.0 specification on `composite abundances <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
+
 
 Reactions
 ~~~~~~~~~
@@ -114,17 +144,49 @@ added to the network for
 
 .. code::
 
-    rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"), a(CHEBI:NADPH), a(CHEBI:hydron)),\
-        products(a(CHEBI:mevalonate), a(CHEBI:"NADP(+)"))) \
-        subProcessOf bp(GOBP:"cholesterol biosynthetic process")
+    rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"), a(CHEBI:"NADPH"), \
+        a(CHEBI:"hydron")), products(a(CHEBI:"mevalonate"), a(CHEBI:"NADP(+)")))
+
+results in the following data:
+
+.. code::
+
+    {
+        pbc.FUNCTION: pbc.REACTION
+    }
+
+The following edges are inferred, where "X" represents the previous reaction, for brevity:
+
+.. code::
+
+    X hasReactant a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA")
+    X hasReactant a(CHEBI:"NADPH")
+    X hasReactant a(CHEBI:"hydron")
+    X hasProduct a(CHEBI:"mevalonate")
+    X hasProduct a(CHEBI:"NADP(+)"))
 
 .. seealso::
 
     BEL 2.0 specification on `reactions <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
 
+Central Dogma
+~~~~~~~~~~~~~
+
+When encountering protein abundance nodes, PyBEL infers the RNA from which it was translated and the DNA from which
+it was transcribed. After the mention of :code:`p(HGNC:YFG)`, the following two edges are inferred:
+
+.. code::
+
+    r(HGNC:YFG) translatedTo p(HGNC:YFG)
+    g(HGNC:YFG) transcribedTo r(HGNC:YFG)
+
+When encountering RNA abundances, PyBEL only infers the genetic origin. PyBEL will not make forward inferences,
+because the function of a gene or RNA may not be clear.
+
+Currently, PyBEL does not make these inferences for miRNAs, but could in the future.
+
 Edges
 -----
-
 
 Design Choices
 ~~~~~~~~~~~~~~
@@ -237,7 +299,7 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 
 Degradations
 ~~~~~~~~~~~~
-Degradations are more simple, because there's no pbc.EFFECT entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
+Degradations are more simple, because there's no :code:`pbc.EFFECT` entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
 
 .. code::
 
