@@ -392,7 +392,6 @@ class GraphCacheManager(BaseCacheManager):
 
         :return: Dictionary with 'key' and 'node' keys.
         """
-        print("jup")
         node_info = node_object.old_forGraph()
         key = list(node_info['key'])
         data = node_info['data']
@@ -412,7 +411,6 @@ class GraphCacheManager(BaseCacheManager):
             key.append(reactant_keys)
             key.append(product_keys)
 
-        print(key)
         return {'key': tuple(key), 'node': (tuple(key), data)}
 
 def to_database(graph, connection=None):

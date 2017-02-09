@@ -120,7 +120,16 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
 
     def help_database_edge_filter(self, path, compare, sentinel_annotation='MeSHDisease',
                                   sentinel_value='Arm Injuries'):
-        """
+        """Helps to test the graph that is created by a specific annotation.
+
+        :param path: Path to the test BEL file.
+        :type path: str
+        :param compare: Method that should be used to compare the original and resulting graph.
+        :type compare:
+        :param sentinel_annotation: Annotation that marks the nodes with an annotation.
+        :type sentinel_annotation: str
+        :param sentinel_value: Annotation value for the given sentinel_annotation.
+        :type sentinel_value: str
 
         :return:
         """

@@ -492,7 +492,6 @@ class Edge(Base):
             prop_info = prop.forGraph()
             if prop_info['participant'] in edge_dict['data']:
                 edge_dict['data'][prop_info['participant']].update(prop_info['data'])
-                edge_dict['data'][prop_info['participant']].update(prop_info['data'])
             else:
                 edge_dict['data'].update(prop_info['data'])
 
