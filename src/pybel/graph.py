@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+PyBEL's main data structure is a subclass of NetworkX MultiDiGraph.
+
+The graph contains metadata for the PyBEL version, the BEL script metadata, the namespace definitions, the
+annotation definitions, and the warnings produced in analysis. Like any :code:`networkx` graph, all attributes of
+a given object can be accessed through the :code:`graph` property, like in: :code:`my_graph.graph['my key']`.
+Convenient property definitions are given for these attributes.
+
+"""
+
 import itertools as itt
 import logging
 import time
@@ -39,13 +50,12 @@ def build_metadata_parser(cache_manager):
 
 
 class BELGraph(nx.MultiDiGraph):
-    """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
-
     def __init__(self, lines=None, cache_manager=None, complete_origin=False, allow_naked_names=False,
                  allow_nested=False, *attrs, **kwargs):
-        """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
+        """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
+        list of strings.
 
-        :param lines: iterable over lines of BEL data file
+        :param lines: iterable over lines of BEL script
         :param cache_manager: database connection string to cache, pre-built cache manager,
                     or True to use the default
         :type cache_manager: str or pybel.manager.CacheManager
@@ -60,7 +70,9 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        #: Stores warnings as 4-tuples with (line number, line text, exception instance, context dictionary)
+        #: Warnings are stored in a list of 4-tuples that is a property of the graph object.
+        #: This tuple respectively contains the line number, the line text, the exception instance, and the context
+        #: dictionary from the parser at the time of error.
         self.warnings = []
         self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
 
@@ -223,9 +235,6 @@ class BELGraph(nx.MultiDiGraph):
     def document(self):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
         according to :py:data:`pybel.parser.language.document_keys`
-
-        :return: metadata derived from the BEL "Document" section
-        :rtype: dict
         """
         return self.graph.get(GRAPH_METADATA, {})
 
@@ -256,7 +265,7 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def annotation_pattern(self):
-        """A dictionary mapping the annotation keywords used in the creation of this graph to their regex patterns"""
+        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns"""
         return self.graph.get(GRAPH_ANNOTATION_PATTERN, {})
 
     @property
@@ -266,7 +275,7 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def pybel_version(self):
-        """Stores the version of PyBEL with which this graph was produced"""
+        """Stores the version of PyBEL with which this graph was produced as a string"""
         return self.graph[GRAPH_PYBEL_VERSION]
 
     def add_warning(self, line_number, line, exception, context=None):

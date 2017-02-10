@@ -1,6 +1,9 @@
 Reference
 =========
 
+This page is for users who want to squeeze the most bizarre possibilities out of PyBEL. Most users will not need this
+reference.
+
 Parsers
 -------
 PyBEL makes extensive use of the PyParsing module. The code is organized to different modules to reflect

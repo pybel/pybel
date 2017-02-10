@@ -1,7 +1,8 @@
 Input and Output
 ================
 
-.. autoclass:: pybel.BELGraph
+PyBEL contains multiple input and output methods. All pairs are data-preserving.
+
 .. autofunction:: pybel.from_lines
 .. autofunction:: pybel.from_path
 .. autofunction:: pybel.from_url

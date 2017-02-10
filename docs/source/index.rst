@@ -20,12 +20,12 @@ Installation is as easy as getting the code from PyPI with :code:`pip3 install p
    installation
    overview
    datamodel
-   cookbook
-   reference
    io
-   logging
+   cookbook
    commandline
    troubleshooting
+   logging
+   reference
    roadmap
    technology
 

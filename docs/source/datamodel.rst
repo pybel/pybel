@@ -75,10 +75,20 @@ programatically via :py:data:`pybel.parser.language.abundance_labels`
 | rxn                | REACTION       |
 +--------------------+----------------+
 
-Simple Abundances
------------------
-The relevant data about a node is stored in its associated dictionary in NetworkX. After parsing, :code:`p(HGNC:GSK3B)`
-becomes:
+Graph
+-----
+
+.. automodule:: pybel.graph
+
+.. autoclass:: pybel.BELGraph
+    :noindex:
+    :exclude-members: parse_lines, parse_document, parse_definitions, parse_statements, nodes_iter, edges_iter, add_warning
+    :members:
+
+Nodes
+-----
+Nodes are used to represent physical entities' abundances. The relevant data about a node is stored in its associated
+dictionary in NetworkX. After parsing, :code:`p(HGNC:GSK3B)` becomes:
 
 .. code::
 
@@ -108,7 +118,7 @@ becomes:
 Unqualified Edges
 -----------------
 
-Unqualified edges are automatically inferred by PyBEL and do not contain citatations or supporting evidence.
+Unqualified edges are automatically inferred by PyBEL and do not contain citations or supporting evidence.
 
 Variant and Modifications' Parent Relations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
