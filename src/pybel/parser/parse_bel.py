@@ -25,13 +25,7 @@ from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarni
 from .parse_identifier import IdentifierParser
 from .utils import list2tuple, cartesian_dictionary
 from .. import constants as pbc
-from ..constants import EQUIVALENT_TO
-from ..constants import FUNCTION, NAMESPACE, NAME, IDENTIFIER, VARIANTS, BEL_DEFAULT_NAMESPACE, DIRTY, GOCC_KEYWORD
-from ..constants import GENE, RNA, PROTEIN, MIRNA, ABUNDANCE, BIOPROCESS, PATHOLOGY, REACTION, COMPLEX, COMPOSITE
-from ..constants import HAS_VARIANT, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_MEMBER, TRANSCRIBED_TO, TRANSLATED_TO
-from ..constants import TWO_WAY_RELATIONS, ACTIVITY, DEGRADATION, TRANSLOCATION, CELL_SECRETION, \
-    CELL_SURFACE_EXPRESSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FUSION, MODIFIER, EFFECT, TARGET, \
-    FROM_LOC, TO_LOC, MEMBERS, REACTANTS, PRODUCTS, LOCATION, SUBJECT, OBJECT, RELATION, EVIDENCE, CITATION, ANNOTATIONS
+from ..constants import *
 
 log = logging.getLogger('pybel')
 

@@ -5,14 +5,7 @@ import logging
 import sys
 from operator import itemgetter
 
-from .constants import ABUNDANCE, GENE, MIRNA, PROTEIN, RNA, \
-    BIOPROCESS, PATHOLOGY, COMPOSITE, COMPLEX, REACTION, CITATION
-from .constants import ACTIVITY, DEGRADATION, TRANSLOCATION, IDENTIFIER
-from .constants import BLACKLIST_EDGE_ATTRIBUTES, CITATION_ENTRIES, EVIDENCE
-from .constants import GMOD, PMOD, HGVS, KIND, FRAGMENT, FUNCTION, BEL_DEFAULT_NAMESPACE
-from .constants import GOCC_LATEST, GOCC_KEYWORD, VARIANTS, ANNOTATIONS
-from .constants import RELATION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P, FROM_LOC, TO_LOC, EFFECT, MODIFIER, \
-    LOCATION, NAME, NAMESPACE, SUBJECT, OBJECT, HAS_REACTANT, HAS_PRODUCT, HAS_MEMBER, FUSION, PYBEL_AUTOEVIDENCE
+from .constants import *
 from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
 from .parser.modifiers import FusionParser
 from .parser.modifiers.fragment import FragmentParser

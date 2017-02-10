@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import itertools as itt
 import logging
 import time
 from collections import defaultdict, Counter
@@ -7,11 +8,8 @@ from collections import defaultdict, Counter
 import networkx as nx
 from pkg_resources import get_distribution
 from pyparsing import ParseException
-import itertools as itt
-from .constants import FUNCTION, NAMESPACE
-from .constants import GRAPH_METADATA, GRAPH_NAMESPACE_URL, GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_PATTERN, \
-    GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, GRAPH_ANNOTATION_LIST, GRAPH_PYBEL_VERSION, REQUIRED_METADATA, \
-    GRAPH_ANNOTATION_PATTERN
+
+from .constants import *
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
 from .parser import language
@@ -293,6 +291,7 @@ class BELGraph(nx.MultiDiGraph):
                 return False
 
         return True
+
 
 def expand_edges(graph):
     """Returns a new graph with expanded edge data dictionaries
