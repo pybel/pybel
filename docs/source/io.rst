@@ -1,6 +1,7 @@
 Input and Output
 ================
 
+.. autoclass:: pybel.BELGraph
 .. autofunction:: pybel.from_lines
 .. autofunction:: pybel.from_path
 .. autofunction:: pybel.from_url

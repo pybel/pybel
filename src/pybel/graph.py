@@ -43,7 +43,7 @@ def build_metadata_parser(cache_manager):
 class BELGraph(nx.MultiDiGraph):
     """An extension of a NetworkX MultiDiGraph to hold a BEL graph."""
 
-    def __init__(self, lines=None, complete_origin=False, cache_manager=None, allow_naked_names=False,
+    def __init__(self, lines=None, cache_manager=None, complete_origin=False, allow_naked_names=False,
                  allow_nested=False, *attrs, **kwargs):
         """Parses a BEL file from an iterable of strings. This can be a file, file-like, or list of strings.
 
@@ -51,7 +51,8 @@ class BELGraph(nx.MultiDiGraph):
         :param cache_manager: database connection string to cache, pre-built cache manager,
                     or True to use the default
         :type cache_manager: str or pybel.manager.CacheManager
-        :param log_stream: a stream to write debug logging to
+        :param complete_origin: add corresponding DNA and RNA entities for all proteins
+        :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
