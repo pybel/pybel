@@ -13,43 +13,67 @@ Constants
 ---------
 
 These documents refer to many aspects of the data model using constants, which can be found in the top-level module
-:code:`pybel.constants`. In these examples, constants will be prefixed with :code:`pbc` such as in :code:`pbc.FUNCTION`.
-
-For normal usage, we suggest referring to values in dictionaries by these constants, in case the hard-coded
-strings behind these constants change. They can be made readily available with:
+:code:`pybel.constants`. In these examples, all constants are imported with the following code:
 
 .. code-block:: python
 
-    >>> from pybel import constants as pbc
+    >>> from pybel.constants import *
+
+Terms describing abundances, annotations, and other internal data are designated in :code:`pybel.constants`
+with full-caps, such as :code:`FUNCTION` and :code:`PROTEIN`.
+
+For normal usage, we suggest referring to values in dictionaries by these constants, in case the hard-coded
+strings behind these constants change.
 
 Function Nomenclature
 ~~~~~~~~~~~~~~~~~~~~~
 
-Internally, PyBEL uses the following table, :code:`pybel.parser.language.abundance_labels`, to map from BEL language
-functions to its internal constants.
+The following table shows PyBEL's internal mapping from BEL functions to its own constants. This can be accessed
+programatically via :py:data:`pybel.parser.language.abundance_labels`
 
-.. code::
-
-    {
-        'abundance': pbc.ABUNDANCE,
-        'a': pbc.ABUNDANCE,
-        'geneAbundance': pbc.GENE,
-        'g': pbc.GENE,
-        'microRNAAbundance': pbc.MIRNA,
-        'm': pbc.MIRNA,
-        'proteinAbundance': pbc.PROTEIN,
-        'p': pbc.PROTEIN,
-        'rnaAbundance': pbc.RNA,
-        'r': pbc.RNA,
-        'biologicalProcess': pbc.BIOPROCESS,
-        'bp': pbc.BIOPROCESS,
-        'pathology': pbc.PATHOLOGY,
-        'path': pbc.PATHOLOGY,
-        'complex': pbc.COMPLEX
-        'complexAbundance': pbc.COMPLEX,
-        'composite': pbc.COMPOSITE
-        'compositeAbundance': pbc.COMPOSITE
-    }
++--------------------+----------------+
+| BEL Function       | PyBEL Constant |
++====================+================+
+| a                  | ABUNDANCE      |
++--------------------+----------------+
+| abundance          | ABUNDANCE      |
++--------------------+----------------+
+| geneAbundance      | GENE           |
++--------------------+----------------+
+| g                  | GENE           |
++--------------------+----------------+
+| rnaAbunance        | RNA            |
++--------------------+----------------+
+| r                  | RNA            |
++--------------------+----------------+
+| microRNAAbundance  | MIRNA          |
++--------------------+----------------+
+| m                  | MIRNA          |
++--------------------+----------------+
+| proteinAbundance   | PROTEIN        |
++--------------------+----------------+
+| p                  | PROTEIN        |
++--------------------+----------------+
+| biologicalProcess  | BIOPROCESS     |
++--------------------+----------------+
+| bp                 | BIOPROCESS     |
++--------------------+----------------+
+| pathology          | PATHOLOGY      |
++--------------------+----------------+
+| path               | PATHOLOGY      |
++--------------------+----------------+
+| complexAbundance   | COMPLEX        |
++--------------------+----------------+
+| complex            | COMPLEX        |
++--------------------+----------------+
+| compositeAbundance | COMPOSITE      |
++--------------------+----------------+
+| composite          | COMPOSITE      |
++--------------------+----------------+
+| reaction           | REACTION       |
++--------------------+----------------+
+| rxn                | REACTION       |
++--------------------+----------------+
 
 Simple Abundances
 -----------------
@@ -59,9 +83,9 @@ becomes:
 .. code::
 
     {
-        pbc.FUNCTION: pbc.PROTEIN,
-        pbc.NAMESPACE: 'HGNC',
-        pbc.NAME: 'GSK3B'
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B'
     }
 
 .. automodule:: pybel.parser.modifiers.variant
@@ -101,7 +125,7 @@ described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 .. code::
 
     {
-        pbc.FUNCTION: pbc.COMPLEX
+        FUNCTION: COMPLEX
     }
 
 The following edges are inferred:
@@ -121,7 +145,7 @@ Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
 .. code::
 
     {
-        pbc.FUNCTION: pbc.COMPOSITE
+        FUNCTION: COMPOSITE
     }
 
 The following edges are inferred:
@@ -152,10 +176,10 @@ results in the following data:
 .. code::
 
     {
-        pbc.FUNCTION: pbc.REACTION
+        FUNCTION: REACTION
     }
 
-The following edges are inferred, where "X" represents the previous reaction, for brevity:
+The following edges are inferred, where :code:`X` represents the previous reaction, for brevity:
 
 .. code::
 
@@ -224,18 +248,18 @@ Below is the "skeleton" for the edge data model in PyBEL:
 .. code::
 
     {
-        pbc.SUBJECT: {
+        SUBJECT: {
             # ... modifications to the subject node
         },
-        pbc.RELATION: 'positiveCorrelation',
-        pbc.OBJECT: {
+        RELATION: 'positiveCorrelation',
+        OBJECT: {
             # ... modifications to the object node
         },
-        pbc.EVIDENCE: '...',
-        pbc.CITATION : {
+        EVIDENCE: '...',
+        CITATION : {
             # ... citation information
         }
-        pbc.ANNOTATIONS: {
+        ANNOTATIONS: {
             # ... additional annotations as key:value pairs
         }
     }
@@ -249,18 +273,18 @@ Modifiers are added to this structure as well. Under this schema,
 .. code::
 
     {
-        pbc.SUBJECT: {},
-        pbc.RELATION: 'positiveCorrelation',
-        pbc.OBJECT: {
-            pbc.MODIFIER: pbc.ACTIVITY,
-            pbc.EFFECT: {
-                pbc.NAME: 'kin'
-                pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
+        SUBJECT: {},
+        RELATION: 'positiveCorrelation',
+        OBJECT: {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
+                NAME: 'kin'
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         },
-        pbc.CITATION: { ... }
-        pbc.EVIDENCE: '...',
-        pbc.ANNOTATIONS: { ... }
+        CITATION: { ... }
+        EVIDENCE: '...',
+        ANNOTATIONS: { ... }
     }
 
 
@@ -277,24 +301,24 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 .. code::
 
     {
-        pbc.SUBJECT: {},
-        pbc.RELATION: 'increases',
-        pbc.OBJECT: {
-            pbc.MODIFIER: pbc.TRANSLOCATION,
-            pbc.EFFECT: {
-                pbc.FROM_LOC: {
-                    pbc.NAMESPACE: 'GOMF',
-                    pbc.NAME: 'intracellular'
+        SUBJECT: {},
+        RELATION: 'increases',
+        OBJECT: {
+            MODIFIER: TRANSLOCATION,
+            EFFECT: {
+                FROM_LOC: {
+                    NAMESPACE: 'GOMF',
+                    NAME: 'intracellular'
                 },
-                pbc.TO_LOC: {
-                    pbc.NAMESPACE: 'GOMF',
-                    pbc.NAME: 'extracellular space'
+                TO_LOC: {
+                    NAMESPACE: 'GOMF',
+                    NAME: 'extracellular space'
                 }
             }
         },
-        pbc.CITATION: { ... }
-        pbc.EVIDENCE: '...',
-        pbc.ANNOTATIONS: { ... }
+        CITATION: { ... }
+        EVIDENCE: '...',
+        ANNOTATIONS: { ... }
     }
 
 .. seealso::
@@ -303,19 +327,19 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 
 Degradations
 ~~~~~~~~~~~~
-Degradations are more simple, because there's no :code:`pbc.EFFECT` entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
+Degradations are more simple, because there's no :code:`EFFECT` entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
 
 .. code::
 
     {
-        pbc.SUBJECT: {},
-        pbc.RELATION: 'increases',
-        pbc.OBJECT: {
-            pbc.MODIFIER: pbc.DEGRADATION
+        SUBJECT: {},
+        RELATION: 'increases',
+        OBJECT: {
+            MODIFIER: DEGRADATION
         },
-        pbc.CITATION: { ... }
-        pbc.EVIDENCE: '...',
-        pbc.ANNOTATIONS: { ... }
+        CITATION: { ... }
+        EVIDENCE: '...',
+        ANNOTATIONS: { ... }
     }
 
 .. seealso::

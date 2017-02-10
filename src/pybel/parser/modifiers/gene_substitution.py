@@ -13,13 +13,13 @@ The previous statements both produce the underlying data:
 .. code::
 
     {
-        pbc.FUNCTION: pbc.GENE,
-        pbc.NAMESPACE: 'HGNC',
-        pbc.NAME: 'APP',
-        pbc.VARIANTS: [
+        FUNCTION: GENE,
+        NAMESPACE: 'HGNC',
+        NAME: 'APP',
+        VARIANTS: [
             {
-                pbc.KIND: pbc.HGVS,
-                pbc.IDENTIFIER: 'c.275341G>C'
+                KIND: HGVS,
+                IDENTIFIER: 'c.275341G>C'
             }
         ]
     }

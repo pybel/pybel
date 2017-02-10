@@ -19,15 +19,15 @@ For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the fol
 .. code::
 
     {
-        pbc.FUNCTION: pbc.GENE,
-        pbc.NAMESPACE: 'HGNC',
-        pbc.NAME: 'GSK3B',
-        pbc.VARIANTS: [
+        FUNCTION: GENE,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
+        VARIANTS: [
             {
-                pbc.KIND: pbc.GMOD,
+                KIND: GMOD,
                 GmodParser.IDENTIFIER: {
-                    pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE,
-                    pbc.NAME: 'Me'
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                    NAME: 'Me'
                 }
             }
         ]

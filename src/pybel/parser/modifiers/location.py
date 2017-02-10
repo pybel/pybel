@@ -8,22 +8,22 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
 .. code::
 
     {
-        pbc.SUBJECT: {
-            pbc.LOCATION: {
-                pbc.NAMESPACE: 'GOCC',
-                pbc.NAME: 'lysozome'
+        SUBJECT: {
+            LOCATION: {
+                NAMESPACE: 'GOCC',
+                NAME: 'lysozome'
             }
         },
-        pbc.RELATION: 'positiveCorrelation',
-        pbc.OBJECT: {
-            pbc.MODIFIER: pbc.ACTIVITY,
-            pbc.EFFECT: {
-                pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
-                pbc.NAME: 'kin',
+        RELATION: 'positiveCorrelation',
+        OBJECT: {
+            MODIFIER: ACTIVITY,
+            EFFECT: {
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
+                NAME: 'kin',
             }
         },
-        pbc.EVIDENCE: '...',
-        pbc.CITATION: { ... }
+        EVIDENCE: '...',
+        CITATION: { ... }
     }
 
 

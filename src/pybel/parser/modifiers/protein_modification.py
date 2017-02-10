@@ -17,15 +17,15 @@ For example, the node :code:`p(HGNC:GSK3B, pmod(P, S, 9))` is represented with t
 .. code::
 
     {
-        pbc.FUNCTION: pbc.PROTEIN,
-        pbc.NAMESPACE: 'HGNC',
-        pbc.NAME: 'GSK3B',
-        pbc.VARIANTS: [
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
+        VARIANTS: [
             {
-                pbc.KIND: pbc.PMOD,
-                pbc.IDENTIFIER: {
-                    pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
-                    pbc.NAME: 'Ph',
+                KIND: PMOD,
+                IDENTIFIER: {
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
+                    NAME: 'Ph',
 
                 },
                 PmodParser.CODE: 'Ser',
@@ -41,25 +41,25 @@ twice to become active. This results in the following:
 .. code::
 
     {
-        pbc.FUNCTION: pbc.PROTEIN,
-        pbc.NAMESPACE: 'HGNC',
-        pbc.NAME: 'MAPK1',
-        pbc.VARIANTS: [
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'MAPK1',
+        VARIANTS: [
             {
-                pbc.KIND: pbc.PMOD,
-                pbc.IDENTIFIER: {
-                    pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
-                    pbc.NAME: 'Ph',
+                KIND: PMOD,
+                IDENTIFIER: {
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
+                    NAME: 'Ph',
 
                 },
                 PmodParser.CODE: 'Thr',
                 PmodParser.POSITION: 202
             },
             {
-                pbc.KIND: pbc.PMOD,
-                pbc.IDENTIFIER: {
-                    pbc.NAMESPACE: pbc.BEL_DEFAULT_NAMESPACE
-                    pbc.NAME: 'Ph',
+                KIND: PMOD,
+                IDENTIFIER: {
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
+                    NAME: 'Ph',
 
                 },
                 PmodParser.CODE: 'Tyr',

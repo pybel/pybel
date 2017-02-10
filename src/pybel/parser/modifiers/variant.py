@@ -15,13 +15,13 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
 .. code::
 
    {
-        pbc.FUNCTION: pbc.PROTEIN,
-        pbc.NAMESPACE: 'HGNC',
-        pbc.NAME: 'GSK3B',
-        pbc.VARIANTS:  [
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
+        VARIANTS:  [
             {
-               pbc.KIND: pbc.HGVS,
-               pbc.IDENTIFIER: 'p.Gly123Arg'
+               KIND: HGVS,
+               IDENTIFIER: 'p.Gly123Arg'
             }
        ]
    }

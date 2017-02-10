@@ -11,17 +11,17 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
 .. code::
 
     {
-        pbc.FUNCTION: pbc.GENE,
-        pbc.FUSION: {
-            pbc.PARTNER_5P: {pbc.NAMESPACE: 'HGNC', pbc.NAME: 'BCR'},
-            pbc.PARTNER_3P: {pbc.NAMESPACE: 'HGNC', pbc.NAME: 'JAK2'},
-            pbc.RANGE_5P: {
+        FUNCTION: GENE,
+        FUSION: {
+            PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
+            PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
+            RANGE_5P: {
                 FusionParser.REFERENCE: 'c',
                 FusionParser.START: '?',
                 FusionParser.STOP: 1875
 
             },
-            pbc.RANGE_3P: {
+            RANGE_3P: {
                 FusionParser.REFERENCE: 'c',
                 FusionParser.START: 2626,
                 FusionParser.STOP: '?'

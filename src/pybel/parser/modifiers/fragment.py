@@ -4,7 +4,7 @@
 Fragments
 ~~~~~~~~~
 
-The addition of a fragment results in an entry called pbc.VARIANTS
+The addition of a fragment results in an entry called VARIANTS
 in the data dictionary associated with a given node. This entry is a list with dictionaries
 describing each of the variants. All variants have the entry 'kind' to identify whether it is
 a PTM, gene modification, fragment, or HGVS variant. The 'kind' value for a fragment is 'frag'.
@@ -17,12 +17,12 @@ For example, the node :code:`p(HGNC:GSK3B, frag(45_129))` is represented with th
 .. code::
 
     {
-        pbc.FUNCTION: pbc.PROTEIN,
-        pbc.NAMESPACE: 'HGNC',
-        pbc.NAME: 'GSK3B',
-        pbc.VARIANTS: [
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
+        VARIANTS: [
             {
-                pbc.KIND: pbc.FRAGMENT,
+                KIND: FRAGMENT,
                 FragmentParser.START: 45,
                 FragmentParser.STOP: 129
             }
@@ -39,12 +39,12 @@ is represented with the key 'missing' and the value of '?' like:
 .. code::
 
     {
-        pbc.FUNCTION: pbc.PROTEIN,
-        pbc.NAMESPACE: 'HGNC',
-        pbc.NAME: 'GSK3B',
-        pbc.VARIANTS: [
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
+        VARIANTS: [
             {
-                pbc.KIND: pbc.FRAGMENT,
+                KIND: FRAGMENT,
                 FragmentParser.MISSING: '?',
             }
         ]
