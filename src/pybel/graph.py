@@ -227,42 +227,42 @@ class BELGraph(nx.MultiDiGraph):
         :return: metadata derived from the BEL "Document" section
         :rtype: dict
         """
-        return self.graph[GRAPH_METADATA]
+        return self.graph.get(GRAPH_METADATA, {})
 
     @property
     def namespace_url(self):
         """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS file"""
-        return self.graph[GRAPH_NAMESPACE_URL]
+        return self.graph.get(GRAPH_NAMESPACE_URL, {})
 
     @property
     def namespace_owl(self):
         """A dictionary mapping the keywords used to create this graph to the URLs of the OWL file"""
-        return self.graph[GRAPH_NAMESPACE_OWL]
+        return self.graph.get(GRAPH_NAMESPACE_OWL, {})
 
     @property
     def namespace_pattern(self):
         """A dictionary mapping the namespace keywords used to create this graph to their regex patterns"""
-        return self.graph[GRAPH_NAMESPACE_PATTERN]
+        return self.graph.get(GRAPH_NAMESPACE_PATTERN, {})
 
     @property
     def annotation_url(self):
         """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO file"""
-        return self.graph[GRAPH_ANNOTATION_URL]
+        return self.graph.get(GRAPH_ANNOTATION_URL, {})
 
     @property
     def annotation_owl(self):
         """A dictionary mapping the annotation keywords to the URL of the OWL file"""
-        return self.graph[GRAPH_ANNOTATION_OWL]
+        return self.graph.get(GRAPH_ANNOTATION_OWL, {})
 
     @property
     def annotation_pattern(self):
         """A dictionary mapping the annotation keywords used in the creation of this graph to their regex patterns"""
-        return self.graph[GRAPH_ANNOTATION_PATTERN]
+        return self.graph.get(GRAPH_ANNOTATION_PATTERN, {})
 
     @property
     def annotation_list(self):
         """A dictionary mapping the keywords of locally defined annotations to a set of their values"""
-        return self.graph[GRAPH_ANNOTATION_LIST]
+        return self.graph.get(GRAPH_ANNOTATION_LIST, {})
 
     @property
     def pybel_version(self):
