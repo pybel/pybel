@@ -18,6 +18,7 @@ These documents refer to many aspects of the data model using constants, which c
 .. code-block:: python
 
     >>> from pybel.constants import *
+    >>> from pybel.parser.modifiers import FragmentParser, GmodParser, PmodParser, FusionParser
 
 Terms describing abundances, annotations, and other internal data are designated in :code:`pybel.constants`
 with full-caps, such as :code:`FUNCTION` and :code:`PROTEIN`.

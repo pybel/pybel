@@ -4,10 +4,10 @@
 Fragments
 ~~~~~~~~~
 
-The addition of a fragment results in an entry called VARIANTS
+The addition of a fragment results in an entry called :py:data:`VARIANTS`
 in the data dictionary associated with a given node. This entry is a list with dictionaries
-describing each of the variants. All variants have the entry 'kind' to identify whether it is
-a PTM, gene modification, fragment, or HGVS variant. The 'kind' value for a fragment is 'frag'.
+describing each of the variants. All variants have the entry :py:data:`KIND` to identify whether it is
+a PTM, gene modification, fragment, or HGVS variant. The :py:data:`KIND` value for a fragment is :py:data:`FRAGMENT`.
 
 Each fragment contains an identifier, which is a dictionary with the namespace and name, and can
 optionally include the position ('pos') and/or amino acid code ('code').
@@ -33,7 +33,7 @@ Additionally, nodes can have an asterick (*) or question mark (?) representing u
 or unknown fragments, respectively.
 
 A fragment may also be unknown, such as in the node :code:`p(HGNC:GSK3B, frag(?))`. This
-is represented with the key 'missing' and the value of '?' like:
+is represented with the key :py:data:`FragmentParser.MISSING` and the value of '?' like:
 
 
 .. code::
