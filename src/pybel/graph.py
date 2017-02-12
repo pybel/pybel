@@ -70,10 +70,7 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        #: Warnings are stored in a list of 4-tuples that is a property of the graph object.
-        #: This tuple respectively contains the line number, the line text, the exception instance, and the context
-        #: dictionary from the parser at the time of error.
-        self.warnings = []
+        self.graph[GRAPH_WARNINGS] = []
         self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
 
         if lines is not None:
@@ -277,6 +274,14 @@ class BELGraph(nx.MultiDiGraph):
     def pybel_version(self):
         """Stores the version of PyBEL with which this graph was produced as a string"""
         return self.graph[GRAPH_PYBEL_VERSION]
+
+    @property
+    def warnings(self):
+        """Warnings are stored in a list of 4-tuples that is a property of the graph object.
+        This tuple respectively contains the line number, the line text, the exception instance, and the context
+        dictionary from the parser at the time of error.
+        """
+        return self.graph[GRAPH_WARNINGS]
 
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""

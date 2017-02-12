@@ -82,7 +82,6 @@ Graph
 .. automodule:: pybel.graph
 
 .. autoclass:: pybel.BELGraph
-    :noindex:
     :exclude-members: parse_lines, parse_document, parse_definitions, parse_statements, nodes_iter, edges_iter, add_warning
     :members:
 
