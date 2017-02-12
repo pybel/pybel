@@ -1,24 +1,35 @@
 """
 
-For end users:
+PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux.
+
+.. warning:: PyBEL is not thoroughly tested on Windows.
+
+Installation
+------------
+
+Easiest
+~~~~~~~
 
 .. code-block:: sh
 
-   $ pip install pybel
+   $ pip3 install pybel
 
-For the latest and greatest:
+Get the Latest
+~~~~~~~~~~~~~~~
 
 .. code-block:: sh
 
-   $ pip install git+https://github.com/pybel/pybel.git@develop
+   $ pip3 install git+https://github.com/pybel/pybel.git@develop
 
-For development:
+For Developers
+~~~~~~~~~~~~~~
 
 .. code-block:: sh
 
    $ git clone https://github.com/pybel/pybel.git@develop
    $ cd pybel
-   $ pip install -e .
+   $ pip3 install -e .
+
 
 Caveats
 -------
@@ -33,21 +44,21 @@ Upgrading
 
 During the current development cycle, many models are being added and changed in the PyBEL schema. This might make
 programmatic access to the database with SQLAlchemy unstable. If you have any problems working with the database,
-try to remove the database either by running :code:`pybel manage remove` from the command line.
+try to remove it by running :code:`pybel manage remove` from the command line. PyBEL will build
+a new database and populate it on the next run.
 
 Future versions of PyBEL will include database integrity checks and provide upgrade procedures/scripts.
 """
 
-from . import graph
 from . import io
 from .canonicalize import to_bel
-from .graph import *
+from .graph import BELGraph
 from .io import *
 from .manager.graph_cache import to_database, from_database
 
-__all__ = ['to_database', 'from_database', 'to_bel'] + graph.__all__ + io.__all__
+__all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel'] + list(io.__all__)
 
-__version__ = '0.3.7'
+__version__ = '0.3.8'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'

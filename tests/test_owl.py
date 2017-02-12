@@ -5,34 +5,16 @@ import unittest
 from pathlib import Path
 
 import pybel
-from pybel.constants import ABUNDANCE, PROTEIN
+from pybel.constants import *
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
-from pybel.parser.language import value_map
+from pybel.parser.language import belns_encodings
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_3
 from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, expected_test_bel_4_metadata, \
     assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
 
 log = logging.getLogger('pybel')
-
-
-class TestOwlBase(unittest.TestCase):
-    def assertHasNode(self, g, n, **kwargs):
-        assertHasNode(self, n, g, **kwargs)
-
-    def assertHasEdge(self, g, u, v, **kwargs):
-        assertHasEdge(self, u, v, g, **kwargs)
-
-
-class TestOwlUtils(unittest.TestCase):
-    def test_value_error(self):
-        with self.assertRaises(ValueError):
-            OWLParser()
-
-    def test_invalid_owl(self):
-        with self.assertRaises(Exception):
-            parse_owl('http://example.com/not_owl')
 
 
 EXPECTED_PIZZA_NODES = {
@@ -50,6 +32,23 @@ EXPECTED_PIZZA_EDGES = {
     ('MeatTopping', 'Topping'),
     ('TomatoTopping', 'Topping')
 }
+
+class TestOwlBase(unittest.TestCase):
+    def assertHasNode(self, g, n, **kwargs):
+        assertHasNode(self, n, g, **kwargs)
+
+    def assertHasEdge(self, g, u, v, **kwargs):
+        assertHasEdge(self, u, v, g, **kwargs)
+
+
+class TestOwlUtils(unittest.TestCase):
+    def test_value_error(self):
+        with self.assertRaises(ValueError):
+            OWLParser()
+
+    def test_invalid_owl(self):
+        with self.assertRaises(Exception):
+            parse_owl('http://example.com/not_owl')
 
 
 class TestParsePizza(TestOwlBase):
@@ -97,7 +96,7 @@ class TestParsePizza(TestOwlBase):
 
         self.assertIn('PIZZA', parser.namespace_dict)
 
-        functions = set(value_map.keys())
+        functions = set(belns_encodings.keys())
         names = set(parser.namespace_dict['PIZZA'].keys())
         for node in EXPECTED_PIZZA_NODES:
             self.assertIn(node, names)
@@ -302,6 +301,10 @@ class TestWine(TestOwlBase):
         for node in sorted(self.expected_nodes):
             self.assertEqual(functions, ''.join(sorted(parser.namespace_dict['Wine'][node])))
 
+        # Check nothing bad happens
+        # with self.assertLogs('pybel', level='WARNING'):
+        parser.parseString(s)
+
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parser_annotation(self, m1, m2):
@@ -313,6 +316,10 @@ class TestWine(TestOwlBase):
 
         self.assertIn('Wine', parser.annotations_dict)
         self.assertLessEqual(self.expected_nodes, set(parser.annotations_dict['Wine']))
+
+        # Check nothing bad happens
+        # with self.assertLogs('pybel', level='WARNING'):
+        parser.parseString(s)
 
 
 class TestAdo(TestOwlBase):
@@ -433,7 +440,15 @@ class TestIntegration(TestOwlBase):
         self.assertHasNode(g, b)
         self.assertHasEdge(g, a, b)
 
-        annots = {'Wine': 'Cotturi'}
+        annots = {
+            CITATION: {
+                CITATION_NAME:'That one article from last week',
+                CITATION_REFERENCE: '123455',
+                CITATION_TYPE:'PubMed'
+            },
+            EVIDENCE: 'Made up support, not even qualifying as evidence',
+            ANNOTATIONS: {'Wine': 'Cotturi'}
+        }
         self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
         self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "TomatoTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
         self.assertHasEdge(g, (ABUNDANCE, 'WINE', 'WhiteWine'), (ABUNDANCE, "PIZZA", "FishTopping"), **annots)

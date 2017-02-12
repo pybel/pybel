@@ -9,12 +9,17 @@ from pybel.parser.parse_identifier import IdentifierParser
 
 class TestIdentifierParser(unittest.TestCase):
     def setUp(self):
-        nsd = {
+        self.namespace_dicts = {
             'A': {'1', '2', '3'},
             'B': {'4', '5', '6'}
         }
 
-        self.parser = IdentifierParser(valid_namespaces=nsd)
+        self.namespace_re = {
+
+        }
+
+        self.parser = IdentifierParser(
+            namespace_dicts=self.namespace_dicts)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -64,7 +69,7 @@ class TestNamespaceParserDefault(unittest.TestCase):
 
         dns = {'X', 'Y', 'W Z'}
 
-        self.parser = IdentifierParser(valid_namespaces=nsd, default_namespace=dns)
+        self.parser = IdentifierParser(namespace_dicts=nsd, default_namespace=dns)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -102,7 +107,7 @@ class TestNamespaceParserLenient(unittest.TestCase):
             'B': {'4', '5', '6'}
         }
 
-        self.parser = IdentifierParser(valid_namespaces=nsd, allow_naked_names=True)
+        self.parser = IdentifierParser(namespace_dicts=nsd, allow_naked_names=True)
 
     def test_valid_1(self):
         s = 'A:3'

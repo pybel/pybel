@@ -28,7 +28,7 @@ owl_tag = Suppress(BEL_KEYWORD_OWL)
 set_tag = Suppress(BEL_KEYWORD_SET)
 define_tag = Suppress(BEL_KEYWORD_DEFINE)
 
-function_tags = Word(''.join(language.value_map))
+function_tags = Word(''.join(language.belns_encodings))
 
 value = quote | ppc.identifier
 
@@ -36,7 +36,9 @@ value = quote | ppc.identifier
 class MetadataParser(BaseParser):
     """Parser for the document and definitions section of a BEL document.
 
-    See: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define
+    .. seealso::
+
+        BEL 1.0 Specification for the `DEFINE <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define>`_ keyword
     """
 
     def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, namespace_re=None,
@@ -102,38 +104,34 @@ class MetadataParser(BaseParser):
             self.namespace_pattern
         ])
 
-    def get_language(self):
-        return self.language
+        BaseParser.__init__(self, self.language)
 
     def handle_document(self, s, l, tokens):
         key = tokens['key']
+        value = tokens['value']
 
         if key not in language.document_keys:
-            raise InvalidMetadataException('Invalid document metadata key: {}'.format(key))
+            raise InvalidMetadataException(key, value)
 
         norm_key = language.document_keys[key]
 
         if norm_key in self.document_metadata:
-            log.warning('Tried to overwrite metadata: {}'.format(key))
+            log.warning('Tried to overwrite metadata: %s', key)
+            return tokens
 
-        self.document_metadata[norm_key] = tokens['value']
+        self.document_metadata[norm_key] = value
 
         return tokens
 
     def handle_namespace_url(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.namespace_dict:
-            log.warning('Tried to overwrite namespace: {}'.format(name))
+        if self.namespace_is_defined(name):
+            log.warning('Tried to overwrite namespace: %s', name)
             return tokens
 
         url = tokens['url']
-        url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
-
         terms = self.cache_manager.get_namespace(url)
-
-        if 0 == len(terms):
-            raise ValueError("Empty Namespace: {}".format(url))
 
         self.namespace_dict[name] = terms
         self.namespace_url_dict[name] = url
@@ -143,42 +141,41 @@ class MetadataParser(BaseParser):
     def handle_namespace_owl(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.namespace_dict:
-            log.warning('Tried to overwrite owl namespace: {}'.format(name))
+        if self.namespace_is_defined(name):
+            log.warning('Tried to overwrite owl namespace: %s', name)
             return tokens
 
-        if 'functions' not in tokens:
-            functions = set(language.value_map)
-        elif not all(x in language.value_map for x in tokens['functions']):
-            raise ValueError("Illegal semantic definition: {}".format(tokens['functions']))
-        else:
-            functions = set(tokens['functions'])
+        functions = set(tokens['functions'] if 'functions' in tokens else language.belns_encodings)
 
         url = tokens['url']
 
         terms = self.cache_manager.get_namespace_owl_terms(url)
-
-        if 0 == len(terms):
-            raise ValueError("Empty ontology: {}".format(url))
 
         self.namespace_dict[name] = {term: functions for term in terms}
         self.namespace_owl_dict[name] = url
 
         return tokens
 
+    def handle_namespace_pattern(self, s, l, tokens):
+        name = tokens['name']
+
+        if self.namespace_is_defined(name):
+            log.warning('Tried to overwrite namespace: {}'.format(name))
+            return tokens
+
+        self.namespace_re[name] = tokens['value']
+        return tokens
+
     def handle_annotation_owl(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.annotations_dict:
-            log.warning('Tried to overwrite owl annotation: {}'.format(name))
+        if self.annotation_is_defined(name):
+            log.warning('Tried to overwrite annotation: {}'.format(name))
             return tokens
 
         url = tokens['url']
 
         terms = self.cache_manager.get_annotation_owl_terms(url)
-
-        if 0 == len(terms):
-            raise ValueError("Empty ontology: {}".format(url))
 
         self.annotations_dict[name] = set(terms)
         self.annotations_owl_dict[name] = url
@@ -188,12 +185,11 @@ class MetadataParser(BaseParser):
     def handle_annotations_url(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.annotations_dict:
-            log.warning('Tried to overwrite annotation: {}'.format(name))
+        if self.annotation_is_defined(name):
+            log.warning('Tried to overwrite annotation: %s', name)
             return tokens
 
         url = tokens['url']
-        url = url.replace('http://resource.belframework.org', 'http://resources.openbel.org')
 
         self.annotations_dict[name] = self.cache_manager.get_annotation(url)
         self.annotation_url_dict[name] = url
@@ -203,7 +199,7 @@ class MetadataParser(BaseParser):
     def handle_annotation_list(self, s, l, tokens):
         name = tokens['name']
 
-        if name in self.annotations_dict:
+        if self.annotation_is_defined(name):
             log.warning('Tried to overwrite annotation: {}'.format(name))
             return tokens
 
@@ -215,23 +211,17 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_pattern(self, s, l, tokens):
-        # TODO implement
-        raise NotImplementedError('Custom annotation regex matching not yet implemented')
-
-    def handle_namespace_pattern(self, s, l, tokens):
         name = tokens['name']
-        self.namespace_re[name] = tokens['value']
+
+        if self.annotation_is_defined(name):
+            log.warning('Tried to overwrite annotation: {}'.format(name))
+            return tokens
+
+        self.annotations_re[name] = tokens['value']
         return tokens
 
-    def dump(self):
-        """Dumps the contents of this metadata parser to a dictionary
+    def annotation_is_defined(self, key):
+        return key in self.annotations_dict or key in self.annotations_re
 
-        :return: The contents of this metadata parser as a dictionary
-        :rtype: dict
-        """
-        return {
-            'namespace': self.namespace_dict.copy(),
-            'namespace_re': self.namespace_re.copy(),
-            'annotations': self.annotations_dict.copy(),
-            'annotations_re': self.annotations_re.copy(),
-        }
+    def namespace_is_defined(self, key):
+        return key in self.namespace_dict or key in self.namespace_re

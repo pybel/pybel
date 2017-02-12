@@ -13,32 +13,33 @@ The previous statements both produce the underlying data:
 .. code::
 
     {
-        'function': 'Protein',
-        'identifier': {
-            'namespace': 'HGNC',
-            'name': 'APP'
-        },
-        'variants': [
+        FUNCTION: GENE,
+        NAMESPACE: 'HGNC',
+        NAME: 'APP',
+        VARIANTS: [
             {
-                'kind': 'hgvs',
-                'identifier': 'p.Arg275His'
+                KIND: HGVS,
+                IDENTIFIER: 'p.Arg275His'
             }
         ]
     }
 
-.. seealso:: http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2
+.. seealso::
+
+    BEL 2.0 specification on `protein substitutions <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
 """
 
 import logging
 
 from pyparsing import pyparsing_common as ppc
 
-from .variant import VariantParser
 from ..baseparser import BaseParser, one_of_tags, nest
 from ..language import amino_acid
-from ...constants import HGVS, KIND
+from ...constants import HGVS, KIND, IDENTIFIER
 
 log = logging.getLogger(__name__)
+
+psub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
 
 
 class PsubParser(BaseParser):
@@ -47,20 +48,18 @@ class PsubParser(BaseParser):
     VARIANT = 'variant'
 
     def __init__(self):
-        psub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
         self.language = psub_tag + nest(amino_acid(self.REFERENCE),
                                         ppc.integer(self.POSITION),
                                         amino_acid(self.VARIANT))
         self.language.setParseAction(self.handle_psub)
 
+        BaseParser.__init__(self, self.language)
+
     def handle_psub(self, s, l, tokens):
         upgraded = 'p.{}{}{}'.format(tokens[self.REFERENCE], tokens[self.POSITION], tokens[self.VARIANT])
         log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', s, upgraded)
-        tokens[VariantParser.IDENTIFIER] = upgraded
+        tokens[IDENTIFIER] = upgraded
         del tokens[self.REFERENCE]
         del tokens[self.POSITION]
         del tokens[self.VARIANT]
         return tokens
-
-    def get_language(self):
-        return self.language

@@ -48,7 +48,7 @@ Development |develop_build| |develop_coverage| |develop_documentation|
     :alt: Apache 2.0 License
 
 
-Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular
+Biological Expression Language (BEL) is a domain-specific language that enables the expression of complex molecular
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
 complex disease networks with several thousands of relationships.
@@ -62,17 +62,9 @@ use it to interface with BEL graphs, but is built on a rich framework that can b
    >>> g = pybel.from_url('http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel')
    >>> networkx.draw(g)  # NOTE: requires matplotlib as a dependency, which isn't automatically installed
 
-Command Line Interface
-----------------------
-
 PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
 conversion. Need help? All logs go to :code:`~/.pybel` or add :code:`-v` for verbose output to the standard error
-stream
-
-Export for Cytoscape
-~~~~~~~~~~~~~~~~~~~~
-
-This example retrieves a BEL file from a path and exports to a GraphML file for use in Cytoscape.
+stream. In this example, a BEL file is exported to GraphML for viewing in Cytoscape.
 
 .. code-block:: sh
 
@@ -80,29 +72,6 @@ This example retrieves a BEL file from a path and exports to a GraphML file for 
    
 In Cytoscape, open with :code:`Import > Network > From File`.
 
-Export to Neo4j
-~~~~~~~~~~~~~~~
-
-This example retrieves a BEL file from a URL, and exports to Neo4j
-
-.. code-block:: sh
-
-   $ URL="http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel"
-   $ NEO="neo4j:neo4j@localhost:7474"
-   $
-   $ pybel convert --url $URL --neo $NEO
-
-Multiple Export
-~~~~~~~~~~~~~~~
-
-This example gets a file from stdin and exports to multiple locations, with logging
-
-.. code-block:: sh
-
-   $ URL="http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel"
-   $ NEO="neo4j:neo4j@localhost:7474"
-   $
-   $ curl $URL | pybel convert --neo $NEO --json ~/Desktop/example.json --log-file ~/Desktop/log.txt
 
 Installation
 ------------
@@ -117,8 +86,8 @@ your favorite terminal:
 
    pip install pybel
 
-See the `documentation <http://pybel.readthedocs.io/>`_ for more advanced instructions. Also, check the change log
-at :code:`CHANGELOG.rst`.
+See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
+instructions. Also, check the change log at :code:`CHANGELOG.rst`.
 
 Contributing
 ------------

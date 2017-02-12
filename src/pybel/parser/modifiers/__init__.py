@@ -15,20 +15,20 @@ from .protein_substitution import PsubParser
 from .truncation import TruncParser
 from .variant import VariantParser
 from ..language import dna_nucleotide_labels, rna_nucleotide_labels
-from ...constants import KIND, PMOD, NAMESPACE, NAME, GMOD, FRAGMENT, HGVS
+from ...constants import KIND, PMOD, NAMESPACE, NAME, GMOD, FRAGMENT, HGVS, IDENTIFIER
 
 
 def canonicalize_hgvs(tokens):
-    return tokens[KIND], tokens[VariantParser.IDENTIFIER]
+    return tokens[KIND], tokens[IDENTIFIER]
 
 
 def canonicalize_pmod(tokens):
-    return (PMOD, (tokens[PmodParser.IDENTIFIER][NAMESPACE], tokens[PmodParser.IDENTIFIER][NAME])) + tuple(
+    return (PMOD, (tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])) + tuple(
         tokens[key] for key in PmodParser.ORDER[2:] if key in tokens)
 
 
 def canonicalize_gmod(tokens):
-    return (GMOD, (tokens[GmodParser.IDENTIFIER][NAMESPACE], tokens[GmodParser.IDENTIFIER][NAME])) + tuple(
+    return (GMOD, (tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])) + tuple(
         tokens[key] for key in GmodParser.ORDER[2:] if key in tokens)
 
 
@@ -51,8 +51,8 @@ def canonicalize_variant(tokens):
         return canonicalize_pmod(tokens)
     elif tokens[KIND] == GMOD:
         return canonicalize_gmod(tokens)
-    elif tokens[KIND] == FRAGMENT:
-        return canonicalize_frag(tokens)
+    # elif tokens[KIND] == FRAGMENT:
+    return canonicalize_frag(tokens)
 
 
 dna_nucleotide_seq = Word(''.join(dna_nucleotide_labels.keys()))

@@ -9,8 +9,6 @@ import networkx as nx
 import requests
 from requests_file import FileAdapter
 
-from .constants import PYBEL_DEFAULT_NAMESPACE, NAMESPACE, NAME
-
 log = logging.getLogger('pybel')
 
 
@@ -41,6 +39,9 @@ def download_url(url):
 
         value_dict[key] = sline[1].strip() if len(sline) == 2 else None
 
+    if not value_dict:
+        raise ValueError('Downloaded empty file: {}'.format(url))
+
     res = {}
     res.update({k: dict(v) for k, v in metadata_config.items()})
     res['Values'] = value_dict
@@ -69,7 +70,7 @@ def expand_dict(flat_dict, sep='_'):
     return res
 
 
-def flatten(d, parent_key='', sep='_'):
+def flatten_dict(d, parent_key='', sep='_'):
     """Flattens a nested dictionary
 
     Borrowed from http://stackoverflow.com/a/6027615
@@ -78,7 +79,7 @@ def flatten(d, parent_key='', sep='_'):
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
         if isinstance(v, collections.MutableMapping):
-            items.extend(flatten(v, new_key, sep=sep).items())
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
         elif isinstance(v, (set, list)):
             items.append((new_key, ','.join(v)))
         else:
@@ -100,11 +101,6 @@ def flatten_graph_data(graph):
         g.add_node(node, data)
 
     for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten(data))
+        g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
 
     return g
-
-
-def default_identifier(s):
-    """Convenience function for building a default namespace/name pair"""
-    return {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: s}

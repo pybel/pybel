@@ -20,9 +20,9 @@ import sys
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../src'))
 
 # -- General configuration ------------------------------------------------
 
@@ -68,7 +68,7 @@ author = u'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.3.7'
+release = '0.3.8'
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -363,7 +363,7 @@ intersphinx_mapping = {
 }
 
 autodoc_member_order = 'bysource'
-autoclass_content = 'init'
+autoclass_content = 'both'
 
 if os.environ.get('READTHEDOCS', None):
     tags.add('readthedocs')

@@ -58,6 +58,12 @@ class BaseParser:
     Multiple parsers can be easily chained together when they are all inheriting from this base class
     """
 
+    def __init__(self, language, streamline=False):
+        self.language = language
+
+        if streamline:
+            self.streamline()
+
     def parse_lines(self, l):
         """Parses multiple lines successively"""
         return [self.parseString(line) for line in l]
@@ -67,15 +73,9 @@ class BaseParser:
         :param s: input string
         :type s: str
         """
-        return self.get_language().parseString(s)
-
-    def get_language(self):
-        """Gets the language represented by this parser"""
-        if not hasattr(self, 'language'):
-            raise Exception('Language not defined')
-        return self.language
+        return self.language.parseString(s)
 
     def streamline(self):
         t = time.time()
-        self.get_language().streamline()
-        log.info('Finished streamlining parser in %.02fs', time.time() - t)
+        self.language.streamline()
+        log.info('Finished streamlining %s in %.02fs', self.__class__.__name__, time.time() - t)

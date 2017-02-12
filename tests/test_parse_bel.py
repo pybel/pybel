@@ -4,24 +4,27 @@ import logging
 import unittest
 
 from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
-from pybel.constants import HGVS, FUNCTION, ACTIVITY, ABUNDANCE, \
-    PATHOLOGY, BIOPROCESS, MIRNA, COMPLEX, REACTION, COMPOSITE, VARIANTS
-from pybel.constants import KIND, PMOD, GMOD, FRAGMENT, PYBEL_DEFAULT_NAMESPACE, PARTNER_3P, PARTNER_5P, RANGE_3P, \
-    RANGE_5P, NAMESPACE, NAME, LOCATION
-from pybel.constants import PROTEIN, GENE, RNA, DEGRADATION, \
-    TRANSFORMATION, TRANSLOCATION, IDENTIFIER, FUSION, FROM_LOC, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO
-from pybel.constants import RELATION, EQUIVALENT_TO, SUBJECT, OBJECT, MODIFIER, TARGET, EFFECT, HAS_MEMBER
+from pybel.constants import *
 from pybel.parser.modifiers import FusionParser, LocationParser, GmodParser, FragmentParser, PmodParser
 from pybel.parser.modifiers import GsubParser, TruncParser, PsubParser, VariantParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
-from pybel.utils import default_identifier
-from tests.constants import TestTokenParserBase, test_citation_bel, test_evidence_bel, build_variant_dict
+from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict, \
+    test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)
 
 TEST_GENE_VARIANT = 'c.308G>A'
 TEST_PROTEIN_VARIANT = 'p.Phe508del'
+
+
+def identifier(namespace, name):
+    return {NAMESPACE: namespace, NAME: name}
+
+
+def default_identifier(name):
+    """Convenience function for building a default namespace/name pair"""
+    return identifier(BEL_DEFAULT_NAMESPACE, name)
 
 
 class TestVariantParser(unittest.TestCase):
@@ -99,7 +102,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
             PmodParser.CODE: 'Ser',
             PmodParser.POSITION: 473
         }
@@ -111,7 +114,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
             PmodParser.CODE: 'Ser',
         }
         self.assertEqual(expected, result.asDict())
@@ -122,7 +125,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
         }
         self.assertEqual(expected, result.asDict())
 
@@ -132,7 +135,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace=PYBEL_DEFAULT_NAMESPACE, name='Ph'),
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
             PmodParser.CODE: 'Ser',
             PmodParser.POSITION: 473
         }
@@ -144,7 +147,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            PmodParser.IDENTIFIER: dict(namespace='MOD', name='PhosRes'),
+            IDENTIFIER: identifier('MOD', 'PhosRes'),
             PmodParser.CODE: 'Ser',
             PmodParser.POSITION: 473
         }
@@ -157,7 +160,7 @@ class TestGmod(unittest.TestCase):
 
         self.expected = {
             KIND: GMOD,
-            GmodParser.IDENTIFIER: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Me'}
+            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Me')
         }
 
     def test_gmod_short(self):
@@ -285,9 +288,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: 1,
-                FusionParser.RIGHT: 79
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: 1,
+                FusionParser.STOP: 79
 
             },
             PARTNER_3P: {
@@ -295,9 +298,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: 312,
-                FusionParser.RIGHT: 5034
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: 312,
+                FusionParser.STOP: 5034
             }
         }
 
@@ -339,9 +342,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: 1,
-                FusionParser.RIGHT: 79
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: 1,
+                FusionParser.STOP: 79
 
             },
             PARTNER_3P: {
@@ -349,9 +352,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: '?',
-                FusionParser.RIGHT: 1
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: '?',
+                FusionParser.STOP: 1
             }
         }
 
@@ -368,9 +371,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: 1,
-                FusionParser.RIGHT: '?'
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: 1,
+                FusionParser.STOP: '?'
 
             },
             PARTNER_3P: {
@@ -378,9 +381,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REF: 'r',
-                FusionParser.LEFT: '?',
-                FusionParser.RIGHT: 1
+                FusionParser.REFERENCE: 'r',
+                FusionParser.START: '?',
+                FusionParser.STOP: 1
             }
         }
 
@@ -541,7 +544,7 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
+                    IDENTIFIER: TEST_PROTEIN_VARIANT
                 }
             ]
 
@@ -558,7 +561,7 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'p.Phe508del'
+                    IDENTIFIER: 'p.Phe508del'
                 }
             ]
         })
@@ -585,13 +588,13 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: GMOD,
-                    GmodParser.IDENTIFIER: default_identifier('Me')
+                    IDENTIFIER: default_identifier('Me')
                 }
             ]
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = GENE, 'HGNC', 'AKT1', (GMOD, (PYBEL_DEFAULT_NAMESPACE, 'Me'))
+        expected_node = GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: GENE})
 
@@ -616,7 +619,7 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT
+                    IDENTIFIER: TEST_GENE_VARIANT
                 }
             ]
         }
@@ -648,7 +651,8 @@ class TestGene(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_GENE_VARIANT}
+                    IDENTIFIER: TEST_GENE_VARIANT
+                }
             ],
             LOCATION: {
                 NAMESPACE: 'GOCC',
@@ -709,15 +713,15 @@ class TestGene(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REF: 'c',
-                    FusionParser.LEFT: 1,
-                    FusionParser.RIGHT: 79
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 1,
+                    FusionParser.STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'c',
-                    FusionParser.LEFT: 312,
-                    FusionParser.RIGHT: 5034
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 312,
+                    FusionParser.STOP: 5034
                 }
             }
         }
@@ -741,15 +745,15 @@ class TestGene(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REF: 'c',
-                    FusionParser.LEFT: '?',
-                    FusionParser.RIGHT: 1875
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: '?',
+                    FusionParser.STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'c',
-                    FusionParser.LEFT: 2626,
-                    FusionParser.RIGHT: '?'
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 2626,
+                    FusionParser.STOP: '?'
                 }
             }
         }
@@ -827,7 +831,7 @@ class TestGene(TestTokenParserBase):
             FUNCTION: GENE,
             IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CFTR'},
             VARIANTS: [
-                {KIND: HGVS, VariantParser.IDENTIFIER: 'c.1521_1523delCTT'}
+                {KIND: HGVS, IDENTIFIER: 'c.1521_1523delCTT'}
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -933,7 +937,7 @@ class TestMiRNA(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
+                    IDENTIFIER: TEST_PROTEIN_VARIANT
                 },
             ]
         }
@@ -962,7 +966,7 @@ class TestMiRNA(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'p.Phe508del'
+                    IDENTIFIER: 'p.Phe508del'
                 },
             ],
             LOCATION: {
@@ -1061,7 +1065,7 @@ class TestProtein(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'p.Ala127Tyr'
+                    IDENTIFIER: 'p.Ala127Tyr'
                 },
                 {
                     KIND: PMOD,
@@ -1073,7 +1077,7 @@ class TestProtein(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser'))
+        node = (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser'))
         self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node, function=PROTEIN)
 
@@ -1094,15 +1098,15 @@ class TestProtein(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REF: 'p',
-                    FusionParser.LEFT: 1,
-                    FusionParser.RIGHT: 79
+                    FusionParser.REFERENCE: 'p',
+                    FusionParser.START: 1,
+                    FusionParser.STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'p',
-                    FusionParser.LEFT: 312,
-                    FusionParser.RIGHT: 5034
+                    FusionParser.REFERENCE: 'p',
+                    FusionParser.START: 312,
+                    FusionParser.STOP: 5034
 
                 }
             }
@@ -1128,15 +1132,15 @@ class TestProtein(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REF: 'p',
-                    FusionParser.LEFT: '?',
-                    FusionParser.RIGHT: 1875
+                    FusionParser.REFERENCE: 'p',
+                    FusionParser.START: '?',
+                    FusionParser.STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'p',
-                    FusionParser.LEFT: 2626,
-                    FusionParser.RIGHT: '?'
+                    FusionParser.REFERENCE: 'p',
+                    FusionParser.START: 2626,
+                    FusionParser.STOP: '?'
 
                 }
             }
@@ -1233,7 +1237,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(Ph, S, 473))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = (PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473))
+        expected_node = (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
@@ -1250,7 +1254,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEIN, 'HGNC', 'AKT1', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)
+        expected_node = PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
@@ -1286,7 +1290,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:HRAS, pmod(Palm))'
         result = self.parser.protein.parseString(statement)
 
-        expected_node = PROTEIN, 'HGNC', 'HRAS', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Palm'))
+        expected_node = PROTEIN, 'HGNC', 'HRAS', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Palm'))
         self.assertEqual(expected_node, canonicalize_node(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
@@ -1579,11 +1583,11 @@ class TestRna(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: TEST_PROTEIN_VARIANT
+                    IDENTIFIER: TEST_PROTEIN_VARIANT
                 },
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'c.1521_1523delCTT'
+                    IDENTIFIER: 'c.1521_1523delCTT'
                 }
             ]
         }
@@ -1613,15 +1617,15 @@ class TestRna(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REF: 'r',
-                    FusionParser.LEFT: 1,
-                    FusionParser.RIGHT: 79
+                    FusionParser.REFERENCE: 'r',
+                    FusionParser.START: 1,
+                    FusionParser.STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'r',
-                    FusionParser.LEFT: 312,
-                    FusionParser.RIGHT: 5034
+                    FusionParser.REFERENCE: 'r',
+                    FusionParser.START: 312,
+                    FusionParser.STOP: 5034
                 }
             }
         }
@@ -1670,15 +1674,15 @@ class TestRna(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REF: 'r',
-                    FusionParser.LEFT: '?',
-                    FusionParser.RIGHT: 1875
+                    FusionParser.REFERENCE: 'r',
+                    FusionParser.START: '?',
+                    FusionParser.STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REF: 'r',
-                    FusionParser.LEFT: 2626,
-                    FusionParser.RIGHT: '?'
+                    FusionParser.REFERENCE: 'r',
+                    FusionParser.START: 2626,
+                    FusionParser.STOP: '?'
                 }
             }
 
@@ -1726,7 +1730,7 @@ class TestRna(TestTokenParserBase):
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    VariantParser.IDENTIFIER: 'r.1521_1523delcuu'
+                    IDENTIFIER: 'r.1521_1523delcuu'
                 }
             ]
         }
@@ -1959,7 +1963,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             },
             TARGET: {
                 FUNCTION: PROTEIN,
@@ -1973,7 +1977,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -1987,7 +1991,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'cat',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             },
             TARGET: {
                 FUNCTION: PROTEIN,
@@ -2001,7 +2005,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'cat',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -2043,7 +2047,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             },
             TARGET: {
                 FUNCTION: PROTEIN,
@@ -2057,7 +2061,7 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         }
         self.assertEqual(expected_mod, mod)
@@ -2248,14 +2252,14 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
-            TRANSFORMATION: REACTION,
-            'reactants': [
+            FUNCTION: REACTION,
+            REACTANTS: [
                 {
                     FUNCTION: ABUNDANCE,
                     IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'superoxide'}
                 }
             ],
-            'products': [
+            PRODUCTS: [
                 {
                     FUNCTION: ABUNDANCE,
                     IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
@@ -2307,11 +2311,8 @@ class TestTransformation(TestTokenParserBase):
 class TestRelations(TestTokenParserBase):
     def setUp(self):
         TestTokenParserBase.setUp(self)
-        self.parser.parseString(test_citation_bel)
-        self.parser.parseString(test_evidence_bel)
-
-    def test_language(self):
-        self.assertIsNotNone(self.parser.get_language())
+        self.parser.parseString(SET_CITATION_TEST)
+        self.parser.parseString(test_set_evidence)
 
     def test_increases(self):
         """
@@ -2417,15 +2418,15 @@ class TestRelations(TestTokenParserBase):
                 },
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE},
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE},
             },
             RELATION: 'decreases',
             OBJECT: {
-                TRANSFORMATION: REACTION,
-                'reactants': [
+                FUNCTION: REACTION,
+                REACTANTS: [
                     {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5R1'}}
                 ],
-                'products': [
+                PRODUCTS: [
                     {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5'}}
                 ]
 
@@ -2454,7 +2455,7 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             }
@@ -2502,10 +2503,12 @@ class TestRelations(TestTokenParserBase):
         Tests simple triple"""
         statement = 'g(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
 
-        self.parser.control_parser.annotations.update({
-            'ListAnnotation': set('ab'),
+        annotations = {
+            'ListAnnotation': {'a', 'b'},
             'ScalarAnnotation': 'c'
-        })
+        }
+
+        self.parser.control_parser.annotations.update(annotations)
 
         result = self.parser.relation.parseString(statement)
 
@@ -2515,7 +2518,7 @@ class TestRelations(TestTokenParserBase):
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CAT'},
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
-            RELATION: 'directlyDecreases',
+            RELATION: DIRECTLY_DECREASES,
             OBJECT: {
                 FUNCTION: ABUNDANCE,
                 IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
@@ -2533,11 +2536,22 @@ class TestRelations(TestTokenParserBase):
             SUBJECT: {
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
-            RELATION: 'directlyDecreases',
+            RELATION: DIRECTLY_DECREASES,
+            CITATION: test_citation_dict,
+            EVIDENCE: test_evidence_text
         }
-        self.assertEqual(2, self.parser.graph.number_of_edges())
-        self.assertHasEdge(sub, obj, ListAnnotation='a', ScalarAnnotation='c', **expected_attrs)
-        self.assertHasEdge(sub, obj, ListAnnotation='b', ScalarAnnotation='c', **expected_attrs)
+
+        expected_attrs[ANNOTATIONS] = {
+            'ListAnnotation': 'a',
+            'ScalarAnnotation': 'c'
+        }
+        self.assertHasEdge(sub, obj, **expected_attrs)
+
+        expected_attrs[ANNOTATIONS] = {
+            'ListAnnotation': 'b',
+            'ScalarAnnotation': 'c'
+        }
+        self.assertHasEdge(sub, obj, **expected_attrs)
 
     def test_rateLimitingStepOf_subjectActivity(self):
         """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof"""
@@ -2553,7 +2567,7 @@ class TestRelations(TestTokenParserBase):
                 },
                 EFFECT: {
                     NAME: 'cat',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
             },
             RELATION: 'rateLimitingStepOf',
@@ -2587,7 +2601,7 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [
                     {
                         KIND: HGVS,
-                        VariantParser.IDENTIFIER: 'c.275341G>C'
+                        IDENTIFIER: 'c.275341G>C'
                     }
                 ]
             },
@@ -2619,7 +2633,7 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
                 TARGET: {
                     FUNCTION: COMPLEX,
@@ -2634,7 +2648,7 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
                 TARGET: {
                     FUNCTION: PROTEIN,
@@ -2675,7 +2689,7 @@ class TestRelations(TestTokenParserBase):
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
         self.parser.allow_nested = True
 
-        result = self.parser.relation.parseString(statement)
+        self.parser.relation.parseString(statement)
 
         self.assertHasEdge((PROTEIN, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', "hydrogen peroxide"))
         self.assertHasEdge((ABUNDANCE, 'CHEBI', "hydrogen peroxide"),
@@ -2695,7 +2709,7 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'kin',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
                 TARGET: {
                     FUNCTION: PROTEIN,
@@ -2709,7 +2723,7 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [
                     {
                         KIND: PMOD,
-                        IDENTIFIER: {NAMESPACE: PYBEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
+                        IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
                     }
                 ]
             }
@@ -2719,7 +2733,7 @@ class TestRelations(TestTokenParserBase):
         sub = PROTEIN, 'SFAM', 'GSK3 Family'
         self.assertHasNode(sub)
 
-        obj = PROTEIN, 'HGNC', 'MAPT', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'))
+        obj = PROTEIN, 'HGNC', 'MAPT', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'))
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation=expected_dict[RELATION])
@@ -2739,8 +2753,8 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [
                     {
                         KIND: PMOD,
+                        IDENTIFIER: default_identifier('Ph'),
                         PmodParser.CODE: 'Ser',
-                        PmodParser.IDENTIFIER: default_identifier('Ph'),
                         PmodParser.POSITION: 9
                     }
                 ]
@@ -2754,13 +2768,13 @@ class TestRelations(TestTokenParserBase):
                 },
                 EFFECT: {
                     NAME: 'kin',
-                    NAMESPACE: PYBEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
                 }
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        subject_node = PROTEIN, 'HGNC', 'GSK3B', (PMOD, (PYBEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)
+        subject_node = PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)
         self.assertHasNode(subject_node)
 
         object_node = PROTEIN, 'HGNC', 'GSK3B'
@@ -2925,7 +2939,7 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [
                     {
                         KIND: HGVS,
-                        VariantParser.IDENTIFIER: 'c.123G>A'
+                        IDENTIFIER: 'c.123G>A'
                     }
                 ]
             }
@@ -2993,7 +3007,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
-        result = self.parser.parseString(statement)
+        self.parser.parseString(statement)
 
 
 class TestWrite(TestTokenParserBase):
@@ -3015,7 +3029,9 @@ class TestWrite(TestTokenParserBase):
             'g(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))',
             'g(fus(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.312_5034))',
             'g(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.?_5034))',
-            ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))')
+            ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'),
+            ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1, ?, ?))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'),
+            'g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))',
         ]
 
         for case in cases:

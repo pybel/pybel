@@ -15,39 +15,35 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
 .. code::
 
    {
-       'function': 'Protein',
-       'identifier': {
-           'namespace': 'HGNC',
-           'name': 'GSK3B'
-       },
-       'variants': [
-           {
-               'kind': 'hgvs',
-               'identifier': 'p.Gly123Arg'
-           }
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
+        VARIANTS:  [
+            {
+               KIND: HGVS,
+               IDENTIFIER: 'p.Gly123Arg'
+            }
        ]
    }
 
 
 .. seealso::
 
-    - http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
-    - HVGS for conventions http://www.hgvs.org/mutnomen/recs.html
+    - BEL 2.0 specification on `variants <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var>`_
+    - HVGS `conventions <http://www.hgvs.org/mutnomen/recs.html>`_
 """
 
 from pyparsing import Word, alphanums
 
 from ..baseparser import BaseParser, one_of_tags, nest
-from ...constants import HGVS, KIND
+from ...constants import HGVS, KIND, IDENTIFIER
+
+variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)
+variant_characters = Word(alphanums + '._*=?>')
 
 
 class VariantParser(BaseParser):
-    IDENTIFIER = 'identifier'
-
     def __init__(self):
-        variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)
-        variant_characters = Word(alphanums + '._*=?>')
-        self.language = variant_tags + nest(variant_characters(self.IDENTIFIER))
+        self.language = variant_tags + nest(variant_characters(IDENTIFIER))
 
-    def get_language(self):
-        return self.language
+        BaseParser.__init__(self, self.language)

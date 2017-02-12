@@ -1,0 +1,339 @@
+# -*- coding: utf-8 -*-
+
+import logging
+import unittest
+
+from pybel.constants import EVIDENCE, CITATION, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE, CITATION_AUTHORS, \
+    CITATION_DATE, CITATION_COMMENTS, ANNOTATIONS
+from pybel.parser import ControlParser
+from pybel.parser.parse_exceptions import *
+from pybel.parser.utils import sanitize_file_lines
+from tests.constants import SET_CITATION_TEST, test_citation_dict
+
+logging.getLogger("requests").setLevel(logging.WARNING)
+
+
+class TestParseControl(unittest.TestCase):
+    def setUp(self):
+        self.custom_annotation_dicts = {
+            'Custom1': {'Custom1_A', 'Custom1_B'},
+            'Custom2': {'Custom2_A', 'Custom2_B'}
+        }
+
+        self.custom_annotation_expressions = {
+            'CustomRegex': '[0-9]+'
+        }
+
+        self.parser = ControlParser(
+            annotation_dicts=self.custom_annotation_dicts,
+            annotation_expressions=self.custom_annotation_expressions
+        )
+
+
+class TestParseControlUnsetStatementErrors(TestParseControl):
+    def test_unset_missing_evidence(self):
+        with self.assertRaises(MissingAnnotationKeyWarning):
+            self.parser.parseString('UNSET Evidence')
+
+    def test_unset_missing_citation(self):
+        with self.assertRaises(MissingAnnotationKeyWarning):
+            self.parser.parseString('UNSET Citation')
+
+    def test_unset_missing_evidence_with_citation(self):
+        """Tests that an evidence can't be unset without a citation"""
+        s = [SET_CITATION_TEST, 'UNSET Evidence']
+        with self.assertRaises(MissingAnnotationKeyWarning):
+            self.parser.parse_lines(s)
+
+    def test_unset_missing_statement_group(self):
+        with self.assertRaises(MissingAnnotationKeyWarning):
+            self.parser.parseString('UNSET STATEMENT_GROUP')
+
+    def test_unset_missing_command(self):
+        s = [
+            SET_CITATION_TEST,
+            'UNSET Custom1'
+        ]
+        with self.assertRaises(MissingAnnotationKeyWarning):
+            self.parser.parse_lines(s)
+
+    def test_unset_invalid_command(self):
+        s = [
+            SET_CITATION_TEST,
+            'UNSET MISSING'
+        ]
+        with self.assertRaises(UndefinedAnnotationWarning):
+            self.parser.parse_lines(s)
+
+
+class TestParseControlSetStatementErrors(TestParseControl):
+    def test_invalid_citation_type(self):
+        with self.assertRaises(InvalidCitationType):
+            self.parser.parseString('SET Citation = {"PubMedCentral","Trends in molecular medicine","12928037"}')
+
+    def test_invalid_pmid(self):
+        with self.assertRaises(InvalidPubMedIdentifierWarning):
+            self.parser.parseString('SET Citation = {"PubMed","Trends in molecular medicine","NOT VALID NUMBER"}')
+
+    def test_set_missing_statement(self):
+        statements = [
+            SET_CITATION_TEST,
+            'SET MissingKey = "lol"'
+        ]
+        with self.assertRaises(UndefinedAnnotationWarning):
+            self.parser.parse_lines(statements)
+
+    def test_custom_annotation_list_withInvalid(self):
+        statements = [
+            SET_CITATION_TEST,
+            'SET Custom1 = {"Custom1_A","Custom1_B","Evil invalid!!!"}'
+        ]
+
+        with self.assertRaises(IllegalAnnotationValueWarning):
+            self.parser.parse_lines(statements)
+
+    def test_custom_value_failure(self):
+        """Tests what happens for a valid annotation key, but an invalid value"""
+        s = [
+            SET_CITATION_TEST,
+            'SET Custom1 = "Custom1_C"'
+        ]
+        with self.assertRaises(IllegalAnnotationValueWarning):
+            self.parser.parse_lines(s)
+
+    def test_regex_failure(self):
+        s = [
+            SET_CITATION_TEST,
+            'SET CustomRegex = "abce13"'
+        ]
+        with self.assertRaises(MissingAnnotationRegexWarning):
+            self.parser.parse_lines(s)
+
+
+class TestParseControl2(TestParseControl):
+    def test_set_statement_group(self):
+        """Tests a statement group gets set properly"""
+        s1 = 'SET STATEMENT_GROUP = "my group"'
+
+        self.assertIsNone(self.parser.statement_group)
+
+        self.parser.parseString(s1)
+        self.assertEqual('my group', self.parser.statement_group, msg='problem with integration')
+
+        s2 = 'UNSET STATEMENT_GROUP'
+        self.parser.parseString(s2)
+        self.assertIsNone(self.parser.statement_group, msg='problem with unset')
+
+    def test_citation_short(self):
+        self.parser.parseString(SET_CITATION_TEST)
+        self.assertEqual(test_citation_dict, self.parser.citation)
+
+        expected_annotations = {
+            EVIDENCE: None,
+            ANNOTATIONS: {},
+            CITATION: test_citation_dict
+        }
+        self.assertEqual(expected_annotations, self.parser.get_annotations())
+
+        self.parser.parseString('UNSET Citation')
+        self.assertEqual(0, len(self.parser.citation))
+
+    def test_citation_long(self):
+        s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","","de Nigris|Lerman A|Ignarro LJ",""}'
+
+        self.parser.parseString(s)
+
+        expected_citation = {
+            CITATION_TYPE: 'PubMed',
+            CITATION_NAME: 'Trends in molecular medicine',
+            CITATION_REFERENCE: '12928037',
+            CITATION_DATE: '',
+            CITATION_AUTHORS: 'de Nigris|Lerman A|Ignarro LJ',
+            CITATION_COMMENTS: ''
+        }
+
+        self.assertEqual(expected_citation, self.parser.citation)
+
+        expected_dict = {
+            EVIDENCE: None,
+            ANNOTATIONS: {},
+            CITATION: expected_citation
+        }
+
+        self.assertEqual(expected_dict, self.parser.get_annotations())
+
+    def test_citation_error(self):
+        s = 'SET Citation = {"PubMed","Trends in molecular medicine"}'
+        with self.assertRaises(InvalidCitationException):
+            self.parser.parseString(s)
+
+    def test_evidence(self):
+        s = 'SET Evidence = "For instance, during 7-ketocholesterol-induced apoptosis of U937 cells"'
+        self.parser.parseString(s)
+
+        self.assertIsNotNone(self.parser.evidence)
+
+        expected_annotation = {
+            CITATION: {},
+            ANNOTATIONS: {},
+            EVIDENCE: 'For instance, during 7-ketocholesterol-induced apoptosis of U937 cells'
+        }
+
+        self.assertEqual(expected_annotation, self.parser.get_annotations())
+
+    def test_custom_annotation(self):
+        s = [
+            SET_CITATION_TEST,
+            'SET Custom1 = "Custom1_A"'
+        ]
+        self.parser.parse_lines(s)
+
+        expected_annotation = {
+            'Custom1': 'Custom1_A'
+        }
+
+        self.assertEqual(expected_annotation, self.parser.annotations)
+
+    def test_custom_annotation_list(self):
+        s = [
+            SET_CITATION_TEST,
+            'SET Custom1 = {"Custom1_A","Custom1_B"}'
+        ]
+        self.parser.parse_lines(s)
+
+        expected_annotation = {
+            'Custom1': {'Custom1_A', 'Custom1_B'}
+        }
+
+        self.assertEqual(expected_annotation, self.parser.annotations)
+
+        expected_dict = {
+            ANNOTATIONS: expected_annotation,
+            CITATION: test_citation_dict,
+            EVIDENCE: None
+        }
+
+        self.assertEqual(expected_dict, self.parser.get_annotations())
+
+    def test_overwrite_evidence(self):
+        s1 = 'SET Evidence = "a"'
+        s2 = 'SET Evidence = "b"'
+
+        self.parser.parseString(s1)
+        self.parser.parseString(s2)
+
+        self.assertEqual('b', self.parser.evidence)
+
+    def test_unset_evidence(self):
+        s1 = 'SET Evidence = "a"'
+        s2 = 'UNSET Evidence'
+
+        self.parser.parseString(s1)
+        self.parser.parseString(s2)
+
+        self.assertEqual({}, self.parser.annotations)
+
+    def test_unset_custom(self):
+        statements = [
+            SET_CITATION_TEST,
+            'SET Custom1 = "Custom1_A"',
+            'UNSET Custom1'
+        ]
+
+        self.parser.parse_lines(statements)
+
+        self.assertEqual({}, self.parser.annotations)
+
+    def test_reset_citation(self):
+        s1 = 'SET Citation = {"PubMed","Test Reference 1","11111"}'
+        s2 = 'SET Evidence = "d"'
+
+        s3 = 'SET Citation = {"PubMed","Test Reference 2","22222"}'
+        s4 = 'SET Evidence = "h"'
+        s5 = 'SET Custom1 = "Custom1_A"'
+        s6 = 'SET Custom2 = "Custom2_A"'
+
+        statements = [s1, s2, s3, s4, s5, s6]
+
+        self.parser.parse_lines(statements)
+
+        self.assertEqual('h', self.parser.evidence)
+        self.assertEqual('PubMed', self.parser.citation[CITATION_TYPE])
+        self.assertEqual('Test Reference 2', self.parser.citation[CITATION_NAME])
+        self.assertEqual('22222', self.parser.citation[CITATION_REFERENCE])
+
+        self.parser.parseString('UNSET {"Custom1","Evidence"}')
+        self.assertNotIn('Custom1', self.parser.annotations)
+        self.assertIsNone(self.parser.evidence)
+        self.assertIn('Custom2', self.parser.annotations)
+        self.assertNotEqual(0, len(self.parser.citation))
+
+        self.parser.parseString('UNSET ALL')
+        self.assertEqual(0, len(self.parser.annotations))
+        self.assertEqual(0, len(self.parser.citation))
+
+    def test_set_regex(self):
+        s = [
+            SET_CITATION_TEST,
+            'SET CustomRegex = "1234"'
+        ]
+        self.parser.parse_lines(s)
+
+        self.assertEqual('1234', self.parser.annotations['CustomRegex'])
+
+
+class TestParseEvidence(unittest.TestCase):
+    def test_111(self):
+        statement = '''SET Evidence = "1.1.1 Easy case"'''
+        expect = '''SET Evidence = "1.1.1 Easy case'''
+        lines = list(sanitize_file_lines(statement.split('\n')))
+        self.assertEqual(1, len(lines))
+        line = lines[0]
+        self.assertTrue(expect, line)
+
+    def test_131(self):
+        statement = '''SET Evidence = "3.1 Backward slash break test \\
+second line"'''
+        expect = '''SET Evidence = "3.1 Backward slash break test second line"'''
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
+        self.assertEqual(1, len(lines))
+        line = lines[0]
+        self.assertEqual(expect, line)
+
+    def test_132(self):
+        statement = '''SET Evidence = "3.2 Backward slash break test with whitespace \\
+second line"'''
+        expect = '''SET Evidence = "3.2 Backward slash break test with whitespace second line"'''
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
+        self.assertEqual(1, len(lines))
+        line = lines[0]
+        self.assertEqual(expect, line)
+
+    def test_133(self):
+        statement = '''SET Evidence = "3.3 Backward slash break test \\
+second line \\
+third line"'''
+        expect = '''SET Evidence = "3.3 Backward slash break test second line third line"'''
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
+        self.assertEqual(1, len(lines))
+        line = lines[0]
+        self.assertEqual(expect, line)
+
+    def test_141(self):
+        statement = '''SET Evidence = "4.1 Malformed line breakcase
+second line"'''
+        expect = '''SET Evidence = "4.1 Malformed line breakcase second line"'''
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
+        self.assertEqual(1, len(lines))
+        line = lines[0]
+        self.assertEqual(expect, line)
+
+    def test_142(self):
+        statement = '''SET Evidence = "4.2 Malformed line breakcase
+second line
+third line"'''
+        expect = '''SET Evidence = "4.2 Malformed line breakcase second line third line"'''
+        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
+        self.assertEqual(1, len(lines))
+        line = lines[0]
+        self.assertEqual(expect, line)

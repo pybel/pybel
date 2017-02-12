@@ -7,7 +7,8 @@ Biological Expression Language (BEL) is a domain specific language that enables 
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
 complex disease networks with several thousands of relationships. For a detailed explanation, see the
-`BEL 1.0 Specification <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_.
+BEL `1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
+`2.0 <openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_ specifications.
 
 OpenBEL Links
 ~~~~~~~~~~~~~
@@ -37,7 +38,7 @@ Often, finding the correct identifier is difficult. Due to the huge number of te
 difficult for curators to know the domain-specific synonyms that obscure the *controlled* or preferred term.
 Additionally, the namespaces provided by OpenBEL do not necessarily reflect the cutting-edge terminologies used in
 specific disease areas. For some of these cases, it is appropriate to design a new namespace, using the
-`specification <http://openbel-framework.readthedocs.io/en/latest/tutorials/building_custom_namespaces.html>`_
+`custom namespace specification <http://openbel-framework.readthedocs.io/en/latest/tutorials/building_custom_namespaces.html>`_
 provided by the OpenBEL Framework.
 
 However, the issue of synonym resolution and semantic searching has already been generally solved by the use of
@@ -56,7 +57,7 @@ relevant ontologies, and ended a long debate over how to represent these objects
 programmatic API to the OLS service, for searching terms (http://www.ebi.ac.uk/ols/api/search?q=folic%20acid) and
 suggesting resolutions (http://www.ebi.ac.uk/ols/api/suggest?q=folic+acid)
 
-PyBEL uses the `OntoSpy <https://github.com/lambdamusic/OntoSpy>`_ package to parse OWL documents in many different
+PyBEL uses the `onto2nx <https://github.com/cthoyt/onto2nx>`_ package to parse OWL documents in many different
 formats, including OWL/XML, RDF/XML, and RDF.
 
 Implementation

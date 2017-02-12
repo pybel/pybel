@@ -32,25 +32,22 @@ class UndefinedNamespaceWarning(PyBelWarning):
     """Raised if reference made to undefined namespace"""
 
 
-class MissingNamespaceNameWarning(PyBelWarning):
-    """Raised if reference to value not in namespace"""
-
+class IdentifierWarning(PyBelWarning):
     def __init__(self, name, namespace):
         PyBelWarning.__init__(self, name, namespace)
         self.name = name
         self.namespace = namespace
+
+
+class MissingNamespaceNameWarning(IdentifierWarning):
+    """Raised if reference to value not in namespace"""
 
     def __str__(self):
         return '"{}" is not in the {} namespace'.format(self.name, self.namespace)
 
 
-class MissingNamespaceRegexWarning(PyBelWarning):
+class MissingNamespaceRegexWarning(IdentifierWarning):
     """Raised if reference not matching regex"""
-
-    def __init__(self, name, namespace):
-        PyBelWarning.__init__(self, name, namespace)
-        self.name = name
-        self.namespace = namespace
 
     def __str__(self):
         return '''"{}" doesn't match the regex for {} namespace'''.format(self.name, self.namespace)
@@ -90,6 +87,18 @@ class IllegalAnnotationValueWarning(PyBelWarning):
         return '"{}" is not in the {} annotation'.format(self.value, self.annotation)
 
 
+class MissingAnnotationRegexWarning(PyBelWarning):
+    """Raised if annotation doesn't match regex"""
+
+    def __init__(self, value, annotation):
+        PyBelWarning.__init__(self, value, annotation)
+        self.value = value
+        self.annotation = annotation
+
+    def __str__(self):
+        return '''"{}" doesn't match the regex for {} annotation'''.format(self.value, self.annotation)
+
+
 # Provenance Warnings
 
 class InvalidMetadataException(PyBelWarning):
@@ -104,8 +113,16 @@ class InvalidMetadataException(PyBelWarning):
 - Name
 - Version
 
-See also: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section
+.. seealso:: BEL 1.0 specification on the `properties section <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section>`_
     """
+
+    def __init__(self, key, value):
+        PyBelWarning.__init__(self, key, value)
+        self.key = key
+        self.value = value
+
+    def __str__(self):
+        return 'Invalid document metadata key: {}'.format(self.key)
 
 
 class MissingMetadataException(PyBelWarning):
@@ -125,14 +142,14 @@ class InvalidCitationException(PyBelWarning):
 
 
 class MissingCitationException(PyBelWarning):
-    """Tried to add an edge, but no citation present. Most likely due to previous improperly formatted citation"""
+    """Tried to parse a line, but no citation present. Most likely due to previous improperly formatted citation"""
 
-    def __init__(self, citation):
-        PyBelWarning.__init__(self, citation)
-        self.citation = citation
+    def __init__(self, line):
+        PyBelWarning.__init__(self, line)
+        self.citation = line
 
     def __str__(self):
-        return "Missing citation; can't add: {}".format(self.citation)
+        return "Missing citation; can't parse: {}".format(self.citation)
 
 
 class MissingSupportWarning(PyBelWarning):
@@ -149,13 +166,13 @@ class MissingSupportWarning(PyBelWarning):
 class InvalidCitationType(PyBelWarning):
     """Incorrect type of citation. Should be one of:
 
-- "Book"
-- "PubMed"
-- "Journal"
-- "Online Resource"
-- "Other"
+- Book
+- PubMed
+- Journal
+- Online Resource
+- Other
 
-See also: https://wiki.openbel.org/display/BELNA/Citation
+.. seealso:: OpenBEL wiki on `citations <https://wiki.openbel.org/display/BELNA/Citation>`_
     """
 
     def __init__(self, citation_type):

@@ -26,14 +26,14 @@ import networkx as nx
 import py2neo
 import requests
 from networkx import GraphMLReader
-from networkx.readwrite import json_graph
+from networkx.readwrite.json_graph import node_link_data, node_link_graph
 from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
-from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION
-from .graph import BELGraph, expand_edges, GRAPH_ANNOTATION_LIST
-from .utils import flatten, flatten_graph_data
+from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
+from .graph import BELGraph, expand_edges
+from .utils import flatten_dict, flatten_graph_data
 
 try:
     import cPickle as pickle
@@ -79,7 +79,7 @@ def from_lines(lines, **kwargs):
     :type lines: iter
     :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
-    :rtype: :class:`BELGraph`
+    :rtype: pybel.BELGraph
     """
     return BELGraph(lines=lines, **kwargs)
 
@@ -89,13 +89,14 @@ def from_path(path, encoding='utf-8', **kwargs):
 
     :param path: a file path
     :type path: str
-    :param encoding: the encoding to use when reading this file. Is passed to codecs.open.
-                     See https://docs.python.org/3/library/codecs.html#standard-encodings for a list of standard
-                     encodings. For example, files starting with a UTF-8 BOM should use 'utf_8_sig'
+    :param encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`.
+                     See the python `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a
+                     list of standard encodings. For example, files starting with a UTF-8 BOM should use
+                     :code:`utf_8_sig`
     :type encoding: str
     :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
-    :rtype: :class:`BELGraph`
+    :rtype: BELGraph
     """
     log.info('Loading from path: %s', path)
     with codecs.open(os.path.expanduser(path), encoding=encoding) as f:
@@ -109,7 +110,7 @@ def from_url(url, **kwargs):
     :type url: str
     :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
     :return: a parsed BEL graph
-    :rtype: :class:`BELGraph`
+    :rtype: BELGraph
     """
     log.info('Loading from url: %s', url)
 
@@ -173,16 +174,54 @@ def from_pickle(path, check_version=True):
     return ensure_version(nx.read_gpickle(path), check_version=check_version)
 
 
+def to_json_dict(graph):
+    """Converts this graph to a node-link JSON object
+
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :rtype: dict
+    """
+    data = node_link_data(graph)
+    data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
+    return data
+
+
+def to_jsons(graph):
+    """Dumps this graph as a node-link JSON object to a string
+
+    :param graph: a BEL graph
+    :type graph: BELGraph
+    :rtype: str
+    """
+    return json.dumps(to_json_dict(graph), ensure_ascii=False)
+
+
 def to_json(graph, output):
-    """Writes this graph to a node-link JSON object
+    """Writes this graph as a node-link JSON object
 
     :param graph: a BEL graph
     :type graph: BELGraph
     :param output: a write-supporting file-like object
+    :type output: file
     """
-    data = json_graph.node_link_data(graph)
-    data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
-    json.dump(data, output, ensure_ascii=False)
+    json.dump(to_json_dict(graph), output, ensure_ascii=False)
+
+
+def from_json_data(data, check_version=True):
+    """Reads graph from node-link JSON Object
+
+    :param data: json dictionary representing graph
+    :type data: dict
+    :param check_version: Checks if the graph was produced by this version of PyBEL
+    :type check_version: bool
+    :rtype: :class:`BELGraph`
+    """
+
+    for i, node in enumerate(data['nodes']):
+        data['nodes'][i]['id'] = tuple(node['id'])
+
+    graph = BELGraph(data=node_link_graph(data, directed=True, multigraph=True))
+    return ensure_version(graph, check_version=check_version)
 
 
 def from_json(path, check_version=True):
@@ -195,13 +234,7 @@ def from_json(path, check_version=True):
     :rtype: :class:`BELGraph`
     """
     with open(os.path.expanduser(path)) as f:
-        data = json.load(f)
-
-    for i, node in enumerate(data['nodes']):
-        data['nodes'][i]['id'] = tuple(node['id'])
-
-    g = json_graph.node_link_graph(data, directed=True, multigraph=True)
-    return ensure_version(BELGraph(data=g), check_version=check_version)
+        return from_json_data(json.load(f), check_version=check_version)
 
 
 def to_graphml(graph, output):
@@ -217,7 +250,7 @@ def to_graphml(graph, output):
         g.add_node(node, json=json.dumps(data))
 
     for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten(data))
+        g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
 
     nx.write_graphml(g, output)
 
@@ -237,7 +270,10 @@ def from_graphml(path, check_version=True):
     g = expand_edges(g)
     for n in g.nodes_iter():
         g.node[n] = json.loads(g.node[n]['json'])
-    nx.relabel_nodes(g, literal_eval, copy=False)  # shh don't tell anyone
+
+    # Use AST to convert stringified tuples into actual tuples
+    nx.relabel_nodes(g, literal_eval, copy=False)
+
     return ensure_version(BELGraph(data=g), check_version=check_version)
 
 
@@ -282,7 +318,7 @@ def to_neo4j(graph, neo_graph, context=None):
         neo_u = node_map[u]
         neo_v = node_map[v]
         rel_type = data[RELATION]
-        attrs = flatten(data)
+        attrs = flatten_dict(data)
         if context is not None:
             attrs[PYBEL_CONTEXT_TAG] = str(context)
         rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
