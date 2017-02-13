@@ -17,7 +17,6 @@ import time
 from collections import defaultdict, Counter
 
 import networkx as nx
-from pkg_resources import get_distribution
 from pyparsing import ParseException
 
 from .constants import *
@@ -40,25 +39,27 @@ __all__ = ['BELGraph']
 log = logging.getLogger(__name__)
 
 
-def build_metadata_parser(cache_manager):
-    if isinstance(cache_manager, CacheManager):
-        return MetadataParser(cache_manager)
-    elif isinstance(cache_manager, str):
-        return MetadataParser(CacheManager(connection=cache_manager))
+def build_metadata_parser(manager):
+    if isinstance(manager, MetadataParser):
+        return manager
+    elif isinstance(manager, CacheManager):
+        return MetadataParser(manager)
+    elif isinstance(manager, str):
+        return MetadataParser(CacheManager(connection=manager))
     else:
         return MetadataParser(CacheManager())
 
 
 class BELGraph(nx.MultiDiGraph):
-    def __init__(self, lines=None, cache_manager=None, complete_origin=False, allow_naked_names=False,
+    def __init__(self, lines=None, manager=None, complete_origin=False, allow_naked_names=False,
                  allow_nested=False, *attrs, **kwargs):
         """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
         list of strings.
 
         :param lines: iterable over lines of BEL script
-        :param cache_manager: database connection string to cache, pre-built cache manager,
-                    or True to use the default
-        :type cache_manager: str or pybel.manager.CacheManager
+        :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
+                        or None to use default cache
+        :type manager: str or pybel.manager.CacheManager or pybel.parser.MetadataParser
         :param complete_origin: add corresponding DNA and RNA entities for all proteins
         :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
@@ -71,24 +72,24 @@ class BELGraph(nx.MultiDiGraph):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self.graph[GRAPH_WARNINGS] = []
-        self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
+        self.graph[GRAPH_PYBEL_VERSION] = PYBEL_VERSION
 
         if lines is not None:
             self.parse_lines(
                 lines,
+                manager=manager,
                 complete_origin=complete_origin,
-                cache_manager=cache_manager,
                 allow_naked_names=allow_naked_names,
                 allow_nested=allow_nested
             )
 
-    def parse_lines(self, lines, cache_manager=None, complete_origin=False,
-                    allow_naked_names=False, allow_nested=False):
+    def parse_lines(self, lines, manager=None, complete_origin=False, allow_naked_names=False, allow_nested=False):
         """Parses an iterable of lines into this graph
 
         :param lines: iterable over lines of BEL data file
-        :param cache_manager: database connection string to cache or pre-built namespace namspace_cache manager
-        :type cache_manager: str or :class:`pybel.manager.cache.CacheManager`
+        :param manager: database connection string to cache, pre-built CacheManager, or pre-build MetadataParser, or
+                        None for default connection
+        :type manager: None or str or :class:`pybel.manager.cache.CacheManager` or :class:`pybel.parser.MetadataParser`
         :param complete_origin: add corresponding DNA and RNA entities for all proteins
         :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
@@ -99,7 +100,7 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, definitions, states = split_file_to_annotations_and_definitions(lines)
 
-        metadata_parser = build_metadata_parser(cache_manager)
+        metadata_parser = build_metadata_parser(manager)
 
         self.parse_document(docs, metadata_parser)
 

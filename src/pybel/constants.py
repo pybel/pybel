@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os
+from pkg_resources import get_distribution
 
 SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
 LARGE_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/large_corpus.bel'
 
 GOCC_LATEST = 'http://resources.openbel.org/belframework/20150611/namespace/go-cellular-component.belns'
 GOCC_KEYWORD = 'GOCC'
+
+PYBEL_VERSION = get_distribution('pybel').version
 
 PYBEL_DIR = os.path.expanduser('~/.pybel')
 if not os.path.exists(PYBEL_DIR):
@@ -120,8 +123,6 @@ TWO_WAY_RELATIONS = {
     ANALOGOUS_TO,
     EQUIVALENT_TO,
 }
-
-BLACKLIST_EDGE_ATTRIBUTES = {RELATION, SUBJECT, OBJECT, CITATION, EVIDENCE}
 
 # BEL Keywords
 

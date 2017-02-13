@@ -27,11 +27,10 @@ import py2neo
 import requests
 from networkx import GraphMLReader
 from networkx.readwrite.json_graph import node_link_data, node_link_graph
-from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
-from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
+from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST, PYBEL_VERSION
 from .graph import BELGraph, expand_edges
 from .utils import flatten_dict, flatten_graph_data
 
@@ -65,9 +64,8 @@ def ensure_version(graph, check_version=True):
     TODO: in the future, just check that the minor versions are the same,
     because development won't be changing the data structure so much
     """
-    version = get_distribution('pybel').version
-    if check_version and version != graph.pybel_version:
-        raise ValueError('Using version {}, tried importing from version {}'.format(version, graph.pybel_version))
+    if check_version and PYBEL_VERSION != graph.pybel_version:
+        raise ValueError('Using version {}, tried importing from version {}'.format(PYBEL_VERSION, graph.pybel_version))
     return graph
 
 
