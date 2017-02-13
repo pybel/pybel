@@ -17,6 +17,7 @@ import time
 from collections import defaultdict, Counter
 
 import networkx as nx
+from pkg_resources import get_distribution
 from pyparsing import ParseException
 
 from .constants import *
@@ -72,7 +73,7 @@ class BELGraph(nx.MultiDiGraph):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self.graph[GRAPH_WARNINGS] = []
-        self.graph[GRAPH_PYBEL_VERSION] = PYBEL_VERSION
+        self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
 
         if lines is not None:
             self.parse_lines(
