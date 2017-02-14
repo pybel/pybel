@@ -8,6 +8,8 @@ LARGE_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/
 GOCC_LATEST = 'http://resources.openbel.org/belframework/20150611/namespace/go-cellular-component.belns'
 GOCC_KEYWORD = 'GOCC'
 
+PYBEL_CONNECTION_ENV = 'PYBEL_CONNECTION'
+
 PYBEL_DIR = os.path.expanduser('~/.pybel')
 if not os.path.exists(PYBEL_DIR):
     os.mkdir(PYBEL_DIR)
