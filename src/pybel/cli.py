@@ -122,7 +122,7 @@ def manage():
     pass
 
 
-@manage.command(help='Set up definition cache with default definitions')
+@manage.command(help='Set up default cache with default definitions')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--skip-namespaces', is_flag=True)
 @click.option('--skip-annotations', is_flag=True)
@@ -137,12 +137,17 @@ def setup(path, skip_namespaces, skip_annotations, skip_owl):
         cm.load_default_namespace_owl()
 
 
-@manage.command(help='Remove default definition cache at {}'.format(DEFAULT_CACHE_LOCATION))
+@manage.command(help='Remove default cache at {}'.format(DEFAULT_CACHE_LOCATION))
 def remove():
     os.remove(DEFAULT_CACHE_LOCATION)
 
 
-@manage.command(help='Manually add definition by URL')
+@manage.group(help="Manage definitions")
+def definitions():
+    pass
+
+
+@definitions.command(help='Manually add definition by URL')
 @click.argument('url')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def insert(url, path):
@@ -156,14 +161,18 @@ def insert(url, path):
         dcm.ensure_namespace_owl(url)
 
 
-@manage.command(help='List URLs of cached resources, or contents of a specific resource')
+@definitions.command(help='List URLs of cached resources, or contents of a specific resource')
 @click.option('--url', help='Resource to list')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def ls(url, path):
     dcm = CacheManager(connection=path)
 
     if not url:
-        click.echo_via_pager('\n'.join(sorted(x for x in dcm.ls() if x)))
+        for line in dcm.ls():
+            if not line:
+                continue
+            click.echo(line)
+
     else:
         if url.endswith('.belns'):
             res = dcm.get_namespace(url)
@@ -171,14 +180,31 @@ def ls(url, path):
             res = dcm.get_annotation(url)
         else:
             res = dcm.get_namespace_owl_terms(url)
-        click.echo_via_pager('\n'.join(res))
+
+        for l in res:
+            click.echo(l)
 
 
-@manage.command(help='Lists stored graph names and versions')
+@manage.group(help="Manage graphs")
+def graph():
+    pass
+
+
+@graph.command(help='Lists stored graph names and versions')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def ls_graphs(path):
+def ls(path):
     gcm = GraphCacheManager(connection=path)
-    click.echo_via_pager('\n'.join('{} - {}'.format(a, b) for a, b in gcm.ls()))
+
+    for row in gcm.ls():
+        click.echo(', '.join(map(str, row)))
+
+
+@graph.command(help='Drops a graph by ID')
+@click.argument('id')
+@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def drop(id, path):
+    gcm = GraphCacheManager(connection=path)
+    gcm.drop_graph(id)
 
 
 if __name__ == '__main__':

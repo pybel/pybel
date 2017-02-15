@@ -282,7 +282,6 @@ class CacheManager(BaseCacheManager):
         :param iri: the location of the ontology
         :type iri: str
         """
-
         return self.insert_owl(iri, models.OwlAnnotation, models.OwlAnnotationEntry)
 
     def ensure_namespace_owl(self, iri):

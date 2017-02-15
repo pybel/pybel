@@ -1,4 +1,10 @@
+import logging
+
+from sqlalchemy.exc import IntegrityError
+
 from .graph_cache import GraphCacheManager
+
+log = logging.getLogger(__name__)
 
 
 def build_graph_cache_manager(connection=None):
@@ -18,7 +24,11 @@ def to_database(graph, connection=None):
                        of URL
     :type connection: None or str or GraphCacheManager
     """
-    build_graph_cache_manager(connection).store_graph(graph)
+    try:
+        build_graph_cache_manager(connection).insert_graph(graph)
+    except IntegrityError:
+        log.exception('Error storing graph - other graph with same metadata'
+                      ' already present. Consider incrementing the version')
 
 
 def from_database(name, version=None, connection=None):

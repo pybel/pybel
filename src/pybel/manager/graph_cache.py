@@ -4,21 +4,18 @@ import logging
 
 from . import models
 from .cache import BaseCacheManager
-from ..constants import METADATA_NAME
 from ..io import to_bytes, from_bytes
 
 log = logging.getLogger(__name__)
 
 
 class GraphCacheManager(BaseCacheManager):
-    def store_graph(self, graph):
+    def insert_graph(self, graph):
         """Stores a graph in the database
 
         :param graph: a BEL network
         :type graph: :class:`pybel.BELGraph`
         """
-        log.info('Storing network: %s', graph.document[METADATA_NAME])
-
         network = models.Network(blob=to_bytes(graph), **graph.document)
 
         self.session.add(network)
@@ -36,7 +33,7 @@ class GraphCacheManager(BaseCacheManager):
         :param name: The name of the graph
         :type name: str
         :param version: The version string of the graph. If not specified, loads most recent graph added with this name
-        :type version: str
+        :type version: None or str
         :return:
         """
         if version is not None:
@@ -48,5 +45,12 @@ class GraphCacheManager(BaseCacheManager):
 
         return from_bytes(n.blob)
 
+    def drop_graph(self, network_id):
+        """Drops a graph by ID"""
+
+        # TODO delete with cascade
+        self.session.query(models.Network).filter(models.Network.id == network_id).delete()
+        self.session.commit()
+
     def ls(self):
-        return [(network.name, network.version) for network in self.session.query(models.Network).all()]
+        return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
