@@ -6,7 +6,7 @@ import sys
 from operator import itemgetter
 
 from .constants import *
-from .parser.language import inv_document_keys, rev_abundance_labels, unqualified_edges
+from .parser.language import rev_abundance_labels, unqualified_edges
 from .parser.modifiers import FusionParser
 from .parser.modifiers.fragment import FragmentParser
 from .parser.modifiers.protein_modification import PmodParser
@@ -211,7 +211,7 @@ def to_bel(graph, file=None):
     file = sys.stdout if file is None else file
 
     for k in sorted(graph.document):
-        print('SET DOCUMENT {} = "{}"'.format(inv_document_keys[k], graph.document[k]), file=file)
+        print('SET DOCUMENT {} = "{}"'.format(INVERSE_DOCUMENT_KEYS[k], graph.document[k]), file=file)
 
     print('###############################################\n', file=file)
 

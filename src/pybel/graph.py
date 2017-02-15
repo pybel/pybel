@@ -23,7 +23,6 @@ from pyparsing import ParseException
 from .constants import *
 from .exceptions import PyBelWarning
 from .manager.cache import CacheManager
-from .parser import language
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import MissingMetadataException
 from .parser.parse_metadata import MetadataParser
@@ -145,11 +144,11 @@ class BELGraph(nx.MultiDiGraph):
 
         for required in REQUIRED_METADATA:
             if required not in metadata_parser.document_metadata:
-                self.add_warning(0, '', MissingMetadataException(language.inv_document_keys[required]))
-                log.error('Missing required document metadata: %s', language.inv_document_keys[required])
+                self.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
+                log.error('Missing required document metadata: %s', INVERSE_DOCUMENT_KEYS[required])
             elif not metadata_parser.document_metadata[required]:
-                self.add_warning(0, '', MissingMetadataException(language.inv_document_keys[required]))
-                log.error('Missing required document metadata not filled: %s', language.inv_document_keys[required])
+                self.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
+                log.error('Missing required document metadata not filled: %s', INVERSE_DOCUMENT_KEYS[required])
 
         self.graph[GRAPH_METADATA] = metadata_parser.document_metadata
 

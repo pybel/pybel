@@ -21,11 +21,12 @@ import time
 
 import click
 
-from . import io
 from .canonicalize import to_bel
 from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
+from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_pickle, to_neo4j
 from .manager.cache import CacheManager
-from .manager.graph_cache import GraphCacheManager, to_database, from_database
+from .manager.database_io import to_database, from_database
+from .manager.graph_cache import GraphCacheManager
 
 log = logging.getLogger('pybel')
 
@@ -76,25 +77,25 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
                       allow_nested=allow_nested,
                       allow_naked_names=allow_naked_names)
         if url:
-            g = io.from_url(url, **params)
+            g = from_url(url, **params)
         else:
-            g = io.from_lines(path, **params)
+            g = from_lines(path, **params)
 
     if csv:
         log.info('Outputting csv to %s', csv)
-        io.to_csv(g, csv)
+        to_csv(g, csv)
 
     if graphml:
         log.info('Outputting graphml to %s', graphml)
-        io.to_graphml(g, graphml)
+        to_graphml(g, graphml)
 
     if json:
         log.info('Outputting json to %s', json)
-        io.to_json(g, json)
+        to_json(g, json)
 
     if pickle:
         log.info('Outputting pickle to %s', pickle)
-        io.to_pickle(g, pickle)
+        to_pickle(g, pickle)
 
     if bel:
         log.info('Outputting BEL to %s', bel)
@@ -111,7 +112,7 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         log.info('Uploading to neo4j with context %s', neo_context)
         neo_graph = py2neo.Graph(neo)
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
-        io.to_neo4j(g, neo_graph, neo_context)
+        to_neo4j(g, neo_graph, neo_context)
 
     sys.exit(0 if 0 == len(g.warnings) else 1)
 

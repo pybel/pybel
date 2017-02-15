@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from . import models
 from .cache import BaseCacheManager
+from ..constants import METADATA_NAME
 from ..io import to_bytes, from_bytes
+
+log = logging.getLogger(__name__)
 
 
 class GraphCacheManager(BaseCacheManager):
@@ -12,6 +17,7 @@ class GraphCacheManager(BaseCacheManager):
         :param graph: a BEL network
         :type graph: :class:`pybel.BELGraph`
         """
+        log.info('Storing network: %s', graph.document[METADATA_NAME])
 
         network = models.Network(blob=to_bytes(graph), **graph.document)
 
@@ -44,39 +50,3 @@ class GraphCacheManager(BaseCacheManager):
 
     def ls(self):
         return [(network.name, network.version) for network in self.session.query(models.Network).all()]
-
-
-def to_database(graph, connection=None):
-    """Stores a graph in a database
-
-    :param graph: a BEL graph
-    :type graph: BELGraph
-    :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
-                       where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
-                       of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
-                       of URL
-    :type connection: str
-    """
-    if isinstance(connection, GraphCacheManager):
-        connection.store_graph(graph)
-    else:
-        GraphCacheManager(connection).store_graph(graph)
-
-
-def from_database(name, version=None, connection=None):
-    """Loads a BEL graph from a database
-
-
-    :param name: The name of the graph
-    :type name: str
-    :param version: The version string of the graph. If not specified, loads most recent graph added with this name
-    :type version: str
-    :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
-                       where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
-                       of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
-                       of URL.
-    :type connection: str
-    :return: a BEL graph loaded from the database
-    :rtype: BELGraph
-    """
-    return GraphCacheManager(connection).get_graph(name, version)

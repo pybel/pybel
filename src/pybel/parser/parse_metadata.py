@@ -15,7 +15,8 @@ from . import language
 from .baseparser import BaseParser, word, quote, delimitedSet
 from .parse_exceptions import InvalidMetadataException
 from ..constants import BEL_KEYWORD_AS, BEL_KEYWORD_URL, BEL_KEYWORD_LIST, BEL_KEYWORD_OWL, BEL_KEYWORD_SET, \
-    BEL_KEYWORD_DEFINE, BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_ANNOTATION, BEL_KEYWORD_DOCUMENT, BEL_KEYWORD_PATTERN
+    BEL_KEYWORD_DEFINE, BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_ANNOTATION, BEL_KEYWORD_DOCUMENT, BEL_KEYWORD_PATTERN, \
+    DOCUMENT_KEYS
 
 log = logging.getLogger('pybel')
 
@@ -110,10 +111,10 @@ class MetadataParser(BaseParser):
         key = tokens['key']
         value = tokens['value']
 
-        if key not in language.document_keys:
+        if key not in DOCUMENT_KEYS:
             raise InvalidMetadataException(key, value)
 
-        norm_key = language.document_keys[key]
+        norm_key = DOCUMENT_KEYS[key]
 
         if norm_key in self.document_metadata:
             log.warning('Tried to overwrite metadata: %s', key)
