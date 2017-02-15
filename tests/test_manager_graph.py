@@ -35,7 +35,7 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         x = self.gcm.ls()
 
         self.assertEqual(1, len(x))
-        self.assertEqual((name, label), x[0])
+        self.assertEqual((1, name, label), x[0])
 
         g2 = self.gcm.get_graph(name, label)
         self.bel_1_reconstituted(g2)
