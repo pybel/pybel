@@ -21,11 +21,10 @@ from pkg_resources import get_distribution
 from pyparsing import ParseException
 
 from .constants import *
+from .constructors import build_metadata_parser
 from .exceptions import PyBelWarning
-from .manager.cache import CacheManager
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import MissingMetadataException
-from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import expand_dict
 
@@ -37,17 +36,6 @@ except ImportError:
 __all__ = ['BELGraph']
 
 log = logging.getLogger(__name__)
-
-
-def build_metadata_parser(manager):
-    if isinstance(manager, MetadataParser):
-        return manager
-    elif isinstance(manager, CacheManager):
-        return MetadataParser(manager)
-    elif isinstance(manager, str):
-        return MetadataParser(CacheManager(connection=manager))
-    else:
-        return MetadataParser(CacheManager())
 
 
 class BELGraph(nx.MultiDiGraph):
@@ -71,7 +59,7 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.graph[GRAPH_WARNINGS] = []
+        self._warnings = []
         self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
 
         if lines is not None:
@@ -282,7 +270,7 @@ class BELGraph(nx.MultiDiGraph):
         This tuple respectively contains the line number, the line text, the exception instance, and the context
         dictionary from the parser at the time of error.
         """
-        return self.graph[GRAPH_WARNINGS]
+        return self._warnings
 
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
