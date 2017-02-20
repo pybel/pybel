@@ -61,7 +61,7 @@ class GmodParser(BaseParser):
 
         self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
 
-        gmod_default_ns = oneOf(language.gmod_namespace.keys()).setParseAction(self.handle_gmod_default)
+        gmod_default_ns = oneOf(list(language.gmod_namespace.keys())).setParseAction(self.handle_gmod_default)
 
         gmod_identifier = Group(self.namespace_parser.identifier_qualified) | Group(gmod_default_ns)
 

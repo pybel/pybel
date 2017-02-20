@@ -13,6 +13,7 @@ from pybel.constants import *
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
+#from requests.compat import urlparse
 
 try:
     from unittest import mock
@@ -273,13 +274,13 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasNode(self, FADD, g, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'FADD'})
         assertHasNode(self, CASP8, g, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CASP8'})
 
-        citation_1 =  {
+        citation_1 = {
           CITATION_NAME: "That one article from last week",
           CITATION_REFERENCE: "123455",
           CITATION_TYPE: "PubMed"
         }
 
-        citation_2 =  {
+        citation_2 = {
           CITATION_NAME: "That other article from last week",
           CITATION_REFERENCE: "123456",
           CITATION_TYPE: "PubMed"
@@ -293,13 +294,13 @@ class BelReconstitutionMixin(unittest.TestCase):
             RELATION: INCREASES,
             CITATION: citation_1,
             EVIDENCE: evidence_1,
-            ANNOTATIONS: {'TESTAN1': "1"}
+            ANNOTATIONS: {'Species': "9606"}
         })
         assertHasEdge(self, EGFR, FADD, g, **{
             RELATION: DECREASES,
             ANNOTATIONS: {
-                'TESTAN1': "1",
-                'TESTAN2': "3"
+                'Species': "9606",
+                'CellLine': "10B9 cell"
             },
             CITATION: citation_1,
             EVIDENCE: evidence_2
@@ -307,8 +308,8 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, EGFR, CASP8, g, **{
             RELATION: DIRECTLY_DECREASES,
             ANNOTATIONS: {
-                'TESTAN1': "1",
-                'TESTAN2': "3"
+                'Species': "9606",
+                'CellLine': "10B9 cell"
             },
             CITATION: citation_1,
             EVIDENCE: evidence_2,
@@ -316,7 +317,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, FADD, CASP8, g, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
-                'TESTAN1': "2"
+                'Species': "10116"
             },
             CITATION: citation_2,
             EVIDENCE: evidence_3,
@@ -324,7 +325,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, AKT1, CASP8, g, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'TESTAN1': "2"
+                'Species': "10116"
             },
             CITATION: citation_2,
             EVIDENCE: evidence_3,

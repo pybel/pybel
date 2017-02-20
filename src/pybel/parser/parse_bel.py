@@ -218,7 +218,7 @@ class BelParser(BaseParser):
         # 2.4 Process Modifier Function
         # backwards compatibility with BEL v1.0
 
-        molecular_activity_default = oneOf(activity_labels.keys()).setParseAction(handle_molecular_activity_default)
+        molecular_activity_default = oneOf(list(activity_labels.keys())).setParseAction(handle_molecular_activity_default)
 
         self.molecular_activity = molecular_activity_tags + nest(
             molecular_activity_default | self.identifier_parser.language)

@@ -34,7 +34,7 @@ class UndefinedNamespaceWarning(PyBelWarning):
 
 class IdentifierWarning(PyBelWarning):
     def __init__(self, name, namespace):
-        PyBelWarning.__init__(self, name, namespace)
+        PyBelWarning.__init__(self, (name, namespace))
         self.name = name
         self.namespace = namespace
 
@@ -79,7 +79,7 @@ class IllegalAnnotationValueWarning(PyBelWarning):
     """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
 
     def __init__(self, value, annotation):
-        PyBelWarning.__init__(self, value, annotation)
+        PyBelWarning.__init__(self, (value, annotation))
         self.value = value
         self.annotation = annotation
 
@@ -91,7 +91,7 @@ class MissingAnnotationRegexWarning(PyBelWarning):
     """Raised if annotation doesn't match regex"""
 
     def __init__(self, value, annotation):
-        PyBelWarning.__init__(self, value, annotation)
+        PyBelWarning.__init__(self, (value, annotation))
         self.value = value
         self.annotation = annotation
 
@@ -117,7 +117,7 @@ class InvalidMetadataException(PyBelWarning):
     """
 
     def __init__(self, key, value):
-        PyBelWarning.__init__(self, key, value)
+        PyBelWarning.__init__(self, (key, value))
         self.key = key
         self.value = value
 
@@ -227,7 +227,7 @@ class InvalidFunctionSemantic(PyBelWarning):
     """Used an identifier in a semantically invalid function"""
 
     def __init__(self, function, namespace, name, allowed_functions):
-        PyBelWarning.__init__(self, function, namespace, name, allowed_functions)
+        PyBelWarning.__init__(self, (function, namespace, name, allowed_functions))
         self.function = function
         self.namespace = namespace
         self.name = name
