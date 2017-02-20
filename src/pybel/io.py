@@ -59,15 +59,20 @@ __all__ = [
 log = logging.getLogger('pybel')
 
 
+def tokenize_version(version_string):
+    return tuple(version_string.split('.')[0:3])
+
+
 def ensure_version(graph, check_version=True):
-    """Ensure that the graph was produced on this version of python
+    """Ensure that the graph was produced on this version of python (disregard dev tags)
 
     TODO: in the future, just check that the minor versions are the same,
     because development won't be changing the data structure so much
     """
-    version = get_distribution('pybel').version
-    if check_version and version != graph.pybel_version:
-        raise ValueError('Using version {}, tried importing from version {}'.format(version, graph.pybel_version))
+    current_version = tokenize_version(get_distribution('pybel').version)
+    graph_version = tokenize_version(graph.pybel_version)
+    if check_version and current_version != graph_version:
+        raise ValueError('Using version {}, tried importing from version {}'.format(current_version, graph_version))
     return graph
 
 
