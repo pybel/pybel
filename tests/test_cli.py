@@ -8,11 +8,11 @@ import py2neo
 import py2neo.database.status
 from click.testing import CliRunner
 
-import pybel
 from pybel import cli
-from pybel.constants import PYBEL_CONTEXT_TAG
-from tests.constants import test_bel, BelReconstitutionMixin, expected_test_bel_metadata, \
-    mock_bel_resources
+from pybel.constants import PYBEL_CONTEXT_TAG, METADATA_NAME
+from pybel.io import from_pickle, from_graphml, from_json, from_path
+from pybel.manager.database_io import from_database
+from .constants import test_bel, BelReconstitutionMixin, expected_test_bel_metadata, mock_bel_resources
 
 log = logging.getLogger(__name__)
 
@@ -49,11 +49,11 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
 
             self.assertTrue(os.path.exists(test_csv))
 
-            self.bel_1_reconstituted(pybel.from_pickle(test_gpickle))
-            self.bel_1_reconstituted(pybel.from_graphml(test_graphml), check_metadata=False)
-            self.bel_1_reconstituted(pybel.from_json(test_json))
-            self.bel_1_reconstituted(pybel.from_path(test_canon))
-            self.bel_1_reconstituted(pybel.from_database(expected_test_bel_metadata['name'], connection=conn))
+            self.bel_1_reconstituted(from_pickle(test_gpickle))
+            self.bel_1_reconstituted(from_graphml(test_graphml), check_metadata=False)
+            self.bel_1_reconstituted(from_json(test_json))
+            self.bel_1_reconstituted(from_path(test_canon))
+            self.bel_1_reconstituted(from_database(expected_test_bel_metadata[METADATA_NAME], connection=conn))
 
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     @mock_bel_resources

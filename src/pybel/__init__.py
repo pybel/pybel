@@ -54,11 +54,11 @@ from . import io
 from .canonicalize import to_bel
 from .graph import BELGraph
 from .io import *
-from .manager.graph_cache import to_database, from_database
+from .manager.database_io import to_database, from_database
 
 __all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel'] + list(io.__all__)
 
-__version__ = '0.3.8'
+__version__ = '0.3.9'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'

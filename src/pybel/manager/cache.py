@@ -7,6 +7,7 @@ enable this option, but can specifiy a specific database location if they choose
 
 import itertools as itt
 import logging
+import os
 
 import networkx as nx
 from sqlalchemy import create_engine
@@ -16,7 +17,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from . import defaults
 from . import models
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
-from ..constants import DEFAULT_CACHE_LOCATION
+from ..constants import DEFAULT_CACHE_LOCATION, PYBEL_CONNECTION_ENV
 from ..parser.language import belns_encodings
 from ..utils import download_url
 
@@ -29,7 +30,22 @@ class BaseCacheManager:
     """Creates a connection to database and a persistient session using SQLAlchemy"""
 
     def __init__(self, connection=None, echo=False):
-        self.connection = connection if connection is not None else 'sqlite:///' + DEFAULT_CACHE_LOCATION
+        """
+
+        :param connection: custom database connection string can be given explicitly, loaded from a 'PYBEL_CONNECTION'
+                           in the environment, or will default to ~/.pybel/data/pybel_cache.db
+        :type connection: str or None
+        :param echo: Whether or not echo the running sql code.
+        :type echo: bool
+        """
+
+        if connection is not None:
+            self.connection = connection
+        elif connection is None and PYBEL_CONNECTION_ENV in os.environ:
+            self.connection = os.environ[PYBEL_CONNECTION_ENV]
+        else:
+            self.connection = 'sqlite:///' + DEFAULT_CACHE_LOCATION
+
         self.engine = create_engine(self.connection, echo=echo)
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
         self.session = scoped_session(self.sessionmaker)()
@@ -266,7 +282,6 @@ class CacheManager(BaseCacheManager):
         :param iri: the location of the ontology
         :type iri: str
         """
-
         return self.insert_owl(iri, models.OwlAnnotation, models.OwlAnnotationEntry)
 
     def ensure_namespace_owl(self, iri):

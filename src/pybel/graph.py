@@ -21,12 +21,10 @@ from pkg_resources import get_distribution
 from pyparsing import ParseException
 
 from .constants import *
+from .constructors import build_metadata_parser
 from .exceptions import PyBelWarning
-from .manager.cache import CacheManager
-from .parser import language
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import MissingMetadataException
-from .parser.parse_metadata import MetadataParser
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
 from .utils import expand_dict
 
@@ -40,25 +38,16 @@ __all__ = ['BELGraph']
 log = logging.getLogger(__name__)
 
 
-def build_metadata_parser(cache_manager):
-    if isinstance(cache_manager, CacheManager):
-        return MetadataParser(cache_manager)
-    elif isinstance(cache_manager, str):
-        return MetadataParser(CacheManager(connection=cache_manager))
-    else:
-        return MetadataParser(CacheManager())
-
-
 class BELGraph(nx.MultiDiGraph):
-    def __init__(self, lines=None, cache_manager=None, complete_origin=False, allow_naked_names=False,
+    def __init__(self, lines=None, manager=None, complete_origin=False, allow_naked_names=False,
                  allow_nested=False, *attrs, **kwargs):
         """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
         list of strings.
 
         :param lines: iterable over lines of BEL script
-        :param cache_manager: database connection string to cache, pre-built cache manager,
-                    or True to use the default
-        :type cache_manager: str or pybel.manager.CacheManager
+        :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
+                        or None to use default cache
+        :type manager: str or pybel.manager.CacheManager or pybel.parser.MetadataParser
         :param complete_origin: add corresponding DNA and RNA entities for all proteins
         :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
@@ -70,25 +59,25 @@ class BELGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
-        self.graph[GRAPH_WARNINGS] = []
+        self._warnings = []
         self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
 
         if lines is not None:
             self.parse_lines(
                 lines,
+                manager=manager,
                 complete_origin=complete_origin,
-                cache_manager=cache_manager,
                 allow_naked_names=allow_naked_names,
                 allow_nested=allow_nested
             )
 
-    def parse_lines(self, lines, cache_manager=None, complete_origin=False,
-                    allow_naked_names=False, allow_nested=False):
+    def parse_lines(self, lines, manager=None, complete_origin=False, allow_naked_names=False, allow_nested=False):
         """Parses an iterable of lines into this graph
 
         :param lines: iterable over lines of BEL data file
-        :param cache_manager: database connection string to cache or pre-built namespace namspace_cache manager
-        :type cache_manager: str or :class:`pybel.manager.cache.CacheManager`
+        :param manager: database connection string to cache, pre-built CacheManager, or pre-build MetadataParser, or
+                        None for default connection
+        :type manager: None or str or :class:`pybel.manager.cache.CacheManager` or :class:`pybel.parser.MetadataParser`
         :param complete_origin: add corresponding DNA and RNA entities for all proteins
         :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
@@ -99,7 +88,7 @@ class BELGraph(nx.MultiDiGraph):
 
         docs, definitions, states = split_file_to_annotations_and_definitions(lines)
 
-        metadata_parser = build_metadata_parser(cache_manager)
+        metadata_parser = build_metadata_parser(manager)
 
         self.parse_document(docs, metadata_parser)
 
@@ -143,11 +132,11 @@ class BELGraph(nx.MultiDiGraph):
 
         for required in REQUIRED_METADATA:
             if required not in metadata_parser.document_metadata:
-                self.add_warning(0, '', MissingMetadataException(language.inv_document_keys[required]))
-                log.error('Missing required document metadata: %s', language.inv_document_keys[required])
+                self.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
+                log.error('Missing required document metadata: %s', INVERSE_DOCUMENT_KEYS[required])
             elif not metadata_parser.document_metadata[required]:
-                self.add_warning(0, '', MissingMetadataException(language.inv_document_keys[required]))
-                log.error('Missing required document metadata not filled: %s', language.inv_document_keys[required])
+                self.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
+                log.error('Missing required document metadata not filled: %s', INVERSE_DOCUMENT_KEYS[required])
 
         self.graph[GRAPH_METADATA] = metadata_parser.document_metadata
 
@@ -231,7 +220,7 @@ class BELGraph(nx.MultiDiGraph):
     @property
     def document(self):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
-        according to :py:data:`pybel.parser.language.document_keys`
+        according to :py:data:`pybel.constants.DOCUMENT_KEYS`
         """
         return self.graph.get(GRAPH_METADATA, {})
 
@@ -281,7 +270,7 @@ class BELGraph(nx.MultiDiGraph):
         This tuple respectively contains the line number, the line text, the exception instance, and the context
         dictionary from the parser at the time of error.
         """
-        return self.graph[GRAPH_WARNINGS]
+        return self._warnings
 
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""

@@ -30,12 +30,12 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
     def test_load_reload(self, mock_get):
         path, name, label = test_bel, 'PyBEL Test Document 1', '1.6'
 
-        self.gcm.store_graph(self.g)
+        self.gcm.insert_graph(self.g)
 
         x = self.gcm.ls()
 
         self.assertEqual(1, len(x))
-        self.assertEqual((name, label), x[0])
+        self.assertEqual((1, name, label), x[0])
 
         g2 = self.gcm.get_graph(name, label)
         self.bel_1_reconstituted(g2)
@@ -43,10 +43,10 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
     @mock_bel_resources
     def test_integrity_failure(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
-        self.gcm.store_graph(self.g)
+        self.gcm.insert_graph(self.g)
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            self.gcm.store_graph(self.g)
+            self.gcm.insert_graph(self.g)
 
     @mock_bel_resources
     def test_get_versions(self, mock_get):
@@ -54,10 +54,10 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         TEST_V2 = '1.6'
 
         self.g.document['version'] = TEST_V1
-        self.gcm.store_graph(self.g)
+        self.gcm.insert_graph(self.g)
 
         self.g.document['version'] = TEST_V2
-        self.gcm.store_graph(self.g)
+        self.gcm.insert_graph(self.g)
 
         self.assertEqual({TEST_V1, TEST_V2}, set(self.gcm.get_graph_versions(self.g.document['name'])))
 

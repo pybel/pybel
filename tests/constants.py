@@ -127,33 +127,33 @@ class TestTokenParserBase(unittest.TestCase):
 
 
 expected_test_bel_metadata = {
-    'name': "PyBEL Test Document 1",
-    "description": "Made for testing PyBEL parsing",
-    'version': "1.6",
-    'copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
-    'authors': "Charles Tapley Hoyt",
-    'licenses': "WTF License",
-    'contact': "charles.hoyt@scai.fraunhofer.de"
+    METADATA_NAME: "PyBEL Test Document 1",
+    METADATA_DESCRIPTION: "Made for testing PyBEL parsing",
+    METADATA_VERSION: "1.6",
+    METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+    METADATA_AUTHORS: "Charles Tapley Hoyt",
+    METADATA_LICENSES: "WTF License",
+    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
 }
 
 expected_test_bel_3_metadata = {
-    'name': "PyBEL Test Document 3",
-    "description": "Made for testing PyBEL parsing",
-    'version': "1.6",
-    'copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
-    'authors': "Charles Tapley Hoyt",
-    'licenses': "WTF License",
-    'contact': "charles.hoyt@scai.fraunhofer.de"
+    METADATA_NAME: "PyBEL Test Document 3",
+    METADATA_DESCRIPTION: "Made for testing PyBEL parsing",
+    METADATA_VERSION: "1.6",
+    METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+    METADATA_AUTHORS: "Charles Tapley Hoyt",
+    METADATA_LICENSES: "WTF License",
+    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
 }
 
 expected_test_bel_4_metadata = {
-    'name': "PyBEL Test Document 4",
-    'description': "Tests the use of OWL ontologies as namespaces",
-    'version': "1.6",
-    'copyright': "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
-    'authors': "Charles Tapley Hoyt",
-    'licenses': "WTF License",
-    'contact': "charles.hoyt@scai.fraunhofer.de"
+    METADATA_NAME: "PyBEL Test Document 4",
+    METADATA_DESCRIPTION: "Tests the use of OWL ontologies as namespaces",
+    METADATA_VERSION: "1.6",
+    METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+    METADATA_AUTHORS: "Charles Tapley Hoyt",
+    METADATA_LICENSES: "WTF License",
+    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
 }
 
 
