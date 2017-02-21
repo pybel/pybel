@@ -70,17 +70,27 @@ class FusionParser(BaseParser):
 
 
 def build_legacy_fusion(identifier, reference):
-    break_start = (ppc.integer | '?').setParseAction(fusion_handler_wrapper(reference, start=True))
-    break_end = (ppc.integer | '?').setParseAction(fusion_handler_wrapper(reference, start=False))
+    break_start = (ppc.integer | '?').setParseAction(fusion_break_handler_wrapper(reference, start=True))
+    break_end = (ppc.integer | '?').setParseAction(fusion_break_handler_wrapper(reference, start=False))
 
     res = identifier(PARTNER_5P) + WCW + fusion_tags + nest(identifier(PARTNER_3P) + Optional(
         WCW + Group(break_start)(RANGE_5P) + WCW + Group(break_end)(RANGE_3P)))
 
+    res.setParseAction(fusion_legacy_handler)
+
     return res
 
 
-def fusion_handler_wrapper(reference, start):
-    def fusion_handler(s, l, tokens):
+def fusion_legacy_handler(s, l, tokens):
+    if RANGE_5P not in tokens:
+        tokens[RANGE_5P] = {FusionParser.MISSING: '?'}
+    if RANGE_3P not in tokens:
+        tokens[RANGE_3P] = {FusionParser.MISSING: '?'}
+    return tokens
+
+
+def fusion_break_handler_wrapper(reference, start):
+    def fusion_break_handler(s, l, tokens):
         if tokens[0] == '?':
             tokens[FusionParser.MISSING] = '?'
             return tokens
@@ -90,4 +100,4 @@ def fusion_handler_wrapper(reference, start):
             tokens[FusionParser.STOP if start else FusionParser.START] = int(tokens[0])
             return tokens
 
-    return fusion_handler
+    return fusion_break_handler

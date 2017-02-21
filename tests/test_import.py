@@ -49,7 +49,7 @@ class TestThoroughIo(BelReconstitutionMixin):
         with open(path) as f:
             graph = from_graphml(f)
 
-        self.bel_thorough_reconstituted(graph)
+        self.bel_thorough_reconstituted(graph, check_metadata=False, check_provenance=False, check_warnings=False)
 
 
 class TestSlushyIo(BelReconstitutionMixin):

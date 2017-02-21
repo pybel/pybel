@@ -831,6 +831,12 @@ class TestGene(TestTokenParserBase):
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node)
 
+        expected_node = GENE, ('HGNC', 'BCR'), ('c', '?', 1875), ('HGNC', 'JAK2'), ('c', 2626, '?')
+        self.assertEqual(expected_node, canonicalize_node(result))
+        self.assertHasNode(expected_node)
+
+        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'g(fus(HGNC:BCR, c.?_1875, HGNC:JAK2, c.2626_?))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
@@ -844,13 +850,19 @@ class TestGene(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
-                # RANGE_5P: {FusionParser.MISSING: '?'},
-                # RANGE_3P: {FusionParser.MISSING: '?'}
+                RANGE_5P: {FusionParser.MISSING: '?'},
+                RANGE_3P: {FusionParser.MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node)
+
+        expected_node = GENE, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)
+        self.assertEqual(expected_node, canonicalize_node(result))
+        self.assertHasNode(expected_node)
+
+        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'
@@ -1232,6 +1244,8 @@ class TestProtein(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
+                RANGE_5P: {FusionParser.MISSING: '?'},
+                RANGE_3P: {FusionParser.MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1774,6 +1788,8 @@ class TestRna(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
+                RANGE_5P: {FusionParser.MISSING: '?'},
+                RANGE_3P: {FusionParser.MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())

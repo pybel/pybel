@@ -712,6 +712,20 @@ def canonicalize_simple_to_dict(tokens):
     }
 
 
+# TODO figure out how to just get dictionary rather than slicing it up like this
+def canonicalize_fusion_range_to_dict(tokens):
+    if FusionParser.MISSING in tokens:
+        return {
+            FusionParser.MISSING: '?'
+        }
+    else:
+        return {
+            FusionParser.REFERENCE: tokens[FusionParser.REFERENCE],
+            FusionParser.START: tokens[FusionParser.START],
+            FusionParser.STOP: tokens[FusionParser.STOP]
+        }
+
+
 def canonicalize_fusion_to_dict(tokens):
     f = tokens[FUSION]
     return {
@@ -721,12 +735,12 @@ def canonicalize_fusion_to_dict(tokens):
                 NAMESPACE: f[PARTNER_5P][NAMESPACE],
                 NAME: f[PARTNER_5P][NAME]
             },
-            RANGE_5P: f[RANGE_5P] if RANGE_5P in f else '?',
+            RANGE_5P: canonicalize_fusion_range_to_dict(f[RANGE_5P]),
             PARTNER_3P: {
                 NAMESPACE: f[PARTNER_3P][NAMESPACE],
                 NAME: f[PARTNER_3P][NAME]
             },
-            RANGE_3P: f[RANGE_3P] if RANGE_3P in f else '?'
+            RANGE_3P: canonicalize_fusion_range_to_dict(f[RANGE_3P])
         }
     }
 

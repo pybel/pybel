@@ -339,22 +339,23 @@ class BelReconstitutionMixin(unittest.TestCase):
             EVIDENCE: evidence_3,
         })
 
-    def bel_thorough_reconstituted(self, graph, check_metadata=True):
+    def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True):
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
-        # FIXME this doesn't work for GraphML IO
+        if check_warnings:
+            self.assertEqual(0, len(graph.warnings), msg='Document warnings:\n{}'.format('\n'.join(map(str, graph.warnings))))
+
         if check_metadata:
             self.assertEqual(expected_test_thorough_metadata, graph.document)
 
-        self.assertEqual(0, len(graph.warnings), msg='Document warnings:\n{}'.format('\n'.join(map(str, graph.warnings))))
-
-        self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
-        self.assertEqual(set(), set(graph.namespace_owl))
-        self.assertEqual({'dbSNP'}, set(graph.namespace_pattern))
-        self.assertEqual(set(), set(graph.annotation_owl))
-        self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
-        self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
+        if check_provenance:
+            self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
+            self.assertEqual(set(), set(graph.namespace_owl))
+            self.assertEqual({'dbSNP'}, set(graph.namespace_pattern))
+            self.assertEqual(set(), set(graph.annotation_owl))
+            self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
+            self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 
         x = {
             (ABUNDANCE, 'CHEBI', 'oxygen atom'),

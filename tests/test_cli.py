@@ -40,7 +40,8 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
                 '--csv', test_csv,
                 '--pickle', test_gpickle,
                 '--bel', test_canon,
-                '--store', conn
+                '--store', conn,
+                '--allow-nested'
             ]
 
             result = self.runner.invoke(cli.main, args)
@@ -63,11 +64,13 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
                 'convert',
                 '--path', test_bel_thorough,
                 '--graphml', test_graphml,
+                '--allow-nested'
             ]
 
             result = self.runner.invoke(cli.main, args)
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
-            self.bel_thorough_reconstituted(from_graphml(test_graphml), check_metadata=False)
+            self.bel_thorough_reconstituted(from_graphml(test_graphml), check_metadata=False, check_provenance=False,
+                                            check_warnings=False)
 
     @mock_bel_resources
     def test_convert_json(self, mock_get):
@@ -78,6 +81,7 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
                 'convert',
                 '--path', test_bel_thorough,
                 '--json', test_json,
+                '--allow-nested'
             ]
 
             result = self.runner.invoke(cli.main, args)
@@ -95,7 +99,9 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             neo = py2neo.Graph(neo_path)
             neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
         except py2neo.database.status.GraphError:
-            self.skipTest("Can't connect to neo4j")
+            self.skipTest("Can't query Neo4J ")
+        except:
+            self.skipTest("Can't connect to Neo4J server")
         else:
             self.runner.invoke(cli.main, ['convert', '--path', test_bel_simple, '--neo',
                                           neo_path, '--neo-context', test_context, '--complete-origin'])
