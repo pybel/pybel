@@ -3,7 +3,7 @@ SET DOCUMENT Description = "This document outlines all of the evil and awful wor
 SET DOCUMENT Version = "0.0"
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
 SET DOCUMENT Licenses = "WTF License"
-SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+# SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"  # Missing Contact Info is required
 # SET DOCUMENT InvalidMetadata = "very invalid, indeed"
 
 DEFINE NAMESPACE CHEBI AS URL "http://resources.openbel.org/belframework/20150611/namespace/chebi.belns"

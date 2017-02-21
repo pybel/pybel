@@ -162,7 +162,6 @@ expected_test_slushy_metadata = {
     METADATA_VERSION: "0.0",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
-    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
 }
 
 
@@ -886,6 +885,7 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         if check_warnings:
             expected_warnings = [
+                (0, MissingMetadataException),
                 (26, MissingAnnotationKeyWarning),
                 (29, MissingAnnotationKeyWarning),
                 (34, InvalidCitationException),
