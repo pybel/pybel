@@ -13,7 +13,7 @@ from pybel.constants import *
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.utils import any_subdict_matches
-
+from pybel.parser.parse_exceptions import *
 try:
     from unittest import mock
 except ImportError:
@@ -26,14 +26,14 @@ belns_dir_path = os.path.join(dir_path, 'belns')
 belanno_dir_path = os.path.join(dir_path, 'belanno')
 beleq_dir_path = os.path.join(dir_path, 'beleq')
 
-test_bel = os.path.join(bel_dir_path, 'test_bel.bel')
-test_bel_4 = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
+test_bel_simple = os.path.join(bel_dir_path, 'test_bel.bel')
+test_bel_extensions = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
 
-test_owl_1 = os.path.join(owl_dir_path, 'pizza_onto.owl')
-test_owl_2 = os.path.join(owl_dir_path, 'wine.owl')
-test_owl_3 = os.path.join(owl_dir_path, 'ado.owl')
+test_owl_pizza = os.path.join(owl_dir_path, 'pizza_onto.owl')
+test_owl_wine = os.path.join(owl_dir_path, 'wine.owl')
+test_owl_ado = os.path.join(owl_dir_path, 'ado.owl')
 
 test_an_1 = os.path.join(belanno_dir_path, 'test_an_1.belanno')
 
@@ -126,7 +126,7 @@ class TestTokenParserBase(unittest.TestCase):
         assertHasEdge(self, u, v, self.parser.graph, **kwargs)
 
 
-expected_test_bel_metadata = {
+expected_test_simple_metadata = {
     METADATA_NAME: "PyBEL Test Document 1",
     METADATA_DESCRIPTION: "Made for testing PyBEL parsing",
     METADATA_VERSION: "1.6",
@@ -136,10 +136,10 @@ expected_test_bel_metadata = {
     METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
 }
 
-expected_test_bel_3_metadata = {
+expected_test_thorough_metadata = {
     METADATA_NAME: "PyBEL Test Document 3",
-    METADATA_DESCRIPTION: "Made for testing PyBEL parsing",
-    METADATA_VERSION: "1.6",
+    METADATA_DESCRIPTION: "Statements made up to contain many conceivable variants of nodes from BEL",
+    METADATA_VERSION: "1.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -151,6 +151,15 @@ expected_test_bel_4_metadata = {
     METADATA_DESCRIPTION: "Tests the use of OWL ontologies as namespaces",
     METADATA_VERSION: "1.6",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
+    METADATA_AUTHORS: "Charles Tapley Hoyt",
+    METADATA_LICENSES: "WTF License",
+    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
+}
+
+expected_test_slushy_metadata = {
+    METADATA_NAME: "Worst. BEL Document. Ever.",
+    METADATA_DESCRIPTION: "This document outlines all of the evil and awful work that is possible during BEL curation",
+    METADATA_VERSION: "0.0",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
     METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
@@ -180,9 +189,9 @@ class MockResponse:
         elif mock_url.endswith('.beleq'):
             self.path = os.path.join(beleq_dir_path, name)
         elif mock_url == wine_iri:
-            self.path = test_owl_2
+            self.path = test_owl_wine
         elif mock_url == pizza_iri:
-            self.path = test_owl_1
+            self.path = test_owl_pizza
         else:
             raise ValueError('Invalid extension')
 
@@ -260,18 +269,18 @@ mock_parse_owl_rdf = mock.patch('pybel.manager.utils.parse_owl_rdf', side_effect
 
 
 class BelReconstitutionMixin(unittest.TestCase):
-    def bel_1_reconstituted(self, g, check_metadata=True):
-        self.assertIsNotNone(g)
-        self.assertIsInstance(g, BELGraph)
+    def bel_simple_reconstituted(self, graph, check_metadata=True):
+        self.assertIsNotNone(graph)
+        self.assertIsInstance(graph, BELGraph)
 
         # FIXME this doesn't work for GraphML IO
         if check_metadata:
-            self.assertEqual(expected_test_bel_metadata, g.document)
+            self.assertEqual(expected_test_simple_metadata, graph.document)
 
-        assertHasNode(self, AKT1, g, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
-        assertHasNode(self, EGFR, g, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'EGFR'})
-        assertHasNode(self, FADD, g, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'FADD'})
-        assertHasNode(self, CASP8, g, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CASP8'})
+        assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        assertHasNode(self, EGFR, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'EGFR'})
+        assertHasNode(self, FADD, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'FADD'})
+        assertHasNode(self, CASP8, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CASP8'})
 
         citation_1 =  {
           CITATION_NAME: "That one article from last week",
@@ -289,13 +298,13 @@ class BelReconstitutionMixin(unittest.TestCase):
         evidence_2 = 'Evidence 2'
         evidence_3 = 'Evidence 3'
 
-        assertHasEdge(self, AKT1, EGFR, g, **{
+        assertHasEdge(self, AKT1, EGFR, graph, **{
             RELATION: INCREASES,
             CITATION: citation_1,
             EVIDENCE: evidence_1,
             ANNOTATIONS: {'TESTAN1': "1"}
         })
-        assertHasEdge(self, EGFR, FADD, g, **{
+        assertHasEdge(self, EGFR, FADD, graph, **{
             RELATION: DECREASES,
             ANNOTATIONS: {
                 'TESTAN1': "1",
@@ -304,7 +313,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             CITATION: citation_1,
             EVIDENCE: evidence_2
         })
-        assertHasEdge(self, EGFR, CASP8, g, **{
+        assertHasEdge(self, EGFR, CASP8, graph, **{
             RELATION: DIRECTLY_DECREASES,
             ANNOTATIONS: {
                 'TESTAN1': "1",
@@ -313,7 +322,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             CITATION: citation_1,
             EVIDENCE: evidence_2,
         })
-        assertHasEdge(self, FADD, CASP8, g, **{
+        assertHasEdge(self, FADD, CASP8, graph, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
                 'TESTAN1': "2"
@@ -321,7 +330,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             CITATION: citation_2,
             EVIDENCE: evidence_3,
         })
-        assertHasEdge(self, AKT1, CASP8, g, **{
+        assertHasEdge(self, AKT1, CASP8, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
                 'TESTAN1': "2"
@@ -330,17 +339,22 @@ class BelReconstitutionMixin(unittest.TestCase):
             EVIDENCE: evidence_3,
         })
 
-    def bel_thorough_reconstituted(self, g, check_metadata=True):
-        self.assertIsNotNone(g)
-        self.assertIsInstance(g, BELGraph)
-        self.assertEqual(0, len(g.warnings), msg='Document warnings:\n{}'.format('\n'.join(map(str, g.warnings))))
+    def bel_thorough_reconstituted(self, graph, check_metadata=True):
+        self.assertIsNotNone(graph)
+        self.assertIsInstance(graph, BELGraph)
 
-        self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(g.namespace_url))
-        self.assertEqual(set(), set(g.namespace_owl))
-        self.assertEqual({'dbSNP'}, set(g.namespace_pattern))
-        self.assertEqual(set(), set(g.annotation_owl))
-        self.assertEqual({'TESTAN1', 'TESTAN2'}, set(g.annotation_list))
-        self.assertEqual({'TestRegex'}, set(g.annotation_pattern))
+        # FIXME this doesn't work for GraphML IO
+        if check_metadata:
+            self.assertEqual(expected_test_thorough_metadata, graph.document)
+
+        self.assertEqual(0, len(graph.warnings), msg='Document warnings:\n{}'.format('\n'.join(map(str, graph.warnings))))
+
+        self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
+        self.assertEqual(set(), set(graph.namespace_owl))
+        self.assertEqual({'dbSNP'}, set(graph.namespace_pattern))
+        self.assertEqual(set(), set(graph.annotation_owl))
+        self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
+        self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 
         x = {
             (ABUNDANCE, 'CHEBI', 'oxygen atom'),
@@ -460,7 +474,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             (GENE, 'dbSNP', 'rs123456')
         }
 
-        self.assertEqual(x, set(g.nodes()))
+        self.assertEqual(x, set(graph.nodes()))
 
         citation_1 = {
             CITATION_TYPE: 'PubMed',
@@ -858,4 +872,60 @@ class BelReconstitutionMixin(unittest.TestCase):
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))
 
         for u, v, d in e:
-            assertHasEdge(self, u, v, g, permissive=False, **d)
+            assertHasEdge(self, u, v, graph, permissive=False, **d)
+
+
+    def bel_slushy_reconstituted(self, graph, check_metadata=True):
+        self.assertIsNotNone(graph)
+        self.assertIsInstance(graph, BELGraph)
+
+        # FIXME this doesn't work for GraphML IO
+        if check_metadata:
+            self.assertEqual(expected_test_slushy_metadata, graph.document)
+
+        expected_warnings = [
+            (26, MissingAnnotationKeyWarning),
+            (29, MissingAnnotationKeyWarning),
+            (34, InvalidCitationException),
+            (37, InvalidCitationType),
+            (40, InvalidPubMedIdentifierWarning),
+            (43, MissingCitationException),
+            (48, MissingAnnotationKeyWarning),
+            (51, MissingAnnotationKeyWarning),
+            (54, MissingSupportWarning),
+            (59, NakedNameWarning),
+            (62, UndefinedNamespaceWarning),
+            (65, MissingNamespaceNameWarning),
+            (68, UndefinedAnnotationWarning),
+            (71, MissingAnnotationKeyWarning),
+            (74, IllegalAnnotationValueWarning),
+            (77, MissingAnnotationRegexWarning),
+            (80, MissingNamespaceRegexWarning),
+            (83, MalformedTranslocationWarning),
+            (86, PlaceholderAminoAcidWarning),
+            (89, NestedRelationWarning),
+            (92, InvalidFunctionSemantic),
+            (95, Exception),
+            (98, Exception),
+        ]
+
+        for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
+            self.assertEqual(el, l)
+            self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
+
+        assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        assertHasNode(self, EGFR, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'EGFR'})
+
+        citation_1 = {
+            CITATION_NAME: "That one article from last week",
+            CITATION_REFERENCE: "123455",
+            CITATION_TYPE: "PubMed"
+        }
+
+        evidence_1 = "Evidence 1"
+
+        assertHasEdge(self, AKT1, EGFR, graph, **{
+            RELATION: INCREASES,
+            CITATION: citation_1,
+            EVIDENCE: evidence_1,
+        })

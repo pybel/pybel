@@ -212,7 +212,7 @@ def to_json(graph, output):
     json.dump(to_json_dict(graph), output, ensure_ascii=False)
 
 
-def from_json_data(data, check_version=True):
+def from_json_dict(data, check_version=True):
     """Reads graph from node-link JSON Object
 
     :param data: json dictionary representing graph
@@ -239,7 +239,7 @@ def from_json(path, check_version=True):
     :rtype: :class:`BELGraph`
     """
     with open(os.path.expanduser(path)) as f:
-        return from_json_data(json.load(f), check_version=check_version)
+        return from_json_dict(json.load(f), check_version=check_version)
 
 
 def to_graphml(graph, output):
