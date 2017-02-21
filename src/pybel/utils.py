@@ -104,3 +104,11 @@ def flatten_graph_data(graph):
         g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
 
     return g
+
+
+def list2tuple(l):
+    """turns a nested list to a nested tuple"""
+    if not isinstance(l, list):
+        return l
+    else:
+        return tuple(list2tuple(e) for e in l)

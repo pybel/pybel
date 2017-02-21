@@ -22,9 +22,10 @@ from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
-from .utils import list2tuple, cartesian_dictionary
+from .utils import cartesian_dictionary
 from .. import constants as pbc
 from ..constants import *
+from ..utils import list2tuple
 
 log = logging.getLogger('pybel')
 

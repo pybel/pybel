@@ -31,7 +31,7 @@ from requests_file import FileAdapter
 from .canonicalize import decanonicalize_node
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
 from .graph import BELGraph
-from .utils import flatten_dict, flatten_graph_data
+from .utils import flatten_dict, flatten_graph_data, list2tuple
 
 try:
     import cPickle as pickle
@@ -206,7 +206,8 @@ def to_json(graph, output):
     :param output: a write-supporting file-like object
     :type output: file
     """
-    json.dump(to_json_dict(graph), output, ensure_ascii=False)
+    json_dict = to_json_dict(graph)
+    json.dump(json_dict, output, ensure_ascii=False)
 
 
 def from_json_dict(data, check_version=True):
@@ -220,9 +221,10 @@ def from_json_dict(data, check_version=True):
     """
 
     for i, node in enumerate(data['nodes']):
-        data['nodes'][i]['id'] = tuple(node['id'])
+        data['nodes'][i]['id'] = list2tuple(data['nodes'][i]['id'])
 
-    graph = BELGraph(data=node_link_graph(data, directed=True, multigraph=True))
+    graph = node_link_graph(data, directed=True, multigraph=True)
+    graph = BELGraph(data=graph)
     return ensure_version(graph, check_version=check_version)
 
 
@@ -236,7 +238,9 @@ def from_json(path, check_version=True):
     :rtype: :class:`BELGraph`
     """
     with open(os.path.expanduser(path)) as f:
-        return from_json_dict(json.load(f), check_version=check_version)
+        json_dict = json.load(f)
+        graph = from_json_dict(json_dict, check_version=check_version)
+        return graph
 
 
 def to_graphml(graph, output):

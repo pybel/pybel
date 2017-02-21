@@ -5,8 +5,9 @@ import unittest
 
 import networkx as nx
 
-from pybel.parser import utils
-from pybel.parser.utils import subdict_matches, check_stability, sanitize_file_lines
+from pybel.parser.utils import subdict_matches, check_stability, sanitize_file_lines, any_subdict_matches, \
+    cartesian_dictionary, ensure_quotes
+from pybel.utils import list2tuple
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -15,7 +16,7 @@ class TestUtils(unittest.TestCase):
     def test_list2tuple(self):
         l = [None, 1, 's', [1, 2, [4], [[]]]]
         e = (None, 1, 's', (1, 2, (4,), ((),)))
-        t = utils.list2tuple(l)
+        t = list2tuple(l)
 
         self.assertEqual(t, e)
 
@@ -108,7 +109,7 @@ class TestUtils(unittest.TestCase):
 
         d = {'relation': 'yup'}
 
-        self.assertTrue(utils.any_subdict_matches(g.edge[1][2], d))
+        self.assertTrue(any_subdict_matches(g.edge[1][2], d))
 
     def test_check_stability_good(self):
         d = {
@@ -190,7 +191,7 @@ class TestUtils(unittest.TestCase):
             'A': {'1', '2'},
             'B': {'x', 'y', 'z'}
         }
-        results = utils.cartesian_dictionary(d)
+        results = cartesian_dictionary(d)
 
         expected_results = [
             {'A': '1', 'B': 'x'},
@@ -285,10 +286,10 @@ and apoptosis (programmed cell death) [1,2]"'''.split('\n')
 
     def test_quote(self):
         a = "word1 word2"
-        self.assertEqual('"word1 word2"', utils.ensure_quotes(a))
+        self.assertEqual('"word1 word2"', ensure_quotes(a))
 
         b = "word1"
-        self.assertEqual('word1', utils.ensure_quotes(b))
+        self.assertEqual('word1', ensure_quotes(b))
 
         c = "word1$#"
-        self.assertEqual('"word1$#"', utils.ensure_quotes(c))
+        self.assertEqual('"word1$#"', ensure_quotes(c))
