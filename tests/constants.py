@@ -876,7 +876,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             assertHasEdge(self, u, v, graph, permissive=False, **d)
 
 
-    def bel_slushy_reconstituted(self, graph, check_metadata=True):
+    def bel_slushy_reconstituted(self, graph, check_metadata=True, check_warnings=True):
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
@@ -884,35 +884,36 @@ class BelReconstitutionMixin(unittest.TestCase):
         if check_metadata:
             self.assertEqual(expected_test_slushy_metadata, graph.document)
 
-        expected_warnings = [
-            (26, MissingAnnotationKeyWarning),
-            (29, MissingAnnotationKeyWarning),
-            (34, InvalidCitationException),
-            (37, InvalidCitationType),
-            (40, InvalidPubMedIdentifierWarning),
-            (43, MissingCitationException),
-            (48, MissingAnnotationKeyWarning),
-            (51, MissingAnnotationKeyWarning),
-            (54, MissingSupportWarning),
-            (59, NakedNameWarning),
-            (62, UndefinedNamespaceWarning),
-            (65, MissingNamespaceNameWarning),
-            (68, UndefinedAnnotationWarning),
-            (71, MissingAnnotationKeyWarning),
-            (74, IllegalAnnotationValueWarning),
-            (77, MissingAnnotationRegexWarning),
-            (80, MissingNamespaceRegexWarning),
-            (83, MalformedTranslocationWarning),
-            (86, PlaceholderAminoAcidWarning),
-            (89, NestedRelationWarning),
-            (92, InvalidFunctionSemantic),
-            (95, Exception),
-            (98, Exception),
-        ]
+        if check_warnings:
+            expected_warnings = [
+                (26, MissingAnnotationKeyWarning),
+                (29, MissingAnnotationKeyWarning),
+                (34, InvalidCitationException),
+                (37, InvalidCitationType),
+                (40, InvalidPubMedIdentifierWarning),
+                (43, MissingCitationException),
+                (48, MissingAnnotationKeyWarning),
+                (51, MissingAnnotationKeyWarning),
+                (54, MissingSupportWarning),
+                (59, NakedNameWarning),
+                (62, UndefinedNamespaceWarning),
+                (65, MissingNamespaceNameWarning),
+                (68, UndefinedAnnotationWarning),
+                (71, MissingAnnotationKeyWarning),
+                (74, IllegalAnnotationValueWarning),
+                (77, MissingAnnotationRegexWarning),
+                (80, MissingNamespaceRegexWarning),
+                (83, MalformedTranslocationWarning),
+                (86, PlaceholderAminoAcidWarning),
+                (89, NestedRelationWarning),
+                (92, InvalidFunctionSemantic),
+                (95, Exception),
+                (98, Exception),
+            ]
 
-        for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
-            self.assertEqual(el, l)
-            self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
+            for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
+                self.assertEqual(el, l)
+                self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
         assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
         assertHasNode(self, EGFR, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'EGFR'})

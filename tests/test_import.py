@@ -68,6 +68,7 @@ class TestSlushyIo(BelReconstitutionMixin):
     def test_json(self):
         graph_json = to_json_dict(self.graph)
         graph = from_json_dict(graph_json)
+        self.bel_slushy_reconstituted(graph)
 
     def test_graphml(self):
         handle, path = tempfile.mkstemp()
