@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 import pybel
-from pybel import to_bytes, from_bytes, from_graphml, to_graphml
+from pybel import to_bytes, from_bytes, to_graphml
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
 from pybel.io import to_json_dict, from_json_dict
 from pybel.parser import BelParser
@@ -46,11 +46,6 @@ class TestThoroughIo(BelReconstitutionMixin):
         with open(path, 'wb') as f:
             to_graphml(self.graph, f)
 
-        with open(path) as f:
-            graph = from_graphml(f)
-
-        self.bel_thorough_reconstituted(graph, check_metadata=False, check_provenance=False, check_warnings=False)
-
 
 class TestSlushyIo(BelReconstitutionMixin):
     @classmethod
@@ -79,9 +74,6 @@ class TestSlushyIo(BelReconstitutionMixin):
 
         with open(path, 'wb') as f:
             to_graphml(self.graph, f)
-
-        with open(path) as f:
-            graph = from_graphml(f)
 
     def test_bytes_io_slushy(self):
         g_bytes = pybel.to_bytes(self.graph)

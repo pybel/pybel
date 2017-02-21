@@ -20,19 +20,17 @@ import codecs
 import json
 import logging
 import os
-from ast import literal_eval
 
 import networkx as nx
 import py2neo
 import requests
-from networkx import GraphMLReader
 from networkx.readwrite.json_graph import node_link_data, node_link_graph
 from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
-from .graph import BELGraph, expand_edges
+from .graph import BELGraph
 from .utils import flatten_dict, flatten_graph_data
 
 try:
@@ -51,7 +49,6 @@ __all__ = [
     'to_json',
     'from_json',
     'to_graphml',
-    'from_graphml',
     'to_csv',
     'to_neo4j'
 ]
@@ -258,28 +255,6 @@ def to_graphml(graph, output):
         g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
 
     nx.write_graphml(g, output)
-
-
-def from_graphml(path, check_version=True):
-    """Reads a graph from a graphml file
-
-    :param path: File or filename to write
-    :type path: file or str
-    :param check_version: Checks if the graph was produced by this version of PyBEL
-    :type check_version: bool
-    :rtype: :class:`BELGraph`
-    """
-    reader = GraphMLReader(node_type=str)
-    reader.multigraph = True
-    g = list(reader(path=path))[0]
-    g = expand_edges(g)
-    for n in g.nodes_iter():
-        g.node[n] = json.loads(g.node[n]['json'])
-
-    # Use AST to convert stringified tuples into actual tuples
-    nx.relabel_nodes(g, literal_eval, copy=False)
-
-    return ensure_version(BELGraph(data=g), check_version=check_version)
 
 
 def to_csv(graph, output):

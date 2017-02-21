@@ -11,7 +11,6 @@ PyBEL contains multiple input and output methods. All pairs are data-preserving.
 .. autofunction:: pybel.to_json
 .. autofunction:: pybel.from_json
 .. autofunction:: pybel.to_graphml
-.. autofunction:: pybel.from_graphml
 .. autofunction:: pybel.to_csv
 .. autofunction:: pybel.to_neo4j
 .. autofunction:: pybel.to_bel

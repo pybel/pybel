@@ -10,7 +10,7 @@ from click.testing import CliRunner
 
 from pybel import cli
 from pybel.constants import PYBEL_CONTEXT_TAG, METADATA_NAME
-from pybel.io import from_pickle, from_graphml, from_json, from_path
+from pybel.io import from_pickle, from_json, from_path
 from pybel.manager.database_io import from_database
 from .constants import test_bel_simple, BelReconstitutionMixin, mock_bel_resources, test_bel_thorough, \
     expected_test_thorough_metadata
@@ -53,24 +53,6 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             self.bel_thorough_reconstituted(from_path(test_canon))
             self.bel_thorough_reconstituted(from_database(expected_test_thorough_metadata[METADATA_NAME],
                                                           connection=conn))
-
-    @mock_bel_resources
-    def test_convert_graphml(self, mock_get):
-
-        with self.runner.isolated_filesystem():
-            test_graphml = os.path.abspath('test.graphml')
-
-            args = [
-                'convert',
-                '--path', test_bel_thorough,
-                '--graphml', test_graphml,
-                '--allow-nested'
-            ]
-
-            result = self.runner.invoke(cli.main, args)
-            self.assertEqual(0, result.exit_code, msg=result.exc_info)
-            self.bel_thorough_reconstituted(from_graphml(test_graphml), check_metadata=False, check_provenance=False,
-                                            check_warnings=False)
 
     @mock_bel_resources
     def test_convert_json(self, mock_get):
