@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+[0.3.9] - 2017-02-21
+--------------------
+Added
+~~~~~
+- Experimental CX export for use with NDEx
+
+Changed
+~~~~~~~
+- Better testing with thorough BEL
+
+Fixed
+~~~~~
+- ParseResult objects no longer propogate through graph
+- Fixed outputting to JSON
+
+Removed
+~~~~~~~
+- Support for importing GraphML is no longer continued because there's too much information loss
+
+[0.3.8] - 2017-02-12
+--------------------
+Added
+~~~~~
+- Annotation pattern definitions
+- Alternative json output to in-memory dictionary
+
+Changed
+~~~~~~~
+- Removed url rewriting for OpenBEL Framework
+- Group all annotations in edge data (see Data Model in docs)
+
 [0.3.7] - 2017-02-06
 --------------------
 Added
@@ -182,7 +213,9 @@ Added
 Diffs
 -----
 
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.7...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.9...HEAD
+- [0.3.9]: https://github.com/pybel/pybel/compare/v0.3.8...v0.3.9
+- [0.3.8]: https://github.com/pybel/pybel/compare/v0.3.7...v0.3.8
 - [0.3.7]: https://github.com/pybel/pybel/compare/v0.3.6...v0.3.7
 - [0.3.6]: https://github.com/pybel/pybel/compare/v0.3.5...v0.3.6
 - [0.3.5]: https://github.com/pybel/pybel/compare/v0.3.4...v0.3.5
