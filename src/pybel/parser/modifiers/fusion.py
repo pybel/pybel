@@ -35,9 +35,10 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
     BEL 2.0 specification on `fusions (2.6.1) <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
 """
 
-from pyparsing import oneOf, replaceWith, pyparsing_common, Keyword, Suppress, Group
+from pyparsing import oneOf, replaceWith, pyparsing_common, Keyword, Suppress, Group, Optional
+from pyparsing import pyparsing_common as ppc
 
-from ..baseparser import BaseParser, nest
+from ..baseparser import BaseParser, nest, WCW
 from ..parse_identifier import IdentifierParser
 from ...constants import FUSION, PARTNER_5P, RANGE_5P, PARTNER_3P, RANGE_3P
 
@@ -66,3 +67,27 @@ class FusionParser(BaseParser):
                                            Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
 
         BaseParser.__init__(self, self.language)
+
+
+def build_legacy_fusion(identifier, reference):
+    break_start = (ppc.integer | '?').setParseAction(fusion_handler_wrapper(reference, start=True))
+    break_end = (ppc.integer | '?').setParseAction(fusion_handler_wrapper(reference, start=False))
+
+    res = identifier(PARTNER_5P) + WCW + fusion_tags + nest(identifier(PARTNER_3P) + Optional(
+        WCW + Group(break_start)(RANGE_5P) + WCW + Group(break_end)(RANGE_3P)))
+
+    return res
+
+
+def fusion_handler_wrapper(reference, start):
+    def fusion_handler(s, l, tokens):
+        if tokens[0] == '?':
+            tokens[FusionParser.MISSING] = '?'
+            return tokens
+        else:  # The break point is specified as an integer
+            tokens[FusionParser.REFERENCE] = reference
+            tokens[FusionParser.START if start else FusionParser.STOP] = '?'
+            tokens[FusionParser.STOP if start else FusionParser.START] = int(tokens[0])
+            return tokens
+
+    return fusion_handler
