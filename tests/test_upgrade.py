@@ -9,7 +9,7 @@ import unittest
 import pybel
 from pybel.canonicalize import postpend_location, decanonicalize_node
 from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD, HAS_MEMBER, RELATION
-from tests.constants import test_bel, test_bel_4, mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_pybel, \
+from tests.constants import test_bel_simple, test_bel_extensions, mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_pybel, \
     test_bel_thorough, BelReconstitutionMixin
 
 log = logging.getLogger('pybel')
@@ -89,13 +89,13 @@ class TestCanonicalize(BelReconstitutionMixin, unittest.TestCase):
 
     @mock_bel_resources
     def test_canonicalize_1(self, mock_get):
-        self.canonicalize_helper(test_bel)
+        self.canonicalize_helper(test_bel_simple, reconstituted=self.bel_simple_reconstituted)
 
     @mock_bel_resources
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_canonicalize_4(self, m1, m2, m3):
-        self.canonicalize_helper(test_bel_4)
+        self.canonicalize_helper(test_bel_extensions)
 
     @mock_bel_resources
     def test_thorough(self, mock_get):

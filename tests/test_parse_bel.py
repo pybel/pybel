@@ -705,6 +705,7 @@ class TestGene(TestTokenParserBase):
         self.assertHasEdge(parent, expected_node, relation='hasVariant')
 
     def test_gene_fusion_1(self):
+        self.maxDiff = None
         statement = 'g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))'
         result = self.parser.gene.parseString(statement)
         expected_dict = {
@@ -727,10 +728,78 @@ class TestGene(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = canonicalize_node(result)
-        self.assertHasNode(node)
+        expected_node = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
+        self.assertEqual(expected_node, canonicalize_node(result))
+        self.assertHasNode(expected_node)
 
-        canonical_bel = decanonicalize_node(self.parser.graph, node)
+        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+
+        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
+        expected_canonical_bel = statement
+        self.assertEqual(expected_canonical_bel, canonical_bel)
+
+    def test_gene_fusion_2(self):
+        self.maxDiff = None
+        statement = 'g(fus(HGNC:TMPRSS2, c.1_?, HGNC:ERG, c.312_5034))'
+        result = self.parser.gene.parseString(statement)
+        expected_dict = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 1,
+                    FusionParser.STOP: '?'
+
+                },
+                RANGE_3P: {
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 312,
+                    FusionParser.STOP: 5034
+                }
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        expected_node = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, '?'), ('HGNC', 'ERG'), ('c', 312, 5034)
+        self.assertEqual(expected_node, canonicalize_node(result))
+        self.assertHasNode(expected_node)
+
+        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+
+        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
+        expected_canonical_bel = statement
+        self.assertEqual(expected_canonical_bel, canonical_bel)
+
+    def test_gene_fusion_3(self):
+        self.maxDiff = None
+        statement = 'g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, c.312_5034))'
+        result = self.parser.gene.parseString(statement)
+        expected_dict = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FusionParser.MISSING: '?'
+                },
+                RANGE_3P: {
+                    FusionParser.REFERENCE: 'c',
+                    FusionParser.START: 312,
+                    FusionParser.STOP: 5034
+                }
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        expected_node = GENE, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('c', 312, 5034)
+        self.assertEqual(expected_node, canonicalize_node(result))
+        self.assertHasNode(expected_node)
+
+        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+
+        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -762,6 +831,12 @@ class TestGene(TestTokenParserBase):
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node)
 
+        expected_node = GENE, ('HGNC', 'BCR'), ('c', '?', 1875), ('HGNC', 'JAK2'), ('c', 2626, '?')
+        self.assertEqual(expected_node, canonicalize_node(result))
+        self.assertHasNode(expected_node)
+
+        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'g(fus(HGNC:BCR, c.?_1875, HGNC:JAK2, c.2626_?))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
@@ -775,13 +850,19 @@ class TestGene(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
-                # RANGE_5P: {FusionParser.MISSING: '?'},
-                # RANGE_3P: {FusionParser.MISSING: '?'}
+                RANGE_5P: {FusionParser.MISSING: '?'},
+                RANGE_3P: {FusionParser.MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
         expected_node = canonicalize_node(result)
         self.assertHasNode(expected_node)
+
+        expected_node = GENE, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)
+        self.assertEqual(expected_node, canonicalize_node(result))
+        self.assertHasNode(expected_node)
+
+        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
         expected_canonical_bel = 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'
@@ -1163,6 +1244,8 @@ class TestProtein(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
+                RANGE_5P: {FusionParser.MISSING: '?'},
+                RANGE_3P: {FusionParser.MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1705,6 +1788,8 @@ class TestRna(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
+                RANGE_5P: {FusionParser.MISSING: '?'},
+                RANGE_3P: {FusionParser.MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())

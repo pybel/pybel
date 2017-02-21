@@ -20,7 +20,7 @@ DEFINE NAMESPACE MESHD AS URL "http://resource.belframework.org/belframework/201
 
 DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"
 
-DEFINE NAMESPACE TESTNS2 AS URL "file://examples/test_ns_2.belns"
+DEFINE NAMESPACE TESTNS2 AS URL "https://raw.githubusercontent.com/pybel/pybel/develop/tests/belns/test_ns_2.belns"
 
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
 DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}

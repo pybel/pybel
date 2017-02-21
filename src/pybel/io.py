@@ -20,20 +20,18 @@ import codecs
 import json
 import logging
 import os
-from ast import literal_eval
 
 import networkx as nx
 import py2neo
 import requests
-from networkx import GraphMLReader
 from networkx.readwrite.json_graph import node_link_data, node_link_graph
 from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
-from .graph import BELGraph, expand_edges
-from .utils import flatten_dict, flatten_graph_data
+from .graph import BELGraph
+from .utils import flatten_dict, flatten_graph_data, list2tuple
 
 try:
     import cPickle as pickle
@@ -51,7 +49,6 @@ __all__ = [
     'to_json',
     'from_json',
     'to_graphml',
-    'from_graphml',
     'to_csv',
     'to_neo4j'
 ]
@@ -59,15 +56,20 @@ __all__ = [
 log = logging.getLogger('pybel')
 
 
+def tokenize_version(version_string):
+    return tuple(version_string.split('.')[0:3])
+
+
 def ensure_version(graph, check_version=True):
-    """Ensure that the graph was produced on this version of python
+    """Ensure that the graph was produced on this version of python (disregard dev tags)
 
     TODO: in the future, just check that the minor versions are the same,
     because development won't be changing the data structure so much
     """
-    version = get_distribution('pybel').version
-    if check_version and version != graph.pybel_version:
-        raise ValueError('Using version {}, tried importing from version {}'.format(version, graph.pybel_version))
+    current_version = tokenize_version(get_distribution('pybel').version)
+    graph_version = tokenize_version(graph.pybel_version)
+    if check_version and current_version != graph_version:
+        raise ValueError('Using version {}, tried importing from version {}'.format(current_version, graph_version))
     return graph
 
 
@@ -204,10 +206,11 @@ def to_json(graph, output):
     :param output: a write-supporting file-like object
     :type output: file
     """
-    json.dump(to_json_dict(graph), output, ensure_ascii=False)
+    json_dict = to_json_dict(graph)
+    json.dump(json_dict, output, ensure_ascii=False)
 
 
-def from_json_data(data, check_version=True):
+def from_json_dict(data, check_version=True):
     """Reads graph from node-link JSON Object
 
     :param data: json dictionary representing graph
@@ -218,9 +221,10 @@ def from_json_data(data, check_version=True):
     """
 
     for i, node in enumerate(data['nodes']):
-        data['nodes'][i]['id'] = tuple(node['id'])
+        data['nodes'][i]['id'] = list2tuple(data['nodes'][i]['id'])
 
-    graph = BELGraph(data=node_link_graph(data, directed=True, multigraph=True))
+    graph = node_link_graph(data, directed=True, multigraph=True)
+    graph = BELGraph(data=graph)
     return ensure_version(graph, check_version=check_version)
 
 
@@ -234,7 +238,9 @@ def from_json(path, check_version=True):
     :rtype: :class:`BELGraph`
     """
     with open(os.path.expanduser(path)) as f:
-        return from_json_data(json.load(f), check_version=check_version)
+        json_dict = json.load(f)
+        graph = from_json_dict(json_dict, check_version=check_version)
+        return graph
 
 
 def to_graphml(graph, output):
@@ -253,28 +259,6 @@ def to_graphml(graph, output):
         g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
 
     nx.write_graphml(g, output)
-
-
-def from_graphml(path, check_version=True):
-    """Reads a graph from a graphml file
-
-    :param path: File or filename to write
-    :type path: file or str
-    :param check_version: Checks if the graph was produced by this version of PyBEL
-    :type check_version: bool
-    :rtype: :class:`BELGraph`
-    """
-    reader = GraphMLReader(node_type=str)
-    reader.multigraph = True
-    g = list(reader(path=path))[0]
-    g = expand_edges(g)
-    for n in g.nodes_iter():
-        g.node[n] = json.loads(g.node[n]['json'])
-
-    # Use AST to convert stringified tuples into actual tuples
-    nx.relabel_nodes(g, literal_eval, copy=False)
-
-    return ensure_version(BELGraph(data=g), check_version=check_version)
 
 
 def to_csv(graph, output):

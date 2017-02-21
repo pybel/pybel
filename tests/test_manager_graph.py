@@ -7,14 +7,16 @@ import unittest
 import sqlalchemy.exc
 
 import pybel
+from pybel.constants import METADATA_NAME, METADATA_VERSION
 from pybel.manager.graph_cache import GraphCacheManager
-from tests.constants import BelReconstitutionMixin, test_bel, mock_bel_resources
+from tests.constants import BelReconstitutionMixin, test_bel_thorough, mock_bel_resources, \
+    expected_test_thorough_metadata
 
 
 class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.g = pybel.from_path(test_bel)
+        cls.graph = pybel.from_path(test_bel_thorough, allow_nested=True)
 
     def setUp(self):
         self.dir = tempfile.mkdtemp()
@@ -28,37 +30,38 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
 
     @mock_bel_resources
     def test_load_reload(self, mock_get):
-        path, name, label = test_bel, 'PyBEL Test Document 1', '1.6'
+        name = expected_test_thorough_metadata[METADATA_NAME]
+        version = expected_test_thorough_metadata[METADATA_VERSION]
 
-        self.gcm.insert_graph(self.g)
+        self.gcm.insert_graph(self.graph)
 
         x = self.gcm.ls()
 
         self.assertEqual(1, len(x))
-        self.assertEqual((1, name, label), x[0])
+        self.assertEqual((1, name, version), x[0])
 
-        g2 = self.gcm.get_graph(name, label)
-        self.bel_1_reconstituted(g2)
+        g2 = self.gcm.get_graph(name, version)
+        self.bel_thorough_reconstituted(g2)
 
     @mock_bel_resources
     def test_integrity_failure(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
-        self.gcm.insert_graph(self.g)
+        self.gcm.insert_graph(self.graph)
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            self.gcm.insert_graph(self.g)
+            self.gcm.insert_graph(self.graph)
 
     @mock_bel_resources
     def test_get_versions(self, mock_get):
-        TEST_V1 = '1.5'
-        TEST_V2 = '1.6'
+        TEST_V1 = '0.9'
+        TEST_V2 = expected_test_thorough_metadata[METADATA_VERSION]  # Actually is 1.0
 
-        self.g.document['version'] = TEST_V1
-        self.gcm.insert_graph(self.g)
+        self.graph.document[METADATA_VERSION] = TEST_V1
+        self.gcm.insert_graph(self.graph)
 
-        self.g.document['version'] = TEST_V2
-        self.gcm.insert_graph(self.g)
+        self.graph.document[METADATA_VERSION] = TEST_V2
+        self.gcm.insert_graph(self.graph)
 
-        self.assertEqual({TEST_V1, TEST_V2}, set(self.gcm.get_graph_versions(self.g.document['name'])))
+        self.assertEqual({TEST_V1, TEST_V2}, set(self.gcm.get_graph_versions(self.graph.document[METADATA_NAME])))
 
-        self.assertEqual(TEST_V2, self.gcm.get_graph(self.g.document['name']).document['version'])
+        self.assertEqual(TEST_V2, self.gcm.get_graph(self.graph.document[METADATA_NAME]).document[METADATA_VERSION])

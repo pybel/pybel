@@ -10,8 +10,8 @@ from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.language import belns_encodings
 from pybel.parser.parse_metadata import MetadataParser
-from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_3
-from tests.constants import test_bel_4, wine_iri, pizza_iri, test_owl_1, test_owl_2, expected_test_bel_4_metadata, \
+from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_ado
+from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, expected_test_bel_4_metadata, \
     assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
 
 log = logging.getLogger('pybel')
@@ -60,7 +60,7 @@ class TestParsePizza(TestOwlBase):
     }
 
     def test_file(self):
-        owl = parse_owl(Path(test_owl_1).as_uri())
+        owl = parse_owl(Path(test_owl_pizza).as_uri())
         self.assertEqual(EXPECTED_PIZZA_NODES, set(owl.nodes()))
         self.assertEqual(EXPECTED_PIZZA_EDGES, set(owl.edges()))
 
@@ -270,7 +270,7 @@ class TestWine(TestOwlBase):
         self.expected_edges = self.expected_subclasses | self.expected_membership
 
     def test_file(self):
-        owl = parse_owl(Path(test_owl_2).as_uri())
+        owl = parse_owl(Path(test_owl_wine).as_uri())
 
         for node in sorted(self.wine_expected_classes):
             self.assertHasNode(owl, node)
@@ -337,7 +337,7 @@ class TestAdo(TestOwlBase):
     }
 
     def test_ado_local(self):
-        ado_path = Path(test_owl_3).as_uri()
+        ado_path = Path(test_owl_ado).as_uri()
         owl = parse_owl(ado_path)
 
         self.assertLessEqual(self.ado_expected_nodes_subset, set(owl.nodes_iter()))
@@ -407,7 +407,7 @@ class TestIntegration(TestOwlBase):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_from_path(self, m1, m2, m3):
-        g = pybel.from_path(test_bel_4)
+        g = pybel.from_path(test_bel_extensions)
         self.assertEqual(0, len(g.warnings))
 
         self.assertEqual(expected_test_bel_4_metadata, g.document)

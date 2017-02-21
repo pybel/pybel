@@ -87,14 +87,6 @@ def check_stability(ns_dict, ns_mapping):
     return flag
 
 
-def list2tuple(l):
-    """turns a nested list to a nested tuple"""
-    if not isinstance(l, list):
-        return l
-    else:
-        return tuple(list2tuple(e) for e in l)
-
-
 def subdict_matches(target_dict, query_dict):
     """Checks if all the keys in the query dict are in the target dict, and that their values match
 

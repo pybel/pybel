@@ -12,7 +12,7 @@ from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.parse_identifier import IdentifierParser
 from pybel.parser.utils import split_file_to_annotations_and_definitions
 from pybel.utils import download_url
-from tests.constants import test_an_1, test_bel
+from tests.constants import test_an_1, test_bel_simple
 
 
 class TestRandom(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestRandom(unittest.TestCase):
             IdentifierParser(namespace_mappings={})
 
     def test_split_lines(self):
-        with open(test_bel) as f:
+        with open(test_bel_simple) as f:
             docs, definitions, statements = split_file_to_annotations_and_definitions(f)
 
         self.assertEqual(7, len(docs))
