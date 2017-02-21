@@ -699,7 +699,7 @@ def handle_legacy_tloc(s, l, tokens):
 
 
 def handle_translocation_illegal(s, l, t):
-    raise MalformedTranslocationWarning('Unqualified translocation {} {} {}'.format(s, l, t))
+    raise MalformedTranslocationWarning(s, l, t)
 
 
 # CANONICALIZATION

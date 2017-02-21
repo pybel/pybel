@@ -27,9 +27,23 @@ class NakedNameWarning(PyBelWarning):
 class MissingDefaultNameWarning(PyBelWarning):
     """Raised if reference to value not in default namespace"""
 
+    def __init__(self, name):
+        PyBelWarning.__init__(self, name)
+        self.name = name
+
+    def __str__(self):
+        return '"{}" is not in the default namespace'.format(self.name)
+
 
 class UndefinedNamespaceWarning(PyBelWarning):
     """Raised if reference made to undefined namespace"""
+
+    def __init__(self, namespace):
+        PyBelWarning.__init__(self, namespace)
+        self.namespace = namespace
+
+    def __str__(self, namespace):
+        return '{} is not a defined namespace'.format(self.namespace)
 
 
 class IdentifierWarning(PyBelWarning):
@@ -128,6 +142,13 @@ class InvalidMetadataException(PyBelWarning):
 class MissingMetadataException(PyBelWarning):
     """BEL Script is missing critical metadata"""
 
+    def __init__(self, key):
+        PyBelWarning.__init__(self, key)
+        self.key = key
+
+    def __str__(self):
+        return 'Missing required document metadata: {}'.format(self.key)
+
 
 class InvalidCitationException(PyBelWarning):
     """Raised when the format for a citation is wrong. It should have either {type, name, reference}; or
@@ -199,10 +220,24 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
 class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
+    def __init__(self, s, t, l):
+        PyBelWarning.__init__(self, s, l, t)
+        self.s, self.l, self.t = s, l, t
+
+    def __str__(self):
+        return 'Unqualified translocation: {} {} {}'.format(self.s, self.l, self.t)
+
 
 class PlaceholderAminoAcidWarning(PyBelWarning):
     """X might be used as a placeholder amino acid, or as a colloquial signifier for a truncation at a certain position.
      Neither are valid within the HGVS nomenclature that defines the way variations are encoded in BEL."""
+
+    def __init__(self, code):
+        PyBelWarning.__init__(self, code)
+        self.code = code
+
+    def __str__(self):
+        return 'Placeholder amino acid found: {}'.format(self.code)
 
 
 class NestedRelationWarning(PyBelWarning):
