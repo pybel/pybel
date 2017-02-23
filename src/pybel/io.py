@@ -184,7 +184,8 @@ def to_json_dict(graph):
     :rtype: dict
     """
     data = node_link_data(graph)
-    data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in data['graph'][GRAPH_ANNOTATION_LIST].items()}
+    data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in
+                                            data['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()}
     return data
 
 
