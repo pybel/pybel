@@ -562,7 +562,7 @@ class BelParser(BaseParser):
         """
         key = unqualified_edge_code[relation]
         if not self.graph.has_edge(u, v, key):
-            self.graph.add_edge(u, v, key=key, **{RELATION: relation})
+            self.graph.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
 
     def _ensure_reaction(self, name, tokens):
         self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
