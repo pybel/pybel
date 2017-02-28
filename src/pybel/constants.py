@@ -99,8 +99,8 @@ HAS_PRODUCT = 'hasProduct'
 HAS_COMPONENT = 'hasComponent'
 HAS_VARIANT = 'hasVariant'
 HAS_MEMBER = 'hasMember'
-TRANSCRIBED_TO = 'transcribedTo'
-TRANSLATED_TO = 'translatedTo'
+TRANSCRIBED_TO = 'transcribedTo'  #: DNA to RNA is called transcription
+TRANSLATED_TO = 'translatedTo'  #: RNA to PROTEIN is called translation
 
 INCREASES = 'increases'
 DIRECTLY_INCREASES = 'directlyIncreases'
