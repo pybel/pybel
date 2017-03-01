@@ -42,7 +42,7 @@ class UndefinedNamespaceWarning(PyBelWarning):
         PyBelWarning.__init__(self, namespace)
         self.namespace = namespace
 
-    def __str__(self, namespace):
+    def __str__(self):
         return '{} is not a defined namespace'.format(self.namespace)
 
 
