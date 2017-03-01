@@ -14,7 +14,7 @@ output = os.path.expanduser('~/Desktop/results.txt')
 
 @unittest.skipUnless('PYBEL2CX' in os.environ, 'Not in development environment for pybel and cx conversion')
 class TestCx(unittest.TestCase):
-    def test_stuff(self):
+    def test_cx_export(self):
         graph = from_path(test_bel_thorough, allow_nested=True)
 
         log.info('Graph size: %d', graph.number_of_nodes())

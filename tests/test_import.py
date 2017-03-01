@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 import pybel
+from pybel import BELGraph
 from pybel import to_bytes, from_bytes, to_graphml
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
 from pybel.io import to_json_dict, from_json_dict
@@ -90,7 +91,8 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
 
 class TestRegex(unittest.TestCase):
     def setUp(self):
-        self.parser = BelParser(namespace_dicts={}, namespace_expressions={'dbSNP': 'rs[0-9]*'})
+        self.graph = BELGraph()
+        self.parser = BelParser(self.graph, namespace_dicts={}, namespace_expressions={'dbSNP': 'rs[0-9]*'})
 
     def test_match(self):
         lines = [
@@ -128,7 +130,8 @@ class TestFull(TestTokenParserBase):
             'TestAnnotation3': {'D', 'E', 'F'}
         }
 
-        self.parser = BelParser(namespace_dicts=self.namespaces, annotation_dicts=self.annotations)
+        self.graph = BELGraph()
+        self.parser = BelParser(self.graph, namespace_dicts=self.namespaces, annotation_dicts=self.annotations)
 
     def test_no_add_duplicates(self):
         s = 'r(TESTNS:1) -> r(TESTNS:2)'
@@ -158,8 +161,8 @@ class TestFull(TestTokenParserBase):
             test_set_evidence,
             "bp(ABASD) -- p(ABASF)"
         ]
-
-        self.parser = BelParser(namespace_dicts=self.namespaces, allow_naked_names=True)
+        self.graph = BELGraph()
+        self.parser = BelParser(self.graph, namespace_dicts=self.namespaces, allow_naked_names=True)
         self.parser.parse_lines(statements)
 
     def test_missing_citation(self):
