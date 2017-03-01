@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+[0.3.10] - 2017-03-91
+---------------------
+Added
+~~~~~
+- Shortcut for adding unqualified edges
+
+Fixed
+~~~~~
+- All edges have annotations dictionary now
+- JSON Export doesn't crash if there aren't list annotations
+- All exceptions have __str__ function for stringification by JSON export if desired
+
 [0.3.9] - 2017-02-21
 --------------------
 Added
@@ -213,7 +225,8 @@ Added
 Diffs
 -----
 
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.9...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.10...HEAD
+- [0.3.10]: https://github.com/pybel/pybel/compare/v0.3.9...v0.3.10
 - [0.3.9]: https://github.com/pybel/pybel/compare/v0.3.8...v0.3.9
 - [0.3.8]: https://github.com/pybel/pybel/compare/v0.3.7...v0.3.8
 - [0.3.7]: https://github.com/pybel/pybel/compare/v0.3.6...v0.3.7
