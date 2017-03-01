@@ -6,7 +6,7 @@ import sys
 from operator import itemgetter
 
 from .constants import *
-from .parser.language import rev_abundance_labels, unqualified_edges
+from .parser.language import rev_abundance_labels
 from .parser.modifiers import FusionParser
 from .parser.modifiers.fragment import FragmentParser
 from .parser.modifiers.protein_modification import PmodParser

@@ -14,7 +14,7 @@ import networkx as nx
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
 
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
-from .language import belns_encodings, activity_labels, activities, unqualified_edge_code
+from .language import belns_encodings, activity_labels, activities
 from .modifiers import FusionParser, VariantParser, canonicalize_variant, FragmentParser, GmodParser, GsubParser, \
     LocationParser, PmodParser, PsubParser, TruncParser
 from .modifiers.fusion import build_legacy_fusion

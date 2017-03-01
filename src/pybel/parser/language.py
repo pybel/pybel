@@ -239,15 +239,3 @@ gmod_namespace = {
     'Me': 'Me',
     'M': 'Me'
 }
-
-unqualified_edges = [
-    HAS_REACTANT,
-    HAS_PRODUCT,
-    HAS_COMPONENT,
-    HAS_VARIANT,
-    TRANSCRIBED_TO,
-    TRANSLATED_TO,
-    HAS_MEMBER,
-]
-
-unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}
