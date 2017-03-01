@@ -171,7 +171,7 @@ class BELGraph(nx.MultiDiGraph):
         :param u: source node
         :type u: tuple
         :param v: target node
-        :type v tuple
+        :type v: tuple
         :param relation: relationship label from :code:`pybel.constants`
         :type relation: str
         """

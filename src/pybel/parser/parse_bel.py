@@ -27,7 +27,7 @@ from .. import constants as pbc
 from ..constants import *
 from ..utils import list2tuple
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 general_abundance_tags = one_of_tags(['a', 'abundance'], ABUNDANCE, FUNCTION)
 gene_tag = one_of_tags(['g', 'geneAbundance'], GENE, FUNCTION)
@@ -553,6 +553,7 @@ class BelParser(BaseParser):
 
         self.graph.add_edge(obj, sub, attr_dict=new_attrs, **single_annotation)
 
+    # TODO replace with pybel.BELGraph.add_unqualified_edge
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
 
