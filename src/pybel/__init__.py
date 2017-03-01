@@ -58,7 +58,7 @@ from .manager.database_io import to_database, from_database
 
 __all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel'] + list(io.__all__)
 
-__version__ = '0.3.10'
+__version__ = '0.3.11-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'
