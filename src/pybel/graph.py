@@ -39,6 +39,8 @@ log = logging.getLogger(__name__)
 
 
 class BELGraph(nx.MultiDiGraph):
+    """The BELGraph class is a container for BEL networks that is based on the NetworkX MultiDiGraph data structure"""
+
     def __init__(self, lines=None, manager=None, complete_origin=False, allow_naked_names=False,
                  allow_nested=False, *attrs, **kwargs):
         """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
@@ -177,13 +179,13 @@ class BELGraph(nx.MultiDiGraph):
         """
         key = unqualified_edge_code[relation]
         if not self.has_edge(u, v, key):
-            self.graph.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
+            self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
 
     def parse_statements(self, statements, bel_parser):
         """Parses a list of statements from a BEL Script
 
         :type statements: list of str
-        :type bel_parser: pybel.parser.parse_bel.BelParser
+        :type bel_parser: BelParser
         """
         t = time.time()
 
@@ -313,8 +315,9 @@ class BELGraph(nx.MultiDiGraph):
 def expand_edges(graph):
     """Returns a new graph with expanded edge data dictionaries
 
-    :param graph: nx.MultiDiGraph
+    :param graph: A BEL Graph
     :type graph: BELGraph
+    :return: A new graph with expanded edge data dictionaries
     :rtype: BELGraph
     """
     g = BELGraph()

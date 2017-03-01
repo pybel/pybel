@@ -115,7 +115,8 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
 class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.parser = BelParser(complete_origin=True)
+        cls.graph = BELGraph()
+        cls.parser = BelParser(cls.graph, complete_origin=True)
 
     def setUp(self):
         self.parser.clear()

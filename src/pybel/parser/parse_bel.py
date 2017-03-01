@@ -10,7 +10,6 @@ import itertools as itt
 import logging
 from copy import deepcopy
 
-import networkx as nx
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
 
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
@@ -48,13 +47,13 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 
 class BelParser(BaseParser):
-    def __init__(self, graph=None, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
+    def __init__(self, graph, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
                  namespace_expressions=None, annotation_expressions=None, complete_origin=False,
                  allow_naked_names=False, allow_nested=False, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
-        :param graph: the graph to put the network in. Constructs new :class:`nx.MultiDiGraph` if None
-        :type graph: nx.MultiDiGraph
+        :param graph: The BEL Graph to use to store the network
+        :type graph: BELGraph
         :param namespace_dicts: A dictionary of {namespace: set of members}
         :type namespace_dicts: dict
         :param annotation_dicts: A dictionary of {annotation: set of values}
@@ -73,7 +72,7 @@ class BelParser(BaseParser):
         :type allow_nested: bool
         """
 
-        self.graph = graph if graph is not None else nx.MultiDiGraph()
+        self.graph = graph
         self.allow_nested = allow_nested
         self.complete_origin = complete_origin
 
@@ -553,28 +552,28 @@ class BelParser(BaseParser):
 
         self.graph.add_edge(obj, sub, attr_dict=new_attrs, **single_annotation)
 
+    '''
     # TODO replace with pybel.BELGraph.add_unqualified_edge
-    def add_unqualified_edge(self, u, v, relation):
-        """Adds unique edge that has no annotations
+    #def add_unqualified_edge(self, u, v, relation):
+    #    """Adds unique edge that has no annotations
 
         :param u: source node
         :param v: target node
         :param relation: relationship label
         """
-        key = unqualified_edge_code[relation]
-        if not self.graph.has_edge(u, v, key):
-            self.graph.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
+        self.graph.add_unqualified_edge(u, v, relation)
+    '''
 
     def _ensure_reaction(self, name, tokens):
         self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
 
         for reactant_tokens in tokens[REACTANTS]:
             reactant_name = self.ensure_node(reactant_tokens)
-            self.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
+            self.graph.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
 
         for product_tokens in tokens[PRODUCTS]:
             product_name = self.ensure_node(product_tokens)
-            self.add_unqualified_edge(name, product_name, HAS_PRODUCT)
+            self.graph.add_unqualified_edge(name, product_name, HAS_PRODUCT)
 
         return name
 
@@ -583,7 +582,7 @@ class BelParser(BaseParser):
 
         for token in tokens[MEMBERS]:
             member_name = self.ensure_node(token)
-            self.add_unqualified_edge(name, member_name, HAS_COMPONENT)
+            self.graph.add_unqualified_edge(name, member_name, HAS_COMPONENT)
         return name
 
     def _ensure_variants(self, name, tokens):
@@ -595,7 +594,7 @@ class BelParser(BaseParser):
         }
 
         parent = self.ensure_node(c)
-        self.add_unqualified_edge(parent, name, HAS_VARIANT)
+        self.graph.add_unqualified_edge(parent, name, HAS_VARIANT)
         return name
 
     def _ensure_fusion(self, name, tokens):
@@ -616,7 +615,7 @@ class BelParser(BaseParser):
         gene_tokens[FUNCTION] = GENE
         gene_name = self.ensure_node(gene_tokens)
 
-        self.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
+        self.graph.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
         return name
 
     def _ensure_protein(self, name, tokens):
@@ -629,7 +628,7 @@ class BelParser(BaseParser):
         rna_tokens[FUNCTION] = RNA
         rna_name = self.ensure_node(rna_tokens)
 
-        self.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
+        self.graph.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
         return name
 
     def ensure_node(self, tokens):
