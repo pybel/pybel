@@ -165,6 +165,20 @@ class BELGraph(nx.MultiDiGraph):
 
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
+    def add_unqualified_edge(self, u, v, relation):
+        """Adds unique edge that has no annotations
+
+        :param u: source node
+        :type u: tuple
+        :param v: target node
+        :type v tuple
+        :param relation: relationship label from :code:`pybel.constants`
+        :type relation: str
+        """
+        key = unqualified_edge_code[relation]
+        if not self.has_edge(u, v, key):
+            self.graph.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
+
     def parse_statements(self, statements, bel_parser):
         """Parses a list of statements from a BEL Script
 
