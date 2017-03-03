@@ -495,7 +495,8 @@ class BelParser(BaseParser):
         parent = self.ensure_node(tokens[0])
         for child_tokens in tokens[2]:
             child = self.ensure_node(child_tokens)
-            self.graph.add_edge(parent, child, **{RELATION: HAS_MEMBER})
+            self.graph.add_unqualified_edge(parent, child, HAS_MEMBER)
+
         return tokens
 
     def build_attrs(self, attrs=None, list_attrs=None):
