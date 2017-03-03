@@ -90,9 +90,15 @@ def check_stability(ns_dict, ns_mapping):
 def subdict_matches(target_dict, query_dict):
     """Checks if all the keys in the query dict are in the target dict, and that their values match
 
+    1. Checks that all keys in the query dict are in the target dict
+    2. Matches the values of the keys in the query dict
+        a. If the value is a string, then must match exactly
+        b. If the value is a set/list/tuple, then will match any of them
+        c. If the value is a dict, then it also must match exactly
+
     :param target_dict: target_dict dictionary
     :type target_dict: dict
-    :param query_dict: target_dict dictionary
+    :param query_dict: A query dict with keys to match, val
     :type query_dict: dict
     :return: if all keys in b are in target_dict and their values match
     :rtype: bool
