@@ -87,31 +87,42 @@ def check_stability(ns_dict, ns_mapping):
     return flag
 
 
-def subdict_matches(target_dict, query_dict):
+def subdict_matches(target, query, partial_match=True):
     """Checks if all the keys in the query dict are in the target dict, and that their values match
 
     1. Checks that all keys in the query dict are in the target dict
     2. Matches the values of the keys in the query dict
         a. If the value is a string, then must match exactly
         b. If the value is a set/list/tuple, then will match any of them
-        c. If the value is a dict, then it also must match exactly
+        c. If the value is a dict, then recursively check if that subdict matches
 
-    :param target_dict: target_dict dictionary
-    :type target_dict: dict
-    :param query_dict: A query dict with keys to match, val
-    :type query_dict: dict
+    :param target: The dictionary to search
+    :type target: dict
+    :param query: A query dict with keys to match
+    :type query: dict
+    :param partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
+    :type partial_match: bool
     :return: if all keys in b are in target_dict and their values match
     :rtype: bool
     """
-    for k, v in query_dict.items():
-        if k not in target_dict:
-            return False
-        elif isinstance(v, (str, dict)) and target_dict[k] != v:
-            return False
-        elif isinstance(v, (list, set, tuple)) and target_dict[k] not in v:
+    for k, v in query.items():
+        if k not in target:
             return False
         elif not isinstance(v, (str, list, set, dict, tuple)):
             raise ValueError('invalid value: {}'.format(v))
+        elif isinstance(v, str) and target[k] != v:
+            return False
+        elif isinstance(v, dict):
+            if partial_match:
+                if not isinstance(target[k], dict):
+                    return False
+                elif not subdict_matches(target[k], v, partial_match):
+                    return False
+            elif not partial_match and target[k] != v:
+                return False
+        elif isinstance(v, (list, set, tuple)) and target[k] not in v:
+            return False
+
     return True
 
 

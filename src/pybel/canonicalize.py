@@ -277,9 +277,11 @@ def to_bel(graph, file=None):
         print(decanonicalize_node(graph, u), file=file)
 
     # Can't infer hasMember relationships, but it's not due to specific evidence or citation
-    for u, v, d in graph.edges_iter(data=True, **{RELATION: HAS_MEMBER}):
+    for u, v, d in graph.edges_iter(data=True):
+        if d[RELATION] != HAS_MEMBER:
+            continue
+
         if EVIDENCE in d:
             continue
 
-        print("{} {} {}".format(decanonicalize_node(graph, u), HAS_MEMBER,
-                                decanonicalize_node(graph, v)), file=file)
+        print(decanonicalize_node(graph, u), HAS_MEMBER, decanonicalize_node(graph, v), file=file)
