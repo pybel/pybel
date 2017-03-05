@@ -60,7 +60,7 @@ class IdentifierParser(BaseParser):
         namespace = tokens[NAMESPACE]
 
         if namespace not in self.namespace_dict and namespace not in self.namespace_regex_compiled:
-            raise UndefinedNamespaceWarning('"{}" is not defined as a namespace'.format(namespace))
+            raise UndefinedNamespaceWarning(namespace)
 
         name = tokens[NAME]
         if namespace in self.namespace_dict and name not in self.namespace_dict[namespace]:
@@ -73,7 +73,7 @@ class IdentifierParser(BaseParser):
     def handle_identifier_default(self, s, l, tokens):
         name = tokens[NAME]
         if name not in self.default_namespace:
-            raise MissingDefaultNameWarning('"{}" is not in the default namespace'.format(name))
+            raise MissingDefaultNameWarning(name)
         return tokens
 
     def as_group(self):

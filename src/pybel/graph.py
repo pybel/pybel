@@ -233,6 +233,20 @@ class BELGraph(nx.MultiDiGraph):
             else:
                 yield n
 
+    def add_simple_node(self, function, namespace, name):
+        """Adds a simple node, with only a namespace and name
+
+        :param function: The node's function (GENE, RNA, PROTEIN, etc)
+        :type function: str
+        :param namespace: The namespace
+        :type namespace: str
+        :param name: The name of the node
+        :type name: str
+        """
+        node = function, namespace, name
+        if node not in self:
+            self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
+
     @property
     def document(self):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized

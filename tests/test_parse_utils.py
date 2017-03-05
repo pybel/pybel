@@ -7,98 +7,119 @@ import networkx as nx
 
 from pybel.parser.utils import subdict_matches, check_stability, sanitize_file_lines, any_subdict_matches, \
     cartesian_dictionary, ensure_quotes
-from pybel.utils import list2tuple
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class TestUtils(unittest.TestCase):
-    def test_list2tuple(self):
-        l = [None, 1, 's', [1, 2, [4], [[]]]]
-        e = (None, 1, 's', (1, 2, (4,), ((),)))
-        t = list2tuple(l)
-
-        self.assertEqual(t, e)
-
+class TestSubdictMatching(unittest.TestCase):
     def test_dict_matches_1(self):
-        a = {
+        target = {
             'k1': 'v1',
             'k2': 'v2'
         }
-        b = {
+        query = {
             'k1': 'v1',
             'k2': 'v2'
         }
-        self.assertTrue(subdict_matches(a, b))
+        self.assertTrue(subdict_matches(target, query))
 
     def test_dict_matches_2(self):
-        a = {
+        target = {
             'k1': 'v1',
             'k2': 'v2',
             'k3': 'v3'
         }
-        b = {
+        query = {
             'k1': 'v1',
             'k2': 'v2'
         }
-        self.assertTrue(subdict_matches(a, b))
+        self.assertTrue(subdict_matches(target, query))
 
     def test_dict_matches_3(self):
-        a = {
+        target = {
             'k1': 'v1',
         }
-        b = {
+        query = {
             'k1': 'v1',
             'k2': 'v2'
         }
-        self.assertFalse(subdict_matches(a, b))
+        self.assertFalse(subdict_matches(target, query))
 
     def test_dict_matches_4(self):
-        a = {
+        target = {
             'k1': 'v1',
             'k2': 'v4',
             'k3': 'v3'
         }
-        b = {
+        query = {
             'k1': 'v1',
             'k2': 'v2'
         }
-        self.assertFalse(subdict_matches(a, b))
+        self.assertFalse(subdict_matches(target, query))
 
     def test_dict_matches_5(self):
-        a = {
+        target = {
             'k1': 'v1',
             'k2': 'v2'
         }
-        b = {
+        query = {
             'k1': 'v1',
             'k2': ['v2', 'v3']
         }
-        self.assertTrue(subdict_matches(a, b))
+        self.assertTrue(subdict_matches(target, query))
 
     def test_dict_matches_6(self):
-        a = {
+        target = {
             'k1': 'v1',
             'k2': ['v2', 'v3']
         }
-        b = {
+        query = {
             'k1': 'v1',
             'k2': 'v4'
         }
-        self.assertFalse(subdict_matches(a, b))
+        self.assertFalse(subdict_matches(target, query))
 
-    def test_dict_matches_7(self):
-        a = {
+    def test_dict_matches_7_partial(self):
+        """Tests a partial match"""
+        target = {
             'k1': 'v1',
             'k2': 'v2'
         }
-        b = {
+        query = {
             'k1': 'v1',
             'k2': {'v2': 'v3'}
         }
 
-        self.assertFalse(subdict_matches(a, b))
+        self.assertFalse(subdict_matches(target, query))
 
+    def test_dict_matches_7_exact(self):
+        """Tests a partial match"""
+        target = {
+            'k1': 'v1',
+            'k2': 'v2'
+        }
+        query = {
+            'k1': 'v1',
+            'k2': {'v2': 'v3'}
+        }
+
+        self.assertFalse(subdict_matches(target, query, partial_match=False))
+
+    def test_dict_matches_8_partial(self):
+        """Tests a partial match"""
+        target = {
+            'k1': 'v1',
+            'k2': {'v2': 'v3', 'v4': 'v5'}
+        }
+        query = {
+            'k1': 'v1',
+            'k2': {'v2': 'v3'}
+        }
+
+        self.assertTrue(subdict_matches(target, query))
+
+
+class TestUtils(unittest.TestCase):
     def test_dict_matches_graph(self):
         g = nx.MultiDiGraph()
 

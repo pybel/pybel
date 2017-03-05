@@ -11,7 +11,7 @@ from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.parse_identifier import IdentifierParser
 from pybel.parser.utils import split_file_to_annotations_and_definitions
-from pybel.utils import download_url
+from pybel.utils import download_url, list2tuple
 from tests.constants import test_an_1, test_bel_simple
 
 
@@ -35,6 +35,13 @@ class TestRandom(unittest.TestCase):
         self.assertEqual(7, len(docs))
         self.assertEqual(4, len(definitions))
         self.assertEqual(14, len(statements))
+
+    def test_list2tuple(self):
+        l = [None, 1, 's', [1, 2, [4], [[]]]]
+        e = (None, 1, 's', (1, 2, (4,), ((),)))
+        t = list2tuple(l)
+
+        self.assertEqual(t, e)
 
 
 class TestUtils(unittest.TestCase):
