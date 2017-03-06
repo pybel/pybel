@@ -9,10 +9,18 @@ log = logging.getLogger(__name__)
 
 
 def to_cx_json(graph):
-    """Converts BEL Graph to CX data format (as in-memory JSON)
+    """Converts BEL Graph to CX data format (as in-memory JSON) for use with `NDEx <http://www.ndexbio.org/>`_
 
+    :param graph: A BEL Graph
     :type graph: pybel.BELGraph
+    :return: The CX JSON for this graph
     :rtype: list
+
+    .. seealso::
+
+        - `NDEx Python Client <https://github.com/ndexbio/ndex-python>`_
+        - `PyBEL / NDEx Python Client Wrapper <https://github.com/cthoyt/pybel2cx>`_
+
     """
     node_nid = {}
     nid_data = {}
@@ -140,3 +148,14 @@ def to_cx_json(graph):
         })
 
     return cx
+
+
+def from_cx_json(cx):
+    """Rebuilds a BELGraph from CX JSON
+
+    :param cx: The CX JSON for this graph
+    :type cx: list
+    :return: A BEL Graph
+    :rtype: pybel.BELGraph
+    """
+    raise NotImplementedError

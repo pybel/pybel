@@ -75,7 +75,7 @@ def ensure_version(graph, check_version=True):
 
 def from_lines(lines, **kwargs):
     """Loads a BEL graph from an iterable over the lines of a BEL script. This can be a list of strings, file, or other.
-    This function is a *very* thin wrapper around :py:meth:`BELGraph`.
+    This function is a *very* thin wrapper around :class:`BELGraph`.
 
     :param lines: An iterable of strings (the lines in a BEL script)
     :type lines: iter

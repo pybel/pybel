@@ -53,11 +53,12 @@ Future versions of PyBEL will include database integrity checks and provide upgr
 from . import constants
 from . import io
 from .canonicalize import to_bel
+from .cx import to_cx_json, from_cx_json
 from .graph import BELGraph
 from .io import *
 from .manager.database_io import to_database, from_database
 
-__all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel'] + list(io.__all__)
+__all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel', 'to_cx_json', 'from_cx_json'] + list(io.__all__)
 
 __version__ = '0.3.12-dev'
 
