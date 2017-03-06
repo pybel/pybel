@@ -59,7 +59,7 @@ class CacheManager(BaseCacheManager):
         :param url: the location of the namespace file
         :type url: str
         :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: :class:`models.Namespace`
+        :rtype: :class:`pybel.manager.models.Namespace`
         """
         log.info('Caching namespace %s', url)
 

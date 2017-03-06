@@ -25,9 +25,17 @@ Installation is as easy as getting the code from PyPI with :code:`python3 -m pip
    commandline
    troubleshooting
    logging
-   reference
    roadmap
    technology
+
+.. toctree::
+   :caption: Reference
+   :name: reference
+
+   parser
+   manager
+   utilities
+
 
 Indices and Tables
 ------------------

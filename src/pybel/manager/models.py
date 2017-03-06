@@ -220,6 +220,7 @@ edge_annotation = Table(
 
 
 class Network(Base):
+    """Represents a collection of edges, specified by a BEL Script"""
     __tablename__ = NETWORK_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -245,6 +246,7 @@ class Network(Base):
 
 
 class Node(Base):
+    """Represents a BEL Term"""
     __tablename__ = NODE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -253,6 +255,7 @@ class Node(Base):
 
 
 class Edge(Base):
+    """Represents the relation between two BEL terms and its properties"""
     __tablename__ = EDGE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -273,6 +276,7 @@ class Edge(Base):
 
 
 class Evidence(Base):
+    """Represents a piece of support taken from a Publication"""
     __tablename__ = EVIDENCE_TABLE_NAME
     id = Column(Integer, primary_key=True)
     text = Column(String, nullable=False, index=True)
@@ -300,6 +304,7 @@ class Citation(Base):
 
 
 class Author(Base):
+    """Represents an Author of a publication"""
     __tablename__ = AUTHOR_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
