@@ -13,7 +13,7 @@ from sqlalchemy import Integer, String, DateTime, Text, Date, Binary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from ..constants import CITATION_REFERENCE, CITATION_TYPE
+from ..constants import CITATION_REFERENCE, CITATION_TYPE, METADATA_VERSION, METADATA_NAME
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
@@ -237,8 +237,10 @@ class Network(Base):
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(Binary)
 
+    edges = relationship('Edge', secondary=network_edge)
+
     __table_args__ = (
-        UniqueConstraint("name", "version"),
+        UniqueConstraint(METADATA_NAME, METADATA_VERSION),
     )
 
 

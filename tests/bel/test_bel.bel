@@ -22,7 +22,7 @@ DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
 SET STATEMENT_GROUP = "Group 1"
 
-SET Citation = {"PubMed","That one article from last week","123455"}
+SET Citation = {"PubMed","That one article from last week","123455","2012-01-31","Example Author|Example Author2"}
 SET TESTAN1 = "1"
 
 SET Evidence = "Evidence 1 \

@@ -49,10 +49,13 @@ class GraphCacheManager(BaseCacheManager):
         :param graph: A BEL Graph
         :type graph: pybel.BELGraph
         """
-        nc = {node: self.get_or_create_node(graph, node) for node in graph}
+        nc = {node: self.get_or_create_node(graph, node) for node in graph.nodes_iter()}
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
             source, target = nc[u], nc[v]
+
+            if CITATION not in data or EVIDENCE not in data:
+                continue
 
             citation = self.get_or_create_citation(**data[CITATION])
             evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
@@ -146,11 +149,11 @@ class GraphCacheManager(BaseCacheManager):
 
         return result
 
-    def get_or_create_citation(self, citation_type, name, reference, date=None, authors=None, comments=None):
+    def get_or_create_citation(self, type, name, reference, date=None, authors=None, comments=None):
         """Creates entry for given citation if it does not exist.
 
-        :param citation_type: Citation type (e.g. PubMed)
-        :type citation_type: str
+        :param type: Citation type (e.g. PubMed)
+        :type type: str
         :param name: Title of the publication that is cited
         :type name: str
         :param reference: Identifier of the given citation (e.g. PubMed id)
@@ -165,13 +168,13 @@ class GraphCacheManager(BaseCacheManager):
         :rtype: models.Citation
         """
 
-        result = self.session.query(models.Citation).filter_by(type=citation_type, reference=reference).one_or_none()
+        result = self.session.query(models.Citation).filter_by(type=type, reference=reference).one_or_none()
 
         if result is None:
             if date is not None:
                 date = parse_datetime(date)
 
-            result = models.Citation(type=citation_type, name=name, reference=reference, date=date, comments=comments)
+            result = models.Citation(type=type, name=name, reference=reference, date=date, comments=comments)
 
             if authors is not None:
                 for author in authors.split('|'):
