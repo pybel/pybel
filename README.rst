@@ -84,7 +84,7 @@ your favorite terminal:
 
 .. code-block:: sh
 
-   pip install pybel
+   python3 -m pip install pybel
 
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
 instructions. Also, check the change log at :code:`CHANGELOG.rst`.
