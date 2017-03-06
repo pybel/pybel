@@ -25,8 +25,6 @@ Installation is as easy as getting the code from PyPI with :code:`python3 -m pip
    commandline
    troubleshooting
    logging
-   roadmap
-   technology
 
 .. toctree::
    :caption: Reference
@@ -35,6 +33,14 @@ Installation is as easy as getting the code from PyPI with :code:`python3 -m pip
    parser
    manager
    utilities
+
+.. toctree::
+   :caption: Project
+   :name: project
+
+   authors
+   roadmap
+   technology
 
 
 Indices and Tables

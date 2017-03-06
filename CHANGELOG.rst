@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-[0.3.10] - 2017-03-91
+[0.3.11] - 2017-03-05
+---------------------
+Fixed
+~~~~~
+- Fixed has_members not adding annotations tag
+- Reliance on node identifiers in canonicalization of complexes and composites
+- Fixed graph iterator filter
+
+[0.3.10] - 2017-03-01
 ---------------------
 Added
 ~~~~~
@@ -225,7 +233,8 @@ Added
 Diffs
 -----
 
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.10...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.11...HEAD
+- [0.3.11]: https://github.com/pybel/pybel/compare/v0.3.10...v0.3.11
 - [0.3.10]: https://github.com/pybel/pybel/compare/v0.3.9...v0.3.10
 - [0.3.9]: https://github.com/pybel/pybel/compare/v0.3.8...v0.3.9
 - [0.3.8]: https://github.com/pybel/pybel/compare/v0.3.7...v0.3.8
