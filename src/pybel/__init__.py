@@ -50,6 +50,7 @@ a new database and populate it on the next run.
 Future versions of PyBEL will include database integrity checks and provide upgrade procedures/scripts.
 """
 
+from . import constants
 from . import io
 from .canonicalize import to_bel
 from .graph import BELGraph
