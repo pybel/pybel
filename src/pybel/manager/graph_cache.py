@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+This module contains the Graph Cache Manager
+
+"""
+
 import logging
 
 from . import models
-from .cache import BaseCacheManager
+from .base_cache import BaseCacheManager
 from ..io import to_bytes, from_bytes
 
 log = logging.getLogger(__name__)
@@ -13,8 +19,8 @@ class GraphCacheManager(BaseCacheManager):
     def insert_graph(self, graph):
         """Stores a graph in the database
 
-        :param graph: a BEL network
-        :type graph: :class:`pybel.BELGraph`
+        :param graph: A BEL Graph
+        :type graph: pybel.BELGraph
         """
         network = models.Network(blob=to_bytes(graph), **graph.document)
 

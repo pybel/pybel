@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+
 This module contains the database models that support the PyBEL definition cache and graph cache
+
 """
 
 import datetime
@@ -10,6 +12,8 @@ from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
 from sqlalchemy import Integer, String, DateTime, Text, Date, Binary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
+from ..constants import CITATION_REFERENCE, CITATION_TYPE
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
@@ -24,13 +28,22 @@ OWL_ANNOTATION_ENTRY_TABLE_NAME = 'pybel_owlAnnotationEntry'
 NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
 NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalence'
 
+CITATION_TABLE_NAME = 'pybel_citation'
+EVIDENCE_TABLE_NAME = 'pybel_evidence'
+NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
 NETWORK_TABLE_NAME = 'pybel_network'
+NODE_TABLE_NAME = 'pybel_node'
+EDGE_TABLE_NAME = 'pybel_edge'
+AUTHOR_TABLE_NAME = 'pybel_author'
+AUTHOR_CITATION_TABLE_NAME = 'pybel_author_citation'
+EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntry'
 
 Base = declarative_base()
 
 
 class Namespace(Base):
     __tablename__ = NAMESPACE_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     url = Column(String(255))
@@ -60,6 +73,7 @@ class Namespace(Base):
 
 class NamespaceEntry(Base):
     __tablename__ = NAMESPACE_ENTRY_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), nullable=False)
@@ -74,6 +88,7 @@ class NamespaceEntry(Base):
 
 class NamespaceEntryEquivalence(Base):
     __tablename__ = NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
     label = Column(String(255), nullable=False, unique=True, index=True)
 
@@ -109,6 +124,7 @@ class Annotation(Base):
 
 class AnnotationEntry(Base):
     __tablename__ = ANNOTATION_ENTRY_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), nullable=False)
@@ -184,8 +200,28 @@ class OwlAnnotationEntry(Base):
                             secondaryjoin=id == owl_annotation_relationship.c.right_id)
 
 
+network_edge = Table(
+    NETWORK_EDGE_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
+)
+
+author_citation = Table(
+    AUTHOR_CITATION_TABLE_NAME, Base.metadata,
+    Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME))),
+    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+)
+
+edge_annotation = Table(
+    EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
+    Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
+)
+
+
 class Network(Base):
     __tablename__ = NETWORK_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), index=True)
@@ -204,3 +240,67 @@ class Network(Base):
     __table_args__ = (
         UniqueConstraint("name", "version"),
     )
+
+
+class Node(Base):
+    __tablename__ = NODE_TABLE_NAME
+
+    id = Column(Integer, primary_key=True)
+
+    bel = Column(String, nullable=False)
+
+
+class Edge(Base):
+    __tablename__ = EDGE_TABLE_NAME
+
+    id = Column(Integer, primary_key=True)
+
+    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
+    source = relationship('Node', foreign_keys=[source_id])
+
+    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
+    target = relationship('Node', foreign_keys=[target_id])
+
+    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)))
+    evidence = relationship("Evidence")
+
+    annotations = relationship('AnnotationEntry', secondary=edge_annotation)
+
+    relation = Column(String, nullable=False)
+    bel = Column(String, nullable=False)
+
+
+class Evidence(Base):
+    __tablename__ = EVIDENCE_TABLE_NAME
+    id = Column(Integer, primary_key=True)
+    text = Column(String, nullable=False, index=True)
+
+    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+    citation = relationship('Citation')
+
+
+class Citation(Base):
+    """The information about the citations that are used to prove a specific relation are stored in this table."""
+    __tablename__ = CITATION_TABLE_NAME
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(16), nullable=False)
+    name = Column(String(255), nullable=False)
+    reference = Column(String(255), nullable=False)
+    date = Column(Date, nullable=True)
+    comments = Column(String(255), nullable=True)
+
+    authors = relationship("Author", secondary=author_citation)
+
+    __table_args__ = (
+        UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
+    )
+
+
+class Author(Base):
+    __tablename__ = AUTHOR_TABLE_NAME
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+
+    citations = relationship("Citation", secondary=author_citation)
