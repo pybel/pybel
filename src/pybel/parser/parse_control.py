@@ -108,10 +108,6 @@ class ControlParser(BaseParser):
 
         BaseParser.__init__(self, self.language)
 
-    def raise_if_no_citation(self, s):
-        if not self.citation:
-            raise MissingCitationException(s)
-
     def validate_annotation_key(self, key):
         if key not in self.valid_annotations and key not in self.annotations_re_compiled:
             raise UndefinedAnnotationWarning(key)
@@ -125,7 +121,10 @@ class ControlParser(BaseParser):
     def handle_annotation_key(self, s, l, tokens):
         """Called on all annotation keys before parsing to validate that it's either enumerated or as a regex"""
         key = tokens['key']
-        self.raise_if_no_citation(s)
+
+        if self.citation_clearing and not self.citation:
+            raise MissingCitationException(s)
+
         self.validate_annotation_key(key)
         return tokens
 
