@@ -13,7 +13,9 @@ from .base_cache import BaseCacheManager
 from .utils import parse_datetime
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
+from ..graph import BELGraph
 from ..io import to_bytes, from_bytes
+from ..parser.utils import subdict_matches
 
 try:
     import cPickle as pickle
@@ -253,12 +255,38 @@ class GraphCacheManager(BaseCacheManager):
         """Lists network id, network name, and network version triples"""
         return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
 
-    # TODO implement
-    def get_by_edge_filter(self, graph, **kwargs):
-        """Gets a BEL graph matching the filter parameters
+    def get_edge_iter_by_filter(self, **annotations):
+        """Returns an iterator over models.Edge object that match the given annotations
 
-        :param graph: The graph to fill with the data
-        :param kwargs: dictionary of {URL: values}
-        :return: A BEL Graph
-        :rtype: BELGraph
+        :param annotations: dictionary of {URL: values}
+        :type annotations: dict
+        :return: An iterator over models.Edge object that match the given annotations
+        :rtype: iter of models.Edge
         """
+
+        # TODO make smarter
+        for edge in self.session.query(models.Edge).all():
+            ad = {a.annotation.name: a.name for a in edge.annotations}
+            if subdict_matches(ad, annotations):
+                yield edge
+
+    def get_graph_by_filter(self, **annotations):
+        """Fills a BEL graph with edges retrieved from a filter
+
+        :param annotations: dictionary of {URL: values}
+        :type annotations: dict
+        :return: A BEL Graph
+        :rtype: pybel.BELGraph
+        """
+        graph = BELGraph()
+
+        for edge in self.get_edge_iter_by_filter(**annotations):
+            if edge.source.id not in graph:
+                graph.add_node(edge.source.id, attr_dict=pickle.loads(edge.source.blob))
+
+            if edge.target.id not in graph:
+                graph.add_node(edge.target.id, attr_dict=pickle.loads(edge.target.blob))
+
+            graph.add_edge(edge.source.id, edge.target.id, attr_dict=pickle.loads(edge.blob))
+
+        return graph
