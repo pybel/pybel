@@ -15,6 +15,11 @@ from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
 from ..io import to_bytes, from_bytes
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 log = logging.getLogger(__name__)
 
 
@@ -61,7 +66,14 @@ class GraphCacheManager(BaseCacheManager):
             evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
 
             bel = decanonicalize_edge(graph, u, v, k)
-            edge = models.Edge(source=source, target=target, relation=data[RELATION], evidence=evidence, bel=bel)
+            edge = models.Edge(
+                source=source,
+                target=target,
+                relation=data[RELATION],
+                evidence=evidence,
+                bel=bel,
+                blob=pickle.dumps(data)
+            )
 
             for key, value in data[ANNOTATIONS].items():
                 if key in graph.annotation_url:
@@ -115,11 +127,12 @@ class GraphCacheManager(BaseCacheManager):
         :rtype: models.Node
         """
         bel = decanonicalize_node(graph, node)
+        blob = pickle.dumps(graph.node[node])
 
         result = self.session.query(models.Node).filter_by(bel=bel).one_or_none()
 
         if result is None:
-            result = models.Node(bel=bel)
+            result = models.Node(bel=bel, blob=blob)
             self.session.add(result)
 
         return result
@@ -225,10 +238,6 @@ class GraphCacheManager(BaseCacheManager):
 
         return from_bytes(n.blob)
 
-    # TODO implement
-    def get_by_edge_filter(self, **kwargs):
-        pass
-
     def drop_graph(self, network_id):
         """Drops a graph by ID
 
@@ -243,3 +252,13 @@ class GraphCacheManager(BaseCacheManager):
     def ls(self):
         """Lists network id, network name, and network version triples"""
         return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
+
+    # TODO implement
+    def get_by_edge_filter(self, graph, **kwargs):
+        """Gets a BEL graph matching the filter parameters
+
+        :param graph: The graph to fill with the data
+        :param kwargs: dictionary of {URL: values}
+        :return: A BEL Graph
+        :rtype: BELGraph
+        """

@@ -252,6 +252,7 @@ class Node(Base):
     id = Column(Integer, primary_key=True)
 
     bel = Column(String, nullable=False)
+    blob = Column(Binary)
 
 
 class Edge(Base):
@@ -273,6 +274,7 @@ class Edge(Base):
 
     relation = Column(String, nullable=False)
     bel = Column(String, nullable=False)
+    blob = Column(Binary)
 
 
 class Evidence(Base):
