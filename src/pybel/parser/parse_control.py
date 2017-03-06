@@ -25,12 +25,18 @@ log = logging.getLogger('pybel')
 
 
 class ControlParser(BaseParser):
-    def __init__(self, annotation_dicts=None, annotation_expressions=None):
+    def __init__(self, annotation_dicts=None, annotation_expressions=None, citation_clearing=True):
         """Builds parser for BEL valid_annotations statements
 
-        :param annotation_dicts: A dictionary from {annotation: set of valid values} for parsing
+        :param annotation_dicts: A dictionary of {annotation: set of valid values} for parsing
         :type annotation_dicts: dict
+        :param annotation_expressions: A dictionary of {annotation: regular expression string}
+        :type annotation_expressions: dict
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+        :type citation_clearing: bool
         """
+
+        self.citation_clearing = citation_clearing
 
         self.valid_annotations = {} if annotation_dicts is None else annotation_dicts
         self.annotations_re = {} if annotation_expressions is None else annotation_expressions
@@ -177,7 +183,9 @@ class ControlParser(BaseParser):
     def handle_unset_citation(self, s, l, tokens):
         if not self.citation:
             raise MissingAnnotationKeyWarning(BEL_KEYWORD_CITATION)
-        self.citation.clear()
+
+        self.clear_citation()
+
         return tokens
 
     def handle_unset_evidence(self, s, l, tokens):
@@ -224,10 +232,14 @@ class ControlParser(BaseParser):
 
     def clear_citation(self):
         self.citation.clear()
-        self.evidence = None
-        self.annotations.clear()
+
+        if self.citation_clearing:
+            self.evidence = None
+            self.annotations.clear()
 
     def clear(self):
-        """Clears the annotations, citation, and statement group"""
+        """Clears the statement_group, citation, evidence, and annotations"""
         self.statement_group = None
-        self.clear_citation()
+        self.citation.clear()
+        self.evidence = None
+        self.annotations.clear()

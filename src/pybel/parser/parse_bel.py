@@ -49,27 +49,37 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 class BelParser(BaseParser):
     def __init__(self, graph, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
                  namespace_expressions=None, annotation_expressions=None, complete_origin=False,
-                 allow_naked_names=False, allow_nested=False, autostreamline=False):
+                 allow_naked_names=False, allow_nested=False, citation_clearing=True, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: The BEL Graph to use to store the network
         :type graph: BELGraph
-        :param namespace_dicts: A dictionary of {namespace: set of members}
+        :param namespace_dicts: A dictionary of {namespace: set of members}.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_dicts: dict
-        :param annotation_dicts: A dictionary of {annotation: set of values}
+        :param annotation_dicts: A dictionary of {annotation: set of values}.
+                                    Delegated to :class:`pybel.parser.ControlParser`
         :type annotation_dicts: dict
-        :param namespace_expressions: A dictionary of {namespace: regular expression strings}
+        :param namespace_expressions: A dictionary of {namespace: regular expression strings}.
+                                        Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_expressions: dict
-        :param annotation_expressions: A dictionary of {annotation: regular expression strings}
+        :param annotation_expressions: A dictionary of {annotation: regular expression strings}.
+                                        Delegated to :class:`pybel.parser.ControlParser`
         :type annotation_expressions: dict
-        :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}
+        :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_mappings: dict
         :param complete_origin: If true, infer the RNA and Gene origins of unmodified proteins
         :type complete_origin: bool
-        :param allow_naked_names: If true, turn off naked namespace failures
+        :param allow_naked_names: If true, turn off naked namespace failures.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_naked_names: bool
-        :param allow_nested: If true, turn off nested statement failures
+        :param allow_nested: If true, turn off nested statement failures.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_nested: bool
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                    Delegated to :class:`pybel.parser.ControlParser`
+        :type citation_clearing: bool
         """
 
         self.graph = graph
@@ -78,7 +88,8 @@ class BelParser(BaseParser):
 
         self.control_parser = ControlParser(
             annotation_dicts=annotation_dicts,
-            annotation_expressions=annotation_expressions
+            annotation_expressions=annotation_expressions,
+            citation_clearing=citation_clearing
         )
 
         self.identifier_parser = IdentifierParser(
