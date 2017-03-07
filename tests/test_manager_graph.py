@@ -5,9 +5,8 @@ import tempfile
 import unittest
 from collections import Counter
 
-import sqlalchemy.exc
-
 import pybel
+import sqlalchemy.exc
 from pybel.constants import METADATA_NAME, METADATA_VERSION
 from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
@@ -20,15 +19,18 @@ TEST_BEL_VERSION = '1.6'
 
 
 class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.graph = pybel.from_path(test_bel_thorough, allow_nested=True)
-        cls.simple_graph = pybel.from_path(test_bel_simple)
+    # ToDo: What does this do? We have to use same manager for parsing and graph insert!
+    # @classmethod
+    # def setUpClass(cls):
+    #    cls.graph = pybel.from_path(test_bel_thorough, allow_nested=True)
+    #    cls.simple_graph = pybel.from_path(test_bel_simple)
 
     def setUp(self):
         self.dir = tempfile.mkdtemp()
         self.db_path = os.path.join(self.dir, 'test.db')
         self.connection = 'sqlite:///' + self.db_path
+        self.graph = pybel.from_path(test_bel_thorough, manager=self.connection, allow_nested=True)
+        self.simple_graph = pybel.from_path(test_bel_simple, manager=self.connection)
         self.gcm = GraphCacheManager(connection=self.connection)
 
     def tearDown(self):
@@ -165,7 +167,7 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
         for u, v, k in original.edges(keys=True):
             original.edge[u][v][k][annotation_tag] = value_tag
 
-        self.gcm.insert_graph(original, store_parts=True)
+        self.gcm.store_graph(original, store_parts=True)
 
         reloaded = self.gcm.get_by_edge_filter(**{annotation_tag: value_tag})
 

@@ -259,30 +259,31 @@ node_modification = Table(
 
 
 class Node(Base):
-    """This table contains node information. """
-
+    """This table contains node information.
+    """
     __tablename__ = NODE_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
+
     type = Column(String(255), nullable=False)
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
+    namespacePattern = Column(String(255), nullable=True)
     modification = Column(Boolean, default=False)
+
     bel = Column(String, nullable=False)
+    blob = Column(Binary)
 
     modifications = relationship("Modification", secondary=node_modification)
 
-    def __repr__(self):
-        return self.bel
-
     def forGraph(self):
-        # ToDo: Delete this after merge with develop and use forGraph instead!
         node_key = [self.type]
         node_data = {
             FUNCTION: self.type,
         }
         if self.namespaceEntry:
             namespace_entry = self.namespaceEntry.forGraph()
-            node_data[IDENTIFIER] = namespace_entry
+            node_data.update(namespace_entry)
             node_key.append(namespace_entry[NAMESPACE])
             node_key.append(namespace_entry[NAME])
 
@@ -312,13 +313,26 @@ class Modification(Base):
 
     modType = Column(String(255))
     variantString = Column(String, nullable=True)
+
     p3PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     p3Partner = relationship("NamespaceEntry", foreign_keys=[p3PartnerName_id])
-    p3Range = Column(String(255), nullable=True)
+
+    p3Reference = Column(String(10), nullable=True)
+    p3Start = Column(String(255), nullable=True)
+    p3Stop = Column(String(255), nullable=True)
+    p3Missing = Column(String(10), nullable=True)
+    # p3Range = Column(String(255), nullable=True)
+
     p5PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     p5Partner = relationship("NamespaceEntry", foreign_keys=[p5PartnerName_id])
-    p5Range = Column(String(255), nullable=True)
-    pmodName = Column(String(255), nullable=True)
+
+    p5Reference = Column(String(10), nullable=True)
+    p5Start = Column(String(255), nullable=True)
+    p5Stop = Column(String(255), nullable=True)
+    p5Missing = Column(String(10), nullable=True)
+    # p5Range = Column(String(255), nullable=True)
+
+    modName = Column(String(255), nullable=True)
     aminoA = Column(String(3), nullable=True)
     position = Column(Integer, nullable=True)
 
@@ -459,7 +473,9 @@ class Edge(Base):
     information about the context of the relation by refaring to the annotation, property and evidence tables."""
 
     __tablename__ = EDGE_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
+
     graphIdentifier = Column(Integer)
     bel = Column(String, nullable=False)
     relation = Column(String, nullable=False)
@@ -476,8 +492,7 @@ class Edge(Base):
     annotations = relationship('AnnotationEntry', secondary=edge_annotation)
     properties = relationship('Property', secondary=edge_property)
 
-    def __repr__(self):
-        return 'Edge(bel={})'.format(self.bel)
+    blob = Column(Binary)
 
     def forGraph(self):
         source_node = self.source.forGraph()

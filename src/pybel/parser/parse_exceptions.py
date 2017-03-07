@@ -221,7 +221,7 @@ class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
     def __init__(self, s, t, l):
-        PyBelWarning.__init__(self, s, l, t)
+        PyBelWarning.__init__(self, (s, l, t))
         self.s, self.l, self.t = s, l, t
 
     def __str__(self):
