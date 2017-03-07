@@ -12,7 +12,7 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_
 --------------------
 Added
 ~~~~~
-- Stable CX export
+- Stable CX import and export
 - Edge Store data models and loading
 - Alternative control parsing technique without citation clearing
 - Node name calculator
