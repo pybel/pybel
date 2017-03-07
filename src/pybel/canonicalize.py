@@ -287,3 +287,34 @@ def to_bel(graph, file=None):
             continue
 
         print(decanonicalize_node(graph, u), HAS_MEMBER, decanonicalize_node(graph, v), file=file)
+
+
+def calculate_canonical_name(graph, node):
+    """Calculates the canonical name for a given node. If it is a simple node, uses the already given name.
+    Otherwise, it uses the BEL string.
+
+    :param graph: A BEL Graph
+    :type graph: pybel.BELGraph
+    :param node: A node
+    :type node: tuple
+    :return: Canonical node name
+    :rtype: str
+    """
+    data = graph.node[node]
+
+    if data[FUNCTION] == COMPLEX and NAMESPACE in data:
+        return graph.node[node][NAME]
+
+    if VARIANTS in data:
+        return decanonicalize_node(graph, node)
+
+    if FUSION in data:
+        return decanonicalize_node(graph, node)
+
+    if data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
+        return decanonicalize_node(graph, node)
+
+    if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
+        return graph.node[node][NAME]
+
+    raise ValueError('Unexpected node data: {}'.format(data))
