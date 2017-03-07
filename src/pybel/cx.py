@@ -1,9 +1,9 @@
 import logging
 import time
 
-from .canonicalize import decanonicalize_node
+from pybel.utils import flatten_dict
+from .canonicalize import calculate_canonical_name
 from .constants import *
-from .utils import expand_dict
 
 log = logging.getLogger(__name__)
 
@@ -33,15 +33,40 @@ def to_cx_json(graph):
 
         nodes_entry.append({
             '@id': node_id,
-            'n': data[NAME] if NAME in data else decanonicalize_node(graph, node),
+            'n': calculate_canonical_name(graph, node)
         })
 
-        for k, v in expand_dict(data).items():
-            node_attributes_entry.append({
-                'po': node_id,
-                'n': k,
-                'v': v
-            })
+        for k, v in data.items():
+
+            if k == VARIANTS:
+                for i, el in enumerate(v):
+                    for a, b in flatten_dict(el).items():
+                        node_attributes_entry.append({
+                            'po': node_id,
+                            'n': '{}_{}_{}'.format(k, i, a),
+                            'v': b
+                        })
+            elif k == FUSION:
+                for a, b in flatten_dict(v).items():
+                    node_attributes_entry.append({
+                        'po': node_id,
+                        'n': '{}_{}'.format(k, a),
+                        'v': b
+
+                    })
+
+            elif k == NAME:
+                node_attributes_entry.append({
+                    'po': node_id,
+                    'n': 'identifier',
+                    'v': v
+                })
+            else:
+                node_attributes_entry.append({
+                    'po': node_id,
+                    'n': k,
+                    'v': v
+                })
 
     edges_entry = []
     edge_attributes_entry = []
@@ -81,7 +106,7 @@ def to_cx_json(graph):
             })
 
         if SUBJECT in d:
-            for k, v in expand_dict(d[SUBJECT]).items():
+            for k, v in flatten_dict(d[SUBJECT]).items():
                 edge_attributes_entry.append({
                     'po': eid,
                     'n': k,
@@ -89,7 +114,7 @@ def to_cx_json(graph):
                 })
 
         if OBJECT in d:
-            for k, v in expand_dict(d[OBJECT]).items():
+            for k, v in flatten_dict(d[OBJECT]).items():
                 edge_attributes_entry.append({
                     'po': eid,
                     'n': k,
