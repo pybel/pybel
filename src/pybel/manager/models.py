@@ -42,6 +42,7 @@ Base = declarative_base()
 
 
 class Namespace(Base):
+    """Represents a BEL Namespace"""
     __tablename__ = NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -72,6 +73,7 @@ class Namespace(Base):
 
 
 class NamespaceEntry(Base):
+    """Represents a name within a BEL namespace"""
     __tablename__ = NAMESPACE_ENTRY_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -96,6 +98,7 @@ class NamespaceEntryEquivalence(Base):
 
 
 class Annotation(Base):
+    """Represents a BEL Annotation"""
     __tablename__ = ANNOTATION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -123,6 +126,7 @@ class Annotation(Base):
 
 
 class AnnotationEntry(Base):
+    """Represents a value within a BEL Annotation"""
     __tablename__ = ANNOTATION_ENTRY_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -142,6 +146,7 @@ owl_namespace_relationship = Table(
 
 
 class OwlNamespace(Base):
+    """Represents an OWL Namespace"""
     __tablename__ = OWL_NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -151,6 +156,7 @@ class OwlNamespace(Base):
 
 
 class OwlNamespaceEntry(Base):
+    """Represents a name within an OWL Namespace"""
     __tablename__ = OWL_NAMESPACE_ENTRY_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -175,6 +181,7 @@ owl_annotation_relationship = Table(
 
 
 class OwlAnnotation(Base):
+    """Represents an OWL namespace used as an annotation"""
     __tablename__ = OWL_ANNOTATION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -184,6 +191,7 @@ class OwlAnnotation(Base):
 
 
 class OwlAnnotationEntry(Base):
+    """Represents a name in an OWL namespace used as an annotation"""
     __tablename__ = OWL_ANNOTATION_ENTRY_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
