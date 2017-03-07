@@ -60,7 +60,7 @@ from .manager.database_io import to_database, from_database
 
 __all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel', 'to_cx_json', 'from_cx_json'] + list(io.__all__)
 
-__version__ = '0.3.12-dev'
+__version__ = '0.4.0'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'

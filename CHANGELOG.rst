@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+[Unreleased]
+------------
+
+[0.4.0] - 2017-03-07
+--------------------
+Added
+~~~~~
+- Stable CX export
+- Edge Store data models and loading
+- Alternative control parsing technique without citation clearing
+- Node name calculator
+
 [0.3.11] - 2017-03-05
 ---------------------
 Fixed
@@ -233,7 +245,8 @@ Added
 Diffs
 -----
 
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.3.11...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.4.0...HEAD
+- [0.3.12]: https://github.com/pybel/pybel/compare/v0.3.11...v0.4.0
 - [0.3.11]: https://github.com/pybel/pybel/compare/v0.3.10...v0.3.11
 - [0.3.10]: https://github.com/pybel/pybel/compare/v0.3.9...v0.3.10
 - [0.3.9]: https://github.com/pybel/pybel/compare/v0.3.8...v0.3.9
