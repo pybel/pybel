@@ -38,7 +38,6 @@ Installation is as easy as getting the code from PyPI with :code:`python3 -m pip
    :caption: Project
    :name: project
 
-   authors
    roadmap
    technology
 
