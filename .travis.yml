@@ -28,6 +28,8 @@ matrix:
     exclude:
         - python: "3.3"
           env: TOXENV=docs
+    allow_failures:
+    - python: "3.3"
 
 before_install:
     - pip install codecov
@@ -53,7 +55,7 @@ deploy:
     provider: pypi
     user: cthoyt
     password:
-    secure: WK8SA0Vtdn9a4RMdpn8L0CFbHs/3a+mOJrwYLaL4kzzZNWjL3yt0ygnhY5138pQoy5ygQ/bLT/COJIE9cN0qP0uUyBMgerUPWozkXryoz79zsQxe2HXHkG/XMhxuNjvPwRKjw9+tmz/wWoCeMFQ0JczNvOg2DYFcT4ruqLY5muHBuMErVB5pwjGSpYmDAEpI30x6KEJTXz5VIDxRpLhI6uehpItBW195Yj5GRAWllnGTqn9zRTeZR7SME1/p2Af1RVOlam4Ur/3hSXYDMUqErNj/vrxvxgpO9lDakfpSUV0U7pETgwQ+g8mp0fgm8I643jfu4Zoj8lITf9ewl9CteiaC80gV4Nj9JA9mdGiiaZwmpkEPUiMq6YLaqef6QDJEL2kx1q40+cOOsnTWe3PjnmRx9oAovQR9koqz1kztr3F++D3H65s6Y+LF46mmAlQs5mQ2sjGGGzd8agBcmoBzAG/Y/oTpkLbZ1Xq1qMSTQML7b0AHgbkWsy0QYUm56pX35uMrcl+r5BezJ5dAG+p3FDfEurD9iR9I0pUoWcE3zZldA1EFNsX6tnrLUwXGrAX7YGT7ul9DgHnD/h8hsS2qcrktTgzWIBIEZSpXiWUoM7Wy0TMbBq+iU+83lhCfQqnOb8fiMaH09v2neMmmsaazIIdF9JIMS9Caq5x7Q/iujeI=
+        secure: WK8SA0Vtdn9a4RMdpn8L0CFbHs/3a+mOJrwYLaL4kzzZNWjL3yt0ygnhY5138pQoy5ygQ/bLT/COJIE9cN0qP0uUyBMgerUPWozkXryoz79zsQxe2HXHkG/XMhxuNjvPwRKjw9+tmz/wWoCeMFQ0JczNvOg2DYFcT4ruqLY5muHBuMErVB5pwjGSpYmDAEpI30x6KEJTXz5VIDxRpLhI6uehpItBW195Yj5GRAWllnGTqn9zRTeZR7SME1/p2Af1RVOlam4Ur/3hSXYDMUqErNj/vrxvxgpO9lDakfpSUV0U7pETgwQ+g8mp0fgm8I643jfu4Zoj8lITf9ewl9CteiaC80gV4Nj9JA9mdGiiaZwmpkEPUiMq6YLaqef6QDJEL2kx1q40+cOOsnTWe3PjnmRx9oAovQR9koqz1kztr3F++D3H65s6Y+LF46mmAlQs5mQ2sjGGGzd8agBcmoBzAG/Y/oTpkLbZ1Xq1qMSTQML7b0AHgbkWsy0QYUm56pX35uMrcl+r5BezJ5dAG+p3FDfEurD9iR9I0pUoWcE3zZldA1EFNsX6tnrLUwXGrAX7YGT7ul9DgHnD/h8hsS2qcrktTgzWIBIEZSpXiWUoM7Wy0TMbBq+iU+83lhCfQqnOb8fiMaH09v2neMmmsaazIIdF9JIMS9Caq5x7Q/iujeI=
     on:
         tags: true
         distributions: "sdist bdist_wheel"

@@ -39,8 +39,10 @@ log = logging.getLogger(__name__)
 
 
 class BELGraph(nx.MultiDiGraph):
+    """The BELGraph class is a container for BEL networks that is based on the NetworkX MultiDiGraph data structure"""
+
     def __init__(self, lines=None, manager=None, complete_origin=False, allow_naked_names=False,
-                 allow_nested=False, *attrs, **kwargs):
+                 allow_nested=False, citation_clearing=True, *attrs, **kwargs):
         """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
         list of strings.
 
@@ -54,6 +56,9 @@ class BELGraph(nx.MultiDiGraph):
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
         :type allow_nested: bool
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                    Delegated to :class:`pybel.parser.ControlParser`
+        :type citation_clearing: bool
         :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
         :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
         """
@@ -68,10 +73,12 @@ class BELGraph(nx.MultiDiGraph):
                 manager=manager,
                 complete_origin=complete_origin,
                 allow_naked_names=allow_naked_names,
-                allow_nested=allow_nested
+                allow_nested=allow_nested,
+                citation_clearing=citation_clearing
             )
 
-    def parse_lines(self, lines, manager=None, complete_origin=False, allow_naked_names=False, allow_nested=False):
+    def parse_lines(self, lines, manager=None, complete_origin=False, allow_naked_names=False, allow_nested=False,
+                    citation_clearing=True):
         """Parses an iterable of lines into this graph
 
         :param lines: iterable over lines of BEL data file
@@ -84,6 +91,9 @@ class BELGraph(nx.MultiDiGraph):
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
         :type allow_nested: bool
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                    Delegated to :class:`pybel.parser.ControlParser`
+        :type citation_clearing: bool
         """
 
         docs, definitions, states = split_file_to_annotations_and_definitions(lines)
@@ -103,6 +113,7 @@ class BELGraph(nx.MultiDiGraph):
             complete_origin=complete_origin,
             allow_naked_names=allow_naked_names,
             allow_nested=allow_nested,
+            citation_clearing=citation_clearing,
             autostreamline=True
         )
 
@@ -165,11 +176,25 @@ class BELGraph(nx.MultiDiGraph):
 
         log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
+    def add_unqualified_edge(self, u, v, relation):
+        """Adds unique edge that has no annotations
+
+        :param u: source node
+        :type u: tuple
+        :param v: target node
+        :type v: tuple
+        :param relation: relationship label from :code:`pybel.constants`
+        :type relation: str
+        """
+        key = unqualified_edge_code[relation]
+        if not self.has_edge(u, v, key):
+            self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
+
     def parse_statements(self, statements, bel_parser):
         """Parses a list of statements from a BEL Script
 
         :type statements: list of str
-        :type bel_parser: pybel.parser.parse_bel.BelParser
+        :type bel_parser: BelParser
         """
         t = time.time()
 
@@ -216,6 +241,20 @@ class BELGraph(nx.MultiDiGraph):
                 yield n, d
             else:
                 yield n
+
+    def add_simple_node(self, function, namespace, name):
+        """Adds a simple node, with only a namespace and name
+
+        :param function: The node's function (GENE, RNA, PROTEIN, etc)
+        :type function: str
+        :param namespace: The namespace
+        :type namespace: str
+        :param name: The name of the node
+        :type name: str
+        """
+        node = function, namespace, name
+        if node not in self:
+            self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
 
     @property
     def document(self):
@@ -299,8 +338,9 @@ class BELGraph(nx.MultiDiGraph):
 def expand_edges(graph):
     """Returns a new graph with expanded edge data dictionaries
 
-    :param graph: nx.MultiDiGraph
+    :param graph: A BEL Graph
     :type graph: BELGraph
+    :return: A new graph with expanded edge data dictionaries
     :rtype: BELGraph
     """
     g = BELGraph()

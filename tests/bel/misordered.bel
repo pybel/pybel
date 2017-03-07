@@ -1,0 +1,43 @@
+##################################################################################
+# Document Properties Section
+
+SET DOCUMENT Name = "PyBEL Test Document 4"
+SET DOCUMENT Description = "Made for testing PyBEL parsing without citation clearance"
+SET DOCUMENT Version = "1.0.0"
+SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
+SET DOCUMENT Authors = "Charles Tapley Hoyt"
+SET DOCUMENT Licenses = "WTF License"
+SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+
+##################################################################################
+# Definitions Section
+
+DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns"
+DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
+
+##################################################################################
+# Statements Section
+
+SET STATEMENT_GROUP = "Group 1"
+
+SET TESTAN1 = "1"
+SET Citation = {"PubMed","That one article from last week","123455"}
+SET Evidence = "Evidence 1"
+
+p(HGNC:AKT1) -> p(HGNC:EGFR)
+
+UNSET ALL
+
+SET Evidence = "Evidence 1"
+SET TESTAN1 = "1"
+SET Citation = {"PubMed","That one article from last week","123455"}
+
+p(HGNC:EGFR) -| p(HGNC:FADD)
+
+UNSET ALL
+
+SET TESTAN1 = "1"
+SET Evidence = "Evidence 1"
+SET Citation = {"PubMed","That one article from last week","123455"}
+
+p(HGNC:EGFR) =| p(HGNC:CASP8)

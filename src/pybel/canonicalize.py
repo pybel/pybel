@@ -6,7 +6,7 @@ import sys
 from operator import itemgetter
 
 from .constants import *
-from .parser.language import rev_abundance_labels, unqualified_edges
+from .parser.language import rev_abundance_labels
 from .parser.modifiers import FusionParser
 from .parser.modifiers.fragment import FragmentParser
 from .parser.modifiers.protein_modification import PmodParser
@@ -86,32 +86,34 @@ def decanonicalize_fusion_range(tokens):
     return '?'
 
 
-def decanonicalize_node(g, v):
+def decanonicalize_node(graph, node):
     """Returns a node from a graph as a BEL string
 
-    :param g: a BEL network
-    :type g: :class:`pybel.BELGraph`
-    :param v: a node from the BEL graph
+    :param graph: A BEL Graph
+    :type graph: BELGraph
+    :param node: a node from the BEL graph
+    :type node: tuple
     """
-    data = g.node[v]
+    data = graph.node[node]
 
     if data[FUNCTION] == REACTION:
-        reactants = get_neighbors_by_path_type(g, v, HAS_REACTANT)
-        reactants_canon = map(lambda n: decanonicalize_node(g, n), sorted(reactants))
-        products = get_neighbors_by_path_type(g, v, HAS_PRODUCT)
-        products_canon = map(lambda n: decanonicalize_node(g, n), sorted(products))
+        reactants = get_neighbors_by_path_type(graph, node, HAS_REACTANT)
+        reactants_canon = sorted(map(lambda n: decanonicalize_node(graph, n), reactants))
+        products = get_neighbors_by_path_type(graph, node, HAS_PRODUCT)
+        products_canon = sorted(map(lambda n: decanonicalize_node(graph, n), products))
         return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
 
-    if data[FUNCTION] in (COMPOSITE, COMPLEX) and NAMESPACE not in data:
-        members_canon = map(lambda n: decanonicalize_node(g, n), v[1:])
+    if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
+        members = get_neighbors_by_path_type(graph, node, HAS_COMPONENT)
+        members_canon = sorted(map(lambda n: decanonicalize_node(graph, n), members))
         return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members_canon))
 
     if VARIANTS in data:
-        variants = ', '.join(sorted(map(decanonicalize_variant, data[VARIANTS])))
+        variants_canon = sorted(map(decanonicalize_variant, data[VARIANTS]))
         return "{}({}:{}, {})".format(rev_abundance_labels[data[FUNCTION]],
                                       data[NAMESPACE],
                                       ensure_quotes(data[NAME]),
-                                      variants)
+                                      ', '.join(variants_canon))
 
     if FUSION in data:
         return "{}(fus({}:{}, {}, {}:{}, {}))".format(
@@ -129,7 +131,7 @@ def decanonicalize_node(g, v):
                                   data[NAMESPACE],
                                   ensure_quotes(data[NAME]))
 
-    raise ValueError('Unknown node data: {} {}'.format(v, data))
+    raise ValueError('Unknown node data: {} {}'.format(node, data))
 
 
 def decanonicalize_edge_node(g, node, edge_data, node_position):
@@ -277,9 +279,11 @@ def to_bel(graph, file=None):
         print(decanonicalize_node(graph, u), file=file)
 
     # Can't infer hasMember relationships, but it's not due to specific evidence or citation
-    for u, v, d in graph.edges_iter(data=True, **{RELATION: HAS_MEMBER}):
+    for u, v, d in graph.edges_iter(data=True):
+        if d[RELATION] != HAS_MEMBER:
+            continue
+
         if EVIDENCE in d:
             continue
 
-        print("{} {} {}".format(decanonicalize_node(graph, u), HAS_MEMBER,
-                                decanonicalize_node(graph, v)), file=file)
+        print(decanonicalize_node(graph, u), HAS_MEMBER, decanonicalize_node(graph, v), file=file)

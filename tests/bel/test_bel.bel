@@ -23,7 +23,7 @@ DEFINE ANNOTATION CellLine AS URL "http://resource.belframework.org/belframework
 
 SET STATEMENT_GROUP = "Group 1"
 
-SET Citation = {"PubMed","That one article from last week","123455"}
+SET Citation = {"PubMed","That one article from last week","123455","2012-01-31","Example Author|Example Author2"}
 SET Species = "9606"
 
 SET Evidence = "Evidence 1 \

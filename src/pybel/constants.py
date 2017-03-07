@@ -99,8 +99,8 @@ HAS_PRODUCT = 'hasProduct'
 HAS_COMPONENT = 'hasComponent'
 HAS_VARIANT = 'hasVariant'
 HAS_MEMBER = 'hasMember'
-TRANSCRIBED_TO = 'transcribedTo'
-TRANSLATED_TO = 'translatedTo'
+TRANSCRIBED_TO = 'transcribedTo'  #: DNA to RNA is called transcription
+TRANSLATED_TO = 'translatedTo'  #: RNA to PROTEIN is called translation
 
 INCREASES = 'increases'
 DIRECTLY_INCREASES = 'directlyIncreases'
@@ -114,6 +114,10 @@ ORTHOLOGOUS = 'orthologous'
 ANALOGOUS_TO = 'analogousTo'
 EQUIVALENT_TO = 'equivalentTo'
 
+CAUSAL_INCREASE_RELATIONS = {INCREASES, DIRECTLY_INCREASES}
+CAUSAL_DECREASE_RELATIONS = {DECREASES, DIRECTLY_DECREASES}
+CAUSAL_RELATIONS = CAUSAL_INCREASE_RELATIONS | CAUSAL_DECREASE_RELATIONS
+
 TWO_WAY_RELATIONS = {
     NEGATIVE_CORRELATION,
     POSITIVE_CORRELATION,
@@ -122,6 +126,17 @@ TWO_WAY_RELATIONS = {
     ANALOGOUS_TO,
     EQUIVALENT_TO,
 }
+
+unqualified_edges = [
+    HAS_REACTANT,
+    HAS_PRODUCT,
+    HAS_COMPONENT,
+    HAS_VARIANT,
+    TRANSCRIBED_TO,
+    TRANSLATED_TO,
+    HAS_MEMBER,
+]
+unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}
 
 # BEL Keywords
 

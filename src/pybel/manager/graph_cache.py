@@ -1,30 +1,48 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+This module contains the Graph Cache Manager
+
+"""
+
 import logging
 import time
 
 from sqlalchemy.orm.exc import NoResultFound
 
 from . import models
-from .cache import BaseCacheManager, CacheManager
+from .base_cache import BaseCacheManager
+from .utils import parse_datetime
+from ..canonicalize import decanonicalize_edge, decanonicalize_node
+from ..constants import *
+from ..graph import BELGraph
 from ..io import to_bytes, from_bytes
-from ..canonicalize import decanonicalize_node, decanonicalize_edge
 from ..constants import * # PYBEL_AUTOEVIDENCE
+from ..parser.utils import subdict_matches
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 log = logging.getLogger(__name__)
 
 
 class GraphCacheManager(BaseCacheManager):
-    def store_graph(self, graph, store_parts=True):
+    def store_graph(self, graph, store_parts=False):
         """Stores a graph in the database
 
         :param graph: a BEL network
-        :type graph: :class:`pybel.BELGraph`
-        :param store_parts: Store the nodes, edges, citation, evidence, and annotations to the cache
+        :type graph: pybel.BELGraph
+        :param store_parts: Should the graph be stored in the Edge Store?
         :type store_parts: bool
+        :return: A Network object
+        :rtype: models.Network
         """
-        t = time.time()
-        network = models.Network(blob=to_bytes(graph), **graph.document)
+        graph_bytes = to_bytes(graph)
+
+        network = models.Network(blob=graph_bytes, **graph.document)
 
         if store_parts:
             self.store_graph_parts(network, graph)
@@ -36,62 +54,231 @@ class GraphCacheManager(BaseCacheManager):
 
         return network
 
-    def store_graph_parts(self, network, graph):
-        """
+#    def store_graph_parts(self, network, graph):
+#        """
 
-        :param network:
-        :type network: models.Network
-        :param graph:
-        :type graph: BELGraph
-        :return:
-        """
-        # nc = {node: self.get_or_create_node(decanonicalize_node(graph, node)) for node in graph}
+#        :param network:
+#        :type network: models.Network
+#        :param graph:
+#        :type graph: BELGraph
+#        :return:
+#        """
+#        # nc = {node: self.get_or_create_node(decanonicalize_node(graph, node)) for node in graph}
 
-        self.cache_manager = CacheManager(connection=self.connection)
-        for key, ns_url in graph.namespace_url.items():
-            self.cache_manager.ensure_namespace(ns_url)
-        for key, anno_url in graph.annotation_url.items():
-            self.cache_manager.ensure_annotation(anno_url)
+#        self.cache_manager = CacheManager(connection=self.connection)
+#        for key, ns_url in graph.namespace_url.items():
+#            self.cache_manager.ensure_namespace(ns_url)
+#        for key, anno_url in graph.annotation_url.items():
+#            self.cache_manager.ensure_annotation(anno_url)
 
         # FIXME add GOCC ensurement to creation of graph.namespace_url ? --> Extract to constans!!!!
-        #GOCC = 'http://resource.belframework.org/belframework/20150611/namespace/go-cellular-component.belns'
-        #self.cache_manager.ensure_namespace(GOCC)
-        #graph.namespace_url['GOCC'] = GOCC
+        # GOCC = 'http://resource.belframework.org/belframework/20150611/namespace/go-cellular-component.belns'
+        # self.cache_manager.ensure_namespace(GOCC)
+        # graph.namespace_url['GOCC'] = GOCC
 
-        nc = {node: self.get_or_create_node(graph, node) for node in graph}
+#        nc = {node: self.get_or_create_node(graph, node) for node in graph}
+
+#        for u, v, k, data in graph.edges_iter(data=True, keys=True):
+#            source, target = nc[u], nc[v]
+#            edge_bel = decanonicalize_edge(graph, u, v, k)
+
+#            if CITATION not in data and BEL_KEYWORD_SUPPORT not in data:  # have to assume it's a valid graph at this point
+#                data[CITATION] = dict(type='Other', name=PYBEL_AUTOEVIDENCE, reference='0')
+#                data[BEL_KEYWORD_SUPPORT] = PYBEL_AUTOEVIDENCE
+
+#            citation = self.get_or_create_citation(**data[CITATION])
+#            evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
+#            edge = self.get_or_create_edge(k, source, target, evidence, edge_bel, data[RELATION])
+
+#            # edge.properties = self.get_or_create_property(graph, data)
+#            properties = self.get_or_create_property(graph, data)
+#            for property in properties:
+#                if property not in edge.properties:
+#                    edge.properties.append(property)
+
+#            for key, value in data[ANNOTATIONS].items():
+#                if key not in graph.annotation_url:
+#                    # FIXME not sure how to handle local annotations. Maybe show warning that can't be cached?
+#                    continue
+
+#                annotation_url = graph.annotation_url[key]
+#                annotation_id = self.cache_manager.annotation_id_cache[annotation_url][value]
+#                if self.get_annotation(annotation_id) not in edge.annotations:
+#                    edge.annotations.append(self.get_annotation(annotation_id))
+
+#            if edge not in network.edges:
+#                network.edges.append(edge)#
+
+                # self.session.commit()
+
+    def store_graph_parts(self, network, graph):
+        """Stores the given graph into the Edge Store
+
+        :param network: A SQLAlchemy PyBEL Network objet
+        :type network: models.Network
+        :param graph: A BEL Graph
+        :type graph: pybel.BELGraph
+        """
+        nc = {node: self.get_or_create_node(graph, node) for node in graph.nodes_iter()}
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
             source, target = nc[u], nc[v]
-            edge_bel = decanonicalize_edge(graph, u, v, k)
 
-            if CITATION not in data and BEL_KEYWORD_SUPPORT not in data:  # have to assume it's a valid graph at this point
-                data[CITATION] = dict(type='Other', name=PYBEL_AUTOEVIDENCE, reference='0')
-                data[BEL_KEYWORD_SUPPORT] = PYBEL_AUTOEVIDENCE
+            if CITATION not in data or EVIDENCE not in data:
+                continue
 
             citation = self.get_or_create_citation(**data[CITATION])
             evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
-            edge = self.get_or_create_edge(k, source, target, evidence, edge_bel, data[RELATION])
 
-            # edge.properties = self.get_or_create_property(graph, data)
-            properties = self.get_or_create_property(graph, data)
-            for property in properties:
-                if property not in edge.properties:
-                    edge.properties.append(property)
+            bel = decanonicalize_edge(graph, u, v, k)
+            edge = models.Edge(
+                source=source,
+                target=target,
+                relation=data[RELATION],
+                evidence=evidence,
+                bel=bel,
+                blob=pickle.dumps(data)
+            )
 
             for key, value in data[ANNOTATIONS].items():
-                if key not in graph.annotation_url:
-                    # FIXME not sure how to handle local annotations. Maybe show warning that can't be cached?
-                    continue
+                if key in graph.annotation_url:
+                    url = graph.annotation_url[key]
+                    edge.annotations.append(self.get_bel_annotation_entry(url, value))
 
-                annotation_url = graph.annotation_url[key]
-                annotation_id = self.cache_manager.annotation_id_cache[annotation_url][value]
-                if self.get_annotation(annotation_id) not in edge.annotations:
-                    edge.annotations.append(self.get_annotation(annotation_id))
+            network.edges.append(edge)
 
-            if edge not in network.edges:
-                network.edges.append(edge)
+    def get_bel_annotation_entry(self, url, value):
+        """Gets a given AnnotationEntry
 
-                # self.session.commit()
+        :param url: The url of the annotation source
+        :type url: str
+        :param value: The value of the annotation from the given url's document
+        :type value: str
+        :return: An AnnotationEntry object
+        :rtype: models.AnnotationEntry
+        """
+        annotation = self.session.query(models.Annotation).filter_by(url=url).one()
+        return self.session.query(models.AnnotationEntry).filter_by(annotation=annotation, name=value).one()
+
+    def get_or_create_evidence(self, citation, text):
+        """Creates entry for given evidence if it does not exist.
+
+        :param citation: Citation object obtained from get_or_create_citation()
+        :type citation: models.Citation
+        :param text: Evidence text
+        :type text: str
+        :return: An Evidence object
+        :rtype: models.Evidence
+        """
+
+        result = self.session.query(models.Evidence).filter_by(text=text).one_or_none()
+
+        if result is None:
+            result = models.Evidence(text=text, citation=citation)
+            self.session.add(result)
+            self.session.flush()
+            # self.session.commit()  # TODO remove?
+
+        return result
+
+    def get_or_create_node(self, graph, node):
+        """Creates entry for given node if it does not exist.
+
+        :param graph: A BEL network
+        :type graph: pybel.BELGraph
+        :param node: Key for the node to insert.
+        :type node: tuple
+        :return: A Node object
+        :rtype: models.Node
+        """
+        bel = decanonicalize_node(graph, node)
+        blob = pickle.dumps(graph.node[node])
+
+        result = self.session.query(models.Node).filter_by(bel=bel).one_or_none()
+
+        if result is None:
+            result = models.Node(bel=bel, blob=blob)
+            self.session.add(result)
+
+        return result
+
+    def get_or_create_edge(self, source, target, evidence, bel, relation):
+        """Creates entry for given edge if it does not exist.
+
+        :param source: Source node of the relation
+        :type source: models.Node
+        :param target: Target node of the relation
+        :type target: models.Node
+        :param evidence: Evidence object that proves the given relation
+        :type evidence: models.Evidence
+        :param bel: BEL statement that describes the relation
+        :type bel: str
+        :param relation: Type of the relation between source and target node
+        :type relation: str
+        :return: An Edge object
+        :rtype: models.Edge
+        """
+        result = self.session.query(models.Edge).filter_by(bel=bel).one_or_none()
+
+        if result:
+            return result
+
+        result = models.Edge(source=source, target=target, relation=relation, evidence=evidence, bel=bel)
+
+        return result
+
+    def get_or_create_citation(self, type, name, reference, date=None, authors=None, comments=None):
+        """Creates entry for given citation if it does not exist.
+
+        :param type: Citation type (e.g. PubMed)
+        :type type: str
+        :param name: Title of the publication that is cited
+        :type name: str
+        :param reference: Identifier of the given citation (e.g. PubMed id)
+        :type reference: str
+        :param date: Date of publication
+        :type date: date
+        :param authors: List of authors separated by |
+        :type authors: str
+        :param comments: Comments on the citation
+        :type comments: str
+        :return: A Citation object
+        :rtype: models.Citation
+        """
+
+        result = self.session.query(models.Citation).filter_by(type=type, reference=reference).one_or_none()
+
+        if result is None:
+            if date is not None:
+                date = parse_datetime(date)
+
+            result = models.Citation(type=type, name=name, reference=reference, date=date, comments=comments)
+
+            if authors is not None:
+                for author in authors.split('|'):
+                    result.authors.append(self.get_or_create_author(author))
+
+            self.session.add(result)
+
+        return result
+
+    def get_or_create_author(self, name):
+        """Gets an author by name, or creates one
+
+        :param name: An author's name
+        :type name: str
+        :return: An Author object
+        :rtype: models.Author
+        """
+        result = self.session.query(models.Author).filter_by(name=name).one_or_none()
+
+        if result:
+            return result
+
+        result = models.Author(name=name)
+        self.session.add(result)
+
+        return result
 
     def get_graph_versions(self, name):
         """Returns all of the versions of a graph with the given name"""
@@ -104,26 +291,32 @@ class GraphCacheManager(BaseCacheManager):
         :type name: str
         :param version: The version string of the graph. If not specified, loads most recent graph added with this name
         :type version: None or str
-        :return:
+        :return: A BEL Graph
+        :rtype: pybel.BELGraph
         """
         if version is not None:
             n = self.session.query(models.Network).filter(models.Network.name == name,
                                                           models.Network.version == version).one()
         else:
             n = self.session.query(models.Network).filter(models.Network.name == name).order_by(
-                models.Network.created.desc()).limit(1).one()
+                models.Network.created.desc()).first()
 
         return from_bytes(n.blob)
 
     def drop_graph(self, network_id):
-        """Drops a graph by ID"""
+        """Drops a graph by ID
+
+        :param network_id: The network's database id
+        :type network_id: int
+        """
 
         # TODO delete with cascade
         self.session.query(models.Network).filter(models.Network.id == network_id).delete()
         self.session.commit()
 
     def ls(self):
-        return [(network.name, network.version) for network in self.session.query(models.Network).all()]
+        """Lists network id, network name, and network version triples"""
+        return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
 
     def get_or_create_edge(self, key, source, target, evidence, bel, relation):
         """Creates entry for given edge if it does not exist.
@@ -445,3 +638,39 @@ def from_database(name, version=None, connection=None):
     :rtype: BELGraph
     """
     return GraphCacheManager(connection).get_graph(name, version)
+
+#    def get_edge_iter_by_filter(self, **annotations):
+#        """Returns an iterator over models.Edge object that match the given annotations
+
+#        :param annotations: dictionary of {URL: values}
+#        :type annotations: dict
+#        :return: An iterator over models.Edge object that match the given annotations
+#        :rtype: iter of models.Edge
+#        """
+
+        # TODO make smarter
+#        for edge in self.session.query(models.Edge).all():
+#            ad = {a.annotation.name: a.name for a in edge.annotations}
+#            if subdict_matches(ad, annotations):
+#                yield edge
+
+#    def get_graph_by_filter(self, **annotations):
+#        """Fills a BEL graph with edges retrieved from a filter
+#
+#        :param annotations: dictionary of {URL: values}
+#        :type annotations: dict
+#        :return: A BEL Graph
+#        :rtype: pybel.BELGraph
+#        """
+#        graph = BELGraph()
+
+#        for edge in self.get_edge_iter_by_filter(**annotations):
+#            if edge.source.id not in graph:
+#                graph.add_node(edge.source.id, attr_dict=pickle.loads(edge.source.blob))
+
+#            if edge.target.id not in graph:
+#                graph.add_node(edge.target.id, attr_dict=pickle.loads(edge.target.blob))
+
+ #           graph.add_edge(edge.source.id, edge.target.id, attr_dict=pickle.loads(edge.blob))
+
+#        return graph

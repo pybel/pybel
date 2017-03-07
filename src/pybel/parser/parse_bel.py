@@ -10,24 +10,23 @@ import itertools as itt
 import logging
 from copy import deepcopy
 
-import networkx as nx
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
-from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
-from .language import belns_encodings, activity_labels, activities, unqualified_edge_code
+from .language import belns_encodings, activity_labels, activities
 from .modifiers import FusionParser, VariantParser, canonicalize_variant, FragmentParser, GmodParser, GsubParser, \
     LocationParser, PmodParser, PsubParser, TruncParser
-from .modifiers.fusion import fusion_tags
+from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
-from .utils import list2tuple, cartesian_dictionary
+from .utils import cartesian_dictionary
 from .. import constants as pbc
 from ..constants import *
+from ..utils import list2tuple
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 general_abundance_tags = one_of_tags(['a', 'abundance'], ABUNDANCE, FUNCTION)
 gene_tag = one_of_tags(['g', 'geneAbundance'], GENE, FUNCTION)
@@ -48,38 +47,49 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 
 class BelParser(BaseParser):
-    def __init__(self, graph=None, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
+    def __init__(self, graph, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
                  namespace_expressions=None, annotation_expressions=None, complete_origin=False,
-                 allow_naked_names=False, allow_nested=False, autostreamline=False):
+                 allow_naked_names=False, allow_nested=False, citation_clearing=True, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
-        :param graph: the graph to put the network in. Constructs new :class:`nx.MultiDiGraph` if None
-        :type graph: nx.MultiDiGraph
-        :param namespace_dicts: A dictionary of {namespace: set of members}
+        :param graph: The BEL Graph to use to store the network
+        :type graph: BELGraph
+        :param namespace_dicts: A dictionary of {namespace: set of members}.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_dicts: dict
-        :param annotation_dicts: A dictionary of {annotation: set of values}
+        :param annotation_dicts: A dictionary of {annotation: set of values}.
+                                    Delegated to :class:`pybel.parser.ControlParser`
         :type annotation_dicts: dict
-        :param namespace_expressions: A dictionary of {namespace: regular expression strings}
+        :param namespace_expressions: A dictionary of {namespace: regular expression strings}.
+                                        Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_expressions: dict
-        :param annotation_expressions: A dictionary of {annotation: regular expression strings}
+        :param annotation_expressions: A dictionary of {annotation: regular expression strings}.
+                                        Delegated to :class:`pybel.parser.ControlParser`
         :type annotation_expressions: dict
-        :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}
+        :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_mappings: dict
         :param complete_origin: If true, infer the RNA and Gene origins of unmodified proteins
         :type complete_origin: bool
-        :param allow_naked_names: If true, turn off naked namespace failures
+        :param allow_naked_names: If true, turn off naked namespace failures.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_naked_names: bool
-        :param allow_nested: If true, turn off nested statement failures
+        :param allow_nested: If true, turn off nested statement failures.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_nested: bool
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                    Delegated to :class:`pybel.parser.ControlParser`
+        :type citation_clearing: bool
         """
 
-        self.graph = graph if graph is not None else nx.MultiDiGraph()
+        self.graph = graph
         self.allow_nested = allow_nested
         self.complete_origin = complete_origin
 
         self.control_parser = ControlParser(
             annotation_dicts=annotation_dicts,
-            annotation_expressions=annotation_expressions
+            annotation_expressions=annotation_expressions,
+            citation_clearing=citation_clearing
         )
 
         self.identifier_parser = IdentifierParser(
@@ -137,13 +147,7 @@ class BelParser(BaseParser):
             WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
 
         self.gene_fusion = Group(self.fusion)(FUSION)
-
-        gene_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=True))
-        gene_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('c', start=False))
-
-        self.gene_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + fusion_tags + nest(
-            identifier(PARTNER_3P) + Optional(
-                WCW + Group(gene_break_5p)(RANGE_5P) + WCW + Group(gene_break_3p)(RANGE_3P))))(FUSION)
+        self.gene_fusion_legacy = Group(build_legacy_fusion(identifier, 'c'))(FUSION)
 
         self.gene = gene_tag + nest(MatchFirst([
             self.gene_fusion,
@@ -162,13 +166,7 @@ class BelParser(BaseParser):
                 VARIANTS))
 
         self.protein_fusion = Group(self.fusion)(FUSION)
-
-        protein_break_5p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=True))
-        protein_break_3p = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('p', start=False))
-
-        self.protein_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + fusion_tags + nest(
-            identifier(PARTNER_3P) + Optional(
-                WCW + Group(protein_break_5p)(RANGE_5P) + WCW + Group(protein_break_3p)(RANGE_3P))))(FUSION)
+        self.protein_fusion_legacy = Group(build_legacy_fusion(identifier, 'p'))(FUSION)
 
         self.protein = protein_tag + nest(MatchFirst([
             self.protein_fusion,
@@ -180,13 +178,7 @@ class BelParser(BaseParser):
         self.rna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS))
 
         self.rna_fusion = Group(self.fusion)(FUSION)
-
-        rna_break_start = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=True))
-        rna_break_end = (ppc.integer | '?').setParseAction(fusion_handler_wrapper('r', start=False))
-
-        self.rna_fusion_legacy = Group(identifier(PARTNER_5P) + WCW + fusion_tags + nest(
-            identifier(PARTNER_3P) + Optional(
-                WCW + Group(rna_break_start)(RANGE_5P) + WCW + Group(rna_break_end)(RANGE_3P))))(FUSION)
+        self.rna_fusion_legacy = Group(build_legacy_fusion(identifier, 'r'))(FUSION)
 
         self.rna = rna_tag + nest(MatchFirst([
             self.rna_fusion,
@@ -491,13 +483,10 @@ class BelParser(BaseParser):
         if self.allow_naked_names and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
-        valid_function_codes = set(itt.chain.from_iterable(
-            belns_encodings[v] for v in self.namespace_dict[namespace][name]))
+        valid_functions = set(itt.chain.from_iterable(belns_encodings[k] for k in self.namespace_dict[namespace][name]))
 
-        if tokens[FUNCTION] not in valid_function_codes:
-            valid = set(itt.chain.from_iterable(
-                belns_encodings[k] for k in self.namespace_dict[namespace][name]))
-            raise InvalidFunctionSemantic(tokens[FUNCTION], namespace, name, valid)
+        if tokens[FUNCTION] not in valid_functions:
+            raise InvalidFunctionSemantic(tokens[FUNCTION], namespace, name, valid_functions)
 
         return tokens
 
@@ -517,7 +506,8 @@ class BelParser(BaseParser):
         parent = self.ensure_node(tokens[0])
         for child_tokens in tokens[2]:
             child = self.ensure_node(child_tokens)
-            self.graph.add_edge(parent, child, **{RELATION: HAS_MEMBER})
+            self.graph.add_unqualified_edge(parent, child, HAS_MEMBER)
+
         return tokens
 
     def build_attrs(self, attrs=None, list_attrs=None):
@@ -574,27 +564,28 @@ class BelParser(BaseParser):
 
         self.graph.add_edge(obj, sub, attr_dict=new_attrs, **single_annotation)
 
-    def add_unqualified_edge(self, u, v, relation):
-        """Adds unique edge that has no annotations
+    '''
+    # TODO replace with pybel.BELGraph.add_unqualified_edge
+    #def add_unqualified_edge(self, u, v, relation):
+    #    """Adds unique edge that has no annotations
 
         :param u: source node
         :param v: target node
         :param relation: relationship label
         """
-        key = unqualified_edge_code[relation]
-        if not self.graph.has_edge(u, v, key):
-            self.graph.add_edge(u, v, key=key, **{RELATION: relation})
+        self.graph.add_unqualified_edge(u, v, relation)
+    '''
 
     def _ensure_reaction(self, name, tokens):
         self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
 
         for reactant_tokens in tokens[REACTANTS]:
             reactant_name = self.ensure_node(reactant_tokens)
-            self.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
+            self.graph.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
 
         for product_tokens in tokens[PRODUCTS]:
             product_name = self.ensure_node(product_tokens)
-            self.add_unqualified_edge(name, product_name, HAS_PRODUCT)
+            self.graph.add_unqualified_edge(name, product_name, HAS_PRODUCT)
 
         return name
 
@@ -603,7 +594,7 @@ class BelParser(BaseParser):
 
         for token in tokens[MEMBERS]:
             member_name = self.ensure_node(token)
-            self.add_unqualified_edge(name, member_name, HAS_COMPONENT)
+            self.graph.add_unqualified_edge(name, member_name, HAS_COMPONENT)
         return name
 
     def _ensure_variants(self, name, tokens):
@@ -615,7 +606,7 @@ class BelParser(BaseParser):
         }
 
         parent = self.ensure_node(c)
-        self.add_unqualified_edge(parent, name, HAS_VARIANT)
+        self.graph.add_unqualified_edge(parent, name, HAS_VARIANT)
         return name
 
     def _ensure_fusion(self, name, tokens):
@@ -636,7 +627,7 @@ class BelParser(BaseParser):
         gene_tokens[FUNCTION] = GENE
         gene_name = self.ensure_node(gene_tokens)
 
-        self.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
+        self.graph.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
         return name
 
     def _ensure_protein(self, name, tokens):
@@ -649,7 +640,7 @@ class BelParser(BaseParser):
         rna_tokens[FUNCTION] = RNA
         rna_name = self.ensure_node(rna_tokens)
 
-        self.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
+        self.graph.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
         return name
 
     def ensure_node(self, tokens):
@@ -696,21 +687,6 @@ class BelParser(BaseParser):
 
 # HANDLERS
 
-def fusion_handler_wrapper(reference, start):
-    def fusion_handler(s, l, tokens):
-        if tokens[0] == '?':
-            tokens[FusionParser.MISSING] = '?'
-            return tokens
-
-        tokens[FusionParser.REFERENCE] = reference
-        tokens[FusionParser.START if start else FusionParser.STOP] = '?'
-        tokens[FusionParser.STOP if start else FusionParser.START] = int(tokens[0])
-
-        return tokens
-
-    return fusion_handler
-
-
 def handle_molecular_activity_default(s, l, tokens):
     upgraded = activity_labels[tokens[0]]
     log.debug('upgraded legacy activity to %s', upgraded)
@@ -736,7 +712,7 @@ def handle_legacy_tloc(s, l, tokens):
 
 
 def handle_translocation_illegal(s, l, t):
-    raise MalformedTranslocationWarning('Unqualified translocation {} {} {}'.format(s, l, t))
+    raise MalformedTranslocationWarning(s, l, t)
 
 
 # CANONICALIZATION
@@ -749,6 +725,20 @@ def canonicalize_simple_to_dict(tokens):
     }
 
 
+# TODO figure out how to just get dictionary rather than slicing it up like this
+def canonicalize_fusion_range_to_dict(tokens):
+    if FusionParser.MISSING in tokens:
+        return {
+            FusionParser.MISSING: '?'
+        }
+    else:
+        return {
+            FusionParser.REFERENCE: tokens[FusionParser.REFERENCE],
+            FusionParser.START: tokens[FusionParser.START],
+            FusionParser.STOP: tokens[FusionParser.STOP]
+        }
+
+
 def canonicalize_fusion_to_dict(tokens):
     f = tokens[FUSION]
     return {
@@ -758,12 +748,12 @@ def canonicalize_fusion_to_dict(tokens):
                 NAMESPACE: f[PARTNER_5P][NAMESPACE],
                 NAME: f[PARTNER_5P][NAME]
             },
-            RANGE_5P: f[RANGE_5P] if RANGE_5P in f else '?',
+            RANGE_5P: canonicalize_fusion_range_to_dict(f[RANGE_5P]),
             PARTNER_3P: {
                 NAMESPACE: f[PARTNER_3P][NAMESPACE],
                 NAME: f[PARTNER_3P][NAME]
             },
-            RANGE_3P: f[RANGE_3P] if RANGE_3P in f else '?'
+            RANGE_3P: canonicalize_fusion_range_to_dict(f[RANGE_3P])
         }
     }
 
@@ -776,20 +766,22 @@ def canonicalize_variant_node_to_dict(tokens):
 
 def canonicalize_fusion_range(tokens, tag):
     if tag in tokens and FusionParser.MISSING not in tokens[tag]:
-        return tokens[tag][FusionParser.REFERENCE], tokens[tag][FusionParser.START], tokens[tag][FusionParser.STOP]
+        fusion_range = tokens[tag]
+        return fusion_range[FusionParser.REFERENCE], fusion_range[FusionParser.START], fusion_range[FusionParser.STOP]
     else:
         return '?',
 
 
 def canonicalize_fusion(tokens):
-    cls = tokens[FUNCTION]
-    f = tokens[FUSION]
+    function = tokens[FUNCTION]
+    fusion = tokens[FUSION]
 
-    range5pt = canonicalize_fusion_range(f, RANGE_5P)
-    range3pt = canonicalize_fusion_range(f, RANGE_3P)
+    partner5p = fusion[PARTNER_5P]
+    partner3p = fusion[PARTNER_3P]
+    range5p = canonicalize_fusion_range(fusion, RANGE_5P)
+    range3p = canonicalize_fusion_range(fusion, RANGE_3P)
 
-    return cls, (f[PARTNER_5P][NAMESPACE], f[PARTNER_5P][NAME]), range5pt, (
-        f[PARTNER_3P][NAMESPACE], f[PARTNER_3P][NAME]), range3pt
+    return function, (partner5p[NAMESPACE], partner5p[NAME]), range5p, (partner3p[NAMESPACE], partner3p[NAME]), range3p
 
 
 def canonicalize_reaction(tokens):

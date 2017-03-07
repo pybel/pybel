@@ -1,89 +1,98 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import tempfile
 import unittest
 from pathlib import Path
 
 import pybel
+from pybel import BELGraph
+from pybel import to_bytes, from_bytes, to_graphml
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
+from pybel.io import to_json_dict, from_json_dict
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
-from tests import constants
-from tests.constants import BelReconstitutionMixin, test_bel, TestTokenParserBase, SET_CITATION_TEST, \
+from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenParserBase, SET_CITATION_TEST, \
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
 
-class TestImport(BelReconstitutionMixin, unittest.TestCase):
-    @mock_bel_resources
-    def test_bytes_io_test(self, mock_get):
-        g = pybel.from_path(test_bel, complete_origin=True)
-        self.bel_1_reconstituted(g)
+class TestThoroughIo(BelReconstitutionMixin):
+    @classmethod
+    def setUpClass(cls):
+        @mock_bel_resources
+        def help_build_graph(mock):
+            graph = pybel.from_path(test_bel_thorough, complete_origin=False, allow_nested=True)
+            return graph
 
-        g_bytes = pybel.to_bytes(g)
-        g_reloaded = pybel.from_bytes(g_bytes)
-        self.bel_1_reconstituted(g_reloaded)
+        cls.graph = help_build_graph()
 
-    @mock_bel_resources
-    def test_bytes_io_slushy(self, mock_get):
-        g = pybel.from_path(test_bel_slushy, complete_origin=True)
-        g_bytes = pybel.to_bytes(g)
+    def test_path(self):
+        self.bel_thorough_reconstituted(self.graph)
+
+    def test_bytes(self):
+        graph_bytes = to_bytes(self.graph)
+        graph = from_bytes(graph_bytes)
+        self.bel_thorough_reconstituted(graph)
+
+    def test_json(self):
+        graph_json = to_json_dict(self.graph)
+        graph = from_json_dict(graph_json)
+        self.bel_thorough_reconstituted(graph)
+
+    def test_graphml(self):
+        handle, path = tempfile.mkstemp()
+
+        with open(path, 'wb') as f:
+            to_graphml(self.graph, f)
+
+
+class TestSlushyIo(BelReconstitutionMixin):
+    @classmethod
+    def setUpClass(cls):
+        @mock_bel_resources
+        def help_build_graph(mock):
+            graph = pybel.from_path(test_bel_slushy, complete_origin=True)
+            return graph
+
+        cls.graph = help_build_graph()
+
+    def test_slushy(self):
+        self.bel_slushy_reconstituted(self.graph)
+
+    def test_bytes(self):
+        graph_bytes = to_bytes(self.graph)
+        graph = from_bytes(graph_bytes)
+        self.bel_slushy_reconstituted(graph)
+
+    def test_json(self):
+        graph_json = to_json_dict(self.graph)
+        graph = from_json_dict(graph_json)
+        self.bel_slushy_reconstituted(graph)
+
+    def test_graphml(self):
+        handle, path = tempfile.mkstemp()
+
+        with open(path, 'wb') as f:
+            to_graphml(self.graph, f)
+
+    def test_bytes_io_slushy(self):
+        g_bytes = pybel.to_bytes(self.graph)
         pybel.from_bytes(g_bytes)
 
-    @mock_bel_resources
-    def test_bytes_io_thorough(self, mock_get):
-        g = pybel.from_path(test_bel_thorough, complete_origin=False, allow_nested=True)
-        self.bel_thorough_reconstituted(g)
 
-        g_bytes = pybel.to_bytes(g)
-        g_reloaded = pybel.from_bytes(g_bytes)
-        self.bel_thorough_reconstituted(g_reloaded)
-
+class TestImport(BelReconstitutionMixin, unittest.TestCase):
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
-        g = pybel.from_url(Path(test_bel).as_uri(), complete_origin=True)
-        self.bel_1_reconstituted(g)
-
-    @mock_bel_resources
-    def test_slushy(self, mock_get):
-        g = pybel.from_path(constants.test_bel_slushy)
-        self.assertIsNotNone(g)
-
-        expected_warnings = [
-            (26, MissingAnnotationKeyWarning),
-            (29, MissingAnnotationKeyWarning),
-            (34, InvalidCitationException),
-            (37, InvalidCitationType),
-            (40, InvalidPubMedIdentifierWarning),
-            (43, MissingCitationException),
-            (48, MissingAnnotationKeyWarning),
-            (51, MissingAnnotationKeyWarning),
-            (54, MissingSupportWarning),
-            (59, NakedNameWarning),
-            (62, UndefinedNamespaceWarning),
-            (65, MissingNamespaceNameWarning),
-            (68, UndefinedAnnotationWarning),
-            (71, MissingAnnotationKeyWarning),
-            (74, IllegalAnnotationValueWarning),
-            (77, MissingAnnotationRegexWarning),
-            (80, MissingNamespaceRegexWarning),
-            (83, MalformedTranslocationWarning),
-            (86, PlaceholderAminoAcidWarning),
-            (89, NestedRelationWarning),
-            (92, InvalidFunctionSemantic),
-            (95, Exception),
-            (98, Exception),
-        ]
-
-        for (el, ew), (l, _, w, _) in zip(expected_warnings, g.warnings):
-            self.assertEqual(el, l)
-            self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
+        g = pybel.from_url(Path(test_bel_simple).as_uri(), complete_origin=True)
+        self.bel_simple_reconstituted(g)
 
 
 class TestRegex(unittest.TestCase):
     def setUp(self):
-        self.parser = BelParser(namespace_dicts={}, namespace_expressions={'dbSNP': 'rs[0-9]*'})
+        self.graph = BELGraph()
+        self.parser = BelParser(self.graph, namespace_dicts={}, namespace_expressions={'dbSNP': 'rs[0-9]*'})
 
     def test_match(self):
         lines = [
@@ -121,7 +130,8 @@ class TestFull(TestTokenParserBase):
             'TestAnnotation3': {'D', 'E', 'F'}
         }
 
-        self.parser = BelParser(namespace_dicts=self.namespaces, annotation_dicts=self.annotations)
+        self.graph = BELGraph()
+        self.parser = BelParser(self.graph, namespace_dicts=self.namespaces, annotation_dicts=self.annotations)
 
     def test_no_add_duplicates(self):
         s = 'r(TESTNS:1) -> r(TESTNS:2)'
@@ -151,8 +161,8 @@ class TestFull(TestTokenParserBase):
             test_set_evidence,
             "bp(ABASD) -- p(ABASF)"
         ]
-
-        self.parser = BelParser(namespace_dicts=self.namespaces, allow_naked_names=True)
+        self.graph = BELGraph()
+        self.parser = BelParser(self.graph, namespace_dicts=self.namespaces, allow_naked_names=True)
         self.parser.parse_lines(statements)
 
     def test_missing_citation(self):

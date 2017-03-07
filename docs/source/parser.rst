@@ -1,11 +1,9 @@
-Reference
-=========
+Parser Reference
+================
 
 This page is for users who want to squeeze the most bizarre possibilities out of PyBEL. Most users will not need this
 reference.
 
-Parsers
--------
 PyBEL makes extensive use of the PyParsing module. The code is organized to different modules to reflect
 the different faces ot the BEL language. These parsers support BEL 2.0 and have some backwards compatability
 for rewriting BEL 1.0 statements as BEL 2.0. The biologist and bioinformatician using this software will likely never
@@ -23,27 +21,3 @@ See: https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BE
 
 .. autoclass:: pybel.parser.parse_metadata.MetadataParser
     :members:
-
-Data Management
----------------
-
-.. autoclass:: pybel.manager.cache.CacheManager
-    :members:
-
-Utilities
----------
-
-Some utilities that are used throughout the software are explained here:
-
-General Utilities
-~~~~~~~~~~~~~~~~~
-
-.. automodule:: pybel.utils
-    :members:
-
-Parser Utilities
-~~~~~~~~~~~~~~~~
-
-.. automodule:: pybel.parser.utils
-    :members:
-

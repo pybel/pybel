@@ -45,6 +45,7 @@ Base = declarative_base()
 
 class Namespace(Base):
     __tablename__ = NAMESPACE_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     url = Column(String(255))
@@ -71,12 +72,10 @@ class Namespace(Base):
 
     has_equivalences = Column(Boolean, default=False)
 
-    def __repr__(self):
-        return 'Namespace({})'.format(self.keyword)
-
 
 class NamespaceEntry(Base):
     __tablename__ = NAMESPACE_ENTRY_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), nullable=False)
@@ -88,22 +87,17 @@ class NamespaceEntry(Base):
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
     equivalence = relationship('NamespaceEntryEquivalence', back_populates='members')
 
-    def __repr__(self):
-        return 'NSEntry({}, {}, {})'.format(self.name, ''.join(sorted(self.encoding)), self.equivalence)
-
     def forGraph(self):
         return {NAMESPACE: self.namespace.keyword, NAME: self.name}
 
 
 class NamespaceEntryEquivalence(Base):
     __tablename__ = NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
     label = Column(String(255), nullable=False, unique=True, index=True)
 
     members = relationship('NamespaceEntry', back_populates='equivalence')
-
-    def __repr__(self):
-        return 'NsEquivalence({})'.format(self.label)
 
 
 class Annotation(Base):
@@ -133,12 +127,10 @@ class Annotation(Base):
 
     entries = relationship('AnnotationEntry', back_populates="annotation")
 
-    def __repr__(self):
-        return 'Annotation({})'.format(self.keyword)
-
 
 class AnnotationEntry(Base):
     __tablename__ = ANNOTATION_ENTRY_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), nullable=False)
@@ -146,9 +138,6 @@ class AnnotationEntry(Base):
 
     annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
     annotation = relationship('Annotation', back_populates='entries')
-
-    def __repr__(self):
-        return 'AnnotationEntry({}, {})'.format(self.name, self.label)
 
     def forGraph(self):
         return {self.annotation.keyword: self.name}
@@ -234,7 +223,9 @@ edge_annotation = Table(
 
 
 class Network(Base):
+    """Represents a collection of edges, specified by a BEL Script"""
     __tablename__ = NETWORK_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), index=True)
@@ -253,7 +244,7 @@ class Network(Base):
     edges = relationship('Edge', secondary=network_edge)
 
     __table_args__ = (
-        UniqueConstraint("name", "version"),
+        UniqueConstraint(METADATA_NAME, METADATA_VERSION),
     )
 
     def __repr__(self):
@@ -547,3 +538,73 @@ class Property(Base):
             }
 
         return prop_dict
+
+
+#class Node(Base):
+#    """Represents a BEL Term"""
+#    __tablename__ = NODE_TABLE_NAME
+#
+#    id = Column(Integer, primary_key=True)#
+#
+#    bel = Column(String, nullable=False)
+#    blob = Column(Binary)
+
+
+#class Edge(Base):
+#    """Represents the relation between two BEL terms and its properties"""
+#    __tablename__ = EDGE_TABLE_NAME
+
+#    id = Column(Integer, primary_key=True)
+
+#    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
+#    source = relationship('Node', foreign_keys=[source_id])
+
+#    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
+#    target = relationship('Node', foreign_keys=[target_id])
+
+#    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)))
+#    evidence = relationship("Evidence")
+
+#    annotations = relationship('AnnotationEntry', secondary=edge_annotation)
+
+#    relation = Column(String, nullable=False)
+#    bel = Column(String, nullable=False)
+#    blob = Column(Binary)
+
+
+#class Evidence(Base):
+#    """Represents a piece of support taken from a Publication"""
+#    __tablename__ = EVIDENCE_TABLE_NAME
+#    id = Column(Integer, primary_key=True)
+#    text = Column(String, nullable=False, index=True)
+
+#    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+#    citation = relationship('Citation')
+
+
+#class Citation(Base):
+#    """The information about the citations that are used to prove a specific relation are stored in this table."""
+#    __tablename__ = CITATION_TABLE_NAME
+
+#    id = Column(Integer, primary_key=True)
+#    type = Column(String(16), nullable=False)
+#    name = Column(String(255), nullable=False)
+#    reference = Column(String(255), nullable=False)
+#    date = Column(Date, nullable=True)
+#    comments = Column(String(255), nullable=True)
+
+#    authors = relationship("Author", secondary=author_citation)
+#
+#    __table_args__ = (
+#        UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
+#    )
+
+
+#class Author(Base):
+#    """Represents an Author of a publication"""
+#    __tablename__ = AUTHOR_TABLE_NAME
+
+#    id = Column(Integer, primary_key=True)
+#    name = Column(String(255), nullable=False)
+
+#    citations = relationship("Citation", secondary=author_citation)
