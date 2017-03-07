@@ -240,6 +240,16 @@ class GraphCacheManager(BaseCacheManager):
 
         return from_bytes(n.blob)
 
+    def get_graph_by_id(self, id):
+        """Gets the graph from the database by its identifier
+
+        :param id: The graph's database ID
+        :type id: int
+        :return: A Network object
+        :rtype: models.Network
+        """
+        return self.session.query(models.Network).get(id)
+
     def drop_graph(self, network_id):
         """Drops a graph by ID
 
