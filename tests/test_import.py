@@ -85,7 +85,7 @@ class TestSlushyIo(BelReconstitutionMixin):
 class TestImport(BelReconstitutionMixin, unittest.TestCase):
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
-        g = pybel.from_url(Path(test_bel_simple).as_uri(), complete_origin=True)
+        g = pybel.from_url(Path(test_bel_simple).as_uri())
         self.bel_simple_reconstituted(g)
 
 

@@ -510,9 +510,9 @@ class BelParser(BaseParser):
 
         return tokens
 
-    def build_attrs(self, attrs=None, list_attrs=None):
-        attrs = {} if attrs is None else attrs
-        list_attrs = {} if list_attrs is None else list_attrs
+    def _build_attrs(self):
+        attrs = {}
+        list_attrs = {}
 
         for annotation_name, annotation_entry in self.control_parser.annotations.copy().items():
             if isinstance(annotation_entry, set):
@@ -528,7 +528,7 @@ class BelParser(BaseParser):
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
 
-        attrs, list_attrs = self.build_attrs()
+        attrs, list_attrs = self._build_attrs()
 
         q = {
             RELATION: tokens[RELATION],
@@ -550,31 +550,19 @@ class BelParser(BaseParser):
 
             self.graph.add_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
             if tokens[RELATION] in TWO_WAY_RELATIONS:
-                self.add_reverse_edge(sub, obj, q, **{ANNOTATIONS: annots})
+                self.add_reverse_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
 
         return tokens
 
-    def add_reverse_edge(self, sub, obj, attrs, **single_annotation):
-        new_attrs = {k: v for k, v in attrs.items() if k not in {SUBJECT, OBJECT}}
-        attrs_subject, attrs_object = attrs.get(SUBJECT), attrs.get(OBJECT)
+    def add_reverse_edge(self, sub, obj, attr_dict, **attr):
+        new_attrs = {k: v for k, v in attr_dict.items() if k not in {SUBJECT, OBJECT}}
+        attrs_subject, attrs_object = attr_dict.get(SUBJECT), attr_dict.get(OBJECT)
         if attrs_subject:
             new_attrs[OBJECT] = attrs_subject
         if attrs_object:
             new_attrs[SUBJECT] = attrs_object
 
-        self.graph.add_edge(obj, sub, attr_dict=new_attrs, **single_annotation)
-
-    '''
-    # TODO replace with pybel.BELGraph.add_unqualified_edge
-    #def add_unqualified_edge(self, u, v, relation):
-    #    """Adds unique edge that has no annotations
-
-        :param u: source node
-        :param v: target node
-        :param relation: relationship label
-        """
-        self.graph.add_unqualified_edge(u, v, relation)
-    '''
+        self.graph.add_edge(obj, sub, attr_dict=new_attrs, **attr)
 
     def _ensure_reaction(self, name, tokens):
         self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
@@ -850,7 +838,9 @@ def canonicalize_modifier(tokens):
 
     elif tokens[MODIFIER] == ACTIVITY:
         attrs[MODIFIER] = tokens[MODIFIER]
-        attrs[EFFECT] = {} if EFFECT not in tokens else dict(tokens[EFFECT])
+
+        if EFFECT in tokens:
+            attrs[EFFECT] = dict(tokens[EFFECT])
 
     elif tokens[MODIFIER] == TRANSLOCATION:
         attrs[MODIFIER] = tokens[MODIFIER]
