@@ -127,7 +127,7 @@ def from_url(url, **kwargs):
     return BELGraph(lines=lines, **kwargs)
 
 
-def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
+def to_bytes(graph, protocol=None):
     """Converts a graph to bytes with pickle
 
     :param graph: A BEL graph
@@ -136,7 +136,10 @@ def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
     :type protocol: int
     :rtype: bytes
     """
-    return pickle.dumps(graph, protocol=protocol)
+    if protocol is not None:
+        return pickle.dumps(graph, protocol=protocol)
+    else:
+        return pickle.dumps(graph)
 
 
 def from_bytes(bytes_graph, check_version=True):
@@ -151,7 +154,7 @@ def from_bytes(bytes_graph, check_version=True):
     return ensure_version(pickle.loads(bytes_graph), check_version)
 
 
-def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
+def to_pickle(graph, output, protocol=None):
     """Writes this graph to a pickle object with nx.write_gpickle
 
     :param graph: A BEL graph
@@ -161,7 +164,10 @@ def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
     :param protocol: Pickling protocol to use
     :type protocol: int
     """
-    nx.write_gpickle(graph, output, protocol=protocol)
+    if protocol is not None:
+        nx.write_gpickle(graph, output, protocol=protocol)
+    else:
+        nx.write_gpickle(graph, output)
 
 
 def from_pickle(path, check_version=True):
