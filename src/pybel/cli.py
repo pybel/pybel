@@ -63,9 +63,10 @@ def main():
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
+@click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--verbose', count=True)
 def convert(path, url, database_name, database_connection, csv, graphml, json, pickle, bel, neo, neo_context,
-            store_default, store, allow_naked_names, allow_nested, complete_origin, verbose):
+            store_default, store, allow_naked_names, allow_nested, complete_origin, no_citation_clearing, verbose):
     """Options for multiple outputs/conversions"""
 
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
@@ -73,9 +74,12 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
     if database_name:
         g = from_database(database_name, connection=database_connection)
     else:
-        params = dict(complete_origin=complete_origin,
-                      allow_nested=allow_nested,
-                      allow_naked_names=allow_naked_names)
+        params = dict(
+            complete_origin=complete_origin,
+            allow_nested=allow_nested,
+            allow_naked_names=allow_naked_names,
+            citation_clearing=(not no_citation_clearing)
+        )
         if url:
             g = from_url(url, **params)
         else:
