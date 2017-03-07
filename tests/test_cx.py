@@ -31,11 +31,6 @@ class TestCx(BelReconstitutionMixin, unittest.TestCase):
         node_mapping = dict(enumerate(sorted(graph.nodes_iter(), key=hash_tuple)))
 
         cx = to_cx_json(graph)
-
-        import json, os
-        with open(os.path.expanduser('~/Desktop/output.json'), 'w') as f:
-            json.dump(cx, f, indent=2)
-
         reconstituted = from_cx_json(cx)
 
         nx.relabel.relabel_nodes(reconstituted, node_mapping, copy=False)
