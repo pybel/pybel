@@ -6,10 +6,12 @@ relationships and their context in a machine-readable form. Its simple grammar a
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
 complex disease networks with several thousands of relationships.
 
-PyBEL is a Python software package that parses BEL statements, validates their semantics, applies common graph
-algorithms, and allows for data interchange with common formats like Neo4J, JSON, CSV, Excel, and SQL.
+:code:`pybel` is a Python software package that parses BEL scripts, validates their semantics, and facilitates data
+interchange between common formats and database systems like JSON, CSV, Excel, SQL, CX, and Neo4J. Its companion
+package, `pybel_tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
+biological networks.
 
-:code:`PyBEL` provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily
+:code:`pybel` provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily
 use it to interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.
 
 Installation is as easy as getting the code from PyPI with :code:`python3 -m pip install pybel`
