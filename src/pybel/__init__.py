@@ -50,20 +50,23 @@ a new database and populate it on the next run.
 Future versions of PyBEL will include database integrity checks and provide upgrade procedures/scripts.
 """
 
+from . import canonicalize
 from . import constants
+from . import cx
 from . import io
-from .canonicalize import to_bel
-from .cx import to_cx_json, from_cx_json
+from .canonicalize import *
+from .cx import *
 from .graph import BELGraph
 from .io import *
-from .manager.database_io import to_database, from_database
+from .manager import database_io
+from .manager.database_io import *
 
-__all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel', 'to_cx_json', 'from_cx_json'] + list(io.__all__)
+__all__ = ['BELGraph'] + io.__all__ + canonicalize.__all__ + cx.__all__ + database_io.__all__
 
 __version__ = '0.4.1-dev'
 
 __title__ = 'PyBEL'
-__description__ = 'Parsing, validation, and analysis of BEL graphs'
+__description__ = 'Parsing, validation, and data exchange of BEL graphs'
 __url__ = 'https://github.com/pybel/pybel'
 
 __author__ = 'Charles Tapley Hoyt'

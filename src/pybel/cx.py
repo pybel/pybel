@@ -7,6 +7,11 @@ from .constants import *
 from .graph import BELGraph
 from .utils import flatten_dict, expand_dict
 
+__all__ = [
+    'to_cx_json',
+    'from_cx_json'
+]
+
 log = logging.getLogger(__name__)
 
 NDEX_SOURCE_FORMAT = "ndex:sourceFormat"
