@@ -37,8 +37,10 @@ INSTALL_REQUIRES = [
     'sqlalchemy',
     'onto2nx',
 ]
-if sys.version_info < (3, 5):
+
+if sys.version_info < (3, ):
     INSTALL_REQUIRES.append('configparser')
+
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = [
     'tox',
