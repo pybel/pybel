@@ -3,6 +3,7 @@
 import codecs  # To use a consistent encoding
 import os
 import re
+import sys
 
 import setuptools
 
@@ -31,12 +32,13 @@ INSTALL_REQUIRES = [
     'requests_file',
     'networkx',
     'pyparsing',
-    'configparser',
     'py2neo',
     'click',
     'sqlalchemy',
     'onto2nx',
 ]
+if sys.version_info < (3, 5):
+    INSTALL_REQUIRES.append('configparser')
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = [
     'tox',
