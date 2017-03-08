@@ -12,14 +12,14 @@ Easiest
 
 .. code-block:: sh
 
-   $ pip3 install pybel
+   $ python3 -m pip install pybel
 
 Get the Latest
 ~~~~~~~~~~~~~~~
 
 .. code-block:: sh
 
-   $ pip3 install git+https://github.com/pybel/pybel.git@develop
+   $ python3 -m pip install git+https://github.com/pybel/pybel.git@develop
 
 For Developers
 ~~~~~~~~~~~~~~
@@ -28,7 +28,7 @@ For Developers
 
    $ git clone https://github.com/pybel/pybel.git@develop
    $ cd pybel
-   $ pip3 install -e .
+   $ python3 -m pip install -e .
 
 
 Caveats
@@ -50,22 +50,24 @@ a new database and populate it on the next run.
 Future versions of PyBEL will include database integrity checks and provide upgrade procedures/scripts.
 """
 
+from . import constants
 from . import io
 from .canonicalize import to_bel
+from .cx import to_cx_json, from_cx_json
 from .graph import BELGraph
 from .io import *
 from .manager.database_io import to_database, from_database
 
-__all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel'] + list(io.__all__)
+__all__ = ['BELGraph', 'to_database', 'from_database', 'to_bel', 'to_cx_json', 'from_cx_json'] + list(io.__all__)
 
-__version__ = '0.3.11'
+__version__ = '0.4.0'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and analysis of BEL graphs'
 __url__ = 'https://github.com/pybel/pybel'
 
-__author__ = 'Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
+__author__ = 'Charles Tapley Hoyt'
 __email__ = 'charles.hoyt@scai.fraunhofer.de'
 
 __license__ = 'Apache 2.0 License'
-__copyright__ = 'Copyright (c) 2016 Charles Tapley Hoyt, Andrej Konotopez, Christian Ebeling'
+__copyright__ = 'Copyright (c) 2017 Charles Tapley Hoyt'

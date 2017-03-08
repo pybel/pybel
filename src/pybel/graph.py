@@ -42,7 +42,7 @@ class BELGraph(nx.MultiDiGraph):
     """The BELGraph class is a container for BEL networks that is based on the NetworkX MultiDiGraph data structure"""
 
     def __init__(self, lines=None, manager=None, complete_origin=False, allow_naked_names=False,
-                 allow_nested=False, *attrs, **kwargs):
+                 allow_nested=False, citation_clearing=True, *attrs, **kwargs):
         """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
         list of strings.
 
@@ -56,6 +56,9 @@ class BELGraph(nx.MultiDiGraph):
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
         :type allow_nested: bool
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                    Delegated to :class:`pybel.parser.ControlParser`
+        :type citation_clearing: bool
         :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
         :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
         """
@@ -70,10 +73,12 @@ class BELGraph(nx.MultiDiGraph):
                 manager=manager,
                 complete_origin=complete_origin,
                 allow_naked_names=allow_naked_names,
-                allow_nested=allow_nested
+                allow_nested=allow_nested,
+                citation_clearing=citation_clearing
             )
 
-    def parse_lines(self, lines, manager=None, complete_origin=False, allow_naked_names=False, allow_nested=False):
+    def parse_lines(self, lines, manager=None, complete_origin=False, allow_naked_names=False, allow_nested=False,
+                    citation_clearing=True):
         """Parses an iterable of lines into this graph
 
         :param lines: iterable over lines of BEL data file
@@ -86,6 +91,9 @@ class BELGraph(nx.MultiDiGraph):
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
         :type allow_nested: bool
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                    Delegated to :class:`pybel.parser.ControlParser`
+        :type citation_clearing: bool
         """
 
         docs, definitions, states = split_file_to_annotations_and_definitions(lines)
@@ -105,6 +113,7 @@ class BELGraph(nx.MultiDiGraph):
             complete_origin=complete_origin,
             allow_naked_names=allow_naked_names,
             allow_nested=allow_nested,
+            citation_clearing=citation_clearing,
             autostreamline=True
         )
 

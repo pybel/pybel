@@ -12,7 +12,7 @@ algorithms, and allows for data interchange with common formats like Neo4J, JSON
 :code:`PyBEL` provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily
 use it to interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.
 
-Installation is as easy as getting the code from PyPI with :code:`pip3 install pybel`
+Installation is as easy as getting the code from PyPI with :code:`python3 -m pip install pybel`
 
 .. toctree::
    :maxdepth: 2
@@ -25,9 +25,22 @@ Installation is as easy as getting the code from PyPI with :code:`pip3 install p
    commandline
    troubleshooting
    logging
-   reference
+
+.. toctree::
+   :caption: Reference
+   :name: reference
+
+   parser
+   manager
+   utilities
+
+.. toctree::
+   :caption: Project
+   :name: project
+
    roadmap
    technology
+
 
 Indices and Tables
 ------------------

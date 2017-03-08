@@ -18,18 +18,18 @@ log = logging.getLogger(__name__)
 
 
 # FIXME remove this, replace with edges_iter
-def get_neighbors_by_path_type(g, v, relation):
+def get_neighbors_by_path_type(graph, node, relation):
     """Gets the set of neighbors of a given node that have a relation of the given type
 
-    :param g: A BEL network
-    :type g: :class:`pybel.BELGraph`
-    :param v: a node from the BEL network
+    :param graph: A BEL network
+    :type graph: BELGraph
+    :param node: a node from the BEL network
     :param relation: the relation to follow from the given node
     :return:
     """
     result = []
-    for neighbor in g.edge[v]:
-        for data in g.edge[v][neighbor].values():
+    for neighbor in graph.edge[node]:
+        for data in graph.edge[node][neighbor].values():
             if data[RELATION] == relation:
                 result.append(neighbor)
     return set(result)
@@ -40,8 +40,8 @@ def postpend_location(s, location_model):
 
     I did this because writing a whole new parsing model for the data would be sad and difficult
 
-    :param s:
-    :type s: BEL string representing node
+    :param s: BEL string representing node
+    :type s: str
     :param location_model:
     :return:
     """
@@ -149,7 +149,7 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
         node_str = "deg({})".format(node_str)
     elif MODIFIER in node_edge_data and ACTIVITY == node_edge_data[MODIFIER]:
         node_str = "act({}".format(node_str)
-        if EFFECT in node_edge_data and node_edge_data[EFFECT]:
+        if EFFECT in node_edge_data and node_edge_data[EFFECT]:  # TODO remove and node_edge_data[EFFECT]
             ma = node_edge_data[EFFECT]
 
             if ma[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
@@ -176,7 +176,7 @@ def decanonicalize_edge(g, u, v, k):
     """Takes two nodes and gives back a BEL string representing the statement
 
     :param g: A BEL graph
-    :type g: :class:`BELGraph`
+    :type g: pybel.BELGraph
     :param u: The edge's source node
     :param v: The edge's target node
     :param k: The edge's key
@@ -287,3 +287,34 @@ def to_bel(graph, file=None):
             continue
 
         print(decanonicalize_node(graph, u), HAS_MEMBER, decanonicalize_node(graph, v), file=file)
+
+
+def calculate_canonical_name(graph, node):
+    """Calculates the canonical name for a given node. If it is a simple node, uses the already given name.
+    Otherwise, it uses the BEL string.
+
+    :param graph: A BEL Graph
+    :type graph: pybel.BELGraph
+    :param node: A node
+    :type node: tuple
+    :return: Canonical node name
+    :rtype: str
+    """
+    data = graph.node[node]
+
+    if data[FUNCTION] == COMPLEX and NAMESPACE in data:
+        return graph.node[node][NAME]
+
+    if VARIANTS in data:
+        return decanonicalize_node(graph, node)
+
+    if FUSION in data:
+        return decanonicalize_node(graph, node)
+
+    if data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
+        return decanonicalize_node(graph, node)
+
+    if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
+        return graph.node[node][NAME]
+
+    raise ValueError('Unexpected node data: {}'.format(data))

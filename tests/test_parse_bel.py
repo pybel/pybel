@@ -2034,8 +2034,7 @@ class TestActivity(TestTokenParserBase):
 
         mod = canonicalize_modifier(result)
         expected_mod = {
-            MODIFIER: ACTIVITY,
-            EFFECT: {}
+            MODIFIER: ACTIVITY
         }
         self.assertEqual(expected_mod, mod)
 

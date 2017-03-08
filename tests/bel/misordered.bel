@@ -1,9 +1,9 @@
 ##################################################################################
 # Document Properties Section
 
-SET DOCUMENT Name = "PyBEL Test Document 1"
-SET DOCUMENT Description = "Made for testing PyBEL parsing"
-SET DOCUMENT Version = "1.6"
+SET DOCUMENT Name = "PyBEL Test Document 4"
+SET DOCUMENT Description = "Made for testing PyBEL parsing without citation clearance"
+SET DOCUMENT Version = "1.0.0"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
 SET DOCUMENT Licenses = "WTF License"
@@ -12,33 +12,32 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 ##################################################################################
 # Definitions Section
 
-DEFINE NAMESPACE CHEBI AS URL "http://resources.openbel.org/belframework/20150611/namespace/chebi.belns"
 DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns"
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
-DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 
 ##################################################################################
 # Statements Section
 
 SET STATEMENT_GROUP = "Group 1"
 
-SET Citation = {"PubMed","That one article from last week","123455","2012-01-31","Example Author|Example Author2"}
 SET TESTAN1 = "1"
-
-SET Evidence = "Evidence 1 \
-w extra notes"
+SET Citation = {"PubMed","That one article from last week","123455"}
+SET Evidence = "Evidence 1"
 
 p(HGNC:AKT1) -> p(HGNC:EGFR)
 
-SET Evidence = "Evidence 2"
-SET TESTAN2 = "3"
+UNSET ALL
+
+SET Evidence = "Evidence 1"
+SET TESTAN1 = "1"
+SET Citation = {"PubMed","That one article from last week","123455"}
 
 p(HGNC:EGFR) -| p(HGNC:FADD)
+
+UNSET ALL
+
+SET TESTAN1 = "1"
+SET Evidence = "Evidence 1"
+SET Citation = {"PubMed","That one article from last week","123455"}
+
 p(HGNC:EGFR) =| p(HGNC:CASP8)
-
-SET Citation = {"PubMed","That other article from last week","123456"}
-SET TESTAN1 = "2"
-SET Evidence = "Evidence 3"
-
-p(HGNC:FADD) -> p(HGNC:CASP8)
-p(HGNC:AKT1) -- p(HGNC:CASP8)

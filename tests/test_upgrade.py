@@ -44,12 +44,11 @@ class TestCanonicalize(BelReconstitutionMixin, unittest.TestCase):
     def canonicalize_helper(self, test_path, reconstituted=None, **kwargs):
         original = pybel.from_path(test_path, **kwargs)
 
-        self.assertEqual(0, len(original.warnings))
+        if reconstituted:
+            reconstituted(original)
 
         with open(self.path, 'w') as f:
             pybel.to_bel(original, f)
-
-        log.info('reloading BEL')
 
         reloaded = pybel.from_path(self.path)
 

@@ -49,27 +49,37 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 class BelParser(BaseParser):
     def __init__(self, graph, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
                  namespace_expressions=None, annotation_expressions=None, complete_origin=False,
-                 allow_naked_names=False, allow_nested=False, autostreamline=False):
+                 allow_naked_names=False, allow_nested=False, citation_clearing=True, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: The BEL Graph to use to store the network
         :type graph: BELGraph
-        :param namespace_dicts: A dictionary of {namespace: set of members}
+        :param namespace_dicts: A dictionary of {namespace: set of members}.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_dicts: dict
-        :param annotation_dicts: A dictionary of {annotation: set of values}
+        :param annotation_dicts: A dictionary of {annotation: set of values}.
+                                    Delegated to :class:`pybel.parser.ControlParser`
         :type annotation_dicts: dict
-        :param namespace_expressions: A dictionary of {namespace: regular expression strings}
+        :param namespace_expressions: A dictionary of {namespace: regular expression strings}.
+                                        Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_expressions: dict
-        :param annotation_expressions: A dictionary of {annotation: regular expression strings}
+        :param annotation_expressions: A dictionary of {annotation: regular expression strings}.
+                                        Delegated to :class:`pybel.parser.ControlParser`
         :type annotation_expressions: dict
-        :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}
+        :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_mappings: dict
         :param complete_origin: If true, infer the RNA and Gene origins of unmodified proteins
         :type complete_origin: bool
-        :param allow_naked_names: If true, turn off naked namespace failures
+        :param allow_naked_names: If true, turn off naked namespace failures.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_naked_names: bool
-        :param allow_nested: If true, turn off nested statement failures
+        :param allow_nested: If true, turn off nested statement failures.
+                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_nested: bool
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                    Delegated to :class:`pybel.parser.ControlParser`
+        :type citation_clearing: bool
         """
 
         self.graph = graph
@@ -78,7 +88,8 @@ class BelParser(BaseParser):
 
         self.control_parser = ControlParser(
             annotation_dicts=annotation_dicts,
-            annotation_expressions=annotation_expressions
+            annotation_expressions=annotation_expressions,
+            citation_clearing=citation_clearing
         )
 
         self.identifier_parser = IdentifierParser(
@@ -499,9 +510,9 @@ class BelParser(BaseParser):
 
         return tokens
 
-    def build_attrs(self, attrs=None, list_attrs=None):
-        attrs = {} if attrs is None else attrs
-        list_attrs = {} if list_attrs is None else list_attrs
+    def _build_attrs(self):
+        attrs = {}
+        list_attrs = {}
 
         for annotation_name, annotation_entry in self.control_parser.annotations.copy().items():
             if isinstance(annotation_entry, set):
@@ -517,7 +528,7 @@ class BelParser(BaseParser):
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
 
-        attrs, list_attrs = self.build_attrs()
+        attrs, list_attrs = self._build_attrs()
 
         q = {
             RELATION: tokens[RELATION],
@@ -539,31 +550,19 @@ class BelParser(BaseParser):
 
             self.graph.add_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
             if tokens[RELATION] in TWO_WAY_RELATIONS:
-                self.add_reverse_edge(sub, obj, q, **{ANNOTATIONS: annots})
+                self.add_reverse_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
 
         return tokens
 
-    def add_reverse_edge(self, sub, obj, attrs, **single_annotation):
-        new_attrs = {k: v for k, v in attrs.items() if k not in {SUBJECT, OBJECT}}
-        attrs_subject, attrs_object = attrs.get(SUBJECT), attrs.get(OBJECT)
+    def add_reverse_edge(self, sub, obj, attr_dict, **attr):
+        new_attrs = {k: v for k, v in attr_dict.items() if k not in {SUBJECT, OBJECT}}
+        attrs_subject, attrs_object = attr_dict.get(SUBJECT), attr_dict.get(OBJECT)
         if attrs_subject:
             new_attrs[OBJECT] = attrs_subject
         if attrs_object:
             new_attrs[SUBJECT] = attrs_object
 
-        self.graph.add_edge(obj, sub, attr_dict=new_attrs, **single_annotation)
-
-    '''
-    # TODO replace with pybel.BELGraph.add_unqualified_edge
-    #def add_unqualified_edge(self, u, v, relation):
-    #    """Adds unique edge that has no annotations
-
-        :param u: source node
-        :param v: target node
-        :param relation: relationship label
-        """
-        self.graph.add_unqualified_edge(u, v, relation)
-    '''
+        self.graph.add_edge(obj, sub, attr_dict=new_attrs, **attr)
 
     def _ensure_reaction(self, name, tokens):
         self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
@@ -839,7 +838,9 @@ def canonicalize_modifier(tokens):
 
     elif tokens[MODIFIER] == ACTIVITY:
         attrs[MODIFIER] = tokens[MODIFIER]
-        attrs[EFFECT] = {} if EFFECT not in tokens else dict(tokens[EFFECT])
+
+        if EFFECT in tokens:
+            attrs[EFFECT] = dict(tokens[EFFECT])
 
     elif tokens[MODIFIER] == TRANSLOCATION:
         attrs[MODIFIER] = tokens[MODIFIER]

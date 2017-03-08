@@ -75,13 +75,13 @@ def ensure_version(graph, check_version=True):
 
 def from_lines(lines, **kwargs):
     """Loads a BEL graph from an iterable over the lines of a BEL script. This can be a list of strings, file, or other.
-    This function is a *very* thin wrapper around :py:meth:`BELGraph`.
+    This function is a *very* thin wrapper around :class:`BELGraph`.
 
-    :param lines: an iterable of strings (the lines in a BEL script)
+    :param lines: An iterable of strings (the lines in a BEL script)
     :type lines: iter
-    :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
+    :param kwargs: Keyword arguments to pass to :class:`pybel.BELGraph`
     :return: a parsed BEL graph
-    :rtype: pybel.BELGraph
+    :rtype: BELGraph
     """
     return BELGraph(lines=lines, **kwargs)
 
@@ -89,14 +89,14 @@ def from_lines(lines, **kwargs):
 def from_path(path, encoding='utf-8', **kwargs):
     """Loads a BEL graph from a file resource
 
-    :param path: a file path
+    :param path: A file path
     :type path: str
     :param encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`.
                      See the python `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a
                      list of standard encodings. For example, files starting with a UTF-8 BOM should use
                      :code:`utf_8_sig`
     :type encoding: str
-    :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
+    :param kwargs: Keyword arguments to pass to :class`pybel.BELGraph`
     :return: a parsed BEL graph
     :rtype: BELGraph
     """
@@ -108,9 +108,9 @@ def from_path(path, encoding='utf-8', **kwargs):
 def from_url(url, **kwargs):
     """Loads a BEL graph from a URL resource
 
-    :param url: a valid URL pointing to a BEL resource
+    :param url: A valid URL pointing to a BEL resource
     :type url: str
-    :param kwargs: keyword arguments to pass to :py:meth:`BELGraph`
+    :param kwargs: Keyword arguments to pass to :class:`pybel.BELGraph`
     :return: a parsed BEL graph
     :rtype: BELGraph
     """
@@ -127,16 +127,19 @@ def from_url(url, **kwargs):
     return BELGraph(lines=lines, **kwargs)
 
 
-def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
+def to_bytes(graph, protocol=None):
     """Converts a graph to bytes with pickle
 
-    :param graph: a BEL graph
+    :param graph: A BEL graph
     :type graph: BELGraph
     :param protocol: Pickling protocol to use
     :type protocol: int
     :rtype: bytes
     """
-    return pickle.dumps(graph, protocol=protocol)
+    if protocol is not None:
+        return pickle.dumps(graph, protocol=protocol)
+    else:
+        return pickle.dumps(graph)
 
 
 def from_bytes(bytes_graph, check_version=True):
@@ -146,22 +149,25 @@ def from_bytes(bytes_graph, check_version=True):
     :type bytes_graph: bytes
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
-    :rtype: :class:`BELGraph`
+    :rtype: BELGraph
     """
     return ensure_version(pickle.loads(bytes_graph), check_version)
 
 
-def to_pickle(graph, output, protocol=pickle.HIGHEST_PROTOCOL):
+def to_pickle(graph, output, protocol=None):
     """Writes this graph to a pickle object with nx.write_gpickle
 
-    :param graph: a BEL graph
+    :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: a file or filename to write to
+    :param output: A file or filename to write to
     :type output: file or file-like or str
     :param protocol: Pickling protocol to use
     :type protocol: int
     """
-    nx.write_gpickle(graph, output, protocol=protocol)
+    if protocol is not None:
+        nx.write_gpickle(graph, output, protocol=protocol)
+    else:
+        nx.write_gpickle(graph, output)
 
 
 def from_pickle(path, check_version=True):
@@ -171,7 +177,7 @@ def from_pickle(path, check_version=True):
     :type path: file or str
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
-    :rtype: :class:`BELGraph`
+    :rtype: BELGraph
     """
     return ensure_version(nx.read_gpickle(path), check_version=check_version)
 
@@ -179,8 +185,9 @@ def from_pickle(path, check_version=True):
 def to_json_dict(graph):
     """Converts this graph to a node-link JSON object
 
-    :param graph: a BEL graph
+    :param graph: A BEL graph
     :type graph: BELGraph
+    :return: A node-link JSON object representing the given graph
     :rtype: dict
     """
     data = node_link_data(graph)
@@ -192,8 +199,9 @@ def to_json_dict(graph):
 def to_jsons(graph):
     """Dumps this graph as a node-link JSON object to a string
 
-    :param graph: a BEL graph
+    :param graph: A BEL graph
     :type graph: BELGraph
+    :return: A string representation of the node-link JSON produced for this graph by :func:`to_json_dict`
     :rtype: str
     """
     return json.dumps(to_json_dict(graph), ensure_ascii=False)
@@ -202,9 +210,9 @@ def to_jsons(graph):
 def to_json(graph, output):
     """Writes this graph as a node-link JSON object
 
-    :param graph: a BEL graph
+    :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: a write-supporting file-like object
+    :param output: A write-supporting file or file-like object
     :type output: file
     """
     json_dict = to_json_dict(graph)
@@ -214,11 +222,11 @@ def to_json(graph, output):
 def from_json_dict(data, check_version=True):
     """Reads graph from node-link JSON Object
 
-    :param data: json dictionary representing graph
+    :param data: A JSON dictionary representing a graph
     :type data: dict
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
-    :rtype: :class:`BELGraph`
+    :rtype: BELGraph
     """
 
     for i, node in enumerate(data['nodes']):
@@ -236,7 +244,7 @@ def from_json(path, check_version=True):
     :type path: str
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
-    :rtype: :class:`BELGraph`
+    :rtype: BELGraph
     """
     with open(os.path.expanduser(path)) as f:
         json_dict = json.load(f)
@@ -247,9 +255,10 @@ def from_json(path, check_version=True):
 def to_graphml(graph, output):
     """Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it
 
-    :param graph: a BEL graph
+    :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: a file or filelike object
+    :param output: A file or filelike object
+    :type output: file
     """
     g = nx.MultiDiGraph()
 
@@ -265,9 +274,10 @@ def to_graphml(graph, output):
 def to_csv(graph, output):
     """Writes graph to edge list csv
 
-    :param graph: a BEL graph
+    :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: a file or filelike object
+    :param output: A file or filelike object
+    :type output: file
     """
     nx.write_edgelist(flatten_graph_data(graph), output, data=True)
 
@@ -275,13 +285,13 @@ def to_csv(graph, output):
 def to_neo4j(graph, neo_graph, context=None):
     """Uploads a BEL graph to Neo4J graph database using `py2neo`
 
-    :param graph: a BEL Graph
+    :param graph: A BEL Graph
     :type graph: BELGraph
-    :param neo_graph: a py2neo graph object, Refer to the
+    :param neo_graph: A py2neo graph object, Refer to the
                         `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_
                         for how to build this object.
     :type neo_graph: :class:`py2neo.Graph`
-    :param context: a disease context to allow for multiple disease models in one neo4j instance.
+    :param context: A disease context to allow for multiple disease models in one neo4j instance.
                     Each edge will be assigned an attribute :code:`pybel_context` with this value
     :type context: str
     """

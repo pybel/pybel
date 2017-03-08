@@ -84,7 +84,7 @@ your favorite terminal:
 
 .. code-block:: sh
 
-   pip install pybel
+   python3 -m pip install pybel
 
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
 instructions. Also, check the change log at :code:`CHANGELOG.rst`.
@@ -93,14 +93,14 @@ Contributing
 ------------
 
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
-:code:`CONTRIBUTING.rst` for more information on getting involved.
+:code:`CONTRIBUTING.rst` for more information on getting involved. Please add your name to :code:`AUTHORS.rst`!
 
 Acknowledgements
 ----------------
 
 - This software is proudly built with Paul McGuire's `PyParsing <http://pyparsing.wikispaces.com/>`_ package.
 - `Scott Colby <https://github.com/scolby33>`_ designed our `logo <https://github.com/pybel/pybel-art>`_ and provided sage advice
-- Core Team: `Charles Tapley Hoyt <https://github.com/cthoyt>`_, `Andrej Konotopez <https://github.com/lekono>`_, and `Christian Ebeling <https://github.com/cebel>`_
+- `Christian Ebeling <https://github.com/cebel>`_ for supervision and consultation
 
 Links
 -----

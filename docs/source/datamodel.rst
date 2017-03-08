@@ -259,11 +259,11 @@ Below is the "skeleton" for the edge data model in PyBEL:
 
     {
         SUBJECT: {
-            # ... modifications to the subject node
+            # ... modifications to the subject node. Only present if non-empty.
         },
         RELATION: 'positiveCorrelation',
         OBJECT: {
-            # ... modifications to the object node
+            # ... modifications to the object node. Only present if non-empty.
         },
         EVIDENCE: '...',
         CITATION : {
@@ -283,7 +283,6 @@ Modifiers are added to this structure as well. Under this schema,
 .. code::
 
     {
-        SUBJECT: {},
         RELATION: 'positiveCorrelation',
         OBJECT: {
             MODIFIER: ACTIVITY,
@@ -291,6 +290,21 @@ Modifiers are added to this structure as well. Under this schema,
                 NAME: 'kin'
                 NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
+        },
+        CITATION: { ... }
+        EVIDENCE: '...',
+        ANNOTATIONS: { ... }
+    }
+
+Activities without molecular activity annotations do not contain an :code:`EFFECT` entry: Under this schema,
+:code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
+
+.. code::
+
+    {
+        RELATION: 'positiveCorrelation',
+        OBJECT: {
+            MODIFIER: ACTIVITY
         },
         CITATION: { ... }
         EVIDENCE: '...',
@@ -311,7 +325,6 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 .. code::
 
     {
-        SUBJECT: {},
         RELATION: 'increases',
         OBJECT: {
             MODIFIER: TRANSLOCATION,
@@ -342,7 +355,6 @@ Degradations are more simple, because there's no :code:`EFFECT` entry. :code:`p(
 .. code::
 
     {
-        SUBJECT: {},
         RELATION: 'increases',
         OBJECT: {
             MODIFIER: DEGRADATION
