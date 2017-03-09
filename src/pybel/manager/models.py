@@ -433,9 +433,9 @@ class Citation(Base):
             CITATION_TYPE: self.type
         }
         if self.authors:
-            citation_dict[CITATION_AUTHORS] = "|".join([author for author in self.authors])
+            citation_dict[CITATION_AUTHORS] = "|".join([author.name for author in self.authors])
         if self.date:
-            citation_dict[CITATION_DATE] = self.date
+            citation_dict[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
         if self.comments:
             citation_dict[CITATION_COMMENTS] = self.comments
 
@@ -513,8 +513,10 @@ class Edge(Base):
             'key': self.graphIdentifier
         }
         edge_dict['data'].update(self.evidence.forGraph())
-        for anno in self.annotations:
-            edge_dict['data'].update(anno.forGraph())
+        if self.annotations:
+            edge_dict['data'][ANNOTATIONS] = {}
+            for anno in self.annotations:
+                edge_dict['data'][ANNOTATIONS].update(anno.forGraph())
         for prop in self.properties:
             prop_info = prop.forGraph()
             if prop_info['participant'] in edge_dict['data']:

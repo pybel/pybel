@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 
 class GraphCacheManager(BaseCacheManager):
     def store_graph(self, graph, store_parts=False):
-        """Stores a graph in the database
+        """Stores a graph in the database.
 
         :param graph: a BEL network
         :type graph: pybel.BELGraph
@@ -52,7 +52,7 @@ class GraphCacheManager(BaseCacheManager):
         return network
 
     def store_graph_parts(self, network, graph):
-        """Stores the given graph into the Edge Store
+        """Stores the given graph into the Edge Store.
 
         :param network: A SQLAlchemy PyBEL Network objet
         :type network: models.Network
@@ -97,7 +97,7 @@ class GraphCacheManager(BaseCacheManager):
                 network.edges.append(edge)
 
     def get_bel_namespace_entry(self, url, value):
-        """Gets a given NamespaceEntry
+        """Gets a given NamespaceEntry object.
 
         :param url: The url of the namespace source
         :type url: str
@@ -110,7 +110,7 @@ class GraphCacheManager(BaseCacheManager):
         return self.session.query(models.NamespaceEntry).filter_by(namespace=namespace, name=value).one()
 
     def get_bel_annotation_entry(self, url, value):
-        """Gets a given AnnotationEntry
+        """Gets a given AnnotationEntry object.
 
         :param url: The url of the annotation source
         :type url: str
@@ -123,7 +123,7 @@ class GraphCacheManager(BaseCacheManager):
         return self.session.query(models.AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
     def get_or_create_evidence(self, citation, text):
-        """Creates entry for given evidence if it does not exist.
+        """Creates entry and object for given evidence if it does not exist.
 
         :param citation: Citation object obtained from get_or_create_citation()
         :type citation: models.Citation
@@ -143,7 +143,7 @@ class GraphCacheManager(BaseCacheManager):
         return result
 
     def get_or_create_node(self, graph, node):
-        """Creates entry for given node if it does not exist.
+        """Creates entry and object for given node if it does not exist.
 
         :param graph: A BEL network
         :type graph: pybel.BELGraph
@@ -166,6 +166,7 @@ class GraphCacheManager(BaseCacheManager):
                 namespaceEntry = self.get_bel_namespace_entry(url, node_data[NAME])
                 result = models.Node(type=type, namespaceEntry=namespaceEntry, bel=bel, blob=blob)
 
+            # ToDo: Test pattern defined namespaces!
             elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
                 # ToDo: How should we handle pattern namespaces in relational database?
                 namespacePattern = graph.namespace_pattern[node_data[NAMESPACE]]

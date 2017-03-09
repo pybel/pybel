@@ -136,8 +136,8 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
         self.dir = tempfile.mkdtemp()
         self.db_path = os.path.join(self.dir, 'test.db')
         self.connection = 'sqlite:///' + self.db_path
+        self.graph = pybel.from_path(test_bel_thorough, manager=self.connection, allow_nested=True)
         self.gcm = GraphCacheManager(connection=self.connection)
-        self.graph = pybel.from_path(test_bel_thorough, allow_nested=True)
 
     @mock_bel_resources
     def test_database_edge_filter(self, mock_get):
@@ -169,7 +169,7 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
 
         self.gcm.store_graph(original, store_parts=True)
 
-        reloaded = self.gcm.get_by_edge_filter(**{annotation_tag: value_tag})
+        reloaded = self.gcm.rebuild_by_edge_filter({annotation_tag: value_tag})
 
         for u, v, k in reloaded.edges(keys=True):
             del reloaded.edge[u][v][k][annotation_tag]
