@@ -48,7 +48,7 @@ class UndefinedNamespaceWarning(PyBelWarning):
 
 class IdentifierWarning(PyBelWarning):
     def __init__(self, name, namespace):
-        PyBelWarning.__init__(self, (name, namespace))
+        PyBelWarning.__init__(self, name, namespace)
         self.name = name
         self.namespace = namespace
 
@@ -93,7 +93,7 @@ class IllegalAnnotationValueWarning(PyBelWarning):
     """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
 
     def __init__(self, value, annotation):
-        PyBelWarning.__init__(self, (value, annotation))
+        PyBelWarning.__init__(self, value, annotation)
         self.value = value
         self.annotation = annotation
 
@@ -105,7 +105,7 @@ class MissingAnnotationRegexWarning(PyBelWarning):
     """Raised if annotation doesn't match regex"""
 
     def __init__(self, value, annotation):
-        PyBelWarning.__init__(self, (value, annotation))
+        PyBelWarning.__init__(self, value, annotation)
         self.value = value
         self.annotation = annotation
 
@@ -221,7 +221,7 @@ class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
     def __init__(self, s, t, l):
-        PyBelWarning.__init__(self, (s, l, t))
+        PyBelWarning.__init__(self, s, l, t)
         self.s, self.l, self.t = s, l, t
 
     def __str__(self):
@@ -262,7 +262,7 @@ class InvalidFunctionSemantic(PyBelWarning):
     """Used an identifier in a semantically invalid function"""
 
     def __init__(self, function, namespace, name, allowed_functions):
-        PyBelWarning.__init__(self, (function, namespace, name, allowed_functions))
+        PyBelWarning.__init__(self, function, namespace, name, allowed_functions)
         self.function = function
         self.namespace = namespace
         self.name = name

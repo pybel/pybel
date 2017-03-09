@@ -96,63 +96,6 @@ class GraphCacheManager(BaseCacheManager):
             if edge not in network.edges:
                 network.edges.append(edge)
 
-#    def store_graph_parts(self, network, graph):
-#        """
-            #
-#        :param network:
-#        :type network: models.Network
-#        :param graph:
-#        :type graph: BELGraph
-#        :return:
-#        """
-            # nc = {node: self.get_or_create_node(decanonicalize_node(graph, node)) for node in graph}
-
-#        self.cache_manager = CacheManager(connection=self.connection)
-#        for key, ns_url in graph.namespace_url.items():
-#            self.cache_manager.ensure_namespace(ns_url)
-#        for key, anno_url in graph.annotation_url.items():
-#            self.cache_manager.ensure_annotation(anno_url)
-
-        # FIXME add GOCC ensurement to creation of graph.namespace_url ? --> Extract to constans!!!!
-        # GOCC = 'http://resource.belframework.org/belframework/20150611/namespace/go-cellular-component.belns'
-            # self.cache_manager.ensure_namespac#e(GOCC)
-        # graph.namespace_url['GOCC'] = GOCC
-
-#        nc = {node: self.get_or_create_node(graph, node) for node in graph}
-            #
-#        for u, v, k, data in graph.edges_iter(data=True, keys=True):
-#            source, target = nc[u], nc[v]
-#            edge_bel = decanonicalize_edge(graph, u, v, k)
-            #
-#            if CITATION not in data and BEL_KEYWORD_SUPPORT not in data:  # have to assume it's a valid graph at this point
-#                data[CITATION] = dict(type='Other', name=PYBEL_AUTOEVIDENCE, reference='0')
-#                data[BEL_KEYWORD_SUPPORT] = PYBEL_AUTOEVIDENCE
-            #
-#            citation = self.get_or_create_citation(**data[CITATION])
-#            evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
-            #            edge = self.get_or_create_edge(k, source, target, evidence, edge_bel, data[RELATION])#
-            #
-#            # edge.properties = self.get_or_create_property(graph, data)
-#            properties = self.get_or_create_property(graph, data)
-#            for property in properties:
-#                if property not in edge.properties:
-#                    edge.properties.append(property)
-            #
-#            for key, value in data[ANNOTATIONS].items():
-#                if key not in graph.annotation_url:
-#                    # FIXME not sure how to handle local annotations. Maybe show warning that can't be cached?
-#                    continue
-            #
-#                annotation_url = graph.annotation_url[key]
-#                annotation_id = self.cache_manager.annotation_id_cache[annotation_url][value]
-#                if self.get_annotation(annotation_id) not in edge.annotations:
-#                    edge.annotations.append(self.get_annotation(annotation_id))
-
-#            if edge not in network.edges:
-#                network.edges.append(edge)#
-
-                # self.session.commit()
-
     def get_bel_namespace_entry(self, url, value):
         """Gets a given NamespaceEntry
 
@@ -238,13 +181,13 @@ class GraphCacheManager(BaseCacheManager):
             self.session.add(result)
             self.session.flush()
 
-        return result
+        return result 
 
     def get_or_create_edge(self, graphKey, source, target, evidence, bel, relation, blob):
         """Creates entry for given edge if it does not exist.
 
         :param graphKey: Key that identifies the order of edges and weather an edge is artificially created or extracted
-        from a valid BEL statement.
+                        from a valid BEL statement.
         :type graphKey: tuple
         :param source: Source node of the relation
         :type source: models.Node
@@ -519,15 +462,6 @@ class GraphCacheManager(BaseCacheManager):
 
         return properties
 
-    def get_annotation(self, anno_id):
-        """
-
-        :param anno_key:
-        :return:
-        :rtype: models.AnnotationEntry
-        """
-        return self.session.query(models.AnnotationEntry).filter_by(id=anno_id).one()
-
     def rebuild_by_edge_filter(self, annotation_dict):
         """Gets all edges matching the given query annotation values
 
@@ -538,6 +472,7 @@ class GraphCacheManager(BaseCacheManager):
         """
         graph = BELGraph()
         for annotation_key, annotation_value in annotation_dict.items():
+
             annotation_def = self.session.query(models.Annotation).filter_by(keyword=annotation_key).first()
             annotation = self.session.query(models.AnnotationEntry).filter_by(annotation=annotation_def,
                                                                               name=annotation_value).first()
