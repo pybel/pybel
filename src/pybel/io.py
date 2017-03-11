@@ -275,15 +275,19 @@ def to_graphml(graph, output):
     nx.write_graphml(g, output)
 
 
-def to_csv(graph, output):
+def to_csv(graph, output, delimiter='\t', encoding='utf-8'):
     """Writes the graph as an edge list using :func:`networkx.write_edgelist`
 
     :param graph: A BEL graph
     :type graph: BELGraph
     :param output: A file or filelike object
     :type output: file
+    :param delimiter: The output CSV delimiter. Defaults to tab
+    :type delimiter: str
+    :param encoding: The output format. Defaults to 'utf-8'
+    :type encoding: str
     """
-    nx.write_edgelist(flatten_graph_data(graph), output, data=True)
+    nx.write_edgelist(flatten_graph_data(graph), output, data=True, delimiter=delimiter, encoding=encoding)
 
 
 def to_neo4j(graph, neo_graph, context=None):
