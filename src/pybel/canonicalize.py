@@ -3,7 +3,10 @@ from __future__ import print_function
 import itertools as itt
 import logging
 import sys
+import time
 from operator import itemgetter
+
+from pkg_resources import get_distribution
 
 from .constants import *
 from .parser.language import rev_abundance_labels
@@ -213,6 +216,8 @@ def to_bel_lines(graph):
     :return: an iterable over the lines of the representative BEL script
     :rtype: iter
     """
+    yield '# Output by PyBEL v{} on {}\n'.format(get_distribution('pybel').version, time.asctime())
+
     for k in sorted(graph.document):
         yield 'SET DOCUMENT {} = "{}"'.format(INVERSE_DOCUMENT_KEYS[k], graph.document[k])
 
