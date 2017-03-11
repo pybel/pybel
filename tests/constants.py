@@ -31,6 +31,7 @@ test_bel_simple = os.path.join(bel_dir_path, 'test_bel.bel')
 test_bel_extensions = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
+test_bel_isolated = os.path.join(bel_dir_path, 'isolated.bel')
 
 test_owl_pizza = os.path.join(owl_dir_path, 'pizza_onto.owl')
 test_owl_wine = os.path.join(owl_dir_path, 'wine.owl')
@@ -104,7 +105,9 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
     :param self: A TestCase
     :type self: unittest.TestCase
     :param u: source node
+    :type u: tuple
     :param v: target node
+    :type v: tuple
     :param graph: underlying graph
     :type graph: BELGraph
     :param kwargs: splat the data to match
@@ -337,11 +340,7 @@ BEL_THOROUGH_NODES = {
     (COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')),
     (PROTEIN, 'HGNC', 'IL6'),
     (BIOPROCESS, 'GOBP', 'cell cycle arrest'),
-    (REACTION, ((ABUNDANCE, ('CHEBI', 'superoxide')),),
-     ((ABUNDANCE, ('CHEBI', 'dioxygen')), (ABUNDANCE, ('CHEBI', 'hydrogen peroxide')))),
-    (ABUNDANCE, 'CHEBI', 'superoxide'),
     (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'),
-    (ABUNDANCE, 'CHEBI', 'dioxygen'),
     (PROTEIN, 'HGNC', 'CAT'),
     (GENE, 'HGNC', 'CAT'),
     (PROTEIN, 'HGNC', 'HMGCR'),
@@ -716,7 +715,7 @@ BEL_THOROUGH_EDGES = [
             MODIFIER: TRANSLOCATION,
             EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                     TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}
         },
         ANNOTATIONS: {}
     }),
@@ -725,8 +724,8 @@ BEL_THOROUGH_EDGES = [
         CITATION: citation_1,
         RELATION: INCREASES,
         OBJECT: {MODIFIER: TRANSLOCATION, EFFECT: {
-            FROM_LOC: {NAMESPACE: 'GOCC',NAME: 'cell surface'},
-            TO_LOC: {NAMESPACE: 'GOCC',NAME: 'endosome'}}},
+            FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
+            TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}},
         ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')), {
@@ -800,24 +799,6 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
          RELATION: DECREASES,
-         ANNOTATIONS: {}
-     }),
-    ((REACTION, ((ABUNDANCE, ('CHEBI', 'superoxide')),),
-      ((ABUNDANCE, ('CHEBI', 'dioxygen')), (ABUNDANCE, ('CHEBI', 'hydrogen peroxide')))),
-     (ABUNDANCE, 'CHEBI', 'superoxide'), {
-         RELATION: HAS_REACTANT,
-         ANNOTATIONS: {}
-     }),
-    ((REACTION, ((ABUNDANCE, ('CHEBI', 'superoxide')),),
-      ((ABUNDANCE, ('CHEBI', 'dioxygen')), (ABUNDANCE, ('CHEBI', 'hydrogen peroxide')))),
-     (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
-         RELATION: HAS_PRODUCT,
-         ANNOTATIONS: {}
-     }),
-    ((REACTION, ((ABUNDANCE, ('CHEBI', 'superoxide')),),
-      ((ABUNDANCE, ('CHEBI', 'dioxygen')), (ABUNDANCE, ('CHEBI', 'hydrogen peroxide')))),
-     (ABUNDANCE, 'CHEBI', 'dioxygen'), {
-         RELATION: HAS_PRODUCT,
          ANNOTATIONS: {}
      }),
     ((PROTEIN, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'),
@@ -999,8 +980,16 @@ BEL_THOROUGH_EDGES = [
 
 class BelReconstitutionMixin(unittest.TestCase):
     def bel_simple_reconstituted(self, graph, check_metadata=True):
+        """Checks that test_bel.bel was loaded properly
+
+        :param graph: A BEL Graph
+        :type graph: pybel.BELGraph
+        :param check_metadata: Should the graph metadata be checked? Defaults to True
+        :type check_metadata: bool
+        """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
+        self.assertFalse(graph.has_singleton_terms)
 
         if check_metadata:
             self.assertEqual(expected_test_simple_metadata, graph.document)
@@ -1081,17 +1070,17 @@ class BelReconstitutionMixin(unittest.TestCase):
         })
 
     def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True):
-        """
+        """Checks that thorough.bel was loaded properly
 
         :param graph: A BEL grpah
         :type graph: BELGraph
         :param check_metadata:
         :param check_warnings:
         :param check_provenance:
-        :return:
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
+        self.assertFalse(graph.has_singleton_terms)
 
         if check_warnings:
             self.assertEqual(0, len(graph.warnings),
@@ -1167,3 +1156,26 @@ class BelReconstitutionMixin(unittest.TestCase):
             CITATION: citation_1,
             EVIDENCE: evidence_1,
         })
+
+    def bel_isolated_reconstituted(self, graph):
+        """Runs the isolated node test
+
+        :param graph: A BEL Graph
+        :type graph: BELGraph
+        """
+        self.assertIsNotNone(graph)
+        self.assertIsInstance(graph, BELGraph)
+        self.assertTrue(graph.has_singleton_terms)
+
+        a = PATHOLOGY, 'MESHD', 'Achlorhydria'
+        b = PROTEIN, 'HGNC', 'ADGRB1'
+        c = PROTEIN, 'HGNC', 'ADGRB2'
+        d = COMPLEX, b, c
+
+        assertHasNode(self, a, graph)
+        assertHasNode(self, b, graph)
+        assertHasNode(self, c, graph)
+        assertHasNode(self, d, graph)
+
+        assertHasEdge(self, d, b, graph)
+        assertHasEdge(self, d, c, graph)

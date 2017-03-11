@@ -28,7 +28,7 @@ from networkx.readwrite.json_graph import node_link_data, node_link_graph
 from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
-from .canonicalize import decanonicalize_node
+from .canonicalize import decanonicalize_node, calculate_canonical_name
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
 from .graph import BELGraph
 from .utils import flatten_dict, flatten_graph_data, list2tuple
@@ -149,13 +149,14 @@ def from_bytes(bytes_graph, check_version=True):
     :type bytes_graph: bytes
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
+    :return: A BEL graph
     :rtype: BELGraph
     """
     return ensure_version(pickle.loads(bytes_graph), check_version)
 
 
 def to_pickle(graph, output, protocol=None):
-    """Writes this graph to a pickle object with nx.write_gpickle
+    """Writes this graph to a pickle object with :func:`networkx.write_gpickle`
 
     :param graph: A BEL graph
     :type graph: BELGraph
@@ -177,6 +178,7 @@ def from_pickle(path, check_version=True):
     :type path: file or str
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
+    :return: A BEL graph
     :rtype: BELGraph
     """
     return ensure_version(nx.read_gpickle(path), check_version=check_version)
@@ -226,6 +228,7 @@ def from_json_dict(data, check_version=True):
     :type data: dict
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
+    :return: A BEL graph
     :rtype: BELGraph
     """
 
@@ -244,6 +247,7 @@ def from_json(path, check_version=True):
     :type path: str
     :param check_version: Checks if the graph was produced by this version of PyBEL
     :type check_version: bool
+    :return: A BEL graph
     :rtype: BELGraph
     """
     with open(os.path.expanduser(path)) as f:
@@ -253,11 +257,11 @@ def from_json(path, check_version=True):
 
 
 def to_graphml(graph, output):
-    """Writes this graph to GraphML file. Use .graphml extension so Cytoscape can recognize it
+    """Writes this graph to GraphML XML file. The .graphml extension is suggested so Cytoscape can recognize it.
 
     :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: A file or filelike object
+    :param output: A file or file-like object
     :type output: file
     """
     g = nx.MultiDiGraph()
@@ -271,15 +275,19 @@ def to_graphml(graph, output):
     nx.write_graphml(g, output)
 
 
-def to_csv(graph, output):
-    """Writes graph to edge list csv
+def to_csv(graph, output, delimiter='\t', encoding='utf-8'):
+    """Writes the graph as an edge list using :func:`networkx.write_edgelist`
 
     :param graph: A BEL graph
     :type graph: BELGraph
     :param output: A file or filelike object
     :type output: file
+    :param delimiter: The output CSV delimiter. Defaults to tab
+    :type delimiter: str
+    :param encoding: The output format. Defaults to 'utf-8'
+    :type encoding: str
     """
-    nx.write_edgelist(flatten_graph_data(graph), output, data=True)
+    nx.write_edgelist(flatten_graph_data(graph), output, data=True, delimiter=delimiter, encoding=encoding)
 
 
 def to_neo4j(graph, neo_graph, context=None):
@@ -300,10 +308,11 @@ def to_neo4j(graph, neo_graph, context=None):
     node_map = {}
     for node, data in graph.nodes(data=True):
         node_type = data[FUNCTION]
-        attrs = {k: v for k, v in data.items() if k != FUNCTION}
+        attrs = {k: v for k, v in data.items() if k not in {FUNCTION, NAME}}
 
         if NAME in data:
-            attrs['value'] = data[NAME]
+            attrs['identifier'] = data[NAME]
+            attrs['name'] = calculate_canonical_name(graph, node)
 
         node_map[node] = py2neo.Node(node_type, bel=decanonicalize_node(graph, node), **attrs)
 
