@@ -1587,7 +1587,18 @@ class TestProtein(TestTokenParserBase):
         s1 = 'g(HGNC:AKT1)'
         s2 = 'deg(g(HGNC:AKT1))'
 
-        self.parser.bel_term.parseString(s1)
+        result = self.parser.language.parseString(s1)
+
+        expected_result_dict = {
+            FUNCTION: GENE,
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
+            }
+        }
+
+        self.assertEqual(expected_result_dict, result.asDict())
+
         self.parser.bel_term.parseString(s2)
 
         gene = GENE, 'HGNC', 'AKT1'
@@ -3087,11 +3098,56 @@ class TestRelations(TestTokenParserBase):
         obj = cls, ns, val = BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'
         self.assertHasNode(obj, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
 
-        self.assertHasEdge(sub, obj, relation='subProcessOf')
+        self.assertHasEdge(sub, obj, **{RELATION: 'subProcessOf'})
 
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
         self.parser.parseString(statement)
+
+    def test_has_variant(self):
+        statement = 'g(HGNC:AKT1) hasVariant g(HGNC:AKT1, gmod(M))'
+        self.parser.relation.parseString(statement)
+
+        expected_parent = GENE, 'HGNC', 'AKT1'
+        expected_child = GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))
+
+        self.assertHasNode(expected_parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        self.assertHasNode(expected_child)
+
+        self.assertEqual('g(HGNC:AKT1)', decanonicalize_node(self.parser.graph, expected_parent))
+        self.assertEqual('g(HGNC:AKT1, gmod(Me))', decanonicalize_node(self.parser.graph, expected_child))
+
+        self.assertHasEdge(expected_parent, expected_child, **{RELATION: HAS_VARIANT})
+
+    def test_has_reaction_component(self):
+        statement = 'rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), \
+                    a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) \
+                    hasReactant a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA")'
+        result = self.parser.relation.parseString(statement)
+
+        sub = canonicalize_node(result[SUBJECT])
+        self.assertHasNode(sub)
+
+        sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
+        sub_reactant_2 = ABUNDANCE, 'CHEBI', 'NADPH'
+        sub_reactant_3 = ABUNDANCE, 'CHEBI', 'hydron'
+        sub_product_1 = ABUNDANCE, 'CHEBI', 'mevalonate'
+        sub_product_2 = ABUNDANCE, 'CHEBI', 'CoA-SH'
+        sub_product_3 = ABUNDANCE, 'CHEBI', 'NADP(+)'
+
+        self.assertHasNode(sub_reactant_1)
+        self.assertHasNode(sub_reactant_2)
+        self.assertHasNode(sub_reactant_3)
+        self.assertHasNode(sub_product_1)
+        self.assertHasNode(sub_product_2)
+        self.assertHasNode(sub_product_3)
+
+        self.assertHasEdge(sub, sub_reactant_1, relation='hasReactant')
+        self.assertHasEdge(sub, sub_reactant_2, relation='hasReactant')
+        self.assertHasEdge(sub, sub_reactant_3, relation='hasReactant')
+        self.assertHasEdge(sub, sub_product_1, relation='hasProduct')
+        self.assertHasEdge(sub, sub_product_2, relation='hasProduct')
+        self.assertHasEdge(sub, sub_product_3, relation='hasProduct')
 
 
 class TestWrite(TestTokenParserBase):

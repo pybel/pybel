@@ -268,25 +268,21 @@ def to_bel_lines(graph):
         yield '\n'
 
     yield '###############################################\n'
-
     yield 'SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}'
     yield 'SET Evidence = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
-    for u in graph.nodes_iter():
-        if any(d[RELATION] not in unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
-            continue
-
-        yield decanonicalize_node(graph, u)
-
-    # Can't infer hasMember relationships, but it's not due to specific evidence or citation
     for u, v, d in graph.edges_iter(data=True):
-        if d[RELATION] != HAS_MEMBER:
+        if d[RELATION] not in unqualified_edge_code:
             continue
 
         if EVIDENCE in d:
             continue
 
-        yield '{} {} {}'.format(decanonicalize_node(graph, u), HAS_MEMBER, decanonicalize_node(graph, v))
+        yield '{} {} {}'.format(decanonicalize_node(graph, u), d[RELATION], decanonicalize_node(graph, v))
+
+    for node in graph.nodes_iter():
+        if not graph.pred[node] and not graph.succ[node]:
+            yield decanonicalize_node(graph, node)
 
 
 def to_bel(graph, file=None):

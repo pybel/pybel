@@ -51,7 +51,7 @@ g(HGNC:CFTR, var(g.117199646_117199648delCTT)) -> g(HGNC:CFTR, var(c.1521_1523de
 
 microRNAAbundance(HGNC:MIR21) -| p(HGNC:AKT1, pmod(TESTNS2:PhosRes, Ser, 473))
 m(HGNC:MIR21,loc(GOCC:intracellular)) -| p(HGNC:AKT1, pmod(Ph, Ser, 473))
-m(HGNC:MIR21,var(p.Phe508del)) - |p(HGNC:AKT1, pmod(Ph, S, 473))
+m(HGNC:MIR21,var(p.Phe508del)) -| p(HGNC:AKT1, pmod(Ph, S, 473))
 
 m(HGNC:MIR21,var(p.Phe508del),loc(GOCC:intracellular)) -> p(HGNC:AKT1, var(p.C40*))
 
@@ -62,7 +62,7 @@ p(HGNC:AKT1, trunc(40)) -> p(HGNC:CHCHD4, fusion(HGNC:AIFM1))
 
 p(HGNC:CFTR, var(=)) -> surf(p(HGNC:EGFR)) -> p(HGNC:MIA, frag(?_*))
 p(HGNC:CFTR, var(?)) -> pathology(MESHD:Adenocarcinoma)
-p(HGNC:CFTR, var(p.Phe508del))
+
 
 p(HGNC:MIA, frag(5_20)) -> sec(complex(GOCC:"interleukin-23 complex"))
 
@@ -70,7 +70,7 @@ p(HGNC:MIA, frag(1_?)) -> tloc(p(HGNC:EGFR), GOCC:"cell surface", GOCC:endosome)
 
 deg(p(HGNC:AKT1)) -> p(HGNC:MIA, frag(?))
 
-p(HGNC:MIA, frag(?, 55kD))
+p(HGNC:CFTR, var(p.Phe508del)) -- p(HGNC:MIA, frag(?, 55kD))
 
 p(HGNC:AKT1) -> p(HGNC:CFTR, var(p.Gly576Ala))
 
@@ -80,7 +80,7 @@ r(HGNC:AKT1, var(p.Phe508del), var(c.1521_1523delCTT)) => r(fus(HGNC:TMPRSS2, r.
 
 r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?)) -> complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))
 
-r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
+r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626)) -- p(HGNC:EGFR)
 
 r(HGNC:CHCHD4, fusion(HGNC:AIFM1)) -> complex(p(HGNC:FOS), p(HGNC:JUN))
 
@@ -100,8 +100,6 @@ kin(p(HGNC:AKT1)) -> sec(p(HGNC:EGFR))
 
 SET Citation = {"PubMed","That one article from last week #2","123456"}
 SET Evidence = "These were all explicitly stated in the BEL 2.0 Specification"
-
-rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:dioxygen)))
 
 composite(p(HGNC:CASP8),p(HGNC:FADD),a(TESTNS2:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")
 

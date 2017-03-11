@@ -67,6 +67,9 @@ class BELGraph(nx.MultiDiGraph):
         self._warnings = []
         self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
 
+        #: Is true if during BEL Parsing, a term that is not part of a relation is found
+        self.has_singleton_terms = False
+
         if lines is not None:
             self.parse_lines(
                 lines,
@@ -210,6 +213,8 @@ class BELGraph(nx.MultiDiGraph):
             except Exception as e:
                 log.exception('Line %07d - General Failure: %s', line_number, line)
                 self.add_warning(line_number, line, e, bel_parser.get_annotations())
+
+        self.has_singleton_terms = bel_parser.has_singleton_terms
 
         log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(self.warnings))
 

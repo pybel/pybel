@@ -99,6 +99,8 @@ class BelParser(BaseParser):
             allow_naked_names=allow_naked_names
         )
 
+        self.has_singleton_terms = False
+
         # TODO replace with:
         # identifier = self.identifier_parser.as_group()
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
@@ -395,22 +397,43 @@ class BelParser(BaseParser):
 
         self.biomarker = triple(self.bel_term, biomarker_tags, self.process)
 
+        has_variant_tags = oneOf(['hasVariant'])
+        self.has_variant_relation = triple(self.abundance, has_variant_tags, self.abundance)
+
+        part_of_reaction_tags = oneOf(['hasReactant', 'hasProduct'])
+        self.part_of_reaction = triple(self.reaction, part_of_reaction_tags, self.abundance)
+
         self.relation = MatchFirst([
             self.bel_to_bel,
-            self.has_member,
-            self.has_component,
+            #self.has_member,
+            #self.has_component,
             self.subprocess_of,
             self.rate_limit,
             self.biomarker,
             self.transcribed,
             self.translated,
+            #self.has_variant_relation,
+            #self.part_of_reaction,
         ])
 
         self.relation.setParseAction(self.handle_relation)
 
+        self.unqualified_relation = MatchFirst([
+            self.has_member,
+            self.has_component,
+            self.has_variant_relation,
+            self.part_of_reaction
+        ])
+
+        self.unqualified_relation.setParseAction(self.handle_unqualified_relation)
+
         #: 3.1 Causal Relationships - nested. Explicitly not supported because of ambiguity
-        causal_relation_tags = MatchFirst([increases_tag, decreases_tag,
-                                           directly_decreases_tag, directly_increases_tag])
+        causal_relation_tags = MatchFirst([
+            increases_tag,
+            decreases_tag,
+            directly_decreases_tag,
+            directly_increases_tag
+        ])
 
         self.nested_causal_relationship = triple(self.bel_term, causal_relation_tags,
                                                  nest(triple(self.bel_term, causal_relation_tags, self.bel_term)))
@@ -418,9 +441,14 @@ class BelParser(BaseParser):
         self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
-        self.relation = MatchFirst([self.has_members, self.nested_causal_relationship, self.relation])
+        self.relation = MatchFirst([
+            self.has_members,
+            self.nested_causal_relationship,
+            self.relation,
+            self.unqualified_relation
+        ])
 
-        self.statement = self.relation | self.bel_term.setParseAction(self.handle_term)
+        self.statement = self.relation | self.bel_term.copy().setParseAction(self.handle_term_singleton)
         self.language = self.control_parser.language | self.statement
         self.language.setName('BEL')
 
@@ -494,6 +522,13 @@ class BelParser(BaseParser):
         self.ensure_node(tokens)
         return tokens
 
+    def handle_term_singleton(self, s, l, tokens):
+        """This function wraps self.handle_term but is only used for top-level parsing of bel_terms. This is done
+        solely to keep track of if a graph has any singletons"""
+        self.has_singleton_terms = True
+        log.warning('Added singleton line: %s', s)
+        return self.handle_term(s, l, tokens)
+
     def check_required_annotations(self, s):
         """Checks that the control parser has a citation and evidence before adding an edge"""
         if not self.control_parser.citation:
@@ -553,6 +588,12 @@ class BelParser(BaseParser):
                 self.add_reverse_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
 
         return tokens
+
+    def handle_unqualified_relation(self, s, l, tokens):
+        sub = self.ensure_node(tokens[SUBJECT])
+        obj = self.ensure_node(tokens[OBJECT])
+        rel = tokens[RELATION]
+        self.graph.add_unqualified_edge(sub, obj, rel)
 
     def add_reverse_edge(self, sub, obj, attr_dict, **attr):
         new_attrs = {k: v for k, v in attr_dict.items() if k not in {SUBJECT, OBJECT}}
