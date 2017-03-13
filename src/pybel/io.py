@@ -157,20 +157,20 @@ def from_bytes(bytes_graph, check_version=True):
     return ensure_version(pickle.loads(bytes_graph), check_version)
 
 
-def to_pickle(graph, output, protocol=None):
+def to_pickle(graph, file, protocol=None):
     """Writes this graph to a pickle object with :func:`networkx.write_gpickle`
 
     :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: A file or filename to write to
-    :type output: file or file-like or str
+    :param file: A file or filename to write to
+    :type file: file or file-like or str
     :param protocol: Pickling protocol to use
     :type protocol: int
     """
     if protocol is not None:
-        nx.write_gpickle(graph, output, protocol=protocol)
+        nx.write_gpickle(graph, file, protocol=protocol)
     else:
-        nx.write_gpickle(graph, output)
+        nx.write_gpickle(graph, file)
 
 
 def from_pickle(path, check_version=True):
@@ -200,16 +200,16 @@ def to_json_dict(graph):
     return data
 
 
-def to_json(graph, output):
+def to_json(graph, file):
     """Writes this graph as a node-link JSON object
 
     :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: A write-supporting file or file-like object
-    :type output: file
+    :param file: A write-supporting file or file-like object
+    :type file: file
     """
     json_dict = to_json_dict(graph)
-    json.dump(json_dict, output, ensure_ascii=False)
+    json.dump(json_dict, file, ensure_ascii=False)
 
 
 def to_jsons(graph):
@@ -273,13 +273,13 @@ def from_jsons(s, check_version=True):
     return graph
 
 
-def to_graphml(graph, output):
+def to_graphml(graph, file):
     """Writes this graph to GraphML XML file. The .graphml extension is suggested so Cytoscape can recognize it.
 
     :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: A file or file-like object
-    :type output: file
+    :param file: A file or file-like object
+    :type file: file
     """
     g = nx.MultiDiGraph()
 
@@ -289,22 +289,22 @@ def to_graphml(graph, output):
     for u, v, key, data in graph.edges(data=True, keys=True):
         g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
 
-    nx.write_graphml(g, output)
+    nx.write_graphml(g, file)
 
 
-def to_csv(graph, output, delimiter='\t', encoding='utf-8'):
+def to_csv(graph, file, delimiter='\t', encoding='utf-8'):
     """Writes the graph as an edge list using :func:`networkx.write_edgelist`
 
     :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: A file or filelike object
-    :type output: file
+    :param file: A file or filelike object
+    :type file: file
     :param delimiter: The output CSV delimiter. Defaults to tab
     :type delimiter: str
     :param encoding: The output format. Defaults to 'utf-8'
     :type encoding: str
     """
-    nx.write_edgelist(flatten_graph_data(graph), output, data=True, delimiter=delimiter, encoding=encoding)
+    nx.write_edgelist(flatten_graph_data(graph), file, data=True, delimiter=delimiter, encoding=encoding)
 
 
 def to_neo4j(graph, neo_graph, context=None):
