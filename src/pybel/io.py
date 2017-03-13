@@ -50,7 +50,7 @@ __all__ = [
     'to_json',
     'from_json',
     'to_jsons',
-    'from_jsons'
+    'from_jsons',
     'to_graphml',
     'to_csv',
     'to_neo4j'
@@ -200,17 +200,6 @@ def to_json_dict(graph):
     return data
 
 
-def to_jsons(graph):
-    """Dumps this graph as a node-link JSON object to a string
-
-    :param graph: A BEL graph
-    :type graph: BELGraph
-    :return: A string representation of the node-link JSON produced for this graph by :func:`to_json_dict`
-    :rtype: str
-    """
-    return json.dumps(to_json_dict(graph), ensure_ascii=False)
-
-
 def to_json(graph, output):
     """Writes this graph as a node-link JSON object
 
@@ -221,6 +210,17 @@ def to_json(graph, output):
     """
     json_dict = to_json_dict(graph)
     json.dump(json_dict, output, ensure_ascii=False)
+
+
+def to_jsons(graph):
+    """Dumps this graph as a node-link JSON object to a string
+
+    :param graph: A BEL graph
+    :type graph: BELGraph
+    :return: A string representation of the node-link JSON produced for this graph by :func:`to_json_dict`
+    :rtype: str
+    """
+    return json.dumps(to_json_dict(graph), ensure_ascii=False)
 
 
 def from_json_dict(data, check_version=True):
@@ -243,7 +243,7 @@ def from_json_dict(data, check_version=True):
 
 
 def from_json(path, check_version=True):
-    """Reads graph from node-link JSON Object
+    """Reads graph from node-link JSON object
 
     :param path: file path to read
     :type path: str
@@ -256,6 +256,21 @@ def from_json(path, check_version=True):
         json_dict = json.load(f)
         graph = from_json_dict(json_dict, check_version=check_version)
         return graph
+
+
+def from_jsons(s, check_version=True):
+    """Reads a BEL graph from a node-link JSON string
+
+    :param s: A node-link JSON string produced by PyBEL
+    :type s: str
+    :param check_version: Checks if the graph was produced by this version of PyBEL
+    :type check_version: bool
+    :return: A BEL graph
+    :rtype: BELGraph
+    """
+    json_dict = json.loads(s)
+    graph = from_json_dict(json_dict, check_version=check_version)
+    return graph
 
 
 def to_graphml(graph, output):
