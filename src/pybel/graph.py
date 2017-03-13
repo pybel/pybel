@@ -181,11 +181,11 @@ class BELGraph(nx.MultiDiGraph):
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
 
-        :param u: source node
+        :param u: The source BEL node
         :type u: tuple
-        :param v: target node
+        :param v: The target BEL node
         :type v: tuple
-        :param relation: relationship label from :code:`pybel.constants`
+        :param relation: A relationship label from :code:`pybel.constants`
         :type relation: str
         """
         key = unqualified_edge_code[relation]
