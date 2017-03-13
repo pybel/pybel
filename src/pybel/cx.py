@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from collections import defaultdict
@@ -9,12 +10,25 @@ from .utils import flatten_dict, expand_dict
 
 __all__ = [
     'to_cx_json',
+    'to_cx',
     'from_cx_json'
 ]
 
 log = logging.getLogger(__name__)
 
 NDEX_SOURCE_FORMAT = "ndex:sourceFormat"
+
+
+def to_cx(graph, file):
+    """Writes this graph to a JSON file in CX format
+
+    :param graph: A BEL graph
+    :type graph: BELGraph
+    :param file: A file to write to
+    :type file: file or file-like
+    """
+    json_graph = to_cx_json(graph)
+    json.dump(json_graph, file, ensure_ascii=False)
 
 
 def hash_tuple(x):
