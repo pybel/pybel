@@ -10,10 +10,8 @@ from pkg_resources import get_distribution
 
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .parser.modifiers import FusionParser
-from .parser.modifiers.fragment import FragmentParser
-from .parser.modifiers.protein_modification import PmodParser
-from .parser.utils import ensure_quotes
+from .parser.modifiers import FragmentParser, FusionParser, PmodParser
+from .utils import ensure_quotes, flatten_citation, sort_edges
 
 __all__ = [
     'to_bel_lines',
@@ -197,15 +195,6 @@ def decanonicalize_edge(g, u, v, k):
     v_str = decanonicalize_edge_node(g, v, ed, node_position=OBJECT)
 
     return "{} {} {}".format(u_str, ed[RELATION], v_str)
-
-
-def flatten_citation(citation):
-    return ','.join('"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)])
-
-
-def sort_edges(d):
-    return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
-        itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
 
 
 def to_bel_lines(graph):

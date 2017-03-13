@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import itertools as itt
 import logging
 from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
+from operator import itemgetter
 
 import networkx as nx
 import requests
 from pkg_resources import get_distribution
 from requests_file import FileAdapter
+
+from pybel.constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS
 
 log = logging.getLogger('pybel')
 
@@ -130,3 +134,26 @@ def get_version():
 
 def tokenize_version(version_string):
     return tuple(map(int, version_string.split('.')[0:3]))
+
+
+def citation_dict_to_tuple(citation):
+    return tuple(citation[x] for x in CITATION_ENTRIES[:len(citation)])
+
+
+def flatten_citation(citation):
+    return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
+
+
+def sort_edges(d):
+    return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
+        itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
+
+
+def ensure_quotes(s):
+    """Quote a string that isn't solely alphanumeric
+
+    :param s: a string
+    :type s: str
+    :rtype: str
+    """
+    return '"{}"'.format(s) if not s.isalnum() else s
