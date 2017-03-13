@@ -63,7 +63,6 @@ class BELGraph(nx.MultiDiGraph):
 
         self._warnings = []
         self.graph[GRAPH_PYBEL_VERSION] = get_version()
-        self.graph[GRAPH_METADATA] = {}
 
         #: Is true if during BEL Parsing, a term that is not part of a relation is found
         self.has_singleton_terms = False
@@ -78,9 +77,72 @@ class BELGraph(nx.MultiDiGraph):
             )
 
     @property
+    def document(self):
+        """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
+        according to :py:data:`pybel.constants.DOCUMENT_KEYS`
+        """
+        return self.graph.get(GRAPH_METADATA, {})
+
+    @property
     def name(self, *attrs):
         """Gets the graph's name. Requires a weird hack in the signature since it's overriding a property"""
-        return self.graph[GRAPH_METADATA].get(METADATA_NAME, '')
+        return self.document.get(METADATA_NAME, '')
+
+    @name.setter
+    def name(self, *attrs, **kwargs):
+        self.document[METADATA_NAME] = attrs[0]
+
+    @property
+    def namespace_url(self):
+        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS file"""
+        return self.graph.get(GRAPH_NAMESPACE_URL, {})
+
+    @property
+    def namespace_owl(self):
+        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL file"""
+        return self.graph.get(GRAPH_NAMESPACE_OWL, {})
+
+    @property
+    def namespace_pattern(self):
+        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns"""
+        return self.graph.get(GRAPH_NAMESPACE_PATTERN, {})
+
+    @property
+    def annotation_url(self):
+        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO file"""
+        return self.graph.get(GRAPH_ANNOTATION_URL, {})
+
+    @property
+    def annotation_owl(self):
+        """A dictionary mapping the annotation keywords to the URL of the OWL file"""
+        return self.graph.get(GRAPH_ANNOTATION_OWL, {})
+
+    @property
+    def annotation_pattern(self):
+        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns"""
+        return self.graph.get(GRAPH_ANNOTATION_PATTERN, {})
+
+    @property
+    def annotation_list(self):
+        """A dictionary mapping the keywords of locally defined annotations to a set of their values"""
+        return self.graph.get(GRAPH_ANNOTATION_LIST, {})
+
+    @property
+    def pybel_version(self):
+        """Stores the version of PyBEL with which this graph was produced as a string"""
+        return self.graph[GRAPH_PYBEL_VERSION]
+
+    @property
+    def warnings(self):
+        """Warnings are stored in a list of 4-tuples that is a property of the graph object.
+        This tuple respectively contains the line number, the line text, the exception instance, and the context
+        dictionary from the parser at the time of error.
+        """
+        return self._warnings
+
+    def add_warning(self, line_number, line, exception, context=None):
+        """Adds a warning to the internal warning log in the graph, with optional context information"""
+        self.warnings.append((line_number, line, exception, {} if context is None else context))
 
     def parse_lines(self, lines, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True):
         """Parses an iterable of lines into this graph
@@ -258,65 +320,6 @@ class BELGraph(nx.MultiDiGraph):
         node = function, namespace, name
         if node not in self:
             self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
-
-    @property
-    def document(self):
-        """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
-        according to :py:data:`pybel.constants.DOCUMENT_KEYS`
-        """
-        return self.graph[GRAPH_METADATA]
-
-    @property
-    def namespace_url(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS file"""
-        return self.graph.get(GRAPH_NAMESPACE_URL, {})
-
-    @property
-    def namespace_owl(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL file"""
-        return self.graph.get(GRAPH_NAMESPACE_OWL, {})
-
-    @property
-    def namespace_pattern(self):
-        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns"""
-        return self.graph.get(GRAPH_NAMESPACE_PATTERN, {})
-
-    @property
-    def annotation_url(self):
-        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO file"""
-        return self.graph.get(GRAPH_ANNOTATION_URL, {})
-
-    @property
-    def annotation_owl(self):
-        """A dictionary mapping the annotation keywords to the URL of the OWL file"""
-        return self.graph.get(GRAPH_ANNOTATION_OWL, {})
-
-    @property
-    def annotation_pattern(self):
-        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns"""
-        return self.graph.get(GRAPH_ANNOTATION_PATTERN, {})
-
-    @property
-    def annotation_list(self):
-        """A dictionary mapping the keywords of locally defined annotations to a set of their values"""
-        return self.graph.get(GRAPH_ANNOTATION_LIST, {})
-
-    @property
-    def pybel_version(self):
-        """Stores the version of PyBEL with which this graph was produced as a string"""
-        return self.graph[GRAPH_PYBEL_VERSION]
-
-    @property
-    def warnings(self):
-        """Warnings are stored in a list of 4-tuples that is a property of the graph object.
-        This tuple respectively contains the line number, the line text, the exception instance, and the context
-        dictionary from the parser at the time of error.
-        """
-        return self._warnings
-
-    def add_warning(self, line_number, line, exception, context=None):
-        """Adds a warning to the internal warning log in the graph, with optional context information"""
-        self.warnings.append((line_number, line, exception, {} if context is None else context))
 
     def __eq__(self, other):
 

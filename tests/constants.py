@@ -1112,9 +1112,8 @@ class BelReconstitutionMixin(unittest.TestCase):
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
-        # FIXME this doesn't work for GraphML IO
         if check_metadata:
-            self.assertEqual(expected_test_slushy_metadata, graph.document)
+            self.assertEqual(expected_test_slushy_metadata, graph.graph[GRAPH_METADATA])
 
         if check_warnings:
             expected_warnings = [
