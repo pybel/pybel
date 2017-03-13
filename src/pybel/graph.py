@@ -17,7 +17,6 @@ import time
 from collections import defaultdict, Counter
 
 import networkx as nx
-from pkg_resources import get_distribution
 from pyparsing import ParseException
 
 from .constants import *
@@ -26,7 +25,7 @@ from .exceptions import PyBelWarning
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import MissingMetadataException
 from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
-from .utils import expand_dict
+from .utils import expand_dict, get_version
 
 try:
     import cPickle as pickle
@@ -63,7 +62,7 @@ class BELGraph(nx.MultiDiGraph):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self._warnings = []
-        self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
+        self.graph[GRAPH_PYBEL_VERSION] = get_version()
         self.graph[GRAPH_METADATA] = {}
 
         #: Is true if during BEL Parsing, a term that is not part of a relation is found

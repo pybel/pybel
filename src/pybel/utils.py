@@ -6,6 +6,7 @@ from configparser import ConfigParser
 
 import networkx as nx
 import requests
+from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 log = logging.getLogger('pybel')
@@ -121,3 +122,11 @@ def list2tuple(l):
         return tuple(list2tuple(e) for e in l)
     else:
         return l
+
+
+def get_version():
+    return get_distribution('pybel').version
+
+
+def tokenize_version(version_string):
+    return tuple(map(int, version_string.split('.')[0:3]))

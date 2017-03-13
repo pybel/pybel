@@ -25,13 +25,12 @@ import networkx as nx
 import py2neo
 import requests
 from networkx.readwrite.json_graph import node_link_data, node_link_graph
-from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node, calculate_canonical_name
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
 from .graph import BELGraph
-from .utils import flatten_dict, flatten_graph_data, list2tuple
+from .utils import flatten_dict, flatten_graph_data, list2tuple, tokenize_version
 
 try:
     import cPickle as pickle
@@ -46,8 +45,12 @@ __all__ = [
     'to_bytes',
     'from_bytes',
     'from_pickle',
+    'to_json_dict',
+    'from_json_dict',
     'to_json',
     'from_json',
+    'to_jsons',
+    'from_jsons'
     'to_graphml',
     'to_csv',
     'to_neo4j'
@@ -56,20 +59,19 @@ __all__ = [
 log = logging.getLogger('pybel')
 
 
-def tokenize_version(version_string):
-    return tuple(version_string.split('.')[0:3])
-
-
 def ensure_version(graph, check_version=True):
-    """Ensure that the graph was produced on this version of python (disregard dev tags)
+    """Ensure that the graph was produced by a minimum of PyBEL v0.4.1, which was the last release with a change
+    in the data structure
 
-    TODO: in the future, just check that the minor versions are the same,
-    because development won't be changing the data structure so much
+    :param graph: A BEL Graph
+    :type graph: BELGraph
+    :param check_version: Should the version be checked, or should the graph just be returned without inspection
+    :type check_version: bool
     """
-    current_version = tokenize_version(get_distribution('pybel').version)
+    minimum_version = (0, 4, 1)
     graph_version = tokenize_version(graph.pybel_version)
-    if check_version and current_version != graph_version:
-        raise ValueError('Using version {}, tried importing from version {}'.format(current_version, graph_version))
+    if check_version and graph_version < minimum_version:
+        raise ValueError('Tried importing from version {}. Need at least'.format(graph_version, minimum_version))
     return graph
 
 
