@@ -41,8 +41,8 @@ log = logging.getLogger(__name__)
 class BELGraph(nx.MultiDiGraph):
     """The BELGraph class is a container for BEL networks that is based on the NetworkX MultiDiGraph data structure"""
 
-    def __init__(self, lines=None, manager=None, complete_origin=False, allow_naked_names=False,
-                 allow_nested=False, citation_clearing=True, *attrs, **kwargs):
+    def __init__(self, lines=None, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
+                 *attrs, **kwargs):
         """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
         list of strings.
 
@@ -50,8 +50,6 @@ class BELGraph(nx.MultiDiGraph):
         :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
                         or None to use default cache
         :type manager: str or pybel.manager.CacheManager or pybel.parser.MetadataParser
-        :param complete_origin: add corresponding DNA and RNA entities for all proteins
-        :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
@@ -66,6 +64,7 @@ class BELGraph(nx.MultiDiGraph):
 
         self._warnings = []
         self.graph[GRAPH_PYBEL_VERSION] = get_distribution('pybel').version
+        self.graph[GRAPH_METADATA] = {}
 
         #: Is true if during BEL Parsing, a term that is not part of a relation is found
         self.has_singleton_terms = False
@@ -74,22 +73,23 @@ class BELGraph(nx.MultiDiGraph):
             self.parse_lines(
                 lines,
                 manager=manager,
-                complete_origin=complete_origin,
                 allow_naked_names=allow_naked_names,
                 allow_nested=allow_nested,
                 citation_clearing=citation_clearing
             )
 
-    def parse_lines(self, lines, manager=None, complete_origin=False, allow_naked_names=False, allow_nested=False,
-                    citation_clearing=True):
+    @property
+    def name(self, *attrs):
+        """Gets the graph's name. Requires a weird hack in the signature since it's overriding a property"""
+        return self.graph.get(GRAPH_METADATA, {}).get(METADATA_NAME, '')
+
+    def parse_lines(self, lines, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True):
         """Parses an iterable of lines into this graph
 
         :param lines: iterable over lines of BEL data file
         :param manager: database connection string to cache, pre-built CacheManager, or pre-build MetadataParser, or
                         None for default connection
         :type manager: None or str or :class:`pybel.manager.cache.CacheManager` or :class:`pybel.parser.MetadataParser`
-        :param complete_origin: add corresponding DNA and RNA entities for all proteins
-        :type complete_origin: bool
         :param allow_naked_names: if true, turn off naked namespace failures
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
@@ -113,7 +113,6 @@ class BELGraph(nx.MultiDiGraph):
             annotation_dicts=metadata_parser.annotations_dict,
             namespace_expressions=metadata_parser.namespace_re,
             annotation_expressions=metadata_parser.annotations_re,
-            complete_origin=complete_origin,
             allow_naked_names=allow_naked_names,
             allow_nested=allow_nested,
             citation_clearing=citation_clearing,
@@ -266,7 +265,7 @@ class BELGraph(nx.MultiDiGraph):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
         according to :py:data:`pybel.constants.DOCUMENT_KEYS`
         """
-        return self.graph.get(GRAPH_METADATA, {})
+        return self.graph[GRAPH_METADATA]
 
     @property
     def namespace_url(self):
