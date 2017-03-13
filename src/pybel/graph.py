@@ -81,7 +81,7 @@ class BELGraph(nx.MultiDiGraph):
     @property
     def name(self, *attrs):
         """Gets the graph's name. Requires a weird hack in the signature since it's overriding a property"""
-        return self.graph.get(GRAPH_METADATA, {}).get(METADATA_NAME, '')
+        return self.graph[GRAPH_METADATA].get(METADATA_NAME, '')
 
     def parse_lines(self, lines, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True):
         """Parses an iterable of lines into this graph
