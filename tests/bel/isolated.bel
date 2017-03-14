@@ -1,0 +1,29 @@
+##################################################################################
+# Document Properties Section
+
+SET DOCUMENT Name = "PyBEL Test Document 5"
+SET DOCUMENT Description = "Tests the effect of using isolated nodes in IO"
+SET DOCUMENT Version = "0.1.0"
+SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
+SET DOCUMENT Authors = "Charles Tapley Hoyt"
+SET DOCUMENT Licenses = "WTF License"
+SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+
+##################################################################################
+# Definitions Section
+
+DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns"
+DEFINE NAMESPACE MESHD AS URL "http://resource.belframework.org/belframework/20150611/namespace/mesh-diseases.belns"
+
+##################################################################################
+# Statements Section
+##################################################################################
+
+SET Citation = {"PubMed","That one article from last week","123455"}
+SET Evidence = "These are mostly made up"
+
+# Test that there's an isolated node that makes it
+path(MESHD:Achlorhydria)
+
+# Test an isolated node that gets some extra stuff induced
+complex(p(HGNC:ADGRB1), p(HGNC:ADGRB2))

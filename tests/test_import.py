@@ -23,7 +23,7 @@ class TestThoroughIo(BelReconstitutionMixin):
     def setUpClass(cls):
         @mock_bel_resources
         def help_build_graph(mock):
-            graph = pybel.from_path(test_bel_thorough, complete_origin=False, allow_nested=True)
+            graph = pybel.from_path(test_bel_thorough, allow_nested=True)
             return graph
 
         cls.graph = help_build_graph()
@@ -53,7 +53,7 @@ class TestSlushyIo(BelReconstitutionMixin):
     def setUpClass(cls):
         @mock_bel_resources
         def help_build_graph(mock):
-            graph = pybel.from_path(test_bel_slushy, complete_origin=True)
+            graph = pybel.from_path(test_bel_slushy)
             return graph
 
         cls.graph = help_build_graph()
@@ -85,7 +85,7 @@ class TestSlushyIo(BelReconstitutionMixin):
 class TestImport(BelReconstitutionMixin, unittest.TestCase):
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
-        g = pybel.from_url(Path(test_bel_simple).as_uri(), complete_origin=True)
+        g = pybel.from_url(Path(test_bel_simple).as_uri())
         self.bel_simple_reconstituted(g)
 
 
@@ -132,23 +132,6 @@ class TestFull(TestTokenParserBase):
 
         self.graph = BELGraph()
         self.parser = BelParser(self.graph, namespace_dicts=self.namespaces, annotation_dicts=self.annotations)
-
-    def test_no_add_duplicates(self):
-        s = 'r(TESTNS:1) -> r(TESTNS:2)'
-
-        statements = [
-            SET_CITATION_TEST,
-            test_set_evidence,
-            s
-        ]
-
-        self.parser.complete_origin = True
-
-        self.parser.parse_lines(statements)
-        self.assertEqual(4, self.parser.graph.number_of_nodes())
-
-        self.parser.parseString(s)
-        self.assertEqual(4, self.parser.graph.number_of_nodes())
 
     def test_semantic_failure(self):
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"

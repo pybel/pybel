@@ -3,33 +3,38 @@ from __future__ import print_function
 import itertools as itt
 import logging
 import sys
+import time
 from operator import itemgetter
+
+from pkg_resources import get_distribution
 
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .parser.modifiers import FusionParser
-from .parser.modifiers.fragment import FragmentParser
-from .parser.modifiers.protein_modification import PmodParser
-from .parser.utils import ensure_quotes
+from .parser.modifiers import FragmentParser, FusionParser, PmodParser
+from .utils import ensure_quotes, flatten_citation, sort_edges
 
-__all__ = ['to_bel']
+__all__ = [
+    'to_bel_lines',
+    'to_bel',
+    'to_bel_path'
+]
 
 log = logging.getLogger(__name__)
 
 
 # FIXME remove this, replace with edges_iter
-def get_neighbors_by_path_type(g, v, relation):
+def get_neighbors_by_path_type(graph, node, relation):
     """Gets the set of neighbors of a given node that have a relation of the given type
 
-    :param g: A BEL network
-    :type g: :class:`pybel.BELGraph`
-    :param v: a node from the BEL network
+    :param graph: A BEL network
+    :type graph: BELGraph
+    :param node: a node from the BEL network
     :param relation: the relation to follow from the given node
     :return:
     """
     result = []
-    for neighbor in g.edge[v]:
-        for data in g.edge[v][neighbor].values():
+    for neighbor in graph.edge[node]:
+        for data in graph.edge[node][neighbor].values():
             if data[RELATION] == relation:
                 result.append(neighbor)
     return set(result)
@@ -40,8 +45,8 @@ def postpend_location(s, location_model):
 
     I did this because writing a whole new parsing model for the data would be sad and difficult
 
-    :param s:
-    :type s: BEL string representing node
+    :param s: BEL string representing node
+    :type s: str
     :param location_model:
     :return:
     """
@@ -149,7 +154,7 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
         node_str = "deg({})".format(node_str)
     elif MODIFIER in node_edge_data and ACTIVITY == node_edge_data[MODIFIER]:
         node_str = "act({}".format(node_str)
-        if EFFECT in node_edge_data and node_edge_data[EFFECT]:
+        if EFFECT in node_edge_data and node_edge_data[EFFECT]:  # TODO remove and node_edge_data[EFFECT]
             ma = node_edge_data[EFFECT]
 
             if ma[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
@@ -176,7 +181,7 @@ def decanonicalize_edge(g, u, v, k):
     """Takes two nodes and gives back a BEL string representing the statement
 
     :param g: A BEL graph
-    :type g: :class:`BELGraph`
+    :type g: pybel.BELGraph
     :param u: The edge's source node
     :param v: The edge's target node
     :param k: The edge's key
@@ -192,59 +197,48 @@ def decanonicalize_edge(g, u, v, k):
     return "{} {} {}".format(u_str, ed[RELATION], v_str)
 
 
-def flatten_citation(citation):
-    return ','.join('"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)])
-
-
-def sort_edges(d):
-    return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
-        itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
-
-
-def to_bel(graph, file=None):
-    """Outputs the BEL graph as a canonical BEL Script (.bel)
+def to_bel_lines(graph):
+    """Returns an iterable over the lines of the BEL graph as a canonical BEL Script (.bel)
 
     :param graph: the BEL Graph to output as a BEL Script
     :type graph: BELGraph
-    :param file: a file-like object. If None, defaults to standard out.
-    :type file: file
+    :return: an iterable over the lines of the representative BEL script
+    :rtype: iter
     """
-
-    file = sys.stdout if file is None else file
+    yield '# Output by PyBEL v{} on {}\n'.format(get_distribution('pybel').version, time.asctime())
 
     for k in sorted(graph.document):
-        print('SET DOCUMENT {} = "{}"'.format(INVERSE_DOCUMENT_KEYS[k], graph.document[k]), file=file)
+        yield 'SET DOCUMENT {} = "{}"'.format(INVERSE_DOCUMENT_KEYS[k], graph.document[k])
 
-    print('###############################################\n', file=file)
+    yield '###############################################\n'
 
     if GOCC_KEYWORD not in graph.namespace_url:
         graph.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
 
     for namespace, url in sorted(graph.namespace_url.items(), key=itemgetter(0)):
-        print('DEFINE NAMESPACE {} AS URL "{}"'.format(namespace, url), file=file)
+        yield 'DEFINE NAMESPACE {} AS URL "{}"'.format(namespace, url)
 
     for namespace, url in sorted(graph.namespace_owl.items(), key=itemgetter(0)):
-        print('DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url), file=file)
+        yield 'DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url)
 
     for namespace, pattern in sorted(graph.namespace_pattern.items(), key=itemgetter(0)):
-        print('DEFINE NAMESPACE {} AS PATTERN "{}"'.format(namespace, pattern), file=file)
+        yield 'DEFINE NAMESPACE {} AS PATTERN "{}"'.format(namespace, pattern)
 
-    print('###############################################\n', file=file)
+    yield '###############################################\n'
 
     for annotation, url in sorted(graph.annotation_url.items(), key=itemgetter(0)):
-        print('DEFINE ANNOTATION {} AS URL "{}"'.format(annotation, url), file=file)
+        yield 'DEFINE ANNOTATION {} AS URL "{}"'.format(annotation, url)
 
     for annotation, url in sorted(graph.annotation_owl.items(), key=itemgetter(0)):
-        print('DEFINE ANNOTATION {} AS OWL "{}"'.format(annotation, url), file=file)
+        yield 'DEFINE ANNOTATION {} AS OWL "{}"'.format(annotation, url)
 
     for annotation, pattern in sorted(graph.annotation_pattern.items(), key=itemgetter(0)):
-        print('DEFINE ANNOTATION {} AS PATTERN "{}"'.format(annotation, pattern), file=file)
+        yield 'DEFINE ANNOTATION {} AS PATTERN "{}"'.format(annotation, pattern)
 
-    for annotation, an_list in sorted(graph.annotation_list.items(), key=itemgetter(0)):
-        an_list_str = ', '.join('"{}"'.format(e) for e in an_list)
-        print('DEFINE ANNOTATION {} AS LIST {{{}}}'.format(annotation, an_list_str), file=file)
+    for annotation, values in sorted(graph.annotation_list.items(), key=itemgetter(0)):
+        yield 'DEFINE ANNOTATION {} AS LIST {{{}}}'.format(annotation, ', '.join('"{}"'.format(e) for e in values))
 
-    print('###############################################\n', file=file)
+    yield '###############################################\n'
 
     # sort by citation, then supporting text
     qualified_edges = filter(lambda u_v_k_d: CITATION in u_v_k_d[3] and EVIDENCE in u_v_k_d[3],
@@ -252,38 +246,90 @@ def to_bel(graph, file=None):
     qualified_edges = sorted(qualified_edges, key=lambda u_v_k_d: sort_edges(u_v_k_d[3]))
 
     for citation, citation_edges in itt.groupby(qualified_edges, key=lambda t: flatten_citation(t[3][CITATION])):
-        print('SET Citation = {{{}}}'.format(citation), file=file)
+        yield 'SET Citation = {{{}}}'.format(citation)
 
         for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3][EVIDENCE]):
-            print('SET SupportingText = "{}"'.format(evidence), file=file)
+            yield 'SET SupportingText = "{}"'.format(evidence)
 
             for u, v, k, d in evidence_edges:
                 dkeys = sorted(d[ANNOTATIONS])
                 for dk in dkeys:
-                    print('SET {} = "{}"'.format(dk, d[ANNOTATIONS][dk]), file=file)
-                print(decanonicalize_edge(graph, u, v, k), file=file)
+                    yield 'SET {} = "{}"'.format(dk, d[ANNOTATIONS][dk])
+                yield decanonicalize_edge(graph, u, v, k)
                 if dkeys:
-                    print('UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys)), file=file)
-            print('UNSET SupportingText', file=file)
-        print('\n', file=file)
+                    yield 'UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys))
+            yield 'UNSET SupportingText'
+        yield '\n'
 
-    print('###############################################\n', file=file)
+    yield '###############################################\n'
+    yield 'SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}'
+    yield 'SET Evidence = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
-    print('SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}', file=file)
-    print('SET Evidence = "{}"'.format(PYBEL_AUTOEVIDENCE), file=file)
-
-    for u in graph.nodes_iter():
-        if any(d[RELATION] not in unqualified_edges for v in graph.adj[u] for d in graph.edge[u][v].values()):
-            continue
-
-        print(decanonicalize_node(graph, u), file=file)
-
-    # Can't infer hasMember relationships, but it's not due to specific evidence or citation
     for u, v, d in graph.edges_iter(data=True):
-        if d[RELATION] != HAS_MEMBER:
+        if d[RELATION] not in unqualified_edge_code:
             continue
 
         if EVIDENCE in d:
             continue
 
-        print(decanonicalize_node(graph, u), HAS_MEMBER, decanonicalize_node(graph, v), file=file)
+        yield '{} {} {}'.format(decanonicalize_node(graph, u), d[RELATION], decanonicalize_node(graph, v))
+
+    for node in graph.nodes_iter():
+        if not graph.pred[node] and not graph.succ[node]:
+            yield decanonicalize_node(graph, node)
+
+
+def to_bel(graph, file=None):
+    """Outputs the BEL graph as canonical BEL to the given file/file-like/stream. Defaults to standard out.
+
+    :param graph: the BEL Graph to output as a BEL Script
+    :type graph: BELGraph
+    :param file: a file-like object. If None, defaults to standard out.
+    :type file: file
+    """
+    file = sys.stdout if file is None else file
+    for line in to_bel_lines(graph):
+        print(line, file=file)
+
+
+def to_bel_path(graph, path):
+    """Writes the BEL graph as a canonical BEL Script to the given path
+
+    :param graph: the BEL Graph to output as a BEL Script
+    :type graph: BELGraph
+    :param path: A file path
+    :type path: str
+    """
+    with open(path, 'w') as f:
+        to_bel(graph, f)
+
+
+def calculate_canonical_name(graph, node):
+    """Calculates the canonical name for a given node. If it is a simple node, uses the already given name.
+    Otherwise, it uses the BEL string.
+
+    :param graph: A BEL Graph
+    :type graph: pybel.BELGraph
+    :param node: A node
+    :type node: tuple
+    :return: Canonical node name
+    :rtype: str
+    """
+    data = graph.node[node]
+
+    if data[FUNCTION] == COMPLEX and NAMESPACE in data:
+        return graph.node[node][NAME]
+
+    if VARIANTS in data:
+        return decanonicalize_node(graph, node)
+
+    if FUSION in data:
+        return decanonicalize_node(graph, node)
+
+    if data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
+        return decanonicalize_node(graph, node)
+
+    if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
+        return graph.node[node][NAME]
+
+    raise ValueError('Unexpected node data: {}'.format(data))

@@ -155,16 +155,6 @@ def cartesian_dictionary(d):
     return res
 
 
-def ensure_quotes(s):
-    """Quote a string that isn't solely alphanumeric
-
-    :param s: a string
-    :type s: str
-    :rtype: str
-    """
-    return '"{}"'.format(s) if not s.isalnum() else s
-
-
 def is_int(s):
     """Determines if an object can be cast to an int
 

@@ -17,6 +17,7 @@ class IdentifierParser(BaseParser):
     def __init__(self, namespace_dicts=None, default_namespace=None, namespace_expressions=None,
                  namespace_mappings=None, allow_naked_names=False):
         """Builds a namespace parser.
+
         :param namespace_dicts: dictionary of {namespace: set of names}
         :type namespace_dicts: dict
         :param namespace_expressions: dictionary of {namespace: regular expression string} to compile
@@ -24,10 +25,9 @@ class IdentifierParser(BaseParser):
         :param default_namespace: set of strings that can be used without a namespace
         :type default_namespace: set of str
         :param namespace_mappings: dictionary of {namespace: {name: (mapped_ns, mapped_name)}}
-        :type namespace_mappings
+        :type namespace_mappings: dict
         :param allow_naked_names: if true, turn off naked namespace failures
         :type allow_naked_names: bool
-        :return:
         """
 
         self.namespace_dict = namespace_dicts

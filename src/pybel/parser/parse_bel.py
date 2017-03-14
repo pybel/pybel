@@ -48,8 +48,8 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 class BelParser(BaseParser):
     def __init__(self, graph, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
-                 namespace_expressions=None, annotation_expressions=None, complete_origin=False,
-                 allow_naked_names=False, allow_nested=False, citation_clearing=True, autostreamline=False):
+                 namespace_expressions=None, annotation_expressions=None, allow_naked_names=False, allow_nested=False,
+                 citation_clearing=True, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: The BEL Graph to use to store the network
@@ -69,8 +69,6 @@ class BelParser(BaseParser):
         :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_mappings: dict
-        :param complete_origin: If true, infer the RNA and Gene origins of unmodified proteins
-        :type complete_origin: bool
         :param allow_naked_names: If true, turn off naked namespace failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_naked_names: bool
@@ -84,7 +82,6 @@ class BelParser(BaseParser):
 
         self.graph = graph
         self.allow_nested = allow_nested
-        self.complete_origin = complete_origin
 
         self.control_parser = ControlParser(
             annotation_dicts=annotation_dicts,
@@ -98,6 +95,8 @@ class BelParser(BaseParser):
             namespace_mappings=namespace_mappings,
             allow_naked_names=allow_naked_names
         )
+
+        self.has_singleton_terms = False
 
         # TODO replace with:
         # identifier = self.identifier_parser.as_group()
@@ -395,22 +394,43 @@ class BelParser(BaseParser):
 
         self.biomarker = triple(self.bel_term, biomarker_tags, self.process)
 
+        has_variant_tags = oneOf(['hasVariant'])
+        self.has_variant_relation = triple(self.abundance, has_variant_tags, self.abundance)
+
+        part_of_reaction_tags = oneOf(['hasReactant', 'hasProduct'])
+        self.part_of_reaction = triple(self.reaction, part_of_reaction_tags, self.abundance)
+
         self.relation = MatchFirst([
             self.bel_to_bel,
-            self.has_member,
-            self.has_component,
+            #self.has_member,
+            #self.has_component,
             self.subprocess_of,
             self.rate_limit,
             self.biomarker,
             self.transcribed,
             self.translated,
+            #self.has_variant_relation,
+            #self.part_of_reaction,
         ])
 
         self.relation.setParseAction(self.handle_relation)
 
+        self.unqualified_relation = MatchFirst([
+            self.has_member,
+            self.has_component,
+            self.has_variant_relation,
+            self.part_of_reaction
+        ])
+
+        self.unqualified_relation.setParseAction(self.handle_unqualified_relation)
+
         #: 3.1 Causal Relationships - nested. Explicitly not supported because of ambiguity
-        causal_relation_tags = MatchFirst([increases_tag, decreases_tag,
-                                           directly_decreases_tag, directly_increases_tag])
+        causal_relation_tags = MatchFirst([
+            increases_tag,
+            decreases_tag,
+            directly_decreases_tag,
+            directly_increases_tag
+        ])
 
         self.nested_causal_relationship = triple(self.bel_term, causal_relation_tags,
                                                  nest(triple(self.bel_term, causal_relation_tags, self.bel_term)))
@@ -418,9 +438,14 @@ class BelParser(BaseParser):
         self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
-        self.relation = MatchFirst([self.has_members, self.nested_causal_relationship, self.relation])
+        self.relation = MatchFirst([
+            self.has_members,
+            self.nested_causal_relationship,
+            self.relation,
+            self.unqualified_relation
+        ])
 
-        self.statement = self.relation | self.bel_term.setParseAction(self.handle_term)
+        self.statement = self.relation | self.bel_term.copy().setParseAction(self.handle_term_singleton)
         self.language = self.control_parser.language | self.statement
         self.language.setName('BEL')
 
@@ -494,6 +519,13 @@ class BelParser(BaseParser):
         self.ensure_node(tokens)
         return tokens
 
+    def handle_term_singleton(self, s, l, tokens):
+        """This function wraps self.handle_term but is only used for top-level parsing of bel_terms. This is done
+        solely to keep track of if a graph has any singletons"""
+        self.has_singleton_terms = True
+        log.warning('Added singleton line: %s', s)
+        return self.handle_term(s, l, tokens)
+
     def check_required_annotations(self, s):
         """Checks that the control parser has a citation and evidence before adding an edge"""
         if not self.control_parser.citation:
@@ -510,9 +542,9 @@ class BelParser(BaseParser):
 
         return tokens
 
-    def build_attrs(self, attrs=None, list_attrs=None):
-        attrs = {} if attrs is None else attrs
-        list_attrs = {} if list_attrs is None else list_attrs
+    def _build_attrs(self):
+        attrs = {}
+        list_attrs = {}
 
         for annotation_name, annotation_entry in self.control_parser.annotations.copy().items():
             if isinstance(annotation_entry, set):
@@ -528,7 +560,7 @@ class BelParser(BaseParser):
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
 
-        attrs, list_attrs = self.build_attrs()
+        attrs, list_attrs = self._build_attrs()
 
         q = {
             RELATION: tokens[RELATION],
@@ -550,31 +582,25 @@ class BelParser(BaseParser):
 
             self.graph.add_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
             if tokens[RELATION] in TWO_WAY_RELATIONS:
-                self.add_reverse_edge(sub, obj, q, **{ANNOTATIONS: annots})
+                self.add_reverse_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
 
         return tokens
 
-    def add_reverse_edge(self, sub, obj, attrs, **single_annotation):
-        new_attrs = {k: v for k, v in attrs.items() if k not in {SUBJECT, OBJECT}}
-        attrs_subject, attrs_object = attrs.get(SUBJECT), attrs.get(OBJECT)
+    def handle_unqualified_relation(self, s, l, tokens):
+        sub = self.ensure_node(tokens[SUBJECT])
+        obj = self.ensure_node(tokens[OBJECT])
+        rel = tokens[RELATION]
+        self.graph.add_unqualified_edge(sub, obj, rel)
+
+    def add_reverse_edge(self, sub, obj, attr_dict, **attr):
+        new_attrs = {k: v for k, v in attr_dict.items() if k not in {SUBJECT, OBJECT}}
+        attrs_subject, attrs_object = attr_dict.get(SUBJECT), attr_dict.get(OBJECT)
         if attrs_subject:
             new_attrs[OBJECT] = attrs_subject
         if attrs_object:
             new_attrs[SUBJECT] = attrs_object
 
-        self.graph.add_edge(obj, sub, attr_dict=new_attrs, **single_annotation)
-
-    '''
-    # TODO replace with pybel.BELGraph.add_unqualified_edge
-    #def add_unqualified_edge(self, u, v, relation):
-    #    """Adds unique edge that has no annotations
-
-        :param u: source node
-        :param v: target node
-        :param relation: relationship label
-        """
-        self.graph.add_unqualified_edge(u, v, relation)
-    '''
+        self.graph.add_edge(obj, sub, attr_dict=new_attrs, **attr)
 
     def _ensure_reaction(self, name, tokens):
         self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
@@ -619,28 +645,10 @@ class BelParser(BaseParser):
 
     def _ensure_rna(self, name, tokens):
         self._ensure_simple_abundance(name, tokens)
-
-        if not self.complete_origin:
-            return name
-
-        gene_tokens = deepcopy(tokens)
-        gene_tokens[FUNCTION] = GENE
-        gene_name = self.ensure_node(gene_tokens)
-
-        self.graph.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
         return name
 
     def _ensure_protein(self, name, tokens):
         self._ensure_simple_abundance(name, tokens)
-
-        if not self.complete_origin:
-            return name
-
-        rna_tokens = deepcopy(tokens)
-        rna_tokens[FUNCTION] = RNA
-        rna_name = self.ensure_node(rna_tokens)
-
-        self.graph.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
         return name
 
     def ensure_node(self, tokens):
@@ -850,7 +858,9 @@ def canonicalize_modifier(tokens):
 
     elif tokens[MODIFIER] == ACTIVITY:
         attrs[MODIFIER] = tokens[MODIFIER]
-        attrs[EFFECT] = {} if EFFECT not in tokens else dict(tokens[EFFECT])
+
+        if EFFECT in tokens:
+            attrs[EFFECT] = dict(tokens[EFFECT])
 
     elif tokens[MODIFIER] == TRANSLOCATION:
         attrs[MODIFIER] = tokens[MODIFIER]
