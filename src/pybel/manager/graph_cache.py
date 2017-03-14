@@ -177,6 +177,7 @@ class GraphCacheManager(BaseCacheManager):
 
             if VARIANTS in node_data or FUSION in node_data:
                 result.modification = True
+                result.fusion = True if FUSION in node_data else False
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
@@ -433,7 +434,7 @@ class GraphCacheManager(BaseCacheManager):
                     'modifier': modifier
                 }
 
-                if modifier in (ACTIVITY, TRANSLOCATION):
+                if modifier in (ACTIVITY, TRANSLOCATION) and EFFECT in participant_data:
                     for effect_type, effect_value in participant_data[EFFECT].items():
                         property_dict['relativeKey'] = effect_type
                         if NAMESPACE in effect_value:
@@ -458,7 +459,9 @@ class GraphCacheManager(BaseCacheManager):
             property = self.session.query(models.Property).filter_by(**property_def).one_or_none()
             if not property:
                 property = models.Property(**property_def)
-            properties.append(property)
+
+            if property not in properties:
+                properties.append(property)
             # properties = [models.Property(**property_def) for property_def in property_list]
 
         return properties

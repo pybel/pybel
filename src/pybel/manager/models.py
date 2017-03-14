@@ -14,6 +14,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 from ..constants import *
+from ..parser.modifiers.fragment import FragmentParser
+from ..parser.modifiers.fusion import FusionParser
+from ..parser.modifiers.protein_modification import PmodParser
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
@@ -92,7 +95,10 @@ class NamespaceEntry(Base):
     equivalence = relationship('NamespaceEntryEquivalence', back_populates='members')
 
     def forGraph(self):
-        return {NAMESPACE: self.namespace.keyword, NAME: self.name}
+        return {
+            NAMESPACE: self.namespace.keyword,
+            NAME: self.name
+        }
 
 
 class NamespaceEntryEquivalence(Base):
@@ -275,6 +281,7 @@ class Node(Base):
     namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
     namespacePattern = Column(String(255), nullable=True)
     modification = Column(Boolean, default=False)
+    fusion = Column(Boolean, default=False)
 
     bel = Column(String, nullable=False)
     blob = Column(Binary)
@@ -292,20 +299,18 @@ class Node(Base):
             node_key.append(namespace_entry[NAMESPACE])
             node_key.append(namespace_entry[NAME])
 
-        if self.type == FUSION:
-            fus = self.modifications[0].forGraph()
-            node_data.update(fus[-1])
-            del (fus[-1])
-            for entry in fus:
-                node_key.append(entry)
-
         elif self.modification:
-            node_data[VARIANTS] = []
-            for mod in self.modifications:
-                mod_tuple = tuple(mod.forGraph())
-                node_data[VARIANTS].append(mod_tuple)
-                node_key.append(mod_tuple)
-            node_data[VARIANTS] = tuple(node_data[VARIANTS])
+            if self.fusion:
+                mod = self.modifications[0].forGraph()
+                node_data[FUSION] = mod['mod_data']
+                [node_key.append(key_element) for key_element in mod['mod_key']]
+            else:
+                node_data[VARIANTS] = []
+                for modification in self.modifications:
+                    mod = modification.forGraph()
+                    node_data[VARIANTS].append(mod['mod_data'])
+                    node_key.append(tuple(mod['mod_key']))
+                    # node_data[VARIANTS] = tuple(node_data[VARIANTS])
 
         return {'key': tuple(node_key), 'data': node_data}
 
@@ -344,51 +349,96 @@ class Modification(Base):
     nodes = relationship("Node", secondary=node_modification)
 
     def forGraph(self):
-        mod_dict = {KIND: self.modType}
-        if self.pmodName:
-            mod_dict[IDENTIFIER] = {
-                NAMESPACE: 'PYBEL',
-                NAME: self.pmodName
-            }
-        if self.aminoA:
-            mod_dict['code'] = self.aminoA
-        if self.position:
-            mod_dict['pos'] = self.position
+        """Recreates a modification dictionary for PyBEL.BELGraph.
 
-        return mod_dict
+            :return: Dictionary that describes a variant or a fusion.
+            :rtype: dict
+        """
+        mod_dict = {}
+        mod_key = []
+        if self.modType == FUSION:
+            mod_dict.update({
+                PARTNER_3P: self.p3Partner.forGraph(),
+                PARTNER_5P: self.p5Partner.forGraph(),
+                RANGE_3P: {},
+                RANGE_5P: {}
+            })
 
-    def old_forGraph(self):
-        mod_array = [self.modType]
+            mod_key.append((mod_dict[PARTNER_5P][NAMESPACE], mod_dict[PARTNER_5P][NAME],))
 
-        if self.modType == 'ProteinFusion':
-            mod_dict = {}
-            if self.p5Partner:
-                p5 = self.p5Partner.forGraph()
-                mod_array.append((p5['namespace'], p5['name']))
-                mod_dict['partner_5p'] = p5
-            if self.p5range:
-                mod_array.append((self.p5Range,))
-                mod_dict['range_5p'] = (self.p5Range,)
-            if self.p3Partner:
-                p3 = self.p3Partner.forGraph()
-                mod_array.append((p3['namespace'], p3['name']))
-                mod_dict['partner_3p'] = p3
-            if self.p3Range:
-                mod_array.append((self.p3Range,))
-                mod_dict['range_3p'] = (self.p3Range,)
-            mod_array.append(mod_dict)
+            if self.p5Missing:
+                mod_dict[RANGE_5P][FusionParser.MISSING] = self.p5Missing
+                mod_key.append((self.p5Missing,))
 
-        elif self.modType == 'ProteinModification':
-            mod_array.append(self.pmodName)
-            if self.aminoA:
-                mod_array.append(self.aminoA)
-            if self.position:
-                mod_array.append(self.position)
+            else:
+                mod_dict[RANGE_5P].update({
+                    FusionParser.REFERENCE: self.p5Reference,
+                    FusionParser.START: self.p5Start,
+                    FusionParser.STOP: self.p5Stop
+                })
+                mod_key.append((self.p5Reference, self.p5Start, self.p5Stop,))
 
-        elif self.modType in ('Variant', 'GeneModificaiton'):
-            mod_array.append(self.variantString)
+            mod_key.append((mod_dict[PARTNER_3P][NAMESPACE], mod_dict[PARTNER_3P][NAME],))
 
-        return mod_array
+            if self.p3Missing:
+                mod_dict[RANGE_3P][FusionParser.MISSING] = self.p3Missing
+                mod_key.append((self.p3Missing,))
+
+            else:
+                mod_dict[RANGE_3P].update({
+                    FusionParser.REFERENCE: self.p3Reference,
+                    FusionParser.START: self.p3Start,
+                    FusionParser.STOP: self.p3Stop
+                })
+                mod_key.append((self.p3Reference, self.p3Start, self.p3Stop,))
+
+
+        else:
+            mod_dict[KIND] = self.modType
+            mod_key.append(self.modType)
+            if self.modType == HGVS:
+                mod_dict[IDENTIFIER] = self.variantString
+
+            elif self.modType == FRAGMENT:
+                if self.p3Missing:
+                    mod_dict[FragmentParser.MISSING] = self.p3Missing
+                    mod_key.append(self.p3Missing)
+                else:
+                    mod_dict.update({
+                        FragmentParser.START: self.p3Start,
+                        FragmentParser.STOP: self.p3Stop
+                    })
+                    mod_key.append((self.p3Start, self.p3Stop,))
+
+            elif self.modType == GMOD:
+                mod_dict.update({
+                    IDENTIFIER: {
+                        NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                        NAME: self.modName
+                    }
+                })
+                mod_key.append((BEL_DEFAULT_NAMESPACE, self.modName,))
+
+            elif self.modType == PMOD:
+                mod_dict.update({
+                    IDENTIFIER: {
+                        NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                        NAME: self.modName
+                    }
+                })
+                mod_key.append((BEL_DEFAULT_NAMESPACE, self.modName,))
+                if self.aminoA:
+                    mod_dict[PmodParser.CODE] = self.aminoA
+                    mod_key.append(self.aminoA)
+
+                if self.position:
+                    mod_dict[PmodParser.POSITION] = self.position
+                    mod_key.append(self.position)
+
+        return {
+            'mod_data': mod_dict,
+            'mod_key': mod_key
+        }
 
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
@@ -427,6 +477,11 @@ class Citation(Base):
 
 
     def forGraph(self):
+        """Creates a citation dictionary that is used to recreate the edge data dictionary of a PyBEL.BELGraph.
+
+            :return: Citation dictionary for the recreation of a PyBEL.BELGraph.
+            :rtype: dict
+        """
         citation_dict = {
             CITATION_NAME: self.name,
             CITATION_REFERENCE: self.reference,
@@ -456,6 +511,11 @@ class Evidence(Base):
         return '{}'.format(self.text)
 
     def forGraph(self):
+        """Creates a dictionary that is used to recreate the edge data dictionary for a PyBEL.BELGraph.
+
+            :return: Dictionary containing citation and evidence for a PyBEL.BELGraph edge.
+            :rtype: dict
+        """
         return {
             CITATION: self.citation.forGraph(),
             EVIDENCE: self.text
@@ -496,6 +556,12 @@ class Edge(Base):
     blob = Column(Binary)
 
     def forGraph(self):
+        """Creates a dictionary of one BEL Edge that can be used to create an edge in a PyBEL.BELGraph.
+
+            :return: Dictionary that contains information about an edge of a PyBEL.BELGraph. Including participants
+                     and edge data informations.
+            :rtype: dict
+        """
         source_node = self.source.forGraph()
         target_node = self.target.forGraph()
         edge_dict = {
@@ -542,6 +608,11 @@ class Property(Base):
     edges = relationship("Edge", secondary=edge_property)
 
     def forGraph(self):
+        """Creates a property dict that is used to recreate an edge dictionary for PyBEL.BELGraph.
+
+            :return: Property-Dict of an edge that is participant (sub/obj) related.
+            :rtype: dict
+        """
         prop_dict = {
             'data': {
                 self.participant: {
