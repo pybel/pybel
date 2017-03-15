@@ -41,7 +41,7 @@ def get_neighbors_by_path_type(graph, node, relation):
 
 
 def postpend_location(s, location_model):
-    """Rips off the closing parentheses and adds canonicalized modification.
+    """Rips off the closing parentheses and adds canonicalized is_variant.
 
     I did this because writing a whole new parsing model for the data would be sad and difficult
 

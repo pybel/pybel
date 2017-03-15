@@ -94,7 +94,8 @@ class NamespaceEntry(Base):
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
     equivalence = relationship('NamespaceEntryEquivalence', back_populates='members')
 
-    def as_dict(self):
+    @property
+    def data(self):
         return {
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
@@ -149,9 +150,6 @@ class AnnotationEntry(Base):
 
     annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
     annotation = relationship('Annotation', back_populates='entries')
-
-    def forGraph(self):
-        return {self.annotation.keyword: self.name}
 
 
 owl_namespace_relationship = Table(
@@ -279,8 +277,8 @@ class Node(Base):
     type = Column(String(255), nullable=False)
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
-    namespacePattern = Column(String(255), nullable=True)
-    modification = Column(Boolean, default=False)
+    namespacePattern = Column(String(255), nullable=True, doc="Contains regex pattern for value identification.")
+    is_variant = Column(Boolean, default=False)
     fusion = Column(Boolean, default=False)
 
     bel = Column(String, nullable=False)
@@ -288,37 +286,37 @@ class Node(Base):
 
     modifications = relationship("Modification", secondary=node_modification)
 
-    def as_dict(self):
+    @property
+    def data(self):
         node_key = [self.type]
         node_data = {
             FUNCTION: self.type,
         }
         if self.namespaceEntry:
-            namespace_entry = self.namespaceEntry.as_dict()
+            namespace_entry = self.namespaceEntry.data
             node_data.update(namespace_entry)
             node_key.append(namespace_entry[NAMESPACE])
             node_key.append(namespace_entry[NAME])
 
-        elif self.modification:
+        elif self.is_variant:
             if self.fusion:
-                mod = self.modifications[0].as_dict()
+                mod = self.modifications[0].data
                 node_data[FUSION] = mod['mod_data']
                 [node_key.append(key_element) for key_element in mod['mod_key']]
             else:
                 node_data[VARIANTS] = []
                 for modification in self.modifications:
-                    mod = modification.as_dict()
+                    mod = modification.data
                     node_data[VARIANTS].append(mod['mod_data'])
                     node_key.append(tuple(mod['mod_key']))
-                    # node_data[VARIANTS] = tuple(node_data[VARIANTS])
 
         return {'key': tuple(node_key), 'data': node_data}
 
 
 class Modification(Base):
     """The modifications that are present in the network are stored in this table."""
-
     __tablename__ = MODIFICATION_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     modType = Column(String(255))
@@ -331,7 +329,6 @@ class Modification(Base):
     p3Start = Column(String(255), nullable=True)
     p3Stop = Column(String(255), nullable=True)
     p3Missing = Column(String(10), nullable=True)
-    # p3Range = Column(String(255), nullable=True)
 
     p5PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     p5Partner = relationship("NamespaceEntry", foreign_keys=[p5PartnerName_id])
@@ -340,26 +337,27 @@ class Modification(Base):
     p5Start = Column(String(255), nullable=True)
     p5Stop = Column(String(255), nullable=True)
     p5Missing = Column(String(10), nullable=True)
-    # p5Range = Column(String(255), nullable=True)
 
+    modNamespace = Column(String(255), nullable=True)
     modName = Column(String(255), nullable=True)
     aminoA = Column(String(3), nullable=True)
     position = Column(Integer, nullable=True)
 
     nodes = relationship("Node", secondary=node_modification)
 
-    def as_dict(self):
-        """Recreates a modification dictionary for PyBEL.BELGraph.
+    @property
+    def data(self):
+        """Recreates a is_variant dictionary for PyBEL.BELGraph.
 
-            :return: Dictionary that describes a variant or a fusion.
-            :rtype: dict
+        :return: Dictionary that describes a variant or a fusion.
+        :rtype: dict
         """
         mod_dict = {}
         mod_key = []
         if self.modType == FUSION:
             mod_dict.update({
-                PARTNER_3P: self.p3Partner.as_dict(),
-                PARTNER_5P: self.p5Partner.as_dict(),
+                PARTNER_3P: self.p3Partner.data,
+                PARTNER_5P: self.p5Partner.data,
                 RANGE_3P: {},
                 RANGE_5P: {}
             })
@@ -413,20 +411,20 @@ class Modification(Base):
             elif self.modType == GMOD:
                 mod_dict.update({
                     IDENTIFIER: {
-                        NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                        NAMESPACE: self.modNamespace,
                         NAME: self.modName
                     }
                 })
-                mod_key.append((BEL_DEFAULT_NAMESPACE, self.modName,))
+                mod_key.append((self.modNamespace, self.modName,))
 
             elif self.modType == PMOD:
                 mod_dict.update({
                     IDENTIFIER: {
-                        NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                        NAMESPACE: self.modNamespace,
                         NAME: self.modName
                     }
                 })
-                mod_key.append((BEL_DEFAULT_NAMESPACE, self.modName,))
+                mod_key.append((self.modNamespace, self.modName,))
                 if self.aminoA:
                     mod_dict[PmodParser.CODE] = self.aminoA
                     mod_key.append(self.aminoA)
@@ -440,6 +438,7 @@ class Modification(Base):
             'mod_key': mod_key
         }
 
+
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
     Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME))),
@@ -449,13 +448,12 @@ author_citation = Table(
 
 class Author(Base):
     """Contains all author names."""
-
     __tablename__ = AUTHOR_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
 
     citations = relationship("Citation", secondary=author_citation)
-
 
 
 class Citation(Base):
@@ -467,7 +465,6 @@ class Citation(Base):
     name = Column(String(255), nullable=False)
     reference = Column(String(255), nullable=False)
     date = Column(Date, nullable=True)
-    comments = Column(String(255), nullable=True)
 
     authors = relationship("Author", secondary=author_citation)
     evidences = relationship("Evidence", back_populates='citation')
@@ -476,11 +473,12 @@ class Citation(Base):
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
     )
 
-    def as_dict(self):
+    @property
+    def data(self):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a PyBEL.BELGraph.
 
-            :return: Citation dictionary for the recreation of a PyBEL.BELGraph.
-            :rtype: dict
+        :return: Citation dictionary for the recreation of a PyBEL.BELGraph.
+        :rtype: dict
         """
         citation_dict = {
             CITATION_NAME: self.name,
@@ -488,36 +486,32 @@ class Citation(Base):
             CITATION_TYPE: self.type
         }
         if self.authors:
-            citation_dict[CITATION_AUTHORS] = "|".join([author.name for author in self.authors])
+            citation_dict[CITATION_AUTHORS] = "|".join(author.name for author in self.authors)
         if self.date:
             citation_dict[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
-        if self.comments:
-            citation_dict[CITATION_COMMENTS] = self.comments
 
         return citation_dict
 
 
 class Evidence(Base):
     """This table contains the evidence text that proves a specific relationship and refers the source that is cited."""
-
     __tablename__ = EVIDENCE_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
     text = Column(String, nullable=False, index=True)
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation', back_populates='evidences')
 
-    def __repr__(self):
-        return '{}'.format(self.text)
-
-    def as_dict(self):
+    @property
+    def data(self):
         """Creates a dictionary that is used to recreate the edge data dictionary for a PyBEL.BELGraph.
 
-            :return: Dictionary containing citation and evidence for a PyBEL.BELGraph edge.
-            :rtype: dict
+        :return: Dictionary containing citation and evidence for a PyBEL.BELGraph edge.
+        :rtype: dict
         """
         return {
-            CITATION: self.citation.as_dict(),
+            CITATION: self.citation.data,
             EVIDENCE: self.text
         }
 
@@ -531,8 +525,8 @@ edge_property = Table(
 
 class Edge(Base):
     """Relationships are represented in this table. It shows the nodes that are in a relation to eachother and provides
-    information about the context of the relation by refaring to the annotation, property and evidence tables."""
-
+    information about the context of the relation by refaring to the annotation, property and evidence tables.
+    """
     __tablename__ = EDGE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -555,15 +549,16 @@ class Edge(Base):
 
     blob = Column(Binary)
 
-    def as_dict(self):
+    @property
+    def data(self):
         """Creates a dictionary of one BEL Edge that can be used to create an edge in a PyBEL.BELGraph.
 
-            :return: Dictionary that contains information about an edge of a PyBEL.BELGraph. Including participants
-                     and edge data informations.
-            :rtype: dict
+        :return: Dictionary that contains information about an edge of a PyBEL.BELGraph. Including participants
+                 and edge data informations.
+        :rtype: dict
         """
-        source_node = self.source.as_dict()
-        target_node = self.target.as_dict()
+        source_node = self.source.data
+        target_node = self.target.data
         edge_dict = {
             'source': {
                 'node': (source_node['key'], source_node['data']),
@@ -578,13 +573,13 @@ class Edge(Base):
             },
             'key': self.graphIdentifier
         }
-        edge_dict['data'].update(self.evidence.as_dict())
+        edge_dict['data'].update(self.evidence.data)
+        edge_dict['data'][ANNOTATIONS] = {}
         if self.annotations:
-            edge_dict['data'][ANNOTATIONS] = {}
             for anno in self.annotations:
-                edge_dict['data'][ANNOTATIONS].update(anno.as_dict())
+                edge_dict['data'][ANNOTATIONS][anno.annotation.keyword] = anno.name
         for prop in self.properties:
-            prop_info = prop.as_dict()
+            prop_info = prop.data
             if prop_info['participant'] in edge_dict['data']:
                 edge_dict['data'][prop_info['participant']].update(prop_info['data'])
             else:
@@ -596,6 +591,7 @@ class Edge(Base):
 class Property(Base):
     """The property table contains additional information that is used to describe the context of a relation."""
     __tablename__ = PROPERTY_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
 
     participant = Column(String(255))
@@ -607,11 +603,12 @@ class Property(Base):
 
     edges = relationship("Edge", secondary=edge_property)
 
-    def as_dict(self):
+    @property
+    def data(self):
         """Creates a property dict that is used to recreate an edge dictionary for PyBEL.BELGraph.
 
-            :return: Property-Dict of an edge that is participant (sub/obj) related.
-            :rtype: dict
+        :return: Property-Dict of an edge that is participant (sub/obj) related.
+        :rtype: dict
         """
         prop_dict = {
             'data': {
@@ -623,77 +620,7 @@ class Property(Base):
         }
         if self.relativeKey:
             prop_dict['data'][EFFECT] = {
-                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.as_dict()
+                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.data
             }
 
         return prop_dict
-
-
-#class Node(Base):
-#    """Represents a BEL Term"""
-#    __tablename__ = NODE_TABLE_NAME
-#
-#    id = Column(Integer, primary_key=True)#
-#
-#    bel = Column(String, nullable=False)
-#    blob = Column(Binary)
-
-
-#class Edge(Base):
-#    """Represents the relation between two BEL terms and its properties"""
-#    __tablename__ = EDGE_TABLE_NAME
-
-#    id = Column(Integer, primary_key=True)
-
-#    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
-#    source = relationship('Node', foreign_keys=[source_id])
-
-#    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
-#    target = relationship('Node', foreign_keys=[target_id])
-
-#    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)))
-#    evidence = relationship("Evidence")
-
-#    annotations = relationship('AnnotationEntry', secondary=edge_annotation)
-
-#    relation = Column(String, nullable=False)
-#    bel = Column(String, nullable=False)
-#    blob = Column(Binary)
-
-
-#class Evidence(Base):
-#    """Represents a piece of support taken from a Publication"""
-#    __tablename__ = EVIDENCE_TABLE_NAME
-#    id = Column(Integer, primary_key=True)
-#    text = Column(String, nullable=False, index=True)
-
-#    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
-#    citation = relationship('Citation')
-
-
-#class Citation(Base):
-#    """The information about the citations that are used to prove a specific relation are stored in this table."""
-#    __tablename__ = CITATION_TABLE_NAME
-
-#    id = Column(Integer, primary_key=True)
-#    type = Column(String(16), nullable=False)
-#    name = Column(String(255), nullable=False)
-#    reference = Column(String(255), nullable=False)
-#    date = Column(Date, nullable=True)
-#    comments = Column(String(255), nullable=True)
-
-#    authors = relationship("Author", secondary=author_citation)
-#
-#    __table_args__ = (
-#        UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
-#    )
-
-
-#class Author(Base):
-#    """Represents an Author of a publication"""
-#    __tablename__ = AUTHOR_TABLE_NAME
-
-#    id = Column(Integer, primary_key=True)
-#    name = Column(String(255), nullable=False)
-
-#    citations = relationship("Citation", secondary=author_citation)

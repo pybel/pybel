@@ -168,9 +168,7 @@ class GraphCacheManager(BaseCacheManager):
                 namespaceEntry = self.get_bel_namespace_entry(url, node_data[NAME])
                 result = models.Node(type=type, namespaceEntry=namespaceEntry, bel=bel, blob=blob)
 
-            # ToDo: Test pattern defined namespaces!
             elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
-                # ToDo: How should we handle pattern namespaces in relational database?
                 namespacePattern = graph.namespace_pattern[node_data[NAMESPACE]]
                 result = models.Node(type=type, namespacePattern=namespacePattern, bel=bel, blob=blob)
 
@@ -178,14 +176,14 @@ class GraphCacheManager(BaseCacheManager):
                 result = models.Node(type=type, bel=bel, blob=blob)
 
             if VARIANTS in node_data or FUSION in node_data:
-                result.modification = True
-                result.fusion = True if FUSION in node_data else False
+                result.is_variant = True
+                result.fusion = FUSION in node_data
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
             self.session.flush()
 
-        return result 
+        return result
 
     def get_or_create_edge(self, graphKey, source, target, evidence, bel, relation, blob):
         """Creates entry for given edge if it does not exist.
@@ -210,15 +208,13 @@ class GraphCacheManager(BaseCacheManager):
         """
         result = self.session.query(models.Edge).filter_by(bel=bel).one_or_none()
 
-        if result:
-            return result
-
-        result = models.Edge(graphIdentifier=graphKey, source=source, target=target, evidence=evidence, bel=bel,
-                             relation=relation, blob=blob)
+        if result is None:
+            result = models.Edge(graphIdentifier=graphKey, source=source, target=target, evidence=evidence, bel=bel,
+                                 relation=relation, blob=blob)
 
         return result
 
-    def get_or_create_citation(self, type, name, reference, date=None, authors=None, comments=None):
+    def get_or_create_citation(self, type, name, reference, date=None, authors=None):
         """Creates entry for given citation if it does not exist.
 
         :param type: Citation type (e.g. PubMed)
@@ -231,8 +227,6 @@ class GraphCacheManager(BaseCacheManager):
         :type date: date
         :param authors: List of authors separated by |
         :type authors: str
-        :param comments: Comments on the citation
-        :type comments: str
         :return: A Citation object
         :rtype: models.Citation
         """
@@ -245,10 +239,7 @@ class GraphCacheManager(BaseCacheManager):
             else:
                 date = None
 
-            if not comments:
-                comments = None
-
-            result = models.Citation(type=type, name=name, reference=reference, date=date, comments=comments)
+            result = models.Citation(type=type, name=name, reference=reference, date=date)
 
             if authors is not None:
                 for author in authors.split('|'):
@@ -269,75 +260,25 @@ class GraphCacheManager(BaseCacheManager):
         """
         result = self.session.query(models.Author).filter_by(name=name).one_or_none()
 
-        if result:
-            return result
-
-        result = models.Author(name=name)
-        self.session.add(result)
+        if result is None:
+            result = models.Author(name=name)
+            self.session.add(result)
 
         return result
 
-    def get_graph_versions(self, name):
-        """Returns all of the versions of a graph with the given name"""
-        return {x for x, in self.session.query(models.Network.version).filter(models.Network.name == name).all()}
-
-    def get_graph(self, name, version=None):
-        """Loads most recent graph, or allows for specification of version
-
-        :param name: The name of the graph
-        :type name: str
-        :param version: The version string of the graph. If not specified, loads most recent graph added with this name
-        :type version: None or str
-        :return: A BEL Graph
-        :rtype: pybel.BELGraph
-        """
-        if version is not None:
-            n = self.session.query(models.Network).filter(models.Network.name == name,
-                                                          models.Network.version == version).one()
-        else:
-            n = self.session.query(models.Network).filter(models.Network.name == name).order_by(
-                models.Network.created.desc()).first()
-
-        return from_bytes(n.blob)
-
-    def get_graph_by_id(self, id):
-        """Gets the graph from the database by its identifier
-
-        :param id: The graph's database ID
-        :type id: int
-        :return: A Network object
-        :rtype: models.Network
-        """
-        return self.session.query(models.Network).get(id)
-
-    def drop_graph(self, network_id):
-        """Drops a graph by ID
-
-        :param network_id: The network's database id
-        :type network_id: int
-        """
-
-        # TODO delete with cascade
-        self.session.query(models.Network).filter(models.Network.id == network_id).delete()
-        self.session.commit()
-
-    def ls(self):
-        """Lists network id, network name, and network version triples"""
-        return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
-
     def get_or_create_modification(self, graph, node_data):
-        """Creates a list of modification object (models.Modification) that belong to the node described by
+        """Creates a list of is_variant object (models.Modification) that belong to the node described by
         node_data.
 
         :param graph: a BEL network
         :type graph: :class:`pybel.BELGraph`
-        :param node_data: Describes the given node and contains modification information
+        :param node_data: Describes the given node and contains is_variant information
         :type node_data: dict
         :return:
         :rtype: list
         """
         modification_list = []
-        if FUSION in node_data:  # node_data['type'] == 'ProteinFusion':
+        if FUSION in node_data:
             modType = FUSION
             node_data = node_data[FUSION]
             p3namespace_url = graph.namespace_url[node_data[PARTNER_3P][NAMESPACE]]
@@ -433,59 +374,106 @@ class GraphCacheManager(BaseCacheManager):
         properties = []
         property_list = []
         for participant in (SUBJECT, OBJECT):
-            if participant in edge_data:
-                participant_data = edge_data[participant]
-                modifier = participant_data[MODIFIER] if MODIFIER in participant_data else LOCATION
-                property_dict = {
-                    'participant': participant,
-                    'modifier': modifier
-                }
+            if participant not in edge_data:
+                continue
 
-                if modifier in (ACTIVITY, TRANSLOCATION) and EFFECT in participant_data:
-                    for effect_type, effect_value in participant_data[EFFECT].items():
-                        property_dict['relativeKey'] = effect_type
-                        if NAMESPACE in effect_value:
-                            if effect_value[NAMESPACE] == GOCC_KEYWORD:
-                                namespace_url = GOCC_LATEST
-                            else:
-                                namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
-                            property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
-                                                                                           effect_value[NAME])
+            participant_data = edge_data[participant]
+            modifier = participant_data[MODIFIER] if MODIFIER in participant_data else LOCATION
+            property_dict = {
+                'participant': participant,
+                'modifier': modifier
+            }
+
+            if modifier in (ACTIVITY, TRANSLOCATION) and EFFECT in participant_data:
+                for effect_type, effect_value in participant_data[EFFECT].items():
+                    property_dict['relativeKey'] = effect_type
+                    if NAMESPACE in effect_value:
+                        if effect_value[NAMESPACE] == GOCC_KEYWORD:
+                            namespace_url = GOCC_LATEST
                         else:
-                            property_dict['propValue'] = effect_value
+                            namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
+                        property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
+                                                                                       effect_value[NAME])
+                    else:
+                        property_dict['propValue'] = effect_value
 
-                        property_list.append(property_dict)
-
-                elif modifier == LOCATION:
-                    namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
-                    property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
-                                                                                   participant_data[LOCATION][NAME])
                     property_list.append(property_dict)
 
-                else:
-                    property_list.append(property_dict)
+            elif modifier == LOCATION:
+                namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
+                property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
+                                                                               participant_data[LOCATION][NAME])
+                property_list.append(property_dict)
+
+            else:
+                property_list.append(property_dict)
 
         for property_def in property_list:
             property = self.session.query(models.Property).filter_by(**property_def).one_or_none()
-            if not property:
+            if property is None:
                 property = models.Property(**property_def)
 
             if property not in properties:
                 properties.append(property)
-            # properties = [models.Property(**property_def) for property_def in property_list]
 
         return properties
 
-    def rebuild_by_edge_filter(self, annotation_dict):
+    def get_graph_versions(self, name):
+        """Returns all of the versions of a graph with the given name"""
+        return {x for x, in self.session.query(models.Network.version).filter(models.Network.name == name).all()}
+
+    def get_graph(self, name, version=None):
+        """Loads most recent graph, or allows for specification of version
+
+        :param name: The name of the graph
+        :type name: str
+        :param version: The version string of the graph. If not specified, loads most recent graph added with this name
+        :type version: None or str
+        :return: A BEL Graph
+        :rtype: pybel.BELGraph
+        """
+        if version is not None:
+            n = self.session.query(models.Network).filter(models.Network.name == name,
+                                                          models.Network.version == version).one()
+        else:
+            n = self.session.query(models.Network).filter(models.Network.name == name).order_by(
+                models.Network.created.desc()).first()
+
+        return from_bytes(n.blob)
+
+    def get_graph_by_id(self, id):
+        """Gets the graph from the database by its identifier
+
+        :param id: The graph's database ID
+        :type id: int
+        :return: A Network object
+        :rtype: models.Network
+        """
+        return self.session.query(models.Network).get(id)
+
+    def drop_graph(self, network_id):
+        """Drops a graph by ID
+
+        :param network_id: The network's database id
+        :type network_id: int
+        """
+
+        # TODO delete with cascade
+        self.session.query(models.Network).filter(models.Network.id == network_id).delete()
+        self.session.commit()
+
+    def ls(self):
+        """Lists network id, network name, and network version triples"""
+        return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
+
+    def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
 
-        :param annotation_dict: annotation/value pairs to filter edges
-        :type annotation_dict: dict
         :return: A graph composed of the filtered edges
         :rtype: BELGraph
         """
         graph = BELGraph()
-        for annotation_key, annotation_value in annotation_dict.items():
+        for annotation_key, annotation_value in annotations.items():
 
             annotation_def = self.session.query(models.Annotation).filter_by(keyword=annotation_key).first()
             annotation = self.session.query(models.AnnotationEntry).filter_by(annotation=annotation_def,
@@ -495,17 +483,17 @@ class GraphCacheManager(BaseCacheManager):
             # What about meta information?
             edges = self.session.query(models.Edge).filter(models.Edge.annotations.contains(annotation)).all()
             for edge in edges:
-                edge_data = edge.as_dict()
+                edge_data = edge.data
 
                 if len(edge_data['source']['key']) == 1:
                     edge_data['source'] = self.help_rebuild_list_components(edge.source)
 
-                elif len(edge_data['target']['key']) == 1:
+                if len(edge_data['target']['key']) == 1:
                     edge_data['target'] = self.help_rebuild_list_components(edge.target)
 
                 graph.add_nodes_from((edge_data['source']['node'], edge_data['target']['node']))
-                graph.add_edge(edge_data['source']['key'], edge_data['target']['key'], edge_data['key'],
-                                  edge_data['data'])
+                graph.add_edge(edge_data['source']['key'], edge_data['target']['key'], key=edge_data['key'],
+                               attr_dict=edge_data['data'])
 
         return graph
 
@@ -516,13 +504,13 @@ class GraphCacheManager(BaseCacheManager):
 
         :return: Dictionary with 'key' and 'node' keys.
         """
-        node_info = node_object.as_dict()
+        node_info = node_object.data
         key = list(node_info['key'])
         data = node_info['data']
         if node_object.type in (COMPLEX, COMPOSITE):
             components = self.session.query(models.Edge).filter_by(source=node_object, relation=HAS_COMPONENT).all()
             for component in components:
-                component_key = component.target.as_dict()['key']
+                component_key = component.target.data['key']
                 key.append(component_key)
 
         elif node_object.type == REACTION:
@@ -530,8 +518,8 @@ class GraphCacheManager(BaseCacheManager):
                                                                             relation=HAS_REACTANT).all()
             product_components = self.session.query(models.Edge).filter_by(source=node_object,
                                                                            relation=HAS_PRODUCT).all()
-            reactant_keys = tuple([reactant.target.as_dict()['key'] for reactant in reactant_components])
-            product_keys = tuple([product.target.as_dict()['key'] for product in product_components])
+            reactant_keys = tuple(reactant.target.data['key'] for reactant in reactant_components)
+            product_keys = tuple(product.target.data['key'] for product in product_components)
             key.append(reactant_keys)
             key.append(product_keys)
 
@@ -573,10 +561,13 @@ class GraphCacheManager(BaseCacheManager):
 
         return graph
 
-    def query_node(self, bel=None, type=None, namespace=None, name=None, modification=None, fusion=None,
-                   as_graph_objects=False):
+    def query_node(self, bel=None, type=None, namespace=None, name=None, modification_type=None,
+                   modification_name=None, as_dict_list=False):
         """Run a query over all nodes in the PyBEL cache.
 
+        :param as_dict_list:
+        :param modification_name:
+        :param modification_type:
         :param bel: BEL term that describes the biological entity. e.g. p(HGNC:APP)
         :param bel: str
         :param type: Type of the biological entity. e.g. Protein
@@ -585,33 +576,111 @@ class GraphCacheManager(BaseCacheManager):
         :type namespace: str
         :param name: Name of the biological entity. e.g. APP
         :type name: str
-        :param modification:
-        :param fusion:
         :return:
         """
         q = self.session.query(models.Node)
 
         if bel:
-            q = q.filter(models.Node.bel == bel)
+            q = q.filter(models.Node.bel.like(bel))
 
         if type:
-            q = q.filter(models.Node.type == type)
+            q = q.filter(models.Node.type.like(type))
 
-        if namespace:
-            q = q.join(models.Namespace).filter(models.Namespace.keyword == namespace)
+        if namespace or name:
+            q = q.join(models.NamespaceEntry)
+            if namespace:
+                q = q.join(models.Namespace).filter(models.Namespace.keyword.like(namespace))
+            if name:
+                q = q.filter(models.NamespaceEntry.name.like(name))
 
-        if name:
-            q = q.join(models.NamespaceEntry).filter(models.NamespaceEntry.name == name)
+        if modification_type or modification_name:
+            q = q.join(models.Modification)
+            if modification_type:
+                q = q.filter(models.Modification.modType.like(modification_type))
+            if modification_name:
+                q = q.filter(models.Modification.modName.like(modification_name))
 
-        return [node.as_dict() for node in q.all()] if as_graph_objects else q.all()
+        result = q.all()
 
-    def query_edge(self, ):
-        pass
+        if as_dict_list:
+            dict_list = [node.data for node in result]
+            return dict_list
+
+        else:
+            return result
+
+    def query_edge(self, bel=None, source=None, target=None, annotation=None, relation=None, citation=None,
+                   evidence_text=None, properties=None, as_dict_list=False):
+        """
+
+        :param annotation:
+        :param bel:
+        :param source: BEL term of source node e.g. p(HGNC:APP) or models.Node object.
+        :type source: str or models.Node
+        :param target:
+        :param relation:
+        :param citation:
+        :param evidence_text:
+        :param properties:
+        :param as_dict_list:
+        :return:
+        """
+        q = self.session.query(models.Edge)
+
+        if bel:
+            q = q.filter(models.Edge.bel.like(bel))
+
+        if relation:
+            q = q.filter(models.Edge.relation.like(relation))
+
+        if annotation:
+            q = q.join(models.AnnotationEntry, models.Edge.annotations)
+            if isinstance(annotation, dict):
+                q = q.join(models.Annotation).filter(models.Annotation.keyword.in_(list(annotation.keys())))
+                q = q.filter(models.AnnotationEntry.name.in_(list(annotation.values())))
+
+            elif isinstance(annotation, str):
+                q = q.filter(models.AnnotationEntry.name.like(annotation))
+
+        if source:
+            if isinstance(source, str):
+                source = self.query_node(bel=source)[0]
+
+            if isinstance(source, models.Node):
+                q = q.filter(models.Edge.source == source)
+
+        if target:
+            if isinstance(target, str):
+                target = self.query_node(bel=target)[0]
+
+            if isinstance(target, models.Node):
+                q = q.filter(models.Edge.target == target)
+
+        if evidence_text:
+            q = q.join(models.Evidence).filter(models.Evidence.text.like(evidence_text))
+
+        elif citation:
+            if isinstance(citation, str):
+                citation = self.query_citation(reference=citation)[0]
+
+            if isinstance(citation, models.Citation):
+                evidences = citation.evidences
+                q = q.filter(models.Edge.evidence.in_(evidences))
+
+        result = q.all()
+
+        if as_dict_list:
+            dict_result = [edge.data for edge in result]
+            return dict_result
+        else:
+            return result
 
     def query_citation(self, type=None, reference=None, name=None, author=None, date=None, evidence=False,
-                       evidence_text=None, as_dict=False):
+                       evidence_text=None, as_dict_list=False):
         """Run a query over all citations in the PyBEL cache.
 
+        :param as_dict_list:
+        :param evidence_text:
         :param type: Type of the citation. e.g. PubMed
         :type type: str
         :param reference: The identifier used for the citation. e.g. PubMed_ID
@@ -658,19 +727,20 @@ class GraphCacheManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict:
+        if as_dict_list:
             dict_result = []
             if evidence or evidence_text:
                 for citation in result:
                     for evidence in citation.evidences:
-                        dict_result.append(evidence.as_dict())
+                        dict_result.append(evidence.data)
             else:
-                dict_result = [cit.as_dict() for cit in result]
+                dict_result = [cit.data for cit in result]
 
             return dict_result
 
         else:
             return result
+
 
 def to_database(graph, connection=None):
     """Stores a graph in a database
