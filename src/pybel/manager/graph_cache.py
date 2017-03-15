@@ -10,6 +10,7 @@ import logging
 
 from . import models
 from .base_cache import BaseCacheManager
+from .cache import CacheManager
 from .utils import parse_datetime
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -44,6 +45,7 @@ class GraphCacheManager(BaseCacheManager):
         network = models.Network(blob=graph_bytes, **graph.document)
 
         if store_parts:
+            CacheManager(connection=self.connection).ensure_namespace(GOCC_LATEST)
             self.store_graph_parts(network, graph)
 
         self.session.add(network)
@@ -238,8 +240,13 @@ class GraphCacheManager(BaseCacheManager):
         result = self.session.query(models.Citation).filter_by(type=type, reference=reference).one_or_none()
 
         if result is None:
-            if date is not None:
+            if date:
                 date = parse_datetime(date)
+            else:
+                date = None
+
+            if not comments:
+                comments = None
 
             result = models.Citation(type=type, name=name, reference=reference, date=date, comments=comments)
 
@@ -438,7 +445,10 @@ class GraphCacheManager(BaseCacheManager):
                     for effect_type, effect_value in participant_data[EFFECT].items():
                         property_dict['relativeKey'] = effect_type
                         if NAMESPACE in effect_value:
-                            namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
+                            if effect_value[NAMESPACE] == GOCC_KEYWORD:
+                                namespace_url = GOCC_LATEST
+                            else:
+                                namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
                             property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
                                                                                            effect_value[NAME])
                         else:
@@ -485,7 +495,7 @@ class GraphCacheManager(BaseCacheManager):
             # What about meta information?
             edges = self.session.query(models.Edge).filter(models.Edge.annotations.contains(annotation)).all()
             for edge in edges:
-                edge_data = edge.forGraph()
+                edge_data = edge.as_dict()
 
                 if len(edge_data['source']['key']) == 1:
                     edge_data['source'] = self.help_rebuild_list_components(edge.source)
@@ -506,13 +516,13 @@ class GraphCacheManager(BaseCacheManager):
 
         :return: Dictionary with 'key' and 'node' keys.
         """
-        node_info = node_object.forGraph()
+        node_info = node_object.as_dict()
         key = list(node_info['key'])
         data = node_info['data']
         if node_object.type in (COMPLEX, COMPOSITE):
             components = self.session.query(models.Edge).filter_by(source=node_object, relation=HAS_COMPONENT).all()
             for component in components:
-                component_key = component.target.forGraph()['key']
+                component_key = component.target.as_dict()['key']
                 key.append(component_key)
 
         elif node_object.type == REACTION:
@@ -520,8 +530,8 @@ class GraphCacheManager(BaseCacheManager):
                                                                             relation=HAS_REACTANT).all()
             product_components = self.session.query(models.Edge).filter_by(source=node_object,
                                                                            relation=HAS_PRODUCT).all()
-            reactant_keys = tuple([reactant.target.forGraph()['key'] for reactant in reactant_components])
-            product_keys = tuple([product.target.forGraph()['key'] for product in product_components])
+            reactant_keys = tuple([reactant.target.as_dict()['key'] for reactant in reactant_components])
+            product_keys = tuple([product.target.as_dict()['key'] for product in product_components])
             key.append(reactant_keys)
             key.append(product_keys)
 
@@ -563,6 +573,104 @@ class GraphCacheManager(BaseCacheManager):
 
         return graph
 
+    def query_node(self, bel=None, type=None, namespace=None, name=None, modification=None, fusion=None,
+                   as_graph_objects=False):
+        """Run a query over all nodes in the PyBEL cache.
+
+        :param bel: BEL term that describes the biological entity. e.g. p(HGNC:APP)
+        :param bel: str
+        :param type: Type of the biological entity. e.g. Protein
+        :type type: str
+        :param namespace: Namespace keyword that is used in BEL. e.g. HGNC
+        :type namespace: str
+        :param name: Name of the biological entity. e.g. APP
+        :type name: str
+        :param modification:
+        :param fusion:
+        :return:
+        """
+        q = self.session.query(models.Node)
+
+        if bel:
+            q = q.filter(models.Node.bel == bel)
+
+        if type:
+            q = q.filter(models.Node.type == type)
+
+        if namespace:
+            q = q.join(models.Namespace).filter(models.Namespace.keyword == namespace)
+
+        if name:
+            q = q.join(models.NamespaceEntry).filter(models.NamespaceEntry.name == name)
+
+        return [node.as_dict() for node in q.all()] if as_graph_objects else q.all()
+
+    def query_edge(self, ):
+        pass
+
+    def query_citation(self, type=None, reference=None, name=None, author=None, date=None, evidence=False,
+                       evidence_text=None, as_dict=False):
+        """Run a query over all citations in the PyBEL cache.
+
+        :param type: Type of the citation. e.g. PubMed
+        :type type: str
+        :param reference: The identifier used for the citation. e.g. PubMed_ID
+        :type reference: str
+        :param name: Title of the citation.
+        :type name: str
+        :param author: The name or a list of names of authors participated in the citation.
+        :type author: str or list
+        :param date: Publishing date of the citation.
+        :type date: str or date
+        :param evidence: Weather or not supporting text should be included in the return.
+        :type evidence: bool
+        :return: List of PyBEL.manager.models.Citation objects.
+        :rtype: list
+        """
+        q = self.session.query(models.Citation)
+
+        if author:
+            q = q.join(models.Author, models.Citation.authors)
+            if isinstance(author, str):
+                q = q.filter(models.Author.name.like(author))
+            elif isinstance(author, list):
+                q = q.filter(models.Author.name.in_(author))
+
+        if type:
+            q = q.filter(models.Citation.type.like(type))
+
+        if reference:
+            q = q.filter(models.Citation.reference == reference)
+
+        if name:
+            q = q.filter(models.Citation.name.like(name))
+
+        if date:
+            if isinstance(date, date):
+                q = q.filter(models.Citation.date == date)
+
+            if isinstance(date, str):
+                d = parse_datetime(date)
+                q = q.filter(models.Citation.date == d)
+
+        if evidence_text:
+            q = q.join(models.Evidence).filter(models.Evidence.text.like(evidence_text))
+
+        result = q.all()
+
+        if as_dict:
+            dict_result = []
+            if evidence or evidence_text:
+                for citation in result:
+                    for evidence in citation.evidences:
+                        dict_result.append(evidence.as_dict())
+            else:
+                dict_result = [cit.as_dict() for cit in result]
+
+            return dict_result
+
+        else:
+            return result
 
 def to_database(graph, connection=None):
     """Stores a graph in a database

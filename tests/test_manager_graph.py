@@ -7,7 +7,8 @@ from collections import Counter
 
 import pybel
 import sqlalchemy.exc
-from pybel.constants import METADATA_NAME, METADATA_VERSION
+from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
+from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION
 from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants
@@ -119,6 +120,99 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
 
         g2 = self.gcm.get_graph(TEST_BEL_NAME, TEST_BEL_VERSION)
         self.bel_simple_reconstituted(g2)
+
+
+class TestQuery(BelReconstitutionMixin, unittest.TestCase):
+    """Tests that the cache can be queried.
+    """
+
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.db_path = os.path.join(self.dir, 'test.db')
+        self.connection = 'sqlite:///' + self.db_path
+        self.graph = pybel.from_path(test_bel_simple, manager=self.connection, allow_nested=True)
+        self.gcm = GraphCacheManager(connection=self.connection)
+        self.gcm.store_graph(self.graph, True)
+
+    @mock_bel_resources
+    def test_query_node(self, mock_get):
+        pass
+
+    @mock_bel_resources
+    def test_query_edge(self, mock_get):
+        pass
+
+    @mock_bel_resources
+    def test_query_citation(self, mock_get):
+        citation_1 = {
+            CITATION_TYPE: "PubMed",
+            CITATION_NAME: "That one article from last week",
+            CITATION_REFERENCE: "123455",
+            CITATION_DATE: "2012-01-31",
+            CITATION_AUTHORS: "Example Author|Example Author2"
+        }
+        citation_2 = {
+            CITATION_TYPE: "PubMed",
+            CITATION_NAME: "That other article from last week",
+            CITATION_REFERENCE: "123456"
+        }
+        evidence_citation = {
+            CITATION: citation_1,
+            EVIDENCE: 'Evidence 1 w extra notes'
+        }
+
+        evidence_citation_2 = {
+            CITATION: citation_1,
+            EVIDENCE: 'Evidence 2'
+        }
+
+        evidence_citation_3 = {
+            CITATION: citation_2,
+            EVIDENCE: "Evidence 3"
+        }
+
+        # type
+        object_list = self.gcm.query_citation(type='PubMed')
+        self.assertEqual(len(object_list), 2)
+
+        # type, reference, as_dict
+        reference_list = self.gcm.query_citation(type='PubMed', reference='123456', as_dict=True)
+        self.assertEqual(len(reference_list), 1)
+        self.assertIn(citation_2, reference_list)
+
+        # author
+        author_list = self.gcm.query_citation(author="Example%")
+        self.assertEqual(len(author_list), 1)
+
+        # author, as_dict
+        author_dict_list = self.gcm.query_citation(author="Example Author", as_dict=True)
+        self.assertIn(citation_1, author_dict_list)
+
+        # author list, as_dict
+        author_dict_list2 = self.gcm.query_citation(author=["Example Author", "Example Author2"], as_dict=True)
+        self.assertIn(citation_1, author_dict_list2)
+
+        # type, name, as_dict
+        name_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week", as_dict=True)
+        self.assertEqual(len(name_dict_list), 1)
+        self.assertIn(citation_2, name_dict_list)
+
+        # type, name like, as_dict
+        name_dict_list2 = self.gcm.query_citation(type='PubMed', name="%article from%", as_dict=True)
+        self.assertEqual(len(name_dict_list2), 2)
+        self.assertIn(citation_1, name_dict_list2)
+        self.assertIn(citation_2, name_dict_list2)
+
+        evidence_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week",
+                                                     evidence=True, as_dict=True)
+        self.assertEqual(len(name_dict_list), 1)
+        self.assertIn(evidence_citation_3, evidence_dict_list)
+
+        evidence_dict_list2 = self.gcm.query_citation(type='PubMed', evidence_text='%Evi%', as_dict=True)
+        self.assertEqual(len(evidence_dict_list2), 3)
+        self.assertIn(evidence_citation, evidence_dict_list2)
+        self.assertIn(evidence_citation_2, evidence_dict_list2)
+        self.assertIn(evidence_citation_3, evidence_dict_list2)
 
 
 @unittest.skip('Feature not started yet')

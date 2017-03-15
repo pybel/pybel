@@ -94,7 +94,7 @@ class NamespaceEntry(Base):
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
     equivalence = relationship('NamespaceEntryEquivalence', back_populates='members')
 
-    def forGraph(self):
+    def as_dict(self):
         return {
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
@@ -288,26 +288,26 @@ class Node(Base):
 
     modifications = relationship("Modification", secondary=node_modification)
 
-    def forGraph(self):
+    def as_dict(self):
         node_key = [self.type]
         node_data = {
             FUNCTION: self.type,
         }
         if self.namespaceEntry:
-            namespace_entry = self.namespaceEntry.forGraph()
+            namespace_entry = self.namespaceEntry.as_dict()
             node_data.update(namespace_entry)
             node_key.append(namespace_entry[NAMESPACE])
             node_key.append(namespace_entry[NAME])
 
         elif self.modification:
             if self.fusion:
-                mod = self.modifications[0].forGraph()
+                mod = self.modifications[0].as_dict()
                 node_data[FUSION] = mod['mod_data']
                 [node_key.append(key_element) for key_element in mod['mod_key']]
             else:
                 node_data[VARIANTS] = []
                 for modification in self.modifications:
-                    mod = modification.forGraph()
+                    mod = modification.as_dict()
                     node_data[VARIANTS].append(mod['mod_data'])
                     node_key.append(tuple(mod['mod_key']))
                     # node_data[VARIANTS] = tuple(node_data[VARIANTS])
@@ -348,7 +348,7 @@ class Modification(Base):
 
     nodes = relationship("Node", secondary=node_modification)
 
-    def forGraph(self):
+    def as_dict(self):
         """Recreates a modification dictionary for PyBEL.BELGraph.
 
             :return: Dictionary that describes a variant or a fusion.
@@ -358,8 +358,8 @@ class Modification(Base):
         mod_key = []
         if self.modType == FUSION:
             mod_dict.update({
-                PARTNER_3P: self.p3Partner.forGraph(),
-                PARTNER_5P: self.p5Partner.forGraph(),
+                PARTNER_3P: self.p3Partner.as_dict(),
+                PARTNER_5P: self.p5Partner.as_dict(),
                 RANGE_3P: {},
                 RANGE_5P: {}
             })
@@ -367,7 +367,7 @@ class Modification(Base):
             mod_key.append((mod_dict[PARTNER_5P][NAMESPACE], mod_dict[PARTNER_5P][NAME],))
 
             if self.p5Missing:
-                mod_dict[RANGE_5P][FusionParser.MISSING] = self.p5Missing
+                mod_dict[RANGE_5P] = {FusionParser.MISSING: self.p5Missing}
                 mod_key.append((self.p5Missing,))
 
             else:
@@ -470,13 +470,13 @@ class Citation(Base):
     comments = Column(String(255), nullable=True)
 
     authors = relationship("Author", secondary=author_citation)
+    evidences = relationship("Evidence", back_populates='citation')
 
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
     )
 
-
-    def forGraph(self):
+    def as_dict(self):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a PyBEL.BELGraph.
 
             :return: Citation dictionary for the recreation of a PyBEL.BELGraph.
@@ -505,19 +505,19 @@ class Evidence(Base):
     text = Column(String, nullable=False, index=True)
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
-    citation = relationship('Citation')
+    citation = relationship('Citation', back_populates='evidences')
 
     def __repr__(self):
         return '{}'.format(self.text)
 
-    def forGraph(self):
+    def as_dict(self):
         """Creates a dictionary that is used to recreate the edge data dictionary for a PyBEL.BELGraph.
 
             :return: Dictionary containing citation and evidence for a PyBEL.BELGraph edge.
             :rtype: dict
         """
         return {
-            CITATION: self.citation.forGraph(),
+            CITATION: self.citation.as_dict(),
             EVIDENCE: self.text
         }
 
@@ -555,15 +555,15 @@ class Edge(Base):
 
     blob = Column(Binary)
 
-    def forGraph(self):
+    def as_dict(self):
         """Creates a dictionary of one BEL Edge that can be used to create an edge in a PyBEL.BELGraph.
 
             :return: Dictionary that contains information about an edge of a PyBEL.BELGraph. Including participants
                      and edge data informations.
             :rtype: dict
         """
-        source_node = self.source.forGraph()
-        target_node = self.target.forGraph()
+        source_node = self.source.as_dict()
+        target_node = self.target.as_dict()
         edge_dict = {
             'source': {
                 'node': (source_node['key'], source_node['data']),
@@ -578,13 +578,13 @@ class Edge(Base):
             },
             'key': self.graphIdentifier
         }
-        edge_dict['data'].update(self.evidence.forGraph())
+        edge_dict['data'].update(self.evidence.as_dict())
         if self.annotations:
             edge_dict['data'][ANNOTATIONS] = {}
             for anno in self.annotations:
-                edge_dict['data'][ANNOTATIONS].update(anno.forGraph())
+                edge_dict['data'][ANNOTATIONS].update(anno.as_dict())
         for prop in self.properties:
-            prop_info = prop.forGraph()
+            prop_info = prop.as_dict()
             if prop_info['participant'] in edge_dict['data']:
                 edge_dict['data'][prop_info['participant']].update(prop_info['data'])
             else:
@@ -607,7 +607,7 @@ class Property(Base):
 
     edges = relationship("Edge", secondary=edge_property)
 
-    def forGraph(self):
+    def as_dict(self):
         """Creates a property dict that is used to recreate an edge dictionary for PyBEL.BELGraph.
 
             :return: Property-Dict of an edge that is participant (sub/obj) related.
@@ -623,7 +623,7 @@ class Property(Base):
         }
         if self.relativeKey:
             prop_dict['data'][EFFECT] = {
-                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.forGraph()
+                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.as_dict()
             }
 
         return prop_dict
