@@ -611,7 +611,7 @@ class GraphCacheManager(BaseCacheManager):
 
     def query_edge(self, bel=None, source=None, target=None, annotation=None, relation=None, citation=None,
                    evidence_text=None, properties=None, as_dict_list=False):
-        """
+        """Run a query over all edges in the PyBEL cache.
 
         :param annotation:
         :param bel:
