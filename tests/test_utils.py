@@ -33,7 +33,7 @@ class TestRandom(unittest.TestCase):
             docs, definitions, statements = split_file_to_annotations_and_definitions(f)
 
         self.assertEqual(7, len(docs))
-        self.assertEqual(4, len(definitions))
+        self.assertEqual(5, len(definitions))
         self.assertEqual(14, len(statements))
 
     def test_list2tuple(self):

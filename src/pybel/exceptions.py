@@ -8,3 +8,4 @@ syntatic/semantic problem. These are logged at the CRITICAL level.
 
 class PyBelWarning(Exception):
     """PyBEL throws exceptions labeled PyBEL1xx for statements that cannot be fixed automatically"""
+

@@ -6,7 +6,7 @@ Module that contains the command line app
 Why does this file exist, and why not put this in __main__?
 You might be tempted to import things from __main__ later, but that will cause
 problems--the code will get executed twice:
- - When you run `python -m pybel` python will execute
+ - When you run `python3 -m pybel` python will execute
    ``__main__.py`` as a script. That means there won't be any
    ``pybel.__main__`` in ``sys.modules``.
  - When you import __main__ it will get executed again (as a module) because
@@ -23,6 +23,7 @@ import click
 
 from .canonicalize import to_bel
 from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
+from .cx import to_cx
 from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_pickle, to_neo4j
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
@@ -55,6 +56,7 @@ def main():
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
 @click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
 @click.option('--pickle', help='Output path for NetworkX *.gpickle')
+@click.option('--cx', help='Output CX JSON for use with NDEx')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
@@ -62,11 +64,10 @@ def main():
 @click.option('--store', help="Database connection string")
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
-@click.option('--complete-origin', is_flag=True, help="Complete origin from protein to gene")
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, database_name, database_connection, csv, graphml, json, pickle, bel, neo, neo_context,
-            store_default, store, allow_naked_names, allow_nested, complete_origin, no_citation_clearing, verbose):
+def convert(path, url, database_name, database_connection, csv, graphml, json, pickle, cx, bel, neo, neo_context,
+            store_default, store, allow_naked_names, allow_nested, no_citation_clearing, verbose):
     """Options for multiple outputs/conversions"""
 
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
@@ -75,7 +76,6 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         g = from_database(database_name, connection=database_connection)
     else:
         params = dict(
-            complete_origin=complete_origin,
             allow_nested=allow_nested,
             allow_naked_names=allow_naked_names,
             citation_clearing=(not no_citation_clearing)
@@ -100,6 +100,10 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
     if pickle:
         log.info('Outputting pickle to %s', pickle)
         to_pickle(g, pickle)
+
+    if cx:
+        log.info('Outputting CX to %s', cx)
+        to_cx(g, cx)
 
     if bel:
         log.info('Outputting BEL to %s', bel)

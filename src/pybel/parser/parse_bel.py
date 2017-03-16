@@ -48,8 +48,8 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 class BelParser(BaseParser):
     def __init__(self, graph, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
-                 namespace_expressions=None, annotation_expressions=None, complete_origin=False,
-                 allow_naked_names=False, allow_nested=False, citation_clearing=True, autostreamline=False):
+                 namespace_expressions=None, annotation_expressions=None, allow_naked_names=False, allow_nested=False,
+                 citation_clearing=True, autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: The BEL Graph to use to store the network
@@ -69,8 +69,6 @@ class BelParser(BaseParser):
         :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type namespace_mappings: dict
-        :param complete_origin: If true, infer the RNA and Gene origins of unmodified proteins
-        :type complete_origin: bool
         :param allow_naked_names: If true, turn off naked namespace failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_naked_names: bool
@@ -84,7 +82,6 @@ class BelParser(BaseParser):
 
         self.graph = graph
         self.allow_nested = allow_nested
-        self.complete_origin = complete_origin
 
         self.control_parser = ControlParser(
             annotation_dicts=annotation_dicts,
@@ -212,7 +209,7 @@ class BelParser(BaseParser):
         # 2.4 Process Modifier Function
         # backwards compatibility with BEL v1.0
 
-        molecular_activity_default = oneOf(activity_labels.keys()).setParseAction(handle_molecular_activity_default)
+        molecular_activity_default = oneOf(list(activity_labels.keys())).setParseAction(handle_molecular_activity_default)
 
         self.molecular_activity = molecular_activity_tags + nest(
             molecular_activity_default | self.identifier_parser.language)
@@ -648,28 +645,10 @@ class BelParser(BaseParser):
 
     def _ensure_rna(self, name, tokens):
         self._ensure_simple_abundance(name, tokens)
-
-        if not self.complete_origin:
-            return name
-
-        gene_tokens = deepcopy(tokens)
-        gene_tokens[FUNCTION] = GENE
-        gene_name = self.ensure_node(gene_tokens)
-
-        self.graph.add_unqualified_edge(gene_name, name, TRANSCRIBED_TO)
         return name
 
     def _ensure_protein(self, name, tokens):
         self._ensure_simple_abundance(name, tokens)
-
-        if not self.complete_origin:
-            return name
-
-        rna_tokens = deepcopy(tokens)
-        rna_tokens[FUNCTION] = RNA
-        rna_name = self.ensure_node(rna_tokens)
-
-        self.graph.add_unqualified_edge(rna_name, name, TRANSLATED_TO)
         return name
 
     def ensure_node(self, tokens):

@@ -6,7 +6,8 @@ import unittest
 import networkx as nx
 
 from pybel.parser.utils import subdict_matches, check_stability, sanitize_file_lines, any_subdict_matches, \
-    cartesian_dictionary, ensure_quotes
+    cartesian_dictionary
+from pybel.utils import ensure_quotes
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -297,7 +298,7 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
         with open(path) as f:
             lines = list(sanitize_file_lines(f))
 
-        self.assertEqual(25, len(lines))
+        self.assertEqual(26, len(lines))
 
     def test_f(self):
         s = '''SET Evidence = "Arterial cells are highly susceptible to oxidative stress, which can induce both necrosis

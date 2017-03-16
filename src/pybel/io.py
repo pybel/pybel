@@ -25,13 +25,12 @@ import networkx as nx
 import py2neo
 import requests
 from networkx.readwrite.json_graph import node_link_data, node_link_graph
-from pkg_resources import get_distribution
 from requests_file import FileAdapter
 
 from .canonicalize import decanonicalize_node, calculate_canonical_name
 from .constants import PYBEL_CONTEXT_TAG, FUNCTION, NAME, RELATION, GRAPH_ANNOTATION_LIST
 from .graph import BELGraph
-from .utils import flatten_dict, flatten_graph_data, list2tuple
+from .utils import flatten_dict, flatten_graph_data, list2tuple, tokenize_version
 
 try:
     import cPickle as pickle
@@ -46,8 +45,12 @@ __all__ = [
     'to_bytes',
     'from_bytes',
     'from_pickle',
+    'to_json_dict',
+    'from_json_dict',
     'to_json',
     'from_json',
+    'to_jsons',
+    'from_jsons',
     'to_graphml',
     'to_csv',
     'to_neo4j'
@@ -56,20 +59,19 @@ __all__ = [
 log = logging.getLogger('pybel')
 
 
-def tokenize_version(version_string):
-    return tuple(version_string.split('.')[0:3])
-
-
 def ensure_version(graph, check_version=True):
-    """Ensure that the graph was produced on this version of python (disregard dev tags)
+    """Ensure that the graph was produced by a minimum of PyBEL v0.4.1, which was the last release with a change
+    in the data structure
 
-    TODO: in the future, just check that the minor versions are the same,
-    because development won't be changing the data structure so much
+    :param graph: A BEL Graph
+    :type graph: BELGraph
+    :param check_version: Should the version be checked, or should the graph just be returned without inspection
+    :type check_version: bool
     """
-    current_version = tokenize_version(get_distribution('pybel').version)
+    minimum_version = (0, 4, 1)
     graph_version = tokenize_version(graph.pybel_version)
-    if check_version and current_version != graph_version:
-        raise ValueError('Using version {}, tried importing from version {}'.format(current_version, graph_version))
+    if check_version and graph_version < minimum_version:
+        raise ValueError('Tried importing from version {}. Need at least'.format(graph_version, minimum_version))
     return graph
 
 
@@ -155,20 +157,20 @@ def from_bytes(bytes_graph, check_version=True):
     return ensure_version(pickle.loads(bytes_graph), check_version)
 
 
-def to_pickle(graph, output, protocol=None):
+def to_pickle(graph, file, protocol=None):
     """Writes this graph to a pickle object with :func:`networkx.write_gpickle`
 
     :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: A file or filename to write to
-    :type output: file or file-like or str
+    :param file: A file or filename to write to
+    :type file: file or file-like or str
     :param protocol: Pickling protocol to use
     :type protocol: int
     """
     if protocol is not None:
-        nx.write_gpickle(graph, output, protocol=protocol)
+        nx.write_gpickle(graph, file, protocol=protocol)
     else:
-        nx.write_gpickle(graph, output)
+        nx.write_gpickle(graph, file)
 
 
 def from_pickle(path, check_version=True):
@@ -198,6 +200,18 @@ def to_json_dict(graph):
     return data
 
 
+def to_json(graph, file):
+    """Writes this graph as a node-link JSON object
+
+    :param graph: A BEL graph
+    :type graph: BELGraph
+    :param file: A write-supporting file or file-like object
+    :type file: file
+    """
+    json_dict = to_json_dict(graph)
+    json.dump(json_dict, file, ensure_ascii=False)
+
+
 def to_jsons(graph):
     """Dumps this graph as a node-link JSON object to a string
 
@@ -207,18 +221,6 @@ def to_jsons(graph):
     :rtype: str
     """
     return json.dumps(to_json_dict(graph), ensure_ascii=False)
-
-
-def to_json(graph, output):
-    """Writes this graph as a node-link JSON object
-
-    :param graph: A BEL graph
-    :type graph: BELGraph
-    :param output: A write-supporting file or file-like object
-    :type output: file
-    """
-    json_dict = to_json_dict(graph)
-    json.dump(json_dict, output, ensure_ascii=False)
 
 
 def from_json_dict(data, check_version=True):
@@ -241,7 +243,7 @@ def from_json_dict(data, check_version=True):
 
 
 def from_json(path, check_version=True):
-    """Reads graph from node-link JSON Object
+    """Reads graph from node-link JSON object
 
     :param path: file path to read
     :type path: str
@@ -256,13 +258,28 @@ def from_json(path, check_version=True):
         return graph
 
 
-def to_graphml(graph, output):
+def from_jsons(s, check_version=True):
+    """Reads a BEL graph from a node-link JSON string
+
+    :param s: A node-link JSON string produced by PyBEL
+    :type s: str
+    :param check_version: Checks if the graph was produced by this version of PyBEL
+    :type check_version: bool
+    :return: A BEL graph
+    :rtype: BELGraph
+    """
+    json_dict = json.loads(s)
+    graph = from_json_dict(json_dict, check_version=check_version)
+    return graph
+
+
+def to_graphml(graph, file):
     """Writes this graph to GraphML XML file. The .graphml extension is suggested so Cytoscape can recognize it.
 
     :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: A file or file-like object
-    :type output: file
+    :param file: A file or file-like object
+    :type file: file
     """
     g = nx.MultiDiGraph()
 
@@ -272,22 +289,22 @@ def to_graphml(graph, output):
     for u, v, key, data in graph.edges(data=True, keys=True):
         g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
 
-    nx.write_graphml(g, output)
+    nx.write_graphml(g, file)
 
 
-def to_csv(graph, output, delimiter='\t', encoding='utf-8'):
+def to_csv(graph, file, delimiter='\t', encoding='utf-8'):
     """Writes the graph as an edge list using :func:`networkx.write_edgelist`
 
     :param graph: A BEL graph
     :type graph: BELGraph
-    :param output: A file or filelike object
-    :type output: file
+    :param file: A file or filelike object
+    :type file: file
     :param delimiter: The output CSV delimiter. Defaults to tab
     :type delimiter: str
     :param encoding: The output format. Defaults to 'utf-8'
     :type encoding: str
     """
-    nx.write_edgelist(flatten_graph_data(graph), output, data=True, delimiter=delimiter, encoding=encoding)
+    nx.write_edgelist(flatten_graph_data(graph), file, data=True, delimiter=delimiter, encoding=encoding)
 
 
 def to_neo4j(graph, neo_graph, context=None):

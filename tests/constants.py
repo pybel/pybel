@@ -89,7 +89,7 @@ def assertHasNode(self, member, graph, **kwargs):
     :param kwargs:
     :return:
     """
-    self.assertTrue(graph.has_node(member), msg='{} not found in {}'.format(member, graph))
+    self.assertTrue(graph.has_node(member), msg='{} not found in graph'.format(member))
     if kwargs:
         missing = set(kwargs) - set(graph.node[member])
         self.assertFalse(missing, msg="Missing {} in node data".format(', '.join(sorted(missing))))
@@ -113,7 +113,7 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
     :param kwargs: splat the data to match
     :return:
     """
-    self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph {}'.format(u, v, graph))
+    self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
 
     msg_format = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'
 
@@ -132,7 +132,7 @@ class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.graph = BELGraph()
-        cls.parser = BelParser(cls.graph, complete_origin=True)
+        cls.parser = BelParser(cls.graph)
 
     def setUp(self):
         self.parser.clear()
@@ -1024,13 +1024,13 @@ class BelReconstitutionMixin(unittest.TestCase):
             RELATION: INCREASES,
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_1,
-            ANNOTATIONS: {'TESTAN1': "1"}
+            ANNOTATIONS: {'Species': "9606"}
         })
         assertHasEdge(self, EGFR, FADD, graph, **{
             RELATION: DECREASES,
             ANNOTATIONS: {
-                'TESTAN1': "1",
-                'TESTAN2': "3"
+                'Species': "9606",
+                'CellLine': "10B9 cell"
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2
@@ -1038,8 +1038,8 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, EGFR, CASP8, graph, **{
             RELATION: DIRECTLY_DECREASES,
             ANNOTATIONS: {
-                'TESTAN1': "1",
-                'TESTAN2': "3"
+                'Species': "9606",
+                'CellLine': "10B9 cell"
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2,
@@ -1047,7 +1047,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, FADD, CASP8, graph, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
-                'TESTAN1': "2"
+                'Species': "10116"
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -1055,7 +1055,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, AKT1, CASP8, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'TESTAN1': "2"
+                'Species': "10116"
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -1063,7 +1063,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, CASP8, AKT1, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'TESTAN1': "2"
+                'Species': "10116"
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -1112,9 +1112,8 @@ class BelReconstitutionMixin(unittest.TestCase):
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
-        # FIXME this doesn't work for GraphML IO
         if check_metadata:
-            self.assertEqual(expected_test_slushy_metadata, graph.document)
+            self.assertEqual(expected_test_slushy_metadata, graph.graph[GRAPH_METADATA])
 
         if check_warnings:
             expected_warnings = [

@@ -10,10 +10,8 @@ from pkg_resources import get_distribution
 
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .parser.modifiers import FusionParser
-from .parser.modifiers.fragment import FragmentParser
-from .parser.modifiers.protein_modification import PmodParser
-from .parser.utils import ensure_quotes
+from .parser.modifiers import FragmentParser, FusionParser, PmodParser
+from .utils import ensure_quotes, flatten_citation, sort_edges
 
 __all__ = [
     'to_bel_lines',
@@ -42,20 +40,23 @@ def get_neighbors_by_path_type(graph, node, relation):
     return set(result)
 
 
-def postpend_location(s, location_model):
+def postpend_location(bel_string, location_model):
     """Rips off the closing parentheses and adds canonicalized modification.
 
     I did this because writing a whole new parsing model for the data would be sad and difficult
 
-    :param s: BEL string representing node
-    :type s: str
-    :param location_model:
-    :return:
+    :param bel_string: BEL string representing node
+    :type bel_string: str
+    :param location_model: A dictionary containing keys :code:`pybel.constants.TO_LOC` and
+                            :code:`pybel.constants.FROM_LOC`
+    :type location_model: dict
+    :return: A part of a BEL string representing the location
+    :rtype: str
     """
+    if not all(k in location_model for k in {NAMESPACE, NAME}):
+        raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
+    return "{}, loc({}:{}))".format(bel_string[:-1], location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
 
-    if all(k in location_model for k in {NAMESPACE, NAME}):
-        return "{}, loc({}:{}))".format(s[:-1], location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
-    raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
 
 
 def decanonicalize_variant(tokens):
@@ -197,15 +198,6 @@ def decanonicalize_edge(g, u, v, k):
     v_str = decanonicalize_edge_node(g, v, ed, node_position=OBJECT)
 
     return "{} {} {}".format(u_str, ed[RELATION], v_str)
-
-
-def flatten_citation(citation):
-    return ','.join('"{}"'.format(citation[x]) for x in CITATION_ENTRIES[:len(citation)])
-
-
-def sort_edges(d):
-    return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
-        itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
 
 
 def to_bel_lines(graph):
