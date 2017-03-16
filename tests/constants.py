@@ -1024,13 +1024,13 @@ class BelReconstitutionMixin(unittest.TestCase):
             RELATION: INCREASES,
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_1,
-            ANNOTATIONS: {'TESTAN1': "1"}
+            ANNOTATIONS: {'Species': "9606"}
         })
         assertHasEdge(self, EGFR, FADD, graph, **{
             RELATION: DECREASES,
             ANNOTATIONS: {
-                'TESTAN1': "1",
-                'TESTAN2': "3"
+                'Species': "9606",
+                'CellLine': "10B9 cell"
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2
@@ -1038,8 +1038,8 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, EGFR, CASP8, graph, **{
             RELATION: DIRECTLY_DECREASES,
             ANNOTATIONS: {
-                'TESTAN1': "1",
-                'TESTAN2': "3"
+                'Species': "9606",
+                'CellLine': "10B9 cell"
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2,
@@ -1047,7 +1047,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, FADD, CASP8, graph, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
-                'TESTAN1': "2"
+                'Species': "10116"
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -1055,7 +1055,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, AKT1, CASP8, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'TESTAN1': "2"
+                'Species': "10116"
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -1063,7 +1063,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         assertHasEdge(self, CASP8, AKT1, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'TESTAN1': "2"
+                'Species': "10116"
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,

@@ -5,10 +5,10 @@ import tempfile
 import unittest
 from collections import Counter
 
-import sqlalchemy.exc
-
 import pybel
-from pybel.constants import METADATA_NAME, METADATA_VERSION
+import sqlalchemy.exc
+from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
+from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME
 from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants
@@ -20,15 +20,11 @@ TEST_BEL_VERSION = '1.6'
 
 
 class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.graph = pybel.from_path(test_bel_thorough, allow_nested=True)
-        cls.simple_graph = pybel.from_path(test_bel_simple)
-
     def setUp(self):
         self.dir = tempfile.mkdtemp()
         self.db_path = os.path.join(self.dir, 'test.db')
         self.connection = 'sqlite:///' + self.db_path
+        self.graph = pybel.from_path(test_bel_thorough, manager=self.connection, allow_nested=True)
         self.gcm = GraphCacheManager(connection=self.connection)
 
     def tearDown(self):
@@ -72,6 +68,19 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         self.assertEqual({TEST_V1, TEST_V2}, set(self.gcm.get_graph_versions(self.graph.document[METADATA_NAME])))
 
         self.assertEqual(TEST_V2, self.gcm.get_graph(self.graph.document[METADATA_NAME]).document[METADATA_VERSION])
+
+
+class TestGraphCacheSimple(BelReconstitutionMixin, unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.db_path = os.path.join(self.dir, 'test.db')
+        self.connection = 'sqlite:///' + self.db_path
+        self.simple_graph = pybel.from_path(test_bel_simple, manager=self.connection)
+        self.gcm = GraphCacheManager(connection=self.connection)
+
+    def tearDown(self):
+        os.remove(self.db_path)
+        os.rmdir(self.dir)
 
     @mock_bel_resources
     def test_get_or_create_node(self, mock_get):
@@ -119,6 +128,125 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         self.bel_simple_reconstituted(g2)
 
 
+class TestQuery(BelReconstitutionMixin, unittest.TestCase):
+    """Tests that the cache can be queried"""
+
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.db_path = os.path.join(self.dir, 'test.db')
+        self.connection = 'sqlite:///' + self.db_path
+        self.graph = pybel.from_path(test_bel_simple, manager=self.connection, allow_nested=True)
+        self.gcm = GraphCacheManager(connection=self.connection)
+        self.gcm.insert_graph(self.graph, True)
+
+    @mock_bel_resources
+    def test_query_node(self, mock_get):
+        akt1_dict = {
+            'key': ('Protein', 'HGNC', 'AKT1'),
+            'data': {
+                FUNCTION: 'Protein',
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
+            }
+        }
+
+        node_list = self.gcm.query_node(bel='p(HGNC:AKT1)')
+        self.assertEqual(len(node_list), 1)
+
+        node_dict_list = self.gcm.query_node(bel='p(HGNC:AKT1)', as_dict_list=True)
+        self.assertIn(akt1_dict, node_dict_list)
+
+        node_dict_list2 = self.gcm.query_node(namespace='HG%', as_dict_list=True)
+        self.assertEqual(len(node_dict_list2), 4)
+        self.assertIn(akt1_dict, node_dict_list2)
+
+        node_dict_list3 = self.gcm.query_node(name='%A%', as_dict_list=True)
+        self.assertEqual(len(node_dict_list3), 3)
+        self.assertIn(akt1_dict, node_dict_list3)
+
+        protein_list = self.gcm.query_node(type='Protein')
+        self.assertEqual(len(protein_list), 4)
+
+
+    @mock_bel_resources
+    def test_query_edge(self, mock_get):
+        edge_list = self.gcm.query_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
+        self.assertEqual(len(edge_list), 1)
+
+    @mock_bel_resources
+    def test_query_citation(self, mock_get):
+        citation_1 = {
+            CITATION_TYPE: "PubMed",
+            CITATION_NAME: "That one article from last week",
+            CITATION_REFERENCE: "123455",
+            CITATION_DATE: "2012-01-31",
+            CITATION_AUTHORS: "Example Author|Example Author2"
+        }
+        citation_2 = {
+            CITATION_TYPE: "PubMed",
+            CITATION_NAME: "That other article from last week",
+            CITATION_REFERENCE: "123456"
+        }
+        evidence_citation = {
+            CITATION: citation_1,
+            EVIDENCE: 'Evidence 1 w extra notes'
+        }
+
+        evidence_citation_2 = {
+            CITATION: citation_1,
+            EVIDENCE: 'Evidence 2'
+        }
+
+        evidence_citation_3 = {
+            CITATION: citation_2,
+            EVIDENCE: "Evidence 3"
+        }
+
+        # type
+        object_list = self.gcm.query_citation(type='PubMed')
+        self.assertEqual(len(object_list), 2)
+
+        # type, reference, data
+        reference_list = self.gcm.query_citation(type='PubMed', reference='123456', as_dict_list=True)
+        self.assertEqual(len(reference_list), 1)
+        self.assertIn(citation_2, reference_list)
+
+        # author
+        author_list = self.gcm.query_citation(author="Example%")
+        self.assertEqual(len(author_list), 1)
+
+        # author, data
+        author_dict_list = self.gcm.query_citation(author="Example Author", as_dict_list=True)
+        self.assertIn(citation_1, author_dict_list)
+
+        # author list, data
+        author_dict_list2 = self.gcm.query_citation(author=["Example Author", "Example Author2"], as_dict_list=True)
+        self.assertIn(citation_1, author_dict_list2)
+
+        # type, name, data
+        name_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week",
+                                                 as_dict_list=True)
+        self.assertEqual(len(name_dict_list), 1)
+        self.assertIn(citation_2, name_dict_list)
+
+        # type, name like, data
+        name_dict_list2 = self.gcm.query_citation(type='PubMed', name="%article from%", as_dict_list=True)
+        self.assertEqual(len(name_dict_list2), 2)
+        self.assertIn(citation_1, name_dict_list2)
+        self.assertIn(citation_2, name_dict_list2)
+
+        evidence_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week",
+                                                     evidence=True, as_dict_list=True)
+        self.assertEqual(len(name_dict_list), 1)
+        self.assertIn(evidence_citation_3, evidence_dict_list)
+
+        evidence_dict_list2 = self.gcm.query_citation(type='PubMed', evidence_text='%Evi%', as_dict_list=True)
+        self.assertEqual(len(evidence_dict_list2), 3)
+        self.assertIn(evidence_citation, evidence_dict_list2)
+        self.assertIn(evidence_citation_2, evidence_dict_list2)
+        self.assertIn(evidence_citation_3, evidence_dict_list2)
+
+
 @unittest.skip('Feature not started yet')
 class TestFilter(BelReconstitutionMixin, unittest.TestCase):
     """Tests that a graph can be reconstructed from the edge and node relational tables in the database
@@ -134,8 +262,8 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
         self.dir = tempfile.mkdtemp()
         self.db_path = os.path.join(self.dir, 'test.db')
         self.connection = 'sqlite:///' + self.db_path
+        self.graph = pybel.from_path(test_bel_thorough, manager=self.connection, allow_nested=True)
         self.gcm = GraphCacheManager(connection=self.connection)
-        self.graph = pybel.from_path(test_bel_thorough, allow_nested=True)
 
     @mock_bel_resources
     def test_database_edge_filter(self, mock_get):
@@ -167,7 +295,7 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
 
         self.gcm.insert_graph(original, store_parts=True)
 
-        reloaded = self.gcm.get_by_edge_filter(**{annotation_tag: value_tag})
+        reloaded = self.gcm.rebuild_by_edge_filter({annotation_tag: value_tag})
 
         for u, v, k in reloaded.edges(keys=True):
             del reloaded.edge[u][v][k][annotation_tag]

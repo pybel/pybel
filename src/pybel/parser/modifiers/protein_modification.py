@@ -104,8 +104,8 @@ class PmodParser(BaseParser):
 
         self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
 
-        pmod_default_ns = oneOf(pmod_namespace.keys()).setParseAction(self.handle_pmod_default_ns)
-        pmod_legacy_ns = oneOf(pmod_legacy_labels.keys()).setParseAction(self.handle_pmod_legacy_ns)
+        pmod_default_ns = oneOf(list(pmod_namespace.keys())).setParseAction(self.handle_pmod_default_ns)
+        pmod_legacy_ns = oneOf(list(pmod_legacy_labels.keys())).setParseAction(self.handle_pmod_legacy_ns)
 
         pmod_identifier = MatchFirst([
             Group(self.namespace_parser.identifier_qualified),

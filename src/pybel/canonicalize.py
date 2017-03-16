@@ -40,20 +40,23 @@ def get_neighbors_by_path_type(graph, node, relation):
     return set(result)
 
 
-def postpend_location(s, location_model):
+def postpend_location(bel_string, location_model):
     """Rips off the closing parentheses and adds canonicalized modification.
 
     I did this because writing a whole new parsing model for the data would be sad and difficult
 
-    :param s: BEL string representing node
-    :type s: str
-    :param location_model:
-    :return:
+    :param bel_string: BEL string representing node
+    :type bel_string: str
+    :param location_model: A dictionary containing keys :code:`pybel.constants.TO_LOC` and
+                            :code:`pybel.constants.FROM_LOC`
+    :type location_model: dict
+    :return: A part of a BEL string representing the location
+    :rtype: str
     """
+    if not all(k in location_model for k in {NAMESPACE, NAME}):
+        raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
+    return "{}, loc({}:{}))".format(bel_string[:-1], location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
 
-    if all(k in location_model for k in {NAMESPACE, NAME}):
-        return "{}, loc({}:{}))".format(s[:-1], location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
-    raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
 
 
 def decanonicalize_variant(tokens):

@@ -14,8 +14,9 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 
 DEFINE NAMESPACE CHEBI AS URL "http://resources.openbel.org/belframework/20150611/namespace/chebi.belns"
 DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns"
-DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
-DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
+DEFINE ANNOTATION MeSHDisease AS URL "http://resources.openbel.org/belframework/20150611/annotation/mesh-diseases.belanno"
+DEFINE ANNOTATION Species AS URL "http://resource.belframework.org/belframework/20150611/annotation/species-taxonomy-id.belanno"
+DEFINE ANNOTATION CellLine AS URL "http://resource.belframework.org/belframework/20150611/annotation/cell-line.belanno"
 
 ##################################################################################
 # Statements Section
@@ -23,7 +24,7 @@ DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
 SET STATEMENT_GROUP = "Group 1"
 
 SET Citation = {"PubMed","That one article from last week","123455","2012-01-31","Example Author|Example Author2"}
-SET TESTAN1 = "1"
+SET Species = "9606"
 
 SET Evidence = "Evidence 1 \
 w extra notes"
@@ -31,13 +32,13 @@ w extra notes"
 p(HGNC:AKT1) -> p(HGNC:EGFR)
 
 SET Evidence = "Evidence 2"
-SET TESTAN2 = "3"
+SET CellLine = "10B9 cell"
 
 p(HGNC:EGFR) -| p(HGNC:FADD)
 p(HGNC:EGFR) =| p(HGNC:CASP8)
 
 SET Citation = {"PubMed","That other article from last week","123456"}
-SET TESTAN1 = "2"
+SET Species = "10116"
 SET Evidence = "Evidence 3"
 
 p(HGNC:FADD) -> p(HGNC:CASP8)
