@@ -564,9 +564,6 @@ class GraphCacheManager(BaseCacheManager):
                    modification_name=None, as_dict_list=False):
         """Run a query over all nodes in the PyBEL cache.
 
-        :param as_dict_list:
-        :param modification_name:
-        :param modification_type:
         :param bel: BEL term that describes the biological entity. e.g. p(HGNC:APP)
         :param bel: str
         :param type: Type of the biological entity. e.g. Protein
@@ -575,6 +572,12 @@ class GraphCacheManager(BaseCacheManager):
         :type namespace: str
         :param name: Name of the biological entity. e.g. APP
         :type name: str
+        :param modification_name:
+        :type modification_name: str
+        :param modification_type:
+        :type modification_type: str
+        :param as_dict_list:
+        :type as_dict_list: bool
         :return:
         """
         q = self.session.query(models.Node)
@@ -607,19 +610,26 @@ class GraphCacheManager(BaseCacheManager):
         else:
             return result
 
-    def query_edge(self, bel=None, source=None, target=None, annotation=None, relation=None, citation=None,
-                   evidence_text=None, properties=None, as_dict_list=False):
-        """Run a query over all edges in the PyBEL cache.
+    def query_edge(self, bel=None, source=None, target=None, relation=None, citation=None,
+                   evidence=None, annotation=None, property=None, as_dict_list=False):
+        """Builds a query to be run against all edges in the PyBEL cache.
 
-        :param annotation:
-        :param bel:
+        :param bel: BEL statement that represents the desired edge.
+        :type bel: str
         :param source: BEL term of source node e.g. p(HGNC:APP) or models.Node object.
         :type source: str or models.Node
-        :param target:
-        :param relation:
-        :param citation:
-        :param evidence_text:
-        :param properties:
+        :param target: BEL term of target node e.g. p(HGNC:APP) or models.Node object.
+        :type target: str or models.Node
+        :param relation: The relation that should be present between source and target node.
+        :type relation: str
+        :param citation: The citation that backs the edge up. It is possible to use the reference_id
+                         or a models.Citation object.
+        :type citation: str or models.Citation
+        :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text
+                         or a models.Evidence object.
+        :type evidence: str or models.Evidence
+        :param annotation:
+        :param property:
         :param as_dict_list:
         :return:
         """
@@ -647,6 +657,11 @@ class GraphCacheManager(BaseCacheManager):
             if isinstance(source, models.Node):
                 q = q.filter(models.Edge.source == source)
 
+            # ToDo: in_() not yet supported for relations
+            #elif isinstance(source, list) and len(source) > 0:
+            #    if isinstance(source[0], models.Node):
+            #        q = q.filter(models.Edge.source.in_(source))
+
         if target:
             if isinstance(target, str):
                 target = self.query_node(bel=target)[0]
@@ -654,16 +669,29 @@ class GraphCacheManager(BaseCacheManager):
             if isinstance(target, models.Node):
                 q = q.filter(models.Edge.target == target)
 
-        if evidence_text:
-            q = q.join(models.Evidence).filter(models.Evidence.text.like(evidence_text))
+            #elif isinstance(target, list) and len(target) > 0:
+            #    if isinstance(target[0], models.Node):
+            #        q = q.filter(models.Edge.source.in_(target))
 
-        elif citation:
-            if isinstance(citation, str):
-                citation = self.query_citation(reference=citation)[0]
+        if citation or evidence:
+            q = q.join(models.Evidence)
 
-            if isinstance(citation, models.Citation):
-                evidences = citation.evidences
-                q = q.filter(models.Edge.evidence.in_(evidences))
+            if citation:
+                if isinstance(citation, models.Citation):
+                    q = q.filter(models.Evidence.citation == citation)
+
+                elif isinstance(citation, str):
+                    q = q.join(models.Citation).filter(models.Citation.reference.like(citation))
+
+            if evidence:
+                if isinstance(evidence, models.Evidence):
+                    q = q.filter(models.Edge.evidence == evidence)
+
+                elif isinstance(evidence, str):
+                    q = q.filter(models.Evidence.text.like(evidence))
+
+        if property:
+            q = q.join(models.Property)
 
         result = q.all()
 

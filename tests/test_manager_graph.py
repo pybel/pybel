@@ -8,7 +8,7 @@ from collections import Counter
 import pybel
 import sqlalchemy.exc
 from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
-from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME
+from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, ANNOTATIONS
 from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants
@@ -170,8 +170,61 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
 
     @mock_bel_resources
     def test_query_edge(self, mock_get):
+        fadd_casp = {
+            'source': {
+                'node': (('Protein', 'HGNC', 'FADD'), {
+                    FUNCTION: 'Protein',
+                    NAMESPACE: 'HGNC',
+                    NAME: 'FADD'
+                }),
+                'key': ('Protein', 'HGNC', 'FADD')
+            },
+            'target': {
+                'node': (('Protein', 'HGNC', 'CASP8'), {
+                    FUNCTION: 'Protein',
+                    NAMESPACE: 'HGNC',
+                    NAME: 'CASP8'
+                }),
+                'key': ('Protein', 'HGNC', 'CASP8')
+            },
+            'data': {
+                RELATION: 'increases',
+                ANNOTATIONS: {
+                    'Species': '10116'
+                },
+                CITATION: {
+                    CITATION_TYPE: "PubMed",
+                    CITATION_NAME: "That other article from last week",
+                    CITATION_REFERENCE: "123456"
+                },
+                EVIDENCE: "Evidence 3"
+            },
+            'key': 0
+        }
+
+        # bel
         edge_list = self.gcm.query_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
         self.assertEqual(len(edge_list), 1)
+
+        # relation like, data
+        increased_list = self.gcm.query_edge(relation='increase%', as_dict_list=True)
+        self.assertEqual(len(increased_list), 2)
+        self.assertIn(fadd_casp, increased_list)
+
+        # evidence like, data
+        evidence_list = self.gcm.query_edge(evidence='%3%', as_dict_list=True)
+        self.assertEqual(len(increased_list), 2)
+        self.assertIn(fadd_casp, evidence_list)
+
+        # no result
+        empty_list = self.gcm.query_edge(source='p(HGNC:EGFR)', relation='increases',  as_dict_list=True)
+        self.assertEqual(len(empty_list), 0)
+
+        # source, relation, data
+        source_list = self.gcm.query_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
+        self.assertEqual(len(source_list), 1)
+        self.assertIn(fadd_casp, source_list)
+
 
     @mock_bel_resources
     def test_query_citation(self, mock_get):
@@ -191,12 +244,10 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
             CITATION: citation_1,
             EVIDENCE: 'Evidence 1 w extra notes'
         }
-
         evidence_citation_2 = {
             CITATION: citation_1,
             EVIDENCE: 'Evidence 2'
         }
-
         evidence_citation_3 = {
             CITATION: citation_2,
             EVIDENCE: "Evidence 3"
@@ -235,11 +286,13 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         self.assertIn(citation_1, name_dict_list2)
         self.assertIn(citation_2, name_dict_list2)
 
+        # type, name, evidence, data
         evidence_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week",
                                                      evidence=True, as_dict_list=True)
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(evidence_citation_3, evidence_dict_list)
 
+        # type, evidence like, data
         evidence_dict_list2 = self.gcm.query_citation(type='PubMed', evidence_text='%Evi%', as_dict_list=True)
         self.assertEqual(len(evidence_dict_list2), 3)
         self.assertIn(evidence_citation, evidence_dict_list2)
