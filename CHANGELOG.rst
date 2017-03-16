@@ -5,8 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`Unreleased <https://github.com/pybel/pybel/compare/v0.4.1...HEAD>`_
----------------------------------------------------------------------
+`Unreleased <https://github.com/pybel/pybel/compare/v0.4.2...HEAD>`_
+--------------------------------------------------------------------
+
+`0.4.2 <https://github.com/pybel/pybel/compare/v0.4.1...v0.4.2>`_ - 2017-03-16
+------------------------------------------------------------------------------
+Added
+~~~~~
+- Node property data model and I/O
+- Edge property data model and I/O
+
+Changed
+~~~~~~~
+- Update version checking to be more lenient
+
+Removed
+~~~~~~~
+- Origin completion option on BEL parsing. See `PyBEL Tools <http://pybel-tools.readthedocs.io/en/latest/mutation.html#pybel_tools.mutation.infer_central_dogma>`_
 
 `0.4.1 <https://github.com/pybel/pybel/compare/v0.4.0...v0.4.1>`_ - 2017-03-11
 ------------------------------------------------------------------------------
@@ -256,7 +271,8 @@ Added
 
 Diffs
 -----
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.4.1...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.4.2...HEAD
+- [0.4.2]: https://github.com/pybel/pybel/compare/v0.4.1...v0.4.2
 - [0.4.1]: https://github.com/pybel/pybel/compare/v0.4.0...v0.4.1
 - [0.4.0]: https://github.com/pybel/pybel/compare/v0.3.11...v0.4.0
 - [0.3.11]: https://github.com/pybel/pybel/compare/v0.3.10...v0.3.11
