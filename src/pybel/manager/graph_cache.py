@@ -30,12 +30,14 @@ log = logging.getLogger(__name__)
 
 
 class GraphCacheManager(BaseCacheManager):
-    def store_graph(self, graph, store_parts=False):
-        """Stores a graph in the database.
+    """The PyBEL graph cache manager has utilities for inserting and querying the graph store and edge store"""
+
+    def insert_graph(self, graph, store_parts=False):
+        """Inserts a graph in the database.
 
         :param graph: a BEL network
         :type graph: pybel.BELGraph
-        :param store_parts: Should the graph be stored in the Edge Store?
+        :param store_parts: Should the graph be stored in the edge store?
         :type store_parts: bool
         :return: A Network object
         :rtype: models.Network
@@ -54,9 +56,9 @@ class GraphCacheManager(BaseCacheManager):
         return network
 
     def store_graph_parts(self, network, graph):
-        """Stores the given graph into the Edge Store.
+        """Stores the given graph into the edge store.
 
-        :param network: A SQLAlchemy PyBEL Network objet
+        :param network: A SQLAlchemy PyBEL Network object
         :type network: models.Network
         :param graph: A BEL Graph
         :type graph: pybel.BELGraph
@@ -127,7 +129,7 @@ class GraphCacheManager(BaseCacheManager):
     def get_or_create_evidence(self, citation, text):
         """Creates entry and object for given evidence if it does not exist.
 
-        :param citation: Citation object obtained from get_or_create_citation()
+        :param citation: Citation object obtained from :func:`get_or_create_citation`
         :type citation: models.Citation
         :param text: Evidence text
         :type text: str
@@ -147,7 +149,7 @@ class GraphCacheManager(BaseCacheManager):
     def get_or_create_node(self, graph, node):
         """Creates entry and object for given node if it does not exist.
 
-        :param graph: A BEL network
+        :param graph: A BEL graph
         :type graph: pybel.BELGraph
         :param node: Key for the node to insert.
         :type node: tuple
@@ -223,8 +225,8 @@ class GraphCacheManager(BaseCacheManager):
         :type name: str
         :param reference: Identifier of the given citation (e.g. PubMed id)
         :type reference: str
-        :param date: Date of publication
-        :type date: date
+        :param date: Date of publication in ISO 8601 format
+        :type date: str
         :param authors: List of authors separated by |
         :type authors: str
         :return: A Citation object
@@ -267,15 +269,15 @@ class GraphCacheManager(BaseCacheManager):
         return result
 
     def get_or_create_modification(self, graph, node_data):
-        """Creates a list of is_variant object (models.Modification) that belong to the node described by
+        """Creates a list of modification objects (models.Modification) that belong to the node described by
         node_data.
 
-        :param graph: a BEL network
-        :type graph: :class:`pybel.BELGraph`
+        :param graph: a BEL graph
+        :type graph: pybel.BELGraph
         :param node_data: Describes the given node and contains is_variant information
         :type node_data: dict
-        :return:
-        :rtype: list
+        :return: A list of modification objects belonging to the given node
+        :rtype: list of models.Modification
         """
         modification_list = []
         if FUSION in node_data:
@@ -364,12 +366,12 @@ class GraphCacheManager(BaseCacheManager):
     def get_or_create_property(self, graph, edge_data):
         """Creates a list of all subject and object related properties of the edge.
 
-        :param graph: A BEL network
-        :type graph: :class:`pybel.BELGraph`
+        :param graph: A BEL graph
+        :type graph: pybel.BELGraph
         :param edge_data: Describes the context of the given edge.
         :type edge_data: dict
-        :return:
-        :rtype: list
+        :return: A list of all subject and object properties of the edge
+        :rtype: list of models.Property
         """
         properties = []
         property_list = []
@@ -469,8 +471,10 @@ class GraphCacheManager(BaseCacheManager):
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
 
+        :param annotations: dictionary of {key: value}
+        :type annotations: dict
         :return: A graph composed of the filtered edges
-        :rtype: BELGraph
+        :rtype: pybel.BELGraph
         """
         graph = BELGraph()
         for annotation_key, annotation_value in annotations.items():
@@ -533,7 +537,6 @@ class GraphCacheManager(BaseCacheManager):
         :return: An iterator over models.Edge object that match the given annotations
         :rtype: iter of models.Edge
         """
-
         # TODO make smarter
         for edge in self.session.query(models.Edge).all():
             ad = {a.annotation.name: a.name for a in edge.annotations}
@@ -605,7 +608,6 @@ class GraphCacheManager(BaseCacheManager):
         if as_dict_list:
             dict_list = [node.data for node in result]
             return dict_list
-
         else:
             return result
 
@@ -679,8 +681,6 @@ class GraphCacheManager(BaseCacheManager):
                        evidence_text=None, as_dict_list=False):
         """Run a query over all citations in the PyBEL cache.
 
-        :param as_dict_list:
-        :param evidence_text:
         :param type: Type of the citation. e.g. PubMed
         :type type: str
         :param reference: The identifier used for the citation. e.g. PubMed_ID
@@ -693,6 +693,9 @@ class GraphCacheManager(BaseCacheManager):
         :type date: str or date
         :param evidence: Weather or not supporting text should be included in the return.
         :type evidence: bool
+        :param evidence_text:
+        :param as_dict_list:
+        :type as_dict_list: bool
         :return: List of PyBEL.manager.models.Citation objects.
         :rtype: list
         """
@@ -745,8 +748,8 @@ class GraphCacheManager(BaseCacheManager):
 def to_database(graph, connection=None):
     """Stores a graph in a database
 
-    :param graph: a BEL graph
-    :type graph: BELGraph
+    :param graph: A BEL graph
+    :type graph: pybel.BELGraph
     :param connection: The string form of the URL is :code:`dialect[+driver]://user:password@host/dbname[?key=value..]`,
                        where dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name
                        of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
@@ -754,14 +757,13 @@ def to_database(graph, connection=None):
     :type connection: str
     """
     if isinstance(connection, GraphCacheManager):
-        connection.store_graph(graph)
+        connection.insert_graph(graph)
     else:
-        GraphCacheManager(connection).store_graph(graph)
+        GraphCacheManager(connection).insert_graph(graph)
 
 
 def from_database(name, version=None, connection=None):
     """Loads a BEL graph from a database
-
 
     :param name: The name of the graph
     :type name: str
@@ -772,7 +774,7 @@ def from_database(name, version=None, connection=None):
                        of a DBAPI, such as psycopg2, pyodbc, cx_oracle, etc. Alternatively, the URL can be an instance
                        of URL.
     :type connection: str
-    :return: a BEL graph loaded from the database
-    :rtype: BELGraph
+    :return: A BEL graph loaded from the database
+    :rtype: pybel.BELGraph
     """
     return GraphCacheManager(connection).get_graph(name, version)

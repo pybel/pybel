@@ -36,7 +36,7 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         name = expected_test_thorough_metadata[METADATA_NAME]
         version = expected_test_thorough_metadata[METADATA_VERSION]
 
-        self.gcm.store_graph(self.graph)
+        self.gcm.insert_graph(self.graph)
 
         x = self.gcm.ls()
 
@@ -49,10 +49,10 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
     @mock_bel_resources
     def test_integrity_failure(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
-        self.gcm.store_graph(self.graph)
+        self.gcm.insert_graph(self.graph)
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            self.gcm.store_graph(self.graph)
+            self.gcm.insert_graph(self.graph)
 
     @mock_bel_resources
     def test_get_versions(self, mock_get):
@@ -60,10 +60,10 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         TEST_V2 = expected_test_thorough_metadata[METADATA_VERSION]  # Actually is 1.0
 
         self.graph.document[METADATA_VERSION] = TEST_V1
-        self.gcm.store_graph(self.graph)
+        self.gcm.insert_graph(self.graph)
 
         self.graph.document[METADATA_VERSION] = TEST_V2
-        self.gcm.store_graph(self.graph)
+        self.gcm.insert_graph(self.graph)
 
         self.assertEqual({TEST_V1, TEST_V2}, set(self.gcm.get_graph_versions(self.graph.document[METADATA_NAME])))
 
@@ -84,7 +84,7 @@ class TestGraphCacheSimple(BelReconstitutionMixin, unittest.TestCase):
 
     @mock_bel_resources
     def test_get_or_create_node(self, mock_get):
-        network = self.gcm.store_graph(self.simple_graph, store_parts=True)
+        network = self.gcm.insert_graph(self.simple_graph, store_parts=True)
 
         citations = self.gcm.session.query(models.Citation).all()
         self.assertEqual(2, len(citations))
@@ -137,7 +137,7 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         self.connection = 'sqlite:///' + self.db_path
         self.graph = pybel.from_path(test_bel_simple, manager=self.connection, allow_nested=True)
         self.gcm = GraphCacheManager(connection=self.connection)
-        self.gcm.store_graph(self.graph, True)
+        self.gcm.insert_graph(self.graph, True)
 
     @mock_bel_resources
     def test_query_node(self, mock_get):
@@ -293,7 +293,7 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
         for u, v, k in original.edges(keys=True):
             original.edge[u][v][k][annotation_tag] = value_tag
 
-        self.gcm.store_graph(original, store_parts=True)
+        self.gcm.insert_graph(original, store_parts=True)
 
         reloaded = self.gcm.rebuild_by_edge_filter({annotation_tag: value_tag})
 

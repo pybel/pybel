@@ -5,28 +5,24 @@ import unittest
 from pathlib import Path
 
 from pybel.manager.cache import CacheManager
-from pybel.parser import MetadataParser #ControlParser,
+from pybel.parser import MetadataParser
 from pybel.parser.parse_exceptions import *
-
-#from pybel.parser.utils import sanitize_file_lines, split_file_to_annotations_and_definitions
-#from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, \
-#    MESH_DISEASES_URL, help_check_hgnc
-#from tests.constants import test_an_1, test_ns_1, test_bel, mock_bel_resources
-
-
+from pybel.parser.utils import split_file_to_annotations_and_definitions
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc
 from tests.constants import test_an_1, test_ns_1, mock_bel_resources
+from tests.constants import test_bel_simple
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
-#class TestSplitLines(unittest.TestCase):
-#    def test_parts(self):
-#        with open(test_bel) as f:
-#            docs, definitions, statements = split_file_to_annotations_and_definitions(f)
 
-#        self.assertEqual(7, len(docs))
-#        self.assertEqual(5, len(definitions))
-#        self.assertEqual(14, len(statements))
+class TestSplitLines(unittest.TestCase):
+    def test_parts(self):
+        with open(test_bel_simple) as f:
+            docs, definitions, statements = split_file_to_annotations_and_definitions(f)
+        self.assertEqual(7, len(docs))
+        self.assertEqual(5, len(definitions))
+        self.assertEqual(14, len(statements))
+
 
 class TestParseMetadata(unittest.TestCase):
     @classmethod

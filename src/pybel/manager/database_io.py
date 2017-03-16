@@ -30,7 +30,7 @@ def to_database(graph, connection=None):
     :type connection: None or str or GraphCacheManager
     """
     try:
-        build_graph_cache_manager(connection).store_graph(graph)
+        build_graph_cache_manager(connection).insert_graph(graph)
     except IntegrityError:
         log.exception('Error storing graph - other graph with same metadata'
                       ' already present. Consider incrementing the version')

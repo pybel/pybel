@@ -136,7 +136,13 @@ PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
 
 
 def parse_datetime(s):
-    """Tries to parse a datetime object from a standard datetime format or date format"""
+    """Tries to parse a datetime object from a standard datetime format or date format
+
+    :param s: A string represing a date or datetime
+    :type s: str
+    :return: A parsed date object
+    :rtype: datetime.date
+    """
     try:
         dt = datetime.strptime(s, CREATION_DATE_FMT)
         return dt

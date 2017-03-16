@@ -131,7 +131,7 @@ class InvalidMetadataException(PyBelWarning):
     """
 
     def __init__(self, key, value):
-        PyBelWarning.__init__(self, (key, value))
+        PyBelWarning.__init__(self, key, value)
         self.key = key
         self.value = value
 
@@ -166,6 +166,11 @@ class MissingCitationException(PyBelWarning):
     """Tried to parse a line, but no citation present. Most likely due to previous improperly formatted citation"""
 
     def __init__(self, line):
+        """
+
+        :param string: The line of the BEL document that's a problem
+        :type string: str
+        """
         PyBelWarning.__init__(self, line)
         self.citation = line
 
@@ -176,9 +181,14 @@ class MissingCitationException(PyBelWarning):
 class MissingSupportWarning(PyBelWarning):
     """All BEL statements must be qualified with evidence"""
 
-    def __init__(self, string):
-        PyBelWarning.__init__(self, string)
-        self.string = string
+    def __init__(self, line):
+        """
+
+        :param line: The line of the BEL document that's a problem
+        :type line: str
+        """
+        PyBelWarning.__init__(self, line)
+        self.string = line
 
     def __str__(self):
         return "Missing evidence; can't add: {}".format(self.string)

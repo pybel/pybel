@@ -6,13 +6,14 @@ import unittest
 
 import networkx as nx
 from onto2nx.ontospy import Ontospy
+from requests.compat import urlparse
+
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches
-from requests.compat import urlparse
 
 try:
     from unittest import mock
