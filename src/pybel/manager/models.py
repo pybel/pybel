@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-
-This module contains the database models that support the PyBEL definition cache and graph cache
-
-"""
+"""This module contains the database models that support the PyBEL definition cache and graph cache"""
 
 import datetime
 
@@ -14,9 +10,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 from ..constants import *
-from ..parser.modifiers.fragment import FragmentParser
-from ..parser.modifiers.fusion import FusionParser
-from ..parser.modifiers.protein_modification import PmodParser
+from ..parser.modifiers import FragmentParser, FusionParser, PmodParser
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
@@ -612,7 +606,7 @@ class Property(Base):
     def data(self):
         """Creates a property dict that is used to recreate an edge dictionary for PyBEL.BELGraph.
 
-        :return: Property-Dict of an edge that is participant (sub/obj) related.
+        :return: Property dictionary of an edge that is participant (sub/obj) related.
         :rtype: dict
         """
         prop_dict = {

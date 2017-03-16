@@ -30,7 +30,8 @@ def to_database(graph, connection=None):
     :type connection: None or str or GraphCacheManager
     """
     try:
-        build_graph_cache_manager(connection).insert_graph(graph)
+        gcm = build_graph_cache_manager(connection)
+        gcm.insert_graph(graph)
     except IntegrityError:
         log.exception('Error storing graph - other graph with same metadata'
                       ' already present. Consider incrementing the version')
@@ -52,4 +53,5 @@ def from_database(name, version=None, connection=None):
     :return: a BEL graph loaded from the database
     :rtype: BELGraph
     """
-    return build_graph_cache_manager(connection).get_graph(name, version)
+    gcm = build_graph_cache_manager(connection)
+    return gcm.get_graph(name, version)

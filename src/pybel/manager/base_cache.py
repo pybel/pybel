@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""This module contains the base class for connection managers in SQLAlchemy"""
+
 import os
 
 from sqlalchemy import create_engine
