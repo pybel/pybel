@@ -20,6 +20,7 @@ from .utils import is_int
 from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT, \
     BEL_KEYWORD_ALL, ANNOTATIONS
 from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET, CITATION
+from ..utils import valid_date
 
 log = logging.getLogger('pybel')
 
@@ -145,6 +146,11 @@ class ControlParser(BaseParser):
 
         if values[0] == 'PubMed' and not is_int(values[2]):
             raise InvalidPubMedIdentifierWarning(values[2])
+
+        if 4 <= len(values) and not valid_date(values[3]):
+            log.debug('Invalid date: %s', values[3])
+            self.citation = dict(zip(CITATION_ENTRIES, values[:3]))
+            return tokens
 
         self.citation = dict(zip(CITATION_ENTRIES, values))
 

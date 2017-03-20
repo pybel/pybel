@@ -4,6 +4,7 @@ import itertools as itt
 import logging
 from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
+from datetime import datetime
 from operator import itemgetter
 
 import networkx as nx
@@ -157,3 +158,40 @@ def ensure_quotes(s):
     :rtype: str
     """
     return '"{}"'.format(s) if not s.isalnum() else s
+
+
+CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
+PUBLISHED_DATE_FMT = '%Y-%m-%d'
+PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
+
+
+def valid_date(s):
+    """Checks that a string represents a valid date in ISO 8601 format YYYY-MM-DD"""
+    try:
+        datetime.strptime(s, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
+
+
+def parse_datetime(s):
+    """Tries to parse a datetime object from a standard datetime format or date format
+
+    :param s: A string represing a date or datetime
+    :type s: str
+    :return: A parsed date object
+    :rtype: datetime.date
+    """
+    try:
+        dt = datetime.strptime(s, CREATION_DATE_FMT)
+        return dt
+    except:
+        try:
+            dt = datetime.strptime(s, PUBLISHED_DATE_FMT)
+            return dt
+        except:
+            try:
+                dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
+                return dt
+            except:
+                raise ValueError('Incorrect datetime format for {}'.format(s))

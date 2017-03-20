@@ -138,8 +138,8 @@ class TestParseControl2(TestParseControl):
         self.parser.parseString('UNSET Citation')
         self.assertEqual(0, len(self.parser.citation))
 
-    def test_citation_long(self):
-        s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","","de Nigris|Lerman A|Ignarro LJ",""}'
+    def test_citation_invalid_date(self):
+        s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","01-12-1999","de Nigris"}'
 
         self.parser.parseString(s)
 
@@ -147,7 +147,28 @@ class TestParseControl2(TestParseControl):
             CITATION_TYPE: 'PubMed',
             CITATION_NAME: 'Trends in molecular medicine',
             CITATION_REFERENCE: '12928037',
-            CITATION_DATE: '',
+        }
+
+        self.assertEqual(expected_citation, self.parser.citation)
+
+        expected_dict = {
+            EVIDENCE: None,
+            ANNOTATIONS: {},
+            CITATION: expected_citation
+        }
+
+        self.assertEqual(expected_dict, self.parser.get_annotations())
+
+    def test_citation_long(self):
+        s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","1999-01-01","de Nigris|Lerman A|Ignarro LJ",""}'
+
+        self.parser.parseString(s)
+
+        expected_citation = {
+            CITATION_TYPE: 'PubMed',
+            CITATION_NAME: 'Trends in molecular medicine',
+            CITATION_REFERENCE: '12928037',
+            CITATION_DATE: '1999-01-01',
             CITATION_AUTHORS: 'de Nigris|Lerman A|Ignarro LJ',
             CITATION_COMMENTS: ''
         }
