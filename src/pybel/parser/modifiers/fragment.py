@@ -4,13 +4,14 @@
 Fragments
 ~~~~~~~~~
 
-The addition of a fragment results in an entry called :py:data:`pybel.constants.VARIANTS`
+The addition of a fragment results in an entry called :data:`pybel.constants.VARIANTS`
 in the data dictionary associated with a given node. This entry is a list with dictionaries
-describing each of the variants. All variants have the entry :py:data:`pybel.constants.KIND` to identify whether it is
-a PTM, gene modification, fragment, or HGVS variant. The :py:data:`pybel.constants.KIND` value for a fragment is :py:data:`pybel.constants.FRAGMENT`.
+describing each of the variants. All variants have the entry :data:`pybel.constants.KIND` to identify whether it is
+a PTM, gene modification, fragment, or HGVS variant. The :data:`pybel.constants.KIND` value for a fragment is
+:data:`pybel.constants.FRAGMENT`.
 
-Each fragment contains an identifier, which is a dictionary with the namespace and name, and can
-optionally include the position ('pos') and/or amino acid code ('code').
+Each fragment contains an identifier, which is a dictionary with the namespace and name, and can optionally include
+the position ('pos') and/or amino acid code ('code').
 
 For example, the node :code:`p(HGNC:GSK3B, frag(45_129))` is represented with the following:
 
@@ -33,7 +34,7 @@ Additionally, nodes can have an asterick (*) or question mark (?) representing u
 or unknown fragments, respectively.
 
 A fragment may also be unknown, such as in the node :code:`p(HGNC:GSK3B, frag(?))`. This
-is represented with the key :py:data:`pybel.constants.FRAGMENT_MISSING` and the value of '?' like:
+is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the value of '?' like:
 
 
 .. code::

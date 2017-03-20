@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+PyBEL Constants
+---------------
+
+This module maintains the strings used throughout the PyBEL codebase to promote consistency.
+"""
+
 import os
 
 SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
@@ -50,20 +57,8 @@ CITATION_COMMENTS = 'comments'
 #: Represents the ordering of the citation entries in a control statement (SET Citation = ...)
 CITATION_ENTRIES = CITATION_TYPE, CITATION_NAME, CITATION_REFERENCE, CITATION_DATE, CITATION_AUTHORS, CITATION_COMMENTS
 
-# Internal node data format keys
+# Used during BEL parsing
 
-ACTIVITY = 'Activity'
-DEGRADATION = 'Degradation'
-TRANSLOCATION = 'Translocation'
-CELL_SECRETION = 'CellSecretion'
-CELL_SURFACE_EXPRESSION = 'CellSurfaceExpression'
-
-PARTNER_3P = 'partner_3p'
-PARTNER_5P = 'partner_5p'
-RANGE_3P = 'range_3p'
-RANGE_5P = 'range_5p'
-
-FUSION = 'fusion'
 MODIFIER = 'modifier'
 EFFECT = 'effect'
 TARGET = 'target'
@@ -74,17 +69,37 @@ REACTANTS = 'reactants'
 PRODUCTS = 'products'
 LOCATION = 'location'
 
-KIND = 'kind'
-HGVS = 'hgvs'
-PMOD = 'pmod'
-GMOD = 'gmod'
-FRAGMENT = 'frag'
+ACTIVITY = 'Activity'
+DEGRADATION = 'Degradation'
+TRANSLOCATION = 'Translocation'
+CELL_SECRETION = 'CellSecretion'
+CELL_SURFACE_EXPRESSION = 'CellSurfaceExpression'
+
+# Internal node data format keys
 FUNCTION = 'function'
 NAMESPACE = 'namespace'
 NAME = 'name'
 IDENTIFIER = 'identifier'
-VARIANTS = 'variants'
 
+FUSION = 'fusion'
+PARTNER_3P = 'partner_3p'
+PARTNER_5P = 'partner_5p'
+RANGE_3P = 'range_3p'
+RANGE_5P = 'range_5p'
+
+VARIANTS = 'variants'
+#: The key representing what kind of variation is being represented
+KIND = 'kind'
+#: The value for :data:`KIND` for an HGVS variant
+HGVS = 'hgvs'
+#: The value for :data:`KIND` for a protein modification
+PMOD = 'pmod'
+#: The value for :data:`KIND` for a gene modification
+GMOD = 'gmod'
+#: The value for :data:`KIND` for a fragment
+FRAGMENT = 'frag'
+
+#: Used as a namespace when none is given when lenient parsing mode is turned on. Not recommended!
 DIRTY = 'dirty'
 
 #: Represents the BEL abundance, geneAbundance()
@@ -132,7 +147,6 @@ ANNOTATIONS = 'annotations'
 SUBJECT = 'subject'
 #: The key for an internal edge data dictionary for the object modifier dictionary
 OBJECT = 'object'
-
 
 HAS_REACTANT = 'hasReactant'
 HAS_PRODUCT = 'hasProduct'
@@ -244,6 +258,7 @@ METADATA_COPYRIGHT = 'copyright'
 #: The key for the document disclaimer. Can be accessed by :code:`graph.document[METADATA_DISCLAIMER]`
 METADATA_DISCLAIMER = 'disclaimer'
 
+#: Provides a mapping from BEL language keywords to internal PyBEL strings
 DOCUMENT_KEYS = {
     BEL_KEYWORD_METADATA_AUTHORS: METADATA_AUTHORS,
     BEL_KEYWORD_METADATA_CONTACT: METADATA_CONTACT,
@@ -254,6 +269,8 @@ DOCUMENT_KEYS = {
     BEL_KEYWORD_METADATA_NAME: METADATA_NAME,
     BEL_KEYWORD_METADATA_VERSION: METADATA_VERSION
 }
+
+#: Provides a mapping from internal PyBEL strings to BEL language keywords. Is the inverse of :data:`DOCUMENT_KEYS`
 INVERSE_DOCUMENT_KEYS = {v: k for k, v in DOCUMENT_KEYS.items()}
 
 #: A set representing the required metadata during BEL document parsing

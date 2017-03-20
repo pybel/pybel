@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""BEL language parameters"""
+"""
+BEL Language
+------------
+
+This module contains mappings between PyBEL's internal constants and BEL language keywords
+"""
 
 import logging
 
@@ -47,6 +52,7 @@ activity_ns = {
 
 activities = list(activity_labels.keys())
 
+#: Provides a mapping from BEL terms to PyBEL internal constants
 abundance_labels = {
     'abundance': ABUNDANCE,
     'a': ABUNDANCE,
