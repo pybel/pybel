@@ -7,9 +7,6 @@ from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import *
 from pybel.parser.modifiers import LocationParser, VariantParser, FragmentParser, GmodParser, GsubParser, PmodParser, \
     PsubParser, TruncationParser, FusionParser
-from pybel.parser.modifiers.fragment import FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP
-from pybel.parser.modifiers.fusion import FUSION_STOP, FUSION_START, FUSION_REFERENCE, FUSION_MISSING
-from pybel.parser.modifiers.protein_modification import PMOD_CODE, PMOD_POSITION
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict, \

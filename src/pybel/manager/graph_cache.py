@@ -12,9 +12,6 @@ from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
 from ..graph import BELGraph
 from ..io import to_bytes, from_bytes
-from ..parser.modifiers.fragment import FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP
-from ..parser.modifiers.fusion import FUSION_STOP, FUSION_START, FUSION_REFERENCE, FUSION_MISSING
-from ..parser.modifiers.protein_modification import PMOD_CODE, PMOD_POSITION
 from ..parser.utils import subdict_matches
 
 try:

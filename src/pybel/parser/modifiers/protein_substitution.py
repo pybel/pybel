@@ -36,14 +36,11 @@ from pyparsing import pyparsing_common as ppc
 from ..baseparser import BaseParser, one_of_tags, nest
 from ..language import amino_acid
 from ...constants import HGVS, KIND, IDENTIFIER
+from ...constants import PSUB_REFERENCE, PSUB_POSITION, PSUB_VARIANT
 
 log = logging.getLogger(__name__)
 
 psub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
-
-PSUB_REFERENCE = 'reference'
-PSUB_POSITION = 'position'
-PSUB_VARIANT = 'variant'
 
 
 class PsubParser(BaseParser):

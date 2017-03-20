@@ -4,7 +4,7 @@
 Gene Substitutions
 ~~~~~~~~~~~~~~~~~~
 
-Gene substitutions are legacy statements defined in BEL 1.0. BEL 2.0 reccomends using HGVS strings. Luckily,
+Gene substitutions are legacy statements defined in BEL 1.0. BEL 2.0 recommends using HGVS strings. Luckily,
 the information contained in a BEL 1.0 encoding, such as :code:`g(HGNC:APP,sub(G,275341,C))` can be
 automatically translated to the appropriate HGVS :code:`g(HGNC:APP, var(c.275341G>C))`, assuming that all
 substitutions are using the reference coding gene sequence for numbering and not the genomic reference.
@@ -35,15 +35,12 @@ from pyparsing import pyparsing_common as ppc
 
 from ..baseparser import BaseParser, one_of_tags, nest
 from ..language import dna_nucleotide
+from ...constants import GSUB_REFERENCE, GSUB_POSITION, GSUB_VARIANT
 from ...constants import HGVS, KIND, IDENTIFIER
 
 log = logging.getLogger(__name__)
 
 gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
-
-GSUB_REFERENCE = 'reference'
-GSUB_POSITION = 'position'
-GSUB_VARIANT = 'variant'
 
 
 class GsubParser(BaseParser):

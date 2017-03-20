@@ -39,13 +39,11 @@ import logging
 from pyparsing import pyparsing_common as ppc
 
 from ..baseparser import BaseParser, one_of_tags, nest
-from ...constants import HGVS, KIND, IDENTIFIER
+from ...constants import HGVS, KIND, IDENTIFIER, TRUNCATION_POSITION
 
 log = logging.getLogger(__name__)
 
 truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, identifier=KIND)
-
-TRUNCATION_POSITION = 'position'
 
 
 class TruncationParser(BaseParser):

@@ -12,9 +12,6 @@ from pkg_resources import get_distribution
 
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .parser.modifiers.fragment import FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP
-from .parser.modifiers.fusion import FUSION_STOP, FUSION_START, FUSION_REFERENCE
-from .parser.modifiers.protein_modification import PMOD_ORDER
 from .utils import ensure_quotes, flatten_citation, sort_edges
 
 __all__ = [

@@ -2,16 +2,17 @@
 
 from pyparsing import Word
 
-from .fragment import FragmentParser, FRAGMENT_START, FRAGMENT_STOP, FRAGMENT_MISSING, FRAGMENT_DESCRIPTION
+from .fragment import FragmentParser
 from .fusion import FusionParser
-from .gene_modification import GmodParser, GMOD_ORDER
+from .gene_modification import GmodParser
 from .gene_substitution import GsubParser
 from .location import LocationParser
-from .protein_modification import PmodParser, PMOD_ORDER
+from .protein_modification import PmodParser
 from .protein_substitution import PsubParser
 from .truncation import TruncationParser
 from .variant import VariantParser
 from ..language import dna_nucleotide_labels, rna_nucleotide_labels
+from ...constants import FRAGMENT_START, FRAGMENT_STOP, FRAGMENT_MISSING, FRAGMENT_DESCRIPTION, GMOD_ORDER, PMOD_ORDER
 from ...constants import KIND, PMOD, NAMESPACE, NAME, GMOD, FRAGMENT, HGVS, IDENTIFIER
 
 

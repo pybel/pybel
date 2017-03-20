@@ -233,3 +233,31 @@ GRAPH_ANNOTATION_PATTERN = 'annotation_pattern'
 GRAPH_ANNOTATION_LIST = 'annotation_list'
 GRAPH_WARNINGS = 'warnings'
 GRAPH_PYBEL_VERSION = 'pybel_version'
+
+# Modifier parser constants
+
+FRAGMENT_START = 'start'
+FRAGMENT_STOP = 'stop'
+FRAGMENT_MISSING = 'missing'
+FRAGMENT_DESCRIPTION = 'description'
+
+FUSION_REFERENCE = 'reference'
+FUSION_START = 'left'
+FUSION_STOP = 'right'
+FUSION_MISSING = 'missing'
+
+GMOD_ORDER = [KIND, IDENTIFIER]
+
+GSUB_REFERENCE = 'reference'
+GSUB_POSITION = 'position'
+GSUB_VARIANT = 'variant'
+
+PMOD_CODE = 'code'
+PMOD_POSITION = 'pos'
+PMOD_ORDER = [KIND, IDENTIFIER, PMOD_CODE, PMOD_POSITION]
+
+PSUB_REFERENCE = 'reference'
+PSUB_POSITION = 'position'
+PSUB_VARIANT = 'variant'
+
+TRUNCATION_POSITION = 'position'

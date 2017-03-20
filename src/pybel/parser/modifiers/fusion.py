@@ -5,8 +5,8 @@ Fusions
 ~~~~~~~
 
 Gene, RNA, protein, and miRNA fusions are all represented with the same underlying data structure. Below
-it is shown with uppercase letters referring to constants from :code:`pybel.constants` and
-:class:`pybel.parser.FusionParser`. For example, :code:`g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))` is represented as:
+it is shown with uppercase letters referring to constants from :code:`pybel.constants` and. For example,
+:code:`g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))` is represented as:
 
 .. code::
 
@@ -16,15 +16,15 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
             PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
             PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
             RANGE_5P: {
-                FusionParser.REFERENCE: 'c',
-                FusionParser.START: '?',
-                FusionParser.STOP: 1875
+                FUSION_REFERENCE: 'c',
+                FUSION_START: '?',
+                FUSION_STOP: 1875
 
             },
             RANGE_3P: {
-                FusionParser.REFERENCE: 'c',
-                FusionParser.START: 2626,
-                FusionParser.STOP: '?'
+                FUSION_REFERENCE: 'c',
+                FUSION_START: 2626,
+                FUSION_STOP: '?'
             }
         }
     }
@@ -41,13 +41,9 @@ from pyparsing import pyparsing_common as ppc
 from ..baseparser import BaseParser, nest, WCW
 from ..parse_identifier import IdentifierParser
 from ...constants import FUSION, PARTNER_5P, RANGE_5P, PARTNER_3P, RANGE_3P
+from ...constants import FUSION_REFERENCE, FUSION_START, FUSION_STOP, FUSION_MISSING
 
 fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
-
-FUSION_REFERENCE = 'reference'
-FUSION_START = 'left'
-FUSION_STOP = 'right'
-FUSION_MISSING = 'missing'
 
 
 class FusionParser(BaseParser):

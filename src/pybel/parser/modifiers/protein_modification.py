@@ -28,8 +28,8 @@ For example, the node :code:`p(HGNC:GSK3B, pmod(P, S, 9))` is represented with t
                     NAME: 'Ph',
 
                 },
-                PmodParser.CODE: 'Ser',
-                PmodParser.POSITION: 9
+                PMOD_CODE: 'Ser',
+                PMOD_POSITION: 9
             }
         ]
     }
@@ -52,8 +52,8 @@ twice to become active. This results in the following:
                     NAME: 'Ph',
 
                 },
-                PmodParser.CODE: 'Thr',
-                PmodParser.POSITION: 202
+                PMOD_CODE: 'Thr',
+                PMOD_POSITION: 202
             },
             {
                 KIND: PMOD,
@@ -62,8 +62,8 @@ twice to become active. This results in the following:
                     NAME: 'Ph',
 
                 },
-                PmodParser.CODE: 'Tyr',
-                PmodParser.POSITION: 204
+                PMOD_CODE: 'Tyr',
+                PMOD_POSITION: 204
             }
         ]
     }
@@ -83,14 +83,11 @@ from ..baseparser import BaseParser, one_of_tags, nest, WCW
 from ..language import pmod_namespace, pmod_legacy_labels, amino_acid
 from ..parse_identifier import IdentifierParser
 from ...constants import KIND, PMOD, NAMESPACE, BEL_DEFAULT_NAMESPACE, IDENTIFIER
+from ...constants import PMOD_CODE, PMOD_POSITION
 
 log = logging.getLogger(__name__)
 
 pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, identifier=KIND)
-
-PMOD_CODE = 'code'
-PMOD_POSITION = 'pos'
-PMOD_ORDER = [KIND, IDENTIFIER, PMOD_CODE, PMOD_POSITION]
 
 
 class PmodParser(BaseParser):

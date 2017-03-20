@@ -10,9 +10,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 from ..constants import *
-from ..parser.modifiers.fragment import FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP
-from ..parser.modifiers.fusion import FUSION_STOP, FUSION_START, FUSION_REFERENCE, FUSION_MISSING
-from ..parser.modifiers.protein_modification import PMOD_CODE, PMOD_POSITION
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'

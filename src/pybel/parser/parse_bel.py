@@ -15,7 +15,6 @@ from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .language import belns_encodings, activity_labels, activities
 from .modifiers import FusionParser, VariantParser, canonicalize_variant, FragmentParser, GmodParser, GsubParser, \
     LocationParser, PmodParser, PsubParser, TruncationParser
-from .modifiers.fusion import FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
