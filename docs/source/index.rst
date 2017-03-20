@@ -32,6 +32,7 @@ Installation is as easy as getting the code from PyPI with :code:`python3 -m pip
    :caption: Reference
    :name: reference
 
+   constants
    parser
    manager
    utilities

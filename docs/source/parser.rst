@@ -12,12 +12,17 @@ of these parsers.
 
 See: https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BEL2.md
 
+Control Parser
+--------------
 .. autoclass:: pybel.parser.parse_control.ControlParser
     :members:
 
-
-.. autoclass:: pybel.parser.parse_bel.BelParser
+Metadata Parser
+---------------
+.. autoclass:: pybel.parser.parse_metadata.MetadataParser
     :members:
 
-.. autoclass:: pybel.parser.parse_metadata.MetadataParser
+BEL Parser
+----------
+.. autoclass:: pybel.parser.parse_bel.BelParser
     :members:

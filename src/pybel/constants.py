@@ -26,14 +26,13 @@ PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'
 
 BEL_DEFAULT_NAMESPACE = 'bel'
 
+#: The valid citation types
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Citation
 CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
 
+#: The valid namespace types
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Custom+Namespaces
 NAMESPACE_DOMAIN_TYPES = {"BiologicalProcess", "Chemical", "Gene and Gene Products", "Other"}
-
-SUBJECT = 'subject'
-OBJECT = 'object'
 
 #: Represents the key for the citation type in a citation dictionary
 CITATION_TYPE = 'type'
@@ -89,39 +88,58 @@ VARIANTS = 'variants'
 DIRTY = 'dirty'
 
 #: Represents the BEL abundance, geneAbundance()
+#: .. seealso:: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#Xabundancea
 GENE = 'Gene'
+
 #: Represents the BEL abundance, rnaAbundance()
 RNA = 'RNA'
+
 #: Represents the BEL abundance, proteinAbundance()
 PROTEIN = 'Protein'
+
 #: Represents the BEL abundance, microRNAAbundance()
 MIRNA = 'miRNA'
+
 #: Represents the BEL abundance, abundance()
 ABUNDANCE = 'Abundance'
+
 #: Represents the BEL function, biologicalProcess()
 BIOPROCESS = 'BiologicalProcess'
+
 #: Represents the BEL function, pathology()
 PATHOLOGY = 'Pathology'
+
 #: Represents the BEL abundance, compositeAbundance()
 COMPOSITE = 'Composite'
+
 #: Represents the BEL abundance, complexAbundance()
 COMPLEX = 'Complex'
+
 #: Represents the BEL transformation, reaction()
 REACTION = 'Reaction'
 
 # Internal edge data keys
 
+#: The key for an internal edge data dictionary for the relation string
 RELATION = 'relation'
+#: The key for an internal edge data dictionary for the citation dictionary
 CITATION = 'citation'
+#: The key for an internal edge data dictionary for the evidence string
 EVIDENCE = 'evidence'
+#: The key for an internal edge data dictionary for the annotations dictionary
 ANNOTATIONS = 'annotations'
+#: The key for an internal edge data dictionary for the subject modifier dictionary
+SUBJECT = 'subject'
+#: The key for an internal edge data dictionary for the object modifier dictionary
+OBJECT = 'object'
+
 
 HAS_REACTANT = 'hasReactant'
 HAS_PRODUCT = 'hasProduct'
 HAS_COMPONENT = 'hasComponent'
 HAS_VARIANT = 'hasVariant'
 HAS_MEMBER = 'hasMember'
-TRANSCRIBED_TO = 'transcribedTo'  #: DNA to RNA is called transcription
+TRANSCRIBED_TO = 'transcribedTo'  #: :data:`GENE` to :data:`RNA` is called transcription
 TRANSLATED_TO = 'translatedTo'  #: RNA to PROTEIN is called translation
 INCREASES = 'increases'
 DIRECTLY_INCREASES = 'directlyIncreases'
@@ -184,7 +202,6 @@ BEL_KEYWORD_EVIDENCE = 'Evidence'
 BEL_KEYWORD_SUPPORT = 'SupportingText'
 BEL_KEYWORD_ALL = 'ALL'
 
-# Internal metadata representation
 BEL_KEYWORD_METADATA_NAME = 'Name'
 BEL_KEYWORD_METADATA_VERSION = 'Version'
 BEL_KEYWORD_METADATA_DESCRIPTION = 'Description'
@@ -194,13 +211,37 @@ BEL_KEYWORD_METADATA_LICENSES = 'Licenses'
 BEL_KEYWORD_METADATA_COPYRIGHT = 'Copyright'
 BEL_KEYWORD_METADATA_DISCLAIMER = 'Disclaimer'
 
+# Internal metadata representation
+
+#: The key for the document metadata dictionary. Can be accessed by :code:`graph.graph[GRAPH_METADATA]`, or by using
+#: the property built in to the :class:`pybel.BELGraph`, :func:`pybel.BELGraph.document`
+GRAPH_METADATA = 'document_metadata'
+GRAPH_NAMESPACE_URL = 'namespace_url'
+GRAPH_NAMESPACE_OWL = 'namespace_owl'
+GRAPH_NAMESPACE_PATTERN = 'namespace_pattern'
+GRAPH_ANNOTATION_URL = 'annotation_url'
+GRAPH_ANNOTATION_OWL = 'annotation_owl'
+GRAPH_ANNOTATION_PATTERN = 'annotation_pattern'
+GRAPH_ANNOTATION_LIST = 'annotation_list'
+GRAPH_WARNINGS = 'warnings'
+GRAPH_PYBEL_VERSION = 'pybel_version'
+
+#: The key for the document name. Can be accessed by :code:`graph.document[METADATA_NAME]` or by using the property
+#: built into the :class:`pybel.BELGraph` class, :func:`pybel.BELGraph.name`
 METADATA_NAME = 'name'
+#: The key for the document version. Can be accessed by :code:`graph.document[METADATA_VERSION]`
 METADATA_VERSION = 'version'
+#: The key for the document description. Can be accessed by :code:`graph.document[METADATA_DESCRIPTION]`
 METADATA_DESCRIPTION = 'description'
+#: The key for the document authors. Can be accessed by :code:`graph.document[METADATA_NAME]`
 METADATA_AUTHORS = 'authors'
+#: The key for the document contact email. Can be accessed by :code:`graph.document[METADATA_CONTACT]`
 METADATA_CONTACT = 'contact'
+#: The key for the document licenses. Can be accessed by :code:`graph.document[METADATA_LICENSES]`
 METADATA_LICENSES = 'licenses'
+#: The key for the document copyright information. Can be accessed by :code:`graph.document[METADATA_COPYRIGHT]`
 METADATA_COPYRIGHT = 'copyright'
+#: The key for the document disclaimer. Can be accessed by :code:`graph.document[METADATA_DISCLAIMER]`
 METADATA_DISCLAIMER = 'disclaimer'
 
 DOCUMENT_KEYS = {
@@ -215,6 +256,7 @@ DOCUMENT_KEYS = {
 }
 INVERSE_DOCUMENT_KEYS = {v: k for k, v in DOCUMENT_KEYS.items()}
 
+#: A set representing the required metadata during BEL document parsing
 REQUIRED_METADATA = {
     METADATA_NAME,
     METADATA_VERSION,
@@ -222,17 +264,6 @@ REQUIRED_METADATA = {
     METADATA_AUTHORS,
     METADATA_CONTACT
 }
-
-GRAPH_METADATA = 'document_metadata'
-GRAPH_NAMESPACE_URL = 'namespace_url'
-GRAPH_NAMESPACE_OWL = 'namespace_owl'
-GRAPH_NAMESPACE_PATTERN = 'namespace_pattern'
-GRAPH_ANNOTATION_URL = 'annotation_url'
-GRAPH_ANNOTATION_OWL = 'annotation_owl'
-GRAPH_ANNOTATION_PATTERN = 'annotation_pattern'
-GRAPH_ANNOTATION_LIST = 'annotation_list'
-GRAPH_WARNINGS = 'warnings'
-GRAPH_PYBEL_VERSION = 'pybel_version'
 
 # Modifier parser constants
 
