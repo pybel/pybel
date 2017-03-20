@@ -10,6 +10,8 @@ from .parse_exceptions import UndefinedNamespaceWarning, NakedNameWarning, Missi
     MissingDefaultNameWarning, MissingNamespaceRegexWarning
 from ..constants import DIRTY, NAMESPACE, NAME, IDENTIFIER
 
+__all__ = ['IdentifierParser']
+
 log = logging.getLogger(__name__)
 
 

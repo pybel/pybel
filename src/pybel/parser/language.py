@@ -14,7 +14,7 @@ from pyparsing import *
 from .parse_exceptions import PlaceholderAminoAcidWarning
 from ..constants import *
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 activity_labels = {
     'catalyticActivity': 'cat',

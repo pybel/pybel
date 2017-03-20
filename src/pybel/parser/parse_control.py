@@ -22,7 +22,9 @@ from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_K
 from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET, CITATION
 from ..utils import valid_date
 
-log = logging.getLogger('pybel')
+__all__ = ['ControlParser']
+
+log = logging.getLogger(__name__)
 
 
 class ControlParser(BaseParser):
