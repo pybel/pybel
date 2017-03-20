@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 
 PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux.

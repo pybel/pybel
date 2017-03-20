@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-BEL language parameters
-"""
+"""BEL language parameters"""
 
 import logging
 
