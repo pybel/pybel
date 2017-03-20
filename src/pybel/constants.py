@@ -12,15 +12,19 @@ import os
 SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
 LARGE_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/large_corpus.bel'
 
+#: GOCC is the only namespace that needs to be stored because translocations use some of its values by default
 GOCC_LATEST = 'http://resources.openbel.org/belframework/20150611/namespace/go-cellular-component.belns'
 GOCC_KEYWORD = 'GOCC'
 
+#: The environment variable that contains the default SQL connection information for the PyBEL cache
 PYBEL_CONNECTION_ENV = 'PYBEL_CONNECTION'
 
+#: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
 PYBEL_DIR = os.path.expanduser('~/.pybel')
 if not os.path.exists(PYBEL_DIR):
     os.mkdir(PYBEL_DIR)
 
+#: The default directory where PyBEL data are stored
 PYBEL_DATA_DIR = os.path.join(PYBEL_DIR, 'data')
 if not os.path.exists(PYBEL_DATA_DIR):
     os.mkdir(PYBEL_DATA_DIR)
@@ -31,6 +35,7 @@ DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 PYBEL_CONTEXT_TAG = 'pybel_context'
 PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'
 
+#: The default namespace given to entities in the BEL language
 BEL_DEFAULT_NAMESPACE = 'bel'
 
 #: The valid citation types
@@ -76,16 +81,32 @@ CELL_SECRETION = 'CellSecretion'
 CELL_SURFACE_EXPRESSION = 'CellSurfaceExpression'
 
 # Internal node data format keys
+#: The node data key specifying the node's function (e.g. :data:`GENE`, :data:`MIRNA`, :data:`BIOPROCESS`, etc.)
 FUNCTION = 'function'
+#: The key specifying an identifier dictionary's namespace. Used for nodes, activities, and transformations.
 NAMESPACE = 'namespace'
+#: The key specifying an identifier dictionary's name. Used for nodes, activities, and transformations.
 NAME = 'name'
+#: The key specifying an identifier dictionary
 IDENTIFIER = 'identifier'
 
+#: The node data key specifying a fusion dictionary, containing :data:`PARTNER_3P`, :data:`PARTNER_5P`,
+# :data:`RANGE_3P`, and :data:`RANGE_5P`
 FUSION = 'fusion'
+#: The key specifying the identifier dictionary of the fusion's 3-Prime partner
 PARTNER_3P = 'partner_3p'
+#: The key specifying the identifier dictionary of the fusion's 5-Prime partner
 PARTNER_5P = 'partner_5p'
+#: The key specifying the range dictionary of the fusion's 3-Prime partner
 RANGE_3P = 'range_3p'
+#: The key specifying the range dictionary of the fusion's 5-Prime partner
 RANGE_5P = 'range_5p'
+
+
+FUSION_REFERENCE = 'reference'
+FUSION_START = 'left'
+FUSION_STOP = 'right'
+FUSION_MISSING = 'missing'
 
 VARIANTS = 'variants'
 #: The key representing what kind of variation is being represented
@@ -185,6 +206,9 @@ CORRELATIVE_RELATIONS = {
     NEGATIVE_CORRELATION
 }
 
+#: A list of relationship types that don't require annotations or evidence
+#: This must be maintained as a list, since the :data:`unqualified_edge_code` is calculated based on the order
+#: and needs to be consistient
 unqualified_edges = [
     HAS_REACTANT,
     HAS_PRODUCT,
@@ -194,6 +218,8 @@ unqualified_edges = [
     TRANSLATED_TO,
     HAS_MEMBER,
 ]
+
+#: Unqualified edges are given negative keys since the standard networkx edge key factory starts at 0 and counts up
 unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}
 
 # BEL Keywords
@@ -284,15 +310,16 @@ REQUIRED_METADATA = {
 
 # Modifier parser constants
 
+#: The key for the starting position of a fragment range
 FRAGMENT_START = 'start'
+#: The key for the stopping position of a fragment range
 FRAGMENT_STOP = 'stop'
+#: The key signifying that there is neither a start nor stop position defined
 FRAGMENT_MISSING = 'missing'
+#: The key for any additional descriptive data about a fragment
 FRAGMENT_DESCRIPTION = 'description'
 
-FUSION_REFERENCE = 'reference'
-FUSION_START = 'left'
-FUSION_STOP = 'right'
-FUSION_MISSING = 'missing'
+
 
 GMOD_ORDER = [KIND, IDENTIFIER]
 
@@ -308,8 +335,10 @@ PSUB_REFERENCE = 'reference'
 PSUB_POSITION = 'position'
 PSUB_VARIANT = 'variant'
 
+#: The key for the position at which a protein is truncated
 TRUNCATION_POSITION = 'position'
 
+#: The mapping from BEL namespace codes to PyBEL internal abundance constants
 #: ..seealso:: https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
 belns_encodings = {
     'G': {GENE},

@@ -48,7 +48,7 @@ class BELGraph(nx.MultiDiGraph):
         :param lines: iterable over lines of BEL script
         :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
                         or None to use default cache
-        :type manager: str or pybel.manager.CacheManager or pybel.parser.MetadataParser
+        :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
         :param allow_naked_names: if true, turn off naked namespace failures
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
@@ -56,8 +56,10 @@ class BELGraph(nx.MultiDiGraph):
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
         :type citation_clearing: bool
-        :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
-        :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
+        :param attrs: arguments to pass to :class:`networkx.MultiDiGraph`
+        :type attrs: list
+        :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
+        :type kwargs: dict
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
