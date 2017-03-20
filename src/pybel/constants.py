@@ -26,37 +26,32 @@ PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'
 
 BEL_DEFAULT_NAMESPACE = 'bel'
 
-KIND = 'kind'
-HGVS = 'hgvs'
-PMOD = 'pmod'
-GMOD = 'gmod'
-FRAGMENT = 'frag'
-FUNCTION = 'function'
-NAMESPACE = 'namespace'
-NAME = 'name'
-IDENTIFIER = 'identifier'
-VARIANTS = 'variants'
-RELATION = 'relation'
-CITATION = 'citation'
-EVIDENCE = 'evidence'
-ANNOTATIONS = 'annotations'
-
-CITATION_TYPE = 'type'
-CITATION_NAME = 'name'
-CITATION_REFERENCE = 'reference'
-CITATION_DATE = 'date'
-CITATION_AUTHORS = 'authors'
-CITATION_COMMENTS = 'comments'
-
-CITATION_ENTRIES = CITATION_TYPE, CITATION_NAME, CITATION_REFERENCE, CITATION_DATE, CITATION_AUTHORS, CITATION_COMMENTS
-
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Citation
 CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
 
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Custom+Namespaces
 NAMESPACE_DOMAIN_TYPES = {"BiologicalProcess", "Chemical", "Gene and Gene Products", "Other"}
 
-DIRTY = 'dirty'
+SUBJECT = 'subject'
+OBJECT = 'object'
+
+#: Represents the key for the citation type in a citation dictionary
+CITATION_TYPE = 'type'
+#: Represents the key for the citation name in a citation dictionary
+CITATION_NAME = 'name'
+#: Represents the key for the citation reference in a citation dictionary
+CITATION_REFERENCE = 'reference'
+#: Represents the key for the citation date in a citation dictionary
+CITATION_DATE = 'date'
+#: Represents the key for the citation authors in a citation dictionary
+CITATION_AUTHORS = 'authors'
+#: Represents the key for the citation comment in a citation dictionary
+CITATION_COMMENTS = 'comments'
+
+#: Represents the ordering of the citation entries in a control statement (SET Citation = ...)
+CITATION_ENTRIES = CITATION_TYPE, CITATION_NAME, CITATION_REFERENCE, CITATION_DATE, CITATION_AUTHORS, CITATION_COMMENTS
+
+# Internal node data format keys
 
 ACTIVITY = 'Activity'
 DEGRADATION = 'Degradation'
@@ -80,19 +75,46 @@ REACTANTS = 'reactants'
 PRODUCTS = 'products'
 LOCATION = 'location'
 
-SUBJECT = 'subject'
-OBJECT = 'object'
+KIND = 'kind'
+HGVS = 'hgvs'
+PMOD = 'pmod'
+GMOD = 'gmod'
+FRAGMENT = 'frag'
+FUNCTION = 'function'
+NAMESPACE = 'namespace'
+NAME = 'name'
+IDENTIFIER = 'identifier'
+VARIANTS = 'variants'
 
+DIRTY = 'dirty'
+
+#: Represents the BEL abundance, geneAbundance()
 GENE = 'Gene'
+#: Represents the BEL abundance, rnaAbundance()
 RNA = 'RNA'
+#: Represents the BEL abundance, proteinAbundance()
 PROTEIN = 'Protein'
+#: Represents the BEL abundance, microRNAAbundance()
 MIRNA = 'miRNA'
+#: Represents the BEL abundance, abundance()
 ABUNDANCE = 'Abundance'
+#: Represents the BEL function, biologicalProcess()
 BIOPROCESS = 'BiologicalProcess'
+#: Represents the BEL function, pathology()
 PATHOLOGY = 'Pathology'
+#: Represents the BEL abundance, compositeAbundance()
 COMPOSITE = 'Composite'
+#: Represents the BEL abundance, complexAbundance()
 COMPLEX = 'Complex'
+#: Represents the BEL transformation, reaction()
 REACTION = 'Reaction'
+
+# Internal edge data keys
+
+RELATION = 'relation'
+CITATION = 'citation'
+EVIDENCE = 'evidence'
+ANNOTATIONS = 'annotations'
 
 HAS_REACTANT = 'hasReactant'
 HAS_PRODUCT = 'hasProduct'
@@ -101,7 +123,6 @@ HAS_VARIANT = 'hasVariant'
 HAS_MEMBER = 'hasMember'
 TRANSCRIBED_TO = 'transcribedTo'  #: DNA to RNA is called transcription
 TRANSLATED_TO = 'translatedTo'  #: RNA to PROTEIN is called translation
-
 INCREASES = 'increases'
 DIRECTLY_INCREASES = 'directlyIncreases'
 DECREASES = 'decreases'
