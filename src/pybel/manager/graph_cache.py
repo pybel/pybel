@@ -7,12 +7,11 @@ import logging
 from . import models
 from .base_cache import BaseCacheManager
 from .cache import CacheManager
-from .utils import parse_datetime
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
 from ..graph import BELGraph
 from ..io import to_bytes, from_bytes
-from ..parser.utils import subdict_matches
+from ..utils import subdict_matches, parse_datetime
 
 try:
     import cPickle as pickle
@@ -40,6 +39,7 @@ class GraphCacheManager(BaseCacheManager):
         network = models.Network(blob=graph_bytes, **graph.document)
 
         if store_parts:
+            # TODO maybe make this part of the cache manager's init function?
             CacheManager(connection=self.connection).ensure_namespace(GOCC_LATEST)
             self.store_graph_parts(network, graph)
 

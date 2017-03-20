@@ -7,7 +7,7 @@ import networkx as nx
 
 from pybel.parser.utils import subdict_matches, check_stability, sanitize_file_lines, any_subdict_matches, \
     cartesian_dictionary
-from pybel.utils import ensure_quotes
+from pybel.utils import ensure_quotes, subdict_matches
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

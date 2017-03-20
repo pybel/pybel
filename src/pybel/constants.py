@@ -309,3 +309,15 @@ PSUB_POSITION = 'position'
 PSUB_VARIANT = 'variant'
 
 TRUNCATION_POSITION = 'position'
+
+#: ..seealso:: https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
+belns_encodings = {
+    'G': {GENE},
+    'R': {RNA, MIRNA},
+    'P': {PROTEIN},
+    'M': {MIRNA},
+    'A': {ABUNDANCE, RNA, MIRNA, PROTEIN, GENE, COMPLEX},
+    'B': {PATHOLOGY, BIOPROCESS},
+    'O': {PATHOLOGY},
+    'C': {COMPLEX}
+}

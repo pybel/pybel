@@ -86,18 +86,6 @@ rev_abundance_labels = {
     COMPOSITE: 'composite'
 }
 
-#: ..seealso:: https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
-belns_encodings = {
-    'G': {GENE},
-    'R': {RNA, MIRNA},
-    'P': {PROTEIN},
-    'M': {MIRNA},
-    'A': {ABUNDANCE, RNA, MIRNA, PROTEIN, GENE, COMPLEX},
-    'B': {PATHOLOGY, BIOPROCESS},
-    'O': {PATHOLOGY},
-    'C': {COMPLEX}
-}
-
 amino_acid_dict = {
     'A': 'Ala',
     'R': 'Arg',

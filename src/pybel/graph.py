@@ -24,8 +24,8 @@ from .constructors import build_metadata_parser
 from .exceptions import PyBelWarning
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import MissingMetadataException
-from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
-from .utils import expand_dict, get_version
+from .parser.utils import split_file_to_annotations_and_definitions
+from .utils import expand_dict, get_version, subdict_matches
 
 try:
     import cPickle as pickle

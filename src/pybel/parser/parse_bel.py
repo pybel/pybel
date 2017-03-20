@@ -12,7 +12,7 @@ import logging
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
 
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
-from .language import belns_encodings, activity_labels, activities
+from .language import activity_labels, activities
 from .modifiers import FusionParser, VariantParser, canonicalize_variant, FragmentParser, GmodParser, GsubParser, \
     LocationParser, PmodParser, PsubParser, TruncationParser
 from .modifiers.fusion import build_legacy_fusion
