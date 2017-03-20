@@ -195,3 +195,20 @@ def parse_datetime(s):
                 return dt
             except:
                 raise ValueError('Incorrect datetime format for {}'.format(s))
+
+
+def hash_tuple(x):
+    """Converts a PyBEL node tuple to a hash
+
+    :param x: A BEL node
+    :type x: tuple
+    :return: A hashed version of the node tuple
+    :rtype: int
+    """
+    h = 0
+    for i in x:
+        if isinstance(i, tuple):
+            h += hash_tuple(i)
+        else:
+            h += hash(i)
+    return hash(h)

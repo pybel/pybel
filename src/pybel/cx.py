@@ -6,7 +6,7 @@ from collections import defaultdict
 from .canonicalize import calculate_canonical_name
 from .constants import *
 from .graph import BELGraph
-from .utils import flatten_dict, expand_dict
+from .utils import flatten_dict, expand_dict, hash_tuple
 
 __all__ = [
     'to_cx_json',
@@ -29,16 +29,6 @@ def to_cx(graph, file):
     """
     json_graph = to_cx_json(graph)
     json.dump(json_graph, file, ensure_ascii=False)
-
-
-def hash_tuple(x):
-    h = 0
-    for i in x:
-        if isinstance(i, tuple):
-            h += hash_tuple(i)
-        else:
-            h += hash(i)
-    return h
 
 
 def to_cx_json(graph):
