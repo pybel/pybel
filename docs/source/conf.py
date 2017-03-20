@@ -364,7 +364,7 @@ intersphinx_mapping = {
 }
 
 autodoc_member_order = 'bysource'
-#autoclass_content = 'both'
+autoclass_content = 'both'
 
 if os.environ.get('READTHEDOCS', None):
     tags.add('readthedocs')
