@@ -62,19 +62,19 @@ from ...constants import FRAGMENT, KIND
 
 fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, identifier=KIND)
 
+FRAGMENT_START = 'start'
+FRAGMENT_STOP = 'stop'
+FRAGMENT_MISSING = 'missing'
+FRAGMENT_DESCRIPTION = 'description'
+
 
 class FragmentParser(BaseParser):
-    START = 'start'
-    STOP = 'stop'
-    MISSING = 'missing'
-    DESCRIPTION = 'description'
-
     def __init__(self):
-        self.fragment_range = (ppc.integer | '?')(self.START) + '_' + (ppc.integer | '?' | '*')(self.STOP)
-        self.missing_fragment = Keyword('?')(self.MISSING)
+        self.fragment_range = (ppc.integer | '?')(FRAGMENT_START) + '_' + (ppc.integer | '?' | '*')(FRAGMENT_STOP)
+        self.missing_fragment = Keyword('?')(FRAGMENT_MISSING)
 
         self.language = fragment_tag + nest(
-            (self.fragment_range | self.missing_fragment(self.MISSING)) + Optional(
-                WCW + word(self.DESCRIPTION)))
+            (self.fragment_range | self.missing_fragment(FRAGMENT_MISSING)) + Optional(
+                WCW + word(FRAGMENT_DESCRIPTION)))
 
         BaseParser.__init__(self, self.language)

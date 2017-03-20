@@ -10,7 +10,9 @@ from pkg_resources import get_distribution
 
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .parser.modifiers import FragmentParser, FusionParser, PmodParser
+from .parser.modifiers.fragment import FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP
+from .parser.modifiers.fusion import FUSION_STOP, FUSION_START, FUSION_REFERENCE
+from .parser.modifiers.protein_modification import PMOD_ORDER
 from .utils import ensure_quotes, flatten_citation, sort_edges
 
 __all__ = [
@@ -58,14 +60,13 @@ def postpend_location(bel_string, location_model):
     return "{}, loc({}:{}))".format(bel_string[:-1], location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
 
 
-
 def decanonicalize_variant(tokens):
     if tokens[KIND] == PMOD:
         if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             name = tokens[IDENTIFIER][NAME]
         else:
             name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])
-        return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PmodParser.ORDER[2:] if x in tokens))
+        return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PMOD_ORDER[2:] if x in tokens))
     elif tokens[KIND] == GMOD:
         if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             name = tokens[IDENTIFIER][NAME]
@@ -75,22 +76,20 @@ def decanonicalize_variant(tokens):
     elif tokens[KIND] == HGVS:
         return 'var({})'.format(tokens[IDENTIFIER])
     elif tokens[KIND] == FRAGMENT:
-        if FragmentParser.MISSING in tokens:
+        if FRAGMENT_MISSING in tokens:
             res = 'frag(?'
         else:
-            res = 'frag({}_{}'.format(tokens[FragmentParser.START], tokens[FragmentParser.STOP])
+            res = 'frag({}_{}'.format(tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
 
-        if FragmentParser.DESCRIPTION in tokens:
-            res += ', {}'.format(tokens[FragmentParser.DESCRIPTION])
+        if FRAGMENT_DESCRIPTION in tokens:
+            res += ', {}'.format(tokens[FRAGMENT_DESCRIPTION])
 
         return res + ')'
 
 
 def decanonicalize_fusion_range(tokens):
-    if FusionParser.REFERENCE in tokens:
-        return '{}.{}_{}'.format(tokens[FusionParser.REFERENCE],
-                                 tokens[FusionParser.START],
-                                 tokens[FusionParser.STOP])
+    if FUSION_REFERENCE in tokens:
+        return '{}.{}_{}'.format(tokens[FUSION_REFERENCE], tokens[FUSION_START], tokens[FUSION_STOP])
     return '?'
 
 

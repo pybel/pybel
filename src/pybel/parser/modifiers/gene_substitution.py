@@ -41,25 +41,25 @@ log = logging.getLogger(__name__)
 
 gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
 
+GSUB_REFERENCE = 'reference'
+GSUB_POSITION = 'position'
+GSUB_VARIANT = 'variant'
+
 
 class GsubParser(BaseParser):
-    REFERENCE = 'reference'
-    POSITION = 'position'
-    VARIANT = 'variant'
-
     def __init__(self):
-        self.language = gsub_tag + nest(dna_nucleotide(self.REFERENCE),
-                                        ppc.integer(self.POSITION),
-                                        dna_nucleotide(self.VARIANT))
+        self.language = gsub_tag + nest(dna_nucleotide(GSUB_REFERENCE),
+                                        ppc.integer(GSUB_POSITION),
+                                        dna_nucleotide(GSUB_VARIANT))
         self.language.setParseAction(self.handle_gsub)
 
         BaseParser.__init__(self, self.language)
 
     def handle_gsub(self, s, l, tokens):
-        upgraded = 'c.{}{}>{}'.format(tokens[self.POSITION], tokens[self.REFERENCE], tokens[self.VARIANT])
+        upgraded = 'c.{}{}>{}'.format(tokens[GSUB_POSITION], tokens[GSUB_REFERENCE], tokens[GSUB_VARIANT])
         log.debug('legacy sub() %s upgraded to %s', s, upgraded)
         tokens[IDENTIFIER] = upgraded
-        del tokens[self.POSITION]
-        del tokens[self.REFERENCE]
-        del tokens[self.VARIANT]
+        del tokens[GSUB_POSITION]
+        del tokens[GSUB_REFERENCE]
+        del tokens[GSUB_VARIANT]
         return tokens

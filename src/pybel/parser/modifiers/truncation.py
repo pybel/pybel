@@ -43,23 +43,23 @@ from ...constants import HGVS, KIND, IDENTIFIER
 
 log = logging.getLogger(__name__)
 
-trunc_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, identifier=KIND)
+truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, identifier=KIND)
+
+TRUNCATION_POSITION = 'position'
 
 
-class TruncParser(BaseParser):
-    POSITION = 'position'
-
+class TruncationParser(BaseParser):
     def __init__(self):
-        self.language = trunc_tag + nest(ppc.integer(self.POSITION))
+        self.language = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
         self.language.setParseAction(self.handle_trunc_legacy)
 
         BaseParser.__init__(self, self.language)
 
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     def handle_trunc_legacy(self, s, l, tokens):
-        upgraded = 'p.{}*'.format(tokens[self.POSITION])
+        upgraded = 'p.{}*'.format(tokens[TRUNCATION_POSITION])
         log.warning(
             'trunc() is deprecated. Please look up reference terminal amino acid and encode with HGVS: {}'.format(s))
         tokens[IDENTIFIER] = upgraded
-        del tokens[self.POSITION]
+        del tokens[TRUNCATION_POSITION]
         return tokens

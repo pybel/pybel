@@ -12,9 +12,9 @@ from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
 from ..graph import BELGraph
 from ..io import to_bytes, from_bytes
-from ..parser.modifiers.fragment import FragmentParser
-from ..parser.modifiers.fusion import FusionParser
-from ..parser.modifiers.protein_modification import PmodParser
+from ..parser.modifiers.fragment import FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP
+from ..parser.modifiers.fusion import FUSION_STOP, FUSION_START, FUSION_REFERENCE, FUSION_MISSING
+from ..parser.modifiers.protein_modification import PMOD_CODE, PMOD_POSITION
 from ..parser.utils import subdict_matches
 
 try:
@@ -291,26 +291,26 @@ class GraphCacheManager(BaseCacheManager):
                 'p5Partner': p5namespaceEntry,
             }
 
-            if FusionParser.MISSING in node_data[RANGE_3P]:
+            if FUSION_MISSING in node_data[RANGE_3P]:
                 fusion_dict.update({
-                    'p3Missing': node_data[RANGE_3P][FusionParser.MISSING]
+                    'p3Missing': node_data[RANGE_3P][FUSION_MISSING]
                 })
             else:
                 fusion_dict.update({
-                    'p3Reference': node_data[RANGE_3P][FusionParser.REFERENCE],
-                    'p3Start': node_data[RANGE_3P][FusionParser.START],
-                    'p3Stop': node_data[RANGE_3P][FusionParser.STOP],
+                    'p3Reference': node_data[RANGE_3P][FUSION_REFERENCE],
+                    'p3Start': node_data[RANGE_3P][FUSION_START],
+                    'p3Stop': node_data[RANGE_3P][FUSION_STOP],
                 })
 
-            if FusionParser.MISSING in node_data[RANGE_5P]:
+            if FUSION_MISSING in node_data[RANGE_5P]:
                 fusion_dict.update({
-                    'p5Missing': node_data[RANGE_5P][FusionParser.MISSING]
+                    'p5Missing': node_data[RANGE_5P][FUSION_MISSING]
                 })
             else:
                 fusion_dict.update({
-                    'p5Reference': node_data[RANGE_5P][FusionParser.REFERENCE],
-                    'p5Start': node_data[RANGE_3P][FusionParser.START],
-                    'p5Stop': node_data[RANGE_3P][FusionParser.STOP],
+                    'p5Reference': node_data[RANGE_5P][FUSION_REFERENCE],
+                    'p5Start': node_data[RANGE_3P][FUSION_START],
+                    'p5Stop': node_data[RANGE_3P][FUSION_STOP],
                 })
 
             modification_list.append(fusion_dict)
@@ -324,16 +324,16 @@ class GraphCacheManager(BaseCacheManager):
                     })
 
                 elif modType == FRAGMENT:
-                    if FragmentParser.MISSING in variant:
+                    if FRAGMENT_MISSING in variant:
                         modification_list.append({
                             'modType': modType,
-                            'p3Missing': variant[FragmentParser.MISSING]
+                            'p3Missing': variant[FRAGMENT_MISSING]
                         })
                     else:
                         modification_list.append({
                             'modType': modType,
-                            'p3Start': variant[FragmentParser.START],
-                            'p3Stop': variant[FragmentParser.STOP]
+                            'p3Start': variant[FRAGMENT_START],
+                            'p3Stop': variant[FRAGMENT_STOP]
                         })
 
                 elif modType == GMOD:
@@ -346,8 +346,8 @@ class GraphCacheManager(BaseCacheManager):
                     modification_list.append({
                         'modType': modType,
                         'modName': variant[IDENTIFIER][NAME],
-                        'aminoA': variant[PmodParser.CODE] if PmodParser.CODE in variant else None,
-                        'position': variant[PmodParser.POSITION] if PmodParser.POSITION in variant else None
+                        'aminoA': variant[PMOD_CODE] if PMOD_CODE in variant else None,
+                        'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None
                     })
 
         modifications = []
@@ -657,10 +657,10 @@ class GraphCacheManager(BaseCacheManager):
             if isinstance(source, models.Node):
                 q = q.filter(models.Edge.source == source)
 
-            # ToDo: in_() not yet supported for relations
-            #elif isinstance(source, list) and len(source) > 0:
-            #    if isinstance(source[0], models.Node):
-            #        q = q.filter(models.Edge.source.in_(source))
+                # ToDo: in_() not yet supported for relations
+                # elif isinstance(source, list) and len(source) > 0:
+                #    if isinstance(source[0], models.Node):
+                #        q = q.filter(models.Edge.source.in_(source))
 
         if target:
             if isinstance(target, str):
@@ -669,9 +669,9 @@ class GraphCacheManager(BaseCacheManager):
             if isinstance(target, models.Node):
                 q = q.filter(models.Edge.target == target)
 
-            #elif isinstance(target, list) and len(target) > 0:
-            #    if isinstance(target[0], models.Node):
-            #        q = q.filter(models.Edge.source.in_(target))
+                # elif isinstance(target, list) and len(target) > 0:
+                #    if isinstance(target[0], models.Node):
+                #        q = q.filter(models.Edge.source.in_(target))
 
         if citation or evidence:
             q = q.join(models.Evidence)

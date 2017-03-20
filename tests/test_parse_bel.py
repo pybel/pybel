@@ -5,8 +5,11 @@ import unittest
 
 from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import *
-from pybel.parser.modifiers import FusionParser, LocationParser, GmodParser, FragmentParser, PmodParser
-from pybel.parser.modifiers import GsubParser, TruncParser, PsubParser, VariantParser
+from pybel.parser.modifiers import LocationParser, VariantParser, FragmentParser, GmodParser, GsubParser, PmodParser, \
+    PsubParser, TruncationParser, FusionParser
+from pybel.parser.modifiers.fragment import FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP
+from pybel.parser.modifiers.fusion import FUSION_STOP, FUSION_START, FUSION_REFERENCE, FUSION_MISSING
+from pybel.parser.modifiers.protein_modification import PMOD_CODE, PMOD_POSITION
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
 from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict, \
@@ -103,8 +106,8 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
-            PmodParser.CODE: 'Ser',
-            PmodParser.POSITION: 473
+            PMOD_CODE: 'Ser',
+            PMOD_POSITION: 473
         }
         self.assertEqual(expected, result.asDict())
 
@@ -115,7 +118,7 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
-            PmodParser.CODE: 'Ser',
+            PMOD_CODE: 'Ser',
         }
         self.assertEqual(expected, result.asDict())
 
@@ -136,8 +139,8 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
-            PmodParser.CODE: 'Ser',
-            PmodParser.POSITION: 473
+            PMOD_CODE: 'Ser',
+            PMOD_POSITION: 473
         }
         self.assertEqual(expected, result.asDict())
 
@@ -148,8 +151,8 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             IDENTIFIER: identifier('MOD', 'PhosRes'),
-            PmodParser.CODE: 'Ser',
-            PmodParser.POSITION: 473
+            PMOD_CODE: 'Ser',
+            PMOD_POSITION: 473
         }
         self.assertEqual(expected, result.asDict())
 
@@ -222,8 +225,8 @@ class TestFragmentParser(unittest.TestCase):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
-            FragmentParser.START: 5,
-            FragmentParser.STOP: 20
+            FRAGMENT_START: 5,
+            FRAGMENT_STOP: 20
         }
         self.assertEqual(expected, result.asDict())
 
@@ -233,8 +236,8 @@ class TestFragmentParser(unittest.TestCase):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
-            FragmentParser.START: 1,
-            FragmentParser.STOP: '?'
+            FRAGMENT_START: 1,
+            FRAGMENT_STOP: '?'
         }
         self.assertEqual(expected, result.asDict())
 
@@ -244,8 +247,8 @@ class TestFragmentParser(unittest.TestCase):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
-            FragmentParser.START: '?',
-            FragmentParser.STOP: '*'
+            FRAGMENT_START: '?',
+            FRAGMENT_STOP: '*'
         }
         self.assertEqual(expected, result.asDict())
 
@@ -255,15 +258,15 @@ class TestFragmentParser(unittest.TestCase):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
-            FragmentParser.MISSING: '?',
-            FragmentParser.DESCRIPTION: '55kD'
+            FRAGMENT_MISSING: '?',
+            FRAGMENT_DESCRIPTION: '55kD'
         }
         self.assertEqual(expected, result.asDict())
 
 
 class TestTruncationParser(unittest.TestCase):
     def setUp(self):
-        self.parser = TruncParser()
+        self.parser = TruncationParser()
 
     def test_trunc_1(self):
         statement = 'trunc(40)'
@@ -288,9 +291,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REFERENCE: 'r',
-                FusionParser.START: 1,
-                FusionParser.STOP: 79
+                FUSION_REFERENCE: 'r',
+                FUSION_START: 1,
+                FUSION_STOP: 79
 
             },
             PARTNER_3P: {
@@ -298,9 +301,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REFERENCE: 'r',
-                FusionParser.START: 312,
-                FusionParser.STOP: 5034
+                FUSION_REFERENCE: 'r',
+                FUSION_START: 312,
+                FUSION_STOP: 5034
             }
         }
 
@@ -317,7 +320,7 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.MISSING: '?'
+                FUSION_MISSING: '?'
 
             },
             PARTNER_3P: {
@@ -325,7 +328,7 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.MISSING: '?'
+                FUSION_MISSING: '?'
             }
         }
 
@@ -342,9 +345,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REFERENCE: 'r',
-                FusionParser.START: 1,
-                FusionParser.STOP: 79
+                FUSION_REFERENCE: 'r',
+                FUSION_START: 1,
+                FUSION_STOP: 79
 
             },
             PARTNER_3P: {
@@ -352,9 +355,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REFERENCE: 'r',
-                FusionParser.START: '?',
-                FusionParser.STOP: 1
+                FUSION_REFERENCE: 'r',
+                FUSION_START: '?',
+                FUSION_STOP: 1
             }
         }
 
@@ -371,9 +374,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'TMPRSS2'
             },
             RANGE_5P: {
-                FusionParser.REFERENCE: 'r',
-                FusionParser.START: 1,
-                FusionParser.STOP: '?'
+                FUSION_REFERENCE: 'r',
+                FUSION_START: 1,
+                FUSION_STOP: '?'
 
             },
             PARTNER_3P: {
@@ -381,9 +384,9 @@ class TestFusionParser(unittest.TestCase):
                 NAME: 'ERG'
             },
             RANGE_3P: {
-                FusionParser.REFERENCE: 'r',
-                FusionParser.START: '?',
-                FusionParser.STOP: 1
+                FUSION_REFERENCE: 'r',
+                FUSION_START: '?',
+                FUSION_STOP: 1
             }
         }
 
@@ -714,15 +717,15 @@ class TestGene(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REFERENCE: 'c',
-                    FusionParser.START: 1,
-                    FusionParser.STOP: 79
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 1,
+                    FUSION_STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REFERENCE: 'c',
-                    FusionParser.START: 312,
-                    FusionParser.STOP: 5034
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
                 }
             }
         }
@@ -748,15 +751,15 @@ class TestGene(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REFERENCE: 'c',
-                    FusionParser.START: 1,
-                    FusionParser.STOP: '?'
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 1,
+                    FUSION_STOP: '?'
 
                 },
                 RANGE_3P: {
-                    FusionParser.REFERENCE: 'c',
-                    FusionParser.START: 312,
-                    FusionParser.STOP: 5034
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
                 }
             }
         }
@@ -782,12 +785,12 @@ class TestGene(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.MISSING: '?'
+                    FUSION_MISSING: '?'
                 },
                 RANGE_3P: {
-                    FusionParser.REFERENCE: 'c',
-                    FusionParser.START: 312,
-                    FusionParser.STOP: 5034
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
                 }
             }
         }
@@ -814,15 +817,15 @@ class TestGene(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REFERENCE: 'c',
-                    FusionParser.START: '?',
-                    FusionParser.STOP: 1875
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: '?',
+                    FUSION_STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REFERENCE: 'c',
-                    FusionParser.START: 2626,
-                    FusionParser.STOP: '?'
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 2626,
+                    FUSION_STOP: '?'
                 }
             }
         }
@@ -850,8 +853,8 @@ class TestGene(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
-                RANGE_5P: {FusionParser.MISSING: '?'},
-                RANGE_3P: {FusionParser.MISSING: '?'}
+                RANGE_5P: {FUSION_MISSING: '?'},
+                RANGE_3P: {FUSION_MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1179,15 +1182,15 @@ class TestProtein(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REFERENCE: 'p',
-                    FusionParser.START: 1,
-                    FusionParser.STOP: 79
+                    FUSION_REFERENCE: 'p',
+                    FUSION_START: 1,
+                    FUSION_STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REFERENCE: 'p',
-                    FusionParser.START: 312,
-                    FusionParser.STOP: 5034
+                    FUSION_REFERENCE: 'p',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
 
                 }
             }
@@ -1213,15 +1216,15 @@ class TestProtein(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REFERENCE: 'p',
-                    FusionParser.START: '?',
-                    FusionParser.STOP: 1875
+                    FUSION_REFERENCE: 'p',
+                    FUSION_START: '?',
+                    FUSION_STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REFERENCE: 'p',
-                    FusionParser.START: 2626,
-                    FusionParser.STOP: '?'
+                    FUSION_REFERENCE: 'p',
+                    FUSION_START: 2626,
+                    FUSION_STOP: '?'
 
                 }
             }
@@ -1244,8 +1247,8 @@ class TestProtein(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
-                RANGE_5P: {FusionParser.MISSING: '?'},
-                RANGE_3P: {FusionParser.MISSING: '?'}
+                RANGE_5P: {FUSION_MISSING: '?'},
+                RANGE_3P: {FUSION_MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1598,7 +1601,6 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(0, self.parser.graph.number_of_edges())
 
 
-
 class TestRna(TestTokenParserBase):
     """2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA"""
 
@@ -1678,15 +1680,15 @@ class TestRna(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.REFERENCE: 'r',
-                    FusionParser.START: 1,
-                    FusionParser.STOP: 79
+                    FUSION_REFERENCE: 'r',
+                    FUSION_START: 1,
+                    FUSION_STOP: 79
 
                 },
                 RANGE_3P: {
-                    FusionParser.REFERENCE: 'r',
-                    FusionParser.START: 312,
-                    FusionParser.STOP: 5034
+                    FUSION_REFERENCE: 'r',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
                 }
             }
         }
@@ -1710,10 +1712,10 @@ class TestRna(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
                 RANGE_5P: {
-                    FusionParser.MISSING: '?',
+                    FUSION_MISSING: '?',
                 },
                 RANGE_3P: {
-                    FusionParser.MISSING: '?',
+                    FUSION_MISSING: '?',
                 }
             }
         }
@@ -1735,15 +1737,15 @@ class TestRna(TestTokenParserBase):
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
                 RANGE_5P: {
-                    FusionParser.REFERENCE: 'r',
-                    FusionParser.START: '?',
-                    FusionParser.STOP: 1875
+                    FUSION_REFERENCE: 'r',
+                    FUSION_START: '?',
+                    FUSION_STOP: 1875
 
                 },
                 RANGE_3P: {
-                    FusionParser.REFERENCE: 'r',
-                    FusionParser.START: 2626,
-                    FusionParser.STOP: '?'
+                    FUSION_REFERENCE: 'r',
+                    FUSION_START: 2626,
+                    FUSION_STOP: '?'
                 }
             }
 
@@ -1766,8 +1768,8 @@ class TestRna(TestTokenParserBase):
             FUSION: {
                 PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
                 PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'AIFM1'},
-                RANGE_5P: {FusionParser.MISSING: '?'},
-                RANGE_3P: {FusionParser.MISSING: '?'}
+                RANGE_5P: {FUSION_MISSING: '?'},
+                RANGE_3P: {FUSION_MISSING: '?'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -2814,8 +2816,8 @@ class TestRelations(TestTokenParserBase):
                     {
                         KIND: PMOD,
                         IDENTIFIER: default_identifier('Ph'),
-                        PmodParser.CODE: 'Ser',
-                        PmodParser.POSITION: 9
+                        PMOD_CODE: 'Ser',
+                        PMOD_POSITION: 9
                     }
                 ]
             },

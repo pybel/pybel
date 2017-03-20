@@ -88,12 +88,12 @@ log = logging.getLogger(__name__)
 
 pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, identifier=KIND)
 
+PMOD_CODE = 'code'
+PMOD_POSITION = 'pos'
+PMOD_ORDER = [KIND, IDENTIFIER, PMOD_CODE, PMOD_POSITION]
+
 
 class PmodParser(BaseParser):
-    CODE = 'code'
-    POSITION = 'pos'
-    ORDER = [KIND, IDENTIFIER, CODE, POSITION]
-
     def __init__(self, namespace_parser=None):
         """
 
@@ -114,7 +114,7 @@ class PmodParser(BaseParser):
         ])
 
         self.language = pmod_tag + nest(pmod_identifier(IDENTIFIER) + Optional(
-            WCW + amino_acid(self.CODE) + Optional(WCW + ppc.integer(self.POSITION))))
+            WCW + amino_acid(PMOD_CODE) + Optional(WCW + ppc.integer(PMOD_POSITION))))
 
         BaseParser.__init__(self, self.language)
 

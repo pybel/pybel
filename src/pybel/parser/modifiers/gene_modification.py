@@ -47,10 +47,10 @@ from ...constants import KIND, GMOD, BEL_DEFAULT_NAMESPACE, IDENTIFIER, NAME, NA
 
 gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, identifier=KIND)
 
+GMOD_ORDER = [KIND, IDENTIFIER]
+
 
 class GmodParser(BaseParser):
-    ORDER = [KIND, IDENTIFIER]
-
     def __init__(self, namespace_parser=None):
         """
 

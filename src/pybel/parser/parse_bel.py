@@ -8,14 +8,14 @@ This module handles parsing BEL relations and validation of semantics.
 
 import itertools as itt
 import logging
-from copy import deepcopy
 
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
 
 from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
 from .language import belns_encodings, activity_labels, activities
 from .modifiers import FusionParser, VariantParser, canonicalize_variant, FragmentParser, GmodParser, GsubParser, \
-    LocationParser, PmodParser, PsubParser, TruncParser
+    LocationParser, PmodParser, PsubParser, TruncationParser
+from .modifiers.fusion import FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
@@ -127,7 +127,7 @@ class BelParser(BaseParser):
 
         #: DEPRECATED
         #: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_truncated_proteins
-        self.trunc = TruncParser().language
+        self.trunc = TruncationParser().language
 
         #: PyBEL BEL Specification variant
         self.gmod = GmodParser().language
@@ -209,7 +209,8 @@ class BelParser(BaseParser):
         # 2.4 Process Modifier Function
         # backwards compatibility with BEL v1.0
 
-        molecular_activity_default = oneOf(list(activity_labels.keys())).setParseAction(handle_molecular_activity_default)
+        molecular_activity_default = oneOf(list(activity_labels.keys())).setParseAction(
+            handle_molecular_activity_default)
 
         self.molecular_activity = molecular_activity_tags + nest(
             molecular_activity_default | self.identifier_parser.language)
@@ -402,15 +403,15 @@ class BelParser(BaseParser):
 
         self.relation = MatchFirst([
             self.bel_to_bel,
-            #self.has_member,
-            #self.has_component,
+            # self.has_member,
+            # self.has_component,
             self.subprocess_of,
             self.rate_limit,
             self.biomarker,
             self.transcribed,
             self.translated,
-            #self.has_variant_relation,
-            #self.part_of_reaction,
+            # self.has_variant_relation,
+            # self.part_of_reaction,
         ])
 
         self.relation.setParseAction(self.handle_relation)
@@ -735,15 +736,15 @@ def canonicalize_simple_to_dict(tokens):
 
 # TODO figure out how to just get dictionary rather than slicing it up like this
 def canonicalize_fusion_range_to_dict(tokens):
-    if FusionParser.MISSING in tokens:
+    if FUSION_MISSING in tokens:
         return {
-            FusionParser.MISSING: '?'
+            FUSION_MISSING: '?'
         }
     else:
         return {
-            FusionParser.REFERENCE: tokens[FusionParser.REFERENCE],
-            FusionParser.START: tokens[FusionParser.START],
-            FusionParser.STOP: tokens[FusionParser.STOP]
+            FUSION_REFERENCE: tokens[FUSION_REFERENCE],
+            FUSION_START: tokens[FUSION_START],
+            FUSION_STOP: tokens[FUSION_STOP]
         }
 
 
@@ -773,9 +774,9 @@ def canonicalize_variant_node_to_dict(tokens):
 
 
 def canonicalize_fusion_range(tokens, tag):
-    if tag in tokens and FusionParser.MISSING not in tokens[tag]:
+    if tag in tokens and FUSION_MISSING not in tokens[tag]:
         fusion_range = tokens[tag]
-        return fusion_range[FusionParser.REFERENCE], fusion_range[FusionParser.START], fusion_range[FusionParser.STOP]
+        return fusion_range[FUSION_REFERENCE], fusion_range[FUSION_START], fusion_range[FUSION_STOP]
     else:
         return '?',
 

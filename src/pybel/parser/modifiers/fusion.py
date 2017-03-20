@@ -44,13 +44,13 @@ from ...constants import FUSION, PARTNER_5P, RANGE_5P, PARTNER_3P, RANGE_3P
 
 fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
 
+FUSION_REFERENCE = 'reference'
+FUSION_START = 'left'
+FUSION_STOP = 'right'
+FUSION_MISSING = 'missing'
+
 
 class FusionParser(BaseParser):
-    REFERENCE = 'reference'
-    START = 'left'
-    STOP = 'right'
-    MISSING = 'missing'
-
     def __init__(self, namespace_parser=None):
         self.identifier_parser = IdentifierParser() if namespace_parser is None else namespace_parser
         identifier = self.identifier_parser.language
@@ -59,9 +59,9 @@ class FusionParser(BaseParser):
         coordinate = pyparsing_common.integer | '?'
         missing = Keyword('?')
 
-        range_coordinate = missing(self.MISSING) | (
-            reference_seq(self.REFERENCE) + Suppress('.') + coordinate(self.START) + Suppress('_') + coordinate(
-                self.STOP))
+        range_coordinate = missing(FUSION_MISSING) | (
+            reference_seq(FUSION_REFERENCE) + Suppress('.') + coordinate(FUSION_START) + Suppress('_') + coordinate(
+                FUSION_STOP))
 
         self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
                                            Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
@@ -83,21 +83,21 @@ def build_legacy_fusion(identifier, reference):
 
 def fusion_legacy_handler(s, l, tokens):
     if RANGE_5P not in tokens:
-        tokens[RANGE_5P] = {FusionParser.MISSING: '?'}
+        tokens[RANGE_5P] = {FUSION_MISSING: '?'}
     if RANGE_3P not in tokens:
-        tokens[RANGE_3P] = {FusionParser.MISSING: '?'}
+        tokens[RANGE_3P] = {FUSION_MISSING: '?'}
     return tokens
 
 
 def fusion_break_handler_wrapper(reference, start):
     def fusion_break_handler(s, l, tokens):
         if tokens[0] == '?':
-            tokens[FusionParser.MISSING] = '?'
+            tokens[FUSION_MISSING] = '?'
             return tokens
         else:  # The break point is specified as an integer
-            tokens[FusionParser.REFERENCE] = reference
-            tokens[FusionParser.START if start else FusionParser.STOP] = '?'
-            tokens[FusionParser.STOP if start else FusionParser.START] = int(tokens[0])
+            tokens[FUSION_REFERENCE] = reference
+            tokens[FUSION_START if start else FUSION_STOP] = '?'
+            tokens[FUSION_STOP if start else FUSION_START] = int(tokens[0])
             return tokens
 
     return fusion_break_handler

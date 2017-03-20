@@ -6,14 +6,14 @@
 
 from pyparsing import Word
 
-from .fragment import FragmentParser
+from .fragment import FragmentParser, FRAGMENT_START, FRAGMENT_STOP, FRAGMENT_MISSING, FRAGMENT_DESCRIPTION
 from .fusion import FusionParser
-from .gene_modification import GmodParser
+from .gene_modification import GmodParser, GMOD_ORDER
 from .gene_substitution import GsubParser
 from .location import LocationParser
-from .protein_modification import PmodParser
+from .protein_modification import PmodParser, PMOD_ORDER
 from .protein_substitution import PsubParser
-from .truncation import TruncParser
+from .truncation import TruncationParser
 from .variant import VariantParser
 from ..language import dna_nucleotide_labels, rna_nucleotide_labels
 from ...constants import KIND, PMOD, NAMESPACE, NAME, GMOD, FRAGMENT, HGVS, IDENTIFIER
@@ -25,22 +25,22 @@ def canonicalize_hgvs(tokens):
 
 def canonicalize_pmod(tokens):
     return (PMOD, (tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])) + tuple(
-        tokens[key] for key in PmodParser.ORDER[2:] if key in tokens)
+        tokens[key] for key in PMOD_ORDER[2:] if key in tokens)
 
 
 def canonicalize_gmod(tokens):
     return (GMOD, (tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])) + tuple(
-        tokens[key] for key in GmodParser.ORDER[2:] if key in tokens)
+        tokens[key] for key in GMOD_ORDER[2:] if key in tokens)
 
 
 def canonicalize_frag(tokens):
-    if FragmentParser.MISSING in tokens:
+    if FRAGMENT_MISSING in tokens:
         result = FRAGMENT, '?'
     else:
-        result = FRAGMENT, (tokens[FragmentParser.START], tokens[FragmentParser.STOP])
+        result = FRAGMENT, (tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
 
-    if FragmentParser.DESCRIPTION in tokens:
-        return result + (tokens[FragmentParser.DESCRIPTION],)
+    if FRAGMENT_DESCRIPTION in tokens:
+        return result + (tokens[FRAGMENT_DESCRIPTION],)
 
     return result
 
