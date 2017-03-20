@@ -56,7 +56,7 @@ def main():
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
 @click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
 @click.option('--pickle', help='Output path for NetworkX *.gpickle')
-@click.option('--cx', help='Output CX JSON for use with NDEx')
+@click.option('--cx', type=click.File('w'), help='Output CX JSON for use with NDEx')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
