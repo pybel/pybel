@@ -4,6 +4,7 @@ import itertools as itt
 import logging
 from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
+from datetime import datetime
 from operator import itemgetter
 
 import networkx as nx
@@ -157,3 +158,96 @@ def ensure_quotes(s):
     :rtype: str
     """
     return '"{}"'.format(s) if not s.isalnum() else s
+
+
+CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
+PUBLISHED_DATE_FMT = '%Y-%m-%d'
+PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
+
+
+def valid_date(s):
+    """Checks that a string represents a valid date in ISO 8601 format YYYY-MM-DD"""
+    try:
+        datetime.strptime(s, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
+
+
+def parse_datetime(s):
+    """Tries to parse a datetime object from a standard datetime format or date format
+
+    :param s: A string represing a date or datetime
+    :type s: str
+    :return: A parsed date object
+    :rtype: datetime.date
+    """
+    try:
+        dt = datetime.strptime(s, CREATION_DATE_FMT)
+        return dt
+    except:
+        try:
+            dt = datetime.strptime(s, PUBLISHED_DATE_FMT)
+            return dt
+        except:
+            try:
+                dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
+                return dt
+            except:
+                raise ValueError('Incorrect datetime format for {}'.format(s))
+
+
+def hash_tuple(x):
+    """Converts a PyBEL node tuple to a hash
+
+    :param x: A BEL node
+    :type x: tuple
+    :return: A hashed version of the node tuple
+    :rtype: int
+    """
+    h = 0
+    for i in x:
+        if isinstance(i, tuple):
+            h += hash_tuple(i)
+        else:
+            h += hash(i)
+    return hash(h)
+
+
+def subdict_matches(target, query, partial_match=True):
+    """Checks if all the keys in the query dict are in the target dict, and that their values match
+
+    1. Checks that all keys in the query dict are in the target dict
+    2. Matches the values of the keys in the query dict
+        a. If the value is a string, then must match exactly
+        b. If the value is a set/list/tuple, then will match any of them
+        c. If the value is a dict, then recursively check if that subdict matches
+
+    :param target: The dictionary to search
+    :type target: dict
+    :param query: A query dict with keys to match
+    :type query: dict
+    :param partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
+    :type partial_match: bool
+    :return: if all keys in b are in target_dict and their values match
+    :rtype: bool
+    """
+    for k, v in query.items():
+        if k not in target:
+            return False
+        elif not isinstance(v, (str, list, set, dict, tuple)):
+            raise ValueError('invalid value: {}'.format(v))
+        elif isinstance(v, str) and target[k] != v:
+            return False
+        elif isinstance(v, dict):
+            if partial_match:
+                if not isinstance(target[k], dict):
+                    return False
+                elif not subdict_matches(target[k], v, partial_match):
+                    return False
+            elif not partial_match and target[k] != v:
+                return False
+        elif isinstance(v, (list, set, tuple)) and target[k] not in v:
+            return False
+
+    return True

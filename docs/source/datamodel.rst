@@ -6,7 +6,7 @@ different contexts, with descriptive annotations. PyBEL represents data as a log
 package. Each node and edge has an associated data dictionary for storing relevant/contextual information.
 
 This allows for much easier programmatic access to answer more complicated questions, which can be written with python
-code. Because the data structure is the same in Neo4J, the data can be directly exported with :code:`pybel.to_neo4j`.
+code. Because the data structure is the same in Neo4J, the data can be directly exported with :func:`pybel.to_neo4j`.
 Neo4J supports the Cypher querying language so that the same queries can be written in an elegant and simple way.
 
 Constants
@@ -21,7 +21,7 @@ These documents refer to many aspects of the data model using constants, which c
     >>> from pybel.parser.modifiers import FragmentParser, GmodParser, PmodParser, FusionParser
 
 Terms describing abundances, annotations, and other internal data are designated in :code:`pybel.constants`
-with full-caps, such as :code:`FUNCTION` and :code:`PROTEIN`.
+with full-caps, such as :data:`pybel.constants.FUNCTION` and :data:`pybel.constants.PROTEIN`.
 
 For normal usage, we suggest referring to values in dictionaries by these constants, in case the hard-coded
 strings behind these constants change.

@@ -7,7 +7,7 @@ Variants
 The addition of a variant tag results in an entry called 'variants' in the data dictionary associated with a given
 node. This entry is a list with dictionaries describing each of the variants. All variants have the entry 'kind' to
 identify whether it is a PTM, gene modification, fragment, or HGVS variant. The 'kind' value for a variant
-is 'hgvs', but best descirbed by :code:`pybel.constants.HGVS`
+is 'hgvs', but best described by :data:`pybel.constants.HGVS`
 
 
 For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented with the following:

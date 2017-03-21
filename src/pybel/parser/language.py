@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-BEL language parameters
+BEL Language
+------------
+
+This module contains mappings between PyBEL's internal constants and BEL language keywords
 """
 
 import logging
@@ -11,7 +14,7 @@ from pyparsing import *
 from .parse_exceptions import PlaceholderAminoAcidWarning
 from ..constants import *
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 activity_labels = {
     'catalyticActivity': 'cat',
@@ -49,6 +52,7 @@ activity_ns = {
 
 activities = list(activity_labels.keys())
 
+#: Provides a mapping from BEL terms to PyBEL internal constants
 abundance_labels = {
     'abundance': ABUNDANCE,
     'a': ABUNDANCE,
@@ -80,18 +84,6 @@ rev_abundance_labels = {
     PATHOLOGY: 'path',
     COMPLEX: 'complex',
     COMPOSITE: 'composite'
-}
-
-#: ..seealso:: https://wiki.openbel.org/display/BELNA/Assignment+of+Encoding+%28Allowed+Functions%29+for+BEL+Namespaces
-belns_encodings = {
-    'G': {GENE},
-    'R': {RNA, MIRNA},
-    'P': {PROTEIN},
-    'M': {MIRNA},
-    'A': {ABUNDANCE, RNA, MIRNA, PROTEIN, GENE, COMPLEX},
-    'B': {PATHOLOGY, BIOPROCESS},
-    'O': {PATHOLOGY},
-    'C': {COMPLEX}
 }
 
 amino_acid_dict = {

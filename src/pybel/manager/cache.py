@@ -11,9 +11,7 @@ enable this option, but can specify a database location if they choose.
 
 import itertools as itt
 import logging
-import os
 from collections import defaultdict
-from datetime import datetime
 
 import networkx as nx
 from sqlalchemy.orm.exc import NoResultFound
@@ -22,7 +20,7 @@ from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
-from ..parser.language import belns_encodings
+from ..constants import belns_encodings
 from ..utils import download_url
 
 log = logging.getLogger(__name__)

@@ -68,7 +68,7 @@ author = u'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.4.2'
+release = '0.4.3'
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -364,7 +364,7 @@ intersphinx_mapping = {
 }
 
 autodoc_member_order = 'bysource'
-#autoclass_content = 'both'
+autoclass_content = 'both'
 
 if os.environ.get('READTHEDOCS', None):
     tags.add('readthedocs')

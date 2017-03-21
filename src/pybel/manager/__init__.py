@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 
 The pybel.manager module serves as an interface between the BEL graph data structure and underlying relational

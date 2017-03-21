@@ -11,16 +11,13 @@ import logging
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
-from . import language
 from .baseparser import BaseParser, word, quote, delimitedSet
 from .parse_exceptions import InvalidMetadataException
-from ..constants import BEL_KEYWORD_AS, BEL_KEYWORD_URL, BEL_KEYWORD_LIST, BEL_KEYWORD_OWL, BEL_KEYWORD_SET, \
-    BEL_KEYWORD_DEFINE, BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_ANNOTATION, BEL_KEYWORD_DOCUMENT, BEL_KEYWORD_PATTERN, \
-    DOCUMENT_KEYS
-
-log = logging.getLogger('pybel')
+from ..constants import *
 
 __all__ = ['MetadataParser']
+
+log = logging.getLogger(__name__)
 
 as_tag = Suppress(BEL_KEYWORD_AS)
 url_tag = Suppress(BEL_KEYWORD_URL)
@@ -29,7 +26,7 @@ owl_tag = Suppress(BEL_KEYWORD_OWL)
 set_tag = Suppress(BEL_KEYWORD_SET)
 define_tag = Suppress(BEL_KEYWORD_DEFINE)
 
-function_tags = Word(''.join(language.belns_encodings))
+function_tags = Word(''.join(belns_encodings))
 
 value = quote | ppc.identifier
 
@@ -146,7 +143,7 @@ class MetadataParser(BaseParser):
             log.warning('Tried to overwrite owl namespace: %s', name)
             return tokens
 
-        functions = set(tokens['functions'] if 'functions' in tokens else language.belns_encodings)
+        functions = set(tokens['functions'] if 'functions' in tokens else belns_encodings)
 
         url = tokens['url']
 

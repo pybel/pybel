@@ -8,7 +8,7 @@ import pybel
 from pybel.constants import *
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
-from pybel.parser.language import belns_encodings
+from pybel.constants import belns_encodings
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_ado
 from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, expected_test_bel_4_metadata, \

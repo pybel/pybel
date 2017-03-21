@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 
 PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux.
@@ -63,7 +65,7 @@ from .manager.database_io import *
 
 __all__ = ['BELGraph'] + io.__all__ + canonicalize.__all__ + cx.__all__ + database_io.__all__
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'

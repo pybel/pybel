@@ -7,15 +7,11 @@ import logging
 from . import models
 from .base_cache import BaseCacheManager
 from .cache import CacheManager
-from .utils import parse_datetime
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
 from ..graph import BELGraph
 from ..io import to_bytes, from_bytes
-from ..parser.modifiers.fragment import FragmentParser
-from ..parser.modifiers.fusion import FusionParser
-from ..parser.modifiers.protein_modification import PmodParser
-from ..parser.utils import subdict_matches
+from ..utils import subdict_matches, parse_datetime
 
 try:
     import cPickle as pickle
@@ -43,6 +39,7 @@ class GraphCacheManager(BaseCacheManager):
         network = models.Network(blob=graph_bytes, **graph.document)
 
         if store_parts:
+            # TODO maybe make this part of the cache manager's init function?
             CacheManager(connection=self.connection).ensure_namespace(GOCC_LATEST)
             self.store_graph_parts(network, graph)
 
@@ -291,26 +288,26 @@ class GraphCacheManager(BaseCacheManager):
                 'p5Partner': p5namespaceEntry,
             }
 
-            if FusionParser.MISSING in node_data[RANGE_3P]:
+            if FUSION_MISSING in node_data[RANGE_3P]:
                 fusion_dict.update({
-                    'p3Missing': node_data[RANGE_3P][FusionParser.MISSING]
+                    'p3Missing': node_data[RANGE_3P][FUSION_MISSING]
                 })
             else:
                 fusion_dict.update({
-                    'p3Reference': node_data[RANGE_3P][FusionParser.REFERENCE],
-                    'p3Start': node_data[RANGE_3P][FusionParser.START],
-                    'p3Stop': node_data[RANGE_3P][FusionParser.STOP],
+                    'p3Reference': node_data[RANGE_3P][FUSION_REFERENCE],
+                    'p3Start': node_data[RANGE_3P][FUSION_START],
+                    'p3Stop': node_data[RANGE_3P][FUSION_STOP],
                 })
 
-            if FusionParser.MISSING in node_data[RANGE_5P]:
+            if FUSION_MISSING in node_data[RANGE_5P]:
                 fusion_dict.update({
-                    'p5Missing': node_data[RANGE_5P][FusionParser.MISSING]
+                    'p5Missing': node_data[RANGE_5P][FUSION_MISSING]
                 })
             else:
                 fusion_dict.update({
-                    'p5Reference': node_data[RANGE_5P][FusionParser.REFERENCE],
-                    'p5Start': node_data[RANGE_3P][FusionParser.START],
-                    'p5Stop': node_data[RANGE_3P][FusionParser.STOP],
+                    'p5Reference': node_data[RANGE_5P][FUSION_REFERENCE],
+                    'p5Start': node_data[RANGE_3P][FUSION_START],
+                    'p5Stop': node_data[RANGE_3P][FUSION_STOP],
                 })
 
             modification_list.append(fusion_dict)
@@ -324,16 +321,16 @@ class GraphCacheManager(BaseCacheManager):
                     })
 
                 elif modType == FRAGMENT:
-                    if FragmentParser.MISSING in variant:
+                    if FRAGMENT_MISSING in variant:
                         modification_list.append({
                             'modType': modType,
-                            'p3Missing': variant[FragmentParser.MISSING]
+                            'p3Missing': variant[FRAGMENT_MISSING]
                         })
                     else:
                         modification_list.append({
                             'modType': modType,
-                            'p3Start': variant[FragmentParser.START],
-                            'p3Stop': variant[FragmentParser.STOP]
+                            'p3Start': variant[FRAGMENT_START],
+                            'p3Stop': variant[FRAGMENT_STOP]
                         })
 
                 elif modType == GMOD:
@@ -346,8 +343,8 @@ class GraphCacheManager(BaseCacheManager):
                     modification_list.append({
                         'modType': modType,
                         'modName': variant[IDENTIFIER][NAME],
-                        'aminoA': variant[PmodParser.CODE] if PmodParser.CODE in variant else None,
-                        'position': variant[PmodParser.POSITION] if PmodParser.POSITION in variant else None
+                        'aminoA': variant[PMOD_CODE] if PMOD_CODE in variant else None,
+                        'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None
                     })
 
         modifications = []
@@ -564,9 +561,6 @@ class GraphCacheManager(BaseCacheManager):
                    modification_name=None, as_dict_list=False):
         """Run a query over all nodes in the PyBEL cache.
 
-        :param as_dict_list:
-        :param modification_name:
-        :param modification_type:
         :param bel: BEL term that describes the biological entity. e.g. p(HGNC:APP)
         :param bel: str
         :param type: Type of the biological entity. e.g. Protein
@@ -575,6 +569,12 @@ class GraphCacheManager(BaseCacheManager):
         :type namespace: str
         :param name: Name of the biological entity. e.g. APP
         :type name: str
+        :param modification_name:
+        :type modification_name: str
+        :param modification_type:
+        :type modification_type: str
+        :param as_dict_list:
+        :type as_dict_list: bool
         :return:
         """
         q = self.session.query(models.Node)
@@ -607,19 +607,26 @@ class GraphCacheManager(BaseCacheManager):
         else:
             return result
 
-    def query_edge(self, bel=None, source=None, target=None, annotation=None, relation=None, citation=None,
-                   evidence_text=None, properties=None, as_dict_list=False):
-        """Run a query over all edges in the PyBEL cache.
+    def query_edge(self, bel=None, source=None, target=None, relation=None, citation=None,
+                   evidence=None, annotation=None, property=None, as_dict_list=False):
+        """Builds a query to be run against all edges in the PyBEL cache.
 
-        :param annotation:
-        :param bel:
+        :param bel: BEL statement that represents the desired edge.
+        :type bel: str
         :param source: BEL term of source node e.g. p(HGNC:APP) or models.Node object.
         :type source: str or models.Node
-        :param target:
-        :param relation:
-        :param citation:
-        :param evidence_text:
-        :param properties:
+        :param target: BEL term of target node e.g. p(HGNC:APP) or models.Node object.
+        :type target: str or models.Node
+        :param relation: The relation that should be present between source and target node.
+        :type relation: str
+        :param citation: The citation that backs the edge up. It is possible to use the reference_id
+                         or a models.Citation object.
+        :type citation: str or models.Citation
+        :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text
+                         or a models.Evidence object.
+        :type evidence: str or models.Evidence
+        :param annotation:
+        :param property:
         :param as_dict_list:
         :return:
         """
@@ -647,6 +654,11 @@ class GraphCacheManager(BaseCacheManager):
             if isinstance(source, models.Node):
                 q = q.filter(models.Edge.source == source)
 
+                # ToDo: in_() not yet supported for relations
+                # elif isinstance(source, list) and len(source) > 0:
+                #    if isinstance(source[0], models.Node):
+                #        q = q.filter(models.Edge.source.in_(source))
+
         if target:
             if isinstance(target, str):
                 target = self.query_node(bel=target)[0]
@@ -654,16 +666,29 @@ class GraphCacheManager(BaseCacheManager):
             if isinstance(target, models.Node):
                 q = q.filter(models.Edge.target == target)
 
-        if evidence_text:
-            q = q.join(models.Evidence).filter(models.Evidence.text.like(evidence_text))
+                # elif isinstance(target, list) and len(target) > 0:
+                #    if isinstance(target[0], models.Node):
+                #        q = q.filter(models.Edge.source.in_(target))
 
-        elif citation:
-            if isinstance(citation, str):
-                citation = self.query_citation(reference=citation)[0]
+        if citation or evidence:
+            q = q.join(models.Evidence)
 
-            if isinstance(citation, models.Citation):
-                evidences = citation.evidences
-                q = q.filter(models.Edge.evidence.in_(evidences))
+            if citation:
+                if isinstance(citation, models.Citation):
+                    q = q.filter(models.Evidence.citation == citation)
+
+                elif isinstance(citation, str):
+                    q = q.join(models.Citation).filter(models.Citation.reference.like(citation))
+
+            if evidence:
+                if isinstance(evidence, models.Evidence):
+                    q = q.filter(models.Edge.evidence == evidence)
+
+                elif isinstance(evidence, str):
+                    q = q.filter(models.Evidence.text.like(evidence))
+
+        if property:
+            q = q.join(models.Property)
 
         result = q.all()
 

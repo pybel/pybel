@@ -25,7 +25,7 @@ For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the fol
         VARIANTS: [
             {
                 KIND: GMOD,
-                GmodParser.IDENTIFIER: {
+                IDENTIFIER: {
                     NAMESPACE: BEL_DEFAULT_NAMESPACE,
                     NAME: 'Me'
                 }
@@ -49,8 +49,6 @@ gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, id
 
 
 class GmodParser(BaseParser):
-    ORDER = [KIND, IDENTIFIER]
-
     def __init__(self, namespace_parser=None):
         """
 

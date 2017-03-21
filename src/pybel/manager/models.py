@@ -10,7 +10,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 from ..constants import *
-from ..parser.modifiers import FragmentParser, FusionParser, PmodParser
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
@@ -363,28 +362,28 @@ class Modification(Base):
             mod_key.append((mod_dict[PARTNER_5P][NAMESPACE], mod_dict[PARTNER_5P][NAME],))
 
             if self.p5Missing:
-                mod_dict[RANGE_5P] = {FusionParser.MISSING: self.p5Missing}
+                mod_dict[RANGE_5P] = {FUSION_MISSING: self.p5Missing}
                 mod_key.append((self.p5Missing,))
 
             else:
                 mod_dict[RANGE_5P].update({
-                    FusionParser.REFERENCE: self.p5Reference,
-                    FusionParser.START: self.p5Start,
-                    FusionParser.STOP: self.p5Stop
+                    FUSION_REFERENCE: self.p5Reference,
+                    FUSION_START: self.p5Start,
+                    FUSION_STOP: self.p5Stop
                 })
                 mod_key.append((self.p5Reference, self.p5Start, self.p5Stop,))
 
             mod_key.append((mod_dict[PARTNER_3P][NAMESPACE], mod_dict[PARTNER_3P][NAME],))
 
             if self.p3Missing:
-                mod_dict[RANGE_3P][FusionParser.MISSING] = self.p3Missing
+                mod_dict[RANGE_3P][FUSION_MISSING] = self.p3Missing
                 mod_key.append((self.p3Missing,))
 
             else:
                 mod_dict[RANGE_3P].update({
-                    FusionParser.REFERENCE: self.p3Reference,
-                    FusionParser.START: self.p3Start,
-                    FusionParser.STOP: self.p3Stop
+                    FUSION_REFERENCE: self.p3Reference,
+                    FUSION_START: self.p3Start,
+                    FUSION_STOP: self.p3Stop
                 })
                 mod_key.append((self.p3Reference, self.p3Start, self.p3Stop,))
 
@@ -397,12 +396,12 @@ class Modification(Base):
 
             elif self.modType == FRAGMENT:
                 if self.p3Missing:
-                    mod_dict[FragmentParser.MISSING] = self.p3Missing
+                    mod_dict[FRAGMENT_MISSING] = self.p3Missing
                     mod_key.append(self.p3Missing)
                 else:
                     mod_dict.update({
-                        FragmentParser.START: self.p3Start,
-                        FragmentParser.STOP: self.p3Stop
+                        FRAGMENT_START: self.p3Start,
+                        FRAGMENT_STOP: self.p3Stop
                     })
                     mod_key.append((self.p3Start, self.p3Stop,))
 
@@ -424,11 +423,11 @@ class Modification(Base):
                 })
                 mod_key.append((self.modNamespace, self.modName,))
                 if self.aminoA:
-                    mod_dict[PmodParser.CODE] = self.aminoA
+                    mod_dict[PMOD_CODE] = self.aminoA
                     mod_key.append(self.aminoA)
 
                 if self.position:
-                    mod_dict[PmodParser.POSITION] = self.position
+                    mod_dict[PMOD_POSITION] = self.position
                     mod_key.append(self.position)
 
         return {

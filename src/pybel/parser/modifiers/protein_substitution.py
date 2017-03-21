@@ -36,6 +36,7 @@ from pyparsing import pyparsing_common as ppc
 from ..baseparser import BaseParser, one_of_tags, nest
 from ..language import amino_acid
 from ...constants import HGVS, KIND, IDENTIFIER
+from ...constants import PSUB_REFERENCE, PSUB_POSITION, PSUB_VARIANT
 
 log = logging.getLogger(__name__)
 
@@ -43,23 +44,19 @@ psub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identif
 
 
 class PsubParser(BaseParser):
-    REFERENCE = 'reference'
-    POSITION = 'position'
-    VARIANT = 'variant'
-
     def __init__(self):
-        self.language = psub_tag + nest(amino_acid(self.REFERENCE),
-                                        ppc.integer(self.POSITION),
-                                        amino_acid(self.VARIANT))
+        self.language = psub_tag + nest(amino_acid(PSUB_REFERENCE),
+                                        ppc.integer(PSUB_POSITION),
+                                        amino_acid(PSUB_VARIANT))
         self.language.setParseAction(self.handle_psub)
 
         BaseParser.__init__(self, self.language)
 
     def handle_psub(self, s, l, tokens):
-        upgraded = 'p.{}{}{}'.format(tokens[self.REFERENCE], tokens[self.POSITION], tokens[self.VARIANT])
+        upgraded = 'p.{}{}{}'.format(tokens[PSUB_REFERENCE], tokens[PSUB_POSITION], tokens[PSUB_VARIANT])
         log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', s, upgraded)
         tokens[IDENTIFIER] = upgraded
-        del tokens[self.REFERENCE]
-        del tokens[self.POSITION]
-        del tokens[self.VARIANT]
+        del tokens[PSUB_REFERENCE]
+        del tokens[PSUB_POSITION]
+        del tokens[PSUB_VARIANT]
         return tokens

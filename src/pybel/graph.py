@@ -24,8 +24,8 @@ from .constructors import build_metadata_parser
 from .exceptions import PyBelWarning
 from .parser.parse_bel import BelParser
 from .parser.parse_exceptions import MissingMetadataException
-from .parser.utils import split_file_to_annotations_and_definitions, subdict_matches
-from .utils import expand_dict, get_version
+from .parser.utils import split_file_to_annotations_and_definitions
+from .utils import expand_dict, get_version, subdict_matches
 
 try:
     import cPickle as pickle
@@ -48,7 +48,7 @@ class BELGraph(nx.MultiDiGraph):
         :param lines: iterable over lines of BEL script
         :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
                         or None to use default cache
-        :type manager: str or pybel.manager.CacheManager or pybel.parser.MetadataParser
+        :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
         :param allow_naked_names: if true, turn off naked namespace failures
         :type allow_naked_names: bool
         :param allow_nested: if true, turn off nested statement failures
@@ -56,13 +56,20 @@ class BELGraph(nx.MultiDiGraph):
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
         :type citation_clearing: bool
-        :param \*attrs: arguments to pass to :py:meth:`networkx.MultiDiGraph`
-        :param \**kwargs: keyword arguments to pass to :py:meth:`networkx.MultiDiGraph`
+        :param attrs: arguments to pass to :class:`networkx.MultiDiGraph`
+        :type attrs: list
+        :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
+        :type kwargs: dict
         """
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self._warnings = []
-        self.graph[GRAPH_PYBEL_VERSION] = get_version()
+
+        if GRAPH_METADATA not in self.graph:
+            self.graph[GRAPH_METADATA] = {}
+
+        if GRAPH_PYBEL_VERSION not in self.graph:
+            self.graph[GRAPH_PYBEL_VERSION] = get_version()
 
         #: Is true if during BEL Parsing, a term that is not part of a relation is found
         self.has_singleton_terms = False
@@ -79,18 +86,18 @@ class BELGraph(nx.MultiDiGraph):
     @property
     def document(self):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
-        according to :py:data:`pybel.constants.DOCUMENT_KEYS`
+        according to :data:`pybel.constants.DOCUMENT_KEYS`
         """
-        return self.graph.get(GRAPH_METADATA, {})
+        return self.graph[GRAPH_METADATA]
 
     @property
     def name(self, *attrs):
         """Gets the graph's name. Requires a weird hack in the signature since it's overriding a property"""
-        return self.document.get(METADATA_NAME, '')
+        return self.graph[GRAPH_METADATA].get(METADATA_NAME, '')
 
     @name.setter
     def name(self, *attrs, **kwargs):
-        self.document[METADATA_NAME] = attrs[0]
+        self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
 
     @property
     def namespace_url(self):

@@ -3,7 +3,8 @@ import unittest
 
 import networkx as nx
 
-from pybel.cx import to_cx_json, from_cx_json, hash_tuple
+from pybel.cx import to_cx_json, from_cx_json
+from pybel.utils import hash_tuple
 from pybel.io import from_path
 from tests.constants import test_bel_thorough, BelReconstitutionMixin, test_bel_simple
 
