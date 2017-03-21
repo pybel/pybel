@@ -5,8 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`Unreleased <https://github.com/pybel/pybel/compare/v0.4.2...HEAD>`_
---------------------------------------------------------------------
+`0.4.3 <https://github.com/pybel/pybel/compare/v0.4.2...v0.4.3>`_ - 2017-03-21
+------------------------------------------------------------------------------
+Added
+~~~~~
+- Documentation for constants
+- Date validation on parse-time
+
+Changed
+~~~~~~~
+- Externalized strings from modifier parsers
+- Move pybel.cx.hash_tuple to pybel.utils.hash_tuple
+
+Fixed
+~~~~~
+- Output to CX on CLI crashing
+- Assignment of graph metadata on reload
 
 `0.4.2 <https://github.com/pybel/pybel/compare/v0.4.1...v0.4.2>`_ - 2017-03-16
 ------------------------------------------------------------------------------
@@ -271,7 +285,8 @@ Added
 
 Diffs
 -----
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.4.2...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.4.3...HEAD
+- [0.4.3]: https://github.com/pybel/pybel/compare/v0.4.2...v0.4.3
 - [0.4.2]: https://github.com/pybel/pybel/compare/v0.4.1...v0.4.2
 - [0.4.1]: https://github.com/pybel/pybel/compare/v0.4.0...v0.4.1
 - [0.4.0]: https://github.com/pybel/pybel/compare/v0.3.11...v0.4.0
