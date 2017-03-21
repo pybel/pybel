@@ -64,7 +64,12 @@ class BELGraph(nx.MultiDiGraph):
         nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
 
         self._warnings = []
-        self.graph[GRAPH_PYBEL_VERSION] = get_version()
+
+        if GRAPH_METADATA not in self.graph:
+            self.graph[GRAPH_METADATA] = {}
+
+        if GRAPH_PYBEL_VERSION not in self.graph:
+            self.graph[GRAPH_PYBEL_VERSION] = get_version()
 
         #: Is true if during BEL Parsing, a term that is not part of a relation is found
         self.has_singleton_terms = False
@@ -83,16 +88,16 @@ class BELGraph(nx.MultiDiGraph):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
         according to :data:`pybel.constants.DOCUMENT_KEYS`
         """
-        return self.graph.get(GRAPH_METADATA, {})
+        return self.graph[GRAPH_METADATA]
 
     @property
     def name(self, *attrs):
         """Gets the graph's name. Requires a weird hack in the signature since it's overriding a property"""
-        return self.document.get(METADATA_NAME, '')
+        return self.graph[GRAPH_METADATA].get(METADATA_NAME, '')
 
     @name.setter
     def name(self, *attrs, **kwargs):
-        self.document[METADATA_NAME] = attrs[0]
+        self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
 
     @property
     def namespace_url(self):
