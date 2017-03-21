@@ -167,7 +167,6 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         protein_list = self.gcm.query_node(type='Protein')
         self.assertEqual(len(protein_list), 4)
 
-
     @mock_bel_resources
     def test_query_edge(self, mock_get):
         fadd_casp = {
@@ -224,7 +223,6 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         source_list = self.gcm.query_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
         self.assertEqual(len(source_list), 1)
         self.assertIn(fadd_casp, source_list)
-
 
     @mock_bel_resources
     def test_query_citation(self, mock_get):
