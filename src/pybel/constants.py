@@ -102,7 +102,6 @@ RANGE_3P = 'range_3p'
 #: The key specifying the range dictionary of the fusion's 5-Prime partner
 RANGE_5P = 'range_5p'
 
-
 FUSION_REFERENCE = 'reference'
 FUSION_START = 'left'
 FUSION_STOP = 'right'
@@ -169,29 +168,53 @@ SUBJECT = 'subject'
 #: The key for an internal edge data dictionary for the object modifier dictionary
 OBJECT = 'object'
 
+#: A BEL relationship
 HAS_REACTANT = 'hasReactant'
+#: A BEL relationship
 HAS_PRODUCT = 'hasProduct'
+#: A BEL relationship
 HAS_COMPONENT = 'hasComponent'
+#: A BEL relationship
 HAS_VARIANT = 'hasVariant'
+#: A BEL relationship
 HAS_MEMBER = 'hasMember'
-TRANSCRIBED_TO = 'transcribedTo'  #: :data:`GENE` to :data:`RNA` is called transcription
-TRANSLATED_TO = 'translatedTo'  #: RNA to PROTEIN is called translation
+#: A BEL relationship
+#: :data:`GENE` to :data:`RNA` is called transcription
+TRANSCRIBED_TO = 'transcribedTo'
+#: A BEL relationship
+#: :data:`RNA` to :data:`PROTEIN` is called translation
+TRANSLATED_TO = 'translatedTo'
+#: A BEL relationship
 INCREASES = 'increases'
+#: A BEL relationship
 DIRECTLY_INCREASES = 'directlyIncreases'
+#: A BEL relationship
 DECREASES = 'decreases'
+#: A BEL relationship
 DIRECTLY_DECREASES = 'directlyDecreases'
+#: A BEL relationship
 CAUSES_NO_CHANGE = 'causesNoChange'
+#: A BEL relationship
 NEGATIVE_CORRELATION = 'negativeCorrelation'
+#: A BEL relationship
 POSITIVE_CORRELATION = 'positiveCorrelation'
+#: A BEL relationship
 ASSOCIATION = 'association'
+#: A BEL relationship
 ORTHOLOGOUS = 'orthologous'
+#: A BEL relationship
 ANALOGOUS_TO = 'analogousTo'
+#: A BEL relationship, added by PyBEL
 EQUIVALENT_TO = 'equivalentTo'
 
+#: A set of all causal relationships that have an increasing effect
 CAUSAL_INCREASE_RELATIONS = {INCREASES, DIRECTLY_INCREASES}
+#: A set of all causal relationships that have a decreasing effect
 CAUSAL_DECREASE_RELATIONS = {DECREASES, DIRECTLY_DECREASES}
+#: A set of all causal relationships
 CAUSAL_RELATIONS = CAUSAL_INCREASE_RELATIONS | CAUSAL_DECREASE_RELATIONS
 
+#: A set of all relationships that are inherently directionless, and are therefore added to the graph twice
 TWO_WAY_RELATIONS = {
     NEGATIVE_CORRELATION,
     POSITIVE_CORRELATION,
@@ -201,6 +224,7 @@ TWO_WAY_RELATIONS = {
     EQUIVALENT_TO,
 }
 
+#: A set of all correlative relationships
 CORRELATIVE_RELATIONS = {
     POSITIVE_CORRELATION,
     NEGATIVE_CORRELATION
@@ -251,7 +275,7 @@ BEL_KEYWORD_METADATA_LICENSES = 'Licenses'
 BEL_KEYWORD_METADATA_COPYRIGHT = 'Copyright'
 BEL_KEYWORD_METADATA_DISCLAIMER = 'Disclaimer'
 
-# Internal metadata representation
+# Internal metadata representation. See BELGraph documentation, since these are shielded from the user by properties.
 
 #: The key for the document metadata dictionary. Can be accessed by :code:`graph.graph[GRAPH_METADATA]`, or by using
 #: the property built in to the :class:`pybel.BELGraph`, :func:`pybel.BELGraph.document`
@@ -319,20 +343,32 @@ FRAGMENT_MISSING = 'missing'
 #: The key for any additional descriptive data about a fragment
 FRAGMENT_DESCRIPTION = 'description'
 
-
-
+#: The order for serializing gene modification data
 GMOD_ORDER = [KIND, IDENTIFIER]
 
+#: The key for the reference nucleotide in a gene substitution.
+#: Only used during parsing  since this is converted to HGVS.
 GSUB_REFERENCE = 'reference'
+#: The key for the position of a gene substitution.
+#: Only used during parsing  since this is converted to HGVS
 GSUB_POSITION = 'position'
+#: The key for the effect of a gene substitution.
+#: Only used during parsing since this is converted to HGVS
 GSUB_VARIANT = 'variant'
 
+#: The key for the protein modification code.
 PMOD_CODE = 'code'
+#: The key for the protein modification position.
 PMOD_POSITION = 'pos'
+#: The order for serializing information about a protein modification
 PMOD_ORDER = [KIND, IDENTIFIER, PMOD_CODE, PMOD_POSITION]
 
+#: The key for the reference amino acid in a protein substitution.
+#: Only used during parsing since this is concerted to HGVS
 PSUB_REFERENCE = 'reference'
+#: The key for the position of a protein substitution. Only used during parsing since this is converted to HGVS.
 PSUB_POSITION = 'position'
+#: The key for the variant of a protein substitution.Only used during parsing since this is converted to HGVS.
 PSUB_VARIANT = 'variant'
 
 #: The key for the position at which a protein is truncated
