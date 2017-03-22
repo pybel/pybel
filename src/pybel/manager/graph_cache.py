@@ -385,7 +385,7 @@ class GraphCacheManager(BaseCacheManager):
                 for effect_type, effect_value in participant_data[EFFECT].items():
                     property_dict['relativeKey'] = effect_type
                     if NAMESPACE in effect_value:
-                        if effect_value[NAMESPACE] == GOCC_KEYWORD:
+                        if effect_value[NAMESPACE] == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
                             namespace_url = GOCC_LATEST
                         else:
                             namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
@@ -575,9 +575,10 @@ class GraphCacheManager(BaseCacheManager):
         :type modification_name: str
         :param modification_type:
         :type modification_type: str
-        :param as_dict_list:
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of models.Node objects.
         :type as_dict_list: bool
-        :return:
+        :return: A list of the fitting nodes.
+        :rtype: list
         """
         q = self.session.query(models.Node)
 
@@ -627,9 +628,11 @@ class GraphCacheManager(BaseCacheManager):
         :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text
                          or a models.Evidence object.
         :type evidence: str or models.Evidence
-        :param annotation:
+        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter as string.
+        :type annotation: dict or str
         :param property:
-        :param as_dict_list:
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of models.Edge objects.
+        :type as_dict_list: bool
         :return:
         """
         q = self.session.query(models.Edge)
@@ -690,6 +693,7 @@ class GraphCacheManager(BaseCacheManager):
                     q = q.filter(models.Evidence.text.like(evidence))
 
         if property:
+            # ToDo: finish property query
             q = q.join(models.Property)
 
         result = q.all()
@@ -717,9 +721,9 @@ class GraphCacheManager(BaseCacheManager):
         :param evidence: Weather or not supporting text should be included in the return.
         :type evidence: bool
         :param evidence_text:
-        :param as_dict_list:
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of models.Citation objects.
         :type as_dict_list: bool
-        :return: List of PyBEL.manager.models.Citation objects.
+        :return: List of PyBEL.manager.models.Citation objects or corresponding dicts.
         :rtype: list
         """
         q = self.session.query(models.Citation)
