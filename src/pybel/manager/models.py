@@ -53,7 +53,7 @@ class Namespace(Base):
     domain = Column(String(255))
     species = Column(String(255), nullable=True,
                      doc='NCBI identifier that states for what species the namespace is valid')
-    description = Column(String(255), nullable=True)
+    description = Column(Text, nullable=True)
     version = Column(String(255), nullable=True)
     created = Column(DateTime)
     query_url = Column(Text, nullable=True)
@@ -63,7 +63,7 @@ class Namespace(Base):
     contact = Column(String(255), nullable=True)
 
     citation = Column(String(255))
-    citation_description = Column(String(255), nullable=True)
+    citation_description = Column(Text, nullable=True)
     citation_version = Column(String(255), nullable=True)
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
@@ -79,7 +79,7 @@ class NamespaceEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), nullable=False,
+    name = Column(Text, nullable=False,
                   doc='Name that is defined in the corresponding namespace definition file')
     encoding = Column(String(8), nullable=True,
                       doc='Represents the biological entities that this name is valid for (e.g. G for Gene or P for Protein)')
@@ -116,7 +116,7 @@ class Annotation(Base):
     url = Column(String(255), doc='Source url of the given annotation definition file (.belanno)')
     keyword = Column(String(50), index=True, doc='Keyword that is used in a BEL file to identify a specific annotation')
     type = Column(String(255))
-    description = Column(String(255), nullable=True)
+    description = Column(Text, nullable=True)
     usage = Column(Text, nullable=True)
     version = Column(String(255), nullable=True)
     created = Column(DateTime)
@@ -127,7 +127,7 @@ class Annotation(Base):
     contact = Column(String(255), nullable=True)
 
     citation = Column(String(255))
-    citation_description = Column(String(255), nullable=True)
+    citation_description = Column(Text, nullable=True)
     citation_version = Column(String(255), nullable=True)
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
@@ -161,7 +161,7 @@ class OwlNamespace(Base):
     __tablename__ = OWL_NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    iri = Column(Text, unique=True)
+    iri = Column(String(255), unique=True)
 
     entries = relationship('OwlNamespaceEntry', back_populates='owl')
 
@@ -196,7 +196,7 @@ class OwlAnnotation(Base):
     __tablename__ = OWL_ANNOTATION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    iri = Column(Text, unique=True)
+    iri = Column(String(255), unique=True)
 
     entries = relationship('OwlAnnotationEntry', back_populates='owl')
 
@@ -278,7 +278,7 @@ class Node(Base):
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
     fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
 
-    bel = Column(String, nullable=False, doc='Valid BEL term that represents the given node')
+    bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
     blob = Column(Binary)
 
     modifications = relationship("Modification", secondary=node_modification)
@@ -317,7 +317,7 @@ class Modification(Base):
     id = Column(Integer, primary_key=True)
 
     modType = Column(String(255), doc='Type of the stored modification e.g. Fusion')
-    variantString = Column(String, nullable=True)
+    variantString = Column(String(255), nullable=True)
 
     p3PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     p3Partner = relationship("NamespaceEntry", foreign_keys=[p3PartnerName_id])
@@ -495,7 +495,7 @@ class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    text = Column(String, nullable=False, index=True, doc='Supporting text that is cited from a given publication')
+    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication') #index=True,
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation', back_populates='evidences')
@@ -530,8 +530,8 @@ class Edge(Base):
 
     graphIdentifier = Column(Integer,
                              doc='Identifier that is used in the PyBEL.BELGraph to identify weather or not an edge is artificial')
-    bel = Column(String, nullable=False, doc='Valid BEL statement that represents the given edge')
-    relation = Column(String, nullable=False)
+    bel = Column(String(255), nullable=False, doc='Valid BEL statement that represents the given edge')
+    relation = Column(String(255), nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
     source = relationship('Node', foreign_keys=[source_id])
@@ -595,7 +595,7 @@ class Property(Base):
     participant = Column(String(255), doc='Identifies which participant of the edge if affected by the given property')
     modifier = Column(String(255), doc='The modifier to the corresponding participant')
     relativeKey = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
-    propValue = Column(String, nullable=True, doc='Value of the effect')
+    propValue = Column(String(255), nullable=True, doc='Value of the effect')
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry')
 
