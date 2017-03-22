@@ -131,9 +131,22 @@ class CacheManager(BaseCacheManager):
         self.ensure_namespace(url)
         return self.namespace_cache[url]
 
-    def ls_namespaces(self):
-        """Returns a list of the locations of the stored namespaces and annotations"""
-        return [definition.url for definition in self.session.query(models.Namespace).all()]
+    def ls_namespaces(self, data=False):
+        """Returns a list of the locations of the stored namespaces and annotations
+
+        :param data: Flag that indicates if all column data should be returned.
+        :type data: bool
+
+        :return: A list of all namespaces in the relational database.
+        :rtype: list[url or dict]
+
+        """
+        if not data:
+            result = [definition.url for definition in self.session.query(models.Namespace).all()]
+        else:
+            result = [definition.data for definition in self.session.query(models.Namespace).all()]
+
+        return result
 
     def load_default_namespaces(self):
         """Caches the default set of namespaces"""

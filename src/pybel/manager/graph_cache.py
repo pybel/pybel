@@ -3,6 +3,7 @@
 """This module contains the Graph Cache Manager"""
 
 import logging
+import sys
 
 from . import models
 from .base_cache import BaseCacheManager
@@ -37,6 +38,10 @@ class GraphCacheManager(BaseCacheManager):
         graph_bytes = to_bytes(graph)
 
         network = models.Network(blob=graph_bytes, **graph.document)
+        for url in graph.namespace_url:
+            network.namespaces.append(self.session.query(models.Namespace).filter_by(url=url).one())
+        for url in graph.annotation_url:
+            network.annotations.append(self.session.query(models.Annotation).filter_by(url=url).one())
 
         if store_parts:
             # TODO maybe make this part of the cache manager's init function?
@@ -59,6 +64,8 @@ class GraphCacheManager(BaseCacheManager):
         :type graph: pybel.BELGraph
         """
         nc = {node: self.get_or_create_node(graph, node) for node in graph.nodes_iter()}
+
+        self.session.flush()
 
         for u, v, graphKey, data in graph.edges_iter(data=True, keys=True):
             source, target = nc[u], nc[v]
@@ -95,6 +102,8 @@ class GraphCacheManager(BaseCacheManager):
             if edge not in network.edges:
                 network.edges.append(edge)
 
+            self.session.flush()
+
     def get_bel_namespace_entry(self, url, value):
         """Gets a given NamespaceEntry object.
 
@@ -106,7 +115,18 @@ class GraphCacheManager(BaseCacheManager):
         :rtype: models.NamespaceEntry
         """
         namespace = self.session.query(models.Namespace).filter_by(url=url).one()
-        return self.session.query(models.NamespaceEntry).filter_by(namespace=namespace, name=value).one()
+        try:
+            namespaceEntry = self.session.query(models.NamespaceEntry).filter_by(namespace=namespace,
+                                                                                 name=value).one_or_none()
+        except:
+            print(url, "::::", value)
+            print(self.session.query(models.NamespaceEntry).filter_by(namespace=namespace, name=value).all())
+            sys.exit()
+
+        if namespaceEntry is None:
+            print(url, "::::", value)
+
+        return namespaceEntry
 
     def get_bel_annotation_entry(self, url, value):
         """Gets a given AnnotationEntry object.
@@ -137,7 +157,7 @@ class GraphCacheManager(BaseCacheManager):
         if result is None:
             result = models.Evidence(text=text, citation=citation)
             self.session.add(result)
-            self.session.flush()
+            # self.session.flush()
 
         return result
 
@@ -178,7 +198,7 @@ class GraphCacheManager(BaseCacheManager):
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
-            self.session.flush()
+            #self.session.flush()
 
         return result
 
@@ -243,7 +263,7 @@ class GraphCacheManager(BaseCacheManager):
                     result.authors.append(self.get_or_create_author(author))
 
             self.session.add(result)
-            self.session.flush()
+            #self.session.flush()
 
         return result
 
@@ -385,7 +405,7 @@ class GraphCacheManager(BaseCacheManager):
                 for effect_type, effect_value in participant_data[EFFECT].items():
                     property_dict['relativeKey'] = effect_type
                     if NAMESPACE in effect_value:
-                        if effect_value[NAMESPACE] == GOCC_KEYWORD:
+                        if effect_value[NAMESPACE] == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
                             namespace_url = GOCC_LATEST
                         else:
                             namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
@@ -575,9 +595,10 @@ class GraphCacheManager(BaseCacheManager):
         :type modification_name: str
         :param modification_type:
         :type modification_type: str
-        :param as_dict_list:
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of models.Node objects.
         :type as_dict_list: bool
-        :return:
+        :return: A list of the fitting nodes.
+        :rtype: list
         """
         q = self.session.query(models.Node)
 
@@ -627,9 +648,11 @@ class GraphCacheManager(BaseCacheManager):
         :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text
                          or a models.Evidence object.
         :type evidence: str or models.Evidence
-        :param annotation:
+        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter as string.
+        :type annotation: dict or str
         :param property:
-        :param as_dict_list:
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of models.Edge objects.
+        :type as_dict_list: bool
         :return:
         """
         q = self.session.query(models.Edge)
@@ -679,6 +702,9 @@ class GraphCacheManager(BaseCacheManager):
                 if isinstance(citation, models.Citation):
                     q = q.filter(models.Evidence.citation == citation)
 
+                elif isinstance(citation, list) and isinstance(citation[0], models.Citation):
+                    q = q.filter(models.Evidence.citation.in_(citation))
+
                 elif isinstance(citation, str):
                     q = q.join(models.Citation).filter(models.Citation.reference.like(citation))
 
@@ -690,6 +716,7 @@ class GraphCacheManager(BaseCacheManager):
                     q = q.filter(models.Evidence.text.like(evidence))
 
         if property:
+            # ToDo: finish property query
             q = q.join(models.Property)
 
         result = q.all()
@@ -717,9 +744,9 @@ class GraphCacheManager(BaseCacheManager):
         :param evidence: Weather or not supporting text should be included in the return.
         :type evidence: bool
         :param evidence_text:
-        :param as_dict_list:
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of models.Citation objects.
         :type as_dict_list: bool
-        :return: List of PyBEL.manager.models.Citation objects.
+        :return: List of PyBEL.manager.models.Citation objects or corresponding dicts.
         :rtype: list
         """
         q = self.session.query(models.Citation)

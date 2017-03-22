@@ -13,30 +13,40 @@ from ..constants import *
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
+
 ANNOTATION_TABLE_NAME = 'pybel_annotation'
 ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntry'
 
 OWL_NAMESPACE_TABLE_NAME = 'pybel_owlNamespace'
 OWL_NAMESPACE_ENTRY_TABLE_NAME = 'pybel_owlNamespaceEntry'
+
 OWL_ANNOTATION_TABLE_NAME = 'pybel_owlAnnotation'
 OWL_ANNOTATION_ENTRY_TABLE_NAME = 'pybel_owlAnnotationEntry'
 
-NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
 NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalence'
+NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
 
 NETWORK_TABLE_NAME = 'pybel_network'
-CITATION_TABLE_NAME = 'pybel_citation'
-EVIDENCE_TABLE_NAME = 'pybel_evidence'
-EDGE_TABLE_NAME = 'pybel_edge'
+NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
+NETWORK_NAMESPACE_TABLE_NAME = 'pybel_network_namespace'
+NETWORK_ANNOTATION_TABLE_NAME = 'pybel_network_annotation'
+
 NODE_TABLE_NAME = 'pybel_node'
+NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
+
 MODIFICATION_TABLE_NAME = 'pybel_modification'
-PROPERTY_TABLE_NAME = 'pybel_property'
+
+EDGE_TABLE_NAME = 'pybel_edge'
+EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntry'
+EDGE_PROPERTY_TABLE_NAME = 'pybel_edge_property'
+
 AUTHOR_TABLE_NAME = 'pybel_author'
 AUTHOR_CITATION_TABLE_NAME = 'pybel_author_citation'
-EDGE_PROPERTY_TABLE_NAME = 'pybel_edge_property'
-NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
-EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntry'
-NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
+
+CITATION_TABLE_NAME = 'pybel_citation'
+EVIDENCE_TABLE_NAME = 'pybel_evidence'
+PROPERTY_TABLE_NAME = 'pybel_property'
+
 
 Base = declarative_base()
 
@@ -71,6 +81,12 @@ class Namespace(Base):
     entries = relationship('NamespaceEntry', back_populates="namespace")
 
     has_equivalences = Column(Boolean, default=False)
+
+    @property
+    def data(self):
+        ns_data = self.__dict__
+        del ns_data['_sa_instance_state']
+        return ns_data
 
 
 class NamespaceEntry(Base):
@@ -219,16 +235,22 @@ class OwlAnnotationEntry(Base):
                             secondaryjoin=id == owl_annotation_relationship.c.right_id)
 
 
+network_annotation = Table(
+    NETWORK_ANNOTATION_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('namespace_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
+)
+
+network_namespace = Table(
+    NETWORK_NAMESPACE_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('namespace_id', Integer, ForeignKey('{}.id'.format(NAMESPACE_TABLE_NAME)), primary_key=True)
+)
+
 network_edge = Table(
     NETWORK_EDGE_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
-)
-
-edge_annotation = Table(
-    EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
-    Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -252,6 +274,8 @@ class Network(Base):
     blob = Column(Binary)
 
     edges = relationship('Edge', secondary=network_edge)
+    namespaces = relationship('Namespace', secondary=network_namespace)
+    annotations = relationship('Annotation', secondary=network_annotation)
 
     __table_args__ = (
         UniqueConstraint(METADATA_NAME, METADATA_VERSION),
@@ -511,6 +535,13 @@ class Evidence(Base):
             CITATION: self.citation.data,
             EVIDENCE: self.text
         }
+
+
+edge_annotation = Table(
+    EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
+    Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
+)
 
 
 edge_property = Table(
