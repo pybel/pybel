@@ -40,7 +40,9 @@ class GraphCacheManager(BaseCacheManager):
 
         if store_parts:
             # TODO maybe make this part of the cache manager's init function?
-            CacheManager(connection=self.connection).ensure_namespace(GOCC_LATEST)
+            cm = CacheManager(connection=self.connection)
+            if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
+                cm.ensure_namespace(GOCC_LATEST)
             self.store_graph_parts(network, graph)
 
         self.session.add(network)
