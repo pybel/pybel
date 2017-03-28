@@ -40,8 +40,7 @@ log = logging.getLogger(__name__)
 class BELGraph(nx.MultiDiGraph):
     """The BELGraph class is a container for BEL networks that is based on the NetworkX MultiDiGraph data structure"""
 
-    def __init__(self, lines=None, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
-                 *attrs, **kwargs):
+    def __init__(self, lines=None, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,**kwargs):
         """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
         list of strings.
 
@@ -56,12 +55,10 @@ class BELGraph(nx.MultiDiGraph):
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
         :type citation_clearing: bool
-        :param attrs: arguments to pass to :class:`networkx.MultiDiGraph`
-        :type attrs: list
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         :type kwargs: dict
         """
-        nx.MultiDiGraph.__init__(self, *attrs, **kwargs)
+        nx.MultiDiGraph.__init__(self, **kwargs)
 
         self._warnings = []
 
@@ -99,6 +96,11 @@ class BELGraph(nx.MultiDiGraph):
     @name.setter
     def name(self, *attrs, **kwargs):
         self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
+
+    @property
+    def version(self):
+        """The graph's version, from the SET DOCUMENT section of the source BEL script"""
+        return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
 
     @property
     def namespace_url(self):

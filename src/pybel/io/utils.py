@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from ..utils import tokenize_version
 
 

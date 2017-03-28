@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""This module contains IO functions for interconversion between BEL graphs and node-link JSON"""
+
 import json
 import os
 
