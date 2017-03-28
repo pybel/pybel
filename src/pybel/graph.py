@@ -75,7 +75,8 @@ class BELGraph(nx.MultiDiGraph):
         self.has_singleton_terms = False
 
         if lines is not None:
-            self.parse_lines(
+            parse_lines(
+                self,
                 lines,
                 manager=manager,
                 allow_naked_names=allow_naked_names,
@@ -151,101 +152,6 @@ class BELGraph(nx.MultiDiGraph):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
-    def parse_lines(self, lines, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True):
-        """Parses an iterable of lines into this graph
-
-        :param lines: iterable over lines of BEL data file
-        :param manager: database connection string to cache, pre-built CacheManager, or pre-build MetadataParser, or
-                        None for default connection
-        :type manager: None or str or :class:`pybel.manager.cache.CacheManager` or :class:`pybel.parser.MetadataParser`
-        :param allow_naked_names: if true, turn off naked namespace failures
-        :type allow_naked_names: bool
-        :param allow_nested: if true, turn off nested statement failures
-        :type allow_nested: bool
-        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-                                    Delegated to :class:`pybel.parser.ControlParser`
-        :type citation_clearing: bool
-        """
-
-        docs, definitions, states = split_file_to_annotations_and_definitions(lines)
-
-        metadata_parser = build_metadata_parser(manager)
-
-        self.parse_document(docs, metadata_parser)
-
-        self.parse_definitions(definitions, metadata_parser)
-
-        bel_parser = BelParser(
-            graph=self,
-            namespace_dicts=metadata_parser.namespace_dict,
-            annotation_dicts=metadata_parser.annotations_dict,
-            namespace_expressions=metadata_parser.namespace_re,
-            annotation_expressions=metadata_parser.annotations_re,
-            allow_naked_names=allow_naked_names,
-            allow_nested=allow_nested,
-            citation_clearing=citation_clearing,
-            autostreamline=True
-        )
-
-        self.parse_statements(states, bel_parser)
-
-        log.info('Network has %d nodes and %d edges', self.number_of_nodes(), self.number_of_edges())
-
-        counter = defaultdict(lambda: defaultdict(int))
-
-        for n, d in self.nodes_iter(data=True):
-            counter[d[FUNCTION]][d[NAMESPACE] if NAMESPACE in d else 'DEFAULT'] += 1
-
-        for fn, nss in sorted(counter.items()):
-            log.debug(' %s: %d', fn, sum(nss.values()))
-            for ns, count in sorted(nss.items()):
-                log.debug('   %s: %d', ns, count)
-
-    def parse_document(self, document_metadata, metadata_parser):
-        t = time.time()
-
-        for line_number, line in document_metadata:
-            try:
-                metadata_parser.parseString(line)
-            except Exception as e:
-                log.exception('Line %07d - Critical Failure - %s', line_number, line)
-                raise e
-
-        for required in REQUIRED_METADATA:
-            if required not in metadata_parser.document_metadata:
-                self.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
-                log.error('Missing required document metadata: %s', INVERSE_DOCUMENT_KEYS[required])
-            elif not metadata_parser.document_metadata[required]:
-                self.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
-                log.error('Missing required document metadata not filled: %s', INVERSE_DOCUMENT_KEYS[required])
-
-        self.graph[GRAPH_METADATA] = metadata_parser.document_metadata
-
-        log.info('Finished parsing document section in %.02f seconds', time.time() - t)
-
-    def parse_definitions(self, definitions, metadata_parser):
-        t = time.time()
-
-        for line_number, line in definitions:
-            try:
-                metadata_parser.parseString(line)
-            except Exception as e:
-                log.exception('Line %07d - Critical Failure - %s', line_number, line)
-                raise e
-
-        self.graph.update({
-            GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
-            GRAPH_NAMESPACE_URL: metadata_parser.namespace_url_dict.copy(),
-            GRAPH_NAMESPACE_PATTERN: metadata_parser.namespace_re.copy(),
-            GRAPH_ANNOTATION_URL: metadata_parser.annotation_url_dict.copy(),
-            GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
-            GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_re.copy(),
-            GRAPH_ANNOTATION_LIST: {e: metadata_parser.annotations_dict[e] for e in
-                                    metadata_parser.annotation_list_list}
-        })
-
-        log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
-
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
 
@@ -259,34 +165,6 @@ class BELGraph(nx.MultiDiGraph):
         key = unqualified_edge_code[relation]
         if not self.has_edge(u, v, key):
             self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
-
-    def parse_statements(self, statements, bel_parser):
-        """Parses a list of statements from a BEL Script
-
-        :type statements: list of str
-        :type bel_parser: BelParser
-        """
-        t = time.time()
-
-        for line_number, line in statements:
-            try:
-                bel_parser.parseString(line)
-            except ParseException:
-                log.error('Line %07d - General Parser Failure: %s', line_number, line)
-                self.add_warning(line_number, line, PyBelWarning('ParseException'), bel_parser.get_annotations())
-            except PyBelWarning as e:
-                log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
-                self.add_warning(line_number, line, e, bel_parser.get_annotations())
-            except Exception as e:
-                log.exception('Line %07d - General Failure: %s', line_number, line)
-                self.add_warning(line_number, line, e, bel_parser.get_annotations())
-
-        self.has_singleton_terms = bel_parser.has_singleton_terms
-
-        log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(self.warnings))
-
-        for k, v in sorted(Counter(e.__class__.__name__ for _, _, e, _ in self.warnings).items(), reverse=True):
-            log.debug('  %s: %d', k, v)
 
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
         """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data.
@@ -365,3 +243,150 @@ def expand_edges(graph):
         g.add_edge(u, v, key=key, attr_dict=expand_dict(data))
 
     return g
+
+
+def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True):
+    """Parses an iterable of lines into this graph
+
+    :param graph: A BEL Graph
+    :type graph: BELGraph
+    :param lines: iterable over lines of BEL data file
+    :param manager: database connection string to cache, pre-built CacheManager, or pre-build MetadataParser, or
+                    None for default connection
+    :type manager: None or str or :class:`pybel.manager.cache.CacheManager` or :class:`pybel.parser.MetadataParser`
+    :param allow_naked_names: if true, turn off naked namespace failures
+    :type allow_naked_names: bool
+    :param allow_nested: if true, turn off nested statement failures
+    :type allow_nested: bool
+    :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                Delegated to :class:`pybel.parser.ControlParser`
+    :type citation_clearing: bool
+    """
+
+    docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
+
+    metadata_parser = build_metadata_parser(manager)
+
+    parse_document(graph, docs, metadata_parser)
+
+    parse_definitions(graph, definitions, metadata_parser)
+
+    bel_parser = BelParser(
+        graph=graph,
+        namespace_dicts=metadata_parser.namespace_dict,
+        annotation_dicts=metadata_parser.annotations_dict,
+        namespace_expressions=metadata_parser.namespace_re,
+        annotation_expressions=metadata_parser.annotations_re,
+        allow_naked_names=allow_naked_names,
+        allow_nested=allow_nested,
+        citation_clearing=citation_clearing,
+        autostreamline=True
+    )
+
+    parse_statements(graph, statements, bel_parser)
+
+    log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
+
+    counter = defaultdict(lambda: defaultdict(int))
+
+    for n, d in graph.nodes_iter(data=True):
+        counter[d[FUNCTION]][d[NAMESPACE] if NAMESPACE in d else 'DEFAULT'] += 1
+
+    for fn, nss in sorted(counter.items()):
+        log.debug(' %s: %d', fn, sum(nss.values()))
+        for ns, count in sorted(nss.items()):
+            log.debug('   %s: %d', ns, count)
+
+
+def parse_document(graph, document_metadata, metadata_parser):
+    """
+
+    :param graph: A BEL Graph
+    :type graph: BELGraph
+    :param document_metadata:
+    :param metadata_parser:
+    :return:
+    """
+    t = time.time()
+
+    for line_number, line in document_metadata:
+        try:
+            metadata_parser.parseString(line)
+        except Exception as e:
+            log.exception('Line %07d - Critical Failure - %s', line_number, line)
+            raise e
+
+    for required in REQUIRED_METADATA:
+        if required not in metadata_parser.document_metadata:
+            graph.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
+            log.error('Missing required document metadata: %s', INVERSE_DOCUMENT_KEYS[required])
+        elif not metadata_parser.document_metadata[required]:
+            graph.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
+            log.error('Missing required document metadata not filled: %s', INVERSE_DOCUMENT_KEYS[required])
+
+    graph.graph[GRAPH_METADATA] = metadata_parser.document_metadata
+
+    log.info('Finished parsing document section in %.02f seconds', time.time() - t)
+
+
+def parse_definitions(graph, definitions, metadata_parser):
+    """
+
+    :param graph: A BEL Graph
+    :type graph: BELGraph
+    :param definitions:
+    :param metadata_parser:
+    :return:
+    """
+    t = time.time()
+
+    for line_number, line in definitions:
+        try:
+            metadata_parser.parseString(line)
+        except Exception as e:
+            log.exception('Line %07d - Critical Failure - %s', line_number, line)
+            raise e
+
+    graph.graph.update({
+        GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
+        GRAPH_NAMESPACE_URL: metadata_parser.namespace_url_dict.copy(),
+        GRAPH_NAMESPACE_PATTERN: metadata_parser.namespace_re.copy(),
+        GRAPH_ANNOTATION_URL: metadata_parser.annotation_url_dict.copy(),
+        GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
+        GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_re.copy(),
+        GRAPH_ANNOTATION_LIST: {e: metadata_parser.annotations_dict[e] for e in
+                                metadata_parser.annotation_list_list}
+    })
+
+    log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
+
+
+def parse_statements(graph, statements, bel_parser):
+    """Parses a list of statements from a BEL Script
+
+    :param graph: A BEL Graph
+    :type graph: BELGraph
+    :type statements: list of str
+    :type bel_parser: BelParser
+    """
+    t = time.time()
+
+    for line_number, line in statements:
+        try:
+            bel_parser.parseString(line)
+        except ParseException:
+            log.error('Line %07d - General Parser Failure: %s', line_number, line)
+            graph.add_warning(line_number, line, PyBelWarning('ParseException'), bel_parser.get_annotations())
+        except PyBelWarning as e:
+            log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
+            graph.add_warning(line_number, line, e, bel_parser.get_annotations())
+        except Exception as e:
+            log.exception('Line %07d - General Failure: %s', line_number, line)
+            graph.add_warning(line_number, line, e, bel_parser.get_annotations())
+
+    graph.has_singleton_terms = bel_parser.has_singleton_terms
+
+    log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(graph.warnings))
+
+    for k, v in sorted(Counter(e.__class__.__name__ for _, _, e, _ in graph.warnings).items(), reverse=True):
+        log.debug('  %s: %d', k, v)

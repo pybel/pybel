@@ -23,6 +23,8 @@ from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..constants import belns_encodings
 from ..utils import download_url
 
+__all__ = ['CacheManager']
+
 log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))

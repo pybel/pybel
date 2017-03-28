@@ -10,6 +10,22 @@ Resources:
 .. seealso:: Building custom namespaces http://openbel-framework.readthedocs.io/en/latest/tutorials/building_custom_namespaces.html>
 """
 
+__all__ = [
+    'default_namespaces_1',
+    'default_namespaces_2013',
+    'default_namespaces_2015',
+    'default_namespaces',
+    'default_annotations_1',
+    'default_annotations_2013',
+    'default_annotations_2015',
+    'default_annotations',
+    'default_equivalences_1',
+    'default_equivalences_2013',
+    'default_equivalences_2015',
+    'default_equivalences',
+    'default_owl'
+]
+
 default_namespaces_1 = [
     'http://resources.openbel.org/belframework/1.0/namespace/affy-hg-u133-plus2.belns',
     'http://resources.openbel.org/belframework/1.0/namespace/affy-hg-u133ab.belns',
