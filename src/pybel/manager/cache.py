@@ -109,11 +109,12 @@ class CacheManager(BaseCacheManager):
             log.info('Already cached %s', url)
             return
 
-        try:
-            results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
-            log.info('Loaded namespace from %s (%d)', url, len(results.entries))
-        except NoResultFound:
+        results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
+
+        if results is None:
             results = self.insert_namespace(url)
+        else:
+            log.info('Loaded namespace from %s (%d)', url, len(results.entries))
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
@@ -189,10 +190,11 @@ class CacheManager(BaseCacheManager):
             log.info('Already cached %s', url)
             return
 
-        try:
-            results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one()
+        results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
+
+        if results is not None:
             log.info('Loaded annotation from %s (%d)', url, len(results.entries))
-        except NoResultFound:
+        else:
             results = self.insert_annotation(url)
 
         for entry in results.entries:
