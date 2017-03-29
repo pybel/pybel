@@ -8,14 +8,12 @@ import pybel
 from pybel.constants import *
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
-from pybel.constants import belns_encodings
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_ado
-from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, expected_test_bel_4_metadata, \
-    assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
+from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, \
+    expected_test_bel_4_metadata, assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
 
 log = logging.getLogger('pybel')
-
 
 EXPECTED_PIZZA_NODES = {
     'Pizza',
@@ -32,6 +30,7 @@ EXPECTED_PIZZA_EDGES = {
     ('MeatTopping', 'Topping'),
     ('TomatoTopping', 'Topping')
 }
+
 
 class TestOwlBase(unittest.TestCase):
     def assertHasNode(self, g, n, **kwargs):
@@ -442,9 +441,9 @@ class TestIntegration(TestOwlBase):
 
         annots = {
             CITATION: {
-                CITATION_NAME:'That one article from last week',
+                CITATION_NAME: 'That one article from last week',
                 CITATION_REFERENCE: '123455',
-                CITATION_TYPE:'PubMed'
+                CITATION_TYPE: 'PubMed'
             },
             EVIDENCE: 'Made up support, not even qualifying as evidence',
             ANNOTATIONS: {'Wine': 'Cotturi'}

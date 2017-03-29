@@ -21,6 +21,8 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
+__all__ = ['GraphCacheManager']
+
 
 class GraphCacheManager(BaseCacheManager):
     """The PyBEL graph cache manager has utilities for inserting and querying the graph store and edge store"""

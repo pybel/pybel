@@ -23,8 +23,7 @@ import click
 
 from .canonicalize import to_bel
 from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
-from .cx import to_cx
-from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_pickle, to_neo4j
+from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
 from .manager.graph_cache import GraphCacheManager

@@ -54,16 +54,15 @@ Future versions of PyBEL will include database integrity checks and provide upgr
 
 from . import canonicalize
 from . import constants
-from . import cx
+from . import graph
 from . import io
 from .canonicalize import *
-from .cx import *
-from .graph import BELGraph
+from .graph import *
 from .io import *
 from .manager import database_io
 from .manager.database_io import *
 
-__all__ = ['BELGraph'] + io.__all__ + canonicalize.__all__ + cx.__all__ + database_io.__all__
+__all__ = graph.__all__ + io.__all__ + canonicalize.__all__ + database_io.__all__
 
 __version__ = '0.4.4-dev'
 
