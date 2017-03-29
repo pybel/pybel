@@ -5,7 +5,7 @@ import os
 import requests
 from requests_file import FileAdapter
 
-from ..graph import BELGraph
+from ..graph import BELGraph, parse_lines
 
 __all__ = [
     'from_lines',
@@ -37,8 +37,10 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
     :return: a parsed BEL graph
     :rtype: BELGraph
     """
-    return BELGraph(lines, manager=manager, allow_naked_names=allow_naked_names, allow_nested=allow_nested,
-                    citation_clearing=citation_clearing, **kwargs)
+    graph = BELGraph(**kwargs)
+    parse_lines(graph, lines, manager=manager, allow_naked_names=allow_naked_names, allow_nested=allow_nested,
+                citation_clearing=citation_clearing)
+    return graph
 
 
 def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
