@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""This module contains IO functions for BEL scripts"""
+
 import codecs
 import logging
 import os

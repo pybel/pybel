@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""This module contains output functions to BEL scripts."""
+
 from __future__ import print_function
 
 import itertools as itt
@@ -8,11 +10,9 @@ import sys
 import time
 from operator import itemgetter
 
-from pkg_resources import get_distribution
-
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .utils import ensure_quotes, flatten_citation, sort_edges
+from .utils import ensure_quotes, flatten_citation, sort_edges, get_version
 
 __all__ = [
     'to_bel_lines',
@@ -206,7 +206,7 @@ def to_bel_lines(graph):
     :return: an iterable over the lines of the representative BEL script
     :rtype: iter
     """
-    yield '# Output by PyBEL v{} on {}\n'.format(get_distribution('pybel').version, time.asctime())
+    yield '# Output by PyBEL v{} on {}\n'.format(get_version(), time.asctime())
 
     for k in sorted(graph.document):
         yield 'SET DOCUMENT {} = "{}"'.format(INVERSE_DOCUMENT_KEYS[k], graph.document[k])

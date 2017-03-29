@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""This module contains helper functions for other IO functions."""
+
 from ..utils import tokenize_version
 
 
