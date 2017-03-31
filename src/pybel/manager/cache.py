@@ -276,9 +276,9 @@ class CacheManager(BaseCacheManager):
         """
         if iri in self.namespace_term_cache:
             return
-        try:
-            results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one()
-        except NoResultFound:
+
+        results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one_or_none()
+        if results is None:
             results = self.insert_namespace_owl(iri)
 
         self.namespace_term_cache[iri] = set(entry.entry for entry in results.entries)
@@ -291,9 +291,9 @@ class CacheManager(BaseCacheManager):
     def ensure_annotation_owl(self, iri):
         if iri in self.annotation_term_cache:
             return
-        try:
-            results = self.session.query(models.OwlAnnotation).filter(models.OwlAnnotation.iri == iri).one()
-        except NoResultFound:
+
+        results = self.session.query(models.OwlAnnotation).filter(models.OwlAnnotation.iri == iri).one_or_none()
+        if results is None:
             results = self.insert_annotation_owl(iri)
 
         self.annotation_term_cache[iri] = set(entry.entry for entry in results.entries)
@@ -372,12 +372,13 @@ class CacheManager(BaseCacheManager):
     # Manage Equivalences
 
     def ensure_equivalence_class(self, label):
-        try:
-            result = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=label).one()
-        except NoResultFound:
+        result = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
+
+        if result is None:
             result = models.NamespaceEntryEquivalence(label=label)
             self.session.add(result)
             self.session.commit()
+
         return result
 
     def insert_equivalences(self, url, namespace_url):
