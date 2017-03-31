@@ -89,7 +89,7 @@ class BelParser(BaseParser):
         )
 
         self.identifier_parser = IdentifierParser(
-            namespace_dicts=namespace_dicts,
+            namespace_dict=namespace_dicts,
             namespace_expressions=namespace_expressions,
             namespace_mappings=namespace_mappings,
             allow_naked_names=allow_naked_names

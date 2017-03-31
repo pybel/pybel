@@ -16,23 +16,25 @@ log = logging.getLogger(__name__)
 
 
 class IdentifierParser(BaseParser):
-    def __init__(self, namespace_dicts=None, default_namespace=None, namespace_expressions=None,
-                 namespace_mappings=None, allow_naked_names=False):
-        """Builds a namespace parser.
+    """A parser for identifiers in the form of namespace:name. Can be made more lenient when given a default namespace
+    or enabling the use of naked names"""
 
-        :param namespace_dicts: dictionary of {namespace: set of names}
-        :type namespace_dicts: dict
-        :param namespace_expressions: dictionary of {namespace: regular expression string} to compile
+    def __init__(self, namespace_dict=None, default_namespace=None, namespace_expressions=None,
+                 namespace_mappings=None, allow_naked_names=False):
+        """
+        :param namespace_dict: A dictionary of {namespace: set of names}
+        :type namespace_dict: dict
+        :param namespace_expressions: A dictionary of {namespace: regular expression string} to compile
         :type namespace_expressions: dict
-        :param default_namespace: set of strings that can be used without a namespace
+        :param default_namespace: A set of strings that can be used without a namespace
         :type default_namespace: set of str
-        :param namespace_mappings: dictionary of {namespace: {name: (mapped_ns, mapped_name)}}
+        :param namespace_mappings: A dictionary of {namespace: {name: (mapped_ns, mapped_name)}}
         :type namespace_mappings: dict
-        :param allow_naked_names: if true, turn off naked namespace failures
+        :param allow_naked_names: If true, turn off naked namespace failures
         :type allow_naked_names: bool
         """
 
-        self.namespace_dict = namespace_dicts
+        self.namespace_dict = namespace_dict
         self.namespace_regex = {} if namespace_expressions is None else namespace_expressions
         self.namespace_regex_compiled = {k: re.compile(v) for k, v in self.namespace_regex.items()}
         self.default_namespace = set(default_namespace) if default_namespace is not None else None

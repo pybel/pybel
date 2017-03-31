@@ -42,7 +42,7 @@ class MetadataParser(BaseParser):
     def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, namespace_re=None,
                  annotations_re=None):
         """
-        :param cache_manager: a namespace namespace_cache manager
+        :param cache_manager: A cache manager
         :type cache_manager: pybel.manager.cache.CacheManager
         :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
         :type valid_namespaces: dict
