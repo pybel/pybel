@@ -32,22 +32,22 @@ value = quote | ppc.identifier
 
 
 class MetadataParser(BaseParser):
-    """Parser for the document and definitions section of a BEL document.
+    """A parser for the document and definitions section of a BEL document.
 
     .. seealso::
 
         BEL 1.0 Specification for the `DEFINE <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define>`_ keyword
     """
 
-    def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, namespace_re=None,
+    def __init__(self, cache_manager, namespace_dict=None, annotation_dict=None, namespace_re=None,
                  annotations_re=None):
         """
         :param cache_manager: A cache manager
         :type cache_manager: pybel.manager.cache.CacheManager
-        :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
-        :type valid_namespaces: dict
-        :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
-        :type valid_annotations: dict
+        :param namespace_dict: dictionary of pre-loaded namespaces {name: set of valid values}
+        :type namespace_dict: dict
+        :param annotation_dict: dictionary of pre-loaded annotations {name: set of valid values}
+        :type annotation_dict: dict
         :param namespace_re: a dictionary of pre-loaded namespace regular expressions {name: regex string}
         :type namespace_re: dict
         :param annotations_re: a dictionary of pre-loaded annotation regular expressions {name: regex string}
@@ -56,8 +56,8 @@ class MetadataParser(BaseParser):
 
         self.cache_manager = cache_manager
 
-        self.namespace_dict = {} if valid_namespaces is None else valid_namespaces
-        self.annotations_dict = {} if valid_annotations is None else valid_annotations
+        self.namespace_dict = {} if namespace_dict is None else namespace_dict
+        self.annotations_dict = {} if annotation_dict is None else annotation_dict
         self.namespace_re = {} if namespace_re is None else namespace_re
         self.annotations_re = {} if annotations_re is None else annotations_re
 
