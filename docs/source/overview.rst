@@ -117,19 +117,23 @@ The lines below show a BEL relation that corresponds to two edges, each with the
 for :code:`ExampleAnnotation`. This should be considered carefully for analyses dealing with the number of edges
 between two entities.
 
-- ``SET Citation = {"PubMed","Example Article","12345"}``
-- ``SET ExampleAnnotation = {"Example Value 1", "Example Value 2"}``
-- ``p(HGNC:YFG1) -> p(HGNC:YFG2)``
+.. code::
+
+    SET Citation = {"PubMed","Example Article","12345"}
+    SET ExampleAnnotation = {"Example Value 1", "Example Value 2"}
+    p(HGNC:YFG1) -> p(HGNC:YFG2)
 
 Furthermore, if there are multiple annotations with lists, the following BEL relations are true for all of the
 different combinations of them. The following statements will produce four edges, as the cartesian product of the values
 used for both :code:`ExampleAnnotation1` and :code:`ExampleAnnotation2`. This might not be the knowledge that the
 annotator wants to express, and is prone to mistakes, so use of annotation lists are not recommended.
 
-- ``SET Citation = {"PubMed","Example Article","12345"}``
-- ``SET ExampleAnnotation1 = {"Example Value 11", "Example Value 12"}``
-- ``SET ExampleAnnotation2 = {"Example Value 21", "Example Value 22"}``
-- ``p(HGNC:YFG1) -> p(HGNC:YFG2)``
+.. code::
+
+    SET Citation = {"PubMed","Example Article","12345"}
+    SET ExampleAnnotation1 = {"Example Value 11", "Example Value 12"}
+    SET ExampleAnnotation2 = {"Example Value 21", "Example Value 22"}
+    p(HGNC:YFG1) -> p(HGNC:YFG2)
 
 Namespace and Annotation Name Choices
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
