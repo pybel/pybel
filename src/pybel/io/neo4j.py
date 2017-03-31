@@ -10,6 +10,7 @@ from ..utils import flatten_dict
 
 __all__ = ['to_neo4j']
 
+
 def to_neo4j(graph, neo_graph, context=None):
     """Uploads a BEL graph to Neo4J graph database using `py2neo`
 
@@ -22,6 +23,14 @@ def to_neo4j(graph, neo_graph, context=None):
     :param context: A disease context to allow for multiple disease models in one neo4j instance.
                     Each edge will be assigned an attribute :code:`pybel_context` with this value
     :type context: str
+    
+    Example Usage:
+    
+    >>> import pybel, py2neo
+    >>> url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
+    >>> g = pybel.from_url(url)
+    >>> neo_graph = py2neo.Graph("http://localhost:7474/db/data/")  # use your own connection settings
+    >>> pybel.to_neo4j(g, neo_graph)
     """
     tx = neo_graph.begin()
 

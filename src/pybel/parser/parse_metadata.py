@@ -43,7 +43,7 @@ class MetadataParser(BaseParser):
                  annotations_re=None):
         """
         :param cache_manager: a namespace namespace_cache manager
-        :type cache_manager: pybel.manager.CacheManager
+        :type cache_manager: pybel.manager.cache.CacheManager
         :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
         :type valid_namespaces: dict
         :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-
-PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux.
+PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux using 
+`Travis CI <https://travis-ci.org/pybel/pybel>`_.
 
 .. warning:: PyBEL is not thoroughly tested on Windows.
 
@@ -44,12 +44,14 @@ Caveats
 Upgrading
 ---------
 
-During the current development cycle, many models are being added and changed in the PyBEL schema. This might make
-programmatic access to the database with SQLAlchemy unstable. If you have any problems working with the database,
-try to remove it by running :code:`pybel manage remove` from the command line. PyBEL will build
-a new database and populate it on the next run.
+During the current development cycle, programmatic access to the definition and graph caches might become unstable. If 
+you have any problems working with the database, try removing it either by 
 
-Future versions of PyBEL will include database integrity checks and provide upgrade procedures/scripts.
+1. Running :code:`pybel manage remove` (unix)
+2. Running :code:`python3 -m pybel manage remove` (windows)
+3. Removing the folder :code:`~/.pybel`
+
+PyBEL will build a new database and populate it on the next run.
 """
 
 from . import canonicalize
