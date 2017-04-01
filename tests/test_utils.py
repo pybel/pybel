@@ -11,7 +11,7 @@ from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.parse_identifier import IdentifierParser
 from pybel.parser.utils import split_file_to_annotations_and_definitions
-from pybel.utils import download_url, list2tuple
+from pybel.utils import get_bel_resource, list2tuple
 from tests.constants import test_an_1, test_bel_simple
 
 
@@ -46,7 +46,7 @@ class TestRandom(unittest.TestCase):
 
 class TestUtils(unittest.TestCase):
     def test_download_url(self):
-        res = download_url(Path(test_an_1).as_uri())
+        res = get_bel_resource(Path(test_an_1).as_uri())
 
         expected_values = {
             'TestAnnot1': 'O',

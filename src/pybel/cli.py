@@ -137,11 +137,11 @@ def manage():
 def setup(path, skip_namespaces, skip_annotations, skip_owl):
     cm = CacheManager(connection=path)
     if not skip_namespaces:
-        cm.load_default_namespaces()
+        cm.ensure_default_namespaces()
     if not skip_annotations:
-        cm.load_default_annotations()
+        cm.ensure_default_annotations()
     if not skip_owl:
-        cm.load_default_namespace_owl()
+        cm.ensure_default_owl_namespaces()
 
 
 @manage.command(help='Remove default cache at {}'.format(DEFAULT_CACHE_LOCATION))
@@ -175,7 +175,7 @@ def ls(url, path):
     dcm = CacheManager(connection=path)
 
     if not url:
-        for line in dcm.ls():
+        for line in dcm.get_definition_urls():
             if not line:
                 continue
             click.echo(line)
