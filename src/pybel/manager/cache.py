@@ -54,6 +54,8 @@ class CacheManager(BaseCacheManager):
         self.annotation_edge_cache = {}
         self.annotation_graph_cache = {}
 
+        log.info('Definition cache manager connected to %s', self.connection)
+
     # NAMESPACE MANAGEMENT
 
     def insert_namespace(self, url):

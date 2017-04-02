@@ -117,6 +117,8 @@ class MetadataParser(BaseParser):
 
         BaseParser.__init__(self, self.language)
 
+        log.info('Metadata parser connected to %s', self.cache_manager.connection)
+
     def handle_document(self, s, l, tokens):
         key = tokens['key']
         value = tokens['value']

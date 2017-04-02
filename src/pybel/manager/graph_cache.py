@@ -2,6 +2,7 @@
 
 """This module contains the Graph Cache Manager"""
 
+import datetime
 import logging
 
 from . import models
@@ -25,6 +26,17 @@ __all__ = ['GraphCacheManager']
 
 class GraphCacheManager(BaseCacheManager):
     """The PyBEL graph cache manager has utilities for inserting and querying the graph store and edge store"""
+
+    def __init__(self, connection=None, echo=False):
+        """
+        :param connection: A custom database connection string
+        :type connection: str
+        :param echo: Whether or not echo the running sql code.
+        :type echo: bool
+        """
+        BaseCacheManager.__init__(self, connection=connection, echo=echo)
+
+        log.info('Definition cache manager connected to %s', self.connection)
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
@@ -713,7 +725,7 @@ class GraphCacheManager(BaseCacheManager):
         :param author: The name or a list of names of authors participated in the citation.
         :type author: str or list
         :param date: Publishing date of the citation.
-        :type date: str or date
+        :type date: str or datetime.date
         :param evidence: Weather or not supporting text should be included in the return.
         :type evidence: bool
         :param evidence_text:
@@ -741,12 +753,10 @@ class GraphCacheManager(BaseCacheManager):
             q = q.filter(models.Citation.name.like(name))
 
         if date:
-            if isinstance(date, date):
+            if isinstance(date, datetime.date):
                 q = q.filter(models.Citation.date == date)
-
-            if isinstance(date, str):
-                d = parse_datetime(date)
-                q = q.filter(models.Citation.date == d)
+            elif isinstance(date, str):
+                q = q.filter(models.Citation.date == parse_datetime(date))
 
         if evidence_text:
             q = q.join(models.Evidence).filter(models.Evidence.text.like(evidence_text))
