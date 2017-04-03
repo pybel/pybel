@@ -5,6 +5,16 @@ An extensive set of examples can be found on the `PyBEL Notebooks <https://githu
 repository on GitHub. These notebooks contain basic usage and also make numerous references to the analytical
 package `PyBEL Tools <https://github.com/pybel/pybel-tools>`_
 
+Configuration
+-------------
+
+The default connection string can be set as an environment variable in your ``~/.bashrc``. If you're using MySQL or
+MariaDB, it could look like this:
+
+.. code::
+
+    $ export PYBEL_CONNECTION="mysql+pymysql://user:password@localhost/table?charset=utf8"
+
 Command Line
 ------------
 
@@ -24,3 +34,4 @@ Load, compile, and export to Cytoscape format:
     $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
 
 In Cytoscape, open with :code:`Import > Network > From File`.
+
