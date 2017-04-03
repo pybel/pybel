@@ -3,9 +3,6 @@
 """
 A message for "General Parser Failure" is displayed when a problem was caused due to an unforseen error. The line
 number and original statement are printed for the user to debug.
-
-When errors in the statement leave the term or relation as nonsense, these errors are thrown and the statement is
-excluded. These are logged at the ERROR level with code :code:`PyBEL1XX`.
 """
 
 from ..exceptions import PyBelWarning
@@ -47,6 +44,8 @@ class UndefinedNamespaceWarning(PyBelWarning):
 
 
 class IdentifierWarning(PyBelWarning):
+    """The base class for warnings related to namespace:name identifiers"""
+
     def __init__(self, name, namespace):
         PyBelWarning.__init__(self, name, namespace)
         self.name = name
@@ -168,8 +167,8 @@ class MissingCitationException(PyBelWarning):
     def __init__(self, line):
         """
 
-        :param string: The line of the BEL document that's a problem
-        :type string: str
+        :param line: The line of the BEL document that's a problem
+        :type line: str
         """
         PyBelWarning.__init__(self, line)
         self.citation = line
@@ -230,9 +229,9 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
 class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
-    def __init__(self, s, t, l):
-        PyBelWarning.__init__(self, s, l, t)
-        self.s, self.l, self.t = s, l, t
+    def __init__(self, s, tokens, l):
+        PyBelWarning.__init__(self, s, l, tokens)
+        self.s, self.l, self.t = s, l, tokens
 
     def __str__(self):
         return 'Unqualified translocation: {} {} {}'.format(self.s, self.l, self.t)
@@ -263,7 +262,7 @@ class NestedRelationWarning(PyBelWarning):
 
 
 class LexicographyWarning(PyBelWarning):
-    """Improper capitalization"""
+    """Raised when encountering improper capitalization of namespace/annotation names"""
 
 
 # Semantic Warnings

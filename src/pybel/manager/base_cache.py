@@ -10,6 +10,8 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from .models import Base
 from ..constants import PYBEL_CONNECTION_ENV, DEFAULT_CACHE_LOCATION
 
+__all__ = ['BaseCacheManager']
+
 
 class BaseCacheManager:
     """Creates a connection to database and a persistent session using SQLAlchemy"""

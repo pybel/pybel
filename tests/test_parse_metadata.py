@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
 import unittest
 from pathlib import Path
 
@@ -88,6 +89,12 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
         self.assertIn(HGNC_KEYWORD, self.parser.namespace_dict)
         self.assertIn('TextLocation', self.parser.annotations_dict)
+
+    @unittest.skipUnless('PYBEL_BASE' in os.environ, "Need local files to test local files")
+    def test_squiggly_filepath(self):
+        line = 'DEFINE NAMESPACE {} AS URL "~/dev/pybel/tests/belns/hgnc-human-genes.belns"'.format(HGNC_KEYWORD)
+        self.parser.parseString(line)
+        help_check_hgnc(self, self.parser.namespace_dict)
 
     def test_document_metadata_exception(self):
         s = 'SET DOCUMENT InvalidKey = "nope"'

@@ -5,7 +5,7 @@ import unittest
 
 import networkx as nx
 
-from pybel.parser.utils import subdict_matches, check_stability, sanitize_file_lines, any_subdict_matches, \
+from pybel.parser.utils import check_stability, sanitize_file_lines, any_subdict_matches, \
     cartesian_dictionary
 from pybel.utils import ensure_quotes, subdict_matches
 

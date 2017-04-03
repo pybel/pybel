@@ -3,7 +3,7 @@ PyBEL
 
 :code:`pybel` is a Python software package that parses BEL scripts, validates their semantics, and facilitates data
 interchange between common formats and database systems like JSON, CSV, Excel, SQL, CX, and Neo4J. Its companion
-package, `pybel_tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
+package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
 biological networks.
 
 =========== =============== ================== =======================
@@ -74,6 +74,7 @@ stream. In this example, a BEL file is exported to GraphML for viewing in Cytosc
    
 In Cytoscape, open with :code:`Import > Network > From File`.
 
+More examples can be found in the `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
 Installation
 ------------
@@ -87,6 +88,12 @@ your favorite terminal:
 .. code-block:: sh
 
    python3 -m pip install pybel
+
+or from the latest code on GitHub with:
+
+.. code-block::
+
+    python3 -m pip install git+https://github.com/pybel/pybel.git@develop
 
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
 instructions. Also, check the change log at :code:`CHANGELOG.rst`.

@@ -5,11 +5,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import pybel
 from pybel import BELGraph
-from pybel import to_bytes, from_bytes, to_graphml
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
-from pybel.io import to_json_dict, from_json_dict
+from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenParserBase, SET_CITATION_TEST, \
@@ -23,7 +21,7 @@ class TestThoroughIo(BelReconstitutionMixin):
     def setUpClass(cls):
         @mock_bel_resources
         def help_build_graph(mock):
-            graph = pybel.from_path(test_bel_thorough, allow_nested=True)
+            graph = from_path(test_bel_thorough, allow_nested=True)
             return graph
 
         cls.graph = help_build_graph()
@@ -53,7 +51,7 @@ class TestSlushyIo(BelReconstitutionMixin):
     def setUpClass(cls):
         @mock_bel_resources
         def help_build_graph(mock):
-            graph = pybel.from_path(test_bel_slushy)
+            graph = from_path(test_bel_slushy)
             return graph
 
         cls.graph = help_build_graph()
@@ -78,14 +76,14 @@ class TestSlushyIo(BelReconstitutionMixin):
             to_graphml(self.graph, f)
 
     def test_bytes_io_slushy(self):
-        g_bytes = pybel.to_bytes(self.graph)
-        pybel.from_bytes(g_bytes)
+        g_bytes = to_bytes(self.graph)
+        from_bytes(g_bytes)
 
 
 class TestImport(BelReconstitutionMixin, unittest.TestCase):
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
-        g = pybel.from_url(Path(test_bel_simple).as_uri())
+        g = from_url(Path(test_bel_simple).as_uri())
         self.bel_simple_reconstituted(g)
 
 

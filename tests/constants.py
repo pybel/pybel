@@ -993,6 +993,8 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         if check_metadata:
             self.assertEqual(expected_test_simple_metadata, graph.document)
+            self.assertEqual(expected_test_simple_metadata[METADATA_NAME], graph.name)
+            self.assertEqual(expected_test_simple_metadata[METADATA_VERSION], graph.version)
 
         self.assertEqual(4, graph.number_of_nodes())
 
@@ -1088,6 +1090,8 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         if check_metadata:
             self.assertEqual(expected_test_thorough_metadata, graph.document)
+            self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], graph.name)
+            self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], graph.version)
 
         if check_provenance:
             self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
@@ -1113,7 +1117,9 @@ class BelReconstitutionMixin(unittest.TestCase):
         self.assertIsInstance(graph, BELGraph)
 
         if check_metadata:
-            self.assertEqual(expected_test_slushy_metadata, graph.graph[GRAPH_METADATA])
+            self.assertEqual(expected_test_slushy_metadata, graph.document)
+            self.assertEqual(expected_test_slushy_metadata[METADATA_NAME], graph.name)
+            self.assertEqual(expected_test_slushy_metadata[METADATA_VERSION], graph.version)
 
         if check_warnings:
             expected_warnings = [

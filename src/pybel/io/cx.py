@@ -5,15 +5,18 @@ import logging
 import time
 from collections import defaultdict
 
-from .canonicalize import calculate_canonical_name
-from .constants import *
-from .graph import BELGraph
-from .utils import flatten_dict, expand_dict, hash_tuple
+from ..canonicalize import calculate_canonical_name
+from ..constants import *
+from ..graph import BELGraph
+from ..utils import flatten_dict, expand_dict, hash_tuple
 
 __all__ = [
     'to_cx_json',
     'to_cx',
-    'from_cx_json'
+    'from_cx_json',
+    'from_cx',
+    'from_cx_path',
+    'NDEX_SOURCE_FORMAT',
 ]
 
 log = logging.getLogger(__name__)
@@ -331,3 +334,26 @@ def from_cx_json(cx):
             raise ValueError('problem adding edge: {}'.format(eid))
 
     return graph
+
+
+def from_cx(file):
+    """Reads a file containing CX JSON and converts to a BEL graph
+
+    :param file: A file or file-like containing the CX JSON for this graph
+    :type file: file or file-like
+    :return: A BEL Graph representing the CX graph contained in the file
+    :rtype: BELGraph
+    """
+    return from_cx_json(json.load(file))
+
+
+def from_cx_path(path):
+    """Reads the file from the given path and loads a BEL graph from the contained CX JSON with :func:`from_cx`
+
+    :param path: The path to a file containing CX JSON
+    :type path: str
+    :return: A BEL Graph representing the CX graph contained in the file
+    :rtype: BELGraph
+    """
+    with open(path) as file:
+        return from_cx(file)

@@ -37,6 +37,12 @@ class TestVariantParser(unittest.TestCase):
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
+    def test_protein_del_quoted(self):
+        statement = 'variant("p.Phe508del")'
+        expected = build_variant_dict('p.Phe508del')
+        result = self.parser.parseString(statement)
+        self.assertEqual(expected, result.asDict())
+
     def test_protein_mut(self):
         statement = 'var(p.Gly576Ala)'
         expected = build_variant_dict('p.Gly576Ala')

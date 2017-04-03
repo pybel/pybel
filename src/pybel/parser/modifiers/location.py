@@ -43,9 +43,15 @@ This calls for thoughtful consideration of the following two statements:
 
 from pyparsing import Suppress, oneOf, Group
 
-from ..baseparser import BaseParser, nest
+from ..baseparser import BaseParser
 from ..parse_identifier import IdentifierParser
+from ..utils import nest
 from ...constants import LOCATION
+
+__all__ = [
+    'location_tag',
+    'LocationParser',
+]
 
 location_tag = Suppress(oneOf(['loc', 'location']))
 

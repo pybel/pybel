@@ -11,12 +11,12 @@ See: https://wiki.openbel.org/display/BLD/Control+Records
 import logging
 import re
 
-from pyparsing import Suppress, MatchFirst
+from pyparsing import Suppress, MatchFirst, And, oneOf
 from pyparsing import pyparsing_common as ppc
 
-from .baseparser import BaseParser, quote, delimitedSet, And, oneOf
+from .baseparser import BaseParser
 from .parse_exceptions import *
-from .utils import is_int
+from .utils import is_int, quote, delimitedSet
 from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT, \
     BEL_KEYWORD_ALL, ANNOTATIONS
 from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET, CITATION

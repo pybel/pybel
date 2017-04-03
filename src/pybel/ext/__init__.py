@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Extensions for PyBEL can be imported from the :code:`pybel.ext` namespace just like normal modules and packages::
 
     import pybel.ext.extension

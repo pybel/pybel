@@ -12,7 +12,7 @@ from pybel import cli
 from pybel.constants import PYBEL_CONTEXT_TAG, METADATA_NAME
 from pybel.io import from_pickle, from_json, from_path
 from pybel.manager.database_io import from_database
-from .constants import test_bel_simple, BelReconstitutionMixin, mock_bel_resources, test_bel_thorough, \
+from tests.constants import test_bel_simple, BelReconstitutionMixin, mock_bel_resources, test_bel_thorough, \
     expected_test_thorough_metadata
 
 log = logging.getLogger(__name__)

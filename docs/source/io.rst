@@ -17,8 +17,15 @@ Transport
 ---------
 All transport pairs are reflective and data-preserving.
 
+Bytes
+~~~~~
 .. autofunction:: pybel.to_pickle
 .. autofunction:: pybel.from_pickle
+.. autofunction:: pybel.to_bytes
+.. autofunction:: pybel.from_bytes
+
+JSON
+~~~~
 .. autofunction:: pybel.to_json
 .. autofunction:: pybel.from_json
 .. autofunction:: pybel.to_cx_json

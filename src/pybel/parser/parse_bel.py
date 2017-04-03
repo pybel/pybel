@@ -11,7 +11,7 @@ import logging
 
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
 
-from .baseparser import BaseParser, WCW, nest, one_of_tags, triple
+from .baseparser import BaseParser
 from .language import activity_labels, activities
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
@@ -19,7 +19,7 @@ from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
     MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
 from .parse_identifier import IdentifierParser
-from .utils import cartesian_dictionary
+from .utils import cartesian_dictionary, WCW, nest, one_of_tags, triple
 from ..constants import *
 from ..utils import list2tuple
 
@@ -89,7 +89,7 @@ class BelParser(BaseParser):
         )
 
         self.identifier_parser = IdentifierParser(
-            namespace_dicts=namespace_dicts,
+            namespace_dict=namespace_dicts,
             namespace_expressions=namespace_expressions,
             namespace_mappings=namespace_mappings,
             allow_naked_names=allow_naked_names

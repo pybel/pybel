@@ -5,10 +5,12 @@ import tempfile
 import unittest
 from collections import Counter
 
-import pybel
 import sqlalchemy.exc
+
+import pybel
 from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
-from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, ANNOTATIONS
+from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, \
+    ANNOTATIONS
 from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants

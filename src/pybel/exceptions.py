@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
-These errors are produced when PyBEL cannot continue parsing, because of a technical problem, or unsalvagable
-syntatic/semantic problem. These are logged at the CRITICAL level.
-"""
+"""This module contains base exceptions that are shared through the package"""
 
 
 class PyBelWarning(Exception):
-    """PyBEL throws exceptions labeled PyBEL1xx for statements that cannot be fixed automatically"""
-
+    """The base class for warnings during compilation from which PyBEL can recover"""
