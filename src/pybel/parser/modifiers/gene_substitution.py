@@ -33,10 +33,15 @@ import logging
 
 from pyparsing import pyparsing_common as ppc
 
-from ..baseparser import BaseParser, one_of_tags, nest
+from ..baseparser import BaseParser
 from ..language import dna_nucleotide
-from ...constants import GSUB_REFERENCE, GSUB_POSITION, GSUB_VARIANT
-from ...constants import HGVS, KIND, IDENTIFIER
+from ..utils import nest, one_of_tags
+from ...constants import GSUB_REFERENCE, GSUB_POSITION, GSUB_VARIANT, HGVS, KIND, IDENTIFIER
+
+__all__ = [
+    'gsub_tag',
+    'GsubParser',
+]
 
 log = logging.getLogger(__name__)
 

@@ -5,9 +5,10 @@ import re
 
 from pyparsing import Suppress, Group
 
-from .baseparser import BaseParser, word, quote
+from .baseparser import BaseParser
 from .parse_exceptions import UndefinedNamespaceWarning, NakedNameWarning, MissingNamespaceNameWarning, \
     MissingDefaultNameWarning, MissingNamespaceRegexWarning
+from .utils import word, quote
 from ..constants import DIRTY, NAMESPACE, NAME, IDENTIFIER
 
 __all__ = ['IdentifierParser']

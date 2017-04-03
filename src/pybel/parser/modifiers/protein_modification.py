@@ -79,11 +79,17 @@ from pyparsing import oneOf, MatchFirst, Group, Optional
 from pyparsing import pyparsing_common as ppc
 
 from .. import language
-from ..baseparser import BaseParser, one_of_tags, nest, WCW
+from ..baseparser import BaseParser
 from ..language import pmod_namespace, pmod_legacy_labels, amino_acid
 from ..parse_identifier import IdentifierParser
+from ..utils import WCW, nest, one_of_tags
 from ...constants import KIND, PMOD, NAMESPACE, BEL_DEFAULT_NAMESPACE, IDENTIFIER
 from ...constants import PMOD_CODE, PMOD_POSITION
+
+__all__ = [
+    'pmod_tag',
+    'PmodParser',
+]
 
 log = logging.getLogger(__name__)
 

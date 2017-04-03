@@ -38,10 +38,16 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
 from pyparsing import oneOf, replaceWith, pyparsing_common, Keyword, Suppress, Group, Optional
 from pyparsing import pyparsing_common as ppc
 
-from ..baseparser import BaseParser, nest, WCW
+from ..baseparser import BaseParser
 from ..parse_identifier import IdentifierParser
+from ..utils import WCW, nest
 from ...constants import FUSION, PARTNER_5P, RANGE_5P, PARTNER_3P, RANGE_3P
 from ...constants import FUSION_REFERENCE, FUSION_START, FUSION_STOP, FUSION_MISSING
+
+__all__ = [
+    'fusion_tags',
+    'FusionParser'
+]
 
 fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
 

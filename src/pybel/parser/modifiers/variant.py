@@ -35,7 +35,8 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
 
 from pyparsing import Word, alphanums
 
-from ..baseparser import BaseParser, one_of_tags, nest, quote
+from ..baseparser import BaseParser
+from ..utils import quote, nest, one_of_tags
 from ...constants import HGVS, KIND, IDENTIFIER
 
 variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)

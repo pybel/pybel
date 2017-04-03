@@ -38,8 +38,14 @@ import logging
 
 from pyparsing import pyparsing_common as ppc
 
-from ..baseparser import BaseParser, one_of_tags, nest
+from ..baseparser import BaseParser
+from ..utils import nest, one_of_tags
 from ...constants import HGVS, KIND, IDENTIFIER, TRUNCATION_POSITION
+
+__all__ = [
+    'truncation_tag',
+    'TruncationParser',
+]
 
 log = logging.getLogger(__name__)
 

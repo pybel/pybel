@@ -11,7 +11,8 @@ import logging
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
-from .baseparser import BaseParser, word, quote, delimitedSet
+from .baseparser import BaseParser
+from pybel.parser.utils import word, quote, delimitedSet
 from .parse_exceptions import InvalidMetadataException
 from ..constants import *
 
