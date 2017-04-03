@@ -89,6 +89,12 @@ your favorite terminal:
 
    python3 -m pip install pybel
 
+or from the latest code on GitHub with:
+
+.. code-block::
+
+    python3 -m pip install git+https://github.com/pybel/pybel.git@develop
+
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
 instructions. Also, check the change log at :code:`CHANGELOG.rst`.
 
