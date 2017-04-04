@@ -68,10 +68,14 @@ class MetadataParser(BaseParser):
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
         #: A dictionary of cached {annotation keyword: set of values}
         self.annotations_dict = {} if annotation_dict is None else annotation_dict
-        #: A dictionary of cached {namespace keyword: regular expression string}
+        #: A dictionary of {namespace keyword: regular expression string}
         self.namespace_re = {} if namespace_re is None else namespace_re
-        #: A dictionary of cached {annotation keyword: regular expression string}
+        #: A dictionary of {namespace keyword: compiled regular expression}
+        self.namespace_re_compiled = {ns: re.compile(pat) for ns, pat in self.namespace_re.items()}
+        #: A dictionary of {annotation keyword: regular expression string}
         self.annotations_re = {} if annotations_re is None else annotations_re
+        #: A dictionary of {annotation keyword: compiled regular expression}
+        self.annotations_re_compiled = {ns: re.compile(pat) for ns, pat in self.annotations_re.items()}
 
         #: A dictionary containing the document metadata
         self.document_metadata = {}
@@ -184,7 +188,11 @@ class MetadataParser(BaseParser):
             log.warning('Tried to overwrite namespace: {}'.format(name))
             return tokens
 
-        self.namespace_re[name] = tokens['value']
+        value = tokens['value']
+
+        self.namespace_re[name] = value
+        self.namespace_re_compiled[name] = re.compile(value)
+
         return tokens
 
     def handle_annotation_owl(self, s, l, tokens):
@@ -238,7 +246,11 @@ class MetadataParser(BaseParser):
             log.warning('Tried to overwrite annotation: {}'.format(name))
             return tokens
 
-        self.annotations_re[name] = tokens['value']
+        value = tokens['value']
+
+        self.annotations_re[name] = value
+        self.annotations_re_compiled[name] = re.compile(value)
+
         return tokens
 
     def annotation_is_defined(self, key):
@@ -250,6 +262,14 @@ class MetadataParser(BaseParser):
         """
         return key in self.annotations_dict or key in self.annotations_re
 
+    def annotation_value_is_valid(self, key, value):
+        if not self.annotation_is_defined(key):
+            return False
+        elif key in self.annotations_dict:
+            return value in self.annotations_dict[key]
+        else:
+            return bool(self.annotations_re_compiled[key].match(value))
+
     def namespace_is_defined(self, key):
         """Returns if the given namespace is defined as either an enumeration of as a regular expression
         
@@ -258,3 +278,11 @@ class MetadataParser(BaseParser):
         :rtype: bool
         """
         return key in self.namespace_dict or key in self.namespace_re
+
+    def namespace_name_is_valid(self, key, value):
+        if not self.namespace_is_defined(key):
+            return False
+        elif key in self.annotations_dict:
+            return value in self.namespace_dict[key]
+        else:
+            return bool(self.namespace_re_compiled[key].match(value))
