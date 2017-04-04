@@ -303,13 +303,13 @@ class BelParser(BaseParser):
             replaceWith(DIRECTLY_DECREASES))
 
         #: 3.5.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_analogous
-        analogous_tag = oneOf(['analogousTo'])
+        analogous_tag = oneOf(['analogousTo']).setParseAction(replaceWith(ANALOGOUS_TO))
 
         #: 3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
         causes_no_change_tag = oneOf(['cnc', 'causesNoChange']).setParseAction(replaceWith(CAUSES_NO_CHANGE))
 
         #: 3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
-        regulates_tag = oneOf(['reg', 'regulates']).setParseAction(replaceWith('regulates'))
+        regulates_tag = oneOf(['reg', 'regulates']).setParseAction(replaceWith(REGULATES))
 
         #: 3.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor
         negative_correlation_tag = oneOf(['neg', 'negativeCorrelation']).setParseAction(
@@ -320,13 +320,13 @@ class BelParser(BaseParser):
             replaceWith(POSITIVE_CORRELATION))
 
         #: 3.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xassociation
-        association_tag = oneOf(['--', 'association']).setParseAction(replaceWith('association'))
+        association_tag = oneOf(['--', 'association']).setParseAction(replaceWith(ASSOCIATION))
 
         #: 3.3.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_orthologous
-        orthologous_tag = oneOf(['orthologous'])
+        orthologous_tag = oneOf(['orthologous']).setParseAction(replaceWith(ORTHOLOGOUS))
 
         #: 3.4.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa
-        is_a_tag = oneOf(['isA'])
+        is_a_tag = oneOf(['isA']).setParseAction(replaceWith(IS_A))
 
         #: PyBEL Variant
         equivalent_tag = oneOf(['eq', EQUIVALENT_TO]).setParseAction(replaceWith(EQUIVALENT_TO))
@@ -351,12 +351,12 @@ class BelParser(BaseParser):
         # Mixed Relationships
 
         #: 3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof
-        rate_limit_tag = oneOf(['rateLimitingStepOf'])
+        rate_limit_tag = oneOf(['rateLimitingStepOf']).setParseAction(replaceWith(RATE_LIMITING_STEP_OF))
         self.rate_limit = triple(MatchFirst([self.biological_process, self.activity, self.transformation]),
                                  rate_limit_tag, self.biological_process)
 
         #: 3.4.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_subprocessof
-        subprocess_of_tag = oneOf(['subProcessOf'])
+        subprocess_of_tag = oneOf(['subProcessOf']).setParseAction(replaceWith(SUBPROCESS_OF))
         self.subprocess_of = triple(MatchFirst([self.process, self.activity, self.transformation]), subprocess_of_tag,
                                     self.process)
 
@@ -369,7 +369,7 @@ class BelParser(BaseParser):
         self.translated = triple(self.rna, translated_tag, self.protein)
 
         #: 3.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmember
-        has_member_tag = oneOf(['hasMember'])
+        has_member_tag = oneOf(['hasMember']).setParseAction(replaceWith(HAS_MEMBER))
         self.has_member = triple(self.abundance, has_member_tag, self.abundance)
 
         #: 3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
@@ -380,24 +380,27 @@ class BelParser(BaseParser):
         self.has_members.setParseAction(self.handle_has_members)
 
         # 3.4.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hascomponent
-        has_component_tag = oneOf(['hasComponent'])
+        has_component_tag = oneOf(['hasComponent']).setParseAction(replaceWith(HAS_COMPONENT))
         self.has_component = triple(self.complex_abundances | self.composite_abundance, has_component_tag,
                                     self.abundance)
 
         #: 3.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_biomarkerfor
-        biomarker_tag = oneOf(['biomarkerFor'])
+        biomarker_tag = oneOf(['biomarkerFor']).setParseAction(replaceWith(BIOMARKER_FOR))
 
         #: 3.5.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_prognosticbiomarkerfor
-        prognostic_biomarker_tag = oneOf(['prognosticBiomarkerFor'])
+        prognostic_biomarker_tag = oneOf(['prognosticBiomarkerFor']).setParseAction(
+            replaceWith(PROGONSTIC_BIOMARKER_FOR))
 
         biomarker_tags = biomarker_tag | prognostic_biomarker_tag
 
         self.biomarker = triple(self.bel_term, biomarker_tags, self.process)
 
-        has_variant_tags = oneOf(['hasVariant'])
+        has_variant_tags = oneOf(['hasVariant']).setParseAction(replaceWith(HAS_VARIANT))
         self.has_variant_relation = triple(self.abundance, has_variant_tags, self.abundance)
 
-        part_of_reaction_tags = oneOf(['hasReactant', 'hasProduct'])
+        has_reactant_tags = oneOf(['hasReactant']).setParseAction(replaceWith(HAS_REACTANT))
+        has_product_tags = oneOf(['hasProduct']).setParseAction(replaceWith(HAS_PRODUCT))
+        part_of_reaction_tags = has_reactant_tags | has_product_tags
         self.part_of_reaction = triple(self.reaction, part_of_reaction_tags, self.abundance)
 
         self.relation = MatchFirst([
