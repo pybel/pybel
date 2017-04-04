@@ -13,14 +13,13 @@ Constants
 ---------
 
 These documents refer to many aspects of the data model using constants, which can be found in the top-level module
-:code:`pybel.constants`. In these examples, all constants are imported with the following code:
+:mod:`pybel.constants`. In these examples, all constants are imported with the following code:
 
 .. code-block:: python
 
     >>> from pybel.constants import *
-    >>> from pybel.parser.modifiers import FragmentParser, GmodParser, PmodParser, FusionParser
 
-Terms describing abundances, annotations, and other internal data are designated in :code:`pybel.constants`
+Terms describing abundances, annotations, and other internal data are designated in :mod:`pybel.constants`
 with full-caps, such as :data:`pybel.constants.FUNCTION` and :data:`pybel.constants.PROTEIN`.
 
 For normal usage, we suggest referring to values in dictionaries by these constants, in case the hard-coded
@@ -30,7 +29,7 @@ Function Nomenclature
 ~~~~~~~~~~~~~~~~~~~~~
 
 The following table shows PyBEL's internal mapping from BEL functions to its own constants. This can be accessed
-programatically via :py:data:`pybel.parser.language.abundance_labels`
+programatically via :data:`pybel.parser.language.abundance_labels`
 
 +--------------------+----------------+
 | BEL Function       | PyBEL Constant |
@@ -82,7 +81,7 @@ Graph
 .. automodule:: pybel.graph
 
 .. autoclass:: pybel.BELGraph
-    :exclude-members: parse_lines, parse_document, parse_definitions, parse_statements, nodes_iter, edges_iter, add_warning
+    :exclude-members: nodes_iter, edges_iter, add_warning
     :members:
 
 Nodes
@@ -203,21 +202,6 @@ The following edges are inferred, where :code:`X` represents the previous reacti
 
     BEL 2.0 specification on `reactions <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
 
-Central Dogma
-~~~~~~~~~~~~~
-
-When encountering protein abundance nodes, PyBEL infers the RNA from which it was translated and the DNA from which
-it was transcribed. After the mention of :code:`p(HGNC:YFG)`, the following two edges are inferred:
-
-.. code::
-
-    r(HGNC:YFG) translatedTo p(HGNC:YFG)
-    g(HGNC:YFG) transcribedTo r(HGNC:YFG)
-
-When encountering RNA abundances, PyBEL only infers the genetic origin. PyBEL will not make forward inferences,
-because the function of a gene or RNA may not be clear.
-
-Currently, PyBEL does not make these inferences for miRNAs, but could in the future.
 
 Edges
 -----
@@ -296,8 +280,8 @@ Modifiers are added to this structure as well. Under this schema,
         ANNOTATIONS: { ... }
     }
 
-Activities without molecular activity annotations do not contain an :code:`EFFECT` entry: Under this schema,
-:code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
+Activities without molecular activity annotations do not contain an :data:`pybel.constants.EFFECT` entry: Under this
+schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
 
 .. code::
 
@@ -350,7 +334,8 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 
 Degradations
 ~~~~~~~~~~~~
-Degradations are more simple, because there's no :code:`EFFECT` entry. :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
+Degradations are more simple, because there's no ::data:`pybel.constants.EFFECT` entry.
+:code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
 
 .. code::
 

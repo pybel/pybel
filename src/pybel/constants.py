@@ -12,8 +12,14 @@ import os
 SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
 LARGE_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/large_corpus.bel'
 
+FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
+OPENBEL_NAMESPACE_RESOURCES = 'http://resources.openbel.org/belframework/20150611/namespace/'
+OPENBEL_ANNOTATION_RESOURCES = 'http://resources.openbel.org/belframework/20150611/annotation/'
+DEFAULT_NAMESPACE_RESOURCES = FRAUNHOFER_RESOURCES
+DEFAULT_ANNOTATION_RESOURCES = FRAUNHOFER_RESOURCES
+
 #: GOCC is the only namespace that needs to be stored because translocations use some of its values by default
-GOCC_LATEST = 'http://resources.openbel.org/belframework/20150611/namespace/go-cellular-component.belns'
+GOCC_LATEST = DEFAULT_NAMESPACE_RESOURCES + 'go-cellular-component.belns'
 GOCC_KEYWORD = 'GOCC'
 
 #: The environment variable that contains the default SQL connection information for the PyBEL cache

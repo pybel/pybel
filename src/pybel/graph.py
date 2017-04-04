@@ -40,21 +40,10 @@ log = logging.getLogger(__name__)
 class BELGraph(nx.MultiDiGraph):
     """The BELGraph class is a container for BEL networks that is based on the NetworkX MultiDiGraph data structure"""
 
-    def __init__(self, lines=None, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,**kwargs):
-        """The default constructor parses a BEL file from an iterable of strings. This can be a file, file-like, or
-        list of strings.
+    def __init__(self, **kwargs):
+        """The default constructor parses a BEL graph using the built-in NetworkX methods. For IO, see
+        the pybel.io module
 
-        :param lines: iterable over lines of BEL script
-        :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
-                        or None to use default cache
-        :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
-        :param allow_naked_names: if true, turn off naked namespace failures
-        :type allow_naked_names: bool
-        :param allow_nested: if true, turn off nested statement failures
-        :type allow_nested: bool
-        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-                                    Delegated to :class:`pybel.parser.ControlParser`
-        :type citation_clearing: bool
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         :type kwargs: dict
         """
@@ -70,16 +59,6 @@ class BELGraph(nx.MultiDiGraph):
 
         #: Is true if during BEL Parsing, a term that is not part of a relation is found
         self.has_singleton_terms = False
-
-        if lines is not None:
-            parse_lines(
-                self,
-                lines,
-                manager=manager,
-                allow_naked_names=allow_naked_names,
-                allow_nested=allow_nested,
-                citation_clearing=citation_clearing
-            )
 
     @property
     def document(self):

@@ -2,6 +2,7 @@
 
 import itertools as itt
 import logging
+import os
 from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
 from datetime import datetime
@@ -10,6 +11,7 @@ from operator import itemgetter
 import networkx as nx
 import requests
 from pkg_resources import get_distribution
+from requests.compat import urlparse
 from requests_file import FileAdapter
 
 from pybel.constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS
@@ -17,18 +19,15 @@ from pybel.constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS
 log = logging.getLogger('pybel')
 
 
-def download_url(url):
-    """Downloads and parses a config file from url
-
-    :param url: the URL of a BELNS, BELANNO, or BELEQ file to download and parse
-    :type url: str
+def parse_bel_resource(lines):
+    """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
+    
+    :param lines: An iterable over the lines in a BEL config file
+    :type lines: iter
+    :return: A config-style dictionary representing the BEL config file
+    :rtype: dict
     """
-    session = requests.Session()
-    session.mount('file://', FileAdapter())
-    res = session.get(url)
-
-    lines = [line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines()]
-
+    lines = list(lines)
     value_line = 1 + max(i for i, line in enumerate(lines) if '[Values]' == line.strip())
 
     metadata_config = ConfigParser(strict=False)
@@ -44,14 +43,48 @@ def download_url(url):
 
         value_dict[key] = sline[1].strip() if len(sline) == 2 else None
 
-    if not value_dict:
-        raise ValueError('Downloaded empty file: {}'.format(url))
-
     res = {}
     res.update({k: dict(v) for k, v in metadata_config.items()})
     res['Values'] = value_dict
 
     return res
+
+
+def is_url(s):
+    """Checks if a string is a valid URL
+    
+    :param s: An input string
+    :type s: str
+    :return: Is the string a valid URL?
+    :rtype: bool
+    """
+    return urlparse(s).scheme != ""
+
+
+def get_bel_resource(location):
+    """Loads/downloads and parses a config file from the given url or file path
+
+    :param location: The URL or file path to a BELNS, BELANNO, or BELEQ file to download and parse
+    :type location: str
+    :return: A config-style dictionary representing the BEL config file
+    :rtype: dict
+    """
+
+    if is_url(location):
+        session = requests.Session()
+        session.mount('file://', FileAdapter())
+        res = session.get(location)
+
+        lines = (line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
+        result = parse_bel_resource(lines)
+    else:
+        with open(os.path.expanduser(location)) as f:
+            result = parse_bel_resource(f)
+
+    if not result['Values']:
+        raise ValueError('Downloaded empty file: {}'.format(location))
+
+    return result
 
 
 def expand_dict(flat_dict, sep='_'):
@@ -105,8 +138,9 @@ def flatten_dict(d, parent_key='', sep='_'):
 def flatten_graph_data(graph):
     """Returns a new graph with flattened edge data dictionaries
 
-    :param graph:
+    :param graph: A graph with nested edge data dictionaries
     :type graph: nx.MultiDiGraph
+    :return: A graph with flattened edge data dictionaries
     :rtype: nx.MultiDiGraph
     """
 
@@ -122,7 +156,7 @@ def flatten_graph_data(graph):
 
 
 def list2tuple(l):
-    """turns a nested list to a nested tuple"""
+    """Recursively converts a nested list to a nested tuple"""
     if isinstance(l, list):
         return tuple(list2tuple(e) for e in l)
     else:
@@ -130,6 +164,11 @@ def list2tuple(l):
 
 
 def get_version():
+    """Gets the current PyBEL version
+    
+    :return: The current PyBEL version
+    :rtype: str
+    """
     return get_distribution('pybel').version
 
 
@@ -166,7 +205,11 @@ PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
 
 
 def valid_date(s):
-    """Checks that a string represents a valid date in ISO 8601 format YYYY-MM-DD"""
+    """Checks that a string represents a valid date in ISO 8601 format YYYY-MM-DD
+    
+    :type s: str
+    :rtype: bool
+    """
     try:
         datetime.strptime(s, '%Y-%m-%d')
         return True
@@ -177,7 +220,7 @@ def valid_date(s):
 def parse_datetime(s):
     """Tries to parse a datetime object from a standard datetime format or date format
 
-    :param s: A string represing a date or datetime
+    :param s: A string representing a date or datetime
     :type s: str
     :return: A parsed date object
     :rtype: datetime.date

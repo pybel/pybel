@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-
-This module contains the Definitions Cache Manager.
-
+Definition Cache Manager
+------------------------
 Under the hood, PyBEL caches namespace and annotation files for quick recall on later use. The user doesn't need to
 enable this option, but can specify a database location if they choose.
-
 """
 
 import itertools as itt
@@ -14,14 +12,13 @@ import logging
 from collections import defaultdict
 
 import networkx as nx
-from sqlalchemy.orm.exc import NoResultFound
 
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..constants import belns_encodings
-from ..utils import download_url
+from ..utils import get_bel_resource
 
 __all__ = ['CacheManager']
 
@@ -31,16 +28,17 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
 class CacheManager(BaseCacheManager):
-    def __init__(self, connection=None, echo=False):
-        """The definition cache manager takes care of storing BEL namespace and annotation files for later use.
-        It uses SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
+    """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
+    SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
+    """
 
+    def __init__(self, connection=None, echo=False):
+        """
         :param connection: custom database connection string
         :type connection: str
         :param echo: Whether or not echo the running sql code.
         :type echo: bool
         """
-
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
         self.namespace_cache = defaultdict(dict)
@@ -56,6 +54,8 @@ class CacheManager(BaseCacheManager):
         self.annotation_edge_cache = {}
         self.annotation_graph_cache = {}
 
+        log.info('Definition cache manager connected to %s', self.connection)
+
     # NAMESPACE MANAGEMENT
 
     def insert_namespace(self, url):
@@ -68,7 +68,7 @@ class CacheManager(BaseCacheManager):
         """
         log.info('Caching namespace %s', url)
 
-        config = download_url(url)
+        config = get_bel_resource(url)
 
         namespace_insert_values = {
             'name': config['Namespace']['NameString'],
@@ -106,14 +106,15 @@ class CacheManager(BaseCacheManager):
         :type url: str
         """
         if url in self.namespace_cache:
-            log.info('Already cached %s', url)
+            log.info('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
             return
 
-        try:
-            results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one()
-            log.info('Loaded namespace from %s (%d)', url, len(results.entries))
-        except NoResultFound:
+        results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
+
+        if results is None:
             results = self.insert_namespace(url)
+        else:
+            log.info('Loaded from database: %s (%d)', url, len(results.entries))
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
@@ -133,7 +134,11 @@ class CacheManager(BaseCacheManager):
         self.ensure_namespace(url)
         return self.namespace_cache[url]
 
-    def ls_namespaces(self, data=False):
+    def get_namespace_urls(self):
+        """Returns a list of the locations of the stored namespaces and annotations"""
+        return [definition.url for definition in self.session.query(models.Namespace).all()]
+
+    def get_namespace_data(self, data=False):
         """Returns a list of the locations of the stored namespaces and annotations
 
         :param data: Flag that indicates if all column data should be returned.
@@ -150,7 +155,7 @@ class CacheManager(BaseCacheManager):
 
         return result
 
-    def load_default_namespaces(self):
+    def ensure_default_namespaces(self):
         """Caches the default set of namespaces"""
         for url in defaults.default_namespaces:
             self.ensure_namespace(url)
@@ -167,7 +172,7 @@ class CacheManager(BaseCacheManager):
         """
         log.info('Caching annotation %s', url)
 
-        config = download_url(url)
+        config = get_bel_resource(url)
 
         annotation_insert_values = {
             'type': config['AnnotationDefinition']['TypeString'],
@@ -199,13 +204,14 @@ class CacheManager(BaseCacheManager):
         :type url: str
         """
         if url in self.annotation_cache:
-            log.info('Already cached %s', url)
+            log.info('Already in memory: %s (%d)', url, len(self.annotation_cache[url]))
             return
 
-        try:
-            results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one()
-            log.info('Loaded annotation from %s (%d)', url, len(results.entries))
-        except NoResultFound:
+        results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
+
+        if results is not None:
+            log.info('Loaded from database: %s (%d)', url, len(results.entries))
+        else:
             results = self.insert_annotation(url)
 
         for entry in results.entries:
@@ -221,7 +227,7 @@ class CacheManager(BaseCacheManager):
         self.ensure_annotation(url)
         return self.annotation_cache[url]
 
-    def ls_annotations(self):
+    def get_annotation_urls(self):
         """Returns a list of the locations of the stored annotations"""
         return [definition.url for definition in self.session.query(models.Annotation).all()]
 
@@ -229,15 +235,15 @@ class CacheManager(BaseCacheManager):
         """Returns a dictionary with the keyword:locations of the stored annotations"""
         return {definition.keyword: definition.url for definition in self.session.query(models.Annotation).all()}
 
-    def load_default_annotations(self):
+    def ensure_default_annotations(self):
         """Caches the default set of annotations"""
         for url in defaults.default_annotations:
             self.ensure_annotation(url)
 
     # NAMESPACE OWL MANAGEMENT
 
-    def insert_owl(self, iri, owl_model, owl_entry_model):
-        """Caches an ontology at the given IRI
+    def _insert_owl(self, iri, owl_model, owl_entry_model):
+        """Helper function for caching an ontology at the given IRI
 
         :param iri: the location of the ontology
         :type iri: str
@@ -269,7 +275,7 @@ class CacheManager(BaseCacheManager):
         :param iri: the location of the ontology
         :type iri: str
         """
-        return self.insert_owl(iri, models.OwlNamespace, models.OwlNamespaceEntry)
+        return self._insert_owl(iri, models.OwlNamespace, models.OwlNamespaceEntry)
 
     def insert_annotation_owl(self, iri):
         """Caches an ontology at the given IRI
@@ -277,7 +283,7 @@ class CacheManager(BaseCacheManager):
         :param iri: the location of the ontology
         :type iri: str
         """
-        return self.insert_owl(iri, models.OwlAnnotation, models.OwlAnnotationEntry)
+        return self._insert_owl(iri, models.OwlAnnotation, models.OwlAnnotationEntry)
 
     def ensure_namespace_owl(self, iri):
         """Caches an ontology at the given IRI if it is not already in the cache
@@ -287,9 +293,9 @@ class CacheManager(BaseCacheManager):
         """
         if iri in self.namespace_term_cache:
             return
-        try:
-            results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one()
-        except NoResultFound:
+
+        results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one_or_none()
+        if results is None:
             results = self.insert_namespace_owl(iri)
 
         self.namespace_term_cache[iri] = set(entry.entry for entry in results.entries)
@@ -302,9 +308,9 @@ class CacheManager(BaseCacheManager):
     def ensure_annotation_owl(self, iri):
         if iri in self.annotation_term_cache:
             return
-        try:
-            results = self.session.query(models.OwlAnnotation).filter(models.OwlAnnotation.iri == iri).one()
-        except NoResultFound:
+
+        results = self.session.query(models.OwlAnnotation).filter(models.OwlAnnotation.iri == iri).one_or_none()
+        if results is None:
             results = self.insert_annotation_owl(iri)
 
         self.annotation_term_cache[iri] = set(entry.entry for entry in results.entries)
@@ -368,27 +374,29 @@ class CacheManager(BaseCacheManager):
         self.ensure_annotation_owl(iri)
         return self.annotation_graph_cache[iri]
 
-    def ls_namespace_owl(self):
+    def get_namespace_owl_urls(self):
         """Returns a list of the locations of the stored ontologies"""
         return [owl.iri for owl in self.session.query(models.OwlNamespace).all()]
 
-    def load_default_namespace_owl(self):
+    def ensure_default_owl_namespaces(self):
         """Caches the default set of ontologies"""
         for url in defaults.default_owl:
             self.ensure_namespace_owl(url)
 
-    def ls(self):
-        return itt.chain(self.ls_namespaces(), self.ls_annotations(), self.ls_namespace_owl())
+    def get_definition_urls(self):
+        """Returns a list of the URLs for all definitions stored in the database"""
+        return list(itt.chain(self.get_namespace_urls(), self.get_annotation_urls(), self.get_namespace_owl_urls()))
 
     # Manage Equivalences
 
     def ensure_equivalence_class(self, label):
-        try:
-            result = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=label).one()
-        except NoResultFound:
+        result = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
+
+        if result is None:
             result = models.NamespaceEntryEquivalence(label=label)
             self.session.add(result)
             self.session.commit()
+
         return result
 
     def insert_equivalences(self, url, namespace_url):
@@ -397,7 +405,7 @@ class CacheManager(BaseCacheManager):
 
         log.info('Caching equivalences: %s', url)
 
-        config = download_url(url)
+        config = get_bel_resource(url)
         values = config['Values']
 
         ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()

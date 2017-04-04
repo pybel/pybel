@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""This module contains IO functions for BEL scripts"""
+
 import codecs
 import logging
 import os
@@ -5,7 +9,7 @@ import os
 import requests
 from requests_file import FileAdapter
 
-from ..graph import BELGraph
+from ..graph import BELGraph, parse_lines
 
 __all__ = [
     'from_lines',
@@ -17,8 +21,7 @@ log = logging.getLogger(__name__)
 
 
 def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True, **kwargs):
-    """Loads a BEL graph from an iterable over the lines of a BEL script. This can be a list of strings, file, or other.
-    This function is a *very* thin wrapper around :class:`BELGraph`.
+    """Loads a BEL graph from an iterable over the lines of a BEL script
 
     :param lines: An iterable of strings (the lines in a BEL script)
     :type lines: iter
@@ -37,13 +40,15 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
     :return: a parsed BEL graph
     :rtype: BELGraph
     """
-    return BELGraph(lines, manager=manager, allow_naked_names=allow_naked_names, allow_nested=allow_nested,
-                    citation_clearing=citation_clearing, **kwargs)
+    graph = BELGraph(**kwargs)
+    parse_lines(graph, lines, manager=manager, allow_naked_names=allow_naked_names, allow_nested=allow_nested,
+                citation_clearing=citation_clearing)
+    return graph
 
 
 def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
               encoding='utf-8', **kwargs):
-    """Loads a BEL graph from a file resource
+    """Loads a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param path: A file path
     :type path: str
@@ -74,7 +79,7 @@ def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, c
 
 
 def from_url(url, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True, **kwargs):
-    """Loads a BEL graph from a URL resource
+    """Loads a BEL graph from a URL resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param url: A valid URL pointing to a BEL resource
     :type url: str

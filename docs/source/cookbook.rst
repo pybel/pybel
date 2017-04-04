@@ -1,26 +1,48 @@
 Cookbook
 ========
-PyBEL has a programmatic API for analysis using the swath of tools provided by PyBEL, NetworkX, and the community of
-python programmers in Network Science. The most useful functions for users are exposed at the top level package.
-These functions allow for easy import from URL, file, iterable, or a database. It also includes various export options.
 
-Draw NetworkX and MatplotLib
-----------------------------
+An extensive set of examples can be found on the `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_
+repository on GitHub. These notebooks contain basic usage and also make numerous references to the analytical
+package `PyBEL Tools <https://github.com/pybel/pybel-tools>`_
 
-.. code-block:: python
+Configuration
+-------------
 
-   >>> import pybel, networkx
-   >>> url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
-   >>> g = pybel.from_url(url)  # takes about 20 seconds
-   >>> networkx.draw(g)
+The default connection string can be set as an environment variable in your ``~/.bashrc``. If you're using MySQL or
+MariaDB, it could look like this:
 
-Export to Neo4j
----------------
+.. code::
 
-.. code-block:: python
+    $ export PYBEL_CONNECTION="mysql+pymysql://user:password@localhost/table?charset=utf8"
 
-   >>> import pybel, py2neo
-   >>> url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
-   >>> g = pybel.from_url(url)
-   >>> neo_graph = py2neo.Graph("http://localhost:7474/db/data/")  # use your own connection settings
-   >>> pybel.to_neo4j(g, neo_graph)
+Command Line
+------------
+
+.. note:: The command line wrapper might not work on Windows. Use :code:`python3 -m pybel` if it has issues.
+
+PyBEL automatically installs the command :code:`pybel`. This command can be used to easily compile BEL documents
+and convert to other formats. See :code:`pybel --help` for usage details. This command makes logs of all conversions
+and warnings to the directory :code:`~/.pybel/`.
+
+Prepare a Cytoscape Network
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Load, compile, and export to Cytoscape format:
+
+.. code-block:: sh
+
+    $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
+
+In Cytoscape, open with :code:`Import > Network > From File`.
+
+Get the latest PyBEL Suite
+--------------------------
+Here is a list of all of the things you can install:
+
+.. code::
+
+    python3 -m pip uninstall pybel_web_validator
+    python3 -m pip uninstall pybel_tools
+    python3 -m pip uninstall pybel
+    python3 -m pip install git+https://github.com/pybel/pybel.git@develop
+    python3 -m pip install git+https://github.com/pybel/pybel-tools.git@develop
+    python3 -m pip install git+https://github.com/pybel/pybel-web-validator.git

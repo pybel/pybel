@@ -24,7 +24,6 @@ Installation is as easy as getting the code from PyPI with :code:`python3 -m pip
    datamodel
    io
    cookbook
-   commandline
    troubleshooting
    logging
 

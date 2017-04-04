@@ -95,7 +95,7 @@ class NamespaceEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(Text, nullable=False,
+    name = Column(String(255), nullable=False,
                   doc='Name that is defined in the corresponding namespace definition file')
     encoding = Column(String(8), nullable=True,
                       doc='Represents the biological entities that this name is valid for (e.g. G for Gene or P for Protein)')
@@ -561,7 +561,7 @@ class Edge(Base):
 
     graphIdentifier = Column(Integer,
                              doc='Identifier that is used in the PyBEL.BELGraph to identify weather or not an edge is artificial')
-    bel = Column(String(255), nullable=False, doc='Valid BEL statement that represents the given edge')
+    bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))

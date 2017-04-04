@@ -41,9 +41,15 @@ the OpenBEL community.
 from pyparsing import oneOf, Group
 
 from .. import language
-from ..baseparser import BaseParser, one_of_tags, nest
+from ..baseparser import BaseParser
 from ..parse_identifier import IdentifierParser
+from ..utils import nest, one_of_tags
 from ...constants import KIND, GMOD, BEL_DEFAULT_NAMESPACE, IDENTIFIER, NAME, NAMESPACE
+
+__all__ = [
+    'gmod_tag',
+    'GmodParser',
+]
 
 gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, identifier=KIND)
 

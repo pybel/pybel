@@ -58,8 +58,14 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
 
 from pyparsing import pyparsing_common as ppc, Keyword, Optional
 
-from ..baseparser import BaseParser, one_of_tags, nest, WCW, word
+from ..baseparser import BaseParser
+from ..utils import WCW, word, nest, one_of_tags
 from ...constants import FRAGMENT, KIND, FRAGMENT_START, FRAGMENT_STOP, FRAGMENT_MISSING, FRAGMENT_DESCRIPTION
+
+__all__ = [
+    'fragment_tag',
+    'FragmentParser',
+]
 
 fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, identifier=KIND)
 

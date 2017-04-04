@@ -11,7 +11,8 @@ import logging
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
-from .baseparser import BaseParser, word, quote, delimitedSet
+from .baseparser import BaseParser
+from pybel.parser.utils import word, quote, delimitedSet
 from .parse_exceptions import InvalidMetadataException
 from ..constants import *
 
@@ -32,42 +33,55 @@ value = quote | ppc.identifier
 
 
 class MetadataParser(BaseParser):
-    """Parser for the document and definitions section of a BEL document.
+    """A parser for the document and definitions section of a BEL document.
 
     .. seealso::
 
         BEL 1.0 Specification for the `DEFINE <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define>`_ keyword
     """
 
-    def __init__(self, cache_manager, valid_namespaces=None, valid_annotations=None, namespace_re=None,
+    def __init__(self, cache_manager, namespace_dict=None, annotation_dict=None, namespace_re=None,
                  annotations_re=None):
         """
-        :param cache_manager: a namespace namespace_cache manager
-        :type cache_manager: pybel.manager.CacheManager
-        :param valid_namespaces: dictionary of pre-loaded namespaces {name: set of valid values}
-        :type valid_namespaces: dict
-        :param valid_annotations: dictionary of pre-loaded annotations {name: set of valid values}
-        :type valid_annotations: dict
-        :param namespace_re: a dictionary of pre-loaded namespace regular expressions {name: regex string}
+        :param cache_manager: A cache manager
+        :type cache_manager: pybel.manager.cache.CacheManager
+        :param namespace_dict: A dictionary of pre-loaded, enumerated namespaces from 
+                                {namespace keyword: set of valid values}
+        :type namespace_dict: dict
+        :param annotation_dict: A dictionary of pre-loaded, enumerated annotations from
+                                {annotation keyword: set of valid values}
+        :type annotation_dict: dict
+        :param namespace_re: A dictionary of pre-loaded, regular expression namespaces from
+                                {namespace keyword: regex string}
         :type namespace_re: dict
-        :param annotations_re: a dictionary of pre-loaded annotation regular expressions {name: regex string}
+        :param annotations_re: A dictionary of pre-loaded, regular expression annotations from 
+                                {annotation keyword: regex string}
         :type annotations_re: dict
         """
-
+        #: This metadata parser's internal definition cache manager
         self.cache_manager = cache_manager
-
-        self.namespace_dict = {} if valid_namespaces is None else valid_namespaces
-        self.annotations_dict = {} if valid_annotations is None else valid_annotations
+        #: A dictionary of cached {namespace keyword: set of values}
+        self.namespace_dict = {} if namespace_dict is None else namespace_dict
+        #: A dictionary of cached {annotation keyword: set of values}
+        self.annotations_dict = {} if annotation_dict is None else annotation_dict
+        #: A dictionary of cached {namespace keyword: regular expression string}
         self.namespace_re = {} if namespace_re is None else namespace_re
+        #: A dictionary of cached {annotation keyword: regular expression string}
         self.annotations_re = {} if annotations_re is None else annotations_re
 
+        #: A dictionary containing the document metadata
         self.document_metadata = {}
 
+        #: A dictionary from {namespace keyword: BEL namespace URL}
         self.namespace_url_dict = {}
+        #: A dictionary from {namespace keyword: OWL namespace URL}
         self.namespace_owl_dict = {}
+        #: A dictionary from {annotation keyword: BEL annotation URL}
         self.annotation_url_dict = {}
+        #: A dictionary from {annotation keyword: OWL annotation URL}
         self.annotations_owl_dict = {}
-        self.annotation_list_list = []
+        #: A list of annotations that are defined ad-hoc in the BEL script
+        self.annotation_list_list = []  # TODO switch to set
 
         self.document = And([set_tag, Suppress(BEL_KEYWORD_DOCUMENT), word('key'), Suppress('='), value('value')])
 
@@ -103,6 +117,8 @@ class MetadataParser(BaseParser):
         ])
 
         BaseParser.__init__(self, self.language)
+
+        log.info('Metadata parser connected to %s', self.cache_manager.connection)
 
     def handle_document(self, s, l, tokens):
         key = tokens['key']
@@ -219,7 +235,19 @@ class MetadataParser(BaseParser):
         return tokens
 
     def annotation_is_defined(self, key):
+        """Returns if the given annotation is defined as either an enumeration of as a regular expression
+        
+        :param key: An annotation keyword
+        :type key: str
+        :rtype: bool
+        """
         return key in self.annotations_dict or key in self.annotations_re
 
     def namespace_is_defined(self, key):
+        """Returns if the given namespace is defined as either an enumeration of as a regular expression
+        
+        :param key: A namespace keyword
+        :type key: str
+        :rtype: bool
+        """
         return key in self.namespace_dict or key in self.namespace_re
