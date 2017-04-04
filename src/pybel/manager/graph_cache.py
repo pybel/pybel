@@ -4,7 +4,6 @@
 
 import datetime
 import logging
-import sys
 
 from . import models
 from .base_cache import BaseCacheManager
@@ -52,9 +51,9 @@ class GraphCacheManager(BaseCacheManager):
         graph_bytes = to_bytes(graph)
 
         network = models.Network(blob=graph_bytes, **graph.document)
-        for url in graph.namespace_url:
+        for key, url in graph.namespace_url.items():
             network.namespaces.append(self.session.query(models.Namespace).filter_by(url=url).one())
-        for url in graph.annotation_url:
+        for key, url in graph.annotation_url.items():
             network.annotations.append(self.session.query(models.Annotation).filter_by(url=url).one())
 
         if store_parts:
@@ -77,7 +76,15 @@ class GraphCacheManager(BaseCacheManager):
         :param graph: A BEL Graph
         :type graph: pybel.BELGraph
         """
-        nc = {node: self.get_or_create_node(graph, node) for node in graph.nodes_iter()}
+        nc = {}
+
+        for node in graph.nodes_iter():
+            node_object = self.get_or_create_node(graph, node)
+            nc[node] = node_object
+            if node_object not in network.nodes:
+                network.nodes.append(node_object)
+
+        # nc = {node: self.get_or_create_node(graph, node) for node in graph.nodes_iter()}
 
         self.session.flush()
 
@@ -116,6 +123,9 @@ class GraphCacheManager(BaseCacheManager):
             if edge not in network.edges:
                 network.edges.append(edge)
 
+            if citation not in network.citations:
+                network.citations.append(citation)
+
             self.session.flush()
 
     def get_bel_namespace_entry(self, url, value):
@@ -133,12 +143,7 @@ class GraphCacheManager(BaseCacheManager):
             namespaceEntry = self.session.query(models.NamespaceEntry).filter_by(namespace=namespace,
                                                                                  name=value).one_or_none()
         except:
-            print(url, "::::", value)
-            print(self.session.query(models.NamespaceEntry).filter_by(namespace=namespace, name=value).all())
-            sys.exit()
-
-        if namespaceEntry is None:
-            print(url, "::::", value)
+            namespaceEntry = self.session.query(models.NamespaceEntry).filter_by(namespace=namespace, name=value).first()
 
         return namespaceEntry
 
@@ -270,7 +275,7 @@ class GraphCacheManager(BaseCacheManager):
             else:
                 date = None
 
-            result = models.Citation(type=type, name=name, reference=reference, date=date)
+            result = models.Citation(type=type, name=name, reference=reference.strip(), date=date)
 
             if authors is not None:
                 for author in authors.split('|'):
@@ -593,6 +598,27 @@ class GraphCacheManager(BaseCacheManager):
 
         return graph
 
+    def query_network(self, db_id=None, name=None, version=None, as_dict_list=False):
+        """Query the PyBEL database for all the networks in the database."""
+        q = self.session.query(models.Network)
+
+        if db_id:
+            q = q.filter(models.Network.id == db_id)
+
+        else:
+            if name:
+                q = q.filter(models.Network.name.like(name))
+
+            if version:
+                q = q.filter(models.Network.version == version)
+
+        result = q.all()
+
+        if as_dict_list:
+            return [network.data for network in result]
+        else:
+            return result
+
     def query_node(self, bel=None, type=None, namespace=None, name=None, modification_type=None,
                    modification_name=None, as_dict_list=False):
         """Run a query over all nodes in the PyBEL cache.
@@ -639,8 +665,7 @@ class GraphCacheManager(BaseCacheManager):
         result = q.all()
 
         if as_dict_list:
-            dict_list = [node.data for node in result]
-            return dict_list
+            return [node.data for node in result]
         else:
             return result
 
@@ -736,8 +761,7 @@ class GraphCacheManager(BaseCacheManager):
         result = q.all()
 
         if as_dict_list:
-            dict_result = [edge.data for edge in result]
-            return dict_result
+            return [edge.data for edge in result]
         else:
             return result
 

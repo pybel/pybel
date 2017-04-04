@@ -27,9 +27,11 @@ NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalence'
 NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
 
 NETWORK_TABLE_NAME = 'pybel_network'
+NETWORK_NODE_TABLE_NAME = 'pybel_network_node'
 NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
 NETWORK_NAMESPACE_TABLE_NAME = 'pybel_network_namespace'
 NETWORK_ANNOTATION_TABLE_NAME = 'pybel_network_annotation'
+NETWORK_CITATION_TABLE_NAME = 'pybel_network_citation'
 
 NODE_TABLE_NAME = 'pybel_node'
 NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
@@ -150,6 +152,12 @@ class Annotation(Base):
 
     entries = relationship('AnnotationEntry', back_populates="annotation")
 
+    @property
+    def data(self):
+        an_data = self.__dict__
+        del an_data['_sa_instance_state']
+        return an_data
+
 
 class AnnotationEntry(Base):
     """Represents a value within a BEL Annotation"""
@@ -253,6 +261,18 @@ network_edge = Table(
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
 )
 
+network_citation = Table(
+    NETWORK_CITATION_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True)
+)
+
+network_node = Table(
+    NETWORK_NODE_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True)
+)
+
 
 class Network(Base):
     """Represents a collection of edges, specified by a BEL Script"""
@@ -273,13 +293,23 @@ class Network(Base):
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(Binary)
 
+    nodes = relationship('Node', secondary=network_node)
     edges = relationship('Edge', secondary=network_edge)
     namespaces = relationship('Namespace', secondary=network_namespace)
     annotations = relationship('Annotation', secondary=network_annotation)
+    citations = relationship('Citation', secondary=network_citation)
 
     __table_args__ = (
         UniqueConstraint(METADATA_NAME, METADATA_VERSION),
     )
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'version': self.version
+        }
 
 
 node_modification = Table(

@@ -134,26 +134,26 @@ class CacheManager(BaseCacheManager):
         self.ensure_namespace(url)
         return self.namespace_cache[url]
 
-    def get_namespace_urls(self):
+    def get_namespace_urls(self, keyword_url_dict=False):
         """Returns a list of the locations of the stored namespaces and annotations"""
-        return [definition.url for definition in self.session.query(models.Namespace).all()]
+        namespaces = self.session.query(models.Namespace).all()
+        if keyword_url_dict:
+            return {definition.keyword: definition.url for definition in namespaces}
+        else:
+            return [definition.url for definition in namespaces]
 
-    def get_namespace_data(self, data=False):
+    def get_namespace_data(self, url=None):
         """Returns a list of the locations of the stored namespaces and annotations
-
-        :param data: Flag that indicates if all column data should be returned.
-        :type data: bool
 
         :return: A list of all namespaces in the relational database.
         :rtype: list[url or dict]
 
         """
-        if not data:
-            result = [definition.url for definition in self.session.query(models.Namespace).all()]
+        if url:
+            definition = self.session.query(models.Namespace).filter_by(url=url).one_or_none()
+            return definition.data
         else:
-            result = [definition.data for definition in self.session.query(models.Namespace).all()]
-
-        return result
+            return [definition.data for definition in self.session.query(models.Namespace).all()]
 
     def ensure_default_namespaces(self):
         """Caches the default set of namespaces"""
@@ -227,9 +227,26 @@ class CacheManager(BaseCacheManager):
         self.ensure_annotation(url)
         return self.annotation_cache[url]
 
-    def get_annotation_urls(self):
+    def get_annotation_urls(self, keyword_url_dict=False):
         """Returns a list of the locations of the stored annotations"""
-        return [definition.url for definition in self.session.query(models.Annotation).all()]
+        annotations = self.session.query(models.Annotation).all()
+        if keyword_url_dict:
+            return {definition.keyword: definition.url for definition in annotations}
+        else:
+            return [definition.url for definition in annotations]
+
+    def get_annotation_data(self, url=None):
+        """Returns a list of the locations of the stored namespaces and annotations
+
+        :return: A list of all annotaitons in the relational database.
+        :rtype: list[url or dict]
+
+        """
+        if url:
+            definition = self.session.query(models.Annotation).filter_by(url=url).one_or_none()
+            return definition.data
+        else:
+            return [definition.data for definition in self.session.query(models.Annotation).all()]
 
     def dict_annotations(self):
         """Returns a dictionary with the keyword:locations of the stored annotations"""
