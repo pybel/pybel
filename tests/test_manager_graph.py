@@ -15,10 +15,7 @@ from pybel.manager import models
 from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel_thorough, mock_bel_resources, \
-    expected_test_thorough_metadata, test_bel_simple
-
-TEST_BEL_NAME = 'PyBEL Test Document 1'
-TEST_BEL_VERSION = '1.6'
+    expected_test_thorough_metadata, test_bel_simple, expected_test_simple_metadata
 
 
 class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
@@ -126,7 +123,8 @@ class TestGraphCacheSimple(BelReconstitutionMixin, unittest.TestCase):
         self.assertEqual({nea.edge_id for nea in network_edge_associations},
                          {edge.id for edge in edges})
 
-        g2 = self.gcm.get_graph(TEST_BEL_NAME, TEST_BEL_VERSION)
+        g2 = self.gcm.get_graph(expected_test_simple_metadata[METADATA_NAME],
+                                expected_test_simple_metadata[METADATA_VERSION])
         self.bel_simple_reconstituted(g2)
 
 
@@ -168,7 +166,6 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
 
         protein_list = self.gcm.query_node(type='Protein')
         self.assertEqual(len(protein_list), 4)
-
 
     @mock_bel_resources
     def test_query_edge(self, mock_get):
@@ -219,14 +216,13 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         self.assertIn(fadd_casp, evidence_list)
 
         # no result
-        empty_list = self.gcm.query_edge(source='p(HGNC:EGFR)', relation='increases',  as_dict_list=True)
+        empty_list = self.gcm.query_edge(source='p(HGNC:EGFR)', relation='increases', as_dict_list=True)
         self.assertEqual(len(empty_list), 0)
 
         # source, relation, data
         source_list = self.gcm.query_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
         self.assertEqual(len(source_list), 1)
         self.assertIn(fadd_casp, source_list)
-
 
     @mock_bel_resources
     def test_query_citation(self, mock_get):
