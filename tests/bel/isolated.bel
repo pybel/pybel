@@ -1,7 +1,7 @@
 ##################################################################################
 # Document Properties Section
 
-SET DOCUMENT Name = "PyBEL Test Document 5"
+SET DOCUMENT Name = "PyBEL Test Isolated Nodes"
 SET DOCUMENT Description = "Tests the effect of using isolated nodes in IO"
 SET DOCUMENT Version = "0.1.0"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."

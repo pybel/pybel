@@ -7,13 +7,14 @@ This module supports the relation parser by handling statements.
 """
 
 import logging
+import re
 
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
-from .baseparser import BaseParser
 from pybel.parser.utils import word, quote, delimitedSet
-from .parse_exceptions import InvalidMetadataException
+from .baseparser import BaseParser
+from .parse_exceptions import InvalidMetadataException, NotSemanticVersionException
 from ..constants import *
 
 __all__ = ['MetadataParser']
@@ -30,6 +31,9 @@ define_tag = Suppress(BEL_KEYWORD_DEFINE)
 function_tags = Word(''.join(belns_encodings))
 
 value = quote | ppc.identifier
+
+SEMANTIC_VERSION_STRING_RE = re.compile(
+    '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?')
 
 
 class MetadataParser(BaseParser):
@@ -134,6 +138,9 @@ class MetadataParser(BaseParser):
             return tokens
 
         self.document_metadata[norm_key] = value
+
+        if norm_key == METADATA_VERSION and not SEMANTIC_VERSION_STRING_RE.match(value):
+            raise NotSemanticVersionException(value)
 
         return tokens
 

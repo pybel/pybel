@@ -177,3 +177,8 @@ class TestParseMetadata(unittest.TestCase):
         self.assertNotIn('dbSNP', self.parser.namespace_dict)
         self.assertIn('dbSNP', self.parser.namespace_re)
         self.assertEqual('rs[0-9]*', self.parser.namespace_re['dbSNP'])
+
+    def test_not_semantic_version(self):
+        s = 'SET DOCUMENT Version = "1.0"'
+        with self.assertRaises(NotSemanticVersionException):
+            self.parser.parseString(s)

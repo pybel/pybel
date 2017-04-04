@@ -23,7 +23,7 @@ from .constants import *
 from .constructors import build_metadata_parser
 from .exceptions import PyBelWarning
 from .parser.parse_bel import BelParser
-from .parser.parse_exceptions import MissingMetadataException
+from .parser.parse_exceptions import MissingMetadataException, NotSemanticVersionException
 from .parser.utils import split_file_to_annotations_and_definitions
 from .utils import expand_dict, get_version, subdict_matches
 
@@ -296,16 +296,19 @@ def parse_document(graph, document_metadata, metadata_parser):
     for line_number, line in document_metadata:
         try:
             metadata_parser.parseString(line)
+        except NotSemanticVersionException as e:
+            log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
+            graph.add_warning(line_number, line, e)
         except Exception as e:
             log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
 
     for required in REQUIRED_METADATA:
         if required not in metadata_parser.document_metadata:
-            graph.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
+            graph.warnings.insert(0, (0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]), {}))
             log.error('Missing required document metadata: %s', INVERSE_DOCUMENT_KEYS[required])
         elif not metadata_parser.document_metadata[required]:
-            graph.add_warning(0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]))
+            graph.warnings.insert(0, (0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]), {}))
             log.error('Missing required document metadata not filled: %s', INVERSE_DOCUMENT_KEYS[required])
 
     graph.graph[GRAPH_METADATA] = metadata_parser.document_metadata

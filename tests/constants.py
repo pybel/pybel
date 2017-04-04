@@ -143,9 +143,9 @@ class TestTokenParserBase(unittest.TestCase):
 
 
 expected_test_simple_metadata = {
-    METADATA_NAME: "PyBEL Test Document 1",
+    METADATA_NAME: "PyBEL Test Simple",
     METADATA_DESCRIPTION: "Made for testing PyBEL parsing",
-    METADATA_VERSION: "1.6",
+    METADATA_VERSION: "1.6.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -153,9 +153,9 @@ expected_test_simple_metadata = {
 }
 
 expected_test_thorough_metadata = {
-    METADATA_NAME: "PyBEL Test Document 3",
+    METADATA_NAME: "PyBEL Test Thorough",
     METADATA_DESCRIPTION: "Statements made up to contain many conceivable variants of nodes from BEL",
-    METADATA_VERSION: "1.0",
+    METADATA_VERSION: "1.0.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -163,9 +163,9 @@ expected_test_thorough_metadata = {
 }
 
 expected_test_bel_4_metadata = {
-    METADATA_NAME: "PyBEL Test Document 4",
+    METADATA_NAME: "PyBEL Test OWL Extension",
     METADATA_DESCRIPTION: "Tests the use of OWL ontologies as namespaces",
-    METADATA_VERSION: "1.6",
+    METADATA_VERSION: "1.6.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -1127,6 +1127,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         if check_warnings:
             expected_warnings = [
                 (0, MissingMetadataException),
+                (3, NotSemanticVersionException),
                 (26, MissingAnnotationKeyWarning),
                 (29, MissingAnnotationKeyWarning),
                 (34, InvalidCitationException),
@@ -1153,7 +1154,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             ]
 
             for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
-                self.assertEqual(el, l)
+                self.assertEqual(el, l, msg="Expected different error")
                 self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
         assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
