@@ -114,6 +114,17 @@ class MissingAnnotationRegexWarning(PyBelWarning):
 
 # Provenance Warnings
 
+class NotSemanticVersionException(PyBelWarning):
+    """Raised if the version string doesn't adhere to semantic versioning"""
+
+    def __init__(self, version_string):
+        PyBelWarning.__init__(self, version_string)
+        self.version_string = version_string
+
+    def __str__(self):
+        return "Version string {} doesn't adhere to semantic versioning".format(self.version_string)
+
+
 class InvalidMetadataException(PyBelWarning):
     """Illegal document metadata. Should be one of:
 

@@ -1,9 +1,9 @@
 ##################################################################################
 # Document Properties Section
 
-SET DOCUMENT Name = "PyBEL Test Document 3"
+SET DOCUMENT Name = "PyBEL Test Thorough"
 SET DOCUMENT Description = "Statements made up to contain many conceivable variants of nodes from BEL"
-SET DOCUMENT Version = "1.0"
+SET DOCUMENT Version = "1.0.0"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
 SET DOCUMENT Licenses = "WTF License"

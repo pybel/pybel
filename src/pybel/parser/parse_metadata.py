@@ -7,13 +7,14 @@ This module supports the relation parser by handling statements.
 """
 
 import logging
+import re
 
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
-from .baseparser import BaseParser
 from pybel.parser.utils import word, quote, delimitedSet
-from .parse_exceptions import InvalidMetadataException
+from .baseparser import BaseParser
+from .parse_exceptions import *
 from ..constants import *
 
 __all__ = ['MetadataParser']
@@ -31,6 +32,9 @@ function_tags = Word(''.join(belns_encodings))
 
 value = quote | ppc.identifier
 
+SEMANTIC_VERSION_STRING_RE = re.compile(
+    '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?')
+
 
 class MetadataParser(BaseParser):
     """A parser for the document and definitions section of a BEL document.
@@ -40,8 +44,8 @@ class MetadataParser(BaseParser):
         BEL 1.0 Specification for the `DEFINE <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define>`_ keyword
     """
 
-    def __init__(self, cache_manager, namespace_dict=None, annotation_dict=None, namespace_re=None,
-                 annotations_re=None):
+    def __init__(self, cache_manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
+                 annotations_regex=None, default_namespace=None):
         """
         :param cache_manager: A cache manager
         :type cache_manager: pybel.manager.cache.CacheManager
@@ -51,12 +55,14 @@ class MetadataParser(BaseParser):
         :param annotation_dict: A dictionary of pre-loaded, enumerated annotations from
                                 {annotation keyword: set of valid values}
         :type annotation_dict: dict
-        :param namespace_re: A dictionary of pre-loaded, regular expression namespaces from
+        :param namespace_regex: A dictionary of pre-loaded, regular expression namespaces from
                                 {namespace keyword: regex string}
-        :type namespace_re: dict
-        :param annotations_re: A dictionary of pre-loaded, regular expression annotations from 
+        :type namespace_regex: dict
+        :param annotations_regex: A dictionary of pre-loaded, regular expression annotations from 
                                 {annotation keyword: regex string}
-        :type annotations_re: dict
+        :type annotations_regex: dict
+        :param default_namespace: A set of strings that can be used without a namespace
+        :type default_namespace: set of str
         """
         #: This metadata parser's internal definition cache manager
         self.cache_manager = cache_manager
@@ -64,10 +70,16 @@ class MetadataParser(BaseParser):
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
         #: A dictionary of cached {annotation keyword: set of values}
         self.annotations_dict = {} if annotation_dict is None else annotation_dict
-        #: A dictionary of cached {namespace keyword: regular expression string}
-        self.namespace_re = {} if namespace_re is None else namespace_re
-        #: A dictionary of cached {annotation keyword: regular expression string}
-        self.annotations_re = {} if annotations_re is None else annotations_re
+        #: A dictionary of {namespace keyword: regular expression string}
+        self.namespace_regex = {} if namespace_regex is None else namespace_regex
+        #: A dictionary of {namespace keyword: compiled regular expression}
+        self.namespace_regex_compiled = {ns: re.compile(pat) for ns, pat in self.namespace_regex.items()}
+        #: A set of names that can be used without a namespace
+        self.default_namespace = set(default_namespace) if default_namespace is not None else None
+        #: A dictionary of {annotation keyword: regular expression string}
+        self.annotations_regex = {} if annotations_regex is None else annotations_regex
+        #: A dictionary of {annotation keyword: compiled regular expression}
+        self.annotations_regex_compiled = {ns: re.compile(pat) for ns, pat in self.annotations_regex.items()}
 
         #: A dictionary containing the document metadata
         self.document_metadata = {}
@@ -135,28 +147,31 @@ class MetadataParser(BaseParser):
 
         self.document_metadata[norm_key] = value
 
+        if norm_key == METADATA_VERSION and not SEMANTIC_VERSION_STRING_RE.match(value):
+            raise NotSemanticVersionException(value)
+
         return tokens
 
     def handle_namespace_url(self, s, l, tokens):
-        name = tokens['name']
+        namespace = tokens['name']
 
-        if self.namespace_is_defined(name):
-            log.warning('Tried to overwrite namespace: %s', name)
+        if self.has_namespace(namespace):
+            log.warning('Tried to overwrite namespace: %s', namespace)
             return tokens
 
         url = tokens['url']
         terms = self.cache_manager.get_namespace(url)
 
-        self.namespace_dict[name] = terms
-        self.namespace_url_dict[name] = url
+        self.namespace_dict[namespace] = terms
+        self.namespace_url_dict[namespace] = url
 
         return tokens
 
     def handle_namespace_owl(self, s, l, tokens):
-        name = tokens['name']
+        namespace = tokens['name']
 
-        if self.namespace_is_defined(name):
-            log.warning('Tried to overwrite owl namespace: %s', name)
+        if self.has_namespace(namespace):
+            log.warning('Tried to overwrite owl namespace: %s', namespace)
             return tokens
 
         functions = set(tokens['functions'] if 'functions' in tokens else belns_encodings)
@@ -165,89 +180,146 @@ class MetadataParser(BaseParser):
 
         terms = self.cache_manager.get_namespace_owl_terms(url)
 
-        self.namespace_dict[name] = {term: functions for term in terms}
-        self.namespace_owl_dict[name] = url
+        self.namespace_dict[namespace] = {term: functions for term in terms}
+        self.namespace_owl_dict[namespace] = url
 
         return tokens
 
     def handle_namespace_pattern(self, s, l, tokens):
-        name = tokens['name']
+        namespace = tokens['name']
 
-        if self.namespace_is_defined(name):
-            log.warning('Tried to overwrite namespace: {}'.format(name))
+        if self.has_namespace(namespace):
+            log.warning('Tried to overwrite namespace: {}'.format(namespace))
             return tokens
 
-        self.namespace_re[name] = tokens['value']
+        value = tokens['value']
+
+        self.namespace_regex[namespace] = value
+        self.namespace_regex_compiled[namespace] = re.compile(value)
+
         return tokens
 
     def handle_annotation_owl(self, s, l, tokens):
-        name = tokens['name']
+        annotation = tokens['name']
 
-        if self.annotation_is_defined(name):
-            log.warning('Tried to overwrite annotation: {}'.format(name))
+        if self.has_annotation(annotation):
+            log.warning('Tried to overwrite annotation: {}'.format(annotation))
             return tokens
 
         url = tokens['url']
 
         terms = self.cache_manager.get_annotation_owl_terms(url)
 
-        self.annotations_dict[name] = set(terms)
-        self.annotations_owl_dict[name] = url
+        self.annotations_dict[annotation] = set(terms)
+        self.annotations_owl_dict[annotation] = url
 
         return tokens
 
     def handle_annotations_url(self, s, l, tokens):
-        name = tokens['name']
+        annotation = tokens['name']
 
-        if self.annotation_is_defined(name):
-            log.warning('Tried to overwrite annotation: %s', name)
+        if self.has_annotation(annotation):
+            log.warning('Tried to overwrite annotation: %s', annotation)
             return tokens
 
         url = tokens['url']
 
-        self.annotations_dict[name] = self.cache_manager.get_annotation(url)
-        self.annotation_url_dict[name] = url
+        self.annotations_dict[annotation] = self.cache_manager.get_annotation(url)
+        self.annotation_url_dict[annotation] = url
 
         return tokens
 
     def handle_annotation_list(self, s, l, tokens):
-        name = tokens['name']
+        annotation = tokens['name']
 
-        if self.annotation_is_defined(name):
-            log.warning('Tried to overwrite annotation: {}'.format(name))
+        if self.has_annotation(annotation):
+            log.warning('Tried to overwrite annotation: {}'.format(annotation))
             return tokens
 
         values = set(tokens['values'])
 
-        self.annotations_dict[name] = values
-        self.annotation_list_list.append(name)
+        self.annotations_dict[annotation] = values
+        self.annotation_list_list.append(annotation)
 
         return tokens
 
     def handle_annotation_pattern(self, s, l, tokens):
-        name = tokens['name']
+        annotation = tokens['name']
 
-        if self.annotation_is_defined(name):
-            log.warning('Tried to overwrite annotation: {}'.format(name))
+        if self.has_annotation(annotation):
+            log.warning('Tried to overwrite annotation: {}'.format(annotation))
             return tokens
 
-        self.annotations_re[name] = tokens['value']
+        value = tokens['value']
+
+        self.annotations_regex[annotation] = value
+        self.annotations_regex_compiled[annotation] = re.compile(value)
+
         return tokens
 
-    def annotation_is_defined(self, key):
-        """Returns if the given annotation is defined as either an enumeration of as a regular expression
-        
-        :param key: An annotation keyword
-        :type key: str
-        :rtype: bool
-        """
-        return key in self.annotations_dict or key in self.annotations_re
+    def has_enumerated_annotation(self, annotation):
+        return annotation in self.annotations_dict
 
-    def namespace_is_defined(self, key):
-        """Returns if the given namespace is defined as either an enumeration of as a regular expression
-        
-        :param key: A namespace keyword
-        :type key: str
-        :rtype: bool
-        """
-        return key in self.namespace_dict or key in self.namespace_re
+    def has_regex_annotation(self, annotation):
+        return annotation in self.annotations_regex
+
+    def has_annotation(self, annotation):
+        return self.has_enumerated_annotation(annotation) or self.has_regex_annotation(annotation)
+
+    def raise_for_missing_annotation(self, annotation):
+        if not self.has_annotation(annotation):
+            raise UndefinedAnnotationWarning(annotation)
+
+    def has_enumerated_annotation_value(self, annotation, value):
+        return annotation in self.annotations_dict and value in self.annotations_dict[annotation]
+
+    def has_regex_annotation_value(self, annotation, value):
+        return annotation in self.annotations_regex and self.annotations_regex_compiled[annotation].match(value)
+
+    def has_annotation_value(self, annotation, value):
+        self.raise_for_missing_annotation(annotation)
+
+        return self.has_enumerated_annotation_value(annotation, value) or self.has_regex_annotation_value(annotation,
+                                                                                                          value)
+
+    def raise_for_missing_annotation_value(self, annotation, value):
+        self.raise_for_missing_annotation(annotation)
+
+        if self.has_enumerated_annotation(annotation) and not self.has_enumerated_annotation_value(annotation, value):
+            raise IllegalAnnotationValueWarning(value, annotation)
+
+        if self.has_regex_annotation(annotation) and not self.has_regex_annotation_value(annotation, value):
+            raise MissingAnnotationRegexWarning(value, annotation)
+
+    def has_enumerated_namespace(self, namespace):
+        return namespace in self.namespace_dict
+
+    def has_regex_namespace(self, namespace):
+        return namespace in self.namespace_regex
+
+    def has_namespace(self, namespace):
+        return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
+
+    def raise_for_missing_namespace(self, namespace):
+        if not self.has_namespace(namespace):
+            raise UndefinedNamespaceWarning(namespace)
+
+    def has_enumerated_namespace_name(self, namespace, name):
+        return self.has_enumerated_namespace(namespace) and name in self.namespace_dict[namespace]
+
+    def has_regex_namespace_name(self, namespace, name):
+        return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
+
+    def has_namespace_name(self, namespace, name):
+        self.raise_for_missing_namespace(namespace)
+
+        return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
+
+    def raise_for_missing_name(self, namespace, name):
+        self.raise_for_missing_namespace(namespace)
+
+        if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
+            raise MissingNamespaceNameWarning(name, namespace)
+
+        if self.has_regex_namespace(namespace) and not self.has_regex_namespace_name(namespace, name):
+            raise MissingNamespaceRegexWarning(name, namespace)

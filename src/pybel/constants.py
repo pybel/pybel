@@ -201,6 +201,8 @@ DIRECTLY_DECREASES = 'directlyDecreases'
 #: A BEL relationship
 CAUSES_NO_CHANGE = 'causesNoChange'
 #: A BEL relationship
+REGULATES = 'regulates'
+#: A BEL relationship
 NEGATIVE_CORRELATION = 'negativeCorrelation'
 #: A BEL relationship
 POSITIVE_CORRELATION = 'positiveCorrelation'
@@ -210,6 +212,16 @@ ASSOCIATION = 'association'
 ORTHOLOGOUS = 'orthologous'
 #: A BEL relationship
 ANALOGOUS_TO = 'analogousTo'
+#: A BEL relationship
+IS_A = 'isA'
+#: A BEL relationship
+RATE_LIMITING_STEP_OF = 'rateLimitingStepOf'
+#: A BEL relationship
+SUBPROCESS_OF = 'subProcessOf'
+#: A BEL relationship
+BIOMARKER_FOR = 'biomarkerFor'
+#: A BEL relationship
+PROGONSTIC_BIOMARKER_FOR = 'prognosticBiomarkerFor'
 #: A BEL relationship, added by PyBEL
 EQUIVALENT_TO = 'equivalentTo'
 

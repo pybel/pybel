@@ -1,9 +1,9 @@
 ##################################################################################
 # Document Properties Section
 
-SET DOCUMENT Name = "PyBEL Test Document 4"
+SET DOCUMENT Name = "PyBEL Test OWL Extension"
 SET DOCUMENT Description = "Tests the use of OWL ontologies as namespaces"
-SET DOCUMENT Version = "1.6"
+SET DOCUMENT Version = "1.6.0"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
 SET DOCUMENT Licenses = "WTF License"

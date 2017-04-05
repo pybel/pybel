@@ -41,9 +41,13 @@ class CacheManager(BaseCacheManager):
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
+        #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
+        #: A dictionary from {namespace URL: {name: database ID}}
         self.namespace_id_cache = defaultdict(dict)
+        #: A dictionary from {annotation URL: {name: label}}
         self.annotation_cache = defaultdict(dict)
+        #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
 
         self.namespace_term_cache = {}
@@ -113,8 +117,8 @@ class CacheManager(BaseCacheManager):
 
         if results is None:
             results = self.insert_namespace(url)
-        else:
-            log.info('Loaded from database: %s (%d)', url, len(results.entries))
+
+        log.info('Loaded from database: %s (%d)', url, len(results.entries))
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
@@ -209,10 +213,10 @@ class CacheManager(BaseCacheManager):
 
         results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
 
-        if results is not None:
-            log.info('Loaded from database: %s (%d)', url, len(results.entries))
-        else:
+        if results is None:
             results = self.insert_annotation(url)
+
+        log.info('Loaded from database: %s (%d)', url, len(results.entries))
 
         for entry in results.entries:
             self.annotation_cache[url][entry.name] = entry.label

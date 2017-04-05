@@ -20,6 +20,8 @@ try:
 except ImportError:
     import mock
 
+log = logging.getLogger(__name__)
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 owl_dir_path = os.path.join(dir_path, 'owl')
 bel_dir_path = os.path.join(dir_path, 'bel')
@@ -71,15 +73,13 @@ EGFR = (PROTEIN, 'HGNC', 'EGFR')
 FADD = (PROTEIN, 'HGNC', 'FADD')
 CASP8 = (PROTEIN, 'HGNC', 'CASP8')
 
-log = logging.getLogger(BEL_DEFAULT_NAMESPACE)
-
 
 def any_dict_matches(dict_of_dicts, query_dict):
     return any(query_dict == sd for sd in dict_of_dicts.values())
 
 
 def assertHasNode(self, member, graph, **kwargs):
-    """
+    """A helper function for checking if a node with the given properties is contained within a graph
 
     :param self: A Test Case
     :type self: unittest.TestCase
@@ -87,7 +87,6 @@ def assertHasNode(self, member, graph, **kwargs):
     :param graph:
     :type graph: BELGraph
     :param kwargs:
-    :return:
     """
     self.assertTrue(graph.has_node(member), msg='{} not found in graph'.format(member))
     if kwargs:
@@ -100,7 +99,7 @@ def assertHasNode(self, member, graph, **kwargs):
 
 
 def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
-    """
+    """A helper function for checking if an edge with the given properties is contained within a graph
 
     :param self: A TestCase
     :type self: unittest.TestCase
@@ -111,7 +110,6 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
     :param graph: underlying graph
     :type graph: BELGraph
     :param kwargs: splat the data to match
-    :return:
     """
     self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
 
@@ -145,9 +143,9 @@ class TestTokenParserBase(unittest.TestCase):
 
 
 expected_test_simple_metadata = {
-    METADATA_NAME: "PyBEL Test Document 1",
+    METADATA_NAME: "PyBEL Test Simple",
     METADATA_DESCRIPTION: "Made for testing PyBEL parsing",
-    METADATA_VERSION: "1.6",
+    METADATA_VERSION: "1.6.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -155,9 +153,9 @@ expected_test_simple_metadata = {
 }
 
 expected_test_thorough_metadata = {
-    METADATA_NAME: "PyBEL Test Document 3",
+    METADATA_NAME: "PyBEL Test Thorough",
     METADATA_DESCRIPTION: "Statements made up to contain many conceivable variants of nodes from BEL",
-    METADATA_VERSION: "1.0",
+    METADATA_VERSION: "1.0.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -165,9 +163,9 @@ expected_test_thorough_metadata = {
 }
 
 expected_test_bel_4_metadata = {
-    METADATA_NAME: "PyBEL Test Document 4",
+    METADATA_NAME: "PyBEL Test OWL Extension",
     METADATA_DESCRIPTION: "Tests the use of OWL ontologies as namespaces",
-    METADATA_VERSION: "1.6",
+    METADATA_VERSION: "1.6.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -184,27 +182,32 @@ expected_test_slushy_metadata = {
 
 
 def build_variant_dict(variant):
+    """A convenience function for building a variant dictionary"""
     return {KIND: HGVS, IDENTIFIER: variant}
 
 
 def get_uri_name(url):
+    """Gets the file name from the end of the URL. Only useful for PyBEL's testing though since it looks specifically
+    if the file is from the weird owncloud resources distributed by Fraunhofer"""
     url_parsed = urlparse(url)
-    url_parts = url_parsed.path.split('/')
-    return url_parts[-1]
+
+    if url.startswith(FRAUNHOFER_RESOURCES):
+        return url_parsed.query.split('=')[-1]
+    else:
+        url_parts = url_parsed.path.split('/')
+        return url_parts[-1]
 
 
 class MockResponse:
     """See http://stackoverflow.com/questions/15753390/python-mock-requests-and-the-response"""
 
     def __init__(self, mock_url):
-        name = get_uri_name(mock_url)
-
         if mock_url.endswith('.belns'):
-            self.path = os.path.join(belns_dir_path, name)
+            self.path = os.path.join(belns_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.belanno'):
-            self.path = os.path.join(belanno_dir_path, name)
+            self.path = os.path.join(belanno_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.beleq'):
-            self.path = os.path.join(beleq_dir_path, name)
+            self.path = os.path.join(beleq_dir_path, get_uri_name(mock_url))
         elif mock_url == wine_iri:
             self.path = test_owl_wine
         elif mock_url == pizza_iri:
@@ -1124,6 +1127,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         if check_warnings:
             expected_warnings = [
                 (0, MissingMetadataException),
+                (3, NotSemanticVersionException),
                 (26, MissingAnnotationKeyWarning),
                 (29, MissingAnnotationKeyWarning),
                 (34, InvalidCitationException),
@@ -1150,7 +1154,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             ]
 
             for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
-                self.assertEqual(el, l)
+                self.assertEqual(el, l, msg="Expected different error")
                 self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
         assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})

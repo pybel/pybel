@@ -9,7 +9,8 @@ import os
 import requests
 from requests_file import FileAdapter
 
-from ..graph import BELGraph, parse_lines
+from .line_utils import parse_lines
+from ..graph import BELGraph
 
 __all__ = [
     'from_lines',
