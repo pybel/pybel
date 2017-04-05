@@ -14,9 +14,9 @@ from pkg_resources import get_distribution
 from requests.compat import urlparse
 from requests_file import FileAdapter
 
-from pybel.constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS
+from .constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS
 
-log = logging.getLogger('pybel')
+log = logging.getLogger(__name__)
 
 
 def parse_bel_resource(lines):
@@ -28,6 +28,7 @@ def parse_bel_resource(lines):
     :rtype: dict
     """
     lines = list(lines)
+
     value_line = 1 + max(i for i, line in enumerate(lines) if '[Values]' == line.strip())
 
     metadata_config = ConfigParser(strict=False)
@@ -75,11 +76,16 @@ def get_bel_resource(location):
         session.mount('file://', FileAdapter())
         res = session.get(location)
 
-        lines = (line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
-        result = parse_bel_resource(lines)
+        lines = list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
     else:
         with open(os.path.expanduser(location)) as f:
-            result = parse_bel_resource(f)
+            lines = list(f)
+
+    try:
+        result = parse_bel_resource(lines)
+    except ValueError:
+        log.error('No [Values] section found in %s', location)
+        raise ValueError('No [Values] section found in {}'.format(location))
 
     if not result['Values']:
         raise ValueError('Downloaded empty file: {}'.format(location))
