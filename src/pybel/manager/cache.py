@@ -41,13 +41,13 @@ class CacheManager(BaseCacheManager):
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
-        #: A dictionary from {namespace keyword: {name: set of encodings}}
+        #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
-        #: A dictionary from {namespace keyword: {name: database ID}}
+        #: A dictionary from {namespace URL: {name: database ID}}
         self.namespace_id_cache = defaultdict(dict)
-        #: A dictionary from {annotation keyword: {name: label}}
+        #: A dictionary from {annotation URL: {name: label}}
         self.annotation_cache = defaultdict(dict)
-        #: A dictionary from {annotation keyword: {name: database ID}}
+        #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
 
         self.namespace_term_cache = {}

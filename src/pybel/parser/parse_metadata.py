@@ -44,8 +44,8 @@ class MetadataParser(BaseParser):
         BEL 1.0 Specification for the `DEFINE <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define>`_ keyword
     """
 
-    def __init__(self, cache_manager, namespace_dict=None, annotation_dict=None, namespace_re=None,
-                 annotations_re=None):
+    def __init__(self, cache_manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
+                 annotations_regex=None, default_namespace=None):
         """
         :param cache_manager: A cache manager
         :type cache_manager: pybel.manager.cache.CacheManager
@@ -55,12 +55,14 @@ class MetadataParser(BaseParser):
         :param annotation_dict: A dictionary of pre-loaded, enumerated annotations from
                                 {annotation keyword: set of valid values}
         :type annotation_dict: dict
-        :param namespace_re: A dictionary of pre-loaded, regular expression namespaces from
+        :param namespace_regex: A dictionary of pre-loaded, regular expression namespaces from
                                 {namespace keyword: regex string}
-        :type namespace_re: dict
-        :param annotations_re: A dictionary of pre-loaded, regular expression annotations from 
+        :type namespace_regex: dict
+        :param annotations_regex: A dictionary of pre-loaded, regular expression annotations from 
                                 {annotation keyword: regex string}
-        :type annotations_re: dict
+        :type annotations_regex: dict
+        :param default_namespace: A set of strings that can be used without a namespace
+        :type default_namespace: set of str
         """
         #: This metadata parser's internal definition cache manager
         self.cache_manager = cache_manager
@@ -69,11 +71,13 @@ class MetadataParser(BaseParser):
         #: A dictionary of cached {annotation keyword: set of values}
         self.annotations_dict = {} if annotation_dict is None else annotation_dict
         #: A dictionary of {namespace keyword: regular expression string}
-        self.namespace_regex = {} if namespace_re is None else namespace_re
+        self.namespace_regex = {} if namespace_regex is None else namespace_regex
         #: A dictionary of {namespace keyword: compiled regular expression}
         self.namespace_regex_compiled = {ns: re.compile(pat) for ns, pat in self.namespace_regex.items()}
+        #: A set of names that can be used without a namespace
+        self.default_namespace = set(default_namespace) if default_namespace is not None else None
         #: A dictionary of {annotation keyword: regular expression string}
-        self.annotations_regex = {} if annotations_re is None else annotations_re
+        self.annotations_regex = {} if annotations_regex is None else annotations_regex
         #: A dictionary of {annotation keyword: compiled regular expression}
         self.annotations_regex_compiled = {ns: re.compile(pat) for ns, pat in self.annotations_regex.items()}
 

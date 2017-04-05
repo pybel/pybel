@@ -3,13 +3,13 @@
 import logging
 import re
 
-from pyparsing import Suppress, Group
+from pyparsing import Suppress
 
 from .baseparser import BaseParser
 from .parse_exceptions import UndefinedNamespaceWarning, NakedNameWarning, MissingNamespaceNameWarning, \
     MissingDefaultNameWarning, MissingNamespaceRegexWarning
 from .utils import word, quote
-from ..constants import DIRTY, NAMESPACE, NAME, IDENTIFIER
+from ..constants import DIRTY, NAMESPACE, NAME
 
 __all__ = ['IdentifierParser']
 
@@ -111,9 +111,6 @@ class IdentifierParser(BaseParser):
         name = tokens[NAME]
         self.raise_for_missing_default(name)
         return tokens
-
-    def as_group(self):
-        return Group(self.language)(IDENTIFIER)
 
     @staticmethod
     def handle_namespace_lenient(s, l, tokens):

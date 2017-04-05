@@ -230,15 +230,15 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
-    :param graph: A BEL Graph
+    :param graph: A BEL graph
     :type graph: BELGraph
-    :param lines: iterable over lines of BEL data file
-    :param manager: database connection string to cache, pre-built CacheManager, or pre-build MetadataParser, or
-                    None for default connection
+    :param lines: An iterable over lines of BEL script
+    :param manager: A database connection string to the PyBEL cache, pre-built CacheManager, or pre-build 
+                    MetadataParser, or ``None`` for default connection
     :type manager: None or str or :class:`pybel.manager.cache.CacheManager` or :class:`pybel.parser.MetadataParser`
-    :param allow_naked_names: if true, turn off naked namespace failures
+    :param allow_naked_names: If true, turns off naked namespace failures
     :type allow_naked_names: bool
-    :param allow_nested: if true, turn off nested statement failures
+    :param allow_nested: If true, turns off nested statement failures
     :type allow_nested: bool
     :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
@@ -257,12 +257,11 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
         graph=graph,
         namespace_dicts=metadata_parser.namespace_dict,
         annotation_dicts=metadata_parser.annotations_dict,
-        namespace_expressions=metadata_parser.namespace_re,
-        annotation_expressions=metadata_parser.annotations_re,
+        namespace_expressions=metadata_parser.namespace_regex,
+        annotation_expressions=metadata_parser.annotations_regex,
         allow_naked_names=allow_naked_names,
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
-        autostreamline=True
     )
 
     parse_statements(graph, statements, bel_parser)
@@ -283,7 +282,7 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 def parse_document(graph, document_metadata, metadata_parser):
     """Parses the lines in the document section of a BEL script.
 
-    :param graph: A BEL Graph
+    :param graph: A BEL graph
     :type graph: BELGraph
     :param document_metadata: An enumerated iterable over the lines in the document section of a BEL script
     :type document_metadata: iter
@@ -317,7 +316,7 @@ def parse_document(graph, document_metadata, metadata_parser):
 def parse_definitions(graph, definitions, metadata_parser):
     """Parses the lines in the definitions section of a BEL script.
 
-    :param graph: A BEL Graph
+    :param graph: A BEL graph
     :type graph: BELGraph
     :param definitions: An enumerated iterable over the lines in the definitions section of a BEL script
     :type definitions: iter
@@ -351,11 +350,11 @@ def parse_definitions(graph, definitions, metadata_parser):
 def parse_statements(graph, statements, bel_parser):
     """Parses a list of statements from a BEL Script.
 
-    :param graph: A BEL Graph
+    :param graph: A BEL graph
     :type graph: BELGraph
     :param statements: An enumerated iterable over the lines in the statements section of a BEL script
     :type statements: iter
-    :param bel_parser:
+    :param bel_parser: A BEL parser
     :type bel_parser: BelParser
     """
     t = time.time()

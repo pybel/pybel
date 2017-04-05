@@ -48,7 +48,7 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 class BelParser(BaseParser):
     def __init__(self, graph, namespace_dicts=None, annotation_dicts=None, namespace_expressions=None,
                  annotation_expressions=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
-                 autostreamline=False):
+                 autostreamline=True):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: The BEL Graph to use to store the network
