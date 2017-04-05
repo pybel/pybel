@@ -46,9 +46,9 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 
 class BelParser(BaseParser):
-    def __init__(self, graph, namespace_dicts=None, namespace_mappings=None, annotation_dicts=None,
-                 namespace_expressions=None, annotation_expressions=None, allow_naked_names=False, allow_nested=False,
-                 citation_clearing=True, autostreamline=False):
+    def __init__(self, graph, namespace_dicts=None, annotation_dicts=None, namespace_expressions=None,
+                 annotation_expressions=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
+                 autostreamline=False):
         """Build a parser backed by a given dictionary of namespaces
 
         :param graph: The BEL Graph to use to store the network
@@ -65,9 +65,6 @@ class BelParser(BaseParser):
         :param annotation_expressions: A dictionary of {annotation: regular expression strings}.
                                         Delegated to :class:`pybel.parser.ControlParser`
         :type annotation_expressions: dict
-        :param namespace_mappings: A dictionary of {name: {value: (other_namespace, other_name)}}.
-                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type namespace_mappings: dict
         :param allow_naked_names: If true, turn off naked namespace failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_naked_names: bool
@@ -91,7 +88,6 @@ class BelParser(BaseParser):
         self.identifier_parser = IdentifierParser(
             namespace_dict=namespace_dicts,
             namespace_expressions=namespace_expressions,
-            namespace_mappings=namespace_mappings,
             allow_naked_names=allow_naked_names
         )
 

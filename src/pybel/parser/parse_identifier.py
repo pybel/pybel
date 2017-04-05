@@ -21,7 +21,7 @@ class IdentifierParser(BaseParser):
     or enabling the use of naked names"""
 
     def __init__(self, namespace_dict=None, namespace_expressions=None, default_namespace=None,
-                 namespace_mappings=None, allow_naked_names=False):
+                 allow_naked_names=False):
         """
         :param namespace_dict: A dictionary of {namespace: set of names}
         :type namespace_dict: dict
@@ -29,8 +29,6 @@ class IdentifierParser(BaseParser):
         :type namespace_expressions: dict
         :param default_namespace: A set of strings that can be used without a namespace
         :type default_namespace: set of str
-        :param namespace_mappings: A dictionary of {namespace: {name: (mapped_ns, mapped_name)}}
-        :type namespace_mappings: dict
         :param allow_naked_names: If true, turn off naked namespace failures
         :type allow_naked_names: bool
         """
@@ -56,10 +54,6 @@ class IdentifierParser(BaseParser):
             self.identifier_bare.setParseAction(IdentifierParser.handle_namespace_lenient)
         else:
             self.identifier_bare.setParseAction(IdentifierParser.handle_namespace_invalid)
-
-        if namespace_mappings is not None:
-            # TODO implement
-            raise NotImplementedError('Mapping not yet implemented')
 
         BaseParser.__init__(self, self.identifier_qualified | self.identifier_bare)
 
