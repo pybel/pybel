@@ -339,10 +339,10 @@ def parse_definitions(graph, definitions, metadata_parser):
     graph.graph.update({
         GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
         GRAPH_NAMESPACE_URL: metadata_parser.namespace_url_dict.copy(),
-        GRAPH_NAMESPACE_PATTERN: metadata_parser.namespace_re.copy(),
+        GRAPH_NAMESPACE_PATTERN: metadata_parser.namespace_regex.copy(),
         GRAPH_ANNOTATION_URL: metadata_parser.annotation_url_dict.copy(),
         GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
-        GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_re.copy(),
+        GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_regex.copy(),
         GRAPH_ANNOTATION_LIST: {e: metadata_parser.annotations_dict[e] for e in
                                 metadata_parser.annotation_list_list}
     })

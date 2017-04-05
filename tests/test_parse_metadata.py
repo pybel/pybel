@@ -167,16 +167,16 @@ class TestParseMetadata(unittest.TestCase):
         self.parser.parseString(s)
 
         self.assertNotIn('Test', self.parser.annotations_dict)
-        self.assertIn('Test', self.parser.annotations_re)
-        self.assertEqual('\w+', self.parser.annotations_re['Test'])
+        self.assertIn('Test', self.parser.annotations_regex)
+        self.assertEqual('\w+', self.parser.annotations_regex['Test'])
 
     def test_define_namespace_regex(self):
         s = 'DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"'
         self.parser.parseString(s)
 
         self.assertNotIn('dbSNP', self.parser.namespace_dict)
-        self.assertIn('dbSNP', self.parser.namespace_re)
-        self.assertEqual('rs[0-9]*', self.parser.namespace_re['dbSNP'])
+        self.assertIn('dbSNP', self.parser.namespace_regex)
+        self.assertEqual('rs[0-9]*', self.parser.namespace_regex['dbSNP'])
 
     def test_not_semantic_version(self):
         s = 'SET DOCUMENT Version = "1.0"'

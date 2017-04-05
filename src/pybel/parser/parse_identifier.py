@@ -20,7 +20,7 @@ class IdentifierParser(BaseParser):
     """A parser for identifiers in the form of namespace:name. Can be made more lenient when given a default namespace
     or enabling the use of naked names"""
 
-    def __init__(self, namespace_dict=None, default_namespace=None, namespace_expressions=None,
+    def __init__(self, namespace_dict=None, namespace_expressions=None, default_namespace=None,
                  namespace_mappings=None, allow_naked_names=False):
         """
         :param namespace_dict: A dictionary of {namespace: set of names}
@@ -34,9 +34,11 @@ class IdentifierParser(BaseParser):
         :param allow_naked_names: If true, turn off naked namespace failures
         :type allow_naked_names: bool
         """
-
+        #: A dictionary of cached {namespace keyword: set of values}
         self.namespace_dict = namespace_dict
+        #: A dictionary of {namespace keyword: regular expression string}
         self.namespace_regex = {} if namespace_expressions is None else namespace_expressions
+        #: A dictionary of {namespace keyword: compiled regular expression}
         self.namespace_regex_compiled = {k: re.compile(v) for k, v in self.namespace_regex.items()}
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
@@ -51,9 +53,9 @@ class IdentifierParser(BaseParser):
         if self.default_namespace is not None:
             self.identifier_bare.setParseAction(self.handle_identifier_default)
         elif self.allow_naked_names:
-            self.identifier_bare.setParseAction(handle_namespace_lenient)
+            self.identifier_bare.setParseAction(IdentifierParser.handle_namespace_lenient)
         else:
-            self.identifier_bare.setParseAction(handle_namespace_invalid)
+            self.identifier_bare.setParseAction(IdentifierParser.handle_namespace_invalid)
 
         if namespace_mappings is not None:
             # TODO implement
@@ -61,35 +63,71 @@ class IdentifierParser(BaseParser):
 
         BaseParser.__init__(self, self.identifier_qualified | self.identifier_bare)
 
-    def handle_identifier_qualified(self, s, l, tokens):
-        namespace = tokens[NAMESPACE]
+    def has_enumerated_namespace(self, namespace):
+        return namespace in self.namespace_dict
 
-        if namespace not in self.namespace_dict and namespace not in self.namespace_regex_compiled:
+    def has_regex_namespace(self, namespace):
+        return namespace in self.namespace_regex
+
+    def has_namespace(self, namespace):
+        return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
+
+    def has_enumerated_namespace_name(self, namespace, name):
+        return namespace in self.namespace_dict and name in self.namespace_dict[namespace]
+
+    def has_regex_namespace_name(self, namespace, name):
+        return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
+
+    def has_namespace_name(self, namespace, name):
+        if not self.has_namespace(namespace):
             raise UndefinedNamespaceWarning(namespace)
 
-        name = tokens[NAME]
-        if namespace in self.namespace_dict and name not in self.namespace_dict[namespace]:
+        return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
+
+    def raise_for_missing_namespace(self, namespace):
+        if not self.has_namespace(namespace):
+            raise UndefinedNamespaceWarning(namespace)
+
+    def raise_for_missing_name(self, namespace, name):
+        self.raise_for_missing_namespace(namespace)
+
+        if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
             raise MissingNamespaceNameWarning(name, namespace)
-        elif namespace in self.namespace_regex_compiled and not self.namespace_regex_compiled[namespace].match(name):
+
+        if self.has_regex_namespace(namespace) and not self.has_regex_namespace_name(namespace, name):
             raise MissingNamespaceRegexWarning(name, namespace)
+
+    def raise_for_missing_default(self, name):
+        if not self.default_namespace:
+            raise ValueError('Default namespace is not set')
+
+        if name not in self.default_namespace:
+            raise MissingDefaultNameWarning(name)
+
+    def handle_identifier_qualified(self, s, l, tokens):
+        namespace = tokens[NAMESPACE]
+        self.raise_for_missing_namespace(namespace)
+
+        name = tokens[NAME]
+        self.raise_for_missing_name(namespace, name)
 
         return tokens
 
     def handle_identifier_default(self, s, l, tokens):
         name = tokens[NAME]
-        if name not in self.default_namespace:
-            raise MissingDefaultNameWarning(name)
+        self.raise_for_missing_default(name)
         return tokens
 
     def as_group(self):
         return Group(self.language)(IDENTIFIER)
 
+    @staticmethod
+    def handle_namespace_lenient(s, l, tokens):
+        tokens[NAMESPACE] = DIRTY
+        log.debug('Naked namespace: %s', s)
+        return tokens
 
-def handle_namespace_lenient(s, l, tokens):
-    tokens[NAMESPACE] = DIRTY
-    log.debug('Naked namespace: %s', s)
-    return tokens
-
-
-def handle_namespace_invalid(s, l, tokens):
-    raise NakedNameWarning(tokens[NAME])
+    @staticmethod
+    def handle_namespace_invalid(s, l, tokens):
+        name = tokens[NAME]
+        raise NakedNameWarning(name)
