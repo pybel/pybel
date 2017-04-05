@@ -304,12 +304,10 @@ def parse_document(graph, document_metadata, metadata_parser):
             raise e
 
     for required in REQUIRED_METADATA:
-        if required not in metadata_parser.document_metadata:
-            graph.warnings.insert(0, (0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]), {}))
-            log.error('Missing required document metadata: %s', INVERSE_DOCUMENT_KEYS[required])
-        elif not metadata_parser.document_metadata[required]:
-            graph.warnings.insert(0, (0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]), {}))
-            log.error('Missing required document metadata not filled: %s', INVERSE_DOCUMENT_KEYS[required])
+        if required in metadata_parser.document_metadata and metadata_parser.document_metadata[required]:
+            continue
+        graph.warnings.insert(0, (0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]), {}))
+        log.error('Missing required document metadata: %s', INVERSE_DOCUMENT_KEYS[required])
 
     graph.graph[GRAPH_METADATA] = metadata_parser.document_metadata
 
@@ -367,7 +365,7 @@ def parse_statements(graph, statements, bel_parser):
             bel_parser.parseString(line)
         except ParseException:
             log.error('Line %07d - General Parser Failure: %s', line_number, line)
-            graph.add_warning(line_number, line, PyBelWarning('ParseException'), bel_parser.get_annotations())
+            graph.add_warning(line_number, line, PyBelWarning('Unable to parse line'), bel_parser.get_annotations())
         except PyBelWarning as e:
             log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
