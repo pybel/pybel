@@ -55,7 +55,7 @@ fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
 class FusionParser(BaseParser):
     """Parses the BEL representation of gene and gene product fusions"""
 
-    def __init__(self, identifier_parser):
+    def __init__(self, identifier_parser=None):
         """
         :param identifier_parser: An identifier parser for checking the 3P and 5P partners
         :type identifier_parser: IdentifierParser
