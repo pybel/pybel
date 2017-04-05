@@ -293,11 +293,11 @@ class Network(Base):
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(Binary)
 
-    nodes = relationship('Node', secondary=network_node)
-    edges = relationship('Edge', secondary=network_edge)
-    namespaces = relationship('Namespace', secondary=network_namespace)
-    annotations = relationship('Annotation', secondary=network_annotation)
-    citations = relationship('Citation', secondary=network_citation)
+    nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
+    edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
+    namespaces = relationship('Namespace', secondary=network_namespace, lazy="dynamic")
+    annotations = relationship('Annotation', secondary=network_annotation, lazy="dynamic")
+    citations = relationship('Citation', secondary=network_citation, lazy="dynamic")
 
     __table_args__ = (
         UniqueConstraint(METADATA_NAME, METADATA_VERSION),
@@ -349,7 +349,7 @@ class Node(Base):
             node_key.append(namespace_entry[NAMESPACE])
             node_key.append(namespace_entry[NAME])
 
-        elif self.is_variant:
+        if self.is_variant:
             if self.fusion:
                 mod = self.modifications[0].data
                 node_data[FUSION] = mod['mod_data']
@@ -440,7 +440,6 @@ class Modification(Base):
                     FUSION_STOP: self.p3Stop
                 })
                 mod_key.append((self.p3Reference, self.p3Start, self.p3Stop,))
-
 
         else:
             mod_dict[KIND] = self.modType
@@ -629,14 +628,11 @@ class Edge(Base):
             },
             'data': {
                 'relation': self.relation,
+                ANNOTATIONS: {anno.annotation.keyword: anno.name for anno in self.annotations}
             },
             'key': self.graphIdentifier
         }
         edge_dict['data'].update(self.evidence.data)
-        edge_dict['data'][ANNOTATIONS] = {}
-        if self.annotations:
-            for anno in self.annotations:
-                edge_dict['data'][ANNOTATIONS][anno.annotation.keyword] = anno.name
         for prop in self.properties:
             prop_info = prop.data
             if prop_info['participant'] in edge_dict['data']:
@@ -646,6 +642,32 @@ class Edge(Base):
 
         return edge_dict
 
+    @property
+    def data_min(self):
+        min_dict = {
+            'db_id': self.id,
+            'bel': self.bel,
+            'source': {
+                'db_id': self.source.id,
+                'bel': self.source.bel
+            },
+            'target': {
+                'db_id': self.target.id,
+                'bel': self.target.bel
+            },
+            'data': {
+                'relation': self.relation,
+                ANNOTATIONS: {anno.annotation.keyword: anno.name for anno in self.annotations}
+            }
+        }
+        min_dict['data'].update(self.evidence.data)
+        for prop in self.properties:
+            prop_info = prop.data
+            if prop_info['participant'] in min_dict['data']:
+                min_dict['data'][prop_info['participant']].update(prop_info['data'][prop_info['participant']])
+            else:
+                min_dict['data'].update(prop_info['data'])
+        return min_dict
 
 class Property(Base):
     """The property table contains additional information that is used to describe the context of a relation."""
@@ -678,7 +700,7 @@ class Property(Base):
             'participant': self.participant
         }
         if self.relativeKey:
-            prop_dict['data'][EFFECT] = {
+            prop_dict['data'][self.participant][EFFECT] = {
                 self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.data
             }
 

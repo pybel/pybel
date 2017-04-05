@@ -122,7 +122,7 @@ class CacheManager(BaseCacheManager):
             raise ValueError('No entries for {}'.format(url))
 
         for entry in results.entries:
-            self.namespace_cache[url][entry.name] = set(entry.encoding)
+            self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
             self.namespace_id_cache[url][entry.name] = entry.id
 
     def get_namespace(self, url):

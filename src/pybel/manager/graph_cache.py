@@ -352,6 +352,7 @@ class GraphCacheManager(BaseCacheManager):
                 })
 
             modification_list.append(fusion_dict)
+
         else:
             for variant in node_data[VARIANTS]:
                 modType = variant[KIND]
@@ -377,12 +378,14 @@ class GraphCacheManager(BaseCacheManager):
                 elif modType == GMOD:
                     modification_list.append({
                         'modType': modType,
+                        'modNamespace': variant[IDENTIFIER][NAME],
                         'modName': variant[IDENTIFIER][NAME]
                     })
 
                 elif modType == PMOD:
                     modification_list.append({
                         'modType': modType,
+                        'modNamespace': variant[IDENTIFIER][NAMESPACE],
                         'modName': variant[IDENTIFIER][NAME],
                         'aminoA': variant[PMOD_CODE] if PMOD_CODE in variant else None,
                         'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None
@@ -602,8 +605,8 @@ class GraphCacheManager(BaseCacheManager):
         """Query the PyBEL database for all the networks in the database."""
         q = self.session.query(models.Network)
 
-        if db_id:
-            q = q.filter(models.Network.id == db_id)
+        if db_id and isinstance(db_id, int):
+            q = q.filter_by(id=db_id)
 
         else:
             if name:
@@ -619,7 +622,7 @@ class GraphCacheManager(BaseCacheManager):
         else:
             return result
 
-    def query_node(self, bel=None, type=None, namespace=None, name=None, modification_type=None,
+    def query_node(self, db_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
                    modification_name=None, as_dict_list=False):
         """Run a query over all nodes in the PyBEL cache.
 
@@ -642,25 +645,28 @@ class GraphCacheManager(BaseCacheManager):
         """
         q = self.session.query(models.Node)
 
-        if bel:
-            q = q.filter(models.Node.bel.like(bel))
+        if db_id and isinstance(db_id, int):
+            q = q.filter_by(id=db_id)
+        else:
+            if bel:
+                q = q.filter(models.Node.bel.like(bel))
 
-        if type:
-            q = q.filter(models.Node.type.like(type))
+            if type:
+                q = q.filter(models.Node.type.like(type))
 
-        if namespace or name:
-            q = q.join(models.NamespaceEntry)
-            if namespace:
-                q = q.join(models.Namespace).filter(models.Namespace.keyword.like(namespace))
-            if name:
-                q = q.filter(models.NamespaceEntry.name.like(name))
+            if namespace or name:
+                q = q.join(models.NamespaceEntry)
+                if namespace:
+                    q = q.join(models.Namespace).filter(models.Namespace.keyword.like(namespace))
+                if name:
+                    q = q.filter(models.NamespaceEntry.name.like(name))
 
-        if modification_type or modification_name:
-            q = q.join(models.Modification)
-            if modification_type:
-                q = q.filter(models.Modification.modType.like(modification_type))
-            if modification_name:
-                q = q.filter(models.Modification.modName.like(modification_name))
+            if modification_type or modification_name:
+                q = q.join(models.Modification)
+                if modification_type:
+                    q = q.filter(models.Modification.modType.like(modification_type))
+                if modification_name:
+                    q = q.filter(models.Modification.modName.like(modification_name))
 
         result = q.all()
 
@@ -669,7 +675,7 @@ class GraphCacheManager(BaseCacheManager):
         else:
             return result
 
-    def query_edge(self, bel=None, source=None, target=None, relation=None, citation=None,
+    def query_edge(self, db_id=None, bel=None, source=None, target=None, relation=None, citation=None,
                    evidence=None, annotation=None, property=None, as_dict_list=False):
         """Builds a query to be run against all edges in the PyBEL cache.
 
@@ -696,67 +702,70 @@ class GraphCacheManager(BaseCacheManager):
         """
         q = self.session.query(models.Edge)
 
-        if bel:
-            q = q.filter(models.Edge.bel.like(bel))
+        if db_id and isinstance(db_id, int):
+            q = q.filter_by(id=db_id)
+        else:
+            if bel:
+                q = q.filter(models.Edge.bel.like(bel))
 
-        if relation:
-            q = q.filter(models.Edge.relation.like(relation))
+            if relation:
+                q = q.filter(models.Edge.relation.like(relation))
 
-        if annotation:
-            q = q.join(models.AnnotationEntry, models.Edge.annotations)
-            if isinstance(annotation, dict):
-                q = q.join(models.Annotation).filter(models.Annotation.keyword.in_(list(annotation.keys())))
-                q = q.filter(models.AnnotationEntry.name.in_(list(annotation.values())))
+            if annotation:
+                q = q.join(models.AnnotationEntry, models.Edge.annotations)
+                if isinstance(annotation, dict):
+                    q = q.join(models.Annotation).filter(models.Annotation.keyword.in_(list(annotation.keys())))
+                    q = q.filter(models.AnnotationEntry.name.in_(list(annotation.values())))
 
-            elif isinstance(annotation, str):
-                q = q.filter(models.AnnotationEntry.name.like(annotation))
+                elif isinstance(annotation, str):
+                    q = q.filter(models.AnnotationEntry.name.like(annotation))
 
-        if source:
-            if isinstance(source, str):
-                source = self.query_node(bel=source)[0]
+            if source:
+                if isinstance(source, str):
+                    source = self.query_node(bel=source)[0]
 
-            if isinstance(source, models.Node):
-                q = q.filter(models.Edge.source == source)
+                if isinstance(source, models.Node):
+                    q = q.filter(models.Edge.source == source)
 
-                # ToDo: in_() not yet supported for relations
-                # elif isinstance(source, list) and len(source) > 0:
-                #    if isinstance(source[0], models.Node):
-                #        q = q.filter(models.Edge.source.in_(source))
+                    # ToDo: in_() not yet supported for relations
+                    # elif isinstance(source, list) and len(source) > 0:
+                    #    if isinstance(source[0], models.Node):
+                    #        q = q.filter(models.Edge.source.in_(source))
 
-        if target:
-            if isinstance(target, str):
-                target = self.query_node(bel=target)[0]
+            if target:
+                if isinstance(target, str):
+                    target = self.query_node(bel=target)[0]
 
-            if isinstance(target, models.Node):
-                q = q.filter(models.Edge.target == target)
+                if isinstance(target, models.Node):
+                    q = q.filter(models.Edge.target == target)
 
-                # elif isinstance(target, list) and len(target) > 0:
-                #    if isinstance(target[0], models.Node):
-                #        q = q.filter(models.Edge.source.in_(target))
+                    # elif isinstance(target, list) and len(target) > 0:
+                    #    if isinstance(target[0], models.Node):
+                    #        q = q.filter(models.Edge.source.in_(target))
 
-        if citation or evidence:
-            q = q.join(models.Evidence)
+            if citation or evidence:
+                q = q.join(models.Evidence)
 
-            if citation:
-                if isinstance(citation, models.Citation):
-                    q = q.filter(models.Evidence.citation == citation)
+                if citation:
+                    if isinstance(citation, models.Citation):
+                        q = q.filter(models.Evidence.citation == citation)
 
-                elif isinstance(citation, list) and isinstance(citation[0], models.Citation):
-                    q = q.filter(models.Evidence.citation.in_(citation))
+                    elif isinstance(citation, list) and isinstance(citation[0], models.Citation):
+                        q = q.filter(models.Evidence.citation.in_(citation))
 
-                elif isinstance(citation, str):
-                    q = q.join(models.Citation).filter(models.Citation.reference.like(citation))
+                    elif isinstance(citation, str):
+                        q = q.join(models.Citation).filter(models.Citation.reference.like(citation))
 
-            if evidence:
-                if isinstance(evidence, models.Evidence):
-                    q = q.filter(models.Edge.evidence == evidence)
+                if evidence:
+                    if isinstance(evidence, models.Evidence):
+                        q = q.filter(models.Edge.evidence == evidence)
 
-                elif isinstance(evidence, str):
-                    q = q.filter(models.Evidence.text.like(evidence))
+                    elif isinstance(evidence, str):
+                        q = q.filter(models.Evidence.text.like(evidence))
 
-        if property:
-            # ToDo: finish property query
-            q = q.join(models.Property)
+            if property:
+                # ToDo: finish property query
+                q = q.join(models.Property)
 
         result = q.all()
 
@@ -765,7 +774,7 @@ class GraphCacheManager(BaseCacheManager):
         else:
             return result
 
-    def query_citation(self, type=None, reference=None, name=None, author=None, date=None, evidence=False,
+    def query_citation(self, db_id=None, type=None, reference=None, name=None, author=None, date=None, evidence=False,
                        evidence_text=None, as_dict_list=False):
         """Run a query over all citations in the PyBEL cache.
 
@@ -789,30 +798,33 @@ class GraphCacheManager(BaseCacheManager):
         """
         q = self.session.query(models.Citation)
 
-        if author:
-            q = q.join(models.Author, models.Citation.authors)
-            if isinstance(author, str):
-                q = q.filter(models.Author.name.like(author))
-            elif isinstance(author, list):
-                q = q.filter(models.Author.name.in_(author))
+        if db_id and isinstance(db_id, int):
+            q = q.filter_by(id=db_id)
+        else:
+            if author:
+                q = q.join(models.Author, models.Citation.authors)
+                if isinstance(author, str):
+                    q = q.filter(models.Author.name.like(author))
+                elif isinstance(author, list):
+                    q = q.filter(models.Author.name.in_(author))
 
-        if type:
-            q = q.filter(models.Citation.type.like(type))
+            if type:
+                q = q.filter(models.Citation.type.like(type))
 
-        if reference:
-            q = q.filter(models.Citation.reference == reference)
+            if reference:
+                q = q.filter(models.Citation.reference == reference)
 
-        if name:
-            q = q.filter(models.Citation.name.like(name))
+            if name:
+                q = q.filter(models.Citation.name.like(name))
 
-        if date:
-            if isinstance(date, datetime.date):
-                q = q.filter(models.Citation.date == date)
-            elif isinstance(date, str):
-                q = q.filter(models.Citation.date == parse_datetime(date))
+            if date:
+                if isinstance(date, datetime.date):
+                    q = q.filter(models.Citation.date == date)
+                elif isinstance(date, str):
+                    q = q.filter(models.Citation.date == parse_datetime(date))
 
-        if evidence_text:
-            q = q.join(models.Evidence).filter(models.Evidence.text.like(evidence_text))
+            if evidence_text:
+                q = q.join(models.Evidence).filter(models.Evidence.text.like(evidence_text))
 
         result = q.all()
 
