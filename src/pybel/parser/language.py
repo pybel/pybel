@@ -142,7 +142,7 @@ rna_nucleotide_labels = {
 
 rna_nucleotide = oneOf(list(rna_nucleotide_labels.keys()))
 
-#: dictionary of default protein modifications to their preferred value
+#: A dictionary of default protein modifications to their preferred value
 pmod_namespace = {
     'Ac': 'Ac',
     'acetylation': 'Ac',
@@ -207,12 +207,12 @@ pmod_namespace = {
     'UbPoly': 'UbPoly',
     'polyubiquitination': 'UbPoly',
 
-    # BEL VARIANTS
+    # PyBEL Variants
     'Ox': "Ox",
     'oxidation': 'Ox',
 }
 
-#: dictionary of legacy (BEL 1.0) default namespace protein modifications to their BEL 2.0 preferred value
+#: A dictionary of legacy (BEL 1.0) default namespace protein modifications to their BEL 2.0 preferred value
 pmod_legacy_labels = {
     'P': 'Ph',
     'A': 'Ac',
@@ -223,9 +223,12 @@ pmod_legacy_labels = {
     'R': 'ADPRib',
     'S': 'Sumo',
     'U': 'Ub',
+
+    # PyBEL Variants
     'O': 'Ox'
 }
 
+#: A dictionary of default gene modifications. This is a PyBEL variant to the BEL specification.
 gmod_namespace = {
     'methylation': 'Me',
     'Me': 'Me',
