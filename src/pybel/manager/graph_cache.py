@@ -217,7 +217,6 @@ class GraphCacheManager(BaseCacheManager):
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
-            #self.session.flush()
 
         return result
 
