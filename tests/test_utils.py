@@ -23,10 +23,6 @@ class TestRandom(unittest.TestCase):
         with self.assertRaises(PlaceholderAminoAcidWarning):
             amino_acid.parseString('X')
 
-    def test_unimplemented_mapping(self):
-        with self.assertRaises(NotImplementedError):
-            IdentifierParser(namespace_mappings={})
-
     def test_split_lines(self):
         with open(test_bel_simple) as f:
             docs, definitions, statements = split_file_to_annotations_and_definitions(f)
