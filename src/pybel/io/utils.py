@@ -17,5 +17,5 @@ def ensure_version(graph, check_version=True):
     minimum_version = (0, 4, 1)
     graph_version = tokenize_version(graph.pybel_version)
     if check_version and graph_version < minimum_version:
-        raise ValueError('Tried importing from version {}. Need at least'.format(graph_version, minimum_version))
+        raise ValueError('Tried importing from version {}. Need at least {}'.format(graph_version, minimum_version))
     return graph
