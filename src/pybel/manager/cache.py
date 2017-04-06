@@ -28,7 +28,7 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
 class CacheManager(BaseCacheManager):
-    """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses 
+    """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
     SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
     """
 
@@ -126,7 +126,7 @@ class CacheManager(BaseCacheManager):
             raise ValueError('No entries for {}'.format(url))
 
         for entry in results.entries:
-            self.namespace_cache[url][entry.name] = set(entry.encoding)
+            self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
             self.namespace_id_cache[url][entry.name] = entry.id
 
     def get_namespace(self, url):
@@ -138,9 +138,26 @@ class CacheManager(BaseCacheManager):
         self.ensure_namespace(url)
         return self.namespace_cache[url]
 
-    def get_namespace_urls(self):
+    def get_namespace_urls(self, keyword_url_dict=False):
         """Returns a list of the locations of the stored namespaces and annotations"""
-        return [definition.url for definition in self.session.query(models.Namespace).all()]
+        namespaces = self.session.query(models.Namespace).all()
+        if keyword_url_dict:
+            return {definition.keyword: definition.url for definition in namespaces}
+        else:
+            return [definition.url for definition in namespaces]
+
+    def get_namespace_data(self, url=None):
+        """Returns a list of the locations of the stored namespaces and annotations
+
+        :return: A list of all namespaces in the relational database.
+        :rtype: list
+
+        """
+        if url:
+            definition = self.session.query(models.Namespace).filter_by(url=url).one_or_none()
+            return definition.data
+        else:
+            return [definition.data for definition in self.session.query(models.Namespace).all()]
 
     def ensure_default_namespaces(self):
         """Caches the default set of namespaces"""
@@ -214,9 +231,26 @@ class CacheManager(BaseCacheManager):
         self.ensure_annotation(url)
         return self.annotation_cache[url]
 
-    def get_annotation_urls(self):
+    def get_annotation_urls(self, keyword_url_dict=False):
         """Returns a list of the locations of the stored annotations"""
-        return [definition.url for definition in self.session.query(models.Annotation).all()]
+        annotations = self.session.query(models.Annotation).all()
+        if keyword_url_dict:
+            return {definition.keyword: definition.url for definition in annotations}
+        else:
+            return [definition.url for definition in annotations]
+
+    def get_annotation_data(self, url=None):
+        """Returns a list of the locations of the stored namespaces and annotations
+
+        :return: A list of all annotations in the relational database.
+        :rtype: list
+
+        """
+        if url:
+            definition = self.session.query(models.Annotation).filter_by(url=url).one_or_none()
+            return definition.data
+        else:
+            return [definition.data for definition in self.session.query(models.Annotation).all()]
 
     def dict_annotations(self):
         """Returns a dictionary with the keyword:locations of the stored annotations"""

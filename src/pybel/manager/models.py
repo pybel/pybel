@@ -13,30 +13,42 @@ from ..constants import *
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
+
 ANNOTATION_TABLE_NAME = 'pybel_annotation'
 ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntry'
 
 OWL_NAMESPACE_TABLE_NAME = 'pybel_owlNamespace'
 OWL_NAMESPACE_ENTRY_TABLE_NAME = 'pybel_owlNamespaceEntry'
+
 OWL_ANNOTATION_TABLE_NAME = 'pybel_owlAnnotation'
 OWL_ANNOTATION_ENTRY_TABLE_NAME = 'pybel_owlAnnotationEntry'
 
-NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
 NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalence'
+NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
 
 NETWORK_TABLE_NAME = 'pybel_network'
-CITATION_TABLE_NAME = 'pybel_citation'
-EVIDENCE_TABLE_NAME = 'pybel_evidence'
-EDGE_TABLE_NAME = 'pybel_edge'
+NETWORK_NODE_TABLE_NAME = 'pybel_network_node'
+NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
+NETWORK_NAMESPACE_TABLE_NAME = 'pybel_network_namespace'
+NETWORK_ANNOTATION_TABLE_NAME = 'pybel_network_annotation'
+NETWORK_CITATION_TABLE_NAME = 'pybel_network_citation'
+
 NODE_TABLE_NAME = 'pybel_node'
+NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
+
 MODIFICATION_TABLE_NAME = 'pybel_modification'
-PROPERTY_TABLE_NAME = 'pybel_property'
+
+EDGE_TABLE_NAME = 'pybel_edge'
+EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntry'
+EDGE_PROPERTY_TABLE_NAME = 'pybel_edge_property'
+
 AUTHOR_TABLE_NAME = 'pybel_author'
 AUTHOR_CITATION_TABLE_NAME = 'pybel_author_citation'
-EDGE_PROPERTY_TABLE_NAME = 'pybel_edge_property'
-NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
-EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_annotationEntry'
-NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
+
+CITATION_TABLE_NAME = 'pybel_citation'
+EVIDENCE_TABLE_NAME = 'pybel_evidence'
+PROPERTY_TABLE_NAME = 'pybel_property'
+
 
 Base = declarative_base()
 
@@ -49,18 +61,18 @@ class Namespace(Base):
 
     url = Column(String(255), doc='Source url of the given namespace definition file (.belns)')
     keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
-    name = Column(String(255))
-    domain = Column(String(255))
+    name = Column(String(255), doc='Name of the given namespace')
+    domain = Column(String(255), doc='Domain the namespace is valid for')
     species = Column(String(255), nullable=True,
                      doc='NCBI identifier that states for what species the namespace is valid')
-    description = Column(Text, nullable=True)
-    version = Column(String(255), nullable=True)
-    created = Column(DateTime)
-    query_url = Column(Text, nullable=True)
+    description = Column(Text, nullable=True, doc='Optional short description of the namespace')
+    version = Column(String(255), nullable=True, doc='Version of the namespace')
+    created = Column(DateTime, doc='DateTime of the creation of the namespace definition file')
+    query_url = Column(Text, nullable=True, doc='URL that can be used to query the namespace (eternally from PyBEL)')
 
-    author = Column(String(255))
-    license = Column(String(255), nullable=True)
-    contact = Column(String(255), nullable=True)
+    author = Column(String(255), doc='The author of the namespace')
+    license = Column(String(255), nullable=True, doc='License information')
+    contact = Column(String(255), nullable=True, doc='Contact information')
 
     citation = Column(String(255))
     citation_description = Column(Text, nullable=True)
@@ -71,6 +83,13 @@ class Namespace(Base):
     entries = relationship('NamespaceEntry', back_populates="namespace")
 
     has_equivalences = Column(Boolean, default=False)
+
+    @property
+    def data(self):
+        """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
+        ns_data = self.__dict__
+        del ns_data['_sa_instance_state']
+        return ns_data
 
 
 class NamespaceEntry(Base):
@@ -115,16 +134,16 @@ class Annotation(Base):
 
     url = Column(String(255), doc='Source url of the given annotation definition file (.belanno)')
     keyword = Column(String(50), index=True, doc='Keyword that is used in a BEL file to identify a specific annotation')
-    type = Column(String(255))
-    description = Column(Text, nullable=True)
+    type = Column(String(255), doc='Annotation type')
+    description = Column(Text, nullable=True, doc='Optional short description of the given annotation')
     usage = Column(Text, nullable=True)
-    version = Column(String(255), nullable=True)
-    created = Column(DateTime)
+    version = Column(String(255), nullable=True, doc='Version of the annotation')
+    created = Column(DateTime, doc='DateTime of the creation of the given annotation definition')
 
-    name = Column(String(255))
-    author = Column(String(255))
-    license = Column(String(255), nullable=True)
-    contact = Column(String(255), nullable=True)
+    name = Column(String(255), doc='Name of the annotation definition')
+    author = Column(String(255), doc='Author information')
+    license = Column(String(255), nullable=True, doc='License information')
+    contact = Column(String(255), nullable=True, doc='Contact information')
 
     citation = Column(String(255))
     citation_description = Column(Text, nullable=True)
@@ -133,6 +152,12 @@ class Annotation(Base):
     citation_url = Column(String(255), nullable=True)
 
     entries = relationship('AnnotationEntry', back_populates="annotation")
+
+    @property
+    def data(self):
+        an_data = self.__dict__
+        del an_data['_sa_instance_state']
+        return an_data
 
 
 class AnnotationEntry(Base):
@@ -219,16 +244,34 @@ class OwlAnnotationEntry(Base):
                             secondaryjoin=id == owl_annotation_relationship.c.right_id)
 
 
+network_annotation = Table(
+    NETWORK_ANNOTATION_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('namespace_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
+)
+
+network_namespace = Table(
+    NETWORK_NAMESPACE_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('namespace_id', Integer, ForeignKey('{}.id'.format(NAMESPACE_TABLE_NAME)), primary_key=True)
+)
+
 network_edge = Table(
     NETWORK_EDGE_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
 )
 
-edge_annotation = Table(
-    EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
-    Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
+network_citation = Table(
+    NETWORK_CITATION_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True)
+)
+
+network_node = Table(
+    NETWORK_NODE_TABLE_NAME, Base.metadata,
+    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
+    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -245,17 +288,29 @@ class Network(Base):
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')
     description = Column(Text, nullable=True, doc='Descriptive text extracted from the BEL file')
     copyright = Column(String(255), nullable=True, doc='Copyright information')
-    disclaimer = Column(String(255), nullable=True)
+    disclaimer = Column(String(255), nullable=True, doc='Disclaimer information')
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(Binary)
 
-    edges = relationship('Edge', secondary=network_edge)
+    nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
+    edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
+    namespaces = relationship('Namespace', secondary=network_namespace, lazy="dynamic")
+    annotations = relationship('Annotation', secondary=network_annotation, lazy="dynamic")
+    citations = relationship('Citation', secondary=network_citation, lazy="dynamic")
 
     __table_args__ = (
         UniqueConstraint(METADATA_NAME, METADATA_VERSION),
     )
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'version': self.version
+        }
 
 
 node_modification = Table(
@@ -295,7 +350,7 @@ class Node(Base):
             node_key.append(namespace_entry[NAMESPACE])
             node_key.append(namespace_entry[NAME])
 
-        elif self.is_variant:
+        if self.is_variant:
             if self.fusion:
                 mod = self.modifications[0].data
                 node_data[FUSION] = mod['mod_data']
@@ -386,7 +441,6 @@ class Modification(Base):
                     FUSION_STOP: self.p3Stop
                 })
                 mod_key.append((self.p3Reference, self.p3Start, self.p3Stop,))
-
 
         else:
             mod_dict[KIND] = self.modType
@@ -495,7 +549,7 @@ class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')
+    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication') #index=True,
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation', back_populates='evidences')
@@ -511,6 +565,13 @@ class Evidence(Base):
             CITATION: self.citation.data,
             EVIDENCE: self.text
         }
+
+
+edge_annotation = Table(
+    EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
+    Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
+)
 
 
 edge_property = Table(
@@ -529,7 +590,7 @@ class Edge(Base):
     id = Column(Integer, primary_key=True)
 
     graphIdentifier = Column(Integer,
-                             doc='Identifier that is used in the PyBEL.BELGraph to identify weather or not an edge is artificial')
+                             doc='Identifier that is used in the PyBEL.BELGraph to identify whether or not an edge is artificial')
     bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
@@ -568,14 +629,11 @@ class Edge(Base):
             },
             'data': {
                 'relation': self.relation,
+                ANNOTATIONS: {anno.annotation.keyword: anno.name for anno in self.annotations}
             },
             'key': self.graphIdentifier
         }
         edge_dict['data'].update(self.evidence.data)
-        edge_dict['data'][ANNOTATIONS] = {}
-        if self.annotations:
-            for anno in self.annotations:
-                edge_dict['data'][ANNOTATIONS][anno.annotation.keyword] = anno.name
         for prop in self.properties:
             prop_info = prop.data
             if prop_info['participant'] in edge_dict['data']:
@@ -585,6 +643,32 @@ class Edge(Base):
 
         return edge_dict
 
+    @property
+    def data_min(self):
+        min_dict = {
+            'db_id': self.id,
+            'bel': self.bel,
+            'source': {
+                'db_id': self.source.id,
+                'bel': self.source.bel
+            },
+            'target': {
+                'db_id': self.target.id,
+                'bel': self.target.bel
+            },
+            'data': {
+                'relation': self.relation,
+                ANNOTATIONS: {anno.annotation.keyword: anno.name for anno in self.annotations}
+            }
+        }
+        min_dict['data'].update(self.evidence.data)
+        for prop in self.properties:
+            prop_info = prop.data
+            if prop_info['participant'] in min_dict['data']:
+                min_dict['data'][prop_info['participant']].update(prop_info['data'][prop_info['participant']])
+            else:
+                min_dict['data'].update(prop_info['data'])
+        return min_dict
 
 class Property(Base):
     """The property table contains additional information that is used to describe the context of a relation."""
@@ -617,7 +701,7 @@ class Property(Base):
             'participant': self.participant
         }
         if self.relativeKey:
-            prop_dict['data'][EFFECT] = {
+            prop_dict['data'][self.participant][EFFECT] = {
                 self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.data
             }
 
