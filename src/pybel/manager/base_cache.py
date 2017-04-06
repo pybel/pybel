@@ -28,11 +28,9 @@ class BaseCacheManager:
         :param echo: Turn on echoing sql
         :type echo: bool
         """
-        if isinstance(connection, str):
+        if connection is not None:
             self.connection = connection
             log.info('Connected to user-defined cache: %s', self.connection)
-        elif connection is not None:
-            raise TypeError('Invalid connection: {}'.format(connection))
         elif PYBEL_CONNECTION_ENV in os.environ:
             self.connection = os.environ[PYBEL_CONNECTION_ENV]
             log.info('Connected to environment-defined cache: %s', self.connection)

@@ -36,6 +36,18 @@ log = logging.getLogger(__name__)
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
+def build_manager(connection=None):
+    """A convenience method for turning a string into a connection, or passing a CacheManager through.
+
+    :type connection: None or str or CacheManager
+    :return: A graph cache manager
+    :rtype: CacheManager
+    """
+    if isinstance(connection, CacheManager):
+        return connection
+    return CacheManager(connection=connection)
+
+
 class CacheManager(BaseCacheManager):
     """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
     SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
@@ -1337,18 +1349,3 @@ class CacheManager(BaseCacheManager):
             result = [property.data for property in result]
 
         return result
-
-
-def build_manager(connection=None):
-    """A convenience method for turning a string into a connection, or passing a CacheManager through.
-    
-    :type connection: None or str or CacheManager
-    :return: A graph cache manager
-    :rtype: CacheManager
-    """
-    if isinstance(connection, CacheManager):
-        return connection
-    elif connection is None or isinstance(connection, str):
-        return CacheManager(connection=connection)
-    else:
-        raise TypeError('Connection is wrong type: {}'.format(connection))

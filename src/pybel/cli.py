@@ -48,7 +48,7 @@ def main():
 @main.command()
 @click.option('--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
-@click.option('--connection', help='Connection to definition cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--database-name', help='Input graph name from database')
 @click.option('--csv', help='Output path for *.csv')
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
