@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.0 <https://github.com/pybel/pybel/compare/v0.4.4...v0.5.0>`_ - 2017-04-07
+------------------------------------------------------------------------------
+Added
+~~~~~
+- Debugging on lines starting with #: comments
+- Added missing relations in pybel constants
+
+Changed
+~~~~~~~
+- Merge definition and graph cache
+- Warn when not using semantic versioning
+
+
+`0.4.4 <https://github.com/pybel/pybel/compare/v0.4.3...v0.4.4>`_ - 2017-04-03
+------------------------------------------------------------------------------
+Added
+~~~~~
+- File paths in definition parsing
+- Quotes around variant string
+
+Changed
+~~~~~~~
+- Reorganized package to split line parsing from core data structure
+
+
 `0.4.3 <https://github.com/pybel/pybel/compare/v0.4.2...v0.4.3>`_ - 2017-03-21
 ------------------------------------------------------------------------------
 Added
@@ -285,7 +310,9 @@ Added
 
 Diffs
 -----
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.4.3...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.5.0...HEAD
+- [0.5.0]: https://github.com/pybel/pybel/compare/v0.4.4...v0.5.0
+- [0.4.4]: https://github.com/pybel/pybel/compare/v0.4.3...v0.4.4
 - [0.4.3]: https://github.com/pybel/pybel/compare/v0.4.2...v0.4.3
 - [0.4.2]: https://github.com/pybel/pybel/compare/v0.4.1...v0.4.2
 - [0.4.1]: https://github.com/pybel/pybel/compare/v0.4.0...v0.4.1
