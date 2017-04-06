@@ -260,11 +260,11 @@ def to_bel_lines(graph):
                 if dkeys:
                     yield 'UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys))
             yield 'UNSET SupportingText'
-        yield '\n'
+        yield 'UNSET Citation\n'
 
     yield '###############################################\n'
     yield 'SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}'
-    yield 'SET Evidence = "{}"'.format(PYBEL_AUTOEVIDENCE)
+    yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
     for u, v, d in graph.edges_iter(data=True):
         if d[RELATION] not in unqualified_edge_code:
@@ -278,6 +278,9 @@ def to_bel_lines(graph):
     for node in graph.nodes_iter():
         if not graph.pred[node] and not graph.succ[node]:
             yield decanonicalize_node(graph, node)
+
+    yield 'UNSET SupportingText'
+    yield 'UNSET Citation'
 
 
 def to_bel(graph, file=None):

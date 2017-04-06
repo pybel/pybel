@@ -208,6 +208,8 @@ class MockResponse:
             self.path = os.path.join(belanno_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.beleq'):
             self.path = os.path.join(beleq_dir_path, get_uri_name(mock_url))
+        elif mock_url.endswith('.bel'):
+            self.path = os.path.join(bel_dir_path, get_uri_name(mock_url))
         elif mock_url == wine_iri:
             self.path = test_owl_wine
         elif mock_url == pizza_iri:
@@ -222,6 +224,9 @@ class MockResponse:
         with open(self.path, 'rb') as f:
             for line in f:
                 yield line
+
+    def raise_for_status(self):
+        pass
 
 
 class MockSession:
