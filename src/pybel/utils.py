@@ -27,6 +27,7 @@ def download(url):
     res.raise_for_status()
     return res
 
+
 def parse_bel_resource(lines):
     """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
     
@@ -259,6 +260,9 @@ def hash_tuple(x):
     :return: A hashed version of the node tuple
     :rtype: int
     """
+    if isinstance(x, int):
+        return x
+
     h = 0
     for i in x:
         if isinstance(i, tuple):
