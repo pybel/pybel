@@ -2,6 +2,7 @@
 
 import json
 import logging
+import tempfile
 import unittest
 
 import networkx as nx
@@ -10,6 +11,7 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
+from pybel.manager.cache import CacheManager
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
@@ -124,6 +126,34 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
         self.assertTrue(any_dict_matches(graph.edge[u][v], kwargs),
                         msg=msg_format.format(u, v, json.dumps(kwargs, indent=2, sort_keys=True),
                                               json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
+
+
+def make_temp_connection():
+    dir = tempfile.mkdtemp()
+    path = os.path.join(dir, 'test.db')
+    connection = 'sqlite:///' + path
+    return dir, path, connection
+
+
+def tear_temp_connection(dir, path):
+    os.remove(path)
+    os.rmdir(dir)
+
+
+class ConnectionMixin(unittest.TestCase):
+    def setUp(self):
+        super(ConnectionMixin, self).setUp()
+        self.dir, self.path, self.connection = make_temp_connection()
+        log.info('Test generated connection string %s', self.connection)
+
+    def tearDown(self):
+        super(ConnectionMixin, self).tearDown()
+        tear_temp_connection(self.dir, self.path)
+
+class TemporaryCacheMixin(ConnectionMixin):
+    def setUp(self):
+        super(TemporaryCacheMixin, self).setUp()
+        self.manager = CacheManager(connection=self.connection)
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -1193,3 +1223,5 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         assertHasEdge(self, d, b, graph)
         assertHasEdge(self, d, c, graph)
+
+

@@ -18,10 +18,10 @@ from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
-from ..graph import BELGraph
-from ..io.gpickle import to_bytes, from_bytes
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
+from ..graph import BELGraph
+from ..io.gpickle import to_bytes, from_bytes
 from ..utils import get_bel_resource, parse_datetime, subdict_matches
 
 try:
@@ -29,7 +29,7 @@ try:
 except ImportError:
     import pickle
 
-__all__ = ['CacheManager', 'GraphCacheManager']
+__all__ = ['CacheManager']
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class CacheManager(BaseCacheManager):
         :type echo: bool
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
-        log.info('Definition cache manager connected to %s', self.connection)
+        log.info('Cache manager connected to %s', self.connection)
 
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
@@ -479,34 +479,7 @@ class CacheManager(BaseCacheManager):
         eq = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=equivalence_class).one()
         return eq.members
 
-
-class GraphCacheManager:
-    """The PyBEL graph cache manager has utilities for inserting and querying the graph store and edge store"""
-
-    def __init__(self, connection=None, echo=False):
-        """
-        :param connection: A custom database connection string
-        :type connection: str or None or CacheManager
-        :param echo: Whether or not echo the running sql code.
-        :type echo: bool
-        """
-
-        if isinstance(connection, CacheManager):
-            self.cache_manager = connection
-        elif connection is None or isinstance(connection, str):
-            self.cache_manager = CacheManager(connection=connection, echo=echo)
-        else:
-            raise TypeError('Connection in wrong format: {}'.format(connection))
-
-        log.info('Graph cache manager connected to %s', self.cache_manager.connection)
-
-    @property
-    def connection(self):
-        return self.cache_manager.connection
-
-    @property
-    def session(self):
-        return self.cache_manager.session
+    # Graph Cache Manager
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
@@ -969,7 +942,7 @@ class GraphCacheManager:
         self.session.query(models.Network).filter(models.Network.id == network_id).delete()
         self.session.commit()
 
-    def ls(self):
+    def list_graphs(self):
         """Lists network id, network name, and network version triples"""
         return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
 
@@ -1367,15 +1340,15 @@ class GraphCacheManager:
 
 
 def build_graph_cache_manager(connection=None):
-    """A convenience method for turning a string into a connection, or passing a GraphCacheManager through.
+    """A convenience method for turning a string into a connection, or passing a CacheManager through.
     
-    :type connection: None or str or CacheManager or GraphCacheManager
+    :type connection: None or str or CacheManager
     :return: A graph cache manager
-    :rtype: GraphCacheManager
+    :rtype: CacheManager
     """
-    if isinstance(connection, GraphCacheManager):
+    if isinstance(connection, CacheManager):
         return connection
-    elif connection is None or isinstance(connection, (str, CacheManager)):
-        return GraphCacheManager(connection=connection)
+    elif connection is None or isinstance(connection, str):
+        return CacheManager(connection=connection)
     else:
         raise TypeError('Connection is wrong type: {}'.format(connection))

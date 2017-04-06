@@ -211,7 +211,7 @@ def graph():
 def ls(path):
     gcm = build_graph_cache_manager(connection=path)
 
-    for row in gcm.ls():
+    for row in gcm.list_graphs():
         click.echo(', '.join(map(str, row)))
 
 
