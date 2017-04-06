@@ -150,7 +150,7 @@ class CacheManager(BaseCacheManager):
         """Returns a list of the locations of the stored namespaces and annotations
 
         :return: A list of all namespaces in the relational database.
-        :rtype: list[url or dict]
+        :rtype: list
 
         """
         if url:
