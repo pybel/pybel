@@ -14,8 +14,7 @@ from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITA
 from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, \
     ANNOTATIONS
 from pybel.manager import models
-from pybel.manager.cache import CacheManager
-from pybel.manager.graph_cache import build_graph_cache_manager
+from pybel.manager.cache import CacheManager, build_graph_cache_manager
 from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel_thorough, mock_bel_resources, \
     expected_test_thorough_metadata, test_bel_simple, expected_test_simple_metadata

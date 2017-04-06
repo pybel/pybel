@@ -25,8 +25,8 @@ from .canonicalize import to_bel
 from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
 from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
 from .manager.cache import CacheManager
+from .manager.cache import build_graph_cache_manager
 from .manager.database_io import to_database, from_database
-from .manager.graph_cache import build_graph_cache_manager
 
 log = logging.getLogger('pybel')
 
