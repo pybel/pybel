@@ -34,12 +34,13 @@ class CacheManager(BaseCacheManager):
 
     def __init__(self, connection=None, echo=False):
         """
-        :param connection: custom database connection string
-        :type connection: str
+        :param connection: A custom database connection string
+        :type connection: str or None
         :param echo: Whether or not echo the running sql code.
         :type echo: bool
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
+        log.info('Definition cache manager connected to %s', self.connection)
 
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
@@ -58,7 +59,7 @@ class CacheManager(BaseCacheManager):
         self.annotation_edge_cache = {}
         self.annotation_graph_cache = {}
 
-        log.info('Definition cache manager connected to %s', self.connection)
+
 
     # NAMESPACE MANAGEMENT
 

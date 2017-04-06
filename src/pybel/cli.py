@@ -73,17 +73,24 @@ def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx
 
     if database_name:
         g = from_database(database_name, connection=connection)
+    elif url:
+        g = from_url(
+            url,
+            manager=connection,
+            allow_nested=
+            allow_nested,
+            allow_naked_names=allow_naked_names,
+            citation_clearing=(not no_citation_clearing)
+        )
+
     else:
-        kwargs = dict(
+        g = from_lines(
+            path,
             manager=connection,
             allow_nested=allow_nested,
             allow_naked_names=allow_naked_names,
             citation_clearing=(not no_citation_clearing)
         )
-        if url:
-            g = from_url(url, **kwargs)
-        else:
-            g = from_lines(path, **kwargs)
 
     if csv:
         log.info('Outputting csv to %s', csv)
