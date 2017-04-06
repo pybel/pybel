@@ -20,7 +20,7 @@ from ..parser.parse_exceptions import NotSemanticVersionException, MissingMetada
 
 log = logging.getLogger(__name__)
 
-re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
+METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
 def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True):
@@ -65,15 +65,7 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
 
-    counter = defaultdict(lambda: defaultdict(int))
-
-    for n, d in graph.nodes_iter(data=True):
-        counter[d[FUNCTION]][d[NAMESPACE] if NAMESPACE in d else 'DEFAULT'] += 1
-
-    for fn, nss in sorted(counter.items()):
-        log.debug(' %s: %d', fn, sum(nss.values()))
-        for ns, count in sorted(nss.items()):
-            log.debug('   %s: %d', ns, count)
+    _log_graph_summary(graph)
 
 
 def parse_document(graph, document_metadata, metadata_parser):
@@ -197,10 +189,26 @@ def build_metadata_parser(manager=None):
     return MetadataParser(CacheManager())
 
 
+def sanitize_file_line_iter(f, note_char=':'):
+    for line_number, line in enumerate(f, start=1):
+        line = line.strip()
+
+        if not line:
+            continue
+
+        if line[0] == '#':
+            if line[1] == note_char:
+                log.info('NOTE: Line %d: %s', line_number, line)
+            continue
+
+        yield line_number, line
+
+
 def sanitize_file_lines(f):
     """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned"""
-    it = (line.strip() for line in f)
-    it = ((line_number, line) for line_number, line in enumerate(it, start=1) if line and not line.startswith('#'))
+    # it = (line.strip() for line in f)
+    # it = ((line_number, line) for line_number, line in enumerate(it, start=1) if line and not line.startswith('#'))
+    it = sanitize_file_line_iter(f)
 
     for line_number, line in it:
         if line.endswith('\\'):
@@ -238,7 +246,7 @@ def split_file_to_annotations_and_definitions(file):
     content = list(sanitize_file_lines(file))
 
     end_document_section = 1 + max(j for j, (i, l) in enumerate(content) if l.startswith('SET DOCUMENT'))
-    end_definitions_section = 1 + max(j for j, (i, l) in enumerate(content) if re_match_bel_header.match(l))
+    end_definitions_section = 1 + max(j for j, (i, l) in enumerate(content) if METADATA_LINE_RE.match(l))
 
     log.info('File length: %d lines', len(content))
     documents = content[:end_document_section]
@@ -246,3 +254,16 @@ def split_file_to_annotations_and_definitions(file):
     statements = content[end_definitions_section:]
 
     return documents, definitions, statements
+
+
+def _log_graph_summary(graph):
+    """Logs simple information about a graph"""
+    counter = defaultdict(lambda: defaultdict(int))
+
+    for n, d in graph.nodes_iter(data=True):
+        counter[d[FUNCTION]][d[NAMESPACE] if NAMESPACE in d else 'DEFAULT'] += 1
+
+    for fn, nss in sorted(counter.items()):
+        log.debug(' %s: %d', fn, sum(nss.values()))
+        for ns, count in sorted(nss.items()):
+            log.debug('   %s: %d', ns, count)

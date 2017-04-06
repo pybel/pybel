@@ -17,7 +17,7 @@ DEFINE ANNOTATION CellLine AS URL "https://owncloud.scai.fraunhofer.de/index.php
 DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}
 DEFINE ANNOTATION Disease AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=mesh-diseases.belanno"
 
-# Name doesn't match annotation file Keyword (LexicographyWarning, not implemented yet)
+#: Name doesn't match annotation file Keyword (LexicographyWarning, not implemented yet)
 DEFINE ANNOTATION Specieses AS  URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=species-taxonomy-id.belanno"
 
 DEFINE ANNOTATION PowerLevel AS PATTERN "[0-9]+$"
