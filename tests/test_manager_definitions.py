@@ -11,7 +11,7 @@ test_ns2 = 'file:///' + test_ns_2
 test_an1 = 'file:///' + test_an_1
 
 
-class TestCachePersistient(TemporaryCacheMixin):
+class TestCachePersistent(TemporaryCacheMixin):
     @mock_bel_resources
     def test_insert_namespace_persistent(self, mock_get):
         self.manager.ensure_namespace(HGNC_URL)

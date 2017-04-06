@@ -291,7 +291,7 @@ class TestWine(TestOwlBase):
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
 
-        parser = MetadataParser(cache_manager=cm)
+        parser = MetadataParser(manager=cm)
         parser.parseString(s)
 
         self.assertIn('Wine', parser.namespace_dict)
@@ -310,7 +310,7 @@ class TestWine(TestOwlBase):
         cm = CacheManager('sqlite://')
         s = 'DEFINE ANNOTATION Wine AS OWL "{}"'.format(wine_iri)
 
-        parser = MetadataParser(cache_manager=cm)
+        parser = MetadataParser(manager=cm)
         parser.parseString(s)
 
         self.assertIn('Wine', parser.annotations_dict)

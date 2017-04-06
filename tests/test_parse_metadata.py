@@ -33,7 +33,7 @@ class TestParseMetadata(unittest.TestCase):
         cls.cm.create_database()
 
     def setUp(self):
-        self.parser = MetadataParser(cache_manager=CacheManager(self.connection))
+        self.parser = MetadataParser(manager=CacheManager(self.connection))
 
     @mock_bel_resources
     def test_namespace_name_persistience(self, mock_get):

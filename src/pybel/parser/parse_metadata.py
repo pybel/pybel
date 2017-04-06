@@ -44,11 +44,11 @@ class MetadataParser(BaseParser):
         BEL 1.0 Specification for the `DEFINE <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define>`_ keyword
     """
 
-    def __init__(self, cache_manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
+    def __init__(self, manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
                  annotations_regex=None, default_namespace=None):
         """
-        :param cache_manager: A cache manager
-        :type cache_manager: pybel.manager.cache.CacheManager
+        :param manager: A cache manager
+        :type manager: pybel.manager.cache.CacheManager
         :param namespace_dict: A dictionary of pre-loaded, enumerated namespaces from 
                                 {namespace keyword: set of valid values}
         :type namespace_dict: dict
@@ -65,7 +65,7 @@ class MetadataParser(BaseParser):
         :type default_namespace: set of str
         """
         #: This metadata parser's internal definition cache manager
-        self.cache_manager = cache_manager
+        self.manager = manager
         #: A dictionary of cached {namespace keyword: set of values}
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
         #: A dictionary of cached {annotation keyword: set of values}
@@ -158,7 +158,7 @@ class MetadataParser(BaseParser):
             return tokens
 
         url = tokens['url']
-        terms = self.cache_manager.get_namespace(url)
+        terms = self.manager.get_namespace(url)
 
         self.namespace_dict[namespace] = terms
         self.namespace_url_dict[namespace] = url
@@ -176,7 +176,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        terms = self.cache_manager.get_namespace_owl_terms(url)
+        terms = self.manager.get_namespace_owl_terms(url)
 
         self.namespace_dict[namespace] = {term: functions for term in terms}
         self.namespace_owl_dict[namespace] = url
@@ -206,7 +206,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        terms = self.cache_manager.get_annotation_owl_terms(url)
+        terms = self.manager.get_annotation_owl_terms(url)
 
         self.annotations_dict[annotation] = set(terms)
         self.annotations_owl_dict[annotation] = url
@@ -222,7 +222,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        self.annotations_dict[annotation] = self.cache_manager.get_annotation(url)
+        self.annotations_dict[annotation] = self.manager.get_annotation(url)
         self.annotation_url_dict[annotation] = url
 
         return tokens

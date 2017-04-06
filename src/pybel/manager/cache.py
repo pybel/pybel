@@ -1339,7 +1339,7 @@ class CacheManager(BaseCacheManager):
         return result
 
 
-def build_graph_cache_manager(connection=None):
+def build_manager(connection=None):
     """A convenience method for turning a string into a connection, or passing a CacheManager through.
     
     :type connection: None or str or CacheManager

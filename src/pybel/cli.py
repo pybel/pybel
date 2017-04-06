@@ -25,7 +25,6 @@ from .canonicalize import to_bel
 from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
 from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
 from .manager.cache import CacheManager
-from .manager.cache import build_graph_cache_manager
 from .manager.database_io import to_database, from_database
 
 log = logging.getLogger('pybel')
@@ -71,14 +70,14 @@ def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx
     """Options for multiple outputs/conversions"""
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
 
-    cm = CacheManager(connection=connection)
+    manager = CacheManager(connection=connection)
 
     if database_name:
-        g = from_database(database_name, connection=cm)
+        g = from_database(database_name, connection=manager)
     elif url:
         g = from_url(
             url,
-            manager=cm,
+            manager=manager,
             allow_nested=allow_nested,
             allow_naked_names=allow_naked_names,
             citation_clearing=(not no_citation_clearing)
@@ -87,7 +86,7 @@ def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx
     else:
         g = from_lines(
             path,
-            manager=cm,
+            manager=manager,
             allow_nested=allow_nested,
             allow_naked_names=allow_naked_names,
             citation_clearing=(not no_citation_clearing)
@@ -165,37 +164,37 @@ def definitions():
 
 @definitions.command(help='Manually add definition by URL')
 @click.argument('url')
-@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def insert(url, path):
-    dcm = CacheManager(connection=path)
+@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def insert(url, connection):
+    manager = CacheManager(connection=connection)
 
     if url.endswith('.belns'):
-        dcm.ensure_namespace(url)
+        manager.ensure_namespace(url)
     elif url.endswith('.belanno'):
-        dcm.ensure_annotation(url)
+        manager.ensure_annotation(url)
     else:
-        dcm.ensure_namespace_owl(url)
+        manager.ensure_namespace_owl(url)
 
 
 @definitions.command(help='List URLs of cached resources, or contents of a specific resource')
 @click.option('--url', help='Resource to list')
-@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def ls(url, path):
-    dcm = CacheManager(connection=path)
+@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def ls(url, connection):
+    manager = CacheManager(connection=connection)
 
     if not url:
-        for line in dcm.get_definition_urls():
+        for line in manager.get_definition_urls():
             if not line:
                 continue
             click.echo(line)
 
     else:
         if url.endswith('.belns'):
-            res = dcm.get_namespace(url)
+            res = manager.get_namespace(url)
         elif url.endswith('.belanno'):
-            res = dcm.get_annotation(url)
+            res = manager.get_annotation(url)
         else:
-            res = dcm.get_namespace_owl_terms(url)
+            res = manager.get_namespace_owl_terms(url)
 
         for l in res:
             click.echo(l)
@@ -207,20 +206,20 @@ def graph():
 
 
 @graph.command(help='Lists stored graph names and versions')
-@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def ls(path):
-    gcm = build_graph_cache_manager(connection=path)
+@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def ls(connection):
+    manager = CacheManager(connection=connection)
 
-    for row in gcm.list_graphs():
+    for row in manager.list_graphs():
         click.echo(', '.join(map(str, row)))
 
 
 @graph.command(help='Drops a graph by ID')
 @click.argument('id')
-@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def drop(id, path):
-    gcm = build_graph_cache_manager(connection=path)
-    gcm.drop_graph(id)
+@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def drop(id, connection):
+    manager = CacheManager(connection=connection)
+    manager.drop_graph(id)
 
 
 if __name__ == '__main__':

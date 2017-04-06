@@ -6,7 +6,7 @@ import logging
 
 from sqlalchemy.exc import IntegrityError
 
-from .cache import build_graph_cache_manager
+from .cache import build_manager
 
 __all__ = [
     'to_database',
@@ -30,8 +30,8 @@ def to_database(graph, connection=None, store_parts=False):
     :type store_parts: bool
     """
     try:
-        gcm = build_graph_cache_manager(connection)
-        gcm.insert_graph(graph, store_parts=store_parts)
+        manager = build_manager(connection=connection)
+        manager.insert_graph(graph, store_parts=store_parts)
     except IntegrityError:
         log.exception('Error storing graph - other graph with same metadata'
                       ' already present. Consider incrementing the version')
@@ -53,5 +53,5 @@ def from_database(name, version=None, connection=None):
     :return: A BEL graph loaded from the database
     :rtype: BELGraph
     """
-    gcm = build_graph_cache_manager(connection)
-    return gcm.get_graph(name, version)
+    manager = build_manager(connection=connection)
+    return manager.get_graph(name, version)
