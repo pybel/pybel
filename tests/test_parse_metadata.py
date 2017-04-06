@@ -5,10 +5,10 @@ import os
 import unittest
 from pathlib import Path
 
+from pybel.io.line_utils import split_file_to_annotations_and_definitions
 from pybel.manager.cache import CacheManager
 from pybel.parser import MetadataParser
 from pybel.parser.parse_exceptions import *
-from pybel.parser.utils import split_file_to_annotations_and_definitions
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc
 from tests.constants import test_an_1, test_ns_1, mock_bel_resources
 from tests.constants import test_bel_simple
@@ -33,7 +33,7 @@ class TestParseMetadata(unittest.TestCase):
         cls.cm.create_database()
 
     def setUp(self):
-        self.parser = MetadataParser(cache_manager=CacheManager(self.connection))
+        self.parser = MetadataParser(manager=CacheManager(self.connection))
 
     @mock_bel_resources
     def test_namespace_name_persistience(self, mock_get):
@@ -167,13 +167,18 @@ class TestParseMetadata(unittest.TestCase):
         self.parser.parseString(s)
 
         self.assertNotIn('Test', self.parser.annotations_dict)
-        self.assertIn('Test', self.parser.annotations_re)
-        self.assertEqual('\w+', self.parser.annotations_re['Test'])
+        self.assertIn('Test', self.parser.annotations_regex)
+        self.assertEqual('\w+', self.parser.annotations_regex['Test'])
 
     def test_define_namespace_regex(self):
         s = 'DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"'
         self.parser.parseString(s)
 
         self.assertNotIn('dbSNP', self.parser.namespace_dict)
-        self.assertIn('dbSNP', self.parser.namespace_re)
-        self.assertEqual('rs[0-9]*', self.parser.namespace_re['dbSNP'])
+        self.assertIn('dbSNP', self.parser.namespace_regex)
+        self.assertEqual('rs[0-9]*', self.parser.namespace_regex['dbSNP'])
+
+    def test_not_semantic_version(self):
+        s = 'SET DOCUMENT Version = "1.0"'
+        with self.assertRaises(NotSemanticVersionException):
+            self.parser.parseString(s)

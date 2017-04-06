@@ -59,9 +59,8 @@ location_tag = Suppress(oneOf(['loc', 'location']))
 class LocationParser(BaseParser):
     def __init__(self, identifier_parser=None):
         """
-        :param identifier_parser:
+        :param identifier_parser: An identifier parser for checking the 3P and 5P partners
         :type identifier_parser: IdentifierParser
-        :return:
         """
         identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
         BaseParser.__init__(self, Group(location_tag + nest(identifier_parser.language))(LOCATION))

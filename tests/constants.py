@@ -2,6 +2,7 @@
 
 import json
 import logging
+import tempfile
 import unittest
 
 import networkx as nx
@@ -10,6 +11,7 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
+from pybel.manager.cache import CacheManager
 from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
@@ -19,6 +21,8 @@ try:
     from unittest import mock
 except ImportError:
     import mock
+
+log = logging.getLogger(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 owl_dir_path = os.path.join(dir_path, 'owl')
@@ -55,13 +59,13 @@ test_evidence_text = 'I read it on Twitter'
 test_set_evidence = 'SET Evidence = "{}"'.format(test_evidence_text)
 
 CHEBI_KEYWORD = 'CHEBI'
-CHEBI_URL = 'http://resources.openbel.org/belframework/20150611/namespace/chebi.belns'
+CHEBI_URL = DEFAULT_NAMESPACE_RESOURCES + 'chebi.belns'
 CELL_LINE_KEYWORD = 'CellLine'
-CELL_LINE_URL = 'http://resources.openbel.org/belframework/20150611/annotation/cell-line.belanno'
+CELL_LINE_URL = DEFAULT_ANNOTATION_RESOURCES + 'cell-line.belanno'
 HGNC_KEYWORD = 'HGNC'
-HGNC_URL = 'http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns'
+HGNC_URL = DEFAULT_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
-MESH_DISEASES_URL = "http://resources.openbel.org/belframework/20150611/annotation/mesh-diseases.belanno"
+MESH_DISEASES_URL = DEFAULT_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
 
 pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
 wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
@@ -71,15 +75,13 @@ EGFR = (PROTEIN, 'HGNC', 'EGFR')
 FADD = (PROTEIN, 'HGNC', 'FADD')
 CASP8 = (PROTEIN, 'HGNC', 'CASP8')
 
-log = logging.getLogger(BEL_DEFAULT_NAMESPACE)
-
 
 def any_dict_matches(dict_of_dicts, query_dict):
     return any(query_dict == sd for sd in dict_of_dicts.values())
 
 
 def assertHasNode(self, member, graph, **kwargs):
-    """
+    """A helper function for checking if a node with the given properties is contained within a graph
 
     :param self: A Test Case
     :type self: unittest.TestCase
@@ -87,7 +89,6 @@ def assertHasNode(self, member, graph, **kwargs):
     :param graph:
     :type graph: BELGraph
     :param kwargs:
-    :return:
     """
     self.assertTrue(graph.has_node(member), msg='{} not found in graph'.format(member))
     if kwargs:
@@ -100,7 +101,7 @@ def assertHasNode(self, member, graph, **kwargs):
 
 
 def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
-    """
+    """A helper function for checking if an edge with the given properties is contained within a graph
 
     :param self: A TestCase
     :type self: unittest.TestCase
@@ -111,7 +112,6 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
     :param graph: underlying graph
     :type graph: BELGraph
     :param kwargs: splat the data to match
-    :return:
     """
     self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
 
@@ -126,6 +126,34 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
         self.assertTrue(any_dict_matches(graph.edge[u][v], kwargs),
                         msg=msg_format.format(u, v, json.dumps(kwargs, indent=2, sort_keys=True),
                                               json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
+
+
+def make_temp_connection():
+    dir = tempfile.mkdtemp()
+    path = os.path.join(dir, 'test.db')
+    connection = 'sqlite:///' + path
+    return dir, path, connection
+
+
+def tear_temp_connection(dir, path):
+    os.remove(path)
+    os.rmdir(dir)
+
+
+class ConnectionMixin(unittest.TestCase):
+    def setUp(self):
+        super(ConnectionMixin, self).setUp()
+        self.dir, self.path, self.connection = make_temp_connection()
+        log.info('Test generated connection string %s', self.connection)
+
+    def tearDown(self):
+        super(ConnectionMixin, self).tearDown()
+        tear_temp_connection(self.dir, self.path)
+
+class TemporaryCacheMixin(ConnectionMixin):
+    def setUp(self):
+        super(TemporaryCacheMixin, self).setUp()
+        self.manager = CacheManager(connection=self.connection)
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -145,9 +173,9 @@ class TestTokenParserBase(unittest.TestCase):
 
 
 expected_test_simple_metadata = {
-    METADATA_NAME: "PyBEL Test Document 1",
+    METADATA_NAME: "PyBEL Test Simple",
     METADATA_DESCRIPTION: "Made for testing PyBEL parsing",
-    METADATA_VERSION: "1.6",
+    METADATA_VERSION: "1.6.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -155,9 +183,9 @@ expected_test_simple_metadata = {
 }
 
 expected_test_thorough_metadata = {
-    METADATA_NAME: "PyBEL Test Document 3",
+    METADATA_NAME: "PyBEL Test Thorough",
     METADATA_DESCRIPTION: "Statements made up to contain many conceivable variants of nodes from BEL",
-    METADATA_VERSION: "1.0",
+    METADATA_VERSION: "1.0.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -165,9 +193,9 @@ expected_test_thorough_metadata = {
 }
 
 expected_test_bel_4_metadata = {
-    METADATA_NAME: "PyBEL Test Document 4",
+    METADATA_NAME: "PyBEL Test OWL Extension",
     METADATA_DESCRIPTION: "Tests the use of OWL ontologies as namespaces",
-    METADATA_VERSION: "1.6",
+    METADATA_VERSION: "1.6.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -184,27 +212,34 @@ expected_test_slushy_metadata = {
 
 
 def build_variant_dict(variant):
+    """A convenience function for building a variant dictionary"""
     return {KIND: HGVS, IDENTIFIER: variant}
 
 
 def get_uri_name(url):
+    """Gets the file name from the end of the URL. Only useful for PyBEL's testing though since it looks specifically
+    if the file is from the weird owncloud resources distributed by Fraunhofer"""
     url_parsed = urlparse(url)
-    url_parts = url_parsed.path.split('/')
-    return url_parts[-1]
+
+    if url.startswith(FRAUNHOFER_RESOURCES):
+        return url_parsed.query.split('=')[-1]
+    else:
+        url_parts = url_parsed.path.split('/')
+        return url_parts[-1]
 
 
 class MockResponse:
     """See http://stackoverflow.com/questions/15753390/python-mock-requests-and-the-response"""
 
     def __init__(self, mock_url):
-        name = get_uri_name(mock_url)
-
         if mock_url.endswith('.belns'):
-            self.path = os.path.join(belns_dir_path, name)
+            self.path = os.path.join(belns_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.belanno'):
-            self.path = os.path.join(belanno_dir_path, name)
+            self.path = os.path.join(belanno_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.beleq'):
-            self.path = os.path.join(beleq_dir_path, name)
+            self.path = os.path.join(beleq_dir_path, get_uri_name(mock_url))
+        elif mock_url.endswith('.bel'):
+            self.path = os.path.join(bel_dir_path, get_uri_name(mock_url))
         elif mock_url == wine_iri:
             self.path = test_owl_wine
         elif mock_url == pizza_iri:
@@ -219,6 +254,9 @@ class MockResponse:
         with open(self.path, 'rb') as f:
             for line in f:
                 yield line
+
+    def raise_for_status(self):
+        pass
 
 
 class MockSession:
@@ -1124,6 +1162,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         if check_warnings:
             expected_warnings = [
                 (0, MissingMetadataException),
+                (3, NotSemanticVersionException),
                 (26, MissingAnnotationKeyWarning),
                 (29, MissingAnnotationKeyWarning),
                 (34, InvalidCitationException),
@@ -1150,7 +1189,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             ]
 
             for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
-                self.assertEqual(el, l)
+                self.assertEqual(el, l, msg="Expected different error")
                 self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
         assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
@@ -1184,3 +1223,5 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         assertHasEdge(self, d, b, graph)
         assertHasEdge(self, d, c, graph)
+
+

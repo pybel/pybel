@@ -1,9 +1,9 @@
 ##################################################################################
 # Document Properties Section
 
-SET DOCUMENT Name = "PyBEL Test Document 3"
+SET DOCUMENT Name = "PyBEL Test Thorough"
 SET DOCUMENT Description = "Statements made up to contain many conceivable variants of nodes from BEL"
-SET DOCUMENT Version = "1.0"
+SET DOCUMENT Version = "1.0.0"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
 SET DOCUMENT Licenses = "WTF License"
@@ -12,11 +12,11 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 ##################################################################################
 # Definitions Section
 
-DEFINE NAMESPACE CHEBI AS URL "http://resources.openbel.org/belframework/20150611/namespace/chebi.belns"
-DEFINE NAMESPACE HGNC AS URL "http://resources.openbel.org/belframework/20150611/namespace/hgnc-human-genes.belns"
-DEFINE NAMESPACE GOBP AS URL "http://resources.openbel.org/belframework/20150611/namespace/go-biological-process.belns"
-DEFINE NAMESPACE GOCC AS URL "http://resources.openbel.org/belframework/20150611/namespace/go-cellular-component.belns"
-DEFINE NAMESPACE MESHD AS URL "http://resource.belframework.org/belframework/20150611/namespace/mesh-diseases.belns"
+DEFINE NAMESPACE CHEBI AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=chebi.belns"
+DEFINE NAMESPACE HGNC AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=hgnc-human-genes.belns"
+DEFINE NAMESPACE GOBP AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=go-biological-process.belns"
+DEFINE NAMESPACE GOCC AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=go-cellular-component.belns"
+DEFINE NAMESPACE MESHD AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=mesh-diseases.belns"
 
 DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"
 

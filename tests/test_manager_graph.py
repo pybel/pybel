@@ -1,60 +1,52 @@
 # -*- coding: utf-8 -*-
 
-import os
-import tempfile
+import logging
 import unittest
 from collections import Counter
 
 import sqlalchemy.exc
 
 import pybel
+from pybel import from_path
 from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
 from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, \
     ANNOTATIONS
 from pybel.manager import models
-from pybel.manager.graph_cache import GraphCacheManager
 from tests import constants
-from tests.constants import BelReconstitutionMixin, test_bel_thorough, mock_bel_resources, \
-    expected_test_thorough_metadata, test_bel_simple
+from tests.constants import test_bel_thorough, mock_bel_resources, \
+    expected_test_thorough_metadata, test_bel_simple, expected_test_simple_metadata, TemporaryCacheMixin, \
+    BelReconstitutionMixin
 
-TEST_BEL_NAME = 'PyBEL Test Document 1'
-TEST_BEL_VERSION = '1.6'
+log = logging.getLogger(__name__)
 
 
-class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
+class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.dir, 'test.db')
-        self.connection = 'sqlite:///' + self.db_path
-        self.graph = pybel.from_path(test_bel_thorough, manager=self.connection, allow_nested=True)
-        self.gcm = GraphCacheManager(connection=self.connection)
-
-    def tearDown(self):
-        os.remove(self.db_path)
-        os.rmdir(self.dir)
+        super(TestGraphCache, self).setUp()
+        self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
 
     @mock_bel_resources
     def test_load_reload(self, mock_get):
         name = expected_test_thorough_metadata[METADATA_NAME]
         version = expected_test_thorough_metadata[METADATA_VERSION]
 
-        self.gcm.insert_graph(self.graph)
+        self.manager.insert_graph(self.graph)
 
-        x = self.gcm.ls()
+        x = self.manager.list_graphs()
 
         self.assertEqual(1, len(x))
         self.assertEqual((1, name, version), x[0])
 
-        g2 = self.gcm.get_graph(name, version)
+        g2 = self.manager.get_graph(name, version)
         self.bel_thorough_reconstituted(g2)
 
     @mock_bel_resources
     def test_integrity_failure(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
-        self.gcm.insert_graph(self.graph)
+        self.manager.insert_graph(self.graph)
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            self.gcm.insert_graph(self.graph)
+            self.manager.insert_graph(self.graph)
 
     @mock_bel_resources
     def test_get_versions(self, mock_get):
@@ -62,51 +54,44 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         TEST_V2 = expected_test_thorough_metadata[METADATA_VERSION]  # Actually is 1.0
 
         self.graph.document[METADATA_VERSION] = TEST_V1
-        self.gcm.insert_graph(self.graph)
+        self.manager.insert_graph(self.graph)
 
         self.graph.document[METADATA_VERSION] = TEST_V2
-        self.gcm.insert_graph(self.graph)
+        self.manager.insert_graph(self.graph)
 
-        self.assertEqual({TEST_V1, TEST_V2}, set(self.gcm.get_graph_versions(self.graph.document[METADATA_NAME])))
+        self.assertEqual({TEST_V1, TEST_V2}, set(self.manager.get_graph_versions(self.graph.document[METADATA_NAME])))
 
-        self.assertEqual(TEST_V2, self.gcm.get_graph(self.graph.document[METADATA_NAME]).document[METADATA_VERSION])
+        self.assertEqual(TEST_V2, self.manager.get_graph(self.graph.document[METADATA_NAME]).document[METADATA_VERSION])
 
 
-class TestGraphCacheSimple(BelReconstitutionMixin, unittest.TestCase):
+class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.dir, 'test.db')
-        self.connection = 'sqlite:///' + self.db_path
-        self.simple_graph = pybel.from_path(test_bel_simple, manager=self.connection)
-        self.gcm = GraphCacheManager(connection=self.connection)
-
-    def tearDown(self):
-        os.remove(self.db_path)
-        os.rmdir(self.dir)
+        super(TestGraphCacheSimple, self).setUp()
+        self.simple_graph = pybel.from_path(test_bel_simple, manager=self.manager)
 
     @mock_bel_resources
     def test_get_or_create_node(self, mock_get):
-        network = self.gcm.insert_graph(self.simple_graph, store_parts=True)
+        network = self.manager.insert_graph(self.simple_graph, store_parts=True)
 
-        citations = self.gcm.session.query(models.Citation).all()
+        citations = self.manager.session.query(models.Citation).all()
         self.assertEqual(2, len(citations))
 
         citations_strs = {'123455', '123456'}
         self.assertEqual(citations_strs, {e.reference for e in citations})
 
         authors = {'Example Author', 'Example Author2'}
-        self.assertEqual(authors, {a.name for a in self.gcm.session.query(models.Author).all()})
+        self.assertEqual(authors, {a.name for a in self.manager.session.query(models.Author).all()})
 
-        evidences = self.gcm.session.query(models.Evidence).all()
+        evidences = self.manager.session.query(models.Evidence).all()
         self.assertEqual(3, len(evidences))
 
         evidences_strs = {'Evidence 1 w extra notes', 'Evidence 2', 'Evidence 3'}
         self.assertEqual(evidences_strs, {e.text for e in evidences})
 
-        nodes = self.gcm.session.query(models.Node).all()
+        nodes = self.manager.session.query(models.Node).all()
         self.assertEqual(4, len(nodes))
 
-        edges = self.gcm.session.query(models.Edge).all()
+        edges = self.manager.session.query(models.Edge).all()
 
         x = Counter((e.source.bel, e.target.bel) for e in edges)
 
@@ -122,24 +107,23 @@ class TestGraphCacheSimple(BelReconstitutionMixin, unittest.TestCase):
 
         self.assertEqual(dict(x), d)
 
-        network_edge_associations = self.gcm.session.query(models.network_edge).filter_by(network_id=network.id).all()
+        network_edge_associations = self.manager.session.query(models.network_edge).filter_by(
+            network_id=network.id).all()
         self.assertEqual({nea.edge_id for nea in network_edge_associations},
                          {edge.id for edge in edges})
 
-        g2 = self.gcm.get_graph(TEST_BEL_NAME, TEST_BEL_VERSION)
+        g2 = self.manager.get_graph(expected_test_simple_metadata[METADATA_NAME],
+                                    expected_test_simple_metadata[METADATA_VERSION])
         self.bel_simple_reconstituted(g2)
 
 
-class TestQuery(BelReconstitutionMixin, unittest.TestCase):
+class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.dir, 'test.db')
-        self.connection = 'sqlite:///' + self.db_path
-        self.graph = pybel.from_path(test_bel_simple, manager=self.connection, allow_nested=True)
-        self.gcm = GraphCacheManager(connection=self.connection)
-        self.gcm.insert_graph(self.graph, True)
+        super(TestQuery, self).setUp()
+        self.graph = pybel.from_path(test_bel_simple, manager=self.manager, allow_nested=True)
+        self.manager.insert_graph(self.graph, store_parts=True)
 
     @mock_bel_resources
     def test_query_node(self, mock_get):
@@ -152,23 +136,22 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
             }
         }
 
-        node_list = self.gcm.query_node(bel='p(HGNC:AKT1)')
+        node_list = self.manager.get_node(bel='p(HGNC:AKT1)')
         self.assertEqual(len(node_list), 1)
 
-        node_dict_list = self.gcm.query_node(bel='p(HGNC:AKT1)', as_dict_list=True)
+        node_dict_list = self.manager.get_node(bel='p(HGNC:AKT1)', as_dict_list=True)
         self.assertIn(akt1_dict, node_dict_list)
 
-        node_dict_list2 = self.gcm.query_node(namespace='HG%', as_dict_list=True)
+        node_dict_list2 = self.manager.get_node(namespace='HG%', as_dict_list=True)
         self.assertEqual(len(node_dict_list2), 4)
         self.assertIn(akt1_dict, node_dict_list2)
 
-        node_dict_list3 = self.gcm.query_node(name='%A%', as_dict_list=True)
+        node_dict_list3 = self.manager.get_node(name='%A%', as_dict_list=True)
         self.assertEqual(len(node_dict_list3), 3)
         self.assertIn(akt1_dict, node_dict_list3)
 
-        protein_list = self.gcm.query_node(type='Protein')
+        protein_list = self.manager.get_node(type='Protein')
         self.assertEqual(len(protein_list), 4)
-
 
     @mock_bel_resources
     def test_query_edge(self, mock_get):
@@ -205,28 +188,27 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         }
 
         # bel
-        edge_list = self.gcm.query_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
+        edge_list = self.manager.get_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
         self.assertEqual(len(edge_list), 1)
 
         # relation like, data
-        increased_list = self.gcm.query_edge(relation='increase%', as_dict_list=True)
+        increased_list = self.manager.get_edge(relation='increase%', as_dict_list=True)
         self.assertEqual(len(increased_list), 2)
         self.assertIn(fadd_casp, increased_list)
 
         # evidence like, data
-        evidence_list = self.gcm.query_edge(evidence='%3%', as_dict_list=True)
+        evidence_list = self.manager.get_edge(evidence='%3%', as_dict_list=True)
         self.assertEqual(len(increased_list), 2)
         self.assertIn(fadd_casp, evidence_list)
 
         # no result
-        empty_list = self.gcm.query_edge(source='p(HGNC:EGFR)', relation='increases',  as_dict_list=True)
+        empty_list = self.manager.get_edge(source='p(HGNC:EGFR)', relation='increases', as_dict_list=True)
         self.assertEqual(len(empty_list), 0)
 
         # source, relation, data
-        source_list = self.gcm.query_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
+        source_list = self.manager.get_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
         self.assertEqual(len(source_list), 1)
         self.assertIn(fadd_casp, source_list)
-
 
     @mock_bel_resources
     def test_query_citation(self, mock_get):
@@ -256,46 +238,46 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         }
 
         # type
-        object_list = self.gcm.query_citation(type='PubMed')
+        object_list = self.manager.get_citation(type='PubMed')
         self.assertEqual(len(object_list), 2)
 
         # type, reference, data
-        reference_list = self.gcm.query_citation(type='PubMed', reference='123456', as_dict_list=True)
+        reference_list = self.manager.get_citation(type='PubMed', reference='123456', as_dict_list=True)
         self.assertEqual(len(reference_list), 1)
         self.assertIn(citation_2, reference_list)
 
         # author
-        author_list = self.gcm.query_citation(author="Example%")
+        author_list = self.manager.get_citation(author="Example%")
         self.assertEqual(len(author_list), 1)
 
         # author, data
-        author_dict_list = self.gcm.query_citation(author="Example Author", as_dict_list=True)
+        author_dict_list = self.manager.get_citation(author="Example Author", as_dict_list=True)
         self.assertIn(citation_1, author_dict_list)
 
         # author list, data
-        author_dict_list2 = self.gcm.query_citation(author=["Example Author", "Example Author2"], as_dict_list=True)
+        author_dict_list2 = self.manager.get_citation(author=["Example Author", "Example Author2"], as_dict_list=True)
         self.assertIn(citation_1, author_dict_list2)
 
         # type, name, data
-        name_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week",
-                                                 as_dict_list=True)
+        name_dict_list = self.manager.get_citation(type='PubMed', name="That other article from last week",
+                                                   as_dict_list=True)
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(citation_2, name_dict_list)
 
         # type, name like, data
-        name_dict_list2 = self.gcm.query_citation(type='PubMed', name="%article from%", as_dict_list=True)
+        name_dict_list2 = self.manager.get_citation(type='PubMed', name="%article from%", as_dict_list=True)
         self.assertEqual(len(name_dict_list2), 2)
         self.assertIn(citation_1, name_dict_list2)
         self.assertIn(citation_2, name_dict_list2)
 
         # type, name, evidence, data
-        evidence_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week",
-                                                     evidence=True, as_dict_list=True)
+        evidence_dict_list = self.manager.get_citation(type='PubMed', name="That other article from last week",
+                                                       evidence=True, as_dict_list=True)
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(evidence_citation_3, evidence_dict_list)
 
         # type, evidence like, data
-        evidence_dict_list2 = self.gcm.query_citation(type='PubMed', evidence_text='%Evi%', as_dict_list=True)
+        evidence_dict_list2 = self.manager.get_citation(type='PubMed', evidence_text='%Evi%', as_dict_list=True)
         self.assertEqual(len(evidence_dict_list2), 3)
         self.assertIn(evidence_citation, evidence_dict_list2)
         self.assertIn(evidence_citation_2, evidence_dict_list2)
@@ -303,7 +285,7 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
 
 
 @unittest.skip('Feature not started yet')
-class TestFilter(BelReconstitutionMixin, unittest.TestCase):
+class TestFilter(TemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that a graph can be reconstructed from the edge and node relational tables in the database
 
     1. Load graph (test BEL 1 or test thorough)
@@ -314,11 +296,8 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
     """
 
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.dir, 'test.db')
-        self.connection = 'sqlite:///' + self.db_path
-        self.graph = pybel.from_path(test_bel_thorough, manager=self.connection, allow_nested=True)
-        self.gcm = GraphCacheManager(connection=self.connection)
+        super(TestFilter, self).setUp()
+        self.graph = pybel.from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
 
     @mock_bel_resources
     def test_database_edge_filter(self, mock_get):
@@ -340,7 +319,6 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
         :param value_tag: Annotation value for the given sentinel_annotation.
         :type value_tag: str
         """
-
         original = pybel.from_path(path)
 
         compare(original)
@@ -348,9 +326,9 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
         for u, v, k in original.edges(keys=True):
             original.edge[u][v][k][annotation_tag] = value_tag
 
-        self.gcm.insert_graph(original, store_parts=True)
+        self.manager.insert_graph(original, store_parts=True)
 
-        reloaded = self.gcm.rebuild_by_edge_filter({annotation_tag: value_tag})
+        reloaded = self.manager.rebuild_by_edge_filter(**{ANNOTATIONS: {annotation_tag: value_tag}})
 
         for u, v, k in reloaded.edges(keys=True):
             del reloaded.edge[u][v][k][annotation_tag]

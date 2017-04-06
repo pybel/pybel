@@ -55,15 +55,13 @@ gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, id
 
 
 class GmodParser(BaseParser):
-    def __init__(self, namespace_parser=None):
+    def __init__(self, identifier_parser=None):
+        """
+        :param identifier_parser: An identifier parser for checking the 3P and 5P partners
+        :type identifier_parser: IdentifierParser
         """
 
-        :param namespace_parser:
-        :type namespace_parser: IdentifierParser
-        :return:
-        """
-
-        self.namespace_parser = namespace_parser if namespace_parser is not None else IdentifierParser()
+        self.namespace_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
 
         gmod_default_ns = oneOf(list(language.gmod_namespace.keys())).setParseAction(self.handle_gmod_default)
 

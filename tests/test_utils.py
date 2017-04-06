@@ -6,10 +6,10 @@ from pathlib import Path
 import networkx as nx
 
 import pybel.utils
+from pybel.io.line_utils import split_file_to_annotations_and_definitions
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
-from pybel.parser.parse_identifier import IdentifierParser
-from pybel.parser.utils import split_file_to_annotations_and_definitions, nest
+from pybel.parser.utils import nest
 from pybel.utils import get_bel_resource, list2tuple
 from tests.constants import test_an_1, test_bel_simple
 
@@ -22,10 +22,6 @@ class TestRandom(unittest.TestCase):
     def test_bad_aminoAcid(self):
         with self.assertRaises(PlaceholderAminoAcidWarning):
             amino_acid.parseString('X')
-
-    def test_unimplemented_mapping(self):
-        with self.assertRaises(NotImplementedError):
-            IdentifierParser(namespace_mappings={})
 
     def test_split_lines(self):
         with open(test_bel_simple) as f:
