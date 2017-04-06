@@ -122,6 +122,9 @@ def parse_definitions(graph, definitions, metadata_parser):
             log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
 
+    # metadata_parser.cache_manager.session.flush()
+    # metadata_parser.cache_manager.session.commit()
+
     graph.graph.update({
         GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
         GRAPH_NAMESPACE_URL: metadata_parser.namespace_url_dict.copy(),

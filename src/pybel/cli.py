@@ -26,7 +26,7 @@ from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
 from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
-from .manager.graph_cache import GraphCacheManager
+from .manager.graph_cache import build_graph_cache_manager
 
 log = logging.getLogger('pybel')
 
@@ -71,14 +71,15 @@ def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx
     """Options for multiple outputs/conversions"""
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
 
+    cm = CacheManager(connection=connection)
+
     if database_name:
-        g = from_database(database_name, connection=connection)
+        g = from_database(database_name, connection=cm)
     elif url:
         g = from_url(
             url,
-            manager=connection,
-            allow_nested=
-            allow_nested,
+            manager=cm,
+            allow_nested=allow_nested,
             allow_naked_names=allow_naked_names,
             citation_clearing=(not no_citation_clearing)
         )
@@ -86,7 +87,7 @@ def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx
     else:
         g = from_lines(
             path,
-            manager=connection,
+            manager=cm,
             allow_nested=allow_nested,
             allow_naked_names=allow_naked_names,
             citation_clearing=(not no_citation_clearing)
@@ -208,7 +209,7 @@ def graph():
 @graph.command(help='Lists stored graph names and versions')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def ls(path):
-    gcm = GraphCacheManager(connection=path)
+    gcm = build_graph_cache_manager(connection=path)
 
     for row in gcm.ls():
         click.echo(', '.join(map(str, row)))
@@ -218,7 +219,7 @@ def ls(path):
 @click.argument('id')
 @click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def drop(id, path):
-    gcm = GraphCacheManager(connection=path)
+    gcm = build_graph_cache_manager(connection=path)
     gcm.drop_graph(id)
 
 

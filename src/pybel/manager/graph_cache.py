@@ -6,7 +6,6 @@ import datetime
 import logging
 
 from . import models
-from .base_cache import BaseCacheManager
 from .cache import CacheManager
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -24,19 +23,33 @@ log = logging.getLogger(__name__)
 __all__ = ['GraphCacheManager']
 
 
-class GraphCacheManager(BaseCacheManager):
+class GraphCacheManager:
     """The PyBEL graph cache manager has utilities for inserting and querying the graph store and edge store"""
 
     def __init__(self, connection=None, echo=False):
         """
         :param connection: A custom database connection string
-        :type connection: str
+        :type connection: str or None or CacheManager
         :param echo: Whether or not echo the running sql code.
         :type echo: bool
         """
-        BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
-        log.info('Graph cache manager connected to %s', self.connection)
+        if isinstance(connection, CacheManager):
+            self.cache_manager = connection
+        elif connection is None or isinstance(connection, str):
+            self.cache_manager = CacheManager(connection=connection, echo=echo)
+        else:
+            raise TypeError('Connection in wrong format: {}'.format(connection))
+
+        log.info('Graph cache manager connected to %s', self.cache_manager.connection)
+
+    @property
+    def connection(self):
+        return self.cache_manager.connection
+
+    @property
+    def session(self):
+        return self.cache_manager.session
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
@@ -894,3 +907,18 @@ class GraphCacheManager(BaseCacheManager):
             result = [property.data for property in result]
 
         return result
+
+
+def build_graph_cache_manager(connection=None):
+    """A convenience method for turning a string into a connection, or passing a GraphCacheManager through.
+    
+    :type connection: None or str or CacheManager or GraphCacheManager
+    :return: A graph cache manager
+    :rtype: GraphCacheManager
+    """
+    if isinstance(connection, GraphCacheManager):
+        return connection
+    elif connection is None or isinstance(connection, (str, CacheManager)):
+        return GraphCacheManager(connection=connection)
+    else:
+        raise TypeError('Connection is wrong type: {}'.format(connection))

@@ -1,33 +1,46 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import tempfile
 import unittest
 from collections import Counter
 
-import pybel
 import sqlalchemy.exc
+
+import pybel
+from pybel import from_path
 from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
 from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, \
     ANNOTATIONS
 from pybel.manager import models
-from pybel.manager.graph_cache import GraphCacheManager
+from pybel.manager.cache import CacheManager
+from pybel.manager.graph_cache import build_graph_cache_manager
 from tests import constants
 from tests.constants import BelReconstitutionMixin, test_bel_thorough, mock_bel_resources, \
     expected_test_thorough_metadata, test_bel_simple, expected_test_simple_metadata
 
+log = logging.getLogger(__name__)
 
-class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
+
+class BaseGraphCacheTest(BelReconstitutionMixin, unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
         self.db_path = os.path.join(self.dir, 'test.db')
         self.connection = 'sqlite:///' + self.db_path
-        self.graph = pybel.from_path(test_bel_thorough, manager=self.connection, allow_nested=True)
-        self.gcm = GraphCacheManager(connection=self.connection)
+        log.info('Test generated connection string %s', self.connection)
+        self.cache_manager = CacheManager(connection=self.connection)
+        self.gcm = build_graph_cache_manager(connection=self.cache_manager)
 
     def tearDown(self):
         os.remove(self.db_path)
         os.rmdir(self.dir)
+
+
+class TestGraphCache(BaseGraphCacheTest):
+    def setUp(self):
+        BaseGraphCacheTest.setUp(self)
+        self.graph = from_path(test_bel_thorough, manager=self.cache_manager, allow_nested=True)
 
     @mock_bel_resources
     def test_load_reload(self, mock_get):
@@ -68,17 +81,10 @@ class TestGraphCache(BelReconstitutionMixin, unittest.TestCase):
         self.assertEqual(TEST_V2, self.gcm.get_graph(self.graph.document[METADATA_NAME]).document[METADATA_VERSION])
 
 
-class TestGraphCacheSimple(BelReconstitutionMixin, unittest.TestCase):
+class TestGraphCacheSimple(BaseGraphCacheTest):
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.dir, 'test.db')
-        self.connection = 'sqlite:///' + self.db_path
-        self.simple_graph = pybel.from_path(test_bel_simple, manager=self.connection)
-        self.gcm = GraphCacheManager(connection=self.connection)
-
-    def tearDown(self):
-        os.remove(self.db_path)
-        os.rmdir(self.dir)
+        BaseGraphCacheTest.setUp(self)
+        self.simple_graph = pybel.from_path(test_bel_simple, manager=self.cache_manager)
 
     @mock_bel_resources
     def test_get_or_create_node(self, mock_get):
@@ -127,16 +133,14 @@ class TestGraphCacheSimple(BelReconstitutionMixin, unittest.TestCase):
         self.bel_simple_reconstituted(g2)
 
 
-class TestQuery(BelReconstitutionMixin, unittest.TestCase):
+class TestQuery(BaseGraphCacheTest):
     """Tests that the cache can be queried"""
 
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.dir, 'test.db')
-        self.connection = 'sqlite:///' + self.db_path
-        self.graph = pybel.from_path(test_bel_simple, manager=self.connection, allow_nested=True)
-        self.gcm = GraphCacheManager(connection=self.connection)
-        self.gcm.insert_graph(self.graph, True)
+        BaseGraphCacheTest.setUp(self)
+
+        self.graph = pybel.from_path(test_bel_simple, manager=self.cache_manager, allow_nested=True)
+        self.gcm.insert_graph(self.graph, store_parts=True)
 
     @mock_bel_resources
     def test_query_node(self, mock_get):
@@ -312,8 +316,10 @@ class TestFilter(BelReconstitutionMixin, unittest.TestCase):
         self.dir = tempfile.mkdtemp()
         self.db_path = os.path.join(self.dir, 'test.db')
         self.connection = 'sqlite:///' + self.db_path
-        self.graph = pybel.from_path(test_bel_thorough, manager=self.connection, allow_nested=True)
-        self.gcm = GraphCacheManager(connection=self.connection)
+        self.cache_manager = CacheManager(connection=self.connection)
+        self.gcm = build_graph_cache_manager(connection=self.cache_manager)
+
+        self.graph = pybel.from_path(test_bel_thorough, manager=self.cache_manager, allow_nested=True)
 
     @mock_bel_resources
     def test_database_edge_filter(self, mock_get):
