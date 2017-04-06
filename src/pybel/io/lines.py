@@ -6,11 +6,9 @@ import codecs
 import logging
 import os
 
-import requests
-from requests_file import FileAdapter
-
 from .line_utils import parse_lines
 from ..graph import BELGraph
+from ..utils import download
 
 __all__ = [
     'from_lines',
@@ -101,13 +99,8 @@ def from_url(url, manager=None, allow_naked_names=False, allow_nested=False, cit
     """
     log.info('Loading from url: %s', url)
 
-    session = requests.session()
-    session.mount('file://', FileAdapter())
-
-    response = session.get(url)
-    response.raise_for_status()
-
-    lines = (line.decode('utf-8') for line in response.iter_lines())
+    res = download(url)
+    lines = (line.decode('utf-8') for line in res.iter_lines())
 
     return from_lines(lines, manager=manager, allow_naked_names=allow_naked_names, allow_nested=allow_nested,
                       citation_clearing=citation_clearing, **kwargs)

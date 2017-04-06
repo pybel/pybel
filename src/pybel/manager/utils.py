@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import networkx as nx
-import requests
 from onto2nx.ontospy import Ontospy
 from onto2nx.parse_owl_xml import OWLParser
 from requests.compat import urldefrag
-from requests_file import FileAdapter
 
-from ..utils import parse_datetime
+from ..utils import parse_datetime, download
 
 
 def parse_owl(url):
@@ -33,9 +31,7 @@ def parse_owl_pybel(url):
     :return: A directional graph representing the OWL document's hierarchy
     :rtype: networkx.DiGraph
     """
-    session = requests.Session()
-    session.mount('file://', FileAdapter())
-    res = session.get(url)
+    res = download(url)
     owl = OWLParser(content=res.content)
     return owl
 
