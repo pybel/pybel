@@ -5,9 +5,8 @@ import tempfile
 import unittest
 from collections import Counter
 
-import sqlalchemy.exc
-
 import pybel
+import sqlalchemy.exc
 from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
 from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, \
     ANNOTATIONS
@@ -150,21 +149,21 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
             }
         }
 
-        node_list = self.gcm.query_node(bel='p(HGNC:AKT1)')
+        node_list = self.gcm.get_node(bel='p(HGNC:AKT1)')
         self.assertEqual(len(node_list), 1)
 
-        node_dict_list = self.gcm.query_node(bel='p(HGNC:AKT1)', as_dict_list=True)
+        node_dict_list = self.gcm.get_node(bel='p(HGNC:AKT1)', as_dict_list=True)
         self.assertIn(akt1_dict, node_dict_list)
 
-        node_dict_list2 = self.gcm.query_node(namespace='HG%', as_dict_list=True)
+        node_dict_list2 = self.gcm.get_node(namespace='HG%', as_dict_list=True)
         self.assertEqual(len(node_dict_list2), 4)
         self.assertIn(akt1_dict, node_dict_list2)
 
-        node_dict_list3 = self.gcm.query_node(name='%A%', as_dict_list=True)
+        node_dict_list3 = self.gcm.get_node(name='%A%', as_dict_list=True)
         self.assertEqual(len(node_dict_list3), 3)
         self.assertIn(akt1_dict, node_dict_list3)
 
-        protein_list = self.gcm.query_node(type='Protein')
+        protein_list = self.gcm.get_node(type='Protein')
         self.assertEqual(len(protein_list), 4)
 
     @mock_bel_resources
@@ -202,25 +201,25 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         }
 
         # bel
-        edge_list = self.gcm.query_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
+        edge_list = self.gcm.get_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
         self.assertEqual(len(edge_list), 1)
 
         # relation like, data
-        increased_list = self.gcm.query_edge(relation='increase%', as_dict_list=True)
+        increased_list = self.gcm.get_edge(relation='increase%', as_dict_list=True)
         self.assertEqual(len(increased_list), 2)
         self.assertIn(fadd_casp, increased_list)
 
         # evidence like, data
-        evidence_list = self.gcm.query_edge(evidence='%3%', as_dict_list=True)
+        evidence_list = self.gcm.get_edge(evidence='%3%', as_dict_list=True)
         self.assertEqual(len(increased_list), 2)
         self.assertIn(fadd_casp, evidence_list)
 
         # no result
-        empty_list = self.gcm.query_edge(source='p(HGNC:EGFR)', relation='increases', as_dict_list=True)
+        empty_list = self.gcm.get_edge(source='p(HGNC:EGFR)', relation='increases', as_dict_list=True)
         self.assertEqual(len(empty_list), 0)
 
         # source, relation, data
-        source_list = self.gcm.query_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
+        source_list = self.gcm.get_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
         self.assertEqual(len(source_list), 1)
         self.assertIn(fadd_casp, source_list)
 
@@ -252,46 +251,46 @@ class TestQuery(BelReconstitutionMixin, unittest.TestCase):
         }
 
         # type
-        object_list = self.gcm.query_citation(type='PubMed')
+        object_list = self.gcm.get_citation(type='PubMed')
         self.assertEqual(len(object_list), 2)
 
         # type, reference, data
-        reference_list = self.gcm.query_citation(type='PubMed', reference='123456', as_dict_list=True)
+        reference_list = self.gcm.get_citation(type='PubMed', reference='123456', as_dict_list=True)
         self.assertEqual(len(reference_list), 1)
         self.assertIn(citation_2, reference_list)
 
         # author
-        author_list = self.gcm.query_citation(author="Example%")
+        author_list = self.gcm.get_citation(author="Example%")
         self.assertEqual(len(author_list), 1)
 
         # author, data
-        author_dict_list = self.gcm.query_citation(author="Example Author", as_dict_list=True)
+        author_dict_list = self.gcm.get_citation(author="Example Author", as_dict_list=True)
         self.assertIn(citation_1, author_dict_list)
 
         # author list, data
-        author_dict_list2 = self.gcm.query_citation(author=["Example Author", "Example Author2"], as_dict_list=True)
+        author_dict_list2 = self.gcm.get_citation(author=["Example Author", "Example Author2"], as_dict_list=True)
         self.assertIn(citation_1, author_dict_list2)
 
         # type, name, data
-        name_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week",
-                                                 as_dict_list=True)
+        name_dict_list = self.gcm.get_citation(type='PubMed', name="That other article from last week",
+                                               as_dict_list=True)
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(citation_2, name_dict_list)
 
         # type, name like, data
-        name_dict_list2 = self.gcm.query_citation(type='PubMed', name="%article from%", as_dict_list=True)
+        name_dict_list2 = self.gcm.get_citation(type='PubMed', name="%article from%", as_dict_list=True)
         self.assertEqual(len(name_dict_list2), 2)
         self.assertIn(citation_1, name_dict_list2)
         self.assertIn(citation_2, name_dict_list2)
 
         # type, name, evidence, data
-        evidence_dict_list = self.gcm.query_citation(type='PubMed', name="That other article from last week",
-                                                     evidence=True, as_dict_list=True)
+        evidence_dict_list = self.gcm.get_citation(type='PubMed', name="That other article from last week",
+                                                   evidence=True, as_dict_list=True)
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(evidence_citation_3, evidence_dict_list)
 
         # type, evidence like, data
-        evidence_dict_list2 = self.gcm.query_citation(type='PubMed', evidence_text='%Evi%', as_dict_list=True)
+        evidence_dict_list2 = self.gcm.get_citation(type='PubMed', evidence_text='%Evi%', as_dict_list=True)
         self.assertEqual(len(evidence_dict_list2), 3)
         self.assertIn(evidence_citation, evidence_dict_list2)
         self.assertIn(evidence_citation_2, evidence_dict_list2)

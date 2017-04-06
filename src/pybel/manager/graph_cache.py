@@ -447,8 +447,8 @@ class GraphCacheManager(BaseCacheManager):
                 property_list.append(property_dict)
 
         for property_def in property_list:
-            property = self.session.query(models.Property).filter_by(**property_def).one_or_none()
-            if property is None:
+            property = self.session.query(models.Property).filter_by(**property_def).first()
+            if not property:
                 property = models.Property(**property_def)
 
             if property not in properties:
@@ -600,8 +600,21 @@ class GraphCacheManager(BaseCacheManager):
 
         return graph
 
-    def query_network(self, db_id=None, name=None, version=None, as_dict_list=False):
-        """Query the PyBEL database for all the networks in the database."""
+    def get_network(self, db_id=None, name=None, version=None, as_dict_list=False):
+        """Builds and runs a query over all networks in the database.
+
+        :param db_id: Database identifier of the network of interest.
+        :type db_id: int
+        :param name: Name of the network.
+        :type name: str
+        :param version: Version of the network
+        :type version: str
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of
+                             :class:`models.Network` objects.
+        :type as_dict_list: bool
+        :return: List of :class:`models.Network` objects or corresponding dicts.
+        :rtype: list or dict
+        """
         q = self.session.query(models.Network)
 
         if db_id and isinstance(db_id, int):
@@ -621,9 +634,9 @@ class GraphCacheManager(BaseCacheManager):
         else:
             return result
 
-    def query_node(self, db_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
-                   modification_name=None, as_dict_list=False):
-        """Run a query over all nodes in the PyBEL cache.
+    def get_node(self, db_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
+                 modification_name=None, as_dict_list=False):
+        """Builds and runs a query over all nodes in the PyBEL cache.
 
         :param bel: BEL term that describes the biological entity. e.g. p(HGNC:APP)
         :param bel: str
@@ -637,9 +650,9 @@ class GraphCacheManager(BaseCacheManager):
         :type modification_name: str
         :param modification_type:
         :type modification_type: str
-        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of models.Node objects.
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of :class:`models.Node` objects.
         :type as_dict_list: bool
-        :return: A list of the fitting nodes.
+        :return: A list of the fitting nodes as :class:`models.Node` objects or dicts.
         :rtype: list
         """
         q = self.session.query(models.Node)
@@ -674,9 +687,9 @@ class GraphCacheManager(BaseCacheManager):
         else:
             return result
 
-    def query_edge(self, db_id=None, bel=None, source=None, target=None, relation=None, citation=None,
-                   evidence=None, annotation=None, property=None, as_dict_list=False):
-        """Builds a query to be run against all edges in the PyBEL cache.
+    def get_edge(self, db_id=None, bel=None, source=None, target=None, relation=None, citation=None,
+                 evidence=None, annotation=None, property=None, as_dict_list=False):
+        """Builds and runs a query over all edges in the PyBEL cache.
 
         :param bel: BEL statement that represents the desired edge.
         :type bel: str
@@ -721,7 +734,7 @@ class GraphCacheManager(BaseCacheManager):
 
             if source:
                 if isinstance(source, str):
-                    source = self.query_node(bel=source)[0]
+                    source = self.get_node(bel=source)[0]
 
                 if isinstance(source, models.Node):
                     q = q.filter(models.Edge.source == source)
@@ -733,7 +746,7 @@ class GraphCacheManager(BaseCacheManager):
 
             if target:
                 if isinstance(target, str):
-                    target = self.query_node(bel=target)[0]
+                    target = self.get_node(bel=target)[0]
 
                 if isinstance(target, models.Node):
                     q = q.filter(models.Edge.target == target)
@@ -763,8 +776,12 @@ class GraphCacheManager(BaseCacheManager):
                         q = q.filter(models.Evidence.text.like(evidence))
 
             if property:
-                # ToDo: finish property query
-                q = q.join(models.Property)
+                q = q.join(models.Property, models.Edge.properties)
+
+                if isinstance(property, models.Property):
+                    q = q.filter(models.Property.id == property.id)
+                elif isinstance(property, int):
+                    q = q.filter(models.Property.id == property)
 
         result = q.all()
 
@@ -773,9 +790,9 @@ class GraphCacheManager(BaseCacheManager):
         else:
             return result
 
-    def query_citation(self, db_id=None, type=None, reference=None, name=None, author=None, date=None, evidence=False,
-                       evidence_text=None, as_dict_list=False):
-        """Run a query over all citations in the PyBEL cache.
+    def get_citation(self, db_id=None, type=None, reference=None, name=None, author=None, date=None, evidence=False,
+                     evidence_text=None, as_dict_list=False):
+        """Builds and runs a query over all citations in the PyBEL cache.
 
         :param type: Type of the citation. e.g. PubMed
         :type type: str
@@ -790,9 +807,9 @@ class GraphCacheManager(BaseCacheManager):
         :param evidence: Weather or not supporting text should be included in the return.
         :type evidence: bool
         :param evidence_text:
-        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of models.Citation objects.
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of :class:`models.Citation` objects.
         :type as_dict_list: bool
-        :return: List of PyBEL.manager.models.Citation objects or corresponding dicts.
+        :return: List of :class:`models.Citation` objects or corresponding dicts.
         :rtype: list
         """
         q = self.session.query(models.Citation)
@@ -840,3 +857,38 @@ class GraphCacheManager(BaseCacheManager):
 
         else:
             return result
+
+    def get_property(self, db_id=None, participant=None, modifier=None, as_dict_list=False):
+        """Builds and runs a query over all property entires in the database.
+
+        :param db_id: Database primary identifer.
+        :type db_id: int
+        :param participant: The participant that is effected by the property (OBJECT or SUBJECT)
+        :type participant: str
+        :param modifier: The modifier of the property.
+        :type modifier: str
+        :param as_dict_list: Identifiese weather the result should be a list of dictionaries or a list of
+                             :class:`models.Property` objects.
+        :type as_dict_list: bool
+        :return:
+        """
+        q = self.session.query(models.Property)
+
+        if db_id:
+            q = q.filter_by(id=db_id)
+        else:
+            if participant:
+                q = q.filter(models.Property.participant.like(participant))
+
+            if modifier:
+                q = q.filter(models.Property.modifier.like(modifier))
+
+            if effect:
+                q = q.filter(models.Property.propValue.like(effect))
+
+        result = q.all()
+
+        if as_dict_list:
+            result = [property.data for property in result]
+
+        return result

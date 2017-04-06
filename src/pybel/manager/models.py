@@ -61,18 +61,18 @@ class Namespace(Base):
 
     url = Column(String(255), doc='Source url of the given namespace definition file (.belns)')
     keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
-    name = Column(String(255))
-    domain = Column(String(255))
+    name = Column(String(255), doc='Name of the given namespace')
+    domain = Column(String(255), doc='Domain the namespace is valid for')
     species = Column(String(255), nullable=True,
                      doc='NCBI identifier that states for what species the namespace is valid')
-    description = Column(Text, nullable=True)
-    version = Column(String(255), nullable=True)
-    created = Column(DateTime)
-    query_url = Column(Text, nullable=True)
+    description = Column(Text, nullable=True, doc='Optional short description of the namespace')
+    version = Column(String(255), nullable=True, doc='Version of the namespace')
+    created = Column(DateTime, doc='DateTime of the creation of the namespace definition file')
+    query_url = Column(Text, nullable=True, doc='URL that can be used to query the namespace (eternally from PyBEL)')
 
-    author = Column(String(255))
-    license = Column(String(255), nullable=True)
-    contact = Column(String(255), nullable=True)
+    author = Column(String(255), doc='The author of the namespace')
+    license = Column(String(255), nullable=True, doc='License information')
+    contact = Column(String(255), nullable=True, doc='Contact information')
 
     citation = Column(String(255))
     citation_description = Column(Text, nullable=True)
@@ -86,6 +86,7 @@ class Namespace(Base):
 
     @property
     def data(self):
+        """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
         ns_data = self.__dict__
         del ns_data['_sa_instance_state']
         return ns_data
@@ -133,16 +134,16 @@ class Annotation(Base):
 
     url = Column(String(255), doc='Source url of the given annotation definition file (.belanno)')
     keyword = Column(String(50), index=True, doc='Keyword that is used in a BEL file to identify a specific annotation')
-    type = Column(String(255))
-    description = Column(Text, nullable=True)
+    type = Column(String(255), doc='Annotation type')
+    description = Column(Text, nullable=True, doc='Optional short description of the given annotation')
     usage = Column(Text, nullable=True)
-    version = Column(String(255), nullable=True)
-    created = Column(DateTime)
+    version = Column(String(255), nullable=True, doc='Version of the annotation')
+    created = Column(DateTime, doc='DateTime of the creation of the given annotation definition')
 
-    name = Column(String(255))
-    author = Column(String(255))
-    license = Column(String(255), nullable=True)
-    contact = Column(String(255), nullable=True)
+    name = Column(String(255), doc='Name of the annotation definition')
+    author = Column(String(255), doc='Author information')
+    license = Column(String(255), nullable=True, doc='License information')
+    contact = Column(String(255), nullable=True, doc='Contact information')
 
     citation = Column(String(255))
     citation_description = Column(Text, nullable=True)
@@ -287,7 +288,7 @@ class Network(Base):
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')
     description = Column(Text, nullable=True, doc='Descriptive text extracted from the BEL file')
     copyright = Column(String(255), nullable=True, doc='Copyright information')
-    disclaimer = Column(String(255), nullable=True)
+    disclaimer = Column(String(255), nullable=True, doc='Disclaimer information')
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
