@@ -15,57 +15,7 @@ log = logging.getLogger('pybel')
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-def sanitize_file_lines(f):
-    """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned"""
-    it = (line.strip() for line in f)
-    it = ((line_number, line) for line_number, line in enumerate(it, start=1) if line and not line.startswith('#'))
-
-    for line_number, line in it:
-        if line.endswith('\\'):
-            log.log(4, 'Multiline quote starting on line: %d', line_number)
-            line = line.strip('\\').strip()
-            next_line_number, next_line = next(it)
-            while next_line.endswith('\\'):
-                log.log(3, 'Extending line: %s', next_line)
-                line += " " + next_line.strip('\\').strip()
-                next_line_number, next_line = next(it)
-            line += " " + next_line.strip()
-            log.log(3, 'Final line: %s', line)
-
-        elif 1 == line.count('"'):
-            log.log(4, 'PyBEL013 Missing new line escapes [line: %d]', line_number)
-            next_line_number, next_line = next(it)
-            next_line = next_line.strip()
-            while not next_line.endswith('"'):
-                log.log(3, 'Extending line: %s', next_line)
-                line = '{} {}'.format(line.strip(), next_line)
-                next_line_number, next_line = next(it)
-                next_line = next_line.strip()
-            line = '{} {}'.format(line, next_line)
-            log.log(3, 'Final line: %s', line)
-
-        comment_loc = line.rfind(' //')
-        if 0 <= comment_loc:
-            line = line[:comment_loc]
-
-        yield line_number, line
-
-
-def split_file_to_annotations_and_definitions(file):
-    """Enumerates a line iterable and splits into 3 parts"""
-    content = list(sanitize_file_lines(file))
-
-    end_document_section = 1 + max(j for j, (i, l) in enumerate(content) if l.startswith('SET DOCUMENT'))
-    end_definitions_section = 1 + max(j for j, (i, l) in enumerate(content) if re_match_bel_header.match(l))
-
-    log.info('File length: %d lines', len(content))
-    documents = content[:end_document_section]
-    definitions = content[end_document_section:end_definitions_section]
-    statements = content[end_definitions_section:]
-
-    return documents, definitions, statements
-
-
+# TODO move to pybel_tools
 def check_stability(ns_dict, ns_mapping):
     """Check the stability of namespace mapping
 

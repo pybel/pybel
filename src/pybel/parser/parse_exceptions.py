@@ -40,7 +40,7 @@ class UndefinedNamespaceWarning(PyBelWarning):
         self.namespace = namespace
 
     def __str__(self):
-        return '{} is not a defined namespace'.format(self.namespace)
+        return '"{}" is not a defined namespace'.format(self.namespace)
 
 
 class IdentifierWarning(PyBelWarning):
@@ -97,7 +97,7 @@ class IllegalAnnotationValueWarning(PyBelWarning):
         self.annotation = annotation
 
     def __str__(self):
-        return '"{}" is not in the {} annotation'.format(self.value, self.annotation)
+        return '"{}" is not defined in the {} annotation'.format(self.value, self.annotation)
 
 
 class MissingAnnotationRegexWarning(PyBelWarning):
@@ -122,7 +122,7 @@ class NotSemanticVersionException(PyBelWarning):
         self.version_string = version_string
 
     def __str__(self):
-        return "Version string {} doesn't adhere to semantic versioning".format(self.version_string)
+        return '''Version string "{}" doesn't adhere to semantic versioning'''.format(self.version_string)
 
 
 class InvalidMetadataException(PyBelWarning):
@@ -169,7 +169,7 @@ class InvalidCitationException(PyBelWarning):
         self.citation = citation
 
     def __str__(self):
-        return "Invalid citation, missing required fields: {}".format(self.citation)
+        return "Incomplete citation; missing required fields: {}".format(self.citation)
 
 
 class MissingCitationException(PyBelWarning):
@@ -185,7 +185,7 @@ class MissingCitationException(PyBelWarning):
         self.citation = line
 
     def __str__(self):
-        return "Missing citation; can't parse: {}".format(self.citation)
+        return "Missing citation; can't add: {}".format(self.citation)
 
 
 class MissingSupportWarning(PyBelWarning):
@@ -221,7 +221,7 @@ class InvalidCitationType(PyBelWarning):
         self.citation_type = citation_type
 
     def __str__(self):
-        return '{} is not a valid citation type'.format(self.citation_type)
+        return '"{}" is not a valid citation type'.format(self.citation_type)
 
 
 class InvalidPubMedIdentifierWarning(PyBelWarning):
@@ -232,7 +232,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
         self.reference = reference
 
     def __str__(self):
-        return '{} is not a valid PMID'.format(self.reference)
+        return '"{}" is not a valid PMID'.format(self.reference)
 
 
 # BEL Syntax Warnings
@@ -289,6 +289,7 @@ class InvalidFunctionSemantic(PyBelWarning):
         self.allowed_functions = allowed_functions
 
     def __str__(self):
-        return "{}:{} should be encoded as one of: {}".format(self.namespace,
-                                                              self.name,
-                                                              ', '.join(self.allowed_functions))
+        return "{} {}:{} should be encoded as one of: {}".format(self.function,
+                                                                 self.namespace,
+                                                                 self.name,
+                                                                 ', '.join(self.allowed_functions))

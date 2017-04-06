@@ -36,7 +36,7 @@ class GraphCacheManager(BaseCacheManager):
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
-        log.info('Definition cache manager connected to %s', self.connection)
+        log.info('Graph cache manager connected to %s', self.connection)
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.

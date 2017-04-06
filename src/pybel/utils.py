@@ -19,6 +19,14 @@ from .constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS
 log = logging.getLogger(__name__)
 
 
+def download(url):
+    """Uses requests to download an URL, maybe from a file"""
+    session = requests.Session()
+    session.mount('file://', FileAdapter())
+    res = session.get(url)
+    res.raise_for_status()
+    return res
+
 def parse_bel_resource(lines):
     """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
     
@@ -72,10 +80,7 @@ def get_bel_resource(location):
     """
 
     if is_url(location):
-        session = requests.Session()
-        session.mount('file://', FileAdapter())
-        res = session.get(location)
-
+        res = download(location)
         lines = list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
     else:
         with open(os.path.expanduser(location)) as f:
