@@ -51,7 +51,6 @@ def main():
 @click.option('--url', help='Input BEL file URL')
 @click.option('--connection', help='Connection to definition cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--database-name', help='Input graph name from database')
-@click.option('--database-connection', help='Input cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--csv', help='Output path for *.csv')
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
 @click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
@@ -66,26 +65,25 @@ def main():
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, connection, database_name, database_connection, csv, graphml, json, pickle, cx, bel, neo,
+def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx, bel, neo,
             neo_context, store_default, store_connection, allow_naked_names, allow_nested, no_citation_clearing,
             verbose):
     """Options for multiple outputs/conversions"""
-
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
 
     if database_name:
-        g = from_database(database_name, connection=database_connection)
+        g = from_database(database_name, connection=connection)
     else:
-        params = dict(
+        kwargs = dict(
             manager=connection,
             allow_nested=allow_nested,
             allow_naked_names=allow_naked_names,
             citation_clearing=(not no_citation_clearing)
         )
         if url:
-            g = from_url(url, **params)
+            g = from_url(url, **kwargs)
         else:
-            g = from_lines(path, **params)
+            g = from_lines(path, **kwargs)
 
     if csv:
         log.info('Outputting csv to %s', csv)

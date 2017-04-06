@@ -30,19 +30,18 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             test_csv = os.path.abspath('test.csv')
             test_gpickle = os.path.abspath('test.gpickle')
             test_canon = os.path.abspath('test.bel')
-
-            conn = 'sqlite:///' + os.path.abspath('test.db')
+            connection = 'sqlite:///' + os.path.abspath('test.db')
 
             args = [
                 'convert',
                 # Input
                 '--path', test_bel_thorough,
-                '--connection', conn,
+                '--connection', connection,
                 # Outputs
                 '--csv', test_csv,
                 '--pickle', test_gpickle,
                 '--bel', test_canon,
-                '--store-connection', conn,
+                '--store-connection', connection,
                 '--allow-nested'
             ]
 
@@ -54,17 +53,19 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
             self.bel_thorough_reconstituted(from_pickle(test_gpickle))
             self.bel_thorough_reconstituted(from_path(test_canon))
             self.bel_thorough_reconstituted(from_database(expected_test_thorough_metadata[METADATA_NAME],
-                                                          connection=conn))
+                                                          connection=connection))
 
     @mock_bel_resources
     def test_convert_json(self, mock_get):
         with self.runner.isolated_filesystem():
             test_json = os.path.abspath('test.json')
+            connection = 'sqlite:///' + os.path.abspath('test.db')
 
             args = [
                 'convert',
                 '--path', test_bel_thorough,
                 '--json', test_json,
+                '--connection', connection,
                 '--allow-nested'
             ]
 
@@ -87,9 +88,17 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
         except:
             self.skipTest("Can't connect to Neo4J server")
         else:
-            self.runner.invoke(cli.main, ['convert', '--path', test_bel_simple, '--neo',
-                                          neo_path, '--neo-context', test_context, '--complete-origin'])
+            with self.runner.isolated_filesystem():
+                connection = 'sqlite:///' + os.path.abspath('test.db')
+                args = [
+                    'convert',
+                    '--path', test_bel_simple,
+                    '--connection', connection,
+                    '--neo', neo_path,
+                    '--neo-context', test_context
+                ]
+                self.runner.invoke(cli.main, args)
 
-            q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
-            count = neo.data(q)[0]['count']
-            self.assertEqual(14, count)
+                q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
+                count = neo.data(q)[0]['count']
+                self.assertEqual(14, count)
