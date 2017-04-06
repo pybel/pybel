@@ -2,6 +2,7 @@
 
 import logging
 import os
+import traceback
 import unittest
 
 import py2neo
@@ -36,16 +37,17 @@ class TestCli(BelReconstitutionMixin, unittest.TestCase):
                 'convert',
                 # Input
                 '--path', test_bel_thorough,
+                '--connection', conn,
                 # Outputs
                 '--csv', test_csv,
                 '--pickle', test_gpickle,
                 '--bel', test_canon,
-                '--store', conn,
+                '--store-connection', conn,
                 '--allow-nested'
             ]
 
             result = self.runner.invoke(cli.main, args)
-            self.assertEqual(0, result.exit_code, msg=result.exc_info)
+            self.assertEqual(0, result.exit_code, msg=traceback.format_tb(result.exc_info[2]))
 
             self.assertTrue(os.path.exists(test_csv))
 

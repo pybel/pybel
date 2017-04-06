@@ -49,6 +49,7 @@ def main():
 @main.command()
 @click.option('--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
+@click.option('--connection', help='Connection to definition cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--database-name', help='Input graph name from database')
 @click.option('--database-connection', help='Input cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--csv', help='Output path for *.csv')
@@ -60,13 +61,14 @@ def main():
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
 @click.option('--store-default', is_flag=True, help="Stores to default cache at {}".format(DEFAULT_CACHE_LOCATION))
-@click.option('--store', help="Database connection string")
+@click.option('--store-connection', help="Database connection string")
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--verbose', count=True)
-def convert(path, url, database_name, database_connection, csv, graphml, json, pickle, cx, bel, neo, neo_context,
-            store_default, store, allow_naked_names, allow_nested, no_citation_clearing, verbose):
+def convert(path, url, connection, database_name, database_connection, csv, graphml, json, pickle, cx, bel, neo,
+            neo_context, store_default, store_connection, allow_naked_names, allow_nested, no_citation_clearing,
+            verbose):
     """Options for multiple outputs/conversions"""
 
     log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
@@ -75,6 +77,7 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
         g = from_database(database_name, connection=database_connection)
     else:
         params = dict(
+            manager=connection,
             allow_nested=allow_nested,
             allow_naked_names=allow_naked_names,
             citation_clearing=(not no_citation_clearing)
@@ -111,8 +114,8 @@ def convert(path, url, database_name, database_connection, csv, graphml, json, p
     if store_default:
         to_database(g)
 
-    if store:
-        to_database(g, store)
+    if store_connection:
+        to_database(g, connection=store_connection)
 
     if neo:
         import py2neo
