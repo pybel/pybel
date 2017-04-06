@@ -242,8 +242,8 @@ class CacheManager(BaseCacheManager):
     def get_annotation_data(self, url=None):
         """Returns a list of the locations of the stored namespaces and annotations
 
-        :return: A list of all annotaitons in the relational database.
-        :rtype: list[url or dict]
+        :return: A list of all annotations in the relational database.
+        :rtype: list
 
         """
         if url:

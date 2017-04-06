@@ -590,7 +590,7 @@ class Edge(Base):
     id = Column(Integer, primary_key=True)
 
     graphIdentifier = Column(Integer,
-                             doc='Identifier that is used in the PyBEL.BELGraph to identify weather or not an edge is artificial')
+                             doc='Identifier that is used in the PyBEL.BELGraph to identify whether or not an edge is artificial')
     bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
