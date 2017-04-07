@@ -9,7 +9,7 @@ This module handles parsing BEL relations and validation of semantics.
 import itertools as itt
 import logging
 
-from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
+from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst, And
 
 from .baseparser import BaseParser
 from .language import activity_labels, activities
@@ -17,9 +17,9 @@ from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
-    MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
+    MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning, RelabelWarning
 from .parse_identifier import IdentifierParser
-from .utils import cartesian_dictionary, WCW, nest, one_of_tags, triple
+from .utils import cartesian_dictionary, WCW, nest, one_of_tags, triple, quote
 from ..constants import *
 from ..utils import list2tuple
 
@@ -440,12 +440,16 @@ class BelParser(BaseParser):
 
         self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
+        self.label_relationship = And([Group(self.bel_term)(SUBJECT), Suppress('labeled'), quote(OBJECT)])
+        self.label_relationship.setParseAction(self.handle_label_relation)
+
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         self.relation = MatchFirst([
             self.has_list,
             self.nested_causal_relationship,
             self.relation,
-            self.unqualified_relation
+            self.unqualified_relation,
+            self.label_relationship,
         ])
 
         self.statement = self.relation | self.bel_term.copy().setParseAction(self.handle_term_singleton)
@@ -618,6 +622,15 @@ class BelParser(BaseParser):
             new_attrs[SUBJECT] = attrs_object
 
         self.graph.add_edge(obj, sub, attr_dict=new_attrs, **attr)
+
+    def handle_label_relation(self, line, position, tokens):
+        subject = self.ensure_node(tokens[SUBJECT])
+        label = tokens[OBJECT]
+
+        if LABEL in self.graph.node[subject]:
+            raise RelabelWarning(self.graph.node, self.graph.node[subject][LABEL], label)
+
+        self.graph.node[subject][LABEL] = label
 
     def _ensure_reaction(self, name, tokens):
         self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})

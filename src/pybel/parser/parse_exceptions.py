@@ -293,3 +293,16 @@ class InvalidFunctionSemantic(PyBelWarning):
                                                                  self.namespace,
                                                                  self.name,
                                                                  ', '.join(self.allowed_functions))
+
+
+class RelabelWarning(PyBelWarning):
+    """Raised when a node is relabeled"""
+
+    def __init__(self, node, old_label, new_label):
+        PyBelWarning.__init__(self, node, old_label, new_label)
+        self.node = node
+        self.old_label = old_label
+        self.new_label = new_label
+
+    def __str__(self):
+        return 'Tried to relabel {} from {} to {}'.format(self.node, self.old_label, self.new_label)

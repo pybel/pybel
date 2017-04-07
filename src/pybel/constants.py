@@ -115,6 +115,8 @@ NAMESPACE = 'namespace'
 NAME = 'name'
 #: The key specifying an identifier dictionary
 IDENTIFIER = 'identifier'
+#: The key specifying an optional label for the node
+LABEL = 'label'
 
 #: The node data key specifying a fusion dictionary, containing :data:`PARTNER_3P`, :data:`PARTNER_5P`,
 # :data:`RANGE_3P`, and :data:`RANGE_5P`

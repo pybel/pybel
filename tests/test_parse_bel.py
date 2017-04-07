@@ -8,7 +8,7 @@ from pybel.constants import *
 from pybel.parser.modifiers import LocationParser, VariantParser, FragmentParser, GmodParser, GsubParser, PmodParser, \
     PsubParser, TruncationParser, FusionParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
-from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
+from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, RelabelWarning
 from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict, \
     test_citation_dict, test_evidence_text
 
@@ -3008,6 +3008,44 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation='isA')
+
+    def test_label_1(self):
+        statement = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
+        result = self.parser.relation.parseString(statement)
+
+        expected_dict = {
+            SUBJECT: {
+                FUNCTION: GENE,
+                IDENTIFIER: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'APOE'
+                },
+                VARIANTS: [
+                    {
+                        KIND: HGVS,
+                        IDENTIFIER: 'c.526C>T'
+                    }, {
+                        KIND: HGVS,
+                        IDENTIFIER: 'c.388T>C'
+                    }
+                ]
+            },
+            OBJECT: 'APOE E2'
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        expected_node = canonicalize_node(result[SUBJECT])
+
+        self.assertHasNode(expected_node)
+        self.assertIn(LABEL, self.parser.graph.node[expected_node])
+        self.assertEqual('APOE E2', self.parser.graph.node[expected_node][LABEL])
+
+    def test_raise_on_relabel(self):
+        s1 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
+        s2 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2 Variant"'
+        self.parser.relation.parseString(s1)
+        with self.assertRaises(RelabelWarning):
+            self.parser.relation.parseString(s2)
 
     def test_equivalentTo(self):
         statement = 'g(dbSNP:"rs123456") eq g(HGNC:YFG, var(c.123G>A))'
