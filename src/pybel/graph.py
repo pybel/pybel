@@ -32,14 +32,14 @@ log = logging.getLogger(__name__)
 class BELGraph(nx.MultiDiGraph):
     """The BELGraph class is a container for BEL networks that is based on the NetworkX MultiDiGraph data structure"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in NetworkX methods. For IO, see
         the :mod:`pybel.io` module
 
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         :type kwargs: dict
         """
-        nx.MultiDiGraph.__init__(self, **kwargs)
+        super(BELGraph, self).__init__(data=data, **kwargs)
 
         self._warnings = []
 
@@ -142,7 +142,7 @@ class BELGraph(nx.MultiDiGraph):
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
         """Allows for filtering by checking keyword arguments are a sub-dictionary of each edges' data.
             See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
-        for u, v, k, d in nx.MultiDiGraph.edges_iter(self, nbunch=nbunch, data=True, keys=True, default=default):
+        for u, v, k, d in super(BELGraph, self).edges_iter(nbunch=nbunch, data=True, keys=True, default=default):
             if not subdict_matches(d, kwargs):
                 continue
             elif keys and data:
@@ -157,7 +157,7 @@ class BELGraph(nx.MultiDiGraph):
     def nodes_iter(self, data=False, **kwargs):
         """Allows for filtering by checking keyword arguments are a sub-dictionary of each nodes' data.
             See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
-        for n, d in nx.MultiDiGraph.nodes_iter(self, data=True):
+        for n, d in super(BELGraph, self).nodes_iter(data=True):
             if not subdict_matches(d, kwargs):
                 continue
             elif data:
