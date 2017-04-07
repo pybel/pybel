@@ -373,6 +373,12 @@ class BelParser(BaseParser):
         self.has_members = triple(self.abundance, has_members_tag, self.abundance_list)
         self.has_members.setParseAction(self.handle_has_members)
 
+        has_components_tag = oneOf(['hasComponents'])
+        self.has_components = triple(self.abundance, has_components_tag, self.abundance_list)
+        self.has_components.setParseAction(self.handle_has_components)
+
+        self.has_list = self.has_members | self.has_components
+
         # 3.4.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hascomponent
         has_component_tag = oneOf(['hasComponent']).setParseAction(replaceWith(HAS_COMPONENT))
         self.has_component = triple(self.complex_abundances | self.composite_abundance, has_component_tag,
@@ -436,7 +442,7 @@ class BelParser(BaseParser):
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         self.relation = MatchFirst([
-            self.has_members,
+            self.has_list,
             self.nested_causal_relationship,
             self.relation,
             self.unqualified_relation
@@ -544,7 +550,13 @@ class BelParser(BaseParser):
         for child_tokens in tokens[2]:
             child = self.ensure_node(child_tokens)
             self.graph.add_unqualified_edge(parent, child, HAS_MEMBER)
+        return tokens
 
+    def handle_has_components(self, line, position, tokens):
+        parent = self.ensure_node(tokens[0])
+        for child_tokens in tokens[2]:
+            child = self.ensure_node(child_tokens)
+            self.graph.add_unqualified_edge(parent, child, HAS_COMPONENT)
         return tokens
 
     def _build_attrs(self):

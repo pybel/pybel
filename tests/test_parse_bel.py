@@ -2930,6 +2930,29 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
                          decanonicalize_edge(self.parser.graph, sub, obj, 0))
 
+    def test_component_list(self):
+        s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
+        result = self.parser.relation.parseString(s)
+
+        expected_result_list = [
+            [COMPLEX, ['SCOMP', 'C1 Complex']],
+            'hasComponents',
+            [
+                [PROTEIN, ['HGNC', 'C1QB']],
+                [PROTEIN, ['HGNC', 'C1S']]
+            ]
+        ]
+        self.assertEqual(expected_result_list, result.asList())
+
+        sub = COMPLEX, 'SCOMP', 'C1 Complex'
+        self.assertHasNode(sub)
+        child_1 = PROTEIN, 'HGNC', 'C1QB'
+        self.assertHasNode(child_1)
+        self.assertHasEdge(sub, child_1, **{RELATION: HAS_COMPONENT})
+        child_2 = PROTEIN, 'HGNC', 'C1S'
+        self.assertHasNode(child_2)
+        self.assertHasEdge(sub, child_2, **{RELATION: HAS_COMPONENT})
+
     def test_member_list(self):
         """
         3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
