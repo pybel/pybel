@@ -119,14 +119,14 @@ class PmodParser(BaseParser):
 
         BaseParser.__init__(self, self.language)
 
-    def handle_pmod_default_ns(self, s, l, tokens):
+    def handle_pmod_default_ns(self, line, position, tokens):
         tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
         tokens['name'] = language.pmod_namespace[tokens[0]]
         return tokens
 
-    def handle_pmod_legacy_ns(self, s, l, tokens):
+    def handle_pmod_legacy_ns(self, line, position, tokens):
         upgraded = language.pmod_legacy_labels[tokens[0]]
-        log.debug('legacy pmod() value %s upgraded to %s', s, upgraded)
+        log.debug('legacy pmod() value %s upgraded to %s', line, upgraded)
         tokens['namespace'] = BEL_DEFAULT_NAMESPACE
         tokens['name'] = upgraded
         return tokens

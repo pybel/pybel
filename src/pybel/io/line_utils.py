@@ -52,10 +52,10 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 
     bel_parser = BelParser(
         graph=graph,
-        namespace_dicts=metadata_parser.namespace_dict,
-        annotation_dicts=metadata_parser.annotations_dict,
-        namespace_expressions=metadata_parser.namespace_regex,
-        annotation_expressions=metadata_parser.annotations_regex,
+        namespace_dict=metadata_parser.namespace_dict,
+        annotation_dict=metadata_parser.annotations_dict,
+        namespace_regex=metadata_parser.namespace_regex,
+        annotation_regex=metadata_parser.annotations_regex,
         allow_naked_names=allow_naked_names,
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,

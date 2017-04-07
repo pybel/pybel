@@ -89,7 +89,7 @@ def build_legacy_fusion(identifier, reference):
     return res
 
 
-def fusion_legacy_handler(s, l, tokens):
+def fusion_legacy_handler(line, position, tokens):
     if RANGE_5P not in tokens:
         tokens[RANGE_5P] = {FUSION_MISSING: '?'}
     if RANGE_3P not in tokens:
@@ -98,7 +98,7 @@ def fusion_legacy_handler(s, l, tokens):
 
 
 def fusion_break_handler_wrapper(reference, start):
-    def fusion_break_handler(s, l, tokens):
+    def fusion_break_handler(line, position, tokens):
         if tokens[0] == '?':
             tokens[FUSION_MISSING] = '?'
             return tokens

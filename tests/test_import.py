@@ -90,7 +90,7 @@ class TestImport(BelReconstitutionMixin, unittest.TestCase):
 class TestRegex(unittest.TestCase):
     def setUp(self):
         self.graph = BELGraph()
-        self.parser = BelParser(self.graph, namespace_dicts={}, namespace_expressions={'dbSNP': 'rs[0-9]*'})
+        self.parser = BelParser(self.graph, namespace_dict={}, namespace_regex={'dbSNP': 'rs[0-9]*'})
 
     def test_match(self):
         lines = [
@@ -129,7 +129,7 @@ class TestFull(TestTokenParserBase):
         }
 
         self.graph = BELGraph()
-        self.parser = BelParser(self.graph, namespace_dicts=self.namespaces, annotation_dicts=self.annotations)
+        self.parser = BelParser(self.graph, namespace_dict=self.namespaces, annotation_dict=self.annotations)
 
     def test_semantic_failure(self):
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
@@ -143,7 +143,7 @@ class TestFull(TestTokenParserBase):
             "bp(ABASD) -- p(ABASF)"
         ]
         self.graph = BELGraph()
-        self.parser = BelParser(self.graph, namespace_dicts=self.namespaces, allow_naked_names=True)
+        self.parser = BelParser(self.graph, namespace_dict=self.namespaces, allow_naked_names=True)
         self.parser.parse_lines(statements)
 
     def test_missing_citation(self):

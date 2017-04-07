@@ -20,13 +20,13 @@ class IdentifierParser(BaseParser):
     """A parser for identifiers in the form of namespace:name. Can be made more lenient when given a default namespace
     or enabling the use of naked names"""
 
-    def __init__(self, namespace_dict=None, namespace_expressions=None, default_namespace=None,
+    def __init__(self, namespace_dict=None, namespace_regex=None, default_namespace=None,
                  allow_naked_names=False):
         """
         :param namespace_dict: A dictionary of {namespace: set of names}
         :type namespace_dict: dict
-        :param namespace_expressions: A dictionary of {namespace: regular expression string} to compile
-        :type namespace_expressions: dict
+        :param namespace_regex: A dictionary of {namespace: regular expression string} to compile
+        :type namespace_regex: dict
         :param default_namespace: A set of strings that can be used without a namespace
         :type default_namespace: set of str
         :param allow_naked_names: If true, turn off naked namespace failures
@@ -35,7 +35,7 @@ class IdentifierParser(BaseParser):
         #: A dictionary of cached {namespace keyword: set of values}
         self.namespace_dict = namespace_dict
         #: A dictionary of {namespace keyword: regular expression string}
-        self.namespace_regex = {} if namespace_expressions is None else namespace_expressions
+        self.namespace_regex = {} if namespace_regex is None else namespace_regex
         #: A dictionary of {namespace keyword: compiled regular expression}
         self.namespace_regex_compiled = {k: re.compile(v) for k, v in self.namespace_regex.items()}
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
@@ -98,7 +98,7 @@ class IdentifierParser(BaseParser):
         if name not in self.default_namespace:
             raise MissingDefaultNameWarning(name)
 
-    def handle_identifier_qualified(self, s, l, tokens):
+    def handle_identifier_qualified(self, line, position, tokens):
         namespace = tokens[NAMESPACE]
         self.raise_for_missing_namespace(namespace)
 
@@ -107,18 +107,18 @@ class IdentifierParser(BaseParser):
 
         return tokens
 
-    def handle_identifier_default(self, s, l, tokens):
+    def handle_identifier_default(self, line, position, tokens):
         name = tokens[NAME]
         self.raise_for_missing_default(name)
         return tokens
 
     @staticmethod
-    def handle_namespace_lenient(s, l, tokens):
+    def handle_namespace_lenient(line, position, tokens):
         tokens[NAMESPACE] = DIRTY
-        log.debug('Naked namespace: %s', s)
+        log.debug('Naked namespace: %s', line)
         return tokens
 
     @staticmethod
-    def handle_namespace_invalid(s, l, tokens):
+    def handle_namespace_invalid(line, positon, tokens):
         name = tokens[NAME]
         raise NakedNameWarning(name)

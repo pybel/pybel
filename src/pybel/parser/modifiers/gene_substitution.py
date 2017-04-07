@@ -57,9 +57,9 @@ class GsubParser(BaseParser):
 
         BaseParser.__init__(self, self.language)
 
-    def handle_gsub(self, s, l, tokens):
+    def handle_gsub(self, line, position, tokens):
         upgraded = 'c.{}{}>{}'.format(tokens[GSUB_POSITION], tokens[GSUB_REFERENCE], tokens[GSUB_VARIANT])
-        log.debug('legacy sub() %s upgraded to %s', s, upgraded)
+        log.debug('legacy sub() %s upgraded to %s', line, upgraded)
         tokens[IDENTIFIER] = upgraded
         del tokens[GSUB_POSITION]
         del tokens[GSUB_REFERENCE]
