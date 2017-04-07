@@ -34,7 +34,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def __init__(self, **kwargs):
         """The default constructor parses a BEL graph using the built-in NetworkX methods. For IO, see
-        the pybel.io module
+        the :mod:`pybel.io` module
 
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         :type kwargs: dict
@@ -132,7 +132,7 @@ class BELGraph(nx.MultiDiGraph):
         :type u: tuple
         :param v: The target BEL node
         :type v: tuple
-        :param relation: A relationship label from :code:`pybel.constants`
+        :param relation: A relationship label from :mod:`pybel.constants`
         :type relation: str
         """
         key = unqualified_edge_code[relation]
@@ -140,7 +140,7 @@ class BELGraph(nx.MultiDiGraph):
             self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
 
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
-        """Allows for filtering by checking keyword arguments are a subdictionary of each edges' data.
+        """Allows for filtering by checking keyword arguments are a sub-dictionary of each edges' data.
             See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
         for u, v, k, d in nx.MultiDiGraph.edges_iter(self, nbunch=nbunch, data=True, keys=True, default=default):
             if not subdict_matches(d, kwargs):
@@ -155,7 +155,7 @@ class BELGraph(nx.MultiDiGraph):
                 yield u, v
 
     def nodes_iter(self, data=False, **kwargs):
-        """Allows for filtering by checking keyword arguments are a subdictionary of each nodes' data.
+        """Allows for filtering by checking keyword arguments are a sub-dictionary of each nodes' data.
             See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
         for n, d in nx.MultiDiGraph.nodes_iter(self, data=True):
             if not subdict_matches(d, kwargs):
@@ -168,7 +168,8 @@ class BELGraph(nx.MultiDiGraph):
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
 
-        :param function: The node's function (GENE, RNA, PROTEIN, etc)
+        :param function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.RNA`, 
+                        :data:`pybel.constants.PROTEIN`, etc)
         :type function: str
         :param namespace: The namespace
         :type namespace: str
