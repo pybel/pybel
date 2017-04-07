@@ -44,13 +44,33 @@ PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'
 #: The default namespace given to entities in the BEL language
 BEL_DEFAULT_NAMESPACE = 'bel'
 
+CITATION_TYPE_BOOK = 'Book'
+CITATION_TYPE_PUBMED = 'PubMed'
+CITATION_TYPE_JOURNAL = 'Journal'
+CITATION_TYPE_ONLINE = 'Online Resource'
+CITATION_TYPE_OTHER = 'Other'
 #: The valid citation types
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Citation
-CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
+CITATION_TYPES = {
+    CITATION_TYPE_BOOK,
+    CITATION_TYPE_PUBMED,
+    CITATION_TYPE_JOURNAL,
+    CITATION_TYPE_ONLINE,
+    CITATION_TYPE_OTHER
+}
 
+NAMESPACE_DOMAIN_BIOPROCESS = 'BiologicalProcess'
+NAMESPACE_DOMAIN_CHEMICAL = 'Chemical'
+NAMESPACE_DOMAIN_GENE = 'Gene and Gene Products'
+NAMESPACE_DOMAIN_OTHER = 'Other'
 #: The valid namespace types
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Custom+Namespaces
-NAMESPACE_DOMAIN_TYPES = {"BiologicalProcess", "Chemical", "Gene and Gene Products", "Other"}
+NAMESPACE_DOMAIN_TYPES = {
+    NAMESPACE_DOMAIN_BIOPROCESS,
+    NAMESPACE_DOMAIN_CHEMICAL,
+    NAMESPACE_DOMAIN_GENE,
+    NAMESPACE_DOMAIN_OTHER
+}
 
 #: Represents the key for the citation type in a citation dictionary
 CITATION_TYPE = 'type'
