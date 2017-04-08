@@ -1,13 +1,14 @@
 PyBEL |develop_build| |develop_coverage| |develop_documentation| |pypi_license|
 ===============================================================================
 
-`PyBEL <http://pybel.readthedocs.io>`_ is a Python software package for compilation, validation, and data interchange
+`PyBEL <http://pybel.readthedocs.io>`_ is a Python package for compilation, validation, and data interchange
 of biological networks encoded in
 `biological expression language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
 It also provides input/output to common formats and database systems such as `NetworkX <http://networkx.github.io/>`_,
-JSON, CSV, Excel, `Cytoscape <http://www.cytoscape.org/>`_, `CX <http://www.home.ndexbio.org/data-model/>`_, SQL, and
-`Neo4J <https://neo4j.com>`_. Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
-suite of functions and workflows for analyzing the resulting biological networks.
+JSON, CSV, Excel, `Cytoscape <http://www.cytoscape.org/>`_, `CX <http://www.home.ndexbio.org/data-model/>`_,
+`NDEx <https://github.com/pybel/pybel2cx>`_, SQL, and `Neo4J <https://neo4j.com>`_. Its companion package,
+`PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a suite of functions and workflows for analyzing the
+resulting biological networks.
 
 This package was developed at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_
 with support from the `IMI <https://www.imi.europa.eu/>`_ projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and
