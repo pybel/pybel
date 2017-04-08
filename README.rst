@@ -1,6 +1,5 @@
 PyBEL |develop_build| |develop_coverage| |develop_documentation| |pypi_license|
 ===============================================================================
-
 `PyBEL <http://pybel.readthedocs.io>`_ is a Python package for compilation and validation of biological networks
 encoded in the
 `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
@@ -42,26 +41,24 @@ In Cytoscape, open with :code:`Import > Network > From File`.
 
 Installation |pypi_version| |python_versions|
 ---------------------------------------------
-
 PyBEL can be installed easily from `PyPI <https://pypi.python.org/pypi/pybel>`_ with the following code in
 your favorite terminal:
 
 .. code-block:: sh
 
-   python3 -m pip install pybel
+    $ python3 -m pip install pybel
 
-or from the latest code on GitHub with:
+or from the latest code on `GitHub <https://github.com/pybel/pybel>`_ with:
 
-.. code-block::
+.. code-block:: sh
 
-    python3 -m pip install git+https://github.com/pybel/pybel.git@develop
+    $ python3 -m pip install git+https://github.com/pybel/pybel.git@develop
 
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
 instructions. Also, check the change log at :code:`CHANGELOG.rst`.
 
 Contributing
 ------------
-
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
 :code:`CONTRIBUTING.rst` for more information on getting involved. Please add your name to :code:`AUTHORS.rst`!
 
@@ -74,7 +71,6 @@ Acknowledgements
 
 Links
 -----
-
 - Specified by `BEL 1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
   `BEL 2.0 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_
 - Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
