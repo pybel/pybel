@@ -1,16 +1,23 @@
 PyBEL |develop_build| |develop_coverage| |develop_documentation| |pypi_license|
 ===============================================================================
 
-:code:`pybel` is a Python software package that parses BEL scripts, validates their semantics, and facilitates data
-interchange between common formats and database systems like NetworkX, JSON, CSV, Excel, Cytoscape, CX, SQL, and Neo4J.
-Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for
-analysis of biological networks. This package was developed at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_
+`PyBEL <http://pybel.readthedocs.io>`_ is a Python software package for compilation, validation, and data interchange
+of biological networks encoded in
+`biological expression language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
+It also provides input/output to common formats and database systems such as `NetworkX <http://networkx.github.io/>`_,
+JSON, CSV, Excel, `Cytoscape <http://www.cytoscape.org/>`_, `CX <http://www.home.ndexbio.org/data-model/>`_, SQL, and
+`Neo4J <https://neo4j.com>`_. Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
+suite of functions and workflows for analyzing the resulting biological networks.
+
+This package was developed at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_
 with support from the `IMI <https://www.imi.europa.eu/>`_ projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and
 `PHAGO <http://www.phago.eu/>`_.
 
 Getting Started
 ---------------
-In this example, the Selventa Small Corpus is loaded and visualized in a Jupyter Notebook
+In this example, the
+`Selventa Small Corpus <https://wiki.openbel.org/display/home/Summary+of+Large+and+Small+BEL+Corpuses>`_ is loaded and
+visualized in a Jupyter Notebook.
 
 .. code-block:: python
 
@@ -20,7 +27,7 @@ In this example, the Selventa Small Corpus is loaded and visualized in a Jupyter
    1207
    >>> pybel_tools.visualization.to_jupyter(graph)
 
-More examples can be found in the `documentation <http://pybel.readthedocs.io/>`_ and in the
+More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
 PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
