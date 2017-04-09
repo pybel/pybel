@@ -50,3 +50,7 @@ class BaseCacheManager:
     def drop_database(self):
         """Drops all data, tables, and databases for the PyBEL cache"""
         Base.metadata.drop_all(self.engine)
+
+    def rollback(self):
+        """Rolls back the session. Should be used when catching exceptions"""
+        self.session.rollback()

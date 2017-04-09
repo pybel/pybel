@@ -60,8 +60,7 @@ class CacheManager(BaseCacheManager):
         :param echo: Whether or not echo the running sql code.
         :type echo: bool
         """
-        BaseCacheManager.__init__(self, connection=connection, echo=echo)
-        log.info('Cache manager connected to %s', self.connection)
+        super(CacheManager, self).__init__(connection=connection, echo=echo)
 
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
