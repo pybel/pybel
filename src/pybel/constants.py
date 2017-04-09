@@ -30,6 +30,11 @@ PYBEL_DIR = os.path.expanduser('~/.pybel')
 if not os.path.exists(PYBEL_DIR):
     os.mkdir(PYBEL_DIR)
 
+#: The default directory where PyBEL logs are stored
+PYBEL_LOG_DIR = os.path.join(PYBEL_DIR, 'logs')
+if not os.path.exists(PYBEL_LOG_DIR):
+    os.mkdir(PYBEL_LOG_DIR)
+
 #: The default directory where PyBEL data are stored
 PYBEL_DATA_DIR = os.path.join(PYBEL_DIR, 'data')
 if not os.path.exists(PYBEL_DATA_DIR):

@@ -22,7 +22,7 @@ import time
 import click
 
 from .canonicalize import to_bel
-from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
+from .constants import PYBEL_LOG_DIR, DEFAULT_CACHE_LOCATION
 from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
@@ -32,7 +32,7 @@ log = logging.getLogger('pybel')
 formatter = logging.Formatter('%(name)s:%(levelname)s - %(message)s')
 logging.basicConfig(format=formatter)
 
-fh_path = os.path.join(PYBEL_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
+fh_path = os.path.join(PYBEL_LOG_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
 fh = logging.FileHandler(fh_path)
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
