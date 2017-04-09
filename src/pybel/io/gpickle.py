@@ -27,6 +27,7 @@ def to_bytes(graph, protocol=None):
     :type graph: BELGraph
     :param protocol: Pickling protocol to use
     :type protocol: int
+    :return: Pickled bytes representing the graph
     :rtype: bytes
     """
     raise_for_not_bel(graph)
