@@ -172,25 +172,22 @@ def parse_statements(graph, statements, bel_parser):
         log.debug('  %s: %d', k, v)
 
 
-def build_metadata_parser(manager=None):
+def build_metadata_parser(connection=None):
     """Builds a metadata parser
     
-    :param manager: An argument to build a metadata parser
-    :type manager: None or str or CacheManager or MetadataParser
+    :param connection: An argument to build a metadata parser
+    :type connection: None or str or CacheManager or MetadataParser
     :return: A metadata parser
     :rtype: MetadataParser
     """
-    if manager is None or isinstance(manager, str):
-        cm = CacheManager(connection=None)
-        return MetadataParser(cm)
+    if isinstance(connection, MetadataParser):
+        return connection
 
-    elif isinstance(manager, CacheManager):
-        return MetadataParser(manager)
+    if isinstance(connection, CacheManager):
+        return MetadataParser(connection)
 
-    elif isinstance(manager, MetadataParser):
-        return manager
-
-    raise TypeError('Invalid argument: {}'.format(manager))
+    manager = CacheManager(connection=connection)
+    return MetadataParser(manager)
 
 
 def sanitize_file_line_iter(f, note_char=':'):
