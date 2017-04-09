@@ -201,7 +201,7 @@ def sanitize_file_line_iter(f, note_char=':'):
             continue
 
         if line[0] == '#':
-            if line[1] == note_char:
+            if len(line) > 1 and line[1] == note_char:
                 log.info('NOTE: Line %d: %s', line_number, line)
             continue
 
