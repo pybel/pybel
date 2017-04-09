@@ -54,3 +54,11 @@ class BaseCacheManager:
     def rollback(self):
         """Rolls back the session. Should be used when catching exceptions"""
         self.session.rollback()
+
+    def flush(self):
+        """Flushes the session."""
+        self.session.flush()
+
+    def commit(self):
+        """Commits the session."""
+        self.session.commit()
