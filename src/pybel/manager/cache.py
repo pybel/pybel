@@ -178,6 +178,10 @@ class CacheManager(BaseCacheManager):
         else:
             return [definition.data for definition in self.session.query(models.Namespace).all()]
 
+    def list_namespaces(self):
+        """Returns a list of all namespace keyword/url pairs"""
+        return list(self.session.query(models.Namespace.keyword, models.Namespace.url).all())
+
     def ensure_default_namespaces(self):
         """Caches the default set of namespaces"""
         for url in defaults.default_namespaces:
@@ -274,6 +278,9 @@ class CacheManager(BaseCacheManager):
     def dict_annotations(self):
         """Returns a dictionary with the keyword:locations of the stored annotations"""
         return {definition.keyword: definition.url for definition in self.session.query(models.Annotation).all()}
+
+    def list_annotations(self):
+        return list(self.session.query(models.Annotation.keyword, models.Annotation.url).all())
 
     def ensure_default_annotations(self):
         """Caches the default set of annotations"""
