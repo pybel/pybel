@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.1 <https://github.com/pybel/pybel/compare/v0.5.0...v0.5.1>`_ - 2017-04-10
+------------------------------------------------------------------------------
+Added
+~~~~~
+- Parsing of labels
+
+Fixed
+~~~~~
+- Parsing of hasComponents lists
+
 `0.5.0 <https://github.com/pybel/pybel/compare/v0.4.4...v0.5.0>`_ - 2017-04-07
 ------------------------------------------------------------------------------
 Added
@@ -310,7 +320,8 @@ Added
 
 Diffs
 -----
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.5.0...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.5.1...HEAD
+- [0.5.1]: https://github.com/pybel/pybel/compare/v0.5.0...v0.5.1
 - [0.5.0]: https://github.com/pybel/pybel/compare/v0.4.4...v0.5.0
 - [0.4.4]: https://github.com/pybel/pybel/compare/v0.4.3...v0.4.4
 - [0.4.3]: https://github.com/pybel/pybel/compare/v0.4.2...v0.4.3
