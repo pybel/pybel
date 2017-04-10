@@ -130,7 +130,7 @@ class MetadataParser(BaseParser):
 
         BaseParser.__init__(self, self.language)
 
-    def handle_document(self, s, l, tokens):
+    def handle_document(self, line, position, tokens):
         key = tokens['key']
         value = tokens['value']
 
@@ -150,7 +150,7 @@ class MetadataParser(BaseParser):
 
         return tokens
 
-    def handle_namespace_url(self, s, l, tokens):
+    def handle_namespace_url(self, line, position, tokens):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -165,7 +165,7 @@ class MetadataParser(BaseParser):
 
         return tokens
 
-    def handle_namespace_owl(self, s, l, tokens):
+    def handle_namespace_owl(self, line, position, tokens):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -183,7 +183,7 @@ class MetadataParser(BaseParser):
 
         return tokens
 
-    def handle_namespace_pattern(self, s, l, tokens):
+    def handle_namespace_pattern(self, line, position, tokens):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -197,7 +197,7 @@ class MetadataParser(BaseParser):
 
         return tokens
 
-    def handle_annotation_owl(self, s, l, tokens):
+    def handle_annotation_owl(self, line, position, tokens):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -213,7 +213,7 @@ class MetadataParser(BaseParser):
 
         return tokens
 
-    def handle_annotations_url(self, s, l, tokens):
+    def handle_annotations_url(self, line, position, tokens):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -227,7 +227,7 @@ class MetadataParser(BaseParser):
 
         return tokens
 
-    def handle_annotation_list(self, s, l, tokens):
+    def handle_annotation_list(self, line, position, tokens):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -241,7 +241,7 @@ class MetadataParser(BaseParser):
 
         return tokens
 
-    def handle_annotation_pattern(self, s, l, tokens):
+    def handle_annotation_pattern(self, line, position, tokens):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):

@@ -61,7 +61,6 @@ class CacheManager(BaseCacheManager):
         :type echo: bool
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
-        log.info('Cache manager connected to %s', self.connection)
 
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
@@ -179,6 +178,10 @@ class CacheManager(BaseCacheManager):
         else:
             return [definition.data for definition in self.session.query(models.Namespace).all()]
 
+    def list_namespaces(self):
+        """Returns a list of all namespace keyword/url pairs"""
+        return list(self.session.query(models.Namespace.keyword, models.Namespace.url).all())
+
     def ensure_default_namespaces(self):
         """Caches the default set of namespaces"""
         for url in defaults.default_namespaces:
@@ -275,6 +278,9 @@ class CacheManager(BaseCacheManager):
     def dict_annotations(self):
         """Returns a dictionary with the keyword:locations of the stored annotations"""
         return {definition.keyword: definition.url for definition in self.session.query(models.Annotation).all()}
+
+    def list_annotations(self):
+        return list(self.session.query(models.Annotation.keyword, models.Annotation.url).all())
 
     def ensure_default_annotations(self):
         """Caches the default set of annotations"""
@@ -512,10 +518,8 @@ class CacheManager(BaseCacheManager):
             network.annotations.append(self.session.query(models.Annotation).filter_by(url=url).one())
 
         if store_parts:
-            # TODO maybe make this part of the cache manager's init function?
-            cm = CacheManager(connection=self.connection)
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
-                cm.ensure_namespace(GOCC_LATEST)
+                self.ensure_namespace(GOCC_LATEST)
             self.store_graph_parts(network, graph)
 
         self.session.add(network)

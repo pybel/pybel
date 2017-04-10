@@ -8,7 +8,7 @@ from pybel.constants import *
 from pybel.parser.modifiers import LocationParser, VariantParser, FragmentParser, GmodParser, GsubParser, PmodParser, \
     PsubParser, TruncationParser, FusionParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
-from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning
+from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, RelabelWarning
 from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict, \
     test_citation_dict, test_evidence_text
 
@@ -2930,6 +2930,29 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
                          decanonicalize_edge(self.parser.graph, sub, obj, 0))
 
+    def test_component_list(self):
+        s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
+        result = self.parser.relation.parseString(s)
+
+        expected_result_list = [
+            [COMPLEX, ['SCOMP', 'C1 Complex']],
+            'hasComponents',
+            [
+                [PROTEIN, ['HGNC', 'C1QB']],
+                [PROTEIN, ['HGNC', 'C1S']]
+            ]
+        ]
+        self.assertEqual(expected_result_list, result.asList())
+
+        sub = COMPLEX, 'SCOMP', 'C1 Complex'
+        self.assertHasNode(sub)
+        child_1 = PROTEIN, 'HGNC', 'C1QB'
+        self.assertHasNode(child_1)
+        self.assertHasEdge(sub, child_1, **{RELATION: HAS_COMPONENT})
+        child_2 = PROTEIN, 'HGNC', 'C1S'
+        self.assertHasNode(child_2)
+        self.assertHasEdge(sub, child_2, **{RELATION: HAS_COMPONENT})
+
     def test_member_list(self):
         """
         3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
@@ -2985,6 +3008,44 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         self.assertHasEdge(sub, obj, relation='isA')
+
+    def test_label_1(self):
+        statement = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
+        result = self.parser.relation.parseString(statement)
+
+        expected_dict = {
+            SUBJECT: {
+                FUNCTION: GENE,
+                IDENTIFIER: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'APOE'
+                },
+                VARIANTS: [
+                    {
+                        KIND: HGVS,
+                        IDENTIFIER: 'c.526C>T'
+                    }, {
+                        KIND: HGVS,
+                        IDENTIFIER: 'c.388T>C'
+                    }
+                ]
+            },
+            OBJECT: 'APOE E2'
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        expected_node = canonicalize_node(result[SUBJECT])
+
+        self.assertHasNode(expected_node)
+        self.assertIn(LABEL, self.parser.graph.node[expected_node])
+        self.assertEqual('APOE E2', self.parser.graph.node[expected_node][LABEL])
+
+    def test_raise_on_relabel(self):
+        s1 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
+        s2 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2 Variant"'
+        self.parser.relation.parseString(s1)
+        with self.assertRaises(RelabelWarning):
+            self.parser.relation.parseString(s2)
 
     def test_equivalentTo(self):
         statement = 'g(dbSNP:"rs123456") eq g(HGNC:YFG, var(c.123G>A))'

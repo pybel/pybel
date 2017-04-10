@@ -71,7 +71,7 @@ class GmodParser(BaseParser):
 
         BaseParser.__init__(self, self.language)
 
-    def handle_gmod_default(self, s, l, tokens):
+    def handle_gmod_default(self, line, position, tokens):
         tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
         tokens[NAME] = language.gmod_namespace[tokens[0]]
         return tokens

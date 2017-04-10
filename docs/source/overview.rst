@@ -102,6 +102,14 @@ Gene Modifications
 Like protein modifications, the physical genomic sequence can be modified to be either methylated or acetylated. This
 is explained further in the Data Model section.
 
+Explicit Node Labels
+~~~~~~~~~~~~~~~~~~~~
+While the BEL 2.0 specification made it possible to represent new terms, such as the APOE gene with two variants
+resulting in the E2 allele, it came at the price of encoding terms in a technical and less readable way. An explicit
+statement for labeling nodes has been added, such that the resulting data structure will have a label for the node:
+
+``g(HGNC:APOE, var(c.388T>C), var(c.526C>T)) labeled "APOE E2"``
+
 Things to Consider
 ------------------
 Do All Statements Need Supporting Text?

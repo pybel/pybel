@@ -9,7 +9,7 @@ This module handles parsing BEL relations and validation of semantics.
 import itertools as itt
 import logging
 
-from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst
+from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst, And
 
 from .baseparser import BaseParser
 from .language import activity_labels, activities
@@ -17,9 +17,9 @@ from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
-    MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning
+    MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning, RelabelWarning
 from .parse_identifier import IdentifierParser
-from .utils import cartesian_dictionary, WCW, nest, one_of_tags, triple
+from .utils import cartesian_dictionary, WCW, nest, one_of_tags, triple, quote
 from ..constants import *
 from ..utils import list2tuple
 
@@ -46,25 +46,25 @@ molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 
 class BelParser(BaseParser):
-    def __init__(self, graph, namespace_dicts=None, annotation_dicts=None, namespace_expressions=None,
-                 annotation_expressions=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
-                 autostreamline=True):
-        """Build a parser backed by a given dictionary of namespaces
+    """Build a parser backed by a given dictionary of namespaces"""
 
+    def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
+                 allow_naked_names=False, allow_nested=False, citation_clearing=True, autostreamline=True):
+        """
         :param graph: The BEL Graph to use to store the network
         :type graph: BELGraph
-        :param namespace_dicts: A dictionary of {namespace: set of members}.
+        :param namespace_dict: A dictionary of {namespace: set of members}.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type namespace_dicts: dict
-        :param annotation_dicts: A dictionary of {annotation: set of values}.
+        :type namespace_dict: dict
+        :param annotation_dict: A dictionary of {annotation: set of values}.
                                     Delegated to :class:`pybel.parser.ControlParser`
-        :type annotation_dicts: dict
-        :param namespace_expressions: A dictionary of {namespace: regular expression strings}.
+        :type annotation_dict: dict
+        :param namespace_regex: A dictionary of {namespace: regular expression strings}.
                                         Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type namespace_expressions: dict
-        :param annotation_expressions: A dictionary of {annotation: regular expression strings}.
+        :type namespace_regex: dict
+        :param annotation_regex: A dictionary of {annotation: regular expression strings}.
                                         Delegated to :class:`pybel.parser.ControlParser`
-        :type annotation_expressions: dict
+        :type annotation_regex: dict
         :param allow_naked_names: If true, turn off naked namespace failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_naked_names: bool
@@ -80,21 +80,19 @@ class BelParser(BaseParser):
         self.allow_nested = allow_nested
 
         self.control_parser = ControlParser(
-            annotation_dicts=annotation_dicts,
-            annotation_expressions=annotation_expressions,
+            annotation_dicts=annotation_dict,
+            annotation_regex=annotation_regex,
             citation_clearing=citation_clearing
         )
 
         self.identifier_parser = IdentifierParser(
-            namespace_dict=namespace_dicts,
-            namespace_expressions=namespace_expressions,
+            namespace_dict=namespace_dict,
+            namespace_regex=namespace_regex,
             allow_naked_names=allow_naked_names
         )
 
         self.has_singleton_terms = False
 
-        # TODO replace with:
-        # identifier = self.identifier_parser.as_group()
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
 
         # 2.2 Abundance Modifier Functions
@@ -375,6 +373,12 @@ class BelParser(BaseParser):
         self.has_members = triple(self.abundance, has_members_tag, self.abundance_list)
         self.has_members.setParseAction(self.handle_has_members)
 
+        has_components_tag = oneOf(['hasComponents'])
+        self.has_components = triple(self.abundance, has_components_tag, self.abundance_list)
+        self.has_components.setParseAction(self.handle_has_components)
+
+        self.has_list = self.has_members | self.has_components
+
         # 3.4.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hascomponent
         has_component_tag = oneOf(['hasComponent']).setParseAction(replaceWith(HAS_COMPONENT))
         self.has_component = triple(self.complex_abundances | self.composite_abundance, has_component_tag,
@@ -436,12 +440,16 @@ class BelParser(BaseParser):
 
         self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
+        self.label_relationship = And([Group(self.bel_term)(SUBJECT), Suppress('labeled'), quote(OBJECT)])
+        self.label_relationship.setParseAction(self.handle_label_relation)
+
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         self.relation = MatchFirst([
-            self.has_members,
+            self.has_list,
             self.nested_causal_relationship,
             self.relation,
-            self.unqualified_relation
+            self.unqualified_relation,
+            self.label_relationship,
         ])
 
         self.statement = self.relation | self.bel_term.copy().setParseAction(self.handle_term_singleton)
@@ -455,12 +463,16 @@ class BelParser(BaseParser):
         return self.identifier_parser.namespace_dict
 
     @property
-    def namespace_re(self):
+    def namespace_regex(self):
         return self.identifier_parser.namespace_regex_compiled
 
     @property
-    def annotation_re(self):
-        return self.control_parser.annotations_re
+    def annotation_dict(self):
+        return self.control_parser.annotation_dict
+
+    @property
+    def annotation_regex(self):
+        return self.control_parser.annotation_regex
 
     @property
     def allow_naked_names(self):
@@ -478,30 +490,30 @@ class BelParser(BaseParser):
         self.graph.clear()
         self.control_parser.clear()
 
-    def handle_nested_relation(self, s, l, tokens):
+    def handle_nested_relation(self, line, position, tokens):
         if not self.allow_nested:
-            raise NestedRelationWarning(s)
+            raise NestedRelationWarning(line)
 
-        self.handle_relation(s, l, {
+        self.handle_relation(line, position, {
             SUBJECT: tokens[SUBJECT],
             RELATION: tokens[RELATION],
             OBJECT: tokens[OBJECT][SUBJECT]
         })
 
-        self.handle_relation(s, l, {
+        self.handle_relation(line, position, {
             SUBJECT: tokens[OBJECT][SUBJECT],
             RELATION: tokens[OBJECT][RELATION],
             OBJECT: tokens[OBJECT][OBJECT]
         })
         return tokens
 
-    def check_function_semantics(self, s, l, tokens):
+    def check_function_semantics(self, line, position, tokens):
         if self.namespace_dict is None or IDENTIFIER not in tokens:
             return tokens
 
         namespace, name = tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
 
-        if namespace in self.namespace_re:
+        if namespace in self.namespace_regex:
             return tokens
 
         if self.allow_naked_names and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
@@ -518,27 +530,37 @@ class BelParser(BaseParser):
         self.ensure_node(tokens)
         return tokens
 
-    def handle_term_singleton(self, s, l, tokens):
+    def handle_term_singleton(self, line, position, tokens):
         """This function wraps self.handle_term but is only used for top-level parsing of bel_terms. This is done
         solely to keep track of if a graph has any singletons"""
         self.has_singleton_terms = True
-        log.warning('Added singleton line: %s', s)
-        return self.handle_term(s, l, tokens)
+        log.warning('Added singleton line: %s', line)
+        return self.handle_term(line, position, tokens)
 
-    def check_required_annotations(self, s):
-        """Checks that the control parser has a citation and evidence before adding an edge"""
+    def check_required_annotations(self, line):
+        """Checks that the control parser has a citation and evidence before adding an edge
+        
+        :param line: The line that's being parsed
+        :type line: str
+        """
         if not self.control_parser.citation:
-            raise MissingCitationException(s)
+            raise MissingCitationException(line)
 
         if not self.control_parser.evidence:
-            raise MissingSupportWarning(s)
+            raise MissingSupportWarning(line)
 
-    def handle_has_members(self, s, l, tokens):
+    def handle_has_members(self, line, position, tokens):
         parent = self.ensure_node(tokens[0])
         for child_tokens in tokens[2]:
             child = self.ensure_node(child_tokens)
             self.graph.add_unqualified_edge(parent, child, HAS_MEMBER)
+        return tokens
 
+    def handle_has_components(self, line, position, tokens):
+        parent = self.ensure_node(tokens[0])
+        for child_tokens in tokens[2]:
+            child = self.ensure_node(child_tokens)
+            self.graph.add_unqualified_edge(parent, child, HAS_COMPONENT)
         return tokens
 
     def _build_attrs(self):
@@ -553,8 +575,8 @@ class BelParser(BaseParser):
 
         return attrs, list_attrs
 
-    def handle_relation(self, s, l, tokens):
-        self.check_required_annotations(s)
+    def handle_relation(self, line, position, tokens):
+        self.check_required_annotations(line)
 
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
@@ -585,7 +607,7 @@ class BelParser(BaseParser):
 
         return tokens
 
-    def handle_unqualified_relation(self, s, l, tokens):
+    def handle_unqualified_relation(self, line, position, tokens):
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
         rel = tokens[RELATION]
@@ -600,6 +622,15 @@ class BelParser(BaseParser):
             new_attrs[SUBJECT] = attrs_object
 
         self.graph.add_edge(obj, sub, attr_dict=new_attrs, **attr)
+
+    def handle_label_relation(self, line, position, tokens):
+        subject = self.ensure_node(tokens[SUBJECT])
+        label = tokens[OBJECT]
+
+        if LABEL in self.graph.node[subject]:
+            raise RelabelWarning(self.graph.node, self.graph.node[subject][LABEL], label)
+
+        self.graph.node[subject][LABEL] = label
 
     def _ensure_reaction(self, name, tokens):
         self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
@@ -694,7 +725,7 @@ class BelParser(BaseParser):
 
 # HANDLERS
 
-def handle_molecular_activity_default(s, l, tokens):
+def handle_molecular_activity_default(line, position, tokens):
     upgraded = activity_labels[tokens[0]]
     log.debug('upgraded legacy activity to %s', upgraded)
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
@@ -702,7 +733,7 @@ def handle_molecular_activity_default(s, l, tokens):
     return tokens
 
 
-def handle_activity_legacy(s, l, tokens):
+def handle_activity_legacy(line, position, tokens):
     legacy_cls = activity_labels[tokens[MODIFIER]]
     tokens[MODIFIER] = ACTIVITY
     tokens[EFFECT] = {
@@ -713,13 +744,13 @@ def handle_activity_legacy(s, l, tokens):
     return tokens
 
 
-def handle_legacy_tloc(s, l, tokens):
-    log.debug('Legacy translocation statement: %s', s)
+def handle_legacy_tloc(line, position, tokens):
+    log.debug('Legacy translocation statement: %s', line)
     return tokens
 
 
-def handle_translocation_illegal(s, l, t):
-    raise MalformedTranslocationWarning(s, l, t)
+def handle_translocation_illegal(line, position, tokens):
+    raise MalformedTranslocationWarning(line, position, tokens)
 
 
 # CANONICALIZATION

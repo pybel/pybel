@@ -4,7 +4,8 @@
 
 from networkx import read_gpickle, write_gpickle
 
-from .utils import ensure_version
+from .utils import raise_for_not_bel, raise_for_old_graph
+from ..graph import BELGraph
 
 try:
     import cPickle as pickle
@@ -20,14 +21,17 @@ __all__ = [
 
 
 def to_bytes(graph, protocol=None):
-    """Converts a graph to bytes with pickle
+    """Converts a graph to bytes with pickle.
 
     :param graph: A BEL graph
     :type graph: BELGraph
     :param protocol: Pickling protocol to use
     :type protocol: int
+    :return: Pickled bytes representing the graph
     :rtype: bytes
     """
+    raise_for_not_bel(graph)
+
     if protocol is not None:
         return pickle.dumps(graph, protocol=protocol)
     else:
@@ -35,7 +39,7 @@ def to_bytes(graph, protocol=None):
 
 
 def from_bytes(bytes_graph, check_version=True):
-    """Reads a graph from bytes (the result of pickling the graph)
+    """Reads a graph from bytes (the result of pickling the graph).
 
     :param bytes_graph: File or filename to write
     :type bytes_graph: bytes
@@ -44,11 +48,17 @@ def from_bytes(bytes_graph, check_version=True):
     :return: A BEL graph
     :rtype: BELGraph
     """
-    return ensure_version(pickle.loads(bytes_graph), check_version)
+    graph = pickle.loads(bytes_graph)
+
+    raise_for_not_bel(graph)
+    if check_version:
+        raise_for_old_graph(graph)
+
+    return graph
 
 
 def to_pickle(graph, file, protocol=None):
-    """Writes this graph to a pickle object with :func:`networkx.write_gpickle`
+    """Writes this graph to a pickle object with :func:`networkx.write_gpickle`.
 
     :param graph: A BEL graph
     :type graph: BELGraph
@@ -57,6 +67,8 @@ def to_pickle(graph, file, protocol=None):
     :param protocol: Pickling protocol to use
     :type protocol: int
     """
+    raise_for_not_bel(graph)
+
     if protocol is not None:
         write_gpickle(graph, file, protocol=protocol)
     else:
@@ -64,7 +76,7 @@ def to_pickle(graph, file, protocol=None):
 
 
 def from_pickle(path, check_version=True):
-    """Reads a graph from a gpickle file
+    """Reads a graph from a gpickle file.
 
     :param path: File or filename to read. Filenames ending in .gz or .bz2 will be uncompressed.
     :type path: file or str
@@ -73,4 +85,10 @@ def from_pickle(path, check_version=True):
     :return: A BEL graph
     :rtype: BELGraph
     """
-    return ensure_version(read_gpickle(path), check_version=check_version)
+    graph = read_gpickle(path)
+
+    raise_for_not_bel(graph)
+    if check_version:
+        raise_for_old_graph(graph)
+
+    return graph

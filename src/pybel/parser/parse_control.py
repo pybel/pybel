@@ -28,22 +28,22 @@ log = logging.getLogger(__name__)
 
 
 class ControlParser(BaseParser):
-    def __init__(self, annotation_dicts=None, annotation_expressions=None, citation_clearing=True):
+    def __init__(self, annotation_dicts=None, annotation_regex=None, citation_clearing=True):
         """Builds parser for BEL valid_annotations statements
 
         :param annotation_dicts: A dictionary of {annotation: set of valid values} for parsing
         :type annotation_dicts: dict
-        :param annotation_expressions: A dictionary of {annotation: regular expression string}
-        :type annotation_expressions: dict
+        :param annotation_regex: A dictionary of {annotation: regular expression string}
+        :type annotation_regex: dict
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
         :type citation_clearing: bool
         """
 
         self.citation_clearing = citation_clearing
 
-        self.valid_annotations = {} if annotation_dicts is None else annotation_dicts
-        self.annotations_re = {} if annotation_expressions is None else annotation_expressions
-        self.annotations_re_compiled = {k: re.compile(v) for k, v in self.annotations_re.items()}
+        self.annotation_dict = {} if annotation_dicts is None else annotation_dicts
+        self.annotation_regex = {} if annotation_regex is None else annotation_regex
+        self.annotation_regex_compiled = {k: re.compile(v) for k, v in self.annotation_regex.items()}
 
         self.statement_group = None
         self.citation = {}
@@ -111,37 +111,38 @@ class ControlParser(BaseParser):
 
         BaseParser.__init__(self, self.language)
 
-    def validate_annotation_key(self, key):
-        if key not in self.valid_annotations and key not in self.annotations_re_compiled:
-            raise UndefinedAnnotationWarning(key)
+    def raise_for_undefined_annotation(self, annotation):
+        if annotation not in self.annotation_dict and annotation not in self.annotation_regex:
+            raise UndefinedAnnotationWarning(annotation)
 
-    def validate_value(self, key, value):
-        if key in self.valid_annotations and value not in self.valid_annotations[key]:
+    def raise_for_invalid_annotation_value(self, key, value):
+        if key in self.annotation_dict and value not in self.annotation_dict[key]:
             raise IllegalAnnotationValueWarning(value, key)
-        elif key in self.annotations_re_compiled and not self.annotations_re_compiled[key].match(value):
+        elif key in self.annotation_regex_compiled and not self.annotation_regex_compiled[key].match(value):
             raise MissingAnnotationRegexWarning(value, key)
 
-    def handle_annotation_key(self, s, l, tokens):
+    def raise_for_missing_citation(self, line):
+        if self.citation_clearing and not self.citation:
+            raise MissingCitationException(line)
+
+    def handle_annotation_key(self, line, position, tokens):
         """Called on all annotation keys before parsing to validate that it's either enumerated or as a regex"""
         key = tokens['key']
-
-        if self.citation_clearing and not self.citation:
-            raise MissingCitationException(s)
-
-        self.validate_annotation_key(key)
+        self.raise_for_missing_citation(line)
+        self.raise_for_undefined_annotation(key)
         return tokens
 
-    def handle_set_statement_group(self, s, l, tokens):
+    def handle_set_statement_group(self, line, position, tokens):
         self.statement_group = tokens['group']
         return tokens
 
-    def handle_set_citation(self, s, l, tokens):
+    def handle_set_citation(self, line, position, tokens):
         self.clear_citation()
 
         values = tokens['values']
 
         if not (3 <= len(values) <= 6):
-            raise InvalidCitationException(s)
+            raise InvalidCitationException(line)
 
         if values[0] not in CITATION_TYPES:
             raise InvalidCitationType(values[0])
@@ -158,36 +159,36 @@ class ControlParser(BaseParser):
 
         return tokens
 
-    def handle_set_evidence(self, s, l, tokens):
+    def handle_set_evidence(self, line, position, tokens):
         self.evidence = tokens['value']
         return tokens
 
-    def handle_set_command(self, s, l, tokens):
+    def handle_set_command(self, line, position, tokens):
         key = tokens['key']
         value = tokens['value']
 
-        self.validate_value(key, value)
+        self.raise_for_invalid_annotation_value(key, value)
 
         self.annotations[key] = value
         return tokens
 
-    def handle_set_command_list(self, s, l, tokens):
+    def handle_set_command_list(self, line, position, tokens):
         key = tokens['key']
         values = tokens['values']
 
         for value in values:
-            self.validate_value(key, value)
+            self.raise_for_invalid_annotation_value(key, value)
 
         self.annotations[key] = set(values)
         return tokens
 
-    def handle_unset_statement_group(self, s, l, tokens):
+    def handle_unset_statement_group(self, line, position, tokens):
         if self.statement_group is None:
             raise MissingAnnotationKeyWarning(BEL_KEYWORD_STATEMENT_GROUP)
         self.statement_group = None
         return tokens
 
-    def handle_unset_citation(self, s, l, tokens):
+    def handle_unset_citation(self, line, position, tokens):
         if not self.citation:
             raise MissingAnnotationKeyWarning(BEL_KEYWORD_CITATION)
 
@@ -195,7 +196,7 @@ class ControlParser(BaseParser):
 
         return tokens
 
-    def handle_unset_evidence(self, s, l, tokens):
+    def handle_unset_evidence(self, line, position, tokens):
         if self.evidence is None:
             raise MissingAnnotationKeyWarning(tokens[EVIDENCE])
         self.evidence = None
@@ -205,13 +206,13 @@ class ControlParser(BaseParser):
         if key not in self.annotations:
             raise MissingAnnotationKeyWarning(key)
 
-    def handle_unset_command(self, s, l, tokens):
+    def handle_unset_command(self, line, position, tokens):
         key = tokens['key']
         self.validate_unset_command(key)
         del self.annotations[key]
         return tokens
 
-    def handle_unset_list(self, s, l, tokens):
+    def handle_unset_list(self, line, position, tokens):
         for key in tokens['values']:
             if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
                 self.evidence = None
@@ -221,7 +222,7 @@ class ControlParser(BaseParser):
 
         return tokens
 
-    def handle_unset_all(self, s, l, tokens):
+    def handle_unset_all(self, line, position, tokens):
         self.clear()
         return tokens
 

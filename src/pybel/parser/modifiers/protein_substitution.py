@@ -58,9 +58,9 @@ class PsubParser(BaseParser):
 
         BaseParser.__init__(self, self.language)
 
-    def handle_psub(self, s, l, tokens):
+    def handle_psub(self, line, position, tokens):
         upgraded = 'p.{}{}{}'.format(tokens[PSUB_REFERENCE], tokens[PSUB_POSITION], tokens[PSUB_VARIANT])
-        log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', s, upgraded)
+        log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', line, upgraded)
         tokens[IDENTIFIER] = upgraded
         del tokens[PSUB_REFERENCE]
         del tokens[PSUB_POSITION]

@@ -22,7 +22,7 @@ import time
 import click
 
 from .canonicalize import to_bel
-from .constants import PYBEL_DIR, DEFAULT_CACHE_LOCATION
+from .constants import PYBEL_LOG_DIR, DEFAULT_CACHE_LOCATION
 from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
@@ -32,7 +32,7 @@ log = logging.getLogger('pybel')
 formatter = logging.Formatter('%(name)s:%(levelname)s - %(message)s')
 logging.basicConfig(format=formatter)
 
-fh_path = os.path.join(PYBEL_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
+fh_path = os.path.join(PYBEL_LOG_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
 fh = logging.FileHandler(fh_path)
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
@@ -46,7 +46,7 @@ def main():
 
 
 @main.command()
-@click.option('--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
+@click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
 @click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--database-name', help='Input graph name from database')
@@ -138,12 +138,12 @@ def manage():
 
 
 @manage.command(help='Set up default cache with default definitions')
-@click.option('--path', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--skip-namespaces', is_flag=True)
 @click.option('--skip-annotations', is_flag=True)
 @click.option('--skip-owl', is_flag=True)
-def setup(path, skip_namespaces, skip_annotations, skip_owl):
-    cm = CacheManager(connection=path)
+def setup(connection, skip_namespaces, skip_annotations, skip_owl):
+    cm = CacheManager(connection=connection)
     if not skip_namespaces:
         cm.ensure_default_namespaces()
     if not skip_annotations:
@@ -211,15 +211,15 @@ def ls(connection):
     manager = CacheManager(connection=connection)
 
     for row in manager.list_graphs():
-        click.echo(', '.join(map(str, row)))
+        click.echo('\t'.join(map(str, row)))
 
 
 @graph.command(help='Drops a graph by ID')
-@click.argument('id')
+@click.argument('gid')
 @click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-def drop(id, connection):
+def drop(gid, connection):
     manager = CacheManager(connection=connection)
-    manager.drop_graph(id)
+    manager.drop_graph(gid)
 
 
 if __name__ == '__main__':

@@ -52,10 +52,10 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 
     bel_parser = BelParser(
         graph=graph,
-        namespace_dicts=metadata_parser.namespace_dict,
-        annotation_dicts=metadata_parser.annotations_dict,
-        namespace_expressions=metadata_parser.namespace_regex,
-        annotation_expressions=metadata_parser.annotations_regex,
+        namespace_dict=metadata_parser.namespace_dict,
+        annotation_dict=metadata_parser.annotations_dict,
+        namespace_regex=metadata_parser.namespace_regex,
+        annotation_regex=metadata_parser.annotations_regex,
         allow_naked_names=allow_naked_names,
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
@@ -172,25 +172,22 @@ def parse_statements(graph, statements, bel_parser):
         log.debug('  %s: %d', k, v)
 
 
-def build_metadata_parser(manager=None):
+def build_metadata_parser(connection=None):
     """Builds a metadata parser
     
-    :param manager: An argument to build a metadata parser
-    :type manager: None or str or CacheManager or MetadataParser
+    :param connection: An argument to build a metadata parser
+    :type connection: None or str or CacheManager or MetadataParser
     :return: A metadata parser
     :rtype: MetadataParser
     """
-    if manager is None or isinstance(manager, str):
-        cm = CacheManager(connection=None)
-        return MetadataParser(cm)
+    if isinstance(connection, MetadataParser):
+        return connection
 
-    elif isinstance(manager, CacheManager):
-        return MetadataParser(manager)
+    if isinstance(connection, CacheManager):
+        return MetadataParser(connection)
 
-    elif isinstance(manager, MetadataParser):
-        return manager
-
-    raise TypeError('Invalid argument: {}'.format(manager))
+    manager = CacheManager(connection=connection)
+    return MetadataParser(manager)
 
 
 def sanitize_file_line_iter(f, note_char=':'):
@@ -201,7 +198,7 @@ def sanitize_file_line_iter(f, note_char=':'):
             continue
 
         if line[0] == '#':
-            if line[1] == note_char:
+            if len(line) > 1 and line[1] == note_char:
                 log.info('NOTE: Line %d: %s', line_number, line)
             continue
 

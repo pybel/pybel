@@ -30,6 +30,11 @@ PYBEL_DIR = os.path.expanduser('~/.pybel')
 if not os.path.exists(PYBEL_DIR):
     os.mkdir(PYBEL_DIR)
 
+#: The default directory where PyBEL logs are stored
+PYBEL_LOG_DIR = os.path.join(PYBEL_DIR, 'logs')
+if not os.path.exists(PYBEL_LOG_DIR):
+    os.mkdir(PYBEL_LOG_DIR)
+
 #: The default directory where PyBEL data are stored
 PYBEL_DATA_DIR = os.path.join(PYBEL_DIR, 'data')
 if not os.path.exists(PYBEL_DATA_DIR):
@@ -44,13 +49,33 @@ PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'
 #: The default namespace given to entities in the BEL language
 BEL_DEFAULT_NAMESPACE = 'bel'
 
+CITATION_TYPE_BOOK = 'Book'
+CITATION_TYPE_PUBMED = 'PubMed'
+CITATION_TYPE_JOURNAL = 'Journal'
+CITATION_TYPE_ONLINE = 'Online Resource'
+CITATION_TYPE_OTHER = 'Other'
 #: The valid citation types
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Citation
-CITATION_TYPES = {'Book', 'PubMed', 'Journal', 'Online Resource', 'Other'}
+CITATION_TYPES = {
+    CITATION_TYPE_BOOK,
+    CITATION_TYPE_PUBMED,
+    CITATION_TYPE_JOURNAL,
+    CITATION_TYPE_ONLINE,
+    CITATION_TYPE_OTHER
+}
 
+NAMESPACE_DOMAIN_BIOPROCESS = 'BiologicalProcess'
+NAMESPACE_DOMAIN_CHEMICAL = 'Chemical'
+NAMESPACE_DOMAIN_GENE = 'Gene and Gene Products'
+NAMESPACE_DOMAIN_OTHER = 'Other'
 #: The valid namespace types
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Custom+Namespaces
-NAMESPACE_DOMAIN_TYPES = {"BiologicalProcess", "Chemical", "Gene and Gene Products", "Other"}
+NAMESPACE_DOMAIN_TYPES = {
+    NAMESPACE_DOMAIN_BIOPROCESS,
+    NAMESPACE_DOMAIN_CHEMICAL,
+    NAMESPACE_DOMAIN_GENE,
+    NAMESPACE_DOMAIN_OTHER
+}
 
 #: Represents the key for the citation type in a citation dictionary
 CITATION_TYPE = 'type'
@@ -95,6 +120,8 @@ NAMESPACE = 'namespace'
 NAME = 'name'
 #: The key specifying an identifier dictionary
 IDENTIFIER = 'identifier'
+#: The key specifying an optional label for the node
+LABEL = 'label'
 
 #: The node data key specifying a fusion dictionary, containing :data:`PARTNER_3P`, :data:`PARTNER_5P`,
 # :data:`RANGE_3P`, and :data:`RANGE_5P`
