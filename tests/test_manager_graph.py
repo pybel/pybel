@@ -4,18 +4,24 @@ import logging
 import unittest
 from collections import Counter
 
-import sqlalchemy.exc
-
 import pybel
+import sqlalchemy.exc
 from pybel import from_path
 from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
 from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, \
-    ANNOTATIONS
+    ANNOTATIONS, FUSION, PARTNER_3P, PARTNER_5P, FUSION_START, FUSION_STOP, FUSION_REFERENCE, FUSION_MISSING, RANGE_3P, \
+    RANGE_5P, KIND, HGVS, FRAGMENT, GMOD, PMOD, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, IDENTIFIER, PMOD_CODE, \
+    PMOD_POSITION, VARIANTS
 from pybel.manager import models
 from tests import constants
 from tests.constants import test_bel_thorough, mock_bel_resources, \
     expected_test_thorough_metadata, test_bel_simple, expected_test_simple_metadata, TemporaryCacheMixin, \
     BelReconstitutionMixin
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 log = logging.getLogger(__name__)
 
@@ -115,6 +121,328 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         g2 = self.manager.get_graph(expected_test_simple_metadata[METADATA_NAME],
                                     expected_test_simple_metadata[METADATA_VERSION])
         self.bel_simple_reconstituted(g2)
+
+    @mock_bel_resources  # pass
+    def test_get_or_create_citation(self, mock_get):
+        basic_citation = {
+            CITATION_TYPE: 'PubMed',
+            CITATION_NAME: 'TestCitation_basic',
+            CITATION_REFERENCE: '1234AB',
+        }
+
+        full_citation = {
+            CITATION_TYPE: 'Other',
+            CITATION_NAME: 'TestCitation_full',
+            CITATION_REFERENCE: 'CD5678',
+            CITATION_DATE: '2017-04-11',
+            CITATION_AUTHORS: 'Jackson M|Lajoie J'
+        }
+
+        # Create
+        basic = self.manager.get_or_create_citation(**basic_citation)
+        self.assertIsInstance(basic, models.Citation)
+        self.assertEqual(basic.data, basic_citation)
+
+        full = self.manager.get_or_create_citation(**full_citation)
+        self.assertIsInstance(full, models.Citation)
+        self.assertEqual(full.data, full_citation)
+
+        self.manager.session.commit()
+
+        self.assertNotEqual(basic.id, full.id)
+
+        # Get
+        reloaded_basic = self.manager.get_or_create_citation(**basic_citation)
+        self.assertEqual(basic.data, reloaded_basic.data)
+        self.assertEqual(basic.id, reloaded_basic.id)
+
+        reloaded_full = self.manager.get_or_create_citation(**full_citation)
+        self.assertEqual(full.data, reloaded_full.data)
+        self.assertEqual(full.id, reloaded_full.id)
+
+    @mock_bel_resources  # pass
+    def test_get_or_create_evidence(self, mock_get):
+        basic_citation = {
+            CITATION_TYPE: 'PubMed',
+            CITATION_NAME: 'TestCitation_basic',
+            CITATION_REFERENCE: '1234AB',
+        }
+
+        basic_citation = self.manager.get_or_create_citation(**basic_citation)
+        evidence_txt = "Yes, all the information is true!"
+        evidence_data = {
+            CITATION: basic_citation.data,
+            EVIDENCE: evidence_txt
+        }
+
+        # Create
+        evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
+        self.assertIsInstance(evidence, models.Evidence)
+        self.assertEqual(evidence.data, evidence_data)
+
+        self.manager.session.commit()
+
+        # Get
+        reloaded_evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
+        self.assertEqual(evidence.data, reloaded_evidence.data)
+        self.assertEqual(evidence.id, reloaded_evidence.id)
+
+    @mock_bel_resources  # pass
+    def test_get_or_create_edge(self, mock_get):
+        edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')]
+        source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
+        target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
+        citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
+        evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
+        basic_edge = {
+            'graph_key': 0,
+            'source': source_node,
+            'target': target_node,
+            'evidence': evidence,
+            'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
+            'relation': edge_data[0][RELATION],
+            'blob': pickle.dumps(edge_data[0])
+        }
+        source_data = source_node.data
+        target_data = target_node.data
+        database_data = {
+            'source': {
+                'node': (source_data['key'], source_data['data']),
+                'key': source_data['key']
+            },
+            'target': {
+                'node': (target_data['key'], target_data['data']),
+                'key': target_data['key']
+            },
+            'data': {
+                RELATION: edge_data[0][RELATION],
+                CITATION: citation.data,
+                EVIDENCE: edge_data[0][EVIDENCE],
+                ANNOTATIONS: {}
+            },
+            'key': 0
+        }
+
+        # Create
+        edge = self.manager.get_or_create_edge(**basic_edge)
+        self.assertIsInstance(edge, models.Edge)
+        self.assertEqual(edge.data, database_data)
+
+        self.manager.session.commit()
+
+        # Get
+        reloaded_edge = self.manager.get_or_create_edge(**basic_edge)
+        self.assertEqual(edge.data, reloaded_edge.data)
+        self.assertEqual(edge.id, reloaded_edge.id)
+
+    @mock_bel_resources  # pass
+    def test_get_or_create_author(self, mock_get):
+        author_name = "Jackson M"
+
+        # Create
+        author = self.manager.get_or_create_author(author_name)
+        self.assertIsInstance(author, models.Author)
+        self.assertEqual(author.name, author_name)
+
+        self.manager.session.commit()
+
+        # Get
+        reloaded_author = self.manager.get_or_create_author(author_name)
+        self.assertEqual(author.name, reloaded_author.name)
+
+    @mock_bel_resources
+    def test_get_or_create_modification(self, mock_get):
+        node_data = self.simple_graph.node[('Protein', 'HGNC', 'FADD')]
+        fusion_missing = {
+            FUSION: {
+                PARTNER_3P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'AKT1',
+                },
+                RANGE_3P: {
+                    FUSION_MISSING: '?',
+                },
+                PARTNER_5P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'EGFR'
+                },
+                RANGE_5P: {
+                    FUSION_MISSING: '?',
+                }
+            }
+        }
+        fusion_full = {
+            FUSION: {
+                PARTNER_3P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'AKT1',
+                },
+                RANGE_3P: {
+                    FUSION_REFERENCE: 'A',
+                    FUSION_START: 'START_1',
+                    FUSION_STOP: 'STOP_1',
+                },
+                PARTNER_5P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'EGFR'
+                },
+                RANGE_5P: {
+                    FUSION_REFERENCE: 'E',
+                    FUSION_START: 'START_2',
+                    FUSION_STOP: 'STOP_2',
+                }
+            }
+        }
+        hgvs = {
+            KIND: HGVS,
+            IDENTIFIER: 'hgvs_ident'
+        }
+        fragment_missing = {
+            KIND: FRAGMENT,
+            FRAGMENT_MISSING: '?',
+        }
+        fragment_full = {
+            KIND: FRAGMENT,
+            FRAGMENT_START: 'START_FRAG',
+            FRAGMENT_STOP: 'STOP_FRAG'
+        }
+        gmod = {
+            KIND: GMOD,
+            IDENTIFIER: {
+                NAMESPACE: 'test_NS',
+                NAME: 'test_GMOD'
+            }
+        }
+        pmod_simple = {
+            KIND: PMOD,
+            IDENTIFIER: {
+                NAMESPACE: 'test_NS',
+                NAME: 'test_PMOD'
+            }
+        }
+        pmod_full = {
+            KIND: PMOD,
+            IDENTIFIER: {
+                NAMESPACE: 'test_NS',
+                NAME: 'test_PMOD_2'
+            },
+            PMOD_CODE: 'Tst',
+            PMOD_POSITION: 12,
+        }
+
+        # Create
+        node_data.update(fusion_missing)
+        fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertIsInstance(fusion_missing_ls, list)
+        self.assertIsInstance(fusion_missing_ls[0], models.Modification)
+        self.assertEqual(fusion_missing[FUSION], fusion_missing_ls[0].data['mod_data'])
+
+        self.manager.session.add(fusion_missing_ls[0])
+        self.manager.session.flush()
+        self.manager.session.commit()
+
+        # Get
+        reloaded_fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(fusion_missing_ls[0].id, reloaded_fusion_missing_ls[0].id)
+
+        # Create
+        node_data.update(fusion_full)
+        fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertIsInstance(fusion_full_ls, list)
+        self.assertIsInstance(fusion_full_ls[0], models.Modification)
+        self.assertEqual(fusion_full[FUSION], fusion_full_ls[0].data['mod_data'])
+
+        self.manager.session.add(fusion_full_ls[0])
+        self.manager.session.flush()
+        self.manager.session.commit()
+
+        # Get
+        reloaded_fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(fusion_full_ls[0].id, reloaded_fusion_full_ls[0].id)
+
+        del node_data[FUSION]
+
+        # Create
+        node_data[VARIANTS] = [hgvs]
+        hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(hgvs, hgvs_ls[0].data['mod_data'])
+
+        self.manager.session.add(fusion_full_ls[0])
+        self.manager.session.flush()
+        self.manager.session.commit()
+
+        # Get
+        reloaded_hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(hgvs_ls[0].id, reloaded_hgvs_ls[0].id)
+
+        # Create
+        node_data[VARIANTS] = [fragment_missing]
+        fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(fragment_missing, fragment_missing_ls[0].data['mod_data'])
+
+        self.manager.session.add(fragment_missing_ls[0])
+        self.manager.session.flush()
+        self.manager.session.commit()
+
+        # Get
+        reloaded_fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(fragment_missing_ls[0].id, reloaded_fragment_missing_ls[0].id)
+
+        # Create
+        node_data[VARIANTS] = [fragment_full]
+        fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(fragment_full, fragment_full_ls[0].data['mod_data'])
+
+        self.manager.session.add(fragment_full_ls[0])
+        self.manager.session.flush()
+        self.manager.session.commit()
+
+        # Get
+        reloaded_fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(fragment_full_ls[0].id, reloaded_fragment_full_ls[0].id)
+
+        # Create
+        node_data[VARIANTS] = [gmod]
+        gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(gmod, gmod_ls[0].data['mod_data'])
+
+        self.manager.session.add(gmod_ls[0])
+        self.manager.session.flush()
+        self.manager.session.commit()
+
+        # Get
+        reloaded_gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(gmod_ls[0].id, reloaded_gmod_ls[0].id)
+
+        # Create
+        node_data[VARIANTS] = [pmod_simple]
+        pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(pmod_simple, pmod_simple_ls[0].data['mod_data'])
+
+        self.manager.session.add(pmod_simple_ls[0])
+        self.manager.session.flush()
+        self.manager.session.commit()
+
+        # Get
+        reloaded_pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(pmod_simple_ls[0].id, reloaded_pmod_simple_ls[0].id)
+
+        # Create
+        node_data[VARIANTS] = [pmod_full]
+        pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(pmod_full, pmod_full_ls[0].data['mod_data'])
+
+        self.manager.session.add(pmod_full_ls[0])
+        self.manager.session.flush()
+        self.manager.session.commit()
+
+        # Get
+        reloaded_pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+        self.assertEqual(pmod_full_ls[0].id, reloaded_pmod_full_ls[0].id)
+
+    @mock_bel_resources
+    def test_get_or_create_property(self, mock_get):
+        pass
 
 
 class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
@@ -283,6 +611,9 @@ class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertIn(evidence_citation_2, evidence_dict_list2)
         self.assertIn(evidence_citation_3, evidence_dict_list2)
 
+    @mock_bel_resources
+    def test_query_network(self, mock_get):
+        pass
 
 @unittest.skip('Feature not started yet')
 class TestFilter(TemporaryCacheMixin, BelReconstitutionMixin):

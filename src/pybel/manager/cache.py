@@ -706,6 +706,8 @@ class CacheManager(BaseCacheManager):
             result = models.Edge(graphIdentifier=graph_key, source=source, target=target, evidence=evidence, bel=bel,
                                  relation=relation, blob=blob)
 
+            # self.session.add(result)
+
         return result
 
     def get_or_create_citation(self, type, name, reference, date=None, authors=None):
@@ -724,7 +726,7 @@ class CacheManager(BaseCacheManager):
         :return: A Citation object
         :rtype: models.Citation
         """
-        result = self.session.query(models.Citation).filter_by(type=type, reference=reference).one_or_none()
+        result = self.session.query(models.Citation).filter_by(type=type, reference=reference.strip()).one_or_none()
 
         if result is None:
             if date:
@@ -739,7 +741,7 @@ class CacheManager(BaseCacheManager):
                     result.authors.append(self.get_or_create_author(author))
 
             self.session.add(result)
-            # self.session.flush()
+            #self.session.flush()
 
         return result
 
@@ -751,10 +753,10 @@ class CacheManager(BaseCacheManager):
         :return: An Author object
         :rtype: models.Author
         """
-        result = self.session.query(models.Author).filter_by(name=name).one_or_none()
+        result = self.session.query(models.Author).filter_by(name=name.strip()).one_or_none()
 
         if result is None:
-            result = models.Author(name=name)
+            result = models.Author(name=name.strip())
             self.session.add(result)
 
         return result
@@ -804,8 +806,8 @@ class CacheManager(BaseCacheManager):
             else:
                 fusion_dict.update({
                     'p5Reference': node_data[RANGE_5P][FUSION_REFERENCE],
-                    'p5Start': node_data[RANGE_3P][FUSION_START],
-                    'p5Stop': node_data[RANGE_3P][FUSION_STOP],
+                    'p5Start': node_data[RANGE_5P][FUSION_START],
+                    'p5Stop': node_data[RANGE_5P][FUSION_STOP],
                 })
 
             modification_list.append(fusion_dict)
@@ -835,7 +837,7 @@ class CacheManager(BaseCacheManager):
                 elif mod_type == GMOD:
                     modification_list.append({
                         'modType': mod_type,
-                        'modNamespace': variant[IDENTIFIER][NAME],
+                        'modNamespace': variant[IDENTIFIER][NAMESPACE],
                         'modName': variant[IDENTIFIER][NAME]
                     })
 
@@ -1057,6 +1059,8 @@ class CacheManager(BaseCacheManager):
             graph.add_edge(edge.source.id, edge.target.id, attr_dict=pickle.loads(edge.blob))
 
         return graph
+
+    #Query
 
     def get_network(self, network_id=None, name=None, version=None, as_dict_list=False):
         """Builds and runs a query over all networks in the database.

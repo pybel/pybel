@@ -670,6 +670,7 @@ class Edge(Base):
                 min_dict['data'].update(prop_info['data'])
         return min_dict
 
+
 class Property(Base):
     """The property table contains additional information that is used to describe the context of a relation."""
     __tablename__ = PROPERTY_TABLE_NAME
