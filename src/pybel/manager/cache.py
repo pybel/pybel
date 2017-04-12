@@ -36,16 +36,17 @@ log = logging.getLogger(__name__)
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
-def build_manager(connection=None):
+def build_manager(connection=None, echo=False):
     """A convenience method for turning a string into a connection, or passing a CacheManager through.
 
     :type connection: None or str or CacheManager
+    :type echo: bool
     :return: A graph cache manager
     :rtype: CacheManager
     """
     if isinstance(connection, CacheManager):
         return connection
-    return CacheManager(connection=connection)
+    return CacheManager(connection=connection, echo=echo)
 
 
 class CacheManager(BaseCacheManager):
