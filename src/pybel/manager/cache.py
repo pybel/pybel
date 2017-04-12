@@ -127,6 +127,8 @@ class CacheManager(BaseCacheManager):
 
         :param url: the location of the namespace file
         :type url: str
+        :return: The namespace instance
+        :rtype: models.Namespace
         """
         if url in self.namespace_cache:
             log.info('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
@@ -147,6 +149,8 @@ class CacheManager(BaseCacheManager):
         for entry in results.entries:
             self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
             self.namespace_id_cache[url][entry.name] = entry.id
+
+        return results
 
     def get_namespace(self, url):
         """Returns a dict of names and their encodings for the given namespace file
@@ -229,6 +233,8 @@ class CacheManager(BaseCacheManager):
 
         :param url: the location of the annotation file
         :type url: str
+        :return: The ensured annotation instance
+        :rtype: models.Annotation
         """
         if url in self.annotation_cache:
             log.info('Already in memory: %s (%d)', url, len(self.annotation_cache[url]))
@@ -244,6 +250,8 @@ class CacheManager(BaseCacheManager):
         for entry in results.entries:
             self.annotation_cache[url][entry.name] = entry.label
             self.annotation_id_cache[url][entry.name] = entry.id
+
+        return results
 
     def get_annotation(self, url):
         """Returns a dict of annotations and their labels for the given annotation file
@@ -512,10 +520,11 @@ class CacheManager(BaseCacheManager):
         graph_bytes = to_bytes(graph)
 
         network = models.Network(blob=graph_bytes, **graph.document)
+
         for key, url in graph.namespace_url.items():
-            network.namespaces.append(self.session.query(models.Namespace).filter_by(url=url).one())
+            network.namespaces.append(self.ensure_namespace(url))
         for key, url in graph.annotation_url.items():
-            network.annotations.append(self.session.query(models.Annotation).filter_by(url=url).one())
+            network.annotations.append(self.ensure_annotation(url))
 
         if store_parts:
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
