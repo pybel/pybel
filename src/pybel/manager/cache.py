@@ -882,7 +882,7 @@ class CacheManager(BaseCacheManager):
                 'modifier': modifier
             }
 
-            if modifier in (ACTIVITY, TRANSLOCATION) and EFFECT in participant_data:
+            if modifier == TRANSLOCATION and EFFECT in participant_data:
                 for effect_type, effect_value in participant_data[EFFECT].items():
                     property_dict['relativeKey'] = effect_type
                     if NAMESPACE in effect_value:
@@ -897,8 +897,18 @@ class CacheManager(BaseCacheManager):
 
                     property_list.append(property_dict)
 
+            elif modifier == ACTIVITY and EFFECT in participant_data:
+                property_dict['effectNamespace'] = participant_data[EFFECT][NAMESPACE]
+                property_dict['effectName'] = participant_data[EFFECT][NAME]
+
+                property_list.append(property_dict)
+
             elif modifier == LOCATION:
-                namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
+                print(participant_data)
+                if participant_data[LOCATION][NAMESPACE] == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
+                    namespace_url = GOCC_LATEST
+                else:
+                    namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
                 property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
                                                                                participant_data[LOCATION][NAME])
                 property_list.append(property_dict)

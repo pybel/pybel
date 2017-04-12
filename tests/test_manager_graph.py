@@ -7,11 +7,7 @@ from collections import Counter
 import pybel
 import sqlalchemy.exc
 from pybel import from_path
-from pybel.constants import CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE
-from pybel.constants import METADATA_NAME, METADATA_VERSION, EVIDENCE, CITATION, FUNCTION, NAMESPACE, NAME, RELATION, \
-    ANNOTATIONS, FUSION, PARTNER_3P, PARTNER_5P, FUSION_START, FUSION_STOP, FUSION_REFERENCE, FUSION_MISSING, RANGE_3P, \
-    RANGE_5P, KIND, HGVS, FRAGMENT, GMOD, PMOD, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, IDENTIFIER, PMOD_CODE, \
-    PMOD_POSITION, VARIANTS
+from pybel.constants import *
 from pybel.manager import models
 from tests import constants
 from tests.constants import test_bel_thorough, mock_bel_resources, \
@@ -74,6 +70,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestGraphCacheSimple, self).setUp()
         self.simple_graph = pybel.from_path(test_bel_simple, manager=self.manager)
+        self.manager.ensure_namespace(GOCC_LATEST)
 
     @mock_bel_resources
     def test_get_or_create_node(self, mock_get):
@@ -122,7 +119,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
                                     expected_test_simple_metadata[METADATA_VERSION])
         self.bel_simple_reconstituted(g2)
 
-    @mock_bel_resources  # pass
+    @mock_bel_resources
     def test_get_or_create_citation(self, mock_get):
         basic_citation = {
             CITATION_TYPE: 'PubMed',
@@ -160,7 +157,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertEqual(full.data, reloaded_full.data)
         self.assertEqual(full.id, reloaded_full.id)
 
-    @mock_bel_resources  # pass
+    @mock_bel_resources
     def test_get_or_create_evidence(self, mock_get):
         basic_citation = {
             CITATION_TYPE: 'PubMed',
@@ -187,7 +184,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertEqual(evidence.data, reloaded_evidence.data)
         self.assertEqual(evidence.id, reloaded_evidence.id)
 
-    @mock_bel_resources  # pass
+    @mock_bel_resources
     def test_get_or_create_edge(self, mock_get):
         edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')]
         source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
@@ -235,7 +232,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertEqual(edge.data, reloaded_edge.data)
         self.assertEqual(edge.id, reloaded_edge.id)
 
-    @mock_bel_resources  # pass
+    @mock_bel_resources
     def test_get_or_create_author(self, mock_get):
         author_name = "Jackson M"
 
@@ -442,7 +439,123 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
 
     @mock_bel_resources
     def test_get_or_create_property(self, mock_get):
-        pass
+        activity = {
+            'data': {
+                SUBJECT: {
+                    EFFECT: {
+                        NAME: 'pep',
+                        NAMESPACE: BEL_DEFAULT_NAMESPACE
+                    },
+                    MODIFIER: ACTIVITY
+                }
+            },
+            'participant': SUBJECT
+        }
+        translocation = {
+            'data': {
+                SUBJECT: {
+                    EFFECT: {
+                        FROM_LOC: {
+                            NAME: 'host intracellular organelle',
+                            NAMESPACE: GOCC_KEYWORD
+                        },
+                        TO_LOC: {
+                            NAME: 'host outer membrane',
+                            NAMESPACE: GOCC_KEYWORD
+                        },
+                    },
+                    MODIFIER: TRANSLOCATION
+                }
+            },
+            'participant': SUBJECT
+        }
+        location = {
+            'data': {
+                SUBJECT: {
+                    LOCATION: {
+                        NAMESPACE: GOCC_KEYWORD,
+                        NAME: 'Herring body'
+                    }
+                }
+            },
+            'participant': SUBJECT
+        }
+        degradation = {
+            'data': {
+                SUBJECT: {
+                    MODIFIER: DEGRADATION
+                }
+            },
+            'participant': SUBJECT
+        }
+        edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')][0]
+
+        # Create
+        edge_data.update(activity['data'])
+        activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        self.assertIsInstance(activity_ls, list)
+        self.assertIsInstance(activity_ls[0], models.Property)
+        self.assertEqual(activity_ls[0].data, activity)
+
+        # Get
+        self.manager.session.add(activity_ls[0])
+        self.manager.flush()
+        self.manager.session.commit()
+
+        reloaded_activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        self.assertEqual(activity_ls[0].id, reloaded_activity_ls[0].id)
+
+        # Create
+        edge_data.update(location['data'])
+        location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        self.assertEqual(location_ls[0].data, location)
+
+        # Get
+        self.manager.session.add(location_ls[0])
+        self.manager.flush()
+        self.manager.session.commit()
+
+        reloaded_location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        self.assertEqual(location_ls[0].id, reloaded_location_ls[0].id)
+
+        # Create
+        edge_data.update(degradation['data'])
+        degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        self.assertEqual(degradation_ls[0].data, degradation)
+
+        # Get
+        self.manager.session.add(degradation_ls[0])
+        self.manager.flush()
+        self.manager.session.commit()
+
+        reloaded_degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        self.assertEqual(degradation_ls[0].id, reloaded_degradation_ls[0].id)
+
+        # Create
+        edge_data.update(translocation['data'])
+        translocation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        self.assertEqual(translocation_ls[0].data, translocation)
+
+        # Get
+        self.manager.session.add(translocation_ls[0])
+        self.manager.flush()
+        self.manager.session.commit()
+
+        source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
+        target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
+        citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
+        evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
+        basic_edge = {
+            'graph_key': 0,
+            'source': source_node,
+            'target': target_node,
+            'evidence': evidence,
+            'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
+            'relation': edge_data[0][RELATION],
+            'blob': pickle.dumps(edge_data[0])
+        }
+        edge = self.manager.get_or_create_edge(**basic_edge)
+        self.assertIn(translocation['data'], edge.data)
 
 
 class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):

@@ -98,7 +98,7 @@ class NamespaceEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), nullable=False,
+    name = Column(Text, nullable=False,
                   doc='Name that is defined in the corresponding namespace definition file')
     encoding = Column(String(8), nullable=True,
                       doc='Represents the biological entities that this name is valid for (e.g. G for Gene or P for Protein)')
@@ -679,6 +679,8 @@ class Property(Base):
 
     participant = Column(String(255), doc='Identifies which participant of the edge if affected by the given property')
     modifier = Column(String(255), doc='The modifier to the corresponding participant')
+    effectNamespace = Column(String(255), nullable=True, doc='Optional namespace that defines modifier value')
+    effectName = Column(String(255), nullable=True, doc='Value for specific modifiers e.g. Activity')
     relativeKey = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
     propValue = Column(String(255), nullable=True, doc='Value of the effect')
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
@@ -701,9 +703,20 @@ class Property(Base):
             },
             'participant': self.participant
         }
+
+        if self.modifier == LOCATION:
+            prop_dict['data'][self.participant] = {
+                LOCATION: self.namespaceEntry.data
+            }
+
         if self.relativeKey:
             prop_dict['data'][self.participant][EFFECT] = {
                 self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.data
+            }
+        elif self.effectNamespace:
+            prop_dict['data'][self.participant][EFFECT] = {
+                NAMESPACE: self.effectNamespace,
+                NAME: self.effectName
             }
 
         return prop_dict
