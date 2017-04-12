@@ -29,7 +29,10 @@ try:
 except ImportError:
     import pickle
 
-__all__ = ['CacheManager']
+__all__ = [
+    'CacheManager',
+    'build_manager',
+]
 
 log = logging.getLogger(__name__)
 
