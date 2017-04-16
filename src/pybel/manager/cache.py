@@ -975,7 +975,7 @@ class CacheManager(BaseCacheManager):
         :type network_id: int
         """
 
-        # TODO delete with cascade
+        # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
         self.session.query(models.Network).filter(models.Network.id == network_id).delete()
         self.session.commit()
 

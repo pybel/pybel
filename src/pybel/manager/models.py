@@ -138,6 +138,7 @@ class NamespaceEntry(Base):
 
 
 class NamespaceEntryEquivalence(Base):
+    """Represents the equivalance classes between entities"""
     __tablename__ = NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
