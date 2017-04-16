@@ -1189,7 +1189,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             ]
 
             for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
-                self.assertEqual(el, l, msg="Expected different error")
+                self.assertEqual(el, l, msg="Expected different error on line {}. Check line {}".format(el, l))
                 self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
         assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
