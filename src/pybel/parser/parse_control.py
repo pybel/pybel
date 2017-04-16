@@ -5,7 +5,9 @@ Control Parser
 ~~~~~~~~~~~~~~
 This module handles parsing control statement, which add annotations and namespaces to the document.
 
-See: https://wiki.openbel.org/display/BLD/Control+Records
+.. see also::
+
+    https://wiki.openbel.org/display/BLD/Control+Records
 """
 
 import logging
@@ -28,9 +30,15 @@ log = logging.getLogger(__name__)
 
 
 class ControlParser(BaseParser):
-    def __init__(self, annotation_dicts=None, annotation_regex=None, citation_clearing=True):
-        """Builds parser for BEL valid_annotations statements
+    """A parser for BEL control statements 
+    
+    .. seealso:: 
+        
+        BEL 1.0 specification on `control records <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_control_records>`_
+    """
 
+    def __init__(self, annotation_dicts=None, annotation_regex=None, citation_clearing=True):
+        """
         :param annotation_dicts: A dictionary of {annotation: set of valid values} for parsing
         :type annotation_dicts: dict
         :param annotation_regex: A dictionary of {annotation: regular expression string}

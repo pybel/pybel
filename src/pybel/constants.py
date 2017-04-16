@@ -9,8 +9,8 @@ This module maintains the strings used throughout the PyBEL codebase to promote 
 
 import os
 
-SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
-LARGE_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/large_corpus.bel'
+SMALL_CORPUS_URL = 'http://resources.openbel.org/belframework/20150611/knowledge/small_corpus.bel'
+LARGE_CORPUS_URL = 'http://resources.openbel.org/belframework/20150611/knowledge/large_corpus.bel'
 
 FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
 OPENBEL_NAMESPACE_RESOURCES = 'http://resources.openbel.org/belframework/20150611/namespace/'

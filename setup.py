@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Setup module for the PyBEL package"""
 
 import codecs  # To use a consistent encoding

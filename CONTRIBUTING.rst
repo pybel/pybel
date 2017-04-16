@@ -22,12 +22,11 @@ Having a Problem? Submit an Issue.
 6. Add a short, but descriptive title
 7. Add a full description of the problem, including the code that caused it and any support files related to this code so others can reproduce your problem
 8. Copy the output and error message you're getting
-9. Add a descriptive tag, like "bug" or "question"
 
-Have a Suggestion?
-------------------
+Have a Question or Suggestion?
+------------------------------
 
-Same drill! Submit an issue with the tag "enhancement"
+Same drill! Submit an issue and we'll have a nice conversation in the thread.
 
 Want to Contribute?
 -------------------
@@ -35,32 +34,22 @@ Want to Contribute?
 1. Get the code. Fork the repository from GitHub using the big green button in the top-right corner of https://github.com/pybel/pybel
 2. Clone your directory with
 
-.. code-block:: sh
-
     $ git clone https://github.com/<YourUsername>/pybel
-
+    
 3. Install with :code:`pip`. The flag, :code:`-e`, makes your installation editable, so your changes will be reflected
 automatically in your installation.
 
-.. code-block:: sh
-
     $ cd pybel
-    $ pip install -e .
-
-
-5. Make a branch off of develop, then make contributions! This line makes a new branch and checks it out
-
-.. code-block:: sh
+    $ python3 -m pip install -e .
+    
+4. Make a branch off of develop, then make contributions! This line makes a new branch and checks it out
 
     $ git checkout -b feature/<YourFeatureName>
+    
+5. This project should be well tested, so write unit tests in the :code:`tests/` directory
+6. Check that all tests are passing and code coverage is good with :code:`tox` before committing.
 
-6. This project should be well tested, so write unit tests in the :code:`tests/` directory
-
-7. Check that all tests are passing and code coverage is good with :code:`tox` before committing.
-
-.. code-block:: sh
-
-   tox
+    $ tox
 
 
 Pull Requests

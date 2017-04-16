@@ -11,6 +11,27 @@ from sqlalchemy.orm import relationship
 
 from ..constants import *
 
+__all__ = [
+    'Base',
+    'Namespace',
+    'NamespaceEntry',
+    'NamespaceEntryEquivalence',
+    'Annotation',
+    'AnnotationEntry',
+    'OwlNamespace',
+    'OwlNamespaceEntry',
+    'OwlAnnotation',
+    'OwlAnnotationEntry',
+    'Network',
+    'Node',
+    'Modification',
+    'Author',
+    'Citation',
+    'Evidence',
+    'Edge',
+    'Property',
+]
+
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
 
@@ -48,7 +69,6 @@ AUTHOR_CITATION_TABLE_NAME = 'pybel_author_citation'
 CITATION_TABLE_NAME = 'pybel_citation'
 EVIDENCE_TABLE_NAME = 'pybel_evidence'
 PROPERTY_TABLE_NAME = 'pybel_property'
-
 
 Base = declarative_base()
 
@@ -549,7 +569,7 @@ class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication') #index=True,
+    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')  # index=True,
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation', back_populates='evidences')
@@ -572,7 +592,6 @@ edge_annotation = Table(
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
     Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
 )
-
 
 edge_property = Table(
     EDGE_PROPERTY_TABLE_NAME, Base.metadata,
@@ -669,6 +688,7 @@ class Edge(Base):
             else:
                 min_dict['data'].update(prop_info['data'])
         return min_dict
+
 
 class Property(Base):
     """The property table contains additional information that is used to describe the context of a relation."""

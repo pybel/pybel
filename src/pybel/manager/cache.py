@@ -29,23 +29,27 @@ try:
 except ImportError:
     import pickle
 
-__all__ = ['CacheManager']
+__all__ = [
+    'CacheManager',
+    'build_manager',
+]
 
 log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
-def build_manager(connection=None):
+def build_manager(connection=None, echo=False):
     """A convenience method for turning a string into a connection, or passing a CacheManager through.
 
     :type connection: None or str or CacheManager
+    :type echo: bool
     :return: A graph cache manager
     :rtype: CacheManager
     """
     if isinstance(connection, CacheManager):
         return connection
-    return CacheManager(connection=connection)
+    return CacheManager(connection=connection, echo=echo)
 
 
 class CacheManager(BaseCacheManager):
@@ -70,6 +74,10 @@ class CacheManager(BaseCacheManager):
         self.annotation_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
+
+
+        self.annotation_model = {}
+        self.namespace_model = {}
 
         self.namespace_term_cache = {}
         self.namespace_edge_cache = {}
@@ -127,10 +135,12 @@ class CacheManager(BaseCacheManager):
 
         :param url: the location of the namespace file
         :type url: str
+        :return: The namespace instance
+        :rtype: models.Namespace
         """
-        if url in self.namespace_cache:
+        if url in self.namespace_model:
             log.info('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
-            return
+            return self.namespace_model[url]
 
         results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
 
@@ -144,9 +154,13 @@ class CacheManager(BaseCacheManager):
         elif not results.entries:
             raise ValueError('No entries for {}'.format(url))
 
+        self.namespace_model[url] = results
+
         for entry in results.entries:
             self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
             self.namespace_id_cache[url][entry.name] = entry.id
+
+        return results
 
     def get_namespace(self, url):
         """Returns a dict of names and their encodings for the given namespace file
@@ -195,7 +209,7 @@ class CacheManager(BaseCacheManager):
         :param url: the location of the namespace file
         :type url: str
         :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: :class:`models.Namespace`
+        :rtype: models.Annotation
         """
         log.info('Caching annotation %s', url)
 
@@ -229,10 +243,12 @@ class CacheManager(BaseCacheManager):
 
         :param url: the location of the annotation file
         :type url: str
+        :return: The ensured annotation instance
+        :rtype: models.Annotation
         """
-        if url in self.annotation_cache:
+        if url in self.annotation_model:
             log.info('Already in memory: %s (%d)', url, len(self.annotation_cache[url]))
-            return
+            return self.annotation_model[url]
 
         results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
 
@@ -241,9 +257,13 @@ class CacheManager(BaseCacheManager):
 
         log.info('Loaded from database: %s (%d)', url, len(results.entries))
 
+        self.annotation_model[url] = results
+
         for entry in results.entries:
             self.annotation_cache[url][entry.name] = entry.label
             self.annotation_id_cache[url][entry.name] = entry.id
+
+        return results
 
     def get_annotation(self, url):
         """Returns a dict of annotations and their labels for the given annotation file
@@ -512,10 +532,11 @@ class CacheManager(BaseCacheManager):
         graph_bytes = to_bytes(graph)
 
         network = models.Network(blob=graph_bytes, **graph.document)
+
         for key, url in graph.namespace_url.items():
-            network.namespaces.append(self.session.query(models.Namespace).filter_by(url=url).one())
+            network.namespaces.append(self.ensure_namespace(url))
         for key, url in graph.annotation_url.items():
-            network.annotations.append(self.session.query(models.Annotation).filter_by(url=url).one())
+            network.annotations.append(self.ensure_annotation(url))
 
         if store_parts:
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():

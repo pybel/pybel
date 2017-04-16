@@ -30,21 +30,25 @@ class BaseCacheManager:
         """
         if connection is not None:
             self.connection = connection
-            log.info('Connected to user-defined cache: %s', self.connection)
+            log.info('connected to user-defined cache: %s', self.connection)
         elif PYBEL_CONNECTION_ENV in os.environ:
             self.connection = os.environ[PYBEL_CONNECTION_ENV]
-            log.info('Connected to environment-defined cache: %s', self.connection)
+            log.info('connected to environment-defined cache: %s', self.connection)
         else:
             self.connection = 'sqlite:///' + DEFAULT_CACHE_LOCATION
-            log.info('Connected to default cache: %s', self.connection)
+            log.info('connected to default cache: %s', self.connection)
 
+        log.debug('building engine with echo: %s', echo)
         self.engine = create_engine(self.connection, echo=echo)
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
+        log.debug('building session')
         self.session = scoped_session(self.sessionmaker)()
         self.create_database()
+        log.debug('done preparing cache manager')
 
     def create_database(self, checkfirst=True):
         """Creates the PyBEL cache's database and tables"""
+        log.debug('creating database')
         Base.metadata.create_all(self.engine, checkfirst=checkfirst)
 
     def drop_database(self):
