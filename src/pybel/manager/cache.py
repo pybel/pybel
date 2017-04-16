@@ -75,6 +75,10 @@ class CacheManager(BaseCacheManager):
         #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
 
+
+        self.annotation_model = {}
+        self.namespace_model = {}
+
         self.namespace_term_cache = {}
         self.namespace_edge_cache = {}
         self.namespace_graph_cache = {}
@@ -134,9 +138,9 @@ class CacheManager(BaseCacheManager):
         :return: The namespace instance
         :rtype: models.Namespace
         """
-        if url in self.namespace_cache:
+        if url in self.namespace_model:
             log.info('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
-            return
+            return self.namespace_model[url]
 
         results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
 
@@ -149,6 +153,8 @@ class CacheManager(BaseCacheManager):
             raise ValueError('No results for {}'.format(url))
         elif not results.entries:
             raise ValueError('No entries for {}'.format(url))
+
+        self.namespace_model[url] = results
 
         for entry in results.entries:
             self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
@@ -203,7 +209,7 @@ class CacheManager(BaseCacheManager):
         :param url: the location of the namespace file
         :type url: str
         :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: :class:`models.Namespace`
+        :rtype: models.Annotation
         """
         log.info('Caching annotation %s', url)
 
@@ -240,9 +246,9 @@ class CacheManager(BaseCacheManager):
         :return: The ensured annotation instance
         :rtype: models.Annotation
         """
-        if url in self.annotation_cache:
+        if url in self.annotation_model:
             log.info('Already in memory: %s (%d)', url, len(self.annotation_cache[url]))
-            return
+            return self.annotation_model[url]
 
         results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
 
@@ -250,6 +256,8 @@ class CacheManager(BaseCacheManager):
             results = self.insert_annotation(url)
 
         log.info('Loaded from database: %s (%d)', url, len(results.entries))
+
+        self.annotation_model[url] = results
 
         for entry in results.entries:
             self.annotation_cache[url][entry.name] = entry.label
