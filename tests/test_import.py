@@ -5,11 +5,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import networkx as nx
+
 from pybel import BELGraph
+from pybel import to_cx_json, from_cx_json
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
 from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
+from pybel.utils import hash_tuple
 from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenParserBase, SET_CITATION_TEST, \
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
 
@@ -45,6 +49,19 @@ class TestThoroughIo(BelReconstitutionMixin):
         with open(path, 'wb') as f:
             to_graphml(self.graph, f)
 
+    def test_cx(self):
+        graph_cx = to_cx_json(self.graph)
+        graph = from_cx_json(graph_cx)
+
+        node_mapping = dict(enumerate(sorted(self.graph.nodes_iter(), key=hash_tuple)))
+        nx.relabel.relabel_nodes(graph, node_mapping, copy=False)
+
+        self.bel_thorough_reconstituted(
+            graph,
+            check_warnings=False,
+            check_provenance=False
+        )
+
 
 class TestSlushyIo(BelReconstitutionMixin):
     @classmethod
@@ -79,12 +96,30 @@ class TestSlushyIo(BelReconstitutionMixin):
         g_bytes = to_bytes(self.graph)
         from_bytes(g_bytes)
 
+    def test_cx(self):
+        graph_cx = to_cx_json(self.graph)
+        graph = from_cx_json(graph_cx)
+        self.bel_slushy_reconstituted(graph)
 
-class TestImport(BelReconstitutionMixin, unittest.TestCase):
+
+class TestSimpleIo(BelReconstitutionMixin):
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
         g = from_url(Path(test_bel_simple).as_uri())
         self.bel_simple_reconstituted(g)
+
+    def test_cx(self):
+        """Tests the CX input/output on test_bel.bel"""
+        graph = from_path(test_bel_simple)
+        self.bel_simple_reconstituted(graph)
+
+        graph_cx = to_cx_json(graph)
+        reconstituted = from_cx_json(graph_cx)
+
+        node_mapping = dict(enumerate(sorted(graph.nodes_iter(), key=hash_tuple)))
+        nx.relabel.relabel_nodes(reconstituted, node_mapping, copy=False)
+
+        self.bel_simple_reconstituted(reconstituted)
 
 
 class TestRegex(unittest.TestCase):
