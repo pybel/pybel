@@ -17,6 +17,7 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
+from .models import Network, Annotation, Namespace
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -74,7 +75,6 @@ class CacheManager(BaseCacheManager):
         self.annotation_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
-
 
         self.annotation_model = {}
         self.namespace_model = {}
@@ -194,7 +194,7 @@ class CacheManager(BaseCacheManager):
 
     def list_namespaces(self):
         """Returns a list of all namespace keyword/url pairs"""
-        return list(self.session.query(models.Namespace.keyword, models.Namespace.url).all())
+        return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
 
     def ensure_default_namespaces(self):
         """Caches the default set of namespaces"""
@@ -300,7 +300,7 @@ class CacheManager(BaseCacheManager):
         return {definition.keyword: definition.url for definition in self.session.query(models.Annotation).all()}
 
     def list_annotations(self):
-        return list(self.session.query(models.Annotation.keyword, models.Annotation.url).all())
+        return list(self.session.query(Annotation.keyword, Annotation.version, Annotation.url).all())
 
     def ensure_default_annotations(self):
         """Caches the default set of annotations"""
@@ -981,7 +981,7 @@ class CacheManager(BaseCacheManager):
 
     def list_graphs(self):
         """Lists network id, network name, and network version triples"""
-        return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
+        return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
 
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
