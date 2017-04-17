@@ -12,10 +12,11 @@ import re
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
-from pybel.parser.utils import word, quote, delimitedSet
 from .baseparser import BaseParser
 from .parse_exceptions import *
+from .utils import word, quote, delimitedSet, qid
 from ..constants import *
+from ..utils import valid_date_version
 
 __all__ = ['MetadataParser']
 
@@ -34,6 +35,17 @@ value = quote | ppc.identifier
 
 SEMANTIC_VERSION_STRING_RE = re.compile(
     '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?')
+
+
+def check_version(s):
+    """Checks that a version string is valid for BEL documents, meaning it's either in the YYYYMMDD or semantic version
+    format
+    """
+    if valid_date_version(s):
+        return
+
+    if not SEMANTIC_VERSION_STRING_RE.match(s):
+        raise NotSemanticVersionException(s)
 
 
 class MetadataParser(BaseParser):
@@ -95,7 +107,13 @@ class MetadataParser(BaseParser):
         #: A list of annotations that are defined ad-hoc in the BEL script
         self.annotation_list_list = []  # TODO switch to set
 
-        self.document = And([set_tag, Suppress(BEL_KEYWORD_DOCUMENT), word('key'), Suppress('='), value('value')])
+        self.document = And([
+            set_tag,
+            Suppress(BEL_KEYWORD_DOCUMENT),
+            word('key'),
+            Suppress('='),
+            qid('value')
+        ])
 
         namespace_tag = And([define_tag, Suppress(BEL_KEYWORD_NAMESPACE), ppc.identifier('name'), as_tag])
         self.namespace_url = And([namespace_tag, url_tag, quote('url')])
@@ -145,8 +163,8 @@ class MetadataParser(BaseParser):
 
         self.document_metadata[norm_key] = value
 
-        if norm_key == METADATA_VERSION and not SEMANTIC_VERSION_STRING_RE.match(value):
-            raise NotSemanticVersionException(value)
+        if norm_key == METADATA_VERSION:
+            check_version(value)
 
         return tokens
 

@@ -229,6 +229,14 @@ def valid_date(s):
         return False
 
 
+def valid_date_version(s):
+    """Checks that the string is a valid date versions string"""
+    try:
+        datetime.strptime(s, '%Y%m%d')
+        return True
+    except ValueError:
+        return False
+
 def parse_datetime(s):
     """Tries to parse a datetime object from a standard datetime format or date format
 

@@ -2,10 +2,10 @@
 
 """
 
-PyBEL's main data structure is a subclass of NetworkX MultiDiGraph.
+PyBEL's main data structure is a subclass of :class:`networkx.MultiDiGraph`.
 
 The graph contains metadata for the PyBEL version, the BEL script metadata, the namespace definitions, the
-annotation definitions, and the warnings produced in analysis. Like any :code:`networkx` graph, all attributes of
+annotation definitions, and the warnings produced in analysis. Like any :mod:`networkx` graph, all attributes of
 a given object can be accessed through the :code:`graph` property, like in: :code:`my_graph.graph['my key']`.
 Convenient property definitions are given for these attributes.
 
@@ -49,6 +49,27 @@ class BELGraph(nx.MultiDiGraph):
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
 
+        if GRAPH_NAMESPACE_URL not in self.graph:
+            self.graph[GRAPH_NAMESPACE_URL] = {}
+
+        if GRAPH_NAMESPACE_OWL not in self.graph:
+            self.graph[GRAPH_NAMESPACE_OWL] = {}
+
+        if GRAPH_NAMESPACE_PATTERN not in self.graph:
+            self.graph[GRAPH_NAMESPACE_PATTERN] = {}
+
+        if GRAPH_ANNOTATION_URL not in self.graph:
+            self.graph[GRAPH_ANNOTATION_URL] = {}
+
+        if GRAPH_ANNOTATION_OWL not in self.graph:
+            self.graph[GRAPH_ANNOTATION_OWL] = {}
+
+        if GRAPH_ANNOTATION_PATTERN not in self.graph:
+            self.graph[GRAPH_ANNOTATION_PATTERN] = {}
+
+        if GRAPH_ANNOTATION_LIST not in self.graph:
+            self.graph[GRAPH_ANNOTATION_LIST] = {}
+
         #: Is true if during BEL Parsing, a term that is not part of a relation is found
         self.has_singleton_terms = False
 
@@ -66,47 +87,53 @@ class BELGraph(nx.MultiDiGraph):
 
     @name.setter
     def name(self, *attrs, **kwargs):
+        """The graph's name, from the `SET DOCUMENT Name = "..."` entry in the source BEL script"""
         self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
 
     @property
     def version(self):
-        """The graph's version, from the SET DOCUMENT section of the source BEL script"""
+        """The graph's version, from the `SET DOCUMENT Version = "..."` entry in the source BEL script"""
         return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
+
+    @property
+    def description(self):
+        """The graph's description, from `SET DOCUMENT Description = "..."` entry in the source BEL Script"""
+        return self.graph[GRAPH_METADATA].get(METADATA_DESCRIPTION)
 
     @property
     def namespace_url(self):
         """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS file"""
-        return self.graph.get(GRAPH_NAMESPACE_URL, {})
+        return self.graph[GRAPH_NAMESPACE_URL]
 
     @property
     def namespace_owl(self):
         """A dictionary mapping the keywords used to create this graph to the URLs of the OWL file"""
-        return self.graph.get(GRAPH_NAMESPACE_OWL, {})
+        return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
     def namespace_pattern(self):
         """A dictionary mapping the namespace keywords used to create this graph to their regex patterns"""
-        return self.graph.get(GRAPH_NAMESPACE_PATTERN, {})
+        return self.graph[GRAPH_NAMESPACE_PATTERN]
 
     @property
     def annotation_url(self):
         """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO file"""
-        return self.graph.get(GRAPH_ANNOTATION_URL, {})
+        return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
     def annotation_owl(self):
         """A dictionary mapping the annotation keywords to the URL of the OWL file"""
-        return self.graph.get(GRAPH_ANNOTATION_OWL, {})
+        return self.graph[GRAPH_ANNOTATION_OWL]
 
     @property
     def annotation_pattern(self):
         """A dictionary mapping the annotation keywords used to create this graph to their regex patterns"""
-        return self.graph.get(GRAPH_ANNOTATION_PATTERN, {})
+        return self.graph[GRAPH_ANNOTATION_PATTERN]
 
     @property
     def annotation_list(self):
         """A dictionary mapping the keywords of locally defined annotations to a set of their values"""
-        return self.graph.get(GRAPH_ANNOTATION_LIST, {})
+        return self.graph[GRAPH_ANNOTATION_LIST]
 
     @property
     def pybel_version(self):
