@@ -99,6 +99,10 @@ class TestSlushyIo(BelReconstitutionMixin):
     def test_cx(self):
         graph_cx = to_cx_json(self.graph)
         graph = from_cx_json(graph_cx)
+
+        node_mapping = dict(enumerate(sorted(self.graph.nodes_iter(), key=hash_tuple)))
+        nx.relabel.relabel_nodes(graph, node_mapping, copy=False)
+
         self.bel_slushy_reconstituted(graph)
 
 
