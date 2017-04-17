@@ -150,6 +150,7 @@ class ConnectionMixin(unittest.TestCase):
         super(ConnectionMixin, self).tearDown()
         tear_temp_connection(self.dir, self.path)
 
+
 class TemporaryCacheMixin(ConnectionMixin):
     def setUp(self):
         super(TemporaryCacheMixin, self).setUp()
@@ -1184,7 +1185,7 @@ class BelReconstitutionMixin(unittest.TestCase):
                 (86, PlaceholderAminoAcidWarning),
                 (89, NestedRelationWarning),
                 (92, InvalidFunctionSemantic),
-                (95, Exception),
+                # (95, Exception),
                 (98, Exception),
             ]
 
@@ -1223,5 +1224,3 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         assertHasEdge(self, d, b, graph)
         assertHasEdge(self, d, c, graph)
-
-
