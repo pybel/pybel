@@ -13,12 +13,12 @@ This module handles parsing control statement, which add annotations and namespa
 import logging
 import re
 
-from pyparsing import Suppress, MatchFirst, And, oneOf
+from pyparsing import Suppress, MatchFirst, And, oneOf, Word, alphanums
 from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .parse_exceptions import *
-from .utils import is_int, quote, delimitedSet
+from .utils import is_int, quote, delimitedSet, qid
 from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT, \
     BEL_KEYWORD_ALL, ANNOTATIONS
 from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET, CITATION
@@ -27,7 +27,6 @@ from ..utils import valid_date
 __all__ = ['ControlParser']
 
 log = logging.getLogger(__name__)
-
 
 class ControlParser(BaseParser):
     """A parser for BEL control statements 
@@ -60,7 +59,7 @@ class ControlParser(BaseParser):
 
         annotation_key = ppc.identifier('key').setParseAction(self.handle_annotation_key)
 
-        self.set_statement_group = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), quote('group')])
+        self.set_statement_group = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), qid('group')])
         self.set_statement_group.setParseAction(self.handle_set_statement_group)
 
         self.set_citation = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
@@ -71,7 +70,7 @@ class ControlParser(BaseParser):
         self.set_evidence.setParseAction(self.handle_set_evidence)
 
         set_command_prefix = And([annotation_key('key'), Suppress('=')])
-        self.set_command = set_command_prefix + quote('value')
+        self.set_command = set_command_prefix + qid('value')
         self.set_command.setParseAction(self.handle_set_command)
 
         self.set_command_list = set_command_prefix + delimitedSet('values')
