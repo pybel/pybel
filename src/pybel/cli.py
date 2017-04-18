@@ -141,18 +141,21 @@ def manage():
 @click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 @click.option('--skip-namespaces', is_flag=True)
 @click.option('--skip-annotations', is_flag=True)
-@click.option('--skip-owl', is_flag=True)
-def setup(connection, skip_namespaces, skip_annotations, skip_owl):
+@click.option('--owl', is_flag=True)
+@click.option('--fraunhofer', is_flag=True, help='Use fraunhofer resources instead of openbel')
+@click.option('-v', '--verbose', count=True)
+def setup(connection, skip_namespaces, skip_annotations, owl,fraunhofer, verbose):
+    log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
     cm = CacheManager(connection=connection)
     if not skip_namespaces:
-        cm.ensure_default_namespaces()
+        cm.ensure_default_namespaces(use_fraunhofer=fraunhofer)
     if not skip_annotations:
-        cm.ensure_default_annotations()
-    if not skip_owl:
+        cm.ensure_default_annotations(use_fraunhofer=fraunhofer)
+    if owl:
         cm.ensure_default_owl_namespaces()
 
 
-@manage.command(help='Remove default cache at {}'.format(DEFAULT_CACHE_LOCATION))
+@manage.command(help='Drops database in cache')
 @click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
 def remove(connection):
     if not connection:

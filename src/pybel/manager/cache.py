@@ -196,9 +196,9 @@ class CacheManager(BaseCacheManager):
         """Returns a list of all namespace keyword/url pairs"""
         return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
 
-    def ensure_default_namespaces(self):
+    def ensure_default_namespaces(self, use_fraunhofer=False):
         """Caches the default set of namespaces"""
-        for url in defaults.default_namespaces:
+        for url in defaults.fraunhofer_namespaces if use_fraunhofer else defaults.default_namespaces:
             self.ensure_namespace(url)
 
     # ANNOTATION MANAGEMENT
@@ -302,9 +302,9 @@ class CacheManager(BaseCacheManager):
     def list_annotations(self):
         return list(self.session.query(Annotation.keyword, Annotation.version, Annotation.url).all())
 
-    def ensure_default_annotations(self):
+    def ensure_default_annotations(self, use_fraunhofer=False):
         """Caches the default set of annotations"""
-        for url in defaults.default_annotations:
+        for url in defaults.fraunhofer_annotations if use_fraunhofer else defaults.default_annotations:
             self.ensure_annotation(url)
 
     # NAMESPACE OWL MANAGEMENT
