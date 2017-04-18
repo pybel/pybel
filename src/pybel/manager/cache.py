@@ -979,6 +979,11 @@ class CacheManager(BaseCacheManager):
         self.session.query(models.Network).filter(models.Network.id == network_id).delete()
         self.session.commit()
 
+    def drop_graphs(self):
+        """Drops all graphs"""
+        self.session.query(models.Network).delete()
+        self.session.commit()
+
     def list_graphs(self):
         """Lists network id, network name, and network version triples"""
         return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
