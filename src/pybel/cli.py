@@ -154,8 +154,13 @@ def setup(connection, skip_namespaces, skip_annotations, skip_owl):
 
 
 @manage.command(help='Remove default cache at {}'.format(DEFAULT_CACHE_LOCATION))
-def remove():
-    os.remove(DEFAULT_CACHE_LOCATION)
+@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def remove(connection):
+    if not connection:
+        os.remove(DEFAULT_CACHE_LOCATION)
+    else:
+        manager = CacheManager(connection=connection)
+        manager.drop_database()
 
 
 @manage.group(help="Manage definitions")
