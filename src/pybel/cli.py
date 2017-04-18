@@ -24,6 +24,7 @@ import click
 from .canonicalize import to_bel
 from .constants import PYBEL_LOG_DIR, DEFAULT_CACHE_LOCATION
 from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
+from .manager import models
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
 
@@ -220,6 +221,14 @@ def ls(connection):
 def drop(gid, connection):
     manager = CacheManager(connection=connection)
     manager.drop_graph(gid)
+
+
+@graph.command(help='Drops all graphs')
+@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+def dropall(connection):
+    manager = CacheManager(connection=connection)
+    manager.session.query(models.Network).delete()
+    manager.session.commit()
 
 
 if __name__ == '__main__':
