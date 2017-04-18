@@ -139,7 +139,7 @@ class CacheManager(BaseCacheManager):
         :rtype: models.Namespace
         """
         if url in self.namespace_model:
-            log.info('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
+            log.debug('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
             return self.namespace_model[url]
 
         results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
@@ -529,6 +529,7 @@ class CacheManager(BaseCacheManager):
         :return: A Network object
         :rtype: models.Network
         """
+        log.debug('inserting %s', graph.name)
         graph_bytes = to_bytes(graph)
 
         network = models.Network(blob=graph_bytes, **graph.document)
