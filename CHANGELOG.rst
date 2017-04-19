@@ -5,63 +5,77 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.3 <https://github.com/pybel/pybel/compare/v0.5.2...v0.5.3>`_ - 2017-04-19
+------------------------------------------------------------------------------
+Added
+-----
+- Lenient parsing mode for unqualified translocations (https://github.com/pybel/pybel/issues/178)
+
+Changed
+-------
+- Check for dead URLs at BEL framework (https://github.com/pybel/pybel/issues/177)
+- Don't throw warnings for versions that are in YYYYMMDD format (https://github.com/pybel/pybel/issues/175)
+- Include character positions in some exceptions (https://github.com/pybel/pybel/issues/176)
+- Update minimum pickle parsing from 0.4.2 to 0.5.4 to reflect the new parse exceptions's names and arguments
+
+
 `0.5.2 <https://github.com/pybel/pybel/compare/v0.5.1...v0.5.2>`_ - 2017-04-16
 ------------------------------------------------------------------------------
 Fixed
 ~~~~~
-- Ensure existence of namespaces/annotations during graph upload
+- Ensure existence of namespaces/annotations during graph upload (https://github.com/pybel/pybel/issues/165)
 
 `0.5.1 <https://github.com/pybel/pybel/compare/v0.5.0...v0.5.1>`_ - 2017-04-10
 ------------------------------------------------------------------------------
 Added
 ~~~~~
-- Parsing of labels
+- Parsing of labels (https://github.com/pybel/pybel/issues/173)
 
 Fixed
 ~~~~~
-- Parsing of hasComponents lists
+- Parsing of hasComponents lists (https://github.com/pybel/pybel/issues/172)
 
 `0.5.0 <https://github.com/pybel/pybel/compare/v0.4.4...v0.5.0>`_ - 2017-04-07
 ------------------------------------------------------------------------------
 Added
 ~~~~~
-- Debugging on lines starting with #: comments
-- Added missing relations in pybel constants
+- Debugging on lines starting with #: comments (https://github.com/pybel/pybel/issues/162)
+- Added missing relations in pybel constants (https://github.com/pybel/pybel/issues/161)
 
 Changed
 ~~~~~~~
-- Merge definition and graph cache
-- Warn when not using semantic versioning
+- Merge definition and graph cache (https://github.com/pybel/pybel/issues/164)
+- Warn when not using semantic versioning (https://github.com/pybel/pybel/issues/160)
 
 
 `0.4.4 <https://github.com/pybel/pybel/compare/v0.4.3...v0.4.4>`_ - 2017-04-03
 ------------------------------------------------------------------------------
 Added
 ~~~~~
-- File paths in definition parsing
-- Quotes around variant string
+- File paths in definition parsing (https://github.com/pybel/pybel/issues/158)
+- Quotes around variant string (https://github.com/pybel/pybel/issues/156)
 
 Changed
 ~~~~~~~
-- Reorganized package to split line parsing from core data structure
+- Reorganized package to split line parsing from core data structure (https://github.com/pybel/pybel/issues/154)
 
 
 `0.4.3 <https://github.com/pybel/pybel/compare/v0.4.2...v0.4.3>`_ - 2017-03-21
 ------------------------------------------------------------------------------
 Added
 ~~~~~
-- Documentation for constants
-- Date validation on parse-time
+- Documentation for constants (https://github.com/pybel/pybel/issues/146)
+- Date validation on parse-time (https://github.com/pybel/pybel/issues/147)
 
 Changed
 ~~~~~~~
 - Externalized strings from modifier parsers
-- Move pybel.cx.hash_tuple to pybel.utils.hash_tuple
+- Move ``pybel.cx.hash_tuple`` to ``pybel.utils.hash_tuple`` (https://github.com/pybel/pybel/issues/144)
 
 Fixed
 ~~~~~
-- Output to CX on CLI crashing
-- Assignment of graph metadata on reload
+- Output to CX on CLI crashing (https://github.com/pybel/pybel/issues/152)
+- Assignment of graph metadata on reload (https://github.com/pybel/pybel/issues/153)
 
 `0.4.2 <https://github.com/pybel/pybel/compare/v0.4.1...v0.4.2>`_ - 2017-03-16
 ------------------------------------------------------------------------------
@@ -72,7 +86,7 @@ Added
 
 Changed
 ~~~~~~~
-- Update version checking to be more lenient
+- Update version checking to be more lenient. v0.4.2 is now the minimum for reloading a graph
 
 Removed
 ~~~~~~~
@@ -326,8 +340,9 @@ Added
 
 Diffs
 -----
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.5.2...HEAD
-- [0.5.2]: https://github.com/pybel/pybel/compare/v0.5.0...v0.5.2
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.5.3...HEAD
+- [0.5.3]: https://github.com/pybel/pybel/compare/v0.5.2...v0.5.3
+- [0.5.2]: https://github.com/pybel/pybel/compare/v0.5.1...v0.5.2
 - [0.5.1]: https://github.com/pybel/pybel/compare/v0.5.0...v0.5.1
 - [0.5.0]: https://github.com/pybel/pybel/compare/v0.4.4...v0.5.0
 - [0.4.4]: https://github.com/pybel/pybel/compare/v0.4.3...v0.4.4

@@ -1163,7 +1163,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         if check_warnings:
             expected_warnings = [
                 (0, MissingMetadataException),
-                (3, NotSemanticVersionException),
+                (3, VersionFormatWarning),
                 (26, MissingAnnotationKeyWarning),
                 (29, MissingAnnotationKeyWarning),
                 (34, InvalidCitationLengthException),

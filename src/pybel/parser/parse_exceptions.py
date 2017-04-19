@@ -126,15 +126,16 @@ class MissingAnnotationRegexWarning(PyBelWarning):
 
 # Provenance Warnings
 
-class NotSemanticVersionException(PyBelWarning):
-    """Raised if the version string doesn't adhere to semantic versioning"""
+class VersionFormatWarning(PyBelWarning):
+    """Raised if the version string doesn't adhere to semantic versioning or YYYYMMDD format"""
 
     def __init__(self, version_string):
         PyBelWarning.__init__(self, version_string)
         self.version_string = version_string
 
     def __str__(self):
-        return '''Version string "{}" doesn't adhere to semantic versioning'''.format(self.version_string)
+        return '''Version string "{}" neither is a date like YYYYMMDD nor adheres to semantic versioning'''.format(
+            self.version_string)
 
 
 class InvalidMetadataException(PyBelWarning):
