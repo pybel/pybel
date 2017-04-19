@@ -92,7 +92,7 @@ p(HGNC:AKT1) -> (p(HGNC:AKT2) -> biologicalProcess(GO:"response to oxidative str
 bp(HGNC:AKT1) -> p(HGNC:AKT2)
 
 # Forgot quotes (ParseException)
-SET Disease = Atherosclerosis
+# SET Disease = Atherosclerosis
 
 # Mixed up arguments (ParseException)
 p(HGNC:TP53,sub(Q,R,248)) directlyDecreases transcriptionalActivity(proteinAbundance(HGNC:TP53))

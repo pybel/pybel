@@ -150,6 +150,7 @@ class ConnectionMixin(unittest.TestCase):
         super(ConnectionMixin, self).tearDown()
         tear_temp_connection(self.dir, self.path)
 
+
 class TemporaryCacheMixin(ConnectionMixin):
     def setUp(self):
         super(TemporaryCacheMixin, self).setUp()
@@ -1162,10 +1163,10 @@ class BelReconstitutionMixin(unittest.TestCase):
         if check_warnings:
             expected_warnings = [
                 (0, MissingMetadataException),
-                (3, NotSemanticVersionException),
+                (3, VersionFormatWarning),
                 (26, MissingAnnotationKeyWarning),
                 (29, MissingAnnotationKeyWarning),
-                (34, InvalidCitationException),
+                (34, InvalidCitationLengthException),
                 (37, InvalidCitationType),
                 (40, InvalidPubMedIdentifierWarning),
                 (43, MissingCitationException),
@@ -1184,12 +1185,12 @@ class BelReconstitutionMixin(unittest.TestCase):
                 (86, PlaceholderAminoAcidWarning),
                 (89, NestedRelationWarning),
                 (92, InvalidFunctionSemantic),
-                (95, Exception),
+                # (95, Exception),
                 (98, Exception),
             ]
 
             for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
-                self.assertEqual(el, l, msg="Expected different error")
+                self.assertEqual(el, l, msg="Expected different error on line {}. Check line {}".format(el, l))
                 self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
         assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
@@ -1223,5 +1224,3 @@ class BelReconstitutionMixin(unittest.TestCase):
 
         assertHasEdge(self, d, b, graph)
         assertHasEdge(self, d, c, graph)
-
-

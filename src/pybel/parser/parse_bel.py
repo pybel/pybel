@@ -49,7 +49,8 @@ class BelParser(BaseParser):
     """Build a parser backed by a given dictionary of namespaces"""
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
-                 allow_naked_names=False, allow_nested=False, citation_clearing=True, autostreamline=True):
+                 allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
+                 citation_clearing=True, autostreamline=True):
         """
         :param graph: The BEL Graph to use to store the network
         :type graph: BELGraph
@@ -71,6 +72,8 @@ class BelParser(BaseParser):
         :param allow_nested: If true, turn off nested statement failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_nested: bool
+        :param allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+        :type allow_unqualified_translocations: bool
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
         :type citation_clearing: bool
@@ -249,11 +252,13 @@ class BelParser(BaseParser):
                 EFFECT))
 
         self.translocation_legacy.addParseAction(handle_legacy_tloc)
-        self.translocation_illegal = nest(self.simple_abundance)
-        self.translocation_illegal.setParseAction(handle_translocation_illegal)
+        self.translocation_unqualified = nest(Group(self.simple_abundance)(TARGET))
+
+        if not allow_unqualified_translocations:
+            self.translocation_unqualified.setParseAction(handle_translocation_illegal)
 
         self.translocation = translocation_tag + MatchFirst([
-            self.translocation_illegal,
+            self.translocation_unqualified,
             self.translocation_standard,
             self.translocation_legacy
         ])
@@ -534,34 +539,21 @@ class BelParser(BaseParser):
         """This function wraps self.handle_term but is only used for top-level parsing of bel_terms. This is done
         solely to keep track of if a graph has any singletons"""
         self.has_singleton_terms = True
-        log.warning('Added singleton line: %s', line)
+        log.warning('Added singleton line: %s. Needs checking.', line)
         return self.handle_term(line, position, tokens)
 
-    def check_required_annotations(self, line):
-        """Checks that the control parser has a citation and evidence before adding an edge
-        
-        :param line: The line that's being parsed
-        :type line: str
-        """
-        if not self.control_parser.citation:
-            raise MissingCitationException(line)
-
-        if not self.control_parser.evidence:
-            raise MissingSupportWarning(line)
+    def _handle_list_helper(self, line, position, tokens, relation):
+        parent = self.ensure_node(tokens[0])
+        for child_tokens in tokens[2]:
+            child = self.ensure_node(child_tokens)
+            self.graph.add_unqualified_edge(parent, child, relation)
+        return tokens
 
     def handle_has_members(self, line, position, tokens):
-        parent = self.ensure_node(tokens[0])
-        for child_tokens in tokens[2]:
-            child = self.ensure_node(child_tokens)
-            self.graph.add_unqualified_edge(parent, child, HAS_MEMBER)
-        return tokens
+        return self._handle_list_helper(line, position, tokens, HAS_MEMBER)
 
     def handle_has_components(self, line, position, tokens):
-        parent = self.ensure_node(tokens[0])
-        for child_tokens in tokens[2]:
-            child = self.ensure_node(child_tokens)
-            self.graph.add_unqualified_edge(parent, child, HAS_COMPONENT)
-        return tokens
+        return self._handle_list_helper(line, position, tokens, HAS_COMPONENT)
 
     def _build_attrs(self):
         attrs = {}
@@ -576,7 +568,11 @@ class BelParser(BaseParser):
         return attrs, list_attrs
 
     def handle_relation(self, line, position, tokens):
-        self.check_required_annotations(line)
+        if not self.control_parser.citation:
+            raise MissingCitationException(line)
+
+        if not self.control_parser.evidence:
+            raise MissingSupportWarning(line)
 
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
@@ -894,7 +890,9 @@ def canonicalize_modifier(tokens):
 
     elif tokens[MODIFIER] == TRANSLOCATION:
         attrs[MODIFIER] = tokens[MODIFIER]
-        attrs[EFFECT] = tokens[EFFECT].asDict()
+
+        if EFFECT in tokens:
+            attrs[EFFECT] = tokens[EFFECT].asDict()
 
     elif tokens[MODIFIER] == CELL_SECRETION:
         attrs[MODIFIER] = TRANSLOCATION

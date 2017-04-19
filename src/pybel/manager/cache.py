@@ -17,6 +17,7 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
+from .models import Network, Annotation, Namespace
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -74,7 +75,6 @@ class CacheManager(BaseCacheManager):
         self.annotation_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
-
 
         self.annotation_model = {}
         self.namespace_model = {}
@@ -139,7 +139,7 @@ class CacheManager(BaseCacheManager):
         :rtype: models.Namespace
         """
         if url in self.namespace_model:
-            log.info('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
+            log.debug('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
             return self.namespace_model[url]
 
         results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
@@ -194,11 +194,11 @@ class CacheManager(BaseCacheManager):
 
     def list_namespaces(self):
         """Returns a list of all namespace keyword/url pairs"""
-        return list(self.session.query(models.Namespace.keyword, models.Namespace.url).all())
+        return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
 
-    def ensure_default_namespaces(self):
+    def ensure_default_namespaces(self, use_fraunhofer=False):
         """Caches the default set of namespaces"""
-        for url in defaults.default_namespaces:
+        for url in defaults.fraunhofer_namespaces if use_fraunhofer else defaults.default_namespaces:
             self.ensure_namespace(url)
 
     # ANNOTATION MANAGEMENT
@@ -300,11 +300,11 @@ class CacheManager(BaseCacheManager):
         return {definition.keyword: definition.url for definition in self.session.query(models.Annotation).all()}
 
     def list_annotations(self):
-        return list(self.session.query(models.Annotation.keyword, models.Annotation.url).all())
+        return list(self.session.query(Annotation.keyword, Annotation.version, Annotation.url).all())
 
-    def ensure_default_annotations(self):
+    def ensure_default_annotations(self, use_fraunhofer=False):
         """Caches the default set of annotations"""
-        for url in defaults.default_annotations:
+        for url in defaults.fraunhofer_annotations if use_fraunhofer else defaults.default_annotations:
             self.ensure_annotation(url)
 
     # NAMESPACE OWL MANAGEMENT
@@ -529,6 +529,7 @@ class CacheManager(BaseCacheManager):
         :return: A Network object
         :rtype: models.Network
         """
+        log.debug('inserting %s v%s', graph.name, graph.version)
         graph_bytes = to_bytes(graph)
 
         network = models.Network(blob=graph_bytes, **graph.document)
@@ -975,13 +976,18 @@ class CacheManager(BaseCacheManager):
         :type network_id: int
         """
 
-        # TODO delete with cascade
+        # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
         self.session.query(models.Network).filter(models.Network.id == network_id).delete()
+        self.session.commit()
+
+    def drop_graphs(self):
+        """Drops all graphs"""
+        self.session.query(models.Network).delete()
         self.session.commit()
 
     def list_graphs(self):
         """Lists network id, network name, and network version triples"""
-        return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
+        return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
 
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values

@@ -19,7 +19,8 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True, **kwargs):
+def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
+               citation_clearing=True, **kwargs):
     """Loads a BEL graph from an iterable over the lines of a BEL script
 
     :param lines: An iterable of strings (the lines in a BEL script)
@@ -31,6 +32,8 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
     :type allow_naked_names: bool
     :param allow_nested: if true, turn off nested statement failures
     :type allow_nested: bool
+    :param allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    :type allow_unqualified_translocations: bool
     :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
     :type citation_clearing: bool
@@ -41,7 +44,7 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
     """
     graph = BELGraph(**kwargs)
     parse_lines(graph, lines, manager=manager, allow_naked_names=allow_naked_names, allow_nested=allow_nested,
-                citation_clearing=citation_clearing)
+                allow_unqualified_translocations=allow_unqualified_translocations, citation_clearing=citation_clearing)
     return graph
 
 

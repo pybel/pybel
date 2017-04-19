@@ -183,9 +183,14 @@ class TestParseControl2(TestParseControl):
 
         self.assertEqual(expected_dict, self.parser.get_annotations())
 
-    def test_citation_error(self):
+    def test_citation_too_short(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine"}'
-        with self.assertRaises(InvalidCitationException):
+        with self.assertRaises(CitationTooShortException):
+            self.parser.parseString(s)
+
+    def test_citation_too_long(self):
+        s = 'SET Citation = {"PubMed","Name","1234","1999-01-01","Nope|Noper","Nope", "nope nope"}'
+        with self.assertRaises(CitationTooLongException):
             self.parser.parseString(s)
 
     def test_evidence(self):

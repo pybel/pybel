@@ -147,7 +147,15 @@ def to_cx_json(graph):
                     'v': v
                 })
 
-    context_entry = [dict(graph.namespace_url)]
+    context_entry = [{
+        GRAPH_NAMESPACE_URL: graph.namespace_url,
+        GRAPH_NAMESPACE_OWL: graph.namespace_owl,
+        GRAPH_NAMESPACE_PATTERN: graph.namespace_pattern,
+        GRAPH_ANNOTATION_URL: graph.namespace_url,
+        GRAPH_ANNOTATION_OWL: graph.annotation_owl,
+        GRAPH_ANNOTATION_PATTERN: graph.annotation_pattern,
+        GRAPH_ANNOTATION_LIST: graph.annotation_list
+    }]
 
     network_attributes_entry = [{
         "n": NDEX_SOURCE_FORMAT,
@@ -209,21 +217,30 @@ def from_cx_json(cx):
     :return: A BEL Graph
     :rtype: pybel.BELGraph
     """
-
     graph = BELGraph()
-    graph.graph[GRAPH_METADATA] = {}
+
+    log.info('CX Entry [0]: %s', cx[0])
+    log.info('CX Entry [1]: %s', cx[1])
 
     context_entry = cx[2]
-    for d in context_entry['@context']:
-        for k, v in d.items():
-            if v.endswith('.belns'):
-                pass
-            elif v.endswith('.belanno'):
-                pass
-            elif v.endswith('.owl'):
-                pass
-            else:
-                pass
+    if '@context' not in context_entry:
+        log.warning('Missing @context. Got: %s', context_entry)
+    else:
+        for d in context_entry['@context']:
+            if GRAPH_NAMESPACE_URL in d:
+                graph.namespace_url.update(d[GRAPH_NAMESPACE_URL])
+            if GRAPH_NAMESPACE_OWL in d:
+                graph.namespace_owl.update(d[GRAPH_NAMESPACE_OWL])
+            if GRAPH_NAMESPACE_PATTERN in d:
+                graph.namespace_pattern.update(d[GRAPH_NAMESPACE_PATTERN])
+            if GRAPH_ANNOTATION_URL in d:
+                graph.annotation_url.update(d[GRAPH_ANNOTATION_URL])
+            if GRAPH_ANNOTATION_OWL in d:
+                graph.annotation_owl.update(d[GRAPH_ANNOTATION_OWL])
+            if GRAPH_ANNOTATION_PATTERN in d:
+                graph.annotation_pattern.update(d[GRAPH_ANNOTATION_PATTERN])
+            if GRAPH_ANNOTATION_LIST in d:
+                graph.annotation_list.update(d[GRAPH_ANNOTATION_LIST])
 
     network_attributes_entry = cx[3]
     for d in network_attributes_entry['networkAttributes']:

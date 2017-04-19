@@ -18,10 +18,11 @@ from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .parse_exceptions import *
-from .utils import is_int, quote, delimitedSet
+from .utils import is_int, quote, delimitedSet, qid
 from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT, \
     BEL_KEYWORD_ALL, ANNOTATIONS
 from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET, CITATION
+from ..constants import CITATION_TYPE_PUBMED
 from ..utils import valid_date
 
 __all__ = ['ControlParser']
@@ -60,7 +61,7 @@ class ControlParser(BaseParser):
 
         annotation_key = ppc.identifier('key').setParseAction(self.handle_annotation_key)
 
-        self.set_statement_group = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), quote('group')])
+        self.set_statement_group = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), qid('group')])
         self.set_statement_group.setParseAction(self.handle_set_statement_group)
 
         self.set_citation = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
@@ -71,7 +72,7 @@ class ControlParser(BaseParser):
         self.set_evidence.setParseAction(self.handle_set_evidence)
 
         set_command_prefix = And([annotation_key('key'), Suppress('=')])
-        self.set_command = set_command_prefix + quote('value')
+        self.set_command = set_command_prefix + qid('value')
         self.set_command.setParseAction(self.handle_set_command)
 
         self.set_command_list = set_command_prefix + delimitedSet('values')
@@ -149,19 +150,22 @@ class ControlParser(BaseParser):
 
         values = tokens['values']
 
-        if not (3 <= len(values) <= 6):
-            raise InvalidCitationException(line)
+        if len(values) < 3:
+            raise CitationTooShortException(line, position)
 
         if values[0] not in CITATION_TYPES:
-            raise InvalidCitationType(values[0])
+            raise InvalidCitationType(line, position, values[0])
 
-        if values[0] == 'PubMed' and not is_int(values[2]):
-            raise InvalidPubMedIdentifierWarning(values[2])
+        if values[0] == CITATION_TYPE_PUBMED and not is_int(values[2]):
+            raise InvalidPubMedIdentifierWarning(line, position, values[2])
 
         if 4 <= len(values) and not valid_date(values[3]):
-            log.debug('Invalid date: %s', values[3])
+            log.debug('Invalid date: %s. Truncating entry.', values[3])
             self.citation = dict(zip(CITATION_ENTRIES, values[:3]))
             return tokens
+
+        if 6 < len(values):
+            raise CitationTooLongException(line, position)
 
         self.citation = dict(zip(CITATION_ENTRIES, values))
 

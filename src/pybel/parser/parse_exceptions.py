@@ -8,17 +8,29 @@ number and original statement are printed for the user to debug.
 from ..exceptions import PyBelWarning
 
 
+# TODO refactor code with this class
+class PyBelParserWarning(PyBelWarning):
+    """Base PyBEL parser exception, which holds the line and position where a parsing problem occurred"""
+
+    def __init__(self, line, position):
+        super(PyBelParserWarning, self).__init__(line, position)
+        self.line = line
+        self.position = position
+
+
 # Naming Warnings
 
 class NakedNameWarning(PyBelWarning):
     """Raised when there is an identifier without a namespace. Enable lenient mode to suppress"""
 
-    def __init__(self, name):
-        PyBelWarning.__init__(self, name)
+    def __init__(self, line, position, name):
+        PyBelWarning.__init__(self, line, position, name)
+        self.line = line
+        self.position = position
         self.name = name
 
     def __str__(self):
-        return '"{}" should be qualified with a valid namespace'.format(self.name)
+        return '[pos:{}] "{}" should be qualified with a valid namespace'.format(self.position, self.name)
 
 
 class MissingDefaultNameWarning(PyBelWarning):
@@ -114,15 +126,16 @@ class MissingAnnotationRegexWarning(PyBelWarning):
 
 # Provenance Warnings
 
-class NotSemanticVersionException(PyBelWarning):
-    """Raised if the version string doesn't adhere to semantic versioning"""
+class VersionFormatWarning(PyBelWarning):
+    """Raised if the version string doesn't adhere to semantic versioning or YYYYMMDD format"""
 
     def __init__(self, version_string):
         PyBelWarning.__init__(self, version_string)
         self.version_string = version_string
 
     def __str__(self):
-        return '''Version string "{}" doesn't adhere to semantic versioning'''.format(self.version_string)
+        return '''Version string "{}" neither is a date like YYYYMMDD nor adheres to semantic versioning'''.format(
+            self.version_string)
 
 
 class InvalidMetadataException(PyBelWarning):
@@ -160,16 +173,27 @@ class MissingMetadataException(PyBelWarning):
         return 'Missing required document metadata: {}'.format(self.key)
 
 
-class InvalidCitationException(PyBelWarning):
-    """Raised when the format for a citation is wrong. It should have either {type, name, reference}; or
-        {type, name, reference, date, authors, comments}"""
+class InvalidCitationLengthException(PyBelWarning):
+    """Raised when the format for a citation is wrong"""
 
-    def __init__(self, citation):
-        PyBelWarning.__init__(self, citation)
-        self.citation = citation
+    def __init__(self, line, position):
+        PyBelWarning.__init__(self, line, position)
+        self.line = line
+        self.position = position
+
+
+class CitationTooShortException(InvalidCitationLengthException):
+    """Raised when a citation does not have the minimum of {type, name, reference}"""
 
     def __str__(self):
-        return "Incomplete citation; missing required fields: {}".format(self.citation)
+        return "[pos:{}] Citation is missing required fields: {}".format(self.position, self.line)
+
+
+class CitationTooLongException(InvalidCitationLengthException):
+    """Raised when a citation has more than the allowed entries, {type, name, reference, date, authors, comments}"""
+
+    def __str__(self):
+        return "[pos:{}] Citation contains too many entries: {}".format(self.position, self.line)
 
 
 class MissingCitationException(PyBelWarning):
@@ -182,10 +206,10 @@ class MissingCitationException(PyBelWarning):
         :type line: str
         """
         PyBelWarning.__init__(self, line)
-        self.citation = line
+        self.line = line
 
     def __str__(self):
-        return "Missing citation; can't add: {}".format(self.citation)
+        return "Missing citation; can't add: {}".format(self.line)
 
 
 class MissingSupportWarning(PyBelWarning):
@@ -216,23 +240,27 @@ class InvalidCitationType(PyBelWarning):
 .. seealso:: OpenBEL wiki on `citations <https://wiki.openbel.org/display/BELNA/Citation>`_
     """
 
-    def __init__(self, citation_type):
-        PyBelWarning.__init__(self, citation_type)
+    def __init__(self, line, position, citation_type):
+        PyBelWarning.__init__(self, line, position, citation_type)
+        self.line = line
+        self.position = position
         self.citation_type = citation_type
 
     def __str__(self):
-        return '"{}" is not a valid citation type'.format(self.citation_type)
+        return '[pos:{}] "{}" is not a valid citation type'.format(self.position, self.citation_type)
 
 
 class InvalidPubMedIdentifierWarning(PyBelWarning):
     """Tried to make a citation to PubMed that's not a legal PMID"""
 
-    def __init__(self, reference):
-        PyBelWarning.__init__(self, reference)
+    def __init__(self, line, position, reference):
+        PyBelWarning.__init__(self, line, position, reference)
+        self.line = line
+        self.position = position
         self.reference = reference
 
     def __str__(self):
-        return '"{}" is not a valid PMID'.format(self.reference)
+        return '[pos:{}] "{}" is not a valid PMID'.format(self.position, self.reference)
 
 
 # BEL Syntax Warnings
@@ -240,24 +268,28 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
 class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
-    def __init__(self, s, tokens, l):
-        PyBelWarning.__init__(self, s, l, tokens)
-        self.s, self.l, self.t = s, l, tokens
+    def __init__(self, line, tokens, position):
+        PyBelWarning.__init__(self, line, position, tokens)
+        self.line = line
+        self.position = position
+        self.tokens = tokens
 
     def __str__(self):
-        return 'Unqualified translocation: {} {} {}'.format(self.s, self.l, self.t)
+        return '[pos:{}] Unqualified translocation: {} {}'.format(self.position, self.line, self.tokens)
 
 
 class PlaceholderAminoAcidWarning(PyBelWarning):
     """X might be used as a placeholder amino acid, or as a colloquial signifier for a truncation at a certain position.
      Neither are valid within the HGVS nomenclature that defines the way variations are encoded in BEL."""
 
-    def __init__(self, code):
-        PyBelWarning.__init__(self, code)
+    def __init__(self, line, position, code):
+        PyBelWarning.__init__(self, line, position, code)
+        self.line = line
+        self.position = position
         self.code = code
 
     def __str__(self):
-        return 'Placeholder amino acid found: {}'.format(self.code)
+        return '[pos:{}] Placeholder amino acid found: {}'.format(self.position, self.code)
 
 
 class NestedRelationWarning(PyBelWarning):
