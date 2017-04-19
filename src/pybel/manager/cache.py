@@ -529,7 +529,7 @@ class CacheManager(BaseCacheManager):
         :return: A Network object
         :rtype: models.Network
         """
-        log.debug('inserting %s', graph.name)
+        log.debug('inserting %s v%s', graph.name, graph.version)
         graph_bytes = to_bytes(graph)
 
         network = models.Network(blob=graph_bytes, **graph.document)
