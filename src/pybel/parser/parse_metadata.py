@@ -45,7 +45,7 @@ def check_version(s):
         return
 
     if not SEMANTIC_VERSION_STRING_RE.match(s):
-        raise NotSemanticVersionException(s)
+        raise VersionFormatWarning(s)
 
 
 class MetadataParser(BaseParser):

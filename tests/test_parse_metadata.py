@@ -180,5 +180,5 @@ class TestParseMetadata(unittest.TestCase):
 
     def test_not_semantic_version(self):
         s = 'SET DOCUMENT Version = "1.0"'
-        with self.assertRaises(NotSemanticVersionException):
+        with self.assertRaises(VersionFormatWarning):
             self.parser.parseString(s)
