@@ -10,11 +10,12 @@ from operator import itemgetter
 
 import networkx as nx
 import requests
+import requests.exceptions
 from pkg_resources import get_distribution
 from requests.compat import urlparse
 from requests_file import FileAdapter
 
-from .constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS
+from .constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN
 
 log = logging.getLogger(__name__)
 
@@ -23,9 +24,19 @@ def download(url):
     """Uses requests to download an URL, maybe from a file"""
     session = requests.Session()
     session.mount('file://', FileAdapter())
-    res = session.get(url)
-    res.raise_for_status()
-    return res
+
+    try:
+        res = session.get(url)
+        res.raise_for_status()
+        return res
+    except requests.exceptions.ConnectionError as e:
+        if url.startswith(BELFRAMEWORK_DOMAIN):
+            log.warning('Got %s address (service is discontinued) trying mirror at %s', BELFRAMEWORK_DOMAIN,
+                        OPENBEL_DOMAIN)
+            res = session.get(url.replace(BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN))
+            res.raise_for_status()
+            return res
+        raise e
 
 
 def parse_bel_resource(lines):
@@ -236,6 +247,7 @@ def valid_date_version(s):
         return True
     except ValueError:
         return False
+
 
 def parse_datetime(s):
     """Tries to parse a datetime object from a standard datetime format or date format
