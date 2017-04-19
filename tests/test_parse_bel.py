@@ -2188,6 +2188,9 @@ class TestTranslocationPermissive(unittest.TestCase):
         3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
         Test translocation in object
         """
+        self.parser.parseString(SET_CITATION_TEST)
+        self.parser.parseString(test_set_evidence)
+
         statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"))'
         result = self.parser.relation.parseString(statement)
 
@@ -2209,7 +2212,6 @@ class TestTranslocationPermissive(unittest.TestCase):
                     }
                 },
                 MODIFIER: TRANSLOCATION,
-                EFFECT: {}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -2224,7 +2226,6 @@ class TestTranslocationPermissive(unittest.TestCase):
             RELATION: 'directlyIncreases',
             OBJECT: {
                 MODIFIER: TRANSLOCATION,
-                EFFECT: {}
             }
         }
 
