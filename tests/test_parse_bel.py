@@ -5,12 +5,15 @@ import unittest
 
 from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import *
+from pybel.graph import BELGraph
+from pybel.parser import BelParser
 from pybel.parser.modifiers import LocationParser, VariantParser, FragmentParser, GmodParser, GsubParser, PmodParser, \
     PsubParser, TruncationParser, FusionParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, RelabelWarning
 from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict, \
     test_citation_dict, test_evidence_text
+from tests.constants import assertHasNode, assertHasEdge
 
 log = logging.getLogger(__name__)
 
@@ -2136,6 +2139,98 @@ class TestActivity(TestTokenParserBase):
         self.assertHasNode(node)
 
 
+class TestTranslocationPermissive(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.graph = BELGraph()
+        cls.parser = BelParser(cls.graph, allow_unqualified_translocations=True)
+
+    def setUp(self):
+        self.parser.clear()
+
+    def assertHasNode(self, member, **kwargs):
+        assertHasNode(self, member, self.parser.graph, **kwargs)
+
+    def assertHasEdge(self, u, v, **kwargs):
+        assertHasEdge(self, u, v, self.parser.graph, **kwargs)
+
+    def test_unqualified_translocation(self):
+        """translocation example"""
+        statement = 'tloc(p(HGNC:EGFR))'
+        result = self.parser.transformation.parseString(statement)
+
+        expected_dict = {
+            MODIFIER: TRANSLOCATION,
+            TARGET: {
+                FUNCTION: PROTEIN,
+                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
+            },
+            EFFECT: {
+            }
+        }
+
+        self.assertEqual(expected_dict, result.asDict())
+
+        mod = canonicalize_modifier(result)
+        expected_mod = {
+            MODIFIER: TRANSLOCATION,
+            EFFECT: {
+            }
+        }
+        self.assertEqual(expected_mod, mod)
+
+        node = PROTEIN, 'HGNC', 'EGFR'
+        self.assertEqual(node, canonicalize_node(result))
+        self.assertHasNode(node)
+
+    def test_unqualified_translocation_relation(self):
+        """
+        3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
+        Test translocation in object
+        """
+        statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"))'
+        result = self.parser.relation.parseString(statement)
+
+        expected_dict = {
+            SUBJECT: {
+                FUNCTION: ABUNDANCE,
+                IDENTIFIER: {
+                    NAMESPACE: 'ADO',
+                    NAME: 'Abeta_42'
+                }
+            },
+            RELATION: 'directlyIncreases',
+            OBJECT: {
+                TARGET: {
+                    FUNCTION: ABUNDANCE,
+                    IDENTIFIER: {
+                        NAMESPACE: 'CHEBI',
+                        NAME: 'calcium(2+)'
+                    }
+                },
+                MODIFIER: TRANSLOCATION,
+                EFFECT: {}
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        sub = ABUNDANCE, 'ADO', 'Abeta_42'
+        self.assertHasNode(sub)
+
+        obj = ABUNDANCE, 'CHEBI', 'calcium(2+)'
+        self.assertHasNode(obj)
+
+        expected_annotations = {
+            RELATION: 'directlyIncreases',
+            OBJECT: {
+                MODIFIER: TRANSLOCATION,
+                EFFECT: {}
+            }
+        }
+
+        self.assertHasEdge(sub, obj, **expected_annotations)
+
+
 class TestTransformation(TestTokenParserBase):
     def setUp(self):
         self.parser.clear()
@@ -2255,7 +2350,7 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(node, canonicalize_node(result))
         self.assertHasNode(node)
 
-    def test_translocation_invalid(self):
+    def test_unqualified_translocation_strict(self):
         """Fail on an improperly written single argument translocation"""
         statement = 'tloc(a(NS:"T-Lymphocytes"))'
         with self.assertRaises(MalformedTranslocationWarning):

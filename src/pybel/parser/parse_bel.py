@@ -49,7 +49,8 @@ class BelParser(BaseParser):
     """Build a parser backed by a given dictionary of namespaces"""
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
-                 allow_naked_names=False, allow_nested=False, citation_clearing=True, autostreamline=True):
+                 allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
+                 citation_clearing=True, autostreamline=True):
         """
         :param graph: The BEL Graph to use to store the network
         :type graph: BELGraph
@@ -71,6 +72,8 @@ class BelParser(BaseParser):
         :param allow_nested: If true, turn off nested statement failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :type allow_nested: bool
+        :param allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+        :type allow_unqualified_translocations: bool
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
         :type citation_clearing: bool
@@ -249,11 +252,13 @@ class BelParser(BaseParser):
                 EFFECT))
 
         self.translocation_legacy.addParseAction(handle_legacy_tloc)
-        self.translocation_illegal = nest(self.simple_abundance)
-        self.translocation_illegal.setParseAction(handle_translocation_illegal)
+        self.translocation_unqualified = nest(self.simple_abundance)
+
+        if not allow_unqualified_translocations:
+            self.translocation_unqualified.setParseAction(handle_translocation_illegal)
 
         self.translocation = translocation_tag + MatchFirst([
-            self.translocation_illegal,
+            self.translocation_unqualified,
             self.translocation_standard,
             self.translocation_legacy
         ])
