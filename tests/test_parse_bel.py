@@ -2147,6 +2147,7 @@ class TestTranslocationPermissive(unittest.TestCase):
 
     def setUp(self):
         self.parser.clear()
+        self.parser.transformation.setParseAction(self.parser.handle_term)
 
     def assertHasNode(self, member, **kwargs):
         assertHasNode(self, member, self.parser.graph, **kwargs)
@@ -2154,7 +2155,7 @@ class TestTranslocationPermissive(unittest.TestCase):
     def assertHasEdge(self, u, v, **kwargs):
         assertHasEdge(self, u, v, self.parser.graph, **kwargs)
 
-    def test_unqualified_translocation(self):
+    def test_unqualified_translocation_single(self):
         """translocation example"""
         statement = 'tloc(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
@@ -2165,8 +2166,6 @@ class TestTranslocationPermissive(unittest.TestCase):
                 FUNCTION: PROTEIN,
                 IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
             },
-            EFFECT: {
-            }
         }
 
         self.assertEqual(expected_dict, result.asDict())
@@ -2174,8 +2173,6 @@ class TestTranslocationPermissive(unittest.TestCase):
         mod = canonicalize_modifier(result)
         expected_mod = {
             MODIFIER: TRANSLOCATION,
-            EFFECT: {
-            }
         }
         self.assertEqual(expected_mod, mod)
 
@@ -2202,7 +2199,7 @@ class TestTranslocationPermissive(unittest.TestCase):
                     NAME: 'Abeta_42'
                 }
             },
-            RELATION: 'directlyIncreases',
+            RELATION: DIRECTLY_INCREASES,
             OBJECT: {
                 TARGET: {
                     FUNCTION: ABUNDANCE,
@@ -2223,7 +2220,7 @@ class TestTranslocationPermissive(unittest.TestCase):
         self.assertHasNode(obj)
 
         expected_annotations = {
-            RELATION: 'directlyIncreases',
+            RELATION: DIRECTLY_INCREASES,
             OBJECT: {
                 MODIFIER: TRANSLOCATION,
             }
