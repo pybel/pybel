@@ -1166,7 +1166,7 @@ class BelReconstitutionMixin(unittest.TestCase):
                 (3, NotSemanticVersionException),
                 (26, MissingAnnotationKeyWarning),
                 (29, MissingAnnotationKeyWarning),
-                (34, InvalidCitationException),
+                (34, InvalidCitationLengthException),
                 (37, InvalidCitationType),
                 (40, InvalidPubMedIdentifierWarning),
                 (43, MissingCitationException),
