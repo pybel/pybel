@@ -144,22 +144,13 @@ def manage():
     pass
 
 
-@manage.command(help='Set up default cache with default definitions')
+@manage.command(help="Create the cache if it doesn't exist")
 @click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
-@click.option('--skip-namespaces', is_flag=True)
-@click.option('--skip-annotations', is_flag=True)
-@click.option('--owl', is_flag=True)
-@click.option('--fraunhofer', is_flag=True, help='Use fraunhofer resources instead of openbel')
-@click.option('-v', '--verbose', count=True)
-def setup(connection, skip_namespaces, skip_annotations, owl, fraunhofer, verbose):
-    log.setLevel(int(5 * verbose ** 2 / 2 - 25 * verbose / 2 + 20))
+@click.option('-v', '--debug', count=True)
+def setup(connection, debug):
+    log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
     cm = CacheManager(connection=connection)
-    if not skip_namespaces:
-        cm.ensure_default_namespaces(use_fraunhofer=fraunhofer)
-    if not skip_annotations:
-        cm.ensure_default_annotations(use_fraunhofer=fraunhofer)
-    if owl:
-        cm.ensure_default_owl_namespaces()
+    cm.create_database()
 
 
 @manage.command(help='Drops database in cache')
@@ -175,6 +166,26 @@ def remove(connection):
 @manage.group(help="Manage definitions")
 def definitions():
     pass
+
+
+@definitions.command(help='Set up default cache with default definitions')
+@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('--skip-namespaces', is_flag=True)
+@click.option('--skip-annotations', is_flag=True)
+@click.option('--owl', is_flag=True)
+@click.option('--fraunhofer', is_flag=True, help='Use fraunhofer resources instead of openbel')
+@click.option('-v', '--debug', count=True)
+def ensure(connection, skip_namespaces, skip_annotations, owl, fraunhofer, debug):
+    log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
+
+    manager = CacheManager(connection=connection)
+
+    if not skip_namespaces:
+        manager.ensure_default_namespaces(use_fraunhofer=fraunhofer)
+    if not skip_annotations:
+        manager.ensure_default_annotations(use_fraunhofer=fraunhofer)
+    if owl:
+        manager.ensure_default_owl_namespaces()
 
 
 @definitions.command(help='Manually add definition by URL')
