@@ -728,6 +728,8 @@ class CacheManager(BaseCacheManager):
             result = models.Edge(graphIdentifier=graph_key, source=source, target=target, evidence=evidence, bel=bel,
                                  relation=relation, blob=blob)
 
+            self.session.add(result)
+
         return result
 
     def get_or_create_citation(self, type, name, reference, date=None, authors=None):
