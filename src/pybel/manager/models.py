@@ -88,7 +88,8 @@ class Namespace(Base):
     def data(self):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
         ns_data = self.__dict__
-        del ns_data['_sa_instance_state']
+        if '_sa_instance_state' in ns_data:
+            del ns_data['_sa_instance_state']
         return ns_data
 
 
@@ -156,7 +157,8 @@ class Annotation(Base):
     @property
     def data(self):
         an_data = self.__dict__
-        del an_data['_sa_instance_state']
+        if '_sa_instance_state' in an_data:
+            del an_data['_sa_instance_state']
         return an_data
 
 
@@ -282,7 +284,7 @@ class Network(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), index=True, doc='Name of the given Network (from the BEL file)')
-    version = Column(String(255), doc='Release version of the given Network (from the BEL file)')
+    version = Column(String(16), doc='Release version of the given Network (from the BEL file)')
 
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')

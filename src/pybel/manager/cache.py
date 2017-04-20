@@ -706,7 +706,7 @@ class CacheManager(BaseCacheManager):
             result = models.Edge(graphIdentifier=graph_key, source=source, target=target, evidence=evidence, bel=bel,
                                  relation=relation, blob=blob)
 
-            # self.session.add(result)
+            self.session.add(result)
 
         return result
 
@@ -855,6 +855,7 @@ class CacheManager(BaseCacheManager):
             mod = self.session.query(models.Modification).filter_by(**modification).one_or_none()
             if not mod:
                 mod = models.Modification(**modification)
+                self.session.add(mod)
             modifications.append(mod)
 
         return modifications
