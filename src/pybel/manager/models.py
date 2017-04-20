@@ -305,7 +305,7 @@ class Network(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), index=True, doc='Name of the given Network (from the BEL file)')
-    version = Column(String(255), doc='Release version of the given Network (from the BEL file)')
+    version = Column(String(16), doc='Release version of the given Network (from the BEL file)')
 
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')
@@ -323,9 +323,9 @@ class Network(Base):
     annotations = relationship('Annotation', secondary=network_annotation, lazy="dynamic")
     citations = relationship('Citation', secondary=network_citation, lazy="dynamic")
 
-    # __table_args__ = (
-    #    UniqueConstraint(name, version),
-    # )
+    __table_args__ = (
+        UniqueConstraint(name, version),
+    )
 
     @property
     def data(self):
