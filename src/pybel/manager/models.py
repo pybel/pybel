@@ -70,6 +70,8 @@ CITATION_TABLE_NAME = 'pybel_citation'
 EVIDENCE_TABLE_NAME = 'pybel_evidence'
 PROPERTY_TABLE_NAME = 'pybel_property'
 
+LONGBLOB = 4294967295
+
 Base = declarative_base()
 
 
@@ -268,7 +270,7 @@ class OwlAnnotationEntry(Base):
 network_annotation = Table(
     NETWORK_ANNOTATION_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('namespace_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
+    Column('annotation_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
 )
 
 network_namespace = Table(
@@ -313,7 +315,7 @@ class Network(Base):
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
-    blob = Column(Binary)
+    blob = Column(Binary(LONGBLOB))
 
     nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
     edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
@@ -321,9 +323,9 @@ class Network(Base):
     annotations = relationship('Annotation', secondary=network_annotation, lazy="dynamic")
     citations = relationship('Citation', secondary=network_citation, lazy="dynamic")
 
-    __table_args__ = (
-        UniqueConstraint(METADATA_NAME, METADATA_VERSION),
-    )
+    # __table_args__ = (
+    #    UniqueConstraint(name, version),
+    # )
 
     @property
     def data(self):
