@@ -247,7 +247,7 @@ class OwlAnnotationEntry(Base):
 network_annotation = Table(
     NETWORK_ANNOTATION_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('namespace_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
+    Column('annotation_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
 )
 
 network_namespace = Table(
