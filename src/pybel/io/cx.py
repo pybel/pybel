@@ -156,7 +156,7 @@ def to_cx_json(graph):
         GRAPH_ANNOTATION_URL: graph.namespace_url,
         GRAPH_ANNOTATION_OWL: graph.annotation_owl,
         GRAPH_ANNOTATION_PATTERN: graph.annotation_pattern,
-        GRAPH_ANNOTATION_LIST: graph.annotation_list
+        GRAPH_ANNOTATION_LIST: {k: list(sorted(v)) for k,v in graph.annotation_list.items()},
     }]
 
     network_attributes_entry = [{
@@ -252,7 +252,7 @@ def from_cx_json(cx):
             if GRAPH_ANNOTATION_PATTERN in d:
                 graph.annotation_pattern.update(d[GRAPH_ANNOTATION_PATTERN])
             if GRAPH_ANNOTATION_LIST in d:
-                graph.annotation_list.update(d[GRAPH_ANNOTATION_LIST])
+                graph.annotation_list.update((k, set(v)) for k, v in d[GRAPH_ANNOTATION_LIST].items())
 
     network_attributes_entry = cx[3]
     for d in network_attributes_entry['networkAttributes']:

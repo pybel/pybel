@@ -10,7 +10,8 @@ import networkx as nx
 from pybel import BELGraph
 from pybel import to_cx_json, from_cx_json
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
-from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url
+from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
+    from_cx_jsons
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
@@ -18,6 +19,16 @@ from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenPa
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
 
 logging.getLogger('requests').setLevel(logging.WARNING)
+
+
+def do_remapping(G, H):
+    """Remaps nodes to use the reconsitution tests
+    
+    :param BELGraph G: The original bel graph 
+    :param BELGraph H: The reconsituted BEL graph from CX input/output
+    """
+    node_mapping = dict(enumerate(sorted(G.nodes_iter(), key=hash_tuple)))
+    nx.relabel.relabel_nodes(H, node_mapping, copy=False)
 
 
 class TestThoroughIo(BelReconstitutionMixin):
@@ -50,14 +61,23 @@ class TestThoroughIo(BelReconstitutionMixin):
             to_graphml(self.graph, f)
 
     def test_cx(self):
-        graph_cx = to_cx_json(self.graph)
-        graph = from_cx_json(graph_cx)
+        reconstituted = from_cx_json(to_cx_json(self.graph))
 
-        node_mapping = dict(enumerate(sorted(self.graph.nodes_iter(), key=hash_tuple)))
-        nx.relabel.relabel_nodes(graph, node_mapping, copy=False)
+        do_remapping(self.graph, reconstituted)
 
         self.bel_thorough_reconstituted(
-            graph,
+            reconstituted,
+            check_warnings=False,
+            check_provenance=False
+        )
+
+    def test_cxs(self):
+        reconstituted = from_cx_jsons(to_cx_jsons(self.graph))
+
+        do_remapping(self.graph, reconstituted)
+
+        self.bel_thorough_reconstituted(
+            reconstituted,
             check_warnings=False,
             check_provenance=False
         )
@@ -97,13 +117,18 @@ class TestSlushyIo(BelReconstitutionMixin):
         from_bytes(g_bytes)
 
     def test_cx(self):
-        graph_cx = to_cx_json(self.graph)
-        graph = from_cx_json(graph_cx)
+        reconstituted = from_cx_json(to_cx_json(self.graph))
 
-        node_mapping = dict(enumerate(sorted(self.graph.nodes_iter(), key=hash_tuple)))
-        nx.relabel.relabel_nodes(graph, node_mapping, copy=False)
+        do_remapping(self.graph, reconstituted)
 
-        self.bel_slushy_reconstituted(graph)
+        self.bel_slushy_reconstituted(reconstituted)
+
+    def test_cxs(self):
+        reconstituted = from_cx_jsons(to_cx_jsons(self.graph))
+
+        do_remapping(self.graph, reconstituted)
+
+        self.bel_slushy_reconstituted(reconstituted)
 
 
 class TestSimpleIo(BelReconstitutionMixin):
@@ -117,11 +142,8 @@ class TestSimpleIo(BelReconstitutionMixin):
         graph = from_path(test_bel_simple)
         self.bel_simple_reconstituted(graph)
 
-        graph_cx = to_cx_json(graph)
-        reconstituted = from_cx_json(graph_cx)
-
-        node_mapping = dict(enumerate(sorted(graph.nodes_iter(), key=hash_tuple)))
-        nx.relabel.relabel_nodes(reconstituted, node_mapping, copy=False)
+        reconstituted = from_cx_json(to_cx_json(graph))
+        do_remapping(graph, reconstituted)
 
         self.bel_simple_reconstituted(reconstituted)
 
