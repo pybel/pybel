@@ -17,6 +17,9 @@ class BaseParser:
     def __init__(self, language, streamline=False):
         self.language = language
 
+        #: The parser can hold an internal state of the current line
+        self.line_number = None
+
         if streamline:
             self.streamline()
 
@@ -28,13 +31,19 @@ class BaseParser:
         """
         return [self.parseString(line) for line in lines]
 
-    def parseString(self, line):
+    def parseString(self, line, line_number=None):
         """Parses a string with the language represented by this parser
         
-        :param line: A string representing an instance of this parser's language
-        :type line: str
+        :param str line: A string representing an instance of this parser's language
+        :param int line_number: The current line number of the parser
         """
-        return self.language.parseString(line)
+        if line_number is None:
+            return self.language.parseString(line)
+
+        self.line_number = line_number
+        result = self.language.parseString(line)
+        self.line_number = None
+        return result
 
     def streamline(self):
         """Streamlines the language represented by this parser to make queries run faster"""
