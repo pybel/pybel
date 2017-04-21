@@ -12,8 +12,10 @@ from ..utils import flatten_dict, expand_dict, hash_tuple
 
 __all__ = [
     'to_cx_json',
+    'to_cx_jsons',
     'to_cx',
     'from_cx_json',
+    'from_cx_jsons',
     'from_cx',
     'from_cx_path',
     'NDEX_SOURCE_FORMAT',
@@ -209,6 +211,16 @@ def to_cx_json(graph):
     return cx
 
 
+def to_cx_jsons(graph):
+    """Dumps a BEL graph as CX JSON to a string
+    
+    :param BELGraph graph: A BEL Graph
+    :return: CX JSON string
+    :rtype: str
+    """
+    return json.dumps(to_cx_json(graph))
+
+
 def from_cx_json(cx):
     """Rebuilds a BELGraph from CX JSON output from PyBEL
 
@@ -351,6 +363,16 @@ def from_cx_json(cx):
             raise ValueError('problem adding edge: {}'.format(eid))
 
     return graph
+
+
+def from_cx_jsons(cxs):
+    """Reconstitutes a BEL graph from a CX JSON string
+    
+    :param str cxs: CX JSON string 
+    :return: A BEL graph
+    :rtype: BELGraph
+    """
+    return from_cx_json(json.loads(cxs))
 
 
 def from_cx(file):
