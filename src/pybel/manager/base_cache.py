@@ -53,8 +53,9 @@ class BaseCacheManager:
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
         log.debug('building session')
         # TODO consider http://docs.sqlalchemy.org/en/latest/orm/contextual.html#using-thread-local-scope-with-web-applications
-        self.session_cls = scoped_session(self.sessionmaker)
-        self.session = self.session_cls()
+        # self.session_cls = scoped_session(self.sessionmaker)
+        # self.session = self.session_cls()
+        self.session = scoped_session(self.sessionmaker)
         self.create_database()
         log.debug('done preparing cache manager')
 
