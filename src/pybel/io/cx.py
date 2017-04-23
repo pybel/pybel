@@ -49,7 +49,7 @@ def to_cx_json(graph):
     .. seealso::
 
         - `NDEx Python Client <https://github.com/ndexbio/ndex-python>`_
-        - `PyBEL / NDEx Python Client Wrapper <https://github.com/cthoyt/pybel2cx>`_
+        - `PyBEL / NDEx Python Client Wrapper <https://github.com/pybel/pybel2ndex>`_
 
     """
     node_nid = {}

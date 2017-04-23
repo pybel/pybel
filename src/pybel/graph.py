@@ -30,10 +30,12 @@ log = logging.getLogger(__name__)
 
 
 class BELGraph(nx.MultiDiGraph):
-    """The BELGraph class is a container for BEL networks that is based on the NetworkX MultiDiGraph data structure"""
+    """This class represents a biological knowledge assembly from a BEL script as a network by extending 
+    :class:`networkx.MultiDiGraph`.
+    """
 
     def __init__(self, data=None, **kwargs):
-        """The default constructor parses a BEL graph using the built-in NetworkX methods. For IO, see
+        """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
 
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`

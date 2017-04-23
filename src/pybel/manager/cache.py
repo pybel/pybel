@@ -41,7 +41,7 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
 def build_manager(connection=None, echo=False):
-    """A convenience method for turning a string into a connection, or passing a CacheManager through.
+    """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
 
     :type connection: None or str or CacheManager
     :type echo: bool

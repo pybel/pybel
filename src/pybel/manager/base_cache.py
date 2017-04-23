@@ -17,7 +17,13 @@ log = logging.getLogger(__name__)
 
 
 class BaseCacheManager:
-    """Creates a connection to database and a persistent session using SQLAlchemy"""
+    """Creates a connection to database and a persistent session using SQLAlchemy
+    
+    A custom default can be set in your :code:`~/.bashrc` using an `RFC-1738 <http://rfc.net/rfc1738.html>`_ string. For 
+    example, a MySQL string can be given with the following form: 
+    ``mysql+pymysql://<username>:<password>@<host>/<dbname>[?<options>]`` Further options and examples can be found on 
+    the  SQLAlchemy documentation on `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
+    """
 
     def __init__(self, connection=None, echo=False):
         """
@@ -42,7 +48,9 @@ class BaseCacheManager:
         self.engine = create_engine(self.connection, echo=echo)
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
         log.debug('building session')
-        self.session = scoped_session(self.sessionmaker)()
+        # TODO consider http://docs.sqlalchemy.org/en/latest/orm/contextual.html#using-thread-local-scope-with-web-applications
+        self.session_cls = scoped_session(self.sessionmaker)
+        self.session = self.session_cls()
         self.create_database()
         log.debug('done preparing cache manager')
 

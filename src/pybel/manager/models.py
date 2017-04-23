@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains the database models that support the PyBEL definition cache and graph cache"""
+"""This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
 import datetime
 
@@ -422,7 +422,7 @@ class Modification(Base):
 
     @property
     def data(self):
-        """Recreates a is_variant dictionary for PyBEL.BELGraph.
+        """Recreates a is_variant dictionary for :class:`BELGraph`
 
         :return: Dictionary that describes a variant or a fusion.
         :rtype: dict
@@ -549,9 +549,9 @@ class Citation(Base):
 
     @property
     def data(self):
-        """Creates a citation dictionary that is used to recreate the edge data dictionary of a PyBEL.BELGraph.
+        """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
-        :return: Citation dictionary for the recreation of a PyBEL.BELGraph.
+        :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         :rtype: dict
         """
         citation_dict = {
@@ -579,9 +579,9 @@ class Evidence(Base):
 
     @property
     def data(self):
-        """Creates a dictionary that is used to recreate the edge data dictionary for a PyBEL.BELGraph.
+        """Creates a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
 
-        :return: Dictionary containing citation and evidence for a PyBEL.BELGraph edge.
+        :return: Dictionary containing citation and evidence for a :class:`BELGraph` edge.
         :rtype: dict
         """
         return {
@@ -612,7 +612,7 @@ class Edge(Base):
     id = Column(Integer, primary_key=True)
 
     graphIdentifier = Column(Integer,
-                             doc='Identifier that is used in the PyBEL.BELGraph to identify whether or not an edge is artificial')
+                             doc='Identifier that is used in the BEL graph to identify whether or not an edge is artificial')
     bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
@@ -632,10 +632,10 @@ class Edge(Base):
 
     @property
     def data(self):
-        """Creates a dictionary of one BEL Edge that can be used to create an edge in a PyBEL.BELGraph.
+        """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
-        :return: Dictionary that contains information about an edge of a PyBEL.BELGraph. Including participants
-                 and edge data informations.
+        :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
+                 and edge data information.
         :rtype: dict
         """
         source_node = self.source.data
@@ -710,7 +710,7 @@ class Property(Base):
 
     @property
     def data(self):
-        """Creates a property dict that is used to recreate an edge dictionary for PyBEL.BELGraph.
+        """Creates a property dict that is used to recreate an edge dictionary for a :class:`BELGraph`.
 
         :return: Property dictionary of an edge that is participant (sub/obj) related.
         :rtype: dict

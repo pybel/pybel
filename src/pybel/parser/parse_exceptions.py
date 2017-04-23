@@ -139,18 +139,18 @@ class VersionFormatWarning(PyBelWarning):
 
 
 class InvalidMetadataException(PyBelWarning):
-    """Illegal document metadata. Should be one of:
+    """Raised when an incorrect document metadata key is used. Valid document metadata keys are:
 
-- Authors
-- ContactInfo
-- Copyright
-- Description
-- Disclaimer
-- Licenses
-- Name
-- Version
+- ``Authors``
+- ``ContactInfo``
+- ``Copyright``
+- ``Description``
+- ``Disclaimer``
+- ``Licenses``
+- ``Name``
+- ``Version``
 
-.. seealso:: BEL 1.0 specification on the `properties section <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section>`_
+.. seealso:: BEL specification on the `properties section <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section>`_
     """
 
     def __init__(self, key, value):
@@ -163,7 +163,7 @@ class InvalidMetadataException(PyBelWarning):
 
 
 class MissingMetadataException(PyBelWarning):
-    """BEL Script is missing critical metadata"""
+    """Raised when a BEL Script is missing critical metadata."""
 
     def __init__(self, key):
         PyBelWarning.__init__(self, key)
@@ -174,7 +174,7 @@ class MissingMetadataException(PyBelWarning):
 
 
 class InvalidCitationLengthException(PyBelWarning):
-    """Raised when the format for a citation is wrong"""
+    """Raised when the format for a citation is wrong."""
 
     def __init__(self, line, position):
         PyBelWarning.__init__(self, line, position)
@@ -183,21 +183,28 @@ class InvalidCitationLengthException(PyBelWarning):
 
 
 class CitationTooShortException(InvalidCitationLengthException):
-    """Raised when a citation does not have the minimum of {type, name, reference}"""
+    """Raised when a citation does not have the minimum of {type, name, reference}."""
 
     def __str__(self):
         return "[pos:{}] Citation is missing required fields: {}".format(self.position, self.line)
 
 
 class CitationTooLongException(InvalidCitationLengthException):
-    """Raised when a citation has more than the allowed entries, {type, name, reference, date, authors, comments}"""
+    """Raised when a citation has more than the allowed entries, {type, name, reference, date, authors, comments}."""
 
     def __str__(self):
         return "[pos:{}] Citation contains too many entries: {}".format(self.position, self.line)
 
 
 class MissingCitationException(PyBelWarning):
-    """Tried to parse a line, but no citation present. Most likely due to previous improperly formatted citation"""
+    """Raised when trying to parse a BEL statement, but no citation is currently set. This might be due to a previous
+    error in the formatting of a citation. 
+    
+    Though it's not a best practice, some BEL curators set other annotations before the citation. If this is the case
+    in your BEL document, and you're absolutly sure that all UNSET statements are correctly written, you can use 
+    ``citation_clearing=True`` as a keyword argument in any of the IO functions in :func:`pybel.from_lines`, 
+    :func:`pybel.from_url`, or :func:`pybel.from_path`.
+    """
 
     def __init__(self, line):
         """
@@ -213,7 +220,13 @@ class MissingCitationException(PyBelWarning):
 
 
 class MissingSupportWarning(PyBelWarning):
-    """All BEL statements must be qualified with evidence"""
+    """Raised when trying to parse a BEL statement, but no evidence is currently set. All BEL statements must be
+    qualified with evidence. 
+    
+    If your data is serialized from a database and provenance information is not readily
+    accessible, consider referencing the publication for the database, or a url pointing to the data from either
+    a programatically or human-readable endpoint.
+    """
 
     def __init__(self, line):
         """
@@ -229,13 +242,13 @@ class MissingSupportWarning(PyBelWarning):
 
 
 class InvalidCitationType(PyBelWarning):
-    """Incorrect type of citation. Should be one of:
+    """Raise when a citation is set with an incorrect type. Valid citation types include:
 
-- Book
-- PubMed
-- Journal
-- Online Resource
-- Other
+- ``Book``
+- ``PubMed``
+- ``Journal``
+- ``Online Resource``
+- ``Other``
 
 .. seealso:: OpenBEL wiki on `citations <https://wiki.openbel.org/display/BELNA/Citation>`_
     """
@@ -251,7 +264,7 @@ class InvalidCitationType(PyBelWarning):
 
 
 class InvalidPubMedIdentifierWarning(PyBelWarning):
-    """Tried to make a citation to PubMed that's not a legal PMID"""
+    """Raised when a citation is set whose type is ``PubMed`` but whose database identifier is not a valid integer."""
 
     def __init__(self, line, position, reference):
         PyBelWarning.__init__(self, line, position, reference)
@@ -260,7 +273,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
         self.reference = reference
 
     def __str__(self):
-        return '[pos:{}] "{}" is not a valid PMID'.format(self.position, self.reference)
+        return '[pos:{}] "{}" is not a valid PubMed identifier'.format(self.position, self.reference)
 
 
 # BEL Syntax Warnings
@@ -279,8 +292,12 @@ class MalformedTranslocationWarning(PyBelWarning):
 
 
 class PlaceholderAminoAcidWarning(PyBelWarning):
-    """X might be used as a placeholder amino acid, or as a colloquial signifier for a truncation at a certain position.
-     Neither are valid within the HGVS nomenclature that defines the way variations are encoded in BEL."""
+    """Raised when an invalid amino acid code is given.
+    
+    
+     One example might be the usage of X, which is a colloquial signifier for a truncation in a given position. Text 
+     mining efforts for knowledge extraction make this mistake often. X might also signify a placeholder amino acid.
+     """
 
     def __init__(self, line, position, code):
         PyBelWarning.__init__(self, line, position, code)
@@ -294,7 +311,8 @@ class PlaceholderAminoAcidWarning(PyBelWarning):
 
 class NestedRelationWarning(PyBelWarning):
     """Raised when encountering a nested statement. See our the docs for an explanation of why we explicitly
-        do not support nested statements."""
+    do not support nested statements.
+    """
 
     def __init__(self, message):
         PyBelWarning.__init__(self, message)
@@ -305,13 +323,16 @@ class NestedRelationWarning(PyBelWarning):
 
 
 class LexicographyWarning(PyBelWarning):
-    """Raised when encountering improper capitalization of namespace/annotation names"""
+    """Raised when encountering improper capitalization of namespace/annotation names."""
 
 
 # Semantic Warnings
 
 class InvalidFunctionSemantic(PyBelWarning):
-    """Used an identifier in a semantically invalid function"""
+    """Raised when an invalid function is used for a given node. 
+    
+    For example, an HGNC symbol for a protein-coding gene YFG cannot be referenced as an miRNA with ``m(HGNC:YFG)``
+    """
 
     def __init__(self, function, namespace, name, allowed_functions):
         PyBelWarning.__init__(self, function, namespace, name, allowed_functions)
