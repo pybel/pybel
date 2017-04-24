@@ -23,7 +23,7 @@ class BaseCacheManager:
     using an `RFC-1738 <http://rfc.net/rfc1738.html>`_ string. For example, a MySQL string can be given with the 
     following form:  
     
-    :code:`mysql+pymysql://<username>:<password>@<host>/<dbname>[?<options>]`
+    :code:`mysql+pymysql://<username>:<password>@<host>/<dbname>?charset=utf8[&<options>]`
     
     Further options and examples can be found on the SQLAlchemy documentation on 
     `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
