@@ -763,7 +763,7 @@ class CacheManager(BaseCacheManager):
                     result.authors.append(self.get_or_create_author(author))
 
             self.session.add(result)
-            # self.session.flush()
+            self.session.flush()
 
         return result
 
