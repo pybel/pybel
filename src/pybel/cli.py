@@ -22,7 +22,7 @@ import time
 import click
 
 from .canonicalize import to_bel
-from .constants import PYBEL_LOG_DIR, DEFAULT_CACHE_LOCATION
+from .constants import PYBEL_LOG_DIR, get_cache_connection
 from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
@@ -48,7 +48,7 @@ def main():
 @main.command()
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
-@click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
 @click.option('--database-name', help='Input graph name from database')
 @click.option('--csv', help='Output path for *.csv')
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
@@ -58,7 +58,7 @@ def main():
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
-@click.option('--store-default', is_flag=True, help="Stores to default cache at {}".format(DEFAULT_CACHE_LOCATION))
+@click.option('--store-default', is_flag=True, help="Stores to default cache at {}".format(get_cache_connection()))
 @click.option('--store-connection', help="Database connection string")
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
@@ -145,22 +145,19 @@ def manage():
 
 
 @manage.command(help="Create the cache if it doesn't exist")
-@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 @click.option('-v', '--debug', count=True)
 def setup(connection, debug):
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
-    cm = CacheManager(connection=connection)
-    cm.create_database()
+    manager = CacheManager(connection=connection, echo=True)
+    manager.create_database()
 
 
 @manage.command(help='Drops database in cache')
-@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 def remove(connection):
-    if not connection:
-        os.remove(DEFAULT_CACHE_LOCATION)
-    else:
-        manager = CacheManager(connection=connection)
-        manager.drop_database()
+    manager = CacheManager(connection=connection, echo=True)
+    manager.drop_database()
 
 
 @manage.group(help="Manage definitions")
@@ -169,11 +166,11 @@ def definitions():
 
 
 @definitions.command(help='Set up default cache with default definitions')
-@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 @click.option('--skip-namespaces', is_flag=True)
 @click.option('--skip-annotations', is_flag=True)
 @click.option('--owl', is_flag=True)
-@click.option('--fraunhofer', is_flag=True, help='Use fraunhofer resources instead of openbel')
+@click.option('--fraunhofer', is_flag=True, help='Use Fraunhofer resources instead of OpenBEL')
 @click.option('-v', '--debug', count=True)
 def ensure(connection, skip_namespaces, skip_annotations, owl, fraunhofer, debug):
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
@@ -190,7 +187,7 @@ def ensure(connection, skip_namespaces, skip_annotations, owl, fraunhofer, debug
 
 @definitions.command(help='Manually add definition by URL')
 @click.argument('url')
-@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 def insert(url, connection):
     manager = CacheManager(connection=connection)
 
@@ -204,7 +201,7 @@ def insert(url, connection):
 
 @definitions.command(help='List URLs of cached resources, or contents of a specific resource')
 @click.option('--url', help='Resource to list')
-@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 def ls(url, connection):
     manager = CacheManager(connection=connection)
 
@@ -232,7 +229,7 @@ def graph():
 
 
 @graph.command(help='Lists stored graph names and versions')
-@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 def ls(connection):
     manager = CacheManager(connection=connection)
 
@@ -242,14 +239,14 @@ def ls(connection):
 
 @graph.command(help='Drops a graph by ID')
 @click.argument('gid')
-@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 def drop(gid, connection):
     manager = CacheManager(connection=connection)
     manager.drop_graph(gid)
 
 
 @graph.command(help='Drops all graphs')
-@click.option('-c', '--connection', help='Cache location. Defaults to {}'.format(DEFAULT_CACHE_LOCATION))
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 def dropall(connection):
     manager = CacheManager(connection=connection)
     manager.drop_graphs()

@@ -46,6 +46,14 @@ if not os.path.exists(PYBEL_DATA_DIR):
 DEFAULT_CACHE_NAME = 'pybel_cache.db'
 #: The default cache location is ~/.pybel/data/pybel_cache.db
 DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
+#: The default cache connection string uses sqlite.
+DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
+
+
+def get_cache_connection():
+    """Returns the default cache connection string"""
+    return os.environ[PYBEL_CONNECTION] if PYBEL_CONNECTION in os.environ else DEFAULT_CACHE_CONNECTION
+
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
 PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'

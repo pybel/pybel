@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from .models import Base
-from ..constants import PYBEL_CONNECTION, DEFAULT_CACHE_LOCATION
+from ..constants import PYBEL_CONNECTION, DEFAULT_CACHE_CONNECTION
 
 __all__ = ['BaseCacheManager']
 
@@ -45,8 +45,8 @@ class BaseCacheManager:
             self.connection = os.environ[PYBEL_CONNECTION]
             log.info('connected to environment-defined cache: %s', self.connection)
         else:
-            self.connection = 'sqlite:///' + DEFAULT_CACHE_LOCATION
-            log.info('connected to default cache: %s', self.connection)
+            self.connection = DEFAULT_CACHE_CONNECTION
+            log.info('connected to default sqlite cache: %s', self.connection)
 
         log.debug('building engine with echo: %s', echo)
         self.engine = create_engine(self.connection, echo=echo)
