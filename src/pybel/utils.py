@@ -25,6 +25,10 @@ def download(url):
     session = requests.Session()
     session.mount('file://', FileAdapter())
 
+    if url.startswith(BELFRAMEWORK_DOMAIN):
+        log.warning('%s has expired', BELFRAMEWORK_DOMAIN)
+        url = url.replace(BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN)
+
     try:
         res = session.get(url)
         res.raise_for_status()
