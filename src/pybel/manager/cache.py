@@ -148,8 +148,8 @@ class CacheManager(BaseCacheManager):
 
         if results is None:
             results = self.insert_namespace(url)
-
-        log.debug('loaded from database: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
+        else:
+            log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
@@ -257,8 +257,8 @@ class CacheManager(BaseCacheManager):
 
         if results is None:
             results = self.insert_annotation(url)
-
-        log.debug('loaded from database: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
+        else:
+            log.debug('loaded annotation: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
 
         self.annotation_model[url] = results
 
