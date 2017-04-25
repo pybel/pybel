@@ -120,8 +120,7 @@ class NamespaceEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), nullable=False,
-                  doc='Name that is defined in the corresponding namespace definition file')
+    name = Column(Text, nullable=False, doc='Name that is defined in the corresponding namespace definition file')
     encoding = Column(String(8), nullable=True,
                       doc='Represents the biological entities that this name is valid for (e.g. G for Gene or P for Protein)')
 
