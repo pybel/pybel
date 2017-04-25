@@ -535,9 +535,14 @@ class CacheManager(BaseCacheManager):
         network = models.Network(blob=graph_bytes, **graph.document)
 
         for key, url in graph.namespace_url.items():
-            network.namespaces.append(self.ensure_namespace(url))
+            namespace = self.ensure_namespace(url)
+            if store_parts:
+                network.namespaces.append(namespace)
+
         for key, url in graph.annotation_url.items():
-            network.annotations.append(self.ensure_annotation(url))
+            annotation = self.ensure_annotation(url)
+            if store_parts:
+                network.annotations.append(annotation)
 
         if store_parts:
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
