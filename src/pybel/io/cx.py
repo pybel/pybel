@@ -5,7 +5,7 @@ import logging
 import time
 from collections import defaultdict
 
-from ..canonicalize import calculate_canonical_name
+from ..canonicalize import decanonicalize_node
 from ..constants import *
 from ..graph import BELGraph
 from ..utils import flatten_dict, expand_dict, hash_tuple
@@ -24,6 +24,29 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 NDEX_SOURCE_FORMAT = "ndex:sourceFormat"
+
+
+def calculate_canonical_cx_identifier(graph, node):
+    """Calculates the canonical name for a given node. If it is a simple node, uses the namespace:name combination.
+    Otherwise, it uses the BEL string.
+
+    :param pybel.BELGraph graph: A BEL Graph
+    :param tuple node: A node
+    :return: Appropriate identifier for the node for CX indexing
+    :rtype: str
+    """
+    data = graph.node[node]
+
+    if data[FUNCTION] == COMPLEX and NAMESPACE in data:
+        return '{}:{}'.format(graph.node[node][NAMESPACE], graph.node[node][NAME])
+
+    if VARIANTS in data or FUSION in data or data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
+        return decanonicalize_node(graph, node)
+
+    if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
+        return '{}:{}'.format(graph.node[node][NAMESPACE], graph.node[node][NAME])
+
+    raise ValueError('Unexpected node data: {}'.format(data))
 
 
 def to_cx(graph, file):
@@ -64,7 +87,7 @@ def to_cx_json(graph):
 
         nodes_entry.append({
             '@id': node_id,
-            'n': calculate_canonical_name(graph, node)
+            'n': calculate_canonical_cx_identifier(graph, node)
         })
 
         for k, v in data.items():
@@ -82,9 +105,7 @@ def to_cx_json(graph):
                         'po': node_id,
                         'n': '{}_{}'.format(k, a),
                         'v': b
-
                     })
-
             elif k == NAME:
                 node_attributes_entry.append({
                     'po': node_id,
@@ -149,15 +170,56 @@ def to_cx_json(graph):
                     'v': v
                 })
 
-    context_entry = [{
-        GRAPH_NAMESPACE_URL: graph.namespace_url,
-        GRAPH_NAMESPACE_OWL: graph.namespace_owl,
-        GRAPH_NAMESPACE_PATTERN: graph.namespace_pattern,
-        GRAPH_ANNOTATION_URL: graph.namespace_url,
-        GRAPH_ANNOTATION_OWL: graph.annotation_owl,
-        GRAPH_ANNOTATION_PATTERN: graph.annotation_pattern,
-        GRAPH_ANNOTATION_LIST: {k: list(sorted(v)) for k,v in graph.annotation_list.items()},
-    }]
+    context_legend = {}
+
+    for key in graph.namespace_url:
+        context_legend[key] = GRAPH_NAMESPACE_URL
+
+    for key in graph.namespace_owl:
+        context_legend[key] = GRAPH_NAMESPACE_OWL
+
+    for key in graph.namespace_pattern:
+        context_legend[key] = GRAPH_NAMESPACE_PATTERN
+
+    for key in graph.annotation_url:
+        context_legend[key] = GRAPH_ANNOTATION_URL
+
+    for key in graph.annotation_owl:
+        context_legend[key] = GRAPH_ANNOTATION_OWL
+
+    for key in graph.annotation_pattern:
+        context_legend[key] = GRAPH_ANNOTATION_PATTERN
+
+    for key in graph.annotation_list:
+        context_legend[key] = GRAPH_ANNOTATION_LIST
+
+    context_legend_entry = []
+    for keyword, resource_type in context_legend.items():
+        context_legend_entry.append({
+            'k': keyword,
+            'v': resource_type
+        })
+
+    annotation_list_keys_lookup = {keyword: i for i, keyword in enumerate(sorted(graph.annotation_list))}
+    annotation_list_entry = []
+    for keyword, values in graph.annotation_list.items():
+        for value in values:
+            annotation_list_entry.append({
+                'k': annotation_list_keys_lookup[keyword],
+                'v': value
+            })
+
+    context_entry_dict = {}
+    context_entry_dict.update(graph.namespace_url)
+    context_entry_dict.update(graph.namespace_pattern)
+    context_entry_dict.update(graph.namespace_owl)
+    context_entry_dict.update(graph.annotation_url)
+    context_entry_dict.update(graph.annotation_pattern)
+    context_entry_dict.update(graph.annotation_owl)
+    context_entry_dict.update(annotation_list_keys_lookup)
+
+    context_entry_dict.update(graph.namespace_url)
+    context_entry = [context_entry_dict]
 
     network_attributes_entry = [{
         "n": NDEX_SOURCE_FORMAT,
@@ -175,6 +237,8 @@ def to_cx_json(graph):
 
     cx_pairs = [
         ('@context', context_entry),
+        ('context_legend', context_legend_entry),
+        ('annotation_lists', annotation_list_entry),
         ('networkAttributes', network_attributes_entry),
         ('nodes', nodes_entry),
         ('nodeAttributes', node_attributes_entry),
@@ -207,6 +271,8 @@ def to_cx_json(graph):
         cx.append({
             key: aspect
         })
+
+    cx.append({"status": [{"error": "", "success": True}]})
 
     return cx
 
