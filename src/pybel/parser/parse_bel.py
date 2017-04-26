@@ -25,7 +25,7 @@ from ..utils import list2tuple
 
 __all__ = ['BelParser']
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pybel.parser')
 
 general_abundance_tags = one_of_tags(['a', 'abundance'], ABUNDANCE, FUNCTION)
 gene_tag = one_of_tags(['g', 'geneAbundance'], GENE, FUNCTION)
@@ -741,7 +741,7 @@ def handle_activity_legacy(line, position, tokens):
 
 
 def handle_legacy_tloc(line, position, tokens):
-    log.debug('Legacy translocation statement: %s', line)
+    log.debug('legacy translocation statement: %s', line)
     return tokens
 
 
