@@ -204,13 +204,16 @@ def tokenize_version(version_string):
 
 
 def citation_dict_to_tuple(citation):
-    n = None
-    for i, entry in enumerate(CITATION_ENTRIES):
-        if entry not in citation:
-            break
-        n = i
+    if all(x in citation for x in CITATION_ENTRIES):
+        return tuple(citation[x] for x in CITATION_ENTRIES)
 
-    return tuple(citation[x] for x in CITATION_ENTRIES[:n])
+    if all(x in citation for x in CITATION_ENTRIES[3:5]):
+        return tuple(citation[x] for x in CITATION_ENTRIES[:5])
+
+    if all(x in citation for x in CITATION_ENTRIES[3:4]):
+        return tuple(citation[x] for x in CITATION_ENTRIES[:4])
+
+    return tuple(citation[x] for x in CITATION_ENTRIES[:3])
 
 
 def flatten_citation(citation):
