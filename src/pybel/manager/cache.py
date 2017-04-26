@@ -995,9 +995,12 @@ class CacheManager(BaseCacheManager):
         self.session.query(models.Network).delete()
         self.session.commit()
 
-    def list_graphs(self):
+    def list_graphs(self, include_description=True):
         """Lists network id, network name, and network version triples"""
-        return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
+        if include_description:
+            return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
+        else:
+            return list(self.session.query(Network.id, Network.name, Network.version).all())
 
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
