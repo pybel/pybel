@@ -13,7 +13,7 @@ MariaDB, it could look like this:
 
 .. code::
 
-    $ export PYBEL_CONNECTION="mysql+pymysql://user:password@localhost/table?charset=utf8"
+    $ export PYBEL_CONNECTION="mysql+pymysql://user:password@server_name/database_name?charset=utf8"
 
 Command Line
 ------------

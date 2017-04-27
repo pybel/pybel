@@ -4,7 +4,7 @@
 
 import logging
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 from .cache import build_manager
 
@@ -29,12 +29,20 @@ def to_database(graph, connection=None, store_parts=False):
     :param store_parts: Should the graph be stored in the edge store?
     :type store_parts: bool
     """
+    manager = build_manager(connection=connection)
+
     try:
-        manager = build_manager(connection=connection)
         manager.insert_graph(graph, store_parts=store_parts)
     except IntegrityError:
+        manager.rollback()
         log.exception('Error storing graph - other graph with same metadata'
                       ' already present. Consider incrementing the version')
+    except OperationalError:
+        manager.rollback()
+        log.exception('Error storing graph - operational exception')
+    except Exception as e:
+        manager.rollback()
+        raise e
 
 
 def from_database(name, version=None, connection=None):

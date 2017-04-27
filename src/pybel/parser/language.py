@@ -113,11 +113,15 @@ aa_single = oneOf(list(amino_acid_dict.keys()))
 aa_single.setParseAction(lambda s, l, t: [amino_acid_dict[t[0]]])
 
 aa_triple = oneOf(list(amino_acid_dict.values()))
+
+#: In biological literature, the X is used to denote a truncation. Text mining efforts often encode X as an amino
+#: acid, for which we will throw an error using :func:`handle_aa_placeholder`
 aa_placeholder = Keyword('X')
 
 
-def handle_aa_placeholder(s, l, tokens):
-    raise PlaceholderAminoAcidWarning(tokens[0])
+def handle_aa_placeholder(line, position, tokens):
+    """Raises an exception when encountering a placeholder amino acid, ``X``"""
+    raise PlaceholderAminoAcidWarning(line, position, tokens[0])
 
 
 aa_placeholder.setParseAction(handle_aa_placeholder)

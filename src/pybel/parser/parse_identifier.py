@@ -119,6 +119,6 @@ class IdentifierParser(BaseParser):
         return tokens
 
     @staticmethod
-    def handle_namespace_invalid(line, positon, tokens):
+    def handle_namespace_invalid(line, position, tokens):
         name = tokens[NAME]
-        raise NakedNameWarning(name)
+        raise NakedNameWarning(line, position, name)

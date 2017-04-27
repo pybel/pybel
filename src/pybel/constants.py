@@ -9,12 +9,15 @@ This module maintains the strings used throughout the PyBEL codebase to promote 
 
 import os
 
-SMALL_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
-LARGE_CORPUS_URL = 'http://resource.belframework.org/belframework/1.0/knowledge/large_corpus.bel'
+BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
+OPENBEL_DOMAIN = 'http://resources.openbel.org'
+
+SMALL_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/small_corpus.bel'
+LARGE_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/large_corpus.bel'
 
 FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
-OPENBEL_NAMESPACE_RESOURCES = 'http://resources.openbel.org/belframework/20150611/namespace/'
-OPENBEL_ANNOTATION_RESOURCES = 'http://resources.openbel.org/belframework/20150611/annotation/'
+OPENBEL_NAMESPACE_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/namespace/'
+OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/annotation/'
 DEFAULT_NAMESPACE_RESOURCES = FRAUNHOFER_RESOURCES
 DEFAULT_ANNOTATION_RESOURCES = FRAUNHOFER_RESOURCES
 
@@ -23,7 +26,7 @@ GOCC_LATEST = DEFAULT_NAMESPACE_RESOURCES + 'go-cellular-component.belns'
 GOCC_KEYWORD = 'GOCC'
 
 #: The environment variable that contains the default SQL connection information for the PyBEL cache
-PYBEL_CONNECTION_ENV = 'PYBEL_CONNECTION'
+PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 
 #: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
 PYBEL_DIR = os.path.expanduser('~/.pybel')
@@ -41,7 +44,16 @@ if not os.path.exists(PYBEL_DATA_DIR):
     os.mkdir(PYBEL_DATA_DIR)
 
 DEFAULT_CACHE_NAME = 'pybel_cache.db'
+#: The default cache location is ~/.pybel/data/pybel_cache.db
 DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
+#: The default cache connection string uses sqlite.
+DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
+
+
+def get_cache_connection():
+    """Returns the default cache connection string"""
+    return os.environ[PYBEL_CONNECTION] if PYBEL_CONNECTION in os.environ else DEFAULT_CACHE_CONNECTION
+
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
 PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'

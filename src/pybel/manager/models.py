@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains the database models that support the PyBEL definition cache and graph cache"""
+"""This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
 import datetime
 
@@ -10,6 +10,27 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 from ..constants import *
+
+__all__ = [
+    'Base',
+    'Namespace',
+    'NamespaceEntry',
+    'NamespaceEntryEquivalence',
+    'Annotation',
+    'AnnotationEntry',
+    'OwlNamespace',
+    'OwlNamespaceEntry',
+    'OwlAnnotation',
+    'OwlAnnotationEntry',
+    'Network',
+    'Node',
+    'Modification',
+    'Author',
+    'Citation',
+    'Evidence',
+    'Edge',
+    'Property',
+]
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
@@ -49,6 +70,7 @@ CITATION_TABLE_NAME = 'pybel_citation'
 EVIDENCE_TABLE_NAME = 'pybel_evidence'
 PROPERTY_TABLE_NAME = 'pybel_property'
 
+LONGBLOB = 4294967295
 
 Base = declarative_base()
 
@@ -119,6 +141,7 @@ class NamespaceEntry(Base):
 
 
 class NamespaceEntryEquivalence(Base):
+    """Represents the equivalance classes between entities"""
     __tablename__ = NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -294,7 +317,7 @@ class Network(Base):
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
-    blob = Column(Binary)
+    blob = Column(Binary(LONGBLOB))
 
     nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
     edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
@@ -303,7 +326,7 @@ class Network(Base):
     citations = relationship('Citation', secondary=network_citation, lazy="dynamic")
 
     __table_args__ = (
-        UniqueConstraint(METADATA_NAME, METADATA_VERSION),
+        UniqueConstraint(name, version),
     )
 
     @property
@@ -401,7 +424,7 @@ class Modification(Base):
 
     @property
     def data(self):
-        """Recreates a is_variant dictionary for PyBEL.BELGraph.
+        """Recreates a is_variant dictionary for :class:`BELGraph`
 
         :return: Dictionary that describes a variant or a fusion.
         :rtype: dict
@@ -528,9 +551,9 @@ class Citation(Base):
 
     @property
     def data(self):
-        """Creates a citation dictionary that is used to recreate the edge data dictionary of a PyBEL.BELGraph.
+        """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
-        :return: Citation dictionary for the recreation of a PyBEL.BELGraph.
+        :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         :rtype: dict
         """
         citation_dict = {
@@ -558,9 +581,9 @@ class Evidence(Base):
 
     @property
     def data(self):
-        """Creates a dictionary that is used to recreate the edge data dictionary for a PyBEL.BELGraph.
+        """Creates a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
 
-        :return: Dictionary containing citation and evidence for a PyBEL.BELGraph edge.
+        :return: Dictionary containing citation and evidence for a :class:`BELGraph` edge.
         :rtype: dict
         """
         return {
@@ -574,7 +597,6 @@ edge_annotation = Table(
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
     Column('annotationEntry_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
 )
-
 
 edge_property = Table(
     EDGE_PROPERTY_TABLE_NAME, Base.metadata,
@@ -592,7 +614,7 @@ class Edge(Base):
     id = Column(Integer, primary_key=True)
 
     graphIdentifier = Column(Integer,
-                             doc='Identifier that is used in the PyBEL.BELGraph to identify whether or not an edge is artificial')
+                             doc='Identifier that is used in the BEL graph to identify whether or not an edge is artificial')
     bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
@@ -612,10 +634,10 @@ class Edge(Base):
 
     @property
     def data(self):
-        """Creates a dictionary of one BEL Edge that can be used to create an edge in a PyBEL.BELGraph.
+        """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
-        :return: Dictionary that contains information about an edge of a PyBEL.BELGraph. Including participants
-                 and edge data informations.
+        :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
+                 and edge data information.
         :rtype: dict
         """
         source_node = self.source.data
@@ -692,7 +714,7 @@ class Property(Base):
 
     @property
     def data(self):
-        """Creates a property dict that is used to recreate an edge dictionary for PyBEL.BELGraph.
+        """Creates a property dict that is used to recreate an edge dictionary for a :class:`BELGraph`.
 
         :return: Property dictionary of an edge that is participant (sub/obj) related.
         :rtype: dict

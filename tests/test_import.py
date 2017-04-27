@@ -5,15 +5,30 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import networkx as nx
+
 from pybel import BELGraph
+from pybel import to_cx_json, from_cx_json
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
-from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url
+from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
+    from_cx_jsons
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
+from pybel.utils import hash_tuple
 from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenParserBase, SET_CITATION_TEST, \
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
 
 logging.getLogger('requests').setLevel(logging.WARNING)
+
+
+def do_remapping(G, H):
+    """Remaps nodes to use the reconsitution tests
+    
+    :param BELGraph G: The original bel graph 
+    :param BELGraph H: The reconsituted BEL graph from CX input/output
+    """
+    node_mapping = dict(enumerate(sorted(G.nodes_iter(), key=hash_tuple)))
+    nx.relabel.relabel_nodes(H, node_mapping, copy=False)
 
 
 class TestThoroughIo(BelReconstitutionMixin):
@@ -44,6 +59,28 @@ class TestThoroughIo(BelReconstitutionMixin):
 
         with open(path, 'wb') as f:
             to_graphml(self.graph, f)
+
+    def test_cx(self):
+        reconstituted = from_cx_json(to_cx_json(self.graph))
+
+        do_remapping(self.graph, reconstituted)
+
+        self.bel_thorough_reconstituted(
+            reconstituted,
+            check_warnings=False,
+            check_provenance=False
+        )
+
+    def test_cxs(self):
+        reconstituted = from_cx_jsons(to_cx_jsons(self.graph))
+
+        do_remapping(self.graph, reconstituted)
+
+        self.bel_thorough_reconstituted(
+            reconstituted,
+            check_warnings=False,
+            check_provenance=False
+        )
 
 
 class TestSlushyIo(BelReconstitutionMixin):
@@ -79,12 +116,36 @@ class TestSlushyIo(BelReconstitutionMixin):
         g_bytes = to_bytes(self.graph)
         from_bytes(g_bytes)
 
+    def test_cx(self):
+        reconstituted = from_cx_json(to_cx_json(self.graph))
 
-class TestImport(BelReconstitutionMixin, unittest.TestCase):
+        do_remapping(self.graph, reconstituted)
+
+        self.bel_slushy_reconstituted(reconstituted)
+
+    def test_cxs(self):
+        reconstituted = from_cx_jsons(to_cx_jsons(self.graph))
+
+        do_remapping(self.graph, reconstituted)
+
+        self.bel_slushy_reconstituted(reconstituted)
+
+
+class TestSimpleIo(BelReconstitutionMixin):
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
         g = from_url(Path(test_bel_simple).as_uri())
         self.bel_simple_reconstituted(g)
+
+    def test_cx(self):
+        """Tests the CX input/output on test_bel.bel"""
+        graph = from_path(test_bel_simple)
+        self.bel_simple_reconstituted(graph)
+
+        reconstituted = from_cx_json(to_cx_json(graph))
+        do_remapping(graph, reconstituted)
+
+        self.bel_simple_reconstituted(reconstituted)
 
 
 class TestRegex(unittest.TestCase):

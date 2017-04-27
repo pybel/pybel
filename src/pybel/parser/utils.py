@@ -94,7 +94,9 @@ LP = Suppress('(') + W
 RP = W + Suppress(')')
 
 word = Word(alphanums)
+identifier = Word(alphanums + '_')
 quote = dblQuotedString().setParseAction(removeQuotes)
+qid = quote | identifier
 delimitedSet = And([Suppress('{'), delimitedList(quote), Suppress('}')])
 
 

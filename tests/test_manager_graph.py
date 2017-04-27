@@ -31,13 +31,14 @@ class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
     def test_load_reload(self, mock_get):
         name = expected_test_thorough_metadata[METADATA_NAME]
         version = expected_test_thorough_metadata[METADATA_VERSION]
+        description = expected_test_thorough_metadata[METADATA_DESCRIPTION]
 
         self.manager.insert_graph(self.graph)
 
         x = self.manager.list_graphs()
 
         self.assertEqual(1, len(x))
-        self.assertEqual((1, name, version), x[0])
+        self.assertEqual((1, name, version, description), x[0])
 
         g2 = self.manager.get_graph(name, version)
         self.bel_thorough_reconstituted(g2)

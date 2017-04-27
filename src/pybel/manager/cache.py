@@ -10,6 +10,7 @@ enable this option, but can specify a database location if they choose.
 import datetime
 import itertools as itt
 import logging
+import time
 from collections import defaultdict
 
 import networkx as nx
@@ -17,6 +18,7 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
+from .models import Network, Annotation, Namespace
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -29,23 +31,27 @@ try:
 except ImportError:
     import pickle
 
-__all__ = ['CacheManager']
+__all__ = [
+    'CacheManager',
+    'build_manager',
+]
 
 log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
-def build_manager(connection=None):
-    """A convenience method for turning a string into a connection, or passing a CacheManager through.
+def build_manager(connection=None, echo=False):
+    """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
 
     :type connection: None or str or CacheManager
+    :type echo: bool
     :return: A graph cache manager
     :rtype: CacheManager
     """
     if isinstance(connection, CacheManager):
         return connection
-    return CacheManager(connection=connection)
+    return CacheManager(connection=connection, echo=echo)
 
 
 class CacheManager(BaseCacheManager):
@@ -71,6 +77,9 @@ class CacheManager(BaseCacheManager):
         #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
 
+        self.annotation_model = {}
+        self.namespace_model = {}
+
         self.namespace_term_cache = {}
         self.namespace_edge_cache = {}
         self.namespace_graph_cache = {}
@@ -89,7 +98,7 @@ class CacheManager(BaseCacheManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: :class:`pybel.manager.models.Namespace`
         """
-        log.info('Caching namespace %s', url)
+        log.info('inserting namespace %s', url)
 
         config = get_bel_resource(url)
 
@@ -127,26 +136,33 @@ class CacheManager(BaseCacheManager):
 
         :param url: the location of the namespace file
         :type url: str
+        :return: The namespace instance
+        :rtype: models.Namespace
         """
-        if url in self.namespace_cache:
-            log.info('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
-            return
+        if url in self.namespace_model:
+            log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
+            return self.namespace_model[url]
 
+        t = time.time()
         results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
 
         if results is None:
             results = self.insert_namespace(url)
-
-        log.info('Loaded from database: %s (%d)', url, len(results.entries))
+        else:
+            log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
         elif not results.entries:
             raise ValueError('No entries for {}'.format(url))
 
+        self.namespace_model[url] = results
+
         for entry in results.entries:
             self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
             self.namespace_id_cache[url][entry.name] = entry.id
+
+        return results
 
     def get_namespace(self, url):
         """Returns a dict of names and their encodings for the given namespace file
@@ -180,11 +196,11 @@ class CacheManager(BaseCacheManager):
 
     def list_namespaces(self):
         """Returns a list of all namespace keyword/url pairs"""
-        return list(self.session.query(models.Namespace.keyword, models.Namespace.url).all())
+        return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
 
-    def ensure_default_namespaces(self):
+    def ensure_default_namespaces(self, use_fraunhofer=False):
         """Caches the default set of namespaces"""
-        for url in defaults.default_namespaces:
+        for url in defaults.fraunhofer_namespaces if use_fraunhofer else defaults.default_namespaces:
             self.ensure_namespace(url)
 
     # ANNOTATION MANAGEMENT
@@ -195,9 +211,9 @@ class CacheManager(BaseCacheManager):
         :param url: the location of the namespace file
         :type url: str
         :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: :class:`models.Namespace`
+        :rtype: models.Annotation
         """
-        log.info('Caching annotation %s', url)
+        log.info('inserting annotation %s', url)
 
         config = get_bel_resource(url)
 
@@ -229,21 +245,28 @@ class CacheManager(BaseCacheManager):
 
         :param url: the location of the annotation file
         :type url: str
+        :return: The ensured annotation instance
+        :rtype: models.Annotation
         """
-        if url in self.annotation_cache:
-            log.info('Already in memory: %s (%d)', url, len(self.annotation_cache[url]))
-            return
+        if url in self.annotation_model:
+            log.debug('already in memory: %s (%d)', url, len(self.annotation_cache[url]))
+            return self.annotation_model[url]
 
+        t = time.time()
         results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
 
         if results is None:
             results = self.insert_annotation(url)
+        else:
+            log.debug('loaded annotation: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
 
-        log.info('Loaded from database: %s (%d)', url, len(results.entries))
+        self.annotation_model[url] = results
 
         for entry in results.entries:
             self.annotation_cache[url][entry.name] = entry.label
             self.annotation_id_cache[url][entry.name] = entry.id
+
+        return results
 
     def get_annotation(self, url):
         """Returns a dict of annotations and their labels for the given annotation file
@@ -280,22 +303,22 @@ class CacheManager(BaseCacheManager):
         return {definition.keyword: definition.url for definition in self.session.query(models.Annotation).all()}
 
     def list_annotations(self):
-        return list(self.session.query(models.Annotation.keyword, models.Annotation.url).all())
+        return list(self.session.query(Annotation.keyword, Annotation.version, Annotation.url).all())
 
-    def ensure_default_annotations(self):
+    def ensure_default_annotations(self, use_fraunhofer=False):
         """Caches the default set of annotations"""
-        for url in defaults.default_annotations:
+        for url in defaults.fraunhofer_annotations if use_fraunhofer else defaults.default_annotations:
             self.ensure_annotation(url)
 
     # NAMESPACE OWL MANAGEMENT
 
     def _insert_owl(self, iri, owl_model, owl_entry_model):
-        """Helper function for caching an ontology at the given IRI
+        """Helper function for inserting an ontology at the given IRI
 
         :param iri: the location of the ontology
         :type iri: str
         """
-        log.info('Caching owl %s', iri)
+        log.info('inserting owl %s', iri)
 
         graph = parse_owl(iri)
 
@@ -450,7 +473,7 @@ class CacheManager(BaseCacheManager):
         """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
         self.ensure_namespace(namespace_url)
 
-        log.info('Caching equivalences: %s', url)
+        log.info('inserting equivalences: %s', url)
 
         config = get_bel_resource(url)
         values = config['Values']
@@ -509,21 +532,28 @@ class CacheManager(BaseCacheManager):
         :return: A Network object
         :rtype: models.Network
         """
-        graph_bytes = to_bytes(graph)
+        log.debug('inserting %s v%s', graph.name, graph.version)
 
-        network = models.Network(blob=graph_bytes, **graph.document)
-        for key, url in graph.namespace_url.items():
-            network.namespaces.append(self.session.query(models.Namespace).filter_by(url=url).one())
-        for key, url in graph.annotation_url.items():
-            network.annotations.append(self.session.query(models.Annotation).filter_by(url=url).one())
+        t = time.time()
+
+        namespaces = [self.ensure_namespace(url) for url in graph.namespace_url.values()]
+        annotations = [self.ensure_annotation(url) for url in graph.annotation_url.values()]
+
+        network = models.Network(blob=to_bytes(graph), **graph.document)
 
         if store_parts:
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
                 self.ensure_namespace(GOCC_LATEST)
+
+            network.namespaces.extend(namespaces)
+            network.annotations.extend(annotations)
+
             self.store_graph_parts(network, graph)
 
         self.session.add(network)
         self.session.commit()
+
+        log.info('inserted %s v%s in %.2fs', graph.name, graph.version, time.time() - t)
 
         return network
 
@@ -741,7 +771,7 @@ class CacheManager(BaseCacheManager):
                     result.authors.append(self.get_or_create_author(author))
 
             self.session.add(result)
-            #self.session.flush()
+            self.session.flush()
 
         return result
 
@@ -855,7 +885,7 @@ class CacheManager(BaseCacheManager):
             mod = self.session.query(models.Modification).filter_by(**modification).one_or_none()
             if not mod:
                 mod = models.Modification(**modification)
-                self.session.add(mod)
+                #self.session.add(mod)
             modifications.append(mod)
 
         return modifications
@@ -905,7 +935,6 @@ class CacheManager(BaseCacheManager):
                 property_list.append(property_dict)
 
             elif modifier == LOCATION:
-                print(participant_data)
                 if participant_data[LOCATION][NAMESPACE] == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
                     namespace_url = GOCC_LATEST
                 else:
@@ -967,13 +996,21 @@ class CacheManager(BaseCacheManager):
         :type network_id: int
         """
 
-        # TODO delete with cascade
+        # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
         self.session.query(models.Network).filter(models.Network.id == network_id).delete()
         self.session.commit()
 
-    def list_graphs(self):
+    def drop_graphs(self):
+        """Drops all graphs"""
+        self.session.query(models.Network).delete()
+        self.session.commit()
+
+    def list_graphs(self, include_description=True):
         """Lists network id, network name, and network version triples"""
-        return [(network.id, network.name, network.version) for network in self.session.query(models.Network).all()]
+        if include_description:
+            return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
+        else:
+            return list(self.session.query(Network.id, Network.name, Network.version).all())
 
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
