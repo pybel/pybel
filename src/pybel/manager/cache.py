@@ -613,7 +613,9 @@ class CacheManager(BaseCacheManager):
             if citation not in network.citations:
                 network.citations.append(citation)
 
-            self.session.flush()
+                # self.session.flush() Disable for unique edges
+
+        self.session.flush()
 
     def get_bel_namespace_entry(self, url, value):
         """Gets a given NamespaceEntry object.
@@ -706,6 +708,7 @@ class CacheManager(BaseCacheManager):
                 result.modifications = self.get_or_create_modification(graph, node_data)
 
             self.session.add(result)
+            #self.session.flush()
 
         return result
 
@@ -820,22 +823,22 @@ class CacheManager(BaseCacheManager):
 
             if FUSION_MISSING in node_data[RANGE_3P]:
                 fusion_dict.update({
-                    'p3Missing': node_data[RANGE_3P][FUSION_MISSING]
+                    'p3Missing': node_data[RANGE_3P][FUSION_MISSING].strip()
                 })
             else:
                 fusion_dict.update({
-                    'p3Reference': node_data[RANGE_3P][FUSION_REFERENCE],
+                    'p3Reference': node_data[RANGE_3P][FUSION_REFERENCE].strip(),
                     'p3Start': node_data[RANGE_3P][FUSION_START],
                     'p3Stop': node_data[RANGE_3P][FUSION_STOP],
                 })
 
             if FUSION_MISSING in node_data[RANGE_5P]:
                 fusion_dict.update({
-                    'p5Missing': node_data[RANGE_5P][FUSION_MISSING]
+                    'p5Missing': node_data[RANGE_5P][FUSION_MISSING].strip()
                 })
             else:
                 fusion_dict.update({
-                    'p5Reference': node_data[RANGE_5P][FUSION_REFERENCE],
+                    'p5Reference': node_data[RANGE_5P][FUSION_REFERENCE].strip(),
                     'p5Start': node_data[RANGE_5P][FUSION_START],
                     'p5Stop': node_data[RANGE_5P][FUSION_STOP],
                 })
@@ -844,18 +847,18 @@ class CacheManager(BaseCacheManager):
 
         else:
             for variant in node_data[VARIANTS]:
-                mod_type = variant[KIND]
+                mod_type = variant[KIND].strip()
                 if mod_type == HGVS:
                     modification_list.append({
                         'modType': mod_type,
-                        'variantString': variant[IDENTIFIER]
+                        'variantString': variant[IDENTIFIER].strip()
                     })
 
                 elif mod_type == FRAGMENT:
                     if FRAGMENT_MISSING in variant:
                         modification_list.append({
                             'modType': mod_type,
-                            'p3Missing': variant[FRAGMENT_MISSING]
+                            'p3Missing': variant[FRAGMENT_MISSING].strip()
                         })
                     else:
                         modification_list.append({
@@ -867,16 +870,16 @@ class CacheManager(BaseCacheManager):
                 elif mod_type == GMOD:
                     modification_list.append({
                         'modType': mod_type,
-                        'modNamespace': variant[IDENTIFIER][NAMESPACE],
-                        'modName': variant[IDENTIFIER][NAME]
+                        'modNamespace': variant[IDENTIFIER][NAMESPACE].strip(),
+                        'modName': variant[IDENTIFIER][NAME].strip()
                     })
 
                 elif mod_type == PMOD:
                     modification_list.append({
                         'modType': mod_type,
-                        'modNamespace': variant[IDENTIFIER][NAMESPACE],
-                        'modName': variant[IDENTIFIER][NAME],
-                        'aminoA': variant[PMOD_CODE] if PMOD_CODE in variant else None,
+                        'modNamespace': variant[IDENTIFIER][NAMESPACE].strip(),
+                        'modName': variant[IDENTIFIER][NAME].strip(),
+                        'aminoA': variant[PMOD_CODE].strip() if PMOD_CODE in variant else None,
                         'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None
                     })
 
