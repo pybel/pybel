@@ -26,6 +26,14 @@ log = logging.getLogger(__name__)
 NDEX_SOURCE_FORMAT = "ndex:sourceFormat"
 
 
+def _dict_to_cx(d, key_tag='k', value_tag='v'):
+    return [{key_tag: k, value_tag: v} for k, v in d.items()]
+
+
+def _cx_to_dict(cx, key_tag='k', value_tag='v'):
+    return {d[key_tag]: d[value_tag] for d in cx}
+
+
 def calculate_canonical_cx_identifier(graph, node):
     """Calculates the canonical name for a given node. If it is a simple node, uses the namespace:name combination.
     Otherwise, it uses the BEL string.
@@ -52,8 +60,7 @@ def calculate_canonical_cx_identifier(graph, node):
 def to_cx(graph, file):
     """Writes this graph to a JSON file in CX format
 
-    :param graph: A BEL graph
-    :type graph: BELGraph
+    :param BELGraph graph: A BEL graph
     :param file: A file to write to
     :type file: file or file-like
     """
@@ -64,8 +71,7 @@ def to_cx(graph, file):
 def to_cx_json(graph):
     """Converts BEL Graph to CX data format (as in-memory JSON) for use with `NDEx <http://www.ndexbio.org/>`_
 
-    :param graph: A BEL Graph
-    :type graph: pybel.BELGraph
+    :param BELGraph graph: A BEL Graph
     :return: The CX JSON for this graph
     :rtype: list
 
@@ -290,48 +296,52 @@ def to_cx_jsons(graph):
 def from_cx_json(cx):
     """Rebuilds a BELGraph from CX JSON output from PyBEL
 
-    :param cx: The CX JSON for this graph
-    :type cx: list
-    :return: A BEL Graph
-    :rtype: pybel.BELGraph
+    :param list cx: The CX JSON for this graph
+    :return: A BEL graph
+    :rtype: BELGraph
     """
     graph = BELGraph()
 
     log.info('CX Entry [0]: %s', cx[0])
     log.info('CX Entry [1]: %s', cx[1])
 
-    context_entry = cx[2]
-    if '@context' not in context_entry:
-        log.warning('Missing @context. Got: %s', context_entry)
-    else:
-        for d in context_entry['@context']:
-            if GRAPH_NAMESPACE_URL in d:
-                graph.namespace_url.update(d[GRAPH_NAMESPACE_URL])
-            if GRAPH_NAMESPACE_OWL in d:
-                graph.namespace_owl.update(d[GRAPH_NAMESPACE_OWL])
-            if GRAPH_NAMESPACE_PATTERN in d:
-                graph.namespace_pattern.update(d[GRAPH_NAMESPACE_PATTERN])
-            if GRAPH_ANNOTATION_URL in d:
-                graph.annotation_url.update(d[GRAPH_ANNOTATION_URL])
-            if GRAPH_ANNOTATION_OWL in d:
-                graph.annotation_owl.update(d[GRAPH_ANNOTATION_OWL])
-            if GRAPH_ANNOTATION_PATTERN in d:
-                graph.annotation_pattern.update(d[GRAPH_ANNOTATION_PATTERN])
-            if GRAPH_ANNOTATION_LIST in d:
-                graph.annotation_list.update((k, set(v)) for k, v in d[GRAPH_ANNOTATION_LIST].items())
+    context_legend_entry = cx[3]
+    context_legend = _cx_to_dict(context_legend_entry)
 
-    network_attributes_entry = cx[3]
+    annotation_lists = defaultdict(set)
+    annotation_list_entry = cx[4]
+    for d in annotation_list_entry:
+        annotation_lists[d['k']].add(d['v'])
+
+    context_entry = cx[2]
+    for keyword, entry in context_entry['@context'].items():
+        if context_legend[keyword] == GRAPH_NAMESPACE_URL:
+            graph.namespace_url[keyword] = entry
+        elif context_legend[keyword] == GRAPH_NAMESPACE_OWL:
+            graph.namespace_owl[keyword] = entry
+        elif context_legend[keyword] == GRAPH_NAMESPACE_PATTERN:
+            graph.namespace_pattern[keyword] = entry
+        elif context_legend[keyword] == GRAPH_ANNOTATION_URL:
+            graph.annotation_url[keyword] = entry
+        elif context_legend[keyword] == GRAPH_ANNOTATION_OWL:
+            graph.annotation_owl[keyword] = entry
+        elif context_legend[keyword] == GRAPH_ANNOTATION_PATTERN:
+            graph.annotation_pattern[keyword] = entry
+        elif context_legend[keyword] == GRAPH_ANNOTATION_LIST:
+            graph.annotation_list[keyword] = annotation_lists[entry]
+
+    network_attributes_entry = cx[5]
     for d in network_attributes_entry['networkAttributes']:
         if d['n'] == NDEX_SOURCE_FORMAT:
             continue
         graph.graph[GRAPH_METADATA][d['n']] = d['v']
 
-    node_entries = cx[4]
+    node_entries = cx[6]
     node_name = {}
     for d in node_entries['nodes']:
         node_name[d['@id']] = d['n']
 
-    node_attributes_entries = cx[5]
+    node_attributes_entries = cx[7]
     node_data = defaultdict(dict)
     for d in node_attributes_entries['nodeAttributes']:
         node_data[d['po']][d['n']] = d['v']
@@ -361,7 +371,7 @@ def from_cx_json(cx):
             d[NAME] = d.pop('identifier')
         graph.add_node(nid, attr_dict=d)
 
-    edges_entries = cx[6]
+    edges_entries = cx[8]
     edge_relation = {}
     edge_source = {}
     edge_target = {}
@@ -371,7 +381,7 @@ def from_cx_json(cx):
         edge_source[eid] = d['s']
         edge_target[eid] = d['t']
 
-    edge_annotations_entries = cx[7]
+    edge_annotations_entries = cx[9]
     edge_data = defaultdict(dict)
     for d in edge_annotations_entries['edgeAttributes']:
         edge_data[d['po']][d['n']] = d['v']
@@ -435,7 +445,7 @@ def from_cx_jsons(cxs):
     """Reconstitutes a BEL graph from a CX JSON string
     
     :param str cxs: CX JSON string 
-    :return: A BEL graph
+    :return: A BEL graph representing the CX graph contained in the string
     :rtype: BELGraph
     """
     return from_cx_json(json.loads(cxs))
@@ -457,7 +467,7 @@ def from_cx_path(path):
 
     :param path: The path to a file containing CX JSON
     :type path: str
-    :return: A BEL Graph representing the CX graph contained in the file
+    :return: A BEL Graph representing the CX graph contained in the file at the given path
     :rtype: BELGraph
     """
     with open(path) as file:
