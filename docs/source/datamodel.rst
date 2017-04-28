@@ -2,8 +2,9 @@ Data Model
 ==========
 
 Molecular biology is a directed graph; not a table. BEL expresses how biological entities interact within many
-different contexts, with descriptive annotations. PyBEL represents data as a logical MultiDiGraph using the NetworkX
-package. Each node and edge has an associated data dictionary for storing relevant/contextual information.
+different contexts, with descriptive annotations. PyBEL represents data as a directional multigraph using an extension
+of :class:`networkx.MultiDiGraph`. Each node and edge has an associated data dictionary for storing relevant/contextual
+information.
 
 This allows for much easier programmatic access to answer more complicated questions, which can be written with python
 code. Because the data structure is the same in Neo4J, the data can be directly exported with :func:`pybel.to_neo4j`.
@@ -87,7 +88,7 @@ Graph
 Nodes
 -----
 Nodes are used to represent physical entities' abundances. The relevant data about a node is stored in its associated
-dictionary in NetworkX. After parsing, :code:`p(HGNC:GSK3B)` becomes:
+dictionary in :mod:`networkx`. After parsing, :code:`p(HGNC:GSK3B)` becomes:
 
 .. code::
 

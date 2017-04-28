@@ -25,6 +25,10 @@ def download(url):
     session = requests.Session()
     session.mount('file://', FileAdapter())
 
+    if url.startswith(BELFRAMEWORK_DOMAIN):
+        log.warning('%s has expired', BELFRAMEWORK_DOMAIN)
+        url = url.replace(BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN)
+
     try:
         res = session.get(url)
         res.raise_for_status()
@@ -200,7 +204,16 @@ def tokenize_version(version_string):
 
 
 def citation_dict_to_tuple(citation):
-    return tuple(citation[x] for x in CITATION_ENTRIES[:len(citation)])
+    if all(x in citation for x in CITATION_ENTRIES):
+        return tuple(citation[x] for x in CITATION_ENTRIES)
+
+    if all(x in citation for x in CITATION_ENTRIES[3:5]):
+        return tuple(citation[x] for x in CITATION_ENTRIES[:5])
+
+    if all(x in citation for x in CITATION_ENTRIES[3:4]):
+        return tuple(citation[x] for x in CITATION_ENTRIES[:4])
+
+    return tuple(citation[x] for x in CITATION_ENTRIES[:3])
 
 
 def flatten_citation(citation):

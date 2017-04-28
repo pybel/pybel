@@ -1,5 +1,5 @@
-Parser Reference
-================
+Parsers
+=======
 
 This page is for users who want to squeeze the most bizarre possibilities out of PyBEL. Most users will not need this
 reference.

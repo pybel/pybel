@@ -12,8 +12,10 @@ from ..utils import flatten_dict, expand_dict, hash_tuple
 
 __all__ = [
     'to_cx_json',
+    'to_cx_jsons',
     'to_cx',
     'from_cx_json',
+    'from_cx_jsons',
     'from_cx',
     'from_cx_path',
     'NDEX_SOURCE_FORMAT',
@@ -47,7 +49,7 @@ def to_cx_json(graph):
     .. seealso::
 
         - `NDEx Python Client <https://github.com/ndexbio/ndex-python>`_
-        - `PyBEL / NDEx Python Client Wrapper <https://github.com/cthoyt/pybel2cx>`_
+        - `PyBEL / NDEx Python Client Wrapper <https://github.com/pybel/pybel2ndex>`_
 
     """
     node_nid = {}
@@ -154,7 +156,7 @@ def to_cx_json(graph):
         GRAPH_ANNOTATION_URL: graph.namespace_url,
         GRAPH_ANNOTATION_OWL: graph.annotation_owl,
         GRAPH_ANNOTATION_PATTERN: graph.annotation_pattern,
-        GRAPH_ANNOTATION_LIST: graph.annotation_list
+        GRAPH_ANNOTATION_LIST: {k: list(sorted(v)) for k,v in graph.annotation_list.items()},
     }]
 
     network_attributes_entry = [{
@@ -209,6 +211,16 @@ def to_cx_json(graph):
     return cx
 
 
+def to_cx_jsons(graph):
+    """Dumps a BEL graph as CX JSON to a string
+    
+    :param BELGraph graph: A BEL Graph
+    :return: CX JSON string
+    :rtype: str
+    """
+    return json.dumps(to_cx_json(graph))
+
+
 def from_cx_json(cx):
     """Rebuilds a BELGraph from CX JSON output from PyBEL
 
@@ -240,7 +252,7 @@ def from_cx_json(cx):
             if GRAPH_ANNOTATION_PATTERN in d:
                 graph.annotation_pattern.update(d[GRAPH_ANNOTATION_PATTERN])
             if GRAPH_ANNOTATION_LIST in d:
-                graph.annotation_list.update(d[GRAPH_ANNOTATION_LIST])
+                graph.annotation_list.update((k, set(v)) for k, v in d[GRAPH_ANNOTATION_LIST].items())
 
     network_attributes_entry = cx[3]
     for d in network_attributes_entry['networkAttributes']:
@@ -351,6 +363,16 @@ def from_cx_json(cx):
             raise ValueError('problem adding edge: {}'.format(eid))
 
     return graph
+
+
+def from_cx_jsons(cxs):
+    """Reconstitutes a BEL graph from a CX JSON string
+    
+    :param str cxs: CX JSON string 
+    :return: A BEL graph
+    :rtype: BELGraph
+    """
+    return from_cx_json(json.loads(cxs))
 
 
 def from_cx(file):

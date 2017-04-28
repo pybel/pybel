@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import unittest
 from pathlib import Path
 
@@ -8,12 +7,12 @@ import pybel
 from pybel.constants import *
 from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
+from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
+from tests.constants import ConnectionMixin
 from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_ado
 from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, \
     expected_test_bel_4_metadata, assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
-
-log = logging.getLogger('pybel')
 
 EXPECTED_PIZZA_NODES = {
     'Pizza',
@@ -50,7 +49,7 @@ class TestOwlUtils(unittest.TestCase):
             parse_owl('http://example.com/not_owl')
 
 
-class TestParsePizza(TestOwlBase):
+class TestParsePizza(TestOwlBase, ConnectionMixin):
     expected_prefixes = {
         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
@@ -76,7 +75,7 @@ class TestParsePizza(TestOwlBase):
     def test_metadata_parser(self, m1, m2):
         functions = set('A')
         s = 'DEFINE NAMESPACE PIZZA AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
-        parser = MetadataParser(CacheManager('sqlite:///'))
+        parser = MetadataParser(CacheManager(connection=self.connection))
         parser.parseString(s)
 
         self.assertIn('PIZZA', parser.namespace_dict)
@@ -90,7 +89,7 @@ class TestParsePizza(TestOwlBase):
     @mock_parse_owl_pybel
     def test_metadata_parser_no_function(self, m1, m2):
         s = 'DEFINE NAMESPACE PIZZA AS OWL "{}"'.format(pizza_iri)
-        parser = MetadataParser(CacheManager('sqlite:///'))
+        parser = MetadataParser(CacheManager(connection=self.connection))
         parser.parseString(s)
 
         self.assertIn('PIZZA', parser.namespace_dict)
@@ -105,15 +104,17 @@ class TestParsePizza(TestOwlBase):
     @mock_parse_owl_pybel
     def test_metadata_parser_annotation(self, m1, m2):
         s = 'DEFINE ANNOTATION Pizza AS OWL "{}"'.format(pizza_iri)
-        parser = MetadataParser(CacheManager('sqlite:///'))
+        parser = MetadataParser(CacheManager(connection=self.connection))
         parser.parseString(s)
 
         self.assertIn('Pizza', parser.annotations_dict)
         self.assertEqual(EXPECTED_PIZZA_NODES, set(parser.annotations_dict['Pizza']))
 
 
-class TestWine(TestOwlBase):
+class TestWine(TestOwlBase, ConnectionMixin):
     def setUp(self):
+        super(TestWine, self).setUp()
+
         self.iri = wine_iri
 
         self.wine_expected_prefixes = {
@@ -286,7 +287,7 @@ class TestWine(TestOwlBase):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parser_namespace(self, m1, m2):
-        cm = CacheManager('sqlite://')
+        cm = CacheManager(connection=self.connection)
 
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
@@ -300,14 +301,13 @@ class TestWine(TestOwlBase):
         for node in sorted(self.expected_nodes):
             self.assertEqual(functions, ''.join(sorted(parser.namespace_dict['Wine'][node])))
 
-        # Check nothing bad happens
-        # with self.assertLogs('pybel', level='WARNING'):
-        parser.parseString(s)
+        with self.assertRaises(RedefinedNamespaceError):
+            parser.parseString(s)
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parser_annotation(self, m1, m2):
-        cm = CacheManager('sqlite://')
+        cm = CacheManager(connection=self.connection)
         s = 'DEFINE ANNOTATION Wine AS OWL "{}"'.format(wine_iri)
 
         parser = MetadataParser(manager=cm)
@@ -316,9 +316,8 @@ class TestWine(TestOwlBase):
         self.assertIn('Wine', parser.annotations_dict)
         self.assertLessEqual(self.expected_nodes, set(parser.annotations_dict['Wine']))
 
-        # Check nothing bad happens
-        # with self.assertLogs('pybel', level='WARNING'):
-        parser.parseString(s)
+        with self.assertRaises(RedefinedAnnotationError):
+            parser.parseString(s)
 
 
 class TestAdo(TestOwlBase):
@@ -352,9 +351,10 @@ class TestAdo(TestOwlBase):
         self.assertLessEqual(self.ado_expected_edges_subset, set(owl.edges_iter()))
 
 
-class TestOwlManager(unittest.TestCase):
+class TestOwlManager(TestOwlBase, ConnectionMixin):
     def setUp(self):
-        self.manager = CacheManager()
+        super(TestOwlManager, self).setUp()
+        self.manager = CacheManager(connection=self.connection)
         self.manager.drop_database()
         self.manager.create_database()
 
@@ -401,12 +401,12 @@ class TestOwlManager(unittest.TestCase):
             self.manager.insert_annotation_owl('http://cthoyt.com/not_owl.owl')
 
 
-class TestIntegration(TestOwlBase):
+class TestIntegration(TestOwlBase, ConnectionMixin):
     @mock_bel_resources
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_from_path(self, m1, m2, m3):
-        g = pybel.from_path(test_bel_extensions)
+        g = pybel.from_path(test_bel_extensions, manager=self.connection)
         self.assertEqual(0, len(g.warnings))
 
         self.assertEqual(expected_test_bel_4_metadata, g.document)
@@ -451,3 +451,7 @@ class TestIntegration(TestOwlBase):
         self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
         self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "TomatoTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
         self.assertHasEdge(g, (ABUNDANCE, 'WINE', 'WhiteWine'), (ABUNDANCE, "PIZZA", "FishTopping"), **annots)
+
+
+if __name__ == '__main__':
+    unittest.main()

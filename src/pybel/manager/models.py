@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains the database models that support the PyBEL definition cache and graph cache"""
+"""This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
 import datetime
 
@@ -70,6 +70,8 @@ CITATION_TABLE_NAME = 'pybel_citation'
 EVIDENCE_TABLE_NAME = 'pybel_evidence'
 PROPERTY_TABLE_NAME = 'pybel_property'
 
+LONGBLOB = 4294967295
+
 Base = declarative_base()
 
 
@@ -118,8 +120,7 @@ class NamespaceEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), nullable=False,
-                  doc='Name that is defined in the corresponding namespace definition file')
+    name = Column(Text, nullable=False, doc='Name that is defined in the corresponding namespace definition file')
     encoding = Column(String(8), nullable=True,
                       doc='Represents the biological entities that this name is valid for (e.g. G for Gene or P for Protein)')
 
@@ -268,7 +269,7 @@ class OwlAnnotationEntry(Base):
 network_annotation = Table(
     NETWORK_ANNOTATION_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('namespace_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
+    Column('annotation_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
 )
 
 network_namespace = Table(
@@ -303,7 +304,7 @@ class Network(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), index=True, doc='Name of the given Network (from the BEL file)')
-    version = Column(String(255), doc='Release version of the given Network (from the BEL file)')
+    version = Column(String(16), doc='Release version of the given Network (from the BEL file)')
 
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')
@@ -313,7 +314,7 @@ class Network(Base):
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
-    blob = Column(Binary)
+    blob = Column(Binary(LONGBLOB))
 
     nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
     edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
@@ -322,7 +323,7 @@ class Network(Base):
     citations = relationship('Citation', secondary=network_citation, lazy="dynamic")
 
     __table_args__ = (
-        UniqueConstraint(METADATA_NAME, METADATA_VERSION),
+        UniqueConstraint(name, version),
     )
 
     @property
@@ -420,7 +421,7 @@ class Modification(Base):
 
     @property
     def data(self):
-        """Recreates a is_variant dictionary for PyBEL.BELGraph.
+        """Recreates a is_variant dictionary for :class:`BELGraph`
 
         :return: Dictionary that describes a variant or a fusion.
         :rtype: dict
@@ -547,9 +548,9 @@ class Citation(Base):
 
     @property
     def data(self):
-        """Creates a citation dictionary that is used to recreate the edge data dictionary of a PyBEL.BELGraph.
+        """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
-        :return: Citation dictionary for the recreation of a PyBEL.BELGraph.
+        :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         :rtype: dict
         """
         citation_dict = {
@@ -577,9 +578,9 @@ class Evidence(Base):
 
     @property
     def data(self):
-        """Creates a dictionary that is used to recreate the edge data dictionary for a PyBEL.BELGraph.
+        """Creates a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
 
-        :return: Dictionary containing citation and evidence for a PyBEL.BELGraph edge.
+        :return: Dictionary containing citation and evidence for a :class:`BELGraph` edge.
         :rtype: dict
         """
         return {
@@ -610,7 +611,7 @@ class Edge(Base):
     id = Column(Integer, primary_key=True)
 
     graphIdentifier = Column(Integer,
-                             doc='Identifier that is used in the PyBEL.BELGraph to identify whether or not an edge is artificial')
+                             doc='Identifier that is used in the BEL graph to identify whether or not an edge is artificial')
     bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
@@ -630,10 +631,10 @@ class Edge(Base):
 
     @property
     def data(self):
-        """Creates a dictionary of one BEL Edge that can be used to create an edge in a PyBEL.BELGraph.
+        """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
-        :return: Dictionary that contains information about an edge of a PyBEL.BELGraph. Including participants
-                 and edge data informations.
+        :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
+                 and edge data information.
         :rtype: dict
         """
         source_node = self.source.data
@@ -708,7 +709,7 @@ class Property(Base):
 
     @property
     def data(self):
-        """Creates a property dict that is used to recreate an edge dictionary for PyBEL.BELGraph.
+        """Creates a property dict that is used to recreate an edge dictionary for a :class:`BELGraph`.
 
         :return: Property dictionary of an edge that is participant (sub/obj) related.
         :rtype: dict

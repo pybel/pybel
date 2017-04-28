@@ -26,7 +26,7 @@ GOCC_LATEST = DEFAULT_NAMESPACE_RESOURCES + 'go-cellular-component.belns'
 GOCC_KEYWORD = 'GOCC'
 
 #: The environment variable that contains the default SQL connection information for the PyBEL cache
-PYBEL_CONNECTION_ENV = 'PYBEL_CONNECTION'
+PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 
 #: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
 PYBEL_DIR = os.path.expanduser('~/.pybel')
@@ -44,7 +44,16 @@ if not os.path.exists(PYBEL_DATA_DIR):
     os.mkdir(PYBEL_DATA_DIR)
 
 DEFAULT_CACHE_NAME = 'pybel_cache.db'
+#: The default cache location is ~/.pybel/data/pybel_cache.db
 DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
+#: The default cache connection string uses sqlite.
+DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
+
+
+def get_cache_connection():
+    """Returns the default cache connection string"""
+    return os.environ[PYBEL_CONNECTION] if PYBEL_CONNECTION in os.environ else DEFAULT_CACHE_CONNECTION
+
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
 PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'

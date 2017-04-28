@@ -68,7 +68,7 @@ author = u'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.5.3'
+release = '0.5.4'
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -359,7 +359,7 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'networkx': ('https://networkx.readthedocs.io/en/latest/', None),
+    'networkx': ('http://networkx.readthedocs.io/en/latest/', None),
     'py2neo': ('http://py2neo.org/v3/', None),
 }
 

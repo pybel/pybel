@@ -10,6 +10,7 @@ enable this option, but can specify a database location if they choose.
 import datetime
 import itertools as itt
 import logging
+import time
 from collections import defaultdict
 
 import networkx as nx
@@ -41,7 +42,7 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
 def build_manager(connection=None, echo=False):
-    """A convenience method for turning a string into a connection, or passing a CacheManager through.
+    """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
 
     :type connection: None or str or CacheManager
     :type echo: bool
@@ -97,7 +98,7 @@ class CacheManager(BaseCacheManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: :class:`pybel.manager.models.Namespace`
         """
-        log.info('Caching namespace %s', url)
+        log.info('inserting namespace %s', url)
 
         config = get_bel_resource(url)
 
@@ -139,15 +140,16 @@ class CacheManager(BaseCacheManager):
         :rtype: models.Namespace
         """
         if url in self.namespace_model:
-            log.debug('Already in memory: %s (%d)', url, len(self.namespace_cache[url]))
+            log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
             return self.namespace_model[url]
 
+        t = time.time()
         results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
 
         if results is None:
             results = self.insert_namespace(url)
-
-        log.info('Loaded from database: %s (%d)', url, len(results.entries))
+        else:
+            log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
@@ -211,7 +213,7 @@ class CacheManager(BaseCacheManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: models.Annotation
         """
-        log.info('Caching annotation %s', url)
+        log.info('inserting annotation %s', url)
 
         config = get_bel_resource(url)
 
@@ -247,15 +249,16 @@ class CacheManager(BaseCacheManager):
         :rtype: models.Annotation
         """
         if url in self.annotation_model:
-            log.info('Already in memory: %s (%d)', url, len(self.annotation_cache[url]))
+            log.debug('already in memory: %s (%d)', url, len(self.annotation_cache[url]))
             return self.annotation_model[url]
 
+        t = time.time()
         results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
 
         if results is None:
             results = self.insert_annotation(url)
-
-        log.info('Loaded from database: %s (%d)', url, len(results.entries))
+        else:
+            log.debug('loaded annotation: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
 
         self.annotation_model[url] = results
 
@@ -310,12 +313,12 @@ class CacheManager(BaseCacheManager):
     # NAMESPACE OWL MANAGEMENT
 
     def _insert_owl(self, iri, owl_model, owl_entry_model):
-        """Helper function for caching an ontology at the given IRI
+        """Helper function for inserting an ontology at the given IRI
 
         :param iri: the location of the ontology
         :type iri: str
         """
-        log.info('Caching owl %s', iri)
+        log.info('inserting owl %s', iri)
 
         graph = parse_owl(iri)
 
@@ -470,7 +473,7 @@ class CacheManager(BaseCacheManager):
         """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
         self.ensure_namespace(namespace_url)
 
-        log.info('Caching equivalences: %s', url)
+        log.info('inserting equivalences: %s', url)
 
         config = get_bel_resource(url)
         values = config['Values']
@@ -530,22 +533,27 @@ class CacheManager(BaseCacheManager):
         :rtype: models.Network
         """
         log.debug('inserting %s v%s', graph.name, graph.version)
-        graph_bytes = to_bytes(graph)
 
-        network = models.Network(blob=graph_bytes, **graph.document)
+        t = time.time()
 
-        for key, url in graph.namespace_url.items():
-            network.namespaces.append(self.ensure_namespace(url))
-        for key, url in graph.annotation_url.items():
-            network.annotations.append(self.ensure_annotation(url))
+        namespaces = [self.ensure_namespace(url) for url in graph.namespace_url.values()]
+        annotations = [self.ensure_annotation(url) for url in graph.annotation_url.values()]
+
+        network = models.Network(blob=to_bytes(graph), **graph.document)
 
         if store_parts:
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
                 self.ensure_namespace(GOCC_LATEST)
+
+            network.namespaces.extend(namespaces)
+            network.annotations.extend(annotations)
+
             self.store_graph_parts(network, graph)
 
         self.session.add(network)
         self.session.commit()
+
+        log.info('inserted %s v%s in %.2fs', graph.name, graph.version, time.time() - t)
 
         return network
 
@@ -728,6 +736,8 @@ class CacheManager(BaseCacheManager):
             result = models.Edge(graphIdentifier=graph_key, source=source, target=target, evidence=evidence, bel=bel,
                                  relation=relation, blob=blob)
 
+            self.session.add(result)
+
         return result
 
     def get_or_create_citation(self, type, name, reference, date=None, authors=None):
@@ -761,7 +771,7 @@ class CacheManager(BaseCacheManager):
                     result.authors.append(self.get_or_create_author(author))
 
             self.session.add(result)
-            # self.session.flush()
+            self.session.flush()
 
         return result
 
@@ -985,9 +995,12 @@ class CacheManager(BaseCacheManager):
         self.session.query(models.Network).delete()
         self.session.commit()
 
-    def list_graphs(self):
+    def list_graphs(self, include_description=True):
         """Lists network id, network name, and network version triples"""
-        return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
+        if include_description:
+            return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
+        else:
+            return list(self.session.query(Network.id, Network.name, Network.version).all())
 
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values

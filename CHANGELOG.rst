@@ -16,7 +16,7 @@ Changed
 - Check for dead URLs at BEL framework (https://github.com/pybel/pybel/issues/177)
 - Don't throw warnings for versions that are in YYYYMMDD format (https://github.com/pybel/pybel/issues/175)
 - Include character positions in some exceptions (https://github.com/pybel/pybel/issues/176)
-- Update minimum pickle parsing from 0.4.2 to 0.5.4 to reflect the new parse exceptions's names and arguments
+- Update minimum pickle parsing from 0.4.2 to 0.5.3 to reflect the new parse exceptions's names and arguments
 
 
 `0.5.2 <https://github.com/pybel/pybel/compare/v0.5.1...v0.5.2>`_ - 2017-04-16
