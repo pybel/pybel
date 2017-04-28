@@ -172,8 +172,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            log.warning('Tried to overwrite namespace: %s', namespace)
-            return tokens
+            raise RedefinedNamespaceError(line, position, namespace)
 
         url = tokens['url']
         terms = self.manager.get_namespace(url)
@@ -187,8 +186,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            log.warning('Tried to overwrite owl namespace: %s', namespace)
-            return tokens
+            raise RedefinedNamespaceError(line, position, namespace)
 
         functions = set(tokens['functions'] if 'functions' in tokens else belns_encodings)
 
@@ -205,8 +203,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            log.warning('Tried to overwrite namespace: {}'.format(namespace))
-            return tokens
+            raise RedefinedNamespaceError(line, position, namespace)
 
         value = tokens['value']
 
@@ -219,8 +216,7 @@ class MetadataParser(BaseParser):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
-            log.warning('Tried to overwrite annotation: {}'.format(annotation))
-            return tokens
+            raise RedefinedAnnotationError(line, position, annotation)
 
         url = tokens['url']
 
@@ -235,8 +231,7 @@ class MetadataParser(BaseParser):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
-            log.warning('Tried to overwrite annotation: %s', annotation)
-            return tokens
+            raise RedefinedAnnotationError(line, position, annotation)
 
         url = tokens['url']
 
@@ -249,8 +244,7 @@ class MetadataParser(BaseParser):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
-            log.warning('Tried to overwrite annotation: {}'.format(annotation))
-            return tokens
+            raise RedefinedAnnotationError(line, position, annotation)
 
         values = set(tokens['values'])
 
@@ -263,8 +257,7 @@ class MetadataParser(BaseParser):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
-            log.warning('Tried to overwrite annotation: {}'.format(annotation))
-            return tokens
+            raise RedefinedAnnotationError(line, position, annotation)
 
         value = tokens['value']
 

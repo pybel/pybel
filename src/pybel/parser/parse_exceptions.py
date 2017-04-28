@@ -18,6 +18,25 @@ class PyBelParserWarning(PyBelWarning):
         self.position = position
 
 
+class InconsistientDefinitionError(PyBelParserWarning):
+    """Base PyBEL error for redefinition"""
+
+    def __init__(self, line, position, definition):
+        super(InconsistientDefinitionError, self).__init__(line, position)
+        self.definition = definition
+
+    def __str__(self):
+        return 'Tried to redefine {} with: {}'.format(self.definition, self.line)
+
+
+class RedefinedNamespaceError(InconsistientDefinitionError):
+    """Raised when a namespace is redefined"""
+
+
+class RedefinedAnnotationError(InconsistientDefinitionError):
+    """Raised when an annotation is redefined"""
+
+
 # Naming Warnings
 
 class NakedNameWarning(PyBelWarning):

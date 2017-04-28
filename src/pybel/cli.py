@@ -230,10 +230,11 @@ def graph():
 
 @graph.command(help='Lists stored graph names and versions')
 @click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
-def ls(connection):
+@click.option('-d', '--include-description', help="Include graph descriptions")
+def ls(connection, include_description):
     manager = CacheManager(connection=connection)
 
-    for row in manager.list_graphs():
+    for row in manager.list_graphs(include_description=include_description):
         click.echo('\t'.join(map(str, row)))
 
 

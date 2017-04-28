@@ -50,7 +50,7 @@ class BaseCacheManager:
 
         log.debug('building engine with echo: %s', echo)
         self.engine = create_engine(self.connection, echo=echo)
-        self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False)
+        self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
         log.debug('building session')
         self.session = scoped_session(self.sessionmaker)
         self.create_database()

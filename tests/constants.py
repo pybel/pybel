@@ -136,8 +136,10 @@ def make_temp_connection():
 
 
 def tear_temp_connection(dir, path):
-    os.remove(path)
-    os.rmdir(dir)
+    if os.path.exists(path):
+        os.remove(path)
+    if os.path.exists(dir):
+        os.rmdir(dir)
 
 
 class ConnectionMixin(unittest.TestCase):

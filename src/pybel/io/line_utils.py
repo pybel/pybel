@@ -19,6 +19,7 @@ from ..parser import MetadataParser
 from ..parser.parse_exceptions import VersionFormatWarning, MissingMetadataException
 
 log = logging.getLogger(__name__)
+parse_log = logging.getLogger('pybel.parser')
 
 METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
@@ -89,10 +90,10 @@ def parse_document(graph, document_metadata, metadata_parser):
         try:
             metadata_parser.parseString(line)
         except VersionFormatWarning as e:
-            log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
+            parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e)
         except Exception as e:
-            log.exception('Line %07d - Critical Failure - %s', line_number, line)
+            parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
 
     for required in REQUIRED_METADATA:
@@ -123,7 +124,7 @@ def parse_definitions(graph, definitions, metadata_parser):
         try:
             metadata_parser.parseString(line)
         except Exception as e:
-            log.exception('Line %07d - Critical Failure - %s', line_number, line)
+            parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
 
     # metadata_parser.cache_manager.session.flush()
@@ -159,13 +160,13 @@ def parse_statements(graph, statements, bel_parser):
         try:
             bel_parser.parseString(line)
         except ParseException:
-            log.error('Line %07d - General Parser Failure: %s', line_number, line)
+            parse_log.error('Line %07d - General Parser Failure: %s', line_number, line)
             graph.add_warning(line_number, line, PyBelWarning('Unable to parse line'), bel_parser.get_annotations())
         except PyBelWarning as e:
-            log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
+            parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
         except Exception as e:
-            log.exception('Line %07d - General Failure: %s', line_number, line)
+            parse_log.exception('Line %07d - General Failure: %s', line_number, line)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
 
     graph.has_singleton_terms = bel_parser.has_singleton_terms
