@@ -539,7 +539,7 @@ class BelParser(BaseParser):
         """This function wraps self.handle_term but is only used for top-level parsing of bel_terms. This is done
         solely to keep track of if a graph has any singletons"""
         self.has_singleton_terms = True
-        log.warning('Added singleton line: %s. Needs checking.', line)
+        log.warning('Added singleton [line %d]: %s. Putative error - needs checking.', self.line_number, line)
         return self.handle_term(line, position, tokens)
 
     def _handle_list_helper(self, line, position, tokens, relation):
