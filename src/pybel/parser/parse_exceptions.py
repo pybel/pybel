@@ -26,7 +26,7 @@ class InconsistientDefinitionError(PyBelParserWarning):
         self.definition = definition
 
     def __str__(self):
-        return 'Tried to redefine: {} with {}'.format(self.line, self.definition)
+        return 'Tried to redefine {} with: {}'.format(self.definition, self.line)
 
 
 class RedefineNamespaceError(InconsistientDefinitionError):
