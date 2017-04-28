@@ -172,7 +172,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            raise RedefineNamespaceError(line, position, namespace)
+            raise RedefinedNamespaceError(line, position, namespace)
 
         url = tokens['url']
         terms = self.manager.get_namespace(url)
@@ -186,7 +186,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            raise RedefineNamespaceError(line, position, namespace)
+            raise RedefinedNamespaceError(line, position, namespace)
 
         functions = set(tokens['functions'] if 'functions' in tokens else belns_encodings)
 
@@ -203,7 +203,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            raise RedefineNamespaceError(line, position, namespace)
+            raise RedefinedNamespaceError(line, position, namespace)
 
         value = tokens['value']
 

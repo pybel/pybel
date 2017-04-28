@@ -29,7 +29,7 @@ class InconsistientDefinitionError(PyBelParserWarning):
         return 'Tried to redefine {} with: {}'.format(self.definition, self.line)
 
 
-class RedefineNamespaceError(InconsistientDefinitionError):
+class RedefinedNamespaceError(InconsistientDefinitionError):
     """Raised when a namespace is redefined"""
 
 
