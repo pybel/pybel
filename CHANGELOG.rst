@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.4 <https://github.com/pybel/pybel/compare/v0.5.3...v0.5.4>`_ - 2017-04-28
+------------------------------------------------------------------------------
+Fixed
+-----
+- MySQL truncations of large BLOBs
+- Session management problems
+
+Changed
+-------
+- If a namespace/annotation was redefined, will now thrown an exception instead of just a logging a warning
+
+Added
+-----
+- Ability to drop graph that isn't in graph store from CLI
+
+
 `0.5.3 <https://github.com/pybel/pybel/compare/v0.5.2...v0.5.3>`_ - 2017-04-19
 ------------------------------------------------------------------------------
 Added
@@ -340,7 +356,8 @@ Added
 
 Diffs
 -----
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.5.3...HEAD
+- [Unreleased]: https://github.com/pybel/pybel/compare/v0.5.4...HEAD
+- [0.5.3]: https://github.com/pybel/pybel/compare/v0.5.3...v0.5.4
 - [0.5.3]: https://github.com/pybel/pybel/compare/v0.5.2...v0.5.3
 - [0.5.2]: https://github.com/pybel/pybel/compare/v0.5.1...v0.5.2
 - [0.5.1]: https://github.com/pybel/pybel/compare/v0.5.0...v0.5.1
