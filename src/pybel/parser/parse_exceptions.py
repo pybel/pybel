@@ -66,9 +66,10 @@ class MissingDefaultNameWarning(PyBelWarning):
 class UndefinedNamespaceWarning(PyBelWarning):
     """Raised if reference made to undefined namespace"""
 
-    def __init__(self, namespace):
-        PyBelWarning.__init__(self, namespace)
+    def __init__(self, namespace, name):
+        PyBelWarning.__init__(self, namespace, name)
         self.namespace = namespace
+        self.name = name
 
     def __str__(self):
         return '"{}" is not a defined namespace'.format(self.namespace)
