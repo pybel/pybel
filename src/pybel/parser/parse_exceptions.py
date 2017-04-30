@@ -301,7 +301,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
 class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
-    def __init__(self, line, tokens, position):
+    def __init__(self, line, position, tokens):
         PyBelWarning.__init__(self, line, position, tokens)
         self.line = line
         self.position = position
