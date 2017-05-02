@@ -42,9 +42,10 @@ class TestParseMetadata(unittest.TestCase):
         self.parser.parseString(s)
         help_check_hgnc(self, self.parser.namespace_dict)
 
-        # Test doesn't overwrite
         s = 'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, 'XXXXX')
-        self.parser.parseString(s)
+        with self.assertRaises(RedefinedNamespaceError):
+            self.parser.parseString(s)
+
         help_check_hgnc(self, self.parser.namespace_dict)
 
     @mock_bel_resources
@@ -56,7 +57,9 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
 
         s = 'DEFINE ANNOTATION {} AS LIST {{"A","B","C"}}'.format(MESH_DISEASES_KEYWORD)
-        self.parser.parseString(s)
+        with self.assertRaises(RedefinedAnnotationError):
+            self.parser.parseString(s)
+
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
         self.assertNotIn('A', self.parser.annotations_dict[MESH_DISEASES_KEYWORD])
 
@@ -67,7 +70,9 @@ class TestParseMetadata(unittest.TestCase):
         self.assertIn('TextLocation', self.parser.annotations_dict)
 
         s = 'DEFINE ANNOTATION TextLocation AS URL "{}"'.format(MESH_DISEASES_URL)
-        self.parser.parseString(s)
+        with self.assertRaises(RedefinedAnnotationError):
+            self.parser.parseString(s)
+
         self.assertIn('TextLocation', self.parser.annotations_dict)
         self.assertIn('Abstract', self.parser.annotations_dict['TextLocation'])
 

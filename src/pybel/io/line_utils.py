@@ -88,7 +88,7 @@ def parse_document(graph, document_metadata, metadata_parser):
 
     for line_number, line in document_metadata:
         try:
-            metadata_parser.parseString(line)
+            metadata_parser.parseString(line, line_number=line_number)
         except VersionFormatWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e)
@@ -122,7 +122,7 @@ def parse_definitions(graph, definitions, metadata_parser):
 
     for line_number, line in definitions:
         try:
-            metadata_parser.parseString(line)
+            metadata_parser.parseString(line, line_number=line_number)
         except Exception as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
@@ -158,7 +158,7 @@ def parse_statements(graph, statements, bel_parser):
 
     for line_number, line in statements:
         try:
-            bel_parser.parseString(line)
+            bel_parser.parseString(line, line_number=line_number)
         except ParseException:
             parse_log.error('Line %07d - General Parser Failure: %s', line_number, line)
             graph.add_warning(line_number, line, PyBelWarning('Unable to parse line'), bel_parser.get_annotations())

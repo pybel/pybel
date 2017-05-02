@@ -74,16 +74,16 @@ class IdentifierParser(BaseParser):
 
     def has_namespace_name(self, namespace, name):
         if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(namespace)
+            raise UndefinedNamespaceWarning(namespace, name)
 
         return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
 
-    def raise_for_missing_namespace(self, namespace):
+    def raise_for_missing_namespace(self, namespace, name):
         if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(namespace)
+            raise UndefinedNamespaceWarning(namespace, name)
 
     def raise_for_missing_name(self, namespace, name):
-        self.raise_for_missing_namespace(namespace)
+        self.raise_for_missing_namespace(namespace, name)
 
         if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
             raise MissingNamespaceNameWarning(name, namespace)
@@ -100,9 +100,9 @@ class IdentifierParser(BaseParser):
 
     def handle_identifier_qualified(self, line, position, tokens):
         namespace = tokens[NAMESPACE]
-        self.raise_for_missing_namespace(namespace)
-
         name = tokens[NAME]
+        
+        self.raise_for_missing_namespace(namespace, name)
         self.raise_for_missing_name(namespace, name)
 
         return tokens

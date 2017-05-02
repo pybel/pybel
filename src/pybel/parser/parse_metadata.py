@@ -172,8 +172,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            log.warning('Tried to overwrite namespace: %s', namespace)
-            return tokens
+            raise RedefinedNamespaceError(line, position, namespace)
 
         url = tokens['url']
         terms = self.manager.get_namespace(url)
@@ -187,8 +186,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            log.warning('Tried to overwrite owl namespace: %s', namespace)
-            return tokens
+            raise RedefinedNamespaceError(line, position, namespace)
 
         functions = set(tokens['functions'] if 'functions' in tokens else belns_encodings)
 
@@ -205,8 +203,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
-            log.warning('Tried to overwrite namespace: {}'.format(namespace))
-            return tokens
+            raise RedefinedNamespaceError(line, position, namespace)
 
         value = tokens['value']
 
@@ -219,8 +216,7 @@ class MetadataParser(BaseParser):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
-            log.warning('Tried to overwrite annotation: {}'.format(annotation))
-            return tokens
+            raise RedefinedAnnotationError(line, position, annotation)
 
         url = tokens['url']
 
@@ -235,8 +231,7 @@ class MetadataParser(BaseParser):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
-            log.warning('Tried to overwrite annotation: %s', annotation)
-            return tokens
+            raise RedefinedAnnotationError(line, position, annotation)
 
         url = tokens['url']
 
@@ -249,8 +244,7 @@ class MetadataParser(BaseParser):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
-            log.warning('Tried to overwrite annotation: {}'.format(annotation))
-            return tokens
+            raise RedefinedAnnotationError(line, position, annotation)
 
         values = set(tokens['values'])
 
@@ -263,8 +257,7 @@ class MetadataParser(BaseParser):
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
-            log.warning('Tried to overwrite annotation: {}'.format(annotation))
-            return tokens
+            raise RedefinedAnnotationError(line, position, annotation)
 
         value = tokens['value']
 
@@ -316,9 +309,9 @@ class MetadataParser(BaseParser):
     def has_namespace(self, namespace):
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
 
-    def raise_for_missing_namespace(self, namespace):
+    def raise_for_missing_namespace(self, namespace, name):
         if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(namespace)
+            raise UndefinedNamespaceWarning(namespace, name)
 
     def has_enumerated_namespace_name(self, namespace, name):
         return self.has_enumerated_namespace(namespace) and name in self.namespace_dict[namespace]
@@ -327,12 +320,12 @@ class MetadataParser(BaseParser):
         return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
 
     def has_namespace_name(self, namespace, name):
-        self.raise_for_missing_namespace(namespace)
+        self.raise_for_missing_namespace(namespace, name)
 
         return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
 
     def raise_for_missing_name(self, namespace, name):
-        self.raise_for_missing_namespace(namespace)
+        self.raise_for_missing_namespace(namespace, name)
 
         if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
             raise MissingNamespaceNameWarning(name, namespace)
