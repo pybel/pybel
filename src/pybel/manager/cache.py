@@ -8,7 +8,9 @@ enable this option, but can specify a database location if they choose.
 """
 
 import datetime
+import hashlib
 import itertools as itt
+import json
 import logging
 import time
 from collections import defaultdict
@@ -573,6 +575,15 @@ class CacheManager(BaseCacheManager):
         :param graph: A BEL Graph
         :type graph: pybel.BELGraph
         """
+        self.object_cache = {
+            'modification': {},
+            'property': {},
+            'edge': {},
+            'evidence': {}
+        }
+        # self.modification_cache = {}
+        # self.edge_property_cache = {}
+        # self.edge_objects_cache = {}
         nc = {}
 
         for node in graph.nodes_iter():
@@ -670,12 +681,18 @@ class CacheManager(BaseCacheManager):
         :return: An Evidence object
         :rtype: models.Evidence
         """
-        result = self.session.query(models.Evidence).filter_by(text=text).one_or_none()
+        evidence_hash = hashlib.sha512(json.dumps({EVIDENCE: text, CITATION: citation}, sort_keys=True).encode('utf-8'))
+        if evidence_hash in self.object_cache['evidence']:
+            result = self.object_cache['evidence'][evidence_hash]
+        else:
+            result = self.session.query(models.Evidence).filter_by(text=text).one_or_none()
 
-        if result is None:
-            result = models.Evidence(text=text, citation=citation)
-            self.session.add(result)
-            # self.session.flush()
+            if result is None:
+                result = models.Evidence(text=text, citation=citation)
+                self.session.add(result)
+                # self.session.flush()
+
+            self.object_cache['evidence'][evidence_hash] = result
 
         return result
 
@@ -741,13 +758,29 @@ class CacheManager(BaseCacheManager):
         :return: An Edge object
         :rtype: models.Edge
         """
-        result = self.session.query(models.Edge).filter_by(bel=bel).one_or_none()
+        edge_dict = {
+            'graphIdentifier': graph_key,
+            'source': source,
+            'target': target,
+            'evidence': evidence,
+            'bel': bel,
+            'relation': relation
+        }
+        edge_hash = hashlib.sha512(json.dumps(edge_dict, sort_keys=True).encode('utf-8'))
 
-        if result is None:
-            result = models.Edge(graphIdentifier=graph_key, source=source, target=target, evidence=evidence, bel=bel,
-                                 relation=relation, blob=blob)
+        if edge_hash in self.object_cache['edge']:
+            # Cached edge object already? Load it from object_cache
+            result = self.object_cache['edge'][edge_hash]
+        else:
+            # Edge already in DB?
+            result = self.session.query(models.Edge).filter_by(graphIdentifier=graph_key, bel=bel).one_or_none()
 
-            self.session.add(result)
+            if result is None:
+                # Create new edge and add it to db_session
+                result = models.Edge(**edge_dict, blob=blob)
+                self.session.add(result)
+
+            self.object_cache['edge'][edge_hash] = result
 
         return result
 
@@ -892,11 +925,19 @@ class CacheManager(BaseCacheManager):
                     })
 
         modifications = []
+
         for modification in modification_list:
-            mod = self.session.query(models.Modification).filter_by(**modification).one_or_none()
-            if not mod:
-                mod = models.Modification(**modification)
-                #self.session.add(mod)
+            mod_hash = hashlib.sha512(json.dumps(modification, sort_keys=True).encode('utf-8'))
+
+            if mod_hash in self.object_cache['modification']:
+                mod = self.object_cache['modification'][mod_hash]
+
+            else:
+                mod = self.session.query(models.Modification).filter_by(**modification).one_or_none()
+                if not mod:
+                    mod = models.Modification(**modification)
+
+                self.object_cache['modification'][mod_hash] = mod
             modifications.append(mod)
 
         return modifications
@@ -958,9 +999,14 @@ class CacheManager(BaseCacheManager):
                 property_list.append(property_dict)
 
         for property_def in property_list:
-            edge_property = self.session.query(models.Property).filter_by(**property_def).first()
+            edge_property = self.session.query(models.Property).filter_by(**property_def).one_or_none()
             if not edge_property:
-                edge_property = models.Property(**property_def)
+                property_hash = hashlib.sha512(json.dumps(property_def, sort_keys=True).endoce('utf-8'))
+                if property_hash in self.object_cache['property']:
+                    edge_property = self.object_cache['property'][property_hash]
+                else:
+                    edge_property = models.Property(**property_def)
+                    self.object_cache['property'][property_hash] = edge_property
 
             if edge_property not in properties:
                 properties.append(edge_property)

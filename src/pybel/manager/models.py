@@ -389,6 +389,8 @@ class Node(Base):
 
         return {'key': tuple(node_key), 'data': node_data}
 
+    def to_json(self):
+        return self.data['key']
 
 class Modification(Base):
     """The modifications that are present in the network are stored in this table."""
@@ -514,6 +516,8 @@ class Modification(Base):
             'mod_key': mod_key
         }
 
+    def to_json(self):
+        return self.data['mod_key']
 
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
@@ -591,6 +595,8 @@ class Evidence(Base):
             EVIDENCE: self.text
         }
 
+    def to_json(self):
+        return self.data
 
 edge_annotation = Table(
     EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
