@@ -10,6 +10,7 @@ downloading and parsing upon each compilation.
 
 from . import cache
 from . import database_io
+from . import make_json_serializable
 from . import models
 from .cache import *
 from .database_io import *

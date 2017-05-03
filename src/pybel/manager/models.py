@@ -139,6 +139,10 @@ class NamespaceEntry(Base):
             NAME: self.name
         }
 
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data
+
 
 class NamespaceEntryEquivalence(Base):
     """Represents the equivalance classes between entities"""
@@ -390,6 +394,7 @@ class Node(Base):
         return {'key': tuple(node_key), 'data': node_data}
 
     def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
         return self.data['key']
 
 class Modification(Base):
@@ -517,6 +522,7 @@ class Modification(Base):
         }
 
     def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
         return self.data['mod_key']
 
 author_citation = Table(
@@ -549,9 +555,10 @@ class Citation(Base):
     authors = relationship("Author", secondary=author_citation)
     evidences = relationship("Evidence", back_populates='citation')
 
-    __table_args__ = (
-        UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
-    )
+    # TODO: Still many citations with wrong name but same type and reference in e.g. alzheimers.bel
+    # __table_args__ = (
+    #    UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
+    # )
 
     @property
     def data(self):
@@ -572,6 +579,9 @@ class Citation(Base):
 
         return citation_dict
 
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data
 
 class Evidence(Base):
     """This table contains the evidence text that proves a specific relationship and refers the source that is cited."""
@@ -596,6 +606,7 @@ class Evidence(Base):
         }
 
     def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
         return self.data
 
 edge_annotation = Table(
@@ -630,7 +641,7 @@ class Edge(Base):
     target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
     target = relationship('Node', foreign_keys=[target_id])
 
-    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)))
+    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship("Evidence")
 
     annotations = relationship('AnnotationEntry', secondary=edge_annotation)
@@ -750,3 +761,7 @@ class Property(Base):
             }
 
         return prop_dict
+
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data['data']

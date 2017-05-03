@@ -12,6 +12,7 @@ import hashlib
 import itertools as itt
 import json
 import logging
+import sys
 import time
 from collections import defaultdict
 
@@ -70,14 +71,19 @@ class CacheManager(BaseCacheManager):
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
+        # TODO: Is namespace_cache used somewhere in the parser? we could use just the namespace_obj_cache. Same for annotations?
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
         #: A dictionary from {namespace URL: {name: database ID}}
         self.namespace_id_cache = defaultdict(dict)
+        #: A dictionary from {namespace URL: {name: ORM object}}
+        self.namespace_object_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: {name: label}}
         self.annotation_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
+        #: A dictionary from {annotation URL: {name: ORM object}}
+        self.annotation_object_cache = defaultdict(dict)
 
         self.annotation_model = {}
         self.namespace_model = {}
@@ -89,6 +95,17 @@ class CacheManager(BaseCacheManager):
         self.annotation_term_cache = {}
         self.annotation_edge_cache = {}
         self.annotation_graph_cache = {}
+
+        #: A dictionary that contains objects of the type described by key
+        self.object_cache = {
+            'modification': {},
+            'property': {},
+            'node': {},
+            'edge': {},
+            'citation': {},
+            'evidence': {},
+            'author': {}
+        }
 
     # NAMESPACE MANAGEMENT
 
@@ -163,6 +180,7 @@ class CacheManager(BaseCacheManager):
         for entry in results.entries:
             self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
             self.namespace_id_cache[url][entry.name] = entry.id
+            self.namespace_object_cache[url][entry.name] = entry
 
         return results
 
@@ -275,6 +293,7 @@ class CacheManager(BaseCacheManager):
         for entry in results.entries:
             self.annotation_cache[url][entry.name] = entry.label
             self.annotation_id_cache[url][entry.name] = entry.id
+            self.annotation_object_cache[url][entry.name] = entry
 
         return results
 
@@ -575,15 +594,6 @@ class CacheManager(BaseCacheManager):
         :param graph: A BEL Graph
         :type graph: pybel.BELGraph
         """
-        self.object_cache = {
-            'modification': {},
-            'property': {},
-            'edge': {},
-            'evidence': {}
-        }
-        # self.modification_cache = {}
-        # self.edge_property_cache = {}
-        # self.edge_objects_cache = {}
         nc = {}
 
         for node in graph.nodes_iter():
@@ -598,10 +608,14 @@ class CacheManager(BaseCacheManager):
             source, target = nc[u], nc[v]
 
             if CITATION not in data or EVIDENCE not in data:
-                continue
+                citation = None
+                evidence = None
 
-            citation = self.get_or_create_citation(**data[CITATION])
-            evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
+            else:
+                citation = self.get_or_create_citation(**data[CITATION])
+                evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
+
+            properties = self.get_or_create_property(graph, data)
 
             bel = decanonicalize_edge(graph, u, v, k)
             edge = self.get_or_create_edge(
@@ -611,65 +625,26 @@ class CacheManager(BaseCacheManager):
                 relation=data[RELATION],
                 evidence=evidence,
                 bel=bel,
+                properties=properties,
                 blob=pickle.dumps(data)
             )
 
             for key, value in data[ANNOTATIONS].items():
                 if key in graph.annotation_url:
                     url = graph.annotation_url[key]
-                    annotation = self.get_bel_annotation_entry(url, value)
+                    annotation = self.annotation_object_cache[url][value]
                     if annotation not in edge.annotations:
                         edge.annotations.append(annotation)
 
-            properties = self.get_or_create_property(graph, data)
-            for property in properties:
-                if property not in edge.properties:
-                    edge.properties.append(property)
+        for hash, edge in self.object_cache['edge'].items():
+            # if edge not in network.edges:
+            network.edges.append(edge)
 
-            if edge not in network.edges:
-                network.edges.append(edge)
-
-            if citation not in network.citations:
-                network.citations.append(citation)
-
-                # self.session.flush() Disable for unique edges
+        for hash, citation in self.object_cache['citation'].items():
+            # if citation not in network.citations:
+            network.citations.append(citation)
 
         self.session.flush()
-
-    def get_bel_namespace_entry(self, url, value):
-        """Gets a given NamespaceEntry object.
-
-        :param url: The url of the namespace source
-        :type url: str
-        :param value: The value of the namespace from the given url's document
-        :type value: str
-        :return: An NamespaceEntry object
-        :rtype: models.NamespaceEntry
-        """
-        namespace = self.session.query(models.Namespace).filter_by(url=url).one()
-
-        # FIXME @kono reinvestigate this
-        try:
-            namespace_entry = self.session.query(models.NamespaceEntry).filter_by(namespace=namespace,
-                                                                                  name=value).one_or_none()
-        except:
-            namespace_entry = self.session.query(models.NamespaceEntry).filter_by(namespace=namespace,
-                                                                                  name=value).first()
-
-        return namespace_entry
-
-    def get_bel_annotation_entry(self, url, value):
-        """Gets a given AnnotationEntry object.
-
-        :param url: The url of the annotation source
-        :type url: str
-        :param value: The value of the annotation from the given url's document
-        :type value: str
-        :return: An AnnotationEntry object
-        :rtype: models.AnnotationEntry
-        """
-        annotation = self.session.query(models.Annotation).filter_by(url=url).one()
-        return self.session.query(models.AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
     def get_or_create_evidence(self, citation, text):
         """Creates entry and object for given evidence if it does not exist.
@@ -681,16 +656,19 @@ class CacheManager(BaseCacheManager):
         :return: An Evidence object
         :rtype: models.Evidence
         """
-        evidence_hash = hashlib.sha512(json.dumps({EVIDENCE: text, CITATION: citation}, sort_keys=True).encode('utf-8'))
+        evidence_hash = hashlib.sha512(
+            json.dumps({EVIDENCE: text, CITATION: citation}, sort_keys=True).encode('utf-8')).hexdigest()
         if evidence_hash in self.object_cache['evidence']:
             result = self.object_cache['evidence'][evidence_hash]
         else:
-            result = self.session.query(models.Evidence).filter_by(text=text).one_or_none()
-
+            try:
+                result = self.session.query(models.Evidence).filter_by(text=text, citation=citation).one_or_none()
+            except:
+                print(text, '\n ======= \n', self.object_cache['evidence'])
+                sys.exit()
             if result is None:
                 result = models.Evidence(text=text, citation=citation)
                 self.session.add(result)
-                # self.session.flush()
 
             self.object_cache['evidence'][evidence_hash] = result
 
@@ -710,34 +688,43 @@ class CacheManager(BaseCacheManager):
         blob = pickle.dumps(graph.node[node])
         node_data = graph.node[node]
 
-        result = self.session.query(models.Node).filter_by(bel=bel).one_or_none()
-        if result is None:
-            type = node_data[FUNCTION]
+        node_hash = hashlib.sha512(bel.encode('utf-8')).hexdigest()
+        if node_hash in self.object_cache['node']:
+            result = self.object_cache['node'][node_hash]
 
-            if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
-                namespace = node_data[NAMESPACE]
-                url = graph.namespace_url[namespace]
-                namespace_entry = self.get_bel_namespace_entry(url, node_data[NAME])
-                result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob)
+        else:
 
-            elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
-                namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
-                result = models.Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob)
+            result = self.session.query(models.Node).filter_by(bel=bel).one_or_none()
+            if result is None:
+                type = node_data[FUNCTION]
 
-            else:
-                result = models.Node(type=type, bel=bel, blob=blob)
+                if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
+                    namespace = node_data[NAMESPACE]
+                    url = graph.namespace_url[namespace]
+                    # namespace_entry = self.get_bel_namespace_entry(url, node_data[NAME])
+                    namespace_entry = self.namespace_object_cache[url][node_data[NAME]]
 
-            if VARIANTS in node_data or FUSION in node_data:
-                result.is_variant = True
-                result.fusion = FUSION in node_data
-                result.modifications = self.get_or_create_modification(graph, node_data)
+                    result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob)
 
-            self.session.add(result)
-            #self.session.flush()
+                elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
+                    namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+                    result = models.Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob)
+
+                else:
+                    result = models.Node(type=type, bel=bel, blob=blob)
+
+                if VARIANTS in node_data or FUSION in node_data:
+                    result.is_variant = True
+                    result.fusion = FUSION in node_data
+                    result.modifications = self.get_or_create_modification(graph, node_data)
+
+                self.session.add(result)
+
+            self.object_cache['node'][node_hash] = result
 
         return result
 
-    def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, blob):
+    def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, blob):
         """Creates entry for given edge if it does not exist.
 
         :param graph_key: Key that identifies the order of edges and weather an edge is artificially created or extracted
@@ -753,6 +740,8 @@ class CacheManager(BaseCacheManager):
         :type bel: str
         :param relation: Type of the relation between source and target node
         :type relation: str
+        :param properties:
+        :type properties:
         :param blob: A blob of the edge data object.
         :type blob: blob
         :return: An Edge object
@@ -764,9 +753,10 @@ class CacheManager(BaseCacheManager):
             'target': target,
             'evidence': evidence,
             'bel': bel,
-            'relation': relation
+            'relation': relation,
         }
-        edge_hash = hashlib.sha512(json.dumps(edge_dict, sort_keys=True).encode('utf-8'))
+        edge_hash = hashlib.sha512(
+            json.dumps({**edge_dict, 'properties': properties}, sort_keys=True).encode('utf-8')).hexdigest()
 
         if edge_hash in self.object_cache['edge']:
             # Cached edge object already? Load it from object_cache
@@ -779,6 +769,10 @@ class CacheManager(BaseCacheManager):
                 # Create new edge and add it to db_session
                 result = models.Edge(**edge_dict, blob=blob)
                 self.session.add(result)
+
+                for property in properties:
+                    if property not in result.properties:
+                        result.properties.append(property)
 
             self.object_cache['edge'][edge_hash] = result
 
@@ -800,22 +794,34 @@ class CacheManager(BaseCacheManager):
         :return: A Citation object
         :rtype: models.Citation
         """
-        result = self.session.query(models.Citation).filter_by(type=type, reference=reference.strip()).one_or_none()
+        citation_dict = {
+            'type': type,
+            'name': name,
+            'reference': reference.strip()
+        }
+        citation_hash = hashlib.sha512(json.dumps(citation_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
-        if result is None:
-            if date:
-                date = parse_datetime(date)
-            else:
-                date = None
+        if citation_hash in self.object_cache['citation']:
+            result = self.object_cache['citation'][citation_hash]
 
-            result = models.Citation(type=type, name=name, reference=reference.strip(), date=date)
+        else:
+            result = self.session.query(models.Citation).filter_by(**citation_dict).one_or_none()
 
-            if authors is not None:
-                for author in authors.split('|'):
-                    result.authors.append(self.get_or_create_author(author))
+            if result is None:
+                if date:
+                    date = parse_datetime(date)
+                else:
+                    date = None
 
-            self.session.add(result)
-            self.session.flush()
+                result = models.Citation(**citation_dict, date=date)
+
+                if authors is not None:
+                    for author in authors.split('|'):
+                        result.authors.append(self.get_or_create_author(author))
+
+                self.session.add(result)
+
+            self.object_cache['citation'][citation_hash] = result
 
         return result
 
@@ -827,11 +833,16 @@ class CacheManager(BaseCacheManager):
         :return: An Author object
         :rtype: models.Author
         """
-        result = self.session.query(models.Author).filter_by(name=name.strip()).one_or_none()
+        if name.strip() in self.object_cache['author']:
+            result = self.object_cache['author'][name.strip()]
+        else:
+            result = self.session.query(models.Author).filter_by(name=name.strip()).one_or_none()
 
-        if result is None:
-            result = models.Author(name=name.strip())
-            self.session.add(result)
+            if result is None:
+                result = models.Author(name=name.strip())
+                self.session.add(result)
+
+            self.object_cache['author'][name.strip()] = result
 
         return result
 
@@ -851,10 +862,12 @@ class CacheManager(BaseCacheManager):
             mod_type = FUSION
             node_data = node_data[FUSION]
             p3_namespace_url = graph.namespace_url[node_data[PARTNER_3P][NAMESPACE]]
-            p3_namespace_entry = self.get_bel_namespace_entry(p3_namespace_url, node_data[PARTNER_3P][NAME])
+            # p3_namespace_entry = self.get_bel_namespace_entry(p3_namespace_url, node_data[PARTNER_3P][NAME])
+            p3_namespace_entry = self.namespace_object_cache[p3_namespace_url][node_data[PARTNER_3P][NAME]]
 
             p5_namespace_url = graph.namespace_url[node_data[PARTNER_5P][NAMESPACE]]
-            p5_namespace_entry = self.get_bel_namespace_entry(p5_namespace_url, node_data[PARTNER_5P][NAME])
+            # p5_namespace_entry = self.get_bel_namespace_entry(p5_namespace_url, node_data[PARTNER_5P][NAME])
+            p5_namespace_entry = self.namespace_object_cache[p5_namespace_url][node_data[PARTNER_5P][NAME]]
 
             fusion_dict = {
                 'modType': mod_type,
@@ -927,7 +940,7 @@ class CacheManager(BaseCacheManager):
         modifications = []
 
         for modification in modification_list:
-            mod_hash = hashlib.sha512(json.dumps(modification, sort_keys=True).encode('utf-8'))
+            mod_hash = hashlib.sha512(json.dumps(modification, sort_keys=True).encode('utf-8')).hexdigest()
 
             if mod_hash in self.object_cache['modification']:
                 mod = self.object_cache['modification'][mod_hash]
@@ -973,8 +986,7 @@ class CacheManager(BaseCacheManager):
                             namespace_url = GOCC_LATEST
                         else:
                             namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
-                        property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
-                                                                                       effect_value[NAME])
+                        property_dict['namespaceEntry'] = self.namespace_object_cache[namespace_url][effect_value[NAME]]
                     else:
                         property_dict['propValue'] = effect_value
 
@@ -991,25 +1003,27 @@ class CacheManager(BaseCacheManager):
                     namespace_url = GOCC_LATEST
                 else:
                     namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
-                property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
-                                                                               participant_data[LOCATION][NAME])
+                property_dict['namespaceEntry'] = self.namespace_object_cache[namespace_url][
+                    participant_data[LOCATION][NAME]]
                 property_list.append(property_dict)
 
             else:
                 property_list.append(property_dict)
 
         for property_def in property_list:
-            edge_property = self.session.query(models.Property).filter_by(**property_def).one_or_none()
-            if not edge_property:
-                property_hash = hashlib.sha512(json.dumps(property_def, sort_keys=True).endoce('utf-8'))
-                if property_hash in self.object_cache['property']:
-                    edge_property = self.object_cache['property'][property_hash]
-                else:
-                    edge_property = models.Property(**property_def)
-                    self.object_cache['property'][property_hash] = edge_property
+            property_hash = hashlib.sha512(json.dumps(property_def, sort_keys=True).encode('utf-8')).hexdigest()
 
-            if edge_property not in properties:
-                properties.append(edge_property)
+            if property_hash in self.object_cache['property']:
+                edge_property = self.object_cache['property'][property_hash]
+            else:
+                edge_property = self.session.query(models.Property).filter_by(**property_def).one_or_none()
+
+                if not edge_property:
+                    edge_property = models.Property(**property_def)
+
+                self.object_cache['property'][property_hash] = edge_property
+
+            properties.append(edge_property)
 
         return properties
 
