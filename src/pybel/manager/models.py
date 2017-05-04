@@ -316,7 +316,7 @@ class Network(Base):
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')
     description = Column(Text, nullable=True, doc='Descriptive text extracted from the BEL file')
-    copyright = Column(String(255), nullable=True, doc='Copyright information')
+    copyright = Column(Text, nullable=True, doc='Copyright information')
     disclaimer = Column(String(255), nullable=True, doc='Disclaimer information')
     licenses = Column(String(255), nullable=True, doc='License information')
 

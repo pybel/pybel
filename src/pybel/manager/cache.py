@@ -18,6 +18,7 @@ from collections import defaultdict
 
 import networkx as nx
 
+from copy import deepcopy
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
@@ -755,8 +756,9 @@ class CacheManager(BaseCacheManager):
             'bel': bel,
             'relation': relation,
         }
-        edge_hash = hashlib.sha512(
-            json.dumps({**edge_dict, 'properties': properties}, sort_keys=True).encode('utf-8')).hexdigest()
+        hash_dict = deepcopy(edge_dict)
+        hash_dict['properties'] = properties
+        edge_hash = hashlib.sha512(json.dumps(hash_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
         if edge_hash in self.object_cache['edge']:
             # Cached edge object already? Load it from object_cache
@@ -862,11 +864,9 @@ class CacheManager(BaseCacheManager):
             mod_type = FUSION
             node_data = node_data[FUSION]
             p3_namespace_url = graph.namespace_url[node_data[PARTNER_3P][NAMESPACE]]
-            # p3_namespace_entry = self.get_bel_namespace_entry(p3_namespace_url, node_data[PARTNER_3P][NAME])
             p3_namespace_entry = self.namespace_object_cache[p3_namespace_url][node_data[PARTNER_3P][NAME]]
 
             p5_namespace_url = graph.namespace_url[node_data[PARTNER_5P][NAMESPACE]]
-            # p5_namespace_entry = self.get_bel_namespace_entry(p5_namespace_url, node_data[PARTNER_5P][NAME])
             p5_namespace_entry = self.namespace_object_cache[p5_namespace_url][node_data[PARTNER_5P][NAME]]
 
             fusion_dict = {
@@ -980,17 +980,18 @@ class CacheManager(BaseCacheManager):
 
             if modifier == TRANSLOCATION and EFFECT in participant_data:
                 for effect_type, effect_value in participant_data[EFFECT].items():
-                    property_dict['relativeKey'] = effect_type
+                    tmp_dict = deepcopy(property_dict)
+                    tmp_dict['relativeKey'] = effect_type
                     if NAMESPACE in effect_value:
                         if effect_value[NAMESPACE] == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
                             namespace_url = GOCC_LATEST
                         else:
                             namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
-                        property_dict['namespaceEntry'] = self.namespace_object_cache[namespace_url][effect_value[NAME]]
+                        tmp_dict['namespaceEntry'] = self.namespace_object_cache[namespace_url][effect_value[NAME]]
                     else:
-                        property_dict['propValue'] = effect_value
+                        tmp_dict['propValue'] = effect_value
 
-                    property_list.append(property_dict)
+                    property_list.append(tmp_dict)
 
             elif modifier == ACTIVITY and EFFECT in participant_data:
                 property_dict['effectNamespace'] = participant_data[EFFECT][NAMESPACE]
