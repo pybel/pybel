@@ -758,8 +758,7 @@ class CacheManager(BaseCacheManager):
     def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, blob):
         """Creates entry for given edge if it does not exist.
 
-        :param graph_key: Key that identifies the order of edges and weather an edge is artificially created or extracted
-                        from a valid BEL statement.
+        :param graph_key: Key that identifies the order of edges and weather an edge is artificially created or extracted from a valid BEL statement.
         :type graph_key: tuple
         :param source: Source node of the relation
         :type source: models.Node
@@ -787,8 +786,6 @@ class CacheManager(BaseCacheManager):
             'relation': relation,
             'properties': properties
         }
-        #hash_dict = deepcopy(edge_dict)
-        #hash_dict['properties'] = properties
         edge_hash = hashlib.sha512(json.dumps(edge_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
         if edge_hash in self.object_cache['edge']:
@@ -801,12 +798,13 @@ class CacheManager(BaseCacheManager):
             if result is None:
                 # Create new edge and add it to db_session
                 del edge_dict['properties']
-                result = models.Edge(**edge_dict, blob=blob)
+                edge_dict['blob'] = blob
+                result = models.Edge(**edge_dict)
                 self.session.add(result)
 
-                for property in properties:
-                    if property not in result.properties:
-                        result.properties.append(property)
+                for prop in properties:
+                    if prop not in result.properties:
+                        result.properties.append(prop)
 
             # Make sure the object is in object_cache from now on
             self.object_cache['edge'][edge_hash] = result
@@ -845,10 +843,11 @@ class CacheManager(BaseCacheManager):
             if result is None:
                 if date:
                     date = parse_datetime(date)
+                    citation_dict['date'] = date
                 else:
                     date = None
 
-                result = models.Citation(**citation_dict, date=date)
+                result = models.Citation(**citation_dict)
 
                 if authors is not None:
                     for author in authors.split('|'):

@@ -293,6 +293,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
         citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
         evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
+        properties = self.manager.get_or_create_property(self.simple_graph, edge_data[0])
         basic_edge = {
             'graph_key': 0,
             'source': source_node,
@@ -300,6 +301,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             'evidence': evidence,
             'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
             'relation': edge_data[0][RELATION],
+            'properties': properties,
             'blob': pickle.dumps(edge_data[0])
         }
         source_data = source_node.data
@@ -321,16 +323,16 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             },
             'key': 0
         }
-        properties = self.manager.get_or_create_property(self.simple_graph, edge_data[0])
+
         # Create
-        edge = self.manager.get_or_create_edge(**basic_edge, properties=properties)
+        edge = self.manager.get_or_create_edge(**basic_edge)
         self.assertIsInstance(edge, models.Edge)
         self.assertEqual(edge.data, database_data)
 
         self.manager.session.commit()
 
         # Get
-        reloaded_edge = self.manager.get_or_create_edge(**basic_edge, properties=properties)
+        reloaded_edge = self.manager.get_or_create_edge(**basic_edge)
         self.assertEqual(edge.data, reloaded_edge.data)
         self.assertEqual(edge.id, reloaded_edge.id)
 
