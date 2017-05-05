@@ -108,6 +108,23 @@ class CacheManager(BaseCacheManager):
             'author': {}
         }
 
+    # DEFINITIONS MANAGEMENT
+
+    def ensure_graph_definitions(self, graph, objects=False):
+        """Ensures all definitions in graph so the user does not have to manage namespaces and annotations manually.
+
+        :param graph: a BEL network
+        :type graph: pybel.BELGraph
+        :param objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
+        :type objects: bool
+        :return:
+        """
+        for url in graph.namespace_url:
+            self.ensure_namespace(url, objects)
+
+        for url in graph.annotation_url:
+            self.ensure_annotation(url, objects)
+
     # NAMESPACE MANAGEMENT
 
     def insert_namespace(self, url):
@@ -151,37 +168,44 @@ class CacheManager(BaseCacheManager):
 
         return namespace
 
-    def ensure_namespace(self, url):
+    def ensure_namespace(self, url, objects=False):
         """Caches a namespace file if not already in the cache
 
         :param url: the location of the namespace file
         :type url: str
+        :param objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
+        :type objects: bool
         :return: The namespace instance
         :rtype: models.Namespace
         """
         if url in self.namespace_model:
             log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
-            return self.namespace_model[url]
+            results = self.namespace_model[url]
 
-        t = time.time()
-        results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
-
-        if results is None:
-            results = self.insert_namespace(url)
         else:
-            log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
+            t = time.time()
+            results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
 
-        if results is None:
-            raise ValueError('No results for {}'.format(url))
-        elif not results.entries:
-            raise ValueError('No entries for {}'.format(url))
+            if results is None:
+                results = self.insert_namespace(url)
+            else:
+                log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
 
-        self.namespace_model[url] = results
+            if results is None:
+                raise ValueError('No results for {}'.format(url))
+            elif not results.entries:
+                raise ValueError('No entries for {}'.format(url))
 
-        for entry in results.entries:
-            self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
-            self.namespace_id_cache[url][entry.name] = entry.id
-            self.namespace_object_cache[url][entry.name] = entry
+            self.namespace_model[url] = results
+
+            for entry in results.entries:
+                self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
+                self.namespace_id_cache[url][entry.name] = entry.id
+
+        if objects and url not in self.namespace_object_cache:
+            log.debug('loading namespace objects: %s (%d)', url, len(self.namespace_cache[url]))
+            for entry in results.entries:
+                self.namespace_object_cache[url][entry.name] = entry
 
         return results
 
@@ -269,32 +293,39 @@ class CacheManager(BaseCacheManager):
 
         return annotation
 
-    def ensure_annotation(self, url):
+    def ensure_annotation(self, url, objects=False):
         """Caches an annotation file if not already in the cache
 
         :param url: the location of the annotation file
         :type url: str
+        :param objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
+        :type objects: bool
         :return: The ensured annotation instance
         :rtype: models.Annotation
         """
         if url in self.annotation_model:
             log.debug('already in memory: %s (%d)', url, len(self.annotation_cache[url]))
-            return self.annotation_model[url]
+            results = self.annotation_model[url]
 
-        t = time.time()
-        results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
-
-        if results is None:
-            results = self.insert_annotation(url)
         else:
-            log.debug('loaded annotation: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
+            t = time.time()
+            results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
 
-        self.annotation_model[url] = results
+            if results is None:
+                results = self.insert_annotation(url)
+            else:
+                log.debug('loaded annotation: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
 
-        for entry in results.entries:
-            self.annotation_cache[url][entry.name] = entry.label
-            self.annotation_id_cache[url][entry.name] = entry.id
-            self.annotation_object_cache[url][entry.name] = entry
+            self.annotation_model[url] = results
+
+            for entry in results.entries:
+                self.annotation_cache[url][entry.name] = entry.label
+                self.annotation_id_cache[url][entry.name] = entry.id
+
+        if objects and url not in self.annotation_object_cache:
+            log.debug('loading annotation objects: %s (%d)', url, len(self.annotation_cache[url]))
+            for entry in results.entries:
+                self.annotation_object_cache[url][entry.name] = entry
 
         return results
 
@@ -566,8 +597,8 @@ class CacheManager(BaseCacheManager):
 
         t = time.time()
 
-        namespaces = [self.ensure_namespace(url) for url in graph.namespace_url.values()]
-        annotations = [self.ensure_annotation(url) for url in graph.annotation_url.values()]
+        namespaces = [self.ensure_namespace(url, objects=store_parts) for url in graph.namespace_url.values()]
+        annotations = [self.ensure_annotation(url, objects=store_parts) for url in graph.annotation_url.values()]
 
         network = models.Network(blob=to_bytes(graph), **graph.document)
 
@@ -609,7 +640,6 @@ class CacheManager(BaseCacheManager):
             source, target = nc[u], nc[v]
 
             if CITATION not in data or EVIDENCE not in data:
-                citation = None
                 evidence = None
 
             else:
@@ -702,7 +732,7 @@ class CacheManager(BaseCacheManager):
                 if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
                     namespace = node_data[NAMESPACE]
                     url = graph.namespace_url[namespace]
-                    # namespace_entry = self.get_bel_namespace_entry(url, node_data[NAME])
+                    print(node_data)
                     namespace_entry = self.namespace_object_cache[url][node_data[NAME]]
 
                     result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob)
@@ -755,10 +785,11 @@ class CacheManager(BaseCacheManager):
             'evidence': evidence,
             'bel': bel,
             'relation': relation,
+            'properties': properties
         }
-        hash_dict = deepcopy(edge_dict)
-        hash_dict['properties'] = properties
-        edge_hash = hashlib.sha512(json.dumps(hash_dict, sort_keys=True).encode('utf-8')).hexdigest()
+        #hash_dict = deepcopy(edge_dict)
+        #hash_dict['properties'] = properties
+        edge_hash = hashlib.sha512(json.dumps(edge_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
         if edge_hash in self.object_cache['edge']:
             # Cached edge object already? Load it from object_cache
@@ -769,6 +800,7 @@ class CacheManager(BaseCacheManager):
 
             if result is None:
                 # Create new edge and add it to db_session
+                del edge_dict['properties']
                 result = models.Edge(**edge_dict, blob=blob)
                 self.session.add(result)
 
@@ -776,6 +808,7 @@ class CacheManager(BaseCacheManager):
                     if property not in result.properties:
                         result.properties.append(property)
 
+            # Make sure the object is in object_cache from now on
             self.object_cache['edge'][edge_hash] = result
 
         return result

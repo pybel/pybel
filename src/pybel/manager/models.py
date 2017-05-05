@@ -110,8 +110,8 @@ class Namespace(Base):
     def data(self):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
         ns_data = self.__dict__
-        if '_sa_instance_state' in ns_data:
-            del ns_data['_sa_instance_state']
+        #if '_sa_instance_state' in ns_data:
+        #    del ns_data['_sa_instance_state']
         return ns_data
 
 
@@ -134,6 +134,7 @@ class NamespaceEntry(Base):
 
     @property
     def data(self):
+        """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name."""
         return {
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
@@ -184,8 +185,8 @@ class Annotation(Base):
     @property
     def data(self):
         an_data = self.__dict__
-        if '_sa_instance_state' in an_data:
-            del an_data['_sa_instance_state']
+        #if '_sa_instance_state' in an_data:
+        #    del an_data['_sa_instance_state']
         return an_data
 
 

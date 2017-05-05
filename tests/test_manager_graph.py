@@ -71,7 +71,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestGraphCacheSimple, self).setUp()
         self.simple_graph = pybel.from_path(test_bel_simple, manager=self.manager)
-        self.manager.ensure_namespace(GOCC_LATEST)
+        self.manager.ensure_namespace(GOCC_LATEST, objects=True)
 
     @mock_bel_resources
     def test_get_or_create_node(self, mock_get):
