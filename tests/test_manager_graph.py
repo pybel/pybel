@@ -288,6 +288,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
 
     @mock_bel_resources
     def test_get_or_create_edge(self, mock_get):
+        self.manager.ensure_graph_definitions(self.simple_graph, objects=True)
         edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')]
         source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
         target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
@@ -353,6 +354,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
 
     @mock_bel_resources
     def test_get_or_create_modification(self, mock_get):
+        self.manager.ensure_graph_definitions(self.simple_graph, objects=True)
         node_data = self.simple_graph.node[('Protein', 'HGNC', 'FADD')]
         fusion_missing = {
             FUSION: {

@@ -732,7 +732,6 @@ class CacheManager(BaseCacheManager):
                 if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
                     namespace = node_data[NAMESPACE]
                     url = graph.namespace_url[namespace]
-                    print(node_data)
                     namespace_entry = self.namespace_object_cache[url][node_data[NAME]]
 
                     result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob)
