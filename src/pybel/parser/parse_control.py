@@ -153,8 +153,11 @@ class ControlParser(BaseParser):
         if values[0] not in CITATION_TYPES:
             raise InvalidCitationType(line, position, values[0])
 
-        if values[0] == CITATION_TYPE_PUBMED and not is_int(values[2]):
-            raise InvalidPubMedIdentifierWarning(line, position, values[2])
+        if values[0] == CITATION_TYPE_PUBMED:
+            if 2 == len(values) and not is_int(values[1]):
+                raise InvalidPubMedIdentifierWarning(line, position, values[1])
+            elif not is_int(values[2]):
+                raise InvalidPubMedIdentifierWarning(line, position, values[2])
 
         if 4 <= len(values) and not valid_date(values[3]):
             log.debug('Invalid date: %s. Truncating entry.', values[3])
