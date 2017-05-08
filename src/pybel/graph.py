@@ -11,7 +11,6 @@ Convenient property definitions are given for these attributes.
 
 """
 
-import itertools as itt
 import logging
 
 import networkx as nx
@@ -208,22 +207,3 @@ class BELGraph(nx.MultiDiGraph):
         node = function, namespace, name
         if node not in self:
             self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
-
-    def __eq__(self, other):
-
-        if not isinstance(other, BELGraph):
-            return False
-
-        if set(self.nodes_iter()) != set(other.nodes_iter()):
-            return False
-
-        if set(self.edges_iter()) != set(other.edges_iter()):
-            return False
-
-        for u, v in self.edges():
-            i = itt.product(self.edge[u][v].values(), other.edge[u][v].values())
-            r = list(filter(lambda q: q[0] == q[1], i))
-            if len(self.edge[u][v]) != len(r):
-                return False
-
-        return True
