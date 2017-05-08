@@ -19,14 +19,15 @@ class TestCanonicalizeHelper(unittest.TestCase):
             postpend_location('', dict(name='failure'))
 
     def test_decanonicalize_node_failure(self):
+        class NotGraph:
+            node = None
+
+        x = NotGraph()
+
+        test_node = ('nope', 'nope', 'nope')
+        x.node = {test_node: {FUNCTION: 'nope'}}
+
         with self.assertRaises(ValueError):
-            class NotGraph:
-                node = None
-
-            x = NotGraph()
-
-            test_node = ('nope', 'nope', 'nope')
-            x.node = {test_node: {FUNCTION: 'nope'}}
             decanonicalize_node(x, test_node)
 
 
@@ -57,12 +58,6 @@ class TestCanonicalize(BelReconstitutionMixin, unittest.TestCase):
     @mock_bel_resources
     def test_simple(self, mock_get):
         self.canonicalize_helper(test_bel_simple, reconstituted=self.bel_simple_reconstituted)
-
-    # @mock_bel_resources
-    # @mock_parse_owl_rdf
-    # @mock_parse_owl_pybel
-    # def test_canonicalize_4(self, m1, m2, m3):
-    #    self.canonicalize_helper(test_bel_extensions)
 
     @mock_bel_resources
     def test_thorough(self, mock_get):
