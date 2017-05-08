@@ -30,8 +30,8 @@ def _dict_to_cx(d, key_tag='k', value_tag='v'):
     return [{key_tag: k, value_tag: v} for k, v in d.items()]
 
 
-def _cx_to_dict(cx, key_tag='k', value_tag='v'):
-    return {d[key_tag]: d[value_tag] for d in cx}
+def _cx_to_dict(list_of_dicts, key_tag='k', value_tag='v'):
+    return {d[key_tag]: d[value_tag] for d in list_of_dicts}
 
 
 def calculate_canonical_cx_identifier(graph, node):
@@ -207,10 +207,10 @@ def to_cx_json(graph):
         })
 
     annotation_list_keys_lookup = {keyword: i for i, keyword in enumerate(sorted(graph.annotation_list))}
-    annotation_list_entry = []
+    annotation_lists_entry = []
     for keyword, values in graph.annotation_list.items():
         for value in values:
-            annotation_list_entry.append({
+            annotation_lists_entry.append({
                 'k': annotation_list_keys_lookup[keyword],
                 'v': value
             })
@@ -244,7 +244,7 @@ def to_cx_json(graph):
     cx_pairs = [
         ('@context', context_entry),
         ('context_legend', context_legend_entry),
-        ('annotation_lists', annotation_list_entry),
+        ('annotation_lists', annotation_lists_entry),
         ('networkAttributes', network_attributes_entry),
         ('nodes', nodes_entry),
         ('nodeAttributes', node_attributes_entry),
@@ -306,15 +306,15 @@ def from_cx_json(cx):
     log.info('CX Entry [1]: %s', cx[1])
 
     context_legend_entry = cx[3]
-    context_legend = _cx_to_dict(context_legend_entry)
+    context_legend = _cx_to_dict(context_legend_entry['context_legend'])
 
     annotation_lists = defaultdict(set)
-    annotation_list_entry = cx[4]
-    for d in annotation_list_entry:
+    annotation_lists_entry = cx[4]
+    for d in annotation_lists_entry['annotation_lists']:
         annotation_lists[d['k']].add(d['v'])
 
     context_entry = cx[2]
-    for keyword, entry in context_entry['@context'].items():
+    for keyword, entry in context_entry['@context'][0].items():
         if context_legend[keyword] == GRAPH_NAMESPACE_URL:
             graph.namespace_url[keyword] = entry
         elif context_legend[keyword] == GRAPH_NAMESPACE_OWL:
