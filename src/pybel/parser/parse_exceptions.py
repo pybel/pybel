@@ -268,6 +268,8 @@ class InvalidCitationType(PyBelWarning):
 - ``PubMed``
 - ``Journal``
 - ``Online Resource``
+- ``URL``
+- ``DOI``
 - ``Other``
 
 .. seealso:: OpenBEL wiki on `citations <https://wiki.openbel.org/display/BELNA/Citation>`_

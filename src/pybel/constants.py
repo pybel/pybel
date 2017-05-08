@@ -65,6 +65,8 @@ CITATION_TYPE_BOOK = 'Book'
 CITATION_TYPE_PUBMED = 'PubMed'
 CITATION_TYPE_JOURNAL = 'Journal'
 CITATION_TYPE_ONLINE = 'Online Resource'
+CITATION_TYPE_URL = 'URL'
+CITATION_TYPE_DOI = 'DOI'
 CITATION_TYPE_OTHER = 'Other'
 #: The valid citation types
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Citation
@@ -73,6 +75,8 @@ CITATION_TYPES = {
     CITATION_TYPE_PUBMED,
     CITATION_TYPE_JOURNAL,
     CITATION_TYPE_ONLINE,
+    CITATION_TYPE_URL,
+    CITATION_TYPE_DOI,
     CITATION_TYPE_OTHER
 }
 
