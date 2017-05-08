@@ -268,6 +268,8 @@ class InvalidCitationType(PyBelWarning):
 - ``PubMed``
 - ``Journal``
 - ``Online Resource``
+- ``URL``
+- ``DOI``
 - ``Other``
 
 .. seealso:: OpenBEL wiki on `citations <https://wiki.openbel.org/display/BELNA/Citation>`_
@@ -301,7 +303,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
 class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
-    def __init__(self, line, tokens, position):
+    def __init__(self, line, position, tokens):
         PyBelWarning.__init__(self, line, position, tokens)
         self.line = line
         self.position = position

@@ -203,6 +203,14 @@ class CacheManager(BaseCacheManager):
         for url in defaults.fraunhofer_namespaces if use_fraunhofer else defaults.default_namespaces:
             self.ensure_namespace(url)
 
+    def drop_namespace(self, url):
+        """Drops the namespace at the given URL. Won't work if the edge store is in use.
+                
+        :param str url: The URL of the namespace to drop
+        """
+        self.session.query(models.Namespace).filter(models.Namespace.url == url).delete()
+        self.session.commit()
+
     # ANNOTATION MANAGEMENT
 
     def insert_annotation(self, url):
