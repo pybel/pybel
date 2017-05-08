@@ -19,6 +19,7 @@ from tests.constants import test_bel_simple, mock_bel_resources, test_bel_thorou
 log = logging.getLogger(__name__)
 
 
+@unittest.skipUnless('PYBEL_TEST_THOROUGH' in os.environ)
 class TestCli(TemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestCli, self).setUp()
