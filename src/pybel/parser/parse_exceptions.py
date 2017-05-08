@@ -66,9 +66,10 @@ class MissingDefaultNameWarning(PyBelWarning):
 class UndefinedNamespaceWarning(PyBelWarning):
     """Raised if reference made to undefined namespace"""
 
-    def __init__(self, namespace):
-        PyBelWarning.__init__(self, namespace)
+    def __init__(self, namespace, name):
+        PyBelWarning.__init__(self, namespace, name)
         self.namespace = namespace
+        self.name = name
 
     def __str__(self):
         return '"{}" is not a defined namespace'.format(self.namespace)
@@ -300,7 +301,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
 class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
-    def __init__(self, line, tokens, position):
+    def __init__(self, line, position, tokens):
         PyBelWarning.__init__(self, line, position, tokens)
         self.line = line
         self.position = position

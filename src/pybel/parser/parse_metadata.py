@@ -309,9 +309,9 @@ class MetadataParser(BaseParser):
     def has_namespace(self, namespace):
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
 
-    def raise_for_missing_namespace(self, namespace):
+    def raise_for_missing_namespace(self, namespace, name):
         if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(namespace)
+            raise UndefinedNamespaceWarning(namespace, name)
 
     def has_enumerated_namespace_name(self, namespace, name):
         return self.has_enumerated_namespace(namespace) and name in self.namespace_dict[namespace]
@@ -320,12 +320,12 @@ class MetadataParser(BaseParser):
         return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
 
     def has_namespace_name(self, namespace, name):
-        self.raise_for_missing_namespace(namespace)
+        self.raise_for_missing_namespace(namespace, name)
 
         return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
 
     def raise_for_missing_name(self, namespace, name):
-        self.raise_for_missing_namespace(namespace)
+        self.raise_for_missing_namespace(namespace, name)
 
         if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
             raise MissingNamespaceNameWarning(name, namespace)

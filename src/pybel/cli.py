@@ -223,6 +223,14 @@ def ls(url, connection):
             click.echo(l)
 
 
+@definitions.command(help='Drop namespace by url')
+@click.argument('url')
+@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
+def drop_namespace(url, connection):
+    manager = CacheManager(connection=connection)
+    manager.drop_namespace(url)
+
+
 @manage.group(help="Manage graphs")
 def graph():
     pass
