@@ -28,19 +28,16 @@ class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
         """Tests that a graph with the same name and version can't be added twice"""
         self.manager.insert_graph(self.graph)
 
-        name = expected_test_thorough_metadata[METADATA_NAME]
-        version = expected_test_thorough_metadata[METADATA_VERSION]
-        description = expected_test_thorough_metadata[METADATA_DESCRIPTION]
-
-        self.manager.insert_graph(self.graph)
-
         x = self.manager.list_graphs()
 
         self.assertEqual(1, len(x))
-        self.assertEqual((1, name, version, description), x[0])
+        self.assertEqual((1, expected_test_thorough_metadata[METADATA_NAME],
+                          expected_test_thorough_metadata[METADATA_VERSION],
+                          expected_test_thorough_metadata[METADATA_DESCRIPTION]), x[0])
 
-        g2 = self.manager.get_graph(name, version)
-        self.bel_thorough_reconstituted(g2)
+        reconstituted = self.manager.get_graph(expected_test_thorough_metadata[METADATA_NAME],
+                                               expected_test_thorough_metadata[METADATA_VERSION])
+        self.bel_thorough_reconstituted(reconstituted)
 
         # Test that the graph can't be added a second time
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
