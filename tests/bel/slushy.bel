@@ -31,7 +31,7 @@ UNSET Citation
 SET STATEMENT_GROUP = "Group 1"
 
 # InvalidCitationException
-SET Citation = {"PubMed", "Incomplete"}
+SET Citation = {"PubMed"}
 
 # InvalidCitationType
 SET Citation = {"Pubmed", "Incomplete", "1234"}
