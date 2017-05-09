@@ -80,6 +80,7 @@ class Namespace(Base):
     __tablename__ = NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
+    uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
     url = Column(String(255), doc='Source url of the given namespace definition file (.belns)')
     keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
@@ -153,6 +154,7 @@ class Annotation(Base):
     __tablename__ = ANNOTATION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
+    uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
     url = Column(String(255), doc='Source url of the given annotation definition file (.belanno)')
     keyword = Column(String(50), index=True, doc='Keyword that is used in a BEL file to identify a specific annotation')
