@@ -2,11 +2,14 @@
 
 """This module contains IO functions for outputting BEL graphs to lossy formats, such as GraphML and CSV"""
 
+from __future__ import print_function
+
 import json
 import logging
 
 import networkx as nx
 
+from ..constants import NAMESPACE, NAME
 from ..graph import BELGraph
 from ..utils import flatten_dict, flatten_graph_data
 
@@ -50,3 +53,15 @@ def to_csv(graph, file, delimiter='\t', encoding='utf-8'):
     :type encoding: str
     """
     nx.write_edgelist(flatten_graph_data(graph), file, data=True, delimiter=delimiter, encoding=encoding)
+
+
+def to_gsea(graph, file):
+    """Writes the genes/gene products to a *.grp file for use with GSEA gene set enrichment analysis
+    
+    :param BELGraph graph: A BEL graph 
+    :param file file: A write-supporing file or file-like object
+    """
+    print('# {}'.format(graph.name), file=file)
+    nodes = {d[NAME] for _, d in graph.nodes_iter(data=True) if NAMESPACE in d and d[NAMESPACE] == 'HGNC'}
+    for node in sorted(nodes):
+        print(node, file=file)
