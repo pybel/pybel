@@ -38,23 +38,21 @@ def to_neo4j(graph, neo_graph, context=None):
     for node, data in graph.nodes(data=True):
         node_type = data[FUNCTION]
         attrs = {k: v for k, v in data.items() if k not in {FUNCTION, NAME}}
+        attrs['name'] = calculate_canonical_name(graph, node)
 
         if NAME in data:
             attrs['identifier'] = data[NAME]
-            attrs['name'] = calculate_canonical_name(graph, node)
 
         node_map[node] = py2neo.Node(node_type, bel=decanonicalize_node(graph, node), **attrs)
 
         tx.create(node_map[node])
 
     for u, v, data in graph.edges(data=True):
-        neo_u = node_map[u]
-        neo_v = node_map[v]
         rel_type = data[RELATION]
         attrs = flatten_dict(data)
         if context is not None:
             attrs[PYBEL_CONTEXT_TAG] = str(context)
-        rel = py2neo.Relationship(neo_u, rel_type, neo_v, **attrs)
+        rel = py2neo.Relationship(node_map[u], rel_type, node_map[v], **attrs)
         tx.create(rel)
 
     tx.commit()

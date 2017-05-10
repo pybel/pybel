@@ -15,10 +15,10 @@ import logging
 import sys
 import time
 from collections import defaultdict
+from copy import deepcopy
 
 import networkx as nx
 
-from copy import deepcopy
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
@@ -110,20 +110,20 @@ class CacheManager(BaseCacheManager):
 
     # DEFINITIONS MANAGEMENT
 
-    def ensure_graph_definitions(self, graph, objects=False):
+    def ensure_graph_definitions(self, graph, cache_objects=False):
         """Ensures all definitions in graph so the user does not have to manage namespaces and annotations manually.
 
         :param graph: a BEL network
         :type graph: pybel.BELGraph
-        :param objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
-        :type objects: bool
+        :param cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
+        :type cache_objects: bool
         :return:
         """
-        for url in graph.namespace_url:
-            self.ensure_namespace(url, objects)
+        for keyword, url in graph.namespace_url.items():
+            self.ensure_namespace(url, cache_objects)
 
-        for url in graph.annotation_url:
-            self.ensure_annotation(url, objects)
+        for keyword, url in graph.annotation_url.items():
+            self.ensure_annotation(url, cache_objects)
 
     # NAMESPACE MANAGEMENT
 
@@ -168,12 +168,12 @@ class CacheManager(BaseCacheManager):
 
         return namespace
 
-    def ensure_namespace(self, url, objects=False):
+    def ensure_namespace(self, url, cache_objects=False):
         """Caches a namespace file if not already in the cache
 
         :param url: the location of the namespace file
         :type url: str
-        :param objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
+        :param cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
         :type objects: bool
         :return: The namespace instance
         :rtype: models.Namespace
@@ -202,8 +202,8 @@ class CacheManager(BaseCacheManager):
                 self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
                 self.namespace_id_cache[url][entry.name] = entry.id
 
-        if objects and url not in self.namespace_object_cache:
-            log.debug('loading namespace objects: %s (%d)', url, len(self.namespace_cache[url]))
+        if cache_objects and url not in self.namespace_object_cache:
+            log.debug('loading namespace cache_objects: %s (%d)', url, len(self.namespace_cache[url]))
             for entry in results.entries:
                 self.namespace_object_cache[url][entry.name] = entry
 
@@ -597,7 +597,7 @@ class CacheManager(BaseCacheManager):
 
         t = time.time()
 
-        namespaces = [self.ensure_namespace(url, objects=store_parts) for url in graph.namespace_url.values()]
+        namespaces = [self.ensure_namespace(url, cache_objects=store_parts) for url in graph.namespace_url.values()]
         annotations = [self.ensure_annotation(url, objects=store_parts) for url in graph.annotation_url.values()]
 
         network = models.Network(blob=to_bytes(graph), **graph.document)
@@ -725,7 +725,7 @@ class CacheManager(BaseCacheManager):
 
         else:
 
-            result = self.session.query(models.Node).filter_by(bel=bel).one_or_none()
+            result = self.session.query(models.Node).filter_by(sha512=node_hash).one_or_none()
             if result is None:
                 type = node_data[FUNCTION]
 
@@ -734,14 +734,16 @@ class CacheManager(BaseCacheManager):
                     url = graph.namespace_url[namespace]
                     namespace_entry = self.namespace_object_cache[url][node_data[NAME]]
 
-                    result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob)
+                    result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob,
+                                         sha512=node_hash)
 
                 elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
                     namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
-                    result = models.Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob)
+                    result = models.Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob,
+                                         sha512=node_hash)
 
                 else:
-                    result = models.Node(type=type, bel=bel, blob=blob)
+                    result = models.Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
                 if VARIANTS in node_data or FUSION in node_data:
                     result.is_variant = True
@@ -792,12 +794,13 @@ class CacheManager(BaseCacheManager):
             result = self.object_cache['edge'][edge_hash]
         else:
             # Edge already in DB?
-            result = self.session.query(models.Edge).filter_by(graphIdentifier=graph_key, bel=bel).one_or_none()
+            result = self.session.query(models.Edge).filter_by(sha512=edge_hash).one_or_none()
 
             if result is None:
                 # Create new edge and add it to db_session
                 del edge_dict['properties']
                 edge_dict['blob'] = blob
+                edge_dict['sha512'] = edge_hash
                 result = models.Edge(**edge_dict)
                 self.session.add(result)
 
@@ -837,7 +840,7 @@ class CacheManager(BaseCacheManager):
             result = self.object_cache['citation'][citation_hash]
 
         else:
-            result = self.session.query(models.Citation).filter_by(**citation_dict).one_or_none()
+            result = self.session.query(models.Citation).filter_by(sha512=citation_hash).one_or_none()
 
             if result is None:
                 if date:
@@ -845,7 +848,7 @@ class CacheManager(BaseCacheManager):
                     citation_dict['date'] = date
                 else:
                     date = None
-
+                citation_dict['sha512'] = citation_hash
                 result = models.Citation(**citation_dict)
 
                 if authors is not None:
@@ -977,8 +980,9 @@ class CacheManager(BaseCacheManager):
                 mod = self.object_cache['modification'][mod_hash]
 
             else:
-                mod = self.session.query(models.Modification).filter_by(**modification).one_or_none()
+                mod = self.session.query(models.Modification).filter_by(sha512=mod_hash).one_or_none()
                 if not mod:
+                    modification['sha512'] = mod_hash
                     mod = models.Modification(**modification)
 
                 self.object_cache['modification'][mod_hash] = mod
@@ -1048,9 +1052,10 @@ class CacheManager(BaseCacheManager):
             if property_hash in self.object_cache['property']:
                 edge_property = self.object_cache['property'][property_hash]
             else:
-                edge_property = self.session.query(models.Property).filter_by(**property_def).one_or_none()
+                edge_property = self.session.query(models.Property).filter_by(sha512=property_hash).one_or_none()
 
                 if not edge_property:
+                    property_def['sha512'] = property_hash
                     edge_property = models.Property(**property_def)
 
                 self.object_cache['property'][property_hash] = edge_property

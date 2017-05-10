@@ -80,6 +80,7 @@ class Namespace(Base):
     __tablename__ = NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
+    uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
     url = Column(String(255), doc='Source url of the given namespace definition file (.belns)')
     keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
@@ -160,6 +161,7 @@ class Annotation(Base):
     __tablename__ = ANNOTATION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
+    uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
     url = Column(String(255), doc='Source url of the given annotation definition file (.belanno)')
     keyword = Column(String(50), index=True, doc='Keyword that is used in a BEL file to identify a specific annotation')
@@ -366,6 +368,8 @@ class Node(Base):
     bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
     blob = Column(Binary)
 
+    sha512 = Column(String(255), index=True)
+
     modifications = relationship("Modification", secondary=node_modification)
 
     @property
@@ -427,6 +431,8 @@ class Modification(Base):
     modName = Column(String(255), nullable=True, doc='Name of the given modification (used for pmod or gmod)')
     aminoA = Column(String(3), nullable=True, doc='Three letter amino accid code')
     position = Column(Integer, nullable=True, doc='Position')
+
+    sha512 = Column(String(255), index=True)
 
     nodes = relationship("Node", secondary=node_modification)
 
@@ -538,7 +544,7 @@ class Author(Base):
     __tablename__ = AUTHOR_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False, index=True)
 
     citations = relationship("Citation", secondary=author_citation)
 
@@ -552,6 +558,7 @@ class Citation(Base):
     name = Column(String(255), nullable=False, doc='Title of the publication')
     reference = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
     date = Column(Date, nullable=True, doc='Publication date')
+    sha512 = Column(String(255), index=True)
 
     authors = relationship("Author", secondary=author_citation)
     evidences = relationship("Evidence", back_populates='citation')
@@ -593,6 +600,8 @@ class Evidence(Base):
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation', back_populates='evidences')
+
+    sha512 = Column(String(255), index=True)
 
     @property
     def data(self):
@@ -649,6 +658,8 @@ class Edge(Base):
     properties = relationship('Property', secondary=edge_property)
 
     blob = Column(Binary)
+
+    sha512 = Column(String(255), index=True)
 
     @property
     def data(self):
@@ -727,6 +738,7 @@ class Property(Base):
     propValue = Column(String(255), nullable=True, doc='Value of the effect')
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry')
+    sha512 = Column(String(255), index=True)
 
     edges = relationship("Edge", secondary=edge_property)
 

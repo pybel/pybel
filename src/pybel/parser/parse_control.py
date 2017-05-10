@@ -19,10 +19,7 @@ from pyparsing import pyparsing_common as ppc
 from .baseparser import BaseParser
 from .parse_exceptions import *
 from .utils import is_int, quote, delimitedSet, qid
-from ..constants import BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT, \
-    BEL_KEYWORD_ALL, ANNOTATIONS
-from ..constants import CITATION_ENTRIES, EVIDENCE, CITATION_TYPES, BEL_KEYWORD_SET, BEL_KEYWORD_UNSET, CITATION
-from ..constants import CITATION_TYPE_PUBMED
+from ..constants import *
 from ..utils import valid_date
 
 __all__ = ['ControlParser']
@@ -150,14 +147,17 @@ class ControlParser(BaseParser):
 
         values = tokens['values']
 
-        if len(values) < 3:
+        if len(values) < 2:
             raise CitationTooShortException(line, position)
 
         if values[0] not in CITATION_TYPES:
             raise InvalidCitationType(line, position, values[0])
 
-        if values[0] == CITATION_TYPE_PUBMED and not is_int(values[2]):
-            raise InvalidPubMedIdentifierWarning(line, position, values[2])
+        if values[0] == CITATION_TYPE_PUBMED:
+            if 2 == len(values) and not is_int(values[1]):
+                raise InvalidPubMedIdentifierWarning(line, position, values[1])
+            elif not is_int(values[2]):
+                raise InvalidPubMedIdentifierWarning(line, position, values[2])
 
         if 4 <= len(values) and not valid_date(values[3]):
             log.debug('Invalid date: %s. Truncating entry.', values[3])
@@ -167,7 +167,10 @@ class ControlParser(BaseParser):
         if 6 < len(values):
             raise CitationTooLongException(line, position)
 
-        self.citation = dict(zip(CITATION_ENTRIES, values))
+        if 2 == len(values):
+            self.citation = dict(zip((CITATION_TYPE, CITATION_REFERENCE), values))
+        else:
+            self.citation = dict(zip(CITATION_ENTRIES, values))
 
         return tokens
 

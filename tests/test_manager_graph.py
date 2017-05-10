@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
+import json
 import logging
 import unittest
 from collections import Counter
@@ -28,26 +30,22 @@ class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
         self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
 
     @mock_bel_resources
-    def test_load_reload(self, mock_get):
-        name = expected_test_thorough_metadata[METADATA_NAME]
-        version = expected_test_thorough_metadata[METADATA_VERSION]
-        description = expected_test_thorough_metadata[METADATA_DESCRIPTION]
-
+    def test_reload(self, mock_get):
+        """Tests that a graph with the same name and version can't be added twice"""
         self.manager.insert_graph(self.graph)
 
         x = self.manager.list_graphs()
 
         self.assertEqual(1, len(x))
-        self.assertEqual((1, name, version, description), x[0])
+        self.assertEqual((1, expected_test_thorough_metadata[METADATA_NAME],
+                          expected_test_thorough_metadata[METADATA_VERSION],
+                          expected_test_thorough_metadata[METADATA_DESCRIPTION]), x[0])
 
-        g2 = self.manager.get_graph(name, version)
-        self.bel_thorough_reconstituted(g2)
+        reconstituted = self.manager.get_graph(expected_test_thorough_metadata[METADATA_NAME],
+                                               expected_test_thorough_metadata[METADATA_VERSION])
+        self.bel_thorough_reconstituted(reconstituted)
 
-    @mock_bel_resources
-    def test_integrity_failure(self, mock_get):
-        """Tests that a graph with the same name and version can't be added twice"""
-        self.manager.insert_graph(self.graph)
-
+        # Test that the graph can't be added a second time
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
             self.manager.insert_graph(self.graph)
 
@@ -66,12 +64,12 @@ class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
 
         self.assertEqual(TEST_V2, self.manager.get_graph(self.graph.document[METADATA_NAME]).document[METADATA_VERSION])
 
-
 class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestGraphCacheSimple, self).setUp()
         self.simple_graph = pybel.from_path(test_bel_simple, manager=self.manager)
-        self.manager.ensure_namespace(GOCC_LATEST, objects=True)
+        self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
+        self.manager.ensure_namespace(GOCC_LATEST, cache_objects=True)
 
     @mock_bel_resources
     def test_get_or_create_node(self, mock_get):
@@ -127,7 +125,6 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             CITATION_NAME: 'TestCitation_basic',
             CITATION_REFERENCE: '1234AB',
         }
-
         full_citation = {
             CITATION_TYPE: 'Other',
             CITATION_NAME: 'TestCitation_full',
@@ -135,28 +132,41 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             CITATION_DATE: '2017-04-11',
             CITATION_AUTHORS: 'Jackson M|Lajoie J'
         }
+        full_citation_basic = {
+            CITATION_TYPE: 'Other',
+            CITATION_NAME: 'TestCitation_full',
+            CITATION_REFERENCE: 'CD5678'
+        }
+        basic_citation_sha512 = hashlib.sha512(json.dumps(basic_citation, sort_keys=True).encode('utf-8')).hexdigest()
+        full_citation_sha512 = hashlib.sha512(
+            json.dumps(full_citation_basic, sort_keys=True).encode('utf-8')).hexdigest()
 
         # Create
         basic = self.manager.get_or_create_citation(**basic_citation)
         self.assertIsInstance(basic, models.Citation)
         self.assertEqual(basic.data, basic_citation)
+        self.assertIn(basic_citation_sha512, self.manager.object_cache['citation'])
 
         full = self.manager.get_or_create_citation(**full_citation)
         self.assertIsInstance(full, models.Citation)
         self.assertEqual(full.data, full_citation)
+        self.assertIn(full_citation_sha512, self.manager.object_cache['citation'])
 
-        self.manager.session.commit()
+        # Different objects created
+        self.assertNotEqual(basic, full)
 
-        self.assertNotEqual(basic.id, full.id)
+        # Two ojbects in object_cache
+        self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
 
-        # Get
+        # Reload from object cache
         reloaded_basic = self.manager.get_or_create_citation(**basic_citation)
-        self.assertEqual(basic.data, reloaded_basic.data)
-        self.assertEqual(basic.id, reloaded_basic.id)
+        self.assertEqual(basic, reloaded_basic)
 
         reloaded_full = self.manager.get_or_create_citation(**full_citation)
-        self.assertEqual(full.data, reloaded_full.data)
-        self.assertEqual(full.id, reloaded_full.id)
+        self.assertEqual(full, reloaded_full)
+
+        # No new entries in object_cache
+        self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
 
     @mock_bel_resources
     def test_get_or_create_evidence(self, mock_get):
@@ -165,7 +175,6 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             CITATION_NAME: 'TestCitation_basic',
             CITATION_REFERENCE: '1234AB',
         }
-
         basic_citation = self.manager.get_or_create_citation(**basic_citation)
         evidence_txt = "Yes, all the information is true!"
         evidence_data = {
@@ -173,17 +182,19 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             EVIDENCE: evidence_txt
         }
 
+        evidence_hash = hashlib.sha512(json.dumps(evidence_data, sort_keys=True).encode('utf-8')).hexdigest()
+
         # Create
         evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
         self.assertIsInstance(evidence, models.Evidence)
         self.assertEqual(evidence.data, evidence_data)
 
-        self.manager.session.commit()
+        self.assertIn(evidence_hash, self.manager.object_cache['evidence'])
+        self.assertEqual(1, len(self.manager.object_cache['evidence']))
 
-        # Get
+        # Objects cached?
         reloaded_evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
-        self.assertEqual(evidence.data, reloaded_evidence.data)
-        self.assertEqual(evidence.id, reloaded_evidence.id)
+        self.assertEqual(evidence, reloaded_evidence)
 
     @mock_bel_resources
     def test_get_or_create_property(self, mock_get):
@@ -238,6 +249,34 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         }
         edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')][0]
 
+        activity_hash = hashlib.sha512(json.dumps({
+            'participant': SUBJECT,
+            'modifier': ACTIVITY,
+            'effectNamespace': BEL_DEFAULT_NAMESPACE,
+            'effectName': 'pep'
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        translocation_from_hash = hashlib.sha512(json.dumps({
+            'participant': SUBJECT,
+            'modifier': TRANSLOCATION,
+            'relativeKey': FROM_LOC,
+            'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['host intracellular organelle']
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        translocation_to_hash = hashlib.sha512(json.dumps({
+            'participant': SUBJECT,
+            'modifier': TRANSLOCATION,
+            'relativeKey': TO_LOC,
+            'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['host outer membrane']
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        location_hash = hashlib.sha512(json.dumps({
+            'participant': SUBJECT,
+            'modifier': LOCATION,
+            'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['Herring body']
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        degradation_hash = hashlib.sha512(json.dumps({
+            'participant': SUBJECT,
+            'modifier': DEGRADATION
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+
         # Create
         edge_data.update(activity['data'])
         activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
@@ -245,50 +284,59 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertIsInstance(activity_ls[0], models.Property)
         self.assertEqual(activity_ls[0].data, activity)
 
-        # Get
-        self.manager.session.add(activity_ls[0])
-        self.manager.session.commit()
+        # Activity was stored with hash in object cache
+        self.assertIn(activity_hash, self.manager.object_cache['property'])
+        self.assertEqual(1, len(self.manager.object_cache['property'].keys()))
 
         reloaded_activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertEqual(activity_ls[0].id, reloaded_activity_ls[0].id)
+        self.assertEqual(activity_ls, reloaded_activity_ls)
+
+        # No new activity object was created
+        self.assertEqual(1, len(self.manager.object_cache['property'].keys()))
 
         # Create
         edge_data.update(location['data'])
         location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
         self.assertEqual(location_ls[0].data, location)
 
-        # Get
-        self.manager.session.add(location_ls[0])
-        self.manager.session.commit()
+        self.assertIn(location_hash, self.manager.object_cache['property'])
+        self.assertEqual(2, len(self.manager.object_cache['property'].keys()))
 
+        # Get
         reloaded_location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertEqual(location_ls[0].id, reloaded_location_ls[0].id)
+        self.assertEqual(location_ls, reloaded_location_ls)
+
+        # No second location property object was created
+        self.assertEqual(2, len(self.manager.object_cache['property'].keys()))
 
         # Create
         edge_data.update(degradation['data'])
         degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
         self.assertEqual(degradation_ls[0].data, degradation)
 
-        # Get
-        self.manager.session.add(degradation_ls[0])
-        self.manager.session.commit()
+        self.assertIn(degradation_hash, self.manager.object_cache['property'])
+        self.assertEqual(3, len(self.manager.object_cache['property'].keys()))
 
+        # Get
         reloaded_degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertEqual(degradation_ls[0].id, reloaded_degradation_ls[0].id)
+        self.assertEqual(degradation_ls, reloaded_degradation_ls)
+
+        # No second degradation property object was created
+        self.assertEqual(3, len(self.manager.object_cache['property'].keys()))
 
         # Create
         edge_data.update(translocation['data'])
         translocation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
         # self.assertEqual(translocation_ls[0].data, translocation)
 
-        # Get
-        [self.manager.session.add(tloc_property) for tloc_property in translocation_ls]
-        # self.manager.session.add(translocation_ls[0])
-        self.manager.session.commit()
+        # 2 translocation objects addaed
+        self.assertEqual(5, len(self.manager.object_cache['property'].keys()))
+        self.assertIn(translocation_from_hash, self.manager.object_cache['property'])
+        self.assertIn(translocation_to_hash, self.manager.object_cache['property'])
 
     @mock_bel_resources
     def test_get_or_create_edge(self, mock_get):
-        self.manager.ensure_graph_definitions(self.simple_graph, objects=True)
+
         edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')]
         source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
         target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
@@ -325,17 +373,29 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             'key': 0
         }
 
+        edge_hash = hashlib.sha512(json.dumps({
+            'graphIdentifier': 0,
+            'source': source_node,
+            'target': target_node,
+            'evidence': evidence,
+            'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
+            'relation': edge_data[0][RELATION],
+            'properties': properties
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+
         # Create
         edge = self.manager.get_or_create_edge(**basic_edge)
         self.assertIsInstance(edge, models.Edge)
         self.assertEqual(edge.data, database_data)
 
-        self.manager.session.commit()
+        self.assertIn(edge_hash, self.manager.object_cache['edge'])
 
         # Get
         reloaded_edge = self.manager.get_or_create_edge(**basic_edge)
         self.assertEqual(edge.data, reloaded_edge.data)
-        self.assertEqual(edge.id, reloaded_edge.id)
+        self.assertEqual(edge, reloaded_edge)
+
+        self.assertEqual(1, len(self.manager.object_cache['edge'].keys()))
 
     @mock_bel_resources
     def test_get_or_create_author(self, mock_get):
@@ -346,15 +406,18 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertIsInstance(author, models.Author)
         self.assertEqual(author.name, author_name)
 
-        self.manager.session.commit()
+        self.assertIn(author_name, self.manager.object_cache['author'])
 
         # Get
         reloaded_author = self.manager.get_or_create_author(author_name)
         self.assertEqual(author.name, reloaded_author.name)
+        self.assertEqual(author, reloaded_author)
+
+        self.assertEqual(1, len(self.manager.object_cache['author'].keys()))
 
     @mock_bel_resources
     def test_get_or_create_modification(self, mock_get):
-        self.manager.ensure_graph_definitions(self.simple_graph, objects=True)
+        # self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
         node_data = self.simple_graph.node[('Protein', 'HGNC', 'FADD')]
         fusion_missing = {
             FUSION: {
@@ -433,6 +496,61 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             PMOD_POSITION: 12,
         }
 
+        hgnc_url = self.simple_graph.namespace_url['HGNC']
+        AKT1_object = self.manager.namespace_object_cache[hgnc_url]['AKT1']
+        EGFR_object = self.manager.namespace_object_cache[hgnc_url]['EGFR']
+
+        fusion_missing_hash = hashlib.sha512(json.dumps({
+            'modType': FUSION,
+            'p3Partner': AKT1_object,
+            'p5Partner': EGFR_object,
+            'p3Missing': '?',
+            'p5Missing': '?',
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        fusion_full_hash = hashlib.sha512(json.dumps({
+            'modType': FUSION,
+            'p3Partner': AKT1_object,
+            'p5Partner': EGFR_object,
+            'p3Reference': 'A',
+            'p3Start': 'START_1',
+            'p3Stop': 'STOP_1',
+            'p5Reference': 'E',
+            'p5Start': 'START_2',
+            'p5Stop': 'STOP_2'
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        hgvs_hash = hashlib.sha512(json.dumps({
+            'modType': HGVS,
+            'variantString': 'hgvs_ident'
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        fragment_missing_hash = hashlib.sha512(json.dumps({
+            'modType': FRAGMENT,
+            'p3Missing': '?'
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        fragment_full_hash = hashlib.sha512(json.dumps({
+            'modType': FRAGMENT,
+            'p3Start': 'START_FRAG',
+            'p3Stop': 'STOP_FRAG'
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        gmod_hash = hashlib.sha512(json.dumps({
+            'modType': GMOD,
+            'modNamespace': 'test_NS',
+            'modName': 'test_GMOD'
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        pmod_simple_hash = hashlib.sha512(json.dumps({
+            'modType': PMOD,
+            'modNamespace': 'test_NS',
+            'modName': 'test_PMOD',
+            'aminoA': None,
+            'position': None
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+        pmod_full_hash = hashlib.sha512(json.dumps({
+            'modType': PMOD,
+            'modNamespace': 'test_NS',
+            'modName': 'test_PMOD_2',
+            'aminoA': 'Tst',
+            'position': 12
+        }, sort_keys=True).encode('utf-8')).hexdigest()
+
         # Create
         node_data.update(fusion_missing)
         fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
@@ -440,13 +558,11 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertIsInstance(fusion_missing_ls[0], models.Modification)
         self.assertEqual(fusion_missing[FUSION], fusion_missing_ls[0].data['mod_data'])
 
-        self.manager.session.add(fusion_missing_ls[0])
-        self.manager.session.flush()
-        self.manager.session.commit()
+        self.assertIn(fusion_missing_hash, self.manager.object_cache['modification'])
 
         # Get
         reloaded_fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fusion_missing_ls[0].id, reloaded_fusion_missing_ls[0].id)
+        self.assertEqual(fusion_missing_ls, reloaded_fusion_missing_ls)
 
         # Create
         node_data.update(fusion_full)
@@ -455,13 +571,11 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertIsInstance(fusion_full_ls[0], models.Modification)
         self.assertEqual(fusion_full[FUSION], fusion_full_ls[0].data['mod_data'])
 
-        self.manager.session.add(fusion_full_ls[0])
-        self.manager.session.flush()
-        self.manager.session.commit()
+        self.assertIn(fusion_full_hash, self.manager.object_cache['modification'])
 
         # Get
         reloaded_fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fusion_full_ls[0].id, reloaded_fusion_full_ls[0].id)
+        self.assertEqual(fusion_full_ls, reloaded_fusion_full_ls)
 
         del node_data[FUSION]
 
@@ -470,91 +584,81 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
         self.assertEqual(hgvs, hgvs_ls[0].data['mod_data'])
 
-        self.manager.session.add(fusion_full_ls[0])
-        self.manager.session.flush()
-        self.manager.session.commit()
+        self.assertIn(hgvs_hash, self.manager.object_cache['modification'])
 
         # Get
         reloaded_hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(hgvs_ls[0].id, reloaded_hgvs_ls[0].id)
+        self.assertEqual(hgvs_ls, reloaded_hgvs_ls)
 
         # Create
         node_data[VARIANTS] = [fragment_missing]
         fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
         self.assertEqual(fragment_missing, fragment_missing_ls[0].data['mod_data'])
 
-        self.manager.session.add(fragment_missing_ls[0])
-        self.manager.session.flush()
-        self.manager.session.commit()
+        self.assertIn(fragment_missing_hash, self.manager.object_cache['modification'])
 
         # Get
         reloaded_fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fragment_missing_ls[0].id, reloaded_fragment_missing_ls[0].id)
+        self.assertEqual(fragment_missing_ls, reloaded_fragment_missing_ls)
 
         # Create
         node_data[VARIANTS] = [fragment_full]
         fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
         self.assertEqual(fragment_full, fragment_full_ls[0].data['mod_data'])
 
-        self.manager.session.add(fragment_full_ls[0])
-        self.manager.session.flush()
-        self.manager.session.commit()
+        self.assertIn(fragment_full_hash, self.manager.object_cache['modification'])
 
         # Get
         reloaded_fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fragment_full_ls[0].id, reloaded_fragment_full_ls[0].id)
+        self.assertEqual(fragment_full_ls, reloaded_fragment_full_ls)
 
         # Create
         node_data[VARIANTS] = [gmod]
         gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
         self.assertEqual(gmod, gmod_ls[0].data['mod_data'])
 
-        self.manager.session.add(gmod_ls[0])
-        self.manager.session.flush()
-        self.manager.session.commit()
+        self.assertIn(gmod_hash, self.manager.object_cache['modification'])
 
         # Get
         reloaded_gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(gmod_ls[0].id, reloaded_gmod_ls[0].id)
+        self.assertEqual(gmod_ls, reloaded_gmod_ls)
 
         # Create
         node_data[VARIANTS] = [pmod_simple]
         pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
         self.assertEqual(pmod_simple, pmod_simple_ls[0].data['mod_data'])
 
-        self.manager.session.add(pmod_simple_ls[0])
-        self.manager.session.flush()
-        self.manager.session.commit()
+        self.assertIn(pmod_simple_hash, self.manager.object_cache['modification'])
 
         # Get
         reloaded_pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(pmod_simple_ls[0].id, reloaded_pmod_simple_ls[0].id)
+        self.assertEqual(pmod_simple_ls, reloaded_pmod_simple_ls)
 
         # Create
         node_data[VARIANTS] = [pmod_full]
         pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
         self.assertEqual(pmod_full, pmod_full_ls[0].data['mod_data'])
 
-        self.manager.session.add(pmod_full_ls[0])
-        self.manager.session.flush()
-        self.manager.session.commit()
+        self.assertIn(pmod_full_hash, self.manager.object_cache['modification'])
 
         # Get
         reloaded_pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(pmod_full_ls[0].id, reloaded_pmod_full_ls[0].id)
+        self.assertEqual(pmod_full_ls, reloaded_pmod_full_ls)
+
+        # Every modification was added only once to the object cache
+        self.assertEqual(8, len(self.manager.object_cache['modification'].keys()))
 
 
-class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
+@unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
+class TestQueryNode(TemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
     def setUp(self):
-        super(TestQuery, self).setUp()
+        super(TestQueryNode, self).setUp()
         self.graph = pybel.from_path(test_bel_simple, manager=self.manager, allow_nested=True)
         self.manager.insert_graph(self.graph, store_parts=True)
 
-    @mock_bel_resources
-    def test_query_node(self, mock_get):
-        akt1_dict = {
+        self.akt1_dict = {
             'key': ('Protein', 'HGNC', 'AKT1'),
             'data': {
                 FUNCTION: 'Protein',
@@ -563,26 +667,35 @@ class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
             }
         }
 
+    @mock_bel_resources
+    def test_query_node(self, mock_get):
         node_list = self.manager.get_node(bel='p(HGNC:AKT1)')
         self.assertEqual(len(node_list), 1)
 
         node_dict_list = self.manager.get_node(bel='p(HGNC:AKT1)', as_dict_list=True)
-        self.assertIn(akt1_dict, node_dict_list)
+        self.assertIn(self.akt1_dict, node_dict_list)
 
         node_dict_list2 = self.manager.get_node(namespace='HG%', as_dict_list=True)
         self.assertEqual(len(node_dict_list2), 4)
-        self.assertIn(akt1_dict, node_dict_list2)
+        self.assertIn(self.akt1_dict, node_dict_list2)
 
         node_dict_list3 = self.manager.get_node(name='%A%', as_dict_list=True)
         self.assertEqual(len(node_dict_list3), 3)
-        self.assertIn(akt1_dict, node_dict_list3)
+        self.assertIn(self.akt1_dict, node_dict_list3)
 
         protein_list = self.manager.get_node(type='Protein')
         self.assertEqual(len(protein_list), 4)
 
-    @mock_bel_resources
-    def test_query_edge(self, mock_get):
-        fadd_casp = {
+
+@unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
+class TestQueryEdge(TemporaryCacheMixin, BelReconstitutionMixin):
+    """Tests that the cache can be queried"""
+
+    def setUp(self):
+        super(TestQueryEdge, self).setUp()
+        self.graph = pybel.from_path(test_bel_simple, manager=self.manager, allow_nested=True)
+        self.manager.insert_graph(self.graph, store_parts=True)
+        self.fadd_casp = {
             'source': {
                 'node': (('Protein', 'HGNC', 'FADD'), {
                     FUNCTION: 'Protein',
@@ -614,6 +727,8 @@ class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
             'key': 0
         }
 
+    @mock_bel_resources
+    def test_query_edge(self, mock_get):
         # bel
         edge_list = self.manager.get_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
         self.assertEqual(len(edge_list), 1)
@@ -621,12 +736,12 @@ class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
         # relation like, data
         increased_list = self.manager.get_edge(relation='increase%', as_dict_list=True)
         self.assertEqual(len(increased_list), 2)
-        self.assertIn(fadd_casp, increased_list)
+        self.assertIn(self.fadd_casp, increased_list)
 
         # evidence like, data
         evidence_list = self.manager.get_edge(evidence='%3%', as_dict_list=True)
         self.assertEqual(len(increased_list), 2)
-        self.assertIn(fadd_casp, evidence_list)
+        self.assertIn(self.fadd_casp, evidence_list)
 
         # no result
         empty_list = self.manager.get_edge(source='p(HGNC:EGFR)', relation='increases', as_dict_list=True)
@@ -635,7 +750,17 @@ class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
         # source, relation, data
         source_list = self.manager.get_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
         self.assertEqual(len(source_list), 1)
-        self.assertIn(fadd_casp, source_list)
+        self.assertIn(self.fadd_casp, source_list)
+
+
+@unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
+class TestQueryCitation(TemporaryCacheMixin, BelReconstitutionMixin):
+    """Tests that the cache can be queried"""
+
+    def setUp(self):
+        super(TestQueryCitation, self).setUp()
+        self.graph = pybel.from_path(test_bel_simple, manager=self.manager, allow_nested=True)
+        self.manager.insert_graph(self.graph, store_parts=True)
 
     @mock_bel_resources
     def test_query_citation(self, mock_get):
@@ -714,7 +839,7 @@ class TestQuery(TemporaryCacheMixin, BelReconstitutionMixin):
     def test_query_network(self, mock_get):
         pass
 
-@unittest.skip('Feature not started yet')
+@unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
 class TestFilter(TemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that a graph can be reconstructed from the edge and node relational tables in the database
 

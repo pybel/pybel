@@ -19,6 +19,7 @@ from tests.constants import test_bel_simple, mock_bel_resources, test_bel_thorou
 log = logging.getLogger(__name__)
 
 
+@unittest.skip
 class TestCli(TemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestCli, self).setUp()
