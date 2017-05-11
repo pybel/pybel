@@ -647,6 +647,12 @@ class CacheManager(BaseCacheManager):
                 evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
 
             properties = self.get_or_create_property(graph, data)
+            annotations = []
+            for key, value in data[ANNOTATIONS].items():
+                if key in graph.annotation_url:
+                    url = graph.annotation_url[key]
+                    annotation = self.annotation_object_cache[url][value]
+                    annotations.append(annotation)
 
             bel = decanonicalize_edge(graph, u, v, k)
             edge = self.get_or_create_edge(
@@ -657,22 +663,14 @@ class CacheManager(BaseCacheManager):
                 evidence=evidence,
                 bel=bel,
                 properties=properties,
+                annotations=annotations,
                 blob=pickle.dumps(data)
             )
 
-            for key, value in data[ANNOTATIONS].items():
-                if key in graph.annotation_url:
-                    url = graph.annotation_url[key]
-                    annotation = self.annotation_object_cache[url][value]
-                    if annotation not in edge.annotations:
-                        edge.annotations.append(annotation)
-
         for hash, edge in self.object_cache['edge'].items():
-            # if edge not in network.edges:
             network.edges.append(edge)
 
         for hash, citation in self.object_cache['citation'].items():
-            # if citation not in network.citations:
             network.citations.append(citation)
 
         self.session.flush()
@@ -756,7 +754,7 @@ class CacheManager(BaseCacheManager):
 
         return result
 
-    def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, blob):
+    def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, annotations, blob):
         """Creates entry for given edge if it does not exist.
 
         :param graph_key: Key that identifies the order of edges and weather an edge is artificially created or extracted from a valid BEL statement.
@@ -771,8 +769,10 @@ class CacheManager(BaseCacheManager):
         :type bel: str
         :param relation: Type of the relation between source and target node
         :type relation: str
-        :param properties:
-        :type properties:
+        :param properties: List of all properties that belong to the edge
+        :type properties: list of :class:`models.Property`
+        :param annotations: List of all annotations that belong to the edge
+        :type properties: list of :class:`models.annotationEntry`
         :param blob: A blob of the edge data object.
         :type blob: blob
         :return: An Edge object
@@ -785,7 +785,8 @@ class CacheManager(BaseCacheManager):
             'evidence': evidence,
             'bel': bel,
             'relation': relation,
-            'properties': properties
+            'properties': properties,
+            'annotations': annotations
         }
         edge_hash = hashlib.sha512(json.dumps(edge_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
@@ -799,14 +800,14 @@ class CacheManager(BaseCacheManager):
             if result is None:
                 # Create new edge and add it to db_session
                 del edge_dict['properties']
+                del edge_dict['annotations']
                 edge_dict['blob'] = blob
                 edge_dict['sha512'] = edge_hash
                 result = models.Edge(**edge_dict)
                 self.session.add(result)
 
-                for prop in properties:
-                    if prop not in result.properties:
-                        result.properties.append(prop)
+                result.properties = properties
+                result.annotations = annotations
 
             # Make sure the object is in object_cache from now on
             self.object_cache['edge'][edge_hash] = result
@@ -1442,7 +1443,7 @@ class CacheManager(BaseCacheManager):
         if citation_id and isinstance(citation_id, int):
             q = q.filter_by(id=citation_id)
         else:
-            if author:
+            if author is not None:
                 q = q.join(models.Author, models.Citation.authors)
                 if isinstance(author, str):
                     q = q.filter(models.Author.name.like(author))
@@ -1469,18 +1470,18 @@ class CacheManager(BaseCacheManager):
 
         result = q.all()
 
-        if not as_dict_list:
-            return result
+        if as_dict_list:
+            dict_result = []
+            if evidence or evidence_text:
+                for citation in result:
+                    for evidence in citation.evidences:
+                        dict_result.append(evidence.data)
+            else:
+                dict_result = [cit.data for cit in result]
 
-        dict_result = []
-        if evidence or evidence_text:
-            for citation in result:
-                for evidence in citation.evidences:
-                    dict_result.append(evidence.data)
-        else:
-            dict_result = [cit.data for cit in result]
+            result = dict_result
 
-        return dict_result
+        return result
 
     def get_property(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
         """Builds and runs a query over all property entries in the database.

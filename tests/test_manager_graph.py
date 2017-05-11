@@ -343,6 +343,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
         evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
         properties = self.manager.get_or_create_property(self.simple_graph, edge_data[0])
+        annotations = []
         basic_edge = {
             'graph_key': 0,
             'source': source_node,
@@ -351,6 +352,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
             'relation': edge_data[0][RELATION],
             'properties': properties,
+            'annotations': annotations,
             'blob': pickle.dumps(edge_data[0])
         }
         source_data = source_node.data
@@ -380,6 +382,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
             'evidence': evidence,
             'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
             'relation': edge_data[0][RELATION],
+            'annotations': annotations,
             'properties': properties
         }, sort_keys=True).encode('utf-8')).hexdigest()
 

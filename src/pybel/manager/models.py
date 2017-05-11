@@ -110,9 +110,28 @@ class Namespace(Base):
     @property
     def data(self):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
-        ns_data = self.__dict__
-        #if '_sa_instance_state' in ns_data:
-        #    del ns_data['_sa_instance_state']
+        ns_data = {
+            'id': self.id,
+            'uploaded': self.uploaded,
+            'url': self.url,
+            'keyword': self.keyword,
+            'name': self.name,
+            'domain': self.domain,
+            'species': self.species,
+            'description': self.description,
+            'version': self.version,
+            'created': self.created,
+            'query_url': self.query_url,
+            'author': self.author,
+            'license': self.license,
+            'contact': self.contact,
+            'citation': self.citation,
+            'citation_description': self.citation_description,
+            'citation_version': self.citation_version,
+            'citation_published': self.citation_published,
+            'citation_url': self.citation_url,
+            'has_equivalences': self.has_equivalences
+        }
         return ns_data
 
 
@@ -186,9 +205,26 @@ class Annotation(Base):
 
     @property
     def data(self):
-        an_data = self.__dict__
-        #if '_sa_instance_state' in an_data:
-        #    del an_data['_sa_instance_state']
+        an_data = {
+            'id': self.id,
+            'uploaded': self.uploaded,
+            'url': self.url,
+            'keyword': self.keyword,
+            'type': self.type,
+            'description': self.description,
+            'usage': self.usage,
+            'version': self.version,
+            'created': self.created,
+            'name': self.name,
+            'author': self.author,
+            'license': self.license,
+            'contact': self.contact,
+            'citation': self.citation,
+            'citation_description': self.citation_description,
+            'citation_version': self.citation_version,
+            'citation_published': self.citation_published,
+            'citation_url': self.citation_url
+        }
         return an_data
 
 
@@ -205,6 +241,17 @@ class AnnotationEntry(Base):
     annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
     annotation = relationship('Annotation', back_populates='entries')
 
+    @property
+    def data(self):
+        """Describes the annotationEntry as dictionary of Annotation-Keyword and Annotation-Name."""
+        return {
+            'annotation_keyword': self.annotation.keyword,
+            'annotation': self.name
+        }
+
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data
 
 owl_namespace_relationship = Table(
     'owl_namespace_relationship', Base.metadata,
@@ -338,11 +385,27 @@ class Network(Base):
 
     @property
     def data(self):
-        return {
+        network_data = {
             'id': self.id,
             'name': self.name,
-            'version': self.version
+            'version': self.version,
+            'created': self.created
         }
+
+        if self.authors:
+            network_data['authors'] = self.authors
+        if self.contact:
+            network_data['contact'] = self.contact
+        if self.description:
+            network_data['description'] = self.description
+        if self.copyright:
+            network_data['copyright'] = self.copyright
+        if self.disclaimer:
+            network_data['disclaimer'] = self.disclaimer
+        if self.licenses:
+            network_data['licenses'] = self.licenses
+
+        return network_data
 
 
 node_modification = Table(
@@ -396,7 +459,7 @@ class Node(Base):
                     node_data[VARIANTS].append(mod['mod_data'])
                     node_key.append(tuple(mod['mod_key']))
 
-        return {'key': tuple(node_key), 'data': node_data}
+        return {'key': tuple(node_key), 'data': node_data, 'db_id': self.id, 'bel': self.bel}
 
     def to_json(self):
         """Enables json serialization for the class this method is defined in."""
@@ -686,7 +749,9 @@ class Edge(Base):
             },
             'key': self.graphIdentifier
         }
-        edge_dict['data'].update(self.evidence.data)
+        if self.evidence:
+            edge_dict['data'].update(self.evidence.data)
+
         for prop in self.properties:
             prop_info = prop.data
             if prop_info['participant'] in edge_dict['data']:
@@ -714,7 +779,8 @@ class Edge(Base):
                 ANNOTATIONS: {anno.annotation.keyword: anno.name for anno in self.annotations}
             }
         }
-        min_dict['data'].update(self.evidence.data)
+        if self.evidence:
+            min_dict['data'].update(self.evidence.data)
         for prop in self.properties:
             prop_info = prop.data
             if prop_info['participant'] in min_dict['data']:
