@@ -39,7 +39,7 @@ class TestParseMetadata(unittest.TestCase):
         """Checks namespace is loaded into parser but not cached"""
         s = 'DEFINE NAMESPACE TESTNS3 AS URL "{}"'.format('file:///' + test_ns_nocache)
         self.parser.parseString(s)
-        self.assertIn('TESTNS3', self.parser.namespace_url)
+        self.assertIn('TESTNS3', self.parser.namespace_dict)
         self.assertEqual(0, len(self.cm.list_namespaces()))
 
     @mock_bel_resources
