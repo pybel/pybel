@@ -45,6 +45,7 @@ test_an_1 = os.path.join(belanno_dir_path, 'test_an_1.belanno')
 
 test_ns_1 = os.path.join(belns_dir_path, 'test_ns_1.belns')
 test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
+test_ns_nocache = os.path.join(belns_dir_path, 'test_nocache.belns')
 
 test_eq_1 = os.path.join(beleq_dir_path, 'disease-ontology.beleq')
 test_eq_2 = os.path.join(beleq_dir_path, 'mesh-diseases.beleq')

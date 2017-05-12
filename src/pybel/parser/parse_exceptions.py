@@ -164,6 +164,18 @@ class VersionFormatWarning(PyBelWarning):
             self.version_string)
 
 
+class MalformedMetadataException(PyBelWarning):
+    """Raised when an invalid metadata line is encountered"""
+
+    def __init__(self, line, line_number):
+        PyBelWarning.__init__(self, line, line_number)
+        self.line = line
+        self.line_number = line_number
+
+    def __str__(self):
+        return '[line:{}] Invalid metadata - "{}"'.format(self.line_number, self.line)
+
+
 class InvalidMetadataException(PyBelWarning):
     """Raised when an incorrect document metadata key is used. Valid document metadata keys are:
 

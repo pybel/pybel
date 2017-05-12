@@ -3,7 +3,7 @@
 from pybel.manager.cache import CacheManager
 from tests.constants import HGNC_URL, help_check_hgnc, CELL_LINE_URL, HGNC_KEYWORD
 from tests.constants import TemporaryCacheMixin
-from tests.constants import test_ns_1, test_ns_2, test_an_1
+from tests.constants import test_ns_1, test_ns_2, test_an_1, test_ns_nocache
 from tests.constants import wine_iri, mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_rdf
 
 test_ns1 = 'file:///' + test_ns_1
@@ -20,6 +20,15 @@ class TestCachePersistent(TemporaryCacheMixin):
         cm2 = CacheManager(connection=self.connection)
         cm2.ensure_namespace(HGNC_URL)
         help_check_hgnc(self, {HGNC_KEYWORD: cm2.namespace_cache[HGNC_URL]})
+
+    def test_insert_namespace_nocache(self):
+        """Test that this namespace isn't cached"""
+        self.assertEqual(0, len(self.manager.list_namespaces()))
+
+        test_ns_nocache_path = 'file:///' + test_ns_nocache
+        self.manager.ensure_namespace(test_ns_nocache_path)
+
+        self.assertEqual(0, len(self.manager.list_namespaces()))
 
 
 class TestCache(TemporaryCacheMixin):
