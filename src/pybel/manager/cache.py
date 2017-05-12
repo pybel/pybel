@@ -91,16 +91,22 @@ class CacheManager(BaseCacheManager):
     # NAMESPACE MANAGEMENT
 
     def insert_namespace(self, url):
-        """Inserts the namespace file at the given location to the cache
+        """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
+        the values of this namespace.
 
         :param url: the location of the namespace file
         :type url: str
         :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: :class:`pybel.manager.models.Namespace`
+        :rtype: :class:`pybel.manager.models.Namespace` or dict
         """
         log.info('inserting namespace %s', url)
 
         config = get_bel_resource(url)
+
+        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in config['Values'].items() if c}
+
+        if config['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
+            return values
 
         namespace_insert_values = {
             'name': config['Namespace']['NameString'],
@@ -121,9 +127,6 @@ class CacheManager(BaseCacheManager):
                 namespace_insert_values[database_column] = config[section][key]
 
         namespace = models.Namespace(**namespace_insert_values)
-
-        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in config['Values'].items() if c}
-
         namespace.entries = [models.NamespaceEntry(name=c, encoding=e) for c, e in values.items()]
 
         self.session.add(namespace)
@@ -132,12 +135,12 @@ class CacheManager(BaseCacheManager):
         return namespace
 
     def ensure_namespace(self, url):
-        """Caches a namespace file if not already in the cache
+        """Caches a namespace file if not already in the cache. If not cachable, returns a dict of the values
 
         :param url: the location of the namespace file
         :type url: str
         :return: The namespace instance
-        :rtype: models.Namespace
+        :rtype: models.Namespace or dict
         """
         if url in self.namespace_model:
             log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
@@ -153,6 +156,8 @@ class CacheManager(BaseCacheManager):
 
         if results is None:
             raise ValueError('No results for {}'.format(url))
+        elif isinstance(results, dict):
+            return results
         elif not results.entries:
             raise ValueError('No entries for {}'.format(url))
 
@@ -165,13 +170,18 @@ class CacheManager(BaseCacheManager):
         return results
 
     def get_namespace(self, url):
-        """Returns a dict of names and their encodings for the given namespace file
+        """Returns a dict of names and their encodings for the given namespace URL.
 
         :param url: the location of the namespace file
         :type url: str
         """
-        self.ensure_namespace(url)
-        return self.namespace_cache[url]
+        result = self.ensure_namespace(url)
+
+        if isinstance(result, dict):
+            return result
+        else:
+            # self.ensure_namespace makes sure it's in the cache if its not cachable
+            return self.namespace_cache[url]
 
     def get_namespace_urls(self, keyword_url_dict=False):
         """Returns a list of the locations of the stored namespaces and annotations"""
