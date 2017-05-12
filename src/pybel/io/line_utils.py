@@ -125,7 +125,7 @@ def parse_definitions(graph, definitions, metadata_parser):
             metadata_parser.parseString(line, line_number=line_number)
         except Exception as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise e
+            raise MalformedMetadataException(line, line_number)
 
     # metadata_parser.cache_manager.session.flush()
     # metadata_parser.cache_manager.session.commit()
