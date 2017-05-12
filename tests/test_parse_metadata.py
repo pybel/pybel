@@ -10,7 +10,7 @@ from pybel.manager.cache import CacheManager
 from pybel.parser import MetadataParser
 from pybel.parser.parse_exceptions import *
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc
-from tests.constants import test_an_1, test_ns_1, mock_bel_resources
+from tests.constants import test_an_1, test_ns_1, mock_bel_resources, test_ns_nocache
 from tests.constants import test_bel_simple
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -34,6 +34,13 @@ class TestParseMetadata(unittest.TestCase):
 
     def setUp(self):
         self.parser = MetadataParser(manager=CacheManager(self.connection))
+
+    def test_namespace_nocache(self):
+        """Checks namespace is loaded into parser but not cached"""
+        s = 'DEFINE NAMESPACE TESTNS3 AS URL "{}"'.format('file:///' + test_ns_nocache)
+        self.parser.parseString(s)
+        self.assertIn('TESTNS3', self.parser.namespace_url)
+        self.assertEqual(0, len(self.cm.list_namespaces()))
 
     @mock_bel_resources
     def test_namespace_name_persistience(self, mock_get):
