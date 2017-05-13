@@ -24,12 +24,30 @@ Bytes
 .. autofunction:: pybel.to_bytes
 .. autofunction:: pybel.from_bytes
 
-JSON
-~~~~
+Node Link JSON
+~~~~~~~~~~~~~~
+
 .. autofunction:: pybel.to_json
 .. autofunction:: pybel.from_json
-.. autofunction:: pybel.to_cx_json
-.. autofunction:: pybel.from_cx_json
+
+.. autofunction:: pybel.from_json_file
+.. autofunction:: pybel.from_json_file
+
+.. autofunction:: pybel.to_jsons
+.. autofunction:: pybel.from_jsons
+
+CX JSON
+~~~~~~~
+
+.. autofunction:: pybel.to_cx
+.. autofunction:: pybel.from_cx
+
+.. autofunction:: pybel.to_cx_file
+.. autofunction:: pybel.from_cx_file
+
+.. autofunction:: pybel.to_cx_jsons
+.. autofunction:: pybel.from_cx_jsons
+
 
 Export
 ------
