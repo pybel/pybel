@@ -23,7 +23,7 @@ import click
 
 from .canonicalize import to_bel
 from .constants import PYBEL_LOG_DIR, get_cache_connection
-from .io import from_lines, from_url, to_json, to_csv, to_graphml, to_neo4j, to_cx, to_pickle
+from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
 
@@ -109,7 +109,7 @@ def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx
 
     if json:
         log.info('Outputting json to %s', json)
-        to_json(g, json)
+        to_json_file(g, json)
 
     if pickle:
         log.info('Outputting pickle to %s', pickle)
@@ -117,7 +117,7 @@ def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx
 
     if cx:
         log.info('Outputting CX to %s', cx)
-        to_cx(g, cx)
+        to_cx_file(g, cx)
 
     if bel:
         log.info('Outputting BEL to %s', bel)

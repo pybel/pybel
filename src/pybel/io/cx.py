@@ -11,13 +11,12 @@ from ..graph import BELGraph
 from ..utils import flatten_dict, expand_dict, hash_tuple
 
 __all__ = [
-    'to_cx_json',
-    'to_cx_jsons',
     'to_cx',
-    'from_cx_json',
-    'from_cx_jsons',
+    'to_cx_jsons',
+    'to_cx_file',
     'from_cx',
-    'from_cx_path',
+    'from_cx_jsons',
+    'from_cx_file',
     'NDEX_SOURCE_FORMAT',
 ]
 
@@ -38,7 +37,7 @@ def calculate_canonical_cx_identifier(graph, node):
     """Calculates the canonical name for a given node. If it is a simple node, uses the namespace:name combination.
     Otherwise, it uses the BEL string.
 
-    :param pybel.BELGraph graph: A BEL Graph
+    :param BELGraph graph: A BEL Graph
     :param tuple node: A node
     :return: Appropriate identifier for the node for CX indexing
     :rtype: str
@@ -57,18 +56,7 @@ def calculate_canonical_cx_identifier(graph, node):
     raise ValueError('Unexpected node data: {}'.format(data))
 
 
-def to_cx(graph, file):
-    """Writes this graph to a JSON file in CX format
-
-    :param BELGraph graph: A BEL graph
-    :param file: A file to write to
-    :type file: file or file-like
-    """
-    json_graph = to_cx_json(graph)
-    json.dump(json_graph, file, ensure_ascii=False)
-
-
-def to_cx_json(graph):
+def to_cx(graph):
     """Converts BEL Graph to CX data format (as in-memory JSON) for use with `NDEx <http://www.ndexbio.org/>`_
 
     :param BELGraph graph: A BEL Graph
@@ -283,6 +271,16 @@ def to_cx_json(graph):
     return cx
 
 
+def to_cx_file(graph, file):
+    """Writes this graph to a JSON file in CX format
+
+    :param BELGraph graph: A BEL graph
+    :param file file: A writable file or file-like
+    """
+    graph_cx_json_dict = to_cx(graph)
+    json.dump(graph_cx_json_dict, file, ensure_ascii=False)
+
+
 def to_cx_jsons(graph):
     """Dumps a BEL graph as CX JSON to a string
     
@@ -290,10 +288,11 @@ def to_cx_jsons(graph):
     :return: CX JSON string
     :rtype: str
     """
-    return json.dumps(to_cx_json(graph))
+    graph_cx_json_str = to_cx(graph)
+    return json.dumps(graph_cx_json_str)
 
 
-def from_cx_json(cx):
+def from_cx(cx):
     """Rebuilds a BELGraph from CX JSON output from PyBEL
 
     :param list cx: The CX JSON for this graph
@@ -441,34 +440,23 @@ def from_cx_json(cx):
     return graph
 
 
-def from_cx_jsons(cxs):
+def from_cx_jsons(graph_cx_json_str):
     """Reconstitutes a BEL graph from a CX JSON string
     
-    :param str cxs: CX JSON string 
+    :param str graph_cx_json_str: CX JSON string 
     :return: A BEL graph representing the CX graph contained in the string
     :rtype: BELGraph
     """
-    return from_cx_json(json.loads(cxs))
+    graph_cx_json_dict = json.loads(graph_cx_json_str)
+    return from_cx(graph_cx_json_dict)
 
 
-def from_cx(file):
+def from_cx_file(file):
     """Reads a file containing CX JSON and converts to a BEL graph
 
-    :param file: A file or file-like containing the CX JSON for this graph
-    :type file: file or file-like
+    :param file file: A readable file or file-like containing the CX JSON for this graph
     :return: A BEL Graph representing the CX graph contained in the file
     :rtype: BELGraph
     """
-    return from_cx_json(json.load(file))
-
-
-def from_cx_path(path):
-    """Reads the file from the given path and loads a BEL graph from the contained CX JSON with :func:`from_cx`
-
-    :param path: The path to a file containing CX JSON
-    :type path: str
-    :return: A BEL Graph representing the CX graph contained in the file at the given path
-    :rtype: BELGraph
-    """
-    with open(path) as file:
-        return from_cx(file)
+    graph_cx_json_dict = json.load(file)
+    return from_cx(graph_cx_json_dict)

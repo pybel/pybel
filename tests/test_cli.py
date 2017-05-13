@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 import logging
 import os
 import traceback
@@ -74,7 +75,8 @@ class TestCli(TemporaryCacheMixin, BelReconstitutionMixin):
             result = self.runner.invoke(cli.main, args)
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
 
-            self.bel_thorough_reconstituted(from_json(test_json))
+            with open(test_json) as f:
+                self.bel_thorough_reconstituted(from_json(json.load(f)))
 
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     @mock_bel_resources

@@ -6,12 +6,13 @@ import unittest
 from pathlib import Path
 
 import networkx as nx
+from six import StringIO
 
 from pybel import BELGraph
-from pybel import to_cx_json, from_cx_json
+from pybel import to_cx, from_cx
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
-from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
-    from_cx_jsons
+from pybel.io import to_json, from_json, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
+    from_cx_jsons, from_json_file, to_json_file, from_jsons, to_jsons
 from pybel.manager import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
@@ -56,8 +57,13 @@ class TestThoroughIo(BelReconstitutionMixin):
         self.bel_thorough_reconstituted(graph)
 
     def test_json(self):
-        graph_json = to_json_dict(self.graph)
-        graph = from_json_dict(graph_json)
+        graph_json_dict = to_json(self.graph)
+        graph = from_json(graph_json_dict)
+        self.bel_thorough_reconstituted(graph)
+
+    def test_jsons(self):
+        graph_json_str = to_jsons(self.graph)
+        graph = from_jsons(graph_json_str)
         self.bel_thorough_reconstituted(graph)
 
     def test_graphml(self):
@@ -67,7 +73,8 @@ class TestThoroughIo(BelReconstitutionMixin):
             to_graphml(self.graph, f)
 
     def test_cx(self):
-        reconstituted = from_cx_json(to_cx_json(self.graph))
+        graph_cx_json_dict = to_cx(self.graph)
+        reconstituted = from_cx(graph_cx_json_dict)
 
         do_remapping(self.graph, reconstituted)
 
@@ -78,7 +85,8 @@ class TestThoroughIo(BelReconstitutionMixin):
         )
 
     def test_cxs(self):
-        reconstituted = from_cx_jsons(to_cx_jsons(self.graph))
+        graph_cx_str = to_cx_jsons(self.graph)
+        reconstituted = from_cx_jsons(graph_cx_str)
 
         do_remapping(self.graph, reconstituted)
 
@@ -111,8 +119,8 @@ class TestSlushyIo(BelReconstitutionMixin):
         self.bel_slushy_reconstituted(graph)
 
     def test_json(self):
-        graph_json = to_json_dict(self.graph)
-        graph = from_json_dict(graph_json)
+        graph_json = to_json(self.graph)
+        graph = from_json(graph_json)
         self.bel_slushy_reconstituted(graph)
 
     def test_graphml(self):
@@ -126,7 +134,7 @@ class TestSlushyIo(BelReconstitutionMixin):
         from_bytes(g_bytes)
 
     def test_cx(self):
-        reconstituted = from_cx_json(to_cx_json(self.graph))
+        reconstituted = from_cx(to_cx(self.graph))
 
         do_remapping(self.graph, reconstituted)
 
@@ -164,7 +172,7 @@ class TestSimpleIo(BelReconstitutionMixin):
         graph = from_path(test_bel_simple, manager=self.manager)
         self.bel_simple_reconstituted(graph)
 
-        reconstituted = from_cx_json(to_cx_json(graph))
+        reconstituted = from_cx(to_cx(graph))
         do_remapping(graph, reconstituted)
 
         self.bel_simple_reconstituted(reconstituted)
