@@ -1584,7 +1584,7 @@ class TestProtein(TestTokenParserBase):
 
         self.assertEqual(expected_result_dict, result.asDict())
 
-        self.parser.bel_term.parseString(s2)
+        self.parser.language.parseString(s2)
 
         gene = GENE, 'HGNC', 'AKT1'
 

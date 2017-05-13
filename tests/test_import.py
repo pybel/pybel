@@ -12,11 +12,13 @@ from pybel import to_cx_json, from_cx_json
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
 from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
     from_cx_jsons
+from pybel.manager import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
 from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenParserBase, SET_CITATION_TEST, \
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
+from tests.constants import make_temp_connection, tear_temp_connection
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
@@ -34,12 +36,16 @@ def do_remapping(G, H):
 class TestThoroughIo(BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
+        dir, path, connection = make_temp_connection()
+        manager = CacheManager(connection=connection)
+
         @mock_bel_resources
         def help_build_graph(mock):
-            graph = from_path(test_bel_thorough, allow_nested=True)
-            return graph
+            return from_path(test_bel_thorough, manager=manager, allow_nested=True)
 
         cls.graph = help_build_graph()
+
+        tear_temp_connection(dir, path)
 
     def test_path(self):
         self.bel_thorough_reconstituted(self.graph)
@@ -86,12 +92,15 @@ class TestThoroughIo(BelReconstitutionMixin):
 class TestSlushyIo(BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
+        dir, path, connection = make_temp_connection()
+        manager = CacheManager(connection=connection)
+
         @mock_bel_resources
         def help_build_graph(mock):
-            graph = from_path(test_bel_slushy)
-            return graph
+            return from_path(test_bel_slushy, manager=manager)
 
         cls.graph = help_build_graph()
+        tear_temp_connection(dir, path)
 
     def test_slushy(self):
         self.bel_slushy_reconstituted(self.graph)
@@ -132,14 +141,27 @@ class TestSlushyIo(BelReconstitutionMixin):
 
 
 class TestSimpleIo(BelReconstitutionMixin):
+    @classmethod
+    def setUpClass(cls):
+        cls.dir, cls.path, cls.connection = make_temp_connection()
+        cls.manager = CacheManager(connection=cls.connection)
+
+    @classmethod
+    def tearDownClass(cls):
+        tear_temp_connection(cls.dir, cls.path)
+
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
-        g = from_url(Path(test_bel_simple).as_uri())
+        dir, path, connection = make_temp_connection()
+        manager = CacheManager(connection=connection)
+        g = from_url(Path(test_bel_simple).as_uri(), manager=manager)
+        tear_temp_connection(dir, path)
+
         self.bel_simple_reconstituted(g)
 
     def test_cx(self):
         """Tests the CX input/output on test_bel.bel"""
-        graph = from_path(test_bel_simple)
+        graph = from_path(test_bel_simple, manager=self.manager)
         self.bel_simple_reconstituted(graph)
 
         reconstituted = from_cx_json(to_cx_json(graph))

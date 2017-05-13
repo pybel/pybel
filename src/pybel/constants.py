@@ -216,6 +216,8 @@ ANNOTATIONS = 'annotations'
 SUBJECT = 'subject'
 #: The key for an internal edge data dictionary for the object modifier dictionary
 OBJECT = 'object'
+#: The key or an internal edge data dictonary for the line number
+LINE = 'line'
 
 #: A BEL relationship
 HAS_REACTANT = 'hasReactant'

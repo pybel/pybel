@@ -9,6 +9,7 @@ from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD
 from tests.constants import test_bel_simple, mock_bel_resources, test_bel_thorough, BelReconstitutionMixin, \
     test_bel_isolated
 
+from tests.constants import TemporaryCacheMixin
 log = logging.getLogger('pybel')
 logging.getLogger('pybel.parser.modifiers.truncation').setLevel(50)
 
@@ -31,14 +32,14 @@ class TestCanonicalizeHelper(unittest.TestCase):
             decanonicalize_node(x, test_node)
 
 
-class TestCanonicalize(BelReconstitutionMixin, unittest.TestCase):
-    def canonicalize_helper(self, test_path, reconstituted, **kwargs):
-        original = pybel.from_path(test_path, **kwargs)
+class TestCanonicalize(TemporaryCacheMixin, BelReconstitutionMixin):
+    def canonicalize_helper(self, test_path, reconstituted, allow_nested=False):
+        original = pybel.from_path(test_path, manager=self.manager, allow_nested=allow_nested)
 
         reconstituted(original)
 
         original_lines = pybel.to_bel_lines(original)
-        reloaded = pybel.from_lines(original_lines)
+        reloaded = pybel.from_lines(original_lines, manager=self.manager)
 
         original.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
 

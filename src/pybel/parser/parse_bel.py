@@ -582,7 +582,8 @@ class BelParser(BaseParser):
         q = {
             RELATION: tokens[RELATION],
             EVIDENCE: self.control_parser.evidence,
-            CITATION: self.control_parser.citation.copy()
+            CITATION: self.control_parser.citation.copy(),
+            LINE: self.line_number,
         }
 
         sub_mod = canonicalize_modifier(tokens[SUBJECT])

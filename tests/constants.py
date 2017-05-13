@@ -1152,7 +1152,7 @@ class BelReconstitutionMixin(unittest.TestCase):
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))
 
         for u, v, d in BEL_THOROUGH_EDGES:
-            assertHasEdge(self, u, v, graph, permissive=False, **d)
+            assertHasEdge(self, u, v, graph, permissive=True, **d)
 
     def bel_slushy_reconstituted(self, graph, check_metadata=True, check_warnings=True):
         self.assertIsNotNone(graph)
