@@ -11,7 +11,8 @@ interchange between common formats and database systems like JSON, CSV, Excel, S
 package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
 biological networks.
 
-Installation is as easy as getting the code from PyPI with :code:`python3 -m pip install pybel`
+Installation is as easy as getting the code from `PyPI <https://pypi.python.org/pypi/pybel>`_ with
+:code:`python3 -m pip install pybel`
 
 Links
 -----
@@ -25,6 +26,8 @@ Links
 
 .. toctree::
    :maxdepth: 2
+   :caption: Getting Started
+   :name: springboard
 
    installation
    overview
