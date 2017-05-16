@@ -26,7 +26,6 @@ Bytes
 
 Node Link JSON
 ~~~~~~~~~~~~~~
-
 .. autofunction:: pybel.to_json
 .. autofunction:: pybel.from_json
 
@@ -38,7 +37,6 @@ Node Link JSON
 
 CX JSON
 ~~~~~~~
-
 .. autofunction:: pybel.to_cx
 .. autofunction:: pybel.from_cx
 
@@ -55,7 +53,7 @@ Export
 .. autofunction:: pybel.to_csv
 .. autofunction:: pybel.to_neo4j
 
-Database
---------
+Relational Database
+-------------------
 .. autofunction:: pybel.to_database
 .. autofunction:: pybel.from_database
