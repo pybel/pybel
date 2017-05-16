@@ -6,15 +6,22 @@ relationships and their context in a machine-readable form. Its simple grammar a
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
 complex disease networks with several thousands of relationships.
 
-:code:`pybel` is a Python software package that parses BEL scripts, validates their semantics, and facilitates data
+PyBEL is a Python software package that parses BEL scripts, validates their semantics, and facilitates data
 interchange between common formats and database systems like JSON, CSV, Excel, SQL, CX, and Neo4J. Its companion
-package, `pybel_tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
+package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
 biological networks.
 
-:code:`pybel` provides a simple API so bioinformaticians and scientists with limited programming knowledge can easily
-use it to interface with BEL graphs, but is built on a rich framework that can be extended to develop new algorithms.
-
 Installation is as easy as getting the code from PyPI with :code:`python3 -m pip install pybel`
+
+Links
+-----
+- Specified by `BEL 1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
+  `BEL 2.0 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_
+- Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
+- Versioned on `GitHub <https://github.com/pybel/pybel>`_
+- Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
+- Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
+- Chat on `Gitter <https://gitter.im/pybel/Lobby>`_
 
 .. toctree::
    :maxdepth: 2
