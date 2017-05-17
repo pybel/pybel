@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.5 <https://github.com/pybel/pybel/compare/v0.5.4...v0.5.5>`_ - 2017-05-08
+------------------------------------------------------------------------------
+Changed
+-------
+- Updated CX output to have full provenance and list definitions (https://github.com/pybel/pybel/issues/180)
+
+Added
+-----
+- DOI and URL are now acceptable citation types (https://github.com/pybel/pybel/issues/188)
+- Citation can now be given as a double of type and reference (https://github.com/pybel/pybel/issues/187)
+
+
 `0.5.4 <https://github.com/pybel/pybel/compare/v0.5.3...v0.5.4>`_ - 2017-04-28
 ------------------------------------------------------------------------------
 Fixed
