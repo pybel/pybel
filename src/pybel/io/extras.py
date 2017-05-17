@@ -42,9 +42,9 @@ def to_csv(graph, file, delimiter='\t', encoding='utf-8'):
     """Writes the graph as an edge list using :func:`networkx.write_edgelist`
 
     :param BELGraph graph: A BEL graph
-    :param file file: A file or filelike object
-    :param str delimiter: The output CSV delimiter. Defaults to ``\t``.
-    :param str encoding: The output encoding. Defaults to ``utf-8``
+    :param file file: A writable file or file-like object
+    :param str delimiter: The delimiter to use in output
+    :param str encoding: The encoding to write. Defaults to ``utf-8``.
     """
     nx.write_edgelist(flatten_graph_data(graph), file, data=True, delimiter=delimiter, encoding=encoding)
 
