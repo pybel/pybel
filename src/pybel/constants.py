@@ -304,6 +304,7 @@ unqualified_edges = [
     TRANSCRIBED_TO,
     TRANSLATED_TO,
     HAS_MEMBER,
+    IS_A,
 ]
 
 #: Unqualified edges are given negative keys since the standard networkx edge key factory starts at 0 and counts up
