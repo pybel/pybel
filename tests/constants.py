@@ -81,23 +81,23 @@ def any_dict_matches(dict_of_dicts, query_dict):
     return any(query_dict == sd for sd in dict_of_dicts.values())
 
 
-def assertHasNode(self, member, graph, **kwargs):
+def assertHasNode(self, node, graph, **kwargs):
     """A helper function for checking if a node with the given properties is contained within a graph
 
     :param self: A Test Case
     :type self: unittest.TestCase
-    :param member:
+    :param node: 
     :param graph:
     :type graph: BELGraph
     :param kwargs:
     """
-    self.assertTrue(graph.has_node(member), msg='{} not found in graph'.format(member))
+    self.assertTrue(graph.has_node(node), msg='{} not found in graph'.format(node))
     if kwargs:
-        missing = set(kwargs) - set(graph.node[member])
+        missing = set(kwargs) - set(graph.node[node])
         self.assertFalse(missing, msg="Missing {} in node data".format(', '.join(sorted(missing))))
-        self.assertTrue(all(kwarg in graph.node[member] for kwarg in kwargs),
+        self.assertTrue(all(kwarg in graph.node[node] for kwarg in kwargs),
                         msg="Missing kwarg in node data")
-        self.assertEqual(kwargs, {k: graph.node[member][k] for k in kwargs},
+        self.assertEqual(kwargs, {k: graph.node[node][k] for k in kwargs},
                          msg="Wrong values in node data")
 
 
