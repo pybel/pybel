@@ -150,7 +150,7 @@ def manage():
 def setup(connection, debug):
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
     manager = CacheManager(connection=connection, echo=True)
-    manager.create_database()
+    manager.create_all()
 
 
 @manage.command(help='Drops database in cache')

@@ -356,7 +356,7 @@ class TestOwlManager(TestOwlBase, ConnectionMixin):
         super(TestOwlManager, self).setUp()
         self.manager = CacheManager(connection=self.connection)
         self.manager.drop_database()
-        self.manager.create_database()
+        self.manager.create_all()
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
