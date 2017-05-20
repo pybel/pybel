@@ -336,6 +336,9 @@ class Network(Base):
             'version': self.version
         }
 
+    def __str__(self):
+        return '{} v{}'.format(self.name, self.version)
+
 
 node_modification = Table(
     NODE_MODIFICATION_TABLE_NAME, Base.metadata,
