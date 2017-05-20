@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.6 <https://github.com/pybel/pybel/compare/v0.5.5...v0.5.6>`_ - 2017-05-20
+------------------------------------------------------------------------------
+Changed
+-------
+- Public IO changed for to/from_json and to/from_cx (https://github.com/pybel/pybel/issues/192)
+- Better error output for metadata failure (https://github.com/pybel/pybel/issues/191)
+
+Added
+-----
+- Add BEL script line to edges (https://github.com/pybel/pybel/issues/155)
+- Export to GSEA gene list (https://github.com/pybel/pybel/issues/189)
+- Non-caching of namespaces support (https://github.com/pybel/pybel/issues/190)
+
 `0.5.5 <https://github.com/pybel/pybel/compare/v0.5.4...v0.5.5>`_ - 2017-05-08
 ------------------------------------------------------------------------------
 Changed
