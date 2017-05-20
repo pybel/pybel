@@ -6,13 +6,12 @@ import unittest
 from pathlib import Path
 
 import networkx as nx
-from six import StringIO
 
 from pybel import BELGraph
 from pybel import to_cx, from_cx
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
 from pybel.io import to_json, from_json, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
-    from_cx_jsons, from_json_file, to_json_file, from_jsons, to_jsons
+    from_cx_jsons, from_jsons, to_jsons
 from pybel.manager import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
@@ -78,11 +77,7 @@ class TestThoroughIo(BelReconstitutionMixin):
 
         do_remapping(self.graph, reconstituted)
 
-        self.bel_thorough_reconstituted(
-            reconstituted,
-            check_warnings=False,
-            check_provenance=False
-        )
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False, check_provenance=False)
 
     def test_cxs(self):
         graph_cx_str = to_cx_jsons(self.graph)
@@ -90,11 +85,7 @@ class TestThoroughIo(BelReconstitutionMixin):
 
         do_remapping(self.graph, reconstituted)
 
-        self.bel_thorough_reconstituted(
-            reconstituted,
-            check_warnings=False,
-            check_provenance=False
-        )
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False, check_provenance=False)
 
 
 class TestSlushyIo(BelReconstitutionMixin):
