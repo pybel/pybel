@@ -101,7 +101,7 @@ class IdentifierParser(BaseParser):
     def handle_identifier_qualified(self, line, position, tokens):
         namespace = tokens[NAMESPACE]
         name = tokens[NAME]
-        
+
         self.raise_for_missing_namespace(namespace, name)
         self.raise_for_missing_name(namespace, name)
 

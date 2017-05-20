@@ -63,6 +63,17 @@ class MissingDefaultNameWarning(PyBelWarning):
         return '"{}" is not in the default namespace'.format(self.name)
 
 
+# Rename to NamespaceIdentifierWarning
+class IdentifierWarning(PyBelWarning):
+    """The base class for warnings related to namespace:name identifiers"""
+
+    def __init__(self, name, namespace):
+        PyBelWarning.__init__(self, name, namespace)
+        self.name = name
+        self.namespace = namespace
+
+
+# TODO subclass of IdentifierWarning
 class UndefinedNamespaceWarning(PyBelWarning):
     """Raised if reference made to undefined namespace"""
 
@@ -73,15 +84,6 @@ class UndefinedNamespaceWarning(PyBelWarning):
 
     def __str__(self):
         return '"{}" is not a defined namespace'.format(self.namespace)
-
-
-class IdentifierWarning(PyBelWarning):
-    """The base class for warnings related to namespace:name identifiers"""
-
-    def __init__(self, name, namespace):
-        PyBelWarning.__init__(self, name, namespace)
-        self.name = name
-        self.namespace = namespace
 
 
 class MissingNamespaceNameWarning(IdentifierWarning):
@@ -120,6 +122,9 @@ class MissingAnnotationKeyWarning(PyBelWarning):
         return '''"{}" is not set, so it can't be unset'''.format(self.annotation)
 
 
+# TODO create base class for AnnotationIdentifierWarning
+
+# TODO subclass from AnnotationIdentifierWarning
 class IllegalAnnotationValueWarning(PyBelWarning):
     """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
 
@@ -132,6 +137,7 @@ class IllegalAnnotationValueWarning(PyBelWarning):
         return '"{}" is not defined in the {} annotation'.format(self.value, self.annotation)
 
 
+# TODO subclass from AnnotationIdentifierWarning
 class MissingAnnotationRegexWarning(PyBelWarning):
     """Raised if annotation doesn't match regex"""
 
@@ -156,6 +162,18 @@ class VersionFormatWarning(PyBelWarning):
     def __str__(self):
         return '''Version string "{}" neither is a date like YYYYMMDD nor adheres to semantic versioning'''.format(
             self.version_string)
+
+
+class MalformedMetadataException(PyBelWarning):
+    """Raised when an invalid metadata line is encountered"""
+
+    def __init__(self, line, line_number):
+        PyBelWarning.__init__(self, line, line_number)
+        self.line = line
+        self.line_number = line_number
+
+    def __str__(self):
+        return '[line:{}] Invalid metadata - "{}"'.format(self.line_number, self.line)
 
 
 class InvalidMetadataException(PyBelWarning):

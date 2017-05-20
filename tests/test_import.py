@@ -8,15 +8,17 @@ from pathlib import Path
 import networkx as nx
 
 from pybel import BELGraph
-from pybel import to_cx_json, from_cx_json
+from pybel import to_cx, from_cx
 from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
-from pybel.io import to_json_dict, from_json_dict, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
-    from_cx_jsons
+from pybel.io import to_json, from_json, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
+    from_cx_jsons, from_jsons, to_jsons
+from pybel.manager import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
 from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenParserBase, SET_CITATION_TEST, \
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
+from tests.constants import make_temp_connection, tear_temp_connection
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 
@@ -34,12 +36,16 @@ def do_remapping(G, H):
 class TestThoroughIo(BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
+        dir, path, connection = make_temp_connection()
+        manager = CacheManager(connection=connection)
+
         @mock_bel_resources
         def help_build_graph(mock):
-            graph = from_path(test_bel_thorough, allow_nested=True)
-            return graph
+            return from_path(test_bel_thorough, manager=manager, allow_nested=True)
 
         cls.graph = help_build_graph()
+
+        tear_temp_connection(dir, path)
 
     def test_path(self):
         self.bel_thorough_reconstituted(self.graph)
@@ -50,8 +56,13 @@ class TestThoroughIo(BelReconstitutionMixin):
         self.bel_thorough_reconstituted(graph)
 
     def test_json(self):
-        graph_json = to_json_dict(self.graph)
-        graph = from_json_dict(graph_json)
+        graph_json_dict = to_json(self.graph)
+        graph = from_json(graph_json_dict)
+        self.bel_thorough_reconstituted(graph)
+
+    def test_jsons(self):
+        graph_json_str = to_jsons(self.graph)
+        graph = from_jsons(graph_json_str)
         self.bel_thorough_reconstituted(graph)
 
     def test_graphml(self):
@@ -61,37 +72,34 @@ class TestThoroughIo(BelReconstitutionMixin):
             to_graphml(self.graph, f)
 
     def test_cx(self):
-        reconstituted = from_cx_json(to_cx_json(self.graph))
+        graph_cx_json_dict = to_cx(self.graph)
+        reconstituted = from_cx(graph_cx_json_dict)
 
         do_remapping(self.graph, reconstituted)
 
-        self.bel_thorough_reconstituted(
-            reconstituted,
-            check_warnings=False,
-            check_provenance=False
-        )
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False, check_provenance=False)
 
     def test_cxs(self):
-        reconstituted = from_cx_jsons(to_cx_jsons(self.graph))
+        graph_cx_str = to_cx_jsons(self.graph)
+        reconstituted = from_cx_jsons(graph_cx_str)
 
         do_remapping(self.graph, reconstituted)
 
-        self.bel_thorough_reconstituted(
-            reconstituted,
-            check_warnings=False,
-            check_provenance=False
-        )
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False, check_provenance=False)
 
 
 class TestSlushyIo(BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
+        dir, path, connection = make_temp_connection()
+        manager = CacheManager(connection=connection)
+
         @mock_bel_resources
         def help_build_graph(mock):
-            graph = from_path(test_bel_slushy)
-            return graph
+            return from_path(test_bel_slushy, manager=manager)
 
         cls.graph = help_build_graph()
+        tear_temp_connection(dir, path)
 
     def test_slushy(self):
         self.bel_slushy_reconstituted(self.graph)
@@ -102,8 +110,8 @@ class TestSlushyIo(BelReconstitutionMixin):
         self.bel_slushy_reconstituted(graph)
 
     def test_json(self):
-        graph_json = to_json_dict(self.graph)
-        graph = from_json_dict(graph_json)
+        graph_json = to_json(self.graph)
+        graph = from_json(graph_json)
         self.bel_slushy_reconstituted(graph)
 
     def test_graphml(self):
@@ -117,7 +125,7 @@ class TestSlushyIo(BelReconstitutionMixin):
         from_bytes(g_bytes)
 
     def test_cx(self):
-        reconstituted = from_cx_json(to_cx_json(self.graph))
+        reconstituted = from_cx(to_cx(self.graph))
 
         do_remapping(self.graph, reconstituted)
 
@@ -132,17 +140,30 @@ class TestSlushyIo(BelReconstitutionMixin):
 
 
 class TestSimpleIo(BelReconstitutionMixin):
+    @classmethod
+    def setUpClass(cls):
+        cls.dir, cls.path, cls.connection = make_temp_connection()
+        cls.manager = CacheManager(connection=cls.connection)
+
+    @classmethod
+    def tearDownClass(cls):
+        tear_temp_connection(cls.dir, cls.path)
+
     @mock_bel_resources
     def test_from_fileUrl(self, mock_get):
-        g = from_url(Path(test_bel_simple).as_uri())
+        dir, path, connection = make_temp_connection()
+        manager = CacheManager(connection=connection)
+        g = from_url(Path(test_bel_simple).as_uri(), manager=manager)
+        tear_temp_connection(dir, path)
+
         self.bel_simple_reconstituted(g)
 
     def test_cx(self):
         """Tests the CX input/output on test_bel.bel"""
-        graph = from_path(test_bel_simple)
+        graph = from_path(test_bel_simple, manager=self.manager)
         self.bel_simple_reconstituted(graph)
 
-        reconstituted = from_cx_json(to_cx_json(graph))
+        reconstituted = from_cx(to_cx(graph))
         do_remapping(graph, reconstituted)
 
         self.bel_simple_reconstituted(reconstituted)

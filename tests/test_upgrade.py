@@ -3,11 +3,11 @@
 import logging
 import unittest
 
-import pybel
+from pybel import from_path, to_bel_lines, from_lines
 from pybel.canonicalize import postpend_location, decanonicalize_node
 from pybel.constants import GOCC_LATEST, FUNCTION, GOCC_KEYWORD
-from tests.constants import test_bel_simple, mock_bel_resources, test_bel_thorough, BelReconstitutionMixin, \
-    test_bel_isolated
+from tests.constants import TemporaryCacheMixin, BelReconstitutionMixin
+from tests.constants import test_bel_simple, mock_bel_resources, test_bel_thorough, test_bel_isolated
 
 log = logging.getLogger('pybel')
 logging.getLogger('pybel.parser.modifiers.truncation').setLevel(50)
@@ -31,28 +31,13 @@ class TestCanonicalizeHelper(unittest.TestCase):
             decanonicalize_node(x, test_node)
 
 
-class TestCanonicalize(BelReconstitutionMixin, unittest.TestCase):
-    def canonicalize_helper(self, test_path, reconstituted, **kwargs):
-        original = pybel.from_path(test_path, **kwargs)
-
+class TestCanonicalize(TemporaryCacheMixin, BelReconstitutionMixin):
+    def canonicalize_helper(self, test_path, reconstituted, allow_nested=False):
+        original = from_path(test_path, manager=self.manager, allow_nested=allow_nested)
         reconstituted(original)
-
-        original_lines = pybel.to_bel_lines(original)
-        reloaded = pybel.from_lines(original_lines)
-
+        original_lines = to_bel_lines(original)
+        reloaded = from_lines(original_lines, manager=self.manager)
         original.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
-
-        self.assertEqual(original.document, reloaded.document)
-        self.assertEqual(original.namespace_owl, reloaded.namespace_owl)
-        self.assertEqual(original.namespace_url, reloaded.namespace_url)
-        self.assertEqual(original.namespace_pattern, reloaded.namespace_pattern)
-        self.assertEqual(original.annotation_url, reloaded.annotation_url)
-        self.assertEqual(original.annotation_owl, reloaded.annotation_owl)
-        self.assertEqual(original.annotation_list, reloaded.annotation_list)
-
-        self.assertEqual(set(original.nodes()), set(reloaded.nodes()))
-        self.assertEqual(set(original.edges()), set(reloaded.edges()))
-
         reconstituted(reloaded)
 
     @mock_bel_resources

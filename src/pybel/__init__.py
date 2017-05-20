@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
+
 PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux using 
 `Travis CI <https://travis-ci.org/pybel/pybel>`_.
 
@@ -11,6 +12,7 @@ Installation
 
 Easiest
 ~~~~~~~
+Download the latest stable code from `PyPI <https://pypi.python.org/pypi/pybel>`_ with:
 
 .. code-block:: sh
 
@@ -18,6 +20,7 @@ Easiest
 
 Get the Latest
 ~~~~~~~~~~~~~~~
+Download the most recent code from `GitHub <https://github.com/pybel/pybel>`_ with:
 
 .. code-block:: sh
 
@@ -25,6 +28,7 @@ Get the Latest
 
 For Developers
 ~~~~~~~~~~~~~~
+Clone the repository from `GitHub <https://github.com/pybel/pybel>`_ and install in editable mode with:
 
 .. code-block:: sh
 
@@ -66,7 +70,7 @@ from .manager.database_io import *
 
 __all__ = graph.__all__ + io.__all__ + canonicalize.__all__ + database_io.__all__
 
-__version__ = '0.5.5'
+__version__ = '0.5.6-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'

@@ -80,9 +80,20 @@ Ontologies as Namespaces and Annotations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PyBEL extends the BEL language to offer namespace definitions that draw directly from the ontologies in these services,
 using statements like :code:`DEFINE NAMESPACE OMIT AS OWL "http://purl.obolibrary.org/obo/omit/dev/omit.owl"` or
-:code:`DEFINE ANNOTATION CELL AS OWL "http://purl.obolibrary.org/obo/cl/releases/2016-11-23/cl.owl"`
+:code:
 Ontologies can also provide immediate access to hierarchical knowledge like subclass relationships that can provide
 better context in analysis.
+
+Rather than using the BEL format, which has serialized the Cell Ontology
+
+``DEFINE ANNOTATION CELL AS URL "http://resources.openbel.org/belframework/20150611/annotation/cell.belanno"``
+
+It is possible now to refer directly to the underlying resource
+
+``DEFINE ANNOTATION CELL AS OWL "http://purl.obolibrary.org/obo/cl/releases/2016-11-23/cl.owl"``.
+
+This allows PyBEL to import the semantic information from the ontology as well, and provide much more rich
+algorithms that take into account the hierarchy and synonyms provided.
 
 PyBEL uses the `onto2nx <https://github.com/cthoyt/onto2nx>`_ package to parse OWL documents in many different
 formats, including OWL/XML, RDF/XML, and RDF.

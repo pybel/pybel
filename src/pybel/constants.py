@@ -216,6 +216,8 @@ ANNOTATIONS = 'annotations'
 SUBJECT = 'subject'
 #: The key for an internal edge data dictionary for the object modifier dictionary
 OBJECT = 'object'
+#: The key or an internal edge data dictonary for the line number
+LINE = 'line'
 
 #: A BEL relationship
 HAS_REACTANT = 'hasReactant'
@@ -302,6 +304,7 @@ unqualified_edges = [
     TRANSCRIBED_TO,
     TRANSLATED_TO,
     HAS_MEMBER,
+    IS_A,
 ]
 
 #: Unqualified edges are given negative keys since the standard networkx edge key factory starts at 0 and counts up
