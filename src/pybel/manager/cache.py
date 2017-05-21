@@ -500,8 +500,7 @@ class CacheManager(BaseCacheManager):
 
         for entry in ns.entries:
             equivalence_label = values[entry.name]
-            equivalence = self.ensure_equivalence_class(equivalence_label)
-            entry.equivalence_id = equivalence.id
+            entry.equivalence = self.ensure_equivalence_class(equivalence_label)
 
         ns.has_equivalences = True
 
@@ -548,7 +547,7 @@ class CacheManager(BaseCacheManager):
         :param store_parts: Should the graph be stored in the edge store?
         :type store_parts: bool
         :return: A Network object
-        :rtype: models.Network
+        :rtype: Network
         """
         log.debug('inserting %s v%s', graph.name, graph.version)
 
@@ -557,7 +556,7 @@ class CacheManager(BaseCacheManager):
         namespaces = [self.ensure_namespace(url) for url in graph.namespace_url.values()]
         annotations = [self.ensure_annotation(url) for url in graph.annotation_url.values()]
 
-        network = models.Network(blob=to_bytes(graph), **graph.document)
+        network = Network(blob=to_bytes(graph), **graph.document)
 
         if store_parts:
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
@@ -579,7 +578,7 @@ class CacheManager(BaseCacheManager):
         """Stores the given graph into the edge store.
 
         :param network: A SQLAlchemy PyBEL Network object
-        :type network: models.Network
+        :type network: Network
         :param graph: A BEL Graph
         :type graph: pybel.BELGraph
         """
@@ -966,7 +965,7 @@ class CacheManager(BaseCacheManager):
 
     def get_graph_versions(self, name):
         """Returns all of the versions of a graph with the given name"""
-        return {x for x, in self.session.query(models.Network.version).filter(models.Network.name == name).all()}
+        return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
 
     def get_graph(self, name, version=None):
         """Loads most recent graph, or allows for specification of version
@@ -979,11 +978,9 @@ class CacheManager(BaseCacheManager):
         :rtype: pybel.BELGraph
         """
         if version is not None:
-            n = self.session.query(models.Network).filter(models.Network.name == name,
-                                                          models.Network.version == version).one()
+            n = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
         else:
-            n = self.session.query(models.Network).filter(models.Network.name == name).order_by(
-                models.Network.created.desc()).first()
+            n = self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
 
         return from_bytes(n.blob)
 
@@ -993,9 +990,9 @@ class CacheManager(BaseCacheManager):
         :param id: The graph's database ID
         :type id: int
         :return: A Network object
-        :rtype: models.Network
+        :rtype: Network
         """
-        return self.session.query(models.Network).get(id)
+        return self.session.query(Network).get(id)
 
     def drop_graph(self, network_id):
         """Drops a graph by ID
@@ -1005,12 +1002,12 @@ class CacheManager(BaseCacheManager):
         """
 
         # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
-        self.session.query(models.Network).filter(models.Network.id == network_id).delete()
+        self.session.query(Network).filter(Network.id == network_id).delete()
         self.session.commit()
 
     def drop_graphs(self):
         """Drops all graphs"""
-        self.session.query(models.Network).delete()
+        self.session.query(Network).delete()
         self.session.commit()
 
     def list_graphs(self, include_description=True):
@@ -1126,22 +1123,22 @@ class CacheManager(BaseCacheManager):
         :param version: Version of the network
         :type version: str
         :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                             :class:`models.Network` objects.
+                             :class:`Network` objects.
         :type as_dict_list: bool
-        :return: List of :class:`models.Network` objects or corresponding dicts.
+        :return: List of :class:`Network` objects or corresponding dicts.
         :rtype: list or dict
         """
-        q = self.session.query(models.Network)
+        q = self.session.query(Network)
 
         if network_id and isinstance(network_id, int):
             q = q.filter_by(id=network_id)
 
         else:
             if name:
-                q = q.filter(models.Network.name.like(name))
+                q = q.filter(Network.name.like(name))
 
             if version:
-                q = q.filter(models.Network.version == version)
+                q = q.filter(Network.version == version)
 
         result = q.all()
 

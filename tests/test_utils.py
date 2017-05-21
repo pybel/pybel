@@ -6,12 +6,32 @@ from pathlib import Path
 import networkx as nx
 
 import pybel.utils
+from pybel.canonicalize import postpend_location, decanonicalize_node
+from pybel.constants import FUNCTION
 from pybel.io.line_utils import split_file_to_annotations_and_definitions
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.utils import nest
 from pybel.utils import get_bel_resource, list2tuple
 from tests.constants import test_an_1, test_bel_simple
+
+
+class TestCanonicalizeHelper(unittest.TestCase):
+    def test_postpend_location_failure(self):
+        with self.assertRaises(ValueError):
+            postpend_location('', dict(name='failure'))
+
+    def test_decanonicalize_node_failure(self):
+        class NotGraph:
+            node = None
+
+        x = NotGraph()
+
+        test_node = ('nope', 'nope', 'nope')
+        x.node = {test_node: {FUNCTION: 'nope'}}
+
+        with self.assertRaises(ValueError):
+            decanonicalize_node(x, test_node)
 
 
 class TestRandom(unittest.TestCase):

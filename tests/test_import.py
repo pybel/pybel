@@ -9,6 +9,7 @@ from pathlib import Path
 import networkx as nx
 
 from pybel import BELGraph
+from pybel import to_bel_lines, from_lines
 from pybel import to_bytes, from_bytes, to_graphml, from_path, from_url
 from pybel import to_cx, from_cx, to_cx_jsons, from_cx_jsons
 from pybel import to_json, from_json, to_jsons, from_jsons
@@ -22,6 +23,7 @@ from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenPa
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
 from tests.constants import assertHasEdge
 from tests.constants import make_temp_connection, tear_temp_connection
+from tests.constants import test_bel_isolated
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
@@ -45,16 +47,18 @@ def do_remapping(original, reconstituted):
 class TestThoroughIo(BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
-        dir, path, connection = make_temp_connection()
-        manager = CacheManager(connection=connection)
+        cls.dir, cls.path, cls.connection = make_temp_connection()
+        cls.manager = CacheManager(connection=cls.connection)
 
         @mock_bel_resources
         def help_build_graph(mock):
-            return from_path(test_bel_thorough, manager=manager, allow_nested=True)
+            return from_path(test_bel_thorough, manager=cls.manager, allow_nested=True)
 
         cls.graph = help_build_graph()
 
-        tear_temp_connection(dir, path)
+    @classmethod
+    def tearDownClass(cls):
+        tear_temp_connection(cls.dir, cls.path)
 
     def test_path(self):
         self.bel_thorough_reconstituted(self.graph)
@@ -113,6 +117,11 @@ class TestThoroughIo(BelReconstitutionMixin):
 
         do_remapping(self.graph, reconstituted)
 
+        self.bel_thorough_reconstituted(reconstituted)
+
+    def test_upgrade(self):
+        lines = to_bel_lines(self.graph)
+        reconstituted = from_lines(lines, manager=self.manager)
         self.bel_thorough_reconstituted(reconstituted)
 
 
@@ -181,7 +190,7 @@ class TestSimpleIo(BelReconstitutionMixin):
 
         tear_temp_connection(dir, path)
 
-    def test_from_url(self):
+    def test_compile(self):
         self.bel_simple_reconstituted(self.graph)
 
     def test_cx(self):
@@ -192,6 +201,31 @@ class TestSimpleIo(BelReconstitutionMixin):
         do_remapping(self.graph, reconstituted)
 
         self.bel_simple_reconstituted(reconstituted)
+
+
+class TestIsolatedIo(BelReconstitutionMixin):
+    @classmethod
+    def setUpClass(cls):
+        cls.dir, cls.path, cls.connection = make_temp_connection()
+        cls.manager = CacheManager(connection=cls.connection)
+
+        @mock_bel_resources
+        def get_graph(mock_get):
+            return from_path(test_bel_isolated, manager=cls.manager)
+
+        cls.graph = get_graph()
+
+    @classmethod
+    def tearDownClass(cls):
+        tear_temp_connection(cls.dir, cls.path)
+
+    def test_compile(self):
+        self.bel_isolated_reconstituted(self.graph)
+
+    def test_upgrade(self):
+        lines = to_bel_lines(self.graph)
+        reconstituted = from_lines(lines, manager=self.manager)
+        self.bel_isolated_reconstituted(reconstituted)
 
 
 class TestRegex(unittest.TestCase):
