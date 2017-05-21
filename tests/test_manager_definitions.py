@@ -3,12 +3,8 @@
 from pybel.manager.cache import CacheManager
 from tests.constants import HGNC_URL, help_check_hgnc, CELL_LINE_URL, HGNC_KEYWORD
 from tests.constants import TemporaryCacheMixin
-from tests.constants import test_ns_1, test_ns_2, test_an_1, test_ns_nocache
+from tests.constants import test_ns_nocache
 from tests.constants import wine_iri, mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_rdf
-
-test_ns1 = 'file:///' + test_ns_1
-test_ns2 = 'file:///' + test_ns_2
-test_an1 = 'file:///' + test_an_1
 
 
 class TestCache(TemporaryCacheMixin):
