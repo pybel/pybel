@@ -1131,7 +1131,9 @@ class BelReconstitutionMixin(unittest.TestCase):
                              msg='Document warnings:\n{}'.format('\n'.join(map(str, graph.warnings))))
 
         if check_metadata:
-            self.assertEqual(expected_test_thorough_metadata, graph.document)
+            self.assertLessEqual(set(expected_test_thorough_metadata), set(graph.document))
+            gmd = {k: v for k, v in graph.document.items() if k in expected_test_thorough_metadata}
+            self.assertEqual(expected_test_thorough_metadata, gmd)
             self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], graph.version)
 
