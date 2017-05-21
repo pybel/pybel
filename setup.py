@@ -37,6 +37,7 @@ INSTALL_REQUIRES = [
     'click',
     'sqlalchemy',
     'onto2nx',
+    'ndex',
 ]
 
 if sys.version_info < (3, ):

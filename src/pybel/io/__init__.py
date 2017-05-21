@@ -18,13 +18,15 @@ from . import cx
 from . import extras
 from . import gpickle
 from . import lines
+from . import ndex
 from . import neo4j
 from . import nodelink
 from .cx import *
 from .extras import *
 from .gpickle import *
 from .lines import *
+from .ndex import *
 from .neo4j import *
 from .nodelink import *
 
-__all__ = lines.__all__ + nodelink.__all__ + gpickle.__all__ + cx.__all__ + neo4j.__all__ + extras.__all__
+__all__ = lines.__all__ + nodelink.__all__ + gpickle.__all__ + cx.__all__ + neo4j.__all__ + extras.__all__ + ndex.__all__
