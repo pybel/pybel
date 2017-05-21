@@ -56,6 +56,15 @@ def calculate_canonical_cx_identifier(graph, node):
     raise ValueError('Unexpected node data: {}'.format(data))
 
 
+def build_node_mapping(graph):
+    """Builds a mapping from a graph's nodes to their canonical sort order
+    
+    :param BELGraph graph: A BEL graph 
+    :return: A mapping from a graph's nodes to their canonical sort order
+    :rtype: dict[tuple, int]
+    """
+    return {node: node_id for node_id, node in enumerate(sorted(graph.nodes_iter(), key=hash_tuple))}
+
 def to_cx(graph):
     """Converts BEL Graph to CX data format (as in-memory JSON) for use with `NDEx <http://www.ndexbio.org/>`_
 
@@ -69,14 +78,13 @@ def to_cx(graph):
         - `PyBEL / NDEx Python Client Wrapper <https://github.com/pybel/pybel2ndex>`_
 
     """
-    node_nid = {}
+    node_nid = build_node_mapping(graph)
     nid_data = {}
     nodes_entry = []
     node_attributes_entry = []
 
-    for node_id, node in enumerate(sorted(graph.nodes_iter(), key=hash_tuple)):
+    for node, node_id in node_nid.items():
         data = graph.node[node]
-        node_nid[node] = node_id
         nid_data[node_id] = data
 
         nodes_entry.append({

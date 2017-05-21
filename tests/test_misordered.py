@@ -17,6 +17,7 @@ testan1 = '1'
 
 class TestMisordered(TemporaryCacheMixin, unittest.TestCase):
     def test_misordered(self):
+        """This test ensures that non-citation clearing mode works"""
         graph = from_path(test_misordered_bel_path, manager=self.manager, citation_clearing=False)
         self.assertEqual(4, graph.number_of_nodes())
         self.assertEqual(3, graph.number_of_edges())

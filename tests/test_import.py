@@ -2,35 +2,46 @@
 
 import logging
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
 import networkx as nx
 
 from pybel import BELGraph
-from pybel import to_cx, from_cx
-from pybel.constants import GENE, CITATION, ANNOTATIONS, EVIDENCE
-from pybel.io import to_json, from_json, to_bytes, from_bytes, to_graphml, from_path, from_url, to_cx_jsons, \
-    from_cx_jsons, from_jsons, to_jsons
+from pybel import to_bytes, from_bytes, to_graphml, from_path, from_url
+from pybel import to_cx, from_cx, to_cx_jsons, from_cx_jsons
+from pybel.io.cx import build_node_mapping
+from pybel import to_json, from_json, to_jsons, from_jsons
+from pybel import to_ndex, from_ndex
+from pybel.constants import *
 from pybel.manager import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
 from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenParserBase, SET_CITATION_TEST, \
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
+from tests.constants import assertHasEdge
 from tests.constants import make_temp_connection, tear_temp_connection
 
 logging.getLogger('requests').setLevel(logging.WARNING)
+log = logging.getLogger(__name__)
 
 
-def do_remapping(G, H):
-    """Remaps nodes to use the reconsitution tests
+def do_remapping(original, reconstituted):
+    """Remaps nodes to use the reconstitution tests
     
-    :param BELGraph G: The original bel graph 
-    :param BELGraph H: The reconsituted BEL graph from CX input/output
+    :param BELGraph original: The original bel graph 
+    :param BELGraph reconstituted: The reconstituted BEL graph from CX input/output
     """
-    node_mapping = dict(enumerate(sorted(G.nodes_iter(), key=hash_tuple)))
-    nx.relabel.relabel_nodes(H, node_mapping, copy=False)
+    node_mapping = dict(enumerate(sorted(original.nodes_iter(), key=hash_tuple)))
+    try:
+        nx.relabel.relabel_nodes(reconstituted, node_mapping, copy=False)
+    except KeyError as e:
+        missing_nodes = set(node_mapping) - set(reconstituted.nodes_iter())
+        log.exception('missing %s', [node_mapping[n] for n in missing_nodes])
+        raise e
+
 
 
 class TestThoroughIo(BelReconstitutionMixin):
@@ -77,7 +88,7 @@ class TestThoroughIo(BelReconstitutionMixin):
 
         do_remapping(self.graph, reconstituted)
 
-        self.bel_thorough_reconstituted(reconstituted, check_warnings=False, check_provenance=False)
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
 
     def test_cxs(self):
         graph_cx_str = to_cx_jsons(self.graph)
@@ -85,7 +96,25 @@ class TestThoroughIo(BelReconstitutionMixin):
 
         do_remapping(self.graph, reconstituted)
 
-        self.bel_thorough_reconstituted(reconstituted, check_warnings=False, check_provenance=False)
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
+
+    def test_ndex_interchange(self):
+        """Tests that a document can be uploaded and downloaded. Sleeps in the middle so that NDEx can process"""
+        network_id = to_ndex(self.graph)
+        time.sleep(15)
+        reconstituted = from_ndex(network_id)
+
+        do_remapping(self.graph, reconstituted)
+
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
+
+    def test_from_ndex(self):
+        """Tests the download of a CX document from NDEx"""
+        reconstituted = from_ndex('014e5957-3d96-11e7-8f50-0ac135e8bacf')
+
+        do_remapping(self.graph, reconstituted)
+
+        self.bel_thorough_reconstituted(reconstituted)
 
 
 class TestSlushyIo(BelReconstitutionMixin):
@@ -142,37 +171,38 @@ class TestSlushyIo(BelReconstitutionMixin):
 class TestSimpleIo(BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
-        cls.dir, cls.path, cls.connection = make_temp_connection()
-        cls.manager = CacheManager(connection=cls.connection)
-
-    @classmethod
-    def tearDownClass(cls):
-        tear_temp_connection(cls.dir, cls.path)
-
-    @mock_bel_resources
-    def test_from_fileUrl(self, mock_get):
         dir, path, connection = make_temp_connection()
-        manager = CacheManager(connection=connection)
-        g = from_url(Path(test_bel_simple).as_uri(), manager=manager)
+        cls.manager = CacheManager(connection=connection)
+
+        @mock_bel_resources
+        def get_graph(mock_get):
+            return from_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
+
+        cls.graph = get_graph()
+
         tear_temp_connection(dir, path)
 
-        self.bel_simple_reconstituted(g)
+    def test_from_url(self):
+        self.bel_simple_reconstituted(self.graph)
 
     def test_cx(self):
         """Tests the CX input/output on test_bel.bel"""
-        graph = from_path(test_bel_simple, manager=self.manager)
-        self.bel_simple_reconstituted(graph)
+        graph_cx_json = to_cx(self.graph)
 
-        reconstituted = from_cx(to_cx(graph))
-        do_remapping(graph, reconstituted)
+        reconstituted = from_cx(graph_cx_json)
+        do_remapping(self.graph, reconstituted)
 
         self.bel_simple_reconstituted(reconstituted)
 
 
 class TestRegex(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.graph = BELGraph()
+        cls.parser = BelParser(cls.graph, namespace_dict={}, namespace_regex={'dbSNP': 'rs[0-9]*'})
+
     def setUp(self):
-        self.graph = BELGraph()
-        self.parser = BelParser(self.graph, namespace_dict={}, namespace_regex={'dbSNP': 'rs[0-9]*'})
+        self.parser.clear()
 
     def test_match(self):
         lines = [
@@ -195,29 +225,21 @@ class TestRegex(unittest.TestCase):
             self.parser.parse_lines(lines)
 
 
-class TestFull(TestTokenParserBase):
-    def setUp(self):
-        self.namespaces = {
-            'TESTNS': {
-                "1": "GRP",
-                "2": "GRP"
-            }
-        }
+namespaces = {
+    'TESTNS': {
+        "1": "GRP",
+        "2": "GRP"
+    }
+}
 
-        self.annotations = {
-            'TestAnnotation1': {'A', 'B', 'C'},
-            'TestAnnotation2': {'X', 'Y', 'Z'},
-            'TestAnnotation3': {'D', 'E', 'F'}
-        }
+annotations = {
+    'TestAnnotation1': {'A', 'B', 'C'},
+    'TestAnnotation2': {'X', 'Y', 'Z'},
+    'TestAnnotation3': {'D', 'E', 'F'}
+}
 
-        self.graph = BELGraph()
-        self.parser = BelParser(self.graph, namespace_dict=self.namespaces, annotation_dict=self.annotations)
 
-    def test_semantic_failure(self):
-        statement = "bp(TESTNS:1) -- p(TESTNS:2)"
-        with self.assertRaises(InvalidFunctionSemantic):
-            self.parser.parseString(statement)
-
+class TestStuff(unittest.TestCase):
     def test_lenient_semantic_no_failure(self):
         statements = [
             SET_CITATION_TEST,
@@ -225,8 +247,30 @@ class TestFull(TestTokenParserBase):
             "bp(ABASD) -- p(ABASF)"
         ]
         self.graph = BELGraph()
-        self.parser = BelParser(self.graph, namespace_dict=self.namespaces, allow_naked_names=True)
+        self.parser = BelParser(self.graph, allow_naked_names=True)
         self.parser.parse_lines(statements)
+
+        node_1 = BIOPROCESS, DIRTY, 'ABASD'
+        node_2 = PROTEIN, DIRTY, 'ABASF'
+
+        self.assertEqual({node_1, node_2}, set(self.graph.nodes_iter()))
+
+        assertHasEdge(self, node_1, node_2, self.graph)
+
+
+class TestFull(TestTokenParserBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.graph = BELGraph()
+        cls.parser = BelParser(cls.graph, namespace_dict=namespaces, annotation_dict=annotations)
+
+    def setUp(self):
+        self.parser.clear()
+
+    def test_semantic_failure(self):
+        statement = "bp(TESTNS:1) -- p(TESTNS:2)"
+        with self.assertRaises(InvalidFunctionSemantic):
+            self.parser.parseString(statement)
 
     def test_missing_citation(self):
         statements = [
