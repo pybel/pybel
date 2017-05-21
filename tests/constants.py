@@ -1145,10 +1145,7 @@ class BelReconstitutionMixin(unittest.TestCase):
             self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
             self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 
-        self.assertEqual(len(BEL_THOROUGH_NODES), graph.number_of_nodes())
-        # self.assertEqual(len(BEL_THOROUGH_EDGES), graph.number_of_edges())
-
-        self.assertEqual(BEL_THOROUGH_NODES, set(graph.nodes()))
+        self.assertEqual(set(BEL_THOROUGH_NODES), set(graph.nodes_iter()))
 
         # FIXME
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))
