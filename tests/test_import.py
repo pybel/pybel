@@ -350,3 +350,7 @@ class TestFull(TestTokenParserBase):
             CITATION: test_citation_dict
         }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -301,19 +301,44 @@ def from_cx(cx):
     """
     graph = BELGraph()
 
-    log.info('CX Entry [0]: %s', cx[0])
-    log.info('CX Entry [1]: %s', cx[1])
+    context_legend_entry = []
+    annotation_lists_entry = []
+    context_entry = {}
+    network_attributes_entry = []
+    node_entries = []
+    node_attributes_entries = []
+    edge_annotations_entries = []
+    edges_entries = []
+    meta_entries = defaultdict(list)
 
-    context_legend_entry = cx[3]
-    context_legend = _cx_to_dict(context_legend_entry['context_legend'])
+    for element in cx:
+        for k, v in element.items():
+            if k == 'context_legend':
+                context_legend_entry.extend(v)
+            elif k == 'annotation_lists':
+                annotation_lists_entry.extend(v)
+            elif k == '@context':
+                context_entry.update(v[0])
+            elif k == 'networkAttributes':
+                network_attributes_entry.extend(v)
+            elif k == 'nodes':
+                node_entries.extend(v)
+            elif k == 'nodeAttributes':
+                node_attributes_entries.extend(v)
+            elif k == 'edges':
+                edges_entries.extend(v)
+            elif k == 'edgeAttributes':
+                edge_annotations_entries.extend(v)
+            else:
+                meta_entries[k].extend(v)
+
+    context_legend = _cx_to_dict(context_legend_entry)
 
     annotation_lists = defaultdict(set)
-    annotation_lists_entry = cx[4]
-    for d in annotation_lists_entry['annotation_lists']:
+    for d in annotation_lists_entry:
         annotation_lists[d['k']].add(d['v'])
 
-    context_entry = cx[2]
-    for keyword, entry in context_entry['@context'][0].items():
+    for keyword, entry in context_entry.items():
         if context_legend[keyword] == GRAPH_NAMESPACE_URL:
             graph.namespace_url[keyword] = entry
         elif context_legend[keyword] == GRAPH_NAMESPACE_OWL:
@@ -329,20 +354,17 @@ def from_cx(cx):
         elif context_legend[keyword] == GRAPH_ANNOTATION_LIST:
             graph.annotation_list[keyword] = annotation_lists[entry]
 
-    network_attributes_entry = cx[5]
-    for d in network_attributes_entry['networkAttributes']:
+    for d in network_attributes_entry:
         if d['n'] == NDEX_SOURCE_FORMAT:
             continue
         graph.graph[GRAPH_METADATA][d['n']] = d['v']
 
-    node_entries = cx[6]
     node_name = {}
-    for d in node_entries['nodes']:
+    for d in node_entries:
         node_name[d['@id']] = d['n']
 
-    node_attributes_entries = cx[7]
     node_data = defaultdict(dict)
-    for d in node_attributes_entries['nodeAttributes']:
+    for d in node_attributes_entries:
         node_data[d['po']][d['n']] = d['v']
 
     node_data_pp = defaultdict(dict)
@@ -370,19 +392,17 @@ def from_cx(cx):
             d[NAME] = d.pop('identifier')
         graph.add_node(nid, attr_dict=d)
 
-    edges_entries = cx[8]
     edge_relation = {}
     edge_source = {}
     edge_target = {}
-    for d in edges_entries['edges']:
+    for d in edges_entries:
         eid = d['@id']
         edge_relation[eid] = d['i']
         edge_source[eid] = d['s']
         edge_target[eid] = d['t']
 
-    edge_annotations_entries = cx[9]
     edge_data = defaultdict(dict)
-    for d in edge_annotations_entries['edgeAttributes']:
+    for d in edge_annotations_entries:
         edge_data[d['po']][d['n']] = d['v']
 
     edge_citation = defaultdict(dict)
