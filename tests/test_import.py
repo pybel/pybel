@@ -11,7 +11,6 @@ import networkx as nx
 from pybel import BELGraph
 from pybel import to_bytes, from_bytes, to_graphml, from_path, from_url
 from pybel import to_cx, from_cx, to_cx_jsons, from_cx_jsons
-from pybel.io.cx import build_node_mapping
 from pybel import to_json, from_json, to_jsons, from_jsons
 from pybel import to_ndex, from_ndex
 from pybel.constants import *
@@ -41,7 +40,6 @@ def do_remapping(original, reconstituted):
         missing_nodes = set(node_mapping) - set(reconstituted.nodes_iter())
         log.exception('missing %s', [node_mapping[n] for n in missing_nodes])
         raise e
-
 
 
 class TestThoroughIo(BelReconstitutionMixin):
@@ -108,6 +106,7 @@ class TestThoroughIo(BelReconstitutionMixin):
 
         self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
 
+    @unittest.skip
     def test_from_ndex(self):
         """Tests the download of a CX document from NDEx"""
         reconstituted = from_ndex('014e5957-3d96-11e7-8f50-0ac135e8bacf')
