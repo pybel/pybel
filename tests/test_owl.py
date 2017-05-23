@@ -5,11 +5,10 @@ from pathlib import Path
 
 import pybel
 from pybel.constants import *
-from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
-from tests.constants import ConnectionMixin
+from tests.constants import TemporaryCacheMixin
 from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_ado
 from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, \
     expected_test_bel_4_metadata, assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
@@ -49,7 +48,7 @@ class TestOwlUtils(unittest.TestCase):
             parse_owl('http://example.com/not_owl')
 
 
-class TestParsePizza(TestOwlBase, ConnectionMixin):
+class TestParsePizza(TestOwlBase, TemporaryCacheMixin):
     expected_prefixes = {
         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
@@ -75,7 +74,7 @@ class TestParsePizza(TestOwlBase, ConnectionMixin):
     def test_metadata_parser(self, m1, m2):
         functions = set('A')
         s = 'DEFINE NAMESPACE PIZZA AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
-        parser = MetadataParser(CacheManager(connection=self.connection))
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('PIZZA', parser.namespace_dict)
@@ -89,7 +88,7 @@ class TestParsePizza(TestOwlBase, ConnectionMixin):
     @mock_parse_owl_pybel
     def test_metadata_parser_no_function(self, m1, m2):
         s = 'DEFINE NAMESPACE PIZZA AS OWL "{}"'.format(pizza_iri)
-        parser = MetadataParser(CacheManager(connection=self.connection))
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('PIZZA', parser.namespace_dict)
@@ -104,14 +103,14 @@ class TestParsePizza(TestOwlBase, ConnectionMixin):
     @mock_parse_owl_pybel
     def test_metadata_parser_annotation(self, m1, m2):
         s = 'DEFINE ANNOTATION Pizza AS OWL "{}"'.format(pizza_iri)
-        parser = MetadataParser(CacheManager(connection=self.connection))
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('Pizza', parser.annotations_dict)
         self.assertEqual(EXPECTED_PIZZA_NODES, set(parser.annotations_dict['Pizza']))
 
 
-class TestWine(TestOwlBase, ConnectionMixin):
+class TestWine(TestOwlBase, TemporaryCacheMixin):
     def setUp(self):
         super(TestWine, self).setUp()
 
@@ -287,12 +286,11 @@ class TestWine(TestOwlBase, ConnectionMixin):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parser_namespace(self, m1, m2):
-        cm = CacheManager(connection=self.connection)
 
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
 
-        parser = MetadataParser(manager=cm)
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('Wine', parser.namespace_dict)
@@ -307,10 +305,9 @@ class TestWine(TestOwlBase, ConnectionMixin):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parser_annotation(self, m1, m2):
-        cm = CacheManager(connection=self.connection)
         s = 'DEFINE ANNOTATION Wine AS OWL "{}"'.format(wine_iri)
 
-        parser = MetadataParser(manager=cm)
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('Wine', parser.annotations_dict)
@@ -351,13 +348,7 @@ class TestAdo(TestOwlBase):
         self.assertLessEqual(self.ado_expected_edges_subset, set(owl.edges_iter()))
 
 
-class TestOwlManager(TestOwlBase, ConnectionMixin):
-    def setUp(self):
-        super(TestOwlManager, self).setUp()
-        self.manager = CacheManager(connection=self.connection)
-        self.manager.drop_database()
-        self.manager.create_all()
-
+class TestOwlManager(TestOwlBase, TemporaryCacheMixin):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_ensure_namespace(self, m1, m2):
@@ -401,12 +392,12 @@ class TestOwlManager(TestOwlBase, ConnectionMixin):
             self.manager.insert_annotation_owl('http://cthoyt.com/not_owl.owl')
 
 
-class TestIntegration(TestOwlBase, ConnectionMixin):
+class TestIntegration(TestOwlBase, TemporaryCacheMixin):
     @mock_bel_resources
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_from_path(self, m1, m2, m3):
-        g = pybel.from_path(test_bel_extensions, manager=self.connection)
+        g = pybel.from_path(test_bel_extensions, manager=self.manager)
         self.assertEqual(0, len(g.warnings))
 
         self.assertEqual(expected_test_bel_4_metadata, g.document)

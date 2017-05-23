@@ -129,35 +129,36 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
                                               json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
 
 
-def make_temp_connection():
-    dir = tempfile.mkdtemp()
-    path = os.path.join(dir, 'test.db')
-    connection = 'sqlite:///' + path
-    return dir, path, connection
+class TemporaryCacheMixin(unittest.TestCase):
+    """Facilitates generating a database in a temporary file on a test-by-test basis"""
 
-
-def tear_temp_connection(dir, path):
-    if os.path.exists(path):
-        os.remove(path)
-    if os.path.exists(dir):
-        os.rmdir(dir)
-
-
-class ConnectionMixin(unittest.TestCase):
     def setUp(self):
-        super(ConnectionMixin, self).setUp()
-        self.dir, self.path, self.connection = make_temp_connection()
+        self.fd, self.path = tempfile.mkstemp()
+        self.connection = 'sqlite:///' + self.path
         log.info('Test generated connection string %s', self.connection)
+        self.manager = CacheManager(connection=self.connection)
 
     def tearDown(self):
-        super(ConnectionMixin, self).tearDown()
-        tear_temp_connection(self.dir, self.path)
+        self.manager.close()
+        os.close(self.fd)
+        os.remove(self.path)
 
 
-class TemporaryCacheMixin(ConnectionMixin):
-    def setUp(self):
-        super(TemporaryCacheMixin, self).setUp()
-        self.manager = CacheManager(connection=self.connection)
+class TemporaryCacheClsMixin(unittest.TestCase):
+    """Facilitates generating a database in a temporary file on a class-by-class basis"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.fd, cls.path = tempfile.mkstemp()
+        cls.connection = 'sqlite:///' + cls.path
+        log.info('Test generated connection string %s', cls.connection)
+        cls.manager = CacheManager(connection=cls.connection)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.manager.close()
+        os.close(cls.fd)
+        os.remove(cls.path)
 
 
 class TestTokenParserBase(unittest.TestCase):

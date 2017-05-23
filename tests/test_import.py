@@ -15,15 +15,13 @@ from pybel import to_cx, from_cx, to_cx_jsons, from_cx_jsons
 from pybel import to_json, from_json, to_jsons, from_jsons
 from pybel import to_ndex, from_ndex
 from pybel.constants import *
-from pybel.manager import CacheManager
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
 from tests.constants import BelReconstitutionMixin, test_bel_simple, TestTokenParserBase, SET_CITATION_TEST, \
     test_citation_dict, test_set_evidence, mock_bel_resources, test_bel_thorough, test_bel_slushy, test_evidence_text
-from tests.constants import assertHasEdge
-from tests.constants import make_temp_connection, tear_temp_connection
-from tests.constants import test_bel_isolated
+from tests.constants import TemporaryCacheClsMixin
+from tests.constants import assertHasEdge, test_bel_isolated
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
@@ -44,21 +42,16 @@ def do_remapping(original, reconstituted):
         raise e
 
 
-class TestThoroughIo(BelReconstitutionMixin):
+class TestThoroughIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
-        cls.dir, cls.path, cls.connection = make_temp_connection()
-        cls.manager = CacheManager(connection=cls.connection)
+        super(TestThoroughIo, cls).setUpClass()
 
         @mock_bel_resources
         def help_build_graph(mock):
             return from_path(test_bel_thorough, manager=cls.manager, allow_nested=True)
 
         cls.graph = help_build_graph()
-
-    @classmethod
-    def tearDownClass(cls):
-        tear_temp_connection(cls.dir, cls.path)
 
     def test_path(self):
         self.bel_thorough_reconstituted(self.graph)
@@ -125,18 +118,16 @@ class TestThoroughIo(BelReconstitutionMixin):
         self.bel_thorough_reconstituted(reconstituted)
 
 
-class TestSlushyIo(BelReconstitutionMixin):
+class TestSlushyIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
-        dir, path, connection = make_temp_connection()
-        manager = CacheManager(connection=connection)
+        super(TestSlushyIo, cls).setUpClass()
 
         @mock_bel_resources
         def help_build_graph(mock):
-            return from_path(test_bel_slushy, manager=manager)
+            return from_path(test_bel_slushy, manager=cls.manager)
 
         cls.graph = help_build_graph()
-        tear_temp_connection(dir, path)
 
     def test_slushy(self):
         self.bel_slushy_reconstituted(self.graph)
@@ -176,19 +167,16 @@ class TestSlushyIo(BelReconstitutionMixin):
         self.bel_slushy_reconstituted(reconstituted)
 
 
-class TestSimpleIo(BelReconstitutionMixin):
+class TestSimpleIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
-        dir, path, connection = make_temp_connection()
-        cls.manager = CacheManager(connection=connection)
+        super(TestSimpleIo, cls).setUpClass()
 
         @mock_bel_resources
         def get_graph(mock_get):
             return from_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
 
         cls.graph = get_graph()
-
-        tear_temp_connection(dir, path)
 
     def test_compile(self):
         self.bel_simple_reconstituted(self.graph)
@@ -203,21 +191,16 @@ class TestSimpleIo(BelReconstitutionMixin):
         self.bel_simple_reconstituted(reconstituted)
 
 
-class TestIsolatedIo(BelReconstitutionMixin):
+class TestIsolatedIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
-        cls.dir, cls.path, cls.connection = make_temp_connection()
-        cls.manager = CacheManager(connection=cls.connection)
+        super(TestIsolatedIo, cls).setUpClass()
 
         @mock_bel_resources
         def get_graph(mock_get):
             return from_path(test_bel_isolated, manager=cls.manager)
 
         cls.graph = get_graph()
-
-    @classmethod
-    def tearDownClass(cls):
-        tear_temp_connection(cls.dir, cls.path)
 
     def test_compile(self):
         self.bel_isolated_reconstituted(self.graph)
