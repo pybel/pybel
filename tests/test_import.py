@@ -103,7 +103,7 @@ class TestThoroughIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
 
-    @unittest.skip
+    @unittest.skip('Not sure if identifier is stable')
     def test_from_ndex(self):
         """Tests the download of a CX document from NDEx"""
         reconstituted = from_ndex('014e5957-3d96-11e7-8f50-0ac135e8bacf')
