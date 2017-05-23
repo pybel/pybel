@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.8 <https://github.com/pybel/pybel/compare/v0.5.7...v0.5.8>`_ - 2017-05-
+------------------------------------------------------------------------------
+Changed
+-------
+- CX is now unstreamified on load, making compatibility with other CX sources (like NDEx) possible
+
+Added
+-----
+- NDEx upload and download
+
 `0.5.7 <https://github.com/pybel/pybel/compare/v0.5.5...v0.5.7>`_ - 2017-05-20
 ------------------------------------------------------------------------------
 Changed
