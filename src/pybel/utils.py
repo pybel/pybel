@@ -31,16 +31,11 @@ def download(url):
 
     try:
         res = session.get(url)
-        res.raise_for_status()
-        return res
     except requests.exceptions.ConnectionError as e:
-        if url.startswith(BELFRAMEWORK_DOMAIN):
-            log.warning('Got %s address (service is discontinued) trying mirror at %s', BELFRAMEWORK_DOMAIN,
-                        OPENBEL_DOMAIN)
-            res = session.get(url.replace(BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN))
-            res.raise_for_status()
-            return res
         raise e
+
+    res.raise_for_status()
+    return res
 
 
 def parse_bel_resource(lines):
