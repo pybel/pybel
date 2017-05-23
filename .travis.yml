@@ -1,6 +1,9 @@
 sudo: false
 cache: pip
 
+services:
+  - mysql
+
 language: python
 
 python:
@@ -9,6 +12,9 @@ python:
     - "3.5"
     - "3.6"
 env:
+  global:
+    - PYBEL_CONNECTION=mysql+pymysql://travis@localhost/pybel?charset=utf8'
+  matrix:
     - TOXENV=manifest
     - TOXENV=docs
 
@@ -25,6 +31,8 @@ matrix:
 
 before_install:
     - pip install codecov
+    - pip install pymysql
+    - mysql -e 'CREATE DATABASE pybel;'
 
 install:
     - pip install tox
