@@ -19,13 +19,11 @@ log = logging.getLogger(__name__)
 
 
 class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
-    def setUp(self):
-        super(TestGraphCache, self).setUp()
-        self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
-
     @mock_bel_resources
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
+        self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
+
         self.manager.insert_graph(self.graph)
 
         x = self.manager.list_graphs()
@@ -35,28 +33,28 @@ class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
                           expected_test_thorough_metadata[METADATA_VERSION],
                           expected_test_thorough_metadata[METADATA_DESCRIPTION]), x[0])
 
-        reconstituted = self.manager.get_graph(expected_test_thorough_metadata[METADATA_NAME],
-                                               expected_test_thorough_metadata[METADATA_VERSION])
+        reconstituted = self.manager.get_graph_by_name(expected_test_thorough_metadata[METADATA_NAME],
+                                                       expected_test_thorough_metadata[METADATA_VERSION])
         self.bel_thorough_reconstituted(reconstituted)
 
         # Test that the graph can't be added a second time
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
             self.manager.insert_graph(self.graph)
 
-    @mock_bel_resources
-    def test_get_versions(self, mock_get):
-        TEST_V1 = '0.9'
-        TEST_V2 = expected_test_thorough_metadata[METADATA_VERSION]  # Actually is 1.0
+        self.manager.rollback()
 
-        self.graph.document[METADATA_VERSION] = TEST_V1
-        self.manager.insert_graph(self.graph)
+        graphcopy = self.graph.copy()
+        graphcopy.document[METADATA_VERSION] = '1.0.1'
+        self.manager.insert_graph(graphcopy)
 
-        self.graph.document[METADATA_VERSION] = TEST_V2
-        self.manager.insert_graph(self.graph)
+        expected_versions = {'1.0.1', self.graph.version}
+        self.assertEqual(expected_versions, set(self.manager.get_graph_versions(self.graph.name)))
 
-        self.assertEqual({TEST_V1, TEST_V2}, set(self.manager.get_graph_versions(self.graph.document[METADATA_NAME])))
+        most_recent = self.manager.get_graph_by_name(self.graph.name)
+        self.assertEqual('1.0.1', most_recent.version)
 
-        self.assertEqual(TEST_V2, self.manager.get_graph(self.graph.document[METADATA_NAME]).document[METADATA_VERSION])
+        exact_name_version = self.manager.get_graph_by_name(self.graph.name, self.graph.version)
+        self.assertEqual(self.graph.version, exact_name_version.version)
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
@@ -108,8 +106,8 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertEqual({nea.edge_id for nea in network_edge_associations},
                          {edge.id for edge in edges})
 
-        g2 = self.manager.get_graph(expected_test_simple_metadata[METADATA_NAME],
-                                    expected_test_simple_metadata[METADATA_VERSION])
+        g2 = self.manager.get_graph_by_name(expected_test_simple_metadata[METADATA_NAME],
+                                            expected_test_simple_metadata[METADATA_VERSION])
         self.bel_simple_reconstituted(g2)
 
 
@@ -350,3 +348,7 @@ class TestFilter(TemporaryCacheMixin, BelReconstitutionMixin):
             del reloaded.edge[u][v][k][annotation_tag]
 
         compare(reloaded, check_metadata=False)
+
+
+if __name__ == '__main__':
+    unittest.main()

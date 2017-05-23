@@ -967,15 +967,13 @@ class CacheManager(BaseCacheManager):
         """Returns all of the versions of a graph with the given name"""
         return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
 
-    def get_graph(self, name, version=None):
-        """Loads most recent graph, or allows for specification of version
+    def get_graph_by_name(self, name, version=None):
+        """Loads most recently added graph with the given name, or allows for specification of version
 
-        :param name: The name of the graph
-        :type name: str
-        :param version: The version string of the graph. If not specified, loads most recent graph added with this name
-        :type version: None or str
-        :return: A BEL Graph
-        :rtype: pybel.BELGraph
+        :param str name: The name of the graph
+        :param str version: The version string of the graph. If not specified, loads most recent graph added with this name
+        :return: A BEL graph
+        :rtype: BELGraph
         """
         if version is not None:
             n = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
