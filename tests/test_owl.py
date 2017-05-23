@@ -377,19 +377,11 @@ class TestOwlManager(TestOwlBase, TemporaryCacheMixin):
 
     def test_missing_namespace(self):
         with self.assertRaises(Exception):
-            self.manager.ensure_namespace_owl('http://example.com/not_owl.owl')
-
-    def test_insert_missing_namespace(self):
-        with self.assertRaises(Exception):
-            self.manager.insert_namespace_owl('http://cthoyt.com/not_owl.owl')
+            self.manager.ensure_namespace_owl('http://example.com/not_owl_namespace.owl')
 
     def test_missing_annotation(self):
         with self.assertRaises(Exception):
-            self.manager.ensure_annotation_owl('http://example.com/not_owl.owl')
-
-    def test_insert_missing_annotation(self):
-        with self.assertRaises(Exception):
-            self.manager.insert_annotation_owl('http://cthoyt.com/not_owl.owl')
+            self.manager.ensure_annotation_owl('http://example.com/not_owl_annotation.owl')
 
 
 class TestIntegration(TestOwlBase, TemporaryCacheMixin):
@@ -402,27 +394,10 @@ class TestIntegration(TestOwlBase, TemporaryCacheMixin):
 
         self.assertEqual(expected_test_bel_4_metadata, g.document)
 
-        expected_definitions = {
-            HGNC_KEYWORD: HGNC_URL,
-            'PIZZA': pizza_iri,
-            'WINE': wine_iri
-        }
+        self.assertEqual({'WINE': wine_iri}, g.namespace_owl)
+        self.assertEqual({'WINE': wine_iri}, g.annotation_owl)
+        self.assertEqual({'HGNC': HGNC_URL}, g.namespace_url)
 
-        actual_definitions = {}
-        actual_definitions.update(g.namespace_url)
-        actual_definitions.update(g.namespace_owl)
-
-        self.assertEqual(expected_definitions, actual_definitions)
-
-        expected_annotations = {
-            'Wine': wine_iri
-        }
-
-        actual_annotations = {}
-        actual_annotations.update(g.annotation_url)
-        actual_annotations.update(g.annotation_owl)
-
-        self.assertEqual(expected_annotations, actual_annotations)
 
         a = PROTEIN, 'HGNC', 'AKT1'
         b = PROTEIN, 'HGNC', 'EGFR'
