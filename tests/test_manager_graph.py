@@ -11,14 +11,14 @@ from pybel import from_path
 from pybel.constants import *
 from pybel.manager import models
 from tests import constants
-from tests.constants import test_bel_thorough, mock_bel_resources, \
-    expected_test_thorough_metadata, test_bel_simple, expected_test_simple_metadata, TemporaryCacheMixin, \
-    BelReconstitutionMixin
+from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin, mock_bel_resources
+from tests.constants import test_bel_simple, expected_test_simple_metadata
+from tests.constants import test_bel_thorough, expected_test_thorough_metadata
 
 log = logging.getLogger(__name__)
 
 
-class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
@@ -58,7 +58,7 @@ class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestGraphCacheSimple(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestGraphCacheSimple, self).setUp()
         self.simple_graph = pybel.from_path(test_bel_simple, manager=self.manager)
@@ -112,7 +112,7 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestQueryNode(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestQueryNode(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
     def setUp(self):
@@ -150,7 +150,7 @@ class TestQueryNode(TemporaryCacheMixin, BelReconstitutionMixin):
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestQueryEdge(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestQueryEdge(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
     def setUp(self):
@@ -216,7 +216,7 @@ class TestQueryEdge(TemporaryCacheMixin, BelReconstitutionMixin):
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestQueryCitation(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestQueryCitation(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
     def setUp(self):
@@ -299,7 +299,7 @@ class TestQueryCitation(TemporaryCacheMixin, BelReconstitutionMixin):
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestFilter(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestFilter(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that a graph can be reconstructed from the edge and node relational tables in the database
 
     1. Load graph (test BEL 1 or test thorough)

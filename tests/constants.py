@@ -129,30 +129,25 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
                                               json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
 
 
-class TemporaryCacheMixin(unittest.TestCase):
-    """Facilitates generating a database in a temporary file on a test-by-test basis"""
+class TestGraphMixin(unittest.TestCase):
+    def assertHasNode(self, g, n, **kwargs):
+        """Helper for asserting node membership
+        
+        :param g: Graph 
+        :param n: Node
+        :param kwargs: 
+        """
+        assertHasNode(self, n, g, **kwargs)
 
-    def setUp(self):
-        self.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
-
-        if self.test_connection:
-            self.connection = self.test_connection
-        else:
-            self.fd, self.path = tempfile.mkstemp()
-            self.connection = 'sqlite:///' + self.path
-            log.info('Test generated connection string %s', self.connection)
-
-        self.manager = CacheManager(connection=self.connection)
-        self.manager.create_all()
-
-    def tearDown(self):
-        if self.test_connection:
-            self.manager.drop_database()
-            self.manager.close()
-        else:
-            self.manager.close()
-            os.close(self.fd)
-            os.remove(self.path)
+    def assertHasEdge(self, g, u, v, **kwargs):
+        """Helper for asserting edge membership
+        
+        :param g: Graph
+        :param u: Source node
+        :param v: Target node
+        :param kwargs: 
+        """
+        assertHasEdge(self, u, v, g, **kwargs)
 
 
 class TemporaryCacheClsMixin(unittest.TestCase):
@@ -175,12 +170,23 @@ class TemporaryCacheClsMixin(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         if cls.test_connection:
-            cls.manager.drop_database()
             cls.manager.close()
         else:
             cls.manager.close()
             os.close(cls.fd)
             os.remove(cls.path)
+
+
+class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
+    """This class makes a manager available for the entire existence of the class but deletes everything that gets
+    stuck in it after each test"""
+
+    def tearDown(self):
+        super(FleetingTemporaryCacheMixin, self).tearDown()
+
+        self.manager.drop_namespaces()
+        self.manager.drop_annotations()
+        self.manager.drop_graphs()
 
 
 class TestTokenParserBase(unittest.TestCase):

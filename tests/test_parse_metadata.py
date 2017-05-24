@@ -8,8 +8,8 @@ from pathlib import Path
 from pybel.io.line_utils import split_file_to_annotations_and_definitions
 from pybel.parser import MetadataParser
 from pybel.parser.parse_exceptions import *
+from tests.constants import FleetingTemporaryCacheMixin
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc
-from tests.constants import TemporaryCacheMixin
 from tests.constants import test_an_1, test_ns_1, mock_bel_resources, test_ns_nocache
 from tests.constants import test_bel_simple
 
@@ -25,7 +25,7 @@ class TestSplitLines(unittest.TestCase):
         self.assertEqual(14, len(statements))
 
 
-class TestParseMetadata(TemporaryCacheMixin):
+class TestParseMetadata(FleetingTemporaryCacheMixin):
     def setUp(self):
         super(TestParseMetadata, self).setUp()
         self.parser = MetadataParser(manager=self.manager)

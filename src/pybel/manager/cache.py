@@ -18,7 +18,7 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
-from .models import Network, Annotation, Namespace
+from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, NamespaceEntry, AnnotationEntry
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -63,8 +63,7 @@ class CacheManager(BaseCacheManager):
         """
         :param connection: A custom database connection string
         :type connection: str or None
-        :param echo: Whether or not echo the running sql code.
-        :type echo: bool
+        :param bool echo: Whether or not echo the running sql code.
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
@@ -87,6 +86,45 @@ class CacheManager(BaseCacheManager):
         self.annotation_term_cache = {}
         self.annotation_edge_cache = {}
         self.annotation_graph_cache = {}
+
+    def drop_graphs(self):
+        """Drops all graphs"""
+        self.session.query(Network).delete()
+        self.session.commit()
+
+    def drop_namespaces(self):
+        """Drops all namespaces"""
+        self.namespace_cache.clear()
+        self.namespace_id_cache.clear()
+        self.namespace_model.clear()
+
+        self.namespace_term_cache.clear()
+        self.namespace_edge_cache.clear()
+        self.namespace_graph_cache.clear()
+
+        self.session.query(NamespaceEntry).delete()
+        self.session.query(Namespace).delete()
+        self.session.commit()
+
+    def drop_annotations(self):
+        """Drops all annotations"""
+
+        self.annotation_cache.clear()
+        self.annotation_id_cache.clear()
+        self.annotation_model.clear()
+
+        self.annotation_term_cache.clear()
+        self.annotation_edge_cache.clear()
+        self.annotation_graph_cache.clear()
+
+        self.session.query(AnnotationEntry).delete()
+        self.session.query(Annotation).delete()
+        self.session.commit()
+
+    def drop_equivalences(self):
+        """Drops all equivalence classes"""
+        self.session.query(NamespaceEntryEquivalence).delete()
+        self.session.commit()
 
     # NAMESPACE MANAGEMENT
 
@@ -999,11 +1037,6 @@ class CacheManager(BaseCacheManager):
 
         # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
         self.session.query(Network).filter(Network.id == network_id).delete()
-        self.session.commit()
-
-    def drop_graphs(self):
-        """Drops all graphs"""
-        self.session.query(Network).delete()
         self.session.commit()
 
     def list_graphs(self, include_description=True):

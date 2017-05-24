@@ -14,14 +14,14 @@ from pybel import cli
 from pybel.constants import PYBEL_CONTEXT_TAG, METADATA_NAME
 from pybel.io import from_pickle, from_json, from_path
 from pybel.manager.database_io import from_database
-from tests.constants import TemporaryCacheMixin, BelReconstitutionMixin
+from tests.constants import BelReconstitutionMixin, FleetingTemporaryCacheMixin
 from tests.constants import test_bel_simple, mock_bel_resources, test_bel_thorough, expected_test_thorough_metadata
 
 log = logging.getLogger(__name__)
 
 
 @unittest.skip
-class TestCli(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestCli, self).setUp()
         self.runner = CliRunner()

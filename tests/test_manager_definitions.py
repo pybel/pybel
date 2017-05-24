@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from pybel.manager.cache import CacheManager
+from tests.constants import FleetingTemporaryCacheMixin
 from tests.constants import HGNC_URL, help_check_hgnc, CELL_LINE_URL, HGNC_KEYWORD
-from tests.constants import TemporaryCacheMixin
 from tests.constants import test_ns_nocache
 from tests.constants import wine_iri, mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_rdf
 
 
-class TestCache(TemporaryCacheMixin):
+class TestCache(FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_insert_namespace_persistent(self, mock_get):
         self.manager.ensure_namespace(HGNC_URL)
