@@ -321,9 +321,9 @@ def subdict_matches(target, query, partial_match=True):
     for k, v in query.items():
         if k not in target:
             return False
-        elif not isinstance(v, (str, list, set, dict, tuple)):
+        elif not isinstance(v, (int, str, list, set, dict, tuple)):
             raise ValueError('invalid value: {}'.format(v))
-        elif isinstance(v, str) and target[k] != v:
+        elif isinstance(v, (int, str)) and target[k] != v:
             return False
         elif isinstance(v, dict):
             if partial_match:

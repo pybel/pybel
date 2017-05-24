@@ -7,8 +7,11 @@ services:
 language: python
 
 python:
-    - 2.7
     - 3.6
+    - 3.5
+    - 3.4
+    - 2.7
+
 env:
   global:
     - PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/pybel?charset=utf8'
@@ -19,9 +22,17 @@ matrix:
     include:
         - python: 3.6
           env: TOXENV=py36
+        - python: 3.5
+          env: TOXENV=py35
+        - python: 3.4
+          env: TOXENV=py34
         - python: 2.7
           env: TOXENV=py27
     exclude:
+        - python: 3.5
+          env: TOXENV=docs
+        - python: 3.4
+          env: TOXENV=docs
         - python: 2.7
           env: TOXENV=docs
 
@@ -34,8 +45,8 @@ jobs:
 
     - stage: Check Manifest
       script: tox
-      env: TOXENV=manifest
       python: 3.6
+      env: TOXENV=manifest
 
     - stage: Deploy to PyPI
       deploy:
