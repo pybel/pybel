@@ -17,7 +17,8 @@ class TestCache(TemporaryCacheMixin):
         alternate_manager.ensure_namespace(HGNC_URL)
         help_check_hgnc(self, {HGNC_KEYWORD: alternate_manager.namespace_cache[HGNC_URL]})
 
-    def test_insert_namespace_nocache(self):
+    @mock_bel_resources
+    def test_insert_namespace_nocache(self, mock):
         """Test that this namespace isn't cached"""
         self.assertEqual(0, len(self.manager.list_namespaces()))
 
