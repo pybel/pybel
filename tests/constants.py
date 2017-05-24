@@ -133,15 +133,26 @@ class TemporaryCacheMixin(unittest.TestCase):
     """Facilitates generating a database in a temporary file on a test-by-test basis"""
 
     def setUp(self):
-        self.fd, self.path = tempfile.mkstemp()
-        self.connection = 'sqlite:///' + self.path
-        log.info('Test generated connection string %s', self.connection)
+        self.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
+
+        if self.test_connection:
+            self.connection = self.test_connection
+        else:
+            self.fd, self.path = tempfile.mkstemp()
+            self.connection = 'sqlite:///' + self.path
+            log.info('Test generated connection string %s', self.connection)
+
         self.manager = CacheManager(connection=self.connection)
+        self.manager.create_all()
 
     def tearDown(self):
-        self.manager.close()
-        os.close(self.fd)
-        os.remove(self.path)
+        if self.test_connection:
+            self.manager.drop_database()
+            self.manager.close()
+        else:
+            self.manager.close()
+            os.close(self.fd)
+            os.remove(self.path)
 
 
 class TemporaryCacheClsMixin(unittest.TestCase):
@@ -149,16 +160,27 @@ class TemporaryCacheClsMixin(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.fd, cls.path = tempfile.mkstemp()
-        cls.connection = 'sqlite:///' + cls.path
-        log.info('Test generated connection string %s', cls.connection)
+        cls.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
+
+        if cls.test_connection:
+            cls.connection = cls.test_connection
+        else:
+            cls.fd, cls.path = tempfile.mkstemp()
+            cls.connection = 'sqlite:///' + cls.path
+            log.info('Test generated connection string %s', cls.connection)
+
         cls.manager = CacheManager(connection=cls.connection)
+        cls.manager.create_all()
 
     @classmethod
     def tearDownClass(cls):
-        cls.manager.close()
-        os.close(cls.fd)
-        os.remove(cls.path)
+        if cls.test_connection:
+            cls.manager.drop_database()
+            cls.manager.close()
+        else:
+            cls.manager.close()
+            os.close(cls.fd)
+            os.remove(cls.path)
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -256,9 +278,11 @@ class MockResponse:
             raise ValueError("file doesn't exist: {}".format(self.path))
 
     def iter_lines(self):
-        with open(self.path, 'rb') as f:
-            for line in f:
-                yield line
+        with open(self.path, 'rb') as file:
+            lines = list(file)
+
+        for line in lines:
+            yield line
 
     def raise_for_status(self):
         pass
@@ -276,6 +300,9 @@ class MockSession:
     @staticmethod
     def get(url):
         return MockResponse(url)
+
+    def close(self):
+        pass
 
 
 mock_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)

@@ -13,7 +13,7 @@ python:
     - "3.6"
 env:
   global:
-    - PYBEL_CONNECTION=mysql+pymysql://travis@localhost/pybel?charset=utf8'
+    - PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/pybel?charset=utf8'
   matrix:
     - TOXENV=manifest
     - TOXENV=docs
