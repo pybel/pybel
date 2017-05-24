@@ -817,7 +817,7 @@ class CacheManager(BaseCacheManager):
         :param node_data: Describes the given node and contains is_variant information
         :type node_data: dict
         :return: A list of modification objects belonging to the given node
-        :rtype: list of models.Modification
+        :rtype: list[models.Modification]
         """
         modification_list = []
         if FUSION in node_data:
@@ -909,12 +909,10 @@ class CacheManager(BaseCacheManager):
     def get_or_create_property(self, graph, edge_data):
         """Creates a list of all subject and object related properties of the edge.
 
-        :param graph: A BEL graph
-        :type graph: pybel.BELGraph
-        :param edge_data: Describes the context of the given edge.
-        :type edge_data: dict
+        :param pybel.BELGraph graph: A BEL graph
+        :param dict edge_data: Describes the context of the given edge.
         :return: A list of all subject and object properties of the edge
-        :rtype: list of models.Property
+        :rtype: list[models.Property]
         """
         properties = []
         property_list = []
@@ -1114,12 +1112,9 @@ class CacheManager(BaseCacheManager):
     def get_network(self, network_id=None, name=None, version=None, as_dict_list=False):
         """Builds and runs a query over all networks in the database.
 
-        :param network_id: Database identifier of the network of interest.
-        :type network_id: int
-        :param name: Name of the network.
-        :type name: str
-        :param version: Version of the network
-        :type version: str
+        :param int network_id: Database identifier of the network of interest.
+        :param str name: Name of the network.
+        :param str version: Version of the network
         :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
                              :class:`Network` objects.
         :type as_dict_list: bool
