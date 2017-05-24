@@ -11,10 +11,10 @@ from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import FleetingTemporaryCacheMixin, TestGraphMixin
-from tests.constants import mock_parse_owl_rdf, test_owl_ado
-from tests.mocks import mock_bel_resources, mock_parse_owl_pybel
 from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, \
     expected_test_bel_4_metadata, HGNC_URL
+from tests.constants import test_owl_ado
+from tests.mocks import mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_rdf
 
 EXPECTED_PIZZA_NODES = {
     'Pizza',
