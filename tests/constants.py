@@ -5,22 +5,14 @@ import logging
 import tempfile
 import unittest
 
-import networkx as nx
-from onto2nx.ontospy import Ontospy
 from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.manager.cache import CacheManager
-from pybel.manager.utils import urldefrag, OWLParser
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +28,7 @@ test_bel_extensions = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
 test_bel_isolated = os.path.join(bel_dir_path, 'isolated.bel')
+test_bel_misordered = os.path.join(bel_dir_path, 'misordered.bel')
 
 test_owl_pizza = os.path.join(owl_dir_path, 'pizza_onto.owl')
 test_owl_wine = os.path.join(owl_dir_path, 'wine.owl')
@@ -127,6 +120,15 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
         self.assertTrue(any_dict_matches(graph.edge[u][v], kwargs),
                         msg=msg_format.format(u, v, json.dumps(kwargs, indent=2, sort_keys=True),
                                               json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
+
+
+def identifier(namespace, name):
+    return {NAMESPACE: namespace, NAME: name}
+
+
+def default_identifier(name):
+    """Convenience function for building a default namespace/name pair"""
+    return identifier(BEL_DEFAULT_NAMESPACE, name)
 
 
 class TestGraphMixin(unittest.TestCase):
@@ -261,59 +263,6 @@ def get_uri_name(url):
         return url_parts[-1]
 
 
-class MockResponse:
-    """See http://stackoverflow.com/questions/15753390/python-mock-requests-and-the-response"""
-
-    def __init__(self, mock_url):
-        if mock_url.endswith('.belns'):
-            self.path = os.path.join(belns_dir_path, get_uri_name(mock_url))
-        elif mock_url.endswith('.belanno'):
-            self.path = os.path.join(belanno_dir_path, get_uri_name(mock_url))
-        elif mock_url.endswith('.beleq'):
-            self.path = os.path.join(beleq_dir_path, get_uri_name(mock_url))
-        elif mock_url.endswith('.bel'):
-            self.path = os.path.join(bel_dir_path, get_uri_name(mock_url))
-        elif mock_url == wine_iri:
-            self.path = test_owl_wine
-        elif mock_url == pizza_iri:
-            self.path = test_owl_pizza
-        else:
-            raise ValueError('Invalid extension')
-
-        if not os.path.exists(self.path):
-            raise ValueError("file doesn't exist: {}".format(self.path))
-
-    def iter_lines(self):
-        with open(self.path, 'rb') as file:
-            lines = list(file)
-
-        for line in lines:
-            yield line
-
-    def raise_for_status(self):
-        pass
-
-
-class MockSession:
-    """Patches the session object so requests can be redirected through the filesystem without rewriting BEL files"""
-
-    def __init__(self):
-        pass
-
-    def mount(self, prefix, adapter):
-        pass
-
-    @staticmethod
-    def get(url):
-        return MockResponse(url)
-
-    def close(self):
-        pass
-
-
-mock_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)
-
-
 def help_check_hgnc(self, namespace_dict):
     self.assertIn(HGNC_KEYWORD, namespace_dict)
 
@@ -326,39 +275,6 @@ def help_check_hgnc(self, namespace_dict):
     self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
     self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
 
-
-def parse_owl_pybel_resolver(iri):
-    path = os.path.join(owl_dir_path, get_uri_name(iri))
-
-    if not os.path.exists(path) and '.' not in path:
-        path = '{}.owl'.format(path)
-
-    return OWLParser(file=path)
-
-
-mock_parse_owl_pybel = mock.patch('pybel.manager.utils.parse_owl_pybel', side_effect=parse_owl_pybel_resolver)
-
-
-def parse_owl_rdf_resolver(iri):
-    path = os.path.join(owl_dir_path, get_uri_name(iri))
-    o = Ontospy(path)
-
-    g = nx.DiGraph(IRI=iri)
-
-    for cls in o.classes:
-        g.add_node(cls.locale, type='Class')
-
-        for parent in cls.parents():
-            g.add_edge(cls.locale, parent.locale, type='SubClassOf')
-
-        for instance in cls.instances():
-            _, frag = urldefrag(instance)
-            g.add_edge(frag, cls.locale, type='ClassAssertion')
-
-    return g
-
-
-mock_parse_owl_rdf = mock.patch('pybel.manager.utils.parse_owl_rdf', side_effect=parse_owl_rdf_resolver)
 
 BEL_THOROUGH_NODES = {
     (ABUNDANCE, 'CHEBI', 'oxygen atom'),

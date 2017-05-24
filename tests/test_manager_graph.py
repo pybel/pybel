@@ -11,7 +11,8 @@ from pybel import from_path
 from pybel.constants import *
 from pybel.manager import models
 from tests import constants
-from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin, mock_bel_resources
+from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin
+from tests.mocks import mock_bel_resources
 from tests.constants import test_bel_simple, expected_test_simple_metadata
 from tests.constants import test_bel_thorough, expected_test_thorough_metadata
 

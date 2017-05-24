@@ -6,7 +6,8 @@ from pathlib import Path
 
 from pybel.manager import models
 from tests.constants import FleetingTemporaryCacheMixin
-from tests.constants import test_eq_1, test_eq_2, belns_dir_path, mock_bel_resources
+from tests.constants import test_eq_1, test_eq_2, belns_dir_path
+from tests.mocks import mock_bel_resources
 
 ns1 = Path(os.path.join(belns_dir_path, 'disease-ontology.belns')).as_uri()
 ns1_eq = Path(test_eq_1).as_uri()

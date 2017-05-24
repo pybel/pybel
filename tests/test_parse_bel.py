@@ -14,20 +14,12 @@ from pybel.parser.parse_exceptions import NestedRelationWarning, MalformedTransl
 from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict, \
     test_citation_dict, test_evidence_text
 from tests.constants import assertHasNode, assertHasEdge
+from tests.constants import identifier, default_identifier
 
 log = logging.getLogger(__name__)
 
 TEST_GENE_VARIANT = 'c.308G>A'
 TEST_PROTEIN_VARIANT = 'p.Phe508del'
-
-
-def identifier(namespace, name):
-    return {NAMESPACE: namespace, NAME: name}
-
-
-def default_identifier(name):
-    """Convenience function for building a default namespace/name pair"""
-    return identifier(BEL_DEFAULT_NAMESPACE, name)
 
 
 class TestVariantParser(unittest.TestCase):

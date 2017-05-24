@@ -11,7 +11,8 @@ from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import FleetingTemporaryCacheMixin, TestGraphMixin
-from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_ado
+from tests.constants import mock_parse_owl_rdf, test_owl_ado
+from tests.mocks import mock_bel_resources, mock_parse_owl_pybel
 from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, \
     expected_test_bel_4_metadata, HGNC_URL
 
@@ -391,7 +392,7 @@ class TestExtensionIo(TestGraphMixin, FleetingTemporaryCacheMixin):
             'WINE': wine_iri,
             'PIZZA': 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
         }, graph.namespace_owl)
-        self.assertEqual({'WINE': wine_iri}, graph.annotation_owl)
+        self.assertEqual({'Wine': wine_iri}, graph.annotation_owl)
         self.assertEqual({'HGNC': HGNC_URL}, graph.namespace_url)
 
         a = PROTEIN, 'HGNC', 'AKT1'

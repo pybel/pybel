@@ -9,9 +9,9 @@ from pybel.io.line_utils import split_file_to_annotations_and_definitions
 from pybel.parser import MetadataParser
 from pybel.parser.parse_exceptions import *
 from tests.constants import FleetingTemporaryCacheMixin
+from tests.mocks import mock_bel_resources
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc
-from tests.constants import test_an_1, test_ns_1, mock_bel_resources, test_ns_nocache
-from tests.constants import test_bel_simple
+from tests.constants import test_an_1, test_ns_1, test_ns_nocache, test_bel_simple
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
