@@ -120,9 +120,10 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         # with self.assertLogs('pybel', level='WARNING'):
         self.parser.parseString(s)
 
-    def test_parse_namespace_url_file(self):
+    @mock_bel_resources
+    def test_parse_namespace_url_file(self, mock):
         """Tests parsing a namespace by file URL"""
-        s = 'DEFINE NAMESPACE TESTNS1 AS URL "{}"'.format(Path(test_ns_1).as_uri())
+        s = 'DEFINE NAMESPACE TESTNS1 AS URL "{}"'.format(test_ns_1)
         self.parser.parseString(s)
 
         expected_values = {

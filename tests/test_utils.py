@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from pathlib import Path
 
 import networkx as nx
 
@@ -14,6 +13,7 @@ from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.utils import nest
 from pybel.utils import get_bel_resource, list2tuple
 from tests.constants import test_an_1, test_bel_simple
+from tests.mocks import mock_bel_resources
 
 
 class TestCanonicalizeHelper(unittest.TestCase):
@@ -60,8 +60,9 @@ class TestRandom(unittest.TestCase):
 
 
 class TestUtils(unittest.TestCase):
-    def test_download_url(self):
-        res = get_bel_resource(Path(test_an_1).as_uri())
+    @mock_bel_resources
+    def test_download_url(self, mock):
+        res = get_bel_resource(test_an_1)
 
         expected_values = {
             'TestAnnot1': 'O',

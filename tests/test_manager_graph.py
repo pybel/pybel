@@ -30,9 +30,12 @@ class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         x = self.manager.list_graphs()
 
         self.assertEqual(1, len(x))
-        self.assertEqual((1, expected_test_thorough_metadata[METADATA_NAME],
+
+        _, name, version, description = x[0]
+
+        self.assertEqual((expected_test_thorough_metadata[METADATA_NAME],
                           expected_test_thorough_metadata[METADATA_VERSION],
-                          expected_test_thorough_metadata[METADATA_DESCRIPTION]), x[0])
+                          expected_test_thorough_metadata[METADATA_DESCRIPTION]), (name, version, description))
 
         reconstituted = self.manager.get_graph_by_name(expected_test_thorough_metadata[METADATA_NAME],
                                                        expected_test_thorough_metadata[METADATA_VERSION])
@@ -52,9 +55,11 @@ class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(expected_versions, set(self.manager.get_graph_versions(self.graph.name)))
 
         most_recent = self.manager.get_graph_by_name(self.graph.name)
+        self.assertEqual(self.graph.name, most_recent.name)
         self.assertEqual('1.0.1', most_recent.version)
 
         exact_name_version = self.manager.get_graph_by_name(self.graph.name, self.graph.version)
+        self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual(self.graph.version, exact_name_version.version)
 
 

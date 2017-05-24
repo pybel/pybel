@@ -45,9 +45,8 @@ if sys.version_info < (3, ):
 
 EXTRAS_REQUIRE = {}
 TESTS_REQUIRE = [
-    'tox',
     'mock',
-    'pathlib'
+    'pathlib',
 ]
 ENTRY_POINTS = {
     'console_scripts': [

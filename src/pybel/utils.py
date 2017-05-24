@@ -14,6 +14,7 @@ import requests.exceptions
 from pkg_resources import get_distribution
 from requests.compat import urlparse
 from requests_file import FileAdapter
+from six import string_types
 
 from .constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN
 
@@ -73,8 +74,7 @@ def parse_bel_resource(lines):
 def is_url(s):
     """Checks if a string is a valid URL
     
-    :param s: An input string
-    :type s: str
+    :param str s: An input string
     :return: Is the string a valid URL?
     :rtype: bool
     """
@@ -84,8 +84,7 @@ def is_url(s):
 def get_bel_resource(location):
     """Loads/downloads and parses a config file from the given url or file path
 
-    :param location: The URL or file path to a BELNS, BELANNO, or BELEQ file to download and parse
-    :type location: str
+    :param str location: The URL or file path to a BELNS, BELANNO, or BELEQ file to download and parse
     :return: A config-style dictionary representing the BEL config file
     :rtype: dict
     """
@@ -112,10 +111,8 @@ def get_bel_resource(location):
 def expand_dict(flat_dict, sep='_'):
     """Expands a flattened dictionary
 
-    :param flat_dict: a nested dictionary that has been flattened so the keys are composite
-    :type flat_dict: dict
-    :param sep: the separator between concatenated keys
-    :type sep: str
+    :param dict flat_dict: a nested dictionary that has been flattened so the keys are composite
+    :param str sep: the separator between concatenated keys
     """
     res = {}
     rdict = defaultdict(list)
@@ -138,10 +135,8 @@ def flatten_dict(d, parent_key='', sep='_'):
 
     :param d: A nested dictionary
     :type d: dict or MutableMapping
-    :param parent_key: The parent's key. This is a value for tail recursion, so don't set it yourself.
-    :type parent_key: str
-    :param sep: The separator used between dictionary levels
-    :type sep: str
+    :param str parent_key: The parent's key. This is a value for tail recursion, so don't set it yourself.
+    :param str sep: The separator used between dictionary levels
 
     .. seealso:: http://stackoverflow.com/a/6027615
     """
@@ -223,8 +218,7 @@ def sort_edges(d):
 def ensure_quotes(s):
     """Quote a string that isn't solely alphanumeric
 
-    :param s: a string
-    :type s: str
+    :param str s: a string
     :rtype: str
     """
     return '"{}"'.format(s) if not s.isalnum() else s
@@ -260,8 +254,7 @@ def valid_date_version(s):
 def parse_datetime(s):
     """Tries to parse a datetime object from a standard datetime format or date format
 
-    :param s: A string representing a date or datetime
-    :type s: str
+    :param str s: A string representing a date or datetime
     :return: A parsed date object
     :rtype: datetime.date
     """
@@ -283,8 +276,7 @@ def parse_datetime(s):
 def hash_tuple(x):
     """Converts a PyBEL node tuple to a hash
 
-    :param x: A BEL node
-    :type x: tuple
+    :param tuple x: A BEL node
     :return: A hashed version of the node tuple
     :rtype: int
     """
@@ -309,21 +301,18 @@ def subdict_matches(target, query, partial_match=True):
         b. If the value is a set/list/tuple, then will match any of them
         c. If the value is a dict, then recursively check if that subdict matches
 
-    :param target: The dictionary to search
-    :type target: dict
-    :param query: A query dict with keys to match
-    :type query: dict
-    :param partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
-    :type partial_match: bool
+    :param dict target: The dictionary to search
+    :param dict query: A query dict with keys to match
+    :param bool partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
     :return: if all keys in b are in target_dict and their values match
     :rtype: bool
     """
     for k, v in query.items():
         if k not in target:
             return False
-        elif not isinstance(v, (int, str, list, set, dict, tuple)):
+        elif not isinstance(v, (int, string_types, list, set, dict, tuple)):
             raise ValueError('invalid value: {}'.format(v))
-        elif isinstance(v, (int, str)) and target[k] != v:
+        elif isinstance(v, (int, string_types)) and target[k] != v:
             return False
         elif isinstance(v, dict):
             if partial_match:
