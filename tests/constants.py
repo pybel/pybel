@@ -974,10 +974,8 @@ class BelReconstitutionMixin(TestGraphMixin):
     def bel_simple_reconstituted(self, graph, check_metadata=True):
         """Checks that test_bel.bel was loaded properly
 
-        :param graph: A BEL Graph
-        :type graph: pybel.BELGraph
-        :param check_metadata: Should the graph metadata be checked? Defaults to True
-        :type check_metadata: bool
+        :param BELGraph graph: A BEL grpah
+        :param bool check_metadata: Check the graph's document section is correct
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -1066,11 +1064,10 @@ class BelReconstitutionMixin(TestGraphMixin):
     def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True):
         """Checks that thorough.bel was loaded properly
 
-        :param graph: A BEL grpah
-        :type graph: BELGraph
-        :param check_metadata:
-        :param check_warnings:
-        :param check_provenance:
+        :param BELGraph graph: A BEL graph
+        :param bool check_metadata: Check the graph's document section is correct
+        :param bool check_warnings: Check the graph produced the expected warnings
+        :param bool check_provenance: Check the graph's definition section is correct
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -1104,6 +1101,13 @@ class BelReconstitutionMixin(TestGraphMixin):
             assertHasEdge(self, u, v, graph, permissive=True, **d)
 
     def bel_slushy_reconstituted(self, graph, check_metadata=True, check_warnings=True):
+        """Check that slushy.bel was loaded properly
+        
+        :param BELGraph graph: A BEL graph
+        :param bool check_metadata: Check the graph's document section is correct
+        :param bool check_warnings: Check the graph produced the expected warnings
+        :return: 
+        """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
@@ -1157,8 +1161,7 @@ class BelReconstitutionMixin(TestGraphMixin):
     def bel_isolated_reconstituted(self, graph):
         """Runs the isolated node test
 
-        :param graph: A BEL Graph
-        :type graph: BELGraph
+        :param BELGraph graph: A BEL Graph
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
