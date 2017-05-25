@@ -256,7 +256,6 @@ class TestFull(TestTokenParserBase):
             annotation_dict=annotations,
             namespace_regex={'dbSNP': 'rs[0-9]*'}
         )
-        cls.parser.streamline()
 
     def setUp(self):
         self.parser.clear()

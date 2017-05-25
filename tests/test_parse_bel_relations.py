@@ -7,7 +7,7 @@ from pybel.constants import *
 from pybel.parser.parse_bel import canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, RelabelWarning
 from tests.constants import TestTokenParserBase
-from tests.constants import default_identifier, test_citation_dict, test_evidence_text
+from tests.constants import default_identifier, test_citation_dict, test_evidence_text, update_provenance
 
 log = logging.getLogger(__name__)
 
@@ -20,8 +20,7 @@ class TestRelations(TestTokenParserBase):
 
     def setUp(self):
         super(TestRelations, self).setUp()
-        self.parser.control_parser.citation.update(test_citation_dict)
-        self.parser.control_parser.evidence = test_evidence_text
+        update_provenance(self.parser)
 
     def test_ensure_no_dup_nodes(self):
         """Ensure node isn't added twice, even if from different statements"""
