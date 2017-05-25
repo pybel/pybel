@@ -14,7 +14,6 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 
 DEFINE NAMESPACE CHEBI AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=chebi.belns"
 DEFINE NAMESPACE HGNC AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=hgnc-human-genes.belns"
-DEFINE ANNOTATION MeSHDisease AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=mesh-diseases.belanno"
 DEFINE ANNOTATION Species AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=species-taxonomy-id.belanno"
 DEFINE ANNOTATION CellLine AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=cell-line.belanno"
 

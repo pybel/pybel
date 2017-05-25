@@ -12,9 +12,9 @@ from pybel.constants import *
 from pybel.manager import models
 from tests import constants
 from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin
-from tests.mocks import mock_bel_resources
 from tests.constants import test_bel_simple, expected_test_simple_metadata
 from tests.constants import test_bel_thorough, expected_test_thorough_metadata
+from tests.mocks import mock_bel_resources
 
 log = logging.getLogger(__name__)
 
@@ -327,7 +327,9 @@ class TestFilter(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     def test_database_edge_filter(self, mock_get):
         self.help_database_edge_filter(test_bel_thorough, self.bel_thorough_reconstituted)
 
-    def help_database_edge_filter(self, path, compare, annotation_tag='MeSHDisease', value_tag='Arm Injuries'):
+    # TODO switch sentinel annotation to cell line
+    def help_database_edge_filter(self, path, compare, annotation_tag='CellLine',
+                                  value_tag='mouse x rat hybridoma cell line cell'):
         """Helps to test the graph that is created by a specific annotation.
 
         :param path: Path to the test BEL file.
