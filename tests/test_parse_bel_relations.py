@@ -6,9 +6,8 @@ from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import *
 from pybel.parser.parse_bel import canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, RelabelWarning
-from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, test_citation_dict, \
-    test_evidence_text
-from tests.constants import default_identifier
+from tests.constants import TestTokenParserBase
+from tests.constants import default_identifier, test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)
 
@@ -17,12 +16,12 @@ class TestRelations(TestTokenParserBase):
     @classmethod
     def setUpClass(cls):
         super(TestRelations, cls).setUpClass()
-        cls.parser.streamline()
+        cls.parser.relation.streamline()
 
     def setUp(self):
         super(TestRelations, self).setUp()
-        self.parser.parseString(SET_CITATION_TEST)
-        self.parser.parseString(test_set_evidence)
+        self.parser.control_parser.citation.update(test_citation_dict)
+        self.parser.control_parser.evidence = test_evidence_text
 
     def test_ensure_no_dup_nodes(self):
         """Ensure node isn't added twice, even if from different statements"""
@@ -806,7 +805,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
-        self.parser.parseString(statement)
+        self.parser.relation.parseString(statement)
 
     def test_has_variant(self):
         statement = 'g(HGNC:AKT1) hasVariant g(HGNC:AKT1, gmod(M))'
