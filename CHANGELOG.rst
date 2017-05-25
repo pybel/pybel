@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.5.8 <https://github.com/pybel/pybel/compare/v0.5.7...v0.5.8>`_ - 2017-05-
+`0.5.8 <https://github.com/pybel/pybel/compare/v0.5.7...v0.5.8>`_ - 2017-05-25
 ------------------------------------------------------------------------------
 Changed
 -------
 - CX is now unstreamified on load, making compatibility with other CX sources (like NDEx) possible
+- Testing now enables ``PYBEL_TEST_CONNECTION`` environment variable to set a persistient database
+- Testing data cut down to reduce memory consumption
 
 Added
 -----
