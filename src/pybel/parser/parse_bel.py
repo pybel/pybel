@@ -52,31 +52,23 @@ class BelParser(BaseParser):
                  allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
                  citation_clearing=True, autostreamline=True):
         """
-        :param graph: The BEL Graph to use to store the network
-        :type graph: BELGraph
-        :param namespace_dict: A dictionary of {namespace: set of members}.
+        :param BELGraph graph: The BEL Graph to use to store the network
+        :param dict[str, set[str]] namespace_dict: A dictionary of {namespace: set of members}.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type namespace_dict: dict
-        :param annotation_dict: A dictionary of {annotation: set of values}.
+        :param dict[str, set[str]] annotation_dict: A dictionary of {annotation: set of values}.
                                     Delegated to :class:`pybel.parser.ControlParser`
-        :type annotation_dict: dict
-        :param namespace_regex: A dictionary of {namespace: regular expression strings}.
+        :param dict[str, str] namespace_regex: A dictionary of {namespace: regular expression strings}.
                                         Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type namespace_regex: dict
-        :param annotation_regex: A dictionary of {annotation: regular expression strings}.
+        :param dict[str, str] annotation_regex: A dictionary of {annotation: regular expression strings}.
                                         Delegated to :class:`pybel.parser.ControlParser`
-        :type annotation_regex: dict
-        :param allow_naked_names: If true, turn off naked namespace failures.
+        :param bool allow_naked_names: If true, turn off naked namespace failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type allow_naked_names: bool
-        :param allow_nested: If true, turn off nested statement failures.
+        :param bool allow_nested: If true, turn off nested statement failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type allow_nested: bool
-        :param allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
-        :type allow_unqualified_translocations: bool
-        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+        :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+        :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
-        :type citation_clearing: bool
+        :param bool autostreamline: Should the parser be streamlined on instantiation?
         """
 
         self.graph = graph
