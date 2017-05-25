@@ -70,6 +70,16 @@ FADD = (PROTEIN, 'HGNC', 'FADD')
 CASP8 = (PROTEIN, 'HGNC', 'CASP8')
 
 
+def update_provenance(bel_parser):
+    """Sticks provenance in a BEL parser
+    
+    :param pybel.parser.parse_bel.BelParser bel_parser: 
+    :return: 
+    """
+    bel_parser.control_parser.citation.update(test_citation_dict)
+    bel_parser.control_parser.evidence = test_evidence_text
+
+
 def any_dict_matches(dict_of_dicts, query_dict):
     return any(query_dict == sd for sd in dict_of_dicts.values())
 

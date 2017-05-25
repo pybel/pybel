@@ -2056,7 +2056,7 @@ class TestSemantics(TestGraphMixin):
 
         self.parser.control_parser.citation.update(test_citation_dict)
         self.parser.control_parser.evidence = test_evidence_text
-        self.parser.biological_process.parseString('bp(ABASD)')
+        self.parser.relation.parseString('rxn(reactants(a(SOMETHING)), products(a(OTHER))) subProcessOf bp(ABASD)')
 
         node = BIOPROCESS, DIRTY, 'ABASD'
         self.assertHasNode(self.parser.graph, node)

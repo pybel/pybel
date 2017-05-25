@@ -21,8 +21,8 @@ from pybel.utils import hash_tuple
 from tests.constants import AKT1, EGFR, CASP8, FADD, citation_1, evidence_1
 from tests.constants import BelReconstitutionMixin, TemporaryCacheClsMixin, TestTokenParserBase
 from tests.constants import test_bel_isolated, test_bel_misordered
-from tests.constants import test_bel_simple, SET_CITATION_TEST, test_citation_dict, test_set_evidence, \
-    test_bel_thorough, test_bel_slushy, test_evidence_text
+from tests.constants import test_bel_simple, test_citation_dict, test_set_evidence, \
+    test_bel_thorough, test_bel_slushy, test_evidence_text, update_provenance
 from tests.mocks import mock_bel_resources
 
 logging.getLogger('requests').setLevel(logging.WARNING)
@@ -263,7 +263,7 @@ class TestFull(TestTokenParserBase):
 
     def test_regex_match(self):
         line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
-
+        update_provenance(self.parser)
         self.parser.parseString(line)
         self.assertIn((GENE, 'dbSNP', 'rs10234'), self.parser.graph)
         self.assertIn((GENE, 'dbSNP', 'rs10235'), self.parser.graph)
@@ -291,13 +291,14 @@ class TestFull(TestTokenParserBase):
             self.parser.parse_lines(statements)
 
     def test_annotations(self):
+        update_provenance(self.parser)
+
         statements = [
-            SET_CITATION_TEST,
-            test_set_evidence,
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
         ]
+
         self.parser.parse_lines(statements)
 
         test_node_1 = GENE, 'TESTNS', '1'
@@ -320,9 +321,9 @@ class TestFull(TestTokenParserBase):
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_withList(self):
+        update_provenance(self.parser)
+
         statements = [
-            SET_CITATION_TEST,
-            test_set_evidence,
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
@@ -343,9 +344,9 @@ class TestFull(TestTokenParserBase):
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_withMultiList(self):
+        update_provenance(self.parser)
+
         statements = [
-            SET_CITATION_TEST,
-            test_set_evidence,
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'SET TestAnnotation3 = {"D","E"}',
