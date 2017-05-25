@@ -195,7 +195,7 @@ class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.graph = BELGraph()
-        cls.parser = BelParser(cls.graph)
+        cls.parser = BelParser(cls.graph, autostreamline=False)
 
     def setUp(self):
         self.parser.clear()
@@ -970,7 +970,7 @@ BEL_THOROUGH_EDGES = [
 ]
 
 
-class BelReconstitutionMixin(unittest.TestCase):
+class BelReconstitutionMixin(TestGraphMixin):
     def bel_simple_reconstituted(self, graph, check_metadata=True):
         """Checks that test_bel.bel was loaded properly
 

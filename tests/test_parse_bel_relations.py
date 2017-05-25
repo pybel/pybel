@@ -15,7 +15,8 @@ log = logging.getLogger(__name__)
 
 class TestRelations(TestTokenParserBase):
     def setUp(self):
-        TestTokenParserBase.setUp(self)
+        super(TestRelations, self).setUp()
+        self.parser.streamline()
         self.parser.parseString(SET_CITATION_TEST)
         self.parser.parseString(test_set_evidence)
 
