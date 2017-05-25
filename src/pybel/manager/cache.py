@@ -1003,36 +1003,30 @@ class CacheManager(BaseCacheManager):
         """Returns all of the versions of a graph with the given name"""
         return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
 
-    def get_graph_by_name(self, name, version=None):
+    def get_graph_by_name(self, name, version):
         """Loads most recently added graph with the given name, or allows for specification of version
 
-        :param str name: The name of the graph
-        :param str version: The version string of the graph. If not specified, loads most recent graph added with this name
+        :param str name: The name of the network.
+        :param str version: The version string of the network.
         :return: A BEL graph
         :rtype: BELGraph
         """
-        if version is not None:
-            n = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
-        else:
-            n = self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
-
+        n = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
         return from_bytes(n.blob)
 
-    def get_graph_by_id(self, id):
-        """Gets the graph from the database by its identifier
+    def get_network_by_id(self, network_id):
+        """Gets a network from the database by its identifier
 
-        :param id: The graph's database ID
-        :type id: int
+        :param int network_id: The network's database identifier
         :return: A Network object
         :rtype: Network
         """
-        return self.session.query(Network).get(id)
+        return self.session.query(Network).get(network_id)
 
     def drop_graph(self, network_id):
         """Drops a graph by ID
 
-        :param network_id: The network's database id
-        :type network_id: int
+        :param int network_id: The network's database identifier
         """
 
         # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
@@ -1126,7 +1120,7 @@ class CacheManager(BaseCacheManager):
 
         :param annotations: dictionary of {URL: values}
         :type annotations: dict
-        :return: A BEL Graph
+        :return: A BEL graph
         :rtype: pybel.BELGraph
         """
         graph = BELGraph()

@@ -54,13 +54,13 @@ class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         expected_versions = {'1.0.1', self.graph.version}
         self.assertEqual(expected_versions, set(self.manager.get_graph_versions(self.graph.name)))
 
-        most_recent = self.manager.get_graph_by_name(self.graph.name)
-        self.assertEqual(self.graph.name, most_recent.name)
-        self.assertEqual('1.0.1', most_recent.version)
-
         exact_name_version = self.manager.get_graph_by_name(self.graph.name, self.graph.version)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual(self.graph.version, exact_name_version.version)
+
+        exact_name_version = self.manager.get_graph_by_name(self.graph.name, '1.0.1')
+        self.assertEqual(self.graph.name, exact_name_version.name)
+        self.assertEqual('1.0.1', exact_name_version.version)
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
