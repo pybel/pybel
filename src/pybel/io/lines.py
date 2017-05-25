@@ -23,23 +23,17 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
                citation_clearing=True, **kwargs):
     """Loads a BEL graph from an iterable over the lines of a BEL script
 
-    :param lines: An iterable of strings (the lines in a BEL script)
-    :type lines: iter
+    :param iter[str] lines: An iterable of strings (the lines in a BEL script)
     :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
                         or None to use default cache
     :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
-    :param allow_naked_names: if true, turn off naked namespace failures
-    :type allow_naked_names: bool
-    :param allow_nested: if true, turn off nested statement failures
-    :type allow_nested: bool
-    :param allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
-    :type allow_unqualified_translocations: bool
-    :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+    :param bool allow_naked_names: if true, turn off naked namespace failures
+    :param bool allow_nested: if true, turn off nested statement failures
+    :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
-    :type citation_clearing: bool
-    :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
-    :type kwargs: dict
-    :return: a parsed BEL graph
+    :param dict kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :return: A BEL graph
     :rtype: BELGraph
     """
     graph = BELGraph(**kwargs)
@@ -52,26 +46,20 @@ def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, c
               encoding='utf-8', **kwargs):
     """Loads a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
-    :param path: A file path
-    :type path: str
+    :param str path: A file path
     :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
                         or None to use default cache
     :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
-    :param allow_naked_names: if true, turn off naked namespace failures
-    :type allow_naked_names: bool
-    :param allow_nested: if true, turn off nested statement failures
-    :type allow_nested: bool
-    :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+    :param bool allow_naked_names: if true, turn off naked namespace failures
+    :param bool allow_nested: if true, turn off nested statement failures
+    :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
-    :type citation_clearing: bool
-    :param encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`.
+    :param str encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`.
                      See the python `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a
                      list of standard encodings. For example, files starting with a UTF-8 BOM should use
                      :code:`utf_8_sig`
-    :type encoding: str
-    :param kwargs: Keyword arguments to pass to :class:`networkx.MultiDiGraph`
-    :type kwargs: dict
-    :return: A parsed BEL graph
+    :param dict kwargs: Keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :return: A BEL graph
     :rtype: BELGraph
     """
     log.info('Loading from path: %s', path)
@@ -83,21 +71,16 @@ def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, c
 def from_url(url, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True, **kwargs):
     """Loads a BEL graph from a URL resource. This function is a thin wrapper around :func:`from_lines`.
 
-    :param url: A valid URL pointing to a BEL resource
-    :type url: str
+    :param str url: A valid URL pointing to a BEL resource
     :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
                         or None to use default cache
     :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
-    :param allow_naked_names: if true, turn off naked namespace failures
-    :type allow_naked_names: bool
-    :param allow_nested: if true, turn off nested statement failures
-    :type allow_nested: bool
-    :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+    :param bool allow_naked_names: if true, turn off naked namespace failures
+    :param bool allow_nested: if true, turn off nested statement failures
+    :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
-    :type citation_clearing: bool
-    :param kwargs: Keyword arguments to pass to :class:`networkx.MultiDiGraph`
-    :type kwargs: dict
-    :return: A parsed BEL graph
+    :param dict kwargs: Keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :return: A BEL graph
     :rtype: BELGraph
     """
     log.info('Loading from url: %s', url)

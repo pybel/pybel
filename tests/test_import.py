@@ -257,9 +257,6 @@ class TestFull(TestTokenParserBase):
             namespace_regex={'dbSNP': 'rs[0-9]*'}
         )
 
-    def setUp(self):
-        self.parser.clear()
-
     def test_regex_match(self):
         line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
         update_provenance(self.parser)
