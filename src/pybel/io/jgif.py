@@ -48,20 +48,28 @@ def from_jgif(graph_jgif_dict):
     :rtype: BELGraph
     """
 
-    label = graph_jgif_dict['graph'].get('label')
-    metadata = graph_jgif_dict['graph']['metadata']
+    root = graph_jgif_dict['graph']
+
+    label = root.get('label')
+    metadata = root['metadata']
 
     graph = BELGraph()
     parser = BelParser(graph)
+    parser.bel_term.addParseAction(parser.handle_term)
 
-    for edge in graph_jgif_dict['graph']['edges']:
+    for node in root['nodes']:
+        if 'label' not in node:
+            log.warning('node missing label: %s', node)
+        node_label = node['label']
+        parser.bel_term.parseString(node_label)
+
+    for edge in root['edges']:
 
         if edge['relation'] in {'actsIn'}:
             continue  # don't need legacy BEL format
 
         if edge['relation'] in unqualified_edges:
             pass
-
 
         if not edge['relation'] in unqualified_edges and ('evidences' not in edge['metadata'] or not edge['metadata']['evidences']):
             log.debug('No evidence for edge %s', edge['label'])
@@ -94,9 +102,11 @@ def from_jgif(graph_jgif_dict):
 
             parser.control_parser.annotations.update(d)
 
+            edge_label = edge['label']
+
             try:
-                parser.parseString(edge['label'])
+                parser.parseString(edge_label)
             except Exception as e:
-                log.warning('Error %s for %s', e, edge['label'])
+                log.warning('Error %s for %s', e, edge_label)
 
     return graph
