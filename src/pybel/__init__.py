@@ -70,7 +70,7 @@ from .manager.database_io import *
 
 __all__ = graph.__all__ + io.__all__ + canonicalize.__all__ + database_io.__all__
 
-__version__ = '0.5.6-dev'
+__version__ = '0.5.9-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'

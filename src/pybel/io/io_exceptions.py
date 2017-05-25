@@ -5,6 +5,7 @@ from ..exceptions import PyBelWarning
 
 class ImportVersionWarning(PyBelWarning, ValueError):
     """Raised when trying to import data from an old version of PyBEL"""
+
     def __init__(self, actual_version_tuple, minimum_version_tuple):
         PyBelWarning.__init__(self, actual_version_tuple, minimum_version_tuple)
         self.actual_tuple = actual_version_tuple

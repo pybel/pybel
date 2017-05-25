@@ -5,7 +5,7 @@
 import datetime
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
-from sqlalchemy import Integer, String, DateTime, Text, Date, Binary, Boolean
+from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -316,7 +316,7 @@ class Network(Base):
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
-    blob = Column(Binary(LONGBLOB))
+    blob = Column(LargeBinary(LONGBLOB))
 
     nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
     edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
@@ -335,6 +335,9 @@ class Network(Base):
             'name': self.name,
             'version': self.version
         }
+
+    def __str__(self):
+        return '{} v{}'.format(self.name, self.version)
 
 
 node_modification = Table(
@@ -358,7 +361,7 @@ class Node(Base):
     fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
 
     bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
-    blob = Column(Binary)
+    blob = Column(LargeBinary)
 
     modifications = relationship("Modification", secondary=node_modification)
 
@@ -629,7 +632,7 @@ class Edge(Base):
     annotations = relationship('AnnotationEntry', secondary=edge_annotation)
     properties = relationship('Property', secondary=edge_property)
 
-    blob = Column(Binary)
+    blob = Column(LargeBinary)
 
     @property
     def data(self):

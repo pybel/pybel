@@ -11,56 +11,60 @@ from pybel import from_path
 from pybel.constants import *
 from pybel.manager import models
 from tests import constants
-from tests.constants import test_bel_thorough, mock_bel_resources, \
-    expected_test_thorough_metadata, test_bel_simple, expected_test_simple_metadata, TemporaryCacheMixin, \
-    BelReconstitutionMixin
+from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin
+from tests.constants import test_bel_simple, expected_test_simple_metadata
+from tests.constants import test_bel_thorough, expected_test_thorough_metadata
+from tests.mocks import mock_bel_resources
 
 log = logging.getLogger(__name__)
 
 
-class TestGraphCache(TemporaryCacheMixin, BelReconstitutionMixin):
-    def setUp(self):
-        super(TestGraphCache, self).setUp()
-        self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
-
+class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
+        self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
+
         self.manager.insert_graph(self.graph)
 
         x = self.manager.list_graphs()
 
         self.assertEqual(1, len(x))
-        self.assertEqual((1, expected_test_thorough_metadata[METADATA_NAME],
-                          expected_test_thorough_metadata[METADATA_VERSION],
-                          expected_test_thorough_metadata[METADATA_DESCRIPTION]), x[0])
 
-        reconstituted = self.manager.get_graph(expected_test_thorough_metadata[METADATA_NAME],
-                                               expected_test_thorough_metadata[METADATA_VERSION])
+        _, name, version, description = x[0]
+
+        self.assertEqual((expected_test_thorough_metadata[METADATA_NAME],
+                          expected_test_thorough_metadata[METADATA_VERSION],
+                          expected_test_thorough_metadata[METADATA_DESCRIPTION]), (name, version, description))
+
+        reconstituted = self.manager.get_graph_by_name(expected_test_thorough_metadata[METADATA_NAME],
+                                                       expected_test_thorough_metadata[METADATA_VERSION])
         self.bel_thorough_reconstituted(reconstituted)
 
         # Test that the graph can't be added a second time
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
             self.manager.insert_graph(self.graph)
 
-    @mock_bel_resources
-    def test_get_versions(self, mock_get):
-        TEST_V1 = '0.9'
-        TEST_V2 = expected_test_thorough_metadata[METADATA_VERSION]  # Actually is 1.0
+        self.manager.rollback()
 
-        self.graph.document[METADATA_VERSION] = TEST_V1
-        self.manager.insert_graph(self.graph)
+        graphcopy = self.graph.copy()
+        graphcopy.document[METADATA_VERSION] = '1.0.1'
+        self.manager.insert_graph(graphcopy)
 
-        self.graph.document[METADATA_VERSION] = TEST_V2
-        self.manager.insert_graph(self.graph)
+        expected_versions = {'1.0.1', self.graph.version}
+        self.assertEqual(expected_versions, set(self.manager.get_graph_versions(self.graph.name)))
 
-        self.assertEqual({TEST_V1, TEST_V2}, set(self.manager.get_graph_versions(self.graph.document[METADATA_NAME])))
+        exact_name_version = self.manager.get_graph_by_name(self.graph.name, self.graph.version)
+        self.assertEqual(self.graph.name, exact_name_version.name)
+        self.assertEqual(self.graph.version, exact_name_version.version)
 
-        self.assertEqual(TEST_V2, self.manager.get_graph(self.graph.document[METADATA_NAME]).document[METADATA_VERSION])
+        exact_name_version = self.manager.get_graph_by_name(self.graph.name, '1.0.1')
+        self.assertEqual(self.graph.name, exact_name_version.name)
+        self.assertEqual('1.0.1', exact_name_version.version)
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestGraphCacheSimple(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestGraphCacheSimple, self).setUp()
         self.simple_graph = pybel.from_path(test_bel_simple, manager=self.manager)
@@ -108,13 +112,13 @@ class TestGraphCacheSimple(TemporaryCacheMixin, BelReconstitutionMixin):
         self.assertEqual({nea.edge_id for nea in network_edge_associations},
                          {edge.id for edge in edges})
 
-        g2 = self.manager.get_graph(expected_test_simple_metadata[METADATA_NAME],
-                                    expected_test_simple_metadata[METADATA_VERSION])
+        g2 = self.manager.get_graph_by_name(expected_test_simple_metadata[METADATA_NAME],
+                                            expected_test_simple_metadata[METADATA_VERSION])
         self.bel_simple_reconstituted(g2)
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestQueryNode(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestQueryNode(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
     def setUp(self):
@@ -152,7 +156,7 @@ class TestQueryNode(TemporaryCacheMixin, BelReconstitutionMixin):
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestQueryEdge(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestQueryEdge(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
     def setUp(self):
@@ -218,7 +222,7 @@ class TestQueryEdge(TemporaryCacheMixin, BelReconstitutionMixin):
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestQueryCitation(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestQueryCitation(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
     def setUp(self):
@@ -301,7 +305,7 @@ class TestQueryCitation(TemporaryCacheMixin, BelReconstitutionMixin):
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestFilter(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestFilter(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     """Tests that a graph can be reconstructed from the edge and node relational tables in the database
 
     1. Load graph (test BEL 1 or test thorough)
@@ -323,7 +327,9 @@ class TestFilter(TemporaryCacheMixin, BelReconstitutionMixin):
     def test_database_edge_filter(self, mock_get):
         self.help_database_edge_filter(test_bel_thorough, self.bel_thorough_reconstituted)
 
-    def help_database_edge_filter(self, path, compare, annotation_tag='MeSHDisease', value_tag='Arm Injuries'):
+    # TODO switch sentinel annotation to cell line
+    def help_database_edge_filter(self, path, compare, annotation_tag='CellLine',
+                                  value_tag='mouse x rat hybridoma cell line cell'):
         """Helps to test the graph that is created by a specific annotation.
 
         :param path: Path to the test BEL file.
@@ -350,3 +356,7 @@ class TestFilter(TemporaryCacheMixin, BelReconstitutionMixin):
             del reloaded.edge[u][v][k][annotation_tag]
 
         compare(reloaded, check_metadata=False)
+
+
+if __name__ == '__main__':
+    unittest.main()
