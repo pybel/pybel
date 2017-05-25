@@ -66,13 +66,17 @@ class BaseCacheManager:
         Base.metadata.drop_all(self.engine)
 
     def rollback(self):
-        """Rolls back the session. Should be used when catching exceptions"""
+        """Rolls back the session. Should be used when catching exceptions. See: http://docs.sqlalchemy.org/en/latest/orm/session_api.html#sqlalchemy.orm.session.Session.rollback"""
         self.session.rollback()
 
     def flush(self):
-        """Flushes the session."""
+        """Flushes the session. See: http://docs.sqlalchemy.org/en/latest/orm/session_api.html#sqlalchemy.orm.session.Session.flush"""
         self.session.flush()
 
     def commit(self):
-        """Commits the session."""
+        """Commits the session. See: http://docs.sqlalchemy.org/en/latest/orm/session_api.html#sqlalchemy.orm.session.Session.commit"""
         self.session.commit()
+
+    def close(self):
+        """Closes the session. See: http://docs.sqlalchemy.org/en/latest/orm/session_api.html#sqlalchemy.orm.session.Session.close"""
+        self.session.close()
