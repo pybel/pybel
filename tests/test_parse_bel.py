@@ -11,7 +11,7 @@ from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
 from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict
 from tests.constants import assertHasNode, assertHasEdge
-from tests.constants import default_identifier
+from tests.constants import default_identifier, TestGraphMixin, test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)
 
@@ -2047,3 +2047,16 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(0, self.parser.graph.number_of_edges())
         self.assertEqual(0, len(self.parser.control_parser.annotations))
         self.assertEqual(0, len(self.parser.control_parser.citation))
+
+
+class TestSemantics(TestGraphMixin):
+    def test_lenient_semantic_no_failure(self):
+        self.graph = BELGraph()
+        self.parser = BelParser(self.graph, allow_naked_names=True)
+
+        self.parser.control_parser.citation.update(test_citation_dict)
+        self.parser.control_parser.evidence = test_evidence_text
+        self.parser.biological_process.parseString('bp(ABASD)')
+
+        node = BIOPROCESS, DIRTY, 'ABASD'
+        self.assertHasNode(self.parser.graph, node)

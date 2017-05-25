@@ -20,7 +20,7 @@ from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
 from tests.constants import AKT1, EGFR, CASP8, FADD, citation_1, evidence_1
 from tests.constants import BelReconstitutionMixin, TemporaryCacheClsMixin, TestTokenParserBase
-from tests.constants import assertHasEdge, test_bel_isolated, test_bel_misordered
+from tests.constants import test_bel_isolated, test_bel_misordered
 from tests.constants import test_bel_simple, SET_CITATION_TEST, test_citation_dict, test_set_evidence, \
     test_bel_thorough, test_bel_slushy, test_evidence_text
 from tests.mocks import mock_bel_resources
@@ -232,32 +232,6 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertHasEdge(self.misordered_graph, EGFR, CASP8, **e3)
 
 
-class TestRegex(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.graph = BELGraph()
-        cls.parser = BelParser(cls.graph, namespace_dict={}, namespace_regex={'dbSNP': 'rs[0-9]*'})
-        cls.parser.streamline()
-
-    def setUp(self):
-        self.parser.clear()
-        self.parser.parseString(SET_CITATION_TEST)
-        self.parser.parseString(test_set_evidence)
-
-    def test_regex_match(self):
-        line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
-
-        self.parser.parseString(line)
-        self.assertIn((GENE, 'dbSNP', 'rs10234'), self.parser.graph)
-        self.assertIn((GENE, 'dbSNP', 'rs10235'), self.parser.graph)
-
-    def test_regex_mismatch(self):
-        line = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
-
-        with self.assertRaises(MissingNamespaceRegexWarning):
-            self.parser.parseString(line)
-
-
 namespaces = {
     'TESTNS': {
         "1": "GRP",
@@ -272,33 +246,33 @@ annotations = {
 }
 
 
-class TestStuff(unittest.TestCase):
-    def test_lenient_semantic_no_failure(self):
-        statements = [
-            SET_CITATION_TEST,
-            test_set_evidence,
-            "bp(ABASD) -- p(ABASF)"
-        ]
-        self.graph = BELGraph()
-        self.parser = BelParser(self.graph, allow_naked_names=True)
-        self.parser.parse_lines(statements)
-
-        node_1 = BIOPROCESS, DIRTY, 'ABASD'
-        node_2 = PROTEIN, DIRTY, 'ABASF'
-
-        self.assertEqual({node_1, node_2}, set(self.graph.nodes_iter()))
-
-        assertHasEdge(self, node_1, node_2, self.graph)
-
-
 class TestFull(TestTokenParserBase):
     @classmethod
     def setUpClass(cls):
         cls.graph = BELGraph()
-        cls.parser = BelParser(cls.graph, namespace_dict=namespaces, annotation_dict=annotations)
+        cls.parser = BelParser(
+            cls.graph,
+            namespace_dict=namespaces,
+            annotation_dict=annotations,
+            namespace_regex={'dbSNP': 'rs[0-9]*'}
+        )
+        cls.parser.streamline()
 
     def setUp(self):
         self.parser.clear()
+
+    def test_regex_match(self):
+        line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
+
+        self.parser.parseString(line)
+        self.assertIn((GENE, 'dbSNP', 'rs10234'), self.parser.graph)
+        self.assertIn((GENE, 'dbSNP', 'rs10235'), self.parser.graph)
+
+    def test_regex_mismatch(self):
+        line = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
+
+        with self.assertRaises(MissingNamespaceRegexWarning):
+            self.parser.parseString(line)
 
     def test_semantic_failure(self):
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
