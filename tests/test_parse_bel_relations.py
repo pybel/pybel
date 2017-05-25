@@ -25,10 +25,8 @@ class TestRelations(TestTokenParserBase):
 
     def test_ensure_no_dup_nodes(self):
         """Ensure node isn't added twice, even if from different statements"""
-        s1 = 'g(HGNC:AKT1)'
-        s2 = 'deg(g(HGNC:AKT1))'
-
-        result = self.parser.language.parseString(s1)
+        self.parser.gene.addParseAction(self.parser.handle_term)
+        result = self.parser.bel_term.parseString('g(HGNC:AKT1)')
 
         expected_result_dict = {
             FUNCTION: GENE,
@@ -40,7 +38,8 @@ class TestRelations(TestTokenParserBase):
 
         self.assertEqual(expected_result_dict, result.asDict())
 
-        self.parser.language.parseString(s2)
+        self.parser.degradation.addParseAction(self.parser.handle_term)
+        self.parser.degradation.parseString('deg(g(HGNC:AKT1))')
 
         gene = GENE, 'HGNC', 'AKT1'
 
@@ -877,9 +876,11 @@ class TestWrite(TestTokenParserBase):
             'g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))',
         ]
 
+        self.parser.bel_term.addParseAction(self.parser.handle_term)
+
         for case in cases:
             source_bel, expected_bel = case if 2 == len(case) else (case, case)
 
-            result = self.parser.parseString(source_bel)
+            result = self.parser.bel_term.parseString(source_bel)
             bel = decanonicalize_node(self.parser.graph, canonicalize_node(result))
             self.assertEqual(expected_bel, bel)

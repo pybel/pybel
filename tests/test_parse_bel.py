@@ -9,9 +9,10 @@ from pybel.graph import BELGraph
 from pybel.parser import BelParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
-from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict
+from tests.constants import TestTokenParserBase, build_variant_dict
 from tests.constants import assertHasNode, assertHasEdge
-from tests.constants import default_identifier, TestGraphMixin, test_citation_dict, test_evidence_text
+from tests.constants import default_identifier, TestGraphMixin
+from tests.constants import update_provenance
 
 log = logging.getLogger(__name__)
 
@@ -1436,7 +1437,7 @@ class TestComplex(TestTokenParserBase):
 
     def test_complex_list_short(self):
         statement = 'complex(p(HGNC:FOS), p(HGNC:JUN))'
-        result = self.parser.parseString(statement)
+        result = self.parser.complex_abundances.parseString(statement)
 
         expected_result = [COMPLEX, [PROTEIN, ['HGNC', 'FOS']], [PROTEIN, ['HGNC', 'JUN']]]
         self.assertEqual(expected_result, result.asList())
@@ -1768,8 +1769,7 @@ class TestTranslocationPermissive(unittest.TestCase):
         3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
         Test translocation in object
         """
-        self.parser.parseString(SET_CITATION_TEST)
-        self.parser.parseString(test_set_evidence)
+        update_provenance(self.parser)
 
         statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"))'
         result = self.parser.relation.parseString(statement)
@@ -2054,9 +2054,10 @@ class TestSemantics(TestGraphMixin):
         self.graph = BELGraph()
         self.parser = BelParser(self.graph, allow_naked_names=True)
 
-        self.parser.control_parser.citation.update(test_citation_dict)
-        self.parser.control_parser.evidence = test_evidence_text
-        self.parser.relation.parseString('rxn(reactants(a(SOMETHING)), products(a(OTHER))) subProcessOf bp(ABASD)')
+        update_provenance(self.parser)
+
+        self.parser.bel_term.addParseAction(self.parser.handle_term)
+        self.parser.bel_term.parseString('bp(ABASD)')
 
         node = BIOPROCESS, DIRTY, 'ABASD'
         self.assertHasNode(self.parser.graph, node)
