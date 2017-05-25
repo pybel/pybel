@@ -1174,30 +1174,6 @@ class TestProtein(TestTokenParserBase):
 
         self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
 
-    def test_ensure_no_dup_nodes(self):
-        """Ensure node isn't added twice, even if from different statements"""
-        s1 = 'g(HGNC:AKT1)'
-        s2 = 'deg(g(HGNC:AKT1))'
-
-        result = self.parser.language.parseString(s1)
-
-        expected_result_dict = {
-            FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            }
-        }
-
-        self.assertEqual(expected_result_dict, result.asDict())
-
-        self.parser.language.parseString(s2)
-
-        gene = GENE, 'HGNC', 'AKT1'
-
-        self.assertEqual(1, self.parser.graph.number_of_nodes())
-        self.assertHasNode(gene, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
-
     def test_ensure_no_dup_edges(self):
         """Ensure node and edges aren't added twice, even if from different statements and has origin completion"""
         s1 = 'p(HGNC:AKT1)'
@@ -1497,7 +1473,7 @@ class TestComplex(TestTokenParserBase):
 
     def test_complex_list_long(self):
         statement = 'complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))'
-        self.parser.parseString(statement)
+        self.parser.complex_abundances.parseString(statement)
 
 
 class TestComposite(TestTokenParserBase):

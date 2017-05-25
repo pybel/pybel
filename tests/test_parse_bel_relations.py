@@ -14,11 +14,39 @@ log = logging.getLogger(__name__)
 
 
 class TestRelations(TestTokenParserBase):
+    @classmethod
+    def setUpClass(cls):
+        super(TestRelations, cls).setUpClass()
+        cls.parser.streamline()
+
     def setUp(self):
         super(TestRelations, self).setUp()
-        self.parser.streamline()
         self.parser.parseString(SET_CITATION_TEST)
         self.parser.parseString(test_set_evidence)
+
+    def test_ensure_no_dup_nodes(self):
+        """Ensure node isn't added twice, even if from different statements"""
+        s1 = 'g(HGNC:AKT1)'
+        s2 = 'deg(g(HGNC:AKT1))'
+
+        result = self.parser.language.parseString(s1)
+
+        expected_result_dict = {
+            FUNCTION: GENE,
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
+            }
+        }
+
+        self.assertEqual(expected_result_dict, result.asDict())
+
+        self.parser.language.parseString(s2)
+
+        gene = GENE, 'HGNC', 'AKT1'
+
+        self.assertEqual(1, self.parser.graph.number_of_nodes())
+        self.assertHasNode(gene, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
     def test_increases(self):
         """
