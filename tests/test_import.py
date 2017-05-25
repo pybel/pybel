@@ -134,15 +134,6 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
 
-    @unittest.skip('Not sure if identifier is stable')
-    def test_from_ndex(self):
-        """Tests the download of a CX document from NDEx"""
-        reconstituted = from_ndex('014e5957-3d96-11e7-8f50-0ac135e8bacf')
-
-        do_remapping(self.thorough_graph, reconstituted)
-
-        self.bel_thorough_reconstituted(reconstituted)
-
     def test_thorough_upgrade(self):
         lines = to_bel_lines(self.thorough_graph)
         reconstituted = from_lines(lines, manager=self.manager)
@@ -246,29 +237,25 @@ class TestRegex(unittest.TestCase):
     def setUpClass(cls):
         cls.graph = BELGraph()
         cls.parser = BelParser(cls.graph, namespace_dict={}, namespace_regex={'dbSNP': 'rs[0-9]*'})
+        cls.parser.streamline()
 
     def setUp(self):
         self.parser.clear()
+        self.parser.parseString(SET_CITATION_TEST)
+        self.parser.parseString(test_set_evidence)
 
-    def test_match(self):
-        lines = [
-            SET_CITATION_TEST,
-            test_set_evidence,
-            'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
-        ]
-        self.parser.parse_lines(lines)
+    def test_regex_match(self):
+        line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
+
+        self.parser.parseString(line)
         self.assertIn((GENE, 'dbSNP', 'rs10234'), self.parser.graph)
         self.assertIn((GENE, 'dbSNP', 'rs10235'), self.parser.graph)
 
-    def test_no_match(self):
-        lines = [
-            SET_CITATION_TEST,
-            test_set_evidence,
-            'g(dbSNP:10234) -- g(dbSNP:rr10235)'
-        ]
+    def test_regex_mismatch(self):
+        line = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
 
         with self.assertRaises(MissingNamespaceRegexWarning):
-            self.parser.parse_lines(lines)
+            self.parser.parseString(line)
 
 
 namespaces = {
