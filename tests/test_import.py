@@ -19,7 +19,7 @@ from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
 from tests.constants import AKT1, EGFR, CASP8, FADD, citation_1
-from tests.constants import BelReconstitutionMixin, TestGraphMixin, TemporaryCacheClsMixin, TestTokenParserBase
+from tests.constants import BelReconstitutionMixin, TemporaryCacheClsMixin, TestTokenParserBase
 from tests.constants import assertHasEdge, test_bel_isolated, test_bel_misordered
 from tests.constants import test_bel_simple, SET_CITATION_TEST, test_citation_dict, test_set_evidence, \
     test_bel_thorough, test_bel_slushy, test_evidence_text
@@ -47,10 +47,10 @@ def do_remapping(original, reconstituted):
         raise e
 
 
-class TestThoroughIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
+class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
-        super(TestThoroughIo, cls).setUpClass()
+        super(TestInterchange, cls).setUpClass()
 
         @mock_bel_resources
         def get_thorough_graph(mock):
@@ -58,31 +58,58 @@ class TestThoroughIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         cls.thorough_graph = get_thorough_graph()
 
-    def test_path(self):
+        @mock_bel_resources
+        def get_slushy_graph(mock):
+            return from_path(test_bel_slushy, manager=cls.manager)
+
+        cls.slushy_graph = get_slushy_graph()
+
+        @mock_bel_resources
+        def get_simple_graph(mock_get):
+            return from_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
+
+        cls.simple_graph = get_simple_graph()
+
+        @mock_bel_resources
+        def get_isolated_graph(mock_get):
+            return from_path(test_bel_isolated, manager=cls.manager)
+
+        cls.isolated_graph = get_isolated_graph()
+
+        @mock_bel_resources
+        def get_misordered_graph(mock_get):
+            return from_path(test_bel_misordered, manager=cls.manager, citation_clearing=False)
+
+        cls.misordered_graph = get_misordered_graph()
+
+    def test_thorough_path(self):
         self.bel_thorough_reconstituted(self.thorough_graph)
 
-    def test_bytes(self):
+    def test_thorough_bytes(self):
         graph_bytes = to_bytes(self.thorough_graph)
         graph = from_bytes(graph_bytes)
         self.bel_thorough_reconstituted(graph)
 
-    def test_json(self):
+    def test_thorough_json(self):
         graph_json_dict = to_json(self.thorough_graph)
         graph = from_json(graph_json_dict)
         self.bel_thorough_reconstituted(graph)
 
-    def test_jsons(self):
+    def test_thorough_jsons(self):
         graph_json_str = to_jsons(self.thorough_graph)
         graph = from_jsons(graph_json_str)
         self.bel_thorough_reconstituted(graph)
 
-    def test_graphml(self):
+    def test_thorough_graphml(self):
         handle, path = tempfile.mkstemp()
 
         with open(path, 'wb') as f:
             to_graphml(self.thorough_graph, f)
 
-    def test_cx(self):
+        os.close(handle)
+        os.remove(path)
+
+    def test_thorough_cx(self):
         graph_cx_json_dict = to_cx(self.thorough_graph)
         reconstituted = from_cx(graph_cx_json_dict)
 
@@ -90,7 +117,7 @@ class TestThoroughIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
 
-    def test_cxs(self):
+    def test_thorough_cxs(self):
         graph_cx_str = to_cx_jsons(self.thorough_graph)
         reconstituted = from_cx_jsons(graph_cx_str)
 
@@ -98,10 +125,10 @@ class TestThoroughIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
 
-    def test_ndex_interchange(self):
+    def test_thorough_ndex(self):
         """Tests that a document can be uploaded and downloaded. Sleeps in the middle so that NDEx can process"""
         network_id = to_ndex(self.thorough_graph)
-        time.sleep(15)
+        time.sleep(10)
         reconstituted = from_ndex(network_id)
 
         do_remapping(self.thorough_graph, reconstituted)
@@ -117,76 +144,51 @@ class TestThoroughIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         self.bel_thorough_reconstituted(reconstituted)
 
-    def test_upgrade(self):
+    def test_thorough_upgrade(self):
         lines = to_bel_lines(self.thorough_graph)
         reconstituted = from_lines(lines, manager=self.manager)
         self.bel_thorough_reconstituted(reconstituted)
 
-
-class TestSlushyIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
-    @classmethod
-    def setUpClass(cls):
-        super(TestSlushyIo, cls).setUpClass()
-
-        @mock_bel_resources
-        def get_slushy_graph(mock):
-            return from_path(test_bel_slushy, manager=cls.manager)
-
-        cls.slushy_graph = get_slushy_graph()
-
     def test_slushy(self):
         self.bel_slushy_reconstituted(self.slushy_graph)
 
-    def test_bytes(self):
+    def test_slushy_bytes(self):
         graph_bytes = to_bytes(self.slushy_graph)
         graph = from_bytes(graph_bytes)
         self.bel_slushy_reconstituted(graph)
 
-    def test_json(self):
+    def test_slushy_json(self):
         graph_json = to_json(self.slushy_graph)
         graph = from_json(graph_json)
         self.bel_slushy_reconstituted(graph)
 
-    def test_graphml(self):
+    def test_slushy_graphml(self):
         handle, path = tempfile.mkstemp()
 
         with open(path, 'wb') as f:
             to_graphml(self.slushy_graph, f)
 
-    def test_bytes_io_slushy(self):
-        g_bytes = to_bytes(self.slushy_graph)
-        from_bytes(g_bytes)
+        os.close(handle)
+        os.remove(path)
 
-    def test_cx(self):
+    def test_slushy_cx(self):
         reconstituted = from_cx(to_cx(self.slushy_graph))
 
         do_remapping(self.slushy_graph, reconstituted)
 
         self.bel_slushy_reconstituted(reconstituted)
 
-    def test_cxs(self):
+    def test_slushy_cxs(self):
         reconstituted = from_cx_jsons(to_cx_jsons(self.slushy_graph))
 
         do_remapping(self.slushy_graph, reconstituted)
 
         self.bel_slushy_reconstituted(reconstituted)
 
-
-class TestSimpleIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
-    @classmethod
-    def setUpClass(cls):
-        super(TestSimpleIo, cls).setUpClass()
-
-        @mock_bel_resources
-        def get_simple_graph(mock_get):
-            return from_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
-
-        cls.simple_graph = get_simple_graph()
-
-    def test_compile(self):
+    def test_simple_compile(self):
         self.bel_simple_reconstituted(self.simple_graph)
 
-    def test_cx(self):
+    def test_simple_cx(self):
         """Tests the CX input/output on test_bel.bel"""
         graph_cx_json = to_cx(self.simple_graph)
 
@@ -195,32 +197,19 @@ class TestSimpleIo(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         self.bel_simple_reconstituted(reconstituted)
 
-
-class TestIsolatedIo(TemporaryCacheClsMixin, BelReconstitutionMixin, TestGraphMixin):
-    @classmethod
-    def setUpClass(cls):
-        super(TestIsolatedIo, cls).setUpClass()
-
-        @mock_bel_resources
-        def get_isolated_graph(mock_get):
-            return from_path(test_bel_isolated, manager=cls.manager)
-
-        cls.isolated_graph = get_isolated_graph()
-
-    def test_compile(self):
+    def test_isolated_compile(self):
         self.bel_isolated_reconstituted(self.isolated_graph)
 
-    def test_upgrade(self):
+    def test_isolated_upgrade(self):
         lines = to_bel_lines(self.isolated_graph)
         reconstituted = from_lines(lines, manager=self.manager)
         self.bel_isolated_reconstituted(reconstituted)
 
     @mock_bel_resources
-    def test_misordered(self, mock):
+    def test_misordered_compile(self, mock):
         """This test ensures that non-citation clearing mode works"""
-        graph = from_path(test_bel_misordered, manager=self.manager, citation_clearing=False)
-        self.assertEqual(4, graph.number_of_nodes())
-        self.assertEqual(3, graph.number_of_edges())
+        self.assertEqual(4, self.misordered_graph.number_of_nodes())
+        self.assertEqual(3, self.misordered_graph.number_of_edges())
 
         e1 = {
             RELATION: INCREASES,
@@ -230,7 +219,7 @@ class TestIsolatedIo(TemporaryCacheClsMixin, BelReconstitutionMixin, TestGraphMi
                 'TESTAN1': testan1
             }
         }
-        self.assertHasEdge(graph, AKT1, EGFR, **e1)
+        self.assertHasEdge(self.misordered_graph, AKT1, EGFR, **e1)
 
         e2 = {
             RELATION: DECREASES,
@@ -240,7 +229,7 @@ class TestIsolatedIo(TemporaryCacheClsMixin, BelReconstitutionMixin, TestGraphMi
                 'TESTAN1': testan1
             }
         }
-        self.assertHasEdge(graph, EGFR, FADD, **e2)
+        self.assertHasEdge(self.misordered_graph, EGFR, FADD, **e2)
 
         e3 = {
             RELATION: DIRECTLY_DECREASES,
@@ -250,7 +239,7 @@ class TestIsolatedIo(TemporaryCacheClsMixin, BelReconstitutionMixin, TestGraphMi
                 'TESTAN1': testan1
             }
         }
-        self.assertHasEdge(graph, EGFR, CASP8, **e3)
+        self.assertHasEdge(self.misordered_graph, EGFR, CASP8, **e3)
 
 
 class TestRegex(unittest.TestCase):
