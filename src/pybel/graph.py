@@ -150,6 +150,9 @@ class BELGraph(nx.MultiDiGraph):
         """
         return self._warnings
 
+    def __str__(self):
+        return '{} v{}'.format(self.name, self.version)
+
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
         self.warnings.append((line_number, line, exception, {} if context is None else context))

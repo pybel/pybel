@@ -93,3 +93,6 @@ ENV/
 
 *.pickle
 *.gpickle
+
+scratch
+scratch/*

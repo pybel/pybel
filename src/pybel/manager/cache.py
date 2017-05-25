@@ -18,7 +18,7 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
-from .models import Network, Annotation, Namespace
+from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, NamespaceEntry, AnnotationEntry
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -63,8 +63,7 @@ class CacheManager(BaseCacheManager):
         """
         :param connection: A custom database connection string
         :type connection: str or None
-        :param echo: Whether or not echo the running sql code.
-        :type echo: bool
+        :param bool echo: Whether or not echo the running sql code.
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
 
@@ -87,6 +86,45 @@ class CacheManager(BaseCacheManager):
         self.annotation_term_cache = {}
         self.annotation_edge_cache = {}
         self.annotation_graph_cache = {}
+
+    def drop_graphs(self):
+        """Drops all graphs"""
+        self.session.query(Network).delete()
+        self.session.commit()
+
+    def drop_namespaces(self):
+        """Drops all namespaces"""
+        self.namespace_cache.clear()
+        self.namespace_id_cache.clear()
+        self.namespace_model.clear()
+
+        self.namespace_term_cache.clear()
+        self.namespace_edge_cache.clear()
+        self.namespace_graph_cache.clear()
+
+        self.session.query(NamespaceEntry).delete()
+        self.session.query(Namespace).delete()
+        self.session.commit()
+
+    def drop_annotations(self):
+        """Drops all annotations"""
+
+        self.annotation_cache.clear()
+        self.annotation_id_cache.clear()
+        self.annotation_model.clear()
+
+        self.annotation_term_cache.clear()
+        self.annotation_edge_cache.clear()
+        self.annotation_graph_cache.clear()
+
+        self.session.query(AnnotationEntry).delete()
+        self.session.query(Annotation).delete()
+        self.session.commit()
+
+    def drop_equivalences(self):
+        """Drops all equivalence classes"""
+        self.session.query(NamespaceEntryEquivalence).delete()
+        self.session.commit()
 
     # NAMESPACE MANAGEMENT
 
@@ -500,8 +538,7 @@ class CacheManager(BaseCacheManager):
 
         for entry in ns.entries:
             equivalence_label = values[entry.name]
-            equivalence = self.ensure_equivalence_class(equivalence_label)
-            entry.equivalence_id = equivalence.id
+            entry.equivalence = self.ensure_equivalence_class(equivalence_label)
 
         ns.has_equivalences = True
 
@@ -548,7 +585,7 @@ class CacheManager(BaseCacheManager):
         :param store_parts: Should the graph be stored in the edge store?
         :type store_parts: bool
         :return: A Network object
-        :rtype: models.Network
+        :rtype: Network
         """
         log.debug('inserting %s v%s', graph.name, graph.version)
 
@@ -557,7 +594,7 @@ class CacheManager(BaseCacheManager):
         namespaces = [self.ensure_namespace(url) for url in graph.namespace_url.values()]
         annotations = [self.ensure_annotation(url) for url in graph.annotation_url.values()]
 
-        network = models.Network(blob=to_bytes(graph), **graph.document)
+        network = Network(blob=to_bytes(graph), **graph.document)
 
         if store_parts:
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
@@ -579,7 +616,7 @@ class CacheManager(BaseCacheManager):
         """Stores the given graph into the edge store.
 
         :param network: A SQLAlchemy PyBEL Network object
-        :type network: models.Network
+        :type network: Network
         :param graph: A BEL Graph
         :type graph: pybel.BELGraph
         """
@@ -818,7 +855,7 @@ class CacheManager(BaseCacheManager):
         :param node_data: Describes the given node and contains is_variant information
         :type node_data: dict
         :return: A list of modification objects belonging to the given node
-        :rtype: list of models.Modification
+        :rtype: list[models.Modification]
         """
         modification_list = []
         if FUSION in node_data:
@@ -910,12 +947,10 @@ class CacheManager(BaseCacheManager):
     def get_or_create_property(self, graph, edge_data):
         """Creates a list of all subject and object related properties of the edge.
 
-        :param graph: A BEL graph
-        :type graph: pybel.BELGraph
-        :param edge_data: Describes the context of the given edge.
-        :type edge_data: dict
+        :param pybel.BELGraph graph: A BEL graph
+        :param dict edge_data: Describes the context of the given edge.
         :return: A list of all subject and object properties of the edge
-        :rtype: list of models.Property
+        :rtype: list[models.Property]
         """
         properties = []
         property_list = []
@@ -966,51 +1001,36 @@ class CacheManager(BaseCacheManager):
 
     def get_graph_versions(self, name):
         """Returns all of the versions of a graph with the given name"""
-        return {x for x, in self.session.query(models.Network.version).filter(models.Network.name == name).all()}
+        return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
 
-    def get_graph(self, name, version=None):
-        """Loads most recent graph, or allows for specification of version
+    def get_graph_by_name(self, name, version):
+        """Loads most recently added graph with the given name, or allows for specification of version
 
-        :param name: The name of the graph
-        :type name: str
-        :param version: The version string of the graph. If not specified, loads most recent graph added with this name
-        :type version: None or str
-        :return: A BEL Graph
-        :rtype: pybel.BELGraph
+        :param str name: The name of the network.
+        :param str version: The version string of the network.
+        :return: A BEL graph
+        :rtype: BELGraph
         """
-        if version is not None:
-            n = self.session.query(models.Network).filter(models.Network.name == name,
-                                                          models.Network.version == version).one()
-        else:
-            n = self.session.query(models.Network).filter(models.Network.name == name).order_by(
-                models.Network.created.desc()).first()
-
+        n = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
         return from_bytes(n.blob)
 
-    def get_graph_by_id(self, id):
-        """Gets the graph from the database by its identifier
+    def get_network_by_id(self, network_id):
+        """Gets a network from the database by its identifier
 
-        :param id: The graph's database ID
-        :type id: int
+        :param int network_id: The network's database identifier
         :return: A Network object
-        :rtype: models.Network
+        :rtype: Network
         """
-        return self.session.query(models.Network).get(id)
+        return self.session.query(Network).get(network_id)
 
     def drop_graph(self, network_id):
         """Drops a graph by ID
 
-        :param network_id: The network's database id
-        :type network_id: int
+        :param int network_id: The network's database identifier
         """
 
         # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
-        self.session.query(models.Network).filter(models.Network.id == network_id).delete()
-        self.session.commit()
-
-    def drop_graphs(self):
-        """Drops all graphs"""
-        self.session.query(models.Network).delete()
+        self.session.query(Network).filter(Network.id == network_id).delete()
         self.session.commit()
 
     def list_graphs(self, include_description=True):
@@ -1100,7 +1120,7 @@ class CacheManager(BaseCacheManager):
 
         :param annotations: dictionary of {URL: values}
         :type annotations: dict
-        :return: A BEL Graph
+        :return: A BEL graph
         :rtype: pybel.BELGraph
         """
         graph = BELGraph()
@@ -1119,29 +1139,26 @@ class CacheManager(BaseCacheManager):
     def get_network(self, network_id=None, name=None, version=None, as_dict_list=False):
         """Builds and runs a query over all networks in the database.
 
-        :param network_id: Database identifier of the network of interest.
-        :type network_id: int
-        :param name: Name of the network.
-        :type name: str
-        :param version: Version of the network
-        :type version: str
+        :param int network_id: Database identifier of the network of interest.
+        :param str name: Name of the network.
+        :param str version: Version of the network
         :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                             :class:`models.Network` objects.
+                             :class:`Network` objects.
         :type as_dict_list: bool
-        :return: List of :class:`models.Network` objects or corresponding dicts.
+        :return: List of :class:`Network` objects or corresponding dicts.
         :rtype: list or dict
         """
-        q = self.session.query(models.Network)
+        q = self.session.query(Network)
 
         if network_id and isinstance(network_id, int):
             q = q.filter_by(id=network_id)
 
         else:
             if name:
-                q = q.filter(models.Network.name.like(name))
+                q = q.filter(Network.name.like(name))
 
             if version:
-                q = q.filter(models.Network.version == version)
+                q = q.filter(Network.version == version)
 
         result = q.all()
 
