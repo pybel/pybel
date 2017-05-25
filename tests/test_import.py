@@ -18,7 +18,7 @@ from pybel.constants import *
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
-from tests.constants import AKT1, EGFR, CASP8, FADD, citation_1
+from tests.constants import AKT1, EGFR, CASP8, FADD, citation_1, evidence_1
 from tests.constants import BelReconstitutionMixin, TemporaryCacheClsMixin, TestTokenParserBase
 from tests.constants import assertHasEdge, test_bel_isolated, test_bel_misordered
 from tests.constants import test_bel_simple, SET_CITATION_TEST, test_citation_dict, test_set_evidence, \
@@ -28,7 +28,6 @@ from tests.mocks import mock_bel_resources
 logging.getLogger('requests').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
 
-evidence = 'Evidence 1'
 testan1 = '1'
 
 
@@ -214,7 +213,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         e1 = {
             RELATION: INCREASES,
             CITATION: citation_1,
-            EVIDENCE: evidence,
+            EVIDENCE: evidence_1,
             ANNOTATIONS: {
                 'TESTAN1': testan1
             }
@@ -224,7 +223,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         e2 = {
             RELATION: DECREASES,
             CITATION: citation_1,
-            EVIDENCE: evidence,
+            EVIDENCE: evidence_1,
             ANNOTATIONS: {
                 'TESTAN1': testan1
             }
@@ -234,7 +233,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         e3 = {
             RELATION: DIRECTLY_DECREASES,
             CITATION: citation_1,
-            EVIDENCE: evidence,
+            EVIDENCE: evidence_1,
             ANNOTATIONS: {
                 'TESTAN1': testan1
             }
