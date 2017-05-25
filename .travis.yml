@@ -16,50 +16,14 @@ env:
   global:
     - PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/pybel?charset=utf8'
   matrix:
-    - TOXENV=docs
+    - TOXENV=py
 
 matrix:
     include:
         - python: 3.6
-          env: TOXENV=py36
-        - python: 3.5
-          env: TOXENV=py35
-        - python: 3.4
-          env: TOXENV=py34
-        - python: 2.7
-          env: TOXENV=py27
-    exclude:
-        - python: 3.5
           env: TOXENV=docs
-        - python: 3.4
-          env: TOXENV=docs
-        - python: 2.7
-          env: TOXENV=docs
-
-jobs:
-  include:
-
-    - stage: Report Coverage
-      script: tox -e coverage-report
-      script: codecov
-
-    - stage: Check Manifest
-      script: tox
-      python: 3.6
-      env: TOXENV=manifest
-
-    - stage: Deploy to PyPI
-      deploy:
-        provider: pypi
-        user: cthoyt
-        password:
-          secure: WK8SA0Vtdn9a4RMdpn8L0CFbHs/3a+mOJrwYLaL4kzzZNWjL3yt0ygnhY5138pQoy5ygQ/bLT/COJIE9cN0qP0uUyBMgerUPWozkXryoz79zsQxe2HXHkG/XMhxuNjvPwRKjw9+tmz/wWoCeMFQ0JczNvOg2DYFcT4ruqLY5muHBuMErVB5pwjGSpYmDAEpI30x6KEJTXz5VIDxRpLhI6uehpItBW195Yj5GRAWllnGTqn9zRTeZR7SME1/p2Af1RVOlam4Ur/3hSXYDMUqErNj/vrxvxgpO9lDakfpSUV0U7pETgwQ+g8mp0fgm8I643jfu4Zoj8lITf9ewl9CteiaC80gV4Nj9JA9mdGiiaZwmpkEPUiMq6YLaqef6QDJEL2kx1q40+cOOsnTWe3PjnmRx9oAovQR9koqz1kztr3F++D3H65s6Y+LF46mmAlQs5mQ2sjGGGzd8agBcmoBzAG/Y/oTpkLbZ1Xq1qMSTQML7b0AHgbkWsy0QYUm56pX35uMrcl+r5BezJ5dAG+p3FDfEurD9iR9I0pUoWcE3zZldA1EFNsX6tnrLUwXGrAX7YGT7ul9DgHnD/h8hsS2qcrktTgzWIBIEZSpXiWUoM7Wy0TMbBq+iU+83lhCfQqnOb8fiMaH09v2neMmmsaazIIdF9JIMS9Caq5x7Q/iujeI=
-        on:
-          tags: true
-          distributions: "sdist bdist_wheel"
-          repo: pybel/pybel
-          branch: master
-
+        - python: 3.6
+          env: TOXENV=manifest
 
 before_install:
     - pip install codecov
@@ -72,6 +36,9 @@ install:
 script:
     - tox
 
+after_success:
+    - tox -e coverage-report
+    - codecov
 
 notifications:
   slack: pybel:n2KbWKBum3musnBg3L76gGwq
@@ -80,3 +47,13 @@ addons:
     code_climate:
         repo_token: e8d763f60ca5495b8bce79682b7c1e2e462a776f8de5c4540ceb01f52458f891
 
+deploy:
+    provider: pypi
+    user: cthoyt
+    password:
+        secure: WK8SA0Vtdn9a4RMdpn8L0CFbHs/3a+mOJrwYLaL4kzzZNWjL3yt0ygnhY5138pQoy5ygQ/bLT/COJIE9cN0qP0uUyBMgerUPWozkXryoz79zsQxe2HXHkG/XMhxuNjvPwRKjw9+tmz/wWoCeMFQ0JczNvOg2DYFcT4ruqLY5muHBuMErVB5pwjGSpYmDAEpI30x6KEJTXz5VIDxRpLhI6uehpItBW195Yj5GRAWllnGTqn9zRTeZR7SME1/p2Af1RVOlam4Ur/3hSXYDMUqErNj/vrxvxgpO9lDakfpSUV0U7pETgwQ+g8mp0fgm8I643jfu4Zoj8lITf9ewl9CteiaC80gV4Nj9JA9mdGiiaZwmpkEPUiMq6YLaqef6QDJEL2kx1q40+cOOsnTWe3PjnmRx9oAovQR9koqz1kztr3F++D3H65s6Y+LF46mmAlQs5mQ2sjGGGzd8agBcmoBzAG/Y/oTpkLbZ1Xq1qMSTQML7b0AHgbkWsy0QYUm56pX35uMrcl+r5BezJ5dAG+p3FDfEurD9iR9I0pUoWcE3zZldA1EFNsX6tnrLUwXGrAX7YGT7ul9DgHnD/h8hsS2qcrktTgzWIBIEZSpXiWUoM7Wy0TMbBq+iU+83lhCfQqnOb8fiMaH09v2neMmmsaazIIdF9JIMS9Caq5x7Q/iujeI=
+    on:
+        tags: true
+        distributions: "sdist bdist_wheel"
+        repo: pybel/pybel
+        branch: master
