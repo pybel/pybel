@@ -193,8 +193,8 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
     """This class makes a manager available for the entire existence of the class but deletes everything that gets
     stuck in it after each test"""
 
-    def tearDown(self):
-        super(FleetingTemporaryCacheMixin, self).tearDown()
+    def setUp(self):
+        super(FleetingTemporaryCacheMixin, self).setUp()
 
         self.manager.drop_namespaces()
         self.manager.drop_annotations()
