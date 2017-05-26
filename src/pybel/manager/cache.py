@@ -61,8 +61,7 @@ class CacheManager(BaseCacheManager):
 
     def __init__(self, connection=None, echo=False):
         """
-        :param connection: A custom database connection string
-        :type connection: str or None
+        :param str connection: A custom database connection string
         :param bool echo: Whether or not echo the running sql code.
         """
         BaseCacheManager.__init__(self, connection=connection, echo=echo)
@@ -132,8 +131,7 @@ class CacheManager(BaseCacheManager):
         """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
         the values of this namespace.
 
-        :param url: the location of the namespace file
-        :type url: str
+        :param str url: the location of the namespace file
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: :class:`pybel.manager.models.Namespace` or dict
         """
@@ -580,10 +578,8 @@ class CacheManager(BaseCacheManager):
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
 
-        :param graph: a BEL network
-        :type graph: pybel.BELGraph
-        :param store_parts: Should the graph be stored in the edge store?
-        :type store_parts: bool
+        :param BELGraph graph: A BEL graph
+        :param bool store_parts: Should the graph be stored in the edge store?
         :return: A Network object
         :rtype: Network
         """
@@ -615,10 +611,8 @@ class CacheManager(BaseCacheManager):
     def store_graph_parts(self, network, graph):
         """Stores the given graph into the edge store.
 
-        :param network: A SQLAlchemy PyBEL Network object
-        :type network: Network
-        :param graph: A BEL Graph
-        :type graph: pybel.BELGraph
+        :param Network network: A SQLAlchemy PyBEL Network object
+        :param BELGraph graph: A BEL Graph
         """
         nc = {}
 
