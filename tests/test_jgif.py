@@ -3,7 +3,7 @@ import logging
 import unittest
 
 from pybel.constants import *
-from pybel.io.jgif import from_jgif
+from pybel.io.jgif import from_jgif, from_cbn_jgif
 from tests.constants import bel_dir_path, TestGraphMixin
 
 test_path = os.path.join(bel_dir_path, 'Cytotoxic T-cell Signaling-2.0-Hs.json')
@@ -74,7 +74,7 @@ class TestJgif(TestGraphMixin):
         with open(test_path) as f:
             graph_jgif_dict = json.load(f)
 
-        graph = from_jgif(graph_jgif_dict)
+        graph = from_cbn_jgif(graph_jgif_dict)
 
         self.assertEqual(set(jgif_expected_nodes), set(graph.nodes_iter()))
         self.assertEqual({(u, v) for u, v, d in jgif_expected_edges}, set(graph.edges_iter()))

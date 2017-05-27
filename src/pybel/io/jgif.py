@@ -9,6 +9,7 @@ from ..graph import BELGraph
 from ..parser import BelParser
 
 __all__ = [
+    'from_cbn_jgif',
     'from_jgif'
 ]
 
@@ -26,10 +27,6 @@ species_map = {
     'mouse': '10090'
 }
 
-annotation_value_map = {
-    'Species': species_map
-}
-
 
 def get_citation(evidence):
     return {
@@ -39,15 +36,45 @@ def get_citation(evidence):
     }
 
 
+def map_cbn(d):
+    """Pre-processes the JSON from the CBN"""
+    for i, edge in enumerate(d['graph']['edges']):
+        if 'metadata' not in d['graph']['edges'][i]:
+            continue
+
+        if 'evidences' not in d['graph']['edges'][i]['metadata']:
+            continue
+
+        for j, evidence in enumerate(d['graph']['edges'][i]['metadata']['evidences']):
+            if 'biological_context' not in evidence:
+                continue
+
+            ctx = evidence['biological_context']
+
+            for k, v in annotation_map.items():
+                if k in ctx and ctx[k].strip():
+                    d['graph']['edges'][i]['metadata']['evidences'][j]['biological_context'][v] = ctx[k]
+                    del d['graph']['edges'][i]['metadata']['evidences'][j]['biological_context'][k]
+
+            if 'species_common_name' in ctx and ctx['species_common_name'].strip():
+                d['graph']['edges'][i]['metadata']['evidences'][j]['biological_context']['Species'] = species_map[
+                    ctx['species_common_name']]
+                del d['graph']['edges'][i]['metadata']['evidences'][j]['biological_context'][
+                    'species_common_name']
+    return d
+
+def from_cbn_jgif(graph_jgif_dict):
+    """Maps CBN JGIF then builds a BEL graph."""
+    return from_jgif(map_cbn(graph_jgif_dict))
+
 # TODO add metadata
 def from_jgif(graph_jgif_dict):
-    """Builds a BEL graph from a JGIF JSON object (tested on data from CausalBioNet)
+    """Builds a BEL graph from a JGIF JSON object.
     
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
     :return: A BEL graph
     :rtype: BELGraph
     """
-
     root = graph_jgif_dict['graph']
 
     label = root.get('label')
@@ -63,7 +90,7 @@ def from_jgif(graph_jgif_dict):
         node_label = node['label']
         parser.bel_term.parseString(node_label)
 
-    for edge in root['edges']:
+    for i, edge in enumerate(root['edges']):
 
         if edge['relation'] in {'actsIn'}:
             continue  # don't need legacy BEL format
@@ -71,7 +98,8 @@ def from_jgif(graph_jgif_dict):
         if edge['relation'] in unqualified_edges:
             pass
 
-        if not edge['relation'] in unqualified_edges and ('evidences' not in edge['metadata'] or not edge['metadata']['evidences']):
+        if not edge['relation'] in unqualified_edges and (
+                        'evidences' not in edge['metadata'] or not edge['metadata']['evidences']):
             log.debug('No evidence for edge %s', edge['label'])
             continue
 
@@ -82,30 +110,12 @@ def from_jgif(graph_jgif_dict):
             parser.control_parser.clear()
             parser.control_parser.citation = get_citation(evidence)
             parser.control_parser.evidence = evidence['summary_text'].strip()
-
-            d = {}
-
-            if 'biological_context' in evidence:
-                annotations = evidence['biological_context'].strip()
-
-                if 'tissue' in annotations and annotations['tissue'].strip():
-                    d['Tissue'] = annotations['tissue']
-
-                if 'disease' in annotations and annotations['disease'].strip():
-                    d['Disease'] = annotations['disease'].strip()
-
-                if 'species_common_name' in annotations and annotations['species_common_name'].strip():
-                    d['Species'] = species_map[annotations['species_common_name'].strip().lower()]
-
-                if 'cell' in annotations and annotations['cell'].strip():
-                    d['Cell'] = annotations['cell'].strip()
-
-            parser.control_parser.annotations.update(d)
+            parser.control_parser.annotations.update(evidence['biological_context'])
 
             edge_label = edge['label']
 
             try:
-                parser.parseString(edge_label)
+                parser.parseString(edge_label, i)
             except Exception as e:
                 log.warning('Error %s for %s', e, edge_label)
 
