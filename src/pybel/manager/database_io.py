@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""This module provides IO functions to the relational edge store"""
+"""
+
+SQL Database
+~~~~~~~~~~~~
+This module provides IO functions to the relational edge store.
+
+"""
 
 import logging
 

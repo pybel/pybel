@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains IO functions for import of BEL graphs stored in JSON Graph Interchange Format"""
+"""
+
+JSON Graph Interchange Format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This module contains IO functions for import of BEL graphs stored in JSON Graph Interchange Format
+
+"""
 
 import logging
 from collections import defaultdict

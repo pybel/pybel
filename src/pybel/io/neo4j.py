@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains IO functions for outputting BEL graphs to a Neo4J graph database"""
+"""
+
+Neo4j
+~~~~~
+This module contains IO functions for outputting BEL graphs to a Neo4J graph database
+
+"""
 
 from ..canonicalize import calculate_canonical_name, decanonicalize_node
 from ..constants import FUNCTION, NAME, RELATION, PYBEL_CONTEXT_TAG
