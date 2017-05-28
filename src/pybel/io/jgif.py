@@ -4,7 +4,9 @@
 
 JSON Graph Interchange Format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This module contains IO functions for import of BEL graphs stored in JSON Graph Interchange Format
+The JSON Graph Interchange Format (JGIF) is `specified <http://jsongraphformat.info/>`_ similarly to the Node Link 
+JSON. Interchange with this format provides compatibilty with other software and repositories, such as the 
+`Causal Biological Network Database <http://causalbionet.com/>`_.
 
 """
 
