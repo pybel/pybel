@@ -4,12 +4,12 @@
 
 NDEx
 ~~~~
-This module provides a wrapper around the input/output functions in :code:`pybel` for converting BEL graphs to CX
-documents and the NDEx API wrapper provided by the :code:`ndex-python` for uploading/downloading CX documents from
-ndexbio.org
+This package provides a wrapper around :func:`pybel.to_cx` and NDEx
+`client <https://github.com/ndexbio/ndex-python>`_ to allow for easy upload and download of BEL documents to the
+`NDEx <http://www.ndexbio.org/>`_ database.
 
-The interface in :code:`pybel2ndex` is incredibly simple. It provides the user with two functions: one for upload, and 
-one for download.
+The programmatic API also provides options for specifying username and password. By default, it checks the environment 
+variables: ``NDEX_USERNAME`` and ``NDEX_PASSWORD``.
 
 """
 
