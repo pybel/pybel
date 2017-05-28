@@ -37,12 +37,9 @@ class ControlParser(BaseParser):
 
     def __init__(self, annotation_dicts=None, annotation_regex=None, citation_clearing=True):
         """
-        :param annotation_dicts: A dictionary of {annotation: set of valid values} for parsing
-        :type annotation_dicts: dict
-        :param annotation_regex: A dictionary of {annotation: regular expression string}
-        :type annotation_regex: dict
-        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-        :type citation_clearing: bool
+        :param dict[str, set[str]] annotation_dicts: A dictionary of {annotation: set of valid values} for parsing
+        :param dict[str, str] annotation_regex: A dictionary of {annotation: regular expression string}
+        :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
         """
 
         self.citation_clearing = citation_clearing

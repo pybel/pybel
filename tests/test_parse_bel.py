@@ -9,9 +9,10 @@ from pybel.graph import BELGraph
 from pybel.parser import BelParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
-from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, build_variant_dict
+from tests.constants import TestTokenParserBase, build_variant_dict
 from tests.constants import assertHasNode, assertHasEdge
-from tests.constants import default_identifier
+from tests.constants import default_identifier, TestGraphMixin
+from tests.constants import update_provenance
 
 log = logging.getLogger(__name__)
 
@@ -1174,30 +1175,6 @@ class TestProtein(TestTokenParserBase):
 
         self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
 
-    def test_ensure_no_dup_nodes(self):
-        """Ensure node isn't added twice, even if from different statements"""
-        s1 = 'g(HGNC:AKT1)'
-        s2 = 'deg(g(HGNC:AKT1))'
-
-        result = self.parser.language.parseString(s1)
-
-        expected_result_dict = {
-            FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            }
-        }
-
-        self.assertEqual(expected_result_dict, result.asDict())
-
-        self.parser.language.parseString(s2)
-
-        gene = GENE, 'HGNC', 'AKT1'
-
-        self.assertEqual(1, self.parser.graph.number_of_nodes())
-        self.assertHasNode(gene, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
-
     def test_ensure_no_dup_edges(self):
         """Ensure node and edges aren't added twice, even if from different statements and has origin completion"""
         s1 = 'p(HGNC:AKT1)'
@@ -1460,7 +1437,7 @@ class TestComplex(TestTokenParserBase):
 
     def test_complex_list_short(self):
         statement = 'complex(p(HGNC:FOS), p(HGNC:JUN))'
-        result = self.parser.parseString(statement)
+        result = self.parser.complex_abundances.parseString(statement)
 
         expected_result = [COMPLEX, [PROTEIN, ['HGNC', 'FOS']], [PROTEIN, ['HGNC', 'JUN']]]
         self.assertEqual(expected_result, result.asList())
@@ -1497,7 +1474,7 @@ class TestComplex(TestTokenParserBase):
 
     def test_complex_list_long(self):
         statement = 'complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))'
-        self.parser.parseString(statement)
+        self.parser.complex_abundances.parseString(statement)
 
 
 class TestComposite(TestTokenParserBase):
@@ -1792,8 +1769,7 @@ class TestTranslocationPermissive(unittest.TestCase):
         3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
         Test translocation in object
         """
-        self.parser.parseString(SET_CITATION_TEST)
-        self.parser.parseString(test_set_evidence)
+        update_provenance(self.parser)
 
         statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"))'
         result = self.parser.relation.parseString(statement)
@@ -2071,3 +2047,17 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(0, self.parser.graph.number_of_edges())
         self.assertEqual(0, len(self.parser.control_parser.annotations))
         self.assertEqual(0, len(self.parser.control_parser.citation))
+
+
+class TestSemantics(TestGraphMixin):
+    def test_lenient_semantic_no_failure(self):
+        self.graph = BELGraph()
+        self.parser = BelParser(self.graph, allow_naked_names=True)
+
+        update_provenance(self.parser)
+
+        self.parser.bel_term.addParseAction(self.parser.handle_term)
+        self.parser.bel_term.parseString('bp(ABASD)')
+
+        node = BIOPROCESS, DIRTY, 'ABASD'
+        self.assertHasNode(self.parser.graph, node)

@@ -2,6 +2,8 @@
 
 """
 
+NDEx
+~~~~
 This module provides a wrapper around the input/output functions in :code:`pybel` for converting BEL graphs to CX
 documents and the NDEx API wrapper provided by the :code:`ndex-python` for uploading/downloading CX documents from
 ndexbio.org

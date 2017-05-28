@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import json
 import logging
 import tempfile
 import unittest
+from json import dumps
 
 from requests.compat import urlparse
 
@@ -70,27 +70,37 @@ FADD = (PROTEIN, 'HGNC', 'FADD')
 CASP8 = (PROTEIN, 'HGNC', 'CASP8')
 
 
+def update_provenance(bel_parser):
+    """Sticks provenance in a BEL parser
+    
+    :param pybel.parser.parse_bel.BelParser bel_parser: 
+    :return: 
+    """
+    bel_parser.control_parser.citation.update(test_citation_dict)
+    bel_parser.control_parser.evidence = test_evidence_text
+
+
 def any_dict_matches(dict_of_dicts, query_dict):
     return any(query_dict == sd for sd in dict_of_dicts.values())
 
 
-def assertHasNode(self, member, graph, **kwargs):
+def assertHasNode(self, node, graph, **kwargs):
     """A helper function for checking if a node with the given properties is contained within a graph
 
     :param self: A Test Case
     :type self: unittest.TestCase
-    :param member:
+    :param node: 
     :param graph:
     :type graph: BELGraph
     :param kwargs:
     """
-    self.assertTrue(graph.has_node(member), msg='{} not found in graph'.format(member))
+    self.assertTrue(graph.has_node(node), msg='{} not found in graph'.format(node))
     if kwargs:
-        missing = set(kwargs) - set(graph.node[member])
+        missing = set(kwargs) - set(graph.node[node])
         self.assertFalse(missing, msg="Missing {} in node data".format(', '.join(sorted(missing))))
-        self.assertTrue(all(kwarg in graph.node[member] for kwarg in kwargs),
+        self.assertTrue(all(kwarg in graph.node[node] for kwarg in kwargs),
                         msg="Missing kwarg in node data")
-        self.assertEqual(kwargs, {k: graph.node[member][k] for k in kwargs},
+        self.assertEqual(kwargs, {k: graph.node[node][k] for k in kwargs},
                          msg="Wrong values in node data")
 
 
@@ -109,17 +119,21 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
     """
     self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
 
-    msg_format = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'
+    if not kwargs:
+        return
 
-    if kwargs and permissive:
+    if permissive:
+        matches = any_subdict_matches(graph.edge[u][v], kwargs)
+    else:
+        matches = any_dict_matches(graph.edge[u][v], kwargs)
 
-        self.assertTrue(any_subdict_matches(graph.edge[u][v], kwargs),
-                        msg=msg_format.format(u, v, json.dumps(kwargs, indent=2, sort_keys=True),
-                                              json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
-    elif kwargs and not permissive:
-        self.assertTrue(any_dict_matches(graph.edge[u][v], kwargs),
-                        msg=msg_format.format(u, v, json.dumps(kwargs, indent=2, sort_keys=True),
-                                              json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
+    msg = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'.format(
+        u,
+        v,
+        dumps(kwargs, indent=2, sort_keys=True),
+        dumps(graph.edge[u][v], indent=2, sort_keys=True)
+    )
+    self.assertTrue(matches, msg=msg)
 
 
 def identifier(namespace, name):
@@ -183,8 +197,8 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
     """This class makes a manager available for the entire existence of the class but deletes everything that gets
     stuck in it after each test"""
 
-    def tearDown(self):
-        super(FleetingTemporaryCacheMixin, self).tearDown()
+    def setUp(self):
+        super(FleetingTemporaryCacheMixin, self).setUp()
 
         self.manager.drop_namespaces()
         self.manager.drop_annotations()
@@ -195,7 +209,7 @@ class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.graph = BELGraph()
-        cls.parser = BelParser(cls.graph)
+        cls.parser = BelParser(cls.graph, autostreamline=False)
 
     def setUp(self):
         self.parser.clear()
@@ -450,13 +464,13 @@ BEL_THOROUGH_EDGES = [
     ((GENE, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
-        RELATION: 'transcribedTo',
+        RELATION: TRANSCRIBED_TO,
         ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), (PROTEIN, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
-        RELATION: 'directlyDecreases',
+        RELATION: DIRECTLY_DECREASES,
         ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)), {
@@ -476,7 +490,7 @@ BEL_THOROUGH_EDGES = [
      (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: 'directlyDecreases',
+         RELATION: DIRECTLY_DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          OBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          ANNOTATIONS: {}
@@ -551,7 +565,7 @@ BEL_THOROUGH_EDGES = [
      (GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: 'causesNoChange',
+         RELATION: CAUSES_NO_CHANGE,
          ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
@@ -567,7 +581,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: 'directlyIncreases',
+         RELATION: DIRECTLY_INCREASES,
          ANNOTATIONS: {}
      }),
     ((MIRNA, 'HGNC', 'MIR21'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
@@ -727,14 +741,14 @@ BEL_THOROUGH_EDGES = [
     ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
-        RELATION: 'translatedTo',
+        RELATION: TRANSLATED_TO,
         ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')),
      (RNA, ('HGNC', 'TMPRSS2'), ('r', 1, 79), ('HGNC', 'ERG'), ('r', 312, 5034)), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: 'directlyIncreases',
+         RELATION: DIRECTLY_INCREASES,
          ANNOTATIONS: {}
      }),
     ((RNA, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('?',)),
@@ -797,21 +811,21 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'directlyDecreases',
+         RELATION: DIRECTLY_DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
-        RELATION: 'directlyDecreases',
+        RELATION: DIRECTLY_DECREASES,
         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
         ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'HMGCR'), (BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
-        RELATION: 'rateLimitingStepOf',
+        RELATION: RATE_LIMITING_STEP_OF,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
         ANNOTATIONS: {}
     }),
@@ -819,7 +833,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'causesNoChange',
+         RELATION: CAUSES_NO_CHANGE,
          ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'APP'), (GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')), {
@@ -838,7 +852,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'regulates',
+         RELATION: REGULATES,
          SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
          OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
          ANNOTATIONS: {}
@@ -847,7 +861,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'positiveCorrelation',
+         RELATION: POSITIVE_CORRELATION,
          OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
          ANNOTATIONS: {}
      }),
@@ -859,7 +873,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'positiveCorrelation',
+         RELATION: POSITIVE_CORRELATION,
          SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
          ANNOTATIONS: {}
      }),
@@ -867,7 +881,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'isA',
+         RELATION: IS_A,
          ANNOTATIONS: {}
      }),
     ((REACTION, (
@@ -918,7 +932,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'subProcessOf',
+         RELATION: SUBPROCESS_OF,
          ANNOTATIONS: {}
      }),
     ((ABUNDANCE, 'CHEBI', 'nitric oxide'),
@@ -970,14 +984,12 @@ BEL_THOROUGH_EDGES = [
 ]
 
 
-class BelReconstitutionMixin(unittest.TestCase):
+class BelReconstitutionMixin(TestGraphMixin):
     def bel_simple_reconstituted(self, graph, check_metadata=True):
         """Checks that test_bel.bel was loaded properly
 
-        :param graph: A BEL Graph
-        :type graph: pybel.BELGraph
-        :param check_metadata: Should the graph metadata be checked? Defaults to True
-        :type check_metadata: bool
+        :param BELGraph graph: A BEL grpah
+        :param bool check_metadata: Check the graph's document section is correct
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -1066,11 +1078,10 @@ class BelReconstitutionMixin(unittest.TestCase):
     def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True):
         """Checks that thorough.bel was loaded properly
 
-        :param graph: A BEL grpah
-        :type graph: BELGraph
-        :param check_metadata:
-        :param check_warnings:
-        :param check_provenance:
+        :param BELGraph graph: A BEL graph
+        :param bool check_metadata: Check the graph's document section is correct
+        :param bool check_warnings: Check the graph produced the expected warnings
+        :param bool check_provenance: Check the graph's definition section is correct
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -1104,6 +1115,13 @@ class BelReconstitutionMixin(unittest.TestCase):
             assertHasEdge(self, u, v, graph, permissive=True, **d)
 
     def bel_slushy_reconstituted(self, graph, check_metadata=True, check_warnings=True):
+        """Check that slushy.bel was loaded properly
+        
+        :param BELGraph graph: A BEL graph
+        :param bool check_metadata: Check the graph's document section is correct
+        :param bool check_warnings: Check the graph produced the expected warnings
+        :return: 
+        """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
@@ -1157,8 +1175,7 @@ class BelReconstitutionMixin(unittest.TestCase):
     def bel_isolated_reconstituted(self, graph):
         """Runs the isolated node test
 
-        :param graph: A BEL Graph
-        :type graph: BELGraph
+        :param BELGraph graph: A BEL Graph
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)

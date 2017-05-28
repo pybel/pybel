@@ -71,8 +71,8 @@ Acknowledgements
 
 Links
 -----
-- Specified by `BEL 1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
-  `BEL 2.0 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_
+- Specified by `BEL 1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_ and
+  `BEL 2.0 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
 - Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
 - Versioned on `GitHub <https://github.com/pybel/pybel>`_
 - Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_

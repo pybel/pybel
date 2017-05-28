@@ -7,7 +7,11 @@ PyBEL Constants
 This module maintains the strings used throughout the PyBEL codebase to promote consistency.
 """
 
+import json
+import logging
 import os
+
+log = logging.getLogger(__name__)
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
@@ -49,10 +53,29 @@ DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
+PYBEL_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config', 'pybel')
+if not os.path.exists(PYBEL_CONFIG_DIR):
+    os.makedirs(PYBEL_CONFIG_DIR)
+
+PYBEL_CONFIG_PATH = os.path.join(PYBEL_CONFIG_DIR, 'config.json')
+if not os.path.exists(PYBEL_CONFIG_PATH):
+    with open(PYBEL_CONFIG_PATH, 'w') as f:
+        config = {PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION}
+        json.dump(config, f)
+else:
+    with open(PYBEL_CONFIG_PATH) as f:
+        config = json.load(f)
+        config.setdefault(PYBEL_CONNECTION, DEFAULT_CACHE_CONNECTION)
+
 
 def get_cache_connection():
     """Returns the default cache connection string"""
-    return os.environ[PYBEL_CONNECTION] if PYBEL_CONNECTION in os.environ else DEFAULT_CACHE_CONNECTION
+    if PYBEL_CONNECTION in os.environ:
+        log.info('connecting to environment-defined database: %s', os.environ[PYBEL_CONNECTION])
+        return os.environ[PYBEL_CONNECTION]
+
+    log.info('connecting to %s', config[PYBEL_CONNECTION])
+    return config[PYBEL_CONNECTION]
 
 
 PYBEL_CONTEXT_TAG = 'pybel_context'

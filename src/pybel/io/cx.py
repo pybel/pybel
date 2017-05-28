@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+CX JSON
+~~~~~~~
+This module contains input and output functions for the CX network exchange format.
+
+"""
+
 import json
 import logging
 import time
@@ -64,6 +72,7 @@ def build_node_mapping(graph):
     :rtype: dict[tuple, int]
     """
     return {node: node_id for node_id, node in enumerate(sorted(graph.nodes_iter(), key=hash_tuple))}
+
 
 def to_cx(graph):
     """Converts BEL Graph to CX data format (as in-memory JSON) for use with `NDEx <http://www.ndexbio.org/>`_

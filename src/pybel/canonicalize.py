@@ -181,11 +181,10 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
 def decanonicalize_edge(g, u, v, k):
     """Takes two nodes and gives back a BEL string representing the statement
 
-    :param g: A BEL graph
-    :type g: pybel.BELGraph
-    :param u: The edge's source node
-    :param v: The edge's target node
-    :param k: The edge's key
+    :param BELGraph g: A BEL graph
+    :param tuple u: The edge's source node
+    :param tuple v: The edge's target node
+    :param int k: The edge's key
     :return: The canonical BEL for this edge
     :rtype: str
     """
@@ -201,10 +200,9 @@ def decanonicalize_edge(g, u, v, k):
 def to_bel_lines(graph):
     """Returns an iterable over the lines of the BEL graph as a canonical BEL Script (.bel)
 
-    :param graph: the BEL Graph to output as a BEL Script
-    :type graph: BELGraph
-    :return: an iterable over the lines of the representative BEL script
-    :rtype: iter
+    :param BELGraph graph: the BEL Graph to output as a BEL Script
+    :return: An iterable over the lines of the representative BEL script
+    :rtype: iter[str]
     """
     yield '# Output by PyBEL v{} on {}\n'.format(get_version(), time.asctime())
 
@@ -286,10 +284,8 @@ def to_bel_lines(graph):
 def to_bel(graph, file=None):
     """Outputs the BEL graph as canonical BEL to the given file/file-like/stream. Defaults to standard out.
 
-    :param graph: the BEL Graph to output as a BEL Script
-    :type graph: BELGraph
-    :param file: a file-like object. If None, defaults to standard out.
-    :type file: file
+    :param BELGraph graph: the BEL Graph to output as a BEL Script
+    :param file file: A writable file-like object. If None, defaults to standard out.
     """
     file = sys.stdout if file is None else file
     for line in to_bel_lines(graph):
@@ -299,10 +295,8 @@ def to_bel(graph, file=None):
 def to_bel_path(graph, path):
     """Writes the BEL graph as a canonical BEL Script to the given path
 
-    :param graph: the BEL Graph to output as a BEL Script
-    :type graph: BELGraph
-    :param path: A file path
-    :type path: str
+    :param BELGraph graph: the BEL Graph to output as a BEL Script
+    :param str path: A file path
     """
     with open(path, 'w') as f:
         to_bel(graph, f)
@@ -312,8 +306,7 @@ def calculate_canonical_name(graph, node):
     """Calculates the canonical name for a given node. If it is a simple node, uses the already given name.
     Otherwise, it uses the BEL string.
 
-    :param graph: A BEL Graph
-    :type graph: pybel.BELGraph
+    :param BELGraph graph: A BEL Graph
     :param node: A node
     :type node: tuple
     :return: Canonical node name

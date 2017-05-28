@@ -6,18 +6,44 @@ from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import *
 from pybel.parser.parse_bel import canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, RelabelWarning
-from tests.constants import TestTokenParserBase, SET_CITATION_TEST, test_set_evidence, test_citation_dict, \
-    test_evidence_text
-from tests.constants import default_identifier
+from tests.constants import TestTokenParserBase
+from tests.constants import default_identifier, test_citation_dict, test_evidence_text, update_provenance
 
 log = logging.getLogger(__name__)
 
 
 class TestRelations(TestTokenParserBase):
+    @classmethod
+    def setUpClass(cls):
+        super(TestRelations, cls).setUpClass()
+        cls.parser.relation.streamline()
+
     def setUp(self):
-        TestTokenParserBase.setUp(self)
-        self.parser.parseString(SET_CITATION_TEST)
-        self.parser.parseString(test_set_evidence)
+        super(TestRelations, self).setUp()
+        update_provenance(self.parser)
+
+    def test_ensure_no_dup_nodes(self):
+        """Ensure node isn't added twice, even if from different statements"""
+        self.parser.gene.addParseAction(self.parser.handle_term)
+        result = self.parser.bel_term.parseString('g(HGNC:AKT1)')
+
+        expected_result_dict = {
+            FUNCTION: GENE,
+            IDENTIFIER: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
+            }
+        }
+
+        self.assertEqual(expected_result_dict, result.asDict())
+
+        self.parser.degradation.addParseAction(self.parser.handle_term)
+        self.parser.degradation.parseString('deg(g(HGNC:AKT1))')
+
+        gene = GENE, 'HGNC', 'AKT1'
+
+        self.assertEqual(1, self.parser.graph.number_of_nodes())
+        self.assertHasNode(gene, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
     def test_increases(self):
         """
@@ -777,7 +803,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
-        self.parser.parseString(statement)
+        self.parser.relation.parseString(statement)
 
     def test_has_variant(self):
         statement = 'g(HGNC:AKT1) hasVariant g(HGNC:AKT1, gmod(M))'
@@ -849,9 +875,11 @@ class TestWrite(TestTokenParserBase):
             'g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))',
         ]
 
+        self.parser.bel_term.addParseAction(self.parser.handle_term)
+
         for case in cases:
             source_bel, expected_bel = case if 2 == len(case) else (case, case)
 
-            result = self.parser.parseString(source_bel)
+            result = self.parser.bel_term.parseString(source_bel)
             bel = decanonicalize_node(self.parser.graph, canonicalize_node(result))
             self.assertEqual(expected_bel, bel)

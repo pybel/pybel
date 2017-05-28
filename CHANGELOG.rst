@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.9 <https://github.com/pybel/pybel/compare/v0.5.8...v0.5.9>`_ - 2017-05-28
+------------------------------------------------------------------------------
+Added
+-----
+- JGIF interchange (https://github.com/pybel/pybel/issues/193) and (https://github.com/pybel/pybel/issues/194)
+- Configuration file parsing (https://github.com/pybel/pybel/issues/197)
+
 `0.5.8 <https://github.com/pybel/pybel/compare/v0.5.7...v0.5.8>`_ - 2017-05-25
 ------------------------------------------------------------------------------
 Changed

@@ -64,6 +64,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
         self.assertNotIn('A', self.parser.annotations_dict[MESH_DISEASES_KEYWORD])
+        self.assertIn('46, XX Disorders of Sex Development', self.parser.annotations_dict[MESH_DISEASES_KEYWORD])
 
     def test_annotation_name_persistience_2(self):
         """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
