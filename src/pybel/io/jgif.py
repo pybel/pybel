@@ -160,7 +160,7 @@ def from_jgif(graph_jgif_dict):
             if 'citation' not in evidence or not evidence['citation']:
                 continue
 
-            if not 'type' in evidence['citation'] and not 'id' in evidence['citation']:
+            if 'type' not in evidence['citation'] and 'id' not in evidence['citation']:
                 continue
 
             summary_text = evidence['summary_text'].strip()

@@ -43,10 +43,12 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 def build_manager(connection=None, echo=False):
     """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
-
+    
+    :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None`` 
+                        for default connection
     :type connection: None or str or CacheManager
     :type echo: bool
-    :return: A graph cache manager
+    :return: A cache manager
     :rtype: CacheManager
     """
     if isinstance(connection, CacheManager):

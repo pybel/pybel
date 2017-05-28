@@ -32,8 +32,8 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 
     :param BELGraph graph: A BEL graph
     :param iter[str] lines: An iterable over lines of BEL script
-    :param manager: A database connection string to the PyBEL cache, pre-built CacheManager, or pre-build 
-                    MetadataParser, or ``None`` for default connection
+    :param manager: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, a pre-built 
+                    :class:`MetadataParser`, or ``None`` for default connection
     :type manager: None or str or CacheManager or MetadataParser
     :param bool allow_naked_names: If true, turns off naked namespace failures
     :param bool allow_nested: If true, turns off nested statement failures
@@ -72,13 +72,10 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 def parse_document(graph, document_metadata, metadata_parser):
     """Parses the lines in the document section of a BEL script.
 
-    :param graph: A BEL graph
+    :param BELGraph graph: A BEL graph
     :type graph: BELGraph
-    :param document_metadata: An enumerated iterable over the lines in the document section of a BEL script
-    :type document_metadata: iter
-    :param metadata_parser: A metadata parser
-    :type metadata_parser: pybel.parser.parse_metadata.MetadataParser
-    :return:
+    :param iter[str] document_metadata: An enumerated iterable over the lines in the document section of a BEL script
+    :param MetadataParser metadata_parser: A metadata parser
     """
     t = time.time()
 
