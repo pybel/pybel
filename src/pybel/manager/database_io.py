@@ -26,8 +26,8 @@ def to_database(graph, connection=None, store_parts=False):
     """Stores a graph in a database.
 
     :param BELGraph graph: A BEL graph
-    :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, a pre-built 
-                    :class:`MetadataParser`, or ``None`` for default connection
+    :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or `None`` for 
+                        default connection
     :type connection: None or str or pybel.manager.cache.CacheManager
     :param bool store_parts: Should the graph be stored in the edge store?
     """
