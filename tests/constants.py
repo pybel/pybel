@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import json
 import logging
 import tempfile
 import unittest
+from json import dumps
 
 from requests.compat import urlparse
 
@@ -119,17 +119,21 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
     """
     self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
 
-    msg_format = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'
+    if not kwargs:
+        return
 
-    if kwargs and permissive:
+    if permissive:
+        matches = any_subdict_matches(graph.edge[u][v], kwargs)
+    else:
+        matches = any_dict_matches(graph.edge[u][v], kwargs)
 
-        self.assertTrue(any_subdict_matches(graph.edge[u][v], kwargs),
-                        msg=msg_format.format(u, v, json.dumps(kwargs, indent=2, sort_keys=True),
-                                              json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
-    elif kwargs and not permissive:
-        self.assertTrue(any_dict_matches(graph.edge[u][v], kwargs),
-                        msg=msg_format.format(u, v, json.dumps(kwargs, indent=2, sort_keys=True),
-                                              json.dumps(graph.edge[u][v], indent=2, sort_keys=True)))
+    msg = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'.format(
+        u,
+        v,
+        dumps(kwargs, indent=2, sort_keys=True),
+        dumps(graph.edge[u][v], indent=2, sort_keys=True)
+    )
+    self.assertTrue(matches, msg=msg)
 
 
 def identifier(namespace, name):
@@ -460,13 +464,13 @@ BEL_THOROUGH_EDGES = [
     ((GENE, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
-        RELATION: 'transcribedTo',
+        RELATION: TRANSCRIBED_TO,
         ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), (PROTEIN, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
-        RELATION: 'directlyDecreases',
+        RELATION: DIRECTLY_DECREASES,
         ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)), {
@@ -486,7 +490,7 @@ BEL_THOROUGH_EDGES = [
      (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: 'directlyDecreases',
+         RELATION: DIRECTLY_DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          OBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          ANNOTATIONS: {}
@@ -561,7 +565,7 @@ BEL_THOROUGH_EDGES = [
      (GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: 'causesNoChange',
+         RELATION: CAUSES_NO_CHANGE,
          ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
@@ -577,7 +581,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: 'directlyIncreases',
+         RELATION: DIRECTLY_INCREASES,
          ANNOTATIONS: {}
      }),
     ((MIRNA, 'HGNC', 'MIR21'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
@@ -737,14 +741,14 @@ BEL_THOROUGH_EDGES = [
     ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
-        RELATION: 'translatedTo',
+        RELATION: TRANSLATED_TO,
         ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')),
      (RNA, ('HGNC', 'TMPRSS2'), ('r', 1, 79), ('HGNC', 'ERG'), ('r', 312, 5034)), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: 'directlyIncreases',
+         RELATION: DIRECTLY_INCREASES,
          ANNOTATIONS: {}
      }),
     ((RNA, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('?',)),
@@ -807,21 +811,21 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'directlyDecreases',
+         RELATION: DIRECTLY_DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
-        RELATION: 'directlyDecreases',
+        RELATION: DIRECTLY_DECREASES,
         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
         ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'HMGCR'), (BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
-        RELATION: 'rateLimitingStepOf',
+        RELATION: RATE_LIMITING_STEP_OF,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
         ANNOTATIONS: {}
     }),
@@ -829,7 +833,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'causesNoChange',
+         RELATION: CAUSES_NO_CHANGE,
          ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'APP'), (GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')), {
@@ -848,7 +852,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'regulates',
+         RELATION: REGULATES,
          SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
          OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
          ANNOTATIONS: {}
@@ -857,7 +861,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'positiveCorrelation',
+         RELATION: POSITIVE_CORRELATION,
          OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
          ANNOTATIONS: {}
      }),
@@ -869,7 +873,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'positiveCorrelation',
+         RELATION: POSITIVE_CORRELATION,
          SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
          ANNOTATIONS: {}
      }),
@@ -877,7 +881,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'isA',
+         RELATION: IS_A,
          ANNOTATIONS: {}
      }),
     ((REACTION, (
@@ -928,7 +932,7 @@ BEL_THOROUGH_EDGES = [
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
-         RELATION: 'subProcessOf',
+         RELATION: SUBPROCESS_OF,
          ANNOTATIONS: {}
      }),
     ((ABUNDANCE, 'CHEBI', 'nitric oxide'),

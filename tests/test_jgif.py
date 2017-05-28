@@ -1,22 +1,35 @@
+# -*- coding: utf-8 -*-
+
 import json
 import logging
 import unittest
 
 from pybel.constants import *
-from pybel.io.jgif import from_jgif, from_cbn_jgif
+from pybel.io.jgif import from_cbn_jgif
 from tests.constants import bel_dir_path, TestGraphMixin
 
 test_path = os.path.join(bel_dir_path, 'Cytotoxic T-cell Signaling-2.0-Hs.json')
 
 logging.getLogger('pybel.parser').setLevel(20)
 
+calcium = (ABUNDANCE, 'SCHEM', 'Calcium')
+calcineurin_complex = (COMPLEX, 'SCOMP', 'Calcineurin Complex')
+foxo3 = (PROTEIN, 'HGNC', 'FOXO3')
+tcell_proliferation = (BIOPROCESS, 'GOBP', 'CD8-positive, alpha-beta T cell proliferation')
+il15 = (PROTEIN, 'HGNC', 'IL15')
+il2rg = (PROTEIN, 'MGI', 'Il2rg')
 jgif_expected_nodes = [
+    calcium,
+    calcineurin_complex,
+    foxo3,
+    tcell_proliferation,
+    il15,
+    il2rg,
     (PROTEIN, 'HGNC', 'CXCR6'),
     (PROTEIN, 'HGNC', 'IL15RA'),
     (BIOPROCESS, 'GOBP', 'lymphocyte chemotaxis'),
     (PROTEIN, 'HGNC', 'IL2RG'),
     (PROTEIN, 'HGNC', 'ZAP70'),
-    (ABUNDANCE, 'SCHEM', 'Calcium'),
     (COMPLEX, 'SCOMP', 'T Cell Receptor Complex'),
     (BIOPROCESS, 'GOBP', 'T cell activation'),
     (PROTEIN, 'HGNC', 'CCL3'),
@@ -29,7 +42,6 @@ jgif_expected_nodes = [
     (PROTEIN, 'HGNC', 'PLCG1'),
     (PROTEIN, 'HGNC', 'BCL2'),
     (PROTEIN, 'HGNC', 'CCR3'),
-    (PROTEIN, 'HGNC', 'IL15'),
     (PROTEIN, 'HGNC', 'IL2RB'),
     (PROTEIN, 'HGNC', 'CD28'),
     (PATHOLOGY, 'SDIS', 'Cytotoxic T-cell activation'),
@@ -41,8 +53,6 @@ jgif_expected_nodes = [
     (PROTEIN, 'HGNC', 'CXCL9'),
     (PATHOLOGY, 'SDIS', 'T-cell migration'),
     (PROTEIN, 'HGNC', 'CXCR3'),
-    (PROTEIN, 'HGNC', 'FOXO3'),
-    (BIOPROCESS, 'GOBP', 'CD8-positive, alpha-beta T cell proliferation'),
     (ABUNDANCE, 'CHEBI', 'acrolein'),
     (PROTEIN, 'HGNC', 'IDO2'),
     (PATHOLOGY, 'MESHD', 'Pulmonary Disease, Chronic Obstructive'),
@@ -56,13 +66,49 @@ jgif_expected_nodes = [
     (COMPLEX, (PROTEIN, 'HGNC', 'CD8A'), (PROTEIN, 'HGNC', 'CD8B')),
     (COMPLEX, (PROTEIN, 'HGNC', 'CD8A'), (PROTEIN, 'HGNC', 'CD8B')),
     (PROTEIN, 'HGNC', 'PLCG1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Tyr')),
-    (PROTEIN, 'MGI', 'Il2rg'),
-    (COMPLEX, 'SCOMP', 'Calcineurin Complex'),
     (PROTEIN, 'EGID', '21577'),
 ]
 
 jgif_expected_edges = [
-
+    (calcium, calcineurin_complex, {
+        RELATION: DIRECTLY_INCREASES,
+        EVIDENCE: 'NMDA-mediated influx of calcium led to activated of the calcium-dependent phosphatase calcineurin and the subsequent dephosphorylation and activation of the protein-tyrosine phosphatase STEP',
+        CITATION: {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_NAME: 'Nat Neurosci 2003 Jan 6(1) 34-42',
+            CITATION_REFERENCE: '12483215'
+        },
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'phos'}},
+        ANNOTATIONS: {
+            'Species': '10116',
+            'Cell': 'neuron'
+        }
+    }),
+    (foxo3, tcell_proliferation, {
+        RELATION: DECREASES,
+        EVIDENCE: "\"These data suggested that FOXO3 downregulates the accumulation of CD8 T cells in tissue specific fashion during an acute LCMV [lymphocytic choriomeningitis virus] infection.\" (p. 3)",
+        CITATION: {
+            CITATION_TYPE: CITATION_TYPE_OTHER,
+            CITATION_NAME: "Sullivan JA, Kim EH, Plisch EH, \"FOXO3 regulates CD8 T cell memory by T cell-intrinsic mechanisms,\" PLoS Pathog, 2012, 8:1002533.",
+            CITATION_REFERENCE: "22359505"
+        },
+        ANNOTATIONS: {
+            'Species': '10090',
+            'Disease': 'Viral infection'
+        }
+    }),
+    (il15, il2rg, {
+        RELATION: DIRECTLY_INCREASES,
+        EVIDENCE: "IL-15 utilizes ... the common cytokine receptor γ-chain (CD132) for signal transduction in lymphocytes",
+        CITATION: {
+            CITATION_TYPE: CITATION_TYPE_OTHER,
+            CITATION_REFERENCE: "20335267"
+        },
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
+        ANNOTATIONS: {
+            'Tissue': 'lung'
+        }
+    })
 ]
 
 
@@ -77,7 +123,9 @@ class TestJgif(TestGraphMixin):
         graph = from_cbn_jgif(graph_jgif_dict)
 
         self.assertEqual(set(jgif_expected_nodes), set(graph.nodes_iter()))
-        self.assertEqual({(u, v) for u, v, d in jgif_expected_edges}, set(graph.edges_iter()))
+
+        for u, v, d in jgif_expected_edges:
+            self.assertHasEdge(graph, u, v, **d)
 
 
 if __name__ == '__main__':
