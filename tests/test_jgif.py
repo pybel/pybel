@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import json
 import logging
 import unittest
 
 from pybel.constants import *
-from pybel.io.jgif import from_cbn_jgif
+from pybel import from_cbn_jgif, to_jgif
 from tests.constants import bel_dir_path, TestGraphMixin
 
 test_path = os.path.join(bel_dir_path, 'Cytotoxic T-cell Signaling-2.0-Hs.json')
@@ -115,7 +117,7 @@ jgif_expected_edges = [
 class TestJgif(TestGraphMixin):
     """Tests data interchange of """
 
-    def test_import_jgif(self):
+    def test_jgif_interchange(self):
         """Tests data from CBN"""
         with open(test_path) as f:
             graph_jgif_dict = json.load(f)
@@ -126,6 +128,10 @@ class TestJgif(TestGraphMixin):
 
         for u, v, d in jgif_expected_edges:
             self.assertHasEdge(graph, u, v, **d)
+
+        # TODO test more thoroughly?
+        export_jgif = to_jgif(graph)
+        self.assertIsInstance(export_jgif, dict)
 
 
 if __name__ == '__main__':

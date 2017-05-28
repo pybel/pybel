@@ -3,14 +3,17 @@
 """This module contains IO functions for import of BEL graphs stored in JSON Graph Interchange Format"""
 
 import logging
+from collections import defaultdict
 
-from ..constants import CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE, unqualified_edges
+from ..canonicalize import decanonicalize_node, decanonicalize_edge
+from ..constants import *
 from ..graph import BELGraph
 from ..parser import BelParser
 
 __all__ = [
     'from_cbn_jgif',
-    'from_jgif'
+    'from_jgif',
+    'to_jgif',
 ]
 
 log = logging.getLogger(__name__)
@@ -34,7 +37,7 @@ EXPERIMENT_CONTEXT = 'experiment_context'
 
 
 def get_citation(evidence):
-    citation= {
+    citation = {
         CITATION_TYPE: evidence['citation']['type'].strip(),
         CITATION_REFERENCE: evidence['citation']['id'].strip()
     }
@@ -170,3 +173,74 @@ def from_jgif(graph_jgif_dict):
                 log.warning('Error %s for %s', e, bel_statement)
 
     return graph
+
+
+def to_jgif(graph):
+    """Builds a JGIF dictionary from a BEL graph.
+    
+    :param BELGraph graph: A BEL graph
+    :return: A JGIF dictionary
+    :rtype: dict
+    
+    .. warning:: Untested! This format is not general purpose and is therefore time is not heavily invested
+    
+    """
+    node_to_bel = {}
+    u_v_r_bel = {}
+
+    nodes_entry = []
+    edges_entry = []
+
+    for i, node in enumerate(graph.nodes_iter()):
+        bel = decanonicalize_node(graph, node)
+        node_to_bel[node] = bel
+
+        nodes_entry.append({
+            'id': bel,
+            'label': bel,
+            'nodeId': i,
+            'bel_function_type': graph.node[node][FUNCTION],
+            'metadata': {}
+        })
+
+    for u, v in graph.edges_iter():
+        relation_evidences = defaultdict(list)
+
+        for k, d in graph.edge[u][v].items():
+
+            if (u, v, d[RELATION]) not in u_v_r_bel:
+                u_v_r_bel[u, v, d[RELATION]] = decanonicalize_edge(graph, u, v, k)
+
+            bel = u_v_r_bel[u, v, d[RELATION]]
+
+            evidence_dict = {
+                'bel_statement': bel,
+                'experiment_context': d[ANNOTATIONS],
+            }
+
+            if EVIDENCE in d:
+                evidence_dict['summary_text'] = d[EVIDENCE]
+
+            if CITATION in d:
+                evidence_dict['citation'] = d[CITATION]
+
+            relation_evidences[d[RELATION]].append(evidence_dict)
+
+        for relation, evidences in relation_evidences.items():
+            edges_entry.append({
+                'source': node_to_bel[u],
+                'target': node_to_bel[v],
+                'relation': relation,
+                'label': u_v_r_bel[u, v, relation],
+                'metadata': {
+                    'evidences': evidences
+                }
+            })
+
+    return {
+        'graph': {
+            'metadata': graph.document,
+            'nodes': nodes_entry,
+            'edges': edges_entry
+        }
+    }
