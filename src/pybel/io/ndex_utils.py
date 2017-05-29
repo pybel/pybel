@@ -80,7 +80,7 @@ def cx_to_ndex(cx, username=None, password=None, debug=False):
 def to_ndex(graph, username=None, password=None, debug=False):
     """Uploads a BEL graph to NDEx
 
-    :param pybel.BELGraph graph: A BEL Graph
+    :param BELGraph graph: A BEL graph
     :param str username: NDEx username
     :param str password: NDEx password
     :param bool debug: If true, turn on NDEx client debugging
@@ -106,8 +106,8 @@ def from_ndex(network_id, username=None, password=None, debug=False):
     :param str username: NDEx username
     :param str password: NDEx password
     :param bool debug: If true, turn on NDEx client debugging
-    :return: A BEL Graph
-    :rtype: pybel.BELGraph
+    :return: A BEL graph
+    :rtype: BELGraph
 
     Example Usage:
 
