@@ -35,6 +35,7 @@ All transport pairs are reflective and data-preserving.
 
 .. automodule:: pybel.io.jgif
 .. autofunction:: pybel.from_jgif
+.. autofunction:: pybel.from_cbn_jgif
 .. autofunction:: pybel.to_jgif
 
 .. automodule:: pybel.io.cx

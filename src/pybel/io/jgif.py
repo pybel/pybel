@@ -14,7 +14,8 @@ import logging
 from collections import defaultdict
 
 from ..canonicalize import decanonicalize_node, decanonicalize_edge
-from ..constants import *
+from ..constants import CITATION_TYPE, CITATION_REFERENCE, CITATION_NAME, unqualified_edges
+from ..constants import RELATION, FUNCTION, EVIDENCE, CITATION, ANNOTATIONS, METADATA_NAME
 from ..graph import BELGraph
 from ..parser import BelParser
 
@@ -116,7 +117,13 @@ def map_cbn(d):
 
 
 def from_cbn_jgif(graph_jgif_dict):
-    """Maps CBN JGIF then builds a BEL graph."""
+    """Maps the JGIF used by the Causal Biological Network Database to standard namespace and annotations, then
+    builds a BEL graph using :func:`from_jgif`.
+
+    :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
+    :return: A BEL graph
+    :rtype: BELGraph
+    """
     return from_jgif(map_cbn(graph_jgif_dict))
 
 
@@ -130,10 +137,12 @@ def from_jgif(graph_jgif_dict):
     """
     root = graph_jgif_dict['graph']
 
-    label = root.get('label')
-    metadata = root['metadata']
+    metadata = {
+        METADATA_NAME: root.get('label')
+    }
+    metadata.update(root['metadata'])
 
-    graph = BELGraph()
+    graph = BELGraph(**metadata)
     parser = BelParser(graph)
     parser.bel_term.addParseAction(parser.handle_term)
 
