@@ -54,7 +54,7 @@ def to_jsons(graph):
     """Dumps this graph as a Node-Link JSON object to a string
 
     :param BELGraph graph: A BEL graph
-    :return: A string representation of the Node-Link JSON produced for this graph by :func:`to_json_dict`
+    :return: A string representation of the Node-Link JSON produced for this graph by :func:`pybel.to_json`
     :rtype: str
     """
     graph_json_str = to_json(graph)

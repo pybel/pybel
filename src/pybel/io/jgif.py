@@ -118,7 +118,7 @@ def map_cbn(d):
 
 def from_cbn_jgif(graph_jgif_dict):
     """Maps the JGIF used by the Causal Biological Network Database to standard namespace and annotations, then
-    builds a BEL graph using :func:`from_jgif`.
+    builds a BEL graph using :func:`pybel.from_jgif`.
 
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
     :return: A BEL graph
