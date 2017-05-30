@@ -57,7 +57,7 @@ class TruncationParser(BaseParser):
         self.language = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
         self.language.setParseAction(self.handle_trunc_legacy)
 
-        BaseParser.__init__(self, self.language)
+        super(TruncationParser, self).__init__(self.language)
 
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     def handle_trunc_legacy(self, line, position, tokens):

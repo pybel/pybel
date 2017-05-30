@@ -117,7 +117,7 @@ class PmodParser(BaseParser):
         self.language = pmod_tag + nest(pmod_identifier(IDENTIFIER) + Optional(
             WCW + amino_acid(PMOD_CODE) + Optional(WCW + ppc.integer(PMOD_POSITION))))
 
-        BaseParser.__init__(self, self.language)
+        super(PmodParser, self).__init__(self.language)
 
     def handle_pmod_default_ns(self, line, position, tokens):
         tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE

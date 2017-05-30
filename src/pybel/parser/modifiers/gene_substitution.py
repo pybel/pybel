@@ -55,7 +55,7 @@ class GsubParser(BaseParser):
                                         dna_nucleotide(GSUB_VARIANT))
         self.language.setParseAction(self.handle_gsub)
 
-        BaseParser.__init__(self, self.language)
+        super(GsubParser, self).__init__(self.language)
 
     def handle_gsub(self, line, position, tokens):
         upgraded = 'c.{}{}>{}'.format(tokens[GSUB_POSITION], tokens[GSUB_REFERENCE], tokens[GSUB_VARIANT])

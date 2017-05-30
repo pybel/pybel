@@ -15,7 +15,7 @@ __all__ = ['BaseCacheManager']
 log = logging.getLogger(__name__)
 
 
-class BaseCacheManager:
+class BaseCacheManager(object):
     """Creates a connection to database and a persistent session using SQLAlchemy
     
     A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,  

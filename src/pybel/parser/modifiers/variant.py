@@ -47,4 +47,4 @@ class VariantParser(BaseParser):
     def __init__(self):
         self.language = variant_tags + nest((variant_characters | quote)(IDENTIFIER))
 
-        BaseParser.__init__(self, self.language)
+        super(VariantParser, self).__init__(self.language)

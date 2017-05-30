@@ -63,4 +63,4 @@ class LocationParser(BaseParser):
         :type identifier_parser: IdentifierParser
         """
         identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
-        BaseParser.__init__(self, Group(location_tag + nest(identifier_parser.language))(LOCATION))
+        super(LocationParser, self).__init__(Group(location_tag + nest(identifier_parser.language))(LOCATION))
