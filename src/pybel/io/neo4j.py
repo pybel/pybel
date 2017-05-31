@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains IO functions for outputting BEL graphs to a Neo4J graph database"""
+"""
 
-import py2neo
+Neo4j
+~~~~~
+This module contains IO functions for outputting BEL graphs to a Neo4J graph database
+
+"""
 
 from ..canonicalize import calculate_canonical_name, decanonicalize_node
 from ..constants import FUNCTION, NAME, RELATION, PYBEL_CONTEXT_TAG
@@ -11,18 +15,16 @@ from ..utils import flatten_dict
 __all__ = ['to_neo4j']
 
 
-def to_neo4j(graph, neo_graph, context=None):
-    """Uploads a BEL graph to Neo4J graph database using `py2neo`
+def to_neo4j(graph, neo_connection, context=None):
+    """Uploads a BEL graph to Neo4J graph database using :mod:`py2neo`
 
-    :param graph: A BEL Graph
-    :type graph: BELGraph
-    :param neo_graph: A py2neo graph object, Refer to the
-                        `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_
-                        for how to build this object.
-    :type neo_graph: :class:`py2neo.Graph`
-    :param context: A disease context to allow for multiple disease models in one neo4j instance.
-                    Each edge will be assigned an attribute :code:`pybel_context` with this value
-    :type context: str
+    :param BELGraph graph: A BEL Graph
+    :param neo_connection: A :mod:`py2neo` connection object. Refer to the
+                          `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_
+                          for how to build this object.
+    :type neo_connection: :class:`py2neo.Graph`
+    :param str context: A disease context to allow for multiple disease models in one neo4j instance.
+                        Each edge will be assigned an attribute :code:`pybel_context` with this value
     
     Example Usage:
     
@@ -32,7 +34,9 @@ def to_neo4j(graph, neo_graph, context=None):
     >>> neo_graph = py2neo.Graph("http://localhost:7474/db/data/")  # use your own connection settings
     >>> pybel.to_neo4j(g, neo_graph)
     """
-    tx = neo_graph.begin()
+    import py2neo
+
+    tx = neo_connection.begin()
 
     node_map = {}
     for node, data in graph.nodes(data=True):

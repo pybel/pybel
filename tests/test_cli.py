@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 import logging
 import os
 import traceback
@@ -13,14 +14,15 @@ from pybel import cli
 from pybel.constants import PYBEL_CONTEXT_TAG, METADATA_NAME
 from pybel.io import from_pickle, from_json, from_path
 from pybel.manager.database_io import from_database
-from tests.constants import TemporaryCacheMixin, BelReconstitutionMixin
-from tests.constants import test_bel_simple, mock_bel_resources, test_bel_thorough, expected_test_thorough_metadata
+from tests.constants import BelReconstitutionMixin, FleetingTemporaryCacheMixin
+from tests.constants import test_bel_simple, test_bel_thorough, expected_test_thorough_metadata
+from tests.mocks import mock_bel_resources
 
 log = logging.getLogger(__name__)
 
 
 @unittest.skip
-class TestCli(TemporaryCacheMixin, BelReconstitutionMixin):
+class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
         super(TestCli, self).setUp()
         self.runner = CliRunner()
@@ -74,7 +76,8 @@ class TestCli(TemporaryCacheMixin, BelReconstitutionMixin):
             result = self.runner.invoke(cli.main, args)
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
 
-            self.bel_thorough_reconstituted(from_json(test_json))
+            with open(test_json) as f:
+                self.bel_thorough_reconstituted(from_json(json.load(f)))
 
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     @mock_bel_resources

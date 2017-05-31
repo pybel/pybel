@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 __all__ = ['BaseParser']
 
 
-class BaseParser:
+class BaseParser(object):
     """This abstract class represents a language backed by a PyParsing statement
 
     Multiple parsers can be easily chained together when they are all inheriting from this base class
@@ -18,7 +18,7 @@ class BaseParser:
         self.language = language
 
         #: The parser can hold an internal state of the current line
-        self.line_number = None
+        self.line_number = 0
 
         if streamline:
             self.streamline()
@@ -29,20 +29,16 @@ class BaseParser:
         :return: An list of the resulting parsed lines' tokens
         :rtype: list
         """
-        return [self.parseString(line) for line in lines]
+        return [self.parseString(line, line_number) for line_number, line in enumerate(lines)]
 
-    def parseString(self, line, line_number=None):
+    def parseString(self, line, line_number=0):
         """Parses a string with the language represented by this parser
         
         :param str line: A string representing an instance of this parser's language
         :param int line_number: The current line number of the parser
         """
-        if line_number is None:
-            return self.language.parseString(line)
-
         self.line_number = line_number
         result = self.language.parseString(line)
-        self.line_number = None
         return result
 
     def streamline(self):

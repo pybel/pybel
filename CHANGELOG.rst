@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.9 <https://github.com/pybel/pybel/compare/v0.5.8...v0.5.9>`_ - 2017-05-28
+------------------------------------------------------------------------------
+Added
+-----
+- JGIF interchange (https://github.com/pybel/pybel/issues/193) and (https://github.com/pybel/pybel/issues/194)
+- Configuration file parsing (https://github.com/pybel/pybel/issues/197)
+
+`0.5.8 <https://github.com/pybel/pybel/compare/v0.5.7...v0.5.8>`_ - 2017-05-25
+------------------------------------------------------------------------------
+Changed
+-------
+- CX is now unstreamified on load, making compatibility with other CX sources (like NDEx) possible
+- Testing now enables ``PYBEL_TEST_CONNECTION`` environment variable to set a persistient database
+- Testing data cut down to reduce memory consumption
+
+Added
+-----
+- NDEx upload and download
+
+`0.5.7 <https://github.com/pybel/pybel/compare/v0.5.5...v0.5.7>`_ - 2017-05-20
+------------------------------------------------------------------------------
+Changed
+-------
+- Public IO changed for to/from_json and to/from_cx (https://github.com/pybel/pybel/issues/192)
+- Better error output for metadata failure (https://github.com/pybel/pybel/issues/191)
+
+Added
+-----
+- Add BEL script line to edges (https://github.com/pybel/pybel/issues/155)
+- Export to GSEA gene list (https://github.com/pybel/pybel/issues/189)
+- Non-caching of namespaces support (https://github.com/pybel/pybel/issues/190)
+
+Note: I made a mistake with the release on 0.5.6, so I just bumped the patch one more.
+
+`0.5.5 <https://github.com/pybel/pybel/compare/v0.5.4...v0.5.5>`_ - 2017-05-08
+------------------------------------------------------------------------------
+Changed
+-------
+- Updated CX output to have full provenance and list definitions (https://github.com/pybel/pybel/issues/180)
+
+Added
+-----
+- DOI and URL are now acceptable citation types (https://github.com/pybel/pybel/issues/188)
+- Citation can now be given as a double of type and reference (https://github.com/pybel/pybel/issues/187)
+
+
 `0.5.4 <https://github.com/pybel/pybel/compare/v0.5.3...v0.5.4>`_ - 2017-04-28
 ------------------------------------------------------------------------------
 Fixed

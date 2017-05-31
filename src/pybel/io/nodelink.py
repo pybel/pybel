@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains IO functions for interconversion between BEL graphs and node-link JSON"""
+"""
+
+Node-Link JSON
+--------------
+This module contains IO functions for interconversion between BEL graphs and Node-Link JSON
+
+"""
 
 import json
-import os
 
 from networkx.readwrite.json_graph import node_link_data, node_link_graph
 
@@ -13,97 +18,84 @@ from ..graph import BELGraph
 from ..utils import list2tuple
 
 __all__ = [
-    'to_json_dict',
     'to_json',
+    'to_json_file',
     'to_jsons',
-    'from_json_dict',
     'from_json',
+    'from_json_file',
     'from_jsons',
 ]
 
 
-def to_json_dict(graph):
-    """Converts this graph to a node-link JSON object
+def to_json(graph):
+    """Converts this graph to a Node-Link JSON object
 
-    :param graph: A BEL graph
-    :type graph: BELGraph
-    :return: A node-link JSON object representing the given graph
+    :param BELGraph graph: A BEL graph
+    :return: A Node-Link JSON object representing the given graph
     :rtype: dict
     """
-    data = node_link_data(graph)
-    data['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in
-                                            data['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()}
-    return data
+    graph_json_dict = node_link_data(graph)
+    graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in
+                                                       graph_json_dict['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()}
+    return graph_json_dict
 
 
-def to_json(graph, file):
-    """Writes this graph as a node-link JSON object
+def to_json_file(graph, file):
+    """Writes this graph as Node-Link JSON to a file
 
-    :param graph: A BEL graph
-    :type graph: BELGraph
-    :param file: A write-supporting file or file-like object
-    :type file: file
+    :param BELGraph graph: A BEL graph
+    :param file file: A write-supporting file or file-like object
     """
-    json_dict = to_json_dict(graph)
-    json.dump(json_dict, file, ensure_ascii=False)
+    graph_json_dict = to_json(graph)
+    json.dump(graph_json_dict, file, ensure_ascii=False)
 
 
 def to_jsons(graph):
-    """Dumps this graph as a node-link JSON object to a string
+    """Dumps this graph as a Node-Link JSON object to a string
 
-    :param graph: A BEL graph
-    :type graph: BELGraph
-    :return: A string representation of the node-link JSON produced for this graph by :func:`to_json_dict`
+    :param BELGraph graph: A BEL graph
+    :return: A string representation of the Node-Link JSON produced for this graph by :func:`pybel.to_json`
     :rtype: str
     """
-    return json.dumps(to_json_dict(graph), ensure_ascii=False)
+    graph_json_str = to_json(graph)
+    return json.dumps(graph_json_str, ensure_ascii=False)
 
 
-def from_json_dict(data, check_version=True):
-    """Reads graph from node-link JSON Object
+def from_json(graph_json_dict, check_version=True):
+    """Builds a graph from Node-Link JSON Object
 
-    :param data: A JSON dictionary representing a graph
-    :type data: dict
-    :param check_version: Checks if the graph was produced by this version of PyBEL
-    :type check_version: bool
+    :param dict graph_json_dict: A JSON dictionary representing a graph
+    :param bool check_version: Checks if the graph was produced by this version of PyBEL
     :return: A BEL graph
     :rtype: BELGraph
     """
+    for i, node in enumerate(graph_json_dict['nodes']):
+        graph_json_dict['nodes'][i]['id'] = list2tuple(graph_json_dict['nodes'][i]['id'])
 
-    for i, node in enumerate(data['nodes']):
-        data['nodes'][i]['id'] = list2tuple(data['nodes'][i]['id'])
-
-    graph = node_link_graph(data, directed=True, multigraph=True)
+    graph = node_link_graph(graph_json_dict, directed=True, multigraph=True)
     graph = BELGraph(data=graph)
     return ensure_version(graph, check_version=check_version)
 
 
-def from_json(path, check_version=True):
-    """Reads graph from node-link JSON object
+def from_json_file(file, check_version=True):
+    """Builds a graph from the Node-Link JSON contained in the given file
 
-    :param path: file path to read
-    :type path: str
-    :param check_version: Checks if the graph was produced by this version of PyBEL
-    :type check_version: bool
+    :param file file: A readable file or file-like
+    :param bool check_version: Checks if the graph was produced by this version of PyBEL
     :return: A BEL graph
     :rtype: BELGraph
     """
-    with open(os.path.expanduser(path)) as f:
-        json_dict = json.load(f)
-        graph = from_json_dict(json_dict, check_version=check_version)
-        return graph
+    graph_json_dict = json.load(file)
+    return from_json(graph_json_dict, check_version=check_version)
 
 
-def from_jsons(s, check_version=True):
-    """Reads a BEL graph from a node-link JSON string
+def from_jsons(graph_json_str, check_version=True):
+    """Reads a BEL graph from a Node-Link JSON string
 
-    :param s: A node-link JSON string produced by PyBEL
-    :type s: str
-    :param check_version: Checks if the graph was produced by this version of PyBEL
-    :type check_version: bool
+    :param str graph_json_str: A Node-Link JSON string produced by PyBEL
+    :param bool check_version: Checks if the graph was produced by this version of PyBEL
     :return: A BEL graph
     :rtype: BELGraph
     """
-    json_dict = json.loads(s)
-    graph = from_json_dict(json_dict, check_version=check_version)
-    return graph
+    graph_json_dict = json.loads(graph_json_str)
+    return from_json(graph_json_dict, check_version=check_version)

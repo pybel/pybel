@@ -1,6 +1,8 @@
 Input and Output
 ================
 
+.. automodule:: pybel.io
+
 Import
 ------
 .. autofunction:: pybel.from_lines
@@ -17,27 +19,48 @@ Transport
 ---------
 All transport pairs are reflective and data-preserving.
 
-Bytes
-~~~~~
-.. autofunction:: pybel.to_pickle
+.. automodule:: pybel.io.gpickle
 .. autofunction:: pybel.from_pickle
-.. autofunction:: pybel.to_bytes
+.. autofunction:: pybel.to_pickle
 .. autofunction:: pybel.from_bytes
+.. autofunction:: pybel.to_bytes
 
-JSON
-~~~~
-.. autofunction:: pybel.to_json
+.. automodule:: pybel.io.nodelink
 .. autofunction:: pybel.from_json
-.. autofunction:: pybel.to_cx_json
-.. autofunction:: pybel.from_cx_json
+.. autofunction:: pybel.to_json
+.. autofunction:: pybel.from_json_file
+.. autofunction:: pybel.to_json_file
+.. autofunction:: pybel.from_jsons
+.. autofunction:: pybel.to_jsons
+
+.. automodule:: pybel.io.jgif
+.. autofunction:: pybel.from_jgif
+.. autofunction:: pybel.from_cbn_jgif
+.. autofunction:: pybel.to_jgif
+
+.. automodule:: pybel.io.cx
+.. autofunction:: pybel.from_cx
+.. autofunction:: pybel.to_cx
+.. autofunction:: pybel.from_cx_file
+.. autofunction:: pybel.to_cx_file
+.. autofunction:: pybel.from_cx_jsons
+.. autofunction:: pybel.to_cx_jsons
 
 Export
 ------
 .. autofunction:: pybel.to_graphml
 .. autofunction:: pybel.to_csv
-.. autofunction:: pybel.to_neo4j
+
 
 Database
 --------
-.. autofunction:: pybel.to_database
+.. automodule:: pybel.manager.database_io
 .. autofunction:: pybel.from_database
+.. autofunction:: pybel.to_database
+
+.. automodule:: pybel.io.neo4j
+.. autofunction:: pybel.to_neo4j
+
+.. automodule:: pybel.io.ndex_utils
+.. autofunction:: pybel.from_ndex
+.. autofunction:: pybel.to_ndex

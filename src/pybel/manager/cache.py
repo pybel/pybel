@@ -22,7 +22,7 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
-from .models import Network, Annotation, Namespace
+from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, NamespaceEntry, AnnotationEntry
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -48,9 +48,11 @@ DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 def build_manager(connection=None, echo=False):
     """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
 
+    :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None``
+                        for default connection
     :type connection: None or str or CacheManager
     :type echo: bool
-    :return: A graph cache manager
+    :return: A cache manager
     :rtype: CacheManager
     """
     if isinstance(connection, CacheManager):
@@ -65,12 +67,10 @@ class CacheManager(BaseCacheManager):
 
     def __init__(self, connection=None, echo=False):
         """
-        :param connection: A custom database connection string
-        :type connection: str or None
-        :param echo: Whether or not echo the running sql code.
-        :type echo: bool
+        :param str connection: A custom database connection string
+        :param bool echo: Whether or not echo the running sql code.
         """
-        BaseCacheManager.__init__(self, connection=connection, echo=echo)
+        super(CacheManager, self).__init__(connection=connection, echo=echo)
 
         # TODO: Is namespace_cache used somewhere in the parser? we could use just the namespace_obj_cache. Same for annotations?
         #: A dictionary from {namespace URL: {name: set of encodings}}
@@ -125,19 +125,63 @@ class CacheManager(BaseCacheManager):
         for keyword, url in graph.annotation_url.items():
             self.ensure_annotation(url, cache_objects)
 
+    def drop_graphs(self):
+        """Drops all graphs"""
+        self.session.query(Network).delete()
+        self.session.commit()
+
+    def drop_namespaces(self):
+        """Drops all namespaces"""
+        self.namespace_cache.clear()
+        self.namespace_id_cache.clear()
+        self.namespace_model.clear()
+
+        self.namespace_term_cache.clear()
+        self.namespace_edge_cache.clear()
+        self.namespace_graph_cache.clear()
+
+        self.session.query(NamespaceEntry).delete()
+        self.session.query(Namespace).delete()
+        self.session.commit()
+
+    def drop_annotations(self):
+        """Drops all annotations"""
+
+        self.annotation_cache.clear()
+        self.annotation_id_cache.clear()
+        self.annotation_model.clear()
+
+        self.annotation_term_cache.clear()
+        self.annotation_edge_cache.clear()
+        self.annotation_graph_cache.clear()
+
+        self.session.query(AnnotationEntry).delete()
+        self.session.query(Annotation).delete()
+        self.session.commit()
+
+    def drop_equivalences(self):
+        """Drops all equivalence classes"""
+        self.session.query(NamespaceEntryEquivalence).delete()
+        self.session.commit()
+
     # NAMESPACE MANAGEMENT
 
     def insert_namespace(self, url):
-        """Inserts the namespace file at the given location to the cache
+        """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
+        the values of this namespace.
 
-        :param url: the location of the namespace file
-        :type url: str
+        :param str url: the location of the namespace file
         :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: :class:`pybel.manager.models.Namespace`
+        :rtype: :class:`pybel.manager.models.Namespace` or dict
         """
         log.info('inserting namespace %s', url)
 
         config = get_bel_resource(url)
+
+        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in config['Values'].items() if c}
+
+        if config['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
+            return values
 
         namespace_insert_values = {
             'name': config['Namespace']['NameString'],
@@ -158,9 +202,6 @@ class CacheManager(BaseCacheManager):
                 namespace_insert_values[database_column] = config[section][key]
 
         namespace = models.Namespace(**namespace_insert_values)
-
-        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in config['Values'].items() if c}
-
         namespace.entries = [models.NamespaceEntry(name=c, encoding=e) for c, e in values.items()]
 
         self.session.add(namespace)
@@ -169,14 +210,14 @@ class CacheManager(BaseCacheManager):
         return namespace
 
     def ensure_namespace(self, url, cache_objects=False):
-        """Caches a namespace file if not already in the cache
+        """Caches a namespace file if not already in the cache. If not cachable, returns a dict of the values
 
         :param url: the location of the namespace file
         :type url: str
         :param cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
         :type objects: bool
         :return: The namespace instance
-        :rtype: models.Namespace
+        :rtype: models.Namespace or dict
         """
         if url in self.namespace_model:
             log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
@@ -193,6 +234,8 @@ class CacheManager(BaseCacheManager):
 
             if results is None:
                 raise ValueError('No results for {}'.format(url))
+            elif isinstance(results, dict):
+                return results
             elif not results.entries:
                 raise ValueError('No entries for {}'.format(url))
 
@@ -210,13 +253,18 @@ class CacheManager(BaseCacheManager):
         return results
 
     def get_namespace(self, url):
-        """Returns a dict of names and their encodings for the given namespace file
+        """Returns a dict of names and their encodings for the given namespace URL.
 
         :param url: the location of the namespace file
         :type url: str
         """
-        self.ensure_namespace(url)
-        return self.namespace_cache[url]
+        result = self.ensure_namespace(url)
+
+        if isinstance(result, dict):
+            return result
+        else:
+            # self.ensure_namespace makes sure it's in the cache if its not cachable
+            return self.namespace_cache[url]
 
     def get_namespace_urls(self, keyword_url_dict=False):
         """Returns a list of the locations of the stored namespaces and annotations"""
@@ -543,8 +591,7 @@ class CacheManager(BaseCacheManager):
 
         for entry in ns.entries:
             equivalence_label = values[entry.name]
-            equivalence = self.ensure_equivalence_class(equivalence_label)
-            entry.equivalence_id = equivalence.id
+            entry.equivalence = self.ensure_equivalence_class(equivalence_label)
 
         ns.has_equivalences = True
 
@@ -586,12 +633,10 @@ class CacheManager(BaseCacheManager):
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
 
-        :param graph: a BEL network
-        :type graph: pybel.BELGraph
-        :param store_parts: Should the graph be stored in the edge store?
-        :type store_parts: bool
+        :param BELGraph graph: A BEL graph
+        :param bool store_parts: Should the graph be stored in the edge store?
         :return: A Network object
-        :rtype: models.Network
+        :rtype: Network
         """
         log.debug('inserting %s v%s', graph.name, graph.version)
 
@@ -600,7 +645,7 @@ class CacheManager(BaseCacheManager):
         namespaces = [self.ensure_namespace(url, cache_objects=store_parts) for url in graph.namespace_url.values()]
         annotations = [self.ensure_annotation(url, objects=store_parts) for url in graph.annotation_url.values()]
 
-        network = models.Network(blob=to_bytes(graph), **graph.document)
+        network = Network(blob=to_bytes(graph), **graph.document)
 
         if store_parts:
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
@@ -621,10 +666,8 @@ class CacheManager(BaseCacheManager):
     def store_graph_parts(self, network, graph):
         """Stores the given graph into the edge store.
 
-        :param network: A SQLAlchemy PyBEL Network object
-        :type network: models.Network
-        :param graph: A BEL Graph
-        :type graph: pybel.BELGraph
+        :param Network network: A SQLAlchemy PyBEL Network object
+        :param BELGraph graph: A BEL Graph
         """
         nc = {}
 
@@ -690,11 +733,7 @@ class CacheManager(BaseCacheManager):
         if evidence_hash in self.object_cache['evidence']:
             result = self.object_cache['evidence'][evidence_hash]
         else:
-            try:
-                result = self.session.query(models.Evidence).filter_by(text=text, citation=citation).one_or_none()
-            except:
-                print(text, '\n ======= \n', self.object_cache['evidence'])
-                sys.exit()
+            result = self.session.query(models.Evidence).filter_by(text=text, citation=citation).one_or_none()
             if result is None:
                 result = models.Evidence(text=text, citation=citation)
                 self.session.add(result)
@@ -892,7 +931,7 @@ class CacheManager(BaseCacheManager):
         :param node_data: Describes the given node and contains is_variant information
         :type node_data: dict
         :return: A list of modification objects belonging to the given node
-        :rtype: list of models.Modification
+        :rtype: list[models.Modification]
         """
         modification_list = []
         if FUSION in node_data:
@@ -973,7 +1012,6 @@ class CacheManager(BaseCacheManager):
                     })
 
         modifications = []
-
         for modification in modification_list:
             mod_hash = hashlib.sha512(json.dumps(modification, sort_keys=True).encode('utf-8')).hexdigest()
 
@@ -994,12 +1032,10 @@ class CacheManager(BaseCacheManager):
     def get_or_create_property(self, graph, edge_data):
         """Creates a list of all subject and object related properties of the edge.
 
-        :param graph: A BEL graph
-        :type graph: pybel.BELGraph
-        :param edge_data: Describes the context of the given edge.
-        :type edge_data: dict
+        :param pybel.BELGraph graph: A BEL graph
+        :param dict edge_data: Describes the context of the given edge.
         :return: A list of all subject and object properties of the edge
-        :rtype: list of models.Property
+        :rtype: list[models.Property]
         """
         properties = []
         property_list = []
@@ -1067,51 +1103,36 @@ class CacheManager(BaseCacheManager):
 
     def get_graph_versions(self, name):
         """Returns all of the versions of a graph with the given name"""
-        return {x for x, in self.session.query(models.Network.version).filter(models.Network.name == name).all()}
+        return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
 
-    def get_graph(self, name, version=None):
-        """Loads most recent graph, or allows for specification of version
+    def get_graph_by_name(self, name, version):
+        """Loads most recently added graph with the given name, or allows for specification of version
 
-        :param name: The name of the graph
-        :type name: str
-        :param version: The version string of the graph. If not specified, loads most recent graph added with this name
-        :type version: None or str
-        :return: A BEL Graph
-        :rtype: pybel.BELGraph
+        :param str name: The name of the network.
+        :param str version: The version string of the network.
+        :return: A BEL graph
+        :rtype: BELGraph
         """
-        if version is not None:
-            n = self.session.query(models.Network).filter(models.Network.name == name,
-                                                          models.Network.version == version).one()
-        else:
-            n = self.session.query(models.Network).filter(models.Network.name == name).order_by(
-                models.Network.created.desc()).first()
-
+        n = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
         return from_bytes(n.blob)
 
-    def get_graph_by_id(self, id):
-        """Gets the graph from the database by its identifier
+    def get_network_by_id(self, network_id):
+        """Gets a network from the database by its identifier
 
-        :param id: The graph's database ID
-        :type id: int
+        :param int network_id: The network's database identifier
         :return: A Network object
-        :rtype: models.Network
+        :rtype: Network
         """
-        return self.session.query(models.Network).get(id)
+        return self.session.query(Network).get(network_id)
 
     def drop_graph(self, network_id):
         """Drops a graph by ID
 
-        :param network_id: The network's database id
-        :type network_id: int
+        :param int network_id: The network's database identifier
         """
 
         # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
-        self.session.query(models.Network).filter(models.Network.id == network_id).delete()
-        self.session.commit()
-
-    def drop_graphs(self):
-        """Drops all graphs"""
-        self.session.query(models.Network).delete()
+        self.session.query(Network).filter(Network.id == network_id).delete()
         self.session.commit()
 
     def list_graphs(self, include_description=True):
@@ -1201,7 +1222,7 @@ class CacheManager(BaseCacheManager):
 
         :param annotations: dictionary of {URL: values}
         :type annotations: dict
-        :return: A BEL Graph
+        :return: A BEL graph
         :rtype: pybel.BELGraph
         """
         graph = BELGraph()
@@ -1217,34 +1238,29 @@ class CacheManager(BaseCacheManager):
 
         return graph
 
-    #Query
-
     def get_network(self, network_id=None, name=None, version=None, as_dict_list=False):
         """Builds and runs a query over all networks in the database.
 
-        :param network_id: Database identifier of the network of interest.
-        :type network_id: int
-        :param name: Name of the network.
-        :type name: str
-        :param version: Version of the network
-        :type version: str
+        :param int network_id: Database identifier of the network of interest.
+        :param str name: Name of the network.
+        :param str version: Version of the network
         :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                             :class:`models.Network` objects.
+                             :class:`Network` objects.
         :type as_dict_list: bool
-        :return: List of :class:`models.Network` objects or corresponding dicts.
+        :return: List of :class:`Network` objects or corresponding dicts.
         :rtype: list or dict
         """
-        q = self.session.query(models.Network)
+        q = self.session.query(Network)
 
         if network_id and isinstance(network_id, int):
             q = q.filter_by(id=network_id)
 
         else:
             if name:
-                q = q.filter(models.Network.name.like(name))
+                q = q.filter(Network.name.like(name))
 
             if version:
-                q = q.filter(models.Network.version == version)
+                q = q.filter(Network.version == version)
 
         result = q.all()
 

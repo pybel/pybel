@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import unittest
 from pathlib import Path
 
-import pybel
+from pybel import from_path
 from pybel.constants import *
-from pybel.manager.cache import CacheManager
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
-from tests.constants import ConnectionMixin
-from tests.constants import mock_parse_owl_rdf, mock_bel_resources, mock_parse_owl_pybel, test_owl_ado
+from tests.constants import FleetingTemporaryCacheMixin, TestGraphMixin
 from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, \
-    expected_test_bel_4_metadata, assertHasNode, assertHasEdge, HGNC_KEYWORD, HGNC_URL
+    expected_test_bel_4_metadata, HGNC_URL
+from tests.constants import test_owl_ado
+from tests.mocks import mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_rdf
 
 EXPECTED_PIZZA_NODES = {
     'Pizza',
@@ -30,13 +32,177 @@ EXPECTED_PIZZA_EDGES = {
     ('TomatoTopping', 'Topping')
 }
 
+wine_prefixes = {
+    'owl': "http://www.w3.org/2002/07/owl#",
+    'rdf': "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+}
 
-class TestOwlBase(unittest.TestCase):
-    def assertHasNode(self, g, n, **kwargs):
-        assertHasNode(self, n, g, **kwargs)
+wine_classes = {
+    'Region',
+    'Vintage',
+    'VintageYear',
+    'Wine',
+    'WineDescriptor',
+    'WineColor',
+    'WineTaste',
+    'WineBody',
+    'WineFlavor',
+    'WineSugar',
+    'Winery'
+}
 
-    def assertHasEdge(self, g, u, v, **kwargs):
-        assertHasEdge(self, u, v, g, **kwargs)
+wine_individuals = {
+    'Red',
+    'Rose',
+    'White',
+    'Full',
+    'Light',
+    'Medium',
+    'Delicate',
+    'Moderate',
+    'Strong',
+    'Dry',
+    'OffDry',
+    'Sweet',
+
+    # Wineries
+    'Bancroft',
+    'Beringer',
+    'ChateauChevalBlanc',
+    'ChateauDeMeursault',
+    'ChateauDYchem',
+    'ChateauLafiteRothschild',
+    'ChateauMargauxWinery',
+    'ChateauMorgon',
+    'ClosDeLaPoussie',
+    'ClosDeVougeot',
+    'CongressSprings',
+    'Corbans',
+    'CortonMontrachet',
+    'Cotturi',
+    'DAnjou',
+    'Elyse',
+    'Forman',
+    'Foxen',
+    'GaryFarrell',
+    'Handley',
+    'KalinCellars',
+    'KathrynKennedy',
+    'LaneTanner',
+    'Longridge',
+    'Marietta',
+    'McGuinnesso',
+    'Mountadam',
+    'MountEdenVineyard',
+    'PageMillWinery',
+    'PeterMccoy',
+    'PulignyMontrachet',
+    'SantaCruzMountainVineyard',
+    'SaucelitoCanyon',
+    'SchlossRothermel',
+    'SchlossVolrad',
+    'SeanThackrey',
+    'Selaks',
+    'SevreEtMaine',
+    'StGenevieve',
+    'Stonleigh',
+    'Taylor',
+    'Ventana',
+    'WhitehallLane',
+
+    # Wines
+}
+
+wine_nodes = wine_classes | wine_individuals
+
+wine_subclasses = {
+
+    ('WineSugar', 'WineTaste'),
+    ('WineTaste', 'WineDescriptor'),
+    ('WineColor', 'WineDescriptor')
+}
+
+wine_membership = {
+    ('Red', 'WineColor'),
+    ('Rose', 'WineColor'),
+    ('White', 'WineColor'),
+    ('Full', 'WineBody'),
+    ('Light', 'WineBody'),
+    ('Medium', 'WineBody'),
+    ('Delicate', 'WineFlavor'),
+    ('Moderate', 'WineFlavor'),
+    ('Strong', 'WineFlavor'),
+    ('Dry', 'WineSugar'),
+    ('OffDry', 'WineSugar'),
+    ('Sweet', 'WineSugar'),
+
+    # Winery Membership
+    ('Bancroft', 'Winery'),
+    ('Beringer', 'Winery'),
+    ('ChateauChevalBlanc', 'Winery'),
+    ('ChateauDeMeursault', 'Winery'),
+    ('ChateauDYchem', 'Winery'),
+    ('ChateauLafiteRothschild', 'Winery'),
+    ('ChateauMargauxWinery', 'Winery'),
+    ('ChateauMorgon', 'Winery'),
+    ('ClosDeLaPoussie', 'Winery'),
+    ('ClosDeVougeot', 'Winery'),
+    ('CongressSprings', 'Winery'),
+    ('Corbans', 'Winery'),
+    ('CortonMontrachet', 'Winery'),
+    ('Cotturi', 'Winery'),
+    ('DAnjou', 'Winery'),
+    ('Elyse', 'Winery'),
+    ('Forman', 'Winery'),
+    ('Foxen', 'Winery'),
+    ('GaryFarrell', 'Winery'),
+    ('Handley', 'Winery'),
+    ('KalinCellars', 'Winery'),
+    ('KathrynKennedy', 'Winery'),
+    ('LaneTanner', 'Winery'),
+    ('Longridge', 'Winery'),
+    ('Marietta', 'Winery'),
+    ('McGuinnesso', 'Winery'),
+    ('Mountadam', 'Winery'),
+    ('MountEdenVineyard', 'Winery'),
+    ('PageMillWinery', 'Winery'),
+    ('PeterMccoy', 'Winery'),
+    ('PulignyMontrachet', 'Winery'),
+    ('SantaCruzMountainVineyard', 'Winery'),
+    ('SaucelitoCanyon', 'Winery'),
+    ('SchlossRothermel', 'Winery'),
+    ('SchlossVolrad', 'Winery'),
+    ('SeanThackrey', 'Winery'),
+    ('Selaks', 'Winery'),
+    ('SevreEtMaine', 'Winery'),
+    ('StGenevieve', 'Winery'),
+    ('Stonleigh', 'Winery'),
+    ('Taylor', 'Winery'),
+    ('Ventana', 'Winery'),
+    ('WhitehallLane', 'Winery'),
+}
+
+wine_edges = wine_subclasses | wine_membership
+
+ado_expected_nodes_subset = {
+    'immunotherapy',
+    'In_vitro_models',
+    'white',
+    'ProcessualEntity'
+}
+ado_expected_edges_subset = {
+    ('control_trials_study_arm', 'Study_arm'),
+    ('copper', 'MaterialEntity'),
+    ('curcumin_plant', 'plant'),
+    ('cytokine', 'cell_signalling')  # Line 12389 of ado.owl
+}
+
+expected_prefixes = {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "owl": "http://www.w3.org/2002/07/owl#"
+}
 
 
 class TestOwlUtils(unittest.TestCase):
@@ -49,33 +215,60 @@ class TestOwlUtils(unittest.TestCase):
             parse_owl('http://example.com/not_owl')
 
 
-class TestParsePizza(TestOwlBase, ConnectionMixin):
-    expected_prefixes = {
-        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-        "xsd": "http://www.w3.org/2001/XMLSchema#",
-        "owl": "http://www.w3.org/2002/07/owl#"
-    }
+class TestParse(TestGraphMixin):
+    """This class tests the parsing of OWL documents and doesn't need a connection"""
 
-    def test_file(self):
+    def test_parse_pizza_file(self):
         owl = parse_owl(Path(test_owl_pizza).as_uri())
         self.assertEqual(EXPECTED_PIZZA_NODES, set(owl.nodes()))
         self.assertEqual(EXPECTED_PIZZA_EDGES, set(owl.edges()))
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_url(self, m1, m2):
+    def test_parse_pizza_url(self, m1, m2):
         owl = parse_owl(pizza_iri)
-        self.assertEqual(pizza_iri, owl.iri)
+        self.assertEqual(pizza_iri, owl.graph['IRI'])
         self.assertEqual(EXPECTED_PIZZA_NODES, set(owl.nodes()))
         self.assertEqual(EXPECTED_PIZZA_EDGES, set(owl.edges()))
 
+    def test_parse_wine_file(self):
+        owl = parse_owl(Path(test_owl_wine).as_uri())
+
+        for node in sorted(wine_classes):
+            self.assertHasNode(owl, node)
+
+        for node in sorted(wine_individuals):
+            self.assertHasNode(owl, node)
+
+        for u, v in sorted(wine_subclasses):
+            self.assertHasEdge(owl, u, v)
+
+        for u, v in sorted(wine_membership):
+            self.assertHasEdge(owl, u, v)
+
+    def test_ado_local(self):
+        ado_path = Path(test_owl_ado).as_uri()
+        owl = parse_owl(ado_path)
+
+        self.assertLessEqual(ado_expected_nodes_subset, set(owl.nodes_iter()))
+        self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
+
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_metadata_parser(self, m1, m2):
+    def test_ado(self, mock1, mock2):
+        ado_path = 'http://mock.com/ado.owl'
+        owl = parse_owl(ado_path)
+        self.assertLessEqual(ado_expected_nodes_subset, set(owl.nodes_iter()))
+        self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
+
+
+class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
+    @mock_parse_owl_rdf
+    @mock_parse_owl_pybel
+    def test_metadata_parse_pizza_namespace(self, m1, m2):
         functions = set('A')
         s = 'DEFINE NAMESPACE PIZZA AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
-        parser = MetadataParser(CacheManager(connection=self.connection))
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('PIZZA', parser.namespace_dict)
@@ -87,9 +280,9 @@ class TestParsePizza(TestOwlBase, ConnectionMixin):
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_metadata_parser_no_function(self, m1, m2):
+    def test_metadata_parser_pizza_namespace_no_function(self, m1, m2):
         s = 'DEFINE NAMESPACE PIZZA AS OWL "{}"'.format(pizza_iri)
-        parser = MetadataParser(CacheManager(connection=self.connection))
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('PIZZA', parser.namespace_dict)
@@ -102,203 +295,29 @@ class TestParsePizza(TestOwlBase, ConnectionMixin):
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_metadata_parser_annotation(self, m1, m2):
+    def test_metadata_parse_pizza_annotation(self, m1, m2):
         s = 'DEFINE ANNOTATION Pizza AS OWL "{}"'.format(pizza_iri)
-        parser = MetadataParser(CacheManager(connection=self.connection))
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('Pizza', parser.annotations_dict)
         self.assertEqual(EXPECTED_PIZZA_NODES, set(parser.annotations_dict['Pizza']))
 
 
-class TestWine(TestOwlBase, ConnectionMixin):
-    def setUp(self):
-        super(TestWine, self).setUp()
-
-        self.iri = wine_iri
-
-        self.wine_expected_prefixes = {
-            'owl': "http://www.w3.org/2002/07/owl#",
-            'rdf': "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        }
-
-        self.wine_expected_classes = {
-            'Region',
-            'Vintage',
-            'VintageYear',
-            'Wine',
-            'WineDescriptor',
-            'WineColor',
-            'WineTaste',
-            'WineBody',
-            'WineFlavor',
-            'WineSugar',
-            'Winery'
-        }
-
-        self.wine_expected_individuals = {
-            'Red',
-            'Rose',
-            'White',
-            'Full',
-            'Light',
-            'Medium',
-            'Delicate',
-            'Moderate',
-            'Strong',
-            'Dry',
-            'OffDry',
-            'Sweet',
-
-            # Wineries
-            'Bancroft',
-            'Beringer',
-            'ChateauChevalBlanc',
-            'ChateauDeMeursault',
-            'ChateauDYchem',
-            'ChateauLafiteRothschild',
-            'ChateauMargauxWinery',
-            'ChateauMorgon',
-            'ClosDeLaPoussie',
-            'ClosDeVougeot',
-            'CongressSprings',
-            'Corbans',
-            'CortonMontrachet',
-            'Cotturi',
-            'DAnjou',
-            'Elyse',
-            'Forman',
-            'Foxen',
-            'GaryFarrell',
-            'Handley',
-            'KalinCellars',
-            'KathrynKennedy',
-            'LaneTanner',
-            'Longridge',
-            'Marietta',
-            'McGuinnesso',
-            'Mountadam',
-            'MountEdenVineyard',
-            'PageMillWinery',
-            'PeterMccoy',
-            'PulignyMontrachet',
-            'SantaCruzMountainVineyard',
-            'SaucelitoCanyon',
-            'SchlossRothermel',
-            'SchlossVolrad',
-            'SeanThackrey',
-            'Selaks',
-            'SevreEtMaine',
-            'StGenevieve',
-            'Stonleigh',
-            'Taylor',
-            'Ventana',
-            'WhitehallLane',
-
-            # Wines
-        }
-
-        self.expected_nodes = self.wine_expected_classes | self.wine_expected_individuals
-
-        self.expected_subclasses = {
-
-            ('WineSugar', 'WineTaste'),
-            ('WineTaste', 'WineDescriptor'),
-            ('WineColor', 'WineDescriptor')
-        }
-
-        self.expected_membership = {
-            ('Red', 'WineColor'),
-            ('Rose', 'WineColor'),
-            ('White', 'WineColor'),
-            ('Full', 'WineBody'),
-            ('Light', 'WineBody'),
-            ('Medium', 'WineBody'),
-            ('Delicate', 'WineFlavor'),
-            ('Moderate', 'WineFlavor'),
-            ('Strong', 'WineFlavor'),
-            ('Dry', 'WineSugar'),
-            ('OffDry', 'WineSugar'),
-            ('Sweet', 'WineSugar'),
-
-            # Winery Membership
-            ('Bancroft', 'Winery'),
-            ('Beringer', 'Winery'),
-            ('ChateauChevalBlanc', 'Winery'),
-            ('ChateauDeMeursault', 'Winery'),
-            ('ChateauDYchem', 'Winery'),
-            ('ChateauLafiteRothschild', 'Winery'),
-            ('ChateauMargauxWinery', 'Winery'),
-            ('ChateauMorgon', 'Winery'),
-            ('ClosDeLaPoussie', 'Winery'),
-            ('ClosDeVougeot', 'Winery'),
-            ('CongressSprings', 'Winery'),
-            ('Corbans', 'Winery'),
-            ('CortonMontrachet', 'Winery'),
-            ('Cotturi', 'Winery'),
-            ('DAnjou', 'Winery'),
-            ('Elyse', 'Winery'),
-            ('Forman', 'Winery'),
-            ('Foxen', 'Winery'),
-            ('GaryFarrell', 'Winery'),
-            ('Handley', 'Winery'),
-            ('KalinCellars', 'Winery'),
-            ('KathrynKennedy', 'Winery'),
-            ('LaneTanner', 'Winery'),
-            ('Longridge', 'Winery'),
-            ('Marietta', 'Winery'),
-            ('McGuinnesso', 'Winery'),
-            ('Mountadam', 'Winery'),
-            ('MountEdenVineyard', 'Winery'),
-            ('PageMillWinery', 'Winery'),
-            ('PeterMccoy', 'Winery'),
-            ('PulignyMontrachet', 'Winery'),
-            ('SantaCruzMountainVineyard', 'Winery'),
-            ('SaucelitoCanyon', 'Winery'),
-            ('SchlossRothermel', 'Winery'),
-            ('SchlossVolrad', 'Winery'),
-            ('SeanThackrey', 'Winery'),
-            ('Selaks', 'Winery'),
-            ('SevreEtMaine', 'Winery'),
-            ('StGenevieve', 'Winery'),
-            ('Stonleigh', 'Winery'),
-            ('Taylor', 'Winery'),
-            ('Ventana', 'Winery'),
-            ('WhitehallLane', 'Winery'),
-        }
-
-        self.expected_edges = self.expected_subclasses | self.expected_membership
-
-    def test_file(self):
-        owl = parse_owl(Path(test_owl_wine).as_uri())
-
-        for node in sorted(self.wine_expected_classes):
-            self.assertHasNode(owl, node)
-
-        for node in sorted(self.wine_expected_individuals):
-            self.assertHasNode(owl, node)
-
-        for u, v in sorted(self.expected_subclasses):
-            self.assertHasEdge(owl, u, v)
-
-        for u, v in sorted(self.expected_membership):
-            self.assertHasEdge(owl, u, v)
-
+class TestWine(TestGraphMixin, FleetingTemporaryCacheMixin):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_metadata_parser_namespace(self, m1, m2):
-        cm = CacheManager(connection=self.connection)
-
+    def test_metadata_parse_wine_namespace(self, m1, m2):
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
 
-        parser = MetadataParser(manager=cm)
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('Wine', parser.namespace_dict)
-        self.assertLessEqual(self.expected_nodes, set(parser.namespace_dict['Wine']))
+        self.assertLessEqual(wine_nodes, set(parser.namespace_dict['Wine']))
 
-        for node in sorted(self.expected_nodes):
+        for node in sorted(wine_nodes):
             self.assertEqual(functions, ''.join(sorted(parser.namespace_dict['Wine'][node])))
 
         with self.assertRaises(RedefinedNamespaceError):
@@ -306,62 +325,25 @@ class TestWine(TestOwlBase, ConnectionMixin):
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_metadata_parser_annotation(self, m1, m2):
-        cm = CacheManager(connection=self.connection)
+    def test_metadata_parse_wine_annotation(self, m1, m2):
         s = 'DEFINE ANNOTATION Wine AS OWL "{}"'.format(wine_iri)
 
-        parser = MetadataParser(manager=cm)
+        parser = MetadataParser(self.manager)
         parser.parseString(s)
 
         self.assertIn('Wine', parser.annotations_dict)
-        self.assertLessEqual(self.expected_nodes, set(parser.annotations_dict['Wine']))
+        self.assertLessEqual(wine_nodes, set(parser.annotations_dict['Wine']))
 
         with self.assertRaises(RedefinedAnnotationError):
             parser.parseString(s)
 
 
-class TestAdo(TestOwlBase):
-    ado_expected_nodes_subset = {
-        'immunotherapy',
-        'In_vitro_models',
-        'white',
-        'ProcessualEntity'
-    }
-    ado_expected_edges_subset = {
-        ('control_trials_study_arm', 'Study_arm'),
-        ('copper', 'MaterialEntity'),
-        ('curcumin_plant', 'plant'),
-        ('cytokine', 'cell_signalling')  # Line 12389 of ado.owl
-    }
-
-    def test_ado_local(self):
-        ado_path = Path(test_owl_ado).as_uri()
-        owl = parse_owl(ado_path)
-
-        self.assertLessEqual(self.ado_expected_nodes_subset, set(owl.nodes_iter()))
-        self.assertLessEqual(self.ado_expected_edges_subset, set(owl.edges_iter()))
-
+class TestOwlManager(TestGraphMixin, FleetingTemporaryCacheMixin):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_ado(self, mock1, mock2):
-        ado_path = 'http://mock.com/ado.owl'
-        owl = parse_owl(ado_path)
-
-        self.assertLessEqual(self.ado_expected_nodes_subset, set(owl.nodes_iter()))
-        self.assertLessEqual(self.ado_expected_edges_subset, set(owl.edges_iter()))
-
-
-class TestOwlManager(TestOwlBase, ConnectionMixin):
-    def setUp(self):
-        super(TestOwlManager, self).setUp()
-        self.manager = CacheManager(connection=self.connection)
-        self.manager.drop_database()
-        self.manager.create_database()
-
-    @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
-    def test_ensure_namespace(self, m1, m2):
+    def test_ensure_pizza_namespace(self, m1, m2):
         self.manager.ensure_namespace_owl(pizza_iri)
+
         entries = self.manager.get_namespace_owl_terms(pizza_iri)
         self.assertEqual(EXPECTED_PIZZA_NODES, entries)
 
@@ -373,8 +355,9 @@ class TestOwlManager(TestOwlBase, ConnectionMixin):
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
-    def test_ensure_annotation(self, m1, m2):
+    def test_ensure_pizza_annotation(self, m1, m2):
         self.manager.ensure_annotation_owl(pizza_iri)
+
         entries = self.manager.get_annotation_owl_terms(pizza_iri)
         self.assertEqual(EXPECTED_PIZZA_NODES, entries)
 
@@ -386,58 +369,37 @@ class TestOwlManager(TestOwlBase, ConnectionMixin):
 
     def test_missing_namespace(self):
         with self.assertRaises(Exception):
-            self.manager.ensure_namespace_owl('http://example.com/not_owl.owl')
-
-    def test_insert_missing_namespace(self):
-        with self.assertRaises(Exception):
-            self.manager.insert_namespace_owl('http://cthoyt.com/not_owl.owl')
+            self.manager.ensure_namespace_owl('http://example.com/not_owl_namespace.owl')
 
     def test_missing_annotation(self):
         with self.assertRaises(Exception):
-            self.manager.ensure_annotation_owl('http://example.com/not_owl.owl')
-
-    def test_insert_missing_annotation(self):
-        with self.assertRaises(Exception):
-            self.manager.insert_annotation_owl('http://cthoyt.com/not_owl.owl')
+            self.manager.ensure_annotation_owl('http://example.com/not_owl_annotation.owl')
 
 
-class TestIntegration(TestOwlBase, ConnectionMixin):
+class TestExtensionIo(TestGraphMixin, FleetingTemporaryCacheMixin):
+    """Tests the import of the test bel document with OWL extensions works properly"""
+
     @mock_bel_resources
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_from_path(self, m1, m2, m3):
-        g = pybel.from_path(test_bel_extensions, manager=self.connection)
-        self.assertEqual(0, len(g.warnings))
+        graph = from_path(test_bel_extensions, manager=self.manager)
+        self.assertEqual(0, len(graph.warnings))
 
-        self.assertEqual(expected_test_bel_4_metadata, g.document)
+        self.assertEqual(expected_test_bel_4_metadata, graph.document)
 
-        expected_definitions = {
-            HGNC_KEYWORD: HGNC_URL,
-            'PIZZA': pizza_iri,
-            'WINE': wine_iri
-        }
-
-        actual_definitions = {}
-        actual_definitions.update(g.namespace_url)
-        actual_definitions.update(g.namespace_owl)
-
-        self.assertEqual(expected_definitions, actual_definitions)
-
-        expected_annotations = {
-            'Wine': wine_iri
-        }
-
-        actual_annotations = {}
-        actual_annotations.update(g.annotation_url)
-        actual_annotations.update(g.annotation_owl)
-
-        self.assertEqual(expected_annotations, actual_annotations)
+        self.assertEqual({
+            'WINE': wine_iri,
+            'PIZZA': 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
+        }, graph.namespace_owl)
+        self.assertEqual({'Wine': wine_iri}, graph.annotation_owl)
+        self.assertEqual({'HGNC': HGNC_URL}, graph.namespace_url)
 
         a = PROTEIN, 'HGNC', 'AKT1'
         b = PROTEIN, 'HGNC', 'EGFR'
-        self.assertHasNode(g, a)
-        self.assertHasNode(g, b)
-        self.assertHasEdge(g, a, b)
+        self.assertHasNode(graph, a)
+        self.assertHasNode(graph, b)
+        self.assertHasEdge(graph, a, b)
 
         annots = {
             CITATION: {
@@ -448,9 +410,9 @@ class TestIntegration(TestOwlBase, ConnectionMixin):
             EVIDENCE: 'Made up support, not even qualifying as evidence',
             ANNOTATIONS: {'Wine': 'Cotturi'}
         }
-        self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
-        self.assertHasEdge(g, (ABUNDANCE, "PIZZA", "TomatoTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
-        self.assertHasEdge(g, (ABUNDANCE, 'WINE', 'WhiteWine'), (ABUNDANCE, "PIZZA", "FishTopping"), **annots)
+        self.assertHasEdge(graph, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
+        self.assertHasEdge(graph, (ABUNDANCE, "PIZZA", "TomatoTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
+        self.assertHasEdge(graph, (ABUNDANCE, 'WINE', 'WhiteWine'), (ABUNDANCE, "PIZZA", "FishTopping"), **annots)
 
 
 if __name__ == '__main__':

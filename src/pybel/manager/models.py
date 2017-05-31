@@ -5,7 +5,7 @@
 import datetime
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
-from sqlalchemy import Integer, String, DateTime, Text, Date, Binary, Boolean
+from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -141,8 +141,7 @@ class NamespaceEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(Text, nullable=False,
-                  doc='Name that is defined in the corresponding namespace definition file')
+    name = Column(Text, nullable=False, doc='Name that is defined in the corresponding namespace definition file')
     encoding = Column(String(8), nullable=True,
                       doc='Represents the biological entities that this name is valid for (e.g. G for Gene or P for Protein)')
 
@@ -371,7 +370,7 @@ class Network(Base):
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
-    blob = Column(Binary(LONGBLOB))
+    blob = Column(LargeBinary(LONGBLOB))
 
     nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
     edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
@@ -407,6 +406,12 @@ class Network(Base):
 
         return network_data
 
+    def __repr__(self):
+        return '{} v{}'.format(self.name, self.version)
+
+    def __str__(self):
+        return repr(self)
+
 
 node_modification = Table(
     NODE_MODIFICATION_TABLE_NAME, Base.metadata,
@@ -429,7 +434,7 @@ class Node(Base):
     fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
 
     bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
-    blob = Column(Binary)
+    blob = Column(LargeBinary)
 
     sha512 = Column(String(255), index=True)
 
@@ -626,10 +631,10 @@ class Citation(Base):
     authors = relationship("Author", secondary=author_citation)
     evidences = relationship("Evidence", back_populates='citation')
 
-    # TODO: Still many citations with wrong name but same type and reference in e.g. alzheimers.bel
-    # __table_args__ = (
-    #    UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
-    # )
+    #TODO: Check for same type reference citations??
+    __table_args__ = (
+        UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
+    )
 
     @property
     def data(self):
@@ -659,7 +664,7 @@ class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication') #index=True,
+    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
     citation = relationship('Citation', back_populates='evidences')
@@ -720,7 +725,7 @@ class Edge(Base):
     annotations = relationship('AnnotationEntry', secondary=edge_annotation)
     properties = relationship('Property', secondary=edge_property)
 
-    blob = Column(Binary)
+    blob = Column(LargeBinary)
 
     sha512 = Column(String(255), index=True)
 

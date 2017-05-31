@@ -49,3 +49,16 @@ Post-Processing Tools
 - Implementation of Reverse Causal Reasoning and Network Perturbation Amplitude
 - Distributed BEL document infrastructure
 - Semantic Diff tool
+
+Data Interchange
+----------------
+Another format, Biological Pathways Expression Language (BioPax), was developed to integrate pathway information from
+many disparate databases. Like BEL, it can describe metabolic pathways and molecular interactions, but it excels in
+signaling pathways, gene regulatory networks, and genetic interactions. Systems Biology Markup Language (SBML) is the
+third common format that provides a more general framework for building quantitative and temporal models.
+
+Data locked away in other formats such as BioPax and SBML cannot be accessed by PyBEL currently. Development of
+knowledge assemblers, like INDRA, provide support for import of many formats. PyBEL will enable the import of BEL
+documents much more quickly, and ultimately enable the export of SMBL. In the future, it would also be useful to
+develop additional interchange tools for BioPax to BEL, but we recognize that this is a large task that will be
+limited by the expressibility of each language and the difficult development of a two-way mapping.

@@ -74,7 +74,7 @@ class FusionParser(BaseParser):
         self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
                                            Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
 
-        BaseParser.__init__(self, self.language)
+        super(FusionParser, self).__init__(self.language)
 
 
 def build_legacy_fusion(identifier, reference):

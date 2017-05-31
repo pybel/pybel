@@ -16,7 +16,8 @@ from ..exceptions import PyBelWarning
 from ..manager.cache import CacheManager
 from ..parser import BelParser
 from ..parser import MetadataParser
-from ..parser.parse_exceptions import VersionFormatWarning, MissingMetadataException
+from ..parser.parse_exceptions import VersionFormatWarning, MissingMetadataException, MalformedMetadataException, \
+    RedefinedNamespaceError, RedefinedAnnotationError
 
 log = logging.getLogger(__name__)
 parse_log = logging.getLogger('pybel.parser')
@@ -29,21 +30,16 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
-    :param graph: A BEL graph
-    :type graph: BELGraph
-    :param lines: An iterable over lines of BEL script
-    :param manager: A database connection string to the PyBEL cache, pre-built CacheManager, or pre-build 
-                    MetadataParser, or ``None`` for default connection
-    :type manager: None or str or :class:`pybel.manager.cache.CacheManager` or :class:`pybel.parser.MetadataParser`
-    :param allow_naked_names: If true, turns off naked namespace failures
-    :type allow_naked_names: bool
-    :param allow_nested: If true, turns off nested statement failures
-    :type allow_nested: bool
-    :param allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
-    :type allow_unqualified_translocations: bool
-    :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-                                Delegated to :class:`pybel.parser.ControlParser`
-    :type citation_clearing: bool
+    :param BELGraph graph: A BEL graph
+    :param iter[str] lines: An iterable over lines of BEL script
+    :param manager: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, a pre-built 
+                    :class:`MetadataParser`, or ``None`` for default connection
+    :type manager: None or str or CacheManager or MetadataParser
+    :param bool allow_naked_names: If true, turns off naked namespace failures
+    :param bool allow_nested: If true, turns off nested statement failures
+    :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+                                   Delegated to :class:`pybel.parser.ControlParser`
     """
 
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
@@ -76,13 +72,10 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 def parse_document(graph, document_metadata, metadata_parser):
     """Parses the lines in the document section of a BEL script.
 
-    :param graph: A BEL graph
+    :param BELGraph graph: A BEL graph
     :type graph: BELGraph
-    :param document_metadata: An enumerated iterable over the lines in the document section of a BEL script
-    :type document_metadata: iter
-    :param metadata_parser: A metadata parser
-    :type metadata_parser: pybel.parser.parse_metadata.MetadataParser
-    :return:
+    :param iter[str] document_metadata: An enumerated iterable over the lines in the document section of a BEL script
+    :param MetadataParser metadata_parser: A metadata parser
     """
     t = time.time()
 
@@ -92,9 +85,9 @@ def parse_document(graph, document_metadata, metadata_parser):
         except VersionFormatWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e)
-        except Exception as e:
+        except:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise e
+            raise MalformedMetadataException(line, line_number)
 
     for required in REQUIRED_METADATA:
         if required in metadata_parser.document_metadata and metadata_parser.document_metadata[required]:
@@ -110,25 +103,21 @@ def parse_document(graph, document_metadata, metadata_parser):
 def parse_definitions(graph, definitions, metadata_parser):
     """Parses the lines in the definitions section of a BEL script.
 
-    :param graph: A BEL graph
-    :type graph: BELGraph
-    :param definitions: An enumerated iterable over the lines in the definitions section of a BEL script
-    :type definitions: iter
-    :param metadata_parser: A metadata parser
-    :type metadata_parser: pybel.parser.parse_metadata.MetadataParser
-    :return:
+    :param BELGraph graph: A BEL graph
+    :param iter[str] definitions: An enumerated iterable over the lines in the definitions section of a BEL script
+    :param MetadataParser metadata_parser: A metadata parser
     """
     t = time.time()
 
     for line_number, line in definitions:
         try:
             metadata_parser.parseString(line, line_number=line_number)
-        except Exception as e:
+        except (RedefinedNamespaceError, RedefinedAnnotationError) as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
-
-    # metadata_parser.cache_manager.session.flush()
-    # metadata_parser.cache_manager.session.commit()
+        except Exception as e:
+            parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
+            raise MalformedMetadataException(line, line_number)
 
     graph.graph.update({
         GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
@@ -147,12 +136,9 @@ def parse_definitions(graph, definitions, metadata_parser):
 def parse_statements(graph, statements, bel_parser):
     """Parses a list of statements from a BEL Script.
 
-    :param graph: A BEL graph
-    :type graph: BELGraph
-    :param statements: An enumerated iterable over the lines in the statements section of a BEL script
-    :type statements: iter
-    :param bel_parser: A BEL parser
-    :type bel_parser: BelParser
+    :param BELGraph graph: A BEL graph
+    :param iter[str] statements: An enumerated iterable over the lines in the statements section of a BEL script
+    :param BelParser bel_parser: A BEL parser
     """
     t = time.time()
 

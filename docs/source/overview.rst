@@ -10,8 +10,8 @@ Biological Expression Language (BEL) is a domain specific language that enables 
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
 complex disease networks with several thousands of relationships. For a detailed explanation, see the
-BEL `1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
-`2.0 <openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_ specifications.
+BEL `1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_ and
+`2.0 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ specifications.
 
 OpenBEL Links
 ~~~~~~~~~~~~~
@@ -74,33 +74,54 @@ system is used to store graphs for high-performance querying.
 
 Extensions to BEL
 -----------------
-This section outlines the enhancements to the BEL specification that are made in PyBEL.
+The PyBEL compiler is fully compliant with both BEL v1.0 and v2.0 and automatically upgrades legacy statements.
+Additionally, we have included several additions to the BEL specification to enable expression of important concepts
+in molecular biology that were previously missing and to facilitate integrating new data types. A short example is the
+inclusion of protein oxidation in the default BEL namespace for protein modifications. Other, more elaborate additions
+are outlined below.
 
-Ontologies as Namespaces and Annotations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-PyBEL extends the BEL language to offer namespace definitions that draw directly from the ontologies in these services,
-using statements like :code:`DEFINE NAMESPACE OMIT AS OWL "http://purl.obolibrary.org/obo/omit/dev/omit.owl"` or
-:code:`DEFINE ANNOTATION CELL AS OWL "http://purl.obolibrary.org/obo/cl/releases/2016-11-23/cl.owl"`
-Ontologies can also provide immediate access to hierarchical knowledge like subclass relationships that can provide
-better context in analysis.
+Syntax for Epigenetics
+~~~~~~~~~~~~~~~~~~~~~~
+We introduce the gene modification function, gmod(), as a syntax for encoding epigenetic modifications. Its usage
+mirrors the pmod() function for proteins and includes arguments for methylation.
+
+For example, the methylation of NDUFB6 was found to be negatively correlated with its expression in a study of insulin
+resistance and Type II diabetes. This can now be expressed in BEL such as in the following statement:
+
+``g(HGNC:NDUFB6, gmod(Me)) negativeCorrelation r(HGNC:NDUFB6)``
+
+References:
+
+- https://www.ncbi.nlm.nih.gov/pubmed/17948130
+- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4655260/
+
+Definition of Namespaces as Regular Expressions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BEL imposes the constraint that each identifier must be qualified with an enumerated namespace to enable semantic
+interoperability and data integration. However, enumerating a namespace with potentially billions of names, such as
+dbSNP, poses a computational issue. We introduce syntax for defining namespaces with a consistent pattern using a
+regular expression to overcome this issue. For these namespaces, semantic validation can be perform in post-processing
+against the underlying database. The dbSNP namespace can be defined with a syntax familiar to BEL annotation
+definitions with regular expressions as follows:
+
+``DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]+"``
+
+Definition of Resources using OWL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+One constraint imposed by the BEL language is that definitions of namespaces and annotations must follow a specific
+format. However, the creation and maintenance of terminologies in the biological domain has tended towards the usage
+of the Web Ontology Format (OWL). Services such as the Ontology Lookup Service allow for standardized querying and
+search of these resources, and provide an important semantic integration layer that previous software tools for BEL
+did not include. PyBEL allows for these resources to be named directly in definitions with the following syntax:
+
+``DEFINE ANNOTATION CELL AS OWL "http://purl.obolibrary.org/obo/cl/releases/2016-11-23/cl.owl"``
+``DEFINE NAMESPACE DO AS OWL "http://purl.obolibrary.org/obo/doid/releases/2017-05-05/doid.owl"``
+
+This allows PyBEL to import the semantic information from the ontology as well, and provide much more rich
+algorithms that take into account the hierarchy and synonyms provided.
 
 PyBEL uses the `onto2nx <https://github.com/cthoyt/onto2nx>`_ package to parse OWL documents in many different
 formats, including OWL/XML, RDF/XML, and RDF.
-
-Regular Expressions for Namespaces
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-As we were building a namespace for dbSNP, we realized storing a list of the first 150 million numbers prefixed by "RS"
-was not the most efficient way. PyBEL allows the dbSNP namespace, and others with simple name rules, to be defined
-as a regular expression like :code:`DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]+"`.
-
-Additional Default Protein Modifications
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Oxidation is a common protein modification, so O, Ox, and oxidation were added.
-
-Gene Modifications
-~~~~~~~~~~~~~~~~~~
-Like protein modifications, the physical genomic sequence can be modified to be either methylated or acetylated. This
-is explained further in the Data Model section.
 
 Explicit Node Labels
 ~~~~~~~~~~~~~~~~~~~~

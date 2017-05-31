@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+CX JSON
+~~~~~~~
+This module contains input and output functions for the CX network exchange format.
+
+"""
+
 import json
 import logging
 import time
@@ -11,13 +19,12 @@ from ..graph import BELGraph
 from ..utils import flatten_dict, expand_dict, hash_tuple
 
 __all__ = [
-    'to_cx_json',
-    'to_cx_jsons',
     'to_cx',
-    'from_cx_json',
-    'from_cx_jsons',
+    'to_cx_jsons',
+    'to_cx_file',
     'from_cx',
-    'from_cx_path',
+    'from_cx_jsons',
+    'from_cx_file',
     'NDEX_SOURCE_FORMAT',
 ]
 
@@ -38,7 +45,7 @@ def calculate_canonical_cx_identifier(graph, node):
     """Calculates the canonical name for a given node. If it is a simple node, uses the namespace:name combination.
     Otherwise, it uses the BEL string.
 
-    :param pybel.BELGraph graph: A BEL Graph
+    :param BELGraph graph: A BEL Graph
     :param tuple node: A node
     :return: Appropriate identifier for the node for CX indexing
     :rtype: str
@@ -57,18 +64,17 @@ def calculate_canonical_cx_identifier(graph, node):
     raise ValueError('Unexpected node data: {}'.format(data))
 
 
-def to_cx(graph, file):
-    """Writes this graph to a JSON file in CX format
-
-    :param BELGraph graph: A BEL graph
-    :param file: A file to write to
-    :type file: file or file-like
+def build_node_mapping(graph):
+    """Builds a mapping from a graph's nodes to their canonical sort order
+    
+    :param BELGraph graph: A BEL graph 
+    :return: A mapping from a graph's nodes to their canonical sort order
+    :rtype: dict[tuple, int]
     """
-    json_graph = to_cx_json(graph)
-    json.dump(json_graph, file, ensure_ascii=False)
+    return {node: node_id for node_id, node in enumerate(sorted(graph.nodes_iter(), key=hash_tuple))}
 
 
-def to_cx_json(graph):
+def to_cx(graph):
     """Converts BEL Graph to CX data format (as in-memory JSON) for use with `NDEx <http://www.ndexbio.org/>`_
 
     :param BELGraph graph: A BEL Graph
@@ -81,14 +87,13 @@ def to_cx_json(graph):
         - `PyBEL / NDEx Python Client Wrapper <https://github.com/pybel/pybel2ndex>`_
 
     """
-    node_nid = {}
+    node_nid = build_node_mapping(graph)
     nid_data = {}
     nodes_entry = []
     node_attributes_entry = []
 
-    for node_id, node in enumerate(sorted(graph.nodes_iter(), key=hash_tuple)):
+    for node, node_id in node_nid.items():
         data = graph.node[node]
-        node_nid[node] = node_id
         nid_data[node_id] = data
 
         nodes_entry.append({
@@ -283,6 +288,16 @@ def to_cx_json(graph):
     return cx
 
 
+def to_cx_file(graph, file):
+    """Writes this graph to a JSON file in CX format
+
+    :param BELGraph graph: A BEL graph
+    :param file file: A writable file or file-like
+    """
+    graph_cx_json_dict = to_cx(graph)
+    json.dump(graph_cx_json_dict, file, ensure_ascii=False)
+
+
 def to_cx_jsons(graph):
     """Dumps a BEL graph as CX JSON to a string
     
@@ -290,10 +305,11 @@ def to_cx_jsons(graph):
     :return: CX JSON string
     :rtype: str
     """
-    return json.dumps(to_cx_json(graph))
+    graph_cx_json_str = to_cx(graph)
+    return json.dumps(graph_cx_json_str)
 
 
-def from_cx_json(cx):
+def from_cx(cx):
     """Rebuilds a BELGraph from CX JSON output from PyBEL
 
     :param list cx: The CX JSON for this graph
@@ -302,19 +318,44 @@ def from_cx_json(cx):
     """
     graph = BELGraph()
 
-    log.info('CX Entry [0]: %s', cx[0])
-    log.info('CX Entry [1]: %s', cx[1])
+    context_legend_entry = []
+    annotation_lists_entry = []
+    context_entry = {}
+    network_attributes_entry = []
+    node_entries = []
+    node_attributes_entries = []
+    edge_annotations_entries = []
+    edges_entries = []
+    meta_entries = defaultdict(list)
 
-    context_legend_entry = cx[3]
-    context_legend = _cx_to_dict(context_legend_entry['context_legend'])
+    for element in cx:
+        for k, v in element.items():
+            if k == 'context_legend':
+                context_legend_entry.extend(v)
+            elif k == 'annotation_lists':
+                annotation_lists_entry.extend(v)
+            elif k == '@context':
+                context_entry.update(v[0])
+            elif k == 'networkAttributes':
+                network_attributes_entry.extend(v)
+            elif k == 'nodes':
+                node_entries.extend(v)
+            elif k == 'nodeAttributes':
+                node_attributes_entries.extend(v)
+            elif k == 'edges':
+                edges_entries.extend(v)
+            elif k == 'edgeAttributes':
+                edge_annotations_entries.extend(v)
+            else:
+                meta_entries[k].extend(v)
+
+    context_legend = _cx_to_dict(context_legend_entry)
 
     annotation_lists = defaultdict(set)
-    annotation_lists_entry = cx[4]
-    for d in annotation_lists_entry['annotation_lists']:
+    for d in annotation_lists_entry:
         annotation_lists[d['k']].add(d['v'])
 
-    context_entry = cx[2]
-    for keyword, entry in context_entry['@context'][0].items():
+    for keyword, entry in context_entry.items():
         if context_legend[keyword] == GRAPH_NAMESPACE_URL:
             graph.namespace_url[keyword] = entry
         elif context_legend[keyword] == GRAPH_NAMESPACE_OWL:
@@ -330,20 +371,17 @@ def from_cx_json(cx):
         elif context_legend[keyword] == GRAPH_ANNOTATION_LIST:
             graph.annotation_list[keyword] = annotation_lists[entry]
 
-    network_attributes_entry = cx[5]
-    for d in network_attributes_entry['networkAttributes']:
+    for d in network_attributes_entry:
         if d['n'] == NDEX_SOURCE_FORMAT:
             continue
         graph.graph[GRAPH_METADATA][d['n']] = d['v']
 
-    node_entries = cx[6]
     node_name = {}
-    for d in node_entries['nodes']:
+    for d in node_entries:
         node_name[d['@id']] = d['n']
 
-    node_attributes_entries = cx[7]
     node_data = defaultdict(dict)
-    for d in node_attributes_entries['nodeAttributes']:
+    for d in node_attributes_entries:
         node_data[d['po']][d['n']] = d['v']
 
     node_data_pp = defaultdict(dict)
@@ -371,19 +409,17 @@ def from_cx_json(cx):
             d[NAME] = d.pop('identifier')
         graph.add_node(nid, attr_dict=d)
 
-    edges_entries = cx[8]
     edge_relation = {}
     edge_source = {}
     edge_target = {}
-    for d in edges_entries['edges']:
+    for d in edges_entries:
         eid = d['@id']
         edge_relation[eid] = d['i']
         edge_source[eid] = d['s']
         edge_target[eid] = d['t']
 
-    edge_annotations_entries = cx[9]
     edge_data = defaultdict(dict)
-    for d in edge_annotations_entries['edgeAttributes']:
+    for d in edge_annotations_entries:
         edge_data[d['po']][d['n']] = d['v']
 
     edge_citation = defaultdict(dict)
@@ -441,34 +477,23 @@ def from_cx_json(cx):
     return graph
 
 
-def from_cx_jsons(cxs):
+def from_cx_jsons(graph_cx_json_str):
     """Reconstitutes a BEL graph from a CX JSON string
     
-    :param str cxs: CX JSON string 
+    :param str graph_cx_json_str: CX JSON string 
     :return: A BEL graph representing the CX graph contained in the string
     :rtype: BELGraph
     """
-    return from_cx_json(json.loads(cxs))
+    graph_cx_json_dict = json.loads(graph_cx_json_str)
+    return from_cx(graph_cx_json_dict)
 
 
-def from_cx(file):
+def from_cx_file(file):
     """Reads a file containing CX JSON and converts to a BEL graph
 
-    :param file: A file or file-like containing the CX JSON for this graph
-    :type file: file or file-like
+    :param file file: A readable file or file-like containing the CX JSON for this graph
     :return: A BEL Graph representing the CX graph contained in the file
     :rtype: BELGraph
     """
-    return from_cx_json(json.load(file))
-
-
-def from_cx_path(path):
-    """Reads the file from the given path and loads a BEL graph from the contained CX JSON with :func:`from_cx`
-
-    :param path: The path to a file containing CX JSON
-    :type path: str
-    :return: A BEL Graph representing the CX graph contained in the file at the given path
-    :rtype: BELGraph
-    """
-    with open(path) as file:
-        return from_cx(file)
+    graph_cx_json_dict = json.load(file)
+    return from_cx(graph_cx_json_dict)

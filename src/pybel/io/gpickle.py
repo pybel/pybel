@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains IO functions for interconversion between BEL graphs and python pickle objects"""
+"""
+
+Bytes
+-----
+This module contains IO functions for interconversion between BEL graphs and python pickle objects
+
+"""
 
 from networkx import read_gpickle, write_gpickle
 

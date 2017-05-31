@@ -6,12 +6,12 @@ import unittest
 from pathlib import Path
 
 from pybel.io.line_utils import split_file_to_annotations_and_definitions
-from pybel.manager.cache import CacheManager
 from pybel.parser import MetadataParser
 from pybel.parser.parse_exceptions import *
+from tests.constants import FleetingTemporaryCacheMixin
+from tests.mocks import mock_bel_resources
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc
-from tests.constants import test_an_1, test_ns_1, mock_bel_resources
-from tests.constants import test_bel_simple
+from tests.constants import test_an_1, test_ns_1, test_ns_nocache, test_bel_simple
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -21,19 +21,21 @@ class TestSplitLines(unittest.TestCase):
         with open(test_bel_simple) as f:
             docs, definitions, statements = split_file_to_annotations_and_definitions(f)
         self.assertEqual(7, len(docs))
-        self.assertEqual(5, len(definitions))
+        self.assertEqual(4, len(definitions))
         self.assertEqual(14, len(statements))
 
 
-class TestParseMetadata(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.connection = 'sqlite://'
-        cls.cm = CacheManager(cls.connection)
-        cls.cm.create_database()
-
+class TestParseMetadata(FleetingTemporaryCacheMixin):
     def setUp(self):
-        self.parser = MetadataParser(manager=CacheManager(self.connection))
+        super(TestParseMetadata, self).setUp()
+        self.parser = MetadataParser(manager=self.manager)
+
+    def test_namespace_nocache(self):
+        """Checks namespace is loaded into parser but not cached"""
+        s = 'DEFINE NAMESPACE TESTNS3 AS URL "{}"'.format('file:///' + test_ns_nocache)
+        self.parser.parseString(s)
+        self.assertIn('TESTNS3', self.parser.namespace_dict)
+        self.assertEqual(0, len(self.manager.list_namespaces()))
 
     @mock_bel_resources
     def test_namespace_name_persistience(self, mock_get):
@@ -62,6 +64,7 @@ class TestParseMetadata(unittest.TestCase):
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
         self.assertNotIn('A', self.parser.annotations_dict[MESH_DISEASES_KEYWORD])
+        self.assertIn('46, XX Disorders of Sex Development', self.parser.annotations_dict[MESH_DISEASES_KEYWORD])
 
     def test_annotation_name_persistience_2(self):
         """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
@@ -118,9 +121,10 @@ class TestParseMetadata(unittest.TestCase):
         # with self.assertLogs('pybel', level='WARNING'):
         self.parser.parseString(s)
 
-    def test_parse_namespace_url_file(self):
+    @mock_bel_resources
+    def test_parse_namespace_url_file(self, mock):
         """Tests parsing a namespace by file URL"""
-        s = 'DEFINE NAMESPACE TESTNS1 AS URL "{}"'.format(Path(test_ns_1).as_uri())
+        s = 'DEFINE NAMESPACE TESTNS1 AS URL "{}"'.format(test_ns_1)
         self.parser.parseString(s)
 
         expected_values = {

@@ -36,7 +36,8 @@ class BELGraph(nx.MultiDiGraph):
     def __init__(self, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
-
+        
+        :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         :type kwargs: dict
         """
@@ -148,6 +149,9 @@ class BELGraph(nx.MultiDiGraph):
         dictionary from the parser at the time of error.
         """
         return self._warnings
+
+    def __str__(self):
+        return '{} v{}'.format(self.name, self.version)
 
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
