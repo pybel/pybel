@@ -10,9 +10,6 @@ enable this option, but can specify a database location if they choose.
 import datetime
 import hashlib
 import itertools as itt
-import json
-import logging
-import sys
 import time
 from collections import defaultdict
 from copy import deepcopy
@@ -129,6 +126,7 @@ class CacheManager(BaseCacheManager):
         """Drops all graphs"""
         self.session.query(Network).delete()
         self.session.commit()
+        self.clean_object_cache()
 
     def drop_namespaces(self):
         """Drops all namespaces"""
@@ -163,6 +161,18 @@ class CacheManager(BaseCacheManager):
         """Drops all equivalence classes"""
         self.session.query(NamespaceEntryEquivalence).delete()
         self.session.commit()
+
+    def clean_object_cache(self):
+        # ToDo: Temporal solution! Cache needs to be cleaned only from deleted entries.
+        self.object_cache = {
+            'modification': {},
+            'property': {},
+            'node': {},
+            'edge': {},
+            'citation': {},
+            'evidence': {},
+            'author': {}
+        }
 
     # NAMESPACE MANAGEMENT
 
@@ -824,8 +834,8 @@ class CacheManager(BaseCacheManager):
             'evidence': evidence,
             'bel': bel,
             'relation': relation,
-            'properties': properties,
-            'annotations': annotations
+            'properties': properties.sort(key=lambda prop: prop.sha512),
+            'annotations': annotations.sort(key=lambda annoentry: annoentry.id)
         }
         edge_hash = hashlib.sha512(json.dumps(edge_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
@@ -870,8 +880,8 @@ class CacheManager(BaseCacheManager):
         :rtype: models.Citation
         """
         citation_dict = {
-            'type': type,
-            'name': name,
+            'type': type.strip(),
+            'name': name.strip(),
             'reference': reference.strip()
         }
         citation_hash = hashlib.sha512(json.dumps(citation_dict, sort_keys=True).encode('utf-8')).hexdigest()
@@ -1132,8 +1142,10 @@ class CacheManager(BaseCacheManager):
         """
 
         # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
-        self.session.query(Network).filter(Network.id == network_id).delete()
+        network = self.session.query(Network).filter(Network.id == network_id).first()
+        self.session.delete(network)
         self.session.commit()
+        self.clean_object_cache()
 
     def list_graphs(self, include_description=True):
         """Lists network id, network name, and network version triples"""

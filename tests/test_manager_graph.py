@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import hashlib
-import json
-import logging
 import unittest
 from collections import Counter
 
-import sqlalchemy.exc
-
 import pybel
+import sqlalchemy.exc
 from pybel import from_path
 from pybel.constants import *
 from pybel.manager import models
@@ -71,7 +67,7 @@ class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
 
 # FIXME @kono need proper deletion cascades
-@unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
+# @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
 class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
 
@@ -131,541 +127,542 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
                                             expected_test_simple_metadata[METADATA_VERSION])
         self.bel_simple_reconstituted(g2)
 
-
-    @mock_bel_resources
-    def test_get_or_create_citation(self, mock_get):
-        basic_citation = {
-            CITATION_TYPE: 'PubMed',
-            CITATION_NAME: 'TestCitation_basic',
-            CITATION_REFERENCE: '1234AB',
-        }
-        full_citation = {
-            CITATION_TYPE: 'Other',
-            CITATION_NAME: 'TestCitation_full',
-            CITATION_REFERENCE: 'CD5678',
-            CITATION_DATE: '2017-04-11',
-            CITATION_AUTHORS: 'Jackson M|Lajoie J'
-        }
-        full_citation_basic = {
-            CITATION_TYPE: 'Other',
-            CITATION_NAME: 'TestCitation_full',
-            CITATION_REFERENCE: 'CD5678'
-        }
-        basic_citation_sha512 = hashlib.sha512(json.dumps(basic_citation, sort_keys=True).encode('utf-8')).hexdigest()
-        full_citation_sha512 = hashlib.sha512(
-            json.dumps(full_citation_basic, sort_keys=True).encode('utf-8')).hexdigest()
-
-        # Create
-        basic = self.manager.get_or_create_citation(**basic_citation)
-        self.assertIsInstance(basic, models.Citation)
-        self.assertEqual(basic.data, basic_citation)
-        self.assertIn(basic_citation_sha512, self.manager.object_cache['citation'])
-
-        full = self.manager.get_or_create_citation(**full_citation)
-        self.assertIsInstance(full, models.Citation)
-        self.assertEqual(full.data, full_citation)
-        self.assertIn(full_citation_sha512, self.manager.object_cache['citation'])
-
-        # Different objects created
-        self.assertNotEqual(basic, full)
-
-        # Two ojbects in object_cache
-        self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
-
-        # Reload from object cache
-        reloaded_basic = self.manager.get_or_create_citation(**basic_citation)
-        self.assertEqual(basic, reloaded_basic)
-
-        reloaded_full = self.manager.get_or_create_citation(**full_citation)
-        self.assertEqual(full, reloaded_full)
-
-        # No new entries in object_cache
-        self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
-
-    @mock_bel_resources
-    def test_get_or_create_evidence(self, mock_get):
-        basic_citation = {
-            CITATION_TYPE: 'PubMed',
-            CITATION_NAME: 'TestCitation_basic',
-            CITATION_REFERENCE: '1234AB',
-        }
-        basic_citation = self.manager.get_or_create_citation(**basic_citation)
-        evidence_txt = "Yes, all the information is true!"
-        evidence_data = {
-            CITATION: basic_citation.data,
-            EVIDENCE: evidence_txt
-        }
-
-        evidence_hash = hashlib.sha512(json.dumps(evidence_data, sort_keys=True).encode('utf-8')).hexdigest()
-
-        # Create
-        evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
-        self.assertIsInstance(evidence, models.Evidence)
-        self.assertEqual(evidence.data, evidence_data)
-
-        self.assertIn(evidence_hash, self.manager.object_cache['evidence'])
-        self.assertEqual(1, len(self.manager.object_cache['evidence']))
-
-        # Objects cached?
-        reloaded_evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
-        self.assertEqual(evidence, reloaded_evidence)
-
-    @mock_bel_resources
-    def test_get_or_create_property(self, mock_get):
-        activity = {
-            'data': {
-                SUBJECT: {
-                    EFFECT: {
-                        NAME: 'pep',
-                        NAMESPACE: BEL_DEFAULT_NAMESPACE
-                    },
-                    MODIFIER: ACTIVITY
-                }
-            },
-            'participant': SUBJECT
-        }
-        translocation = {
-            'data': {
-                SUBJECT: {
-                    EFFECT: {
-                        FROM_LOC: {
-                            NAME: 'host intracellular organelle',
-                            NAMESPACE: GOCC_KEYWORD
-                        },
-                        TO_LOC: {
-                            NAME: 'host outer membrane',
-                            NAMESPACE: GOCC_KEYWORD
-                        },
-                    },
-                    MODIFIER: TRANSLOCATION
-                }
-            },
-            'participant': SUBJECT
-        }
-        location = {
-            'data': {
-                SUBJECT: {
-                    LOCATION: {
-                        NAMESPACE: GOCC_KEYWORD,
-                        NAME: 'Herring body'
-                    }
-                }
-            },
-            'participant': SUBJECT
-        }
-        degradation = {
-            'data': {
-                SUBJECT: {
-                    MODIFIER: DEGRADATION
-                }
-            },
-            'participant': SUBJECT
-        }
-        edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')][0]
-
-        activity_hash = hashlib.sha512(json.dumps({
-            'participant': SUBJECT,
-            'modifier': ACTIVITY,
-            'effectNamespace': BEL_DEFAULT_NAMESPACE,
-            'effectName': 'pep'
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        translocation_from_hash = hashlib.sha512(json.dumps({
-            'participant': SUBJECT,
-            'modifier': TRANSLOCATION,
-            'relativeKey': FROM_LOC,
-            'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['host intracellular organelle']
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        translocation_to_hash = hashlib.sha512(json.dumps({
-            'participant': SUBJECT,
-            'modifier': TRANSLOCATION,
-            'relativeKey': TO_LOC,
-            'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['host outer membrane']
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        location_hash = hashlib.sha512(json.dumps({
-            'participant': SUBJECT,
-            'modifier': LOCATION,
-            'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['Herring body']
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        degradation_hash = hashlib.sha512(json.dumps({
-            'participant': SUBJECT,
-            'modifier': DEGRADATION
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-
-        # Create
-        edge_data.update(activity['data'])
-        activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertIsInstance(activity_ls, list)
-        self.assertIsInstance(activity_ls[0], models.Property)
-        self.assertEqual(activity_ls[0].data, activity)
-
-        # Activity was stored with hash in object cache
-        self.assertIn(activity_hash, self.manager.object_cache['property'])
-        self.assertEqual(1, len(self.manager.object_cache['property'].keys()))
-
-        reloaded_activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertEqual(activity_ls, reloaded_activity_ls)
-
-        # No new activity object was created
-        self.assertEqual(1, len(self.manager.object_cache['property'].keys()))
-
-        # Create
-        edge_data.update(location['data'])
-        location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertEqual(location_ls[0].data, location)
-
-        self.assertIn(location_hash, self.manager.object_cache['property'])
-        self.assertEqual(2, len(self.manager.object_cache['property'].keys()))
-
-        # Get
-        reloaded_location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertEqual(location_ls, reloaded_location_ls)
-
-        # No second location property object was created
-        self.assertEqual(2, len(self.manager.object_cache['property'].keys()))
-
-        # Create
-        edge_data.update(degradation['data'])
-        degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertEqual(degradation_ls[0].data, degradation)
-
-        self.assertIn(degradation_hash, self.manager.object_cache['property'])
-        self.assertEqual(3, len(self.manager.object_cache['property'].keys()))
-
-        # Get
-        reloaded_degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        self.assertEqual(degradation_ls, reloaded_degradation_ls)
-
-        # No second degradation property object was created
-        self.assertEqual(3, len(self.manager.object_cache['property'].keys()))
-
-        # Create
-        edge_data.update(translocation['data'])
-        translocation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
-        # self.assertEqual(translocation_ls[0].data, translocation)
-
-        # 2 translocation objects addaed
-        self.assertEqual(5, len(self.manager.object_cache['property'].keys()))
-        self.assertIn(translocation_from_hash, self.manager.object_cache['property'])
-        self.assertIn(translocation_to_hash, self.manager.object_cache['property'])
-
-    @mock_bel_resources
-    def test_get_or_create_edge(self, mock_get):
-
-        edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')]
-        source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
-        target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
-        citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
-        evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
-        properties = self.manager.get_or_create_property(self.simple_graph, edge_data[0])
-        annotations = []
-        basic_edge = {
-            'graph_key': 0,
-            'source': source_node,
-            'target': target_node,
-            'evidence': evidence,
-            'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
-            'relation': edge_data[0][RELATION],
-            'properties': properties,
-            'annotations': annotations,
-            'blob': pickle.dumps(edge_data[0])
-        }
-        source_data = source_node.data
-        target_data = target_node.data
-        database_data = {
-            'source': {
-                'node': (source_data['key'], source_data['data']),
-                'key': source_data['key']
-            },
-            'target': {
-                'node': (target_data['key'], target_data['data']),
-                'key': target_data['key']
-            },
-            'data': {
-                RELATION: edge_data[0][RELATION],
-                CITATION: citation.data,
-                EVIDENCE: edge_data[0][EVIDENCE],
-                ANNOTATIONS: {}
-            },
-            'key': 0
-        }
-
-        edge_hash = hashlib.sha512(json.dumps({
-            'graphIdentifier': 0,
-            'source': source_node,
-            'target': target_node,
-            'evidence': evidence,
-            'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
-            'relation': edge_data[0][RELATION],
-            'annotations': annotations,
-            'properties': properties
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-
-        # Create
-        edge = self.manager.get_or_create_edge(**basic_edge)
-        self.assertIsInstance(edge, models.Edge)
-        self.assertEqual(edge.data, database_data)
-
-        self.assertIn(edge_hash, self.manager.object_cache['edge'])
-
-        # Get
-        reloaded_edge = self.manager.get_or_create_edge(**basic_edge)
-        self.assertEqual(edge.data, reloaded_edge.data)
-        self.assertEqual(edge, reloaded_edge)
-
-        self.assertEqual(1, len(self.manager.object_cache['edge'].keys()))
-
-    @mock_bel_resources
-    def test_get_or_create_author(self, mock_get):
-        author_name = "Jackson M"
-
-        # Create
-        author = self.manager.get_or_create_author(author_name)
-        self.assertIsInstance(author, models.Author)
-        self.assertEqual(author.name, author_name)
-
-        self.assertIn(author_name, self.manager.object_cache['author'])
-
-        # Get
-        reloaded_author = self.manager.get_or_create_author(author_name)
-        self.assertEqual(author.name, reloaded_author.name)
-        self.assertEqual(author, reloaded_author)
-
-        self.assertEqual(1, len(self.manager.object_cache['author'].keys()))
-
-    @mock_bel_resources
-    def test_get_or_create_modification(self, mock_get):
-        # self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
-        node_data = self.simple_graph.node[('Protein', 'HGNC', 'FADD')]
-        fusion_missing = {
-            FUSION: {
-                PARTNER_3P: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1',
-                },
-                RANGE_3P: {
-                    FUSION_MISSING: '?',
-                },
-                PARTNER_5P: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'EGFR'
-                },
-                RANGE_5P: {
-                    FUSION_MISSING: '?',
-                }
-            }
-        }
-        fusion_full = {
-            FUSION: {
-                PARTNER_3P: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1',
-                },
-                RANGE_3P: {
-                    FUSION_REFERENCE: 'A',
-                    FUSION_START: 'START_1',
-                    FUSION_STOP: 'STOP_1',
-                },
-                PARTNER_5P: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'EGFR'
-                },
-                RANGE_5P: {
-                    FUSION_REFERENCE: 'E',
-                    FUSION_START: 'START_2',
-                    FUSION_STOP: 'STOP_2',
-                }
-            }
-        }
-        hgvs = {
-            KIND: HGVS,
-            IDENTIFIER: 'hgvs_ident'
-        }
-        fragment_missing = {
-            KIND: FRAGMENT,
-            FRAGMENT_MISSING: '?',
-        }
-        fragment_full = {
-            KIND: FRAGMENT,
-            FRAGMENT_START: 'START_FRAG',
-            FRAGMENT_STOP: 'STOP_FRAG'
-        }
-        gmod = {
-            KIND: GMOD,
-            IDENTIFIER: {
-                NAMESPACE: 'test_NS',
-                NAME: 'test_GMOD'
-            }
-        }
-        pmod_simple = {
-            KIND: PMOD,
-            IDENTIFIER: {
-                NAMESPACE: 'test_NS',
-                NAME: 'test_PMOD'
-            }
-        }
-        pmod_full = {
-            KIND: PMOD,
-            IDENTIFIER: {
-                NAMESPACE: 'test_NS',
-                NAME: 'test_PMOD_2'
-            },
-            PMOD_CODE: 'Tst',
-            PMOD_POSITION: 12,
-        }
-
-        hgnc_url = self.simple_graph.namespace_url['HGNC']
-        AKT1_object = self.manager.namespace_object_cache[hgnc_url]['AKT1']
-        EGFR_object = self.manager.namespace_object_cache[hgnc_url]['EGFR']
-
-        fusion_missing_hash = hashlib.sha512(json.dumps({
-            'modType': FUSION,
-            'p3Partner': AKT1_object,
-            'p5Partner': EGFR_object,
-            'p3Missing': '?',
-            'p5Missing': '?',
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        fusion_full_hash = hashlib.sha512(json.dumps({
-            'modType': FUSION,
-            'p3Partner': AKT1_object,
-            'p5Partner': EGFR_object,
-            'p3Reference': 'A',
-            'p3Start': 'START_1',
-            'p3Stop': 'STOP_1',
-            'p5Reference': 'E',
-            'p5Start': 'START_2',
-            'p5Stop': 'STOP_2'
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        hgvs_hash = hashlib.sha512(json.dumps({
-            'modType': HGVS,
-            'variantString': 'hgvs_ident'
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        fragment_missing_hash = hashlib.sha512(json.dumps({
-            'modType': FRAGMENT,
-            'p3Missing': '?'
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        fragment_full_hash = hashlib.sha512(json.dumps({
-            'modType': FRAGMENT,
-            'p3Start': 'START_FRAG',
-            'p3Stop': 'STOP_FRAG'
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        gmod_hash = hashlib.sha512(json.dumps({
-            'modType': GMOD,
-            'modNamespace': 'test_NS',
-            'modName': 'test_GMOD'
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        pmod_simple_hash = hashlib.sha512(json.dumps({
-            'modType': PMOD,
-            'modNamespace': 'test_NS',
-            'modName': 'test_PMOD',
-            'aminoA': None,
-            'position': None
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-        pmod_full_hash = hashlib.sha512(json.dumps({
-            'modType': PMOD,
-            'modNamespace': 'test_NS',
-            'modName': 'test_PMOD_2',
-            'aminoA': 'Tst',
-            'position': 12
-        }, sort_keys=True).encode('utf-8')).hexdigest()
-
-        # Create
-        node_data.update(fusion_missing)
-        fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertIsInstance(fusion_missing_ls, list)
-        self.assertIsInstance(fusion_missing_ls[0], models.Modification)
-        self.assertEqual(fusion_missing[FUSION], fusion_missing_ls[0].data['mod_data'])
-
-        self.assertIn(fusion_missing_hash, self.manager.object_cache['modification'])
-
-        # Get
-        reloaded_fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fusion_missing_ls, reloaded_fusion_missing_ls)
-
-        # Create
-        node_data.update(fusion_full)
-        fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertIsInstance(fusion_full_ls, list)
-        self.assertIsInstance(fusion_full_ls[0], models.Modification)
-        self.assertEqual(fusion_full[FUSION], fusion_full_ls[0].data['mod_data'])
-
-        self.assertIn(fusion_full_hash, self.manager.object_cache['modification'])
-
-        # Get
-        reloaded_fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fusion_full_ls, reloaded_fusion_full_ls)
-
-        del node_data[FUSION]
-
-        # Create
-        node_data[VARIANTS] = [hgvs]
-        hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(hgvs, hgvs_ls[0].data['mod_data'])
-
-        self.assertIn(hgvs_hash, self.manager.object_cache['modification'])
-
-        # Get
-        reloaded_hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(hgvs_ls, reloaded_hgvs_ls)
-
-        # Create
-        node_data[VARIANTS] = [fragment_missing]
-        fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fragment_missing, fragment_missing_ls[0].data['mod_data'])
-
-        self.assertIn(fragment_missing_hash, self.manager.object_cache['modification'])
-
-        # Get
-        reloaded_fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fragment_missing_ls, reloaded_fragment_missing_ls)
-
-        # Create
-        node_data[VARIANTS] = [fragment_full]
-        fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fragment_full, fragment_full_ls[0].data['mod_data'])
-
-        self.assertIn(fragment_full_hash, self.manager.object_cache['modification'])
-
-        # Get
-        reloaded_fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(fragment_full_ls, reloaded_fragment_full_ls)
-
-        # Create
-        node_data[VARIANTS] = [gmod]
-        gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(gmod, gmod_ls[0].data['mod_data'])
-
-        self.assertIn(gmod_hash, self.manager.object_cache['modification'])
-
-        # Get
-        reloaded_gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(gmod_ls, reloaded_gmod_ls)
-
-        # Create
-        node_data[VARIANTS] = [pmod_simple]
-        pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(pmod_simple, pmod_simple_ls[0].data['mod_data'])
-
-        self.assertIn(pmod_simple_hash, self.manager.object_cache['modification'])
-
-        # Get
-        reloaded_pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(pmod_simple_ls, reloaded_pmod_simple_ls)
-
-        # Create
-        node_data[VARIANTS] = [pmod_full]
-        pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(pmod_full, pmod_full_ls[0].data['mod_data'])
-
-        self.assertIn(pmod_full_hash, self.manager.object_cache['modification'])
-
-        # Get
-        reloaded_pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        self.assertEqual(pmod_full_ls, reloaded_pmod_full_ls)
-
-        # Every modification was added only once to the object cache
-        self.assertEqual(8, len(self.manager.object_cache['modification'].keys()))
-
-
+    # ============================================================
+    #
+    # @mock_bel_resources
+    # def test_get_or_create_citation(self, mock_get):
+    #     basic_citation = {
+    #         CITATION_TYPE: 'PubMed',
+    #         CITATION_NAME: 'TestCitation_basic',
+    #         CITATION_REFERENCE: '1234AB',
+    #     }
+    #     full_citation = {
+    #         CITATION_TYPE: 'Other',
+    #         CITATION_NAME: 'TestCitation_full',
+    #         CITATION_REFERENCE: 'CD5678',
+    #         CITATION_DATE: '2017-04-11',
+    #         CITATION_AUTHORS: 'Jackson M|Lajoie J'
+    #     }
+    #     full_citation_basic = {
+    #         CITATION_TYPE: 'Other',
+    #         CITATION_NAME: 'TestCitation_full',
+    #         CITATION_REFERENCE: 'CD5678'
+    #     }
+    #     basic_citation_sha512 = hashlib.sha512(json.dumps(basic_citation, sort_keys=True).encode('utf-8')).hexdigest()
+    #     full_citation_sha512 = hashlib.sha512(
+    #         json.dumps(full_citation_basic, sort_keys=True).encode('utf-8')).hexdigest()
+    #
+    #     # Create
+    #     basic = self.manager.get_or_create_citation(**basic_citation)
+    #     self.assertIsInstance(basic, models.Citation)
+    #     self.assertEqual(basic.data, basic_citation)
+    #     self.assertIn(basic_citation_sha512, self.manager.object_cache['citation'])
+    #
+    #     full = self.manager.get_or_create_citation(**full_citation)
+    #     self.assertIsInstance(full, models.Citation)
+    #     self.assertEqual(full.data, full_citation)
+    #     self.assertIn(full_citation_sha512, self.manager.object_cache['citation'])
+    #
+    #     # Different objects created
+    #     self.assertNotEqual(basic, full)
+    #
+    #     # Two ojbects in object_cache
+    #     self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
+    #
+    #     # Reload from object cache
+    #     reloaded_basic = self.manager.get_or_create_citation(**basic_citation)
+    #     self.assertEqual(basic, reloaded_basic)
+    #
+    #     reloaded_full = self.manager.get_or_create_citation(**full_citation)
+    #     self.assertEqual(full, reloaded_full)
+    #
+    #     # No new entries in object_cache
+    #     self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
+    #
+    # @mock_bel_resources
+    # def test_get_or_create_evidence(self, mock_get):
+    #     basic_citation = {
+    #         CITATION_TYPE: 'PubMed',
+    #         CITATION_NAME: 'TestCitation_basic',
+    #         CITATION_REFERENCE: '1234AB',
+    #     }
+    #     basic_citation = self.manager.get_or_create_citation(**basic_citation)
+    #     evidence_txt = "Yes, all the information is true!"
+    #     evidence_data = {
+    #         CITATION: basic_citation.data,
+    #         EVIDENCE: evidence_txt
+    #     }
+    #
+    #     evidence_hash = hashlib.sha512(json.dumps(evidence_data, sort_keys=True).encode('utf-8')).hexdigest()
+    #
+    #     # Create
+    #     evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
+    #     self.assertIsInstance(evidence, models.Evidence)
+    #     self.assertEqual(evidence.data, evidence_data)
+    #
+    #     self.assertIn(evidence_hash, self.manager.object_cache['evidence'])
+    #     self.assertEqual(1, len(self.manager.object_cache['evidence']))
+    #
+    #     # Objects cached?
+    #     reloaded_evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
+    #     self.assertEqual(evidence, reloaded_evidence)
+    #
+    # @mock_bel_resources
+    # def test_get_or_create_property(self, mock_get):
+    #     activity = {
+    #         'data': {
+    #             SUBJECT: {
+    #                 EFFECT: {
+    #                     NAME: 'pep',
+    #                     NAMESPACE: BEL_DEFAULT_NAMESPACE
+    #                 },
+    #                 MODIFIER: ACTIVITY
+    #             }
+    #         },
+    #         'participant': SUBJECT
+    #     }
+    #     translocation = {
+    #         'data': {
+    #             SUBJECT: {
+    #                 EFFECT: {
+    #                     FROM_LOC: {
+    #                         NAME: 'host intracellular organelle',
+    #                         NAMESPACE: GOCC_KEYWORD
+    #                     },
+    #                     TO_LOC: {
+    #                         NAME: 'host outer membrane',
+    #                         NAMESPACE: GOCC_KEYWORD
+    #                     },
+    #                 },
+    #                 MODIFIER: TRANSLOCATION
+    #             }
+    #         },
+    #         'participant': SUBJECT
+    #     }
+    #     location = {
+    #         'data': {
+    #             SUBJECT: {
+    #                 LOCATION: {
+    #                     NAMESPACE: GOCC_KEYWORD,
+    #                     NAME: 'Herring body'
+    #                 }
+    #             }
+    #         },
+    #         'participant': SUBJECT
+    #     }
+    #     degradation = {
+    #         'data': {
+    #             SUBJECT: {
+    #                 MODIFIER: DEGRADATION
+    #             }
+    #         },
+    #         'participant': SUBJECT
+    #     }
+    #     edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')][0]
+    #
+    #     activity_hash = hashlib.sha512(json.dumps({
+    #         'participant': SUBJECT,
+    #         'modifier': ACTIVITY,
+    #         'effectNamespace': BEL_DEFAULT_NAMESPACE,
+    #         'effectName': 'pep'
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     translocation_from_hash = hashlib.sha512(json.dumps({
+    #         'participant': SUBJECT,
+    #         'modifier': TRANSLOCATION,
+    #         'relativeKey': FROM_LOC,
+    #         'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['host intracellular organelle']
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     translocation_to_hash = hashlib.sha512(json.dumps({
+    #         'participant': SUBJECT,
+    #         'modifier': TRANSLOCATION,
+    #         'relativeKey': TO_LOC,
+    #         'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['host outer membrane']
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     location_hash = hashlib.sha512(json.dumps({
+    #         'participant': SUBJECT,
+    #         'modifier': LOCATION,
+    #         'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['Herring body']
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     degradation_hash = hashlib.sha512(json.dumps({
+    #         'participant': SUBJECT,
+    #         'modifier': DEGRADATION
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #
+    #     # Create
+    #     edge_data.update(activity['data'])
+    #     activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+    #     self.assertIsInstance(activity_ls, list)
+    #     self.assertIsInstance(activity_ls[0], models.Property)
+    #     self.assertEqual(activity_ls[0].data, activity)
+    #
+    #     # Activity was stored with hash in object cache
+    #     self.assertIn(activity_hash, self.manager.object_cache['property'])
+    #     self.assertEqual(1, len(self.manager.object_cache['property'].keys()))
+    #
+    #     reloaded_activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+    #     self.assertEqual(activity_ls, reloaded_activity_ls)
+    #
+    #     # No new activity object was created
+    #     self.assertEqual(1, len(self.manager.object_cache['property'].keys()))
+    #
+    #     # Create
+    #     edge_data.update(location['data'])
+    #     location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+    #     self.assertEqual(location_ls[0].data, location)
+    #
+    #     self.assertIn(location_hash, self.manager.object_cache['property'])
+    #     self.assertEqual(2, len(self.manager.object_cache['property'].keys()))
+    #
+    #     # Get
+    #     reloaded_location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+    #     self.assertEqual(location_ls, reloaded_location_ls)
+    #
+    #     # No second location property object was created
+    #     self.assertEqual(2, len(self.manager.object_cache['property'].keys()))
+    #
+    #     # Create
+    #     edge_data.update(degradation['data'])
+    #     degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+    #     self.assertEqual(degradation_ls[0].data, degradation)
+    #
+    #     self.assertIn(degradation_hash, self.manager.object_cache['property'])
+    #     self.assertEqual(3, len(self.manager.object_cache['property'].keys()))
+    #
+    #     # Get
+    #     reloaded_degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+    #     self.assertEqual(degradation_ls, reloaded_degradation_ls)
+    #
+    #     # No second degradation property object was created
+    #     self.assertEqual(3, len(self.manager.object_cache['property'].keys()))
+    #
+    #     # Create
+    #     edge_data.update(translocation['data'])
+    #     translocation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+    #     # self.assertEqual(translocation_ls[0].data, translocation)
+    #
+    #     # 2 translocation objects addaed
+    #     self.assertEqual(5, len(self.manager.object_cache['property'].keys()))
+    #     self.assertIn(translocation_from_hash, self.manager.object_cache['property'])
+    #     self.assertIn(translocation_to_hash, self.manager.object_cache['property'])
+    #
+    # @mock_bel_resources
+    # def test_get_or_create_edge(self, mock_get):
+    #
+    #     edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')]
+    #     source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
+    #     target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
+    #     citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
+    #     evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
+    #     properties = self.manager.get_or_create_property(self.simple_graph, edge_data[0])
+    #     annotations = []
+    #     basic_edge = {
+    #         'graph_key': 0,
+    #         'source': source_node,
+    #         'target': target_node,
+    #         'evidence': evidence,
+    #         'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
+    #         'relation': edge_data[0][RELATION],
+    #         'properties': properties,
+    #         'annotations': annotations,
+    #         'blob': pickle.dumps(edge_data[0])
+    #     }
+    #     source_data = source_node.data
+    #     target_data = target_node.data
+    #     database_data = {
+    #         'source': {
+    #             'node': (source_data['key'], source_data['data']),
+    #             'key': source_data['key']
+    #         },
+    #         'target': {
+    #             'node': (target_data['key'], target_data['data']),
+    #             'key': target_data['key']
+    #         },
+    #         'data': {
+    #             RELATION: edge_data[0][RELATION],
+    #             CITATION: citation.data,
+    #             EVIDENCE: edge_data[0][EVIDENCE],
+    #             ANNOTATIONS: {}
+    #         },
+    #         'key': 0
+    #     }
+    #
+    #     edge_hash = hashlib.sha512(json.dumps({
+    #         'graphIdentifier': 0,
+    #         'source': source_node,
+    #         'target': target_node,
+    #         'evidence': evidence,
+    #         'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
+    #         'relation': edge_data[0][RELATION],
+    #         'annotations': annotations,
+    #         'properties': properties
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #
+    #     # Create
+    #     edge = self.manager.get_or_create_edge(**basic_edge)
+    #     self.assertIsInstance(edge, models.Edge)
+    #     self.assertEqual(edge.data, database_data)
+    #
+    #     self.assertIn(edge_hash, self.manager.object_cache['edge'])
+    #
+    #     # Get
+    #     reloaded_edge = self.manager.get_or_create_edge(**basic_edge)
+    #     self.assertEqual(edge.data, reloaded_edge.data)
+    #     self.assertEqual(edge, reloaded_edge)
+    #
+    #     self.assertEqual(1, len(self.manager.object_cache['edge'].keys()))
+    #
+    # @mock_bel_resources
+    # def test_get_or_create_author(self, mock_get):
+    #     author_name = "Jackson M"
+    #
+    #     # Create
+    #     author = self.manager.get_or_create_author(author_name)
+    #     self.assertIsInstance(author, models.Author)
+    #     self.assertEqual(author.name, author_name)
+    #
+    #     self.assertIn(author_name, self.manager.object_cache['author'])
+    #
+    #     # Get
+    #     reloaded_author = self.manager.get_or_create_author(author_name)
+    #     self.assertEqual(author.name, reloaded_author.name)
+    #     self.assertEqual(author, reloaded_author)
+    #
+    #     self.assertEqual(1, len(self.manager.object_cache['author'].keys()))
+    #
+    # @mock_bel_resources
+    # def test_get_or_create_modification(self, mock_get):
+    #     # self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
+    #     node_data = self.simple_graph.node[('Protein', 'HGNC', 'FADD')]
+    #     fusion_missing = {
+    #         FUSION: {
+    #             PARTNER_3P: {
+    #                 NAMESPACE: 'HGNC',
+    #                 NAME: 'AKT1',
+    #             },
+    #             RANGE_3P: {
+    #                 FUSION_MISSING: '?',
+    #             },
+    #             PARTNER_5P: {
+    #                 NAMESPACE: 'HGNC',
+    #                 NAME: 'EGFR'
+    #             },
+    #             RANGE_5P: {
+    #                 FUSION_MISSING: '?',
+    #             }
+    #         }
+    #     }
+    #     fusion_full = {
+    #         FUSION: {
+    #             PARTNER_3P: {
+    #                 NAMESPACE: 'HGNC',
+    #                 NAME: 'AKT1',
+    #             },
+    #             RANGE_3P: {
+    #                 FUSION_REFERENCE: 'A',
+    #                 FUSION_START: 'START_1',
+    #                 FUSION_STOP: 'STOP_1',
+    #             },
+    #             PARTNER_5P: {
+    #                 NAMESPACE: 'HGNC',
+    #                 NAME: 'EGFR'
+    #             },
+    #             RANGE_5P: {
+    #                 FUSION_REFERENCE: 'E',
+    #                 FUSION_START: 'START_2',
+    #                 FUSION_STOP: 'STOP_2',
+    #             }
+    #         }
+    #     }
+    #     hgvs = {
+    #         KIND: HGVS,
+    #         IDENTIFIER: 'hgvs_ident'
+    #     }
+    #     fragment_missing = {
+    #         KIND: FRAGMENT,
+    #         FRAGMENT_MISSING: '?',
+    #     }
+    #     fragment_full = {
+    #         KIND: FRAGMENT,
+    #         FRAGMENT_START: 'START_FRAG',
+    #         FRAGMENT_STOP: 'STOP_FRAG'
+    #     }
+    #     gmod = {
+    #         KIND: GMOD,
+    #         IDENTIFIER: {
+    #             NAMESPACE: 'test_NS',
+    #             NAME: 'test_GMOD'
+    #         }
+    #     }
+    #     pmod_simple = {
+    #         KIND: PMOD,
+    #         IDENTIFIER: {
+    #             NAMESPACE: 'test_NS',
+    #             NAME: 'test_PMOD'
+    #         }
+    #     }
+    #     pmod_full = {
+    #         KIND: PMOD,
+    #         IDENTIFIER: {
+    #             NAMESPACE: 'test_NS',
+    #             NAME: 'test_PMOD_2'
+    #         },
+    #         PMOD_CODE: 'Tst',
+    #         PMOD_POSITION: 12,
+    #     }
+    #
+    #     hgnc_url = self.simple_graph.namespace_url['HGNC']
+    #     AKT1_object = self.manager.namespace_object_cache[hgnc_url]['AKT1']
+    #     EGFR_object = self.manager.namespace_object_cache[hgnc_url]['EGFR']
+    #
+    #     fusion_missing_hash = hashlib.sha512(json.dumps({
+    #         'modType': FUSION,
+    #         'p3Partner': AKT1_object,
+    #         'p5Partner': EGFR_object,
+    #         'p3Missing': '?',
+    #         'p5Missing': '?',
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     fusion_full_hash = hashlib.sha512(json.dumps({
+    #         'modType': FUSION,
+    #         'p3Partner': AKT1_object,
+    #         'p5Partner': EGFR_object,
+    #         'p3Reference': 'A',
+    #         'p3Start': 'START_1',
+    #         'p3Stop': 'STOP_1',
+    #         'p5Reference': 'E',
+    #         'p5Start': 'START_2',
+    #         'p5Stop': 'STOP_2'
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     hgvs_hash = hashlib.sha512(json.dumps({
+    #         'modType': HGVS,
+    #         'variantString': 'hgvs_ident'
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     fragment_missing_hash = hashlib.sha512(json.dumps({
+    #         'modType': FRAGMENT,
+    #         'p3Missing': '?'
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     fragment_full_hash = hashlib.sha512(json.dumps({
+    #         'modType': FRAGMENT,
+    #         'p3Start': 'START_FRAG',
+    #         'p3Stop': 'STOP_FRAG'
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     gmod_hash = hashlib.sha512(json.dumps({
+    #         'modType': GMOD,
+    #         'modNamespace': 'test_NS',
+    #         'modName': 'test_GMOD'
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     pmod_simple_hash = hashlib.sha512(json.dumps({
+    #         'modType': PMOD,
+    #         'modNamespace': 'test_NS',
+    #         'modName': 'test_PMOD',
+    #         'aminoA': None,
+    #         'position': None
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #     pmod_full_hash = hashlib.sha512(json.dumps({
+    #         'modType': PMOD,
+    #         'modNamespace': 'test_NS',
+    #         'modName': 'test_PMOD_2',
+    #         'aminoA': 'Tst',
+    #         'position': 12
+    #     }, sort_keys=True).encode('utf-8')).hexdigest()
+    #
+    #     # Create
+    #     node_data.update(fusion_missing)
+    #     fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertIsInstance(fusion_missing_ls, list)
+    #     self.assertIsInstance(fusion_missing_ls[0], models.Modification)
+    #     self.assertEqual(fusion_missing[FUSION], fusion_missing_ls[0].data['mod_data'])
+    #
+    #     self.assertIn(fusion_missing_hash, self.manager.object_cache['modification'])
+    #
+    #     # Get
+    #     reloaded_fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(fusion_missing_ls, reloaded_fusion_missing_ls)
+    #
+    #     # Create
+    #     node_data.update(fusion_full)
+    #     fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertIsInstance(fusion_full_ls, list)
+    #     self.assertIsInstance(fusion_full_ls[0], models.Modification)
+    #     self.assertEqual(fusion_full[FUSION], fusion_full_ls[0].data['mod_data'])
+    #
+    #     self.assertIn(fusion_full_hash, self.manager.object_cache['modification'])
+    #
+    #     # Get
+    #     reloaded_fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(fusion_full_ls, reloaded_fusion_full_ls)
+    #
+    #     del node_data[FUSION]
+    #
+    #     # Create
+    #     node_data[VARIANTS] = [hgvs]
+    #     hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(hgvs, hgvs_ls[0].data['mod_data'])
+    #
+    #     self.assertIn(hgvs_hash, self.manager.object_cache['modification'])
+    #
+    #     # Get
+    #     reloaded_hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(hgvs_ls, reloaded_hgvs_ls)
+    #
+    #     # Create
+    #     node_data[VARIANTS] = [fragment_missing]
+    #     fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(fragment_missing, fragment_missing_ls[0].data['mod_data'])
+    #
+    #     self.assertIn(fragment_missing_hash, self.manager.object_cache['modification'])
+    #
+    #     # Get
+    #     reloaded_fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(fragment_missing_ls, reloaded_fragment_missing_ls)
+    #
+    #     # Create
+    #     node_data[VARIANTS] = [fragment_full]
+    #     fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(fragment_full, fragment_full_ls[0].data['mod_data'])
+    #
+    #     self.assertIn(fragment_full_hash, self.manager.object_cache['modification'])
+    #
+    #     # Get
+    #     reloaded_fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(fragment_full_ls, reloaded_fragment_full_ls)
+    #
+    #     # Create
+    #     node_data[VARIANTS] = [gmod]
+    #     gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(gmod, gmod_ls[0].data['mod_data'])
+    #
+    #     self.assertIn(gmod_hash, self.manager.object_cache['modification'])
+    #
+    #     # Get
+    #     reloaded_gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(gmod_ls, reloaded_gmod_ls)
+    #
+    #     # Create
+    #     node_data[VARIANTS] = [pmod_simple]
+    #     pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(pmod_simple, pmod_simple_ls[0].data['mod_data'])
+    #
+    #     self.assertIn(pmod_simple_hash, self.manager.object_cache['modification'])
+    #
+    #     # Get
+    #     reloaded_pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(pmod_simple_ls, reloaded_pmod_simple_ls)
+    #
+    #     # Create
+    #     node_data[VARIANTS] = [pmod_full]
+    #     pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(pmod_full, pmod_full_ls[0].data['mod_data'])
+    #
+    #     self.assertIn(pmod_full_hash, self.manager.object_cache['modification'])
+    #
+    #     # Get
+    #     reloaded_pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
+    #     self.assertEqual(pmod_full_ls, reloaded_pmod_full_ls)
+    #
+    #     # Every modification was added only once to the object cache
+    #     self.assertEqual(8, len(self.manager.object_cache['modification'].keys()))
+
+    # ============================================================
 
     @mock_bel_resources
     def test_query_node(self, mock_get):
@@ -675,7 +672,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 FUNCTION: 'Protein',
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
-            }
+            },
         }
 
         node_list = self.manager.get_node(bel='p(HGNC:AKT1)')
