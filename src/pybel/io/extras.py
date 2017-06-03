@@ -22,7 +22,8 @@ log = logging.getLogger(__name__)
 
 
 def to_graphml(graph, file):
-    """Writes this graph to GraphML XML file. The .graphml extension is suggested so Cytoscape can recognize it.
+    """Writes this graph to GraphML XML file using :func:`networkx.write_graphml`. The .graphml file extension is
+    suggested so Cytoscape can recognize it.
 
     :param BELGraph graph: A BEL graph
     :param file file: A file or file-like object
@@ -57,7 +58,7 @@ def to_gsea(graph, file):
     """Writes the genes/gene products to a *.grp file for use with GSEA gene set enrichment analysis
     
     :param BELGraph graph: A BEL graph 
-    :param file file: A write-supporing file or file-like object
+    :param file file: A writeable file or file-like object
     """
     print('# {}'.format(graph.name), file=file)
     nodes = {d[NAME] for _, d in graph.nodes_iter(data=True) if NAMESPACE in d and d[NAMESPACE] == 'HGNC'}
