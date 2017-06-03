@@ -38,15 +38,19 @@ def to_graphml(graph, file):
     nx.write_graphml(g, file)
 
 
-def to_csv(graph, file, delimiter='\t', encoding='utf-8'):
+def to_csv(graph, file, delimiter='\t', data=True, encoding='utf-8'):
     """Writes the graph as an edge list using :func:`networkx.write_edgelist`
 
     :param BELGraph graph: A BEL graph
-    :param file file: A writable file or file-like object
+    :param file or str file: File or filename to write. If a file is provided, it must be opened in ‘wb’ mode.
+                                Filenames ending in .gz or .bz2 will be compressed.
+    :param bool or list data: If False write no edge data. If True write a string representation of the edge data
+                                dictionary. If a list (or other iterable) is provided, write the keys specified in
+                                the list.
     :param str delimiter: The delimiter to use in output
     :param str encoding: The encoding to write. Defaults to ``utf-8``.
     """
-    nx.write_edgelist(flatten_graph_data(graph), file, data=True, delimiter=delimiter, encoding=encoding)
+    nx.write_edgelist(flatten_graph_data(graph), file, data=data, delimiter=delimiter, encoding=encoding)
 
 
 def to_gsea(graph, file):
