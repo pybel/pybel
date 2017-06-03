@@ -8,10 +8,10 @@ This module maintains the strings used throughout the PyBEL codebase to promote 
 """
 
 import json
-import logging
 import os
+from logging import getLogger
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
@@ -33,7 +33,7 @@ GOCC_KEYWORD = 'GOCC'
 PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 
 #: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
-PYBEL_DIR = os.path.expanduser('~/.pybel')
+PYBEL_DIR = os.path.join(os.path.expanduser('~'), '.pybel')
 if not os.path.exists(PYBEL_DIR):
     os.mkdir(PYBEL_DIR)
 
@@ -161,6 +161,8 @@ NAME = 'name'
 IDENTIFIER = 'identifier'
 #: The key specifying an optional label for the node
 LABEL = 'label'
+#: The key specifying an optional description for the node
+DESCRIPTION = 'description'
 
 #: The node data key specifying a fusion dictionary, containing :data:`PARTNER_3P`, :data:`PARTNER_5P`,
 # :data:`RANGE_3P`, and :data:`RANGE_5P`
