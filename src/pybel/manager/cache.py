@@ -1132,36 +1132,27 @@ class CacheManager(BaseCacheManager):
 
         return graph
 
-    def get_network(self, network_id=None, name=None, version=None, as_dict_list=False):
+    def get_networks(self, network_ids=None, name=None, version=None):
         """Builds and runs a query over all networks in the database.
 
-        :param int network_id: Database identifier of the network of interest.
+        :param iter[int] network_ids: Database identifiers of the networks of interest.
         :param str name: Name of the network.
         :param str version: Version of the network
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                             :class:`Network` objects.
-        :type as_dict_list: bool
-        :return: List of :class:`Network` objects or corresponding dicts.
-        :rtype: list or dict
+        :return: A list of network objects passing the queries
+        :rtype: list[Network]
         """
         q = self.session.query(Network)
 
-        if network_id and isinstance(network_id, int):
-            q = q.filter_by(id=network_id)
+        if network_ids:
+            q = q.filter(Network.id in set(network_ids))
 
-        else:
-            if name:
-                q = q.filter(Network.name.like(name))
+        if name:
+            q = q.filter(Network.name.like(name))
 
-            if version:
-                q = q.filter(Network.version == version)
+        if version:
+            q = q.filter(Network.version == version)
 
-        result = q.all()
-
-        if as_dict_list:
-            return [network.data for network in result]
-        else:
-            return result
+        return q.all()
 
     def get_node(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
                  modification_name=None, as_dict_list=False):
