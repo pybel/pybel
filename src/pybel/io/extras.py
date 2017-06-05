@@ -9,13 +9,16 @@ import logging
 
 import networkx as nx
 
-from ..constants import NAMESPACE, NAME
+from ..canonicalize import decanonicalize_edge_node
+from ..constants import NAMESPACE, NAME, RELATION, SUBJECT, OBJECT
 from ..graph import BELGraph
-from ..utils import flatten_dict, flatten_graph_data
+from ..utils import flatten_dict
 
 __all__ = [
     'to_graphml',
-    'to_csv'
+    'to_csv',
+    'to_sif',
+    'to_gsea',
 ]
 
 log = logging.getLogger(__name__)
@@ -28,7 +31,7 @@ def to_graphml(graph, file):
     :param BELGraph graph: A BEL graph
     :param file file: A file or file-like object
     """
-    g = nx.MultiDiGraph()
+    g = nx.MultiDiGraph(**graph.graph)
 
     for node, data in graph.nodes(data=True):
         g.add_node(node, json=json.dumps(data))
@@ -39,19 +42,52 @@ def to_graphml(graph, file):
     nx.write_graphml(g, file)
 
 
-def to_csv(graph, file, delimiter='\t', data=True, encoding='utf-8'):
-    """Writes the graph as an edge list using :func:`networkx.write_edgelist`
+def to_csv(graph, file):
+    """Writes the graph as a tab-separated edge list with the columns:
+
+    1. Source BEL term
+    2. Relation
+    3. Target BEL term
+    4. Edge data dictionary.
+
+    See the Data Models section of the documentation for which data are stored in the edge data dictionary, such
+    as queryable information about transforms on the subject and object and their associated metadata.
 
     :param BELGraph graph: A BEL graph
-    :param file or str file: File or filename to write. If a file is provided, it must be opened in ‘wb’ mode.
-                                Filenames ending in .gz or .bz2 will be compressed.
-    :param bool or list data: If False write no edge data. If True write a string representation of the edge data
-                                dictionary. If a list (or other iterable) is provided, write the keys specified in
-                                the list.
-    :param str delimiter: The delimiter to use in output
-    :param str encoding: The encoding to write. Defaults to ``utf-8``.
+    :param file file: A writable file or file-like.
     """
-    nx.write_edgelist(flatten_graph_data(graph), file, data=data, delimiter=delimiter, encoding=encoding)
+    for u, v, d in graph.edges_iter(data=True):
+        print(
+            decanonicalize_edge_node(graph, u, d, SUBJECT),
+            d[RELATION],
+            decanonicalize_edge_node(graph, v, d, OBJECT),
+            json.dumps(d),
+            sep='\t',
+            file=file
+        )
+
+
+def to_sif(graph, file):
+    """Writes the graph as a tab-separated SIF file with the following columns:
+
+    1. Source BEL term
+    2. Relation
+    3. Target BEL term
+
+    This format is simple and can be used readily with many applications, but is lossy in that it does not include
+    relation metadata.
+
+    :param BELGraph graph: A BEL graph
+    :param file file: A writable file or file-like.
+    """
+    for u, v, d in graph.edges_iter(data=True):
+        print(
+            decanonicalize_edge_node(graph, u, d, SUBJECT),
+            d[RELATION],
+            decanonicalize_edge_node(graph, v, d, OBJECT),
+            sep='\t',
+            file=file
+        )
 
 
 def to_gsea(graph, file):

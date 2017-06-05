@@ -23,7 +23,7 @@ import click
 
 from .canonicalize import to_bel
 from .constants import PYBEL_LOG_DIR, get_cache_connection
-from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle
+from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
 
@@ -50,7 +50,9 @@ def main():
 @click.option('--url', help='Input BEL file URL')
 @click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
 @click.option('--database-name', help='Input graph name from database')
-@click.option('--csv', help='Output path for *.csv')
+@click.option('--csv', type=click.File('w'), help='Output path for *.csv')
+@click.option('--sif', type=click.File('w'), help='Output path for *.sif')
+@click.option('--gsea', type=click.File('w'), help='Output path for *.grp for gene set enrichment analysis')
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
 @click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
 @click.option('--pickle', help='Output path for NetworkX *.gpickle')
@@ -66,7 +68,7 @@ def main():
               help="Enable lenient parsing for unqualified translocations")
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--debug', count=True)
-def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx, bel, neo,
+def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
             neo_context, store_default, store_connection, allow_naked_names, allow_nested,
             allow_unqualified_translocations, no_citation_clearing, debug):
     """Options for multiple outputs/conversions"""
@@ -103,9 +105,17 @@ def convert(path, url, connection, database_name, csv, graphml, json, pickle, cx
         log.info('Outputting csv to %s', csv)
         to_csv(g, csv)
 
+    if sif:
+        log.info('Outputting sif to %s', sif)
+        to_sif(g, sif)
+
     if graphml:
         log.info('Outputting graphml to %s', graphml)
         to_graphml(g, graphml)
+
+    if gsea:
+        log.info('Outputting grp to %s', gsea)
+        to_gsea(g, gsea)
 
     if json:
         log.info('Outputting json to %s', json)
