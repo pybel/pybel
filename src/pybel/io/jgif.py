@@ -123,6 +123,14 @@ def from_cbn_jgif(graph_jgif_dict):
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
     :return: A BEL graph
     :rtype: BELGraph
+
+    Example:
+
+    >>> import requests
+    >>> from pybel import from_cbn_jgif
+    >>> apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
+    >>> graph_jgif_dict = requests.get(apoptosis_url).json()
+    >>> graph = from_cbn_jgif(graph_jgif_dict)
     """
     return from_jgif(map_cbn(graph_jgif_dict))
 
