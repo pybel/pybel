@@ -1,5 +1,5 @@
-PyBEL |develop_build| |develop_coverage| |develop_documentation| |pypi_license|
-===============================================================================
+PyBEL |develop_build| |develop_coverage| |develop_documentation| |zenodo|
+=========================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a Python package for compilation and validation of biological networks
 encoded in the
 `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
@@ -39,8 +39,8 @@ conversion. In this example, a BEL file is exported to GraphML for viewing in Cy
    
 In Cytoscape, open with :code:`Import > Network > From File`.
 
-Installation |pypi_version| |python_versions|
----------------------------------------------
+Installation |pypi_version| |python_versions| |pypi_license|
+------------------------------------------------------------
 PyBEL can be installed easily from `PyPI <https://pypi.python.org/pypi/pybel>`_ with the following code in
 your favorite terminal:
 
@@ -116,3 +116,6 @@ Links
 
 .. |pypi_license| image:: https://img.shields.io/pypi/l/PyBEL.svg
     :alt: Apache 2.0 License
+
+.. |zenodo| image:: https://zenodo.org/badge/68376693.svg
+    :target: https://zenodo.org/badge/latestdoi/68376693
