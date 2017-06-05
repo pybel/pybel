@@ -152,15 +152,13 @@ def flatten_dict(d, parent_key='', sep='_'):
 
 
 def flatten_graph_data(graph):
-    """Returns a new graph with flattened edge data dictionaries
+    """Returns a new graph with flattened edge data dictionaries.
 
-    :param graph: A graph with nested edge data dictionaries
-    :type graph: nx.MultiDiGraph
+    :param nx.MultiDiGraph graph: A graph with nested edge data dictionaries
     :return: A graph with flattened edge data dictionaries
     :rtype: nx.MultiDiGraph
     """
-
-    g = nx.MultiDiGraph()
+    g = nx.MultiDiGraph(**graph.graph)
 
     for node, data in graph.nodes(data=True):
         g.add_node(node, data)
