@@ -31,7 +31,7 @@ def to_graphml(graph, file):
     :param BELGraph graph: A BEL graph
     :param file file: A file or file-like object
     """
-    g = nx.MultiDiGraph(**graph.graph)
+    g = nx.MultiDiGraph()
 
     for node, data in graph.nodes(data=True):
         g.add_node(node, json=json.dumps(data))
@@ -91,10 +91,16 @@ def to_sif(graph, file):
 
 
 def to_gsea(graph, file):
-    """Writes the genes/gene products to a *.grp file for use with GSEA gene set enrichment analysis
-    
+    """Writes the genes/gene products to a GRP file for use with GSEA gene set enrichment analysis
+
     :param BELGraph graph: A BEL graph 
     :param file file: A writeable file or file-like object
+
+    .. seealso::
+
+        - GRP `format specification <http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#GRP:_Gene_set_file_format_.28.2A.grp.29>`_
+        - GSEA `publication <https://doi.org/10.1073/pnas.0506580102>`_
+
     """
     print('# {}'.format(graph.name), file=file)
     nodes = {d[NAME] for _, d in graph.nodes_iter(data=True) if NAMESPACE in d and d[NAMESPACE] == 'HGNC'}
