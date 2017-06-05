@@ -43,7 +43,7 @@ class NakedNameWarning(PyBelWarning):
     """Raised when there is an identifier without a namespace. Enable lenient mode to suppress"""
 
     def __init__(self, line, position, name):
-        PyBelWarning.__init__(self, line, position, name)
+        super(NakedNameWarning, self).__init__(line, position, name)
         self.line = line
         self.position = position
         self.name = name
@@ -56,7 +56,7 @@ class MissingDefaultNameWarning(PyBelWarning):
     """Raised if reference to value not in default namespace"""
 
     def __init__(self, name):
-        PyBelWarning.__init__(self, name)
+        super(MissingDefaultNameWarning, self).__init__(name)
         self.name = name
 
     def __str__(self):
@@ -68,7 +68,7 @@ class IdentifierWarning(PyBelWarning):
     """The base class for warnings related to namespace:name identifiers"""
 
     def __init__(self, name, namespace):
-        PyBelWarning.__init__(self, name, namespace)
+        super(IdentifierWarning, self).__init__(name, namespace)
         self.name = name
         self.namespace = namespace
 
@@ -78,7 +78,7 @@ class UndefinedNamespaceWarning(PyBelWarning):
     """Raised if reference made to undefined namespace"""
 
     def __init__(self, namespace, name):
-        PyBelWarning.__init__(self, namespace, name)
+        super(UndefinedNamespaceWarning, self).__init__(namespace, name)
         self.namespace = namespace
         self.name = name
 
@@ -104,7 +104,7 @@ class UndefinedAnnotationWarning(PyBelWarning):
     """Raised when an undefined annotation is used"""
 
     def __init__(self, annotation):
-        PyBelWarning.__init__(self, annotation)
+        super(UndefinedAnnotationWarning, self).__init__(annotation)
         self.annotation = annotation
 
     def __str__(self):
@@ -115,7 +115,7 @@ class MissingAnnotationKeyWarning(PyBelWarning):
     """Raised when trying to unset an annotation that is not set"""
 
     def __init__(self, annotation):
-        PyBelWarning.__init__(self, annotation)
+        super(MissingAnnotationKeyWarning, self).__init__(annotation)
         self.annotation = annotation
 
     def __str__(self):
@@ -129,7 +129,7 @@ class IllegalAnnotationValueWarning(PyBelWarning):
     """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
 
     def __init__(self, value, annotation):
-        PyBelWarning.__init__(self, value, annotation)
+        super(IllegalAnnotationValueWarning, self).__init__(value, annotation)
         self.value = value
         self.annotation = annotation
 
@@ -142,7 +142,7 @@ class MissingAnnotationRegexWarning(PyBelWarning):
     """Raised if annotation doesn't match regex"""
 
     def __init__(self, value, annotation):
-        PyBelWarning.__init__(self, value, annotation)
+        super(MissingAnnotationRegexWarning, self).__init__(value, annotation)
         self.value = value
         self.annotation = annotation
 
@@ -153,10 +153,10 @@ class MissingAnnotationRegexWarning(PyBelWarning):
 # Provenance Warnings
 
 class VersionFormatWarning(PyBelWarning):
-    """Raised if the version string doesn't adhere to semantic versioning or YYYYMMDD format"""
+    """Raised if the version string doesn't adhere to semantic versioning or ``YYYYMMDD`` format"""
 
     def __init__(self, version_string):
-        PyBelWarning.__init__(self, version_string)
+        super(VersionFormatWarning, self).__init__(version_string)
         self.version_string = version_string
 
     def __str__(self):
@@ -168,7 +168,7 @@ class MalformedMetadataException(PyBelWarning):
     """Raised when an invalid metadata line is encountered"""
 
     def __init__(self, line, line_number):
-        PyBelWarning.__init__(self, line, line_number)
+        super(MalformedMetadataException, self).__init__(line, line_number)
         self.line = line
         self.line_number = line_number
 
@@ -192,7 +192,7 @@ class InvalidMetadataException(PyBelWarning):
     """
 
     def __init__(self, key, value):
-        PyBelWarning.__init__(self, key, value)
+        super(InvalidMetadataException, self).__init__(key, value)
         self.key = key
         self.value = value
 
@@ -204,7 +204,7 @@ class MissingMetadataException(PyBelWarning):
     """Raised when a BEL Script is missing critical metadata."""
 
     def __init__(self, key):
-        PyBelWarning.__init__(self, key)
+        super(MissingMetadataException, self).__init__(key)
         self.key = key
 
     def __str__(self):
@@ -215,7 +215,7 @@ class InvalidCitationLengthException(PyBelWarning):
     """Raised when the format for a citation is wrong."""
 
     def __init__(self, line, position):
-        PyBelWarning.__init__(self, line, position)
+        super(InvalidCitationLengthException, self).__init__(line, position)
         self.line = line
         self.position = position
 
@@ -246,11 +246,9 @@ class MissingCitationException(PyBelWarning):
 
     def __init__(self, line):
         """
-
-        :param line: The line of the BEL document that's a problem
-        :type line: str
+        :param str line: The line of the BEL document that's a problem
         """
-        PyBelWarning.__init__(self, line)
+        super(MissingCitationException, self).__init__(line)
         self.line = line
 
     def __str__(self):
@@ -268,11 +266,9 @@ class MissingSupportWarning(PyBelWarning):
 
     def __init__(self, line):
         """
-
-        :param line: The line of the BEL document that's a problem
-        :type line: str
+        :param str line: The line of the BEL document that's a problem
         """
-        PyBelWarning.__init__(self, line)
+        super(MissingSupportWarning, self).__init__(line)
         self.string = line
 
     def __str__(self):
@@ -294,7 +290,7 @@ class InvalidCitationType(PyBelWarning):
     """
 
     def __init__(self, line, position, citation_type):
-        PyBelWarning.__init__(self, line, position, citation_type)
+        super(InvalidCitationType, self).__init__(line, position, citation_type)
         self.line = line
         self.position = position
         self.citation_type = citation_type
@@ -307,7 +303,7 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
     """Raised when a citation is set whose type is ``PubMed`` but whose database identifier is not a valid integer."""
 
     def __init__(self, line, position, reference):
-        PyBelWarning.__init__(self, line, position, reference)
+        super(InvalidPubMedIdentifierWarning, self).__init__(line, position, reference)
         self.line = line
         self.position = position
         self.reference = reference
@@ -322,7 +318,7 @@ class MalformedTranslocationWarning(PyBelWarning):
     """Raised when there is a translocation statement without location information."""
 
     def __init__(self, line, position, tokens):
-        PyBelWarning.__init__(self, line, position, tokens)
+        super(MalformedTranslocationWarning, self).__init__(line, position, tokens)
         self.line = line
         self.position = position
         self.tokens = tokens
@@ -340,7 +336,7 @@ class PlaceholderAminoAcidWarning(PyBelWarning):
      """
 
     def __init__(self, line, position, code):
-        PyBelWarning.__init__(self, line, position, code)
+        super(PlaceholderAminoAcidWarning, self).__init__(line, position, code)
         self.line = line
         self.position = position
         self.code = code
@@ -355,7 +351,7 @@ class NestedRelationWarning(PyBelWarning):
     """
 
     def __init__(self, message):
-        PyBelWarning.__init__(self, message)
+        super(NestedRelationWarning, self).__init__(message)
         self.message = message
 
     def __str__(self):
@@ -375,7 +371,7 @@ class InvalidFunctionSemantic(PyBelWarning):
     """
 
     def __init__(self, function, namespace, name, allowed_functions):
-        PyBelWarning.__init__(self, function, namespace, name, allowed_functions)
+        super(InvalidFunctionSemantic, self).__init__(function, namespace, name, allowed_functions)
         self.function = function
         self.namespace = namespace
         self.name = name
@@ -392,7 +388,7 @@ class RelabelWarning(PyBelWarning):
     """Raised when a node is relabeled"""
 
     def __init__(self, node, old_label, new_label):
-        PyBelWarning.__init__(self, node, old_label, new_label)
+        super(RelabelWarning, self).__init__(node, old_label, new_label)
         self.node = node
         self.old_label = old_label
         self.new_label = new_label

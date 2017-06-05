@@ -42,8 +42,7 @@ def download(url):
 def parse_bel_resource(lines):
     """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
     
-    :param lines: An iterable over the lines in a BEL config file
-    :type lines: iter
+    :param iter[str] lines: An iterable over the lines in a BEL config file
     :return: A config-style dictionary representing the BEL config file
     :rtype: dict
     """

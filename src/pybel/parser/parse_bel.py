@@ -456,7 +456,7 @@ class BelParser(BaseParser):
         self.language = self.control_parser.language | self.statement
         self.language.setName('BEL')
 
-        BaseParser.__init__(self, self.language, streamline=autostreamline)
+        super(BelParser, self).__init__(self.language, streamline=autostreamline)
 
     @property
     def namespace_dict(self):
