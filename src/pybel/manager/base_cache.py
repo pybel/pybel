@@ -46,13 +46,10 @@ class BaseCacheManager(object):
         else:
             self.connection = get_cache_connection()
 
-        log.debug('building engine with echo: %s', echo)
         self.engine = create_engine(self.connection, echo=echo)
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
-        log.debug('building session')
         self.session = scoped_session(self.sessionmaker)
         self.create_all()
-        log.debug('done preparing cache manager')
 
     def create_all(self, checkfirst=True):
         """Creates the PyBEL cache's database and tables"""
