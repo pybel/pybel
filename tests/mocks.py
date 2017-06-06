@@ -2,13 +2,15 @@
 
 """This module holds the mocks used in testing"""
 
+import os
+
+from networkx import DiGraph
 from onto2nx.ontospy import Ontospy
 
-from pybel.constants import *
 from pybel.manager.utils import urldefrag, OWLParser
 from tests.constants import belns_dir_path, get_uri_name, belanno_dir_path, beleq_dir_path, bel_dir_path, wine_iri, \
     test_owl_wine, pizza_iri, test_owl_pizza, owl_dir_path
-from networkx import DiGraph
+
 try:
     from unittest import mock
 except ImportError:

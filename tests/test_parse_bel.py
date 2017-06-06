@@ -3,9 +3,9 @@
 import logging
 import unittest
 
+from pybel import BELGraph
 from pybel.canonicalize import decanonicalize_node
 from pybel.constants import *
-from pybel.graph import BELGraph
 from pybel.parser import BelParser
 from pybel.parser.parse_bel import canonicalize_modifier, canonicalize_node
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning

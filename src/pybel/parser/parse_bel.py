@@ -50,7 +50,7 @@ class BelParser(BaseParser):
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
                  allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-                 citation_clearing=True, autostreamline=True):
+                 citation_clearing=True, warn_on_singleton=True, autostreamline=True):
         """
         :param BELGraph graph: The BEL Graph to use to store the network
         :param dict[str, set[str]] namespace_dict: A dictionary of {namespace: set of members}.
@@ -68,6 +68,8 @@ class BelParser(BaseParser):
         :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
+        :param bool warn_on_singleton: Should the parser thorugh warnings on singletons? Only disable this if you're
+                                        sure your BEL Script is syntactically and semantically valid.
         :param bool autostreamline: Should the parser be streamlined on instantiation?
         """
 
@@ -86,6 +88,7 @@ class BelParser(BaseParser):
             allow_naked_names=allow_naked_names
         )
 
+        self.warn_on_singleton = warn_on_singleton
         self.has_singleton_terms = False
 
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
@@ -453,7 +456,7 @@ class BelParser(BaseParser):
         self.language = self.control_parser.language | self.statement
         self.language.setName('BEL')
 
-        BaseParser.__init__(self, self.language, streamline=autostreamline)
+        super(BelParser, self).__init__(self.language, streamline=autostreamline)
 
     @property
     def namespace_dict(self):
@@ -531,7 +534,8 @@ class BelParser(BaseParser):
         """This function wraps self.handle_term but is only used for top-level parsing of bel_terms. This is done
         solely to keep track of if a graph has any singletons"""
         self.has_singleton_terms = True
-        log.warning('Added singleton [line %d]: %s. Putative error - needs checking.', self.line_number, line)
+        if self.warn_on_singleton:
+            log.warning('Added singleton [line %d]: %s. Putative error - needs checking.', self.line_number, line)
         return self.handle_term(line, position, tokens)
 
     def _handle_list_helper(self, line, position, tokens, relation):

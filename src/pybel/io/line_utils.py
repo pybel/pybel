@@ -26,7 +26,7 @@ METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOT
 
 
 def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_nested=False,
-                allow_unqualified_translocations=False, citation_clearing=True):
+                allow_unqualified_translocations=False, citation_clearing=True, warn_on_singleton=True):
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
@@ -40,6 +40,8 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
+    :param bool warn_on_singleton: Should the parser thorugh warnings on singletons? Only disable this if you're
+                                        sure your BEL Script is syntactically and semantically valid.
     """
 
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
@@ -60,6 +62,7 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
         allow_nested=allow_nested,
         allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
+        warn_on_singleton=warn_on_singleton,
     )
 
     parse_statements(graph, statements, bel_parser)
@@ -73,7 +76,6 @@ def parse_document(graph, document_metadata, metadata_parser):
     """Parses the lines in the document section of a BEL script.
 
     :param BELGraph graph: A BEL graph
-    :type graph: BELGraph
     :param iter[str] document_metadata: An enumerated iterable over the lines in the document section of a BEL script
     :param MetadataParser metadata_parser: A metadata parser
     """

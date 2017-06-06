@@ -23,14 +23,10 @@ class IdentifierParser(BaseParser):
     def __init__(self, namespace_dict=None, namespace_regex=None, default_namespace=None,
                  allow_naked_names=False):
         """
-        :param namespace_dict: A dictionary of {namespace: set of names}
-        :type namespace_dict: dict
-        :param namespace_regex: A dictionary of {namespace: regular expression string} to compile
-        :type namespace_regex: dict
-        :param default_namespace: A set of strings that can be used without a namespace
-        :type default_namespace: set of str
-        :param allow_naked_names: If true, turn off naked namespace failures
-        :type allow_naked_names: bool
+        :param dict[str, set[str]] namespace_dict: A dictionary of {namespace: set of names}
+        :param dict[str, str] namespace_regex: A dictionary of {namespace: regular expression string} to compile
+        :param set[str] default_namespace: A set of strings that can be used without a namespace
+        :param bool allow_naked_names: If true, turn off naked namespace failures
         """
         #: A dictionary of cached {namespace keyword: set of values}
         self.namespace_dict = namespace_dict
@@ -55,7 +51,7 @@ class IdentifierParser(BaseParser):
         else:
             self.identifier_bare.setParseAction(IdentifierParser.handle_namespace_invalid)
 
-        BaseParser.__init__(self, self.identifier_qualified | self.identifier_bare)
+        super(IdentifierParser, self).__init__(self.identifier_qualified | self.identifier_bare)
 
     def has_enumerated_namespace(self, namespace):
         return namespace in self.namespace_dict

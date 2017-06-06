@@ -4,10 +4,11 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import os
 import unittest
 
-from pybel.constants import *
 from pybel import from_cbn_jgif, to_jgif
+from pybel.constants import *
 from tests.constants import bel_dir_path, TestGraphMixin
 
 test_path = os.path.join(bel_dir_path, 'Cytotoxic T-cell Signaling-2.0-Hs.json')

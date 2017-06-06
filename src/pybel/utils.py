@@ -42,8 +42,7 @@ def download(url):
 def parse_bel_resource(lines):
     """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
     
-    :param lines: An iterable over the lines in a BEL config file
-    :type lines: iter
+    :param iter[str] lines: An iterable over the lines in a BEL config file
     :return: A config-style dictionary representing the BEL config file
     :rtype: dict
     """
@@ -153,15 +152,13 @@ def flatten_dict(d, parent_key='', sep='_'):
 
 
 def flatten_graph_data(graph):
-    """Returns a new graph with flattened edge data dictionaries
+    """Returns a new graph with flattened edge data dictionaries.
 
-    :param graph: A graph with nested edge data dictionaries
-    :type graph: nx.MultiDiGraph
+    :param nx.MultiDiGraph graph: A graph with nested edge data dictionaries
     :return: A graph with flattened edge data dictionaries
     :rtype: nx.MultiDiGraph
     """
-
-    g = nx.MultiDiGraph()
+    g = nx.MultiDiGraph(**graph.graph)
 
     for node, data in graph.nodes(data=True):
         g.add_node(node, data)

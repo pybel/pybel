@@ -112,13 +112,19 @@ class ControlParser(BaseParser):
 
         self.language = self.set_statements | self.unset_statements
 
-        BaseParser.__init__(self, self.language)
+        super(ControlParser, self).__init__(self.language)
 
     def raise_for_undefined_annotation(self, annotation):
+        if not self.annotation_dict and not self.annotation_regex:
+            return
+
         if annotation not in self.annotation_dict and annotation not in self.annotation_regex:
             raise UndefinedAnnotationWarning(annotation)
 
     def raise_for_invalid_annotation_value(self, key, value):
+        if not self.annotation_dict and not self.annotation_regex:
+            return
+
         if key in self.annotation_dict and value not in self.annotation_dict[key]:
             raise IllegalAnnotationValueWarning(value, key)
         elif key in self.annotation_regex_compiled and not self.annotation_regex_compiled[key].match(value):

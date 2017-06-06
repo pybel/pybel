@@ -4,7 +4,7 @@
 
 JSON Graph Interchange Format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The JSON Graph Interchange Format (JGIF) is `specified <http://jsongraphformat.info/>`_ similarly to the Node Link 
+The JSON Graph Interchange Format (JGIF) is `specified <http://jsongraphformat.info/>`_ similarly to the Node-Link
 JSON. Interchange with this format provides compatibilty with other software and repositories, such as the 
 `Causal Biological Network Database <http://causalbionet.com/>`_.
 
@@ -14,9 +14,10 @@ import logging
 from collections import defaultdict
 
 from ..canonicalize import decanonicalize_node, decanonicalize_edge
-from ..constants import *
-from ..graph import BELGraph
+from ..constants import CITATION_TYPE, CITATION_REFERENCE, CITATION_NAME, unqualified_edges
+from ..constants import RELATION, FUNCTION, EVIDENCE, CITATION, ANNOTATIONS, METADATA_NAME
 from ..parser import BelParser
+from ..struct import BELGraph
 
 __all__ = [
     'from_cbn_jgif',
@@ -116,7 +117,21 @@ def map_cbn(d):
 
 
 def from_cbn_jgif(graph_jgif_dict):
-    """Maps CBN JGIF then builds a BEL graph."""
+    """Maps the JGIF used by the Causal Biological Network Database to standard namespace and annotations, then
+    builds a BEL graph using :func:`pybel.from_jgif`.
+
+    :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
+    :return: A BEL graph
+    :rtype: BELGraph
+
+    Example:
+
+    >>> import requests
+    >>> from pybel import from_cbn_jgif
+    >>> apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
+    >>> graph_jgif_dict = requests.get(apoptosis_url).json()
+    >>> graph = from_cbn_jgif(graph_jgif_dict)
+    """
     return from_jgif(map_cbn(graph_jgif_dict))
 
 
@@ -130,10 +145,12 @@ def from_jgif(graph_jgif_dict):
     """
     root = graph_jgif_dict['graph']
 
-    label = root.get('label')
-    metadata = root['metadata']
+    metadata = {
+        METADATA_NAME: root.get('label')
+    }
+    metadata.update(root['metadata'])
 
-    graph = BELGraph()
+    graph = BELGraph(**metadata)
     parser = BelParser(graph)
     parser.bel_term.addParseAction(parser.handle_term)
 

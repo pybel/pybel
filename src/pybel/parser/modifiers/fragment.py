@@ -79,4 +79,4 @@ class FragmentParser(BaseParser):
             (self.fragment_range | self.missing_fragment(FRAGMENT_MISSING)) + Optional(
                 WCW + word(FRAGMENT_DESCRIPTION)))
 
-        BaseParser.__init__(self, self.language)
+        super(FragmentParser, self).__init__(self.language)

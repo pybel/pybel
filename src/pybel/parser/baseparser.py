@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 __all__ = ['BaseParser']
 
 
-class BaseParser:
+class BaseParser(object):
     """This abstract class represents a language backed by a PyParsing statement
 
     Multiple parsers can be easily chained together when they are all inheriting from this base class

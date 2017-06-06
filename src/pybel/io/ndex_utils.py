@@ -4,12 +4,12 @@
 
 NDEx
 ~~~~
-This module provides a wrapper around the input/output functions in :code:`pybel` for converting BEL graphs to CX
-documents and the NDEx API wrapper provided by the :code:`ndex-python` for uploading/downloading CX documents from
-ndexbio.org
+This package provides a wrapper around :func:`pybel.to_cx` and NDEx
+`client <https://github.com/ndexbio/ndex-python>`_ to allow for easy upload and download of BEL documents to the
+`NDEx <http://www.ndexbio.org/>`_ database.
 
-The interface in :code:`pybel2ndex` is incredibly simple. It provides the user with two functions: one for upload, and 
-one for download.
+The programmatic API also provides options for specifying username and password. By default, it checks the environment 
+variables: ``NDEX_USERNAME`` and ``NDEX_PASSWORD``.
 
 """
 
@@ -80,7 +80,7 @@ def cx_to_ndex(cx, username=None, password=None, debug=False):
 def to_ndex(graph, username=None, password=None, debug=False):
     """Uploads a BEL graph to NDEx
 
-    :param pybel.BELGraph graph: A BEL Graph
+    :param BELGraph graph: A BEL graph
     :param str username: NDEx username
     :param str password: NDEx password
     :param bool debug: If true, turn on NDEx client debugging
@@ -106,8 +106,8 @@ def from_ndex(network_id, username=None, password=None, debug=False):
     :param str username: NDEx username
     :param str password: NDEx password
     :param bool debug: If true, turn on NDEx client debugging
-    :return: A BEL Graph
-    :rtype: pybel.BELGraph
+    :return: A BEL graph
+    :rtype: BELGraph
 
     Example Usage:
 

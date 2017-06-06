@@ -56,7 +56,7 @@ class PsubParser(BaseParser):
                                         amino_acid(PSUB_VARIANT))
         self.language.setParseAction(self.handle_psub)
 
-        BaseParser.__init__(self, self.language)
+        super(PsubParser, self).__init__(self.language)
 
     def handle_psub(self, line, position, tokens):
         upgraded = 'p.{}{}{}'.format(tokens[PSUB_REFERENCE], tokens[PSUB_POSITION], tokens[PSUB_VARIANT])
