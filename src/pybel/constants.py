@@ -5,6 +5,11 @@ PyBEL Constants
 ---------------
 
 This module maintains the strings used throughout the PyBEL codebase to promote consistency.
+
+Configuration Loading
+---------------------
+By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. This json is stored in the object
+:data:`pybel.constants.config`.
 """
 
 from json import load, dump
@@ -48,7 +53,7 @@ if not path.exists(PYBEL_DATA_DIR):
     mkdir(PYBEL_DATA_DIR)
 
 DEFAULT_CACHE_NAME = 'pybel_cache.db'
-#: The default cache location is ~/.pybel/data/pybel_cache.db
+#: The default cache location is ``~/.pybel/data/pybel_cache.db``
 DEFAULT_CACHE_LOCATION = path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
@@ -57,14 +62,17 @@ PYBEL_CONFIG_DIR = path.join(path.expanduser('~'), '.config', 'pybel')
 if not path.exists(PYBEL_CONFIG_DIR):
     makedirs(PYBEL_CONFIG_DIR)
 
+#: The global configuration for PyBEL is stored here. By default, it loads from ``~/.config/pybel/config.json``
+config = {}
+
 PYBEL_CONFIG_PATH = path.join(PYBEL_CONFIG_DIR, 'config.json')
 if not path.exists(PYBEL_CONFIG_PATH):
     with open(PYBEL_CONFIG_PATH, 'w') as f:
-        config = {PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION}
+        config.update({PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION})
         dump(config, f)
 else:
     with open(PYBEL_CONFIG_PATH) as f:
-        config = load(f)
+        config.update(load(f))
         config.setdefault(PYBEL_CONNECTION, DEFAULT_CACHE_CONNECTION)
 
 
