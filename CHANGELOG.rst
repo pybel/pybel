@@ -16,6 +16,8 @@ Added
 Changed
 -------
 - Moved :mod:`pybel.graph` to :mod:`pybel.struct.graph`
+- Parse exceptions are renamed
+- Update minimum pickle parsing from 0.5.4 to 0.5.10 to reflect the new parse exceptions's names and arguments
 
 Fixed
 -----
@@ -77,6 +79,7 @@ Fixed
 Changed
 -------
 - If a namespace/annotation was redefined, will now thrown an exception instead of just a logging a warning
+- Update minimum pickle parsing from 0.5.3 to 0.5.4 to reflect changes in parse exceptions
 
 Added
 -----
