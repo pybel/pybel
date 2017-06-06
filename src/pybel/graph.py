@@ -23,7 +23,10 @@ try:
 except ImportError:
     import pickle
 
-__all__ = ['BELGraph']
+__all__ = [
+    'BELGraph',
+    'left_full_merge',
+]
 
 log = logging.getLogger(__name__)
 
@@ -236,3 +239,25 @@ class BELGraph(networkx.MultiDiGraph):
     def set_node_description(self, node, description):
         """Sets the description for a given node"""
         self.node[node][DESCRIPTION] = description
+
+
+def left_full_merge(g, h):
+    """Adds all nodes and edges from H to G, in-place for G
+
+    :param BELGraph g: A BEL Graph
+    :param BELGraph h: A BEL Graph
+    """
+    for node in h.nodes_iter():
+        if node not in g:
+            g.add_node(node, attr_dict=h.node[node])
+
+    for u, v, k, d in h.edges_iter(keys=True, data=True):
+        if k < 0:  # unqualified edge that's not in G yet
+            if v not in g.edge[u] or k not in g.edge[u][v]:
+                g.add_edge(u, v, key=k, attr_dict=d)
+        elif v not in g.edge[u]:
+            g.add_edge(u, v, attr_dict=d)
+        elif any(0 <= gk and d == gd for gk, gd in g.edge[u][v].items()):
+            continue
+        else:
+            g.add_edge(u, v, attr_dict=d)
