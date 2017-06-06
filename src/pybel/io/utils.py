@@ -3,7 +3,7 @@
 """This module contains helper functions for other IO functions."""
 
 from .io_exceptions import ImportVersionWarning
-from ..graph import BELGraph
+from ..struct import BELGraph
 from ..utils import tokenize_version
 
 #: The last PyBEL version where the graph data definition changed

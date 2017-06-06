@@ -1,22 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""
-
-PyBEL's main data structure is a subclass of :class:`networkx.MultiDiGraph`.
-
-The graph contains metadata for the PyBEL version, the BEL script metadata, the namespace definitions, the
-annotation definitions, and the warnings produced in analysis. Like any :mod:`networkx` graph, all attributes of
-a given object can be accessed through the :code:`graph` property, like in: :code:`my_graph.graph['my key']`.
-Convenient property definitions are given for these attributes.
-
-"""
-
 import logging
 
 import networkx
 
-from .constants import *
-from .utils import get_version, subdict_matches
+from .operations import left_full_join, left_outer_join
+from ..constants import *
+from ..utils import get_version, subdict_matches
 
 try:
     import cPickle as pickle
@@ -238,3 +228,11 @@ class BELGraph(networkx.MultiDiGraph):
     def set_node_description(self, node, description):
         """Sets the description for a given node"""
         self.node[node][DESCRIPTION] = description
+
+    def __iadd__(self, other):
+        """Allows g += h to full join h into g"""
+        left_full_join(self, other)
+
+    def __iand__(self, other):
+        """Allows g &= h to outer join h into g"""
+        left_outer_join(self, other)

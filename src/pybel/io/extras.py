@@ -11,7 +11,7 @@ import networkx as nx
 
 from ..canonicalize import decanonicalize_edge_node
 from ..constants import NAMESPACE, NAME, RELATION, SUBJECT, OBJECT
-from ..graph import BELGraph
+from ..struct import BELGraph
 from ..utils import flatten_dict
 
 __all__ = [

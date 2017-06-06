@@ -60,15 +60,20 @@ PyBEL will build a new database and populate it on the next run.
 
 from . import canonicalize
 from . import constants
-from . import graph
 from . import io
+from . import struct
 from .canonicalize import *
-from .graph import *
 from .io import *
 from .manager import database_io
 from .manager.database_io import *
+from .struct import *
 
-__all__ = graph.__all__ + io.__all__ + canonicalize.__all__ + database_io.__all__
+__all__ = (
+    struct.__all__ +
+    io.__all__ +
+    canonicalize.__all__ +
+    database_io.__all__
+)
 
 __version__ = '0.5.10-dev'
 

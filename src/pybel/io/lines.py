@@ -7,7 +7,7 @@ import logging
 import os
 
 from .line_utils import parse_lines
-from ..graph import BELGraph
+from ..struct import BELGraph
 from ..utils import download
 
 __all__ = [

@@ -22,8 +22,8 @@ from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, N
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
-from ..graph import BELGraph
 from ..io.gpickle import to_bytes, from_bytes
+from ..struct import BELGraph
 from ..utils import get_bel_resource, parse_datetime, subdict_matches
 
 try:

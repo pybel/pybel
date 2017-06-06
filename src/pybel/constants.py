@@ -7,9 +7,9 @@ PyBEL Constants
 This module maintains the strings used throughout the PyBEL codebase to promote consistency.
 """
 
-import json
-import os
+from json import load, dump
 from logging import getLogger
+from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
 
@@ -33,46 +33,46 @@ GOCC_KEYWORD = 'GOCC'
 PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 
 #: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
-PYBEL_DIR = os.path.join(os.path.expanduser('~'), '.pybel')
-if not os.path.exists(PYBEL_DIR):
-    os.mkdir(PYBEL_DIR)
+PYBEL_DIR = path.join(path.expanduser('~'), '.pybel')
+if not path.exists(PYBEL_DIR):
+    mkdir(PYBEL_DIR)
 
 #: The default directory where PyBEL logs are stored
-PYBEL_LOG_DIR = os.path.join(PYBEL_DIR, 'logs')
-if not os.path.exists(PYBEL_LOG_DIR):
-    os.mkdir(PYBEL_LOG_DIR)
+PYBEL_LOG_DIR = path.join(PYBEL_DIR, 'logs')
+if not path.exists(PYBEL_LOG_DIR):
+    mkdir(PYBEL_LOG_DIR)
 
 #: The default directory where PyBEL data are stored
-PYBEL_DATA_DIR = os.path.join(PYBEL_DIR, 'data')
-if not os.path.exists(PYBEL_DATA_DIR):
-    os.mkdir(PYBEL_DATA_DIR)
+PYBEL_DATA_DIR = path.join(PYBEL_DIR, 'data')
+if not path.exists(PYBEL_DATA_DIR):
+    mkdir(PYBEL_DATA_DIR)
 
 DEFAULT_CACHE_NAME = 'pybel_cache.db'
 #: The default cache location is ~/.pybel/data/pybel_cache.db
-DEFAULT_CACHE_LOCATION = os.path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
+DEFAULT_CACHE_LOCATION = path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
-PYBEL_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config', 'pybel')
-if not os.path.exists(PYBEL_CONFIG_DIR):
-    os.makedirs(PYBEL_CONFIG_DIR)
+PYBEL_CONFIG_DIR = path.join(path.expanduser('~'), '.config', 'pybel')
+if not path.exists(PYBEL_CONFIG_DIR):
+    makedirs(PYBEL_CONFIG_DIR)
 
-PYBEL_CONFIG_PATH = os.path.join(PYBEL_CONFIG_DIR, 'config.json')
-if not os.path.exists(PYBEL_CONFIG_PATH):
+PYBEL_CONFIG_PATH = path.join(PYBEL_CONFIG_DIR, 'config.json')
+if not path.exists(PYBEL_CONFIG_PATH):
     with open(PYBEL_CONFIG_PATH, 'w') as f:
         config = {PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION}
-        json.dump(config, f)
+        dump(config, f)
 else:
     with open(PYBEL_CONFIG_PATH) as f:
-        config = json.load(f)
+        config = load(f)
         config.setdefault(PYBEL_CONNECTION, DEFAULT_CACHE_CONNECTION)
 
 
 def get_cache_connection():
     """Returns the default cache connection string"""
-    if PYBEL_CONNECTION in os.environ:
-        log.info('connecting to environment-defined database: %s', os.environ[PYBEL_CONNECTION])
-        return os.environ[PYBEL_CONNECTION]
+    if PYBEL_CONNECTION in environ:
+        log.info('connecting to environment-defined database: %s', environ[PYBEL_CONNECTION])
+        return environ[PYBEL_CONNECTION]
 
     log.info('connecting to %s', config[PYBEL_CONNECTION])
     return config[PYBEL_CONNECTION]

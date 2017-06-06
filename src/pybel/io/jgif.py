@@ -16,8 +16,8 @@ from collections import defaultdict
 from ..canonicalize import decanonicalize_node, decanonicalize_edge
 from ..constants import CITATION_TYPE, CITATION_REFERENCE, CITATION_NAME, unqualified_edges
 from ..constants import RELATION, FUNCTION, EVIDENCE, CITATION, ANNOTATIONS, METADATA_NAME
-from ..graph import BELGraph
 from ..parser import BelParser
+from ..struct import BELGraph
 
 __all__ = [
     'from_cbn_jgif',
