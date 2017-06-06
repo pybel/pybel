@@ -492,7 +492,7 @@ class BelParser(BaseParser):
 
     def handle_nested_relation(self, line, position, tokens):
         if not self.allow_nested:
-            raise NestedRelationWarning(line)
+            raise NestedRelationWarning(line, position)
 
         self.handle_relation(line, position, {
             SUBJECT: tokens[SUBJECT],
@@ -522,7 +522,7 @@ class BelParser(BaseParser):
         valid_functions = set(itt.chain.from_iterable(belns_encodings[k] for k in self.namespace_dict[namespace][name]))
 
         if tokens[FUNCTION] not in valid_functions:
-            raise InvalidFunctionSemantic(tokens[FUNCTION], namespace, name, valid_functions)
+            raise InvalidFunctionSemantic(line, position, tokens[FUNCTION], namespace, name, valid_functions)
 
         return tokens
 
@@ -565,10 +565,10 @@ class BelParser(BaseParser):
 
     def handle_relation(self, line, position, tokens):
         if not self.control_parser.citation:
-            raise MissingCitationException(line)
+            raise MissingCitationException(line, position)
 
         if not self.control_parser.evidence:
-            raise MissingSupportWarning(line)
+            raise MissingSupportWarning(line, position)
 
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
@@ -621,7 +621,7 @@ class BelParser(BaseParser):
         label = tokens[OBJECT]
 
         if LABEL in self.graph.node[subject]:
-            raise RelabelWarning(self.graph.node, self.graph.node[subject][LABEL], label)
+            raise RelabelWarning(line, position, self.graph.node, self.graph.node[subject][LABEL], label)
 
         self.graph.node[subject][LABEL] = label
 
