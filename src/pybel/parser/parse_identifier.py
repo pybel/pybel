@@ -74,38 +74,38 @@ class IdentifierParser(BaseParser):
 
         return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
 
-    def raise_for_missing_namespace(self, namespace, name):
+    def raise_for_missing_namespace(self, line, position, namespace, name):
         if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(namespace, name)
+            raise UndefinedNamespaceWarning(line, position, namespace, name)
 
-    def raise_for_missing_name(self, namespace, name):
-        self.raise_for_missing_namespace(namespace, name)
+    def raise_for_missing_name(self, line, position, namespace, name):
+        self.raise_for_missing_namespace(line, position, namespace, name)
 
         if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
-            raise MissingNamespaceNameWarning(name, namespace)
+            raise MissingNamespaceNameWarning(line, position, name, namespace)
 
         if self.has_regex_namespace(namespace) and not self.has_regex_namespace_name(namespace, name):
-            raise MissingNamespaceRegexWarning(name, namespace)
+            raise MissingNamespaceRegexWarning(line, position, name, namespace)
 
-    def raise_for_missing_default(self, name):
+    def raise_for_missing_default(self, line, position, name):
         if not self.default_namespace:
             raise ValueError('Default namespace is not set')
 
         if name not in self.default_namespace:
-            raise MissingDefaultNameWarning(name)
+            raise MissingDefaultNameWarning(line, position, name)
 
     def handle_identifier_qualified(self, line, position, tokens):
         namespace = tokens[NAMESPACE]
         name = tokens[NAME]
 
-        self.raise_for_missing_namespace(namespace, name)
-        self.raise_for_missing_name(namespace, name)
+        self.raise_for_missing_namespace(line, position, namespace, name)
+        self.raise_for_missing_name(line, position, namespace, name)
 
         return tokens
 
     def handle_identifier_default(self, line, position, tokens):
         name = tokens[NAME]
-        self.raise_for_missing_default(name)
+        self.raise_for_missing_default(line, position, name)
         return tokens
 
     @staticmethod

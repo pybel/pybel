@@ -8,143 +8,126 @@ number and original statement are printed for the user to debug.
 from ..exceptions import PyBelWarning
 
 
-# TODO refactor code with this class
 class PyBelParserWarning(PyBelWarning):
     """Base PyBEL parser exception, which holds the line and position where a parsing problem occurred"""
 
-    def __init__(self, line, position):
-        super(PyBelParserWarning, self).__init__(line, position)
+    def __init__(self, line, position, *args):
+        super(PyBelParserWarning, self).__init__(line, position, *args)
         self.line = line
         self.position = position
 
 
-class InconsistientDefinitionError(PyBelParserWarning):
+class InconsistentDefinitionError(PyBelParserWarning):
     """Base PyBEL error for redefinition"""
 
     def __init__(self, line, position, definition):
-        super(InconsistientDefinitionError, self).__init__(line, position)
+        super(InconsistentDefinitionError, self).__init__(line, position, definition)
         self.definition = definition
 
     def __str__(self):
         return 'Tried to redefine {} with: {}'.format(self.definition, self.line)
 
 
-class RedefinedNamespaceError(InconsistientDefinitionError):
+class RedefinedNamespaceError(InconsistentDefinitionError):
     """Raised when a namespace is redefined"""
 
 
-class RedefinedAnnotationError(InconsistientDefinitionError):
+class RedefinedAnnotationError(InconsistentDefinitionError):
     """Raised when an annotation is redefined"""
 
 
 # Naming Warnings
 
-class NakedNameWarning(PyBelWarning):
-    """Raised when there is an identifier without a namespace. Enable lenient mode to suppress"""
+class NameWarning(PyBelParserWarning):
+    """The base class for errors related to nomenclature"""
 
-    def __init__(self, line, position, name):
-        super(NakedNameWarning, self).__init__(line, position, name)
-        self.line = line
-        self.position = position
+    def __init__(self, line, position, name, *args):
+        super(NameWarning, self).__init__(line, position, name, *args)
         self.name = name
+
+
+class NakedNameWarning(NameWarning):
+    """Raised when there is an identifier without a namespace. Enable lenient mode to suppress"""
 
     def __str__(self):
         return '[pos:{}] "{}" should be qualified with a valid namespace'.format(self.position, self.name)
 
 
-class MissingDefaultNameWarning(PyBelWarning):
+class MissingDefaultNameWarning(NameWarning):
     """Raised if reference to value not in default namespace"""
-
-    def __init__(self, name):
-        super(MissingDefaultNameWarning, self).__init__(name)
-        self.name = name
 
     def __str__(self):
         return '"{}" is not in the default namespace'.format(self.name)
 
 
-# Rename to NamespaceIdentifierWarning
-class IdentifierWarning(PyBelWarning):
+class NamespaceIdentifierWarning(NameWarning):
     """The base class for warnings related to namespace:name identifiers"""
 
-    def __init__(self, name, namespace):
-        super(IdentifierWarning, self).__init__(name, namespace)
-        self.name = name
+    def __init__(self, line, position, namespace, name):
+        super(NamespaceIdentifierWarning, self).__init__(line, position, name, namespace)
         self.namespace = namespace
 
 
-# TODO subclass of IdentifierWarning
-class UndefinedNamespaceWarning(PyBelWarning):
+class UndefinedNamespaceWarning(NamespaceIdentifierWarning):
     """Raised if reference made to undefined namespace"""
-
-    def __init__(self, namespace, name):
-        super(UndefinedNamespaceWarning, self).__init__(namespace, name)
-        self.namespace = namespace
-        self.name = name
 
     def __str__(self):
         return '"{}" is not a defined namespace'.format(self.namespace)
 
 
-class MissingNamespaceNameWarning(IdentifierWarning):
+class MissingNamespaceNameWarning(NamespaceIdentifierWarning):
     """Raised if reference to value not in namespace"""
 
     def __str__(self):
         return '"{}" is not in the {} namespace'.format(self.name, self.namespace)
 
 
-class MissingNamespaceRegexWarning(IdentifierWarning):
+class MissingNamespaceRegexWarning(NamespaceIdentifierWarning):
     """Raised if reference not matching regex"""
 
     def __str__(self):
         return '''"{}" doesn't match the regex for {} namespace'''.format(self.name, self.namespace)
 
 
-class UndefinedAnnotationWarning(PyBelWarning):
-    """Raised when an undefined annotation is used"""
+class AnnotationWarning(PyBelParserWarning):
+    """Base exception for annotation warnings"""
 
-    def __init__(self, annotation):
-        super(UndefinedAnnotationWarning, self).__init__(annotation)
+    def __init__(self, line, position, annotation, *args):
+        super(AnnotationWarning, self).__init__(line, position, annotation, *args)
         self.annotation = annotation
+
+
+class UndefinedAnnotationWarning(AnnotationWarning):
+    """Raised when an undefined annotation is used"""
 
     def __str__(self):
         return '''"{}" is not defined'''.format(self.annotation)
 
 
-class MissingAnnotationKeyWarning(PyBelWarning):
+class MissingAnnotationKeyWarning(AnnotationWarning):
     """Raised when trying to unset an annotation that is not set"""
-
-    def __init__(self, annotation):
-        super(MissingAnnotationKeyWarning, self).__init__(annotation)
-        self.annotation = annotation
 
     def __str__(self):
         return '''"{}" is not set, so it can't be unset'''.format(self.annotation)
 
 
-# TODO create base class for AnnotationIdentifierWarning
+class AnnotationIdentifierWarning(AnnotationWarning):
+    """Base exception for annotation:value pairs"""
 
-# TODO subclass from AnnotationIdentifierWarning
-class IllegalAnnotationValueWarning(PyBelWarning):
-    """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
-
-    def __init__(self, value, annotation):
-        super(IllegalAnnotationValueWarning, self).__init__(value, annotation)
+    def __init__(self, line, position, annotation, value):
+        super(AnnotationIdentifierWarning, self).__init__(line, position, annotation, value)
         self.value = value
-        self.annotation = annotation
+
+
+class IllegalAnnotationValueWarning(AnnotationIdentifierWarning):
+    """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
 
     def __str__(self):
         return '"{}" is not defined in the {} annotation'.format(self.value, self.annotation)
 
 
-# TODO subclass from AnnotationIdentifierWarning
-class MissingAnnotationRegexWarning(PyBelWarning):
+class MissingAnnotationRegexWarning(AnnotationIdentifierWarning):
     """Raised if annotation doesn't match regex"""
-
-    def __init__(self, value, annotation):
-        super(MissingAnnotationRegexWarning, self).__init__(value, annotation)
-        self.value = value
-        self.annotation = annotation
 
     def __str__(self):
         return '''"{}" doesn't match the regex for {} annotation'''.format(self.value, self.annotation)
@@ -211,13 +194,8 @@ class MissingMetadataException(PyBelWarning):
         return 'Missing required document metadata: {}'.format(self.key)
 
 
-class InvalidCitationLengthException(PyBelWarning):
-    """Raised when the format for a citation is wrong."""
-
-    def __init__(self, line, position):
-        super(InvalidCitationLengthException, self).__init__(line, position)
-        self.line = line
-        self.position = position
+class InvalidCitationLengthException(PyBelParserWarning):
+    """Base exception raised when the format for a citation is wrong."""
 
 
 class CitationTooShortException(InvalidCitationLengthException):
@@ -234,7 +212,7 @@ class CitationTooLongException(InvalidCitationLengthException):
         return "[pos:{}] Citation contains too many entries: {}".format(self.position, self.line)
 
 
-class MissingCitationException(PyBelWarning):
+class MissingCitationException(PyBelParserWarning):
     """Raised when trying to parse a BEL statement, but no citation is currently set. This might be due to a previous
     error in the formatting of a citation. 
     
@@ -244,38 +222,24 @@ class MissingCitationException(PyBelWarning):
     :func:`pybel.from_url`, or :func:`pybel.from_path`.
     """
 
-    def __init__(self, line):
-        """
-        :param str line: The line of the BEL document that's a problem
-        """
-        super(MissingCitationException, self).__init__(line)
-        self.line = line
-
     def __str__(self):
         return "Missing citation; can't add: {}".format(self.line)
 
 
-class MissingSupportWarning(PyBelWarning):
+class MissingSupportWarning(PyBelParserWarning):
     """Raised when trying to parse a BEL statement, but no evidence is currently set. All BEL statements must be
     qualified with evidence. 
     
     If your data is serialized from a database and provenance information is not readily
     accessible, consider referencing the publication for the database, or a url pointing to the data from either
-    a programatically or human-readable endpoint.
+    a programmatically or human-readable endpoint.
     """
 
-    def __init__(self, line):
-        """
-        :param str line: The line of the BEL document that's a problem
-        """
-        super(MissingSupportWarning, self).__init__(line)
-        self.string = line
-
     def __str__(self):
-        return "Missing evidence; can't add: {}".format(self.string)
+        return "Missing evidence; can't add: {}".format(self.line)
 
 
-class InvalidCitationType(PyBelWarning):
+class InvalidCitationType(PyBelParserWarning):
     """Raise when a citation is set with an incorrect type. Valid citation types include:
 
 - ``Book``
@@ -291,21 +255,17 @@ class InvalidCitationType(PyBelWarning):
 
     def __init__(self, line, position, citation_type):
         super(InvalidCitationType, self).__init__(line, position, citation_type)
-        self.line = line
-        self.position = position
         self.citation_type = citation_type
 
     def __str__(self):
         return '[pos:{}] "{}" is not a valid citation type'.format(self.position, self.citation_type)
 
 
-class InvalidPubMedIdentifierWarning(PyBelWarning):
+class InvalidPubMedIdentifierWarning(PyBelParserWarning):
     """Raised when a citation is set whose type is ``PubMed`` but whose database identifier is not a valid integer."""
 
     def __init__(self, line, position, reference):
         super(InvalidPubMedIdentifierWarning, self).__init__(line, position, reference)
-        self.line = line
-        self.position = position
         self.reference = reference
 
     def __str__(self):
@@ -314,48 +274,40 @@ class InvalidPubMedIdentifierWarning(PyBelWarning):
 
 # BEL Syntax Warnings
 
-class MalformedTranslocationWarning(PyBelWarning):
+class MalformedTranslocationWarning(PyBelParserWarning):
     """Raised when there is a translocation statement without location information."""
 
     def __init__(self, line, position, tokens):
         super(MalformedTranslocationWarning, self).__init__(line, position, tokens)
-        self.line = line
-        self.position = position
         self.tokens = tokens
 
     def __str__(self):
         return '[pos:{}] Unqualified translocation: {} {}'.format(self.position, self.line, self.tokens)
 
 
-class PlaceholderAminoAcidWarning(PyBelWarning):
+class PlaceholderAminoAcidWarning(PyBelParserWarning):
     """Raised when an invalid amino acid code is given.
     
     
-     One example might be the usage of X, which is a colloquial signifier for a truncation in a given position. Text 
-     mining efforts for knowledge extraction make this mistake often. X might also signify a placeholder amino acid.
-     """
+    One example might be the usage of X, which is a colloquial signifier for a truncation in a given position. Text
+    mining efforts for knowledge extraction make this mistake often. X might also signify a placeholder amino acid.
+    """
 
     def __init__(self, line, position, code):
         super(PlaceholderAminoAcidWarning, self).__init__(line, position, code)
-        self.line = line
-        self.position = position
         self.code = code
 
     def __str__(self):
         return '[pos:{}] Placeholder amino acid found: {}'.format(self.position, self.code)
 
 
-class NestedRelationWarning(PyBelWarning):
+class NestedRelationWarning(PyBelParserWarning):
     """Raised when encountering a nested statement. See our the docs for an explanation of why we explicitly
     do not support nested statements.
     """
 
-    def __init__(self, message):
-        super(NestedRelationWarning, self).__init__(message)
-        self.message = message
-
     def __str__(self):
-        return 'Nesting is not supported. Split this statement: {}'.format(self.message)
+        return 'Nesting is not supported. Split this statement: {}'.format(self.line)
 
 
 class LexicographyWarning(PyBelWarning):
@@ -364,31 +316,33 @@ class LexicographyWarning(PyBelWarning):
 
 # Semantic Warnings
 
-class InvalidFunctionSemantic(PyBelWarning):
+class InvalidFunctionSemantic(PyBelParserWarning):
     """Raised when an invalid function is used for a given node. 
     
     For example, an HGNC symbol for a protein-coding gene YFG cannot be referenced as an miRNA with ``m(HGNC:YFG)``
     """
 
-    def __init__(self, function, namespace, name, allowed_functions):
-        super(InvalidFunctionSemantic, self).__init__(function, namespace, name, allowed_functions)
+    def __init__(self, line, position, function, namespace, name, allowed_functions):
+        super(InvalidFunctionSemantic, self).__init__(line, position, function, namespace, name, allowed_functions)
         self.function = function
         self.namespace = namespace
         self.name = name
         self.allowed_functions = allowed_functions
 
     def __str__(self):
-        return "{} {}:{} should be encoded as one of: {}".format(self.function,
-                                                                 self.namespace,
-                                                                 self.name,
-                                                                 ', '.join(self.allowed_functions))
+        return "{} {}:{} should be encoded as one of: {}".format(
+            self.function,
+            self.namespace,
+            self.name,
+            ', '.join(self.allowed_functions)
+        )
 
 
-class RelabelWarning(PyBelWarning):
+class RelabelWarning(PyBelParserWarning):
     """Raised when a node is relabeled"""
 
-    def __init__(self, node, old_label, new_label):
-        super(RelabelWarning, self).__init__(node, old_label, new_label)
+    def __init__(self, line, position, node, old_label, new_label):
+        super(RelabelWarning, self).__init__(line, position, node, old_label, new_label)
         self.node = node
         self.old_label = old_label
         self.new_label = new_label

@@ -187,10 +187,21 @@ def get_version():
 
 
 def tokenize_version(version_string):
+    """Tokenizes a version string to a tuple. Truncates qualifiers like ``-dev``.
+
+    :param str version_string: A version string
+    :return: A tuple representing the version string
+    :rtype: tuple
+
+    >>> tokenize_version('0.1.2-dev')
+    (0, 1, 2)
+
+    """
     return tuple(map(int, version_string.split('.')[0:3]))
 
 
 def citation_dict_to_tuple(citation):
+    """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple"""
     if all(x in citation for x in CITATION_ENTRIES):
         return tuple(citation[x] for x in CITATION_ENTRIES)
 
@@ -204,10 +215,12 @@ def citation_dict_to_tuple(citation):
 
 
 def flatten_citation(citation):
+    """Flattens a citation dict, from the ``d[CITATION]`` entry in an edge data dictionary"""
     return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
 
 
 def sort_edges(d):
+    """Acts as a sort key function for an edge"""
     return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
         itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
 
