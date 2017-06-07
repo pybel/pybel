@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.11 <https://github.com/pybel/pybel/compare/v0.5.9...v0.5.10>`_ - 2017-06-07
+--------------------------------------------------------------------------------
+Changed
+-------
+- Added line numbers to parsing exceptions
+- Update minimum pickle parsing from 0.5.10 to 0.5.11 to reflect changes in parsing exceptions
+
+
 `0.5.10 <https://github.com/pybel/pybel/compare/v0.5.9...v0.5.10>`_ - 2017-06-06
 --------------------------------------------------------------------------------
 Added
@@ -17,7 +25,7 @@ Changed
 -------
 - Moved :mod:`pybel.graph` to :mod:`pybel.struct.graph`
 - Parse exceptions are renamed
-- Update minimum pickle parsing from 0.5.4 to 0.5.10 to reflect the new parse exceptions's names and arguments
+- Update minimum pickle parsing from 0.5.4 to 0.5.10 to reflect changes in parsing execeptions and project structure
 
 Fixed
 -----

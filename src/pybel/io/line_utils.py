@@ -119,7 +119,7 @@ def parse_definitions(graph, definitions, metadata_parser):
             raise e
         except Exception as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise MalformedMetadataException(line, line_number)
+            raise MalformedMetadataException(line_number, line)
 
     graph.graph.update({
         GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
@@ -128,8 +128,10 @@ def parse_definitions(graph, definitions, metadata_parser):
         GRAPH_ANNOTATION_URL: metadata_parser.annotation_url_dict.copy(),
         GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
         GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_regex.copy(),
-        GRAPH_ANNOTATION_LIST: {e: metadata_parser.annotations_dict[e] for e in
-                                metadata_parser.annotation_list_list}
+        GRAPH_ANNOTATION_LIST: {
+            e: metadata_parser.annotations_dict[e]
+            for e in  metadata_parser.annotation_list_list
+        }
     })
 
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)

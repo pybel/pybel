@@ -119,20 +119,20 @@ class ControlParser(BaseParser):
             return
 
         if annotation not in self.annotation_dict and annotation not in self.annotation_regex:
-            raise UndefinedAnnotationWarning(line, position, annotation)
+            raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
 
     def raise_for_invalid_annotation_value(self, line, position, key, value):
         if not self.annotation_dict and not self.annotation_regex:
             return
 
         if key in self.annotation_dict and value not in self.annotation_dict[key]:
-            raise IllegalAnnotationValueWarning(line, position, value, key)
+            raise IllegalAnnotationValueWarning(self.line_number, line, position, value, key)
         elif key in self.annotation_regex_compiled and not self.annotation_regex_compiled[key].match(value):
-            raise MissingAnnotationRegexWarning(line, position, value, key)
+            raise MissingAnnotationRegexWarning(self.line_number, line, position, value, key)
 
     def raise_for_missing_citation(self, line, position):
         if self.citation_clearing and not self.citation:
-            raise MissingCitationException(line, position)
+            raise MissingCitationException(self.line_number, line, position)
 
     def handle_annotation_key(self, line, position, tokens):
         """Called on all annotation keys before parsing to validate that it's either enumerated or as a regex"""
@@ -151,16 +151,16 @@ class ControlParser(BaseParser):
         values = tokens['values']
 
         if len(values) < 2:
-            raise CitationTooShortException(line, position)
+            raise CitationTooShortException(self.line_number, line, position)
 
         if values[0] not in CITATION_TYPES:
-            raise InvalidCitationType(line, position, values[0])
+            raise InvalidCitationType(self.line_number, line, position, values[0])
 
         if values[0] == CITATION_TYPE_PUBMED:
             if 2 == len(values) and not is_int(values[1]):
-                raise InvalidPubMedIdentifierWarning(line, position, values[1])
+                raise InvalidPubMedIdentifierWarning(self.line_number, line, position, values[1])
             elif not is_int(values[2]):
-                raise InvalidPubMedIdentifierWarning(line, position, values[2])
+                raise InvalidPubMedIdentifierWarning(self.line_number, line, position, values[2])
 
         if 4 <= len(values) and not valid_date(values[3]):
             log.debug('Invalid date: %s. Truncating entry.', values[3])
@@ -168,7 +168,7 @@ class ControlParser(BaseParser):
             return tokens
 
         if 6 < len(values):
-            raise CitationTooLongException(line, position)
+            raise CitationTooLongException(self.line_number, line, position)
 
         if 2 == len(values):
             self.citation = dict(zip((CITATION_TYPE, CITATION_REFERENCE), values))
@@ -202,13 +202,13 @@ class ControlParser(BaseParser):
 
     def handle_unset_statement_group(self, line, position, tokens):
         if self.statement_group is None:
-            raise MissingAnnotationKeyWarning(line, position, BEL_KEYWORD_STATEMENT_GROUP)
+            raise MissingAnnotationKeyWarning(self.line_number, line, position, BEL_KEYWORD_STATEMENT_GROUP)
         self.statement_group = None
         return tokens
 
     def handle_unset_citation(self, line, position, tokens):
         if not self.citation:
-            raise MissingAnnotationKeyWarning(line, position, BEL_KEYWORD_CITATION)
+            raise MissingAnnotationKeyWarning(self.line_number, line, position, BEL_KEYWORD_CITATION)
 
         self.clear_citation()
 
@@ -216,13 +216,13 @@ class ControlParser(BaseParser):
 
     def handle_unset_evidence(self, line, position, tokens):
         if self.evidence is None:
-            raise MissingAnnotationKeyWarning(line, position, tokens[EVIDENCE])
+            raise MissingAnnotationKeyWarning(self.line_number, line, position, tokens[EVIDENCE])
         self.evidence = None
         return tokens
 
     def validate_unset_command(self, line, position, key):
         if key not in self.annotations:
-            raise MissingAnnotationKeyWarning(line, position, key)
+            raise MissingAnnotationKeyWarning(self.line_number, line, position, key)
 
     def handle_unset_command(self, line, position, tokens):
         key = tokens['key']

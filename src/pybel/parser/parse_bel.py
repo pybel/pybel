@@ -250,7 +250,7 @@ class BelParser(BaseParser):
         self.translocation_unqualified = nest(Group(self.simple_abundance)(TARGET))
 
         if not allow_unqualified_translocations:
-            self.translocation_unqualified.setParseAction(handle_translocation_illegal)
+            self.translocation_unqualified.setParseAction(self.handle_translocation_illegal)
 
         self.translocation = translocation_tag + MatchFirst([
             self.translocation_unqualified,
@@ -492,7 +492,7 @@ class BelParser(BaseParser):
 
     def handle_nested_relation(self, line, position, tokens):
         if not self.allow_nested:
-            raise NestedRelationWarning(line, position)
+            raise NestedRelationWarning(self.line_number, line, position)
 
         self.handle_relation(line, position, {
             SUBJECT: tokens[SUBJECT],
@@ -522,11 +522,11 @@ class BelParser(BaseParser):
         valid_functions = set(itt.chain.from_iterable(belns_encodings[k] for k in self.namespace_dict[namespace][name]))
 
         if tokens[FUNCTION] not in valid_functions:
-            raise InvalidFunctionSemantic(line, position, tokens[FUNCTION], namespace, name, valid_functions)
+            raise InvalidFunctionSemantic(self.line_number, line, position, tokens[FUNCTION], namespace, name, valid_functions)
 
         return tokens
 
-    def handle_term(self, s, l, tokens):
+    def handle_term(self, line, position, tokens):
         self.ensure_node(tokens)
         return tokens
 
@@ -538,7 +538,7 @@ class BelParser(BaseParser):
             log.warning('Added singleton [line %d]: %s. Putative error - needs checking.', self.line_number, line)
         return self.handle_term(line, position, tokens)
 
-    def _handle_list_helper(self, line, position, tokens, relation):
+    def _handle_list_helper(self, tokens, relation):
         parent = self.ensure_node(tokens[0])
         for child_tokens in tokens[2]:
             child = self.ensure_node(child_tokens)
@@ -546,10 +546,10 @@ class BelParser(BaseParser):
         return tokens
 
     def handle_has_members(self, line, position, tokens):
-        return self._handle_list_helper(line, position, tokens, HAS_MEMBER)
+        return self._handle_list_helper(tokens, HAS_MEMBER)
 
     def handle_has_components(self, line, position, tokens):
-        return self._handle_list_helper(line, position, tokens, HAS_COMPONENT)
+        return self._handle_list_helper(tokens, HAS_COMPONENT)
 
     def _build_attrs(self):
         attrs = {}
@@ -565,10 +565,10 @@ class BelParser(BaseParser):
 
     def handle_relation(self, line, position, tokens):
         if not self.control_parser.citation:
-            raise MissingCitationException(line, position)
+            raise MissingCitationException(self.line_number, line, position)
 
         if not self.control_parser.evidence:
-            raise MissingSupportWarning(line, position)
+            raise MissingSupportWarning(self.line_number, line, position)
 
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
@@ -621,7 +621,7 @@ class BelParser(BaseParser):
         label = tokens[OBJECT]
 
         if LABEL in self.graph.node[subject]:
-            raise RelabelWarning(line, position, self.graph.node, self.graph.node[subject][LABEL], label)
+            raise RelabelWarning(self.line_number, line, position, self.graph.node, self.graph.node[subject][LABEL], label)
 
         self.graph.node[subject][LABEL] = label
 
@@ -715,6 +715,8 @@ class BelParser(BaseParser):
 
         return self._ensure_protein(name, tokens)
 
+    def handle_translocation_illegal(self, line, position, tokens):
+        raise MalformedTranslocationWarning(self.line_number, line, position, tokens)
 
 # HANDLERS
 
@@ -742,8 +744,6 @@ def handle_legacy_tloc(line, position, tokens):
     return tokens
 
 
-def handle_translocation_illegal(line, position, tokens):
-    raise MalformedTranslocationWarning(line, position, tokens)
 
 
 # CANONICALIZATION
