@@ -23,8 +23,8 @@ class IdentifierParser(BaseParser):
     def __init__(self, namespace_dict=None, namespace_regex=None, default_namespace=None,
                  allow_naked_names=False):
         """
-        :param dict[str, set[str]] namespace_dict: A dictionary of {namespace: set of names}
-        :param dict[str, str] namespace_regex: A dictionary of {namespace: regular expression string} to compile
+        :param dict[str,set[str]] namespace_dict: A dictionary of {namespace: set of names}
+        :param dict[str,str] namespace_regex: A dictionary of {namespace: regular expression string} to compile
         :param set[str] default_namespace: A set of strings that can be used without a namespace
         :param bool allow_naked_names: If true, turn off naked namespace failures
         """
@@ -49,50 +49,55 @@ class IdentifierParser(BaseParser):
         elif self.allow_naked_names:
             self.identifier_bare.setParseAction(IdentifierParser.handle_namespace_lenient)
         else:
-            self.identifier_bare.setParseAction(IdentifierParser.handle_namespace_invalid)
+            self.identifier_bare.setParseAction(self.handle_namespace_invalid)
 
         super(IdentifierParser, self).__init__(self.identifier_qualified | self.identifier_bare)
 
     def has_enumerated_namespace(self, namespace):
+        """Checks that the namespace has been defined by an enumeration"""
         return namespace in self.namespace_dict
 
     def has_regex_namespace(self, namespace):
+        """Checks that the namespace has been defined by a regular expression"""
         return namespace in self.namespace_regex
 
     def has_namespace(self, namespace):
+        """Checks that the namespace has either been defined by an enumeration or a regular expression"""
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
 
     def has_enumerated_namespace_name(self, namespace, name):
+        """Checks that the namespace is defined by an enumeration and that the name is a member"""
         return namespace in self.namespace_dict and name in self.namespace_dict[namespace]
 
     def has_regex_namespace_name(self, namespace, name):
+        """Checks that the namespace is defined as a regular expression and the name matches it"""
         return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
 
-    def has_namespace_name(self, namespace, name):
+    def has_namespace_name(self, line, position, namespace, name):
         if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(namespace, name)
+            raise UndefinedNamespaceWarning(self.line_number, line, position, namespace, name)
 
         return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
 
     def raise_for_missing_namespace(self, line, position, namespace, name):
         if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(line, position, namespace, name)
+            raise UndefinedNamespaceWarning(self.line_number, line, position, namespace, name)
 
     def raise_for_missing_name(self, line, position, namespace, name):
         self.raise_for_missing_namespace(line, position, namespace, name)
 
         if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
-            raise MissingNamespaceNameWarning(line, position, name, namespace)
+            raise MissingNamespaceNameWarning(self.line_number, line, position, name, namespace)
 
         if self.has_regex_namespace(namespace) and not self.has_regex_namespace_name(namespace, name):
-            raise MissingNamespaceRegexWarning(line, position, name, namespace)
+            raise MissingNamespaceRegexWarning(self.line_number, line, position, name, namespace)
 
     def raise_for_missing_default(self, line, position, name):
         if not self.default_namespace:
             raise ValueError('Default namespace is not set')
 
         if name not in self.default_namespace:
-            raise MissingDefaultNameWarning(line, position, name)
+            raise MissingDefaultNameWarning(self.line_number, line, position, name)
 
     def handle_identifier_qualified(self, line, position, tokens):
         namespace = tokens[NAMESPACE]
@@ -111,10 +116,9 @@ class IdentifierParser(BaseParser):
     @staticmethod
     def handle_namespace_lenient(line, position, tokens):
         tokens[NAMESPACE] = DIRTY
-        log.debug('Naked namespace: %s', line)
+        log.debug('Naked namespace: [%d] %s', position, line)
         return tokens
 
-    @staticmethod
-    def handle_namespace_invalid(line, position, tokens):
+    def handle_namespace_invalid(self, line, position, tokens):
         name = tokens[NAME]
-        raise NakedNameWarning(line, position, name)
+        raise NakedNameWarning(self.line_number, line, position, name)

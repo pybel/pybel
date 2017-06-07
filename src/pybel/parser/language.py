@@ -121,7 +121,7 @@ aa_placeholder = Keyword('X')
 
 def handle_aa_placeholder(line, position, tokens):
     """Raises an exception when encountering a placeholder amino acid, ``X``"""
-    raise PlaceholderAminoAcidWarning(line, position, tokens[0])
+    raise PlaceholderAminoAcidWarning(-1, line, position, tokens[0])
 
 
 aa_placeholder.setParseAction(handle_aa_placeholder)

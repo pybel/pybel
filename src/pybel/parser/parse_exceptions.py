@@ -11,8 +11,9 @@ from ..exceptions import PyBelWarning
 class PyBelParserWarning(PyBelWarning):
     """Base PyBEL parser exception, which holds the line and position where a parsing problem occurred"""
 
-    def __init__(self, line, position, *args):
-        super(PyBelParserWarning, self).__init__(line, position, *args)
+    def __init__(self, line_number, line, position, *args):
+        super(PyBelParserWarning, self).__init__(line_number, line, position, *args)
+        self.line_number = line_number
         self.line = line
         self.position = position
 
@@ -20,8 +21,8 @@ class PyBelParserWarning(PyBelWarning):
 class InconsistentDefinitionError(PyBelParserWarning):
     """Base PyBEL error for redefinition"""
 
-    def __init__(self, line, position, definition):
-        super(InconsistentDefinitionError, self).__init__(line, position, definition)
+    def __init__(self, line_number, line, position, definition):
+        super(InconsistentDefinitionError, self).__init__(line_number, line, position, definition)
         self.definition = definition
 
     def __str__(self):
@@ -41,8 +42,8 @@ class RedefinedAnnotationError(InconsistentDefinitionError):
 class NameWarning(PyBelParserWarning):
     """The base class for errors related to nomenclature"""
 
-    def __init__(self, line, position, name, *args):
-        super(NameWarning, self).__init__(line, position, name, *args)
+    def __init__(self, line_number, line, position, name, *args):
+        super(NameWarning, self).__init__(line_number, line, position, name, *args)
         self.name = name
 
 
@@ -63,8 +64,8 @@ class MissingDefaultNameWarning(NameWarning):
 class NamespaceIdentifierWarning(NameWarning):
     """The base class for warnings related to namespace:name identifiers"""
 
-    def __init__(self, line, position, namespace, name):
-        super(NamespaceIdentifierWarning, self).__init__(line, position, name, namespace)
+    def __init__(self, line_number, line, position, namespace, name):
+        super(NamespaceIdentifierWarning, self).__init__(line_number, line, position, name, namespace)
         self.namespace = namespace
 
 
@@ -92,8 +93,8 @@ class MissingNamespaceRegexWarning(NamespaceIdentifierWarning):
 class AnnotationWarning(PyBelParserWarning):
     """Base exception for annotation warnings"""
 
-    def __init__(self, line, position, annotation, *args):
-        super(AnnotationWarning, self).__init__(line, position, annotation, *args)
+    def __init__(self, line_number, line, position, annotation, *args):
+        super(AnnotationWarning, self).__init__(line_number, line, position, annotation, *args)
         self.annotation = annotation
 
 
@@ -114,8 +115,8 @@ class MissingAnnotationKeyWarning(AnnotationWarning):
 class AnnotationIdentifierWarning(AnnotationWarning):
     """Base exception for annotation:value pairs"""
 
-    def __init__(self, line, position, annotation, value):
-        super(AnnotationIdentifierWarning, self).__init__(line, position, annotation, value)
+    def __init__(self, line_number, line, position, annotation, value):
+        super(AnnotationIdentifierWarning, self).__init__(line_number, line, position, annotation, value)
         self.value = value
 
 
@@ -135,11 +136,11 @@ class MissingAnnotationRegexWarning(AnnotationIdentifierWarning):
 
 # Provenance Warnings
 
-class VersionFormatWarning(PyBelWarning):
+class VersionFormatWarning(PyBelParserWarning):
     """Raised if the version string doesn't adhere to semantic versioning or ``YYYYMMDD`` format"""
 
-    def __init__(self, version_string):
-        super(VersionFormatWarning, self).__init__(version_string)
+    def __init__(self, line_number, line, position, version_string):
+        super(VersionFormatWarning, self).__init__(line_number, line, position, version_string)
         self.version_string = version_string
 
     def __str__(self):
@@ -150,8 +151,8 @@ class VersionFormatWarning(PyBelWarning):
 class MalformedMetadataException(PyBelWarning):
     """Raised when an invalid metadata line is encountered"""
 
-    def __init__(self, line, line_number):
-        super(MalformedMetadataException, self).__init__(line, line_number)
+    def __init__(self, line_number, line):
+        super(MalformedMetadataException, self).__init__(line_number, line)
         self.line = line
         self.line_number = line_number
 
@@ -159,7 +160,7 @@ class MalformedMetadataException(PyBelWarning):
         return '[line:{}] Invalid metadata - "{}"'.format(self.line_number, self.line)
 
 
-class InvalidMetadataException(PyBelWarning):
+class InvalidMetadataException(PyBelParserWarning):
     """Raised when an incorrect document metadata key is used. Valid document metadata keys are:
 
 - ``Authors``
@@ -174,8 +175,8 @@ class InvalidMetadataException(PyBelWarning):
 .. seealso:: BEL specification on the `properties section <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section>`_
     """
 
-    def __init__(self, key, value):
-        super(InvalidMetadataException, self).__init__(key, value)
+    def __init__(self, line_number, line, position, key, value):
+        super(InvalidMetadataException, self).__init__(line_number, line, position, key, value)
         self.key = key
         self.value = value
 
@@ -253,8 +254,8 @@ class InvalidCitationType(PyBelParserWarning):
 .. seealso:: OpenBEL wiki on `citations <https://wiki.openbel.org/display/BELNA/Citation>`_
     """
 
-    def __init__(self, line, position, citation_type):
-        super(InvalidCitationType, self).__init__(line, position, citation_type)
+    def __init__(self, line_number, line, position, citation_type):
+        super(InvalidCitationType, self).__init__(line_number, line, position, citation_type)
         self.citation_type = citation_type
 
     def __str__(self):
@@ -264,8 +265,8 @@ class InvalidCitationType(PyBelParserWarning):
 class InvalidPubMedIdentifierWarning(PyBelParserWarning):
     """Raised when a citation is set whose type is ``PubMed`` but whose database identifier is not a valid integer."""
 
-    def __init__(self, line, position, reference):
-        super(InvalidPubMedIdentifierWarning, self).__init__(line, position, reference)
+    def __init__(self, line_number, line, position, reference):
+        super(InvalidPubMedIdentifierWarning, self).__init__(line_number, line, position, reference)
         self.reference = reference
 
     def __str__(self):
@@ -277,8 +278,8 @@ class InvalidPubMedIdentifierWarning(PyBelParserWarning):
 class MalformedTranslocationWarning(PyBelParserWarning):
     """Raised when there is a translocation statement without location information."""
 
-    def __init__(self, line, position, tokens):
-        super(MalformedTranslocationWarning, self).__init__(line, position, tokens)
+    def __init__(self, line_number, line, position, tokens):
+        super(MalformedTranslocationWarning, self).__init__(line_number, line, position, tokens)
         self.tokens = tokens
 
     def __str__(self):
@@ -293,8 +294,8 @@ class PlaceholderAminoAcidWarning(PyBelParserWarning):
     mining efforts for knowledge extraction make this mistake often. X might also signify a placeholder amino acid.
     """
 
-    def __init__(self, line, position, code):
-        super(PlaceholderAminoAcidWarning, self).__init__(line, position, code)
+    def __init__(self, line_number, line, position, code):
+        super(PlaceholderAminoAcidWarning, self).__init__(line_number, line, position, code)
         self.code = code
 
     def __str__(self):
@@ -322,8 +323,9 @@ class InvalidFunctionSemantic(PyBelParserWarning):
     For example, an HGNC symbol for a protein-coding gene YFG cannot be referenced as an miRNA with ``m(HGNC:YFG)``
     """
 
-    def __init__(self, line, position, function, namespace, name, allowed_functions):
-        super(InvalidFunctionSemantic, self).__init__(line, position, function, namespace, name, allowed_functions)
+    def __init__(self, line_number, line, position, function, namespace, name, allowed_functions):
+        super(InvalidFunctionSemantic, self).__init__(line_number, line, position, function, namespace, name,
+                                                      allowed_functions)
         self.function = function
         self.namespace = namespace
         self.name = name
@@ -341,8 +343,8 @@ class InvalidFunctionSemantic(PyBelParserWarning):
 class RelabelWarning(PyBelParserWarning):
     """Raised when a node is relabeled"""
 
-    def __init__(self, line, position, node, old_label, new_label):
-        super(RelabelWarning, self).__init__(line, position, node, old_label, new_label)
+    def __init__(self, line_number, line, position, node, old_label, new_label):
+        super(RelabelWarning, self).__init__(line_number, line, position, node, old_label, new_label)
         self.node = node
         self.old_label = old_label
         self.new_label = new_label
