@@ -79,7 +79,7 @@ programatically via :data:`pybel.parser.language.abundance_labels`
 Graph
 -----
 
-.. automodule:: pybel.graph
+.. automodule:: pybel.struct
 
 .. autoclass:: pybel.BELGraph
     :exclude-members: nodes_iter, edges_iter, add_warning

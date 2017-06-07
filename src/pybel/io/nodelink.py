@@ -14,7 +14,7 @@ from networkx.readwrite.json_graph import node_link_data, node_link_graph
 
 from .utils import ensure_version
 from ..constants import GRAPH_ANNOTATION_LIST
-from ..graph import BELGraph
+from ..struct import BELGraph
 from ..utils import list2tuple
 
 __all__ = [

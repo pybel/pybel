@@ -42,8 +42,7 @@ def download(url):
 def parse_bel_resource(lines):
     """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
     
-    :param lines: An iterable over the lines in a BEL config file
-    :type lines: iter
+    :param iter[str] lines: An iterable over the lines in a BEL config file
     :return: A config-style dictionary representing the BEL config file
     :rtype: dict
     """
@@ -153,15 +152,13 @@ def flatten_dict(d, parent_key='', sep='_'):
 
 
 def flatten_graph_data(graph):
-    """Returns a new graph with flattened edge data dictionaries
+    """Returns a new graph with flattened edge data dictionaries.
 
-    :param graph: A graph with nested edge data dictionaries
-    :type graph: nx.MultiDiGraph
+    :param nx.MultiDiGraph graph: A graph with nested edge data dictionaries
     :return: A graph with flattened edge data dictionaries
     :rtype: nx.MultiDiGraph
     """
-
-    g = nx.MultiDiGraph()
+    g = nx.MultiDiGraph(**graph.graph)
 
     for node, data in graph.nodes(data=True):
         g.add_node(node, data)
@@ -190,10 +187,21 @@ def get_version():
 
 
 def tokenize_version(version_string):
+    """Tokenizes a version string to a tuple. Truncates qualifiers like ``-dev``.
+
+    :param str version_string: A version string
+    :return: A tuple representing the version string
+    :rtype: tuple
+
+    >>> tokenize_version('0.1.2-dev')
+    (0, 1, 2)
+
+    """
     return tuple(map(int, version_string.split('.')[0:3]))
 
 
 def citation_dict_to_tuple(citation):
+    """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple"""
     if all(x in citation for x in CITATION_ENTRIES):
         return tuple(citation[x] for x in CITATION_ENTRIES)
 
@@ -207,10 +215,12 @@ def citation_dict_to_tuple(citation):
 
 
 def flatten_citation(citation):
+    """Flattens a citation dict, from the ``d[CITATION]`` entry in an edge data dictionary"""
     return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
 
 
 def sort_edges(d):
+    """Acts as a sort key function for an edge"""
     return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
         itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
 

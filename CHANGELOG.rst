@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.5.11 <https://github.com/pybel/pybel/compare/v0.5.9...v0.5.10>`_ - 2017-06-07
+--------------------------------------------------------------------------------
+Changed
+-------
+- Added line numbers to parsing exceptions
+- Update minimum pickle parsing from 0.5.10 to 0.5.11 to reflect changes in parsing exceptions
+
+
+`0.5.10 <https://github.com/pybel/pybel/compare/v0.5.9...v0.5.10>`_ - 2017-06-06
+--------------------------------------------------------------------------------
+Added
+-----
+- Network outer join (https://github.com/pybel/pybel/issues/205)
+- Network full join with hash (https://github.com/pybel/pybel/issues/204 and https://github.com/pybel/pybel/issues/204)
+- Option to suppress singleton warnings (https://github.com/pybel/pybel/issues/200)
+
+Changed
+-------
+- Moved :mod:`pybel.graph` to :mod:`pybel.struct.graph`
+- Parse exceptions are renamed
+- Update minimum pickle parsing from 0.5.4 to 0.5.10 to reflect changes in parsing execeptions and project structure
+
+Fixed
+-----
+- Rewrote the CSV Exporter (https://github.com/pybel/pybel/issues/201)
+
 `0.5.9 <https://github.com/pybel/pybel/compare/v0.5.8...v0.5.9>`_ - 2017-05-28
 ------------------------------------------------------------------------------
 Added
@@ -61,6 +87,7 @@ Fixed
 Changed
 -------
 - If a namespace/annotation was redefined, will now thrown an exception instead of just a logging a warning
+- Update minimum pickle parsing from 0.5.3 to 0.5.4 to reflect changes in parse exceptions
 
 Added
 -----
@@ -399,35 +426,3 @@ Added
 Added
 ~~~~~
 - Added definition cache manager
-
-Diffs
------
-- [Unreleased]: https://github.com/pybel/pybel/compare/v0.5.4...HEAD
-- [0.5.3]: https://github.com/pybel/pybel/compare/v0.5.3...v0.5.4
-- [0.5.3]: https://github.com/pybel/pybel/compare/v0.5.2...v0.5.3
-- [0.5.2]: https://github.com/pybel/pybel/compare/v0.5.1...v0.5.2
-- [0.5.1]: https://github.com/pybel/pybel/compare/v0.5.0...v0.5.1
-- [0.5.0]: https://github.com/pybel/pybel/compare/v0.4.4...v0.5.0
-- [0.4.4]: https://github.com/pybel/pybel/compare/v0.4.3...v0.4.4
-- [0.4.3]: https://github.com/pybel/pybel/compare/v0.4.2...v0.4.3
-- [0.4.2]: https://github.com/pybel/pybel/compare/v0.4.1...v0.4.2
-- [0.4.1]: https://github.com/pybel/pybel/compare/v0.4.0...v0.4.1
-- [0.4.0]: https://github.com/pybel/pybel/compare/v0.3.11...v0.4.0
-- [0.3.11]: https://github.com/pybel/pybel/compare/v0.3.10...v0.3.11
-- [0.3.10]: https://github.com/pybel/pybel/compare/v0.3.9...v0.3.10
-- [0.3.9]: https://github.com/pybel/pybel/compare/v0.3.8...v0.3.9
-- [0.3.8]: https://github.com/pybel/pybel/compare/v0.3.7...v0.3.8
-- [0.3.7]: https://github.com/pybel/pybel/compare/v0.3.6...v0.3.7
-- [0.3.6]: https://github.com/pybel/pybel/compare/v0.3.5...v0.3.6
-- [0.3.5]: https://github.com/pybel/pybel/compare/v0.3.4...v0.3.5
-- [0.3.4]: https://github.com/pybel/pybel/compare/v0.3.3...v0.3.4
-- [0.3.3]: https://github.com/pybel/pybel/compare/v0.3.2...v0.3.3
-- [0.3.2]: https://github.com/pybel/pybel/compare/v0.3.1...v0.3.2
-- [0.3.1]: https://github.com/pybel/pybel/compare/v0.3.0...v0.3.1
-- [0.3.0]: https://github.com/pybel/pybel/compare/v0.2.6...v0.3.0
-- [0.2.6]: https://github.com/pybel/pybel/compare/v0.2.5...v0.2.6
-- [0.2.5]: https://github.com/pybel/pybel/compare/v0.2.4...v0.2.5
-- [0.2.4]: https://github.com/pybel/pybel/compare/v0.2.3...v0.2.4
-- [0.2.3]: https://github.com/pybel/pybel/compare/v0.2.2...v0.2.3
-- [0.2.2]: https://github.com/pybel/pybel/compare/v0.2.1...v0.2.2
-- [0.2.1]: https://github.com/pybel/pybel/compare/v0.2.0...v0.2.1

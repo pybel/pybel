@@ -112,27 +112,33 @@ class ControlParser(BaseParser):
 
         self.language = self.set_statements | self.unset_statements
 
-        BaseParser.__init__(self, self.language)
+        super(ControlParser, self).__init__(self.language)
 
-    def raise_for_undefined_annotation(self, annotation):
+    def raise_for_undefined_annotation(self, line, position, annotation):
+        if not self.annotation_dict and not self.annotation_regex:
+            return
+
         if annotation not in self.annotation_dict and annotation not in self.annotation_regex:
-            raise UndefinedAnnotationWarning(annotation)
+            raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
 
-    def raise_for_invalid_annotation_value(self, key, value):
+    def raise_for_invalid_annotation_value(self, line, position, key, value):
+        if not self.annotation_dict and not self.annotation_regex:
+            return
+
         if key in self.annotation_dict and value not in self.annotation_dict[key]:
-            raise IllegalAnnotationValueWarning(value, key)
+            raise IllegalAnnotationValueWarning(self.line_number, line, position, value, key)
         elif key in self.annotation_regex_compiled and not self.annotation_regex_compiled[key].match(value):
-            raise MissingAnnotationRegexWarning(value, key)
+            raise MissingAnnotationRegexWarning(self.line_number, line, position, value, key)
 
-    def raise_for_missing_citation(self, line):
+    def raise_for_missing_citation(self, line, position):
         if self.citation_clearing and not self.citation:
-            raise MissingCitationException(line)
+            raise MissingCitationException(self.line_number, line, position)
 
     def handle_annotation_key(self, line, position, tokens):
         """Called on all annotation keys before parsing to validate that it's either enumerated or as a regex"""
         key = tokens['key']
-        self.raise_for_missing_citation(line)
-        self.raise_for_undefined_annotation(key)
+        self.raise_for_missing_citation(line, position)
+        self.raise_for_undefined_annotation(line, position, key)
         return tokens
 
     def handle_set_statement_group(self, line, position, tokens):
@@ -145,16 +151,16 @@ class ControlParser(BaseParser):
         values = tokens['values']
 
         if len(values) < 2:
-            raise CitationTooShortException(line, position)
+            raise CitationTooShortException(self.line_number, line, position)
 
         if values[0] not in CITATION_TYPES:
-            raise InvalidCitationType(line, position, values[0])
+            raise InvalidCitationType(self.line_number, line, position, values[0])
 
         if values[0] == CITATION_TYPE_PUBMED:
             if 2 == len(values) and not is_int(values[1]):
-                raise InvalidPubMedIdentifierWarning(line, position, values[1])
+                raise InvalidPubMedIdentifierWarning(self.line_number, line, position, values[1])
             elif not is_int(values[2]):
-                raise InvalidPubMedIdentifierWarning(line, position, values[2])
+                raise InvalidPubMedIdentifierWarning(self.line_number, line, position, values[2])
 
         if 4 <= len(values) and not valid_date(values[3]):
             log.debug('Invalid date: %s. Truncating entry.', values[3])
@@ -162,7 +168,7 @@ class ControlParser(BaseParser):
             return tokens
 
         if 6 < len(values):
-            raise CitationTooLongException(line, position)
+            raise CitationTooLongException(self.line_number, line, position)
 
         if 2 == len(values):
             self.citation = dict(zip((CITATION_TYPE, CITATION_REFERENCE), values))
@@ -179,7 +185,7 @@ class ControlParser(BaseParser):
         key = tokens['key']
         value = tokens['value']
 
-        self.raise_for_invalid_annotation_value(key, value)
+        self.raise_for_invalid_annotation_value(line, position, key, value)
 
         self.annotations[key] = value
         return tokens
@@ -189,20 +195,20 @@ class ControlParser(BaseParser):
         values = tokens['values']
 
         for value in values:
-            self.raise_for_invalid_annotation_value(key, value)
+            self.raise_for_invalid_annotation_value(line, position, key, value)
 
         self.annotations[key] = set(values)
         return tokens
 
     def handle_unset_statement_group(self, line, position, tokens):
         if self.statement_group is None:
-            raise MissingAnnotationKeyWarning(BEL_KEYWORD_STATEMENT_GROUP)
+            raise MissingAnnotationKeyWarning(self.line_number, line, position, BEL_KEYWORD_STATEMENT_GROUP)
         self.statement_group = None
         return tokens
 
     def handle_unset_citation(self, line, position, tokens):
         if not self.citation:
-            raise MissingAnnotationKeyWarning(BEL_KEYWORD_CITATION)
+            raise MissingAnnotationKeyWarning(self.line_number, line, position, BEL_KEYWORD_CITATION)
 
         self.clear_citation()
 
@@ -210,17 +216,17 @@ class ControlParser(BaseParser):
 
     def handle_unset_evidence(self, line, position, tokens):
         if self.evidence is None:
-            raise MissingAnnotationKeyWarning(tokens[EVIDENCE])
+            raise MissingAnnotationKeyWarning(self.line_number, line, position, tokens[EVIDENCE])
         self.evidence = None
         return tokens
 
-    def validate_unset_command(self, key):
+    def validate_unset_command(self, line, position, key):
         if key not in self.annotations:
-            raise MissingAnnotationKeyWarning(key)
+            raise MissingAnnotationKeyWarning(self.line_number, line, position, key)
 
     def handle_unset_command(self, line, position, tokens):
         key = tokens['key']
-        self.validate_unset_command(key)
+        self.validate_unset_command(line, position, key)
         del self.annotations[key]
         return tokens
 
@@ -229,7 +235,7 @@ class ControlParser(BaseParser):
             if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
                 self.evidence = None
             else:
-                self.validate_unset_command(key)
+                self.validate_unset_command(line, position, key)
                 del self.annotations[key]
 
         return tokens

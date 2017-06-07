@@ -50,6 +50,8 @@ Export
 ------
 .. autofunction:: pybel.to_graphml
 .. autofunction:: pybel.to_csv
+.. autofunction:: pybel.to_sif
+.. autofunction:: pybel.to_gsea
 
 
 Database

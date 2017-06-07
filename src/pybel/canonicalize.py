@@ -307,8 +307,7 @@ def calculate_canonical_name(graph, node):
     Otherwise, it uses the BEL string.
 
     :param BELGraph graph: A BEL Graph
-    :param node: A node
-    :type node: tuple
+    :param tuple node: A BEL node
     :return: Canonical node name
     :rtype: str
     """

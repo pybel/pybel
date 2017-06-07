@@ -1,35 +1,27 @@
 # -*- coding: utf-8 -*-
 
-"""
-
-PyBEL's main data structure is a subclass of :class:`networkx.MultiDiGraph`.
-
-The graph contains metadata for the PyBEL version, the BEL script metadata, the namespace definitions, the
-annotation definitions, and the warnings produced in analysis. Like any :mod:`networkx` graph, all attributes of
-a given object can be accessed through the :code:`graph` property, like in: :code:`my_graph.graph['my key']`.
-Convenient property definitions are given for these attributes.
-
-"""
-
 import logging
 
-import networkx as nx
+import networkx
 
-from .constants import *
-from .utils import get_version, subdict_matches
+from .operations import left_full_join, left_outer_join
+from ..constants import *
+from ..utils import get_version, subdict_matches
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-__all__ = ['BELGraph']
+__all__ = [
+    'BELGraph',
+]
 
 log = logging.getLogger(__name__)
 
 
-class BELGraph(nx.MultiDiGraph):
-    """This class represents a biological knowledge assembly from a BEL script as a network by extending 
+class BELGraph(networkx.MultiDiGraph):
+    """This class represents biological knowledge assembled in BEL as a network by extending the
     :class:`networkx.MultiDiGraph`.
     """
 
@@ -39,7 +31,6 @@ class BELGraph(nx.MultiDiGraph):
         
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
-        :type kwargs: dict
         """
         super(BELGraph, self).__init__(data=data, **kwargs)
 
@@ -89,17 +80,17 @@ class BELGraph(nx.MultiDiGraph):
 
     @name.setter
     def name(self, *attrs, **kwargs):
-        """The graph's name, from the `SET DOCUMENT Name = "..."` entry in the source BEL script"""
+        """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script"""
         self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
 
     @property
     def version(self):
-        """The graph's version, from the `SET DOCUMENT Version = "..."` entry in the source BEL script"""
+        """The graph's version, from the ``SET DOCUMENT Version = "..."`` entry in the source BEL script"""
         return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
 
     @property
     def description(self):
-        """The graph's description, from `SET DOCUMENT Description = "..."` entry in the source BEL Script"""
+        """The graph's description, from the ``SET DOCUMENT Description = "..."`` entry in the source BEL Script"""
         return self.graph[GRAPH_METADATA].get(METADATA_DESCRIPTION)
 
     @property
@@ -160,12 +151,9 @@ class BELGraph(nx.MultiDiGraph):
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
 
-        :param u: The source BEL node
-        :type u: tuple
-        :param v: The target BEL node
-        :type v: tuple
-        :param relation: A relationship label from :mod:`pybel.constants`
-        :type relation: str
+        :param tuple u: The source BEL node
+        :param tuple v: The target BEL node
+        :param str relation: A relationship label from :mod:`pybel.constants`
         """
         key = unqualified_edge_code[relation]
         if not self.has_edge(u, v, key):
@@ -200,14 +188,51 @@ class BELGraph(nx.MultiDiGraph):
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
 
-        :param function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.RNA`, 
+        :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.RNA`,
                         :data:`pybel.constants.PROTEIN`, etc)
-        :type function: str
-        :param namespace: The namespace
-        :type namespace: str
-        :param name: The name of the node
-        :type name: str
+        :param str namespace: The namespace
+        :param str name: The name of the node
         """
         node = function, namespace, name
         if node not in self:
             self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
+
+    def get_edge_citation(self, u, v, key):
+        """Gets the citation for a given edge"""
+        return self.edge[u][v][key][CITATION]
+
+    def get_edge_evidence(self, u, v, key):
+        """Gets the evidence for a given edge"""
+        return self.edge[u][v][key][EVIDENCE]
+
+    def get_edge_annotations(self, u, v, key):
+        """Gets the annotations for a given edge"""
+        return self.edge[u][v][key][ANNOTATIONS]
+
+    def get_node_name(self, node):
+        """Gets the node's name, or return None if no name"""
+        return self.node[node].get(NAME)
+
+    def get_node_label(self, node):
+        """Gets the label for a given node"""
+        return self.node[node].get(LABEL)
+
+    def set_node_label(self, node, label):
+        """Sets the label for a given node"""
+        self.node[node][LABEL] = label
+
+    def get_node_description(self, node):
+        """Gets the description for a given node"""
+        return self.node[node].get(DESCRIPTION)
+
+    def set_node_description(self, node, description):
+        """Sets the description for a given node"""
+        self.node[node][DESCRIPTION] = description
+
+    def __iadd__(self, other):
+        """Allows g += h to full join h into g"""
+        left_full_join(self, other)
+
+    def __iand__(self, other):
+        """Allows g &= h to outer join h into g"""
+        left_outer_join(self, other)

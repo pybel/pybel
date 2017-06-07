@@ -15,7 +15,7 @@ from collections import defaultdict
 
 from ..canonicalize import decanonicalize_node
 from ..constants import *
-from ..graph import BELGraph
+from ..struct import BELGraph
 from ..utils import flatten_dict, expand_dict, hash_tuple
 
 __all__ = [

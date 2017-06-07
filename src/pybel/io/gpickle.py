@@ -11,7 +11,7 @@ This module contains IO functions for interconversion between BEL graphs and pyt
 from networkx import read_gpickle, write_gpickle
 
 from .utils import raise_for_not_bel, raise_for_old_graph
-from ..graph import BELGraph
+from ..struct import BELGraph
 
 try:
     import cPickle as pickle

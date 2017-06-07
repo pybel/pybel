@@ -3,11 +3,11 @@
 """This module contains helper functions for other IO functions."""
 
 from .io_exceptions import ImportVersionWarning
-from ..graph import BELGraph
+from ..struct import BELGraph
 from ..utils import tokenize_version
 
 #: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = (0, 5, 4)
+PYBEL_MINIMUM_IMPORT_VERSION = (0, 5, 11)
 
 
 def raise_for_old_graph(graph):

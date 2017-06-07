@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import logging
+import os
 import unittest
 from collections import Counter
 
-import pybel
 import sqlalchemy.exc
+
+import pybel
 from pybel import from_path
 from pybel.constants import *
 from pybel.manager import models
@@ -13,11 +16,6 @@ from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin,
 from tests.constants import test_bel_simple, expected_test_simple_metadata
 from tests.constants import test_bel_thorough, expected_test_thorough_metadata
 from tests.mocks import mock_bel_resources
-
-#try:
-#    import cPickle as pickle
-#except ImportError:
-#    import pickle
 
 log = logging.getLogger(__name__)
 
