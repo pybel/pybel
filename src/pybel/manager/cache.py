@@ -1142,7 +1142,7 @@ class CacheManager(BaseCacheManager):
         """
 
         # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
-        network = self.session.query(Network).filter(Network.id == network_id).first()
+        network = self.session.query(Network).filter_by(id=network_id).first()
         self.session.delete(network)
         self.session.commit()
         self.clean_object_cache()
@@ -1299,8 +1299,8 @@ class CacheManager(BaseCacheManager):
         :type modification_name: str
         :param modification_type:
         :type modification_type: str
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of 
-                            :class:`models.Node` objects.
+        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
+        :class:`models.Node` objects.
         :type as_dict_list: bool
         :return: A list of the fitting nodes as :class:`models.Node` objects or dicts.
         :rtype: list
@@ -1333,7 +1333,14 @@ class CacheManager(BaseCacheManager):
         result = q.all()
 
         if as_dict_list:
-            return [node.data for node in result]
+            dict_list = []
+
+            for node in result:
+                node_dict = node.data
+                node_dict['bel'] = node.bel
+                dict_list.append(node_dict)
+
+            return dict_list
         else:
             return result
 

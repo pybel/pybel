@@ -673,6 +673,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
+            'bel': 'p(HGNC:AKT1)'
         }
 
         node_list = self.manager.get_node(bel='p(HGNC:AKT1)')

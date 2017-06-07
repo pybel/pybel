@@ -482,7 +482,7 @@ class Node(Base):
                     node_data[VARIANTS].append(mod['mod_data'])
                     node_key.append(tuple(mod['mod_key']))
 
-        return {'key': tuple(node_key), 'data': node_data, 'db_id': self.id, 'bel': self.bel}
+        return {'key': tuple(node_key), 'data': node_data}
 
     def to_json(self):
         """Enables json serialization for the class this method is defined in."""
@@ -719,8 +719,8 @@ edge_annotation = Table(
 
 edge_property = Table(
     EDGE_PROPERTY_TABLE_NAME, Base.metadata,
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME))),
-    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)))
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
+    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -746,8 +746,9 @@ class Edge(Base):
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship("Evidence")
 
-    annotations = relationship('AnnotationEntry', secondary=edge_annotation)  # , backref='edges'
-    properties = relationship('Property', secondary=edge_property)  #, cascade='all, delete-orphan')
+    annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic")  # , backref='edges'
+    properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
+    networks = relationship('Network', secondary=network_edge, lazy="dynamic")
 
     blob = Column(LargeBinary)
 
@@ -819,20 +820,22 @@ class Edge(Base):
         return min_dict
 
 
-trigger_drop_orphan_properties = DDL('''
-    CREATE TRIGGER drop_orphan_properties AFTER DELETE ON {edge_tablename}
+# Trigger deletes edge-property relationships of deleted edges
+trigger_drop_orphan_edge_property_relations = DDL('''
+    CREATE TRIGGER drop_orphan_edge_property_relations AFTER DELETE ON {edge_tablename}
     FOR EACH ROW
     BEGIN
-    DELETE FROM {property_tablename}
-    WHERE id NOT IN (
-        SELECT DISTINCT property_id
+    DELETE FROM {edge_property_tablename}
+    WHERE edge_id NOT IN (
+        SELECT DISTINCT edge_id
         FROM {association_tablename}
     );
     END;'''.format(edge_tablename=EDGE_TABLE_NAME,
-                   property_tablename=PROPERTY_TABLE_NAME,
-                   association_tablename=EDGE_PROPERTY_TABLE_NAME)
+                   edge_property_tablename=EDGE_PROPERTY_TABLE_NAME,
+                   association_tablename=NETWORK_EDGE_TABLE_NAME)
                                      )
-event.listen(Edge.__table__, 'after_create', trigger_drop_orphan_properties)
+event.listen(Edge.__table__, 'after_create', trigger_drop_orphan_edge_property_relations)
+
 
 
 class Property(Base):
@@ -889,3 +892,19 @@ class Property(Base):
     def to_json(self):
         """Enables json serialization for the class this method is defined in."""
         return self.data['data']
+
+
+# Trigger deletes properties without relationships to edges
+trigger_drop_orphan_properties = DDL('''
+    CREATE TRIGGER drop_orphan_properties AFTER DELETE ON {association_tablename}
+    FOR EACH ROW
+    BEGIN
+    DELETE FROM {property_tablename}
+    WHERE id NOT IN (
+        SELECT DISTINCT property_id
+        FROM {association_tablename}
+    );
+    END;'''.format(property_tablename=PROPERTY_TABLE_NAME,
+                   association_tablename=EDGE_PROPERTY_TABLE_NAME)
+                                     )
+event.listen(edge_property, 'after_create', trigger_drop_orphan_properties)
