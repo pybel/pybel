@@ -667,8 +667,8 @@ class CacheManager(BaseCacheManager):
             if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
                 self.ensure_namespace(GOCC_LATEST)
 
-            network.namespaces.extend(namespaces)
-            network.annotations.extend(annotations)
+            # network.namespaces.extend(namespaces)
+            # network.annotations.extend(annotations)
 
             self.store_graph_parts(network, graph)
 
@@ -1281,7 +1281,7 @@ class CacheManager(BaseCacheManager):
     def get_node(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
                  modification_name=None, as_dict_list=False):
         """Builds and runs a query over all nodes in the PyBEL cache.
-        
+
         :param node_id: The node ID to get
         :type node_id: int
         :param bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
@@ -1292,12 +1292,11 @@ class CacheManager(BaseCacheManager):
         :type namespace: str
         :param name: Name of the biological entity. e.g. APP
         :type name: str
-        :param modification_name:
+        :param modification_name: Name of modification
         :type modification_name: str
-        :param modification_type:
+        :param modification_type: Type of modification
         :type modification_type: str
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-        :class:`models.Node` objects.
+        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`models.Node` objects.
         :type as_dict_list: bool
         :return: A list of the fitting nodes as :class:`models.Node` objects or dicts.
         :rtype: list
@@ -1354,17 +1353,17 @@ class CacheManager(BaseCacheManager):
         :param relation: The relation that should be present between source and target node.
         :type relation: str
         :param citation: The citation that backs the edge up. It is possible to use the reference_id
-                         or a models.Citation object.
+        or a models.Citation object.
         :type citation: str or models.Citation
         :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text
-                         or a models.Evidence object.
+        or a models.Evidence object.
         :type evidence: str or models.Evidence
-        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter 
-                            as string.
+        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter
+        as string.
         :type annotation: dict or str
         :param property:
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of 
-                            :class:`models.Edge` objects.
+        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
+        :class:`models.Edge` objects.
         :type as_dict_list: bool
         :return:
         """
@@ -1464,8 +1463,8 @@ class CacheManager(BaseCacheManager):
         :param evidence: Weather or not supporting text should be included in the return.
         :type evidence: bool
         :param evidence_text:
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of 
-                            :class:`models.Citation` objects.
+        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
+        :class:`models.Citation` objects.
         :type as_dict_list: bool
         :return: List of :class:`models.Citation` objects or corresponding dicts.
         :rtype: list
@@ -1525,7 +1524,7 @@ class CacheManager(BaseCacheManager):
         :param modifier: The modifier of the property.
         :type modifier: str
         :param as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
-                             :class:`models.Property` objects.
+        :class:`models.Property` objects.
         :type as_dict_list: bool
         :return:
         """
