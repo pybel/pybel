@@ -6,10 +6,11 @@ Definition Cache Manager
 Under the hood, PyBEL caches namespace and annotation files for quick recall on later use. The user doesn't need to
 enable this option, but can specify a database location if they choose.
 """
-
 import datetime
 import hashlib
 import itertools as itt
+import json
+import logging
 import time
 from collections import defaultdict
 from copy import deepcopy
@@ -19,7 +20,7 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
-from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, NamespaceEntry, AnnotationEntry
+from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, NamespaceEntry, AnnotationEntry, Node
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -160,6 +161,11 @@ class CacheManager(BaseCacheManager):
     def drop_equivalences(self):
         """Drops all equivalence classes"""
         self.session.query(NamespaceEntryEquivalence).delete()
+        self.session.commit()
+
+    def drop_nodes(self):
+        """Drops all nodes"""
+        self.session.query(Node).delete()
         self.session.commit()
 
     def clean_object_cache(self):
