@@ -87,10 +87,10 @@ class IdentifierParser(BaseParser):
         self.raise_for_missing_namespace(line, position, namespace, name)
 
         if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
-            raise MissingNamespaceNameWarning(self.line_number, line, position, name, namespace)
+            raise MissingNamespaceNameWarning(self.line_number, line, position, namespace, name)
 
         if self.has_regex_namespace(namespace) and not self.has_regex_namespace_name(namespace, name):
-            raise MissingNamespaceRegexWarning(self.line_number, line, position, name, namespace)
+            raise MissingNamespaceRegexWarning(self.line_number, line, position, namespace, name)
 
     def raise_for_missing_default(self, line, position, name):
         if not self.default_namespace:
