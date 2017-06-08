@@ -29,13 +29,14 @@ def left_full_join(g, h, use_hash=True):
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     """
     if use_hash:
-        return left_full_hash_join(g, h)
+        return _left_full_hash_join(g, h)
     else:
-        return left_full_exhaustive_join(g, h)
+        return _left_full_exhaustive_join(g, h)
 
 
-def left_full_exhaustive_join(g, h):
-    """Adds all nodes and edges from H to G, in-place for G
+def _left_full_exhaustive_join(g, h):
+    """Adds all nodes and edges from H to G, in-place for G using an exhaustive algorithm to ensure correctness,
+    but runs in O(|E(G)| * |E(H)|)
 
     :param BELGraph g: A BEL Graph
     :param BELGraph h: A BEL Graph
@@ -54,8 +55,9 @@ def left_full_exhaustive_join(g, h):
             g.add_edge(u, v, attr_dict=d)
 
 
-def left_full_hash_join(g, h):
-    """Adds all nodes and edges from H to G, in-place for G using a hash-based approach for faster speed.
+def _left_full_hash_join(g, h):
+    """Adds all nodes and edges from H to G, in-place for G using a hash-based approach for faster speed. Runs
+    in O(|E(G)| + |E(H)|)
 
     :param BELGraph g: A BEL Graph
     :param BELGraph h: A BEL Graph
