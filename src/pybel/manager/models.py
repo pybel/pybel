@@ -135,8 +135,7 @@ class Namespace(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    entries = relationship('NamespaceEntry', backref='namespace',
-                           cascade='all, delete-orphan')  # back_populates="namespace")
+    entries = relationship('NamespaceEntry', backref='namespace', cascade='all, delete-orphan')
 
     has_equivalences = Column(Boolean, default=False)
 
@@ -360,12 +359,6 @@ network_edge = Table(
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
 )
 
-network_citation = Table(
-    NETWORK_CITATION_TABLE_NAME, Base.metadata,
-    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True)
-)
-
 network_node = Table(
     NETWORK_NODE_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
@@ -394,7 +387,6 @@ class Network(Base):
 
     nodes = relationship('Node', secondary=network_node, lazy="dynamic")  # backref='networks'
     edges = relationship('Edge', secondary=network_edge, lazy="dynamic")  # backref='networks'
-    citations = relationship('Citation', secondary=network_citation, lazy="dynamic")
 
     __table_args__ = (
         UniqueConstraint(name, version),
@@ -431,20 +423,6 @@ class Network(Base):
         return repr(self)
 
 
-# trigger_drop_orphan_edges = DDL('''
-#    CREATE TRIGGER drop_orphan_edges AFTER DELETE ON {network_tablename}
-#    FOR EACH ROW
-#    BEGIN
-#    DELETE FROM {edge_tablename}
-#    WHERE id NOT IN (
-#        SELECT DISTINCT edge_id
-#        FROM {association_tablename}
-#    );
-#    END;'''.format(network_tablename=NETWORK_TABLE_NAME,
-#                   edge_tablename=EDGE_TABLE_NAME,
-#                   association_tablename=NETWORK_EDGE_TABLE_NAME)
-#                                )
-
 trigger_drop_orphan_edges = build_orphan_trigger(trigger_name='drop_orphan_edges',
                                                  trigger_tablename=NETWORK_TABLE_NAME,
                                                  orphan_tablename=EDGE_TABLE_NAME,
@@ -478,8 +456,7 @@ class Node(Base):
 
     sha512 = Column(String(255), index=True)
 
-    modifications = relationship("Modification", secondary=node_modification,
-                                 backref='nodes')  #, cascade='all, delete-orphan')
+    modifications = relationship("Modification", secondary=node_modification, backref='nodes')
 
     @property
     def data(self):
@@ -840,21 +817,6 @@ class Edge(Base):
         return min_dict
 
 
-# Trigger deletes edge-property relationships of deleted edges
-# trigger_drop_orphan_edge_property_relations = DDL('''
-#    CREATE TRIGGER drop_orphan_edge_property_relations AFTER DELETE ON {edge_tablename}
-#    FOR EACH ROW
-#    BEGIN
-#    DELETE FROM {edge_property_tablename}
-#    WHERE edge_id NOT IN (
-#        SELECT DISTINCT edge_id
-#        FROM {association_tablename}
-#    );
-#    END;'''.format(edge_tablename=EDGE_TABLE_NAME,
-#                   edge_property_tablename=EDGE_PROPERTY_TABLE_NAME,
-#                   association_tablename=NETWORK_EDGE_TABLE_NAME)
-#                                     )
-
 trigger_drop_orphan_edge_property_relations = build_orphan_trigger(trigger_name='drop_orphan_edge_property_relations',
                                                                    trigger_tablename=EDGE_TABLE_NAME,
                                                                    orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
@@ -921,19 +883,6 @@ class Property(Base):
         return self.data['data']
 
 
-# Trigger deletes properties without relationships to edges
-# trigger_drop_orphan_properties = DDL('''
-#    CREATE TRIGGER drop_orphan_properties AFTER DELETE ON {association_tablename}
-#    FOR EACH ROW
-#    BEGIN
-#    DELETE FROM {property_tablename}
-#    WHERE id NOT IN (
-#        SELECT DISTINCT property_id
-#        FROM {association_tablename}
-#    );
-#    END;'''.format(property_tablename=PROPERTY_TABLE_NAME,
-#                   association_tablename=EDGE_PROPERTY_TABLE_NAME)
-#                                     )
 trigger_drop_orphan_properties = build_orphan_trigger(trigger_name='drop_orphan_properties',
                                                       trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
                                                       orphan_tablename=PROPERTY_TABLE_NAME,

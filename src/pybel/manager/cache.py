@@ -20,7 +20,7 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
-from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, NamespaceEntry, AnnotationEntry, Node
+from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, Node
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -125,21 +125,22 @@ class CacheManager(BaseCacheManager):
 
     def drop_graphs(self):
         """Drops all graphs"""
+        self.clean_object_cache()
         self.session.query(Network).delete()
         self.session.commit()
-        self.clean_object_cache()
 
     def drop_namespaces(self):
         """Drops all namespaces"""
         self.namespace_cache.clear()
         self.namespace_id_cache.clear()
+        self.namespace_object_cache.clear()
         self.namespace_model.clear()
 
         self.namespace_term_cache.clear()
         self.namespace_edge_cache.clear()
         self.namespace_graph_cache.clear()
 
-        self.session.query(NamespaceEntry).delete()
+        # self.session.query(NamespaceEntry).delete()
         self.session.query(Namespace).delete()
         self.session.commit()
 
@@ -148,13 +149,14 @@ class CacheManager(BaseCacheManager):
 
         self.annotation_cache.clear()
         self.annotation_id_cache.clear()
+        self.annotation_object_cache.clear()
         self.annotation_model.clear()
 
         self.annotation_term_cache.clear()
         self.annotation_edge_cache.clear()
         self.annotation_graph_cache.clear()
 
-        self.session.query(AnnotationEntry).delete()
+        #self.session.query(AnnotationEntry).delete()
         self.session.query(Annotation).delete()
         self.session.commit()
 
@@ -728,9 +730,6 @@ class CacheManager(BaseCacheManager):
 
         for hash, edge in self.object_cache['edge'].items():
             network.edges.append(edge)
-
-        for hash, citation in self.object_cache['citation'].items():
-            network.citations.append(citation)
 
         self.session.flush()
 
@@ -1352,20 +1351,15 @@ class CacheManager(BaseCacheManager):
         :type target: str or models.Node
         :param relation: The relation that should be present between source and target node.
         :type relation: str
-        :param citation: The citation that backs the edge up. It is possible to use the reference_id
-        or a models.Citation object.
+        :param citation: The citation that backs the edge up. It is possible to use the reference_id or a models.Citation object.
         :type citation: str or models.Citation
-        :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text
-        or a models.Evidence object.
+        :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text or a models.Evidence object.
         :type evidence: str or models.Evidence
-        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter
-        as string.
+        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter as string.
         :type annotation: dict or str
-        :param property:
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-        :class:`models.Edge` objects.
+        :param property: An edge property object or a corresponding database identifier.
+        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`models.Edge` objects.
         :type as_dict_list: bool
-        :return:
         """
         q = self.session.query(models.Edge)
 
@@ -1463,8 +1457,7 @@ class CacheManager(BaseCacheManager):
         :param evidence: Weather or not supporting text should be included in the return.
         :type evidence: bool
         :param evidence_text:
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-        :class:`models.Citation` objects.
+        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`models.Citation` objects.
         :type as_dict_list: bool
         :return: List of :class:`models.Citation` objects or corresponding dicts.
         :rtype: list
@@ -1523,10 +1516,8 @@ class CacheManager(BaseCacheManager):
         :type participant: str
         :param modifier: The modifier of the property.
         :type modifier: str
-        :param as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
-        :class:`models.Property` objects.
+        :param as_dict_list: Identifies weather the result should be a list of dictionaries or a list of :class:`models.Property` objects.
         :type as_dict_list: bool
-        :return:
         """
         q = self.session.query(models.Property)
 
