@@ -200,10 +200,11 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
     def setUp(self):
         super(FleetingTemporaryCacheMixin, self).setUp()
 
-        self.manager.drop_graphs()
-        self.manager.drop_nodes()
-        self.manager.drop_namespaces()
-        self.manager.drop_annotations()
+        self.manager.reset_database()
+        # self.manager.drop_graphs()
+        # self.manager.drop_nodes()
+        # self.manager.drop_namespaces()
+        # self.manager.drop_annotations()
 
 
 class TestTokenParserBase(unittest.TestCase):

@@ -75,6 +75,13 @@ LONGBLOB = 4294967295
 Base = declarative_base()
 
 
+def reset_tables(engine):
+    """Drops all tables in database"""
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+
+
 def build_orphan_trigger(trigger_name, trigger_tablename, orphan_tablename, reference_tablename, reference_column,
                          orphan_column='id'):
     """builds a trigger to delete orphans in many-to-many relationships after deletion of a table.
@@ -96,13 +103,14 @@ def build_orphan_trigger(trigger_name, trigger_tablename, orphan_tablename, refe
         SELECT DISTINCT {reference_column}
         FROM {reference_tablename}
     );
-    END;'''.format(trigger_name=trigger_name,
-                   trigger_tablename=trigger_tablename,
-                   orphan_tablename=orphan_tablename,
-                   orphan_column=orphan_column,
-                   reference_column=reference_column,
-                   reference_tablename=reference_tablename)
-              )
+    END;'''.format(
+        trigger_name=trigger_name,
+        trigger_tablename=trigger_tablename,
+        orphan_tablename=orphan_tablename,
+        orphan_column=orphan_column,
+        reference_column=reference_column,
+        reference_tablename=reference_tablename)
+    )
 
     return ddl
 

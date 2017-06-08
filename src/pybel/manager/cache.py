@@ -20,7 +20,8 @@ import networkx as nx
 from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
-from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, Node
+from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, Node, AnnotationEntry, NamespaceEntry, \
+    reset_tables
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
@@ -123,6 +124,10 @@ class CacheManager(BaseCacheManager):
         for keyword, url in graph.annotation_url.items():
             self.ensure_annotation(url, cache_objects)
 
+    def reset_database(self):
+        """Drops and recreates all tables in database"""
+        reset_tables(self.engine)
+
     def drop_graphs(self):
         """Drops all graphs"""
         self.clean_object_cache()
@@ -140,7 +145,7 @@ class CacheManager(BaseCacheManager):
         self.namespace_edge_cache.clear()
         self.namespace_graph_cache.clear()
 
-        # self.session.query(NamespaceEntry).delete()
+        self.session.query(NamespaceEntry).delete()
         self.session.query(Namespace).delete()
         self.session.commit()
 
@@ -156,7 +161,7 @@ class CacheManager(BaseCacheManager):
         self.annotation_edge_cache.clear()
         self.annotation_graph_cache.clear()
 
-        #self.session.query(AnnotationEntry).delete()
+        self.session.query(AnnotationEntry).delete()
         self.session.query(Annotation).delete()
         self.session.commit()
 
