@@ -39,10 +39,10 @@ fh.setFormatter(formatter)
 log.addHandler(fh)
 
 
-@click.group(help="PyBEL Command Line Interface on {}".format(sys.executable))
+@click.group(help="PyBEL Command Line Utilities on {}".format(sys.executable))
 @click.version_option()
 def main():
-    """PyBEL Command Line Interface"""
+    """PyBEL Command Line """
 
 
 @main.command()
