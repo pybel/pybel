@@ -7,6 +7,8 @@ import networkx as nx
 __all__ = [
     'left_full_join',
     'left_outer_join',
+    'left_full_join_networks',
+    'left_outer_join_networks',
 ]
 
 
@@ -144,3 +146,33 @@ def left_outer_join(g, h, use_hash=True):
     for comp in nx.weakly_connected_components(h):
         if g_nodes.intersection(comp):
             left_full_join(g, h.subgraph(comp), use_hash=use_hash)
+
+
+def left_full_join_networks(target, networks, use_hash=True):
+    """Full joins a list of networks to a target network
+
+    The order of the networks will not impact the result.
+
+    :param BELGraph target: A BEL network
+    :param iter[BELGraph] networks: An iterator of BEL networks
+    :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+    :return:
+    """
+    for network in networks:
+        left_full_join(target, network, use_hash=use_hash)
+    return target
+
+
+def left_outer_join_networks(target, networks, use_hash=True):
+    """Outer joins a list of networks to a target network.
+
+    Note: the order of networks will have significant results!
+
+    :param BELGraph target: A BEL network
+    :param iter[BELGraph] networks: An iterator of BEL networks
+    :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+    :return:
+    """
+    for network in networks:
+        left_outer_join(target, network, use_hash=use_hash)
+    return target
