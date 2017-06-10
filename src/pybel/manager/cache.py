@@ -55,17 +55,11 @@ def build_manager(connection=None, echo=False):
     return CacheManager(connection=connection, echo=echo)
 
 
-class CacheManager(BaseCacheManager):
-    """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
-    SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
-    """
+class NamespaceManager(BaseCacheManager):
+    """Manages namespace database"""
 
     def __init__(self, connection=None, echo=False):
-        """
-        :param str connection: A custom database connection string
-        :param bool echo: Whether or not echo the running sql code.
-        """
-        super(CacheManager, self).__init__(connection=connection, echo=echo)
+        super(NamespaceManager, self).__init__(connection=connection, echo=echo)
 
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
@@ -73,25 +67,10 @@ class CacheManager(BaseCacheManager):
         self.namespace_id_cache = defaultdict(dict)
         #: A dictionary from {namespace URL: models.Namespace}
         self.namespace_model = {}
-        #: A dictionary from {annotation URL: {name: label}}
-        self.annotation_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: {name: database ID}}
-        self.annotation_id_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: models.Annotation}
-        self.annotation_model = {}
 
         self.namespace_term_cache = {}
         self.namespace_edge_cache = {}
         self.namespace_graph_cache = {}
-
-        self.annotation_term_cache = {}
-        self.annotation_edge_cache = {}
-        self.annotation_graph_cache = {}
-
-    def drop_graphs(self):
-        """Drops all graphs"""
-        self.session.query(Network).delete()
-        self.session.commit()
 
     def drop_namespaces(self):
         """Drops all namespaces"""
@@ -107,27 +86,13 @@ class CacheManager(BaseCacheManager):
         self.session.query(Namespace).delete()
         self.session.commit()
 
-    def drop_annotations(self):
-        """Drops all annotations"""
+    def drop_namespace(self, url):
+        """Drops the namespace at the given URL. Won't work if the edge store is in use.
 
-        self.annotation_cache.clear()
-        self.annotation_id_cache.clear()
-        self.annotation_model.clear()
-
-        self.annotation_term_cache.clear()
-        self.annotation_edge_cache.clear()
-        self.annotation_graph_cache.clear()
-
-        self.session.query(AnnotationEntry).delete()
-        self.session.query(Annotation).delete()
+        :param str url: The URL of the namespace to drop
+        """
+        self.session.query(Namespace).filter(Namespace.url == url).delete()
         self.session.commit()
-
-    def drop_equivalences(self):
-        """Drops all equivalence classes"""
-        self.session.query(NamespaceEntryEquivalence).delete()
-        self.session.commit()
-
-    # NAMESPACE MANAGEMENT
 
     def insert_namespace(self, url):
         """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
@@ -238,15 +203,38 @@ class CacheManager(BaseCacheManager):
         """Returns a list of all namespace keyword/url pairs"""
         return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
 
-    def drop_namespace(self, url):
-        """Drops the namespace at the given URL. Won't work if the edge store is in use.
-                
-        :param str url: The URL of the namespace to drop
-        """
-        self.session.query(Namespace).filter(Namespace.url == url).delete()
-        self.session.commit()
 
-    # ANNOTATION MANAGEMENT
+class AnnotationManager(BaseCacheManager):
+    """Manages database annotations"""
+
+    def __init__(self, connection=None, echo=False):
+        super(AnnotationManager, self).__init__(connection=connection, echo=echo)
+
+        #: A dictionary from {annotation URL: {name: label}}
+        self.annotation_cache = defaultdict(dict)
+        #: A dictionary from {annotation URL: {name: database ID}}
+        self.annotation_id_cache = defaultdict(dict)
+        #: A dictionary from {annotation URL: models.Annotation}
+        self.annotation_model = {}
+
+        self.annotation_term_cache = {}
+        self.annotation_edge_cache = {}
+        self.annotation_graph_cache = {}
+
+    def drop_annotations(self):
+        """Drops all annotations"""
+
+        self.annotation_cache.clear()
+        self.annotation_id_cache.clear()
+        self.annotation_model.clear()
+
+        self.annotation_term_cache.clear()
+        self.annotation_edge_cache.clear()
+        self.annotation_graph_cache.clear()
+
+        self.session.query(AnnotationEntry).delete()
+        self.session.query(Annotation).delete()
+        self.session.commit()
 
     def insert_annotation(self, url):
         """Inserts the namespace file at the given location to the cache
@@ -330,6 +318,152 @@ class CacheManager(BaseCacheManager):
             return definition.data
         else:
             return [definition.data for definition in self.session.query(models.Annotation).all()]
+
+
+class EquivalenceManager(NamespaceManager):
+    """Manages database equivalences"""
+
+    def drop_equivalences(self):
+        """Drops all equivalence classes"""
+        self.session.query(NamespaceEntryEquivalence).delete()
+        self.session.commit()
+
+    def ensure_equivalence_class(self, label):
+        """Ensures the equivalence class is loaded in the database"""
+        result = self.session.query(NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
+
+        if result is None:
+            result = NamespaceEntryEquivalence(label=label)
+            self.session.add(result)
+            self.session.commit()
+
+        return result
+
+    def insert_equivalences(self, url, namespace_url):
+        """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
+        self.ensure_namespace(namespace_url)
+
+        log.info('inserting equivalences: %s', url)
+
+        config = get_bel_resource(url)
+        values = config['Values']
+
+        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
+
+        for entry in ns.entries:
+            equivalence_label = values[entry.name]
+            entry.equivalence = self.ensure_equivalence_class(equivalence_label)
+
+        ns.has_equivalences = True
+
+        self.session.commit()
+
+    def ensure_equivalences(self, url, namespace_url):
+        """Check if the equivalence file is already loaded, and if not, load it"""
+        self.ensure_namespace(namespace_url)
+
+        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
+
+        if not ns.has_equivalences:
+            self.insert_equivalences(url, namespace_url)
+
+    def get_equivalence_by_entry(self, namespace_url, name):
+        """Gets the equivalence class
+
+        :param str namespace_url: the URL of the namespace
+        :param str name: the name of the entry in the namespace
+        :return: the equivalence class of the entry in the given namespace
+        """
+        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
+        ns_entry = self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace_id == ns.id,
+                                                             NamespaceEntry.name == name).one()
+        return ns_entry.equivalence
+
+    def get_equivalence_members(self, equivalence_class):
+        """Gets all members of the given equivalence class
+
+        :param equivalence_class: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
+                                    for Alzheimer's Disease
+        :return: a list of members of the class
+        """
+        eq = self.session.query(NamespaceEntryEquivalence).filter_by(label=equivalence_class).one()
+        return eq.members
+
+
+class NetworkManager(NamespaceManager, AnnotationManager):
+    """Manages database networks"""
+
+    def count_networks(self):
+        """Counts the number of networks in the cache
+
+        :rtype: int
+        """
+        return self.session.query(func.count(models.Network.id)).scalar()
+
+    def list_networks(self):
+        """Lists all networks in the cache
+
+        :rtype: list[Network]
+        """
+        return self.session.query(Network).all()
+
+    def drop_network(self, network_id):
+        """Drops a network by its database identifier
+
+        :param int network_id: The network's database identifier
+        """
+
+        # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
+        self.session.query(Network).filter(Network.id == network_id).delete()
+        self.session.commit()
+
+    def drop_networks(self):
+        """Drops all networks"""
+        self.session.query(Network).delete()
+        self.session.commit()
+
+    def insert_graph(self, graph, store_parts=False):
+        """Inserts a graph in the database.
+
+        :param BELGraph graph: A BEL graph
+        :param bool store_parts: Should the graph be stored in the edge store?
+        :return: A Network object
+        :rtype: Network
+        """
+        log.debug('inserting %s v%s', graph.name, graph.version)
+
+        t = time.time()
+
+        namespaces = [self.ensure_namespace(url) for url in graph.namespace_url.values()]
+        annotations = [self.ensure_annotation(url) for url in graph.annotation_url.values()]
+
+        network = Network(blob=to_bytes(graph), **graph.document)
+
+        if store_parts:
+            if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
+                self.ensure_namespace(GOCC_LATEST)
+
+            network.namespaces.extend(namespaces)
+            network.annotations.extend(annotations)
+
+            self.store_graph_parts(network, graph)
+
+        self.session.add(network)
+        self.session.commit()
+
+        log.info('inserted %s v%s in %.2fs', graph.name, graph.version, time.time() - t)
+
+        return network
+
+    def store_graph_parts(self, network, graph):
+        """Stores graph parts. Needs to be overridden."""
+        raise NotImplementedError
+
+
+class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, AnnotationManager):
+    """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
+    SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
+    """
 
     # NAMESPACE OWL MANAGEMENT
 
@@ -455,103 +589,7 @@ class CacheManager(BaseCacheManager):
         """Returns a list of the locations of the stored ontologies"""
         return [owl.iri for owl in self.session.query(models.OwlNamespace).all()]
 
-    # Manage Equivalences
-
-    def ensure_equivalence_class(self, label):
-        """Ensures the equivalence class is loaded in the database"""
-        result = self.session.query(NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
-
-        if result is None:
-            result = NamespaceEntryEquivalence(label=label)
-            self.session.add(result)
-            self.session.commit()
-
-        return result
-
-    def insert_equivalences(self, url, namespace_url):
-        """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
-        self.ensure_namespace(namespace_url)
-
-        log.info('inserting equivalences: %s', url)
-
-        config = get_bel_resource(url)
-        values = config['Values']
-
-        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
-
-        for entry in ns.entries:
-            equivalence_label = values[entry.name]
-            entry.equivalence = self.ensure_equivalence_class(equivalence_label)
-
-        ns.has_equivalences = True
-
-        self.session.commit()
-
-    def ensure_equivalences(self, url, namespace_url):
-        """Check if the equivalence file is already loaded, and if not, load it"""
-        self.ensure_namespace(namespace_url)
-
-        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
-
-        if not ns.has_equivalences:
-            self.insert_equivalences(url, namespace_url)
-
-    def get_equivalence_by_entry(self, namespace_url, name):
-        """Gets the equivalence class
-
-        :param str namespace_url: the URL of the namespace
-        :param str name: the name of the entry in the namespace
-        :return: the equivalence class of the entry in the given namespace
-        """
-        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
-        ns_entry = self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace_id == ns.id,
-                                                             NamespaceEntry.name == name).one()
-        return ns_entry.equivalence
-
-    def get_equivalence_members(self, equivalence_class):
-        """Gets all members of the given equivalence class
-
-        :param equivalence_class: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
-                                    for Alzheimer's Disease
-        :return: a list of members of the class
-        """
-        eq = self.session.query(NamespaceEntryEquivalence).filter_by(label=equivalence_class).one()
-        return eq.members
-
     # Graph Cache Manager
-
-    def insert_graph(self, graph, store_parts=False):
-        """Inserts a graph in the database.
-
-        :param BELGraph graph: A BEL graph
-        :param bool store_parts: Should the graph be stored in the edge store?
-        :return: A Network object
-        :rtype: Network
-        """
-        log.debug('inserting %s v%s', graph.name, graph.version)
-
-        t = time.time()
-
-        namespaces = [self.ensure_namespace(url) for url in graph.namespace_url.values()]
-        annotations = [self.ensure_annotation(url) for url in graph.annotation_url.values()]
-
-        network = Network(blob=to_bytes(graph), **graph.document)
-
-        if store_parts:
-            if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
-                self.ensure_namespace(GOCC_LATEST)
-
-            network.namespaces.extend(namespaces)
-            network.annotations.extend(annotations)
-
-            self.store_graph_parts(network, graph)
-
-        self.session.add(network)
-        self.session.commit()
-
-        log.info('inserted %s v%s in %.2fs', graph.name, graph.version, time.time() - t)
-
-        return network
 
     def store_graph_parts(self, network, graph):
         """Stores the given graph into the edge store.
@@ -950,23 +988,6 @@ class CacheManager(BaseCacheManager):
         """
         return self.session.query(Network).get(network_id)
 
-    def drop_network(self, network_id):
-        """Drops a network by its database identifier
-
-        :param int network_id: The network's database identifier
-        """
-
-        # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
-        self.session.query(Network).filter(Network.id == network_id).delete()
-        self.session.commit()
-
-    def list_networks(self):
-        """Lists all networks in the cache
-
-        :rtype: list[Network]
-        """
-        return self.session.query(Network).all()
-
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
 
@@ -1059,7 +1080,7 @@ class CacheManager(BaseCacheManager):
 
         return graph
 
-    def get_networks(self, network_ids=None, name=None, version=None):
+    def query_networks(self, network_ids=None, name=None, version=None):
         """Builds and runs a query over all networks in the database.
 
         :param iter[int] network_ids: Database identifiers of the networks of interest.
@@ -1128,13 +1149,6 @@ class CacheManager(BaseCacheManager):
             return [node.data for node in result]
         else:
             return result
-
-    def count_networks(self):
-        """Counts the number of networks in the cache
-
-        :rtype: int
-        """
-        return self.session.query(func.count(models.Network.id)).scalar()
 
     def count_nodes(self):
         """Counts the number of nodes in the cache

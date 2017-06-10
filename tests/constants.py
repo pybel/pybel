@@ -203,7 +203,7 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
 
         self.manager.drop_namespaces()
         self.manager.drop_annotations()
-        self.manager.drop_graphs()
+        self.manager.drop_networks()
 
 
 class TestTokenParserBase(unittest.TestCase):

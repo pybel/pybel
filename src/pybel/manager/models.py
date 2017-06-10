@@ -7,7 +7,7 @@ import datetime
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
 from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from ..constants import *
 
@@ -129,7 +129,7 @@ class NamespaceEntry(Base):
     namespace = relationship('Namespace', back_populates='entries')
 
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
-    equivalence = relationship('NamespaceEntryEquivalence', back_populates='members')
+    equivalence = relationship('NamespaceEntryEquivalence', backref=backref('members'))
 
     @property
     def data(self):
@@ -145,8 +145,6 @@ class NamespaceEntryEquivalence(Base):
 
     id = Column(Integer, primary_key=True)
     label = Column(String(255), nullable=False, unique=True, index=True)
-
-    members = relationship('NamespaceEntry', back_populates='equivalence')
 
 
 class Annotation(Base):
