@@ -24,8 +24,10 @@ import click
 from .canonicalize import to_bel
 from .constants import PYBEL_LOG_DIR, get_cache_connection
 from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
+from .manager import defaults
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
+from .manager.models import Network
 
 log = logging.getLogger('pybel')
 
@@ -49,7 +51,7 @@ def main():
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
 @click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
-@click.option('--database-name', help='Input graph name from database')
+@click.option('--database-name', help='Input network name from database')
 @click.option('--csv', type=click.File('w'), help='Output path for *.csv')
 @click.option('--sif', type=click.File('w'), help='Output path for *.sif')
 @click.option('--gsea', type=click.File('w'), help='Output path for *.grp for gene set enrichment analysis')
@@ -194,11 +196,14 @@ def ensure(ctx, skip_namespaces, skip_annotations, owl, fraunhofer, debug):
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
 
     if not skip_namespaces:
-        ctx.obj.ensure_default_namespaces(use_fraunhofer=fraunhofer)
+        for url in defaults.fraunhofer_namespaces if fraunhofer else defaults.default_namespaces:
+            ctx.obj.ensure_namespace(url)
     if not skip_annotations:
-        ctx.obj.ensure_default_annotations(use_fraunhofer=fraunhofer)
+        for url in defaults.fraunhofer_annotations if fraunhofer else defaults.default_annotations:
+            ctx.obj.ensure_annotation(url)
     if owl:
-        ctx.obj.ensure_default_owl_namespaces()
+        for url in defaults.default_owl:
+            ctx.obj.ensure_namespace_owl(url)
 
 
 @definitions.command()
@@ -251,20 +256,26 @@ def network():
 
 
 @network.command()
-@click.option('-d', '--include-description', help="Include graph descriptions")
+@click.option('-d', '--include-description', help="Include network descriptions")
 @click.pass_context
 def ls(ctx, include_description):
     """Lists network names, versions, and optionally descriptions"""
-    for row in ctx.obj.list_graphs(include_description=include_description):
+
+    if include_description:
+        l = ctx.obj.session.query(Network.id, Network.name, Network.version, Network.description).all()
+    else:
+        l = ctx.obj.session.query(Network.id, Network.name, Network.version).all()
+
+    for row in l:
         click.echo('\t'.join(map(str, row)))
 
 
 @network.command()
-@click.argument('gid')
+@click.argument('network_id')
 @click.pass_context
-def drop(ctx, gid):
+def drop(ctx, network_id):
     """Drops a network by its database identifier"""
-    ctx.obj.drop_graph(gid)
+    ctx.obj.drop_network(network_id)
 
 
 @network.command()
@@ -273,7 +284,7 @@ def drop(ctx, gid):
 def dropall(ctx, yes):
     """Drops all networks"""
     if yes or click.confirm('Drop all networks?'):
-        ctx.obj.drop_graphs()
+        ctx.obj.drop_networks()
 
 
 if __name__ == '__main__':

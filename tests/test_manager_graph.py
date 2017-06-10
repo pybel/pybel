@@ -20,7 +20,7 @@ from tests.mocks import mock_bel_resources
 log = logging.getLogger(__name__)
 
 
-class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
+class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
@@ -28,18 +28,21 @@ class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         self.manager.insert_graph(self.graph)
 
-        x = self.manager.list_graphs()
+        self.assertEqual(1, self.manager.count_networks())
 
-        self.assertEqual(1, len(x))
+        networks = self.manager.list_networks()
+        self.assertEqual(1, len(networks))
 
-        _, name, version, description = x[0]
+        network = networks[0]
 
-        self.assertEqual((expected_test_thorough_metadata[METADATA_NAME],
-                          expected_test_thorough_metadata[METADATA_VERSION],
-                          expected_test_thorough_metadata[METADATA_DESCRIPTION]), (name, version, description))
+        self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], network.name)
+        self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], network.version)
+        self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], network.description)
 
-        reconstituted = self.manager.get_graph_by_name(expected_test_thorough_metadata[METADATA_NAME],
-                                                       expected_test_thorough_metadata[METADATA_VERSION])
+        reconstituted = self.manager.get_network_by_name(
+            expected_test_thorough_metadata[METADATA_NAME],
+            expected_test_thorough_metadata[METADATA_VERSION]
+        )
         self.bel_thorough_reconstituted(reconstituted)
 
         # Test that the graph can't be added a second time
@@ -53,13 +56,13 @@ class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.manager.insert_graph(graphcopy)
 
         expected_versions = {'1.0.1', self.graph.version}
-        self.assertEqual(expected_versions, set(self.manager.get_graph_versions(self.graph.name)))
+        self.assertEqual(expected_versions, set(self.manager.get_network_versions(self.graph.name)))
 
-        exact_name_version = self.manager.get_graph_by_name(self.graph.name, self.graph.version)
+        exact_name_version = self.manager.get_network_by_name(self.graph.name, self.graph.version)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual(self.graph.version, exact_name_version.version)
 
-        exact_name_version = self.manager.get_graph_by_name(self.graph.name, '1.0.1')
+        exact_name_version = self.manager.get_network_by_name(self.graph.name, '1.0.1')
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
@@ -121,8 +124,10 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertEqual({nea.edge_id for nea in network_edge_associations},
                          {edge.id for edge in edges})
 
-        g2 = self.manager.get_graph_by_name(expected_test_simple_metadata[METADATA_NAME],
-                                            expected_test_simple_metadata[METADATA_VERSION])
+        g2 = self.manager.get_network_by_name(
+            expected_test_simple_metadata[METADATA_NAME],
+            expected_test_simple_metadata[METADATA_VERSION]
+        )
         self.bel_simple_reconstituted(g2)
 
     @mock_bel_resources

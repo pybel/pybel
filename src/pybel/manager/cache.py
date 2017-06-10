@@ -8,14 +8,13 @@ enable this option, but can specify a database location if they choose.
 """
 
 import datetime
-import itertools as itt
 import logging
 import time
 from collections import defaultdict
 
 import networkx as nx
+from sqlalchemy import func
 
-from . import defaults
 from . import models
 from .base_cache import BaseCacheManager
 from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, NamespaceEntry, AnnotationEntry
@@ -72,13 +71,14 @@ class CacheManager(BaseCacheManager):
         self.namespace_cache = defaultdict(dict)
         #: A dictionary from {namespace URL: {name: database ID}}
         self.namespace_id_cache = defaultdict(dict)
+        #: A dictionary from {namespace URL: models.Namespace}
+        self.namespace_model = {}
         #: A dictionary from {annotation URL: {name: label}}
         self.annotation_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
-
+        #: A dictionary from {annotation URL: models.Annotation}
         self.annotation_model = {}
-        self.namespace_model = {}
 
         self.namespace_term_cache = {}
         self.namespace_edge_cache = {}
@@ -135,7 +135,7 @@ class CacheManager(BaseCacheManager):
 
         :param str url: the location of the namespace file
         :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: :class:`pybel.manager.models.Namespace` or dict
+        :rtype: Namespace or dict
         """
         log.info('inserting namespace %s', url)
 
@@ -164,8 +164,8 @@ class CacheManager(BaseCacheManager):
             if section in config and key in config[section]:
                 namespace_insert_values[database_column] = config[section][key]
 
-        namespace = models.Namespace(**namespace_insert_values)
-        namespace.entries = [models.NamespaceEntry(name=c, encoding=e) for c, e in values.items()]
+        namespace = Namespace(**namespace_insert_values)
+        namespace.entries = [NamespaceEntry(name=c, encoding=e) for c, e in values.items()]
 
         self.session.add(namespace)
         self.session.commit()
@@ -178,14 +178,14 @@ class CacheManager(BaseCacheManager):
         :param url: the location of the namespace file
         :type url: str
         :return: The namespace instance
-        :rtype: models.Namespace or dict
+        :rtype: Namespace or dict
         """
         if url in self.namespace_model:
             log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
             return self.namespace_model[url]
 
         t = time.time()
-        results = self.session.query(models.Namespace).filter(models.Namespace.url == url).one_or_none()
+        results = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
         if results is None:
             results = self.insert_namespace(url)
@@ -221,14 +221,6 @@ class CacheManager(BaseCacheManager):
             # self.ensure_namespace makes sure it's in the cache if its not cachable
             return self.namespace_cache[url]
 
-    def get_namespace_urls(self, keyword_url_dict=False):
-        """Returns a list of the locations of the stored namespaces and annotations"""
-        namespaces = self.session.query(models.Namespace).all()
-        if keyword_url_dict:
-            return {definition.keyword: definition.url for definition in namespaces}
-        else:
-            return [definition.url for definition in namespaces]
-
     def get_namespace_data(self, url=None):
         """Returns a list of the locations of the stored namespaces and annotations
 
@@ -237,26 +229,21 @@ class CacheManager(BaseCacheManager):
 
         """
         if url:
-            definition = self.session.query(models.Namespace).filter_by(url=url).one_or_none()
+            definition = self.session.query(Namespace).filter_by(url=url).one_or_none()
             return definition.data
         else:
-            return [definition.data for definition in self.session.query(models.Namespace).all()]
+            return [definition.data for definition in self.session.query(Namespace).all()]
 
     def list_namespaces(self):
         """Returns a list of all namespace keyword/url pairs"""
         return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
-
-    def ensure_default_namespaces(self, use_fraunhofer=False):
-        """Caches the default set of namespaces"""
-        for url in defaults.fraunhofer_namespaces if use_fraunhofer else defaults.default_namespaces:
-            self.ensure_namespace(url)
 
     def drop_namespace(self, url):
         """Drops the namespace at the given URL. Won't work if the edge store is in use.
                 
         :param str url: The URL of the namespace to drop
         """
-        self.session.query(models.Namespace).filter(models.Namespace.url == url).delete()
+        self.session.query(Namespace).filter(Namespace.url == url).delete()
         self.session.commit()
 
     # ANNOTATION MANAGEMENT
@@ -327,26 +314,16 @@ class CacheManager(BaseCacheManager):
     def get_annotation(self, url):
         """Returns a dict of annotations and their labels for the given annotation file
 
-        :param url: the location of the annotation file
-        :type url: str
+        :param str url: the location of the annotation file
         """
         self.ensure_annotation(url)
         return self.annotation_cache[url]
-
-    def get_annotation_urls(self, keyword_url_dict=False):
-        """Returns a list of the locations of the stored annotations"""
-        annotations = self.session.query(models.Annotation).all()
-        if keyword_url_dict:
-            return {definition.keyword: definition.url for definition in annotations}
-        else:
-            return [definition.url for definition in annotations]
 
     def get_annotation_data(self, url=None):
         """Returns a list of the locations of the stored namespaces and annotations
 
         :return: A list of all annotations in the relational database.
         :rtype: list
-
         """
         if url:
             definition = self.session.query(models.Annotation).filter_by(url=url).one_or_none()
@@ -354,33 +331,16 @@ class CacheManager(BaseCacheManager):
         else:
             return [definition.data for definition in self.session.query(models.Annotation).all()]
 
-    def dict_annotations(self):
-        """Returns a dictionary with the keyword:locations of the stored annotations"""
-        return {definition.keyword: definition.url for definition in self.session.query(models.Annotation).all()}
-
-    def list_annotations(self):
-        return list(self.session.query(Annotation.keyword, Annotation.version, Annotation.url).all())
-
-    def ensure_default_annotations(self, use_fraunhofer=False):
-        """Caches the default set of annotations"""
-        for url in defaults.fraunhofer_annotations if use_fraunhofer else defaults.default_annotations:
-            self.ensure_annotation(url)
-
     # NAMESPACE OWL MANAGEMENT
 
     def _insert_owl(self, iri, owl_model, owl_entry_model):
         """Helper function for inserting an ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         log.info('inserting owl %s', iri)
 
         graph = parse_owl(iri)
-
-        if 0 == len(graph):
-            raise ValueError('Empty owl document: {}'.format(iri))
-
         owl = owl_model(iri=iri)
 
         entries = {node: owl_entry_model(entry=node) for node in graph.nodes_iter()}
@@ -398,24 +358,21 @@ class CacheManager(BaseCacheManager):
     def insert_namespace_owl(self, iri):
         """Caches an ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         return self._insert_owl(iri, models.OwlNamespace, models.OwlNamespaceEntry)
 
     def insert_annotation_owl(self, iri):
         """Caches an ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         return self._insert_owl(iri, models.OwlAnnotation, models.OwlAnnotationEntry)
 
     def ensure_namespace_owl(self, iri):
         """Caches an ontology at the given IRI if it is not already in the cache
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         if iri in self.namespace_term_cache:
             return
@@ -449,8 +406,7 @@ class CacheManager(BaseCacheManager):
     def get_namespace_owl_terms(self, iri):
         """Gets a set of classes and individuals in the ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         self.ensure_namespace_owl(iri)
         return self.namespace_term_cache[iri]
@@ -458,8 +414,7 @@ class CacheManager(BaseCacheManager):
     def get_annotation_owl_terms(self, iri):
         """Gets a set of classes and individuals in the ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         self.ensure_annotation_owl(iri)
         return self.annotation_term_cache[iri]
@@ -467,8 +422,7 @@ class CacheManager(BaseCacheManager):
     def get_namespace_owl_edges(self, iri):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         self.ensure_namespace_owl(iri)
         return self.namespace_edge_cache[iri]
@@ -476,8 +430,7 @@ class CacheManager(BaseCacheManager):
     def get_annotation_owl_edges(self, iri):
         """Gets a set of classes and individuals in the ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         self.ensure_annotation_owl(iri)
         return self.annotation_edge_cache[iri]
@@ -485,8 +438,7 @@ class CacheManager(BaseCacheManager):
     def get_namespace_owl_graph(self, iri):
         """Gets the graph representing the ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         self.ensure_namespace_owl(iri)
         return self.namespace_graph_cache[iri]
@@ -494,8 +446,7 @@ class CacheManager(BaseCacheManager):
     def get_annotation_owl_graph(self, iri):
         """Gets the graph representing the ontology at the given IRI
 
-        :param iri: the location of the ontology
-        :type iri: str
+        :param str iri: the location of the ontology
         """
         self.ensure_annotation_owl(iri)
         return self.annotation_graph_cache[iri]
@@ -504,22 +455,14 @@ class CacheManager(BaseCacheManager):
         """Returns a list of the locations of the stored ontologies"""
         return [owl.iri for owl in self.session.query(models.OwlNamespace).all()]
 
-    def ensure_default_owl_namespaces(self):
-        """Caches the default set of ontologies"""
-        for url in defaults.default_owl:
-            self.ensure_namespace_owl(url)
-
-    def get_definition_urls(self):
-        """Returns a list of the URLs for all definitions stored in the database"""
-        return list(itt.chain(self.get_namespace_urls(), self.get_annotation_urls(), self.get_namespace_owl_urls()))
-
     # Manage Equivalences
 
     def ensure_equivalence_class(self, label):
-        result = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
+        """Ensures the equivalence class is loaded in the database"""
+        result = self.session.query(NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
 
         if result is None:
-            result = models.NamespaceEntryEquivalence(label=label)
+            result = NamespaceEntryEquivalence(label=label)
             self.session.add(result)
             self.session.commit()
 
@@ -534,7 +477,7 @@ class CacheManager(BaseCacheManager):
         config = get_bel_resource(url)
         values = config['Values']
 
-        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
+        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
 
         for entry in ns.entries:
             equivalence_label = values[entry.name]
@@ -548,7 +491,7 @@ class CacheManager(BaseCacheManager):
         """Check if the equivalence file is already loaded, and if not, load it"""
         self.ensure_namespace(namespace_url)
 
-        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
+        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
 
         if not ns.has_equivalences:
             self.insert_equivalences(url, namespace_url)
@@ -556,13 +499,13 @@ class CacheManager(BaseCacheManager):
     def get_equivalence_by_entry(self, namespace_url, name):
         """Gets the equivalence class
 
-        :param namespace_url: the URL of the namespace
-        :param name: the name of the entry in the namespace
+        :param str namespace_url: the URL of the namespace
+        :param str name: the name of the entry in the namespace
         :return: the equivalence class of the entry in the given namespace
         """
-        ns = self.session.query(models.Namespace).filter_by(url=namespace_url).one()
-        ns_entry = self.session.query(models.NamespaceEntry).filter(models.NamespaceEntry.namespace_id == ns.id,
-                                                                    models.NamespaceEntry.name == name).one()
+        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
+        ns_entry = self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace_id == ns.id,
+                                                             NamespaceEntry.name == name).one()
         return ns_entry.equivalence
 
     def get_equivalence_members(self, equivalence_class):
@@ -572,7 +515,7 @@ class CacheManager(BaseCacheManager):
                                     for Alzheimer's Disease
         :return: a list of members of the class
         """
-        eq = self.session.query(models.NamespaceEntryEquivalence).filter_by(label=equivalence_class).one()
+        eq = self.session.query(NamespaceEntryEquivalence).filter_by(label=equivalence_class).one()
         return eq.members
 
     # Graph Cache Manager
@@ -595,7 +538,7 @@ class CacheManager(BaseCacheManager):
         network = Network(blob=to_bytes(graph), **graph.document)
 
         if store_parts:
-            if not self.session.query(models.Namespace).filter_by(keyword=GOCC_KEYWORD).first():
+            if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
                 self.ensure_namespace(GOCC_LATEST)
 
             network.namespaces.extend(namespaces)
@@ -669,32 +612,28 @@ class CacheManager(BaseCacheManager):
     def get_bel_namespace_entry(self, url, value):
         """Gets a given NamespaceEntry object.
 
-        :param url: The url of the namespace source
-        :type url: str
-        :param value: The value of the namespace from the given url's document
-        :type value: str
+        :param str url: The url of the namespace source
+        :param str value: The value of the namespace from the given url's document
         :return: An NamespaceEntry object
-        :rtype: models.NamespaceEntry
+        :rtype: NamespaceEntry
         """
-        namespace = self.session.query(models.Namespace).filter_by(url=url).one()
+        namespace = self.session.query(Namespace).filter_by(url=url).one()
 
         # FIXME @kono reinvestigate this
         try:
-            namespace_entry = self.session.query(models.NamespaceEntry).filter_by(namespace=namespace,
-                                                                                  name=value).one_or_none()
+            namespace_entry = self.session.query(NamespaceEntry).filter_by(namespace=namespace,
+                                                                           name=value).one_or_none()
         except:
-            namespace_entry = self.session.query(models.NamespaceEntry).filter_by(namespace=namespace,
-                                                                                  name=value).first()
+            namespace_entry = self.session.query(NamespaceEntry).filter_by(namespace=namespace,
+                                                                           name=value).first()
 
         return namespace_entry
 
     def get_bel_annotation_entry(self, url, value):
         """Gets a given AnnotationEntry object.
 
-        :param url: The url of the annotation source
-        :type url: str
-        :param value: The value of the annotation from the given url's document
-        :type value: str
+        :param str url: The url of the annotation source
+        :param str value: The value of the annotation from the given url's document
         :return: An AnnotationEntry object
         :rtype: models.AnnotationEntry
         """
@@ -704,10 +643,8 @@ class CacheManager(BaseCacheManager):
     def get_or_create_evidence(self, citation, text):
         """Creates entry and object for given evidence if it does not exist.
 
-        :param citation: Citation object obtained from :func:`get_or_create_citation`
-        :type citation: models.Citation
-        :param text: Evidence text
-        :type text: str
+        :param models.Citation citation: Citation object obtained from :func:`get_or_create_citation`
+        :param str text: Evidence text
         :return: An Evidence object
         :rtype: models.Evidence
         """
@@ -723,10 +660,8 @@ class CacheManager(BaseCacheManager):
     def get_or_create_node(self, graph, node):
         """Creates entry and object for given node if it does not exist.
 
-        :param graph: A BEL graph
-        :type graph: pybel.BELGraph
-        :param node: Key for the node to insert.
-        :type node: tuple
+        :param BELGraph graph: A BEL graph
+        :param tuple node: A BEL node
         :return: A Node object
         :rtype: models.Node
         """
@@ -766,27 +701,27 @@ class CacheManager(BaseCacheManager):
         :param graph_key: Key that identifies the order of edges and weather an edge is artificially created or extracted
                         from a valid BEL statement.
         :type graph_key: tuple
-        :param source: Source node of the relation
-        :type source: models.Node
-        :param target: Target node of the relation
-        :type target: models.Node
-        :param evidence: Evidence object that proves the given relation
-        :type evidence: models.Evidence
-        :param bel: BEL statement that describes the relation
-        :type bel: str
-        :param relation: Type of the relation between source and target node
-        :type relation: str
-        :param blob: A blob of the edge data object.
-        :type blob: blob
+        :param models.Node source: Source node of the relation
+        :param models.Node target: Target node of the relation
+        :param models.Evidence evidence: Evidence object that proves the given relation
+        :param str bel: BEL statement that describes the relation
+        :param str relation: Type of the relation between source and target node
+        :param bytes blob: A blob of the edge data object.
         :return: An Edge object
         :rtype: models.Edge
         """
         result = self.session.query(models.Edge).filter_by(bel=bel).one_or_none()
 
         if result is None:
-            result = models.Edge(graphIdentifier=graph_key, source=source, target=target, evidence=evidence, bel=bel,
-                                 relation=relation, blob=blob)
-
+            result = models.Edge(
+                graphIdentifier=graph_key,
+                source=source,
+                target=target,
+                evidence=evidence,
+                bel=bel,
+                relation=relation,
+                blob=blob
+            )
             self.session.add(result)
 
         return result
@@ -794,16 +729,11 @@ class CacheManager(BaseCacheManager):
     def get_or_create_citation(self, type, name, reference, date=None, authors=None):
         """Creates entry for given citation if it does not exist.
 
-        :param type: Citation type (e.g. PubMed)
-        :type type: str
-        :param name: Title of the publication that is cited
-        :type name: str
-        :param reference: Identifier of the given citation (e.g. PubMed id)
-        :type reference: str
-        :param date: Date of publication in ISO 8601 format
-        :type date: str
-        :param authors: List of authors separated by |
-        :type authors: str
+        :param str type: Citation type (e.g. PubMed)
+        :param str name: Title of the publication that is cited
+        :param str reference: Identifier of the given citation (e.g. PubMed id)
+        :param str date: Date of publication in ISO 8601 format
+        :param str authors: List of authors separated by |
         :return: A Citation object
         :rtype: models.Citation
         """
@@ -829,8 +759,7 @@ class CacheManager(BaseCacheManager):
     def get_or_create_author(self, name):
         """Gets an author by name, or creates one
 
-        :param name: An author's name
-        :type name: str
+        :param str name: An author's name
         :return: An Author object
         :rtype: models.Author
         """
@@ -846,10 +775,8 @@ class CacheManager(BaseCacheManager):
         """Creates a list of modification objects (models.Modification) that belong to the node described by
         node_data.
 
-        :param graph: a BEL graph
-        :type graph: pybel.BELGraph
-        :param node_data: Describes the given node and contains is_variant information
-        :type node_data: dict
+        :param BELGraph graph: A BEL graph
+        :param dict node_data: Describes the given node and contains is_variant information
         :return: A list of modification objects belonging to the given node
         :rtype: list[models.Modification]
         """
@@ -995,11 +922,15 @@ class CacheManager(BaseCacheManager):
 
         return properties
 
-    def get_graph_versions(self, name):
-        """Returns all of the versions of a graph with the given name"""
+    def get_network_versions(self, name):
+        """Returns all of the versions of a network with the given name
+
+        :param str name: The name of the network to query
+        :rtype: set[str]
+        """
         return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
 
-    def get_graph_by_name(self, name, version):
+    def get_network_by_name(self, name, version):
         """Loads most recently added graph with the given name, or allows for specification of version
 
         :param str name: The name of the network.
@@ -1007,8 +938,8 @@ class CacheManager(BaseCacheManager):
         :return: A BEL graph
         :rtype: BELGraph
         """
-        n = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
-        return from_bytes(n.blob)
+        network = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
+        return from_bytes(network.blob)
 
     def get_network_by_id(self, network_id):
         """Gets a network from the database by its identifier
@@ -1019,8 +950,8 @@ class CacheManager(BaseCacheManager):
         """
         return self.session.query(Network).get(network_id)
 
-    def drop_graph(self, network_id):
-        """Drops a graph by ID
+    def drop_network(self, network_id):
+        """Drops a network by its database identifier
 
         :param int network_id: The network's database identifier
         """
@@ -1029,18 +960,17 @@ class CacheManager(BaseCacheManager):
         self.session.query(Network).filter(Network.id == network_id).delete()
         self.session.commit()
 
-    def list_graphs(self, include_description=True):
-        """Lists network id, network name, and network version triples"""
-        if include_description:
-            return list(self.session.query(Network.id, Network.name, Network.version, Network.description).all())
-        else:
-            return list(self.session.query(Network.id, Network.name, Network.version).all())
+    def list_networks(self):
+        """Lists all networks in the cache
+
+        :rtype: list[Network]
+        """
+        return self.session.query(Network).all()
 
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
 
-        :param annotations: dictionary of {key: value}
-        :type annotations: dict
+        :param dict annotations: dictionary of {key: value}
         :return: A graph composed of the filtered edges
         :rtype: pybel.BELGraph
         """
@@ -1073,7 +1003,6 @@ class CacheManager(BaseCacheManager):
         """Builds data and identifier for list node objects.
 
         :param node_object: Node object defined in models.
-
         :return: Dictionary with 'key' and 'node' keys.
         """
         node_info = node_object.data
@@ -1100,8 +1029,7 @@ class CacheManager(BaseCacheManager):
     def get_edge_iter_by_filter(self, **annotations):
         """Returns an iterator over models.Edge object that match the given annotations
 
-        :param annotations: dictionary of {URL: values}
-        :type annotations: dict
+        :param dict annotations: dictionary of {URL: values}
         :return: An iterator over models.Edge object that match the given annotations
         :rtype: iter of models.Edge
         """
@@ -1114,8 +1042,7 @@ class CacheManager(BaseCacheManager):
     def get_graph_by_filter(self, **annotations):
         """Fills a BEL graph with edges retrieved from a filter
 
-        :param annotations: dictionary of {URL: values}
-        :type annotations: dict
+        :param dict annotations: dictionary of {URL: values}
         :return: A BEL graph
         :rtype: pybel.BELGraph
         """
@@ -1158,25 +1085,17 @@ class CacheManager(BaseCacheManager):
                  modification_name=None, as_dict_list=False):
         """Builds and runs a query over all nodes in the PyBEL cache.
         
-        :param node_id: The node ID to get
-        :type node_id: int
-        :param bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
-        :type bel: str
-        :param type: Type of the biological entity. e.g. Protein
-        :type type: str
-        :param namespace: Namespace keyword that is used in BEL. e.g. HGNC
-        :type namespace: str
-        :param name: Name of the biological entity. e.g. APP
-        :type name: str
-        :param modification_name:
-        :type modification_name: str
-        :param modification_type:
-        :type modification_type: str
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of 
+        :param int node_id: The node ID to get
+        :param str bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
+        :param str type: Type of the biological entity. e.g. Protein
+        :param str namespace: Namespace keyword that is used in BEL. e.g. HGNC
+        :param str name: Name of the biological entity. e.g. APP
+        :param str modification_name:
+        :param str modification_type:
+        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
                             :class:`models.Node` objects.
-        :type as_dict_list: bool
         :return: A list of the fitting nodes as :class:`models.Node` objects or dicts.
-        :rtype: list
+        :rtype: list[models.Node]
         """
         q = self.session.query(models.Node)
 
@@ -1190,11 +1109,11 @@ class CacheManager(BaseCacheManager):
                 q = q.filter(models.Node.type.like(type))
 
             if namespace or name:
-                q = q.join(models.NamespaceEntry)
+                q = q.join(NamespaceEntry)
                 if namespace:
-                    q = q.join(models.Namespace).filter(models.Namespace.keyword.like(namespace))
+                    q = q.join(Namespace).filter(Namespace.keyword.like(namespace))
                 if name:
-                    q = q.filter(models.NamespaceEntry.name.like(name))
+                    q = q.filter(NamespaceEntry.name.like(name))
 
             if modification_type or modification_name:
                 q = q.join(models.Modification)
@@ -1210,18 +1129,37 @@ class CacheManager(BaseCacheManager):
         else:
             return result
 
+    def count_networks(self):
+        """Counts the number of networks in the cache
+
+        :rtype: int
+        """
+        return self.session.query(func.count(models.Network.id)).scalar()
+
+    def count_nodes(self):
+        """Counts the number of nodes in the cache
+
+        :rtype: int
+        """
+        return self.session.query(func.count(models.Node.id)).scalar()
+
+    def count_edges(self):
+        """Counts the number of edges in the cache
+
+        :rtype: int
+        """
+        return self.session.query(func.count(models.Edge.id)).scalar()
+
     def get_edge(self, edge_id=None, bel=None, source=None, target=None, relation=None, citation=None,
                  evidence=None, annotation=None, property=None, as_dict_list=False):
         """Builds and runs a query over all edges in the PyBEL cache.
 
-        :param bel: BEL statement that represents the desired edge.
-        :type bel: str
+        :param str bel: BEL statement that represents the desired edge.
         :param source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`models.Node` object.
         :type source: str or models.Node
         :param target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`models.Node` object.
         :type target: str or models.Node
-        :param relation: The relation that should be present between source and target node.
-        :type relation: str
+        :param str relation: The relation that should be present between source and target node.
         :param citation: The citation that backs the edge up. It is possible to use the reference_id
                          or a models.Citation object.
         :type citation: str or models.Citation
@@ -1232,9 +1170,8 @@ class CacheManager(BaseCacheManager):
                             as string.
         :type annotation: dict or str
         :param property:
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of 
+        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
                             :class:`models.Edge` objects.
-        :type as_dict_list: bool
         :return:
         """
         q = self.session.query(models.Edge)
@@ -1320,24 +1257,18 @@ class CacheManager(BaseCacheManager):
                      evidence_text=None, as_dict_list=False):
         """Builds and runs a query over all citations in the PyBEL cache.
 
-        :param type: Type of the citation. e.g. PubMed
-        :type type: str
-        :param reference: The identifier used for the citation. e.g. PubMed_ID
-        :type reference: str
-        :param name: Title of the citation.
-        :type name: str
-        :param author: The name or a list of names of authors participated in the citation.
-        :type author: str or list
+        :param str type: Type of the citation. e.g. PubMed
+        :param str reference: The identifier used for the citation. e.g. PubMed_ID
+        :param str name: Title of the citation.
+        :param str or list[str] author: The name or a list of names of authors participated in the citation.
         :param date: Publishing date of the citation.
         :type date: str or datetime.date
-        :param evidence: Weather or not supporting text should be included in the return.
-        :type evidence: bool
+        :param bool evidence: Weather or not supporting text should be included in the return.
         :param evidence_text:
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of 
+        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
                             :class:`models.Citation` objects.
-        :type as_dict_list: bool
         :return: List of :class:`models.Citation` objects or corresponding dicts.
-        :rtype: list
+        :rtype: list[models.Citation] or dict
         """
         q = self.session.query(models.Citation)
 
@@ -1387,16 +1318,13 @@ class CacheManager(BaseCacheManager):
     def get_property(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
         """Builds and runs a query over all property entries in the database.
 
-        :param property_id: Database primary identifier.
-        :type property_id: int
-        :param participant: The participant that is effected by the property (OBJECT or SUBJECT)
-        :type participant: str
-        :param modifier: The modifier of the property.
-        :type modifier: str
-        :param as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
+        :param int property_id: Database primary identifier.
+        :param str participant: The participant that is effected by the property (OBJECT or SUBJECT)
+        :param str modifier: The modifier of the property.
+        :param bool as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
                              :class:`models.Property` objects.
-        :type as_dict_list: bool
         :return:
+        :rtype: list[models.Property]
         """
         q = self.session.query(models.Property)
 
