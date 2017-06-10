@@ -11,6 +11,7 @@ from operator import itemgetter
 import networkx as nx
 import requests
 import requests.exceptions
+from pkg_resources import get_distribution
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
@@ -182,7 +183,7 @@ def get_version():
     :return: The current PyBEL version
     :rtype: str
     """
-    return '0.5.12-dev'
+    return get_distribution('pybel').version
 
 
 def tokenize_version(version_string):
