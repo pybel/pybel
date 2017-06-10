@@ -257,71 +257,28 @@ class MetadataParser(BaseParser):
         return tokens
 
     def has_enumerated_annotation(self, annotation):
+        """Checks if this annotation is defined by an enumeration"""
         return annotation in self.annotations_dict
 
     def has_regex_annotation(self, annotation):
+        """Checks if this annotation is defined by a regular expression"""
         return annotation in self.annotations_regex
 
     def has_annotation(self, annotation):
+        """Checks if this annotation is defined"""
         return self.has_enumerated_annotation(annotation) or self.has_regex_annotation(annotation)
 
-    def raise_for_missing_annotation(self, line, position, annotation):
-        if not self.has_annotation(annotation):
-            raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
-
-    def has_enumerated_annotation_value(self, annotation, value):
-        return annotation in self.annotations_dict and value in self.annotations_dict[annotation]
-
-    def has_regex_annotation_value(self, annotation, value):
-        return annotation in self.annotations_regex and self.annotations_regex_compiled[annotation].match(value)
-
-    def has_annotation_value(self, line, position, annotation, value):
-        self.raise_for_missing_annotation(line, position, annotation)
-
-        return self.has_enumerated_annotation_value(annotation, value) or self.has_regex_annotation_value(annotation,
-                                                                                                          value)
-
-    def raise_for_missing_annotation_value(self, line, position, annotation, value):
-        self.raise_for_missing_annotation(line, position, annotation)
-
-        if self.has_enumerated_annotation(annotation) and not self.has_enumerated_annotation_value(annotation, value):
-            raise IllegalAnnotationValueWarning(self.line_number, line, position, value, annotation)
-
-        if self.has_regex_annotation(annotation) and not self.has_regex_annotation_value(annotation, value):
-            raise MissingAnnotationRegexWarning(self.line_number, line, position, value, annotation)
-
     def has_enumerated_namespace(self, namespace):
+        """Checks if this namespace is defined by an enumeration"""
         return namespace in self.namespace_dict
 
     def has_regex_namespace(self, namespace):
+        """Checks if this namespace is defined by a regular expression"""
         return namespace in self.namespace_regex
 
     def has_namespace(self, namespace):
+        """Checks if this namespace is defined"""
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
-
-    def raise_for_missing_namespace(self, line, position, namespace, name):
-        if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(self.line_number, line, position, namespace, name)
-
-    def has_enumerated_namespace_name(self, namespace, name):
-        return self.has_enumerated_namespace(namespace) and name in self.namespace_dict[namespace]
-
-    def has_regex_namespace_name(self, namespace, name):
-        return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
-
-    def has_namespace_name(self, line, position, namespace, name):
-        self.raise_for_missing_namespace(line, position, namespace, name)
-
-        return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
-
-    def raise_for_missing_name(self, line, position, namespace, name):
-        self.raise_for_missing_namespace(line, position, namespace, name)
-
-        if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
-            raise MissingNamespaceNameWarning(self.line_number, line, position, name, namespace)
-
-        if self.has_regex_namespace(namespace) and not self.has_regex_namespace_name(namespace, name):
-            raise MissingNamespaceRegexWarning(self.line_number, line, position, name, namespace)
 
     def check_version(self, line, position, s):
         """Checks that a version string is valid for BEL documents, meaning it's either in the YYYYMMDD or semantic version

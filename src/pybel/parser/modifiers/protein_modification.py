@@ -99,10 +99,8 @@ pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD,
 class PmodParser(BaseParser):
     def __init__(self, identifier_parser=None):
         """
-        :param identifier_parser: An identifier parser for checking the 3P and 5P partners
-        :type identifier_parser: IdentifierParser
+        :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
         """
-
         self.namespace_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
 
         pmod_default_ns = oneOf(list(pmod_namespace.keys())).setParseAction(self.handle_pmod_default_ns)
