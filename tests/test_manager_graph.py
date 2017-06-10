@@ -10,6 +10,7 @@ import sqlalchemy.exc
 import pybel
 from pybel import from_path
 from pybel.constants import *
+from pybel import from_database, to_database
 from pybel.manager import models
 from tests import constants
 from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin, TemporaryCacheClsMixin
@@ -26,7 +27,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         """Tests that a graph with the same name and version can't be added twice"""
         self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
 
-        self.manager.insert_graph(self.graph)
+        to_database(self.graph, connection=self.manager)
 
         self.assertEqual(1, self.manager.count_networks())
 
@@ -49,7 +50,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
             self.manager.insert_graph(self.graph)
 
-        self.manager.rollback()
+        self.manager.session.rollback()
 
         graphcopy = self.graph.copy()
         graphcopy.document[METADATA_VERSION] = '1.0.1'
@@ -58,11 +59,11 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         expected_versions = {'1.0.1', self.graph.version}
         self.assertEqual(expected_versions, set(self.manager.get_network_versions(self.graph.name)))
 
-        exact_name_version = self.manager.get_network_by_name(self.graph.name, self.graph.version)
+        exact_name_version = from_database(self.graph.name, self.graph.version, connection=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual(self.graph.version, exact_name_version.version)
 
-        exact_name_version = self.manager.get_network_by_name(self.graph.name, '1.0.1')
+        exact_name_version = from_database(self.graph.name, '1.0.1', connection=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 

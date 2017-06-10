@@ -36,18 +36,18 @@ def to_database(graph, connection=None, store_parts=False):
     try:
         manager.insert_graph(graph, store_parts=store_parts)
     except IntegrityError:
-        manager.rollback()
+        manager.session.rollback()
         log.exception('Error storing graph - other graph with same metadata'
                       ' already present. Consider incrementing the version')
     except OperationalError:
-        manager.rollback()
+        manager.session.rollback()
         log.exception('Error storing graph - operational exception')
     except Exception as e:
-        manager.rollback()
+        manager.session.rollback()
         raise e
 
 
-def from_database(name, version=None, connection=None):
+def from_database(name, version, connection=None):
     """Loads a BEL graph from a database.
 
     :param str name: The name of the graph

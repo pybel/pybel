@@ -326,14 +326,6 @@ class Network(Base):
         UniqueConstraint(name, version),
     )
 
-    @property
-    def data(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'version': self.version
-        }
-
     def __repr__(self):
         return '{} v{}'.format(self.name, self.version)
 
