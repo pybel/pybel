@@ -7,9 +7,10 @@ import datetime
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
 from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from ..constants import *
+from ..io.gpickle import from_bytes
 
 __all__ = [
     'Base',
@@ -18,10 +19,6 @@ __all__ = [
     'NamespaceEntryEquivalence',
     'Annotation',
     'AnnotationEntry',
-    'OwlNamespace',
-    'OwlNamespaceEntry',
-    'OwlAnnotation',
-    'OwlAnnotationEntry',
     'Network',
     'Node',
     'Modification',
@@ -34,18 +31,13 @@ __all__ = [
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 NAMESPACE_ENTRY_TABLE_NAME = 'pybel_namespaceEntry'
+NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalence'
+NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
+NAMESPACE_HIERARCHY_TABLE_NAME = 'pybel_namespace_hierarchy'
 
 ANNOTATION_TABLE_NAME = 'pybel_annotation'
 ANNOTATION_ENTRY_TABLE_NAME = 'pybel_annotationEntry'
-
-OWL_NAMESPACE_TABLE_NAME = 'pybel_owlNamespace'
-OWL_NAMESPACE_ENTRY_TABLE_NAME = 'pybel_owlNamespaceEntry'
-
-OWL_ANNOTATION_TABLE_NAME = 'pybel_owlAnnotation'
-OWL_ANNOTATION_ENTRY_TABLE_NAME = 'pybel_owlAnnotationEntry'
-
-NAMESPACE_EQUIVALENCE_TABLE_NAME = 'pybel_namespaceEquivalence'
-NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME = 'pybel_namespaceEquivalenceClass'
+ANNOTATION_HIERARCHY_TABLE_NAME = 'pybel_annotation_hierarchy'
 
 NETWORK_TABLE_NAME = 'pybel_network'
 NETWORK_NODE_TABLE_NAME = 'pybel_network_node'
@@ -74,6 +66,20 @@ LONGBLOB = 4294967295
 
 Base = declarative_base()
 
+namespace_hierarchy = Table(
+    NAMESPACE_HIERARCHY_TABLE_NAME,
+    Base.metadata,
+    Column('left_id', Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True),
+    Column('right_id', Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True)
+)
+
+annotation_hierarchy = Table(
+    ANNOTATION_HIERARCHY_TABLE_NAME,
+    Base.metadata,
+    Column('left_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True),
+    Column('right_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
+)
+
 
 class Namespace(Base):
     """Represents a BEL Namespace"""
@@ -82,12 +88,11 @@ class Namespace(Base):
     id = Column(Integer, primary_key=True)
     uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
-    url = Column(String(255), doc='Source url of the given namespace definition file (.belns)')
+    url = Column(String(255), nullable=False, doc='Source url of the given namespace definition file (.belns)')
     keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
     name = Column(String(255), doc='Name of the given namespace')
-    domain = Column(String(255), doc='Domain the namespace is valid for')
-    species = Column(String(255), nullable=True,
-                     doc='NCBI identifier that states for what species the namespace is valid')
+    domain = Column(String(255), doc='Domain for which this namespace is valid')
+    species = Column(String(255), nullable=True, doc='Taxonomy identifiers for which this namespace is valid')
     description = Column(Text, nullable=True, doc='Optional short description of the namespace')
     version = Column(String(255), nullable=True, doc='Version of the namespace')
     created = Column(DateTime, doc='DateTime of the creation of the namespace definition file')
@@ -102,8 +107,6 @@ class Namespace(Base):
     citation_version = Column(String(255), nullable=True)
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
-
-    entries = relationship('NamespaceEntry', back_populates="namespace")
 
     has_equivalences = Column(Boolean, default=False)
 
@@ -122,14 +125,20 @@ class NamespaceEntry(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(Text, nullable=False, doc='Name that is defined in the corresponding namespace definition file')
-    encoding = Column(String(8), nullable=True,
-                      doc='Represents the biological entities that this name is valid for (e.g. G for Gene or P for Protein)')
+    encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
     namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), index=True)
-    namespace = relationship('Namespace', back_populates='entries')
+    namespace = relationship('Namespace', backref=backref('entries'))
 
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
-    equivalence = relationship('NamespaceEntryEquivalence', back_populates='members')
+    equivalence = relationship('NamespaceEntryEquivalence', backref=backref('members'))
+
+    children = relationship(
+        'NamespaceEntry',
+        secondary=namespace_hierarchy,
+        primaryjoin=id == namespace_hierarchy.c.left_id,
+        secondaryjoin=id == namespace_hierarchy.c.right_id
+    )
 
     @property
     def data(self):
@@ -145,8 +154,6 @@ class NamespaceEntryEquivalence(Base):
 
     id = Column(Integer, primary_key=True)
     label = Column(String(255), nullable=False, unique=True, index=True)
-
-    members = relationship('NamespaceEntry', back_populates='equivalence')
 
 
 class Annotation(Base):
@@ -175,8 +182,6 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    entries = relationship('AnnotationEntry', back_populates="annotation")
-
     @property
     def data(self):
         an_data = self.__dict__
@@ -195,77 +200,14 @@ class AnnotationEntry(Base):
     label = Column(String(255), nullable=True)
 
     annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
-    annotation = relationship('Annotation', back_populates='entries')
+    annotation = relationship('Annotation', backref=backref('entries'))
 
-
-owl_namespace_relationship = Table(
-    'owl_namespace_relationship', Base.metadata,
-    Column('left_id', Integer, ForeignKey('{}.id'.format(OWL_NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True),
-    Column('right_id', Integer, ForeignKey('{}.id'.format(OWL_NAMESPACE_ENTRY_TABLE_NAME)), primary_key=True)
-)
-
-
-class OwlNamespace(Base):
-    """Represents an OWL Namespace"""
-    __tablename__ = OWL_NAMESPACE_TABLE_NAME
-
-    id = Column(Integer, primary_key=True)
-    iri = Column(String(255), unique=True)
-
-    entries = relationship('OwlNamespaceEntry', back_populates='owl')
-
-
-class OwlNamespaceEntry(Base):
-    """Represents a name within an OWL Namespace"""
-    __tablename__ = OWL_NAMESPACE_ENTRY_TABLE_NAME
-
-    id = Column(Integer, primary_key=True)
-
-    entry = Column(String(255))
-    encoding = Column(String(50))
-
-    owl_id = Column(Integer, ForeignKey('{}.id'.format(OWL_NAMESPACE_TABLE_NAME)), index=True)
-    owl = relationship('OwlNamespace', back_populates='entries')
-
-    children = relationship('OwlNamespaceEntry',
-                            secondary=owl_namespace_relationship,
-                            primaryjoin=id == owl_namespace_relationship.c.left_id,
-                            secondaryjoin=id == owl_namespace_relationship.c.right_id)
-
-
-owl_annotation_relationship = Table(
-    'owl_annotation_relationship', Base.metadata,
-    Column('left_id', Integer, ForeignKey('{}.id'.format(OWL_ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True),
-    Column('right_id', Integer, ForeignKey('{}.id'.format(OWL_ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
-)
-
-
-class OwlAnnotation(Base):
-    """Represents an OWL namespace used as an annotation"""
-    __tablename__ = OWL_ANNOTATION_TABLE_NAME
-
-    id = Column(Integer, primary_key=True)
-    iri = Column(String(255), unique=True)
-
-    entries = relationship('OwlAnnotationEntry', back_populates='owl')
-
-
-class OwlAnnotationEntry(Base):
-    """Represents a name in an OWL namespace used as an annotation"""
-    __tablename__ = OWL_ANNOTATION_ENTRY_TABLE_NAME
-
-    id = Column(Integer, primary_key=True)
-
-    entry = Column(String(255))
-    label = Column(String(255))
-
-    owl_id = Column(Integer, ForeignKey('{}.id'.format(OWL_ANNOTATION_TABLE_NAME)), index=True)
-    owl = relationship('OwlAnnotation', back_populates='entries')
-
-    children = relationship('OwlAnnotationEntry',
-                            secondary=owl_annotation_relationship,
-                            primaryjoin=id == owl_annotation_relationship.c.left_id,
-                            secondaryjoin=id == owl_annotation_relationship.c.right_id)
+    children = relationship(
+        'AnnotationEntry',
+        secondary=annotation_hierarchy,
+        primaryjoin=id == annotation_hierarchy.c.left_id,
+        secondaryjoin=id == annotation_hierarchy.c.right_id
+    )
 
 
 network_annotation = Table(
@@ -316,7 +258,7 @@ class Network(Base):
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
-    blob = Column(LargeBinary(LONGBLOB))
+    blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
     nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
     edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
@@ -328,19 +270,18 @@ class Network(Base):
         UniqueConstraint(name, version),
     )
 
-    @property
-    def data(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'version': self.version
-        }
-
     def __repr__(self):
         return '{} v{}'.format(self.name, self.version)
 
     def __str__(self):
         return repr(self)
+
+    def as_bel(self):
+        """Gets this network and loads it into a :class:`BELGraph`
+
+        :rtype: BELGraph
+        """
+        return from_bytes(self.blob)
 
 
 node_modification = Table(

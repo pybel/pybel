@@ -47,31 +47,19 @@ class BaseCacheManager(object):
             self.connection = get_cache_connection()
 
         self.engine = create_engine(self.connection, echo=echo)
+
+        #: A SQLAlchemy session maker
         self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
+
+        #: A SQLAlchemy session object
         self.session = scoped_session(self.sessionmaker)
+
         self.create_all()
 
     def create_all(self, checkfirst=True):
         """Creates the PyBEL cache's database and tables"""
-        log.debug('creating database')
         Base.metadata.create_all(self.engine, checkfirst=checkfirst)
 
     def drop_database(self):
         """Drops all data, tables, and databases for the PyBEL cache"""
         Base.metadata.drop_all(self.engine)
-
-    def rollback(self):
-        """Rolls back the session. Should be used when catching exceptions. See: http://docs.sqlalchemy.org/en/latest/orm/session_api.html#sqlalchemy.orm.session.Session.rollback"""
-        self.session.rollback()
-
-    def flush(self):
-        """Flushes the session. See: http://docs.sqlalchemy.org/en/latest/orm/session_api.html#sqlalchemy.orm.session.Session.flush"""
-        self.session.flush()
-
-    def commit(self):
-        """Commits the session. See: http://docs.sqlalchemy.org/en/latest/orm/session_api.html#sqlalchemy.orm.session.Session.commit"""
-        self.session.commit()
-
-    def close(self):
-        """Closes the session. See: http://docs.sqlalchemy.org/en/latest/orm/session_api.html#sqlalchemy.orm.session.Session.close"""
-        self.session.close()

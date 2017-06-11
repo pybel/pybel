@@ -10,6 +10,7 @@ import sqlalchemy.exc
 import pybel
 from pybel import from_path
 from pybel.constants import *
+from pybel import from_database, to_database
 from pybel.manager import models
 from tests import constants
 from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin, TemporaryCacheClsMixin
@@ -20,46 +21,49 @@ from tests.mocks import mock_bel_resources
 log = logging.getLogger(__name__)
 
 
-class TestGraphCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
+class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
         self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
 
-        self.manager.insert_graph(self.graph)
+        to_database(self.graph, connection=self.manager)
 
-        x = self.manager.list_graphs()
+        self.assertEqual(1, self.manager.count_networks())
 
-        self.assertEqual(1, len(x))
+        networks = self.manager.list_networks()
+        self.assertEqual(1, len(networks))
 
-        _, name, version, description = x[0]
+        network = networks[0]
 
-        self.assertEqual((expected_test_thorough_metadata[METADATA_NAME],
-                          expected_test_thorough_metadata[METADATA_VERSION],
-                          expected_test_thorough_metadata[METADATA_DESCRIPTION]), (name, version, description))
+        self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], network.name)
+        self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], network.version)
+        self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], network.description)
 
-        reconstituted = self.manager.get_graph_by_name(expected_test_thorough_metadata[METADATA_NAME],
-                                                       expected_test_thorough_metadata[METADATA_VERSION])
+        reconstituted = self.manager.get_network_by_name_version(
+            expected_test_thorough_metadata[METADATA_NAME],
+            expected_test_thorough_metadata[METADATA_VERSION]
+        )
         self.bel_thorough_reconstituted(reconstituted)
 
         # Test that the graph can't be added a second time
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
             self.manager.insert_graph(self.graph)
 
-        self.manager.rollback()
+        self.manager.session.rollback()
 
         graphcopy = self.graph.copy()
         graphcopy.document[METADATA_VERSION] = '1.0.1'
         self.manager.insert_graph(graphcopy)
 
         expected_versions = {'1.0.1', self.graph.version}
-        self.assertEqual(expected_versions, set(self.manager.get_graph_versions(self.graph.name)))
+        self.assertEqual(expected_versions, set(self.manager.get_network_versions(self.graph.name)))
 
-        exact_name_version = self.manager.get_graph_by_name(self.graph.name, self.graph.version)
+        exact_name_version = from_database(self.graph.name, self.graph.version, connection=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual(self.graph.version, exact_name_version.version)
 
-        exact_name_version = self.manager.get_graph_by_name(self.graph.name, '1.0.1')
+        exact_name_version = from_database(self.graph.name, '1.0.1', connection=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
@@ -121,8 +125,10 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertEqual({nea.edge_id for nea in network_edge_associations},
                          {edge.id for edge in edges})
 
-        g2 = self.manager.get_graph_by_name(expected_test_simple_metadata[METADATA_NAME],
-                                            expected_test_simple_metadata[METADATA_VERSION])
+        g2 = self.manager.get_network_by_name_version(
+            expected_test_simple_metadata[METADATA_NAME],
+            expected_test_simple_metadata[METADATA_VERSION]
+        )
         self.bel_simple_reconstituted(g2)
 
     @mock_bel_resources

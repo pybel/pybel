@@ -31,8 +31,6 @@ define_tag = Suppress(BEL_KEYWORD_DEFINE)
 
 function_tags = Word(''.join(belns_encodings))
 
-value = quote | ppc.identifier
-
 SEMANTIC_VERSION_STRING_RE = re.compile(
     '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?')
 
@@ -67,6 +65,7 @@ class MetadataParser(BaseParser):
         """
         #: This metadata parser's internal definition cache manager
         self.manager = manager
+
         #: A dictionary of cached {namespace keyword: set of values}
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
         #: A dictionary of cached {annotation keyword: set of values}
@@ -93,8 +92,8 @@ class MetadataParser(BaseParser):
         self.annotation_url_dict = {}
         #: A dictionary from {annotation keyword: OWL annotation URL}
         self.annotations_owl_dict = {}
-        #: A list of annotations that are defined ad-hoc in the BEL script
-        self.annotation_list_list = []  # TODO switch to set
+        #: A set of annotation keywords that are defined ad-hoc in the BEL script
+        self.annotation_lists = set()
 
         self.document = And([
             set_tag,
@@ -138,7 +137,7 @@ class MetadataParser(BaseParser):
         super(MetadataParser, self).__init__(self.language)
 
     def handle_document(self, line, position, tokens):
-        """Handles ``SET DOCUMENT X = "Y"`` statements"""
+        """Handles statements like ``SET DOCUMENT X = "Y"``"""
         key = tokens['key']
         value = tokens['value']
 
@@ -159,6 +158,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_url(self, line, position, tokens):
+        """Handles statements like ``DEFINE NAMESPACE X AS URL "Y"``"""
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -173,6 +173,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_owl(self, line, position, tokens):
+        """Handles statements like ``DEFINE NAMESPACE X AS OWL "Y"``"""
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -182,7 +183,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        terms = self.manager.get_namespace_owl_terms(url)
+        terms = self.manager.get_namespace_owl_terms(url, namespace)
 
         self.namespace_dict[namespace] = {term: functions for term in terms}
         self.namespace_owl_dict[namespace] = url
@@ -190,6 +191,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_pattern(self, line, position, tokens):
+        """Handles statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``"""
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -203,6 +205,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_owl(self, line, position, tokens):
+        """Handles statements like ``DEFINE ANNOTATION X AS OWL "Y"``"""
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -210,7 +213,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        terms = self.manager.get_annotation_owl_terms(url)
+        terms = self.manager.get_annotation_owl_terms(url, annotation)
 
         self.annotations_dict[annotation] = set(terms)
         self.annotations_owl_dict[annotation] = url
@@ -218,6 +221,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotations_url(self, line, position, tokens):
+        """Handles statements like ``DEFINE ANNOTATION X AS URL "Y"``"""
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -231,6 +235,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_list(self, line, position, tokens):
+        """Handles statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``"""
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -239,11 +244,12 @@ class MetadataParser(BaseParser):
         values = set(tokens['values'])
 
         self.annotations_dict[annotation] = values
-        self.annotation_list_list.append(annotation)
+        self.annotation_lists.add(annotation)
 
         return tokens
 
     def handle_annotation_pattern(self, line, position, tokens):
+        """Handles statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``"""
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -257,71 +263,28 @@ class MetadataParser(BaseParser):
         return tokens
 
     def has_enumerated_annotation(self, annotation):
+        """Checks if this annotation is defined by an enumeration"""
         return annotation in self.annotations_dict
 
     def has_regex_annotation(self, annotation):
+        """Checks if this annotation is defined by a regular expression"""
         return annotation in self.annotations_regex
 
     def has_annotation(self, annotation):
+        """Checks if this annotation is defined"""
         return self.has_enumerated_annotation(annotation) or self.has_regex_annotation(annotation)
 
-    def raise_for_missing_annotation(self, line, position, annotation):
-        if not self.has_annotation(annotation):
-            raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
-
-    def has_enumerated_annotation_value(self, annotation, value):
-        return annotation in self.annotations_dict and value in self.annotations_dict[annotation]
-
-    def has_regex_annotation_value(self, annotation, value):
-        return annotation in self.annotations_regex and self.annotations_regex_compiled[annotation].match(value)
-
-    def has_annotation_value(self, line, position, annotation, value):
-        self.raise_for_missing_annotation(line, position, annotation)
-
-        return self.has_enumerated_annotation_value(annotation, value) or self.has_regex_annotation_value(annotation,
-                                                                                                          value)
-
-    def raise_for_missing_annotation_value(self, line, position, annotation, value):
-        self.raise_for_missing_annotation(line, position, annotation)
-
-        if self.has_enumerated_annotation(annotation) and not self.has_enumerated_annotation_value(annotation, value):
-            raise IllegalAnnotationValueWarning(self.line_number, line, position, value, annotation)
-
-        if self.has_regex_annotation(annotation) and not self.has_regex_annotation_value(annotation, value):
-            raise MissingAnnotationRegexWarning(self.line_number, line, position, value, annotation)
-
     def has_enumerated_namespace(self, namespace):
+        """Checks if this namespace is defined by an enumeration"""
         return namespace in self.namespace_dict
 
     def has_regex_namespace(self, namespace):
+        """Checks if this namespace is defined by a regular expression"""
         return namespace in self.namespace_regex
 
     def has_namespace(self, namespace):
+        """Checks if this namespace is defined"""
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
-
-    def raise_for_missing_namespace(self, line, position, namespace, name):
-        if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(self.line_number, line, position, namespace, name)
-
-    def has_enumerated_namespace_name(self, namespace, name):
-        return self.has_enumerated_namespace(namespace) and name in self.namespace_dict[namespace]
-
-    def has_regex_namespace_name(self, namespace, name):
-        return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
-
-    def has_namespace_name(self, line, position, namespace, name):
-        self.raise_for_missing_namespace(line, position, namespace, name)
-
-        return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
-
-    def raise_for_missing_name(self, line, position, namespace, name):
-        self.raise_for_missing_namespace(line, position, namespace, name)
-
-        if self.has_enumerated_namespace(namespace) and not self.has_enumerated_namespace_name(namespace, name):
-            raise MissingNamespaceNameWarning(self.line_number, line, position, name, namespace)
-
-        if self.has_regex_namespace(namespace) and not self.has_regex_namespace_name(namespace, name):
-            raise MissingNamespaceRegexWarning(self.line_number, line, position, name, namespace)
 
     def check_version(self, line, position, s):
         """Checks that a version string is valid for BEL documents, meaning it's either in the YYYYMMDD or semantic version

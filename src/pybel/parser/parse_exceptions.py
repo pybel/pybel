@@ -65,6 +65,13 @@ class NamespaceIdentifierWarning(NameWarning):
     """The base class for warnings related to namespace:name identifiers"""
 
     def __init__(self, line_number, line, position, namespace, name):
+        """
+        :param int line_number: The line number of the line that caused the exception
+        :param str line: The line that caused the exception
+        :param int position: The line's position of the exception
+        :param str namespace: The namespace of the identifier
+        :param str name: The name of the identifier
+        """
         super(NamespaceIdentifierWarning, self).__init__(line_number, line, position, name, namespace)
         self.namespace = namespace
 

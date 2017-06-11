@@ -6,7 +6,7 @@ import unittest
 import networkx as nx
 
 from pybel.io.line_utils import sanitize_file_lines
-from pybel.parser.utils import check_stability, any_subdict_matches, cartesian_dictionary
+from pybel.parser.utils import any_subdict_matches, cartesian_dictionary
 from pybel.utils import ensure_quotes, subdict_matches
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -132,81 +132,6 @@ class TestUtils(unittest.TestCase):
         d = {'relation': 'yup'}
 
         self.assertTrue(any_subdict_matches(g.edge[1][2], d))
-
-    def test_check_stability_good(self):
-        d = {
-            'A': {1, 2, 3},
-            'B': {4, 5, 6}
-        }
-
-        m = {
-            'A': {
-                1: ('B', 4),
-                2: ('B', 5)
-            }
-        }
-
-        self.assertTrue(check_stability(d, m))
-
-    def test_check_stability_missingNs(self):
-        d = {
-            'A': {1, 2, 3},
-            'B': {4, 5, 6}
-        }
-
-        m = {
-            'C': {
-                1: ('B', 4),
-                2: ('B', 5)
-            }
-        }
-
-        self.assertFalse(check_stability(d, m))
-
-    def test_check_stability_MissingValue(self):
-        d = {
-            'A': {1, 2, 3},
-            'B': {4, 5, 6}
-        }
-
-        m = {
-            'A': {
-                1: ('B', 4),
-                0: ('B', 5)
-            }
-        }
-
-        self.assertFalse(check_stability(d, m))
-
-    def test_check_stability_MissingNsLink(self):
-        d = {
-            'A': {1, 2, 3},
-            'B': {4, 5, 6}
-        }
-
-        m = {
-            'A': {
-                1: ('C', 4),
-                2: ('B', 5)
-            }
-        }
-
-        self.assertFalse(check_stability(d, m))
-
-    def test_check_stability_MissingMapValue(self):
-        d = {
-            'A': {1, 2, 3},
-            'B': {4, 5, 6}
-        }
-
-        m = {
-            'A': {
-                1: ('B', 4),
-                2: ('B', 9)
-            }
-        }
-
-        self.assertFalse(check_stability(d, m))
 
     def test_cartesian_dictionary(self):
         d = {

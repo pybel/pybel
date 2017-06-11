@@ -57,8 +57,7 @@ class FusionParser(BaseParser):
 
     def __init__(self, identifier_parser=None):
         """
-        :param identifier_parser: An identifier parser for checking the 3P and 5P partners
-        :type identifier_parser: IdentifierParser
+        :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
         """
         self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.language

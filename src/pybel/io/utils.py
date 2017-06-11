@@ -27,10 +27,8 @@ def ensure_version(graph, check_version=True):
     """Ensure that the graph was produced by a minimum of PyBEL v:data:`PYBEL_MINIMUM_IMPORT_VERSION`, which was the 
     last release with a change in the graph data definition.
 
-    :param graph: A BEL Graph
-    :type graph: BELGraph
-    :param check_version: Should the version be checked, or should the graph just be returned without inspection
-    :type check_version: bool
+    :param BELGraph graph: A BEL Graph
+    :param bool check_version: Should the version be checked, or should the graph just be returned without inspection
     """
     if check_version:
         raise_for_old_graph(graph)

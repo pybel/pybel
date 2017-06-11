@@ -15,34 +15,6 @@ log = logging.getLogger('pybel')
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-# TODO move to pybel_tools
-def check_stability(ns_dict, ns_mapping):
-    """Check the stability of namespace mapping
-
-    :param ns_dict: dict of {name: set of values}
-    :param ns_mapping: dict of {name: {value: (other_name, other_value)}}
-    :return: if the mapping is stable
-    :rtype: Boolean
-    """
-    flag = True
-    for ns, kv in ns_mapping.items():
-        if ns not in ns_dict:
-            log.warning('missing namespace %s', ns)
-            flag = False
-            continue
-        for k, (k_ns, v_val) in kv.items():
-            if k not in ns_dict[ns]:
-                log.warning('missing value %s', k)
-                flag = False
-            if k_ns not in ns_dict:
-                log.warning('missing namespace link %s', k_ns)
-                flag = False
-            elif v_val not in ns_dict[k_ns]:
-                log.warning('missing value %s in namespace %s', v_val, k_ns)
-                flag = False
-    return flag
-
-
 def any_subdict_matches(dict_of_dicts, query_dict):
     """Checks if dictionary target_dict matches one of the subdictionaries of a
 
