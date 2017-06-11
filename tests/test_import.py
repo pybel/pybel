@@ -8,14 +8,17 @@ import unittest
 from pathlib import Path
 
 import networkx as nx
+from six import BytesIO, StringIO
 
 from pybel import BELGraph
 from pybel import to_bel_lines, from_lines
 from pybel import to_bytes, from_bytes, to_graphml, from_path, from_url
 from pybel import to_cx, from_cx, to_cx_jsons, from_cx_jsons
 from pybel import to_json, from_json, to_jsons, from_jsons
-from pybel import to_ndex, from_ndex
+from pybel import to_ndex, from_ndex, to_pickle, from_pickle, to_json_file, from_json_file
 from pybel.constants import *
+from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_fmt
+from pybel.io.utils import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_tuple
@@ -90,6 +93,13 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         graph = from_bytes(graph_bytes)
         self.bel_thorough_reconstituted(graph)
 
+    def test_thorough_pickle(self):
+        bio = BytesIO()
+        to_pickle(self.thorough_graph, bio)
+        bio.seek(0)
+        graph = from_pickle(bio)
+        self.bel_thorough_reconstituted(graph)
+
     def test_thorough_json(self):
         graph_json_dict = to_json(self.thorough_graph)
         graph = from_json(graph_json_dict)
@@ -98,6 +108,13 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_jsons(self):
         graph_json_str = to_jsons(self.thorough_graph)
         graph = from_jsons(graph_json_str)
+        self.bel_thorough_reconstituted(graph)
+
+    def test_thorough_json_file(self):
+        sio = StringIO()
+        to_json_file(self.thorough_graph, sio)
+        sio.seek(0)
+        graph = from_json_file(sio)
         self.bel_thorough_reconstituted(graph)
 
     def test_thorough_graphml(self):
@@ -399,6 +416,25 @@ class TestFull(TestTokenParserBase):
             CITATION: test_citation_dict
         }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
+
+
+class TestRandom(unittest.TestCase):
+    def test_import_warning(self):
+        """Tests an error is thrown when the version is set wrong"""
+        graph = BELGraph()
+
+        # Much with stuff that would normally be set
+        graph.graph[GRAPH_PYBEL_VERSION] = '0.0.0'
+
+        graph_bytes = to_bytes(graph)
+
+        with self.assertRaises(ImportVersionWarning) as cm:
+            from_bytes(graph_bytes)
+
+            self.assertEqual(
+                import_version_message_fmt.format('0.0.0', PYBEL_MINIMUM_IMPORT_VERSION),
+                str(cm.exception)
+            )
 
 
 if __name__ == '__main__':
