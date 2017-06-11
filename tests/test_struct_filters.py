@@ -3,7 +3,14 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.struct.filters import filter_nodes, keep_node_permissive, filter_edges, keep_edge_permissive
+from pybel.struct.filters import (
+    keep_node_permissive,
+    filter_edges,
+    keep_edge_permissive,
+    get_nodes,
+    count_passed_node_filter,
+    count_passed_edge_filter,
+)
 
 
 def make_edge_iterator_set(it):
@@ -29,15 +36,15 @@ class TestNodeFilters(unittest.TestCase):
         self.all_graph_nodes = {1, 2}
 
     def test_no_node_filter_argument(self):
-        nodes = set(filter_nodes(self.universe))
+        nodes = get_nodes(self.universe)
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_keep_node_permissive(self):
-        nodes = set(filter_nodes(self.universe, keep_node_permissive))
+        nodes = get_nodes(self.universe, keep_node_permissive)
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_concatenate_single_node_filter(self):
-        nodes = set(filter_nodes(self.universe, [keep_node_permissive]))
+        nodes = get_nodes(self.universe, [keep_node_permissive])
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_concatenate_multiple_node_filters(self):
@@ -47,8 +54,10 @@ class TestNodeFilters(unittest.TestCase):
         def big(graph, node):
             return node > 3
 
-        nodes = set(filter_nodes(self.universe, [even, big]))
+        nodes = get_nodes(self.universe, [even, big])
         self.assertEqual({4, 6, 8}, nodes)
+
+        self.assertEqual(3, count_passed_node_filter(self.universe, [even, big]))
 
     def test_no_edge_filter(self):
         edges = make_edge_iterator_set(filter_edges(self.graph))
@@ -71,6 +80,8 @@ class TestNodeFilters(unittest.TestCase):
 
         edges = make_edge_iterator_set(filter_edges(self.universe, [has_odd_source, has_even_target]))
         self.assertEqual({(1, 2), (1, 4), (5, 6)}, edges)
+
+        self.assertEqual(3, count_passed_edge_filter(self.universe, [has_odd_source, has_even_target]))
 
 
 if __name__ == '__main__':

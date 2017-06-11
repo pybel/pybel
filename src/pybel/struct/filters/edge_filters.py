@@ -17,6 +17,7 @@ __all__ = [
     'keep_edge_permissive',
     'concatenate_edge_filters',
     'filter_edges',
+    'count_passed_edge_filter',
     'filter_provenance_edges',
 ]
 
@@ -91,6 +92,18 @@ def filter_edges(graph, filters=None):
         for u, v, k, d in graph.edges_iter(keys=True, data=True):
             if concatenated_edge_filter(graph, u, v, k, d):
                 yield u, v, k, d
+
+
+def count_passed_edge_filter(graph, filters=None):
+    """Returns the number of edges passing a given set of filters
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param filters: A filter or list of filters
+    :type filters: types.FunctionType or list[types.FunctionType] or tuple[types.FunctionType]
+    :return: The number of edges passing a given set of filters
+    :rtype: int
+    """
+    return sum(1 for _ in filter_edges(graph, filters))
 
 
 def edge_has_provenance(graph, u, v, k, d):
