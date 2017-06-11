@@ -182,7 +182,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        terms = self.manager.get_namespace_owl_terms(url)
+        terms = self.manager.get_namespace_owl_terms(url, namespace)
 
         self.namespace_dict[namespace] = {term: functions for term in terms}
         self.namespace_owl_dict[namespace] = url
@@ -210,7 +210,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        terms = self.manager.get_annotation_owl_terms(url)
+        terms = self.manager.get_annotation_owl_terms(url, annotation)
 
         self.annotations_dict[annotation] = set(terms)
         self.annotations_owl_dict[annotation] = url

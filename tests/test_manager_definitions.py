@@ -59,9 +59,9 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
     @mock_parse_owl_pybel
     def test_insert_owl(self, m1, m2):
         self.manager.ensure_namespace_owl(wine_iri)
-        self.assertIn(wine_iri, self.manager.namespace_term_cache)
-        self.assertIn('ChateauMorgon', self.manager.namespace_term_cache[wine_iri])
-        self.assertIn('Winery', self.manager.namespace_term_cache[wine_iri])
+        self.assertIn(wine_iri, self.manager.namespace_cache)
+        self.assertIn('ChateauMorgon', self.manager.namespace_cache[wine_iri])
+        self.assertIn('Winery', self.manager.namespace_cache[wine_iri])
 
 
 class TestEquivalenceManager(FleetingTemporaryCacheMixin):

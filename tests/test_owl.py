@@ -10,10 +10,18 @@ from pybel.constants import *
 from pybel.manager.utils import parse_owl, OWLParser
 from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
-from tests.constants import FleetingTemporaryCacheMixin, TestGraphMixin
-from tests.constants import test_bel_extensions, wine_iri, pizza_iri, test_owl_pizza, test_owl_wine, \
-    expected_test_bel_4_metadata, HGNC_URL
-from tests.constants import test_owl_ado
+from tests.constants import (
+    FleetingTemporaryCacheMixin,
+    TestGraphMixin,
+    test_bel_extensions,
+    wine_iri,
+    pizza_iri,
+    test_owl_pizza,
+    test_owl_wine,
+    expected_test_bel_4_metadata,
+    HGNC_URL,
+    test_owl_ado
+)
 from tests.mocks import mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_rdf
 
 EXPECTED_PIZZA_NODES = {
@@ -345,7 +353,7 @@ class TestOwlManager(TestGraphMixin, FleetingTemporaryCacheMixin):
         self.manager.ensure_namespace_owl(pizza_iri)
 
         entries = self.manager.get_namespace_owl_terms(pizza_iri)
-        self.assertEqual(EXPECTED_PIZZA_NODES, entries)
+        self.assertEqual(EXPECTED_PIZZA_NODES, set(entries))
 
         edges = self.manager.get_namespace_owl_edges(pizza_iri)
         self.assertEqual(EXPECTED_PIZZA_EDGES, edges)
@@ -359,7 +367,7 @@ class TestOwlManager(TestGraphMixin, FleetingTemporaryCacheMixin):
         self.manager.ensure_annotation_owl(pizza_iri)
 
         entries = self.manager.get_annotation_owl_terms(pizza_iri)
-        self.assertEqual(EXPECTED_PIZZA_NODES, entries)
+        self.assertEqual(EXPECTED_PIZZA_NODES, set(entries))
 
         edges = self.manager.get_annotation_owl_edges(pizza_iri)
         self.assertEqual(EXPECTED_PIZZA_EDGES, edges)
