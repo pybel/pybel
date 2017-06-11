@@ -23,22 +23,20 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-# FIXME remove this, replace with edges_iter
-def get_neighbors_by_path_type(graph, node, relation):
+def get_targets_by_relation(graph, node, relation):
     """Gets the set of neighbors of a given node that have a relation of the given type
 
-    :param graph: A BEL network
-    :type graph: BELGraph
-    :param node: a node from the BEL network
+    :param BELGraph graph: A BEL network
+    :param tuple node: A BEL node
     :param relation: the relation to follow from the given node
-    :return:
+    :return: A set of BEL nodes
+    :rtype: set[tuple]
     """
-    result = []
-    for neighbor in graph.edge[node]:
-        for data in graph.edge[node][neighbor].values():
-            if data[RELATION] == relation:
-                result.append(neighbor)
-    return set(result)
+    return {
+        target
+        for _, target, data in graph.out_edges_iter(node, data=True)
+        if data[RELATION] == relation
+    }
 
 
 def postpend_location(bel_string, location_model):
@@ -56,7 +54,12 @@ def postpend_location(bel_string, location_model):
     """
     if not all(k in location_model for k in {NAMESPACE, NAME}):
         raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
-    return "{}, loc({}:{}))".format(bel_string[:-1], location_model[NAMESPACE], ensure_quotes(location_model[NAME]))
+
+    return "{}, loc({}:{}))".format(
+        bel_string[:-1],
+        location_model[NAMESPACE],
+        ensure_quotes(location_model[NAME])
+    )
 
 
 def decanonicalize_variant(tokens):
@@ -103,14 +106,14 @@ def decanonicalize_node(graph, node):
     data = graph.node[node]
 
     if data[FUNCTION] == REACTION:
-        reactants = get_neighbors_by_path_type(graph, node, HAS_REACTANT)
+        reactants = get_targets_by_relation(graph, node, HAS_REACTANT)
         reactants_canon = sorted(map(lambda n: decanonicalize_node(graph, n), reactants))
-        products = get_neighbors_by_path_type(graph, node, HAS_PRODUCT)
+        products = get_targets_by_relation(graph, node, HAS_PRODUCT)
         products_canon = sorted(map(lambda n: decanonicalize_node(graph, n), products))
         return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
 
     if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
-        members = get_neighbors_by_path_type(graph, node, HAS_COMPONENT)
+        members = get_targets_by_relation(graph, node, HAS_COMPONENT)
         members_canon = sorted(map(lambda n: decanonicalize_node(graph, n), members))
         return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members_canon))
 

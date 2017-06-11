@@ -1096,6 +1096,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual(expected_test_thorough_metadata, gmd)
             self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], graph.version)
+            self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description)
 
         if check_provenance:
             self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
@@ -1119,7 +1120,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         :param BELGraph graph: A BEL graph
         :param bool check_metadata: Check the graph's document section is correct
         :param bool check_warnings: Check the graph produced the expected warnings
-        :return: 
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -1128,6 +1128,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual(expected_test_slushy_metadata, graph.document)
             self.assertEqual(expected_test_slushy_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_slushy_metadata[METADATA_VERSION], graph.version)
+            self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description)
 
         if check_warnings:
             expected_warnings = [
