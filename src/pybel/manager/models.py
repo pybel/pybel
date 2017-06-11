@@ -10,6 +10,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
 from ..constants import *
+from ..io.gpickle import from_bytes
 
 __all__ = [
     'Base',
@@ -314,7 +315,7 @@ class Network(Base):
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
-    blob = Column(LargeBinary(LONGBLOB))
+    blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
     nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
     edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
@@ -331,6 +332,13 @@ class Network(Base):
 
     def __str__(self):
         return repr(self)
+
+    def as_bel(self):
+        """Gets this network and loads it into a :class:`BELGraph`
+
+        :rtype: BELGraph
+        """
+        return from_bytes(self.blob)
 
 
 node_modification = Table(
