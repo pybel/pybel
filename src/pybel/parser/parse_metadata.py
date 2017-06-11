@@ -67,6 +67,7 @@ class MetadataParser(BaseParser):
         """
         #: This metadata parser's internal definition cache manager
         self.manager = manager
+
         #: A dictionary of cached {namespace keyword: set of values}
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
         #: A dictionary of cached {annotation keyword: set of values}
@@ -138,7 +139,7 @@ class MetadataParser(BaseParser):
         super(MetadataParser, self).__init__(self.language)
 
     def handle_document(self, line, position, tokens):
-        """Handles ``SET DOCUMENT X = "Y"`` statements"""
+        """Handles statements like ``SET DOCUMENT X = "Y"``"""
         key = tokens['key']
         value = tokens['value']
 
@@ -159,6 +160,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_url(self, line, position, tokens):
+        """Handles statements like ``DEFINE NAMESPACE X AS URL "Y"``"""
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -173,6 +175,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_owl(self, line, position, tokens):
+        """Handles statements like ``DEFINE NAMESPACE X AS OWL "Y"``"""
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -190,6 +193,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_pattern(self, line, position, tokens):
+        """Handles statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``"""
         namespace = tokens['name']
 
         if self.has_namespace(namespace):
@@ -203,6 +207,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_owl(self, line, position, tokens):
+        """Handles statements like ``DEFINE ANNOTATION X AS OWL "Y"``"""
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -218,6 +223,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotations_url(self, line, position, tokens):
+        """Handles statements like ``DEFINE ANNOTATION X AS URL "Y"``"""
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -231,6 +237,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_list(self, line, position, tokens):
+        """Handles statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``"""
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
@@ -244,6 +251,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_pattern(self, line, position, tokens):
+        """Handles statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``"""
         annotation = tokens['name']
 
         if self.has_annotation(annotation):
