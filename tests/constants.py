@@ -1128,7 +1128,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual(expected_test_slushy_metadata, graph.document)
             self.assertEqual(expected_test_slushy_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_slushy_metadata[METADATA_VERSION], graph.version)
-            self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description)
+            self.assertEqual(expected_test_slushy_metadata[METADATA_DESCRIPTION], graph.description)
 
         if check_warnings:
             expected_warnings = [

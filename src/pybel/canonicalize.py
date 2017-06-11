@@ -12,6 +12,7 @@ from operator import itemgetter
 
 from .constants import *
 from .parser.language import rev_abundance_labels
+from .struct.filters import filter_provenance_edges
 from .utils import ensure_quotes, flatten_citation, sort_edges, get_version
 
 __all__ = [
@@ -243,9 +244,8 @@ def to_bel_lines(graph):
     yield '###############################################\n'
 
     # sort by citation, then supporting text
-    qualified_edges = filter(lambda u_v_k_d: CITATION in u_v_k_d[3] and EVIDENCE in u_v_k_d[3],
-                             graph.edges_iter(data=True, keys=True))
-    qualified_edges = sorted(qualified_edges, key=lambda u_v_k_d: sort_edges(u_v_k_d[3]))
+    qualified_edges_iter = filter_provenance_edges(graph)
+    qualified_edges = sorted(qualified_edges_iter, key=lambda u_v_k_d: sort_edges(u_v_k_d[3]))
 
     for citation, citation_edges in itt.groupby(qualified_edges, key=lambda t: flatten_citation(t[3][CITATION])):
         yield 'SET Citation = {{{}}}'.format(citation)
