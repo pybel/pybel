@@ -40,7 +40,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], network.version)
         self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], network.description)
 
-        reconstituted = self.manager.get_network_by_name(
+        reconstituted = self.manager.get_network_by_name_version(
             expected_test_thorough_metadata[METADATA_NAME],
             expected_test_thorough_metadata[METADATA_VERSION]
         )
@@ -125,7 +125,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertEqual({nea.edge_id for nea in network_edge_associations},
                          {edge.id for edge in edges})
 
-        g2 = self.manager.get_network_by_name(
+        g2 = self.manager.get_network_by_name_version(
             expected_test_simple_metadata[METADATA_NAME],
             expected_test_simple_metadata[METADATA_VERSION]
         )

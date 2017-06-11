@@ -21,7 +21,7 @@ from .models import Network, Annotation, Namespace, NamespaceEntryEquivalence, N
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
-from ..io.gpickle import to_bytes, from_bytes
+from ..io.gpickle import to_bytes
 from ..struct import BELGraph
 from ..utils import get_bel_resource, parse_datetime, subdict_matches
 
@@ -72,6 +72,10 @@ class NamespaceManager(BaseCacheManager):
         self.namespace_edge_cache = {}
         self.namespace_graph_cache = {}
 
+    def list_namespaces(self):
+        """Returns a list of all namespace keyword/url pairs"""
+        return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
+
     def drop_namespaces(self):
         """Drops all namespaces"""
         self.namespace_cache.clear()
@@ -86,7 +90,7 @@ class NamespaceManager(BaseCacheManager):
         self.session.query(Namespace).delete()
         self.session.commit()
 
-    def drop_namespace(self, url):
+    def drop_namespace_by_url(self, url):
         """Drops the namespace at the given URL. Won't work if the edge store is in use.
 
         :param str url: The URL of the namespace to drop
@@ -186,22 +190,25 @@ class NamespaceManager(BaseCacheManager):
             # self.ensure_namespace makes sure it's in the cache if its not cachable
             return self.namespace_cache[url]
 
-    def get_namespace_data(self, url=None):
-        """Returns a list of the locations of the stored namespaces and annotations
+    def get_namespace_entry(self, url, value):
+        """Gets a given NamespaceEntry object.
 
-        :return: A list of all namespaces in the relational database.
-        :rtype: list
-
+        :param str url: The url of the namespace source
+        :param str value: The value of the namespace from the given url's document
+        :return: An NamespaceEntry object
+        :rtype: NamespaceEntry
         """
-        if url:
-            definition = self.session.query(Namespace).filter_by(url=url).one_or_none()
-            return definition.data
-        else:
-            return [definition.data for definition in self.session.query(Namespace).all()]
+        namespace = self.session.query(Namespace).filter_by(url=url).one()
 
-    def list_namespaces(self):
-        """Returns a list of all namespace keyword/url pairs"""
-        return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
+        # FIXME @kono reinvestigate this
+        try:
+            namespace_entry = self.session.query(NamespaceEntry). \
+                filter_by(namespace=namespace, name=value).one_or_none()
+        except:
+            namespace_entry = self.session.query(NamespaceEntry). \
+                filter_by(namespace=namespace, name=value).first()
+
+        return namespace_entry
 
 
 class AnnotationManager(BaseCacheManager):
@@ -307,17 +314,16 @@ class AnnotationManager(BaseCacheManager):
         self.ensure_annotation(url)
         return self.annotation_cache[url]
 
-    def get_annotation_data(self, url=None):
-        """Returns a list of the locations of the stored namespaces and annotations
+    def get_annotation_entry(self, url, value):
+        """Gets a given AnnotationEntry object.
 
-        :return: A list of all annotations in the relational database.
-        :rtype: list
+        :param str url: The url of the annotation source
+        :param str value: The value of the annotation from the given url's document
+        :return: An AnnotationEntry object
+        :rtype: models.AnnotationEntry
         """
-        if url:
-            definition = self.session.query(models.Annotation).filter_by(url=url).one_or_none()
-            return definition.data
-        else:
-            return [definition.data for definition in self.session.query(models.Annotation).all()]
+        annotation = self.session.query(models.Annotation).filter_by(url=url).one()
+        return self.session.query(models.AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
 
 class EquivalenceManager(NamespaceManager):
@@ -407,7 +413,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).all()
 
-    def drop_network(self, network_id):
+    def drop_network_by_id(self, network_id):
         """Drops a network by its database identifier
 
         :param int network_id: The network's database identifier
@@ -421,6 +427,50 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Drops all networks"""
         self.session.query(Network).delete()
         self.session.commit()
+
+    def get_network_versions(self, name):
+        """Returns all of the versions of a network with the given name
+
+        :param str name: The name of the network to query
+        :rtype: set[str]
+        """
+        return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
+
+    def get_network_by_name_version(self, name, version):
+        """Loads most recently added graph with the given name, or allows for specification of version
+
+        :param str name: The name of the network.
+        :param str version: The version string of the network.
+        :return: A BEL graph
+        :rtype: BELGraph
+        """
+        network = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
+        return network.as_bel()
+
+    def get_networks_by_name(self, name):
+        """Gets all networks with the given name. Useful for getting all versions of a given network.
+
+        :param str name: The name of the network
+        :rtype: list[Network]
+        """
+        return self.session.query(Network).filter(Network.name.like(name)).all()
+
+    def get_network_by_id(self, network_id):
+        """Gets a network from the database by its identifier.
+
+        :param int network_id: The network's database identifier
+        :return: A Network object
+        :rtype: Network
+        """
+        return self.session.query(Network).get(network_id)
+
+    def get_networks_by_ids(self, network_ids):
+        """Gets a list of networks with the given identifiers. Note: order is not necessarily preserved.
+
+        :param iter[int] network_ids: The identifiers of networks in the database
+        :rtype: list[Network]
+        """
+        return self.session.query(Network).filter(Network.id in set(network_ids)).all()
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
@@ -460,136 +510,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         raise NotImplementedError
 
 
-class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, AnnotationManager):
-    """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
-    SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
-    """
-
-    # NAMESPACE OWL MANAGEMENT
-
-    def _insert_owl(self, iri, owl_model, owl_entry_model):
-        """Helper function for inserting an ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        log.info('inserting owl %s', iri)
-
-        graph = parse_owl(iri)
-        owl = owl_model(iri=iri)
-
-        entries = {node: owl_entry_model(entry=node) for node in graph.nodes_iter()}
-
-        owl.entries = list(entries.values())
-
-        for u, v in graph.edges_iter():
-            entries[u].children.append(entries[v])
-
-        self.session.add(owl)
-        self.session.commit()
-
-        return owl
-
-    def insert_namespace_owl(self, iri):
-        """Caches an ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        return self._insert_owl(iri, models.OwlNamespace, models.OwlNamespaceEntry)
-
-    def insert_annotation_owl(self, iri):
-        """Caches an ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        return self._insert_owl(iri, models.OwlAnnotation, models.OwlAnnotationEntry)
-
-    def ensure_namespace_owl(self, iri):
-        """Caches an ontology at the given IRI if it is not already in the cache
-
-        :param str iri: the location of the ontology
-        """
-        if iri in self.namespace_term_cache:
-            return
-
-        results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one_or_none()
-        if results is None:
-            results = self.insert_namespace_owl(iri)
-
-        self.namespace_term_cache[iri] = set(entry.entry for entry in results.entries)
-        self.namespace_edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
-
-        graph = nx.DiGraph()
-        graph.add_edges_from(self.namespace_edge_cache[iri])
-        self.namespace_graph_cache[iri] = graph
-
-    def ensure_annotation_owl(self, iri):
-        if iri in self.annotation_term_cache:
-            return
-
-        results = self.session.query(models.OwlAnnotation).filter(models.OwlAnnotation.iri == iri).one_or_none()
-        if results is None:
-            results = self.insert_annotation_owl(iri)
-
-        self.annotation_term_cache[iri] = set(entry.entry for entry in results.entries)
-        self.annotation_edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
-
-        graph = nx.DiGraph()
-        graph.add_edges_from(self.annotation_edge_cache[iri])
-        self.annotation_graph_cache[iri] = graph
-
-    def get_namespace_owl_terms(self, iri):
-        """Gets a set of classes and individuals in the ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        self.ensure_namespace_owl(iri)
-        return self.namespace_term_cache[iri]
-
-    def get_annotation_owl_terms(self, iri):
-        """Gets a set of classes and individuals in the ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        self.ensure_annotation_owl(iri)
-        return self.annotation_term_cache[iri]
-
-    def get_namespace_owl_edges(self, iri):
-        """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        self.ensure_namespace_owl(iri)
-        return self.namespace_edge_cache[iri]
-
-    def get_annotation_owl_edges(self, iri):
-        """Gets a set of classes and individuals in the ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        self.ensure_annotation_owl(iri)
-        return self.annotation_edge_cache[iri]
-
-    def get_namespace_owl_graph(self, iri):
-        """Gets the graph representing the ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        self.ensure_namespace_owl(iri)
-        return self.namespace_graph_cache[iri]
-
-    def get_annotation_owl_graph(self, iri):
-        """Gets the graph representing the ontology at the given IRI
-
-        :param str iri: the location of the ontology
-        """
-        self.ensure_annotation_owl(iri)
-        return self.annotation_graph_cache[iri]
-
-    def get_namespace_owl_urls(self):
-        """Returns a list of the locations of the stored ontologies"""
-        return [owl.iri for owl in self.session.query(models.OwlNamespace).all()]
-
-    # Graph Cache Manager
+class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
+    """Manages the edge store"""
 
     def store_graph_parts(self, network, graph):
         """Stores the given graph into the edge store.
@@ -630,7 +552,7 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
             for key, value in data[ANNOTATIONS].items():
                 if key in graph.annotation_url:
                     url = graph.annotation_url[key]
-                    annotation = self.get_bel_annotation_entry(url, value)
+                    annotation = self.get_annotation_entry(url, value)
                     if annotation not in edge.annotations:
                         edge.annotations.append(annotation)
 
@@ -646,37 +568,6 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
                 network.citations.append(citation)
 
             self.session.flush()
-
-    def get_bel_namespace_entry(self, url, value):
-        """Gets a given NamespaceEntry object.
-
-        :param str url: The url of the namespace source
-        :param str value: The value of the namespace from the given url's document
-        :return: An NamespaceEntry object
-        :rtype: NamespaceEntry
-        """
-        namespace = self.session.query(Namespace).filter_by(url=url).one()
-
-        # FIXME @kono reinvestigate this
-        try:
-            namespace_entry = self.session.query(NamespaceEntry).filter_by(namespace=namespace,
-                                                                           name=value).one_or_none()
-        except:
-            namespace_entry = self.session.query(NamespaceEntry).filter_by(namespace=namespace,
-                                                                           name=value).first()
-
-        return namespace_entry
-
-    def get_bel_annotation_entry(self, url, value):
-        """Gets a given AnnotationEntry object.
-
-        :param str url: The url of the annotation source
-        :param str value: The value of the annotation from the given url's document
-        :return: An AnnotationEntry object
-        :rtype: models.AnnotationEntry
-        """
-        annotation = self.session.query(models.Annotation).filter_by(url=url).one()
-        return self.session.query(models.AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
     def get_or_create_evidence(self, citation, text):
         """Creates entry and object for given evidence if it does not exist.
@@ -714,7 +605,7 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
             if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
                 namespace = node_data[NAMESPACE]
                 url = graph.namespace_url[namespace]
-                namespace_entry = self.get_bel_namespace_entry(url, node_data[NAME])
+                namespace_entry = self.get_namespace_entry(url, node_data[NAME])
                 result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob)
 
             elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
@@ -823,10 +714,10 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
             mod_type = FUSION
             node_data = node_data[FUSION]
             p3_namespace_url = graph.namespace_url[node_data[PARTNER_3P][NAMESPACE]]
-            p3_namespace_entry = self.get_bel_namespace_entry(p3_namespace_url, node_data[PARTNER_3P][NAME])
+            p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, node_data[PARTNER_3P][NAME])
 
             p5_namespace_url = graph.namespace_url[node_data[PARTNER_5P][NAMESPACE]]
-            p5_namespace_entry = self.get_bel_namespace_entry(p5_namespace_url, node_data[PARTNER_5P][NAME])
+            p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, node_data[PARTNER_5P][NAME])
 
             fusion_dict = {
                 'modType': mod_type,
@@ -934,8 +825,7 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
                             namespace_url = GOCC_LATEST
                         else:
                             namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
-                        property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
-                                                                                       effect_value[NAME])
+                        property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, effect_value[NAME])
                     else:
                         property_dict['propValue'] = effect_value
 
@@ -943,8 +833,8 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
 
             elif modifier == LOCATION:
                 namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
-                property_dict['namespaceEntry'] = self.get_bel_namespace_entry(namespace_url,
-                                                                               participant_data[LOCATION][NAME])
+                property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url,
+                                                                           participant_data[LOCATION][NAME])
                 property_list.append(property_dict)
 
             else:
@@ -960,33 +850,9 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
 
         return properties
 
-    def get_network_versions(self, name):
-        """Returns all of the versions of a network with the given name
 
-        :param str name: The name of the network to query
-        :rtype: set[str]
-        """
-        return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
-
-    def get_network_by_name(self, name, version):
-        """Loads most recently added graph with the given name, or allows for specification of version
-
-        :param str name: The name of the network.
-        :param str version: The version string of the network.
-        :return: A BEL graph
-        :rtype: BELGraph
-        """
-        network = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
-        return from_bytes(network.blob)
-
-    def get_network_by_id(self, network_id):
-        """Gets a network from the database by its identifier
-
-        :param int network_id: The network's database identifier
-        :return: A Network object
-        :rtype: Network
-        """
-        return self.session.query(Network).get(network_id)
+class EdgeStoreQueryManager(BaseCacheManager):
+    """Groups queries over the edge store"""
 
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
@@ -1001,6 +867,7 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
             annotation_def = self.session.query(models.Annotation).filter_by(keyword=annotation_key).first()
             annotation = self.session.query(models.AnnotationEntry).filter_by(annotation=annotation_def,
                                                                               name=annotation_value).first()
+
             # Add Annotations to belGraph.annotation_url
             # Add Namespaces to belGraph.namespace_url
             # What about meta information?
@@ -1015,8 +882,12 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
                     edge_data['target'] = self.help_rebuild_list_components(edge.target)
 
                 graph.add_nodes_from((edge_data['source']['node'], edge_data['target']['node']))
-                graph.add_edge(edge_data['source']['key'], edge_data['target']['key'], key=edge_data['key'],
-                               attr_dict=edge_data['data'])
+                graph.add_edge(
+                    edge_data['source']['key'],
+                    edge_data['target']['key'],
+                    key=edge_data['key'],
+                    attr_dict=edge_data['data']
+                )
 
         return graph
 
@@ -1080,32 +951,10 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
 
         return graph
 
-    def query_networks(self, network_ids=None, name=None, version=None):
-        """Builds and runs a query over all networks in the database.
-
-        :param iter[int] network_ids: Database identifiers of the networks of interest.
-        :param str name: Name of the network.
-        :param str version: Version of the network
-        :return: A list of network objects passing the queries
-        :rtype: list[Network]
-        """
-        q = self.session.query(Network)
-
-        if network_ids:
-            q = q.filter(Network.id in set(network_ids))
-
-        if name:
-            q = q.filter(Network.name.like(name))
-
-        if version:
-            q = q.filter(Network.version == version)
-
-        return q.all()
-
     def get_node(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
                  modification_name=None, as_dict_list=False):
         """Builds and runs a query over all nodes in the PyBEL cache.
-        
+
         :param int node_id: The node ID to get
         :param str bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
         :param str type: Type of the biological entity. e.g. Protein
@@ -1180,7 +1029,7 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
         :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text
                          or a models.Evidence object.
         :type evidence: str or models.Evidence
-        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter 
+        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter
                             as string.
         :type annotation: dict or str
         :param property:
@@ -1357,3 +1206,134 @@ class CacheManager(NetworkManager, EquivalenceManager, NamespaceManager, Annotat
             result = [property.data for property in result]
 
         return result
+
+
+class CacheManager(EdgeStoreQueryManager, EdgeStoreInsertManager, NetworkManager, EquivalenceManager, NamespaceManager,
+                   AnnotationManager):
+    """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
+    SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
+    """
+
+    # NAMESPACE OWL MANAGEMENT
+
+    def _insert_owl(self, iri, owl_model, owl_entry_model):
+        """Helper function for inserting an ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        log.info('inserting owl %s', iri)
+
+        graph = parse_owl(iri)
+        owl = owl_model(iri=iri)
+
+        entries = {node: owl_entry_model(entry=node) for node in graph.nodes_iter()}
+
+        owl.entries = list(entries.values())
+
+        for u, v in graph.edges_iter():
+            entries[u].children.append(entries[v])
+
+        self.session.add(owl)
+        self.session.commit()
+
+        return owl
+
+    def insert_namespace_owl(self, iri):
+        """Caches an ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        return self._insert_owl(iri, models.OwlNamespace, models.OwlNamespaceEntry)
+
+    def insert_annotation_owl(self, iri):
+        """Caches an ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        return self._insert_owl(iri, models.OwlAnnotation, models.OwlAnnotationEntry)
+
+    def ensure_namespace_owl(self, iri):
+        """Caches an ontology at the given IRI if it is not already in the cache
+
+        :param str iri: the location of the ontology
+        """
+        if iri in self.namespace_term_cache:
+            return
+
+        results = self.session.query(models.OwlNamespace).filter(models.OwlNamespace.iri == iri).one_or_none()
+        if results is None:
+            results = self.insert_namespace_owl(iri)
+
+        self.namespace_term_cache[iri] = set(entry.entry for entry in results.entries)
+        self.namespace_edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
+
+        graph = nx.DiGraph()
+        graph.add_edges_from(self.namespace_edge_cache[iri])
+        self.namespace_graph_cache[iri] = graph
+
+    def ensure_annotation_owl(self, iri):
+        if iri in self.annotation_term_cache:
+            return
+
+        results = self.session.query(models.OwlAnnotation).filter(models.OwlAnnotation.iri == iri).one_or_none()
+        if results is None:
+            results = self.insert_annotation_owl(iri)
+
+        self.annotation_term_cache[iri] = set(entry.entry for entry in results.entries)
+        self.annotation_edge_cache[iri] = set((sub.entry, sup.entry) for sub in results.entries for sup in sub.children)
+
+        graph = nx.DiGraph()
+        graph.add_edges_from(self.annotation_edge_cache[iri])
+        self.annotation_graph_cache[iri] = graph
+
+    def get_namespace_owl_terms(self, iri):
+        """Gets a set of classes and individuals in the ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        self.ensure_namespace_owl(iri)
+        return self.namespace_term_cache[iri]
+
+    def get_annotation_owl_terms(self, iri):
+        """Gets a set of classes and individuals in the ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        self.ensure_annotation_owl(iri)
+        return self.annotation_term_cache[iri]
+
+    def get_namespace_owl_edges(self, iri):
+        """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        self.ensure_namespace_owl(iri)
+        return self.namespace_edge_cache[iri]
+
+    def get_annotation_owl_edges(self, iri):
+        """Gets a set of classes and individuals in the ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        self.ensure_annotation_owl(iri)
+        return self.annotation_edge_cache[iri]
+
+    def get_namespace_owl_graph(self, iri):
+        """Gets the graph representing the ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        self.ensure_namespace_owl(iri)
+        return self.namespace_graph_cache[iri]
+
+    def get_annotation_owl_graph(self, iri):
+        """Gets the graph representing the ontology at the given IRI
+
+        :param str iri: the location of the ontology
+        """
+        self.ensure_annotation_owl(iri)
+        return self.annotation_graph_cache[iri]
+
+    def get_namespace_owl_urls(self):
+        """Returns a list of the locations of the stored ontologies"""
+        return [owl.iri for owl in self.session.query(models.OwlNamespace).all()]

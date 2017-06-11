@@ -247,7 +247,7 @@ def ls(ctx, url):
 @click.pass_context
 def drop_namespace(ctx, url):
     """Drops a namespace by url"""
-    ctx.obj.drop_namespace(url)
+    ctx.obj.drop_namespace_by_url(url)
 
 
 @manage.group()
@@ -275,7 +275,7 @@ def ls(ctx, include_description):
 @click.pass_context
 def drop(ctx, network_id):
     """Drops a network by its database identifier"""
-    ctx.obj.drop_network(network_id)
+    ctx.obj.drop_network_by_id(network_id)
 
 
 @network.command()

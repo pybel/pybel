@@ -59,4 +59,6 @@ def from_database(name, version, connection=None):
     :rtype: BELGraph
     """
     manager = build_manager(connection=connection)
-    return manager.get_network_by_name(name, version)
+    return manager.get_network_by_name_version(name, version)
+
+
