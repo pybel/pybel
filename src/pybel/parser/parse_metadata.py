@@ -93,8 +93,8 @@ class MetadataParser(BaseParser):
         self.annotation_url_dict = {}
         #: A dictionary from {annotation keyword: OWL annotation URL}
         self.annotations_owl_dict = {}
-        #: A list of annotations that are defined ad-hoc in the BEL script
-        self.annotation_list_list = []  # TODO switch to set
+        #: A set of annotation keywords that are defined ad-hoc in the BEL script
+        self.annotation_lists = set()
 
         self.document = And([
             set_tag,
@@ -239,7 +239,7 @@ class MetadataParser(BaseParser):
         values = set(tokens['values'])
 
         self.annotations_dict[annotation] = values
-        self.annotation_list_list.append(annotation)
+        self.annotation_lists.add(annotation)
 
         return tokens
 
