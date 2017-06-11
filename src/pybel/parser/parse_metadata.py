@@ -31,8 +31,6 @@ define_tag = Suppress(BEL_KEYWORD_DEFINE)
 
 function_tags = Word(''.join(belns_encodings))
 
-value = quote | ppc.identifier
-
 SEMANTIC_VERSION_STRING_RE = re.compile(
     '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?')
 
