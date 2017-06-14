@@ -9,6 +9,7 @@ from collections import defaultdict, Counter
 
 import requests.exceptions
 from pyparsing import ParseException
+from sqlalchemy.exc import OperationalError
 
 from ..constants import FUNCTION, NAMESPACE, REQUIRED_METADATA, INVERSE_DOCUMENT_KEYS, GRAPH_METADATA, \
     GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_URL, GRAPH_NAMESPACE_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, \
@@ -121,7 +122,11 @@ def parse_definitions(graph, definitions, metadata_parser):
         except requests.exceptions.ConnectionError as e:
             parse_log.warning('Line %07d - Resource not found - %s', line_number, line)
             raise MalformedMetadataException(line, line_number)
-        except Exception as e:
+        except OperationalError as e:
+            parse_log.warning('Need to upgrade database. See '
+                              'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
+            raise e
+        except Exception:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise MalformedMetadataException(line_number, line)
 
