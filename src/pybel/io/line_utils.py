@@ -7,6 +7,7 @@ import re
 import time
 from collections import defaultdict, Counter
 
+import requests.exceptions
 from pyparsing import ParseException
 
 from ..constants import FUNCTION, NAMESPACE, REQUIRED_METADATA, INVERSE_DOCUMENT_KEYS, GRAPH_METADATA, \
@@ -117,6 +118,9 @@ def parse_definitions(graph, definitions, metadata_parser):
         except (RedefinedNamespaceError, RedefinedAnnotationError) as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
+        except requests.exceptions.ConnectionError as e:
+            parse_log.warning('Line %07d - Resource not found - %s', line_number, line)
+            raise MalformedMetadataException(line, line_number)
         except Exception as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise MalformedMetadataException(line_number, line)
