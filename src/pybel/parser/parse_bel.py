@@ -50,7 +50,7 @@ class BelParser(BaseParser):
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
                  allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-                 citation_clearing=True, warn_on_singleton=True, autostreamline=True):
+                 citation_clearing=True, warn_on_singleton=True, no_identifier_validation=False, autostreamline=True):
         """
         :param BELGraph graph: The BEL Graph to use to store the network
         :param dict[str, set[str]] namespace_dict: A dictionary of {namespace: set of members}.
@@ -82,11 +82,16 @@ class BelParser(BaseParser):
             citation_clearing=citation_clearing
         )
 
-        self.identifier_parser = IdentifierParser(
-            namespace_dict=namespace_dict,
-            namespace_regex=namespace_regex,
-            allow_naked_names=allow_naked_names
-        )
+        if no_identifier_validation:
+            self.identifier_parser = IdentifierParser(
+                allow_naked_names=allow_naked_names
+            )
+        else:
+            self.identifier_parser = IdentifierParser(
+                namespace_dict=namespace_dict,
+                namespace_regex=namespace_regex,
+                allow_naked_names=allow_naked_names
+            )
 
         self.warn_on_singleton = warn_on_singleton
         self.has_singleton_terms = False
@@ -522,7 +527,8 @@ class BelParser(BaseParser):
         valid_functions = set(itt.chain.from_iterable(belns_encodings[k] for k in self.namespace_dict[namespace][name]))
 
         if tokens[FUNCTION] not in valid_functions:
-            raise InvalidFunctionSemantic(self.line_number, line, position, tokens[FUNCTION], namespace, name, valid_functions)
+            raise InvalidFunctionSemantic(self.line_number, line, position, tokens[FUNCTION], namespace, name,
+                                          valid_functions)
 
         return tokens
 
@@ -621,7 +627,8 @@ class BelParser(BaseParser):
         label = tokens[OBJECT]
 
         if LABEL in self.graph.node[subject]:
-            raise RelabelWarning(self.line_number, line, position, self.graph.node, self.graph.node[subject][LABEL], label)
+            raise RelabelWarning(self.line_number, line, position, self.graph.node, self.graph.node[subject][LABEL],
+                                 label)
 
         self.graph.node[subject][LABEL] = label
 
@@ -718,6 +725,7 @@ class BelParser(BaseParser):
     def handle_translocation_illegal(self, line, position, tokens):
         raise MalformedTranslocationWarning(self.line_number, line, position, tokens)
 
+
 # HANDLERS
 
 def handle_molecular_activity_default(line, position, tokens):
@@ -742,8 +750,6 @@ def handle_activity_legacy(line, position, tokens):
 def handle_legacy_tloc(line, position, tokens):
     log.debug('legacy translocation statement: %s', line)
     return tokens
-
-
 
 
 # CANONICALIZATION

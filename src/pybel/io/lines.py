@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 
 def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-               citation_clearing=True, warn_on_singleton=True, **kwargs):
+               citation_clearing=True, warn_on_singleton=True, no_identifier_validation=False, **kwargs):
     """Loads a BEL graph from an iterable over the lines of a BEL script
 
     :param iter[str] lines: An iterable of strings (the lines in a BEL script)
@@ -48,12 +48,13 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
         allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
         warn_on_singleton=warn_on_singleton,
+        no_identifier_validation=no_identifier_validation,
     )
     return graph
 
 
 def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
-              warn_on_singleton=True, encoding='utf-8', **kwargs):
+              warn_on_singleton=True, no_identifier_validation=False, encoding='utf-8', **kwargs):
     """Loads a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str path: A file path
@@ -83,6 +84,7 @@ def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, c
             allow_nested=allow_nested,
             citation_clearing=citation_clearing,
             warn_on_singleton=warn_on_singleton,
+            no_identifier_validation=no_identifier_validation,
             **kwargs
         )
 

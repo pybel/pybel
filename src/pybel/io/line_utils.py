@@ -28,7 +28,8 @@ METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOT
 
 
 def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_nested=False,
-                allow_unqualified_translocations=False, citation_clearing=True, warn_on_singleton=True):
+                allow_unqualified_translocations=False, citation_clearing=True, warn_on_singleton=True,
+                no_identifier_validation=False):
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
@@ -65,6 +66,7 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
         allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
         warn_on_singleton=warn_on_singleton,
+        no_identifier_validation=no_identifier_validation,
     )
 
     parse_statements(graph, statements, bel_parser)
