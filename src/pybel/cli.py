@@ -256,7 +256,7 @@ def network():
 
 
 @network.command()
-@click.option('-d', '--include-description', help="Include network descriptions")
+@click.option('-d', '--include-description', is_flag=True, help="Include network descriptions")
 @click.pass_context
 def ls(ctx, include_description):
     """Lists network names, versions, and optionally descriptions"""
