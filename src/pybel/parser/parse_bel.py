@@ -53,13 +53,13 @@ class BelParser(BaseParser):
                  citation_clearing=True, warn_on_singleton=True, no_identifier_validation=False, autostreamline=True):
         """
         :param BELGraph graph: The BEL Graph to use to store the network
-        :param dict[str, set[str]] namespace_dict: A dictionary of {namespace: set of members}.
+        :param dict[str,set[str]] namespace_dict: A dictionary of {namespace: set of members}.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param dict[str, set[str]] annotation_dict: A dictionary of {annotation: set of values}.
+        :param dict[str,set[str]] annotation_dict: A dictionary of {annotation: set of values}.
                                     Delegated to :class:`pybel.parser.ControlParser`
-        :param dict[str, str] namespace_regex: A dictionary of {namespace: regular expression strings}.
+        :param dict[str,str] namespace_regex: A dictionary of {namespace: regular expression strings}.
                                         Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param dict[str, str] annotation_regex: A dictionary of {annotation: regular expression strings}.
+        :param dict[str,str] annotation_regex: A dictionary of {annotation: regular expression strings}.
                                         Delegated to :class:`pybel.parser.ControlParser`
         :param bool allow_naked_names: If true, turn off naked namespace failures.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
@@ -537,7 +537,7 @@ class BelParser(BaseParser):
         return tokens
 
     def handle_term_singleton(self, line, position, tokens):
-        """This function wraps self.handle_term but is only used for top-level parsing of bel_terms. This is done
+        """This function wraps :meth:`BelParser.handle_term` but is only used for top-level parsing of bel_terms. This is done
         solely to keep track of if a graph has any singletons"""
         self.has_singleton_terms = True
         if self.warn_on_singleton:
