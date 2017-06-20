@@ -603,7 +603,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param iter[int] network_ids: The identifiers of networks in the database
         :rtype: list[Network]
         """
-        return self.session.query(Network).filter(Network.id in set(network_ids)).all()
+        return self.session.query(Network).filter(Network.id.in_(network_ids)).all()
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
