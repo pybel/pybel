@@ -8,9 +8,9 @@ from collections import Counter
 import sqlalchemy.exc
 
 import pybel
+from pybel import from_database, to_database
 from pybel import from_path
 from pybel.constants import *
-from pybel import from_database, to_database
 from pybel.manager import models
 from tests import constants
 from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin, TemporaryCacheClsMixin
@@ -52,9 +52,16 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         self.manager.session.rollback()
 
-        graphcopy = self.graph.copy()
-        graphcopy.document[METADATA_VERSION] = '1.0.1'
-        self.manager.insert_graph(graphcopy)
+        graph_copy = self.graph.copy()
+        graph_copy.document[METADATA_VERSION] = '1.0.1'
+        network_copy = self.manager.insert_graph(graph_copy)
+
+        self.assertEqual(2, self.manager.count_networks())
+
+        query_ids = {-1, network.id, network_copy.id}
+        query_networks_result = self.manager.get_networks_by_ids(query_ids)
+        self.assertEqual(2, len(query_networks_result))
+        self.assertEqual({network.id, network_copy.id}, {network.id for network in query_networks_result})
 
         expected_versions = {'1.0.1', self.graph.version}
         self.assertEqual(expected_versions, set(self.manager.get_network_versions(self.graph.name)))

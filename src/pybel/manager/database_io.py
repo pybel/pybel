@@ -37,8 +37,8 @@ def to_database(graph, connection=None, store_parts=False):
         manager.insert_graph(graph, store_parts=store_parts)
     except IntegrityError:
         manager.session.rollback()
-        log.exception('Error storing graph - other graph with same metadata'
-                      ' already present. Consider incrementing the version')
+        log.warning('Error storing graph - other graph with same metadata'
+                    ' already present. Consider incrementing the version')
     except OperationalError:
         manager.session.rollback()
         log.exception('Error storing graph - operational exception')

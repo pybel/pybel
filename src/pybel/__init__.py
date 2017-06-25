@@ -75,7 +75,7 @@ __all__ = (
     database_io.__all__
 )
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'

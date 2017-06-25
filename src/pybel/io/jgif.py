@@ -207,8 +207,19 @@ def to_jgif(graph):
     :return: A JGIF dictionary
     :rtype: dict
     
-    .. warning:: Untested! This format is not general purpose and is therefore time is not heavily invested
-    
+    .. warning::
+
+        Untested! This format is not general purpose and is therefore time is not heavily invested. If you want to
+        use Cytoscape.js, we suggest using :func:`pybel.to_cx` instead.
+
+    Example:
+
+    >>> import pybel, os, json
+    >>> graph_url = 'https://arty.scai.fraunhofer.de/artifactory/bel/knowledge/selventa-small-corpus/selventa-small-corpus-20150611.bel'
+    >>> graph = pybel.from_url(graph_url)
+    >>> graph_jgif_json = pybel.to_jgif(graph)
+    >>> with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
+    ...     json.dump(graph_jgif_json, f)
     """
     node_to_bel = {}
     u_v_r_bel = {}

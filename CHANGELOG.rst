@@ -17,6 +17,7 @@ Changed
 Added
 ~~~~~
 - Multiple options for graph joining
+- Filter functions (https://github.com/pybel/pybel/issues/206)
 
 
 `0.5.11 <https://github.com/pybel/pybel/compare/v0.5.10...v0.5.11>`_ - 2017-06-07

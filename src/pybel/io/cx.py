@@ -4,7 +4,15 @@
 
 CX JSON
 ~~~~~~~
-This module contains input and output functions for the CX network exchange format.
+CX is an aspect-oriented network interchange format encoded in JSON with a format inspired by the JSON-LD encoding of
+Resource Description Framework (RDF). It is primarily used by the Network Data Exchange (NDEx) and more recent versions
+of Cytoscape.
+
+.. seealso::
+
+    - The NDEx Data Model `Specification <http://www.home.ndexbio.org/data-model/>`_
+    - `Cytoscape.js <http://js.cytoscape.org/>`_
+    - CX Support for Cytoscape.js on the Cytoscape `App Store <http://apps.cytoscape.org/apps/cxsupport>`_
 
 """
 
