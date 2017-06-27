@@ -28,7 +28,7 @@ from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
 from ..io.gpickle import to_bytes
-from ..struct import BELGraph
+from ..struct import BELGraph, union
 from ..utils import get_bel_resource, parse_datetime, subdict_matches
 
 try:
@@ -604,6 +604,20 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :rtype: list[Network]
         """
         return self.session.query(Network).filter(Network.id.in_(network_ids)).all()
+
+    def get_network_by_ids(self, network_ids):
+        """Gets a networks by a list of database identifiers
+
+        :param list[int] network_ids: A network identifier or list of network identifiers
+        :rtype: pybel.BELGraph
+        """
+        if len(network_ids) == 1:
+            return self.get_network_by_id(network_ids[0]).as_bel()
+
+        return union(
+            network.as_bel()
+            for network in self.get_networks_by_ids(network_ids)
+        )
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
