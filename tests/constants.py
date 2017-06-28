@@ -6,14 +6,13 @@ import tempfile
 import unittest
 from json import dumps
 
-from requests.compat import urlparse
-
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.manager.cache import CacheManager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches
+from requests.compat import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -199,9 +198,10 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
     def setUp(self):
         super(FleetingTemporaryCacheMixin, self).setUp()
 
+        self.manager.drop_networks()
+        self.manager.drop_nodes()
         self.manager.drop_namespaces()
         self.manager.drop_annotations()
-        self.manager.drop_networks()
 
 
 class TestTokenParserBase(unittest.TestCase):
