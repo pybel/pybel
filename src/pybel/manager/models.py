@@ -805,17 +805,6 @@ trigger_drop_orphan_edge_property_relations = build_orphan_trigger(trigger_name=
 
 event.listen(Edge.__table__, 'after_create', trigger_drop_orphan_edge_property_relations)
 
-trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
-    trigger_name='drop_orphan_edge_annotation_relations',
-    trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
-    orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
-    reference_tablename=NETWORK_EDGE_TABLE_NAME,
-    reference_column='edge_id',
-    orphan_column='edge_id',
-    trigger_time='BEFORE')
-
-event.listen(edge_property, 'after_create', trigger_drop_orphan_edge_annotation_relations)
-
 
 
 class Property(Base):
@@ -881,3 +870,14 @@ trigger_drop_orphan_properties = build_orphan_trigger(trigger_name='drop_orphan_
                                                       reference_column='property_id')
 
 event.listen(edge_property, 'after_create', trigger_drop_orphan_properties)
+
+trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
+    trigger_name='drop_orphan_edge_annotation_relations',
+    trigger_tablename=PROPERTY_TABLE_NAME,
+    orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
+    reference_tablename=NETWORK_EDGE_TABLE_NAME,
+    reference_column='edge_id',
+    orphan_column='edge_id',
+    trigger_time='BEFORE')
+
+event.listen(edge_property, 'after_create', trigger_drop_orphan_edge_annotation_relations)
