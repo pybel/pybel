@@ -75,19 +75,21 @@ def reset_tables(engine):
 
 
 def build_orphan_trigger(trigger_name, trigger_tablename, orphan_tablename, reference_tablename, reference_column,
-                         orphan_column='id'):
+                         orphan_column='id', trigger_time='AFTER', trigger_action='DELETE'):
     """builds a trigger to delete orphans in many-to-many relationships after deletion of a table.
 
-    :param trigger_name: Name that will be used to create the trigger in the database.
-    :param trigger_tablename: Name of the table that starts the trigger after deletion.
-    :param orphan_tablename: Name of the table that may contain orphan entries.
-    :param reference_tablename: Name of the table that should be used as reference to weather delete or not.
-    :param reference_column: Column in the reference table that should be checked.
-    :param orphan_column: Column in the orphan table that should be checked agains the reference table.
+    :param str trigger_name: Name that will be used to create the trigger in the database.
+    :param str trigger_tablename: Name of the table that starts the trigger after deletion.
+    :param str orphan_tablename: Name of the table that may contain orphan entries.
+    :param str reference_tablename: Name of the table that should be used as reference to weather delete or not.
+    :param str reference_column: Column in the reference table that should be checked.
+    :param str orphan_column: Column in the orphan table that should be checked agains the reference table.
+    :param str trigger_time: Timepoint the trigger gets called.
+    :param str trigger_action: Action that calls the trigger.
     :return: :class:`DDL` object.
     """
     ddl = DDL('''
-    CREATE TRIGGER {trigger_name} AFTER DELETE ON {trigger_tablename}
+    CREATE TRIGGER {trigger_name} {trigger_time} {trigger_action} ON {trigger_tablename}
     FOR EACH ROW
     BEGIN
     DELETE FROM {orphan_tablename}
@@ -97,6 +99,8 @@ def build_orphan_trigger(trigger_name, trigger_tablename, orphan_tablename, refe
     );
     END;'''.format(
         trigger_name=trigger_name,
+        trigger_time=trigger_time,
+        trigger_action=trigger_action,
         trigger_tablename=trigger_tablename,
         orphan_tablename=orphan_tablename,
         orphan_column=orphan_column,
@@ -787,8 +791,21 @@ trigger_drop_orphan_edge_property_relations = build_orphan_trigger(trigger_name=
                                                                    orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
                                                                    reference_tablename=NETWORK_EDGE_TABLE_NAME,
                                                                    reference_column='edge_id',
-                                                                   orphan_column='edge_id')
+                                                                   orphan_column='edge_id',
+                                                                   trigger_time='BEFORE')
+
 event.listen(Edge.__table__, 'after_create', trigger_drop_orphan_edge_property_relations)
+
+trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
+    trigger_name='drop_orphan_edge_annotation_relations',
+    trigger_tablename=EDGE_TABLE_NAME,
+    orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
+    reference_tablename=NETWORK_EDGE_TABLE_NAME,
+    reference_column='edge_id',
+    orphan_column='edge_id',
+    trigger_time='BEFORE')
+
+event.listen(Edge.__table__, 'after_create', trigger_drop_orphan_edge_annotation_relations)
 
 
 

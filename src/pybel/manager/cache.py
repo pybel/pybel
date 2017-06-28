@@ -9,7 +9,6 @@ enable this option, but can specify a database location if they choose.
 
 import datetime
 import hashlib
-import itertools as itt
 import json
 import logging
 import time
@@ -78,18 +77,8 @@ class NamespaceManager(BaseCacheManager):
         #: A dictionary from {namespace URL: models.Namespace}
         self.namespace_model = {}
 
-        # MINE =================
-        #: A dictionary from {namespace URL: {name: ORM object}}
+        #: A dictionary from {namespace URL: {name: models.NamespaceEntry}}
         self.namespace_object_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: {name: label}}
-        self.annotation_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: {name: database ID}}
-        self.annotation_id_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: {name: ORM object}}
-        self.annotation_object_cache = defaultdict(dict)
-
-        self.annotation_model = {}
-        # END MINE ==============
 
         #: A dictionary from {namespace URL: set of (parent, child) tuples}
         self.namespace_edge_cache = {}
@@ -98,56 +87,11 @@ class NamespaceManager(BaseCacheManager):
         """Returns a list of all namespace keyword/url pairs"""
         return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
 
-# MINE ===========================================
-        self.annotation_term_cache = {}
-        self.annotation_edge_cache = {}
-        self.annotation_graph_cache = {}
-
-        #: A dictionary that contains objects of the type described by key
-        self.object_cache = {
-            'modification': {},
-            'property': {},
-            'node': {},
-            'edge': {},
-            'citation': {},
-            'evidence': {},
-            'author': {}
-        }
-
-    # DEFINITIONS MANAGEMENT
-
-    def ensure_graph_definitions(self, graph, cache_objects=False):
-        """Ensures all definitions in graph so the user does not have to manage namespaces and annotations manually.
-
-        :param graph: a BEL network
-        :type graph: pybel.BELGraph
-        :param cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
-        :type cache_objects: bool
-        :return:
-        """
-        for keyword, url in graph.namespace_url.items():
-            self.ensure_namespace(url, cache_objects)
-
-        for keyword, url in graph.annotation_url.items():
-            self.ensure_annotation(url, cache_objects)
-
-    def reset_database(self):
-        """Drops and recreates all tables in database"""
-        reset_tables(self.engine)
-
-    def drop_graphs(self):
-        """Drops all graphs"""
-        self.clean_object_cache()
-        self.session.query(Network).delete()
-        self.session.commit()
-
-# END MINE =============================================
-
     def drop_namespaces(self):
         """Drops all namespaces"""
         self.namespace_cache.clear()
         self.namespace_id_cache.clear()
-        #self.namespace_object_cache.clear()
+        self.namespace_object_cache.clear()
         self.namespace_model.clear()
         self.namespace_edge_cache.clear()
 
@@ -166,31 +110,7 @@ class NamespaceManager(BaseCacheManager):
         """
         self.session.query(Namespace).filter(Namespace.url == url).delete()
         self.session.commit()
-#MINE ====================================================
-    def drop_equivalences(self):
-        """Drops all equivalence classes"""
-        self.session.query(NamespaceEntryEquivalence).delete()
-        self.session.commit()
 
-    def drop_nodes(self):
-        """Drops all nodes"""
-        self.session.query(Node).delete()
-        self.session.commit()
-
-    def clean_object_cache(self):
-        # ToDo: Temporal solution! Cache needs to be cleaned only from deleted entries.
-        self.object_cache = {
-            'modification': {},
-            'property': {},
-            'node': {},
-            'edge': {},
-            'citation': {},
-            'evidence': {},
-            'author': {}
-        }
-
-    # NAMESPACE MANAGEMENT
-# END MINE ===============================================
     def insert_namespace(self, url):
         """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
         the values of this namespace.
@@ -270,12 +190,11 @@ class NamespaceManager(BaseCacheManager):
                 self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
                 self.namespace_id_cache[url][entry.name] = entry.id
 
-# MINE =============================================
         if cache_objects and url not in self.namespace_object_cache:
             log.debug('loading namespace cache_objects: %s (%d)', url, len(self.namespace_cache[url]))
             for entry in results.entries:
                 self.namespace_object_cache[url][entry.name] = entry
-# END MINE ==========================================
+
         return results
 
     def get_namespace(self, url):
@@ -300,15 +219,18 @@ class NamespaceManager(BaseCacheManager):
         :return: An NamespaceEntry object
         :rtype: NamespaceEntry
         """
-        namespace = self.session.query(Namespace).filter_by(url=url).one()
+        if self.namespace_object_cache:
+            namespace_entry = self.namespace_object_cache[url][value]
+        else:
+            namespace = self.session.query(Namespace).filter_by(url=url).one()
 
-        # FIXME @kono reinvestigate this
-        try:
-            namespace_entry = self.session.query(NamespaceEntry). \
-                filter_by(namespace=namespace, name=value).one_or_none()
-        except:
-            namespace_entry = self.session.query(NamespaceEntry). \
-                filter_by(namespace=namespace, name=value).first()
+            # FIXME @kono reinvestigate this
+            try:
+                namespace_entry = self.session.query(NamespaceEntry). \
+                    filter_by(namespace=namespace, name=value).one_or_none()
+            except:
+                namespace_entry = self.session.query(NamespaceEntry). \
+                    filter_by(namespace=namespace, name=value).first()
 
         return namespace_entry
 
@@ -391,6 +313,10 @@ class AnnotationManager(BaseCacheManager):
         self.annotation_id_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: models.Annotation}
         self.annotation_model = {}
+
+        #: A dictionary from {annotation URL: {name: models.AnnotationEntry}}
+        self.annotation_object_cache = defaultdict(dict)
+
         #: A dictionary from {annotation URL: set of (parent, child) tuples}
         self.annotation_edge_cache = {}
 
@@ -399,6 +325,7 @@ class AnnotationManager(BaseCacheManager):
 
         self.annotation_cache.clear()
         self.annotation_id_cache.clear()
+        self.annotation_object_cache.clear()
         self.annotation_model.clear()
         self.annotation_edge_cache.clear()
 
@@ -496,8 +423,14 @@ class AnnotationManager(BaseCacheManager):
         :return: An AnnotationEntry object
         :rtype: models.AnnotationEntry
         """
-        annotation = self.session.query(models.Annotation).filter_by(url=url).one()
-        return self.session.query(models.AnnotationEntry).filter_by(annotation=annotation, name=value).one()
+        if self.annotation_object_cache:
+            annotation_entry = self.annotation_object_cache[url][value]
+        else:
+            annotation = self.session.query(models.Annotation).filter_by(url=url).one()
+            annotation_entry = self.session.query(models.AnnotationEntry).filter_by(annotation=annotation,
+                                                                                    name=value).one()
+
+        return annotation_entry
 
 
 class OwlAnnotationManager(AnnotationManager):
@@ -657,13 +590,14 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param int network_id: The network's database identifier
         """
 
-        # TODO delete with cascade, such that the network-edge table and all edges just in that network are deleted
-        self.session.query(Network).filter(Network.id == network_id).delete()
+        network = self.session.query(Network).filter(Network.id == network_id).one_or_none()
+        self.session.delete(network)
         self.session.commit()
 
     def drop_networks(self):
         """Drops all networks"""
-        self.session.query(Network).delete()
+        for network in self.session.query(Network).all():
+            self.session.delete(network)
         self.session.commit()
 
     def get_network_versions(self, name):
@@ -773,6 +707,17 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         """
         nc = {}
 
+        #: A dictionary that contains objects of the type described by the key
+        self.object_cache = {
+            'modification': {},
+            'property': {},
+            'node': {},
+            'edge': {},
+            'citation': {},
+            'evidence': {},
+            'author': {}
+        }
+
         for node in graph.nodes_iter():
             node_object = self.get_or_create_node(graph, node)
             nc[node] = node_object
@@ -864,7 +809,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
                     namespace = node_data[NAMESPACE]
                     url = graph.namespace_url[namespace]
-                    namespace_entry = self.namespace_object_cache[url][node_data[NAME]]
+                    namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
                     result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob,
                                          sha512=node_hash)
@@ -1017,10 +962,10 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             mod_type = FUSION
             node_data = node_data[FUSION]
             p3_namespace_url = graph.namespace_url[node_data[PARTNER_3P][NAMESPACE]]
-            p3_namespace_entry = self.namespace_object_cache[p3_namespace_url][node_data[PARTNER_3P][NAME]]
+            p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, node_data[PARTNER_3P][NAME])
 
             p5_namespace_url = graph.namespace_url[node_data[PARTNER_5P][NAMESPACE]]
-            p5_namespace_entry = self.namespace_object_cache[p5_namespace_url][node_data[PARTNER_5P][NAME]]
+            p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, node_data[PARTNER_5P][NAME])
 
             fusion_dict = {
                 'modType': mod_type,
@@ -1138,7 +1083,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                             namespace_url = GOCC_LATEST
                         else:
                             namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
-                        tmp_dict['namespaceEntry'] = self.namespace_object_cache[namespace_url][effect_value[NAME]]
+                        tmp_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, effect_value[NAME])
                     else:
                         tmp_dict['propValue'] = effect_value
 
@@ -1155,8 +1100,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                     namespace_url = GOCC_LATEST
                 else:
                     namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
-                property_dict['namespaceEntry'] = self.namespace_object_cache[namespace_url][
-                    participant_data[LOCATION][NAME]]
+                property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url,
+                                                                           participant_data[LOCATION][NAME])
                 property_list.append(property_dict)
 
             else:
