@@ -598,7 +598,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Drops all networks"""
         for network in self.session.query(Network).all():
             self.session.delete(network)
-        self.session.commit()
+            self.session.commit()
 
     def get_network_versions(self, name):
         """Returns all of the versions of a network with the given name
