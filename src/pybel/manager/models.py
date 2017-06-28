@@ -587,6 +587,15 @@ class Modification(Base):
         return self.data['mod_key']
 
 
+trigger_drop_orphan_modifications = build_orphan_trigger(trigger_name='drop_orphan_modifications',
+                                                         trigger_tablename=NODE_TABLE_NAME,
+                                                         orphan_tablename=MODIFICATION_TABLE_NAME,
+                                                         reference_tablename=NODE_MODIFICATION_TABLE_NAME,
+                                                         reference_column='modification_id')
+
+event.listen(Node.__table__, 'after_create', trigger_drop_orphan_modifications)
+
+
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
     Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME))),
@@ -798,14 +807,14 @@ event.listen(Edge.__table__, 'after_create', trigger_drop_orphan_edge_property_r
 
 trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
     trigger_name='drop_orphan_edge_annotation_relations',
-    trigger_tablename=EDGE_TABLE_NAME,
+    trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
     orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
     reference_tablename=NETWORK_EDGE_TABLE_NAME,
     reference_column='edge_id',
     orphan_column='edge_id',
     trigger_time='BEFORE')
 
-event.listen(Edge.__table__, 'after_create', trigger_drop_orphan_edge_annotation_relations)
+event.listen(edge_property, 'after_create', trigger_drop_orphan_edge_annotation_relations)
 
 
 
