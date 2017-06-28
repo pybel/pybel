@@ -159,6 +159,7 @@ class BELGraph(networkx.MultiDiGraph):
         if not self.has_edge(u, v, key):
             self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
 
+    # TODO better implementation using edge filters
     def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
         """Allows for filtering by checking keyword arguments are a sub-dictionary of each edges' data.
             See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
@@ -174,6 +175,7 @@ class BELGraph(networkx.MultiDiGraph):
             else:
                 yield u, v
 
+    # TODO better implementation using node filters
     def nodes_iter(self, data=False, **kwargs):
         """Allows for filtering by checking keyword arguments are a sub-dictionary of each nodes' data.
             See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
@@ -197,17 +199,25 @@ class BELGraph(networkx.MultiDiGraph):
         if node not in self:
             self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
 
+    def has_edge_citation(self, u, v, key):
+        """Does the given edge have a citation?"""
+        return CITATION in self.edge[u][v][key]
+
     def get_edge_citation(self, u, v, key):
         """Gets the citation for a given edge"""
-        return self.edge[u][v][key][CITATION]
+        return self.edge[u][v][key].get(CITATION)
+
+    def has_edge_evidence(self, u, v, key):
+        """Does the given edge have evidence?"""
+        return EVIDENCE in self.edge[u][v][key]
 
     def get_edge_evidence(self, u, v, key):
         """Gets the evidence for a given edge"""
-        return self.edge[u][v][key][EVIDENCE]
+        return self.edge[u][v][key].get(EVIDENCE)
 
     def get_edge_annotations(self, u, v, key):
         """Gets the annotations for a given edge"""
-        return self.edge[u][v][key][ANNOTATIONS]
+        return self.edge[u][v][key].get(ANNOTATIONS)
 
     def get_node_name(self, node):
         """Gets the node's name, or return None if no name"""

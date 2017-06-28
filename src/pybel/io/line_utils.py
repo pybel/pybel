@@ -7,7 +7,9 @@ import re
 import time
 from collections import defaultdict, Counter
 
+import requests.exceptions
 from pyparsing import ParseException
+from sqlalchemy.exc import OperationalError
 
 from ..constants import FUNCTION, NAMESPACE, REQUIRED_METADATA, INVERSE_DOCUMENT_KEYS, GRAPH_METADATA, \
     GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_URL, GRAPH_NAMESPACE_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, \
@@ -26,7 +28,8 @@ METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOT
 
 
 def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_nested=False,
-                allow_unqualified_translocations=False, citation_clearing=True, warn_on_singleton=True):
+                allow_unqualified_translocations=False, citation_clearing=True, warn_on_singleton=True,
+                no_identifier_validation=False):
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
@@ -63,6 +66,7 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
         allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
         warn_on_singleton=warn_on_singleton,
+        no_identifier_validation=no_identifier_validation,
     )
 
     parse_statements(graph, statements, bel_parser)
@@ -117,7 +121,14 @@ def parse_definitions(graph, definitions, metadata_parser):
         except (RedefinedNamespaceError, RedefinedAnnotationError) as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
-        except Exception as e:
+        except requests.exceptions.ConnectionError as e:
+            parse_log.warning('Line %07d - Resource not found - %s', line_number, line)
+            raise MalformedMetadataException(line, line_number)
+        except OperationalError as e:
+            parse_log.warning('Need to upgrade database. See '
+                              'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
+            raise e
+        except Exception:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise MalformedMetadataException(line_number, line)
 
@@ -129,8 +140,8 @@ def parse_definitions(graph, definitions, metadata_parser):
         GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
         GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_regex.copy(),
         GRAPH_ANNOTATION_LIST: {
-            e: metadata_parser.annotations_dict[e]
-            for e in  metadata_parser.annotation_list_list
+            keyword: metadata_parser.annotations_dict[keyword]
+            for keyword in metadata_parser.annotation_lists
         }
     })
 

@@ -24,8 +24,10 @@ import click
 from .canonicalize import to_bel
 from .constants import PYBEL_LOG_DIR, get_cache_connection
 from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
+from .manager import defaults
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
+from .manager.models import Network
 
 log = logging.getLogger('pybel')
 
@@ -42,14 +44,14 @@ log.addHandler(fh)
 @click.group(help="PyBEL Command Line Utilities on {}".format(sys.executable))
 @click.version_option()
 def main():
-    pass
+    """PyBEL Command Line """
 
 
 @main.command()
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
 @click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
-@click.option('--database-name', help='Input graph name from database')
+@click.option('--database-name', help='Input network name from database')
 @click.option('--csv', type=click.File('w'), help='Output path for *.csv')
 @click.option('--sif', type=click.File('w'), help='Output path for *.sif')
 @click.option('--gsea', type=click.File('w'), help='Output path for *.grp for gene set enrichment analysis')
@@ -71,7 +73,7 @@ def main():
 def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
             neo_context, store_default, store_connection, allow_naked_names, allow_nested,
             allow_unqualified_translocations, no_citation_clearing, debug):
-    """Options for multiple outputs/conversions"""
+    """Convert BEL"""
     if debug == 1:
         log.setLevel(20)
     elif debug == 2:
@@ -149,126 +151,140 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
     sys.exit(0 if 0 == len(g.warnings) else 1)
 
 
-@main.group(help="PyBEL Data Manager Utilities")
-def manage():
-    pass
+@main.group()
+@click.option('-c', '--connection', help='Cache connection. Defaults to {}'.format(get_cache_connection()))
+@click.pass_context
+def manage(ctx, connection):
+    """Manage database"""
+    ctx.obj = CacheManager(connection)
 
 
-@manage.command(help="Create the cache if it doesn't exist")
+@manage.command()
 @click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 @click.option('-v', '--debug', count=True)
 def setup(connection, debug):
+    """Create the cache if it doesn't exist"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
     manager = CacheManager(connection=connection, echo=True)
     manager.create_all()
 
 
-@manage.command(help='Drops database in cache')
+@manage.command()
 @click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
-def remove(connection):
-    manager = CacheManager(connection=connection, echo=True)
-    manager.drop_database()
+@click.option('-y', '--yes', is_flag=True)
+def remove(connection, yes):
+    """Drops cache"""
+    if yes or click.confirm('Drop database?'):
+        manager = CacheManager(connection=connection, echo=True)
+        manager.drop_database()
 
 
-@manage.group(help="Manage definitions")
+@manage.group()
 def definitions():
-    pass
+    """Manage definitions"""
 
 
-@definitions.command(help='Set up default cache with default definitions')
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
+@definitions.command()
 @click.option('--skip-namespaces', is_flag=True)
 @click.option('--skip-annotations', is_flag=True)
 @click.option('--owl', is_flag=True)
 @click.option('--fraunhofer', is_flag=True, help='Use Fraunhofer resources instead of OpenBEL')
 @click.option('-v', '--debug', count=True)
-def ensure(connection, skip_namespaces, skip_annotations, owl, fraunhofer, debug):
+@click.pass_context
+def ensure(ctx, skip_namespaces, skip_annotations, owl, fraunhofer, debug):
+    """Set up default cache with default definitions"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
 
-    manager = CacheManager(connection=connection)
-
     if not skip_namespaces:
-        manager.ensure_default_namespaces(use_fraunhofer=fraunhofer)
+        for url in defaults.fraunhofer_namespaces if fraunhofer else defaults.default_namespaces:
+            ctx.obj.ensure_namespace(url)
     if not skip_annotations:
-        manager.ensure_default_annotations(use_fraunhofer=fraunhofer)
+        for url in defaults.fraunhofer_annotations if fraunhofer else defaults.default_annotations:
+            ctx.obj.ensure_annotation(url)
     if owl:
-        manager.ensure_default_owl_namespaces()
+        for url in defaults.default_owl:
+            ctx.obj.ensure_namespace_owl(url)
 
 
-@definitions.command(help='Manually add definition by URL')
+@definitions.command()
 @click.argument('url')
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
-def insert(url, connection):
-    manager = CacheManager(connection=connection)
-
+@click.pass_context
+def insert(ctx, url):
+    """Manually add definition by URL"""
     if url.endswith('.belns'):
-        manager.ensure_namespace(url)
+        ctx.obj.ensure_namespace(url)
     elif url.endswith('.belanno'):
-        manager.ensure_annotation(url)
+        ctx.obj.ensure_annotation(url)
     else:
-        manager.ensure_namespace_owl(url)
+        ctx.obj.ensure_namespace_owl(url)
 
 
-@definitions.command(help='List URLs of cached resources, or contents of a specific resource')
-@click.option('--url', help='Resource to list')
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
-def ls(url, connection):
-    manager = CacheManager(connection=connection)
-
+@definitions.command()
+@click.option('--url', help='Specific resource URL to list')
+@click.pass_context
+def ls(ctx, url):
+    """Lists cached definitions"""
     if not url:
-        for line in manager.get_definition_urls():
+        for line in ctx.obj.get_definition_urls():
             if not line:
                 continue
             click.echo(line)
 
     else:
         if url.endswith('.belns'):
-            res = manager.get_namespace(url)
+            res = ctx.obj.get_namespace(url)
         elif url.endswith('.belanno'):
-            res = manager.get_annotation(url)
+            res = ctx.obj.get_annotation(url)
         else:
-            res = manager.get_namespace_owl_terms(url)
+            res = ctx.obj.get_namespace_owl_terms(url)
 
         for l in res:
             click.echo(l)
 
 
-@definitions.command(help='Drop namespace by url')
+@definitions.command()
 @click.argument('url')
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
-def drop_namespace(url, connection):
-    manager = CacheManager(connection=connection)
-    manager.drop_namespace(url)
+@click.pass_context
+def drop_namespace(ctx, url):
+    """Drops a namespace by url"""
+    ctx.obj.drop_namespace_by_url(url)
 
 
-@manage.group(help="Manage graphs")
-def graph():
-    pass
+@manage.group()
+def network():
+    """Manage networks"""
 
 
-@graph.command(help='Lists stored graph names and versions')
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
-@click.option('-d', '--include-description', help="Include graph descriptions")
-def ls(connection, include_description):
-    manager = CacheManager(connection=connection)
+@network.command()
+@click.option('-d', '--include-description', is_flag=True, help="Include network descriptions")
+@click.pass_context
+def ls(ctx, include_description):
+    """Lists network names, versions, and optionally descriptions"""
 
-    for row in manager.list_graphs(include_description=include_description):
+    if include_description:
+        l = ctx.obj.session.query(Network.id, Network.name, Network.version, Network.description).all()
+    else:
+        l = ctx.obj.session.query(Network.id, Network.name, Network.version).all()
+
+    for row in l:
         click.echo('\t'.join(map(str, row)))
 
 
-@graph.command(help='Drops a graph by ID')
-@click.argument('gid')
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
-def drop(gid, connection):
-    manager = CacheManager(connection=connection)
-    manager.drop_graph(gid)
+@network.command()
+@click.argument('network_id')
+@click.pass_context
+def drop(ctx, network_id):
+    """Drops a network by its database identifier"""
+    ctx.obj.drop_network_by_id(network_id)
 
 
-@graph.command(help='Drops all graphs')
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
-def dropall(connection):
-    manager = CacheManager(connection=connection)
-    manager.drop_graphs()
+@network.command()
+@click.option('-y', '--yes', is_flag=True)
+@click.pass_context
+def dropall(ctx, yes):
+    """Drops all networks"""
+    if yes or click.confirm('Drop all networks?'):
+        ctx.obj.drop_networks()
 
 
 if __name__ == '__main__':

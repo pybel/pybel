@@ -7,14 +7,17 @@ import networkx as nx
 __all__ = [
     'left_full_join',
     'left_outer_join',
+    'left_full_join_networks',
+    'left_outer_join_networks',
+    'union',
 ]
 
 
 def left_full_node_join(g, h):
     """Adds all nodes from H to G, in-place for G
 
-    :param BELGraph g: A BEL Graph
-    :param BELGraph h: A BEL Graph
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
     """
     for node in h.nodes_iter():
         if node not in g:
@@ -24,21 +27,22 @@ def left_full_node_join(g, h):
 def left_full_join(g, h, use_hash=True):
     """Adds all nodes and edges from H to G, in-place for G
 
-    :param BELGraph g: A BEL Graph
-    :param BELGraph h: A BEL Graph
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     """
     if use_hash:
-        return left_full_hash_join(g, h)
+        return _left_full_hash_join(g, h)
     else:
-        return left_full_exhaustive_join(g, h)
+        return _left_full_exhaustive_join(g, h)
 
 
-def left_full_exhaustive_join(g, h):
-    """Adds all nodes and edges from H to G, in-place for G
+def _left_full_exhaustive_join(g, h):
+    """Adds all nodes and edges from H to G, in-place for G using an exhaustive algorithm to ensure correctness,
+    but runs in O(|E(G)| * |E(H)|)
 
-    :param BELGraph g: A BEL Graph
-    :param BELGraph h: A BEL Graph
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
     """
     left_full_node_join(g, h)
 
@@ -54,11 +58,12 @@ def left_full_exhaustive_join(g, h):
             g.add_edge(u, v, attr_dict=d)
 
 
-def left_full_hash_join(g, h):
-    """Adds all nodes and edges from H to G, in-place for G using a hash-based approach for faster speed.
+def _left_full_hash_join(g, h):
+    """Adds all nodes and edges from H to G, in-place for G using a hash-based approach for faster speed. Runs
+    in O(|E(G)| + |E(H)|)
 
-    :param BELGraph g: A BEL Graph
-    :param BELGraph h: A BEL Graph
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
     """
     left_full_node_join(g, h)
 
@@ -111,7 +116,7 @@ def hash_dict(d):
 def stratify_hash_edges(graph):
     """Splits all qualified and unqualified edges by different indexing strategies
 
-    :param BELGraph graph: A BEL Graph
+    :param BELGraph graph: A BEL network
     :rtype dict[tuple, dict[int, int]], dict[tuple, dict[int, set[int]]]
     """
     qualified_edges = defaultdict(dict)
@@ -134,11 +139,73 @@ def left_outer_join(g, h, use_hash=True):
     1. Identify all weakly connected components in H
     2. Add those that have an intersection with the original graph
 
-    :param BELGraph g: A BEL Graph
-    :param BELGraph h: A BEL Graph
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     """
     g_nodes = set(g.nodes_iter())
     for comp in nx.weakly_connected_components(h):
         if g_nodes.intersection(comp):
             left_full_join(g, h.subgraph(comp), use_hash=use_hash)
+
+
+def left_full_join_networks(target, networks, use_hash=True):
+    """Full joins a list of networks to a target network
+
+    The order of the networks will not impact the result.
+
+    :param BELGraph target: A BEL network
+    :param iter[BELGraph] networks: An iterator of BEL networks
+    :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+    :return:
+    """
+    for network in networks:
+        left_full_join(target, network, use_hash=use_hash)
+    return target
+
+
+def left_outer_join_networks(target, networks, use_hash=True):
+    """Outer joins a list of networks to a target network.
+
+    Note: the order of networks will have significant results!
+
+    :param BELGraph target: A BEL network
+    :param iter[BELGraph] networks: An iterator of BEL networks
+    :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+    :return:
+    """
+    for network in networks:
+        left_outer_join(target, network, use_hash=use_hash)
+    return target
+
+
+def union(networks, use_hash=True):
+    """Takes the union over a collection of networks into a new network.
+
+    :param iter[BELGraph] networks: An iterator over BEL networks
+    :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+    :return: A merged network
+    :rtype: BELGraph
+    """
+    networks_iter = iter(networks)
+    target = next(networks_iter).copy()
+    return left_full_join_networks(target, networks_iter, use_hash=use_hash)
+
+
+def node_intersection_join(g, h, use_hash=True):
+    """Takes the intersection over two networks. This intersection of two graphs is defined by the
+     union of the subgraphs induced over the intersection of their nodes
+
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
+    :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+    :return:
+    :rtype: BELGraph
+    """
+    intersecting = set(g.nodes_iter()).intersection(set(h.nodes_iter()))
+    g_inter = g.subgraph(intersecting)
+    h_inter = h.subgraph(intersecting)
+    return left_full_join(g_inter, h_inter, use_hash=use_hash)
+
+
+

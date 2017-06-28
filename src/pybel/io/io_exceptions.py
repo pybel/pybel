@@ -2,6 +2,8 @@
 
 from ..exceptions import PyBelWarning
 
+import_version_message_fmt = 'Tried importing from PyBEL v{}. Need at least v{}'
+
 
 class ImportVersionWarning(PyBelWarning, ValueError):
     """Raised when trying to import data from an old version of PyBEL"""
@@ -14,4 +16,4 @@ class ImportVersionWarning(PyBelWarning, ValueError):
     def __str__(self):
         actual_s = '.'.join(map(str, self.actual_tuple))
         minimum_s = '.'.join(map(str, self.minimum_tuple))
-        return 'Tried importing from PyBEL v{}. Need at least v{}'.format(actual_s, minimum_s)
+        return import_version_message_fmt.format(actual_s, minimum_s)

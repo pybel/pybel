@@ -6,13 +6,14 @@ import tempfile
 import unittest
 from json import dumps
 
+from requests.compat import urlparse
+
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.manager.cache import CacheManager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches
-from requests.compat import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -185,10 +186,8 @@ class TemporaryCacheClsMixin(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        if cls.test_connection:
-            cls.manager.close()
-        else:
-            cls.manager.close()
+        cls.manager.session.close()
+        if not cls.test_connection:
             os.close(cls.fd)
             os.remove(cls.path)
 
@@ -200,11 +199,9 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
     def setUp(self):
         super(FleetingTemporaryCacheMixin, self).setUp()
 
-        self.manager.reset_database()
-        # self.manager.drop_graphs()
-        # self.manager.drop_nodes()
-        # self.manager.drop_namespaces()
-        # self.manager.drop_annotations()
+        self.manager.drop_namespaces()
+        self.manager.drop_annotations()
+        self.manager.drop_networks()
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -1099,6 +1096,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual(expected_test_thorough_metadata, gmd)
             self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], graph.version)
+            self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description)
 
         if check_provenance:
             self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
@@ -1122,7 +1120,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         :param BELGraph graph: A BEL graph
         :param bool check_metadata: Check the graph's document section is correct
         :param bool check_warnings: Check the graph produced the expected warnings
-        :return: 
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -1131,6 +1128,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual(expected_test_slushy_metadata, graph.document)
             self.assertEqual(expected_test_slushy_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_slushy_metadata[METADATA_VERSION], graph.version)
+            self.assertEqual(expected_test_slushy_metadata[METADATA_DESCRIPTION], graph.description)
 
         if check_warnings:
             expected_warnings = [

@@ -35,8 +35,10 @@ def to_json(graph):
     :rtype: dict
     """
     graph_json_dict = node_link_data(graph)
-    graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {k: list(sorted(v)) for k, v in
-                                                       graph_json_dict['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()}
+    graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
+        k: list(sorted(v))
+        for k, v in graph_json_dict['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()
+    }
     return graph_json_dict
 
 
