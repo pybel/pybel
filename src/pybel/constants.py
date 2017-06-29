@@ -38,7 +38,7 @@ GOCC_KEYWORD = 'GOCC'
 PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 
 #: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
-PYBEL_DIR = path.join(path.expanduser('~'), '.pybel')
+PYBEL_DIR = environ.get('PYBEL_RESOURCE_DIRECTORY', path.join(path.expanduser('~'), '.pybel'))
 if not path.exists(PYBEL_DIR):
     mkdir(PYBEL_DIR)
 
@@ -58,7 +58,7 @@ DEFAULT_CACHE_LOCATION = path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
-PYBEL_CONFIG_DIR = path.join(path.expanduser('~'), '.config', 'pybel')
+PYBEL_CONFIG_DIR = environ.get('PYBEL_CONFIG_DIRECTORY', path.join(path.expanduser('~'), '.config', 'pybel'))
 if not path.exists(PYBEL_CONFIG_DIR):
     makedirs(PYBEL_CONFIG_DIR)
 
