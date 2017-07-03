@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
 import itertools as itt
 import logging
 import os
+import pickle
 from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
 from datetime import datetime
@@ -287,19 +289,10 @@ def hash_tuple(x):
     """Converts a PyBEL node tuple to a hash
 
     :param tuple x: A BEL node
-    :return: A hashed version of the node tuple
-    :rtype: int
+    :return: A hashed version of the node tuple using md5 hash of the binary pickle dump
+    :rtype: str
     """
-    if isinstance(x, int):
-        return x
-
-    h = 0
-    for i in x:
-        if isinstance(i, tuple):
-            h += hash_tuple(i)
-        else:
-            h += hash(i)
-    return hash(h)
+    return hashlib.md5(pickle.dumps(x)).hexdigest()
 
 
 def subdict_matches(target, query, partial_match=True):
