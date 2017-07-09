@@ -28,10 +28,10 @@ log = logging.getLogger(__name__)
 
 
 class ControlParser(BaseParser):
-    """A parser for BEL control statements 
-    
-    .. seealso:: 
-        
+    """A parser for BEL control statements
+
+    .. seealso::
+
         BEL 1.0 specification on `control records <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_control_records>`_
     """
 
@@ -257,6 +257,7 @@ class ControlParser(BaseParser):
         }
 
     def clear_citation(self):
+        """Clears the citation. Additionally, if citation clearing is enabled, clears the evidence and annotations."""
         self.citation.clear()
 
         if self.citation_clearing:
