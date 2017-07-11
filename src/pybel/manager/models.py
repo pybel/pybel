@@ -392,14 +392,6 @@ class Network(Base):
         return from_bytes(self.blob)
 
 
-trigger_drop_orphan_edges = build_orphan_trigger(trigger_name='drop_orphan_edges',
-                                                 trigger_tablename=NETWORK_TABLE_NAME,
-                                                 orphan_tablename=EDGE_TABLE_NAME,
-                                                 reference_tablename=NETWORK_EDGE_TABLE_NAME,
-                                                 reference_column='edge_id')
-event.listen(Network.__table__, 'after_create', trigger_drop_orphan_edges)
-
-
 node_modification = Table(
     NODE_MODIFICATION_TABLE_NAME, Base.metadata,
     Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME))),
@@ -585,15 +577,6 @@ class Modification(Base):
     def to_json(self):
         """Enables json serialization for the class this method is defined in."""
         return self.data['mod_key']
-
-
-trigger_drop_orphan_modifications = build_orphan_trigger(trigger_name='drop_orphan_modifications',
-                                                         trigger_tablename=NODE_TABLE_NAME,
-                                                         orphan_tablename=MODIFICATION_TABLE_NAME,
-                                                         reference_tablename=NODE_MODIFICATION_TABLE_NAME,
-                                                         reference_column='modification_id')
-
-event.listen(Node.__table__, 'after_create', trigger_drop_orphan_modifications)
 
 
 author_citation = Table(
@@ -795,17 +778,6 @@ class Edge(Base):
         return min_dict
 
 
-trigger_drop_orphan_edge_property_relations = build_orphan_trigger(trigger_name='drop_orphan_edge_property_relations',
-                                                                   trigger_tablename=EDGE_TABLE_NAME,
-                                                                   orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
-                                                                   reference_tablename=NETWORK_EDGE_TABLE_NAME,
-                                                                   reference_column='edge_id',
-                                                                   orphan_column='edge_id',
-                                                                   trigger_time='BEFORE')
-
-event.listen(Edge.__table__, 'after_create', trigger_drop_orphan_edge_property_relations)
-
-
 
 class Property(Base):
     """The property table contains additional information that is used to describe the context of a relation."""
@@ -863,21 +835,42 @@ class Property(Base):
         return self.data['data']
 
 
+trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
+    trigger_name='drop_orphan_edge_annotation_relations',
+    trigger_tablename=NETWORK_TABLE_NAME,
+    # PROPERTY_TABLE_NAME,
+    orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
+    reference_tablename=NETWORK_EDGE_TABLE_NAME,
+    reference_column='edge_id',
+    orphan_column='edge_id')
+event.listen(Network.__table__, 'after_create', trigger_drop_orphan_edge_annotation_relations)
+
+trigger_drop_orphan_edge_property_relations = build_orphan_trigger(trigger_name='drop_orphan_edge_property_relations',
+                                                                   trigger_tablename=EDGE_ANNOTATION_TABLE_NAME,
+                                                                   orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
+                                                                   reference_tablename=NETWORK_EDGE_TABLE_NAME,
+                                                                   reference_column='edge_id',
+                                                                   orphan_column='edge_id')
+event.listen(edge_annotation, 'after_create', trigger_drop_orphan_edge_property_relations)
+
+
 trigger_drop_orphan_properties = build_orphan_trigger(trigger_name='drop_orphan_properties',
                                                       trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
                                                       orphan_tablename=PROPERTY_TABLE_NAME,
                                                       reference_tablename=EDGE_PROPERTY_TABLE_NAME,
                                                       reference_column='property_id')
-
 event.listen(edge_property, 'after_create', trigger_drop_orphan_properties)
 
-trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
-    trigger_name='drop_orphan_edge_annotation_relations',
-    trigger_tablename=PROPERTY_TABLE_NAME,
-    orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
-    reference_tablename=NETWORK_EDGE_TABLE_NAME,
-    reference_column='edge_id',
-    orphan_column='edge_id',
-    trigger_time='BEFORE')
+trigger_drop_orphan_edges = build_orphan_trigger(trigger_name='drop_orphan_edges',
+                                                 trigger_tablename=PROPERTY_TABLE_NAME,
+                                                 orphan_tablename=EDGE_TABLE_NAME,
+                                                 reference_tablename=NETWORK_EDGE_TABLE_NAME,
+                                                 reference_column='edge_id')
+event.listen(Property.__table__, 'after_create', trigger_drop_orphan_edges)
 
-event.listen(edge_property, 'after_create', trigger_drop_orphan_edge_annotation_relations)
+trigger_drop_orphan_modifications = build_orphan_trigger(trigger_name='drop_orphan_modifications',
+                                                         trigger_tablename=NODE_TABLE_NAME,
+                                                         orphan_tablename=MODIFICATION_TABLE_NAME,
+                                                         reference_tablename=NODE_MODIFICATION_TABLE_NAME,
+                                                         reference_column='modification_id')
+event.listen(Node.__table__, 'after_create', trigger_drop_orphan_modifications)
