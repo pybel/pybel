@@ -839,6 +839,12 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             self.session.delete(node)
         self.session.commit()
 
+    def drop_edges(self):
+        """Drops all edges in RDB"""
+        for edge in self.session.query(models.Edge).all():
+            self.session.delete(edge)
+        self.session.commit()
+
     def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, annotations, blob):
         """Creates entry for given edge if it does not exist.
 

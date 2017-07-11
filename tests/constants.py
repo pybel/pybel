@@ -199,6 +199,7 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
         super(FleetingTemporaryCacheMixin, self).setUp()
 
         self.manager.drop_networks()
+        self.manager.drop_edges()
         self.manager.drop_nodes()
         self.manager.drop_namespaces()
         self.manager.drop_annotations()
