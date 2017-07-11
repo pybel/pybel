@@ -4,7 +4,7 @@
 
 import datetime
 
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, event, DDL
 from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
@@ -66,6 +66,51 @@ LONGBLOB = 4294967295
 
 Base = declarative_base()
 
+
+def reset_tables(engine):
+    """Drops all tables in database"""
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+
+
+def build_orphan_trigger(trigger_name, trigger_tablename, orphan_tablename, reference_tablename, reference_column,
+                         orphan_column='id', trigger_time='AFTER', trigger_action='DELETE'):
+    """builds a trigger to delete orphans in many-to-many relationships after deletion of a table.
+
+    :param str trigger_name: Name that will be used to create the trigger in the database.
+    :param str trigger_tablename: Name of the table that starts the trigger after deletion.
+    :param str orphan_tablename: Name of the table that may contain orphan entries.
+    :param str reference_tablename: Name of the table that should be used as reference to weather delete or not.
+    :param str reference_column: Column in the reference table that should be checked.
+    :param str orphan_column: Column in the orphan table that should be checked agains the reference table.
+    :param str trigger_time: Timepoint the trigger gets called.
+    :param str trigger_action: Action that calls the trigger.
+    :return: :class:`DDL` object.
+    """
+    ddl = DDL('''
+    CREATE TRIGGER {trigger_name} {trigger_time} {trigger_action} ON {trigger_tablename}
+    FOR EACH ROW
+    BEGIN
+    DELETE FROM {orphan_tablename}
+    WHERE {orphan_column} NOT IN (
+        SELECT DISTINCT {reference_column}
+        FROM {reference_tablename}
+    );
+    END;'''.format(
+        trigger_name=trigger_name,
+        trigger_time=trigger_time,
+        trigger_action=trigger_action,
+        trigger_tablename=trigger_tablename,
+        orphan_tablename=orphan_tablename,
+        orphan_column=orphan_column,
+        reference_column=reference_column,
+        reference_tablename=reference_tablename)
+    )
+
+    return ddl
+
+
 namespace_hierarchy = Table(
     NAMESPACE_HIERARCHY_TABLE_NAME,
     Base.metadata,
@@ -79,6 +124,7 @@ annotation_hierarchy = Table(
     Column('left_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True),
     Column('right_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_ENTRY_TABLE_NAME)), primary_key=True)
 )
+
 
 
 class Namespace(Base):
@@ -108,13 +154,35 @@ class Namespace(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
+    #entries = relationship('NamespaceEntry', backref='namespace', cascade='all, delete-orphan')
+
     has_equivalences = Column(Boolean, default=False)
 
     @property
     def data(self):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
-        ns_data = self.__dict__
-        del ns_data['_sa_instance_state']
+        ns_data = {
+            'id': self.id,
+            'uploaded': self.uploaded,
+            'url': self.url,
+            'keyword': self.keyword,
+            'name': self.name,
+            'domain': self.domain,
+            'species': self.species,
+            'description': self.description,
+            'version': self.version,
+            'created': self.created,
+            'query_url': self.query_url,
+            'author': self.author,
+            'license': self.license,
+            'contact': self.contact,
+            'citation': self.citation,
+            'citation_description': self.citation_description,
+            'citation_version': self.citation_version,
+            'citation_published': self.citation_published,
+            'citation_url': self.citation_url,
+            'has_equivalences': self.has_equivalences
+        }
         return ns_data
 
 
@@ -142,10 +210,15 @@ class NamespaceEntry(Base):
 
     @property
     def data(self):
+        """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name."""
         return {
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
         }
+
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data
 
 
 class NamespaceEntryEquivalence(Base):
@@ -182,10 +255,30 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
+    #entries = relationship('AnnotationEntry', back_populates="annotation", cascade='all, delete-orphan')
+
     @property
     def data(self):
-        an_data = self.__dict__
-        del an_data['_sa_instance_state']
+        an_data = {
+            'id': self.id,
+            'uploaded': self.uploaded,
+            'url': self.url,
+            'keyword': self.keyword,
+            'type': self.type,
+            'description': self.description,
+            'usage': self.usage,
+            'version': self.version,
+            'created': self.created,
+            'name': self.name,
+            'author': self.author,
+            'license': self.license,
+            'contact': self.contact,
+            'citation': self.citation,
+            'citation_description': self.citation_description,
+            'citation_version': self.citation_version,
+            'citation_published': self.citation_published,
+            'citation_url': self.citation_url
+        }
         return an_data
 
 
@@ -202,6 +295,7 @@ class AnnotationEntry(Base):
     annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
     annotation = relationship('Annotation', backref=backref('entries'))
 
+
     children = relationship(
         'AnnotationEntry',
         secondary=annotation_hierarchy,
@@ -209,29 +303,22 @@ class AnnotationEntry(Base):
         secondaryjoin=id == annotation_hierarchy.c.right_id
     )
 
+    @property
+    def data(self):
+        """Describes the annotationEntry as dictionary of Annotation-Keyword and Annotation-Name."""
+        return {
+            'annotation_keyword': self.annotation.keyword,
+            'annotation': self.name
+        }
 
-network_annotation = Table(
-    NETWORK_ANNOTATION_TABLE_NAME, Base.metadata,
-    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('annotation_id', Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), primary_key=True)
-)
-
-network_namespace = Table(
-    NETWORK_NAMESPACE_TABLE_NAME, Base.metadata,
-    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('namespace_id', Integer, ForeignKey('{}.id'.format(NAMESPACE_TABLE_NAME)), primary_key=True)
-)
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data
 
 network_edge = Table(
     NETWORK_EDGE_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
-)
-
-network_citation = Table(
-    NETWORK_CITATION_TABLE_NAME, Base.metadata,
-    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True)
 )
 
 network_node = Table(
@@ -253,22 +340,43 @@ class Network(Base):
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')
     description = Column(Text, nullable=True, doc='Descriptive text extracted from the BEL file')
-    copyright = Column(String(255), nullable=True, doc='Copyright information')
+    copyright = Column(Text, nullable=True, doc='Copyright information')
     disclaimer = Column(String(255), nullable=True, doc='Disclaimer information')
     licenses = Column(String(255), nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
-    nodes = relationship('Node', secondary=network_node, backref='networks', lazy="dynamic")
-    edges = relationship('Edge', secondary=network_edge, backref='networks', lazy="dynamic")
-    namespaces = relationship('Namespace', secondary=network_namespace, lazy="dynamic")
-    annotations = relationship('Annotation', secondary=network_annotation, lazy="dynamic")
-    citations = relationship('Citation', secondary=network_citation, lazy="dynamic")
+    nodes = relationship('Node', secondary=network_node, lazy="dynamic")  # backref='networks'
+    edges = relationship('Edge', secondary=network_edge, lazy="dynamic")  # backref='networks'
 
     __table_args__ = (
         UniqueConstraint(name, version),
     )
+
+    @property
+    def data(self):
+        network_data = {
+            'id': self.id,
+            'name': self.name,
+            'version': self.version,
+            'created': self.created
+        }
+
+        if self.authors:
+            network_data['authors'] = self.authors
+        if self.contact:
+            network_data['contact'] = self.contact
+        if self.description:
+            network_data['description'] = self.description
+        if self.copyright:
+            network_data['copyright'] = self.copyright
+        if self.disclaimer:
+            network_data['disclaimer'] = self.disclaimer
+        if self.licenses:
+            network_data['licenses'] = self.licenses
+
+        return network_data
 
     def __repr__(self):
         return '{} v{}'.format(self.name, self.version)
@@ -307,7 +415,9 @@ class Node(Base):
     bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
     blob = Column(LargeBinary)
 
-    modifications = relationship("Modification", secondary=node_modification)
+    sha512 = Column(String(255), index=True)
+
+    modifications = relationship("Modification", secondary=node_modification, backref='nodes')
 
     @property
     def data(self):
@@ -334,6 +444,10 @@ class Node(Base):
                     node_key.append(tuple(mod['mod_key']))
 
         return {'key': tuple(node_key), 'data': node_data}
+
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data['key']
 
 
 class Modification(Base):
@@ -366,7 +480,7 @@ class Modification(Base):
     aminoA = Column(String(3), nullable=True, doc='Three letter amino accid code')
     position = Column(Integer, nullable=True, doc='Position')
 
-    nodes = relationship("Node", secondary=node_modification)
+    sha512 = Column(String(255), index=True)
 
     @property
     def data(self):
@@ -460,6 +574,10 @@ class Modification(Base):
             'mod_key': mod_key
         }
 
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data['mod_key']
+
 
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
@@ -473,9 +591,9 @@ class Author(Base):
     __tablename__ = AUTHOR_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False, index=True)
 
-    citations = relationship("Citation", secondary=author_citation)
+    #citations = relationship("Citation", secondary=author_citation)
 
 
 class Citation(Base):
@@ -487,10 +605,12 @@ class Citation(Base):
     name = Column(String(255), nullable=False, doc='Title of the publication')
     reference = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
     date = Column(Date, nullable=True, doc='Publication date')
+    sha512 = Column(String(255), index=True)
 
-    authors = relationship("Author", secondary=author_citation)
-    evidences = relationship("Evidence", back_populates='citation')
+    authors = relationship("Author", secondary=author_citation, backref='citations')
+    evidences = relationship("Evidence", backref='citation')
 
+    #TODO: Check for same type reference citations??
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
     )
@@ -508,11 +628,16 @@ class Citation(Base):
             CITATION_TYPE: self.type
         }
         if self.authors:
-            citation_dict[CITATION_AUTHORS] = "|".join(author.name for author in self.authors)
+            citation_dict[CITATION_AUTHORS] = "|".join(
+                author.name for author in sorted(self.authors, key=lambda auth: auth.name))
         if self.date:
             citation_dict[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
 
         return citation_dict
+
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data
 
 
 class Evidence(Base):
@@ -520,10 +645,12 @@ class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')  # index=True,
+    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
-    citation = relationship('Citation', back_populates='evidences')
+    #citation = relationship('Citation', back_populates='evidences')
+
+    sha512 = Column(String(255), index=True)
 
     @property
     def data(self):
@@ -537,6 +664,10 @@ class Evidence(Base):
             EVIDENCE: self.text
         }
 
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data
+
 
 edge_annotation = Table(
     EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
@@ -546,8 +677,8 @@ edge_annotation = Table(
 
 edge_property = Table(
     EDGE_PROPERTY_TABLE_NAME, Base.metadata,
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME))),
-    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)))
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
+    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -570,13 +701,16 @@ class Edge(Base):
     target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
     target = relationship('Node', foreign_keys=[target_id])
 
-    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)))
+    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship("Evidence")
 
-    annotations = relationship('AnnotationEntry', secondary=edge_annotation)
-    properties = relationship('Property', secondary=edge_property)
+    annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic")  # , backref='edges'
+    properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
+    networks = relationship('Network', secondary=network_edge, lazy="dynamic")
 
     blob = Column(LargeBinary)
+
+    sha512 = Column(String(255), index=True)
 
     @property
     def data(self):
@@ -603,7 +737,9 @@ class Edge(Base):
             },
             'key': self.graphIdentifier
         }
-        edge_dict['data'].update(self.evidence.data)
+        if self.evidence:
+            edge_dict['data'].update(self.evidence.data)
+
         for prop in self.properties:
             prop_info = prop.data
             if prop_info['participant'] in edge_dict['data']:
@@ -631,7 +767,8 @@ class Edge(Base):
                 ANNOTATIONS: {anno.annotation.keyword: anno.name for anno in self.annotations}
             }
         }
-        min_dict['data'].update(self.evidence.data)
+        if self.evidence:
+            min_dict['data'].update(self.evidence.data)
         for prop in self.properties:
             prop_info = prop.data
             if prop_info['participant'] in min_dict['data']:
@@ -639,6 +776,7 @@ class Edge(Base):
             else:
                 min_dict['data'].update(prop_info['data'])
         return min_dict
+
 
 
 class Property(Base):
@@ -649,12 +787,15 @@ class Property(Base):
 
     participant = Column(String(255), doc='Identifies which participant of the edge if affected by the given property')
     modifier = Column(String(255), doc='The modifier to the corresponding participant')
+    effectNamespace = Column(String(255), nullable=True, doc='Optional namespace that defines modifier value')
+    effectName = Column(String(255), nullable=True, doc='Value for specific modifiers e.g. Activity')
     relativeKey = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
     propValue = Column(String(255), nullable=True, doc='Value of the effect')
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry')
+    sha512 = Column(String(255), index=True)
 
-    edges = relationship("Edge", secondary=edge_property)
+    #edges = relationship("Edge", secondary=edge_property)
 
     @property
     def data(self):
@@ -671,9 +812,65 @@ class Property(Base):
             },
             'participant': self.participant
         }
+
+        if self.modifier == LOCATION:
+            prop_dict['data'][self.participant] = {
+                LOCATION: self.namespaceEntry.data
+            }
+
         if self.relativeKey:
             prop_dict['data'][self.participant][EFFECT] = {
                 self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.data
             }
+        elif self.effectNamespace:
+            prop_dict['data'][self.participant][EFFECT] = {
+                NAMESPACE: self.effectNamespace,
+                NAME: self.effectName
+            }
 
         return prop_dict
+
+    def to_json(self):
+        """Enables json serialization for the class this method is defined in."""
+        return self.data['data']
+
+
+trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
+    trigger_name='drop_orphan_edge_annotation_relations',
+    trigger_tablename=NETWORK_TABLE_NAME,
+    # PROPERTY_TABLE_NAME,
+    orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
+    reference_tablename=NETWORK_EDGE_TABLE_NAME,
+    reference_column='edge_id',
+    orphan_column='edge_id')
+event.listen(Network.__table__, 'after_create', trigger_drop_orphan_edge_annotation_relations)
+
+trigger_drop_orphan_edge_property_relations = build_orphan_trigger(trigger_name='drop_orphan_edge_property_relations',
+                                                                   trigger_tablename=EDGE_ANNOTATION_TABLE_NAME,
+                                                                   orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
+                                                                   reference_tablename=NETWORK_EDGE_TABLE_NAME,
+                                                                   reference_column='edge_id',
+                                                                   orphan_column='edge_id')
+event.listen(edge_annotation, 'after_create', trigger_drop_orphan_edge_property_relations)
+
+
+trigger_drop_orphan_properties = build_orphan_trigger(trigger_name='drop_orphan_properties',
+                                                      trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
+                                                      orphan_tablename=PROPERTY_TABLE_NAME,
+                                                      reference_tablename=EDGE_PROPERTY_TABLE_NAME,
+                                                      reference_column='property_id')
+event.listen(edge_property, 'after_create', trigger_drop_orphan_properties)
+
+trigger_drop_orphan_edges = build_orphan_trigger(trigger_name='drop_orphan_edges',
+                                                 trigger_tablename=PROPERTY_TABLE_NAME,
+                                                 orphan_tablename=EDGE_TABLE_NAME,
+                                                 reference_tablename=NETWORK_EDGE_TABLE_NAME,
+                                                 reference_column='edge_id')
+event.listen(Property.__table__, 'after_create', trigger_drop_orphan_edges)
+
+trigger_drop_orphan_modifications = build_orphan_trigger(trigger_name='drop_orphan_modifications',
+                                                         trigger_tablename=NODE_TABLE_NAME,
+                                                         orphan_tablename=MODIFICATION_TABLE_NAME,
+                                                         reference_tablename=NODE_MODIFICATION_TABLE_NAME,
+                                                         reference_column='modification_id')
+event.listen(Node.__table__, 'after_create', trigger_drop_orphan_modifications)
