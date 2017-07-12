@@ -301,6 +301,14 @@ def to_cx_file(graph, file):
 
     :param BELGraph graph: A BEL graph
     :param file file: A writable file or file-like
+
+    Example:
+
+    >>> from pybel import from_url, to_cx_file
+    >>> from pybel.constants import SMALL_CORPUS_URL
+    >>> graph = from_url(SMALL_CORPUS_URL)
+    >>> with open('graph.cx', 'w') as f:
+    >>> ... to_cx_file(graph, f)
     """
     graph_cx_json_dict = to_cx(graph)
     json.dump(graph_cx_json_dict, file, ensure_ascii=False)
