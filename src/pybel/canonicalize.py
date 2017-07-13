@@ -246,7 +246,7 @@ def to_bel_lines(graph):
 
     # sort by citation, then supporting text
     qualified_edges_iter = filter_provenance_edges(graph)
-    qualified_edges = sorted(qualified_edges_iter, key=hash_edge)
+    qualified_edges = sorted(qualified_edges_iter, key=lambda edge: hash_edge(*edge))
 
     for citation, citation_edges in itt.groupby(qualified_edges, key=lambda t: flatten_citation(t[3][CITATION])):
         yield 'SET Citation = {{{}}}'.format(citation)
