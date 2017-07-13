@@ -8,16 +8,15 @@ enable this option, but can specify a database location if they choose.
 """
 
 import datetime
-import hashlib
 import json
 import logging
 import time
+
+import hashlib
 from collections import defaultdict
 from copy import deepcopy
-
 from sqlalchemy import func
 
-from . import models
 from .base_cache import BaseCacheManager
 from .models import (
     Network,
@@ -25,7 +24,14 @@ from .models import (
     AnnotationEntry,
     Namespace,
     NamespaceEntryEquivalence,
-    NamespaceEntry
+    NamespaceEntry,
+    Node,
+    Edge,
+    Evidence,
+    Citation,
+    Property,
+    Author,
+    Modification,
 )
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import decanonicalize_edge, decanonicalize_node
@@ -74,10 +80,10 @@ class NamespaceManager(BaseCacheManager):
         self.namespace_cache = defaultdict(dict)
         #: A dictionary from {namespace URL: {name: database ID}}
         self.namespace_id_cache = defaultdict(dict)
-        #: A dictionary from {namespace URL: models.Namespace}
+        #: A dictionary from {namespace URL: Namespace}
         self.namespace_model = {}
 
-        #: A dictionary from {namespace URL: {name: models.NamespaceEntry}}
+        #: A dictionary from {namespace URL: {name: NamespaceEntry}}
         self.namespace_object_cache = defaultdict(dict)
 
         #: A dictionary from {namespace URL: set of (parent, child) tuples}
@@ -157,10 +163,8 @@ class NamespaceManager(BaseCacheManager):
     def ensure_namespace(self, url, cache_objects=False):
         """Caches a namespace file if not already in the cache. If not cachable, returns a dict of the values
 
-        :param url: the location of the namespace file
-        :type url: str
-        :param cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
-        :type objects: bool
+        :param str url: the location of the namespace file
+        :param bool cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
         :return: The namespace instance
         :rtype: Namespace or dict
         """
@@ -311,10 +315,10 @@ class AnnotationManager(BaseCacheManager):
         self.annotation_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: {name: database ID}}
         self.annotation_id_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: models.Annotation}
+        #: A dictionary from {annotation URL: Annotation}
         self.annotation_model = {}
 
-        #: A dictionary from {annotation URL: {name: models.AnnotationEntry}}
+        #: A dictionary from {annotation URL: {name: AnnotationEntry}}
         self.annotation_object_cache = defaultdict(dict)
 
         #: A dictionary from {annotation URL: set of (parent, child) tuples}
@@ -342,7 +346,7 @@ class AnnotationManager(BaseCacheManager):
 
         :param str url: the location of the namespace file
         :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: models.Annotation
+        :rtype: Annotation
         """
         log.info('inserting annotation %s', url)
 
@@ -363,8 +367,8 @@ class AnnotationManager(BaseCacheManager):
             if section in config and key in config[section]:
                 annotation_insert_values[database_column] = config[section][key]
 
-        annotation = models.Annotation(**annotation_insert_values)
-        annotation.entries = [models.AnnotationEntry(name=c, label=l) for c, l in config['Values'].items() if c]
+        annotation = Annotation(**annotation_insert_values)
+        annotation.entries = [AnnotationEntry(name=c, label=l) for c, l in config['Values'].items() if c]
 
         self.session.add(annotation)
         self.session.commit()
@@ -379,7 +383,7 @@ class AnnotationManager(BaseCacheManager):
         :param objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
         :type objects: bool
         :return: The ensured annotation instance
-        :rtype: models.Annotation
+        :rtype: Annotation
         """
         if url in self.annotation_model:
             log.debug('already in memory: %s (%d)', url, len(self.annotation_cache[url]))
@@ -387,7 +391,7 @@ class AnnotationManager(BaseCacheManager):
 
         else:
             t = time.time()
-            results = self.session.query(models.Annotation).filter(models.Annotation.url == url).one_or_none()
+            results = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
 
             if results is None:
                 results = self.insert_annotation(url)
@@ -421,14 +425,13 @@ class AnnotationManager(BaseCacheManager):
         :param str url: The url of the annotation source
         :param str value: The value of the annotation from the given url's document
         :return: An AnnotationEntry object
-        :rtype: models.AnnotationEntry
+        :rtype: AnnotationEntry
         """
         if self.annotation_object_cache:
             annotation_entry = self.annotation_object_cache[url][value]
         else:
-            annotation = self.session.query(models.Annotation).filter_by(url=url).one()
-            annotation_entry = self.session.query(models.AnnotationEntry).filter_by(annotation=annotation,
-                                                                                    name=value).one()
+            annotation = self.session.query(Annotation).filter_by(url=url).one()
+            annotation_entry = self.session.query(AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
         return annotation_entry
 
@@ -544,17 +547,17 @@ class EquivalenceManager(NamespaceManager):
         if not ns.has_equivalences:
             self.insert_equivalences(url, namespace_url)
 
-    def get_equivalence_by_entry(self, namespace_url, name):
+    def get_equivalence_by_entry(self, url, name):
         """Gets the equivalence class
 
-        :param str namespace_url: the URL of the namespace
+        :param str url: the URL of the namespace
         :param str name: the name of the entry in the namespace
         :return: the equivalence class of the entry in the given namespace
         """
-        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
-        ns_entry = self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace_id == ns.id,
-                                                             NamespaceEntry.name == name).one()
-        return ns_entry.equivalence
+        namespace = self.session.query(Namespace).filter_by(url=url).one()
+        entry = self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace_id == namespace.id,
+                                                          NamespaceEntry.name == name).one()
+        return entry.equivalence
 
     def get_equivalence_members(self, equivalence_class):
         """Gets all members of the given equivalence class
@@ -575,7 +578,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         :rtype: int
         """
-        return self.session.query(func.count(models.Network.id)).scalar()
+        return self.session.query(func.count(Network.id)).scalar()
 
     def list_networks(self):
         """Lists all networks in the cache
@@ -765,19 +768,19 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
     def get_or_create_evidence(self, citation, text):
         """Creates entry and object for given evidence if it does not exist.
 
-        :param models.Citation citation: Citation object obtained from :func:`get_or_create_citation`
+        :param Citation citation: Citation object obtained from :func:`get_or_create_citation`
         :param str text: Evidence text
         :return: An Evidence object
-        :rtype: models.Evidence
+        :rtype: Evidence
         """
         evidence_hash = hashlib.sha512(
             json.dumps({EVIDENCE: text, CITATION: citation}, sort_keys=True).encode('utf-8')).hexdigest()
         if evidence_hash in self.object_cache['evidence']:
             result = self.object_cache['evidence'][evidence_hash]
         else:
-            result = self.session.query(models.Evidence).filter_by(text=text, citation=citation).one_or_none()
+            result = self.session.query(Evidence).filter_by(text=text, citation=citation).one_or_none()
             if result is None:
-                result = models.Evidence(text=text, citation=citation)
+                result = Evidence(text=text, citation=citation)
                 self.session.add(result)
 
             self.object_cache['evidence'][evidence_hash] = result
@@ -790,7 +793,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :param BELGraph graph: A BEL graph
         :param tuple node: A BEL node
         :return: A Node object
-        :rtype: models.Node
+        :rtype: Node
         """
         bel = decanonicalize_node(graph, node)
         blob = pickle.dumps(graph.node[node])
@@ -802,7 +805,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         else:
 
-            result = self.session.query(models.Node).filter_by(sha512=node_hash).one_or_none()
+            result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
             if result is None:
                 type = node_data[FUNCTION]
 
@@ -811,16 +814,16 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                     url = graph.namespace_url[namespace]
                     namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
-                    result = models.Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob,
-                                         sha512=node_hash)
+                    result = Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob,
+                                  sha512=node_hash)
 
                 elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
                     namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
-                    result = models.Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob,
-                                         sha512=node_hash)
+                    result = Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob,
+                                  sha512=node_hash)
 
                 else:
-                    result = models.Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+                    result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
                 if VARIANTS in node_data or FUSION in node_data:
                     result.is_variant = True
@@ -835,31 +838,31 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
     def drop_nodes(self):
         """Drops all nodes in RDB"""
-        for node in self.session.query(models.Node).all():
+        for node in self.session.query(Node).all():
             self.session.delete(node)
         self.session.commit()
 
     def drop_edges(self):
         """Drops all edges in RDB"""
-        for edge in self.session.query(models.Edge).all():
+        for edge in self.session.query(Edge).all():
             self.session.delete(edge)
         self.session.commit()
 
     def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, annotations, blob):
         """Creates entry for given edge if it does not exist.
 
-        :param graph_key: Key that identifies the order of edges and weather an edge is artificially created or extracted from a valid BEL statement.
-        :type graph_key: tuple
-        :param models.Node source: Source node of the relation
-        :param models.Node target: Target node of the relation
-        :param models.Evidence evidence: Evidence object that proves the given relation
+        :param tuple graph_key: Key that identifies the order of edges and weather an edge is artificially created or
+                                extracted from a valid BEL statement.
+        :param Node source: Source node of the relation
+        :param Node target: Target node of the relation
+        :param Evidence evidence: Evidence object that proves the given relation
         :param str bel: BEL statement that describes the relation
         :param str relation: Type of the relation between source and target node
-        :param [models.Property] properties: List of all properties that belong to the edge
-        param [models.AnnotationEntry] annotations: List of all annotations that belong to the edge
+        :param list[Property] properties: List of all properties that belong to the edge
+        :param list[AnnotationEntry] annotations: List of all annotations that belong to the edge
         :param bytes blob: A blob of the edge data object.
         :return: An Edge object
-        :rtype: models.Edge
+        :rtype: Edge
         """
         edge_dict = {
             'graphIdentifier': graph_key,
@@ -878,7 +881,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result = self.object_cache['edge'][edge_hash]
         else:
             # Edge already in DB?
-            result = self.session.query(models.Edge).filter_by(sha512=edge_hash).one_or_none()
+            result = self.session.query(Edge).filter_by(sha512=edge_hash).one_or_none()
 
             if result is None:
                 # Create new edge and add it to db_session
@@ -886,7 +889,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 del edge_dict['annotations']
                 edge_dict['blob'] = blob
                 edge_dict['sha512'] = edge_hash
-                result = models.Edge(**edge_dict)
+                result = Edge(**edge_dict)
                 self.session.add(result)
 
                 result.properties = properties
@@ -906,7 +909,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :param str date: Date of publication in ISO 8601 format
         :param str authors: List of authors separated by |
         :return: A Citation object
-        :rtype: models.Citation
+        :rtype: Citation
         """
         citation_dict = {
             'type': type.strip(),
@@ -919,16 +922,15 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result = self.object_cache['citation'][citation_hash]
 
         else:
-            result = self.session.query(models.Citation).filter_by(sha512=citation_hash).one_or_none()
+            result = self.session.query(Citation).filter_by(sha512=citation_hash).one_or_none()
 
             if result is None:
                 if date:
                     date = parse_datetime(date)
                     citation_dict['date'] = date
-                else:
-                    date = None
+
                 citation_dict['sha512'] = citation_hash
-                result = models.Citation(**citation_dict)
+                result = Citation(**citation_dict)
 
                 if authors is not None:
                     for author in authors.split('|'):
@@ -945,15 +947,15 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         :param str name: An author's name
         :return: An Author object
-        :rtype: models.Author
+        :rtype: Author
         """
         if name.strip() in self.object_cache['author']:
             result = self.object_cache['author'][name.strip()]
         else:
-            result = self.session.query(models.Author).filter_by(name=name.strip()).one_or_none()
+            result = self.session.query(Author).filter_by(name=name.strip()).one_or_none()
 
             if result is None:
-                result = models.Author(name=name.strip())
+                result = Author(name=name.strip())
                 self.session.add(result)
 
             self.object_cache['author'][name.strip()] = result
@@ -961,13 +963,13 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         return result
 
     def get_or_create_modification(self, graph, node_data):
-        """Creates a list of modification objects (models.Modification) that belong to the node described by
+        """Creates a list of modification objects (Modification) that belong to the node described by
         node_data.
 
         :param BELGraph graph: A BEL graph
         :param dict node_data: Describes the given node and contains is_variant information
         :return: A list of modification objects belonging to the given node
-        :rtype: list[models.Modification]
+        :rtype: list[Modification]
         """
         modification_list = []
         if FUSION in node_data:
@@ -1055,10 +1057,10 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 mod = self.object_cache['modification'][mod_hash]
 
             else:
-                mod = self.session.query(models.Modification).filter_by(sha512=mod_hash).one_or_none()
+                mod = self.session.query(Modification).filter_by(sha512=mod_hash).one_or_none()
                 if not mod:
                     modification['sha512'] = mod_hash
-                    mod = models.Modification(**modification)
+                    mod = Modification(**modification)
 
                 self.object_cache['modification'][mod_hash] = mod
             modifications.append(mod)
@@ -1071,7 +1073,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :param pybel.BELGraph graph: A BEL graph
         :param dict edge_data: Describes the context of the given edge.
         :return: A list of all subject and object properties of the edge
-        :rtype: list[models.Property]
+        :rtype: list[Property]
         """
         properties = []
         property_list = []
@@ -1125,11 +1127,11 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             if property_hash in self.object_cache['property']:
                 edge_property = self.object_cache['property'][property_hash]
             else:
-                edge_property = self.session.query(models.Property).filter_by(sha512=property_hash).one_or_none()
+                edge_property = self.session.query(Property).filter_by(sha512=property_hash).one_or_none()
 
                 if not edge_property:
                     property_def['sha512'] = property_hash
-                    edge_property = models.Property(**property_def)
+                    edge_property = Property(**property_def)
 
                 self.object_cache['property'][property_hash] = edge_property
 
@@ -1151,14 +1153,14 @@ class EdgeStoreQueryManager(BaseCacheManager):
         graph = BELGraph()
         for annotation_key, annotation_value in annotations.items():
 
-            annotation_def = self.session.query(models.Annotation).filter_by(keyword=annotation_key).first()
-            annotation = self.session.query(models.AnnotationEntry).filter_by(annotation=annotation_def,
-                                                                              name=annotation_value).first()
+            annotation_def = self.session.query(Annotation).filter_by(keyword=annotation_key).first()
+            annotation = self.session.query(AnnotationEntry).filter_by(annotation=annotation_def,
+                                                                       name=annotation_value).first()
 
             # Add Annotations to belGraph.annotation_url
             # Add Namespaces to belGraph.namespace_url
             # What about meta information?
-            edges = self.session.query(models.Edge).filter(models.Edge.annotations.contains(annotation)).all()
+            edges = self.session.query(Edge).filter(Edge.annotations.contains(annotation)).all()
             for edge in edges:
                 edge_data = edge.data
 
@@ -1178,26 +1180,24 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         return graph
 
-    def help_rebuild_list_components(self, node_object):
+    def help_rebuild_list_components(self, node):
         """Builds data and identifier for list node objects.
 
-        :param node_object: Node object defined in models.
+        :param Node node: Node object defined in models
         :return: Dictionary with 'key' and 'node' keys.
         """
-        node_info = node_object.data
+        node_info = node.data
         key = list(node_info['key'])
         data = node_info['data']
-        if node_object.type in (COMPLEX, COMPOSITE):
-            components = self.session.query(models.Edge).filter_by(source=node_object, relation=HAS_COMPONENT).all()
+        if node.type in (COMPLEX, COMPOSITE):
+            components = self.session.query(Edge).filter_by(source=node, relation=HAS_COMPONENT).all()
             for component in components:
                 component_key = component.target.data['key']
                 key.append(component_key)
 
-        elif node_object.type == REACTION:
-            reactant_components = self.session.query(models.Edge).filter_by(source=node_object,
-                                                                            relation=HAS_REACTANT).all()
-            product_components = self.session.query(models.Edge).filter_by(source=node_object,
-                                                                           relation=HAS_PRODUCT).all()
+        elif node.type == REACTION:
+            reactant_components = self.session.query(Edge).filter_by(source=node, relation=HAS_REACTANT).all()
+            product_components = self.session.query(Edge).filter_by(source=node, relation=HAS_PRODUCT).all()
             reactant_keys = tuple(reactant.target.data['key'] for reactant in reactant_components)
             product_keys = tuple(product.target.data['key'] for product in product_components)
             key.append(reactant_keys)
@@ -1206,14 +1206,14 @@ class EdgeStoreQueryManager(BaseCacheManager):
         return {'key': tuple(key), 'node': (tuple(key), data)}
 
     def get_edge_iter_by_filter(self, **annotations):
-        """Returns an iterator over models.Edge object that match the given annotations
+        """Returns an iterator over Edge object that match the given annotations
 
         :param dict annotations: dictionary of {URL: values}
-        :return: An iterator over models.Edge object that match the given annotations
-        :rtype: iter of models.Edge
+        :return: An iterator over Edge object that match the given annotations
+        :rtype: iter of Edge
         """
         # TODO make smarter
-        for edge in self.session.query(models.Edge).all():
+        for edge in self.session.query(Edge).all():
             ad = {a.annotation.name: a.name for a in edge.annotations}
             if subdict_matches(ad, annotations):
                 yield edge
@@ -1250,20 +1250,20 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :param str modification_name:
         :param str modification_type:
         :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`models.Node` objects.
-        :return: A list of the fitting nodes as :class:`models.Node` objects or dicts.
-        :rtype: list[models.Node]
+                            :class:`Node` objects.
+        :return: A list of the fitting nodes as :class:`Node` objects or dicts.
+        :rtype: list[Node]
         """
-        q = self.session.query(models.Node)
+        q = self.session.query(Node)
 
         if node_id and isinstance(node_id, int):
             q = q.filter_by(id=node_id)
         else:
             if bel:
-                q = q.filter(models.Node.bel.like(bel))
+                q = q.filter(Node.bel.like(bel))
 
             if type:
-                q = q.filter(models.Node.type.like(type))
+                q = q.filter(Node.type.like(type))
 
             if namespace or name:
                 q = q.join(NamespaceEntry)
@@ -1273,11 +1273,11 @@ class EdgeStoreQueryManager(BaseCacheManager):
                     q = q.filter(NamespaceEntry.name.like(name))
 
             if modification_type or modification_name:
-                q = q.join(models.Modification)
+                q = q.join(Modification)
                 if modification_type:
-                    q = q.filter(models.Modification.modType.like(modification_type))
+                    q = q.filter(Modification.modType.like(modification_type))
                 if modification_name:
-                    q = q.filter(models.Modification.modName.like(modification_name))
+                    q = q.filter(Modification.modName.like(modification_name))
 
         result = q.all()
 
@@ -1298,106 +1298,106 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         :rtype: int
         """
-        return self.session.query(func.count(models.Node.id)).scalar()
+        return self.session.query(func.count(Node.id)).scalar()
 
     def count_edges(self):
         """Counts the number of edges in the cache
 
         :rtype: int
         """
-        return self.session.query(func.count(models.Edge.id)).scalar()
+        return self.session.query(func.count(Edge.id)).scalar()
 
     def get_edge(self, edge_id=None, bel=None, source=None, target=None, relation=None, citation=None,
                  evidence=None, annotation=None, property=None, as_dict_list=False):
         """Builds and runs a query over all edges in the PyBEL cache.
 
         :param str bel: BEL statement that represents the desired edge.
-        :param source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`models.Node` object.
-        :type source: str or models.Node
-        :param target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`models.Node` object.
-        :type target: str or models.Node
+        :param source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
+        :type source: str or Node
+        :param target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
+        :type target: str or Node
         :param str relation: The relation that should be present between source and target node.
         :param citation: The citation that backs the edge up. It is possible to use the reference_id
-                         or a models.Citation object.
-        :type citation: str or models.Citation
-        :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text or a models.Evidence object.
-        :type evidence: str or models.Evidence
+                         or a Citation object.
+        :type citation: str or Citation
+        :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text or a Evidence object.
+        :type evidence: str or Evidence
         :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter as string.
         :type annotation: dict or str
         :param property: An edge property object or a corresponding database identifier.
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`models.Edge` objects.
+        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`Edge` objects.
         :type as_dict_list: bool
         """
-        q = self.session.query(models.Edge)
+        q = self.session.query(Edge)
 
         if edge_id and isinstance(edge_id, int):
             q = q.filter_by(id=edge_id)
         else:
             if bel:
-                q = q.filter(models.Edge.bel.like(bel))
+                q = q.filter(Edge.bel.like(bel))
 
             if relation:
-                q = q.filter(models.Edge.relation.like(relation))
+                q = q.filter(Edge.relation.like(relation))
 
             if annotation:
-                q = q.join(models.AnnotationEntry, models.Edge.annotations)
+                q = q.join(AnnotationEntry, Edge.annotations)
                 if isinstance(annotation, dict):
-                    q = q.join(models.Annotation).filter(models.Annotation.keyword.in_(list(annotation.keys())))
-                    q = q.filter(models.AnnotationEntry.name.in_(list(annotation.values())))
+                    q = q.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
+                    q = q.filter(AnnotationEntry.name.in_(list(annotation.values())))
 
                 elif isinstance(annotation, str):
-                    q = q.filter(models.AnnotationEntry.name.like(annotation))
+                    q = q.filter(AnnotationEntry.name.like(annotation))
 
             if source:
                 if isinstance(source, str):
                     source = self.get_node(bel=source)[0]
 
-                if isinstance(source, models.Node):
-                    q = q.filter(models.Edge.source == source)
+                if isinstance(source, Node):
+                    q = q.filter(Edge.source == source)
 
                     # ToDo: in_() not yet supported for relations
                     # elif isinstance(source, list) and len(source) > 0:
-                    #    if isinstance(source[0], models.Node):
-                    #        q = q.filter(models.Edge.source.in_(source))
+                    #    if isinstance(source[0], Node):
+                    #        q = q.filter(Edge.source.in_(source))
 
             if target:
                 if isinstance(target, str):
                     target = self.get_node(bel=target)[0]
 
-                if isinstance(target, models.Node):
-                    q = q.filter(models.Edge.target == target)
+                if isinstance(target, Node):
+                    q = q.filter(Edge.target == target)
 
                     # elif isinstance(target, list) and len(target) > 0:
-                    #    if isinstance(target[0], models.Node):
-                    #        q = q.filter(models.Edge.source.in_(target))
+                    #    if isinstance(target[0], Node):
+                    #        q = q.filter(Edge.source.in_(target))
 
             if citation or evidence:
-                q = q.join(models.Evidence)
+                q = q.join(Evidence)
 
                 if citation:
-                    if isinstance(citation, models.Citation):
-                        q = q.filter(models.Evidence.citation == citation)
+                    if isinstance(citation, Citation):
+                        q = q.filter(Evidence.citation == citation)
 
-                    elif isinstance(citation, list) and isinstance(citation[0], models.Citation):
-                        q = q.filter(models.Evidence.citation.in_(citation))
+                    elif isinstance(citation, list) and isinstance(citation[0], Citation):
+                        q = q.filter(Evidence.citation.in_(citation))
 
                     elif isinstance(citation, str):
-                        q = q.join(models.Citation).filter(models.Citation.reference.like(citation))
+                        q = q.join(Citation).filter(Citation.reference.like(citation))
 
                 if evidence:
-                    if isinstance(evidence, models.Evidence):
-                        q = q.filter(models.Edge.evidence == evidence)
+                    if isinstance(evidence, Evidence):
+                        q = q.filter(Edge.evidence == evidence)
 
                     elif isinstance(evidence, str):
-                        q = q.filter(models.Evidence.text.like(evidence))
+                        q = q.filter(Evidence.text.like(evidence))
 
             if property:
-                q = q.join(models.Property, models.Edge.properties)
+                q = q.join(Property, Edge.properties)
 
-                if isinstance(property, models.Property):
-                    q = q.filter(models.Property.id == property.id)
+                if isinstance(property, Property):
+                    q = q.filter(Property.id == property.id)
                 elif isinstance(property, int):
-                    q = q.filter(models.Property.id == property)
+                    q = q.filter(Property.id == property)
 
         result = q.all()
 
@@ -1420,39 +1420,39 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :param bool evidence: Weather or not supporting text should be included in the return.
         :param evidence_text:
         :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`models.Citation` objects.
-        :return: List of :class:`models.Citation` objects or corresponding dicts.
-        :rtype: list[models.Citation] or dict
+                            :class:`Citation` objects.
+        :return: List of :class:`Citation` objects or corresponding dicts.
+        :rtype: list[Citation] or dict
         """
-        q = self.session.query(models.Citation)
+        q = self.session.query(Citation)
 
         if citation_id and isinstance(citation_id, int):
             q = q.filter_by(id=citation_id)
         else:
             if author is not None:
-                q = q.join(models.Author, models.Citation.authors)
+                q = q.join(Author, Citation.authors)
                 if isinstance(author, str):
-                    q = q.filter(models.Author.name.like(author))
+                    q = q.filter(Author.name.like(author))
                 elif isinstance(author, list):
-                    q = q.filter(models.Author.name.in_(author))
+                    q = q.filter(Author.name.in_(author))
 
             if type:
-                q = q.filter(models.Citation.type.like(type))
+                q = q.filter(Citation.type.like(type))
 
             if reference:
-                q = q.filter(models.Citation.reference == reference)
+                q = q.filter(Citation.reference == reference)
 
             if name:
-                q = q.filter(models.Citation.name.like(name))
+                q = q.filter(Citation.name.like(name))
 
             if date:
                 if isinstance(date, datetime.date):
-                    q = q.filter(models.Citation.date == date)
+                    q = q.filter(Citation.date == date)
                 elif isinstance(date, str):
-                    q = q.filter(models.Citation.date == parse_datetime(date))
+                    q = q.filter(Citation.date == parse_datetime(date))
 
             if evidence_text:
-                q = q.join(models.Evidence).filter(models.Evidence.text.like(evidence_text))
+                q = q.join(Evidence).filter(Evidence.text.like(evidence_text))
 
         result = q.all()
 
@@ -1476,20 +1476,20 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :param str participant: The participant that is effected by the property (OBJECT or SUBJECT)
         :param str modifier: The modifier of the property.
         :param bool as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
-                             :class:`models.Property` objects.
+                             :class:`Property` objects.
         :return:
-        :rtype: list[models.Property]
+        :rtype: list[Property]
         """
-        q = self.session.query(models.Property)
+        q = self.session.query(Property)
 
         if property_id:
             q = q.filter_by(id=property_id)
         else:
             if participant:
-                q = q.filter(models.Property.participant.like(participant))
+                q = q.filter(Property.participant.like(participant))
 
             if modifier:
-                q = q.filter(models.Property.modifier.like(modifier))
+                q = q.filter(Property.modifier.like(modifier))
 
         result = q.all()
 
