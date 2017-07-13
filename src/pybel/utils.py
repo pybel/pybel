@@ -285,7 +285,7 @@ def hash_node(node):
     :return: A hashed version of the node tuple using md5 hash of the binary pickle dump
     :rtype: str
     """
-    return hashlib.md5(pickle.dumps(node)).hexdigest()
+    return hashlib.sha1(pickle.dumps(node)).hexdigest()
 
 
 def hash_edge(u, v, k, d):
@@ -295,7 +295,7 @@ def hash_edge(u, v, k, d):
     :rtype: str
     """
     edge_tuple = (u, v, json.dumps(d, ensure_ascii=False, sort_keys=True))
-    return hashlib.md5(pickle.dumps(edge_tuple)).hexdigest()
+    return hashlib.sha1(pickle.dumps(edge_tuple)).hexdigest()
 
 
 def subdict_matches(target, query, partial_match=True):
