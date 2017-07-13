@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*-
 
-import hashlib
-import itertools as itt
+import json
 import logging
-import os
 import pickle
-from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
 from datetime import datetime
-from operator import itemgetter
 
+import hashlib
 import networkx as nx
+import os
 import requests
 import requests.exceptions
+from collections import defaultdict, MutableMapping
 from pkg_resources import get_distribution
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
 
-from .constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN
+from .constants import CITATION_ENTRIES, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN
 
 log = logging.getLogger(__name__)
 
@@ -221,12 +220,6 @@ def flatten_citation(citation):
     return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
 
 
-def sort_edges(d):
-    """Acts as a sort key function for an edge"""
-    return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
-        itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
-
-
 def ensure_quotes(s):
     """Quote a string that isn't solely alphanumeric
 
@@ -285,14 +278,24 @@ def parse_datetime(s):
                 raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
-def hash_tuple(x):
+def hash_node(node):
     """Converts a PyBEL node tuple to a hash
 
-    :param tuple x: A BEL node
+    :param tuple node: A BEL node
     :return: A hashed version of the node tuple using md5 hash of the binary pickle dump
     :rtype: str
     """
-    return hashlib.md5(pickle.dumps(x)).hexdigest()
+    return hashlib.md5(pickle.dumps(node)).hexdigest()
+
+
+def hash_edge(u, v, k, d):
+    """Converts an edge tuple to a hash
+
+    :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
+    :rtype: str
+    """
+    edge_tuple = (u, v, json.dumps(d, ensure_ascii=False, sort_keys=True))
+    return hashlib.md5(pickle.dumps(edge_tuple)).hexdigest()
 
 
 def subdict_matches(target, query, partial_match=True):
