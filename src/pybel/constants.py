@@ -14,6 +14,7 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 
 from json import load, dump
 from logging import getLogger
+
 from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
@@ -249,8 +250,23 @@ ANNOTATIONS = 'annotations'
 SUBJECT = 'subject'
 #: The key for an internal edge data dictionary for the object modifier dictionary
 OBJECT = 'object'
-#: The key or an internal edge data dictonary for the line number
+#: The key or an internal edge data dictionary for the line number
 LINE = 'line'
+#: The key representing the hash of the other
+ID = 'id'
+
+#: The group of all BEL-provided keys for edge data dictionaries
+PYBEL_EDGE_DATA_KEYS = {
+    RELATION,
+    CITATION,
+    EVIDENCE,
+    ANNOTATIONS,
+    SUBJECT,
+    OBJECT,
+}
+
+#: The group of all PyBEL annotated keys for edge data dictionaries
+PYBEL_EDGE_ALL_KEYS = {LINE, ID} | PYBEL_EDGE_DATA_KEYS
 
 #: A BEL relationship
 HAS_REACTANT = 'hasReactant'

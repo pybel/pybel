@@ -17,7 +17,7 @@ from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
 
-from .constants import CITATION_ENTRIES, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN
+from .constants import CITATION_ENTRIES, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN, PYBEL_EDGE_DATA_KEYS
 
 log = logging.getLogger(__name__)
 
@@ -288,14 +288,40 @@ def hash_node(node):
     return hashlib.sha1(pickle.dumps(node)).hexdigest()
 
 
+def extract_pybel_data(data):
+    """Extracts only the PyBEL-specific data from the given edge data dictionary
+
+    :param dict data: An edge data dictionary
+    :rtype: dict
+    """
+    return {
+        key: value
+        for key, value in data.items()
+        if key in PYBEL_EDGE_DATA_KEYS
+    }
+
+
+def edge_to_tuple(u, v, k, data):
+    """Converts an edge to tuple
+
+    :param tuple u: The source BEL node
+    :param tuple v: The target BEL node
+    :param dict data: The edge's data dictionary
+    :return: A tuple that can be hashed representing this edge. Makes no promises to its structure.
+    """
+    extracted_data_dict = extract_pybel_data(data)
+    return u, v, json.dumps(extracted_data_dict, ensure_ascii=False, sort_keys=True)
+
+
 def hash_edge(u, v, k, d):
     """Converts an edge tuple to a hash
 
     :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
     :rtype: str
     """
-    edge_tuple = (u, v, json.dumps(d, ensure_ascii=False, sort_keys=True))
-    return hashlib.sha1(pickle.dumps(edge_tuple)).hexdigest()
+    edge_tuple = edge_to_tuple(u, v, k, d)
+    edge_tuple_bytes = pickle.dumps(edge_tuple)
+    return hashlib.sha1(edge_tuple_bytes).hexdigest()
 
 
 def subdict_matches(target, query, partial_match=True):
