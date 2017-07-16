@@ -675,17 +675,17 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         t = time.time()
 
-        namespaces = [self.ensure_namespace(url, cache_objects=store_parts) for url in graph.namespace_url.values()]
-        annotations = [self.ensure_annotation(url, objects=store_parts) for url in graph.annotation_url.values()]
+        for url in graph.namespace_url.values():
+            self.ensure_namespace(url, cache_objects=store_parts)
+
+        for url in graph.annotation_url.values():
+            self.ensure_annotation(url, objects=store_parts)
 
         network = Network(blob=to_bytes(graph), **graph.document)
 
         if store_parts:
             if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
                 self.ensure_namespace(GOCC_LATEST)
-
-            # network.namespaces.extend(namespaces)
-            # network.annotations.extend(annotations)
 
             self.store_graph_parts(network, graph)
 
@@ -789,14 +789,14 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         evidence_hash = hashlib.sha512(
             json.dumps({EVIDENCE: text, CITATION: citation}, sort_keys=True).encode('utf-8')).hexdigest()
         if evidence_hash in self.object_cache['evidence']:
-            result = self.object_cache['evidence'][evidence_hash]
-        else:
-            result = self.session.query(Evidence).filter_by(text=text, citation=citation).one_or_none()
-            if result is None:
-                result = Evidence(text=text, citation=citation)
-                self.session.add(result)
+            return self.object_cache['evidence'][evidence_hash]
 
-            self.object_cache['evidence'][evidence_hash] = result
+        result = self.session.query(Evidence).filter_by(text=text, citation=citation).one_or_none()
+        if result is None:
+            result = Evidence(text=text, citation=citation, sha512=evidence_hash)
+            self.session.add(result)
+
+        self.object_cache['evidence'][evidence_hash] = result
 
         return result
 
@@ -817,6 +817,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         node_data = graph.node[node]
 
         result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
+
         if result is None:
             type = node_data[FUNCTION]
 
@@ -896,7 +897,6 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result.properties = properties
             result.annotations = annotations
 
-        # Make sure the object is in object_cache from now on
         self.object_cache['edge'][edge_hash] = result
 
         return result
@@ -920,26 +920,25 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         citation_hash = hashlib.sha512(json.dumps(citation_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
         if citation_hash in self.object_cache['citation']:
-            result = self.object_cache['citation'][citation_hash]
+            return self.object_cache['citation'][citation_hash]
 
-        else:
-            result = self.session.query(Citation).filter_by(sha512=citation_hash).one_or_none()
+        result = self.session.query(Citation).filter_by(sha512=citation_hash).one_or_none()
 
-            if result is None:
-                if date:
-                    date = parse_datetime(date)
-                    citation_dict['date'] = date
+        if result is None:
+            if date:
+                date = parse_datetime(date)
+                citation_dict['date'] = date
 
-                citation_dict['sha512'] = citation_hash
-                result = Citation(**citation_dict)
+            citation_dict['sha512'] = citation_hash
+            result = Citation(**citation_dict)
 
-                if authors is not None:
-                    for author in authors.split('|'):
-                        result.authors.append(self.get_or_create_author(author))
+            if authors is not None:
+                for author in authors.split('|'):
+                    result.authors.append(self.get_or_create_author(author))
 
-                self.session.add(result)
+            self.session.add(result)
 
-            self.object_cache['citation'][citation_hash] = result
+        self.object_cache['citation'][citation_hash] = result
 
         return result
 
@@ -950,16 +949,18 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: An Author object
         :rtype: Author
         """
-        if name.strip() in self.object_cache['author']:
-            result = self.object_cache['author'][name.strip()]
-        else:
-            result = self.session.query(Author).filter_by(name=name.strip()).one_or_none()
+        name = name.strip()
 
-            if result is None:
-                result = Author(name=name.strip())
-                self.session.add(result)
+        if name in self.object_cache['author']:
+            return self.object_cache['author'][name]
 
-            self.object_cache['author'][name.strip()] = result
+        result = self.session.query(Author).filter_by(name=name).one_or_none()
+
+        if result is None:
+            result = Author(name=name)
+            self.session.add(result)
+
+        self.object_cache['author'][name] = result
 
         return result
 
