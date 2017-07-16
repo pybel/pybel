@@ -73,7 +73,6 @@ def reset_tables(engine):
     Base.metadata.create_all(bind=engine)
 
 
-
 def build_orphan_trigger(trigger_name, trigger_tablename, orphan_tablename, reference_tablename, reference_column,
                          orphan_column='id', trigger_time='AFTER', trigger_action='DELETE'):
     """builds a trigger to delete orphans in many-to-many relationships after deletion of a table.
@@ -126,7 +125,6 @@ annotation_hierarchy = Table(
 )
 
 
-
 class Namespace(Base):
     """Represents a BEL Namespace"""
     __tablename__ = NAMESPACE_TABLE_NAME
@@ -154,7 +152,7 @@ class Namespace(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    #entries = relationship('NamespaceEntry', backref='namespace', cascade='all, delete-orphan')
+    # entries = relationship('NamespaceEntry', backref='namespace', cascade='all, delete-orphan')
 
     has_equivalences = Column(Boolean, default=False)
 
@@ -255,7 +253,7 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    #entries = relationship('AnnotationEntry', back_populates="annotation", cascade='all, delete-orphan')
+    # entries = relationship('AnnotationEntry', back_populates="annotation", cascade='all, delete-orphan')
 
     @property
     def data(self):
@@ -295,7 +293,6 @@ class AnnotationEntry(Base):
     annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
     annotation = relationship('Annotation', backref=backref('entries'))
 
-
     children = relationship(
         'AnnotationEntry',
         secondary=annotation_hierarchy,
@@ -314,6 +311,7 @@ class AnnotationEntry(Base):
     def to_json(self):
         """Enables json serialization for the class this method is defined in."""
         return self.data
+
 
 network_edge = Table(
     NETWORK_EDGE_TABLE_NAME, Base.metadata,
@@ -356,6 +354,8 @@ class Network(Base):
 
     @property
     def data(self):
+        # TODO switch to using constants from :mod:`pybel.constants`
+
         network_data = {
             'id': self.id,
             'name': self.name,
@@ -593,7 +593,7 @@ class Author(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, index=True)
 
-    #citations = relationship("Citation", secondary=author_citation)
+    # citations = relationship("Citation", secondary=author_citation)
 
 
 class Citation(Base):
@@ -610,7 +610,7 @@ class Citation(Base):
     authors = relationship("Author", secondary=author_citation, backref='citations')
     evidences = relationship("Evidence", backref='citation')
 
-    #TODO: Check for same type reference citations??
+    # TODO: Check for same type reference citations??
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
     )
@@ -648,7 +648,7 @@ class Evidence(Base):
     text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
-    #citation = relationship('Citation', back_populates='evidences')
+    # citation = relationship('Citation', back_populates='evidences')
 
     sha512 = Column(String(255), index=True)
 
@@ -778,7 +778,6 @@ class Edge(Base):
         return min_dict
 
 
-
 class Property(Base):
     """The property table contains additional information that is used to describe the context of a relation."""
     __tablename__ = PROPERTY_TABLE_NAME
@@ -795,7 +794,7 @@ class Property(Base):
     namespaceEntry = relationship('NamespaceEntry')
     sha512 = Column(String(255), index=True)
 
-    #edges = relationship("Edge", secondary=edge_property)
+    # edges = relationship("Edge", secondary=edge_property)
 
     @property
     def data(self):
@@ -842,35 +841,43 @@ trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
     orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
     reference_tablename=NETWORK_EDGE_TABLE_NAME,
     reference_column='edge_id',
-    orphan_column='edge_id')
+    orphan_column='edge_id'
+)
 event.listen(Network.__table__, 'after_create', trigger_drop_orphan_edge_annotation_relations)
 
-trigger_drop_orphan_edge_property_relations = build_orphan_trigger(trigger_name='drop_orphan_edge_property_relations',
-                                                                   trigger_tablename=EDGE_ANNOTATION_TABLE_NAME,
-                                                                   orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
-                                                                   reference_tablename=NETWORK_EDGE_TABLE_NAME,
-                                                                   reference_column='edge_id',
-                                                                   orphan_column='edge_id')
+trigger_drop_orphan_edge_property_relations = build_orphan_trigger(
+    trigger_name='drop_orphan_edge_property_relations',
+    trigger_tablename=EDGE_ANNOTATION_TABLE_NAME,
+    orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
+    reference_tablename=NETWORK_EDGE_TABLE_NAME,
+    reference_column='edge_id',
+    orphan_column='edge_id'
+)
 event.listen(edge_annotation, 'after_create', trigger_drop_orphan_edge_property_relations)
 
-
-trigger_drop_orphan_properties = build_orphan_trigger(trigger_name='drop_orphan_properties',
-                                                      trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
-                                                      orphan_tablename=PROPERTY_TABLE_NAME,
-                                                      reference_tablename=EDGE_PROPERTY_TABLE_NAME,
-                                                      reference_column='property_id')
+trigger_drop_orphan_properties = build_orphan_trigger(
+    trigger_name='drop_orphan_properties',
+    trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
+    orphan_tablename=PROPERTY_TABLE_NAME,
+    reference_tablename=EDGE_PROPERTY_TABLE_NAME,
+    reference_column='property_id'
+)
 event.listen(edge_property, 'after_create', trigger_drop_orphan_properties)
 
-trigger_drop_orphan_edges = build_orphan_trigger(trigger_name='drop_orphan_edges',
-                                                 trigger_tablename=PROPERTY_TABLE_NAME,
-                                                 orphan_tablename=EDGE_TABLE_NAME,
-                                                 reference_tablename=NETWORK_EDGE_TABLE_NAME,
-                                                 reference_column='edge_id')
+trigger_drop_orphan_edges = build_orphan_trigger(
+    trigger_name='drop_orphan_edges',
+    trigger_tablename=PROPERTY_TABLE_NAME,
+    orphan_tablename=EDGE_TABLE_NAME,
+    reference_tablename=NETWORK_EDGE_TABLE_NAME,
+    reference_column='edge_id'
+)
 event.listen(Property.__table__, 'after_create', trigger_drop_orphan_edges)
 
-trigger_drop_orphan_modifications = build_orphan_trigger(trigger_name='drop_orphan_modifications',
-                                                         trigger_tablename=NODE_TABLE_NAME,
-                                                         orphan_tablename=MODIFICATION_TABLE_NAME,
-                                                         reference_tablename=NODE_MODIFICATION_TABLE_NAME,
-                                                         reference_column='modification_id')
+trigger_drop_orphan_modifications = build_orphan_trigger(
+    trigger_name='drop_orphan_modifications',
+    trigger_tablename=NODE_TABLE_NAME,
+    orphan_tablename=MODIFICATION_TABLE_NAME,
+    reference_tablename=NODE_MODIFICATION_TABLE_NAME,
+    reference_column='modification_id'
+)
 event.listen(Node.__table__, 'after_create', trigger_drop_orphan_modifications)
