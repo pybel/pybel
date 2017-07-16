@@ -38,7 +38,7 @@ from ..canonicalize import decanonicalize_edge, decanonicalize_node
 from ..constants import *
 from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
-from ..utils import get_bel_resource, parse_datetime, subdict_matches
+from ..utils import get_bel_resource, parse_datetime, subdict_matches, hash_edge, hash_node
 
 try:
     import cPickle as pickle
@@ -748,6 +748,9 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                     annotations.append(annotation)
 
             bel = decanonicalize_edge(graph, u, v, k)
+
+            edge_hash = hash_edge(u, v, k, data)
+
             edge = self.get_or_create_edge(
                 graph_key=k,
                 source=source,
@@ -757,11 +760,15 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 bel=bel,
                 properties=properties,
                 annotations=annotations,
-                blob=pickle.dumps(data)
+                blob=pickle.dumps(data),
+                edge_hash=edge_hash,
             )
 
-        for hash, edge in self.object_cache['edge'].items():
             network.edges.append(edge)
+
+        # FIXME Why aren't the edges getting added directly?
+        # for hash, edge in self.object_cache['edge'].items():
+        #     network.edges.append(edge)
 
         self.session.flush()
 
@@ -799,12 +806,10 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         blob = pickle.dumps(graph.node[node])
         node_data = graph.node[node]
 
-        node_hash = hashlib.sha512(bel.encode('utf-8')).hexdigest()
+        node_hash = hash_node(node)
         if node_hash in self.object_cache['node']:
             result = self.object_cache['node'][node_hash]
-
         else:
-
             result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
             if result is None:
                 type = node_data[FUNCTION]
@@ -848,7 +853,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             self.session.delete(edge)
         self.session.commit()
 
-    def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, annotations, blob):
+    def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, annotations, blob,
+                           edge_hash):
         """Creates entry for given edge if it does not exist.
 
         :param tuple graph_key: Key that identifies the order of edges and weather an edge is artificially created or
@@ -874,7 +880,6 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             'properties': properties.sort(key=lambda prop: prop.sha512),
             'annotations': annotations.sort(key=lambda annoentry: annoentry.id)
         }
-        edge_hash = hashlib.sha512(json.dumps(edge_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
         if edge_hash in self.object_cache['edge']:
             # Cached edge object already? Load it from object_cache
