@@ -378,10 +378,8 @@ class AnnotationManager(BaseCacheManager):
     def ensure_annotation(self, url, objects=False):
         """Caches an annotation file if not already in the cache
 
-        :param url: the location of the annotation file
-        :type url: str
-        :param objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
-        :type objects: bool
+        :param str url: the location of the annotation file
+        :param bool objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
         :return: The ensured annotation instance
         :rtype: Annotation
         """
@@ -1149,7 +1147,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
     def rebuild_by_edge_filter(self, **annotations):
         """Gets all edges matching the given query annotation values
 
-        :param dict annotations: dictionary of {key: value}
+        :param dict[str,str] annotations: dictionary of {key: value}
         :return: A graph composed of the filtered edges
         :rtype: pybel.BELGraph
         """
@@ -1193,6 +1191,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         :param Node node: Node object defined in models
         :return: Dictionary with 'key' and 'node' keys.
+        :rtype: dict[str,str]
         """
         node_info = node.data
         key = list(node_info['key'])
@@ -1216,9 +1215,9 @@ class EdgeStoreQueryManager(BaseCacheManager):
     def get_edge_iter_by_filter(self, **annotations):
         """Returns an iterator over Edge object that match the given annotations
 
-        :param dict annotations: dictionary of {URL: values}
+        :param dict[str,str] annotations: dictionary of {URL: values}
         :return: An iterator over Edge object that match the given annotations
-        :rtype: iter of Edge
+        :rtype: iter[Edge]
         """
         # TODO make smarter
         for edge in self.session.query(Edge).all():
@@ -1229,7 +1228,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
     def get_graph_by_filter(self, **annotations):
         """Fills a BEL graph with edges retrieved from a filter
 
-        :param dict annotations: dictionary of {URL: values}
+        :param dict[str,str] annotations: dictionary of {URL: values}
         :return: A BEL graph
         :rtype: pybel.BELGraph
         """
@@ -1319,22 +1318,17 @@ class EdgeStoreQueryManager(BaseCacheManager):
                  evidence=None, annotation=None, property=None, as_dict_list=False):
         """Builds and runs a query over all edges in the PyBEL cache.
 
+        :param int edge_id: The edge identifier
         :param str bel: BEL statement that represents the desired edge.
-        :param source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :type source: str or Node
-        :param target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :type target: str or Node
+        :param str or Node source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
+        :param str or Node target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
         :param str relation: The relation that should be present between source and target node.
-        :param citation: The citation that backs the edge up. It is possible to use the reference_id
+        :param str or Citation citation: The citation that backs the edge up. It is possible to use the reference_id
                          or a Citation object.
-        :type citation: str or Citation
-        :param evidence: The supporting text of the edge. It is possible to use a snipplet of the text or a Evidence object.
-        :type evidence: str or Evidence
-        :param annotation: Dictionary of annotationKey:annotationValue parameters or just a annotationValue parameter as string.
-        :type annotation: dict or str
+        :param str or Evidence evidence: The supporting text of the edge. It is possible to use a snipplet of the text or a Evidence object.
+        :param  dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just a annotationValue parameter as string.
         :param property: An edge property object or a corresponding database identifier.
-        :param as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`Edge` objects.
-        :type as_dict_list: bool
+        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`Edge` objects.
         """
         q = self.session.query(Edge)
 
@@ -1485,7 +1479,6 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :param str modifier: The modifier of the property.
         :param bool as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
                              :class:`Property` objects.
-        :return:
         :rtype: list[Property]
         """
         q = self.session.query(Property)
@@ -1510,5 +1503,5 @@ class EdgeStoreQueryManager(BaseCacheManager):
 class CacheManager(EdgeStoreQueryManager, EdgeStoreInsertManager, NetworkManager, EquivalenceManager,
                    OwlNamespaceManager, OwlAnnotationManager):
     """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
-    SQLite by default for speed and lightness, but any database can be used wiht its SQLAlchemy interface.
+    SQLite by default for speed and lightness, but any database can be used with its SQLAlchemy interface.
     """
