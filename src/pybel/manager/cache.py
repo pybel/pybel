@@ -744,7 +744,16 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             if CITATION not in data or EVIDENCE not in data:
                 evidence = None
             else:
-                citation = self.get_or_create_citation(**data[CITATION])
+
+                citation_dict = data[CITATION]
+
+                citation = self.get_or_create_citation(
+                    type=citation_dict.get(CITATION_TYPE),
+                    name=citation_dict.get(CITATION_NAME),
+                    reference=citation_dict.get(CITATION_REFERENCE),
+                    date=citation_dict.get(CITATION_DATE),
+                    authors=citation_dict.get(CITATION_AUTHORS),
+                )
                 evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
 
             properties = self.get_or_create_property(graph, data)
@@ -933,7 +942,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result = Citation(**citation_dict)
 
             if authors is not None:
-                for author in authors.split('|'):
+                for author in authors.split('|') if isinstance(authors, str) else authors:
                     result.authors.append(self.get_or_create_author(author))
 
             self.session.add(result)
