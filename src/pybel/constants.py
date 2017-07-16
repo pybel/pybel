@@ -344,7 +344,7 @@ CORRELATIVE_RELATIONS = {
 
 #: A list of relationship types that don't require annotations or evidence
 #: This must be maintained as a list, since the :data:`unqualified_edge_code` is calculated based on the order
-#: and needs to be consistient
+#: and needs to be consistent
 unqualified_edges = [
     HAS_REACTANT,
     HAS_PRODUCT,

@@ -731,7 +731,10 @@ class Edge(Base):
             },
             'data': {
                 'relation': self.relation,
-                ANNOTATIONS: {anno.annotation.keyword: anno.name for anno in self.annotations}
+                ANNOTATIONS: {
+                    anno.annotation.keyword: anno.name
+                    for anno in self.annotations
+                }
             },
         }
         if self.evidence:
@@ -761,7 +764,10 @@ class Edge(Base):
             },
             'data': {
                 'relation': self.relation,
-                ANNOTATIONS: {anno.annotation.keyword: anno.name for anno in self.annotations}
+                ANNOTATIONS: {
+                    anno.annotation.keyword: anno.name
+                    for anno in self.annotations
+                }
             }
         }
         if self.evidence:
