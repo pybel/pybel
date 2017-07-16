@@ -356,7 +356,9 @@ unqualified_edges = [
     IS_A,
 ]
 
-#: Unqualified edges are given negative keys since the standard networkx edge key factory starts at 0 and counts up
+UNQUALIFIED_EDGES = set(unqualified_edges)
+
+#: Unqualified edges are given negative keys since the standard NetworkX edge key factory starts at 0 and counts up
 unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}
 
 # BEL Keywords

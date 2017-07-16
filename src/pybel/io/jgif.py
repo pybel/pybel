@@ -14,7 +14,7 @@ import logging
 from collections import defaultdict
 
 from ..canonicalize import decanonicalize_node, decanonicalize_edge
-from ..constants import CITATION_TYPE, CITATION_REFERENCE, CITATION_NAME, unqualified_edges
+from ..constants import CITATION_TYPE, CITATION_REFERENCE, CITATION_NAME, UNQUALIFIED_EDGES
 from ..constants import RELATION, FUNCTION, EVIDENCE, CITATION, ANNOTATIONS, METADATA_NAME
 from ..parser import BelParser
 from ..struct import BELGraph
@@ -165,10 +165,10 @@ def from_jgif(graph_jgif_dict):
         if edge['relation'] in {'actsIn'}:
             continue  # don't need legacy BEL format
 
-        if edge['relation'] in unqualified_edges:
+        if edge['relation'] in UNQUALIFIED_EDGES:
             pass
 
-        if not edge['relation'] in unqualified_edges and (
+        if not edge['relation'] in UNQUALIFIED_EDGES and (
                         'evidences' not in edge['metadata'] or not edge['metadata']['evidences']):
             log.debug('No evidence for edge %s', edge['label'])
             continue
