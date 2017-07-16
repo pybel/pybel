@@ -443,7 +443,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     # @mock_bel_resources
     # def test_get_or_create_modification(self, mock_get):
     #     # self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
-    #     node_data = self.simple_graph.node[('Protein', 'HGNC', 'FADD')]
+    #     node_data = self.simple_graph.node[(PROTEIN, 'HGNC', 'FADD')]
     #     fusion_missing = {
     #         FUSION: {
     #             PARTNER_3P: {
@@ -678,9 +678,9 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @mock_bel_resources
     def test_query_node(self, mock_get):
         akt1_dict = {
-            'key': ('Protein', 'HGNC', 'AKT1'),
+            'key': (PROTEIN, 'HGNC', 'AKT1'),
             'data': {
-                FUNCTION: 'Protein',
+                FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1'
             },
@@ -701,27 +701,27 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertEqual(len(node_dict_list3), 3)
         self.assertIn(akt1_dict, node_dict_list3)
 
-        protein_list = self.manager.get_node(type='Protein')
+        protein_list = self.manager.get_node(type=PROTEIN)
         self.assertEqual(len(protein_list), 4)
 
     @mock_bel_resources
     def test_query_edge(self, mock_get):
         fadd_casp = {
             'source': {
-                'node': (('Protein', 'HGNC', 'FADD'), {
-                    FUNCTION: 'Protein',
+                'node': ((PROTEIN, 'HGNC', 'FADD'), {
+                    FUNCTION: PROTEIN,
                     NAMESPACE: 'HGNC',
                     NAME: 'FADD'
                 }),
-                'key': ('Protein', 'HGNC', 'FADD')
+                'key': (PROTEIN, 'HGNC', 'FADD')
             },
             'target': {
-                'node': (('Protein', 'HGNC', 'CASP8'), {
-                    FUNCTION: 'Protein',
+                'node': ((PROTEIN, 'HGNC', 'CASP8'), {
+                    FUNCTION: PROTEIN,
                     NAMESPACE: 'HGNC',
                     NAME: 'CASP8'
                 }),
-                'key': ('Protein', 'HGNC', 'CASP8')
+                'key': (PROTEIN, 'HGNC', 'CASP8')
             },
             'data': {
                 RELATION: 'increases',
