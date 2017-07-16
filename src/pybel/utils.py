@@ -285,7 +285,7 @@ def hash_node(node):
     :return: A hashed version of the node tuple using md5 hash of the binary pickle dump
     :rtype: str
     """
-    return hashlib.sha1(pickle.dumps(node)).hexdigest()
+    return hashlib.sha512(pickle.dumps(node)).hexdigest()
 
 
 def extract_pybel_data(data):
@@ -321,7 +321,7 @@ def hash_edge(u, v, k, d):
     """
     edge_tuple = edge_to_tuple(u, v, k, d)
     edge_tuple_bytes = pickle.dumps(edge_tuple)
-    return hashlib.sha1(edge_tuple_bytes).hexdigest()
+    return hashlib.sha512(edge_tuple_bytes).hexdigest()
 
 
 def subdict_matches(target, query, partial_match=True):
