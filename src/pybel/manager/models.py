@@ -602,7 +602,8 @@ class Author(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, index=True)
 
-    # citations = relationship("Citation", secondary=author_citation)
+    def __str__(self):
+        return self.name
 
 
 class Citation(Base):
