@@ -440,7 +440,7 @@ class OwlAnnotationManager(AnnotationManager):
     """Manages OWL annotations"""
 
     def insert_annotation_owl(self, iri, keyword=None):
-        """Caches an ontology at the given IRI
+        """Caches an ontology as a namespace from the given IRI
 
         :param str iri: the location of the ontology
         """
@@ -465,6 +465,10 @@ class OwlAnnotationManager(AnnotationManager):
         return annotation
 
     def ensure_annotation_owl(self, iri, keyword=None):
+        """Caches an ontology as an annotation from the given IRI
+
+        :param str iri: the location of the ontology
+        """
         if iri in self.annotation_cache:
             return
 
