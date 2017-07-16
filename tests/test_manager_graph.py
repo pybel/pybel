@@ -735,7 +735,6 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 },
                 EVIDENCE: "Evidence 3"
             },
-            'key': 0
         }
 
         edge_list = self.manager.get_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
