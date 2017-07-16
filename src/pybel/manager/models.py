@@ -156,6 +156,9 @@ class Namespace(Base):
 
     has_equivalences = Column(Boolean, default=False)
 
+    def __str__(self):
+        return self.keyword
+
     @property
     def data(self):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
@@ -205,6 +208,9 @@ class NamespaceEntry(Base):
         primaryjoin=id == namespace_hierarchy.c.left_id,
         secondaryjoin=id == namespace_hierarchy.c.right_id
     )
+
+    def __str__(self):
+        return '{}:{}'.format(self.namespace, self.name)
 
     @property
     def data(self):
@@ -419,6 +425,9 @@ class Node(Base):
 
     modifications = relationship("Modification", secondary=node_modification, backref='nodes')
 
+    def __str__(self):
+        return self.bel
+
     @property
     def data(self):
         node_key = [self.type]
@@ -615,6 +624,9 @@ class Citation(Base):
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
     )
 
+    def __str__(self):
+        return '{}:{}'.format(self.type, self.reference)
+
     @property
     def data(self):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
@@ -648,9 +660,11 @@ class Evidence(Base):
     text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
-    # citation = relationship('Citation', back_populates='evidences')
 
     sha512 = Column(String(255), index=True)
+
+    def __str__(self):
+        return '{}:{}'.format(self.citation, self.text)
 
     @property
     def data(self):
@@ -709,6 +723,9 @@ class Edge(Base):
     blob = Column(LargeBinary)
 
     sha512 = Column(String(255), index=True)
+
+    def __str__(self):
+        return self.bel
 
     @property
     def data(self):
