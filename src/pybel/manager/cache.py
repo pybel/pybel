@@ -1174,23 +1174,17 @@ class EdgeStoreQueryManager(BaseCacheManager):
                     edge_data['target'] = self.help_rebuild_list_components(edge.target)
 
                 graph.add_nodes_from((edge_data['source']['node'], edge_data['target']['node']))
-                # TODO use safe add edge that checks the relation to see if it's a key that should be negative
 
-                attr_dict = edge_data['data']
-
-                if attr_dict['relation'] in UNQUALIFIED_EDGES:
-                    graph.add_edge(
-                        edge_data['source']['key'],
-                        edge_data['target']['key'],
-                        key=unqualified_edge_code[attr_dict['relation']],
-                        attr_dict=edge_data['data']
-                    )
-                else:
-                    graph.add_edge(
-                        edge_data['source']['key'],
-                        edge_data['target']['key'],
-                        attr_dict=edge_data['data']
-                    )
+                graph.add_edge(
+                    edge_data['source']['key'],
+                    edge_data['target']['key'],
+                    key=(
+                        unqualified_edge_code[edge_data['data']['relation']]
+                        if edge_data['data']['relation'] in UNQUALIFIED_EDGES
+                        else None
+                    ),
+                    attr_dict=edge_data['data']
+                )
 
         return graph
 
