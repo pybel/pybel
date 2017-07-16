@@ -702,13 +702,11 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
     """Manages the edge store"""
 
-    def store_graph_parts(self, network, graph):
-        """Stores the given graph into the edge store.
+    def __init__(self, *args, **kwargs):
+        super(EdgeStoreInsertManager, self).__init__(*args, **kwargs)
 
-        :param Network network: A SQLAlchemy PyBEL Network object
-        :param BELGraph graph: A BEL Graph
-        """
-        nc = {}
+        #: A dictionary that maps node tuples to their models
+        self.node_model = {}
 
         #: A dictionary that contains objects of the type described by the key
         self.object_cache = {
@@ -721,20 +719,28 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             'author': {}
         }
 
+    def store_graph_parts(self, network, graph):
+        """Stores the given graph into the edge store.
+
+        :param Network network: A SQLAlchemy PyBEL Network object
+        :param BELGraph graph: A BEL Graph
+        """
         for node in graph.nodes_iter():
-            node_object = self.get_or_create_node(graph, node)
-            nc[node] = node_object
-            if node_object not in network.nodes:
+            if node in self.node_model:
+                node_object = self.node_model[node]
+            else:
+                node_object = self.get_or_create_node(graph, node)
+                self.node_model[node] = node_object
+
+            if node_object not in network.nodes:  # FIXME when would the network ever have nodes in it already?
                 network.nodes.append(node_object)
 
         self.session.flush()
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
-            source, target = nc[u], nc[v]
 
             if CITATION not in data or EVIDENCE not in data:
                 evidence = None
-
             else:
                 citation = self.get_or_create_citation(**data[CITATION])
                 evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
@@ -751,9 +757,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             edge_hash = hash_edge(u, v, k, data)
 
             edge = self.get_or_create_edge(
-                graph_key=k,
-                source=source,
-                target=target,
+                source=self.node_model[u],
+                target=self.node_model[v],
                 relation=data[RELATION],
                 evidence=evidence,
                 bel=bel,
@@ -801,42 +806,42 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: A Node object
         :rtype: Node
         """
+        node_hash = hash_node(node)
+        if node_hash in self.object_cache['node']:
+            return self.object_cache['node'][node_hash]
+
         bel = decanonicalize_node(graph, node)
         blob = pickle.dumps(graph.node[node])
         node_data = graph.node[node]
 
-        node_hash = hash_node(node)
-        if node_hash in self.object_cache['node']:
-            result = self.object_cache['node'][node_hash]
-        else:
-            result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
-            if result is None:
-                type = node_data[FUNCTION]
+        result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
+        if result is None:
+            type = node_data[FUNCTION]
 
-                if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
-                    namespace = node_data[NAMESPACE]
-                    url = graph.namespace_url[namespace]
-                    namespace_entry = self.get_namespace_entry(url, node_data[NAME])
+            if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
+                namespace = node_data[NAMESPACE]
+                url = graph.namespace_url[namespace]
+                namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
-                    result = Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob,
-                                  sha512=node_hash)
+                result = Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob,
+                              sha512=node_hash)
 
-                elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
-                    namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
-                    result = Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob,
-                                  sha512=node_hash)
+            elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
+                namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+                result = Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob,
+                              sha512=node_hash)
 
-                else:
-                    result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+            else:
+                result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
-                if VARIANTS in node_data or FUSION in node_data:
-                    result.is_variant = True
-                    result.fusion = FUSION in node_data
-                    result.modifications = self.get_or_create_modification(graph, node_data)
+            if VARIANTS in node_data or FUSION in node_data:
+                result.is_variant = True
+                result.fusion = FUSION in node_data
+                result.modifications = self.get_or_create_modification(graph, node_data)
 
-                self.session.add(result)
+            self.session.add(result)
 
-            self.object_cache['node'][node_hash] = result
+        self.object_cache['node'][node_hash] = result
 
         return result
 
@@ -852,12 +857,9 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             self.session.delete(edge)
         self.session.commit()
 
-    def get_or_create_edge(self, graph_key, source, target, evidence, bel, relation, properties, annotations, blob,
-                           edge_hash):
+    def get_or_create_edge(self, source, target, evidence, bel, relation, properties, annotations, blob, edge_hash):
         """Creates entry for given edge if it does not exist.
 
-        :param tuple graph_key: Key that identifies the order of edges and weather an edge is artificially created or
-                                extracted from a valid BEL statement.
         :param Node source: Source node of the relation
         :param Node target: Target node of the relation
         :param Evidence evidence: Evidence object that proves the given relation
@@ -869,38 +871,31 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: An Edge object
         :rtype: Edge
         """
-        edge_dict = {
-            'graphIdentifier': graph_key,
-            'source': source,
-            'target': target,
-            'evidence': evidence,
-            'bel': bel,
-            'relation': relation,
-            'properties': properties.sort(key=lambda prop: prop.sha512),
-            'annotations': annotations.sort(key=lambda annoentry: annoentry.id)
-        }
-
         if edge_hash in self.object_cache['edge']:
-            # Cached edge object already? Load it from object_cache
-            result = self.object_cache['edge'][edge_hash]
-        else:
-            # Edge already in DB?
-            result = self.session.query(Edge).filter_by(sha512=edge_hash).one_or_none()
+            return self.object_cache['edge'][edge_hash]
 
-            if result is None:
-                # Create new edge and add it to db_session
-                del edge_dict['properties']
-                del edge_dict['annotations']
-                edge_dict['blob'] = blob
-                edge_dict['sha512'] = edge_hash
-                result = Edge(**edge_dict)
-                self.session.add(result)
+        # Edge already in DB?
+        result = self.session.query(Edge).filter_by(sha512=edge_hash).one_or_none()
 
-                result.properties = properties
-                result.annotations = annotations
+        if result is None:
+            # Create new edge and add it to db_session
+            edge_dict = {
+                'source': source,
+                'target': target,
+                'evidence': evidence,
+                'bel': bel,
+                'relation': relation,
+                'blob': blob,
+                'sha512': edge_hash,
+            }
+            result = Edge(**edge_dict)
+            self.session.add(result)
 
-            # Make sure the object is in object_cache from now on
-            self.object_cache['edge'][edge_hash] = result
+            result.properties = properties
+            result.annotations = annotations
+
+        # Make sure the object is in object_cache from now on
+        self.object_cache['edge'][edge_hash] = result
 
         return result
 
