@@ -740,12 +740,11 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
 
             properties = self.get_or_create_property(graph, data)
-            annotations = []
-            for key, value in data[ANNOTATIONS].items():
-                if key in graph.annotation_url:
-                    url = graph.annotation_url[key]
-                    annotation = self.annotation_object_cache[url][value]
-                    annotations.append(annotation)
+            annotations = [
+                self.annotation_object_cache[graph.annotation_url[key]][value]
+                for key, value in data[ANNOTATIONS].items()
+                if key in graph.annotation_url
+            ]
 
             bel = decanonicalize_edge(graph, u, v, k)
 
