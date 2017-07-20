@@ -595,7 +595,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param int network_id: The network's database identifier
         """
 
-        network = self.session.query(Network).filter(Network.id == network_id).one_or_none()
+        network = self.session.query(Network).get(network_id)
         self.session.delete(network)
         self.session.commit()
 
