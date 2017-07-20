@@ -132,7 +132,8 @@ class Namespace(Base):
     id = Column(Integer, primary_key=True)
     uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
-    url = Column(String(255), nullable=False, doc='Source url of the given namespace definition file (.belns)')
+    url = Column(String(255), nullable=False, unique=True, index=True,
+                 doc='Source url of the given namespace definition file (.belns)')
     keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
     name = Column(String(255), doc='Name of the given namespace')
     domain = Column(String(255), doc='Domain for which this namespace is valid')
@@ -239,7 +240,8 @@ class Annotation(Base):
     id = Column(Integer, primary_key=True)
     uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
-    url = Column(String(255), doc='Source url of the given annotation definition file (.belanno)')
+    url = Column(String(255), nullable=False, unique=True, index=True,
+                 doc='Source url of the given annotation definition file (.belanno)')
     keyword = Column(String(50), index=True, doc='Keyword that is used in a BEL file to identify a specific annotation')
     type = Column(String(255), doc='Annotation type')
     description = Column(Text, nullable=True, doc='Optional short description of the given annotation')
