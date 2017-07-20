@@ -162,7 +162,7 @@ class Namespace(Base):
     @property
     def data(self):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
-        ns_data = {
+        return {
             'id': self.id,
             'uploaded': self.uploaded,
             'url': self.url,
@@ -184,7 +184,6 @@ class Namespace(Base):
             'citation_url': self.citation_url,
             'has_equivalences': self.has_equivalences
         }
-        return ns_data
 
 
 class NamespaceEntry(Base):
@@ -259,11 +258,9 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    # entries = relationship('AnnotationEntry', back_populates="annotation", cascade='all, delete-orphan')
-
     @property
     def data(self):
-        an_data = {
+        return {
             'id': self.id,
             'uploaded': self.uploaded,
             'url': self.url,
@@ -283,7 +280,6 @@ class Annotation(Base):
             'citation_published': self.citation_published,
             'citation_url': self.citation_url
         }
-        return an_data
 
 
 class AnnotationEntry(Base):
@@ -814,8 +810,6 @@ class Property(Base):
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry')
     sha512 = Column(String(255), index=True)
-
-    # edges = relationship("Edge", secondary=edge_property)
 
     @property
     def data(self):
