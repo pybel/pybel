@@ -11,6 +11,7 @@ python:
     - 3.5
     - 3.4
     - 2.7
+    - pypy3
 
 env:
   global:
@@ -24,6 +25,8 @@ matrix:
           env: TOXENV=docs
         - python: 3.6
           env: TOXENV=manifest
+    allow_failures:
+        - python: pypy3
 
 before_install:
     - pip install codecov
