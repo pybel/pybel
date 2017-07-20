@@ -43,14 +43,6 @@ class TestRandom(unittest.TestCase):
         with self.assertRaises(PlaceholderAminoAcidWarning):
             amino_acid.parseString('X')
 
-    def test_split_lines(self):
-        with open(test_bel_simple) as f:
-            docs, definitions, statements = split_file_to_annotations_and_definitions(f)
-
-        self.assertEqual(7, len(docs))
-        self.assertEqual(4, len(definitions))
-        self.assertEqual(14, len(statements))
-
     def test_list2tuple(self):
         l = [None, 1, 's', [1, 2, [4], [[]]]]
         e = (None, 1, 's', (1, 2, (4,), ((),)))

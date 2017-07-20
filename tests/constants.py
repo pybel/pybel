@@ -6,14 +6,13 @@ import tempfile
 import unittest
 from json import dumps
 
-from requests.compat import urlparse
-
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.manager.cache import CacheManager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches
+from requests.compat import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -54,13 +53,13 @@ test_evidence_text = 'I read it on Twitter'
 test_set_evidence = 'SET Evidence = "{}"'.format(test_evidence_text)
 
 CHEBI_KEYWORD = 'CHEBI'
-CHEBI_URL = DEFAULT_NAMESPACE_RESOURCES + 'chebi.belns'
+CHEBI_URL = OPENBEL_NAMESPACE_RESOURCES + 'chebi.belns'
 CELL_LINE_KEYWORD = 'CellLine'
-CELL_LINE_URL = DEFAULT_ANNOTATION_RESOURCES + 'cell-line.belanno'
+CELL_LINE_URL = OPENBEL_ANNOTATION_RESOURCES + 'cell-line.belanno'
 HGNC_KEYWORD = 'HGNC'
-HGNC_URL = DEFAULT_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
+HGNC_URL = OPENBEL_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
-MESH_DISEASES_URL = DEFAULT_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
+MESH_DISEASES_URL = OPENBEL_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
 
 pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
 wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
@@ -199,9 +198,11 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
     def setUp(self):
         super(FleetingTemporaryCacheMixin, self).setUp()
 
+        self.manager.drop_networks()
+        self.manager.drop_edges()
+        self.manager.drop_nodes()
         self.manager.drop_namespaces()
         self.manager.drop_annotations()
-        self.manager.drop_networks()
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -227,7 +228,8 @@ expected_test_simple_metadata = {
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
-    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
+    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de",
+    METADATA_PROJECT: 'PyBEL Testing',
 }
 
 expected_test_thorough_metadata = {
@@ -1156,7 +1158,7 @@ class BelReconstitutionMixin(TestGraphMixin):
                 (89, NestedRelationWarning),
                 (92, InvalidFunctionSemantic),
                 # (95, Exception),
-                (98, Exception),
+                (98, PyBelParserWarning),
             ]
 
             for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):

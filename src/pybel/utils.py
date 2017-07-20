@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 
-import itertools as itt
+import json
 import logging
-import os
-from collections import defaultdict, MutableMapping
+import pickle
 from configparser import ConfigParser
 from datetime import datetime
-from operator import itemgetter
 
+import hashlib
 import networkx as nx
+import os
 import requests
 import requests.exceptions
+from collections import defaultdict, MutableMapping
 from pkg_resources import get_distribution
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
 
-from .constants import CITATION_ENTRIES, CITATION, EVIDENCE, ANNOTATIONS, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN
+from .constants import CITATION_ENTRIES, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN, PYBEL_EDGE_DATA_KEYS
 
 log = logging.getLogger(__name__)
 
@@ -219,12 +220,6 @@ def flatten_citation(citation):
     return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
 
 
-def sort_edges(d):
-    """Acts as a sort key function for an edge"""
-    return (flatten_citation(d[CITATION]), d[EVIDENCE]) + tuple(
-        itt.chain.from_iterable(sorted(d[ANNOTATIONS].items(), key=itemgetter(0))))
-
-
 def ensure_quotes(s):
     """Quote a string that isn't solely alphanumeric
 
@@ -283,23 +278,50 @@ def parse_datetime(s):
                 raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
-def hash_tuple(x):
+def hash_node(node):
     """Converts a PyBEL node tuple to a hash
 
-    :param tuple x: A BEL node
-    :return: A hashed version of the node tuple
-    :rtype: int
+    :param tuple node: A BEL node
+    :return: A hashed version of the node tuple using md5 hash of the binary pickle dump
+    :rtype: str
     """
-    if isinstance(x, int):
-        return x
+    return hashlib.sha512(pickle.dumps(node)).hexdigest()
 
-    h = 0
-    for i in x:
-        if isinstance(i, tuple):
-            h += hash_tuple(i)
-        else:
-            h += hash(i)
-    return hash(h)
+
+def extract_pybel_data(data):
+    """Extracts only the PyBEL-specific data from the given edge data dictionary
+
+    :param dict data: An edge data dictionary
+    :rtype: dict
+    """
+    return {
+        key: value
+        for key, value in data.items()
+        if key in PYBEL_EDGE_DATA_KEYS
+    }
+
+
+def edge_to_tuple(u, v, k, data):
+    """Converts an edge to tuple
+
+    :param tuple u: The source BEL node
+    :param tuple v: The target BEL node
+    :param dict data: The edge's data dictionary
+    :return: A tuple that can be hashed representing this edge. Makes no promises to its structure.
+    """
+    extracted_data_dict = extract_pybel_data(data)
+    return u, v, json.dumps(extracted_data_dict, ensure_ascii=False, sort_keys=True)
+
+
+def hash_edge(u, v, k, d):
+    """Converts an edge tuple to a hash
+
+    :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
+    :rtype: str
+    """
+    edge_tuple = edge_to_tuple(u, v, k, d)
+    edge_tuple_bytes = pickle.dumps(edge_tuple)
+    return hashlib.sha512(edge_tuple_bytes).hexdigest()
 
 
 def subdict_matches(target, query, partial_match=True):

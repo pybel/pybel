@@ -21,7 +21,7 @@ from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_
 from pybel.io.utils import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
-from pybel.utils import hash_tuple
+from pybel.utils import hash_node
 from tests.constants import AKT1, EGFR, CASP8, FADD, citation_1, evidence_1
 from tests.constants import BelReconstitutionMixin, TemporaryCacheClsMixin, TestTokenParserBase
 from tests.constants import test_bel_isolated, test_bel_misordered
@@ -41,7 +41,7 @@ def do_remapping(original, reconstituted):
     :param BELGraph original: The original bel graph 
     :param BELGraph reconstituted: The reconstituted BEL graph from CX input/output
     """
-    node_mapping = dict(enumerate(sorted(original.nodes_iter(), key=hash_tuple)))
+    node_mapping = dict(enumerate(sorted(original.nodes_iter(), key=hash_node)))
     try:
         nx.relabel.relabel_nodes(reconstituted, node_mapping, copy=False)
     except KeyError as e:

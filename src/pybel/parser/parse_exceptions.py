@@ -12,10 +12,19 @@ class PyBelParserWarning(PyBelWarning):
     """Base PyBEL parser exception, which holds the line and position where a parsing problem occurred"""
 
     def __init__(self, line_number, line, position, *args):
+        """
+        :param int line_number: The line number on which this warning occurred
+        :param str line: The content of the line
+        :param int position: The position within the line where the warning occurred
+        :param args: Additional arguments to supply to the super class
+        """
         super(PyBelParserWarning, self).__init__(line_number, line, position, *args)
         self.line_number = line_number
         self.line = line
         self.position = position
+
+    def __str__(self):
+        return 'General Parser Failure on line {} at pos {}: {}'.format(self.line_number, self.position, self.line)
 
 
 class InconsistentDefinitionError(PyBelParserWarning):
@@ -155,16 +164,25 @@ class VersionFormatWarning(PyBelParserWarning):
             self.version_string)
 
 
-class MalformedMetadataException(PyBelWarning):
-    """Raised when an invalid metadata line is encountered"""
-
-    def __init__(self, line_number, line):
-        super(MalformedMetadataException, self).__init__(line_number, line)
+class MetadataException(PyBelWarning):
+    def __init__(self, line_number, line, *args):
+        super(MetadataException, self).__init__(line_number, line, *args)
         self.line = line
         self.line_number = line_number
 
     def __str__(self):
         return '[line:{}] Invalid metadata - "{}"'.format(self.line_number, self.line)
+
+
+class MalformedMetadataException(MetadataException):
+    """Raised when an invalid metadata line is encountered"""
+
+
+class MissingBelResource(MetadataException):
+    """Raised when a missing resource is encountered"""
+
+    def __str__(self):
+        return "Can't locate resource [line:{}] - {}".format(self.line_number, self.line)
 
 
 class InvalidMetadataException(PyBelParserWarning):

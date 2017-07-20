@@ -14,6 +14,7 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 
 from json import load, dump
 from logging import getLogger
+
 from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
@@ -27,11 +28,9 @@ LARGE_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/large_corp
 FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
 OPENBEL_NAMESPACE_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/namespace/'
 OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/annotation/'
-DEFAULT_NAMESPACE_RESOURCES = FRAUNHOFER_RESOURCES
-DEFAULT_ANNOTATION_RESOURCES = FRAUNHOFER_RESOURCES
 
 #: GOCC is the only namespace that needs to be stored because translocations use some of its values by default
-GOCC_LATEST = DEFAULT_NAMESPACE_RESOURCES + 'go-cellular-component.belns'
+GOCC_LATEST = 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-cellular-component/go-cellular-component-20170511.belns'
 GOCC_KEYWORD = 'GOCC'
 
 #: The environment variable that contains the default SQL connection information for the PyBEL cache
@@ -249,8 +248,23 @@ ANNOTATIONS = 'annotations'
 SUBJECT = 'subject'
 #: The key for an internal edge data dictionary for the object modifier dictionary
 OBJECT = 'object'
-#: The key or an internal edge data dictonary for the line number
+#: The key or an internal edge data dictionary for the line number
 LINE = 'line'
+#: The key representing the hash of the other
+ID = 'id'
+
+#: The group of all BEL-provided keys for edge data dictionaries
+PYBEL_EDGE_DATA_KEYS = {
+    RELATION,
+    CITATION,
+    EVIDENCE,
+    ANNOTATIONS,
+    SUBJECT,
+    OBJECT,
+}
+
+#: The group of all PyBEL annotated keys for edge data dictionaries
+PYBEL_EDGE_ALL_KEYS = {LINE, ID} | PYBEL_EDGE_DATA_KEYS
 
 #: A BEL relationship
 HAS_REACTANT = 'hasReactant'
@@ -328,7 +342,7 @@ CORRELATIVE_RELATIONS = {
 
 #: A list of relationship types that don't require annotations or evidence
 #: This must be maintained as a list, since the :data:`unqualified_edge_code` is calculated based on the order
-#: and needs to be consistient
+#: and needs to be consistent
 unqualified_edges = [
     HAS_REACTANT,
     HAS_PRODUCT,
@@ -340,7 +354,9 @@ unqualified_edges = [
     IS_A,
 ]
 
-#: Unqualified edges are given negative keys since the standard networkx edge key factory starts at 0 and counts up
+UNQUALIFIED_EDGES = set(unqualified_edges)
+
+#: Unqualified edges are given negative keys since the standard NetworkX edge key factory starts at 0 and counts up
 unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}
 
 # BEL Keywords
@@ -371,6 +387,7 @@ BEL_KEYWORD_METADATA_CONTACT = 'ContactInfo'
 BEL_KEYWORD_METADATA_LICENSES = 'Licenses'
 BEL_KEYWORD_METADATA_COPYRIGHT = 'Copyright'
 BEL_KEYWORD_METADATA_DISCLAIMER = 'Disclaimer'
+BEL_KEYWORD_METADATA_PROJECT = 'Project'
 
 # Internal metadata representation. See BELGraph documentation, since these are shielded from the user by properties.
 
@@ -404,6 +421,8 @@ METADATA_LICENSES = 'licenses'
 METADATA_COPYRIGHT = 'copyright'
 #: The key for the document disclaimer. Can be accessed by :code:`graph.document[METADATA_DISCLAIMER]`
 METADATA_DISCLAIMER = 'disclaimer'
+#: The key for the document project. Can be accessed by :code:`graph.document[METADATA_PROJECT]`
+METADATA_PROJECT = 'project'
 
 #: Provides a mapping from BEL language keywords to internal PyBEL strings
 DOCUMENT_KEYS = {
@@ -414,7 +433,20 @@ DOCUMENT_KEYS = {
     BEL_KEYWORD_METADATA_DISCLAIMER: METADATA_DISCLAIMER,
     BEL_KEYWORD_METADATA_LICENSES: METADATA_LICENSES,
     BEL_KEYWORD_METADATA_NAME: METADATA_NAME,
-    BEL_KEYWORD_METADATA_VERSION: METADATA_VERSION
+    BEL_KEYWORD_METADATA_VERSION: METADATA_VERSION,
+    BEL_KEYWORD_METADATA_PROJECT: METADATA_PROJECT,
+}
+
+#: The keys to use when inserting a graph to the cache
+METADATA_INSERT_KEYS = {
+    METADATA_NAME,
+    METADATA_VERSION,
+    METADATA_DESCRIPTION,
+    METADATA_AUTHORS,
+    METADATA_CONTACT,
+    METADATA_LICENSES,
+    METADATA_COPYRIGHT,
+    METADATA_DISCLAIMER,
 }
 
 #: Provides a mapping from internal PyBEL strings to BEL language keywords. Is the inverse of :data:`DOCUMENT_KEYS`

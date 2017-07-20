@@ -3,23 +3,42 @@
 """This module contains helper functions for reading BEL scripts"""
 
 import logging
-import re
 import time
-from collections import defaultdict, Counter
 
+import re
 import requests.exceptions
+from collections import defaultdict, Counter
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 
-from ..constants import FUNCTION, NAMESPACE, REQUIRED_METADATA, INVERSE_DOCUMENT_KEYS, GRAPH_METADATA, \
-    GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_URL, GRAPH_NAMESPACE_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, \
-    GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_LIST
+from ..constants import (
+    FUNCTION,
+    NAMESPACE,
+    REQUIRED_METADATA,
+    INVERSE_DOCUMENT_KEYS,
+    GRAPH_METADATA,
+    GRAPH_NAMESPACE_OWL,
+    GRAPH_NAMESPACE_URL,
+    GRAPH_NAMESPACE_PATTERN,
+    GRAPH_ANNOTATION_URL,
+    GRAPH_ANNOTATION_OWL,
+    GRAPH_ANNOTATION_PATTERN,
+    GRAPH_ANNOTATION_LIST
+)
 from ..exceptions import PyBelWarning
 from ..manager.cache import CacheManager
 from ..parser import BelParser
 from ..parser import MetadataParser
-from ..parser.parse_exceptions import VersionFormatWarning, MissingMetadataException, MalformedMetadataException, \
-    RedefinedNamespaceError, RedefinedAnnotationError
+from ..parser.parse_exceptions import (
+    VersionFormatWarning,
+    MissingMetadataException,
+    MalformedMetadataException,
+    MetadataException,
+    MissingBelResource,
+    RedefinedNamespaceError,
+    RedefinedAnnotationError,
+    PyBelParserWarning,
+)
 
 log = logging.getLogger(__name__)
 parse_log = logging.getLogger('pybel.parser')
@@ -93,7 +112,7 @@ def parse_document(graph, document_metadata, metadata_parser):
             graph.add_warning(line_number, line, e)
         except:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise MalformedMetadataException(line, line_number)
+            raise MalformedMetadataException(line_number, line)
 
     for required in REQUIRED_METADATA:
         if required in metadata_parser.document_metadata and metadata_parser.document_metadata[required]:
@@ -123,14 +142,14 @@ def parse_definitions(graph, definitions, metadata_parser):
             raise e
         except requests.exceptions.ConnectionError as e:
             parse_log.warning('Line %07d - Resource not found - %s', line_number, line)
-            raise MalformedMetadataException(line, line_number)
+            raise MissingBelResource(line_number, line)
         except OperationalError as e:
             parse_log.warning('Need to upgrade database. See '
                               'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
             raise e
-        except Exception:
-            parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise MalformedMetadataException(line_number, line)
+        except Exception as e:
+            parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
+            raise MetadataException(line_number, line)
 
     graph.graph.update({
         GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
@@ -160,9 +179,10 @@ def parse_statements(graph, statements, bel_parser):
     for line_number, line in statements:
         try:
             bel_parser.parseString(line, line_number=line_number)
-        except ParseException:
+        except ParseException as e:
             parse_log.error('Line %07d - General Parser Failure: %s', line_number, line)
-            graph.add_warning(line_number, line, PyBelWarning('Unable to parse line'), bel_parser.get_annotations())
+            graph.add_warning(line_number, line, PyBelParserWarning(line_number, line, e.loc),
+                              bel_parser.get_annotations())
         except PyBelWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())

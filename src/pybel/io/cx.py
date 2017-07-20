@@ -24,7 +24,7 @@ from collections import defaultdict
 from ..canonicalize import decanonicalize_node
 from ..constants import *
 from ..struct import BELGraph
-from ..utils import flatten_dict, expand_dict, hash_tuple
+from ..utils import flatten_dict, expand_dict, hash_node
 
 __all__ = [
     'to_cx',
@@ -79,7 +79,7 @@ def build_node_mapping(graph):
     :return: A mapping from a graph's nodes to their canonical sort order
     :rtype: dict[tuple, int]
     """
-    return {node: node_id for node_id, node in enumerate(sorted(graph.nodes_iter(), key=hash_tuple))}
+    return {node: node_id for node_id, node in enumerate(sorted(graph.nodes_iter(), key=hash_node))}
 
 
 def to_cx(graph):
@@ -301,6 +301,14 @@ def to_cx_file(graph, file):
 
     :param BELGraph graph: A BEL graph
     :param file file: A writable file or file-like
+
+    Example:
+
+    >>> from pybel import from_url, to_cx_file
+    >>> from pybel.constants import SMALL_CORPUS_URL
+    >>> graph = from_url(SMALL_CORPUS_URL)
+    >>> with open('graph.cx', 'w') as f:
+    >>> ... to_cx_file(graph, f)
     """
     graph_cx_json_dict = to_cx(graph)
     json.dump(graph_cx_json_dict, file, ensure_ascii=False)
