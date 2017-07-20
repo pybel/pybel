@@ -710,16 +710,14 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         #: A dictionary that maps node tuples to their models
         self.node_model = {}
 
-        #: A dictionary that contains objects of the type described by the key
-        self.object_cache = {
-            'modification': {},
-            'property': {},
-            'node': {},
-            'edge': {},
-            'citation': {},
-            'evidence': {},
-            'author': {}
-        }
+        # A set of dictionaries that contains objects of the type described by the key
+        self.object_cache_modification = {}
+        self.object_cache_property = {}
+        self.object_cache_node = {}
+        self.object_cache_edge = {}
+        self.object_cache_citation = {}
+        self.object_cache_evidence = {}
+        self.object_cache_author = {}
 
     def store_graph_parts(self, network, graph):
         """Stores the given graph into the edge store.
@@ -781,10 +779,6 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
             network.edges.append(edge)
 
-        # FIXME Why aren't the edges getting added directly?
-        # for hash, edge in self.object_cache['edge'].items():
-        #     network.edges.append(edge)
-
         self.session.flush()
 
     def get_or_create_evidence(self, citation, text):
@@ -797,15 +791,15 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         """
         evidence_hash = hashlib.sha512(
             json.dumps({EVIDENCE: text, CITATION: citation}, sort_keys=True).encode('utf-8')).hexdigest()
-        if evidence_hash in self.object_cache['evidence']:
-            return self.object_cache['evidence'][evidence_hash]
+        if evidence_hash in self.object_cache_evidence:
+            return self.object_cache_evidence[evidence_hash]
 
         result = self.session.query(Evidence).filter_by(text=text, citation=citation).one_or_none()
         if result is None:
             result = Evidence(text=text, citation=citation, sha512=evidence_hash)
             self.session.add(result)
 
-        self.object_cache['evidence'][evidence_hash] = result
+        self.object_cache_evidence[evidence_hash] = result
 
         return result
 
@@ -818,8 +812,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :rtype: Node
         """
         node_hash = hash_node(node)
-        if node_hash in self.object_cache['node']:
-            return self.object_cache['node'][node_hash]
+        if node_hash in self.object_cache_node:
+            return self.object_cache_node[node_hash]
 
         bel = decanonicalize_node(graph, node)
         blob = pickle.dumps(graph.node[node])
@@ -853,7 +847,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
             self.session.add(result)
 
-        self.object_cache['node'][node_hash] = result
+        self.object_cache_node[node_hash] = result
 
         return result
 
@@ -883,8 +877,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: An Edge object
         :rtype: Edge
         """
-        if edge_hash in self.object_cache['edge']:
-            return self.object_cache['edge'][edge_hash]
+        if edge_hash in self.object_cache_edge:
+            return self.object_cache_edge[edge_hash]
 
         # Edge already in DB?
         result = self.session.query(Edge).filter_by(sha512=edge_hash).one_or_none()
@@ -906,7 +900,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result.properties = properties
             result.annotations = annotations
 
-        self.object_cache['edge'][edge_hash] = result
+        self.object_cache_edge[edge_hash] = result
 
         return result
 
@@ -928,8 +922,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         }
         citation_hash = hashlib.sha512(json.dumps(citation_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
-        if citation_hash in self.object_cache['citation']:
-            return self.object_cache['citation'][citation_hash]
+        if citation_hash in self.object_cache_citation:
+            return self.object_cache_citation[citation_hash]
 
         result = self.session.query(Citation).filter_by(sha512=citation_hash).one_or_none()
 
@@ -947,7 +941,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
             self.session.add(result)
 
-        self.object_cache['citation'][citation_hash] = result
+        self.object_cache_citation[citation_hash] = result
 
         return result
 
@@ -960,8 +954,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         """
         name = name.strip()
 
-        if name in self.object_cache['author']:
-            return self.object_cache['author'][name]
+        if name in self.object_cache_author:
+            return self.object_cache_author[name]
 
         result = self.session.query(Author).filter_by(name=name).one_or_none()
 
@@ -969,7 +963,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result = Author(name=name)
             self.session.add(result)
 
-        self.object_cache['author'][name] = result
+        self.object_cache_author[name] = result
 
         return result
 
@@ -1064,8 +1058,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         for modification in modification_list:
             mod_hash = hashlib.sha512(json.dumps(modification, sort_keys=True).encode('utf-8')).hexdigest()
 
-            if mod_hash in self.object_cache['modification']:
-                mod = self.object_cache['modification'][mod_hash]
+            if mod_hash in self.object_cache_modification:
+                mod = self.object_cache_modification[mod_hash]
 
             else:
                 mod = self.session.query(Modification).filter_by(sha512=mod_hash).one_or_none()
@@ -1073,7 +1067,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                     modification['sha512'] = mod_hash
                     mod = Modification(**modification)
 
-                self.object_cache['modification'][mod_hash] = mod
+                self.object_cache_modification[mod_hash] = mod
             modifications.append(mod)
 
         return modifications
@@ -1135,8 +1129,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         for property_def in property_list:
             property_hash = hashlib.sha512(json.dumps(property_def, sort_keys=True).encode('utf-8')).hexdigest()
 
-            if property_hash in self.object_cache['property']:
-                edge_property = self.object_cache['property'][property_hash]
+            if property_hash in self.object_cache_property:
+                edge_property = self.object_cache_property[property_hash]
             else:
                 edge_property = self.session.query(Property).filter_by(sha512=property_hash).one_or_none()
 
@@ -1144,7 +1138,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                     property_def['sha512'] = property_hash
                     edge_property = Property(**property_def)
 
-                self.object_cache['property'][property_hash] = edge_property
+                self.object_cache_property[property_hash] = edge_property
 
             properties.append(edge_property)
 
