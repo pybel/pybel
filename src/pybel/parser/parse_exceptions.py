@@ -164,16 +164,25 @@ class VersionFormatWarning(PyBelParserWarning):
             self.version_string)
 
 
-class MalformedMetadataException(PyBelWarning):
-    """Raised when an invalid metadata line is encountered"""
-
-    def __init__(self, line_number, line):
-        super(MalformedMetadataException, self).__init__(line_number, line)
+class MetadataException(PyBelWarning):
+    def __init__(self, line_number, line, *args):
+        super(MetadataException, self).__init__(line_number, line, *args)
         self.line = line
         self.line_number = line_number
 
     def __str__(self):
         return '[line:{}] Invalid metadata - "{}"'.format(self.line_number, self.line)
+
+
+class MalformedMetadataException(MetadataException):
+    """Raised when an invalid metadata line is encountered"""
+
+
+class MissingBelResource(MetadataException):
+    """Raised when a missing resource is encountered"""
+
+    def __str__(self):
+        return "Can't locate resource [line:{}] - {}".format(self.line_number, self.line)
 
 
 class InvalidMetadataException(PyBelParserWarning):

@@ -33,6 +33,8 @@ from ..parser.parse_exceptions import (
     VersionFormatWarning,
     MissingMetadataException,
     MalformedMetadataException,
+    MetadataException,
+    MissingBelResource,
     RedefinedNamespaceError,
     RedefinedAnnotationError,
     PyBelParserWarning,
@@ -110,7 +112,7 @@ def parse_document(graph, document_metadata, metadata_parser):
             graph.add_warning(line_number, line, e)
         except:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise MalformedMetadataException(line, line_number)
+            raise MalformedMetadataException(line_number, line)
 
     for required in REQUIRED_METADATA:
         if required in metadata_parser.document_metadata and metadata_parser.document_metadata[required]:
@@ -140,14 +142,14 @@ def parse_definitions(graph, definitions, metadata_parser):
             raise e
         except requests.exceptions.ConnectionError as e:
             parse_log.warning('Line %07d - Resource not found - %s', line_number, line)
-            raise MalformedMetadataException(line, line_number)
+            raise MissingBelResource(line_number, line)
         except OperationalError as e:
             parse_log.warning('Need to upgrade database. See '
                               'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
             raise e
-        except Exception:
-            parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise MalformedMetadataException(line_number, line)
+        except Exception as e:
+            parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
+            raise MetadataException(line_number, line)
 
     graph.graph.update({
         GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
