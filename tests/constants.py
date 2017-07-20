@@ -53,13 +53,13 @@ test_evidence_text = 'I read it on Twitter'
 test_set_evidence = 'SET Evidence = "{}"'.format(test_evidence_text)
 
 CHEBI_KEYWORD = 'CHEBI'
-CHEBI_URL = DEFAULT_NAMESPACE_RESOURCES + 'chebi.belns'
+CHEBI_URL = OPENBEL_NAMESPACE_RESOURCES + 'chebi.belns'
 CELL_LINE_KEYWORD = 'CellLine'
-CELL_LINE_URL = DEFAULT_ANNOTATION_RESOURCES + 'cell-line.belanno'
+CELL_LINE_URL = OPENBEL_ANNOTATION_RESOURCES + 'cell-line.belanno'
 HGNC_KEYWORD = 'HGNC'
-HGNC_URL = DEFAULT_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
+HGNC_URL = OPENBEL_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
-MESH_DISEASES_URL = DEFAULT_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
+MESH_DISEASES_URL = OPENBEL_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
 
 pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
 wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
