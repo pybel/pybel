@@ -12,10 +12,19 @@ class PyBelParserWarning(PyBelWarning):
     """Base PyBEL parser exception, which holds the line and position where a parsing problem occurred"""
 
     def __init__(self, line_number, line, position, *args):
+        """
+        :param int line_number: The line number on which this warning occurred
+        :param str line: The content of the line
+        :param int position: The position within the line where the warning occurred
+        :param args: Additional arguments to supply to the super class
+        """
         super(PyBelParserWarning, self).__init__(line_number, line, position, *args)
         self.line_number = line_number
         self.line = line
         self.position = position
+
+    def __str__(self):
+        return 'General Parser Failure on line {} at pos {}: {}'.format(self.line_number, self.position, self.line)
 
 
 class InconsistentDefinitionError(PyBelParserWarning):
