@@ -682,7 +682,11 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         for url in graph.annotation_url.values():
             self.ensure_annotation(url, objects=store_parts)
 
-        network = Network(blob=to_bytes(graph), **graph.document)
+        network = Network(blob=to_bytes(graph), **{
+            key:value
+            for key, value in graph.document.items()
+            if key in METADATA_INSERT_KEYS
+        })
 
         if store_parts:
             if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():

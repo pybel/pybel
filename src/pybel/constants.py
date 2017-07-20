@@ -387,6 +387,7 @@ BEL_KEYWORD_METADATA_CONTACT = 'ContactInfo'
 BEL_KEYWORD_METADATA_LICENSES = 'Licenses'
 BEL_KEYWORD_METADATA_COPYRIGHT = 'Copyright'
 BEL_KEYWORD_METADATA_DISCLAIMER = 'Disclaimer'
+BEL_KEYWORD_METADATA_PROJECT = 'Project'
 
 # Internal metadata representation. See BELGraph documentation, since these are shielded from the user by properties.
 
@@ -420,6 +421,8 @@ METADATA_LICENSES = 'licenses'
 METADATA_COPYRIGHT = 'copyright'
 #: The key for the document disclaimer. Can be accessed by :code:`graph.document[METADATA_DISCLAIMER]`
 METADATA_DISCLAIMER = 'disclaimer'
+#: The key for the document project. Can be accessed by :code:`graph.document[METADATA_PROJECT]`
+METADATA_PROJECT = 'project'
 
 #: Provides a mapping from BEL language keywords to internal PyBEL strings
 DOCUMENT_KEYS = {
@@ -430,7 +433,20 @@ DOCUMENT_KEYS = {
     BEL_KEYWORD_METADATA_DISCLAIMER: METADATA_DISCLAIMER,
     BEL_KEYWORD_METADATA_LICENSES: METADATA_LICENSES,
     BEL_KEYWORD_METADATA_NAME: METADATA_NAME,
-    BEL_KEYWORD_METADATA_VERSION: METADATA_VERSION
+    BEL_KEYWORD_METADATA_VERSION: METADATA_VERSION,
+    BEL_KEYWORD_METADATA_PROJECT: METADATA_PROJECT,
+}
+
+#: The keys to use when inserting a graph to the cache
+METADATA_INSERT_KEYS = {
+    METADATA_NAME,
+    METADATA_VERSION,
+    METADATA_DESCRIPTION,
+    METADATA_AUTHORS,
+    METADATA_CONTACT,
+    METADATA_LICENSES,
+    METADATA_COPYRIGHT,
+    METADATA_DISCLAIMER,
 }
 
 #: Provides a mapping from internal PyBEL strings to BEL language keywords. Is the inverse of :data:`DOCUMENT_KEYS`

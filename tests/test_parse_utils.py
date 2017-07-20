@@ -223,7 +223,7 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
         with open(path) as f:
             lines = list(sanitize_file_lines(f))
 
-        self.assertEqual(25, len(lines))
+        self.assertEqual(26, len(lines))
 
     def test_f(self):
         s = '''SET Evidence = "Arterial cells are highly susceptible to oxidative stress, which can induce both necrosis
