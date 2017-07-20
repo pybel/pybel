@@ -3,23 +3,39 @@
 """This module contains helper functions for reading BEL scripts"""
 
 import logging
-import re
 import time
-from collections import defaultdict, Counter
 
+import re
 import requests.exceptions
+from collections import defaultdict, Counter
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 
-from ..constants import FUNCTION, NAMESPACE, REQUIRED_METADATA, INVERSE_DOCUMENT_KEYS, GRAPH_METADATA, \
-    GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_URL, GRAPH_NAMESPACE_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_ANNOTATION_OWL, \
-    GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_LIST
+from ..constants import (
+    FUNCTION,
+    NAMESPACE,
+    REQUIRED_METADATA,
+    INVERSE_DOCUMENT_KEYS,
+    GRAPH_METADATA,
+    GRAPH_NAMESPACE_OWL,
+    GRAPH_NAMESPACE_URL,
+    GRAPH_NAMESPACE_PATTERN,
+    GRAPH_ANNOTATION_URL,
+    GRAPH_ANNOTATION_OWL,
+    GRAPH_ANNOTATION_PATTERN,
+    GRAPH_ANNOTATION_LIST
+)
 from ..exceptions import PyBelWarning
 from ..manager.cache import CacheManager
 from ..parser import BelParser
 from ..parser import MetadataParser
-from ..parser.parse_exceptions import VersionFormatWarning, MissingMetadataException, MalformedMetadataException, \
-    RedefinedNamespaceError, RedefinedAnnotationError
+from ..parser.parse_exceptions import (
+    VersionFormatWarning,
+    MissingMetadataException,
+    MalformedMetadataException,
+    RedefinedNamespaceError,
+    RedefinedAnnotationError,
+)
 
 log = logging.getLogger(__name__)
 parse_log = logging.getLogger('pybel.parser')
