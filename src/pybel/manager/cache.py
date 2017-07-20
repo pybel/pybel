@@ -15,6 +15,7 @@ import time
 import hashlib
 from collections import defaultdict
 from copy import deepcopy
+from six import string_types
 from sqlalchemy import func
 
 from .base_cache import BaseCacheManager
@@ -39,7 +40,7 @@ from ..constants import *
 from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
 from ..utils import get_bel_resource, parse_datetime, subdict_matches, hash_edge, hash_node
-from six import string_types
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -127,21 +128,21 @@ class NamespaceManager(BaseCacheManager):
         """
         log.info('inserting namespace %s', url)
 
-        config = get_bel_resource(url)
+        bel_resource = get_bel_resource(url)
 
-        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in config['Values'].items() if c}
+        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in bel_resource['Values'].items() if c}
 
-        if config['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
+        if bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
             return values
 
         namespace_insert_values = {
-            'name': config['Namespace']['NameString'],
+            'name': bel_resource['Namespace']['NameString'],
             'url': url,
-            'domain': config['Namespace']['DomainString']
+            'domain': bel_resource['Namespace']['DomainString']
         }
 
-        namespace_insert_values.update(extract_shared_required(config, 'Namespace'))
-        namespace_insert_values.update(extract_shared_optional(config, 'Namespace'))
+        namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
+        namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
 
         namespace_mapping = {
             'species': ('Namespace', 'SpeciesString'),
@@ -149,8 +150,8 @@ class NamespaceManager(BaseCacheManager):
         }
 
         for database_column, (section, key) in namespace_mapping.items():
-            if section in config and key in config[section]:
-                namespace_insert_values[database_column] = config[section][key]
+            if section in bel_resource and key in bel_resource[section]:
+                namespace_insert_values[database_column] = bel_resource[section][key]
 
         namespace = Namespace(**namespace_insert_values)
         namespace.entries = [NamespaceEntry(name=c, encoding=e) for c, e in values.items()]
@@ -911,7 +912,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :param str name: Title of the publication that is cited
         :param str reference: Identifier of the given citation (e.g. PubMed id)
         :param str date: Date of publication in ISO 8601 format
-        :param str authors: List of authors separated by |
+        :param str or list[str] authors: Either a list of authors separated by |, or an actual list of authors
         :return: A Citation object
         :rtype: Citation
         """
