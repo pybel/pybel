@@ -39,7 +39,7 @@ from ..constants import *
 from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
 from ..utils import get_bel_resource, parse_datetime, subdict_matches, hash_edge, hash_node
-
+from six import string_types
 try:
     import cPickle as pickle
 except ImportError:
@@ -936,7 +936,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result = Citation(**citation_dict)
 
             if authors is not None:
-                for author in authors.split('|') if isinstance(authors, str) else authors:
+                for author in authors.split('|') if isinstance(authors, string_types) else authors:
                     result.authors.append(self.get_or_create_author(author))
 
             self.session.add(result)
