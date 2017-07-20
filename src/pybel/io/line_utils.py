@@ -35,6 +35,7 @@ from ..parser.parse_exceptions import (
     MalformedMetadataException,
     RedefinedNamespaceError,
     RedefinedAnnotationError,
+    PyBelParserWarning,
 )
 
 log = logging.getLogger(__name__)
@@ -176,9 +177,10 @@ def parse_statements(graph, statements, bel_parser):
     for line_number, line in statements:
         try:
             bel_parser.parseString(line, line_number=line_number)
-        except ParseException:
+        except ParseException as e:
             parse_log.error('Line %07d - General Parser Failure: %s', line_number, line)
-            graph.add_warning(line_number, line, PyBelWarning('Unable to parse line'), bel_parser.get_annotations())
+            graph.add_warning(line_number, line, PyBelParserWarning(line_number, line, e.loc),
+                              bel_parser.get_annotations())
         except PyBelWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
