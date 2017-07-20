@@ -6,6 +6,49 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
 
+`0.7.0 <https://github.com/pybel/pybel/compare/v0.6.2...v0.7.0>`_ - 2017-07-21
+------------------------------------------------------------------------------
+Added
+~~~~~
+- Added Project key to document metadata parser (https://github.com/pybel/pybel/issues/215)
+- Reusable protocols for hashing nodes and edges
+
+Fixed
+~~~~~
+- Edge store working (https://github.com/pybel/pybel/issues/212)
+
+Changed
+~~~~~~~
+- Update resource urls (https://github.com/pybel/pybel/issues/211)
+- General improvements to exception handling
+- Made new minimum unpickle version 0.7.0
+
+`0.6.2 <https://github.com/pybel/pybel/compare/v0.6.1...v0.6.2>`_ - 2017-06-28
+------------------------------------------------------------------------------
+Added
+~~~~~
+- Environment variable for data locations
+- Add get network by ids merger
+
+`0.6.1 <https://github.com/pybel/pybel/compare/v0.6.0...v0.6.1>`_ - 2017-06-25
+------------------------------------------------------------------------------
+Added
+~~~~~
+- Node and edge filter framework (https://github.com/pybel/pybel/issues/206)
+- Network joining (https://github.com/pybel/pybel/issues/205 and https://github.com/pybel/pybel/issues/204)
+- More thorough tests of IO
+
+Fixed
+~~~~~
+- Bug when getting multiple networks by identifier (https://github.com/pybel/pybel/issues/208)
+- Arguments to exceptions mixed up
+
+Changed
+~~~~~~~
+- Use context in command line interface to streamline code
+- Remove old, unused code
+
+
 `0.6.0 <https://github.com/pybel/pybel/compare/v0.5.11...v0.6.0>`_ - 2017-06-11
 -------------------------------------------------------------------------------
 Changed
