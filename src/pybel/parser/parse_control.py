@@ -11,8 +11,8 @@ This module handles parsing control statement, which add annotations and namespa
 """
 
 import logging
-import re
 
+import re
 from pyparsing import Suppress, MatchFirst, And, oneOf
 from pyparsing import pyparsing_common as ppc
 
@@ -25,6 +25,15 @@ from ..utils import valid_date
 __all__ = ['ControlParser']
 
 log = logging.getLogger(__name__)
+
+set_tag = Suppress(BEL_KEYWORD_SET)
+unset_tag = Suppress(BEL_KEYWORD_UNSET)
+unset_all = Suppress(BEL_KEYWORD_ALL)
+
+supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
+
+set_citation = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
+set_evidence = And([Suppress(supporting_text_tags), Suppress('='), quote('value')])
 
 
 class ControlParser(BaseParser):
@@ -41,12 +50,14 @@ class ControlParser(BaseParser):
         :param dict[str, str] annotation_regex: A dictionary of {annotation: regular expression string}
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
         """
-
         self.citation_clearing = citation_clearing
 
         self.annotation_dict = {} if annotation_dicts is None else annotation_dicts
         self.annotation_regex = {} if annotation_regex is None else annotation_regex
-        self.annotation_regex_compiled = {k: re.compile(v) for k, v in self.annotation_regex.items()}
+        self.annotation_regex_compiled = {
+            k: re.compile(v)
+            for k, v in self.annotation_regex.items()
+        }
 
         self.statement_group = None
         self.citation = {}
@@ -58,12 +69,8 @@ class ControlParser(BaseParser):
         self.set_statement_group = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), qid('group')])
         self.set_statement_group.setParseAction(self.handle_set_statement_group)
 
-        self.set_citation = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
-        self.set_citation.setParseAction(self.handle_set_citation)
-
-        supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
-        self.set_evidence = And([Suppress(supporting_text_tags), Suppress('='), quote('value')])
-        self.set_evidence.setParseAction(self.handle_set_evidence)
+        self.set_citation = set_citation.setParseAction(self.handle_set_citation)
+        self.set_evidence = set_evidence.setParseAction(self.handle_set_evidence)
 
         set_command_prefix = And([annotation_key('key'), Suppress('=')])
         self.set_command = set_command_prefix + qid('value')
@@ -87,11 +94,7 @@ class ControlParser(BaseParser):
         self.unset_list = delimitedSet('values')
         self.unset_list.setParseAction(self.handle_unset_list)
 
-        self.unset_all = Suppress(BEL_KEYWORD_ALL)
-        self.unset_all.setParseAction(self.handle_unset_all)
-
-        set_tag = Suppress(BEL_KEYWORD_SET)
-        unset_tag = Suppress(BEL_KEYWORD_UNSET)
+        self.unset_all = unset_all.setParseAction(self.handle_unset_all)
 
         self.set_statements = set_tag + MatchFirst([
             self.set_statement_group,
