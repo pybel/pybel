@@ -203,7 +203,13 @@ def tokenize_version(version_string):
     (0, 1, 2)
 
     """
-    return tuple(map(int, version_string.split('.')[0:3]))
+    before_dash = version_string.split('-')[0]
+    version_tuple = before_dash.split('.')
+
+    if 3 != len(version_tuple):
+        raise ValueError
+
+    return tuple(map(int, version_tuple))
 
 
 def citation_dict_to_tuple(citation):

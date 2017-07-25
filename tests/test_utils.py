@@ -7,13 +7,36 @@ import networkx as nx
 import pybel.utils
 from pybel.canonicalize import postpend_location, decanonicalize_node
 from pybel.constants import FUNCTION
-from pybel.io.line_utils import split_file_to_annotations_and_definitions
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.utils import nest
-from pybel.utils import get_bel_resource, list2tuple
-from tests.constants import test_an_1, test_bel_simple
+from pybel.utils import get_bel_resource, list2tuple, tokenize_version
+from tests.constants import test_an_1
 from tests.mocks import mock_bel_resources
+
+
+class TestTokenizeVersion(unittest.TestCase):
+    def test_simple(self):
+        """Test the simplest version string case"""
+        version_str = '0.1.2'
+        version_tuple = 0, 1, 2
+        self.assertEqual(version_tuple, tokenize_version(version_str))
+
+    def test_long(self):
+        """Tests when the version pieces have more than 1 digit"""
+        version_str = '0.12.20'
+        version_tuple = 0, 12, 20
+        self.assertEqual(version_tuple, tokenize_version(version_str))
+
+    def test_dev(self):
+        """Test when there's a dash after"""
+        version_str = '0.1.2-dev'
+        version_tuple = 0, 1, 2
+        self.assertEqual(version_tuple, tokenize_version(version_str))
+
+    def test_too_long(self):
+        with self.assertRaises(ValueError):
+            tokenize_version('0.1.2.3')
 
 
 class TestCanonicalizeHelper(unittest.TestCase):
