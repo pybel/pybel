@@ -6,6 +6,16 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
 
+`0.7.1 <https://github.com/pybel/pybel/compare/v0.7.0...v0.7.1>`_ - 2017-07-25
+------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Externalized some PyParsing elements
+
+Fixed
+~~~~~
+- Version string tokenization
+
 `0.7.0 <https://github.com/pybel/pybel/compare/v0.6.2...v0.7.0>`_ - 2017-07-21
 ------------------------------------------------------------------------------
 Added
