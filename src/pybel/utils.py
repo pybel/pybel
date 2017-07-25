@@ -207,7 +207,7 @@ def tokenize_version(version_string):
     version_tuple = before_dash.split('.')
 
     if 3 != len(version_tuple):
-        raise ValueError
+        raise ValueError('Improperly formatted version: {}'.format(version_tuple))
 
     return tuple(map(int, version_tuple))
 
