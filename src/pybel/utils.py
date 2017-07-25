@@ -12,12 +12,17 @@ import os
 import requests
 import requests.exceptions
 from collections import defaultdict, MutableMapping
-from pkg_resources import get_distribution
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
 
-from .constants import CITATION_ENTRIES, BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN, PYBEL_EDGE_DATA_KEYS
+from .constants import (
+    CITATION_ENTRIES,
+    BELFRAMEWORK_DOMAIN,
+    OPENBEL_DOMAIN,
+    PYBEL_EDGE_DATA_KEYS,
+    VERSION,
+)
 
 log = logging.getLogger(__name__)
 
@@ -184,7 +189,7 @@ def get_version():
     :return: The current PyBEL version
     :rtype: str
     """
-    return get_distribution('pybel').version
+    return VERSION
 
 
 def tokenize_version(version_string):
