@@ -27,6 +27,15 @@ class TestAbundance(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
+        self.expected_node = ABUNDANCE, 'CHEBI', 'oxygen atom'
+        self.expected_node_data = {
+            FUNCTION: ABUNDANCE,
+            NAMESPACE: 'CHEBI',
+            NAME: 'oxygen atom'
+        }
+
+        self.expected_canonical_bel = 'a(CHEBI:"oxygen atom")'
+
     def test_short_abundance(self):
         """small molecule"""
         statement = 'a(CHEBI:"oxygen atom")'
@@ -41,17 +50,14 @@ class TestAbundance(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         node = canonicalize_node(result)
-        expected_node = cls, ns, val = ABUNDANCE, 'CHEBI', 'oxygen atom'
-        self.assertEqual(expected_node, node)
 
-        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'a(CHEBI:"oxygen atom")'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual(self.expected_node, node)
+        self.assertEqual(self.expected_canonical_bel, decanonicalize_node(self.parser.graph, self.expected_node))
 
         expected_modifier = {}
         self.assertEqual(expected_modifier, canonicalize_modifier(result))
 
-        self.assertHasNode(node, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
+        self.assertHasNode(node, **self.expected_node_data)
 
     def test_long_abundance(self):
         """small molecule"""
@@ -68,12 +74,9 @@ class TestAbundance(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         node = canonicalize_node(result)
-        expected_node = cls, ns, val = ABUNDANCE, 'CHEBI', 'oxygen atom'
-        self.assertEqual(expected_node, node)
 
-        canonical_bel = decanonicalize_node(self.parser.graph, expected_node)
-        expected_canonical_bel = 'a(CHEBI:"oxygen atom")'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual(self.expected_node, node)
+        self.assertEqual(self.expected_canonical_bel, decanonicalize_node(self.parser.graph, self.expected_node))
 
         modifier = canonicalize_modifier(result)
         expected_modifier = {
@@ -81,7 +84,7 @@ class TestAbundance(TestTokenParserBase):
         }
         self.assertEqual(expected_modifier, modifier)
 
-        self.assertHasNode(node, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
+        self.assertHasNode(node, **self.expected_node_data)
 
 
 class TestGene(TestTokenParserBase):
@@ -1817,7 +1820,8 @@ class TestTransformation(TestTokenParserBase):
         self.parser.clear()
         self.parser.transformation.setParseAction(self.parser.handle_term)
 
-    def test_degredation_1(self):
+    def test_degredation_short(self):
+        """Test the short form of degradation works"""
         statement = 'deg(p(HGNC:AKT1))'
         result = self.parser.transformation.parseString(statement)
 
@@ -1839,9 +1843,9 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_mod, mod)
 
-    def test_degradation_2(self):
-        """"""
-        statement = 'deg(p(HGNC:EGFR))'
+    def test_degradation_long(self):
+        """Test the long form of degradation works"""
+        statement = 'degradation(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
 
         expected_result = [DEGRADATION, [PROTEIN, ['HGNC', 'EGFR']]]
