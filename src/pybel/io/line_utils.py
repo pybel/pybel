@@ -62,7 +62,7 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
-    :param bool warn_on_singleton: Should the parser thorugh warnings on singletons? Only disable this if you're
+    :param bool warn_on_singleton: Should the parser throw warnings on singletons? Only disable this if you're
                                         sure your BEL Script is syntactically and semantically valid.
     """
 
