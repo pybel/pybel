@@ -746,8 +746,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
             if CITATION not in data or EVIDENCE not in data:
                 evidence = None
-            else:
 
+            else:
                 citation_dict = data[CITATION]
 
                 citation = self.get_or_create_citation(
@@ -920,12 +920,16 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: A Citation object
         :rtype: Citation
         """
+        type = type.strip()
+        reference = reference.strip()
+
         citation_dict = {
-            'type': type.strip(),
+            'type': type,
             'name': name.strip(),
-            'reference': reference.strip()
+            'reference': reference
         }
-        citation_hash = hashlib.sha512(json.dumps(citation_dict, sort_keys=True).encode('utf-8')).hexdigest()
+
+        citation_hash = hashlib.sha512(json.dumps((type, reference), sort_keys=True).encode('utf-8')).hexdigest()
 
         if citation_hash in self.object_cache_citation:
             return self.object_cache_citation[citation_hash]
