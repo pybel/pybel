@@ -71,6 +71,18 @@ def build_manager(connection=None, echo=False):
     return CacheManager(connection=connection, echo=echo)
 
 
+def hash_dump(d):
+    return hashlib.sha512(json.dumps(d, sort_keys=True).encode('utf-8')).hexdigest()
+
+
+def hash_citation(type, reference):
+    return hash_dump((type, reference))
+
+
+def hash_evidence(text, citation):
+    return hash_dump({EVIDENCE: text, CITATION: citation})
+
+
 class NamespaceManager(BaseCacheManager):
     """Manages namespace database"""
 
@@ -802,8 +814,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: An Evidence object
         :rtype: Evidence
         """
-        evidence_hash = hashlib.sha512(
-            json.dumps({EVIDENCE: text, CITATION: citation}, sort_keys=True).encode('utf-8')).hexdigest()
+        evidence_hash = hash_evidence(text, citation)
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
 
@@ -937,7 +948,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             'reference': reference
         }
 
-        citation_hash = hashlib.sha512(json.dumps((type, reference), sort_keys=True).encode('utf-8')).hexdigest()
+        citation_hash = hash_citation(type, reference)
 
         if citation_hash in self.object_cache_citation:
             return self.object_cache_citation[citation_hash]
@@ -1073,7 +1084,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         modifications = []
         for modification in modification_list:
-            mod_hash = hashlib.sha512(json.dumps(modification, sort_keys=True).encode('utf-8')).hexdigest()
+            mod_hash = hash_dump(modification)
 
             if mod_hash in self.object_cache_modification:
                 mod = self.object_cache_modification[mod_hash]
@@ -1144,7 +1155,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 property_list.append(property_dict)
 
         for property_def in property_list:
-            property_hash = hashlib.sha512(json.dumps(property_def, sort_keys=True).encode('utf-8')).hexdigest()
+            property_hash = hash_dump(property_def)
 
             if property_hash in self.object_cache_property:
                 edge_property = self.object_cache_property[property_hash]
