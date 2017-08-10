@@ -112,6 +112,7 @@ def map_cbn(d):
             '''
 
             d['graph']['edges'][i]['metadata']['evidences'][j][EXPERIMENT_CONTEXT] = new_context
+
     return d
 
 
@@ -220,7 +221,7 @@ def from_jgif(graph_jgif_dict):
             if 'type' not in evidence['citation'] and 'id' not in evidence['citation']:
                 continue
 
-            summary_text = evidence['summary_text'].strip().strip('"')
+            summary_text = evidence['summary_text'].strip()
 
             if not summary_text or summary_text == placeholder_evidence:
                 continue
