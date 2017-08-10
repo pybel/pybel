@@ -161,7 +161,7 @@ def from_cbn_jgif(graph_jgif_dict):
     })
 
     graph.annotation_url.update({
-        'Cell': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/cell/cell-line-20150601.belanno',
+        'Cell': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/cell-line/cell-line-20150601.belanno',
         'Disease': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/disease/disease-20150601.belanno',
         'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno',
         'Tissue': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/mesh-anatomy/mesh-anatomy-20150601.belanno',
