@@ -47,8 +47,10 @@ def to_database(graph, connection=None, store_parts=False):
         raise e
 
 
-def from_database(name, version, connection=None):
-    """Loads a BEL graph from a database.
+def from_database(name, version=None, connection=None):
+    """Loads a BEL graph from a database. If name and version are given, finds it exactly with
+    :meth:`pybel.manager.cache.CacheManager.get_network_by_name_version`. If just the name is given, finds most recent
+    with :meth:`pybel.manager.cache.CacheManager.get_network_by_name_version`
 
     :param str name: The name of the graph
     :param str version: The version string of the graph. If not specified, loads most recent graph added with this name
@@ -59,6 +61,8 @@ def from_database(name, version, connection=None):
     :rtype: BELGraph
     """
     manager = build_manager(connection=connection)
+
+    if version is None:
+        return manager.get_most_recent_network_by_name(name)
+
     return manager.get_network_by_name_version(name, version)
-
-
