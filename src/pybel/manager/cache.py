@@ -1309,17 +1309,17 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict_list:
-            dict_list = []
-
-            for node in result:
-                node_dict = node.data
-                node_dict['bel'] = node.bel
-                dict_list.append(node_dict)
-
-            return dict_list
-        else:
+        if not as_dict_list:
             return result
+
+        dict_list = []
+
+        for node in result:
+            node_dict = node.data
+            node_dict['bel'] = node.bel
+            dict_list.append(node_dict)
+
+        return dict_list
 
     def count_nodes(self):
         """Counts the number of nodes in the cache
@@ -1346,10 +1346,12 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :param str relation: The relation that should be present between source and target node.
         :param str or Citation citation: The citation that backs the edge up. It is possible to use the reference_id
                          or a Citation object.
-        :param str or Evidence evidence: The supporting text of the edge. It is possible to use a snipplet of the text or a Evidence object.
-        :param  dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just a annotationValue parameter as string.
+        :param str or Evidence evidence: The supporting text of the edge
+        :param dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
+                                        annotationValue parameter as string.
         :param property: An edge property object or a corresponding database identifier.
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`Edge` objects.
+        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
+                                    :class:`Edge` objects.
         """
         q = self.session.query(Edge)
 
@@ -1424,10 +1426,13 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict_list:
-            return [edge.data for edge in result]
-        else:
+        if not as_dict_list:
             return result
+
+        return [
+            edge.data
+            for edge in result
+        ]
 
     def get_citation(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
                      evidence=False,
@@ -1479,18 +1484,20 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict_list:
-            dict_result = []
-            if evidence or evidence_text:
-                for citation in result:
-                    for evidence in citation.evidences:
-                        dict_result.append(evidence.data)
-            else:
-                dict_result = [cit.data for cit in result]
+        if not as_dict_list:
+            return result
 
-            result = dict_result
+        if not (evidence or evidence_text):
+            return [
+                cit.data
+                for cit in result
+            ]
 
-        return result
+        return [
+            evidence.data
+            for citation in result
+            for evidence in citation.evidences
+        ]
 
     def get_property(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
         """Builds and runs a query over all property entries in the database.
@@ -1515,10 +1522,13 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict_list:
-            result = [property.data for property in result]
+        if not as_dict_list:
+            return result
 
-        return result
+        return [
+            prop.data
+            for prop in result
+        ]
 
 
 class CacheManager(EdgeStoreQueryManager, EdgeStoreInsertManager, NetworkManager, EquivalenceManager,
