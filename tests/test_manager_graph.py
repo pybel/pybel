@@ -58,6 +58,8 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         self.assertEqual(2, self.manager.count_networks())
 
+        self.assertEqual('1.0.1', self.manager.get_most_recent_network_by_name(self.graph.name).version)
+
         query_ids = {-1, network.id, network_copy.id}
         query_networks_result = self.manager.get_networks_by_ids(query_ids)
         self.assertEqual(2, len(query_networks_result))

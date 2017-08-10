@@ -8,13 +8,13 @@ enable this option, but can specify a database location if they choose.
 """
 
 import datetime
+import hashlib
 import json
 import logging
 import time
-
-import hashlib
 from collections import defaultdict
 from copy import deepcopy
+
 from six import string_types
 from sqlalchemy import func
 
@@ -633,6 +633,14 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).filter(Network.name.like(name)).all()
 
+    def get_most_recent_network_by_name(self, name):
+        """Gets the most recently created network with the given name.
+
+        :param str name: The name of the network
+        :rtype: Network
+        """
+        return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+
     def get_network_by_id(self, network_id):
         """Gets a network from the database by its identifier.
 
@@ -683,7 +691,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
             self.ensure_annotation(url, objects=store_parts)
 
         network = Network(blob=to_bytes(graph), **{
-            key:value
+            key: value
             for key, value in graph.document.items()
             if key in METADATA_INSERT_KEYS
         })
