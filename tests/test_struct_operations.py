@@ -5,7 +5,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import *
-from pybel.struct.operations import left_full_join, left_outer_join
+from pybel.struct.operations import left_full_join, left_outer_join, left_node_intersection_join
 
 HGNC = 'HGNC'
 
@@ -212,6 +212,34 @@ class TestMerge(unittest.TestCase):
         self.assertEqual({1, 3, 4, 5, 6, 7}, set(h.nodes_iter()))
         self.assertEqual(3, h.number_of_edges())
         self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(h.edges_iter()))
+
+    def test_inner_join(self):
+        g = BELGraph()
+
+        g.add_edge(1, 2)
+        g.add_edge(1, 3)
+        g.add_edge(8, 3)
+
+        self.assertEqual(4, g.number_of_nodes())
+        self.assertEqual(3, g.number_of_edges())
+
+        h = BELGraph()
+        h.add_edge(1, 3)
+        h.add_edge(1, 4)
+        h.add_edge(5, 6)
+        h.add_node(7)
+
+        self.assertEqual(6, h.number_of_nodes())
+        self.assertEqual({1, 3, 4, 5, 6, 7}, set(h.nodes_iter()))
+        self.assertEqual(3, h.number_of_edges())
+        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(h.edges_iter()))
+
+        j = left_node_intersection_join(g, h)
+
+        self.assertEqual(2, j.number_of_nodes())
+        self.assertEqual({1, 3}, set(j.nodes_iter()))
+        self.assertEqual(1, j.number_of_edges())
+        self.assertEqual({(1, 3), }, set(j.edges_iter()))
 
 
 if __name__ == '__main__':

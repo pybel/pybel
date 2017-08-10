@@ -199,14 +199,16 @@ def left_node_intersection_join(g, h, use_hash=True):
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
-    :return:
     :rtype: BELGraph
     """
     intersecting = set(g.nodes_iter()).intersection(set(h.nodes_iter()))
+
     g_inter = g.subgraph(intersecting)
     h_inter = h.subgraph(intersecting)
-    return left_full_join(g_inter, h_inter, use_hash=use_hash)
 
+    left_full_join(g_inter, h_inter, use_hash=use_hash)
+
+    return g_inter
 
 def node_intersection(networks, use_hash=True):
     """Takes the node intersection over a collection of networks into a new network. This intersection is defined
