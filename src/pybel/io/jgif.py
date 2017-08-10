@@ -14,8 +14,7 @@ import logging
 from collections import defaultdict
 
 from ..canonicalize import decanonicalize_node, decanonicalize_edge
-from ..constants import CITATION_TYPE, CITATION_REFERENCE, CITATION_NAME, UNQUALIFIED_EDGES
-from ..constants import RELATION, FUNCTION, EVIDENCE, CITATION, ANNOTATIONS, METADATA_NAME
+from ..constants import *
 from ..parser import BelParser
 from ..struct import BELGraph
 
@@ -132,10 +131,45 @@ def from_cbn_jgif(graph_jgif_dict):
     >>> graph_jgif_dict = requests.get(apoptosis_url).json()
     >>> graph = from_cbn_jgif(graph_jgif_dict)
     """
-    return from_jgif(map_cbn(graph_jgif_dict))
+    graph_jgif_dict = map_cbn(graph_jgif_dict)
+
+    graph_jgif_dict['graph']['metadata'].update({
+        METADATA_AUTHORS: 'Causal Biological Networks Database',
+        METADATA_LICENSES: """
+        Please cite:
+        
+        - www.causalbionet.com
+        - https://bionet.sbvimprover.com 
+
+        as well as any relevant publications.
+        
+        The sbv IMPROVER project, the website and the Symposia are part of a collaborative project 
+        designed to enable scientists to learn about and contribute to the development of a new crowd 
+        sourcing method for verification of scientific data and results. The current challenges, website 
+        and biological network models were developed and are maintained as part of a collaboration among 
+        Selventa, OrangeBus and ADS. The project is led and funded by Philip Morris International. For more
+        information on the focus of Philip Morris International’s research, please visit www.pmi.com.
+        """.replace('\n', '\t')
+    })
+
+    graph = from_jgif(graph_jgif_dict)
+
+    graph.namespace_url.update({
+        'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20150601.belns',
+        'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20150601.belns',
+        'SFAM': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-protein-families/selventa-protein-families-20150601.belns',
+    })
+
+    graph.annotation_url.update({
+        'Cell': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/cell/cell-line-20150601.belanno',
+        'Disease': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/disease/disease-20150601.belanno',
+        'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno',
+        'Tissue': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/mesh-anatomy/mesh-anatomy-20150601.belanno',
+    })
+
+    return graph
 
 
-# TODO add metadata
 def from_jgif(graph_jgif_dict):
     """Builds a BEL graph from a JGIF JSON object.
     
@@ -143,14 +177,20 @@ def from_jgif(graph_jgif_dict):
     :return: A BEL graph
     :rtype: BELGraph
     """
+    graph = BELGraph()
+
     root = graph_jgif_dict['graph']
 
-    metadata = {
-        METADATA_NAME: root.get('label')
-    }
-    metadata.update(root['metadata'])
+    if 'label' in root:
+        graph.name = root['label']
 
-    graph = BELGraph(**metadata)
+    if 'metadata' in root:
+        metadata = root['metadata']
+
+        for key in METADATA_INSERT_KEYS:
+            if key in metadata:
+                graph.document[key] = metadata[key]
+
     parser = BelParser(graph)
     parser.bel_term.addParseAction(parser.handle_term)
 
@@ -180,7 +220,7 @@ def from_jgif(graph_jgif_dict):
             if 'type' not in evidence['citation'] and 'id' not in evidence['citation']:
                 continue
 
-            summary_text = evidence['summary_text'].strip()
+            summary_text = evidence['summary_text'].strip().strip('"')
 
             if not summary_text or summary_text == placeholder_evidence:
                 continue
