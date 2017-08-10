@@ -204,11 +204,7 @@ def tokenize_version(version_string):
 
     """
     before_dash = version_string.split('-')[0]
-    version_tuple = before_dash.split('.')
-
-    if 3 != len(version_tuple):
-        raise ValueError
-
+    version_tuple = before_dash.split('.')[:3] # take only the first 3 in case there's an extension like -dev.0
     return tuple(map(int, version_tuple))
 
 

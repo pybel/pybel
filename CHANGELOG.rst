@@ -6,6 +6,25 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
 
+`0.7.2 <https://github.com/pybel/pybel/compare/v0.7.1...v0.7.2>`_ - 2017-08-10
+------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Externalized more parsing constants
+- Updated version management
+- Keep track of all singleton lines in parsing
+- Update CLI
+- Update JGIF export from CBN
+
+Fixed
+~~~~~
+- Change node hashing ot only use type and reference
+
+Added
+~~~~~
+- Node intersection merge
+- Get most recent network by name in manager
+
 `0.7.1 <https://github.com/pybel/pybel/compare/v0.7.0...v0.7.1>`_ - 2017-07-25
 ------------------------------------------------------------------------------
 Changed

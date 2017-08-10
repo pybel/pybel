@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 import unittest
 from collections import Counter
 
@@ -52,11 +53,15 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         self.manager.session.rollback()
 
+        time.sleep(1)
+
         graph_copy = self.graph.copy()
         graph_copy.document[METADATA_VERSION] = '1.0.1'
         network_copy = self.manager.insert_graph(graph_copy)
 
         self.assertEqual(2, self.manager.count_networks())
+
+        self.assertEqual('1.0.1', self.manager.get_most_recent_network_by_name(self.graph.name).version)
 
         query_ids = {-1, network.id, network_copy.id}
         query_networks_result = self.manager.get_networks_by_ids(query_ids)

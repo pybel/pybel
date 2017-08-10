@@ -8,13 +8,13 @@ enable this option, but can specify a database location if they choose.
 """
 
 import datetime
+import hashlib
 import json
 import logging
 import time
-
-import hashlib
 from collections import defaultdict
 from copy import deepcopy
+
 from six import string_types
 from sqlalchemy import func
 
@@ -69,6 +69,18 @@ def build_manager(connection=None, echo=False):
     if isinstance(connection, CacheManager):
         return connection
     return CacheManager(connection=connection, echo=echo)
+
+
+def hash_dump(d):
+    return hashlib.sha512(json.dumps(d, sort_keys=True).encode('utf-8')).hexdigest()
+
+
+def hash_citation(type, reference):
+    return hash_dump((type, reference))
+
+
+def hash_evidence(text, citation):
+    return hash_dump({EVIDENCE: text, CITATION: citation})
 
 
 class NamespaceManager(BaseCacheManager):
@@ -633,6 +645,14 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).filter(Network.name.like(name)).all()
 
+    def get_most_recent_network_by_name(self, name):
+        """Gets the most recently created network with the given name.
+
+        :param str name: The name of the network
+        :rtype: Network
+        """
+        return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+
     def get_network_by_id(self, network_id):
         """Gets a network from the database by its identifier.
 
@@ -683,7 +703,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
             self.ensure_annotation(url, objects=store_parts)
 
         network = Network(blob=to_bytes(graph), **{
-            key:value
+            key: value
             for key, value in graph.document.items()
             if key in METADATA_INSERT_KEYS
         })
@@ -746,8 +766,8 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
             if CITATION not in data or EVIDENCE not in data:
                 evidence = None
-            else:
 
+            else:
                 citation_dict = data[CITATION]
 
                 citation = self.get_or_create_citation(
@@ -794,8 +814,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: An Evidence object
         :rtype: Evidence
         """
-        evidence_hash = hashlib.sha512(
-            json.dumps({EVIDENCE: text, CITATION: citation}, sort_keys=True).encode('utf-8')).hexdigest()
+        evidence_hash = hash_evidence(text, citation)
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
 
@@ -920,12 +939,16 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: A Citation object
         :rtype: Citation
         """
+        type = type.strip()
+        reference = reference.strip()
+
         citation_dict = {
-            'type': type.strip(),
+            'type': type,
             'name': name.strip(),
-            'reference': reference.strip()
+            'reference': reference
         }
-        citation_hash = hashlib.sha512(json.dumps(citation_dict, sort_keys=True).encode('utf-8')).hexdigest()
+
+        citation_hash = hash_citation(type, reference)
 
         if citation_hash in self.object_cache_citation:
             return self.object_cache_citation[citation_hash]
@@ -1061,7 +1084,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         modifications = []
         for modification in modification_list:
-            mod_hash = hashlib.sha512(json.dumps(modification, sort_keys=True).encode('utf-8')).hexdigest()
+            mod_hash = hash_dump(modification)
 
             if mod_hash in self.object_cache_modification:
                 mod = self.object_cache_modification[mod_hash]
@@ -1132,7 +1155,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 property_list.append(property_dict)
 
         for property_def in property_list:
-            property_hash = hashlib.sha512(json.dumps(property_def, sort_keys=True).encode('utf-8')).hexdigest()
+            property_hash = hash_dump(property_def)
 
             if property_hash in self.object_cache_property:
                 edge_property = self.object_cache_property[property_hash]
@@ -1274,6 +1297,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         if node_id and isinstance(node_id, int):
             q = q.filter_by(id=node_id)
+
         else:
             if bel:
                 q = q.filter(Node.bel.like(bel))
@@ -1297,17 +1321,17 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict_list:
-            dict_list = []
-
-            for node in result:
-                node_dict = node.data
-                node_dict['bel'] = node.bel
-                dict_list.append(node_dict)
-
-            return dict_list
-        else:
+        if not as_dict_list:
             return result
+
+        dict_list = []
+
+        for node in result:
+            node_dict = node.data
+            node_dict['bel'] = node.bel
+            dict_list.append(node_dict)
+
+        return dict_list
 
     def count_nodes(self):
         """Counts the number of nodes in the cache
@@ -1334,15 +1358,18 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :param str relation: The relation that should be present between source and target node.
         :param str or Citation citation: The citation that backs the edge up. It is possible to use the reference_id
                          or a Citation object.
-        :param str or Evidence evidence: The supporting text of the edge. It is possible to use a snipplet of the text or a Evidence object.
-        :param  dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just a annotationValue parameter as string.
+        :param str or Evidence evidence: The supporting text of the edge
+        :param dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
+                                        annotationValue parameter as string.
         :param property: An edge property object or a corresponding database identifier.
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of :class:`Edge` objects.
+        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
+                                    :class:`Edge` objects.
         """
         q = self.session.query(Edge)
 
         if edge_id and isinstance(edge_id, int):
             q = q.filter_by(id=edge_id)
+
         else:
             if bel:
                 q = q.filter(Edge.bel.like(bel))
@@ -1412,16 +1439,19 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict_list:
-            return [edge.data for edge in result]
-        else:
+        if not as_dict_list:
             return result
 
+        return [
+            edge.data
+            for edge in result
+        ]
+
     def get_citation(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
-                     evidence=False,
-                     evidence_text=None, as_dict_list=False):
+                     evidence=False, evidence_text=None, as_dict_list=False):
         """Builds and runs a query over all citations in the PyBEL cache.
 
+        :param int citation_id:
         :param str type: Type of the citation. e.g. PubMed
         :param str reference: The identifier used for the citation. e.g. PubMed_ID
         :param str name: Title of the citation.
@@ -1439,6 +1469,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         if citation_id and isinstance(citation_id, int):
             q = q.filter_by(id=citation_id)
+
         else:
             if author is not None:
                 q = q.join(Author, Citation.authors)
@@ -1467,18 +1498,20 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict_list:
-            dict_result = []
-            if evidence or evidence_text:
-                for citation in result:
-                    for evidence in citation.evidences:
-                        dict_result.append(evidence.data)
-            else:
-                dict_result = [cit.data for cit in result]
+        if not as_dict_list:
+            return result
 
-            result = dict_result
+        if not (evidence or evidence_text):
+            return [
+                cit.data
+                for cit in result
+            ]
 
-        return result
+        return [
+            evidence.data
+            for citation in result
+            for evidence in citation.evidences
+        ]
 
     def get_property(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
         """Builds and runs a query over all property entries in the database.
@@ -1494,6 +1527,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         if property_id:
             q = q.filter_by(id=property_id)
+
         else:
             if participant:
                 q = q.filter(Property.participant.like(participant))
@@ -1503,10 +1537,13 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         result = q.all()
 
-        if as_dict_list:
-            result = [property.data for property in result]
+        if not as_dict_list:
+            return result
 
-        return result
+        return [
+            prop.data
+            for prop in result
+        ]
 
 
 class CacheManager(EdgeStoreQueryManager, EdgeStoreInsertManager, NetworkManager, EquivalenceManager,

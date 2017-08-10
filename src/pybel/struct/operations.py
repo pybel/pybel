@@ -192,20 +192,42 @@ def union(networks, use_hash=True):
     return left_full_join_networks(target, networks_iter, use_hash=use_hash)
 
 
-def node_intersection_join(g, h, use_hash=True):
+def left_node_intersection_join(g, h, use_hash=True):
     """Takes the intersection over two networks. This intersection of two graphs is defined by the
      union of the subgraphs induced over the intersection of their nodes
 
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
-    :return:
     :rtype: BELGraph
     """
     intersecting = set(g.nodes_iter()).intersection(set(h.nodes_iter()))
+
     g_inter = g.subgraph(intersecting)
     h_inter = h.subgraph(intersecting)
-    return left_full_join(g_inter, h_inter, use_hash=use_hash)
 
+    left_full_join(g_inter, h_inter, use_hash=use_hash)
 
+    return g_inter
 
+def node_intersection(networks, use_hash=True):
+    """Takes the node intersection over a collection of networks into a new network. This intersection is defined
+    the same way as by :func:`left_node_intersection_join`
+
+    :param iter[BELGraph] networks: An iterable of networks. Since it's iterated over twice, it gets converted to a
+                                    tuple first, so this isn't a safe operation for infinite lists.
+    :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+    :rtype: BELGraph
+    """
+    networks = tuple(networks)
+
+    nodes = set.intersection(
+        set(network.nodes_iter())
+        for network in networks
+    )
+    subgraphs = (
+        network.subgraph(nodes)
+        for network in networks
+    )
+
+    return union(subgraphs, use_hash=use_hash)

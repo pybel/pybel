@@ -94,7 +94,7 @@ class BelParser(BaseParser):
             )
 
         self.warn_on_singleton = warn_on_singleton
-        self.has_singleton_terms = False
+        self.singleton_line_numbers = []
 
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
 
@@ -464,6 +464,10 @@ class BelParser(BaseParser):
         super(BelParser, self).__init__(self.language, streamline=autostreamline)
 
     @property
+    def has_singleton_terms(self):
+        return bool(self.singleton_line_numbers)
+
+    @property
     def namespace_dict(self):
         return self.identifier_parser.namespace_dict
 
@@ -539,7 +543,7 @@ class BelParser(BaseParser):
     def handle_term_singleton(self, line, position, tokens):
         """This function wraps :meth:`BelParser.handle_term` but is only used for top-level parsing of bel_terms. This is done
         solely to keep track of if a graph has any singletons"""
-        self.has_singleton_terms = True
+        self.singleton_line_numbers.append(self.line_number)
         if self.warn_on_singleton:
             log.warning('Added singleton [line %d]: %s. Putative error - needs checking.', self.line_number, line)
         return self.handle_term(line, position, tokens)

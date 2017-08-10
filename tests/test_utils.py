@@ -34,10 +34,6 @@ class TestTokenizeVersion(unittest.TestCase):
         version_tuple = 0, 1, 2
         self.assertEqual(version_tuple, tokenize_version(version_str))
 
-    def test_too_long(self):
-        with self.assertRaises(ValueError):
-            tokenize_version('0.1.2.3')
-
 
 class TestCanonicalizeHelper(unittest.TestCase):
     def test_postpend_location_failure(self):
