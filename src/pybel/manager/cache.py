@@ -1297,6 +1297,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         if node_id and isinstance(node_id, int):
             q = q.filter_by(id=node_id)
+
         else:
             if bel:
                 q = q.filter(Node.bel.like(bel))
@@ -1368,6 +1369,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         if edge_id and isinstance(edge_id, int):
             q = q.filter_by(id=edge_id)
+
         else:
             if bel:
                 q = q.filter(Edge.bel.like(bel))
@@ -1446,10 +1448,10 @@ class EdgeStoreQueryManager(BaseCacheManager):
         ]
 
     def get_citation(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
-                     evidence=False,
-                     evidence_text=None, as_dict_list=False):
+                     evidence=False, evidence_text=None, as_dict_list=False):
         """Builds and runs a query over all citations in the PyBEL cache.
 
+        :param int citation_id:
         :param str type: Type of the citation. e.g. PubMed
         :param str reference: The identifier used for the citation. e.g. PubMed_ID
         :param str name: Title of the citation.
@@ -1467,6 +1469,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         if citation_id and isinstance(citation_id, int):
             q = q.filter_by(id=citation_id)
+
         else:
             if author is not None:
                 q = q.join(Author, Citation.authors)
@@ -1524,6 +1527,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         if property_id:
             q = q.filter_by(id=property_id)
+
         else:
             if participant:
                 q = q.filter(Property.participant.like(participant))
