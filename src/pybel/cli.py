@@ -27,7 +27,7 @@ from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j
 from .manager import defaults
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
-from .manager.models import Network
+from .manager.models import Network, Namespace, Annotation, Base
 
 log = logging.getLogger('pybel')
 
@@ -84,6 +84,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 
     if database_name:
         g = from_database(database_name, connection=manager)
+
     elif url:
         g = from_url(
             url,
@@ -107,23 +108,23 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
         )
 
     if csv:
-        log.info('Outputting csv to %s', csv)
+        log.info('Outputting CSV to %s', csv)
         to_csv(g, csv)
 
     if sif:
-        log.info('Outputting sif to %s', sif)
+        log.info('Outputting SIF to %s', sif)
         to_sif(g, sif)
 
     if graphml:
-        log.info('Outputting graphml to %s', graphml)
+        log.info('Outputting GraphML to %s', graphml)
         to_graphml(g, graphml)
 
     if gsea:
-        log.info('Outputting grp to %s', gsea)
+        log.info('Outputting GRP to %s', gsea)
         to_gsea(g, gsea)
 
     if json:
-        log.info('Outputting json to %s', json)
+        log.info('Outputting JSON to %s', json)
         to_json_file(g, json)
 
     if pickle:
@@ -139,9 +140,11 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
         to_bel(g, bel)
 
     if store_default:
+        log.info('Storing to database')
         to_database(g)
 
     if store_connection:
+        log.info('Storing to database: %s', store_connection)
         to_database(g, connection=store_connection)
 
     if neo:
@@ -160,84 +163,94 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 def manage(ctx, connection):
     """Manage database"""
     ctx.obj = CacheManager(connection)
+    Base.metadata.bind = ctx.obj.engine
+    Base.query = ctx.obj.session.query_property()
 
 
 @manage.command()
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 @click.option('-v', '--debug', count=True)
-def setup(connection, debug):
+@click.pass_context
+def setup(ctx, debug):
     """Create the cache if it doesn't exist"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
-    manager = CacheManager(connection=connection, echo=True)
-    manager.create_all()
+    ctx.obj.create_all()
 
 
 @manage.command()
-@click.option('-c', '--connection', help='Cache connection string. Defaults to {}'.format(get_cache_connection()))
 @click.option('-y', '--yes', is_flag=True)
-def remove(connection, yes):
+@click.pass_context
+def remove(ctx, yes):
     """Drops cache"""
     if yes or click.confirm('Drop database?'):
-        manager = CacheManager(connection=connection, echo=True)
-        manager.drop_database()
+        ctx.obj.drop_database()
 
 
 @manage.group()
-def definitions():
+def namespaces():
     """Manage definitions"""
 
 
-@definitions.command()
-@click.option('--skip-namespaces', is_flag=True)
-@click.option('--skip-annotations', is_flag=True)
-@click.option('--owl', is_flag=True)
-@click.option('--fraunhofer', is_flag=True, help='Use Fraunhofer resources instead of OpenBEL')
+@manage.group()
+def annotations():
+    """Manage definitions"""
+
+
+@namespaces.command()
 @click.option('-v', '--debug', count=True)
 @click.pass_context
-def ensure(ctx, skip_namespaces, skip_annotations, owl, fraunhofer, debug):
+def ensure(ctx, debug):
     """Set up default cache with default definitions"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
 
-    if not skip_namespaces:
-        for url in defaults.fraunhofer_namespaces if fraunhofer else defaults.default_namespaces:
-            ctx.obj.ensure_namespace(url)
-    if not skip_annotations:
-        for url in defaults.fraunhofer_annotations if fraunhofer else defaults.default_annotations:
-            ctx.obj.ensure_annotation(url)
-    if owl:
-        for url in defaults.default_owl:
-            ctx.obj.ensure_namespace_owl(url)
+    for url in defaults.fraunhofer_namespaces:
+        ctx.obj.ensure_namespace(url)
 
 
-@definitions.command()
+@annotations.command()
+@click.option('-v', '--debug', count=True)
+@click.pass_context
+def ensure(ctx, debug):
+    """Set up default cache with default annotations"""
+    log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
+
+    for url in defaults.fraunhofer_annotations:
+        ctx.obj.ensure_annotation(url)
+
+
+@namespaces.command()
 @click.argument('url')
 @click.pass_context
 def insert(ctx, url):
-    """Manually add definition by URL"""
+    """Manually add namespace by URL"""
     if url.endswith('.belns'):
         ctx.obj.ensure_namespace(url)
-    elif url.endswith('.belanno'):
-        ctx.obj.ensure_annotation(url)
     else:
         ctx.obj.ensure_namespace_owl(url)
 
 
-@definitions.command()
+@annotations.command()
+@click.argument('url')
+@click.pass_context
+def insert(ctx, url):
+    """Manually add annotation by URL"""
+    if url.endswith('.belanno'):
+        ctx.obj.ensure_annotation(url)
+    else:
+        ctx.obj.ensure_annotation_owl(url)
+
+
+@namespaces.command()
 @click.option('--url', help='Specific resource URL to list')
 @click.pass_context
 def ls(ctx, url):
-    """Lists cached definitions"""
+    """Lists cached namespaces"""
     if not url:
-        for line in ctx.obj.get_definition_urls():
-            if not line:
-                continue
-            click.echo(line)
+        for namespace_url, in ctx.obj.session.query(Namespace.url).all():
+            click.echo(namespace_url)
 
     else:
         if url.endswith('.belns'):
             res = ctx.obj.get_namespace(url)
-        elif url.endswith('.belanno'):
-            res = ctx.obj.get_annotation(url)
         else:
             res = ctx.obj.get_namespace_owl_terms(url)
 
@@ -245,12 +258,39 @@ def ls(ctx, url):
             click.echo(l)
 
 
-@definitions.command()
+@annotations.command()
+@click.option('--url', help='Specific resource URL to list')
+@click.pass_context
+def ls(ctx, url):
+    """Lists cached annotations"""
+    if not url:
+        for annotation_url, in ctx.obj.session.query(Annotation.url).all():
+            click.echo(annotation_url)
+
+    else:
+        if url.endswith('.belanno'):
+            res = ctx.obj.get_annotation(url)
+        else:
+            res = ctx.obj.get_annotation_owl_terms(url)
+
+        for l in res:
+            click.echo(l)
+
+
+@namespaces.command()
 @click.argument('url')
 @click.pass_context
-def drop_namespace(ctx, url):
-    """Drops a namespace by url"""
+def drop(ctx, url):
+    """Drops a namespace by URL"""
     ctx.obj.drop_namespace_by_url(url)
+
+
+@annotations.command()
+@click.argument('url')
+@click.pass_context
+def drop(ctx, url):
+    """Drops an annotation by URL"""
+    ctx.obj.drop_annotation_by_url(url)
 
 
 @manage.group()
@@ -259,17 +299,12 @@ def network():
 
 
 @network.command()
-@click.option('-d', '--include-description', is_flag=True, help="Include network descriptions")
 @click.pass_context
-def ls(ctx, include_description):
+def ls(ctx):
     """Lists network names, versions, and optionally descriptions"""
+    query = ctx.obj.session.query(Network.id, Network.name, Network.version)
 
-    if include_description:
-        l = ctx.obj.session.query(Network.id, Network.name, Network.version, Network.description).all()
-    else:
-        l = ctx.obj.session.query(Network.id, Network.name, Network.version).all()
-
-    for row in l:
+    for row in query.all():
         click.echo('\t'.join(map(str, row)))
 
 
