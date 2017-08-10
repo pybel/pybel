@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 import unittest
 from collections import Counter
 
@@ -51,6 +52,8 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
             self.manager.insert_graph(self.graph)
 
         self.manager.session.rollback()
+
+        time.sleep(1)
 
         graph_copy = self.graph.copy()
         graph_copy.document[METADATA_VERSION] = '1.0.1'
