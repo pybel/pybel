@@ -27,15 +27,21 @@ Links
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
-   :name: springboard
+   :name: start
 
    installation
    overview
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Topic Guide
+   :name: topics
+
    datamodel
    io
    cookbook
    troubleshooting
-   logging
 
 .. toctree::
    :caption: Reference
@@ -45,6 +51,7 @@ Links
    parser
    manager
    utilities
+   logging
 
 .. toctree::
    :caption: Project
