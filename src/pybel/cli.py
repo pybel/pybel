@@ -169,20 +169,20 @@ def manage(ctx, connection):
 
 @manage.command()
 @click.option('-v', '--debug', count=True)
-@click.pass_context
-def setup(ctx, debug):
+@click.pass_obj
+def setup(manager, debug):
     """Create the cache if it doesn't exist"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
-    ctx.obj.create_all()
+    manager.create_all()
 
 
 @manage.command()
 @click.option('-y', '--yes', is_flag=True)
-@click.pass_context
-def remove(ctx, yes):
+@click.pass_obj
+def remove(manager, yes):
     """Drops cache"""
     if yes or click.confirm('Drop database?'):
-        ctx.obj.drop_database()
+        manager.drop_database()
 
 
 @manage.group()
@@ -197,62 +197,62 @@ def annotations():
 
 @namespaces.command()
 @click.option('-v', '--debug', count=True)
-@click.pass_context
-def ensure(ctx, debug):
+@click.pass_obj
+def ensure(manager, debug):
     """Set up default cache with default definitions"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
 
     for url in defaults.fraunhofer_namespaces:
-        ctx.obj.ensure_namespace(url)
+        manager.ensure_namespace(url)
 
 
 @annotations.command()
 @click.option('-v', '--debug', count=True)
-@click.pass_context
-def ensure(ctx, debug):
+@click.pass_obj
+def ensure(manager, debug):
     """Set up default cache with default annotations"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
 
     for url in defaults.fraunhofer_annotations:
-        ctx.obj.ensure_annotation(url)
+        manager.ensure_annotation(url)
 
 
 @namespaces.command()
 @click.argument('url')
-@click.pass_context
-def insert(ctx, url):
+@click.pass_obj
+def insert(manager, url):
     """Manually add namespace by URL"""
     if url.endswith('.belns'):
-        ctx.obj.ensure_namespace(url)
+        manager.ensure_namespace(url)
     else:
-        ctx.obj.ensure_namespace_owl(url)
+        manager.ensure_namespace_owl(url)
 
 
 @annotations.command()
 @click.argument('url')
-@click.pass_context
-def insert(ctx, url):
+@click.pass_obj
+def insert(manager, url):
     """Manually add annotation by URL"""
     if url.endswith('.belanno'):
-        ctx.obj.ensure_annotation(url)
+        manager.ensure_annotation(url)
     else:
-        ctx.obj.ensure_annotation_owl(url)
+        manager.ensure_annotation_owl(url)
 
 
 @namespaces.command()
 @click.option('--url', help='Specific resource URL to list')
-@click.pass_context
-def ls(ctx, url):
+@click.pass_obj
+def ls(manager, url):
     """Lists cached namespaces"""
     if not url:
-        for namespace_url, in ctx.obj.session.query(Namespace.url).all():
+        for namespace_url, in manager.session.query(Namespace.url).all():
             click.echo(namespace_url)
 
     else:
         if url.endswith('.belns'):
-            res = ctx.obj.get_namespace(url)
+            res = manager.get_namespace(url)
         else:
-            res = ctx.obj.get_namespace_owl_terms(url)
+            res = manager.get_namespace_owl_terms(url)
 
         for l in res:
             click.echo(l)
@@ -260,18 +260,18 @@ def ls(ctx, url):
 
 @annotations.command()
 @click.option('--url', help='Specific resource URL to list')
-@click.pass_context
-def ls(ctx, url):
+@click.pass_obj
+def ls(manager, url):
     """Lists cached annotations"""
     if not url:
-        for annotation_url, in ctx.obj.session.query(Annotation.url).all():
+        for annotation_url, in manager.session.query(Annotation.url).all():
             click.echo(annotation_url)
 
     else:
         if url.endswith('.belanno'):
-            res = ctx.obj.get_annotation(url)
+            res = manager.get_annotation(url)
         else:
-            res = ctx.obj.get_annotation_owl_terms(url)
+            res = manager.get_annotation_owl_terms(url)
 
         for l in res:
             click.echo(l)
@@ -279,18 +279,18 @@ def ls(ctx, url):
 
 @namespaces.command()
 @click.argument('url')
-@click.pass_context
-def drop(ctx, url):
+@click.pass_obj
+def drop(manager, url):
     """Drops a namespace by URL"""
-    ctx.obj.drop_namespace_by_url(url)
+    manager.drop_namespace_by_url(url)
 
 
 @annotations.command()
 @click.argument('url')
-@click.pass_context
-def drop(ctx, url):
+@click.pass_obj
+def drop(manager, url):
     """Drops an annotation by URL"""
-    ctx.obj.drop_annotation_by_url(url)
+    manager.drop_annotation_by_url(url)
 
 
 @manage.group()
@@ -299,10 +299,10 @@ def network():
 
 
 @network.command()
-@click.pass_context
-def ls(ctx):
+@click.pass_obj
+def ls(manager):
     """Lists network names, versions, and optionally descriptions"""
-    query = ctx.obj.session.query(Network.id, Network.name, Network.version)
+    query = manager.session.query(Network.id, Network.name, Network.version)
 
     for row in query.all():
         click.echo('\t'.join(map(str, row)))
@@ -310,19 +310,19 @@ def ls(ctx):
 
 @network.command()
 @click.argument('network_id')
-@click.pass_context
-def drop(ctx, network_id):
+@click.pass_obj
+def drop(manager, network_id):
     """Drops a network by its database identifier"""
-    ctx.obj.drop_network_by_id(network_id)
+    manager.drop_network_by_id(network_id)
 
 
 @network.command()
 @click.option('-y', '--yes', is_flag=True)
-@click.pass_context
-def dropall(ctx, yes):
+@click.pass_obj
+def dropall(manager, yes):
     """Drops all networks"""
     if yes or click.confirm('Drop all networks?'):
-        ctx.obj.drop_networks()
+        manager.drop_networks()
 
 
 if __name__ == '__main__':
