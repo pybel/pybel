@@ -68,8 +68,6 @@ visualize untested code and track the improvement of testing coverage over time.
 which feature branches are inadequately tested. In development of PyBEL, inadequately tested code is not allowed to be
 merged into develop.
 
-Distribution
-------------
 
 Versioning
 ~~~~~~~~~~
@@ -81,7 +79,7 @@ The version string appears in multiple places throughout the project, so BumpVer
 of these version strings. See .bumpversion.cfg for more information.
 
 Deployment
-~~~~~~~~~~
+----------
 Code for PyBEL is open-source on GitHub, but it is also distributed on the PyPI (pronounced Py-Pee-Eye) server.
 Travis CI has a wonderful integration with PyPI, so any time a tag is made on the master branch (and also assuming the
 tests pass), a new distribution is packed and sent to PyPI. Refer to the "deploy" section at the bottom of the
@@ -89,3 +87,12 @@ tests pass), a new distribution is packed and sent to PyPI. Refer to the "deploy
 `deployment documentation <https://docs.travis-ci.com/user/deployment/pypi/>`_.
 As a side note, Travis CI has an encryption tool so the password for the PyPI account can be displayed publicly
 on GitHub. Travis decrypts it before performing the upload to PyPI.
+
+Steps
+~~~~~
+1. :code:`bumpversion release` on development branch
+2. Push to git
+3. After tests pass, merge develop in to master
+4. After tests pass, create a tag on GitHub with the same name as the version number (on master)
+5. Travis will automatically deploy to PyPI after tests pass. After checking deployment has been successful,
+   switch to develop and :code:`bumpversion patch`
