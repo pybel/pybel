@@ -49,7 +49,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         # Test that the graph can't be added a second time
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            self.manager.insert_graph(self.graph)
+            self.manager.insert_graph(self.graph, store_parts=False)
 
         self.manager.session.rollback()
 
@@ -57,7 +57,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         graph_copy = self.graph.copy()
         graph_copy.document[METADATA_VERSION] = '1.0.1'
-        network_copy = self.manager.insert_graph(graph_copy)
+        network_copy = self.manager.insert_graph(graph_copy, store_parts=False)
 
         self.assertEqual(2, self.manager.count_networks())
 
