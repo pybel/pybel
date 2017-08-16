@@ -9,9 +9,9 @@ from pybel.io.line_utils import split_file_to_annotations_and_definitions
 from pybel.parser import MetadataParser
 from pybel.parser.parse_exceptions import *
 from tests.constants import FleetingTemporaryCacheMixin
-from tests.mocks import mock_bel_resources
 from tests.constants import HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc
 from tests.constants import test_an_1, test_ns_1, test_ns_nocache, test_bel_simple
+from tests.mocks import mock_bel_resources
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -191,3 +191,5 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         s = 'SET DOCUMENT Version = "1.0"'
         with self.assertRaises(VersionFormatWarning):
             self.parser.parseString(s)
+
+        self.assertEqual('1.0.0', self.parser.document_metadata['version'])
