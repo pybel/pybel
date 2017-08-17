@@ -173,6 +173,47 @@ class NamespaceManager(BaseCacheManager):
 
         return namespace
 
+    def old_ensure_namespace(self, url, cache_objects=False):
+        """Caches a namespace file if not already in the cache. If not cachable, returns a dict of the values
+
+        :param str url: the location of the namespace file
+        :param bool cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
+        :return: The namespace instance
+        :rtype: Namespace or dict
+        """
+        if url in self.namespace_model:
+            log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
+            results = self.namespace_model[url]
+
+        else:
+            t = time.time()
+            results = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+
+            if results is None:
+                results = self.insert_namespace(url)
+            else:
+                log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
+
+            if results is None:
+                raise ValueError('No results for {}'.format(url))
+            elif isinstance(results, dict):
+                return results
+            elif not results.entries:
+                raise ValueError('No entries for {}'.format(url))
+
+            self.namespace_model[url] = results
+
+            for entry in results.entries:
+                self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
+                self.namespace_id_cache[url][entry.name] = entry.id
+
+        if cache_objects and url not in self.namespace_object_cache:
+            log.debug('loading namespace cache_objects: %s (%d)', url, len(self.namespace_cache[url]))
+            for entry in results.entries:
+                self.namespace_object_cache[url][entry.name] = entry
+
+        return results
+
     def ensure_namespace(self, url, cache_objects=False):
         """Caches a namespace file if not already in the cache. If not cachable, returns a dict of the values
 
@@ -236,18 +277,31 @@ class NamespaceManager(BaseCacheManager):
         :return: An NamespaceEntry object
         :rtype: NamespaceEntry
         """
-        if self.namespace_object_cache:
-            namespace_entry = self.namespace_object_cache[url][value]
-        else:
-            namespace = self.session.query(Namespace).filter_by(url=url).one()
+        # if self.namespace_object_cache:
+        # namespace_object_cache is in use
 
-            # FIXME @kono reinvestigate this
-            try:
-                namespace_entry = self.session.query(NamespaceEntry). \
-                    filter_by(namespace=namespace, name=value).one_or_none()
-            except:
-                namespace_entry = self.session.query(NamespaceEntry). \
-                    filter_by(namespace=namespace, name=value).first()
+        if url in self.namespace_object_cache and value in self.namespace_object_cache[url]:
+            # URL is present in cache and value is present in cache[url]
+            namespace_entry = self.namespace_object_cache[url][value]
+
+        else:
+            # URL not in cache or value not in cache[url]
+            namespace_entry = self.session.query(Namespace).join(NamespaceEntry).filter(Namespace.url == url). \
+                filter(NamespaceEntry.name == value).first()
+
+            self.namespace_object_cache[url][value] = namespace_entry
+
+        # else:
+        #     # namespace_object_cache NOT in use
+        #     namespace = self.session.query(Namespace).filter_by(url=url).one()
+        #
+        #     # FIXME @kono reinvestigate this
+        #     try:
+        #         namespace_entry = self.session.query(NamespaceEntry). \
+        #             filter_by(namespace=namespace, name=value).one_or_none()
+        #     except:
+        #         namespace_entry = self.session.query(NamespaceEntry). \
+        #             filter_by(namespace=namespace, name=value).first()
 
         return namespace_entry
 
