@@ -5,6 +5,44 @@ Input and Output
 
 Import
 ------
+
+Parsing Modes
+~~~~~~~~~~~~~
+The PyBEL parser has several modes that can be enabled and disabled. They are described below.
+
+Allow Naked Names
+*****************
+By default, this is set to :code:`False`. The parser does not allow identifiers that are not qualified with
+namespaces (*naked names*), like in :code:`p(YFG)`. A proper namespace, like :code:`p(HGNC:YFG)` must be used. By
+setting this to :code:`True`, the parser becomes permissive to naked names. In general, this is bad practice and this
+feature will be removed in the future.
+
+Allow Nested
+************
+By default, this is set to :code:`False`. The parser does not allow nested statements is disabled. See `overview`.
+By setting this to :code:`True` the parser will accept nested statements one level deep.
+
+Citation Clearing
+*****************
+While the BEL specification clearly states how the language should be used as a state machine, many BEL documents
+do not conform to the strict :code:`SET`/:code:`UNSET` rules. To guard against annotations accidentally carried from
+one set of statements to the next, the parser has two modes. By default, this is set to :code:`True`. When a
+:code:`SET CITATION` command is reached, it will clear all other annotations (except the :code:`STATEMENT_GROUP`,
+which has higher priority). This behavior can be disabled by setting this to :code:`False` to re-enable strict
+parsing.
+
+Warn on Singleton
+*****************
+Because of the quirks of PyParsing and the PyBEL implementation, some BEL relations with errors that occur in either
+the relation or the object will still result in the node for the subject being added to the graph.
+
+The BEL specification states that a single node is valid. This might be useful for defining protein complexes, and
+some other uses. However, because it is generally impossible to foresee all errors, and furthermore, it is more likely
+that a single node is due to an error than on purpose, a warning is raised.
+
+Reference
+~~~~~~~~~
+
 .. autofunction:: pybel.from_lines
 .. autofunction:: pybel.from_path
 .. autofunction:: pybel.from_url

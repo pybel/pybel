@@ -167,6 +167,8 @@ class VersionFormatWarning(PyBelParserWarning):
 
 
 class MetadataException(PyBelWarning):
+    """Base exception for issues with document metadata"""
+
     def __init__(self, line_number, line, *args):
         super(MetadataException, self).__init__(line_number, line, *args)
         self.line = line
