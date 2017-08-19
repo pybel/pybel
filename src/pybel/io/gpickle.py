@@ -63,8 +63,7 @@ def to_pickle(graph, file, protocol=pickle.HIGHEST_PROTOCOL):
     incompatibilities between Python 2 and 3. To export a universally importable pickle, choose 0, 1, or 2.
 
     :param BELGraph graph: A BEL graph
-    :param file: A file or filename to write to
-    :type file: file or file-like or str
+    :param str or file: A file or filename to write to
     :param int protocol: Pickling protocol to use
 
     .. seealso:: https://docs.python.org/3.6/library/pickle.html#data-stream-format
