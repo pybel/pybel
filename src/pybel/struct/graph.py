@@ -63,9 +63,6 @@ class BELGraph(networkx.MultiDiGraph):
         if GRAPH_ANNOTATION_LIST not in self.graph:
             self.graph[GRAPH_ANNOTATION_LIST] = {}
 
-        #: Is true if during BEL Parsing, a term that is not part of a relation is found
-        self.has_singleton_terms = False
-
     @property
     def document(self):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized

@@ -47,8 +47,7 @@ METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOT
 
 
 def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_nested=False,
-                allow_unqualified_translocations=False, citation_clearing=True, warn_on_singleton=True,
-                no_identifier_validation=False):
+                allow_unqualified_translocations=False, citation_clearing=True, no_identifier_validation=False):
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
@@ -62,8 +61,6 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
-    :param bool warn_on_singleton: Should the parser throw warnings on singletons? Only disable this if you're
-                                        sure your BEL Script is syntactically and semantically valid.
     """
 
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
@@ -84,7 +81,6 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
         allow_nested=allow_nested,
         allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
-        warn_on_singleton=warn_on_singleton,
         no_identifier_validation=no_identifier_validation,
     )
 
@@ -189,8 +185,6 @@ def parse_statements(graph, statements, bel_parser):
         except Exception as e:
             parse_log.exception('Line %07d - General Failure: %s', line_number, line)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
-
-    graph.has_singleton_terms = bel_parser.has_singleton_terms
 
     log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(graph.warnings))
 

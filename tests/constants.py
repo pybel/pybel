@@ -994,7 +994,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
-        self.assertFalse(graph.has_singleton_terms)
 
         if check_metadata:
             self.assertEqual(expected_test_simple_metadata, graph.document)
@@ -1086,7 +1085,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
-        self.assertFalse(graph.has_singleton_terms)
 
         if check_warnings:
             self.assertEqual(0, len(graph.warnings),
@@ -1181,7 +1179,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
-        self.assertTrue(graph.has_singleton_terms)
 
         a = PATHOLOGY, 'MESHD', 'Achlorhydria'
         b = PROTEIN, 'HGNC', 'ADGRB1'

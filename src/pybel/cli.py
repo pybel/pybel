@@ -68,12 +68,11 @@ def main():
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--allow-unqualified-translocations', is_flag=True,
               help="Enable lenient parsing for unqualified translocations")
-@click.option('--suppress-singleton-warnings', is_flag=True)
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--debug', count=True)
 def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
             neo_context, store_default, store_connection, allow_naked_names, allow_nested,
-            allow_unqualified_translocations, suppress_singleton_warnings, no_citation_clearing, debug):
+            allow_unqualified_translocations, no_citation_clearing, debug):
     """Convert BEL"""
     if debug == 1:
         log.setLevel(20)
@@ -93,7 +92,6 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
-            warn_on_singleton=(not suppress_singleton_warnings),
         )
 
     else:
@@ -104,7 +102,6 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
-            warn_on_singleton=(not suppress_singleton_warnings),
         )
 
     if csv:

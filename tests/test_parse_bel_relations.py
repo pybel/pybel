@@ -2,6 +2,8 @@
 
 import logging
 
+from pyparsing import ParseException
+
 from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
 from pybel.constants import *
 from pybel.parser.parse_bel import canonicalize_node
@@ -45,10 +47,39 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual(1, self.parser.graph.number_of_nodes())
         self.assertHasNode(gene, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
+    def test_singleton(self):
+        """Test singleton composite in subject."""
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42"))")'
+        result = self.parser.relation.parseString(statement)
+
+        expected = [
+            [COMPOSITE, [PROTEIN, ['HGNC', 'CASP8']], [PROTEIN, ['HGNC', 'FADD']],
+             [ABUNDANCE, ['ADO', 'Abeta_42']]],
+        ]
+        self.assertEqual(expected, result.asList())
+
+        sub = canonicalize_node(result[SUBJECT])
+        self.assertHasNode(sub)
+
+        sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
+        self.assertHasNode(sub_member_1)
+
+        sub_member_2 = PROTEIN, 'HGNC', 'FADD'
+        self.assertHasNode(sub_member_2)
+
+        self.assertHasEdge(sub, sub_member_1, relation='hasComponent')
+        self.assertHasEdge(sub, sub_member_2, relation='hasComponent')
+
+    def test_predicate_failure(self):
+        """Checks that if there's a problem with the relation/object, that an error gets thrown"""
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> nope(GOBP:"neuron apoptotic process")'
+
+        with self.assertRaises(ParseException):
+            self.parser.relation.parseString(statement)
+
     def test_increases(self):
-        """
-        3.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases
-        Test composite in subject
+        """Test composite in subject. See BEL 2.0 specification
+        `3.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases>`_
         """
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")'
         result = self.parser.relation.parseString(statement)
@@ -79,9 +110,8 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(sub, obj, relation='increases')
 
     def test_directlyIncreases_withTlocObject(self):
-        """
-        3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
-        Test translocation in object
+        """Test translocation in object. See BEL 2.0 specification
+        `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
         """
         statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESHCS:"Cell Membrane"),' \
                     'toLoc(MESHCS:"Intracellular Space"))'
