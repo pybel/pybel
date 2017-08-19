@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
 import json
 import logging
+import os
 import pickle
+from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
 from datetime import datetime
 
-import hashlib
 import networkx as nx
-import os
 import requests
 import requests.exceptions
-from collections import defaultdict, MutableMapping
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
@@ -86,6 +86,15 @@ def is_url(s):
     return urlparse(s).scheme != ""
 
 
+def get_lines(location):
+    if is_url(location):
+        res = download(location)
+        return list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
+    else:
+        with open(os.path.expanduser(location)) as f:
+            return list(f)
+
+
 def get_bel_resource(location):
     """Loads/downloads and parses a config file from the given url or file path
 
@@ -93,13 +102,7 @@ def get_bel_resource(location):
     :return: A config-style dictionary representing the BEL config file
     :rtype: dict
     """
-
-    if is_url(location):
-        res = download(location)
-        lines = list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
-    else:
-        with open(os.path.expanduser(location)) as f:
-            lines = list(f)
+    lines = get_lines(location)
 
     try:
         result = parse_bel_resource(lines)
@@ -204,7 +207,7 @@ def tokenize_version(version_string):
 
     """
     before_dash = version_string.split('-')[0]
-    version_tuple = before_dash.split('.')[:3] # take only the first 3 in case there's an extension like -dev.0
+    version_tuple = before_dash.split('.')[:3]  # take only the first 3 in case there's an extension like -dev.0
     return tuple(map(int, version_tuple))
 
 
