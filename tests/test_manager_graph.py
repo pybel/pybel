@@ -101,17 +101,26 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         citations = self.manager.session.query(models.Citation).all()
         self.assertEqual(2, len(citations))
 
-        citations_strs = {'123455', '123456'}
-        self.assertEqual(citations_strs, {e.reference for e in citations})
+        citation_references = {'123455', '123456'}
+        self.assertEqual(citation_references, {
+            citation.reference
+            for citation in citations
+        })
 
         authors = {'Example Author', 'Example Author2'}
-        self.assertEqual(authors, {a.name for a in self.manager.session.query(models.Author).all()})
+        self.assertEqual(authors, {
+            author.name
+            for author in self.manager.session.query(models.Author).all()
+        })
 
         evidences = self.manager.session.query(models.Evidence).all()
         self.assertEqual(3, len(evidences))
 
-        evidences_strs = {'Evidence 1 w extra notes', 'Evidence 2', 'Evidence 3'}
-        self.assertEqual(evidences_strs, {e.text for e in evidences})
+        evidences_texts = {'Evidence 1 w extra notes', 'Evidence 2', 'Evidence 3'}
+        self.assertEqual(evidences_texts, {
+            evidence.text
+            for evidence in evidences
+        })
 
         nodes = self.manager.session.query(models.Node).all()
         self.assertEqual(4, len(nodes))
@@ -134,8 +143,11 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         network_edge_associations = self.manager.session.query(models.network_edge).filter_by(
             network_id=self.network.id).all()
-        self.assertEqual({nea.edge_id for nea in network_edge_associations},
-                         {edge.id for edge in edges})
+
+        self.assertEqual(
+            {network_edge_association.edge_id for network_edge_association in network_edge_associations},
+            {edge.id for edge in edges}
+        )
 
         g2 = self.manager.get_network_by_name_version(
             expected_test_simple_metadata[METADATA_NAME],

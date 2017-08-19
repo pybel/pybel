@@ -1496,20 +1496,20 @@ class EdgeStoreQueryManager(BaseCacheManager):
             if evidence_text:
                 q = q.join(Evidence).filter(Evidence.text.like(evidence_text))
 
-        result = q.all()
+        citations = q.all()
 
         if not as_dict_list:
-            return result
+            return citations
 
         if not (evidence or evidence_text):
             return [
-                cit.data
-                for cit in result
+                citation.to_json()
+                for citation in citations
             ]
 
         return [
-            evidence.data
-            for citation in result
+            evidence.to_json()
+            for citation in citations
             for evidence in citation.evidences
         ]
 
