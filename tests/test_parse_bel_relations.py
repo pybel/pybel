@@ -50,15 +50,17 @@ class TestRelations(TestTokenParserBase):
     def test_singleton(self):
         """Test singleton composite in subject."""
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42"))'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.statement.parseString(statement)
 
         expected = [
-            [COMPOSITE, [PROTEIN, ['HGNC', 'CASP8']], [PROTEIN, ['HGNC', 'FADD']],
-             [ABUNDANCE, ['ADO', 'Abeta_42']]],
+            COMPOSITE,
+            [PROTEIN, ['HGNC', 'CASP8']],
+            [PROTEIN, ['HGNC', 'FADD']],
+            [ABUNDANCE, ['ADO', 'Abeta_42']]
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = canonicalize_node(result)
         self.assertHasNode(sub)
 
         sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
