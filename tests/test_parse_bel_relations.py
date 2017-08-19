@@ -49,7 +49,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_singleton(self):
         """Test singleton composite in subject."""
-        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42"))")'
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42"))'
         result = self.parser.relation.parseString(statement)
 
         expected = [
