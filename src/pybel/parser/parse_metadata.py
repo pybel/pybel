@@ -36,6 +36,7 @@ SEMANTIC_VERSION_STRING_RE = re.compile(
 
 MALFORMED_VERSION_STRING_RE = re.compile('(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?')
 
+
 class MetadataParser(BaseParser):
     """A parser for the document and definitions section of a BEL document.
 
@@ -154,13 +155,6 @@ class MetadataParser(BaseParser):
         self.document_metadata[norm_key] = value
 
         if norm_key == METADATA_VERSION:
-
-            if not SEMANTIC_VERSION_STRING_RE.match(value) and MALFORMED_VERSION_STRING_RE.match(value):
-                k = value.split('.')
-                while len(k) < 3:
-                    k.append('0')
-                self.document_metadata[norm_key] = ".".join(k)
-
             self.check_version(line, position, value)
 
         return tokens
@@ -303,3 +297,18 @@ class MetadataParser(BaseParser):
 
         if not SEMANTIC_VERSION_STRING_RE.match(s):
             raise VersionFormatWarning(self.line_number, line, position, s)
+
+
+def extend_version(value):
+    """
+
+    :param str value: A version string, that might not be a semantic one
+    :return:
+    """
+    if not SEMANTIC_VERSION_STRING_RE.match(value) and MALFORMED_VERSION_STRING_RE.match(value):
+        k = value.split('.')
+        while len(k) < 3:
+            k.append('0')
+        return ".".join(k)
+
+    return value
