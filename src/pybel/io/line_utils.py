@@ -26,7 +26,7 @@ from ..constants import (
     GRAPH_ANNOTATION_LIST
 )
 from ..exceptions import PyBelWarning
-from ..manager.cache import CacheManager
+from ..manager.cache import CacheManager, build_manager
 from ..parser import BelParser
 from ..parser import MetadataParser
 from ..parser.parse_exceptions import (
@@ -55,8 +55,8 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
     :param iter[str] lines: An iterable over lines of BEL script
     :param manager: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, a pre-built 
                     :class:`MetadataParser`, or ``None`` for default connection
-    :type manager: None or str or CacheManager or MetadataParser
     :param bool allow_naked_names: If true, turns off naked namespace failures
+    :type manager: None or str or CacheManager
     :param bool allow_nested: If true, turns off nested statement failures
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
@@ -65,7 +65,9 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
-    metadata_parser = build_metadata_parser(manager)
+    manager= build_manager(manager)
+
+    metadata_parser =  MetadataParser(manager, allow_redefinition=kwargs.get('allow_redefinition'))
 
     parse_document(graph, docs, metadata_parser)
 
@@ -190,24 +192,6 @@ def parse_statements(graph, statements, bel_parser):
 
     for k, v in sorted(Counter(e.__class__.__name__ for _, _, e, _ in graph.warnings).items(), reverse=True):
         log.debug('  %s: %d', k, v)
-
-
-def build_metadata_parser(connection=None):
-    """Builds a metadata parser
-    
-    :param connection: An argument to build a metadata parser
-    :type connection: None or str or CacheManager or MetadataParser
-    :return: A metadata parser
-    :rtype: MetadataParser
-    """
-    if isinstance(connection, MetadataParser):
-        return connection
-
-    if isinstance(connection, CacheManager):
-        return MetadataParser(connection)
-
-    manager = CacheManager(connection=connection)
-    return MetadataParser(manager)
 
 
 def sanitize_file_line_iter(f, note_char=':'):
