@@ -3,11 +3,11 @@
 """This module contains helper functions for reading BEL scripts"""
 
 import logging
-import time
-
 import re
-import requests.exceptions
+import time
 from collections import defaultdict, Counter
+
+import requests.exceptions
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 
@@ -46,8 +46,7 @@ parse_log = logging.getLogger('pybel.parser')
 METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_nested=False,
-                allow_unqualified_translocations=False, citation_clearing=True, no_identifier_validation=False):
+def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, **kwargs):
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
@@ -55,14 +54,18 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
     :param iter[str] lines: An iterable over lines of BEL script
     :param manager: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, a pre-built 
                     :class:`MetadataParser`, or ``None`` for default connection
-    :param bool allow_naked_names: If true, turns off naked namespace failures
     :type manager: None or str or CacheManager
+
     :param bool allow_nested: If true, turns off nested statement failures
-    :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
-    """
 
+
+    Deprecated options for kwargs
+
+    :param bool allow_naked_names: If true, turns off naked namespace failures
+    :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
     manager= build_manager(manager)
@@ -71,7 +74,12 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
 
     parse_document(graph, docs, metadata_parser)
 
-    parse_definitions(graph, definitions, metadata_parser)
+    parse_definitions(
+        graph,
+        definitions,
+        metadata_parser,
+        allow_failures=kwargs.get('allow_definition_failures')
+    )
 
     bel_parser = BelParser(
         graph=graph,
@@ -79,11 +87,11 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
         annotation_dict=metadata_parser.annotations_dict,
         namespace_regex=metadata_parser.namespace_regex,
         annotation_regex=metadata_parser.annotations_regex,
-        allow_naked_names=allow_naked_names,
         allow_nested=allow_nested,
-        allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
-        no_identifier_validation=no_identifier_validation,
+        allow_naked_names=kwargs.get('allow_naked_names'),
+        allow_unqualified_translocations=kwargs.get('allow_unqualified_translocations'),
+        no_identifier_validation=kwargs.get('no_identifier_validation'),
     )
 
     parse_statements(graph, statements, bel_parser)
@@ -123,7 +131,7 @@ def parse_document(graph, document_metadata, metadata_parser):
     log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
 
-def parse_definitions(graph, definitions, metadata_parser):
+def parse_definitions(graph, definitions, metadata_parser, allow_failures=False):
     """Parses the lines in the definitions section of a BEL script.
 
     :param BELGraph graph: A BEL graph
@@ -145,9 +153,10 @@ def parse_definitions(graph, definitions, metadata_parser):
             parse_log.warning('Need to upgrade database. See '
                               'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
             raise e
-        except Exception as e:
-            parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
-            raise MetadataException(line_number, line)
+        except:
+            if not allow_failures:
+                parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
+                raise MetadataException(line_number, line)
 
     graph.graph.update({
         GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
