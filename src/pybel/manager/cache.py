@@ -138,7 +138,7 @@ class NamespaceManager(BaseCacheManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
         """
-        log.info('inserting namespace %s', url)
+        log.info('downloading namespace %s', url)
 
         bel_resource = get_bel_resource(url)
 
@@ -146,6 +146,8 @@ class NamespaceManager(BaseCacheManager):
 
         if bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
             return values
+
+        log.info('inserting namespace %s', url)
 
         namespace_insert_values = {
             'name': bel_resource['Namespace']['NameString'],
