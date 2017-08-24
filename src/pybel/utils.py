@@ -23,6 +23,7 @@ from .constants import (
     PYBEL_EDGE_DATA_KEYS,
     VERSION,
 )
+from .exceptions import EmptyResourceError, MissingSectionError
 
 log = logging.getLogger(__name__)
 
@@ -108,10 +109,10 @@ def get_bel_resource(location):
         result = parse_bel_resource(lines)
     except ValueError:
         log.error('No [Values] section found in %s', location)
-        raise ValueError('No [Values] section found in {}'.format(location))
+        raise MissingSectionError(location)
 
     if not result['Values']:
-        raise ValueError('Downloaded empty file: {}'.format(location))
+        raise EmptyResourceError(location)
 
     return result
 
