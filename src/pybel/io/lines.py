@@ -31,11 +31,11 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
-    :param dict kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
     :return: A BEL graph
     :rtype: BELGraph
     """
-    graph = BELGraph(**kwargs)
+    graph = BELGraph()
     parse_lines(
         graph=graph,
         lines=lines,
@@ -45,6 +45,7 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
         allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
         no_identifier_validation=no_identifier_validation,
+        **kwargs
     )
     return graph
 
