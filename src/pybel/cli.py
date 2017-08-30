@@ -22,12 +22,13 @@ import time
 import click
 
 from .canonicalize import to_bel
-from .constants import PYBEL_LOG_DIR, get_cache_connection
+from .constants import PYBEL_LOG_DIR, get_cache_connection, config, PYBEL_CONNECTION
 from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
 from .manager import defaults
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
 from .manager.models import Network, Namespace, Annotation, Base
+from .utils import set_default_connection, set_default_mysql_connection
 
 log = logging.getLogger('pybel')
 
@@ -152,6 +153,35 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
         to_neo4j(g, neo_graph, neo_context)
 
     sys.exit(0 if 0 == len(g.warnings) else 1)
+
+
+@main.group(help="Edit connection settings. Set to: {}".format(config[PYBEL_CONNECTION]))
+def connection():
+    pass
+
+
+@connection.command()
+@click.argument('value')
+def set(value):
+    """Set custom connection string"""
+    set_default_connection(value)
+
+
+@connection.command()
+@click.option('--user')
+@click.option('--password')
+@click.option('--host')
+@click.option('--database')
+@click.option('--charset')
+def set_mysql(user, password, host, database, charset):
+    """Sets MySQL connection string"""
+    set_default_mysql_connection(
+        user=user,
+        password=password,
+        host=host,
+        database=database,
+        charset=charset
+    )
 
 
 @main.group()
