@@ -248,6 +248,7 @@ def ensure_quotes(s):
 CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
 PUBLISHED_DATE_FMT = '%Y-%m-%d'
 PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
+DATE_VERSION_FMT = '%Y%m%d'
 
 
 def valid_date(s):
@@ -257,7 +258,7 @@ def valid_date(s):
     :rtype: bool
     """
     try:
-        datetime.strptime(s, '%Y-%m-%d')
+        datetime.strptime(s, PUBLISHED_DATE_FMT)
         return True
     except ValueError:
         return False
@@ -266,7 +267,7 @@ def valid_date(s):
 def valid_date_version(s):
     """Checks that the string is a valid date versions string"""
     try:
-        datetime.strptime(s, '%Y%m%d')
+        datetime.strptime(s, DATE_VERSION_FMT)
         return True
     except ValueError:
         return False
