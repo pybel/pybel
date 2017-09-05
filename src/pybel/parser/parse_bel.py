@@ -9,7 +9,7 @@ This module handles parsing BEL relations and validation of semantics.
 import itertools as itt
 import logging
 
-from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst, And
+from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst, And, StringEnd
 
 from .baseparser import BaseParser
 from .language import activity_labels, activities
@@ -50,7 +50,7 @@ class BelParser(BaseParser):
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
                  allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-                 citation_clearing=True, warn_on_singleton=True, no_identifier_validation=False, autostreamline=True):
+                 citation_clearing=True, no_identifier_validation=False, autostreamline=True):
         """
         :param BELGraph graph: The BEL Graph to use to store the network
         :param dict[str,set[str]] namespace_dict: A dictionary of {namespace: set of members}.
@@ -68,8 +68,6 @@ class BelParser(BaseParser):
         :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
-        :param bool warn_on_singleton: Should the parser thorugh warnings on singletons? Only disable this if you're
-                                        sure your BEL Script is syntactically and semantically valid.
         :param bool autostreamline: Should the parser be streamlined on instantiation?
         """
 
@@ -92,9 +90,6 @@ class BelParser(BaseParser):
                 namespace_regex=namespace_regex,
                 allow_naked_names=allow_naked_names
             )
-
-        self.warn_on_singleton = warn_on_singleton
-        self.singleton_line_numbers = []
 
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
 
@@ -457,15 +452,13 @@ class BelParser(BaseParser):
             self.label_relationship,
         ])
 
-        self.statement = self.relation | self.bel_term.copy().setParseAction(self.handle_term_singleton)
+        self.singleton_term = (self.bel_term + StringEnd()).setParseAction(self.handle_term)
+
+        self.statement = self.relation | self.singleton_term
         self.language = self.control_parser.language | self.statement
         self.language.setName('BEL')
 
         super(BelParser, self).__init__(self.language, streamline=autostreamline)
-
-    @property
-    def has_singleton_terms(self):
-        return bool(self.singleton_line_numbers)
 
     @property
     def namespace_dict(self):
@@ -539,14 +532,6 @@ class BelParser(BaseParser):
     def handle_term(self, line, position, tokens):
         self.ensure_node(tokens)
         return tokens
-
-    def handle_term_singleton(self, line, position, tokens):
-        """This function wraps :meth:`BelParser.handle_term` but is only used for top-level parsing of bel_terms. This is done
-        solely to keep track of if a graph has any singletons"""
-        self.singleton_line_numbers.append(self.line_number)
-        if self.warn_on_singleton:
-            log.warning('Added singleton [line %d]: %s. Putative error - needs checking.', self.line_number, line)
-        return self.handle_term(line, position, tokens)
 
     def _handle_list_helper(self, tokens, relation):
         parent = self.ensure_node(tokens[0])

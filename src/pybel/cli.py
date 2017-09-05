@@ -22,12 +22,13 @@ import time
 import click
 
 from .canonicalize import to_bel
-from .constants import PYBEL_LOG_DIR, get_cache_connection
+from .constants import PYBEL_LOG_DIR, get_cache_connection, config, PYBEL_CONNECTION
 from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
 from .manager import defaults
 from .manager.cache import CacheManager
 from .manager.database_io import to_database, from_database
 from .manager.models import Network, Namespace, Annotation, Base
+from .utils import set_default_connection, set_default_mysql_connection
 
 log = logging.getLogger('pybel')
 
@@ -68,12 +69,11 @@ def main():
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--allow-unqualified-translocations', is_flag=True,
               help="Enable lenient parsing for unqualified translocations")
-@click.option('--suppress-singleton-warnings', is_flag=True)
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--debug', count=True)
 def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
             neo_context, store_default, store_connection, allow_naked_names, allow_nested,
-            allow_unqualified_translocations, suppress_singleton_warnings, no_citation_clearing, debug):
+            allow_unqualified_translocations, no_citation_clearing, debug):
     """Convert BEL"""
     if debug == 1:
         log.setLevel(20)
@@ -93,7 +93,6 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
-            warn_on_singleton=(not suppress_singleton_warnings),
         )
 
     else:
@@ -104,7 +103,6 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
-            warn_on_singleton=(not suppress_singleton_warnings),
         )
 
     if csv:
@@ -157,6 +155,35 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
     sys.exit(0 if 0 == len(g.warnings) else 1)
 
 
+@main.group(help="Edit connection settings. Set to: {}".format(config[PYBEL_CONNECTION]))
+def connection():
+    pass
+
+
+@connection.command()
+@click.argument('value')
+def set(value):
+    """Set custom connection string"""
+    set_default_connection(value)
+
+
+@connection.command()
+@click.option('--user')
+@click.option('--password')
+@click.option('--host')
+@click.option('--database')
+@click.option('--charset')
+def set_mysql(user, password, host, database, charset):
+    """Sets MySQL connection string"""
+    set_default_mysql_connection(
+        user=user,
+        password=password,
+        host=host,
+        database=database,
+        charset=charset
+    )
+
+
 @main.group()
 @click.option('-c', '--connection', help='Cache connection. Defaults to {}'.format(get_cache_connection()))
 @click.pass_context
@@ -169,20 +196,20 @@ def manage(ctx, connection):
 
 @manage.command()
 @click.option('-v', '--debug', count=True)
-@click.pass_context
-def setup(ctx, debug):
+@click.pass_obj
+def setup(manager, debug):
     """Create the cache if it doesn't exist"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
-    ctx.obj.create_all()
+    manager.create_all()
 
 
 @manage.command()
 @click.option('-y', '--yes', is_flag=True)
-@click.pass_context
-def remove(ctx, yes):
+@click.pass_obj
+def remove(manager, yes):
     """Drops cache"""
     if yes or click.confirm('Drop database?'):
-        ctx.obj.drop_database()
+        manager.drop_database()
 
 
 @manage.group()
@@ -197,62 +224,62 @@ def annotations():
 
 @namespaces.command()
 @click.option('-v', '--debug', count=True)
-@click.pass_context
-def ensure(ctx, debug):
+@click.pass_obj
+def ensure(manager, debug):
     """Set up default cache with default definitions"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
 
     for url in defaults.fraunhofer_namespaces:
-        ctx.obj.ensure_namespace(url)
+        manager.ensure_namespace(url)
 
 
 @annotations.command()
 @click.option('-v', '--debug', count=True)
-@click.pass_context
-def ensure(ctx, debug):
+@click.pass_obj
+def ensure(manager, debug):
     """Set up default cache with default annotations"""
     log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
 
     for url in defaults.fraunhofer_annotations:
-        ctx.obj.ensure_annotation(url)
+        manager.ensure_annotation(url)
 
 
 @namespaces.command()
 @click.argument('url')
-@click.pass_context
-def insert(ctx, url):
+@click.pass_obj
+def insert(manager, url):
     """Manually add namespace by URL"""
     if url.endswith('.belns'):
-        ctx.obj.ensure_namespace(url)
+        manager.ensure_namespace(url)
     else:
-        ctx.obj.ensure_namespace_owl(url)
+        manager.ensure_namespace_owl(url)
 
 
 @annotations.command()
 @click.argument('url')
-@click.pass_context
-def insert(ctx, url):
+@click.pass_obj
+def insert(manager, url):
     """Manually add annotation by URL"""
     if url.endswith('.belanno'):
-        ctx.obj.ensure_annotation(url)
+        manager.ensure_annotation(url)
     else:
-        ctx.obj.ensure_annotation_owl(url)
+        manager.ensure_annotation_owl(url)
 
 
 @namespaces.command()
 @click.option('--url', help='Specific resource URL to list')
-@click.pass_context
-def ls(ctx, url):
+@click.pass_obj
+def ls(manager, url):
     """Lists cached namespaces"""
     if not url:
-        for namespace_url, in ctx.obj.session.query(Namespace.url).all():
+        for namespace_url, in manager.session.query(Namespace.url).all():
             click.echo(namespace_url)
 
     else:
         if url.endswith('.belns'):
-            res = ctx.obj.get_namespace(url)
+            res = manager.get_namespace(url)
         else:
-            res = ctx.obj.get_namespace_owl_terms(url)
+            res = manager.get_namespace_owl_terms(url)
 
         for l in res:
             click.echo(l)
@@ -260,18 +287,18 @@ def ls(ctx, url):
 
 @annotations.command()
 @click.option('--url', help='Specific resource URL to list')
-@click.pass_context
-def ls(ctx, url):
+@click.pass_obj
+def ls(manager, url):
     """Lists cached annotations"""
     if not url:
-        for annotation_url, in ctx.obj.session.query(Annotation.url).all():
+        for annotation_url, in manager.session.query(Annotation.url).all():
             click.echo(annotation_url)
 
     else:
         if url.endswith('.belanno'):
-            res = ctx.obj.get_annotation(url)
+            res = manager.get_annotation(url)
         else:
-            res = ctx.obj.get_annotation_owl_terms(url)
+            res = manager.get_annotation_owl_terms(url)
 
         for l in res:
             click.echo(l)
@@ -279,18 +306,18 @@ def ls(ctx, url):
 
 @namespaces.command()
 @click.argument('url')
-@click.pass_context
-def drop(ctx, url):
+@click.pass_obj
+def drop(manager, url):
     """Drops a namespace by URL"""
-    ctx.obj.drop_namespace_by_url(url)
+    manager.drop_namespace_by_url(url)
 
 
 @annotations.command()
 @click.argument('url')
-@click.pass_context
-def drop(ctx, url):
+@click.pass_obj
+def drop(manager, url):
     """Drops an annotation by URL"""
-    ctx.obj.drop_annotation_by_url(url)
+    manager.drop_annotation_by_url(url)
 
 
 @manage.group()
@@ -299,10 +326,10 @@ def network():
 
 
 @network.command()
-@click.pass_context
-def ls(ctx):
+@click.pass_obj
+def ls(manager):
     """Lists network names, versions, and optionally descriptions"""
-    query = ctx.obj.session.query(Network.id, Network.name, Network.version)
+    query = manager.session.query(Network.id, Network.name, Network.version)
 
     for row in query.all():
         click.echo('\t'.join(map(str, row)))
@@ -310,19 +337,19 @@ def ls(ctx):
 
 @network.command()
 @click.argument('network_id')
-@click.pass_context
-def drop(ctx, network_id):
+@click.pass_obj
+def drop(manager, network_id):
     """Drops a network by its database identifier"""
-    ctx.obj.drop_network_by_id(network_id)
+    manager.drop_network_by_id(network_id)
 
 
 @network.command()
 @click.option('-y', '--yes', is_flag=True)
-@click.pass_context
-def dropall(ctx, yes):
+@click.pass_obj
+def dropall(manager, yes):
     """Drops all networks"""
     if yes or click.confirm('Drop all networks?'):
-        ctx.obj.drop_networks()
+        manager.drop_networks()
 
 
 if __name__ == '__main__':

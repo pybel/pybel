@@ -160,11 +160,15 @@ class VersionFormatWarning(PyBelParserWarning):
         self.version_string = version_string
 
     def __str__(self):
-        return '''Version string "{}" neither is a date like YYYYMMDD nor adheres to semantic versioning'''.format(
-            self.version_string)
+        return (
+            'Version string "{}" neither is a date like YYYYMMDD nor adheres to semantic versioning.'
+            ' See http://semver.org/'.format(self.version_string)
+        )
 
 
 class MetadataException(PyBelWarning):
+    """Base exception for issues with document metadata"""
+
     def __init__(self, line_number, line, *args):
         super(MetadataException, self).__init__(line_number, line, *args)
         self.line = line

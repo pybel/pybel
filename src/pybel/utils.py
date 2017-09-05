@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
 import json
 import logging
+import os
 import pickle
+from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
 from datetime import datetime
 
-import hashlib
 import networkx as nx
-import os
 import requests
 import requests.exceptions
-from collections import defaultdict, MutableMapping
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
@@ -22,9 +22,15 @@ from .constants import (
     OPENBEL_DOMAIN,
     PYBEL_EDGE_DATA_KEYS,
     VERSION,
+    PYBEL_CONFIG_PATH,
+    PYBEL_CONNECTION,
 )
+from .exceptions import EmptyResourceError, MissingSectionError
 
 log = logging.getLogger(__name__)
+
+PYBEL_MYSQL_FMT_NOPASS = 'mysql+pymysql://{user}@{host}/{database}?charset={charset}'
+PYBEL_MYSQL_FMT_PASS = 'mysql+pymysql://{user}:{password}@{host}/{database}?charset={charset}'
 
 
 def download(url):
@@ -33,8 +39,8 @@ def download(url):
     session.mount('file://', FileAdapter())
 
     if url.startswith(BELFRAMEWORK_DOMAIN):
-        log.warning('%s has expired', BELFRAMEWORK_DOMAIN)
         url = url.replace(BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN)
+        log.warning('%s has expired. Redirecting to %s', BELFRAMEWORK_DOMAIN, url)
 
     try:
         res = session.get(url)
@@ -86,6 +92,15 @@ def is_url(s):
     return urlparse(s).scheme != ""
 
 
+def get_lines(location):
+    if is_url(location):
+        res = download(location)
+        return list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
+    else:
+        with open(os.path.expanduser(location)) as f:
+            return list(f)
+
+
 def get_bel_resource(location):
     """Loads/downloads and parses a config file from the given url or file path
 
@@ -93,22 +108,16 @@ def get_bel_resource(location):
     :return: A config-style dictionary representing the BEL config file
     :rtype: dict
     """
-
-    if is_url(location):
-        res = download(location)
-        lines = list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
-    else:
-        with open(os.path.expanduser(location)) as f:
-            lines = list(f)
+    lines = get_lines(location)
 
     try:
         result = parse_bel_resource(lines)
     except ValueError:
         log.error('No [Values] section found in %s', location)
-        raise ValueError('No [Values] section found in {}'.format(location))
+        raise MissingSectionError(location)
 
     if not result['Values']:
-        raise ValueError('Downloaded empty file: {}'.format(location))
+        raise EmptyResourceError(location)
 
     return result
 
@@ -204,7 +213,7 @@ def tokenize_version(version_string):
 
     """
     before_dash = version_string.split('-')[0]
-    version_tuple = before_dash.split('.')[:3] # take only the first 3 in case there's an extension like -dev.0
+    version_tuple = before_dash.split('.')[:3]  # take only the first 3 in case there's an extension like -dev.0
     return tuple(map(int, version_tuple))
 
 
@@ -239,6 +248,7 @@ def ensure_quotes(s):
 CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
 PUBLISHED_DATE_FMT = '%Y-%m-%d'
 PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
+DATE_VERSION_FMT = '%Y%m%d'
 
 
 def valid_date(s):
@@ -248,7 +258,7 @@ def valid_date(s):
     :rtype: bool
     """
     try:
-        datetime.strptime(s, '%Y-%m-%d')
+        datetime.strptime(s, PUBLISHED_DATE_FMT)
         return True
     except ValueError:
         return False
@@ -257,7 +267,7 @@ def valid_date(s):
 def valid_date_version(s):
     """Checks that the string is a valid date versions string"""
     try:
-        datetime.strptime(s, '%Y%m%d')
+        datetime.strptime(s, DATE_VERSION_FMT)
         return True
     except ValueError:
         return False
@@ -365,3 +375,46 @@ def subdict_matches(target, query, partial_match=True):
             return False
 
     return True
+
+
+def set_default(key, value):
+    """Sets the default setting for this key/value pair. Does NOT update the current config.
+
+    :param str key:
+    :param str value:
+    """
+    with open(PYBEL_CONFIG_PATH) as f:
+        default_config = json.load(f)
+
+    default_config[key] = value
+
+    with open(PYBEL_CONFIG_PATH, 'w') as f:
+        json.dump(f, default_config)
+
+
+def set_default_connection(value):
+    """Sets the default connection string with the given value. See
+    http://docs.sqlalchemy.org/en/latest/core/engines.html for examples"""
+    set_default(PYBEL_CONNECTION, value)
+
+
+def set_default_mysql_connection(user=None, password=None, host=None, database=None, charset=None):
+    """Sets the default connection string with MySQL settings
+
+    :param host: MySQL database host
+    :param user: MySQL database user
+    :param password: MySQL database password. Can be None if no password is used.
+    :param database: MySQL database name
+    :param charset: MySQL database character set
+    """
+    kwargs = dict(
+        user=user or 'pybel',
+        host=host or 'localhost',
+        password=password,
+        database=database or 'pybel',
+        charset=charset or 'utf8'
+    )
+
+    fmt = PYBEL_MYSQL_FMT_NOPASS if password is None else PYBEL_MYSQL_FMT_PASS
+
+    set_default_connection(fmt.format(**kwargs))

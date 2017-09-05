@@ -35,7 +35,13 @@ activity_labels = {
     'tscript': 'tscript',
     'transportActivity': 'tport',
     'tport': 'tport',
-    'molecularActivity': 'molecularActivity'
+    'molecularActivity': 'molecularActivity',
+
+    # Added by PyBEL
+    'guanineNucleotideExchangeFactorActivity': 'gef',
+    'gef': 'gef',
+    'gtpaseActivatingProteinActivity': 'gap',
+    'gap': 'gap',
 }
 
 # TODO fill out

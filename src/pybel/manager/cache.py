@@ -138,7 +138,7 @@ class NamespaceManager(BaseCacheManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
         """
-        log.info('inserting namespace %s', url)
+        log.info('downloading namespace %s', url)
 
         bel_resource = get_bel_resource(url)
 
@@ -146,6 +146,8 @@ class NamespaceManager(BaseCacheManager):
 
         if bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
             return values
+
+        log.info('inserting namespace %s', url)
 
         namespace_insert_values = {
             'name': bel_resource['Namespace']['NameString'],
@@ -1496,20 +1498,20 @@ class EdgeStoreQueryManager(BaseCacheManager):
             if evidence_text:
                 q = q.join(Evidence).filter(Evidence.text.like(evidence_text))
 
-        result = q.all()
+        citations = q.all()
 
         if not as_dict_list:
-            return result
+            return citations
 
         if not (evidence or evidence_text):
             return [
-                cit.data
-                for cit in result
+                citation.to_json()
+                for citation in citations
             ]
 
         return [
-            evidence.data
-            for citation in result
+            evidence.to_json()
+            for citation in citations
             for evidence in citation.evidences
         ]
 

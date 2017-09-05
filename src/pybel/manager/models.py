@@ -205,24 +205,19 @@ class NamespaceEntry(Base):
     children = relationship(
         'NamespaceEntry',
         secondary=namespace_hierarchy,
-        primaryjoin=id == namespace_hierarchy.c.left_id,
-        secondaryjoin=id == namespace_hierarchy.c.right_id
+        primaryjoin=(id == namespace_hierarchy.c.left_id),
+        secondaryjoin=(id == namespace_hierarchy.c.right_id),
     )
 
     def __str__(self):
         return '{}:{}'.format(self.namespace, self.name)
 
-    @property
-    def data(self):
+    def to_json(self):
         """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name."""
         return {
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
         }
-
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data
 
 
 class NamespaceEntryEquivalence(Base):
@@ -260,8 +255,8 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    @property
-    def data(self):
+    def to_json(self):
+        """Returns this annotation as a JSON dictionary"""
         return {
             'id': self.id,
             'uploaded': self.uploaded,
@@ -304,17 +299,12 @@ class AnnotationEntry(Base):
         secondaryjoin=id == annotation_hierarchy.c.right_id
     )
 
-    @property
-    def data(self):
+    def to_json(self):
         """Describes the annotationEntry as dictionary of Annotation-Keyword and Annotation-Name."""
         return {
             'annotation_keyword': self.annotation.keyword,
             'annotation': self.name
         }
-
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data
 
 
 network_edge = Table(
@@ -356,8 +346,8 @@ class Network(Base):
         UniqueConstraint(name, version),
     )
 
-    @property
-    def data(self):
+    def to_json(self):
+        """Returns this network as JSON"""
         # TODO switch to using constants from :mod:`pybel.constants`
 
         network_data = {
@@ -398,8 +388,8 @@ class Network(Base):
 
 node_modification = Table(
     NODE_MODIFICATION_TABLE_NAME, Base.metadata,
-    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME))),
-    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)))
+    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True),
+    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -433,7 +423,7 @@ class Node(Base):
             FUNCTION: self.type,
         }
         if self.namespaceEntry:
-            namespace_entry = self.namespaceEntry.data
+            namespace_entry = self.namespaceEntry.to_json()
             node_data.update(namespace_entry)
             node_key.append(namespace_entry[NAMESPACE])
             node_key.append(namespace_entry[NAME])
@@ -500,8 +490,8 @@ class Modification(Base):
         mod_key = []
         if self.modType == FUSION:
             mod_dict.update({
-                PARTNER_3P: self.p3Partner.data,
-                PARTNER_5P: self.p5Partner.data,
+                PARTNER_3P: self.p3Partner.to_json(),
+                PARTNER_5P: self.p5Partner.to_json(),
                 RANGE_3P: {},
                 RANGE_5P: {}
             })
@@ -588,8 +578,8 @@ class Modification(Base):
 
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
-    Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME))),
-    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+    Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), primary_key=True),
+    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -626,8 +616,7 @@ class Citation(Base):
     def __str__(self):
         return '{}:{}'.format(self.type, self.reference)
 
-    @property
-    def data(self):
+    def to_json(self):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
@@ -638,17 +627,17 @@ class Citation(Base):
             CITATION_REFERENCE: self.reference,
             CITATION_TYPE: self.type
         }
+
         if self.authors:
-            citation_dict[CITATION_AUTHORS] = "|".join(
-                author.name for author in sorted(self.authors, key=lambda auth: auth.name))
+            citation_dict[CITATION_AUTHORS] = "|".join(sorted(
+                author.name
+                for author in self.authors
+            ))
+
         if self.date:
             citation_dict[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
 
         return citation_dict
-
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data
 
 
 class Evidence(Base):
@@ -665,21 +654,16 @@ class Evidence(Base):
     def __str__(self):
         return '{}:{}'.format(self.citation, self.text)
 
-    @property
-    def data(self):
+    def to_json(self):
         """Creates a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
 
         :return: Dictionary containing citation and evidence for a :class:`BELGraph` edge.
         :rtype: dict
         """
         return {
-            CITATION: self.citation.data,
+            CITATION: self.citation.to_json(),
             EVIDENCE: self.text
         }
-
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data
 
 
 edge_annotation = Table(
@@ -754,7 +738,7 @@ class Edge(Base):
             },
         }
         if self.evidence:
-            edge_dict['data'].update(self.evidence.data)
+            edge_dict['data'].update(self.evidence.to_json())
 
         for prop in self.properties:
             prop_info = prop.data
@@ -787,7 +771,7 @@ class Edge(Base):
             }
         }
         if self.evidence:
-            min_dict['data'].update(self.evidence.data)
+            min_dict['data'].update(self.evidence.to_json())
         for prop in self.properties:
             prop_info = prop.data
             if prop_info['participant'] in min_dict['data']:
@@ -831,12 +815,12 @@ class Property(Base):
 
         if self.modifier == LOCATION:
             prop_dict['data'][self.participant] = {
-                LOCATION: self.namespaceEntry.data
+                LOCATION: self.namespaceEntry.to_json()
             }
 
         if self.relativeKey:
             prop_dict['data'][self.participant][EFFECT] = {
-                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.data
+                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.to_json()
             }
         elif self.effectNamespace:
             prop_dict['data'][self.participant][EFFECT] = {

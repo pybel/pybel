@@ -252,13 +252,20 @@ Below is the "skeleton" for the edge data model in PyBEL:
         },
         EVIDENCE: '...',
         CITATION : {
-            # ... citation information
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: '...',
+            CITATION_DATE: 'YYYY-MM-DD',
+            CITATION_AUTHORS: 'Jon Snow|John Doe',
         }
         ANNOTATIONS: {
+            'Disease': 'Colorectal Cancer',
             # ... additional annotations as key:value pairs
         }
     }
 
+Each edge must contain the ``RELATION``, ``EVIDENCE``, ``CITATION``, and ``ANNOTATIONS`` entries. The ``CITATION``
+must minimally contain ``CITATION_TYPE`` and ``CITATION_REFERENCE`` since these can be used to look up additional
+metadata.
 
 Activities
 ~~~~~~~~~~

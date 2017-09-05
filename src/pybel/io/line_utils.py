@@ -26,7 +26,7 @@ from ..constants import (
     GRAPH_ANNOTATION_LIST
 )
 from ..exceptions import PyBelWarning
-from ..manager.cache import CacheManager
+from ..manager.cache import CacheManager, build_manager
 from ..parser import BelParser
 from ..parser import MetadataParser
 from ..parser.parse_exceptions import (
@@ -46,33 +46,39 @@ parse_log = logging.getLogger('pybel.parser')
 METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_nested=False,
-                allow_unqualified_translocations=False, citation_clearing=True, warn_on_singleton=True,
-                no_identifier_validation=False):
+def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, **kwargs):
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
     :param BELGraph graph: A BEL graph
     :param iter[str] lines: An iterable over lines of BEL script
-    :param manager: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, a pre-built 
-                    :class:`MetadataParser`, or ``None`` for default connection
-    :type manager: None or str or CacheManager or MetadataParser
-    :param bool allow_naked_names: If true, turns off naked namespace failures
+    :param manager: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None`` for
+                    default connection
+    :type manager: None or str or CacheManager
     :param bool allow_nested: If true, turns off nested statement failures
-    :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
-    :param bool warn_on_singleton: Should the parser throw warnings on singletons? Only disable this if you're
-                                        sure your BEL Script is syntactically and semantically valid.
-    """
 
+
+    Deprecated options for kwargs
+
+    :param bool allow_naked_names: If true, turns off naked namespace failures
+    :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
-    metadata_parser = build_metadata_parser(manager)
+    manager = build_manager(manager)
+
+    metadata_parser = MetadataParser(manager, allow_redefinition=kwargs.get('allow_redefinition'))
 
     parse_document(graph, docs, metadata_parser)
 
-    parse_definitions(graph, definitions, metadata_parser)
+    parse_definitions(
+        graph,
+        definitions,
+        metadata_parser,
+        allow_failures=kwargs.get('allow_definition_failures')
+    )
 
     bel_parser = BelParser(
         graph=graph,
@@ -80,12 +86,11 @@ def parse_lines(graph, lines, manager=None, allow_naked_names=False, allow_neste
         annotation_dict=metadata_parser.annotations_dict,
         namespace_regex=metadata_parser.namespace_regex,
         annotation_regex=metadata_parser.annotations_regex,
-        allow_naked_names=allow_naked_names,
         allow_nested=allow_nested,
-        allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
-        warn_on_singleton=warn_on_singleton,
-        no_identifier_validation=no_identifier_validation,
+        allow_naked_names=kwargs.get('allow_naked_names'),
+        allow_unqualified_translocations=kwargs.get('allow_unqualified_translocations'),
+        no_identifier_validation=kwargs.get('no_identifier_validation'),
     )
 
     parse_statements(graph, statements, bel_parser)
@@ -125,7 +130,7 @@ def parse_document(graph, document_metadata, metadata_parser):
     log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
 
-def parse_definitions(graph, definitions, metadata_parser):
+def parse_definitions(graph, definitions, metadata_parser, allow_failures=False):
     """Parses the lines in the definitions section of a BEL script.
 
     :param BELGraph graph: A BEL graph
@@ -147,9 +152,10 @@ def parse_definitions(graph, definitions, metadata_parser):
             parse_log.warning('Need to upgrade database. See '
                               'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
             raise e
-        except Exception as e:
-            parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
-            raise MetadataException(line_number, line)
+        except:
+            if not allow_failures:
+                parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
+                raise MetadataException(line_number, line)
 
     graph.graph.update({
         GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
@@ -190,30 +196,10 @@ def parse_statements(graph, statements, bel_parser):
             parse_log.exception('Line %07d - General Failure: %s', line_number, line)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
 
-    graph.has_singleton_terms = bel_parser.has_singleton_terms
-
     log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(graph.warnings))
 
     for k, v in sorted(Counter(e.__class__.__name__ for _, _, e, _ in graph.warnings).items(), reverse=True):
         log.debug('  %s: %d', k, v)
-
-
-def build_metadata_parser(connection=None):
-    """Builds a metadata parser
-    
-    :param connection: An argument to build a metadata parser
-    :type connection: None or str or CacheManager or MetadataParser
-    :return: A metadata parser
-    :rtype: MetadataParser
-    """
-    if isinstance(connection, MetadataParser):
-        return connection
-
-    if isinstance(connection, CacheManager):
-        return MetadataParser(connection)
-
-    manager = CacheManager(connection=connection)
-    return MetadataParser(manager)
 
 
 def sanitize_file_line_iter(f, note_char=':'):
