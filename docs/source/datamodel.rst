@@ -82,8 +82,8 @@ Graph
 .. automodule:: pybel.struct
 
 .. autoclass:: pybel.BELGraph
-:exclude-members: nodes_iter, edges_iter, add_warning
-        :members:
+    :exclude-members: nodes_iter, edges_iter, add_warning
+    :members:
 
 Nodes
 -----
