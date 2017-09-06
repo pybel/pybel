@@ -77,12 +77,11 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def name(self, *attrs):
-        """Gets the graph's name. Requires a weird hack in the signature since it's overriding a property"""
+        """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script"""
         return self.graph[GRAPH_METADATA].get(METADATA_NAME, '')
 
     @name.setter
     def name(self, *attrs, **kwargs):
-        """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script"""
         self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
 
     @property
@@ -92,7 +91,6 @@ class BELGraph(networkx.MultiDiGraph):
 
     @version.setter
     def version(self, version):
-        """The graph's version, from the ``SET DOCUMENT Version = "..."`` entry in the source BEL script"""
         self.graph[GRAPH_METADATA][METADATA_VERSION] = version
 
     @property
@@ -102,7 +100,6 @@ class BELGraph(networkx.MultiDiGraph):
 
     @description.setter
     def description(self, description):
-        """The graph's description, from the ``SET DOCUMENT Description = "..."`` entry in the source BEL Script"""
         self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
 
     @property
