@@ -326,8 +326,8 @@ class Network(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), index=True, doc='Name of the given Network (from the BEL file)')
-    version = Column(String(16), doc='Release version of the given Network (from the BEL file)')
+    name = Column(String(255), nullable=False, index=True, doc='Name of the given Network (from the BEL file)')
+    version = Column(String(16), nullable=False, doc='Release version of the given Network (from the BEL file)')
 
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')
@@ -347,28 +347,29 @@ class Network(Base):
     )
 
     def to_json(self):
-        """Returns this network as JSON"""
-        # TODO switch to using constants from :mod:`pybel.constants`
+        """Returns this network as JSON
 
+        :rtype: dict
+        """
         network_data = {
             'id': self.id,
-            'name': self.name,
-            'version': self.version,
-            'created': self.created
+            'created': self.created,
+            METADATA_NAME: self.name,
+            METADATA_VERSION: self.version,
         }
 
         if self.authors:
-            network_data['authors'] = self.authors
+            network_data[METADATA_AUTHORS] = self.authors
         if self.contact:
-            network_data['contact'] = self.contact
+            network_data[METADATA_CONTACT] = self.contact
         if self.description:
-            network_data['description'] = self.description
+            network_data[METADATA_DESCRIPTION] = self.description
         if self.copyright:
-            network_data['copyright'] = self.copyright
+            network_data[METADATA_COPYRIGHT] = self.copyright
         if self.disclaimer:
-            network_data['disclaimer'] = self.disclaimer
+            network_data[METADATA_DISCLAIMER] = self.disclaimer
         if self.licenses:
-            network_data['licenses'] = self.licenses
+            network_data[METADATA_LICENSES] = self.licenses
 
         return network_data
 
