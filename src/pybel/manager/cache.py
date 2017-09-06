@@ -694,10 +694,10 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :return: A Network object
         :rtype: Network
         """
-        if graph.name is None:
+        if not graph.name:
             raise ValueError('Can not upload a graph without a name')
 
-        if graph.version is None:
+        if not graph.version:
             raise ValueError('Can not upload a graph without a version')
 
         log.debug('inserting %s v%s', graph.name, graph.version)
