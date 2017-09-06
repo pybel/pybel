@@ -711,9 +711,6 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         })
 
         if store_parts:
-            if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
-                self.ensure_namespace(GOCC_LATEST)
-
             self.store_graph_parts(network, graph)
 
         self.session.add(network)
@@ -752,6 +749,9 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
         """
+        if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
+            self.ensure_namespace(GOCC_LATEST)
+
         for node in graph.nodes_iter():
             if node in self.node_model:
                 node_object = self.node_model[node]
