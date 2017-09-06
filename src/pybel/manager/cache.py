@@ -8,13 +8,13 @@ enable this option, but can specify a database location if they choose.
 """
 
 import datetime
-import hashlib
 import json
 import logging
 import time
+
+import hashlib
 from collections import defaultdict
 from copy import deepcopy
-
 from six import string_types
 from sqlalchemy import func
 
@@ -694,6 +694,12 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :return: A Network object
         :rtype: Network
         """
+        if graph.name is None:
+            raise ValueError('Can not upload a graph without a name')
+
+        if graph.version is None:
+            raise ValueError('Can not upload a graph without a version')
+
         log.debug('inserting %s v%s', graph.name, graph.version)
 
         t = time.time()
