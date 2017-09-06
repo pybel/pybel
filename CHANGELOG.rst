@@ -26,7 +26,7 @@ Fixed
 
 Added
 ~~~~~
-- CLI command for set connection
+- CLI command for set connection (https://github.com/pybel/pybel/issues/220)
 - GEF and GAP activities added for INDRA
 
 `0.7.2 <https://github.com/pybel/pybel/compare/v0.7.1...v0.7.2>`_ - 2017-08-10
