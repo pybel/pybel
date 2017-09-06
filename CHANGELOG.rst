@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+Current
+-------
+Changed
+~~~~~~~
+- Better init function for BELGraph
+- Force name and version to not be null in the database
+
+`0.7.3 <https://github.com/pybel/pybel/compare/v0.7.2...v0.7.3>`_ - 2017-09-05
+------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Update logging for parsing of bad version strings
+- Change where kwargs go in parse_lines function
+- Make non-standard parsing modes part of kwargs
+
+Fixed
+~~~~~
+- On-purpose singletons now properly identified (https://github.com/pybel/pybel/issues/218)
+
+Added
+~~~~~
+- CLI command for set connection
+- GEF and GAP activities added for INDRA
 
 `0.7.2 <https://github.com/pybel/pybel/compare/v0.7.1...v0.7.2>`_ - 2017-08-10
 ------------------------------------------------------------------------------
