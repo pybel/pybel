@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
-import tempfile
 import unittest
 from json import dumps
+
+import os
+import tempfile
+from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
@@ -12,7 +14,6 @@ from pybel.manager.cache import CacheManager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches
-from requests.compat import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -164,6 +165,27 @@ class TestGraphMixin(unittest.TestCase):
         :param kwargs: 
         """
         assertHasEdge(self, u, v, g, **kwargs)
+
+
+class TemporaryCacheMixin(unittest.TestCase):
+    def setUp(self):
+        self.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
+
+        if self.test_connection:
+            self.connection = self.test_connection
+        else:
+            self.fd, self.path = tempfile.mkstemp()
+            self.connection = 'sqlite:///' + self.path
+            log.info('Test generated connection string %s', self.connection)
+
+        self.manager = CacheManager(connection=self.connection)
+        self.manager.create_all()
+
+    def tearDown(self):
+        self.manager.session.close()
+        if not self.test_connection:
+            os.close(self.fd)
+            os.remove(self.path)
 
 
 class TemporaryCacheClsMixin(unittest.TestCase):

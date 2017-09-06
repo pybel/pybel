@@ -79,8 +79,8 @@ def hash_citation(type, reference):
     return hash_dump((type, reference))
 
 
-def hash_evidence(text, citation):
-    return hash_dump({EVIDENCE: text, CITATION: citation})
+def hash_evidence(text, type, reference):
+    return hash_dump((type, reference, text))
 
 
 class NamespaceManager(BaseCacheManager):
@@ -772,27 +772,36 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
 
-            if CITATION not in data or EVIDENCE not in data:
-                evidence = None
+            if EVIDENCE not in data:
+                continue
 
-            else:
-                citation_dict = data[CITATION]
+            if CITATION not in data:
+                continue
 
-                citation = self.get_or_create_citation(
-                    type=citation_dict.get(CITATION_TYPE),
-                    name=citation_dict.get(CITATION_NAME),
-                    reference=citation_dict.get(CITATION_REFERENCE),
-                    date=citation_dict.get(CITATION_DATE),
-                    authors=citation_dict.get(CITATION_AUTHORS),
-                )
-                evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
+            citation_dict = data[CITATION]
+
+            if CITATION_TYPE not in citation_dict or CITATION_REFERENCE not in citation_dict:
+                continue
+
+            citation = self.get_or_create_citation(
+                type=citation_dict.get(CITATION_TYPE),
+                reference=citation_dict.get(CITATION_REFERENCE),
+                name=citation_dict.get(CITATION_NAME),
+                date=citation_dict.get(CITATION_DATE),
+                authors=citation_dict.get(CITATION_AUTHORS),
+            )
+
+            evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
 
             properties = self.get_or_create_property(graph, data)
-            annotations = [
-                self.annotation_object_cache[graph.annotation_url[key]][value]
-                for key, value in data[ANNOTATIONS].items()
-                if key in graph.annotation_url
-            ]
+
+            annotations = []
+
+            for key, value in data[ANNOTATIONS].items():
+                if key in graph.annotation_url:
+                    annotations.append(self.annotation_object_cache[graph.annotation_url[key]][value])
+                elif key in graph.annotation_owl:
+                    annotations.append(self.annotation_object_cache[graph.annotation_owl[key]][value])
 
             bel = decanonicalize_edge(graph, u, v, k)
 
@@ -822,11 +831,13 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: An Evidence object
         :rtype: Evidence
         """
-        evidence_hash = hash_evidence(text, citation)
+        evidence_hash = hash_evidence(text, citation.type, citation.reference)
+
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
 
-        result = self.session.query(Evidence).filter_by(text=text, citation=citation).one_or_none()
+        result = self.session.query(Evidence).filter_by(sha512=evidence_hash).one_or_none()
+
         if result is None:
             result = Evidence(text=text, citation=citation, sha512=evidence_hash)
             self.session.add(result)
@@ -930,25 +941,19 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         return result
 
-    def get_or_create_citation(self, type, name, reference, date=None, authors=None):
+    def get_or_create_citation(self, type, reference, name=None, date=None, authors=None):
         """Creates entry for given citation if it does not exist.
 
         :param str type: Citation type (e.g. PubMed)
-        :param str name: Title of the publication that is cited
         :param str reference: Identifier of the given citation (e.g. PubMed id)
-        :param str date: Date of publication in ISO 8601 format
+        :param str name: Title of the publication that is cited
+        :param str date: Date of publication in ISO 8601 (YYYY-MM-DD) format
         :param str or list[str] authors: Either a list of authors separated by |, or an actual list of authors
         :return: A Citation object
         :rtype: Citation
         """
         type = type.strip()
         reference = reference.strip()
-
-        citation_dict = {
-            'type': type,
-            'name': name.strip(),
-            'reference': reference
-        }
 
         citation_hash = hash_citation(type, reference)
 
@@ -957,22 +962,28 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         result = self.session.query(Citation).filter_by(sha512=citation_hash).one_or_none()
 
-        if result is None:
-            if date:
-                date = parse_datetime(date)
-                citation_dict['date'] = date
+        if result is not None:
+            self.object_cache_citation[citation_hash] = result
+            return result
 
-            citation_dict['sha512'] = citation_hash
-            result = Citation(**citation_dict)
+        result = Citation(
+            type=type,
+            reference=reference,
+            sha512 = citation_hash
+        )
 
-            if authors is not None:
-                for author in authors.split('|') if isinstance(authors, string_types) else authors:
-                    result.authors.append(self.get_or_create_author(author))
+        if name is not None:
+            result.name = name.strip()
 
-            self.session.add(result)
+        if date is not None:
+            result.date = parse_datetime(date)
 
+        if authors is not None:
+            for author in authors.split('|') if isinstance(authors, string_types) else authors:
+                result.authors.append(self.get_or_create_author(author))
+
+        self.session.add(result)
         self.object_cache_citation[citation_hash] = result
-
         return result
 
     def get_or_create_author(self, name):
@@ -989,12 +1000,14 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         result = self.session.query(Author).filter_by(name=name).one_or_none()
 
-        if result is None:
-            result = Author(name=name)
-            self.session.add(result)
+        if result is not None:
+            self.object_cache_author[name] = result
+            return result
 
+        result = Author(name=name)
+
+        self.session.add(result)
         self.object_cache_author[name] = result
-
         return result
 
     def get_or_create_modification(self, graph, node_data):

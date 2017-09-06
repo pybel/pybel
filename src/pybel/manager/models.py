@@ -600,9 +600,11 @@ class Citation(Base):
     __tablename__ = CITATION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
+
     type = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
-    name = Column(String(255), nullable=False, doc='Title of the publication')
     reference = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
+
+    name = Column(String(255), nullable=True, doc='Title of the publication')
     date = Column(Date, nullable=True, doc='Publication date')
     sha512 = Column(String(255), index=True)
 
@@ -624,10 +626,12 @@ class Citation(Base):
         :rtype: dict
         """
         citation_dict = {
-            CITATION_NAME: self.name,
             CITATION_REFERENCE: self.reference,
             CITATION_TYPE: self.type
         }
+
+        if self.name:
+            citation_dict[CITATION_NAME] = self.name
 
         if self.authors:
             citation_dict[CITATION_AUTHORS] = "|".join(sorted(

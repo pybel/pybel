@@ -1,22 +1,30 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
 import time
 import unittest
-from collections import Counter
 
+import os
 import sqlalchemy.exc
+from collections import Counter
 
 import pybel
 from pybel import from_database, to_database
 from pybel import from_path
 from pybel.constants import *
 from pybel.manager import models
+from pybel.manager.cache import hash_citation
 from tests import constants
-from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin, TemporaryCacheClsMixin
-from tests.constants import test_bel_simple, expected_test_simple_metadata
-from tests.constants import test_bel_thorough, expected_test_thorough_metadata
+from tests.constants import (
+    FleetingTemporaryCacheMixin,
+    BelReconstitutionMixin,
+    TemporaryCacheClsMixin,
+    TemporaryCacheMixin,
+    test_bel_simple,
+    expected_test_simple_metadata,
+    test_bel_thorough,
+    expected_test_thorough_metadata,
+)
 from tests.mocks import mock_bel_resources
 
 log = logging.getLogger(__name__)
@@ -78,6 +86,57 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         exact_name_version = from_database(self.graph.name, '1.0.1', connection=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
+
+
+class TestEnsure(TemporaryCacheMixin):
+    def test_get_or_create_citation(self):
+        citation_dict = {
+            CITATION_TYPE: 'PubMed',
+            CITATION_NAME: 'TestCitation_basic',
+            CITATION_REFERENCE: '1234AB',
+        }
+
+        citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
+
+        citation = self.manager.get_or_create_citation(**citation_dict)
+        self.assertIsInstance(citation, models.Citation)
+        self.assertEqual(citation_dict, citation.to_json())
+        self.assertIn(citation_hash, self.manager.object_cache_citation)
+        self.assertEqual(1, len(self.manager.object_cache_citation))
+
+        citation_reloaded = self.manager.get_or_create_citation(**citation_dict)
+        self.assertEqual(citation, citation_reloaded)
+        self.assertEqual(1, len(self.manager.object_cache_citation))
+
+    def test_get_or_create_citation_full(self):
+        citation_dict = {
+            CITATION_TYPE: 'Other',
+            CITATION_NAME: 'TestCitation_full',
+            CITATION_REFERENCE: 'CD5678',
+            CITATION_DATE: '2017-04-11',
+            CITATION_AUTHORS: 'Jackson M|Lajoie J'
+        }
+
+        citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
+
+        citation = self.manager.get_or_create_citation(**citation_dict)
+        self.assertIsInstance(citation, models.Citation)
+        self.assertEqual(citation_dict, citation.to_json())
+        self.assertIn(citation_hash, self.manager.object_cache_citation)
+        self.assertEqual(1, len(self.manager.object_cache_citation))
+
+        citation_reloaded = self.manager.get_or_create_citation(**citation_dict)
+        self.assertEqual(citation, citation_reloaded)
+        self.assertEqual(1, len(self.manager.object_cache_citation))
+
+        full_citation_basic = {
+            CITATION_TYPE: 'Other',
+            CITATION_NAME: 'TestCitation_full',
+            CITATION_REFERENCE: 'CD5678'
+        }
+
+        citation_truncated = self.manager.get_or_create_citation(**full_citation_basic)
+        self.assertEqual(citation, citation_truncated)
 
 
 # FIXME @kono need proper deletion cascades
@@ -155,58 +214,6 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         )
         self.bel_simple_reconstituted(g2)
 
-    # ============================================================
-    #
-    # @mock_bel_resources
-    # def test_get_or_create_citation(self, mock_get):
-    #     basic_citation = {
-    #         CITATION_TYPE: 'PubMed',
-    #         CITATION_NAME: 'TestCitation_basic',
-    #         CITATION_REFERENCE: '1234AB',
-    #     }
-    #     full_citation = {
-    #         CITATION_TYPE: 'Other',
-    #         CITATION_NAME: 'TestCitation_full',
-    #         CITATION_REFERENCE: 'CD5678',
-    #         CITATION_DATE: '2017-04-11',
-    #         CITATION_AUTHORS: 'Jackson M|Lajoie J'
-    #     }
-    #     full_citation_basic = {
-    #         CITATION_TYPE: 'Other',
-    #         CITATION_NAME: 'TestCitation_full',
-    #         CITATION_REFERENCE: 'CD5678'
-    #     }
-    #     basic_citation_sha512 = hashlib.sha512(json.dumps(basic_citation, sort_keys=True).encode('utf-8')).hexdigest()
-    #     full_citation_sha512 = hashlib.sha512(
-    #         json.dumps(full_citation_basic, sort_keys=True).encode('utf-8')).hexdigest()
-    #
-    #     # Create
-    #     basic = self.manager.get_or_create_citation(**basic_citation)
-    #     self.assertIsInstance(basic, models.Citation)
-    #     self.assertEqual(basic.data, basic_citation)
-    #     self.assertIn(basic_citation_sha512, self.manager.object_cache['citation'])
-    #
-    #     full = self.manager.get_or_create_citation(**full_citation)
-    #     self.assertIsInstance(full, models.Citation)
-    #     self.assertEqual(full.data, full_citation)
-    #     self.assertIn(full_citation_sha512, self.manager.object_cache['citation'])
-    #
-    #     # Different objects created
-    #     self.assertNotEqual(basic, full)
-    #
-    #     # Two ojbects in object_cache
-    #     self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
-    #
-    #     # Reload from object cache
-    #     reloaded_basic = self.manager.get_or_create_citation(**basic_citation)
-    #     self.assertEqual(basic, reloaded_basic)
-    #
-    #     reloaded_full = self.manager.get_or_create_citation(**full_citation)
-    #     self.assertEqual(full, reloaded_full)
-    #
-    #     # No new entries in object_cache
-    #     self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
-    #
     # @mock_bel_resources
     # def test_get_or_create_evidence(self, mock_get):
     #     basic_citation = {
