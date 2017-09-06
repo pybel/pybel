@@ -19,16 +19,26 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
+RESOURCE_DICTIONARY_NAMES = (
+    GRAPH_NAMESPACE_URL,
+    GRAPH_NAMESPACE_OWL,
+    GRAPH_NAMESPACE_PATTERN,
+    GRAPH_ANNOTATION_URL,
+    GRAPH_ANNOTATION_OWL,
+    GRAPH_ANNOTATION_PATTERN,
+    GRAPH_ANNOTATION_LIST,
+)
+
 
 class BELGraph(networkx.MultiDiGraph):
     """This class represents biological knowledge assembled in BEL as a network by extending the
     :class:`networkx.MultiDiGraph`.
     """
 
-    def __init__(self, data=None, **kwargs):
+    def __init__(self, name=None, version=None, description=None, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
-        
+
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         """
@@ -39,29 +49,21 @@ class BELGraph(networkx.MultiDiGraph):
         if GRAPH_METADATA not in self.graph:
             self.graph[GRAPH_METADATA] = {}
 
+        if name:
+            self.graph[GRAPH_METADATA][METADATA_NAME] = name
+
+        if version:
+            self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+
+        if description:
+            self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
 
-        if GRAPH_NAMESPACE_URL not in self.graph:
-            self.graph[GRAPH_NAMESPACE_URL] = {}
-
-        if GRAPH_NAMESPACE_OWL not in self.graph:
-            self.graph[GRAPH_NAMESPACE_OWL] = {}
-
-        if GRAPH_NAMESPACE_PATTERN not in self.graph:
-            self.graph[GRAPH_NAMESPACE_PATTERN] = {}
-
-        if GRAPH_ANNOTATION_URL not in self.graph:
-            self.graph[GRAPH_ANNOTATION_URL] = {}
-
-        if GRAPH_ANNOTATION_OWL not in self.graph:
-            self.graph[GRAPH_ANNOTATION_OWL] = {}
-
-        if GRAPH_ANNOTATION_PATTERN not in self.graph:
-            self.graph[GRAPH_ANNOTATION_PATTERN] = {}
-
-        if GRAPH_ANNOTATION_LIST not in self.graph:
-            self.graph[GRAPH_ANNOTATION_LIST] = {}
+        for resource_dict in RESOURCE_DICTIONARY_NAMES:
+            if resource_dict not in self.graph:
+                self.graph[resource_dict] = {}
 
     @property
     def document(self):
