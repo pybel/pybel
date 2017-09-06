@@ -85,10 +85,20 @@ class BELGraph(networkx.MultiDiGraph):
         """The graph's version, from the ``SET DOCUMENT Version = "..."`` entry in the source BEL script"""
         return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
 
+    @version.setter
+    def version(self, version):
+        """The graph's version, from the ``SET DOCUMENT Version = "..."`` entry in the source BEL script"""
+        self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+
     @property
     def description(self):
         """The graph's description, from the ``SET DOCUMENT Description = "..."`` entry in the source BEL Script"""
         return self.graph[GRAPH_METADATA].get(METADATA_DESCRIPTION)
+
+    @description.setter
+    def description(self, description):
+        """The graph's description, from the ``SET DOCUMENT Description = "..."`` entry in the source BEL Script"""
+        self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
 
     @property
     def namespace_url(self):
