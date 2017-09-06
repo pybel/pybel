@@ -850,21 +850,15 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         if result is None:
             type = node_data[FUNCTION]
 
+            result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+
             if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
                 namespace = node_data[NAMESPACE]
                 url = graph.namespace_url[namespace]
-                namespace_entry = self.get_namespace_entry(url, node_data[NAME])
-
-                result = Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob,
-                              sha512=node_hash)
+                result.namespaceEntry = self.get_namespace_entry(url, node_data[NAME])
 
             elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
-                namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
-                result = Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob,
-                              sha512=node_hash)
-
-            else:
-                result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+                result.namespacePattern = graph.namespace_pattern[node_data[NAMESPACE]]
 
             if VARIANTS in node_data or FUSION in node_data:
                 result.is_variant = True
