@@ -39,6 +39,9 @@ class BELGraph(networkx.MultiDiGraph):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
 
+        :param str name: The graph's name
+        :param str version: The graph's version. Recommended to use semantic versioning or YYYYMMDD format.
+        :param str description: A description of the graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         """
