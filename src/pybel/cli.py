@@ -209,7 +209,7 @@ def setup(manager, debug):
 def remove(manager, yes):
     """Drops cache"""
     if yes or click.confirm('Drop database?'):
-        manager.drop_database()
+        manager.drop_all()
 
 
 @manage.group()
