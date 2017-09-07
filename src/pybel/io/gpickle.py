@@ -54,7 +54,7 @@ def from_bytes(bytes_graph, check_version=True):
     return graph
 
 
-def to_pickle(graph, file, protocol=pickle.HIGHEST_PROTOCOL):
+def to_pickle(graph, file, protocol=HIGHEST_PROTOCOL):
     """Writes this graph to a pickle object with :func:`networkx.write_gpickle`.  Note that the pickle module has some
     incompatibilities between Python 2 and 3. To export a universally importable pickle, choose 0, 1, or 2.
 
