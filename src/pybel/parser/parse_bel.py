@@ -268,7 +268,7 @@ class BelParser(BaseParser):
         #: `2.5.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg>`_
         self.degradation = degradation_tags + nest(Group(self.simple_abundance)(TARGET))
 
-        #: `2.5.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
+        #: `2.5.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
         self.reactants = Suppress(REACTANTS) + nest(delimitedList(Group(self.simple_abundance)))
         self.products = Suppress(PRODUCTS) + nest(delimitedList(Group(self.simple_abundance)))
 
