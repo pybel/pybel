@@ -31,16 +31,6 @@ citation clearing mode, when a :code:`SET CITATION` command is reached, it will 
 the :code:`STATEMENT_GROUP`, which has higher priority). This behavior can be disabled by setting this to :code:`False`
 to re-enable strict parsing.
 
-Warn on Singleton
-*****************
-By default, this is set to :code:`True`. Because of the quirks of PyParsing and the PyBEL implementation, some BEL relations with errors that occur in either
-the relation or the object will still result in the node for the subject being added to the graph.
-
-The BEL specification states that a single node is valid. This might be useful for defining protein complexes, and
-some other uses. However, because it is generally impossible to foresee all errors, and furthermore, it is more likely
-that a single node is due to an error than on purpose, a warning is raised. If you are sure that your document is
-correct, this can be disabled by setting it to :code:`False`.
-
 Reference
 ~~~~~~~~~
 
