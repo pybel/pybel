@@ -86,8 +86,8 @@ def hash_evidence(text, type, reference):
 class NamespaceManager(BaseCacheManager):
     """Manages namespace database"""
 
-    def __init__(self, connection=None, echo=False):
-        super(NamespaceManager, self).__init__(connection=connection, echo=echo)
+    def __init__(self, *args, **kwargs):
+        super(NamespaceManager, self).__init__(*args, **kwargs)
 
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
@@ -323,8 +323,8 @@ class OwlNamespaceManager(NamespaceManager):
 class AnnotationManager(BaseCacheManager):
     """Manages database annotations"""
 
-    def __init__(self, connection=None, echo=False):
-        super(AnnotationManager, self).__init__(connection=connection, echo=echo)
+    def __init__(self, *args, **kwargs):
+        super(AnnotationManager, self).__init__(*args, **kwargs)
 
         #: A dictionary from {annotation URL: {name: label}}
         self.annotation_cache = defaultdict(dict)
