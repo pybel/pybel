@@ -91,7 +91,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_citation(self):
         citation_dict = {
-            CITATION_TYPE: 'PubMed',
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
             CITATION_NAME: 'TestCitation_basic',
             CITATION_REFERENCE: '1234AB',
         }
@@ -268,7 +268,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     # @mock_bel_resources
     # def test_get_or_create_evidence(self, mock_get):
     #     basic_citation = {
-    #         CITATION_TYPE: 'PubMed',
+    #         CITATION_TYPE: CITATION_TYPE_PUBMED,
     #         CITATION_NAME: 'TestCitation_basic',
     #         CITATION_REFERENCE: '1234AB',
     #     }
@@ -830,14 +830,14 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @mock_bel_resources
     def test_query_citation(self, mock_get):
         citation_1 = {
-            CITATION_TYPE: "PubMed",
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
             CITATION_NAME: "That one article from last week",
             CITATION_REFERENCE: "123455",
             CITATION_DATE: "2012-01-31",
             CITATION_AUTHORS: "Example Author|Example Author2"
         }
         citation_2 = {
-            CITATION_TYPE: "PubMed",
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
             CITATION_NAME: "That other article from last week",
             CITATION_REFERENCE: "123456"
         }
@@ -855,11 +855,11 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         }
 
         # type
-        object_list = self.manager.get_citation(type='PubMed')
+        object_list = self.manager.get_citation(type=CITATION_TYPE_PUBMED)
         self.assertEqual(len(object_list), 2)
 
         # type, reference, data
-        reference_list = self.manager.get_citation(type='PubMed', reference='123456', as_dict_list=True)
+        reference_list = self.manager.get_citation(type=CITATION_TYPE_PUBMED, reference='123456', as_dict_list=True)
         self.assertEqual(len(reference_list), 1)
         self.assertIn(citation_2, reference_list)
 
@@ -876,25 +876,27 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertIn(citation_1, author_dict_list2)
 
         # type, name, data
-        name_dict_list = self.manager.get_citation(type='PubMed', name="That other article from last week",
+        name_dict_list = self.manager.get_citation(type=CITATION_TYPE_PUBMED, name="That other article from last week",
                                                    as_dict_list=True)
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(citation_2, name_dict_list)
 
         # type, name like, data
-        name_dict_list2 = self.manager.get_citation(type='PubMed', name="%article from%", as_dict_list=True)
+        name_dict_list2 = self.manager.get_citation(type=CITATION_TYPE_PUBMED, name="%article from%", as_dict_list=True)
         self.assertEqual(len(name_dict_list2), 2)
         self.assertIn(citation_1, name_dict_list2)
         self.assertIn(citation_2, name_dict_list2)
 
         # type, name, evidence, data
-        evidence_dict_list = self.manager.get_citation(type='PubMed', name="That other article from last week",
+        evidence_dict_list = self.manager.get_citation(type=CITATION_TYPE_PUBMED,
+                                                       name="That other article from last week",
                                                        evidence=True, as_dict_list=True)
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(evidence_citation_3, evidence_dict_list)
 
         # type, evidence like, data
-        evidence_dict_list2 = self.manager.get_citation(type='PubMed', evidence_text='%Evi%', as_dict_list=True)
+        evidence_dict_list2 = self.manager.get_citation(type=CITATION_TYPE_PUBMED, evidence_text='%Evi%',
+                                                        as_dict_list=True)
         self.assertEqual(len(evidence_dict_list2), 3)
         self.assertIn(evidence_citation, evidence_dict_list2)
         self.assertIn(evidence_citation_2, evidence_dict_list2)
