@@ -92,8 +92,7 @@ def canonicalize_simple(tokens):
 def safe_get_dict(tokens):
     if hasattr(tokens, 'asDict'):
         return tokens.asDict()
-
-    return tokens
+    return dict(tokens)
 
 
 def canonicalize_hgvs(tokens):
@@ -170,7 +169,7 @@ def _canonicalize_variants_heper(tokens):
     :rtype: tuple
     """
     return tuple(sorted(
-        canonicalize_variant(token.asDict())
+        canonicalize_variant(safe_get_dict(token))
         for token in tokens
     ))
 

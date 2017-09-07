@@ -189,6 +189,23 @@ class TestNodes(TemporaryCacheMixin):
 
         self.help_test_round_trip(node_tuple, node_data)
 
+    def test_2(self):
+        node_tuple = PROTEIN, 'HGNC', 'YFG', (HGVS, 'p.Glu600Arg')
+
+        node_data = {
+            FUNCTION: PROTEIN,
+            NAMESPACE: 'HGNC',
+            NAME: 'YFG',
+            VARIANTS: [
+                {
+                    KIND: HGVS,
+                    IDENTIFIER: 'p.Glu600Arg'
+                }
+            ]
+        }
+
+        self.help_test_round_trip(node_tuple, node_data)
+
 
 # FIXME @kono need proper deletion cascades
 # @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
