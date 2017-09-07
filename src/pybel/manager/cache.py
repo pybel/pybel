@@ -16,6 +16,7 @@ import hashlib
 from collections import defaultdict
 from copy import deepcopy
 from six import string_types
+from six.moves.cPickle import dumps, loads
 from sqlalchemy import func
 
 from .base_cache import BaseCacheManager
@@ -40,11 +41,6 @@ from ..constants import *
 from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
 from ..utils import get_bel_resource, parse_datetime, subdict_matches, hash_edge, hash_node
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
 __all__ = [
     'CacheManager',
@@ -815,7 +811,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 bel=bel,
                 properties=properties,
                 annotations=annotations,
-                blob=pickle.dumps(data),
+                blob=dumps(data),
                 edge_hash=edge_hash,
             )
 
@@ -859,7 +855,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             return self.object_cache_node[node_hash]
 
         bel = decanonicalize_node(graph, node)
-        blob = pickle.dumps(graph.node[node])
+        blob = dumps(graph.node[node])
         node_data = graph.node[node]
 
         result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
@@ -1283,12 +1279,12 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         for edge in self.get_edge_iter_by_filter(**annotations):
             if edge.source.id not in graph:
-                graph.add_node(edge.source.id, attr_dict=pickle.loads(edge.source.blob))
+                graph.add_node(edge.source.id, attr_dict=loads(edge.source.blob))
 
             if edge.target.id not in graph:
-                graph.add_node(edge.target.id, attr_dict=pickle.loads(edge.target.blob))
+                graph.add_node(edge.target.id, attr_dict=loads(edge.target.blob))
 
-            graph.add_edge(edge.source.id, edge.target.id, attr_dict=pickle.loads(edge.blob))
+            graph.add_edge(edge.source.id, edge.target.id, attr_dict=loads(edge.blob))
 
         return graph
 

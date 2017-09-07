@@ -8,10 +8,6 @@ from .operations import left_full_join, left_outer_join
 from ..constants import *
 from ..utils import get_version, subdict_matches
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
 __all__ = [
     'BELGraph',

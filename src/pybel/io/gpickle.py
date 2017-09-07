@@ -9,14 +9,10 @@ This module contains IO functions for interconversion between BEL graphs and pyt
 """
 
 from networkx import read_gpickle, write_gpickle
+from six.moves.cPickle import loads, dumps, HIGHEST_PROTOCOL
 
 from .utils import raise_for_not_bel, raise_for_old_graph
 from ..struct import BELGraph
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
 __all__ = [
     'to_bytes',
@@ -26,7 +22,7 @@ __all__ = [
 ]
 
 
-def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
+def to_bytes(graph, protocol=HIGHEST_PROTOCOL):
     """Converts a graph to bytes with pickle. Note that the pickle module has some incompatibilities between Python
     2 and 3. To export a universally importable pickle, choose 0, 1, or 2.
 
@@ -38,7 +34,7 @@ def to_bytes(graph, protocol=pickle.HIGHEST_PROTOCOL):
     .. seealso:: https://docs.python.org/3.6/library/pickle.html#data-stream-format
     """
     raise_for_not_bel(graph)
-    return pickle.dumps(graph, protocol=protocol)
+    return dumps(graph, protocol=protocol)
 
 
 def from_bytes(bytes_graph, check_version=True):
@@ -49,7 +45,7 @@ def from_bytes(bytes_graph, check_version=True):
     :return: A BEL graph
     :rtype: BELGraph
     """
-    graph = pickle.loads(bytes_graph)
+    graph = loads(bytes_graph)
 
     raise_for_not_bel(graph)
     if check_version:
