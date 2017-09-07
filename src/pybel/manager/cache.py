@@ -960,7 +960,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         if citation_hash in self.object_cache_citation:
             return self.object_cache_citation[citation_hash]
 
-        result = self.session.query(Citation).filter_by(sha512=citation_hash).one_or_none()
+        result = self.session.query(Citation).filter(Citation.sha512 == citation_hash).one_or_none()
 
         if result is not None:
             self.object_cache_citation[citation_hash] = result
@@ -969,7 +969,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         result = Citation(
             type=type,
             reference=reference,
-            sha512 = citation_hash
+            sha512=citation_hash
         )
 
         if name is not None:
