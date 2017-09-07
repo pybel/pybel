@@ -178,9 +178,8 @@ class TemporaryCacheMixin(unittest.TestCase):
 
     def tearDown(self):
         self.manager.session.close()
-        if not self.test_connection:
-            os.close(self.fd)
-            os.remove(self.path)
+        os.close(self.fd)
+        os.remove(self.path)
 
 
 class TemporaryCacheClsMixin(unittest.TestCase):
