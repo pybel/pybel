@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import hashlib
 import json
 import logging
-import os
 import pickle
-from collections import defaultdict, MutableMapping
 from configparser import ConfigParser
 from datetime import datetime
 
+import hashlib
 import networkx as nx
+import os
 import requests
 import requests.exceptions
+from collections import defaultdict, MutableMapping
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types

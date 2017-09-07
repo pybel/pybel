@@ -25,32 +25,14 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def get_targets_by_relation(graph, node, relation):
-    """Gets the set of neighbors of a given node that have a relation of the given type
-
-    :param BELGraph graph: A BEL network
-    :param tuple node: A BEL node
-    :param relation: the relation to follow from the given node
-    :return: A set of BEL nodes
-    :rtype: set[tuple]
-    """
-    return {
-        target
-        for _, target, data in graph.out_edges_iter(node, data=True)
-        if data[RELATION] == relation
-    }
-
-
 def postpend_location(bel_string, location_model):
     """Rips off the closing parentheses and adds canonicalized modification.
 
     I did this because writing a whole new parsing model for the data would be sad and difficult
 
-    :param bel_string: BEL string representing node
-    :type bel_string: str
-    :param location_model: A dictionary containing keys :code:`pybel.constants.TO_LOC` and
-                            :code:`pybel.constants.FROM_LOC`
-    :type location_model: dict
+    :param str bel_string: BEL string representing node
+    :param dict location_model: A dictionary containing keys :code:`pybel.constants.TO_LOC` and
+                                :code:`pybel.constants.FROM_LOC`
     :return: A part of a BEL string representing the location
     :rtype: str
     """
@@ -97,13 +79,28 @@ def decanonicalize_fusion_range(tokens):
     return '?'
 
 
+def get_targets_by_relation(graph, node, relation):
+    """Gets the set of neighbors of a given node that have a relation of the given type
+
+    :param BELGraph graph: A BEL network
+    :param tuple node: A BEL node
+    :param relation: the relation to follow from the given node
+    :return: A set of BEL nodes
+    :rtype: set[tuple]
+    """
+    return {
+        target
+        for _, target, data in graph.out_edges_iter(node, data=True)
+        if data[RELATION] == relation
+    }
+
+
 def decanonicalize_node(graph, node):
     """Returns a node from a graph as a BEL string
 
-    :param graph: A BEL Graph
-    :type graph: BELGraph
-    :param node: a node from the BEL graph
-    :type node: tuple
+    :param BELGraph graph: A BEL Graph
+    :param tuple node: a node from the BEL graph
+    :rtype: str
     """
     data = graph.node[node]
 
@@ -121,10 +118,12 @@ def decanonicalize_node(graph, node):
 
     if VARIANTS in data:
         variants_canon = sorted(map(decanonicalize_variant, data[VARIANTS]))
-        return "{}({}:{}, {})".format(rev_abundance_labels[data[FUNCTION]],
-                                      data[NAMESPACE],
-                                      ensure_quotes(data[NAME]),
-                                      ', '.join(variants_canon))
+        return "{}({}:{}, {})".format(
+            rev_abundance_labels[data[FUNCTION]],
+            data[NAMESPACE],
+            ensure_quotes(data[NAME]),
+            ', '.join(variants_canon)
+        )
 
     if FUSION in data:
         return "{}(fus({}:{}, {}, {}:{}, {}))".format(
@@ -138,15 +137,28 @@ def decanonicalize_node(graph, node):
         )
 
     if data[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY, BIOPROCESS}:
-        return "{}({}:{})".format(rev_abundance_labels[data[FUNCTION]],
-                                  data[NAMESPACE],
-                                  ensure_quotes(data[NAME]))
+        return "{}({}:{})".format(
+            rev_abundance_labels[data[FUNCTION]],
+            data[NAMESPACE],
+            ensure_quotes(data[NAME])
+        )
 
     raise ValueError('Unknown node data: {} {}'.format(node, data))
 
 
-def decanonicalize_edge_node(g, node, edge_data, node_position):
-    node_str = decanonicalize_node(g, node)
+def decanonicalize_edge_node(graph, node, edge_data, node_position):
+    """Writes a node with its modifiers stored in the given edge
+
+    :param BELGraph graph: A BEL graph
+    :param tuple node: A PyBEL node tuple
+    :param dict edge_data: A PyBEL edge data dictionary
+    :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
+    :rtype: str
+    """
+    if node_position not in {SUBJECT, OBJECT}:
+        raise ValueError('invalid node position: {}'.format(node_position))
+
+    node_str = decanonicalize_node(graph, node)
 
     if node_position not in edge_data:
         return node_str
@@ -158,6 +170,7 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
 
     if MODIFIER in node_edge_data and DEGRADATION == node_edge_data[MODIFIER]:
         node_str = "deg({})".format(node_str)
+
     elif MODIFIER in node_edge_data and ACTIVITY == node_edge_data[MODIFIER]:
         node_str = "act({}".format(node_str)
         if EFFECT in node_edge_data and node_edge_data[EFFECT]:  # TODO remove and node_edge_data[EFFECT]
@@ -171,33 +184,35 @@ def decanonicalize_edge_node(g, node, edge_data, node_position):
             node_str = "{})".format(node_str)
 
     elif MODIFIER in node_edge_data and TRANSLOCATION == node_edge_data[MODIFIER]:
+        from_loc = "fromLoc({}:{})".format(
+            node_edge_data[EFFECT][FROM_LOC][NAMESPACE],
+            ensure_quotes(node_edge_data[EFFECT][FROM_LOC][NAME])
+        )
 
-        from_loc = "fromLoc({}:{})".format(node_edge_data[EFFECT][FROM_LOC][NAMESPACE],
-                                           ensure_quotes(node_edge_data[EFFECT][FROM_LOC][NAME]))
-
-        to_loc = "toLoc({}:{})".format(node_edge_data[EFFECT][TO_LOC][NAMESPACE],
-                                       ensure_quotes(node_edge_data[EFFECT][TO_LOC][NAME]))
+        to_loc = "toLoc({}:{})".format(
+            node_edge_data[EFFECT][TO_LOC][NAMESPACE],
+            ensure_quotes(node_edge_data[EFFECT][TO_LOC][NAME])
+        )
 
         node_str = "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
 
     return node_str
 
 
-def decanonicalize_edge(g, u, v, k):
+def decanonicalize_edge(graph, u, v, k):
     """Takes two nodes and gives back a BEL string representing the statement
 
-    :param BELGraph g: A BEL graph
-    :param tuple u: The edge's source node
-    :param tuple v: The edge's target node
+    :param BELGraph graph: A BEL graph
+    :param tuple u: The edge's source's PyBEL node tuple
+    :param tuple v: The edge's target's PyBEL node tuple
     :param int k: The edge's key
     :return: The canonical BEL for this edge
     :rtype: str
     """
+    ed = graph.edge[u][v][k]
 
-    ed = g.edge[u][v][k]
-
-    u_str = decanonicalize_edge_node(g, u, ed, node_position=SUBJECT)
-    v_str = decanonicalize_edge_node(g, v, ed, node_position=OBJECT)
+    u_str = decanonicalize_edge_node(graph, u, ed, node_position=SUBJECT)
+    v_str = decanonicalize_edge_node(graph, v, ed, node_position=OBJECT)
 
     return "{} {} {}".format(u_str, ed[RELATION], v_str)
 
@@ -333,3 +348,25 @@ def calculate_canonical_name(graph, node):
         return graph.node[node][NAME]
 
     raise ValueError('Unexpected node data: {}'.format(data))
+
+
+def canonicalize_edge_modifications(data):
+    """Returns the SUBJECT or OBJECT entry of a PyBEL edge data dictioanry as a canonicalized tuple"""
+    raise NotImplementedError
+
+
+def canonicalize_edge(data):
+    """Canonicalizes the edge to a tuple based on the relation, subject modifications, and object modifications
+
+    :param dict data: A PyBEL edge data dictionary
+    :return: A 3-tuple that's specific for the edge (relation, subject, object)
+    :rtype: tuple
+    """
+    subject = data.get(SUBJECT)
+    obj = data.get(OBJECT)
+
+    return (
+        data[RELATION],
+        canonicalize_edge_modifications(subject) if subject else tuple(),
+        canonicalize_edge_modifications(obj) if obj else tuple(),
+    )

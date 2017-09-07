@@ -11,6 +11,7 @@ JSON. Interchange with this format provides compatibilty with other software and
 """
 
 import logging
+
 from collections import defaultdict
 
 from ..canonicalize import decanonicalize_node, decanonicalize_edge

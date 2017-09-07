@@ -7,8 +7,8 @@ This module supports the relation parser by handling statements.
 """
 
 import logging
-import re
 
+import re
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
@@ -164,7 +164,6 @@ class MetadataParser(BaseParser):
     def raise_for_redefined_namespace(self, line, position, namespace):
         if self.disallow_redefinition and self.has_namespace(namespace):
             raise RedefinedNamespaceError(self.line_number, line, position, namespace)
-
 
     def handle_namespace_url(self, line, position, tokens):
         """Handles statements like ``DEFINE NAMESPACE X AS URL "Y"``"""

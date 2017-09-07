@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from collections import defaultdict
-
 import networkx as nx
+from collections import defaultdict
 
 __all__ = [
     'left_full_join',
@@ -209,6 +208,7 @@ def left_node_intersection_join(g, h, use_hash=True):
     left_full_join(g_inter, h_inter, use_hash=use_hash)
 
     return g_inter
+
 
 def node_intersection(networks, use_hash=True):
     """Takes the node intersection over a collection of networks into a new network. This intersection is defined

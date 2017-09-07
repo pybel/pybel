@@ -2,8 +2,9 @@
 
 """This module contains IO functions for BEL scripts"""
 
-import codecs
 import logging
+
+import codecs
 import os
 
 from .line_utils import parse_lines

@@ -15,11 +15,11 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
-import os
 import sys
 import time
 
 import click
+import os
 
 from .canonicalize import to_bel
 from .constants import PYBEL_LOG_DIR, get_cache_connection, config, PYBEL_CONNECTION

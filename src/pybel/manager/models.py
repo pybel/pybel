@@ -11,6 +11,7 @@ from sqlalchemy.orm import relationship, backref
 
 from ..constants import *
 from ..io.gpickle import from_bytes
+from ..parser.canonicalize import data_to_tuple
 
 __all__ = [
     'Base',
@@ -130,10 +131,11 @@ class Namespace(Base):
     __tablename__ = NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
+    uploaded = Column(DateTime, nullable=False, default=datetime.datetime.utcnow, doc='The date of upload')
     url = Column(String(255), nullable=False, unique=True, index=True,
                  doc='Source url of the given namespace definition file (.belns)')
+
     keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
     name = Column(String(255), doc='Name of the given namespace')
     domain = Column(String(255), doc='Domain for which this namespace is valid')
@@ -346,32 +348,39 @@ class Network(Base):
         UniqueConstraint(name, version),
     )
 
-    def to_json(self):
+    def to_json(self, include_id=False):
         """Returns this network as JSON
 
         :rtype: dict
         """
-        network_data = {
-            'id': self.id,
+        result = {
             'created': self.created,
             METADATA_NAME: self.name,
             METADATA_VERSION: self.version,
         }
 
-        if self.authors:
-            network_data[METADATA_AUTHORS] = self.authors
-        if self.contact:
-            network_data[METADATA_CONTACT] = self.contact
-        if self.description:
-            network_data[METADATA_DESCRIPTION] = self.description
-        if self.copyright:
-            network_data[METADATA_COPYRIGHT] = self.copyright
-        if self.disclaimer:
-            network_data[METADATA_DISCLAIMER] = self.disclaimer
-        if self.licenses:
-            network_data[METADATA_LICENSES] = self.licenses
+        if include_id:
+            result[ID] = self.id
 
-        return network_data
+        if self.authors:
+            result[METADATA_AUTHORS] = self.authors
+
+        if self.contact:
+            result[METADATA_CONTACT] = self.contact
+
+        if self.description:
+            result[METADATA_DESCRIPTION] = self.description
+
+        if self.copyright:
+            result[METADATA_COPYRIGHT] = self.copyright
+
+        if self.disclaimer:
+            result[METADATA_DISCLAIMER] = self.disclaimer
+
+        if self.licenses:
+            result[METADATA_LICENSES] = self.licenses
+
+        return result
 
     def __repr__(self):
         return '{} v{}'.format(self.name, self.version)
@@ -417,35 +426,45 @@ class Node(Base):
     def __str__(self):
         return self.bel
 
-    @property
-    def data(self):
-        node_key = [self.type]
-        node_data = {
+    def to_json(self, include_id=False):
+        """Serializes this node the same way a PyBEL node data dictionary would
+
+        :rtype: dict
+        """
+        # node_key = [self.type]
+        result = {
             FUNCTION: self.type,
         }
+
+        if include_id:
+            result[ID] = self.id
+
         if self.namespaceEntry:
             namespace_entry = self.namespaceEntry.to_json()
-            node_data.update(namespace_entry)
-            node_key.append(namespace_entry[NAMESPACE])
-            node_key.append(namespace_entry[NAME])
+            result.update(namespace_entry)
+            # node_key.append(namespace_entry[NAMESPACE])
+            # node_key.append(namespace_entry[NAME])
 
         if self.is_variant:
             if self.fusion:
                 mod = self.modifications[0].data
-                node_data[FUSION] = mod['mod_data']
-                [node_key.append(key_element) for key_element in mod['mod_key']]
+                result[FUSION] = mod['mod_data']
+                # [node_key.append(key_element) for key_element in mod['mod_key']]
             else:
-                node_data[VARIANTS] = []
+                result[VARIANTS] = []
                 for modification in self.modifications:
                     mod = modification.data
-                    node_data[VARIANTS].append(mod['mod_data'])
-                    node_key.append(tuple(mod['mod_key']))
+                    result[VARIANTS].append(mod['mod_data'])
+                    # node_key.append(tuple(mod['mod_key']))
 
-        return {'key': tuple(node_key), 'data': node_data}
+        return result
 
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data['key']
+    def as_pybel(self):
+        """Converts this node to a PyBEL tuple
+
+        :rtype: tuple
+        """
+        return data_to_tuple(self.to_json())
 
 
 class Modification(Base):
@@ -611,7 +630,6 @@ class Citation(Base):
     authors = relationship("Author", secondary=author_citation, backref='citations')
     evidences = relationship("Evidence", backref='citation')
 
-    # TODO: Check for same type reference citations??
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
     )
@@ -619,30 +637,33 @@ class Citation(Base):
     def __str__(self):
         return '{}:{}'.format(self.type, self.reference)
 
-    def to_json(self):
+    def to_json(self, include_id=False):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         :rtype: dict
         """
-        citation_dict = {
+        result = {
             CITATION_REFERENCE: self.reference,
             CITATION_TYPE: self.type
         }
 
+        if include_id:
+            result[ID] = self.id
+
         if self.name:
-            citation_dict[CITATION_NAME] = self.name
+            result[CITATION_NAME] = self.name
 
         if self.authors:
-            citation_dict[CITATION_AUTHORS] = "|".join(sorted(
+            result[CITATION_AUTHORS] = "|".join(sorted(
                 author.name
                 for author in self.authors
             ))
 
         if self.date:
-            citation_dict[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
+            result[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
 
-        return citation_dict
+        return result
 
 
 class Evidence(Base):
@@ -659,16 +680,21 @@ class Evidence(Base):
     def __str__(self):
         return '{}:{}'.format(self.citation, self.text)
 
-    def to_json(self):
+    def to_json(self, include_id=False):
         """Creates a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
 
         :return: Dictionary containing citation and evidence for a :class:`BELGraph` edge.
         :rtype: dict
         """
-        return {
+        result = {
             CITATION: self.citation.to_json(),
             EVIDENCE: self.text
         }
+
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 edge_annotation = Table(
@@ -715,75 +741,41 @@ class Edge(Base):
     def __str__(self):
         return self.bel
 
-    @property
-    def data(self):
+    def to_json(self, include_id=False):
         """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
         :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
                  and edge data information.
         :rtype: dict
         """
-        source_node = self.source.data
-        target_node = self.target.data
-        edge_dict = {
-            'source': {
-                'node': (source_node['key'], source_node['data']),
-                'key': source_node['key']
-            },
-            'target': {
-                'node': (target_node['key'], target_node['data']),
-                'key': target_node['key']
-            },
-            'data': {
-                'relation': self.relation,
-                ANNOTATIONS: {
-                    anno.annotation.keyword: anno.name
-                    for anno in self.annotations
-                }
-            },
-        }
-        if self.evidence:
-            edge_dict['data'].update(self.evidence.to_json())
-
-        for prop in self.properties:
-            prop_info = prop.data
-            if prop_info['participant'] in edge_dict['data']:
-                edge_dict['data'][prop_info['participant']].update(prop_info['data'])
-            else:
-                edge_dict['data'].update(prop_info['data'])
-
-        return edge_dict
-
-    @property
-    def data_min(self):
-        min_dict = {
-            'db_id': self.id,
-            'bel': self.bel,
-            'source': {
-                'db_id': self.source.id,
-                'bel': self.source.bel
-            },
-            'target': {
-                'db_id': self.target.id,
-                'bel': self.target.bel
-            },
-            'data': {
-                'relation': self.relation,
-                ANNOTATIONS: {
-                    anno.annotation.keyword: anno.name
-                    for anno in self.annotations
-                }
+        data = {
+            RELATION: self.relation,
+            ANNOTATIONS: {
+                entry.annotation.keyword: entry.name
+                for entry in self.annotations
             }
         }
+
         if self.evidence:
-            min_dict['data'].update(self.evidence.to_json())
+            data.update(self.evidence.to_json())
+
         for prop in self.properties:
             prop_info = prop.data
-            if prop_info['participant'] in min_dict['data']:
-                min_dict['data'][prop_info['participant']].update(prop_info['data'][prop_info['participant']])
+            if prop_info['participant'] in data:
+                data[prop_info['participant']].update(prop_info['data'])
             else:
-                min_dict['data'].update(prop_info['data'])
-        return min_dict
+                data.update(prop_info['data'])
+
+        result = {
+            'source': self.source.to_json(),
+            'target': self.target.to_json(),
+            'data': data
+        }
+
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 class Property(Base):

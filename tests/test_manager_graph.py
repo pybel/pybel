@@ -9,11 +9,11 @@ import sqlalchemy.exc
 from collections import Counter
 
 import pybel
-from pybel import from_database, to_database
-from pybel import from_path
+from pybel import BELGraph, from_database, to_database, from_path
 from pybel.constants import *
 from pybel.manager import models
 from pybel.manager.cache import hash_citation
+from pybel.manager.models import Namespace, NamespaceEntry, Node
 from tests import constants
 from tests.constants import (
     FleetingTemporaryCacheMixin,
@@ -137,6 +137,57 @@ class TestEnsure(TemporaryCacheMixin):
 
         citation_truncated = self.manager.get_or_create_citation(**full_citation_basic)
         self.assertEqual(citation, citation_truncated)
+
+
+class TestNodes(TemporaryCacheMixin):
+    def setUp(self):
+        super(TestNodes, self).setUp()
+
+        self.hgnc_keyword = 'HGNC'
+        self.hgnc_url = 'http://localhost/hgnc.belns'
+        self.hgnc = Namespace(
+            keyword=self.hgnc_keyword,
+            url=self.hgnc_url,
+        )
+        self.manager.session.add(self.hgnc)
+        self.manager.session.add(Namespace(keyword='GOCC', url='http://localhost/gocc.belns'))
+
+        self.yfg = NamespaceEntry(
+            name='YFG',
+            namespace=self.hgnc,
+            encoding='P',
+        )
+        self.manager.session.add(self.yfg)
+        self.manager.session.commit()
+
+        self.graph = BELGraph(name='TestNode', version='0.0.0')
+        self.graph.namespace_url[self.hgnc_keyword] = self.hgnc_url
+
+    def help_test_round_trip(self, node_tuple, node_data):
+        """Helps run the round trip test of inserting a node, getting it, and reconstituting it in multiple forms
+
+        :param tuple tuple node_tuple: A PyBEL node tuple
+        :param dict node_data: A PyBEL node data dictionary
+        """
+        self.graph.add_node(node_tuple, attr_dict=node_data)
+        self.manager.insert_graph(self.graph, store_parts=True)
+
+        node_model = self.manager.get_node_by_tuple(node_tuple)
+        self.assertIsNotNone(node_model)
+        self.assertIsInstance(node_model, Node)
+
+        self.assertEqual(node_tuple, node_model.as_pybel())
+
+    def test_1(self):
+        node_tuple = PROTEIN, 'HGNC', 'YFG'
+
+        node_data = {
+            FUNCTION: PROTEIN,
+            NAMESPACE: 'HGNC',
+            NAME: 'YFG'
+        }
+
+        self.help_test_round_trip(node_tuple, node_data)
 
 
 # FIXME @kono need proper deletion cascades
@@ -702,7 +753,6 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @mock_bel_resources
     def test_query_node(self, mock_get):
         akt1_dict = {
-            'key': (PROTEIN, 'HGNC', 'AKT1'),
             'data': {
                 FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
@@ -732,20 +782,14 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_query_edge(self, mock_get):
         fadd_casp = {
             'source': {
-                'node': ((PROTEIN, 'HGNC', 'FADD'), {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'FADD'
-                }),
-                'key': (PROTEIN, 'HGNC', 'FADD')
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'FADD'
             },
             'target': {
-                'node': ((PROTEIN, 'HGNC', 'CASP8'), {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'CASP8'
-                }),
-                'key': (PROTEIN, 'HGNC', 'CASP8')
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'CASP8'
             },
             'data': {
                 RELATION: 'increases',

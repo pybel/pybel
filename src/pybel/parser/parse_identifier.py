@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import re
 
+import re
 from pyparsing import Suppress
 
 from .baseparser import BaseParser

@@ -6,8 +6,8 @@ import networkx
 
 from .operations import left_full_join, left_outer_join
 from ..constants import *
+from ..parser.canonicalize import data_to_tuple, tuple_to_data
 from ..utils import get_version, subdict_matches
-
 
 __all__ = [
     'BELGraph',
@@ -192,15 +192,33 @@ class BELGraph(networkx.MultiDiGraph):
             else:
                 yield n
 
+    def add_node_from_tuple(self, node_tuple):
+        """Converts a PyBEL node tuple to a canonical PyBEL node data dictionary then adds it to the graph
+
+        :param tuple node_tuple: A PyBEL node tuple
+        """
+        if node_tuple not in self:
+            node_data = tuple_to_data(node_tuple)
+            self.add_node(node_tuple, attr_dict=node_data)
+
+    def add_node_from_data(self, node_data):
+        """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple then adds it to the graph
+
+        :param dict node_data: A PyBEL node data dictionary
+        """
+        node_tuple = data_to_tuple(node_data)
+        if node_tuple not in self:
+            self.add_node(node_tuple, attr_dict=node_data)
+
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
 
-        :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.RNA`,
-                        :data:`pybel.constants.PROTEIN`, etc)
-        :param str namespace: The namespace
-        :param str name: The name of the node
+        :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.PROTEIN`, etc)
+        :param str namespace: The node's namespace
+        :param str name: The node's name
         """
         node = function, namespace, name
+        # self.add_node_from_tuple(node)
         if node not in self:
             self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
 

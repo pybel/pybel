@@ -19,6 +19,7 @@ of Cytoscape.
 import json
 import logging
 import time
+
 from collections import defaultdict
 
 from ..canonicalize import decanonicalize_node

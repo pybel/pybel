@@ -1236,7 +1236,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :return: Dictionary with 'key' and 'node' keys.
         :rtype: dict[str,str]
         """
-        node_info = node.data
+        node_info = node.to_json()
         key = list(node_info['key'])
         data = node_info['data']
         if node.type in (COMPLEX, COMPOSITE):
@@ -1288,6 +1288,14 @@ class EdgeStoreQueryManager(BaseCacheManager):
 
         return graph
 
+    def get_node_by_tuple(self, node):
+        """Looks up a node by the PyBEL tuple
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: Node
+        """
+        return self.session.query(Node).filter(Node.sha512 == hash_node(node)).one_or_none()
+
     def get_node(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
                  modification_name=None, as_dict_list=False):
         """Builds and runs a query over all nodes in the PyBEL cache.
@@ -1338,9 +1346,12 @@ class EdgeStoreQueryManager(BaseCacheManager):
         dict_list = []
 
         for node in result:
-            node_dict = node.data
+            node_dict = node.to_json()
             node_dict['bel'] = node.bel
-            dict_list.append(node_dict)
+            dict_list.append({
+                'data': node.to_json(),
+                'bel': node.bel
+            })
 
         return dict_list
 
@@ -1357,6 +1368,16 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :rtype: int
         """
         return self.session.query(func.count(Edge.id)).scalar()
+
+    def get_edge_by_tuple(self, u, v, d):
+        """Looks up an edge by PyBEL tuple
+
+        :param tuple u: A PyBEL node tuple
+        :param tuple v: A PyBEL node tuple
+        :param dict d:
+        :rtype: Edge
+        """
+        return self.session.query(Edge).filter(Edge.sha512 == hash_edge(u, v, None, d)).one_or_none()
 
     def get_edge(self, edge_id=None, bel=None, source=None, target=None, relation=None, citation=None,
                  evidence=None, annotation=None, property=None, as_dict_list=False):
@@ -1454,7 +1475,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
             return result
 
         return [
-            edge.data
+            edge.to_json()
             for edge in result
         ]
 
