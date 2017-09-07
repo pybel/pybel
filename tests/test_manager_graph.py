@@ -293,7 +293,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     #         },
     #         'participant': SUBJECT
     #     }
-    #     edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')][0]
+    #     edge_data = self.simple_graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')][0]
     #
     #     activity_hash = hashlib.sha512(json.dumps({
     #         'participant': SUBJECT,
@@ -383,9 +383,9 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     # @mock_bel_resources
     # def test_get_or_create_edge(self, mock_get):
     #
-    #     edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')]
-    #     source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
-    #     target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
+    #     edge_data = self.simple_graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')]
+    #     source_node = self.manager.get_or_create_node(self.simple_graph, (PROTEIN, 'HGNC', 'AKT1'))
+    #     target_node = self.manager.get_or_create_node(self.simple_graph, (PROTEIN, 'HGNC', 'EGFR'))
     #     citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
     #     evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
     #     properties = self.manager.get_or_create_property(self.simple_graph, edge_data[0])
