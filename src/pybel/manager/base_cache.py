@@ -32,7 +32,7 @@ class BaseCacheManager(object):
     `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
     """
 
-    def __init__(self, connection=None, echo=False):
+    def __init__(self, connection=None, echo=False, autoflush=True, autocommit=False, expire_on_commit=False):
         """
         :param str connection: An RFC-1738 database connection string. If ``None``, tries to load from the environment
                                 variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json``
@@ -49,10 +49,15 @@ class BaseCacheManager(object):
         self.engine = create_engine(self.connection, echo=echo)
 
         #: A SQLAlchemy session maker
-        self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
+        self.session_maker = sessionmaker(
+            bind=self.engine,
+            autoflush=autoflush,
+            autocommit=autocommit,
+            expire_on_commit=expire_on_commit,
+        )
 
         #: A SQLAlchemy session object
-        self.session = scoped_session(self.sessionmaker)
+        self.session = scoped_session(self.session_maker)
 
         self.create_all()
 
