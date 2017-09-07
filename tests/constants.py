@@ -169,14 +169,9 @@ class TestGraphMixin(unittest.TestCase):
 
 class TemporaryCacheMixin(unittest.TestCase):
     def setUp(self):
-        self.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
-
-        if self.test_connection:
-            self.connection = self.test_connection
-        else:
-            self.fd, self.path = tempfile.mkstemp()
-            self.connection = 'sqlite:///' + self.path
-            log.info('Test generated connection string %s', self.connection)
+        self.fd, self.path = tempfile.mkstemp()
+        self.connection = 'sqlite:///' + self.path
+        log.info('Test generated connection string %s', self.connection)
 
         self.manager = CacheManager(connection=self.connection)
         self.manager.create_all()
