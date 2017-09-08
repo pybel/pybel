@@ -98,6 +98,10 @@ dictionary in :mod:`networkx`. After parsing, :code:`p(HGNC:GSK3B)` becomes:
         NAME: 'GSK3B'
     }
 
+This section describes the structure of the data dictionaries created for each type of node available in BEL.
+Programatically, these dictionaries can be converted to tuples, which are used as the keys for the network with the
+:func:`pybel.parser.canonicalize.node_to_tuple` function.
+
 .. automodule:: pybel.parser.modifiers.variant
 
 .. automodule:: pybel.parser.modifiers.gene_substitution
