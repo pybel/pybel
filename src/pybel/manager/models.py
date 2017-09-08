@@ -635,10 +635,16 @@ class Citation(Base):
 
     type = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
     reference = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
-
-    name = Column(String(255), nullable=True, doc='Title of the publication')
-    date = Column(Date, nullable=True, doc='Publication date')
     sha512 = Column(String(255), index=True)
+
+    name = Column(String(255), nullable=True, doc='Journal name')
+    title = Column(Text, nullable=True, doc='Title of the publication')
+    volume = Column(Text, nullable=True, doc='Volume of the journal')
+    issue = Column(Text, nullable=True, doc='Issue within the volume')
+    pages = Column(Text, nullable=True, doc='Pages of the publication')
+    date = Column(Date, nullable=True, doc='Publication date')
+    first = Column(Text, nullable=True, doc='First author name')
+    last = Column(Text, nullable=True, doc='Last author name')
 
     authors = relationship("Author", secondary=author_citation, backref='citations')
     evidences = relationship("Evidence", backref='citation')
