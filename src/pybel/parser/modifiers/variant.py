@@ -39,7 +39,7 @@ from ..baseparser import BaseParser
 from ..utils import quote, nest, one_of_tags
 from ...constants import HGVS, KIND, IDENTIFIER
 
-variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, identifier=KIND)
+variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, name=KIND)
 variant_characters = Word(alphanums + '._*=?>')
 
 

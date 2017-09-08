@@ -67,7 +67,7 @@ __all__ = [
     'FragmentParser',
 ]
 
-fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, identifier=KIND)
+fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, name=KIND)
 
 
 class FragmentParser(BaseParser):
