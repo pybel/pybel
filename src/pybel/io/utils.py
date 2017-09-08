@@ -7,7 +7,7 @@ from ..struct import BELGraph
 from ..utils import tokenize_version
 
 #: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = (0, 7, 0)
+PYBEL_MINIMUM_IMPORT_VERSION = (0, 8, 0)
 
 
 def raise_for_old_graph(graph):
