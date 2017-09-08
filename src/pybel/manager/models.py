@@ -4,6 +4,7 @@
 
 import datetime
 
+from six.moves.cPickle import loads
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, event, DDL
 from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
@@ -310,7 +311,7 @@ class AnnotationEntry(Base):
 
         :rtype: dict
         """
-        result= {
+        result = {
             'annotation_keyword': self.annotation.keyword,
             'annotation': self.name
         }
@@ -788,6 +789,22 @@ class Edge(Base):
             result[ID] = self.id
 
         return result
+
+    def insert_into_graph(self, graph):
+        """Inserts this edge into a BEL Graph
+
+        :param BELGraph graph: A BEL graph
+        """
+        source_tuple = self.source.as_pybel()
+        target_tuple = self.target.as_pybel()
+
+        if source_tuple not in graph:
+            graph.add_node(source_tuple, attr_dict=loads(self.source.blob))
+
+        if self.target.id not in graph:
+            graph.add_node(target_tuple, attr_dict=loads(self.target.blob))
+
+        graph.add_edge(source_tuple, target_tuple, attr_dict=loads(self.blob))
 
 
 class Property(Base):
