@@ -712,10 +712,10 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).filter(Network.id.in_(network_ids)).all()
 
-    def get_network_by_ids(self, network_ids):
-        """Gets a networks by a list of database identifiers
+    def get_graph_by_ids(self, network_ids):
+        """Gets a combine BEL Graph from a list of network identifiers
 
-        :param list[int] network_ids: A network identifier or list of network identifiers
+        :param list[int] network_ids: A list of network identifiers
         :rtype: pybel.BELGraph
         """
         if len(network_ids) == 1:
