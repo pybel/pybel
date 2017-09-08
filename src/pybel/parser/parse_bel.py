@@ -12,16 +12,28 @@ import logging
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst, And, StringEnd
 
 from .baseparser import BaseParser
+from .canonicalize import (
+    node_to_tuple,
+    modifier_po_to_dict,
+    variant_po_to_dict,
+    canonicalize_simple_to_dict,
+    canonicalize_fusion_to_dict
+)
 from .language import activity_labels, activities
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
-from .parse_exceptions import NestedRelationWarning, MalformedTranslocationWarning, \
-    MissingCitationException, InvalidFunctionSemantic, MissingSupportWarning, RelabelWarning
+from .parse_exceptions import (
+    NestedRelationWarning,
+    MalformedTranslocationWarning,
+    MissingCitationException,
+    InvalidFunctionSemantic,
+    MissingSupportWarning,
+    RelabelWarning,
+)
 from .parse_identifier import IdentifierParser
 from .utils import cartesian_dictionary, WCW, nest, one_of_tags, triple, quote
 from ..constants import *
-from ..utils import list2tuple
 
 __all__ = ['BelParser']
 
@@ -43,6 +55,10 @@ translocation_tag = one_of_tags(['translocation', 'tloc'], TRANSLOCATION, MODIFI
 degradation_tags = one_of_tags(['deg', 'degradation'], DEGRADATION, MODIFIER)
 reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, FUNCTION)
 molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
+
+
+def canonicalized_oneOf(l, canon):
+    return oneOf(l).setParseAction(replaceWith(canon))
 
 
 class BelParser(BaseParser):
@@ -95,29 +111,27 @@ class BelParser(BaseParser):
 
         # 2.2 Abundance Modifier Functions
 
-        #: 2.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_protein_modifications
+        #: `2.2.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_protein_modifications>`_
         self.pmod = PmodParser(self.identifier_parser).language
 
-        #: 2.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var
+        #: `2.2.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var>`_
         self.variant = VariantParser().language
 
-        #: 2.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
+        #: `2.2.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
         self.fragment = FragmentParser().language
 
-        #: 2.2.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location
+        #: `2.2.4 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
         self.location = LocationParser(self.identifier_parser).language
         opt_location = Optional(WCW + self.location)
 
-        #: 2.2.X DEPRECATED
-        #: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_amino_acid_substitutions
+        #: DEPRECATED: `2.2.X Amino Acid Substitutions <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_amino_acid_substitutions>`_
         self.psub = PsubParser().language
 
-        #: 2.2.X DEPRECATED
-        #: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_sequence_variations
+        #: DEPRECATED: `2.2.X Sequence Variations <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_sequence_variations>`_
         self.gsub = GsubParser().language
 
         #: DEPRECATED
-        #: http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_truncated_proteins
+        #: `Truncated proteins <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_truncated_proteins>`_
         self.trunc = TruncationParser().language
 
         #: PyBEL BEL Specification variant
@@ -125,12 +139,12 @@ class BelParser(BaseParser):
 
         # 2.6 Other Functions
 
-        #: 2.6.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus
+        #: `2.6.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
         self.fusion = FusionParser(self.identifier_parser).language
 
         # 2.1 Abundance Functions
 
-        #: 2.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
+        #: `2.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
         self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
 
         self.gene_modified = identifier + Optional(
@@ -144,12 +158,12 @@ class BelParser(BaseParser):
             self.gene_fusion_legacy,
             self.gene_modified
         ]) + opt_location)
-        """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA"""
+        """`2.1.4 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA>`_"""
 
         self.mirna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS)) + opt_location
 
         self.mirna = mirna_tag + nest(self.mirna_modified)
-        """2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA"""
+        """`2.1.5 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA>`_"""
 
         self.protein_modified = identifier + Optional(
             WCW + delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(
@@ -163,7 +177,7 @@ class BelParser(BaseParser):
             self.protein_fusion_legacy,
             self.protein_modified,
         ]) + opt_location)
-        """2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA"""
+        """`2.1.6 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA>`_"""
 
         self.rna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS))
 
@@ -175,11 +189,11 @@ class BelParser(BaseParser):
             self.rna_fusion_legacy,
             self.rna_modified,
         ]) + opt_location)
-        """2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA"""
+        """`2.1.7 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA>`_"""
 
         self.single_abundance = MatchFirst([self.general_abundance, self.gene, self.mirna, self.protein, self.rna])
 
-        #: 2.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA
+        #: `2.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
         self.complex_singleton = complex_tag + nest(identifier + opt_location)
 
         self.complex_list = complex_tag + nest(
@@ -191,7 +205,7 @@ class BelParser(BaseParser):
         self.simple_abundance = self.complex_abundances | self.single_abundance
         self.simple_abundance.setParseAction(self.check_function_semantics)
 
-        #: 2.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA
+        #: `2.1.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
         self.composite_abundance = composite_abundance_tag + nest(
             delimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location)
 
@@ -200,19 +214,18 @@ class BelParser(BaseParser):
         # 2.4 Process Modifier Function
         # backwards compatibility with BEL v1.0
 
-        molecular_activity_default = oneOf(list(activity_labels.keys())).setParseAction(
-            handle_molecular_activity_default)
+        molecular_activity_default = oneOf(list(activity_labels)).setParseAction(handle_molecular_activity_default)
 
         self.molecular_activity = molecular_activity_tags + nest(
             molecular_activity_default | self.identifier_parser.language)
-        """2.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA"""
+        """`2.4.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA>`_"""
 
         # 2.3 Process Functions
 
-        #: 2.3.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_biologicalprocess_bp
+        #: `2.3.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_biologicalprocess_bp>`_
         self.biological_process = biological_process_tag + nest(identifier)
 
-        #: 2.3.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_pathology_path
+        #: `2.3.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_pathology_path>`_
         self.pathology = pathology_tag + nest(identifier)
 
         self.bp_path = self.biological_process | self.pathology
@@ -226,7 +239,7 @@ class BelParser(BaseParser):
         self.activity_legacy.setParseAction(handle_activity_legacy)
 
         self.activity = self.activity_standard | self.activity_legacy
-        """2.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xactivity"""
+        """`2.3.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xactivity>`_"""
 
         self.process = self.bp_path | self.activity
 
@@ -257,12 +270,12 @@ class BelParser(BaseParser):
             self.translocation_standard,
             self.translocation_legacy
         ])
-        """2.5.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translocations"""
+        """`2.5.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translocations>`_"""
 
-        #: 2.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg
+        #: `2.5.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg>`_
         self.degradation = degradation_tags + nest(Group(self.simple_abundance)(TARGET))
 
-        #: 2.5.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
+        #: `2.5.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
         self.reactants = Suppress(REACTANTS) + nest(delimitedList(Group(self.simple_abundance)))
         self.products = Suppress(PRODUCTS) + nest(delimitedList(Group(self.simple_abundance)))
 
@@ -282,48 +295,44 @@ class BelParser(BaseParser):
 
         # BEL Term to BEL Term Relationships
 
-        #: 3.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases
+        #: `3.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases>`_
         increases_tag = oneOf(['->', '→', 'increases']).setParseAction(replaceWith(INCREASES))
 
-        #: 3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
-        directly_increases_tag = oneOf(['=>', '⇒', 'directlyIncreases']).setParseAction(
-            replaceWith(DIRECTLY_INCREASES))
+        #: `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
+        directly_increases_tag = canonicalized_oneOf(['=>', '⇒', 'directlyIncreases'], DIRECTLY_INCREASES)
 
-        #: 3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
-        decreases_tag = oneOf(['-|', 'decreases']).setParseAction(replaceWith(DECREASES))
+        #: `3.1.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases>`_
+        decreases_tag = canonicalized_oneOf(['-|', 'decreases'], DECREASES)
 
-        #: 3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
-        directly_decreases_tag = oneOf(['=|', 'directlyDecreases']).setParseAction(
-            replaceWith(DIRECTLY_DECREASES))
+        #: `3.1.4 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases>`_
+        directly_decreases_tag = canonicalized_oneOf(['=|', 'directlyDecreases'], DIRECTLY_DECREASES)
 
-        #: 3.5.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_analogous
-        analogous_tag = oneOf(['analogousTo']).setParseAction(replaceWith(ANALOGOUS_TO))
+        #: `3.5.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_analogous>`_
+        analogous_tag = canonicalized_oneOf(['analogousTo'], ANALOGOUS_TO)
 
-        #: 3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
-        causes_no_change_tag = oneOf(['cnc', 'causesNoChange']).setParseAction(replaceWith(CAUSES_NO_CHANGE))
+        #: `3.1.6 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc>`_
+        causes_no_change_tag = canonicalized_oneOf(['cnc', 'causesNoChange'], CAUSES_NO_CHANGE)
 
-        #: 3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
-        regulates_tag = oneOf(['reg', 'regulates']).setParseAction(replaceWith(REGULATES))
+        #: `3.1.7 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg>`_
+        regulates_tag = canonicalized_oneOf(['reg', 'regulates'], REGULATES)
 
-        #: 3.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor
-        negative_correlation_tag = oneOf(['neg', 'negativeCorrelation']).setParseAction(
-            replaceWith(NEGATIVE_CORRELATION))
+        #: `3.2.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor>`_
+        negative_correlation_tag = canonicalized_oneOf(['neg', 'negativeCorrelation'], NEGATIVE_CORRELATION)
 
-        #: 3.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XposCor
-        positive_correlation_tag = oneOf(['pos', 'positiveCorrelation']).setParseAction(
-            replaceWith(POSITIVE_CORRELATION))
+        #: `3.2.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XposCor>`_
+        positive_correlation_tag = canonicalized_oneOf(['pos', 'positiveCorrelation'], POSITIVE_CORRELATION)
 
-        #: 3.2.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xassociation
-        association_tag = oneOf(['--', 'association']).setParseAction(replaceWith(ASSOCIATION))
+        #: `3.2.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xassociation>`_
+        association_tag = canonicalized_oneOf(['--', 'association'], ASSOCIATION)
 
-        #: 3.3.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_orthologous
-        orthologous_tag = oneOf(['orthologous']).setParseAction(replaceWith(ORTHOLOGOUS))
+        #: `3.3.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_orthologous>`_
+        orthologous_tag = canonicalized_oneOf(['orthologous'], ORTHOLOGOUS)
 
-        #: 3.4.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa
-        is_a_tag = oneOf(['isA']).setParseAction(replaceWith(IS_A))
+        #: `3.4.5 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa>`_
+        is_a_tag = canonicalized_oneOf(['isA'], IS_A)
 
         #: PyBEL Variant
-        equivalent_tag = oneOf(['eq', EQUIVALENT_TO]).setParseAction(replaceWith(EQUIVALENT_TO))
+        equivalent_tag = canonicalized_oneOf(['eq', EQUIVALENT_TO], EQUIVALENT_TO)
 
         self.bel_to_bel_relations = [
             association_tag,
@@ -344,29 +353,29 @@ class BelParser(BaseParser):
 
         # Mixed Relationships
 
-        #: 3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof
+        #: `3.1.5 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof>`_
         rate_limit_tag = oneOf(['rateLimitingStepOf']).setParseAction(replaceWith(RATE_LIMITING_STEP_OF))
         self.rate_limit = triple(MatchFirst([self.biological_process, self.activity, self.transformation]),
                                  rate_limit_tag, self.biological_process)
 
-        #: 3.4.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_subprocessof
+        #: `3.4.6 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_subprocessof>`_
         subprocess_of_tag = oneOf(['subProcessOf']).setParseAction(replaceWith(SUBPROCESS_OF))
         self.subprocess_of = triple(MatchFirst([self.process, self.activity, self.transformation]), subprocess_of_tag,
                                     self.process)
 
-        #: 3.3.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_transcribedto
+        #: `3.3.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_transcribedto>`_
         transcribed_tag = oneOf([':>', 'transcribedTo']).setParseAction(replaceWith(TRANSCRIBED_TO))
         self.transcribed = triple(self.gene, transcribed_tag, self.rna)
 
-        #: 3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto
+        #: `3.3.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto>`_
         translated_tag = oneOf(['>>', 'translatedTo']).setParseAction(replaceWith(TRANSLATED_TO))
         self.translated = triple(self.rna, translated_tag, self.protein)
 
-        #: 3.4.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmember
+        #: `3.4.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmember>`_
         has_member_tag = oneOf(['hasMember']).setParseAction(replaceWith(HAS_MEMBER))
         self.has_member = triple(self.abundance, has_member_tag, self.abundance)
 
-        #: 3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
+        #: `3.4.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers>`_
         self.abundance_list = Suppress('list') + nest(delimitedList(Group(self.abundance)))
 
         has_members_tag = oneOf(['hasMembers'])
@@ -379,15 +388,15 @@ class BelParser(BaseParser):
 
         self.has_list = self.has_members | self.has_components
 
-        # 3.4.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hascomponent
+        # `3.4.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hascomponent>`_
         has_component_tag = oneOf(['hasComponent']).setParseAction(replaceWith(HAS_COMPONENT))
         self.has_component = triple(self.complex_abundances | self.composite_abundance, has_component_tag,
                                     self.abundance)
 
-        #: 3.5.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_biomarkerfor
+        #: `3.5.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_biomarkerfor>`_
         biomarker_tag = oneOf(['biomarkerFor']).setParseAction(replaceWith(BIOMARKER_FOR))
 
-        #: 3.5.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_prognosticbiomarkerfor
+        #: `3.5.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_prognosticbiomarkerfor>`_
         prognostic_biomarker_tag = oneOf(['prognosticBiomarkerFor']).setParseAction(
             replaceWith(PROGONSTIC_BIOMARKER_FOR))
 
@@ -568,8 +577,6 @@ class BelParser(BaseParser):
         sub = self.ensure_node(tokens[SUBJECT])
         obj = self.ensure_node(tokens[OBJECT])
 
-        attrs, list_attrs = self._build_attrs()
-
         q = {
             RELATION: tokens[RELATION],
             EVIDENCE: self.control_parser.evidence,
@@ -577,13 +584,15 @@ class BelParser(BaseParser):
             LINE: self.line_number,
         }
 
-        sub_mod = canonicalize_modifier(tokens[SUBJECT])
+        sub_mod = modifier_po_to_dict(tokens[SUBJECT])
         if sub_mod:
             q[SUBJECT] = sub_mod
 
-        obj_mod = canonicalize_modifier(tokens[OBJECT])
+        obj_mod = modifier_po_to_dict(tokens[OBJECT])
         if obj_mod:
             q[OBJECT] = obj_mod
+
+        attrs, list_attrs = self._build_attrs()
 
         for single_annotation in cartesian_dictionary(list_attrs):
             annots = attrs.copy()
@@ -643,7 +652,7 @@ class BelParser(BaseParser):
         return name
 
     def _ensure_variants(self, name, tokens):
-        self.graph.add_node(name, **canonicalize_variant_node_to_dict(tokens))
+        self.graph.add_node(name, **variant_po_to_dict(tokens))
 
         c = {
             FUNCTION: tokens[FUNCTION],
@@ -680,7 +689,7 @@ class BelParser(BaseParser):
         if MODIFIER in tokens:
             return self.ensure_node(tokens[TARGET])
 
-        name = canonicalize_node(tokens)
+        name = node_to_tuple(tokens)
 
         if name in self.graph:
             return name
@@ -739,203 +748,3 @@ def handle_activity_legacy(line, position, tokens):
 def handle_legacy_tloc(line, position, tokens):
     log.debug('legacy translocation statement: %s', line)
     return tokens
-
-
-# CANONICALIZATION
-
-def canonicalize_simple_to_dict(tokens):
-    return {
-        FUNCTION: tokens[FUNCTION],
-        NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
-        NAME: tokens[IDENTIFIER][NAME]
-    }
-
-
-# TODO figure out how to just get dictionary rather than slicing it up like this
-def canonicalize_fusion_range_to_dict(tokens):
-    if FUSION_MISSING in tokens:
-        return {
-            FUSION_MISSING: '?'
-        }
-    else:
-        return {
-            FUSION_REFERENCE: tokens[FUSION_REFERENCE],
-            FUSION_START: tokens[FUSION_START],
-            FUSION_STOP: tokens[FUSION_STOP]
-        }
-
-
-def canonicalize_fusion_to_dict(tokens):
-    f = tokens[FUSION]
-    return {
-        FUNCTION: tokens[FUNCTION],
-        FUSION: {
-            PARTNER_5P: {
-                NAMESPACE: f[PARTNER_5P][NAMESPACE],
-                NAME: f[PARTNER_5P][NAME]
-            },
-            RANGE_5P: canonicalize_fusion_range_to_dict(f[RANGE_5P]),
-            PARTNER_3P: {
-                NAMESPACE: f[PARTNER_3P][NAMESPACE],
-                NAME: f[PARTNER_3P][NAME]
-            },
-            RANGE_3P: canonicalize_fusion_range_to_dict(f[RANGE_3P])
-        }
-    }
-
-
-def canonicalize_variant_node_to_dict(tokens):
-    attr_data = canonicalize_simple_to_dict(tokens)
-    attr_data[VARIANTS] = [variant.asDict() for variant in tokens[VARIANTS]]
-    return attr_data
-
-
-def canonicalize_fusion_range(tokens, tag):
-    if tag in tokens and FUSION_MISSING not in tokens[tag]:
-        fusion_range = tokens[tag]
-        return fusion_range[FUSION_REFERENCE], fusion_range[FUSION_START], fusion_range[FUSION_STOP]
-    else:
-        return '?',
-
-
-def canonicalize_fusion(tokens):
-    function = tokens[FUNCTION]
-    fusion = tokens[FUSION]
-
-    partner5p = fusion[PARTNER_5P]
-    partner3p = fusion[PARTNER_3P]
-    range5p = canonicalize_fusion_range(fusion, RANGE_5P)
-    range3p = canonicalize_fusion_range(fusion, RANGE_3P)
-
-    return function, (partner5p[NAMESPACE], partner5p[NAME]), range5p, (partner3p[NAMESPACE], partner3p[NAME]), range3p
-
-
-def canonicalize_reaction(tokens):
-    reactants = tuple(sorted(list2tuple(tokens[REACTANTS].asList())))
-    products = tuple(sorted(list2tuple(tokens[PRODUCTS].asList())))
-    return (tokens[FUNCTION],) + (reactants,) + (products,)
-
-
-def canonicalize_simple(tokens):
-    return tokens[FUNCTION], tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
-
-
-def canonicalize_variant_node(tokens):
-    variants = tuple(sorted(canonicalize_variant(token.asDict()) for token in tokens[VARIANTS]))
-    return canonicalize_simple(tokens) + variants
-
-
-def canonicalize_list_node(tokens):
-    return (tokens[FUNCTION],) + tuple(sorted(canonicalize_node(member) for member in tokens[MEMBERS]))
-
-
-def canonicalize_node(tokens):
-    """Given tokens, returns node name
-
-    :param tokens: tokens ParseObject or dict
-    """
-
-    if MODIFIER in tokens:
-        return canonicalize_node(tokens[TARGET])
-
-    elif REACTION == tokens[FUNCTION]:
-        return canonicalize_reaction(tokens)
-
-    elif VARIANTS in tokens:
-        return canonicalize_variant_node(tokens)
-
-    elif MEMBERS in tokens:
-        return canonicalize_list_node(tokens)
-
-    elif FUSION in tokens:
-        return canonicalize_fusion(tokens)
-
-    return canonicalize_simple(tokens)
-
-
-def canonicalize_modifier(tokens):
-    """Get activity, transformation, or transformation information as a dictionary
-
-    :return: a dictionary describing the modifier
-    :rtype: dict
-    """
-
-    attrs = {}
-
-    if LOCATION in tokens:
-        attrs[LOCATION] = tokens[LOCATION].asDict()
-
-    if MODIFIER not in tokens:
-        return attrs
-
-    if LOCATION in tokens[TARGET]:
-        attrs[LOCATION] = tokens[TARGET][LOCATION].asDict()
-
-    if tokens[MODIFIER] == DEGRADATION:
-        attrs[MODIFIER] = tokens[MODIFIER]
-
-    elif tokens[MODIFIER] == ACTIVITY:
-        attrs[MODIFIER] = tokens[MODIFIER]
-
-        if EFFECT in tokens:
-            attrs[EFFECT] = dict(tokens[EFFECT])
-
-    elif tokens[MODIFIER] == TRANSLOCATION:
-        attrs[MODIFIER] = tokens[MODIFIER]
-
-        if EFFECT in tokens:
-            attrs[EFFECT] = tokens[EFFECT].asDict()
-
-    elif tokens[MODIFIER] == CELL_SECRETION:
-        attrs[MODIFIER] = TRANSLOCATION
-        attrs[EFFECT] = {
-            FROM_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'intracellular'},
-            TO_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'extracellular space'}
-        }
-
-    # elif tokens[MODIFIER] == CELL_SURFACE_EXPRESSION:
-    else:
-        attrs[MODIFIER] = TRANSLOCATION
-        attrs[EFFECT] = {
-            FROM_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'intracellular'},
-            TO_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'cell surface'}
-        }
-
-    return attrs
-
-
-def canonicalize_hgvs(tokens):
-    return tokens[KIND], tokens[IDENTIFIER]
-
-
-def canonicalize_pmod(tokens):
-    return (PMOD, (tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])) + tuple(
-        tokens[key] for key in PMOD_ORDER[2:] if key in tokens)
-
-
-def canonicalize_gmod(tokens):
-    return (GMOD, (tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])) + tuple(
-        tokens[key] for key in GMOD_ORDER[2:] if key in tokens)
-
-
-def canonicalize_frag(tokens):
-    if FRAGMENT_MISSING in tokens:
-        result = FRAGMENT, '?'
-    else:
-        result = FRAGMENT, (tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
-
-    if FRAGMENT_DESCRIPTION in tokens:
-        return result + (tokens[FRAGMENT_DESCRIPTION],)
-
-    return result
-
-
-def canonicalize_variant(tokens):
-    if tokens[KIND] == HGVS:
-        return canonicalize_hgvs(tokens)
-    elif tokens[KIND] == PMOD:
-        return canonicalize_pmod(tokens)
-    elif tokens[KIND] == GMOD:
-        return canonicalize_gmod(tokens)
-    # elif tokens[KIND] == FRAGMENT:
-    return canonicalize_frag(tokens)

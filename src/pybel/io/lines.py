@@ -2,8 +2,9 @@
 
 """This module contains IO functions for BEL scripts"""
 
-import codecs
 import logging
+
+import codecs
 import os
 
 from .line_utils import parse_lines
@@ -65,7 +66,7 @@ def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, c
                      See the python `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a
                      list of standard encodings. For example, files starting with a UTF-8 BOM should use
                      :code:`utf_8_sig`
-    :param dict kwargs: Keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
     :return: A BEL graph
     :rtype: BELGraph
     """
@@ -92,7 +93,7 @@ def from_url(url, manager=None, allow_naked_names=False, allow_nested=False, cit
     :param bool allow_nested: if true, turn off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
-    :param dict kwargs: Keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
     :return: A BEL graph
     :rtype: BELGraph
     """

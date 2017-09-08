@@ -2,8 +2,8 @@
 
 import itertools as itt
 import logging
-import re
 
+import re
 from pyparsing import Suppress, ZeroOrMore, White, Word, alphanums, dblQuotedString, removeQuotes, And, delimitedList, \
     oneOf, replaceWith, Group
 

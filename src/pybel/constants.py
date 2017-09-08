@@ -19,7 +19,10 @@ from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
 
-VERSION = '0.7.3'
+VERSION = '0.8.0'
+
+#: The last PyBEL version where the graph data definition changed
+PYBEL_MINIMUM_IMPORT_VERSION = (0, 8, 0)
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
@@ -53,7 +56,7 @@ PYBEL_DATA_DIR = path.join(PYBEL_DIR, 'data')
 if not path.exists(PYBEL_DATA_DIR):
     mkdir(PYBEL_DATA_DIR)
 
-DEFAULT_CACHE_NAME = 'pybel_cache.db'
+DEFAULT_CACHE_NAME = 'pybel_{}.{}.{}_cache.db'.format(*PYBEL_MINIMUM_IMPORT_VERSION)
 #: The default cache location is ``~/.pybel/data/pybel_cache.db``
 DEFAULT_CACHE_LOCATION = path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
@@ -77,8 +80,16 @@ else:
         config.setdefault(PYBEL_CONNECTION, DEFAULT_CACHE_CONNECTION)
 
 
-def get_cache_connection():
-    """Returns the default cache connection string"""
+def get_cache_connection(connection=None):
+    """Returns the default cache connection string. If a connection string is explicitly given, passes it through
+
+    :param str connection: RFC connection string
+    :rtype: str
+    """
+    if connection is not None:
+        log.info('connected to user-defined cache: %s', connection)
+        return connection
+
     if PYBEL_CONNECTION in environ:
         log.info('connecting to environment-defined database: %s', environ[PYBEL_CONNECTION])
         return environ[PYBEL_CONNECTION]

@@ -32,7 +32,7 @@ class BaseCacheManager(object):
     `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
     """
 
-    def __init__(self, connection=None, echo=False):
+    def __init__(self, connection=None, echo=False, autoflush=True, autocommit=False, expire_on_commit=False):
         """
         :param str connection: An RFC-1738 database connection string. If ``None``, tries to load from the environment
                                 variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json``
@@ -40,19 +40,22 @@ class BaseCacheManager(object):
                                 :data:`pybel.constants.DEFAULT_CACHE_LOCATION`
         :param bool echo: Turn on echoing sql
         """
-        if connection is not None:
-            self.connection = connection
-            log.info('connected to user-defined cache: %s', self.connection)
-        else:
-            self.connection = get_cache_connection()
-
+        self.connection = get_cache_connection(connection)
         self.engine = create_engine(self.connection, echo=echo)
+        self.autoflush = autoflush
+        self.autocommit = autocommit
+        self.expire_on_commit = expire_on_commit
 
         #: A SQLAlchemy session maker
-        self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
+        self.session_maker = sessionmaker(
+            bind=self.engine,
+            autoflush=self.autoflush,
+            autocommit=self.autocommit,
+            expire_on_commit=self.expire_on_commit,
+        )
 
         #: A SQLAlchemy session object
-        self.session = scoped_session(self.sessionmaker)
+        self.session = scoped_session(self.session_maker)
 
         self.create_all()
 
@@ -60,6 +63,6 @@ class BaseCacheManager(object):
         """Creates the PyBEL cache's database and tables"""
         Base.metadata.create_all(self.engine, checkfirst=checkfirst)
 
-    def drop_database(self):
+    def drop_all(self):
         """Drops all data, tables, and databases for the PyBEL cache"""
         Base.metadata.drop_all(self.engine)

@@ -14,3 +14,6 @@ Parser Utilities
 
 .. automodule:: pybel.parser.utils
     :members:
+
+.. automodule:: pybel.parser.canonicalize
+    :members:

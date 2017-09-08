@@ -16,6 +16,7 @@ from ..constants import *
 
 log = logging.getLogger(__name__)
 
+#: A dictionary of activity labels used in the ma() function in activity(p(X), ma(Y))
 activity_labels = {
     'catalyticActivity': 'cat',
     'cat': 'cat',

@@ -5,7 +5,7 @@ import unittest
 import networkx as nx
 
 import pybel.utils
-from pybel.canonicalize import postpend_location, decanonicalize_node
+from pybel.canonicalize import postpend_location, node_to_bel
 from pybel.constants import FUNCTION
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
@@ -50,7 +50,7 @@ class TestCanonicalizeHelper(unittest.TestCase):
         x.node = {test_node: {FUNCTION: 'nope'}}
 
         with self.assertRaises(ValueError):
-            decanonicalize_node(x, test_node)
+            node_to_bel(x, test_node)
 
 
 class TestRandom(unittest.TestCase):
