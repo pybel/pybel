@@ -704,6 +704,15 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).get(network_id)
 
+    def get_graph_by_id(self, network_id):
+        """Gets a network from the database by its identifier and converts to a BEL graph
+
+        :param int network_id: The network's database identifier
+        :rtype: BELGraph
+        """
+        network = self.get_network_by_id(network_id)
+        return network.as_bel()
+
     def get_networks_by_ids(self, network_ids):
         """Gets a list of networks with the given identifiers. Note: order is not necessarily preserved.
 
@@ -712,6 +721,18 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).filter(Network.id.in_(network_ids)).all()
 
+    def get_graphs_by_ids(self, network_ids):
+        """Gets a list of networks with the given identifiers and converts to BEL graphs. Note: order is not
+        necessarily preserved.
+
+        :param iter[int] network_ids: The identifiers of networks in the database
+        :rtype: list[BELGraph]
+        """
+        return [
+            self.get_graph_by_id(network_id)
+            for network_id in network_ids
+        ]
+
     def get_graph_by_ids(self, network_ids):
         """Gets a combine BEL Graph from a list of network identifiers
 
@@ -719,12 +740,9 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :rtype: pybel.BELGraph
         """
         if len(network_ids) == 1:
-            return self.get_network_by_id(network_ids[0]).as_bel()
+            return self.get_graph_by_id(network_ids[0])
 
-        return union(
-            network.as_bel()
-            for network in self.get_networks_by_ids(network_ids)
-        )
+        return union(self.get_graphs_by_ids(network_ids))
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
