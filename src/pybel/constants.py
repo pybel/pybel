@@ -77,8 +77,16 @@ else:
         config.setdefault(PYBEL_CONNECTION, DEFAULT_CACHE_CONNECTION)
 
 
-def get_cache_connection():
-    """Returns the default cache connection string"""
+def get_cache_connection(connection=None):
+    """Returns the default cache connection string. If a connection string is explicitly given, passes it through
+
+    :param str connection: RFC connection string
+    :rtype: str
+    """
+    if connection is not None:
+        log.info('connected to user-defined cache: %s', connection)
+        return connection
+
     if PYBEL_CONNECTION in environ:
         log.info('connecting to environment-defined database: %s', environ[PYBEL_CONNECTION])
         return environ[PYBEL_CONNECTION]

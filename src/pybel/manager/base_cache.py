@@ -40,20 +40,18 @@ class BaseCacheManager(object):
                                 :data:`pybel.constants.DEFAULT_CACHE_LOCATION`
         :param bool echo: Turn on echoing sql
         """
-        if connection is not None:
-            self.connection = connection
-            log.info('connected to user-defined cache: %s', self.connection)
-        else:
-            self.connection = get_cache_connection()
-
+        self.connection = get_cache_connection(connection)
         self.engine = create_engine(self.connection, echo=echo)
+        self.autoflush = autoflush
+        self.autocommit = autocommit
+        self.expire_on_commit = expire_on_commit
 
         #: A SQLAlchemy session maker
         self.session_maker = sessionmaker(
             bind=self.engine,
-            autoflush=autoflush,
-            autocommit=autocommit,
-            expire_on_commit=expire_on_commit,
+            autoflush=self.autoflush,
+            autocommit=self.autocommit,
+            expire_on_commit=self.expire_on_commit,
         )
 
         #: A SQLAlchemy session object
