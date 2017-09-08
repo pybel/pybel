@@ -1476,7 +1476,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
             return result
 
         return [
-            edge.to_json(include_id=True)
+            edge.to_json()
             for edge in result
         ]
 
