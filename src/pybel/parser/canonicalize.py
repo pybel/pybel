@@ -77,7 +77,7 @@ def canonicalize_fusion_to_dict(tokens):
 def variant_po_to_dict(tokens):
     """Converts a PyParsing data dictionary to a PyBEL variant data dictionary
 
-    :param ParseObject tokens:
+    :param tokens:
     :rtype: dict
     """
     attr_data = canonicalize_simple_to_dict(tokens)
@@ -195,7 +195,7 @@ def canonicalize_pmod(tokens):
     """
     identifier = identifier_to_tuple(tokens[IDENTIFIER])
     params = tuple(tokens[key] for key in PMOD_ORDER[2:] if key in tokens)
-    return (PMOD,)  + identifier + params
+    return (PMOD,) + (identifier,) + params
 
 
 def canonicalize_gmod(tokens):
@@ -206,7 +206,7 @@ def canonicalize_gmod(tokens):
     """
     identifier = identifier_to_tuple(tokens[IDENTIFIER])
     params = tuple(tokens[key] for key in GMOD_ORDER[2:] if key in tokens)
-    return (GMOD,) + identifier + params
+    return (GMOD,) + (identifier,) + params
 
 
 def canonicalize_frag(tokens):
