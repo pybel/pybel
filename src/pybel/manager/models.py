@@ -12,7 +12,7 @@ from sqlalchemy.orm import relationship, backref
 
 from ..constants import *
 from ..io.gpickle import from_bytes
-from ..parser.canonicalize import data_to_tuple
+from ..parser.canonicalize import node_to_tuple
 
 __all__ = [
     'Base',
@@ -164,7 +164,10 @@ class Namespace(Base):
         return self.keyword
 
     def to_json(self):
-        """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
+        """Returns the table entry as a dictionary without the SQLAlchemy instance information.
+
+        :rtype: dict
+        """
         return {
             'id': self.id,
             'uploaded': self.uploaded,
@@ -215,7 +218,10 @@ class NamespaceEntry(Base):
         return '{}:{}'.format(self.namespace, self.name)
 
     def to_json(self, include_id=False):
-        """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name."""
+        """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name.
+
+        :rtype: dict
+        """
         result = {
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
@@ -262,10 +268,12 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    def to_json(self):
-        """Returns this annotation as a JSON dictionary"""
-        return {
-            'id': self.id,
+    def to_json(self, include_id=False):
+        """Returns this annotation as a JSON dictionary
+
+        :rtype: dict
+        """
+        result = {
             'uploaded': self.uploaded,
             'url': self.url,
             'keyword': self.keyword,
@@ -284,6 +292,11 @@ class Annotation(Base):
             'citation_published': self.citation_published,
             'citation_url': self.citation_url
         }
+
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 class AnnotationEntry(Base):
@@ -472,12 +485,12 @@ class Node(Base):
 
         return result
 
-    def as_pybel(self):
+    def to_tuple(self):
         """Converts this node to a PyBEL tuple
 
         :rtype: tuple
         """
-        return data_to_tuple(self.to_json())
+        return node_to_tuple(self.to_json())
 
 
 class Modification(Base):
@@ -605,7 +618,10 @@ class Modification(Base):
         }
 
     def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
+        """Enables json serialization for the class this method is defined in.
+
+        :rtype: dict
+        """
         return self.data['mod_key']
 
 
@@ -801,8 +817,8 @@ class Edge(Base):
 
         :param BELGraph graph: A BEL graph
         """
-        source_tuple = self.source.as_pybel()
-        target_tuple = self.target.as_pybel()
+        source_tuple = self.source.to_tuple()
+        target_tuple = self.target.to_tuple()
 
         if source_tuple not in graph:
             graph.add_node(source_tuple, attr_dict=loads(self.source.blob))
@@ -863,7 +879,10 @@ class Property(Base):
         return prop_dict
 
     def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
+        """Enables json serialization for the class this method is defined in.
+
+        :rtype: dict
+        """
         return self.data['data']
 
 

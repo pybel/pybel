@@ -6,7 +6,7 @@ from pyparsing import ParseException
 
 from pybel.canonicalize import node_to_bel, edge_to_bel
 from pybel.constants import *
-from pybel.parser.parse_bel import canonicalize_node
+from pybel.parser.parse_bel import node_to_tuple
 from pybel.parser.parse_exceptions import NestedRelationWarning, RelabelWarning
 from tests.constants import TestTokenParserBase
 from tests.constants import default_identifier, test_citation_dict, test_evidence_text, update_provenance
@@ -60,7 +60,7 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = canonicalize_node(result)
+        sub = node_to_tuple(result)
         self.assertHasNode(sub)
 
         sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
@@ -94,7 +94,7 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = node_to_tuple(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
@@ -200,7 +200,7 @@ class TestRelations(TestTokenParserBase):
         sub = PROTEIN, 'SFAM', 'CAPN Family'
         self.assertHasNode(sub)
 
-        obj = canonicalize_node(result[OBJECT])
+        obj = node_to_tuple(result[OBJECT])
         self.assertHasNode(obj)
 
         obj_member_1 = PROTEIN, 'HGNC', 'CDK5R1'
@@ -422,7 +422,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = node_to_tuple(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_member_1 = PROTEIN, 'HGNC', 'F3'
@@ -732,7 +732,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = canonicalize_node(result[SUBJECT])
+        expected_node = node_to_tuple(result[SUBJECT])
 
         self.assertHasNode(expected_node)
         self.assertIn(LABEL, self.parser.graph.node[expected_node])
@@ -804,7 +804,7 @@ class TestRelations(TestTokenParserBase):
                            [BIOPROCESS, ['GOBP', 'cholesterol biosynthetic process']]]
         self.assertEqual(expected_result, result.asList())
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = node_to_tuple(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
@@ -858,7 +858,7 @@ class TestRelations(TestTokenParserBase):
                     hasReactant a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA")'
         result = self.parser.relation.parseString(statement)
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = node_to_tuple(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
@@ -913,5 +913,5 @@ class TestWrite(TestTokenParserBase):
             source_bel, expected_bel = case if 2 == len(case) else (case, case)
 
             result = self.parser.bel_term.parseString(source_bel)
-            bel = node_to_bel(self.parser.graph, canonicalize_node(result))
+            bel = node_to_bel(self.parser.graph, node_to_tuple(result))
             self.assertEqual(expected_bel, bel)

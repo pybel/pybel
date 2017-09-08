@@ -12,7 +12,13 @@ import logging
 from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst, And, StringEnd
 
 from .baseparser import BaseParser
-from .canonicalize import *
+from .canonicalize import (
+    node_to_tuple,
+    modifier_po_to_dict,
+    variant_po_to_dict,
+    canonicalize_simple_to_dict,
+    canonicalize_fusion_to_dict
+)
 from .language import activity_labels, activities
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
@@ -27,6 +33,7 @@ from .parse_exceptions import (
 )
 from .parse_identifier import IdentifierParser
 from .utils import cartesian_dictionary, WCW, nest, one_of_tags, triple, quote
+from ..constants import *
 
 __all__ = ['BelParser']
 
@@ -577,11 +584,11 @@ class BelParser(BaseParser):
             LINE: self.line_number,
         }
 
-        sub_mod = canonicalize_modifier(tokens[SUBJECT])
+        sub_mod = modifier_po_to_dict(tokens[SUBJECT])
         if sub_mod:
             q[SUBJECT] = sub_mod
 
-        obj_mod = canonicalize_modifier(tokens[OBJECT])
+        obj_mod = modifier_po_to_dict(tokens[OBJECT])
         if obj_mod:
             q[OBJECT] = obj_mod
 
@@ -645,7 +652,7 @@ class BelParser(BaseParser):
         return name
 
     def _ensure_variants(self, name, tokens):
-        self.graph.add_node(name, **canonicalize_variant_node_to_dict(tokens))
+        self.graph.add_node(name, **variant_po_to_dict(tokens))
 
         c = {
             FUNCTION: tokens[FUNCTION],
@@ -682,7 +689,7 @@ class BelParser(BaseParser):
         if MODIFIER in tokens:
             return self.ensure_node(tokens[TARGET])
 
-        name = canonicalize_node(tokens)
+        name = node_to_tuple(tokens)
 
         if name in self.graph:
             return name

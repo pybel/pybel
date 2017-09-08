@@ -176,7 +176,7 @@ class TestNodes(TemporaryCacheMixin):
         self.assertIsNotNone(node_model)
         self.assertIsInstance(node_model, Node)
 
-        self.assertEqual(node_tuple, node_model.as_pybel())
+        self.assertEqual(node_tuple, node_model.to_tuple())
 
     def test_1(self):
         node_tuple = PROTEIN, 'HGNC', 'YFG'

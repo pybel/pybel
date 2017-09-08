@@ -6,7 +6,7 @@ import networkx
 
 from .operations import left_full_join, left_outer_join
 from ..constants import *
-from ..parser.canonicalize import data_to_tuple, tuple_to_data
+from ..parser.canonicalize import node_to_tuple, tuple_to_data
 from ..utils import get_version, subdict_matches
 
 __all__ = [
@@ -206,7 +206,7 @@ class BELGraph(networkx.MultiDiGraph):
 
         :param dict node_data: A PyBEL node data dictionary
         """
-        node_tuple = data_to_tuple(node_data)
+        node_tuple = node_to_tuple(node_data)
         if node_tuple not in self:
             self.add_node(node_tuple, attr_dict=node_data)
 
