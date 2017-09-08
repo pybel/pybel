@@ -14,7 +14,7 @@ import logging
 
 from collections import defaultdict
 
-from ..canonicalize import decanonicalize_node, decanonicalize_edge
+from ..canonicalize import node_to_bel, edge_to_bel
 from ..constants import *
 from ..parser import BelParser
 from ..struct import BELGraph
@@ -263,15 +263,15 @@ def to_jgif(graph):
     >>> with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
     ...     json.dump(graph_jgif_json, f)
     """
-    node_to_bel = {}
+    node_bel = {}
     u_v_r_bel = {}
 
     nodes_entry = []
     edges_entry = []
 
     for i, node in enumerate(graph.nodes_iter()):
-        bel = decanonicalize_node(graph, node)
-        node_to_bel[node] = bel
+        bel = node_to_bel(graph, node)
+        node_bel[node] = bel
 
         nodes_entry.append({
             'id': bel,
@@ -287,7 +287,7 @@ def to_jgif(graph):
         for k, d in graph.edge[u][v].items():
 
             if (u, v, d[RELATION]) not in u_v_r_bel:
-                u_v_r_bel[u, v, d[RELATION]] = decanonicalize_edge(graph, u, v, k)
+                u_v_r_bel[u, v, d[RELATION]] = edge_to_bel(graph, u, v, k)
 
             bel = u_v_r_bel[u, v, d[RELATION]]
 
@@ -306,8 +306,8 @@ def to_jgif(graph):
 
         for relation, evidences in relation_evidences.items():
             edges_entry.append({
-                'source': node_to_bel[u],
-                'target': node_to_bel[v],
+                'source': node_bel[u],
+                'target': node_bel[v],
                 'relation': relation,
                 'label': u_v_r_bel[u, v, relation],
                 'metadata': {

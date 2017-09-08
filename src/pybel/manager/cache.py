@@ -36,7 +36,7 @@ from .models import (
     Modification,
 )
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
-from ..canonicalize import decanonicalize_edge, decanonicalize_node
+from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
 from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
@@ -799,7 +799,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 elif key in graph.annotation_owl:
                     annotations.append(self.annotation_object_cache[graph.annotation_owl[key]][value])
 
-            bel = decanonicalize_edge(graph, u, v, k)
+            bel = edge_to_bel(graph, u, v, k)
 
             edge_hash = hash_edge(u, v, k, data)
 
@@ -854,7 +854,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         if node_hash in self.object_cache_node:
             return self.object_cache_node[node_hash]
 
-        bel = decanonicalize_node(graph, node)
+        bel = node_to_bel(graph, node)
         blob = dumps(graph.node[node])
         node_data = graph.node[node]
 
@@ -868,10 +868,10 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
                 namespace = node_data[NAMESPACE]
                 url = graph.namespace_url[namespace]
-                result.namespaceEntry = self.get_namespace_entry(url, node_data[NAME])
+                result.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
             elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
-                result.namespacePattern = graph.namespace_pattern[node_data[NAMESPACE]]
+                result.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
 
             if VARIANTS in node_data or FUSION in node_data:
                 result.is_variant = True
@@ -1396,6 +1396,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
         :param property: An edge property object or a corresponding database identifier.
         :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
                                     :class:`Edge` objects.
+        :rtype: list[Edge]
         """
         q = self.session.query(Edge)
 
@@ -1475,7 +1476,7 @@ class EdgeStoreQueryManager(BaseCacheManager):
             return result
 
         return [
-            edge.to_json()
+            edge.to_json(include_id=Trueq)
             for edge in result
         ]
 

@@ -162,8 +162,7 @@ class Namespace(Base):
     def __str__(self):
         return self.keyword
 
-    @property
-    def data(self):
+    def to_json(self):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
         return {
             'id': self.id,
@@ -214,12 +213,17 @@ class NamespaceEntry(Base):
     def __str__(self):
         return '{}:{}'.format(self.namespace, self.name)
 
-    def to_json(self):
+    def to_json(self, include_id=False):
         """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name."""
-        return {
+        result = {
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
         }
+
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 class NamespaceEntryEquivalence(Base):
@@ -301,12 +305,20 @@ class AnnotationEntry(Base):
         secondaryjoin=id == annotation_hierarchy.c.right_id
     )
 
-    def to_json(self):
-        """Describes the annotationEntry as dictionary of Annotation-Keyword and Annotation-Name."""
-        return {
+    def to_json(self, include_id=False):
+        """Describes the annotationEntry as dictionary of Annotation-Keyword and Annotation-Name.
+
+        :rtype: dict
+        """
+        result= {
             'annotation_keyword': self.annotation.keyword,
             'annotation': self.name
         }
+
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 network_edge = Table(
@@ -410,9 +422,9 @@ class Node(Base):
     id = Column(Integer, primary_key=True)
 
     type = Column(String(255), nullable=False, doc='The type of the represented biological entity e.g. Protein or Gene')
-    namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
-    namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
-    namespacePattern = Column(String(255), nullable=True, doc="Contains regex pattern for value identification.")
+    namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    namespace_entry = relationship('NamespaceEntry', foreign_keys=[namespace_entry_id])
+    namespace_pattern = Column(String(255), nullable=True, doc="Contains regex pattern for value identification.")
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
     fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
 
@@ -439,8 +451,8 @@ class Node(Base):
         if include_id:
             result[ID] = self.id
 
-        if self.namespaceEntry:
-            namespace_entry = self.namespaceEntry.to_json()
+        if self.namespace_entry:
+            namespace_entry = self.namespace_entry.to_json()
             result.update(namespace_entry)
             # node_key.append(namespace_entry[NAMESPACE])
             # node_key.append(namespace_entry[NAME])

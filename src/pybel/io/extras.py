@@ -9,8 +9,8 @@ import logging
 
 import networkx as nx
 
-from ..canonicalize import decanonicalize_edge_node
-from ..constants import NAMESPACE, NAME, RELATION, SUBJECT, OBJECT
+from ..canonicalize import edge_to_bel
+from ..constants import NAMESPACE, NAME
 from ..struct import BELGraph
 from ..utils import flatten_dict
 
@@ -42,7 +42,7 @@ def to_graphml(graph, file):
     nx.write_graphml(g, file)
 
 
-def to_csv(graph, file):
+def to_csv(graph, file=None, sep='\t'):
     """Writes the graph as a tab-separated edge list with the columns:
 
     1. Source BEL term
@@ -54,20 +54,19 @@ def to_csv(graph, file):
     as queryable information about transforms on the subject and object and their associated metadata.
 
     :param BELGraph graph: A BEL graph
-    :param file file: A writable file or file-like.
+    :param file file: A writable file or file-like. Defaults to stdout.
+    :param str sep: The separator. Defaults to tab.
     """
-    for u, v, d in graph.edges_iter(data=True):
+    for u, v, k, d in graph.edges_iter(keys=True, data=True):
         print(
-            decanonicalize_edge_node(graph, u, d, SUBJECT),
-            d[RELATION],
-            decanonicalize_edge_node(graph, v, d, OBJECT),
+            edge_to_bel(graph, u, v, k, sep=sep),
             json.dumps(d),
-            sep='\t',
+            sep=sep,
             file=file
         )
 
 
-def to_sif(graph, file):
+def to_sif(graph, file=None, sep='\t'):
     """Writes the graph as a tab-separated SIF file with the following columns:
 
     1. Source BEL term
@@ -78,23 +77,21 @@ def to_sif(graph, file):
     relation metadata.
 
     :param BELGraph graph: A BEL graph
-    :param file file: A writable file or file-like.
+    :param file file: A writable file or file-like. Defaults to stdout.
+    :param str sep: The separator. Defaults to tab.
     """
-    for u, v, d in graph.edges_iter(data=True):
+    for u, v, k in graph.edges_iter(keys=True):
         print(
-            decanonicalize_edge_node(graph, u, d, SUBJECT),
-            d[RELATION],
-            decanonicalize_edge_node(graph, v, d, OBJECT),
-            sep='\t',
+            edge_to_bel(graph, u, v, k, sep=sep),
             file=file
         )
 
 
-def to_gsea(graph, file):
+def to_gsea(graph, file=None):
     """Writes the genes/gene products to a GRP file for use with GSEA gene set enrichment analysis
 
     :param BELGraph graph: A BEL graph 
-    :param file file: A writeable file or file-like object
+    :param file file: A writeable file or file-like object. Defaults to stdout.
 
     .. seealso::
 
@@ -103,6 +100,10 @@ def to_gsea(graph, file):
 
     """
     print('# {}'.format(graph.name), file=file)
-    nodes = {d[NAME] for _, d in graph.nodes_iter(data=True) if NAMESPACE in d and d[NAMESPACE] == 'HGNC'}
+    nodes = {
+        d[NAME]
+        for _, d in graph.nodes_iter(data=True)
+        if NAMESPACE in d and d[NAMESPACE] == 'HGNC'
+    }
     for node in sorted(nodes):
         print(node, file=file)

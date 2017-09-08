@@ -4,7 +4,7 @@ import logging
 
 from pyparsing import ParseException
 
-from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
+from pybel.canonicalize import node_to_bel, edge_to_bel
 from pybel.constants import *
 from pybel.parser.parse_bel import canonicalize_node
 from pybel.parser.parse_exceptions import NestedRelationWarning, RelabelWarning
@@ -626,7 +626,7 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(sub, obj, **{RELATION: TRANSLATED_TO})
 
         self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
-                         decanonicalize_edge(self.parser.graph, sub, obj, 0))
+                         edge_to_bel(self.parser.graph, sub, obj, 0))
 
     def test_component_list(self):
         s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
@@ -847,8 +847,8 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(expected_parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
         self.assertHasNode(expected_child)
 
-        self.assertEqual('g(HGNC:AKT1)', decanonicalize_node(self.parser.graph, expected_parent))
-        self.assertEqual('g(HGNC:AKT1, gmod(Me))', decanonicalize_node(self.parser.graph, expected_child))
+        self.assertEqual('g(HGNC:AKT1)', node_to_bel(self.parser.graph, expected_parent))
+        self.assertEqual('g(HGNC:AKT1, gmod(Me))', node_to_bel(self.parser.graph, expected_child))
 
         self.assertHasEdge(expected_parent, expected_child, **{RELATION: HAS_VARIANT})
 
@@ -913,5 +913,5 @@ class TestWrite(TestTokenParserBase):
             source_bel, expected_bel = case if 2 == len(case) else (case, case)
 
             result = self.parser.bel_term.parseString(source_bel)
-            bel = decanonicalize_node(self.parser.graph, canonicalize_node(result))
+            bel = node_to_bel(self.parser.graph, canonicalize_node(result))
             self.assertEqual(expected_bel, bel)
