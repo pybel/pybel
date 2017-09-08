@@ -21,6 +21,9 @@ log = getLogger(__name__)
 
 VERSION = '0.8.0'
 
+#: The last PyBEL version where the graph data definition changed
+PYBEL_MINIMUM_IMPORT_VERSION = (0, 8, 0)
+
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
 
@@ -53,7 +56,7 @@ PYBEL_DATA_DIR = path.join(PYBEL_DIR, 'data')
 if not path.exists(PYBEL_DATA_DIR):
     mkdir(PYBEL_DATA_DIR)
 
-DEFAULT_CACHE_NAME = 'pybel_cache.db'
+DEFAULT_CACHE_NAME = 'pybel_{}.{}.{}_cache.db'.format(*PYBEL_MINIMUM_IMPORT_VERSION)
 #: The default cache location is ``~/.pybel/data/pybel_cache.db``
 DEFAULT_CACHE_LOCATION = path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
