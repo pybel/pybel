@@ -1034,8 +1034,10 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result.date = parse_datetime(date)
 
         if authors is not None:
-            for author in authors.split('|') if isinstance(authors, string_types) else authors:
-                result.authors.append(self.get_or_create_author(author))
+            result.authors = [
+                self.get_or_create_author(author)
+                for author in (authors.split('|') if isinstance(authors, string_types) else authors)
+            ]
 
         self.session.add(result)
         self.object_cache_citation[citation_hash] = result
