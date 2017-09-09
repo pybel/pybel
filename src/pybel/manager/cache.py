@@ -81,7 +81,7 @@ def hash_evidence(text, type, reference):
 
 
 class NamespaceManager(BaseCacheManager):
-    """Manages namespace database"""
+    """Manages BEL namespaces"""
 
     def __init__(self, *args, **kwargs):
         super(NamespaceManager, self).__init__(*args, **kwargs)
@@ -330,7 +330,7 @@ class OwlNamespaceManager(NamespaceManager):
 
 
 class AnnotationManager(BaseCacheManager):
-    """Manages database annotations"""
+    """Manages BEL annotations"""
 
     def __init__(self, *args, **kwargs):
         super(AnnotationManager, self).__init__(*args, **kwargs)
@@ -543,7 +543,7 @@ class OwlAnnotationManager(AnnotationManager):
 
 
 class EquivalenceManager(NamespaceManager):
-    """Manages database equivalences"""
+    """Manages BEL equivalences"""
 
     def drop_equivalences(self):
         """Drops all equivalence classes"""
