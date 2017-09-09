@@ -637,7 +637,7 @@ class Author(Base):
     __tablename__ = AUTHOR_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False, index=True)
+    name = Column(String(255), nullable=False, unique=True, index=True)
 
     def __str__(self):
         return self.name
@@ -689,14 +689,29 @@ class Citation(Base):
         if self.name:
             result[CITATION_NAME] = self.name
 
+        if self.title:
+            result[CITATION_TITLE] = self.title
+
+        if self.volume:
+            result[CITATION_VOLUME] = self.volume
+
+        if self.pages:
+            result[CITATION_PAGES] = self.pages
+
+        if self.date:
+            result[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
+
+        if self.first:
+            result[CITATION_FIRST_AUTHOR] = self.first
+
+        if self.last:
+            result[CITATION_LAST_AUTHOR] = self.last
+
         if self.authors:
             result[CITATION_AUTHORS] = "|".join(sorted(
                 author.name
                 for author in self.authors
             ))
-
-        if self.date:
-            result[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
 
         return result
 
