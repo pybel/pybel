@@ -12,7 +12,7 @@ import logging
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 
-from .cache import build_manager
+from .cache import CacheManager
 
 __all__ = [
     'to_database',
@@ -31,7 +31,7 @@ def to_database(graph, connection=None, store_parts=False):
     :type connection: None or str or pybel.manager.cache.CacheManager
     :param bool store_parts: Should the graph be stored in the edge store?
     """
-    manager = build_manager(connection=connection)
+    manager = CacheManager.ensure(connection=connection)
 
     try:
         manager.insert_graph(graph, store_parts=store_parts)
@@ -60,7 +60,7 @@ def from_database(name, version=None, connection=None):
     :return: A BEL graph loaded from the database
     :rtype: BELGraph
     """
-    manager = build_manager(connection=connection)
+    manager = CacheManager.ensure(connection=connection)
 
     if version is None:
         return manager.get_most_recent_network_by_name(name)

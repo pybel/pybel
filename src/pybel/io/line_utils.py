@@ -67,7 +67,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
-    manager = build_manager(manager)
+    manager = CacheManager.ensure(manager)
 
     metadata_parser = MetadataParser(manager, allow_redefinition=kwargs.get('allow_redefinition'))
 

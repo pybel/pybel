@@ -12,6 +12,7 @@ import logging
 import time
 import uuid
 
+import warnings
 from collections import defaultdict
 from copy import deepcopy
 from six import string_types
@@ -70,6 +71,8 @@ def build_manager(connection=None, echo=False):
     :return: A cache manager
     :rtype: CacheManager
     """
+    warnings.warn('build_manager is deprecated. Use CacheManager.ensure instead')
+
     if isinstance(connection, CacheManager):
         return connection
     return CacheManager(connection=connection, echo=echo)
@@ -1041,7 +1044,6 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         self.object_cache_citation[citation_hash] = result
         return result
 
-    
     def get_or_create_author(self, name):
         """Gets an author by name, or creates one
 
@@ -1657,3 +1659,16 @@ class CacheManager(EdgeStoreQueryManager, EdgeStoreInsertManager, NetworkManager
     """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
     SQLite by default for speed and lightness, but any database can be used with its SQLAlchemy interface.
     """
+
+    @staticmethod
+    def ensure(connection=None, **kwargs):
+        """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
+
+        :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None``
+                            for default connection
+        :type connection: None or str or CacheManager
+        :rtype: CacheManager
+        """
+        if isinstance(connection, CacheManager):
+            return connection
+        return CacheManager(connection=connection, **kwargs)
