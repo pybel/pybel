@@ -8,12 +8,10 @@ enable this option, but can specify a database location if they choose.
 """
 
 import datetime
-import json
 import logging
 import time
 import uuid
 
-import hashlib
 from collections import defaultdict
 from copy import deepcopy
 from six import string_types
@@ -1034,15 +1032,16 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
             result.date = parse_datetime(date)
 
         if authors is not None:
-            result.authors = [
-                self.get_or_create_author(author)
-                for author in (authors.split('|') if isinstance(authors, string_types) else authors)
-            ]
+            for author in (authors.split('|') if isinstance(authors, string_types) else authors):
+                author_model = self.get_or_create_author(author)
+                if author_model not in result.authors:
+                    result.authors.append(author_model)
 
         self.session.add(result)
         self.object_cache_citation[citation_hash] = result
         return result
 
+    
     def get_or_create_author(self, name):
         """Gets an author by name, or creates one
 
@@ -1055,14 +1054,13 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         if name in self.object_cache_author:
             return self.object_cache_author[name]
 
-        result = self.session.query(Author).filter_by(name=name).one_or_none()
+        result = self.session.query(Author).filter(Author.name == name).one_or_none()
 
         if result is not None:
             self.object_cache_author[name] = result
             return result
 
         result = Author(name=name)
-
         self.session.add(result)
         self.object_cache_author[name] = result
         return result
