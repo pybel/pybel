@@ -418,3 +418,15 @@ def set_default_mysql_connection(user=None, password=None, host=None, database=N
     fmt = PYBEL_MYSQL_FMT_NOPASS if password is None else PYBEL_MYSQL_FMT_PASS
 
     set_default_connection(fmt.format(**kwargs))
+
+
+def hash_dump(d):
+    return hashlib.sha512(json.dumps(d, sort_keys=True).encode('utf-8')).hexdigest()
+
+
+def hash_citation(type, reference):
+    return hash_dump((type, reference))
+
+
+def hash_evidence(text, type, reference):
+    return hash_dump((type, reference, text))

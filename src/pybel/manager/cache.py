@@ -41,7 +41,16 @@ from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
 from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
-from ..utils import get_bel_resource, parse_datetime, subdict_matches, hash_edge, hash_node
+from ..utils import (
+    get_bel_resource,
+    parse_datetime,
+    subdict_matches,
+    hash_edge,
+    hash_node,
+    hash_evidence,
+    hash_citation,
+    hash_dump,
+)
 
 __all__ = [
     'CacheManager',
@@ -66,18 +75,6 @@ def build_manager(connection=None, echo=False):
     if isinstance(connection, CacheManager):
         return connection
     return CacheManager(connection=connection, echo=echo)
-
-
-def hash_dump(d):
-    return hashlib.sha512(json.dumps(d, sort_keys=True).encode('utf-8')).hexdigest()
-
-
-def hash_citation(type, reference):
-    return hash_dump((type, reference))
-
-
-def hash_evidence(text, type, reference):
-    return hash_dump((type, reference, text))
 
 
 class NamespaceManager(BaseCacheManager):
