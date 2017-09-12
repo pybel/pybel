@@ -139,11 +139,11 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 
     if store_default:
         log.info('Storing to database')
-        to_database(g)
+        to_database(g, store_parts=True)
 
     if store_connection:
         log.info('Storing to database: %s', store_connection)
-        to_database(g, connection=store_connection)
+        to_database(g, connection=store_connection, store_parts=True)
 
     if neo:
         import py2neo
