@@ -5,7 +5,7 @@ import uuid
 
 from sqlalchemy import func
 
-from .base_cache import BaseCacheManager
+from .base_manager import BaseManager
 from .models import (
     Annotation,
     AnnotationEntry,
@@ -33,7 +33,7 @@ __all__ = [
 ]
 
 
-class QueryManager(BaseCacheManager):
+class QueryManager(BaseManager):
     """Groups queries over the edge store"""
 
     def rebuild_by_edge_filter(self, **annotations):

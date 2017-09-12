@@ -17,7 +17,7 @@ from six import string_types
 from six.moves.cPickle import dumps
 from sqlalchemy import func, exists
 
-from .base_cache import BaseCacheManager
+from .base_manager import BaseManager
 from .models import (
     Network,
     Annotation,
@@ -75,7 +75,7 @@ def build_manager(connection=None, **kwargs):
     return Manager(connection=connection, **kwargs)
 
 
-class NamespaceManager(BaseCacheManager):
+class NamespaceManager(BaseManager):
     """Manages BEL namespaces"""
 
     def __init__(self, *args, **kwargs):
@@ -324,7 +324,7 @@ class OwlNamespaceManager(NamespaceManager):
         return self.namespace_edge_cache[iri]
 
 
-class AnnotationManager(BaseCacheManager):
+class AnnotationManager(BaseManager):
     """Manages BEL annotations"""
 
     def __init__(self, *args, **kwargs):
@@ -770,7 +770,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         })
 
         if store_parts:
-            self.store_graph_parts(network, graph)
+            self._store_graph_parts(network, graph)
 
         self.session.add(network)
         self.session.commit()
@@ -779,7 +779,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         return network
 
-    def store_graph_parts(self, network, graph):
+    def _store_graph_parts(self, network, graph):
         """Stores graph parts. Needs to be overridden."""
         raise NotImplementedError
 
@@ -802,7 +802,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         self.object_cache_evidence = {}
         self.object_cache_author = {}
 
-    def store_graph_parts(self, network, graph):
+    def _store_graph_parts(self, network, graph):
         """Stores the given graph into the edge store.
 
         :param Network network: A SQLAlchemy PyBEL Network object
