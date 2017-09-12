@@ -12,7 +12,7 @@ import logging
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 
-from .cache import CacheManager
+from .cache import Manager
 
 __all__ = [
     'to_database',
@@ -26,12 +26,12 @@ def to_database(graph, connection=None, store_parts=False):
     """Stores a graph in a database.
 
     :param BELGraph graph: A BEL graph
-    :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or `None`` for 
+    :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or `None`` for
                         default connection
-    :type connection: None or str or pybel.manager.cache.CacheManager
+    :type connection: None or str or pybel.manager.cache.Manager
     :param bool store_parts: Should the graph be stored in the edge store?
     """
-    manager = CacheManager.ensure(connection=connection)
+    manager = Manager.ensure(connection=connection)
 
     try:
         manager.insert_graph(graph, store_parts=store_parts)
@@ -49,18 +49,18 @@ def to_database(graph, connection=None, store_parts=False):
 
 def from_database(name, version=None, connection=None):
     """Loads a BEL graph from a database. If name and version are given, finds it exactly with
-    :meth:`pybel.manager.cache.CacheManager.get_network_by_name_version`. If just the name is given, finds most recent
-    with :meth:`pybel.manager.cache.CacheManager.get_network_by_name_version`
+    :meth:`pybel.manager.cache.Manager.get_network_by_name_version`. If just the name is given, finds most recent
+    with :meth:`pybel.manager.cache.Manager.get_network_by_name_version`
 
     :param str name: The name of the graph
     :param str version: The version string of the graph. If not specified, loads most recent graph added with this name
-    :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None`` 
+    :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
                         for default connection
-    :type connection: None or str or pybel.manager.cache.CacheManager
+    :type connection: None or str or pybel.manager.cache.Manager
     :return: A BEL graph loaded from the database
     :rtype: BELGraph
     """
-    manager = CacheManager.ensure(connection=connection)
+    manager = Manager.ensure(connection=connection)
 
     if version is None:
         return manager.get_most_recent_network_by_name(name)

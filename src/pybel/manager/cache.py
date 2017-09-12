@@ -7,10 +7,8 @@ Under the hood, PyBEL caches namespace and annotation files for quick recall on 
 enable this option, but can specify a database location if they choose.
 """
 
-import datetime
 import logging
 import time
-import uuid
 
 import warnings
 from collections import defaultdict
@@ -35,6 +33,7 @@ from .models import (
     Author,
     Modification,
 )
+from .query_manager import QueryManager
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
@@ -43,7 +42,6 @@ from ..struct import BELGraph, union
 from ..utils import (
     get_bel_resource,
     parse_datetime,
-    subdict_matches,
     hash_edge,
     hash_node,
     hash_evidence,
@@ -52,7 +50,7 @@ from ..utils import (
 )
 
 __all__ = [
-    'CacheManager',
+    'Manager',
     'build_manager',
 ]
 
@@ -61,21 +59,20 @@ log = logging.getLogger(__name__)
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
-def build_manager(connection=None, echo=False):
-    """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
+def build_manager(connection=None, **kwargs):
+    """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
     
-    :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None`` 
+    :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
                         for default connection
-    :type connection: None or str or CacheManager
-    :type echo: bool
-    :return: A cache manager
-    :rtype: CacheManager
+    :type connection: None or str or Manager
+    :param kwargs: Arguments to pass ot the constructor of
+    :rtype: Manager
     """
-    warnings.warn('build_manager is deprecated. Use CacheManager.ensure instead')
+    warnings.warn('build_manager is deprecated. Use Manager.ensure instead')
 
-    if isinstance(connection, CacheManager):
+    if isinstance(connection, Manager):
         return connection
-    return CacheManager(connection=connection, echo=echo)
+    return Manager(connection=connection, **kwargs)
 
 
 class NamespaceManager(BaseCacheManager):
@@ -787,11 +784,11 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         raise NotImplementedError
 
 
-class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
-    """Manages the edge store"""
+class InsertManager(NamespaceManager, AnnotationManager):
+    """Manages inserting data into the edge store"""
 
     def __init__(self, *args, **kwargs):
-        super(EdgeStoreInsertManager, self).__init__(*args, **kwargs)
+        super(InsertManager, self).__init__(*args, **kwargs)
 
         #: A dictionary that maps node tuples to their models
         self.node_model = {}
@@ -1245,430 +1242,28 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         return properties
 
 
-class EdgeStoreQueryManager(BaseCacheManager):
-    """Groups queries over the edge store"""
-
-    def rebuild_by_edge_filter(self, **annotations):
-        """Gets all edges matching the given query annotation values
-
-        :param dict[str,str] annotations: dictionary of {key: value}
-        :return: A graph composed of the filtered edges
-        :rtype: pybel.BELGraph
-        """
-        graph = BELGraph()
-        for annotation_key, annotation_value in annotations.items():
-            # TODO write get most recent by keyword function
-            annotation_def = self.session.query(Annotation).filter_by(keyword=annotation_key).first()
-            annotation = self.session.query(AnnotationEntry).filter_by(annotation=annotation_def,
-                                                                       name=annotation_value).first()
-
-            # Add Annotations to belGraph.annotation_url
-            # Add Namespaces to belGraph.namespace_url
-            # What about meta information?
-            edges = self.session.query(Edge).filter(Edge.annotations.contains(annotation)).all()
-            for edge in edges:
-                edge_data = edge.data
-
-                if len(edge_data['source']['key']) == 1:
-                    edge_data['source'] = self.help_rebuild_list_components(edge.source)
-
-                if len(edge_data['target']['key']) == 1:
-                    edge_data['target'] = self.help_rebuild_list_components(edge.target)
-
-                graph.add_nodes_from((edge_data['source']['node'], edge_data['target']['node']))
-
-                graph.add_edge(
-                    edge_data['source']['key'],
-                    edge_data['target']['key'],
-                    key=(
-                        unqualified_edge_code[edge_data['data']['relation']]
-                        if edge_data['data']['relation'] in UNQUALIFIED_EDGES
-                        else None
-                    ),
-                    attr_dict=edge_data['data']
-                )
-
-        return graph
-
-    def help_rebuild_list_components(self, node):
-        """Builds data and identifier for list node objects.
-
-        :param Node node: Node object defined in models
-        :return: Dictionary with 'key' and 'node' keys.
-        :rtype: dict[str,str]
-        """
-        node_info = node.to_json()
-        key = list(node_info['key'])
-        data = node_info['data']
-        if node.type in (COMPLEX, COMPOSITE):
-            components = self.session.query(Edge).filter_by(source=node, relation=HAS_COMPONENT).all()
-            for component in components:
-                component_key = component.target.data['key']
-                key.append(component_key)
-
-        elif node.type == REACTION:
-            reactant_components = self.session.query(Edge).filter_by(source=node, relation=HAS_REACTANT).all()
-            product_components = self.session.query(Edge).filter_by(source=node, relation=HAS_PRODUCT).all()
-            reactant_keys = tuple(reactant.target.data['key'] for reactant in reactant_components)
-            product_keys = tuple(product.target.data['key'] for product in product_components)
-            key.append(reactant_keys)
-            key.append(product_keys)
-
-        return {'key': tuple(key), 'node': (tuple(key), data)}
-
-    def get_edge_iter_by_filter(self, **annotations):
-        """Returns an iterator over Edge object that match the given annotations
-
-        :param dict[str,str] annotations: dictionary of {URL: values}
-        :return: An iterator over Edge object that match the given annotations
-        :rtype: iter[Edge]
-        """
-        # TODO make smarter
-        for edge in self.session.query(Edge).all():
-            ad = {a.annotation.name: a.name for a in edge.annotations}
-            if subdict_matches(ad, annotations):
-                yield edge
-
-    def get_graph_by_filter(self, **annotations):
-        """Fills a BEL graph with edges retrieved from a filter
-
-        :param dict[str,str] annotations: dictionary of {URL: values}
-        :return: A BEL graph
-        :rtype: pybel.BELGraph
-        """
-        graph = BELGraph(
-            name=uuid.uuid4(),
-            version='1.0.0',
-            description='This BEL Graph was generated by querying with: {}'.format(annotations)
-        )
-
-        for edge in self.get_edge_iter_by_filter(**annotations):
-            edge.insert_into_graph(graph)
-
-        return graph
-
-    def count_nodes(self):
-        """Counts the number of nodes in the cache
-
-        :rtype: int
-        """
-        return self.session.query(func.count(Node.id)).scalar()
-
-    def get_node_by_hash(self, node_hash):
-        """Looks up a node by the hash of a PyBEL node tuple
-
-        :param str node_hash: The hash of a PyBEL node tuple from :func:`pybel.utils.hash_node`
-        :rtype: Node
-        """
-        return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
-
-    def get_node_by_tuple(self, node):
-        """Looks up a node by the PyBEL node tuple
-
-        :param tuple node: A PyBEL node tuple
-        :rtype: Node
-        """
-        return self.get_node_by_hash(hash_node(node))
-
-    def query_nodes(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
-                    modification_name=None, as_dict_list=False):
-        """Builds and runs a query over all nodes in the PyBEL cache.
-
-        :param int node_id: The node ID to get
-        :param str bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
-        :param str type: Type of the biological entity. e.g. Protein
-        :param str namespace: Namespace keyword that is used in BEL. e.g. HGNC
-        :param str name: Name of the biological entity. e.g. APP
-        :param str modification_name:
-        :param str modification_type:
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`Node` objects.
-        :return: A list of the fitting nodes as :class:`Node` objects or dicts.
-        :rtype: list[Node]
-        """
-        q = self.session.query(Node)
-
-        if node_id and isinstance(node_id, int):
-            q = q.filter_by(id=node_id)
-
-        else:
-            if bel:
-                q = q.filter(Node.bel.like(bel))
-
-            if type:
-                q = q.filter(Node.type.like(type))
-
-            if namespace or name:
-                q = q.join(NamespaceEntry)
-                if namespace:
-                    q = q.join(Namespace).filter(Namespace.keyword.like(namespace))
-                if name:
-                    q = q.filter(NamespaceEntry.name.like(name))
-
-            if modification_type or modification_name:
-                q = q.join(Modification)
-                if modification_type:
-                    q = q.filter(Modification.modType.like(modification_type))
-                if modification_name:
-                    q = q.filter(Modification.modName.like(modification_name))
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        dict_list = []
-
-        for node in result:
-            node_dict = node.to_json()
-            node_dict['bel'] = node.bel
-            dict_list.append({
-                'data': node.to_json(),
-                'bel': node.bel
-            })
-
-        return dict_list
-
-    def count_edges(self):
-        """Counts the number of edges in the cache
-
-        :rtype: int
-        """
-        return self.session.query(func.count(Edge.id)).scalar()
-
-    def get_edge_by_hash(self, edge_hash):
-        """Looks up an edge by the hash of a PyBEL edge data dictionary
-
-        :param str edge_hash: The hash of a PyBEL edge data dictionary from :func:`pybel.utils.hash_edge`
-        :rtype: Edge
-        """
-        return self.session.query(Edge).filter(Edge.sha512 == edge_hash).one_or_none()
-
-    def get_edge_by_tuple(self, u, v, d):
-        """Looks up an edge by PyBEL edge tuple
-
-        :param tuple u: A PyBEL node tuple
-        :param tuple v: A PyBEL node tuple
-        :param dict d:
-        :rtype: Edge
-        """
-        return self.get_edge_by_hash(hash_edge(u, v, None, d))
-
-    def query_edges(self, edge_id=None, bel=None, source=None, target=None, relation=None, citation=None,
-                    evidence=None, annotation=None, property=None, as_dict_list=False):
-        """Builds and runs a query over all edges in the PyBEL cache.
-
-        :param int edge_id: The edge identifier
-        :param str bel: BEL statement that represents the desired edge.
-        :param str or Node source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :param str or Node target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :param str relation: The relation that should be present between source and target node.
-        :param str or Citation citation: The citation that backs the edge up. It is possible to use the reference_id
-                         or a Citation object.
-        :param str or Evidence evidence: The supporting text of the edge
-        :param dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
-                                        annotationValue parameter as string.
-        :param property: An edge property object or a corresponding database identifier.
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                                    :class:`Edge` objects.
-        :rtype: list[Edge]
-        """
-        q = self.session.query(Edge)
-
-        if edge_id and isinstance(edge_id, int):
-            q = q.filter_by(id=edge_id)
-
-        else:
-            if bel:
-                q = q.filter(Edge.bel.like(bel))
-
-            if relation:
-                q = q.filter(Edge.relation.like(relation))
-
-            if annotation:
-                q = q.join(AnnotationEntry, Edge.annotations)
-                if isinstance(annotation, dict):
-                    q = q.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
-                    q = q.filter(AnnotationEntry.name.in_(list(annotation.values())))
-
-                elif isinstance(annotation, str):
-                    q = q.filter(AnnotationEntry.name.like(annotation))
-
-            if source:
-                if isinstance(source, str):
-                    source = self.query_nodes(bel=source)[0]
-
-                if isinstance(source, Node):
-                    q = q.filter(Edge.source == source)
-
-                    # ToDo: in_() not yet supported for relations
-                    # elif isinstance(source, list) and len(source) > 0:
-                    #    if isinstance(source[0], Node):
-                    #        q = q.filter(Edge.source.in_(source))
-
-            if target:
-                if isinstance(target, str):
-                    target = self.query_nodes(bel=target)[0]
-
-                if isinstance(target, Node):
-                    q = q.filter(Edge.target == target)
-
-                    # elif isinstance(target, list) and len(target) > 0:
-                    #    if isinstance(target[0], Node):
-                    #        q = q.filter(Edge.source.in_(target))
-
-            if citation or evidence:
-                q = q.join(Evidence)
-
-                if citation:
-                    if isinstance(citation, Citation):
-                        q = q.filter(Evidence.citation == citation)
-
-                    elif isinstance(citation, list) and isinstance(citation[0], Citation):
-                        q = q.filter(Evidence.citation.in_(citation))
-
-                    elif isinstance(citation, str):
-                        q = q.join(Citation).filter(Citation.reference.like(citation))
-
-                if evidence:
-                    if isinstance(evidence, Evidence):
-                        q = q.filter(Edge.evidence == evidence)
-
-                    elif isinstance(evidence, str):
-                        q = q.filter(Evidence.text.like(evidence))
-
-            if property:
-                q = q.join(Property, Edge.properties)
-
-                if isinstance(property, Property):
-                    q = q.filter(Property.id == property.id)
-                elif isinstance(property, int):
-                    q = q.filter(Property.id == property)
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        return [
-            edge.to_json()
-            for edge in result
-        ]
-
-    def query_citations(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
-                        evidence=False, evidence_text=None, as_dict_list=False):
-        """Builds and runs a query over all citations in the PyBEL cache.
-
-        :param int citation_id:
-        :param str type: Type of the citation. e.g. PubMed
-        :param str reference: The identifier used for the citation. e.g. PubMed_ID
-        :param str name: Title of the citation.
-        :param str or list[str] author: The name or a list of names of authors participated in the citation.
-        :param date: Publishing date of the citation.
-        :type date: str or datetime.date
-        :param bool evidence: Weather or not supporting text should be included in the return.
-        :param evidence_text:
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`Citation` objects.
-        :return: List of :class:`Citation` objects or corresponding dicts.
-        :rtype: list[Citation] or dict
-        """
-        q = self.session.query(Citation)
-
-        if citation_id and isinstance(citation_id, int):
-            q = q.filter_by(id=citation_id)
-
-        else:
-            if author is not None:
-                q = q.join(Author, Citation.authors)
-                if isinstance(author, str):
-                    q = q.filter(Author.name.like(author))
-                elif isinstance(author, list):
-                    q = q.filter(Author.name.in_(author))
-
-            if type:
-                q = q.filter(Citation.type.like(type))
-
-            if reference:
-                q = q.filter(Citation.reference == reference)
-
-            if name:
-                q = q.filter(Citation.name.like(name))
-
-            if date:
-                if isinstance(date, datetime.date):
-                    q = q.filter(Citation.date == date)
-                elif isinstance(date, str):
-                    q = q.filter(Citation.date == parse_datetime(date))
-
-            if evidence_text:
-                q = q.join(Evidence).filter(Evidence.text.like(evidence_text))
-
-        citations = q.all()
-
-        if not as_dict_list:
-            return citations
-
-        if not (evidence or evidence_text):
-            return [
-                citation.to_json()
-                for citation in citations
-            ]
-
-        return [
-            evidence.to_json()
-            for citation in citations
-            for evidence in citation.evidences
-        ]
-
-    def query_node_properties(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
-        """Builds and runs a query over all property entries in the database.
-
-        :param int property_id: Database primary identifier.
-        :param str participant: The participant that is effected by the property (OBJECT or SUBJECT)
-        :param str modifier: The modifier of the property.
-        :param bool as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
-                             :class:`Property` objects.
-        :rtype: list[Property]
-        """
-        q = self.session.query(Property)
-
-        if property_id:
-            q = q.filter_by(id=property_id)
-
-        else:
-            if participant:
-                q = q.filter(Property.participant.like(participant))
-
-            if modifier:
-                q = q.filter(Property.modifier.like(modifier))
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        return [
-            prop.data
-            for prop in result
-        ]
-
-
-class CacheManager(EdgeStoreQueryManager, EdgeStoreInsertManager, NetworkManager, EquivalenceManager,
-                   OwlNamespaceManager, OwlAnnotationManager):
+class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, OwlNamespaceManager,
+              OwlAnnotationManager):
     """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
     SQLite by default for speed and lightness, but any database can be used with its SQLAlchemy interface.
     """
 
     @staticmethod
     def ensure(connection=None, **kwargs):
-        """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
+        """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
 
-        :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None``
+        :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
                             for default connection
-        :type connection: None or str or CacheManager
-        :rtype: CacheManager
+        :type connection: None or str or Manager
+        :param kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
+        :rtype: Manager
         """
-        if isinstance(connection, CacheManager):
+        if isinstance(connection, Manager):
             return connection
-        return CacheManager(connection=connection, **kwargs)
+        return Manager(connection=connection, **kwargs)
+
+
+class CacheManager(Manager):
+    def __init__(self, *args, **kwargs):
+        super(CacheManager, self).__init__(*args, **kwargs)
+        warnings.warn('CacheManager renamed to Manager')

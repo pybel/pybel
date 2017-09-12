@@ -25,8 +25,8 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
     """Loads a BEL graph from an iterable over the lines of a BEL script
 
     :param iter[str] lines: An iterable of strings (the lines in a BEL script)
-    :param manager: database connection string to cache, pre-built CacheManager, or None to use default cache
-    :type manager: None or str or pybel.manager.cache.CacheManager
+    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
+    :type manager: None or str or pybel.manager.cache.Manager
     :param bool allow_naked_names: if true, turn off naked namespace failures
     :param bool allow_nested: if true, turn off nested statement failures
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
@@ -56,8 +56,8 @@ def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, c
     """Loads a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str path: A file path
-    :param manager: database connection string to cache, pre-built CacheManager, or None to use default cache
-    :type manager: None or str or pybel.manager.cache.CacheManager
+    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
+    :type manager: None or str or pybel.manager.cache.Manager
     :param bool allow_naked_names: if true, turn off naked namespace failures
     :param bool allow_nested: if true, turn off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
@@ -87,8 +87,8 @@ def from_url(url, manager=None, allow_naked_names=False, allow_nested=False, cit
     """Loads a BEL graph from a URL resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str url: A valid URL pointing to a BEL resource
-    :param manager: database connection string to cache, pre-built CacheManager, or None to use default cache
-    :type manager: None or str or pybel.manager.cache.CacheManager
+    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
+    :type manager: None or str or pybel.manager.cache.Manager
     :param bool allow_naked_names: if true, turn off naked namespace failures
     :param bool allow_nested: if true, turn off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
