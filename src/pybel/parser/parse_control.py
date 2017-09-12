@@ -32,8 +32,9 @@ unset_all = Suppress(BEL_KEYWORD_ALL)
 
 supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
 
-set_citation = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
-set_evidence = And([Suppress(supporting_text_tags), Suppress('='), quote('value')])
+set_statement_group_stub = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), qid('group')])
+set_citation_stub = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
+set_evidence_stub = And([Suppress(supporting_text_tags), Suppress('='), quote('value')])
 
 
 class ControlParser(BaseParser):
@@ -66,11 +67,9 @@ class ControlParser(BaseParser):
 
         annotation_key = ppc.identifier('key').setParseAction(self.handle_annotation_key)
 
-        self.set_statement_group = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), qid('group')])
-        self.set_statement_group.setParseAction(self.handle_set_statement_group)
-
-        self.set_citation = set_citation.setParseAction(self.handle_set_citation)
-        self.set_evidence = set_evidence.setParseAction(self.handle_set_evidence)
+        self.set_statement_group = set_statement_group_stub().setParseAction(self.handle_set_statement_group)
+        self.set_citation = set_citation_stub().setParseAction(self.handle_set_citation)
+        self.set_evidence = set_evidence_stub().setParseAction(self.handle_set_evidence)
 
         set_command_prefix = And([annotation_key('key'), Suppress('=')])
         self.set_command = set_command_prefix + qid('value')
@@ -156,35 +155,50 @@ class ControlParser(BaseParser):
         if len(values) < 2:
             raise CitationTooShortException(self.line_number, line, position)
 
-        if values[0] not in CITATION_TYPES:
-            raise InvalidCitationType(self.line_number, line, position, values[0])
+        citation_type = values[0]
 
-        if values[0] == CITATION_TYPE_PUBMED:
-            if 2 == len(values) and not is_int(values[1]):
-                raise InvalidPubMedIdentifierWarning(self.line_number, line, position, values[1])
-            elif not is_int(values[2]):
-                raise InvalidPubMedIdentifierWarning(self.line_number, line, position, values[2])
+        if citation_type not in CITATION_TYPES:
+            raise InvalidCitationType(self.line_number, line, position, citation_type)
+
+        if 2 == len(values) :
+            return self.handle_set_citation_double(line, position, tokens)
+
+        citation_reference = values[2]
+
+        if citation_type == CITATION_TYPE_PUBMED and not is_int(citation_reference):
+            raise InvalidPubMedIdentifierWarning(self.line_number, line, position, citation_reference)
 
         if 4 <= len(values) and not valid_date(values[3]):
             log.debug('Invalid date: %s. Truncating entry.', values[3])
             self.citation = dict(zip(CITATION_ENTRIES, values[:3]))
             return tokens
 
+        # TODO consider parsing up authors list
+
         if 6 < len(values):
             raise CitationTooLongException(self.line_number, line, position)
 
-        if 2 == len(values):
-            self.citation = dict(zip((CITATION_TYPE, CITATION_REFERENCE), values))
-        else:
-            self.citation = dict(zip(CITATION_ENTRIES, values))
+        self.citation = dict(zip(CITATION_ENTRIES, values))
+
+        return tokens
+
+    def handle_set_citation_double(self, line, position, tokens):
+        values = tokens['values']
+
+        if values[0] == CITATION_TYPE_PUBMED and not is_int(values[1]):
+            raise InvalidPubMedIdentifierWarning(self.line_number, line, position, values[1])
+
+        self.citation = dict(zip((CITATION_TYPE, CITATION_REFERENCE), values))
 
         return tokens
 
     def handle_set_evidence(self, line, position, tokens):
+        log.debug('Setting evidence: %s', tokens)
         self.evidence = tokens['value']
         return tokens
 
     def handle_set_command(self, line, position, tokens):
+        log.debug('Setting annotation: %s', tokens)
         key = tokens['key']
         value = tokens['value']
 
@@ -194,6 +208,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_set_command_list(self, line, position, tokens):
+        log.debug('Setting annotation list: %s', tokens)
         key = tokens['key']
         values = tokens['values']
 

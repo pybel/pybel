@@ -26,7 +26,7 @@ from ..constants import (
     GRAPH_ANNOTATION_LIST
 )
 from ..exceptions import PyBelWarning
-from ..manager.cache import CacheManager, build_manager
+from ..manager import Manager
 from ..parser import BelParser
 from ..parser import MetadataParser
 from ..parser.parse_exceptions import (
@@ -52,9 +52,9 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
 
     :param BELGraph graph: A BEL graph
     :param iter[str] lines: An iterable over lines of BEL script
-    :param manager: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None`` for
+    :param manager: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None`` for
                     default connection
-    :type manager: None or str or CacheManager
+    :type manager: None or str or Manager
     :param bool allow_nested: If true, turns off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
@@ -67,7 +67,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
-    manager = build_manager(manager)
+    manager = Manager.ensure(manager)
 
     metadata_parser = MetadataParser(manager, allow_redefinition=kwargs.get('allow_redefinition'))
 

@@ -45,7 +45,7 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, identifier=KIND)
+gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, name=KIND)
 
 
 class GsubParser(BaseParser):

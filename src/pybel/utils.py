@@ -24,6 +24,8 @@ from .constants import (
     VERSION,
     PYBEL_CONFIG_PATH,
     PYBEL_CONNECTION,
+    CITATION_TYPE,
+    CITATION_REFERENCE,
 )
 from .exceptions import EmptyResourceError, MissingSectionError
 
@@ -219,6 +221,9 @@ def tokenize_version(version_string):
 
 def citation_dict_to_tuple(citation):
     """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple"""
+    if len(citation) == 2 and CITATION_TYPE in citation and CITATION_REFERENCE in citation:
+        return citation[CITATION_TYPE], citation[CITATION_REFERENCE]
+
     if all(x in citation for x in CITATION_ENTRIES):
         return tuple(citation[x] for x in CITATION_ENTRIES)
 
@@ -232,7 +237,10 @@ def citation_dict_to_tuple(citation):
 
 
 def flatten_citation(citation):
-    """Flattens a citation dict, from the ``d[CITATION]`` entry in an edge data dictionary"""
+    """Flattens a citation dict, from the ``d[CITATION]`` entry in an edge data dictionary
+
+    :param dict[str,str] citation: A PyBEL citation data dictionary
+    """
     return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
 
 
@@ -418,3 +426,15 @@ def set_default_mysql_connection(user=None, password=None, host=None, database=N
     fmt = PYBEL_MYSQL_FMT_NOPASS if password is None else PYBEL_MYSQL_FMT_PASS
 
     set_default_connection(fmt.format(**kwargs))
+
+
+def hash_dump(d):
+    return hashlib.sha512(json.dumps(d, sort_keys=True).encode('utf-8')).hexdigest()
+
+
+def hash_citation(type, reference):
+    return hash_dump((type, reference))
+
+
+def hash_evidence(text, type, reference):
+    return hash_dump((type, reference, text))

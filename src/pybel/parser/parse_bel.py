@@ -57,10 +57,6 @@ reaction_tags = one_of_tags(['reaction', 'rxn'], REACTION, FUNCTION)
 molecular_activity_tags = Suppress(oneOf(['ma', 'molecularActivity']))
 
 
-def canonicalized_oneOf(l, canon):
-    return oneOf(l).setParseAction(replaceWith(canon))
-
-
 class BelParser(BaseParser):
     """Build a parser backed by a given dictionary of namespaces"""
 
@@ -299,40 +295,40 @@ class BelParser(BaseParser):
         increases_tag = oneOf(['->', '→', 'increases']).setParseAction(replaceWith(INCREASES))
 
         #: `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
-        directly_increases_tag = canonicalized_oneOf(['=>', '⇒', 'directlyIncreases'], DIRECTLY_INCREASES)
+        directly_increases_tag = one_of_tags(['=>', '⇒', 'directlyIncreases'], DIRECTLY_INCREASES)
 
         #: `3.1.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases>`_
-        decreases_tag = canonicalized_oneOf(['-|', 'decreases'], DECREASES)
+        decreases_tag = one_of_tags(['-|', 'decreases'], DECREASES)
 
         #: `3.1.4 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases>`_
-        directly_decreases_tag = canonicalized_oneOf(['=|', 'directlyDecreases'], DIRECTLY_DECREASES)
+        directly_decreases_tag = one_of_tags(['=|', 'directlyDecreases'], DIRECTLY_DECREASES)
 
         #: `3.5.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_analogous>`_
-        analogous_tag = canonicalized_oneOf(['analogousTo'], ANALOGOUS_TO)
+        analogous_tag = one_of_tags(['analogousTo'], ANALOGOUS_TO)
 
         #: `3.1.6 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc>`_
-        causes_no_change_tag = canonicalized_oneOf(['cnc', 'causesNoChange'], CAUSES_NO_CHANGE)
+        causes_no_change_tag = one_of_tags(['cnc', 'causesNoChange'], CAUSES_NO_CHANGE)
 
         #: `3.1.7 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg>`_
-        regulates_tag = canonicalized_oneOf(['reg', 'regulates'], REGULATES)
+        regulates_tag = one_of_tags(['reg', 'regulates'], REGULATES)
 
         #: `3.2.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor>`_
-        negative_correlation_tag = canonicalized_oneOf(['neg', 'negativeCorrelation'], NEGATIVE_CORRELATION)
+        negative_correlation_tag = one_of_tags(['neg', 'negativeCorrelation'], NEGATIVE_CORRELATION)
 
         #: `3.2.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XposCor>`_
-        positive_correlation_tag = canonicalized_oneOf(['pos', 'positiveCorrelation'], POSITIVE_CORRELATION)
+        positive_correlation_tag = one_of_tags(['pos', 'positiveCorrelation'], POSITIVE_CORRELATION)
 
         #: `3.2.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xassociation>`_
-        association_tag = canonicalized_oneOf(['--', 'association'], ASSOCIATION)
+        association_tag = one_of_tags(['--', 'association'], ASSOCIATION)
 
         #: `3.3.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_orthologous>`_
-        orthologous_tag = canonicalized_oneOf(['orthologous'], ORTHOLOGOUS)
+        orthologous_tag = one_of_tags(['orthologous'], ORTHOLOGOUS)
 
         #: `3.4.5 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa>`_
-        is_a_tag = canonicalized_oneOf(['isA'], IS_A)
+        is_a_tag = one_of_tags(['isA'], IS_A)
 
         #: PyBEL Variant
-        equivalent_tag = canonicalized_oneOf(['eq', EQUIVALENT_TO], EQUIVALENT_TO)
+        equivalent_tag = one_of_tags(['eq', EQUIVALENT_TO], EQUIVALENT_TO)
 
         self.bel_to_bel_relations = [
             association_tag,

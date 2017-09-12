@@ -9,9 +9,9 @@ It also facilitates data interchange between common formats and databases such a
 `Neo4J <https://neo4j.com>`_. Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
 suite of functions and workflows for analyzing the resulting biological networks.
 
-This package was developed at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_
-with support from the `IMI <https://www.imi.europa.eu/>`_ projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and
-`PHAGO <http://www.phago.eu/>`_.
+This package was originally developed as part of the master's work of `Charles Tapley Hoyt <https://github.com/cthoyt>`_
+at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_ with support from the `IMI <https://www.imi.europa.eu/>`_
+projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and `PHAGO <http://www.phago.eu/>`_.
 
 Getting Started
 ---------------

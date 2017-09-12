@@ -93,7 +93,7 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, identifier=KIND)
+pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, name=KIND)
 
 
 class PmodParser(BaseParser):

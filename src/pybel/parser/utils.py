@@ -4,8 +4,20 @@ import itertools as itt
 import logging
 
 import re
-from pyparsing import Suppress, ZeroOrMore, White, Word, alphanums, dblQuotedString, removeQuotes, And, delimitedList, \
-    oneOf, replaceWith, Group
+from pyparsing import (
+    Suppress,
+    ZeroOrMore,
+    White,
+    Word,
+    alphanums,
+    dblQuotedString,
+    removeQuotes,
+    And,
+    delimitedList,
+    oneOf,
+    replaceWith,
+    Group,
+)
 
 from ..constants import SUBJECT, RELATION, OBJECT
 from ..utils import subdict_matches
@@ -18,30 +30,39 @@ re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+AN
 def any_subdict_matches(dict_of_dicts, query_dict):
     """Checks if dictionary target_dict matches one of the subdictionaries of a
 
-    :param dict_of_dicts: dictionary of dictionaries
-    :param query_dict: dictionary
+    :param dict[any,dict] dict_of_dicts: dictionary of dictionaries
+    :param dict query_dict: dictionary
     :return: if dictionary target_dict matches one of the subdictionaries of a
     :rtype: bool
     """
-    return any(subdict_matches(sd, query_dict) for sd in dict_of_dicts.values())
+    return any(
+        subdict_matches(sub_dict, query_dict)
+        for sub_dict in dict_of_dicts.values()
+    )
 
 
 def cartesian_dictionary(d):
     """takes a dictionary of sets and provides subdicts
 
     :param d: a dictionary of sets
-    :type d: dict
+    :type d: dict[any,set[any]]
     :rtype: list
+
+    >>> cartesian_dictionary({'A': {'1', '2'}, 'B': {'x', 'y'}})
+    [{'A': '1', 'B': 'x'}, {'A': '1', 'B': 'y'}, {'A': '2', 'B': 'x'}, {'A': '2', 'B': 'y'}]
     """
-    q = {}
-    for key in d:
-        q[key] = {(key, value) for value in d[key]}
+    q = [
+        {
+            (key, value)
+            for value in values
+        }
+        for key, values in d.items()
+    ]
 
-    res = []
-    for values in itt.product(*q.values()):
-        res.append(dict(values))
-
-    return res
+    return [
+        dict(values)
+        for values in itt.product(*q)
+    ]
 
 
 def is_int(s):
@@ -79,22 +100,24 @@ def nest(*content):
     return And([LPF, content[0]] + list(itt.chain.from_iterable(zip(itt.repeat(C), content[1:]))) + [RPF])
 
 
-def one_of_tags(tags, canonical_tag, identifier):
+def one_of_tags(tags, canonical_tag, name=None):
     """This is a convenience method for defining the tags usable in the :class:`BelParser`. For example,
     statements like g(HGNC:SNCA) can be expressed also as geneAbundance(HGNC:SNCA). The language
     must define multiple different tags that get normalized to the same thing.
 
-    :param tags: a list of strings that are the tags for a function. For example, ['g', 'geneAbundance'] for the
+    :param list[str] tags: a list of strings that are the tags for a function. For example, ['g', 'geneAbundance'] for the
                     abundance of a gene
-    :type tags: list of str
-    :param canonical_tag: the preferred tag name. Does not have to be one of the tags. For example, 'GeneAbundance'
+    :param str canonical_tag: the preferred tag name. Does not have to be one of the tags. For example, 'GeneAbundance'
                             (note capitalization) is used for the abundance of a gene
-    :type canonical_tag: str
-    :param identifier: this is the key under which the value for this tag is put in the PyParsing framework.
-    :return: a PyParsing :class:`ParseElement`
-    :rtype: :class:`ParseElement`
+    :param str name: this is the key under which the value for this tag is put in the PyParsing framework.
+    :rtype: :class:`pyparsing.ParseElement`
     """
-    return oneOf(tags).setParseAction(replaceWith(canonical_tag)).setResultsName(identifier)
+    element = oneOf(tags).setParseAction(replaceWith(canonical_tag))
+
+    if name is None:
+        return element
+
+    return element.setResultsName(name)
 
 
 def triple(subject, relation, obj):

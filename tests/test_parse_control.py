@@ -7,6 +7,7 @@ from pybel.constants import EVIDENCE, CITATION, CITATION_NAME, CITATION_TYPE, CI
     CITATION_DATE, CITATION_COMMENTS, ANNOTATIONS
 from pybel.io.line_utils import sanitize_file_lines
 from pybel.parser import ControlParser
+from pybel.parser.parse_control import set_citation_stub
 from pybel.parser.parse_exceptions import *
 from tests.constants import SET_CITATION_TEST, test_citation_dict
 
@@ -66,6 +67,20 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
             self.parser.parse_lines(s)
 
 
+class TestSetCitation(unittest.TestCase):
+    def test_parser_double(self):
+        set_citation_stub.parseString('Citation = {"PubMed","12928037"}')
+
+    def test_parser_double_spaced(self):
+        set_citation_stub.parseString('Citation = {"PubMed", "12928037"}')
+
+    def test_parser_triple(self):
+        set_citation_stub.parseString('Citation = {"PubMedCentral","Trends in molecular medicine","12928037"}')
+
+    def test_parser_triple_spaced(self):
+        set_citation_stub.parseString('Citation = {"PubMedCentral", "Trends in molecular medicine", "12928037"}')
+
+
 class TestParseControlSetStatementErrors(TestParseControl):
     def test_invalid_citation_type(self):
         with self.assertRaises(InvalidCitationType):
@@ -74,6 +89,10 @@ class TestParseControlSetStatementErrors(TestParseControl):
     def test_invalid_pmid(self):
         with self.assertRaises(InvalidPubMedIdentifierWarning):
             self.parser.parseString('SET Citation = {"PubMed","Trends in molecular medicine","NOT VALID NUMBER"}')
+
+    def test_invalid_pmid_short(self):
+        with self.assertRaises(InvalidPubMedIdentifierWarning):
+            self.parser.parseString('SET Citation = {"PubMed","NOT VALID NUMBER"}')
 
     def test_set_missing_statement(self):
         statements = [
@@ -159,14 +178,14 @@ class TestParseControl2(TestParseControl):
 
         self.assertEqual(expected_dict, self.parser.get_annotations())
 
-    def test_citation_long(self):
-        s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","1999-01-01","de Nigris|Lerman A|Ignarro LJ",""}'
+    def test_citation_with_empty_comment(self):
+        s = 'SET Citation = {"PubMed","Test Name","12928037","1999-01-01","de Nigris|Lerman A|Ignarro LJ",""}'
 
         self.parser.parseString(s)
 
         expected_citation = {
             CITATION_TYPE: 'PubMed',
-            CITATION_NAME: 'Trends in molecular medicine',
+            CITATION_NAME: 'Test Name',
             CITATION_REFERENCE: '12928037',
             CITATION_DATE: '1999-01-01',
             CITATION_AUTHORS: 'de Nigris|Lerman A|Ignarro LJ',
@@ -182,6 +201,27 @@ class TestParseControl2(TestParseControl):
         }
 
         self.assertEqual(expected_dict, self.parser.get_annotations())
+
+    def test_double(self):
+        s = 'SET Citation = {"PubMed","12928037"}'
+        self.parser.parseString(s)
+
+        expected_citation = {
+            CITATION_TYPE: 'PubMed',
+            CITATION_REFERENCE: '12928037',
+        }
+        self.assertEqual(expected_citation, self.parser.citation)
+
+    def test_double_with_space(self):
+        """Same as test_double, but has a space between the comma and next entry"""
+        s = 'SET Citation = {"PubMed", "12928037"}'
+        self.parser.parseString(s)
+
+        expected_citation = {
+            CITATION_TYPE: 'PubMed',
+            CITATION_REFERENCE: '12928037',
+        }
+        self.assertEqual(expected_citation, self.parser.citation)
 
     def test_citation_too_short(self):
         s = 'SET Citation = {"PubMed"}'
