@@ -19,7 +19,7 @@ from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
 
-VERSION = '0.8.1-dev'
+VERSION = '0.8.1'
 
 #: The last PyBEL version where the graph data definition changed
 PYBEL_MINIMUM_IMPORT_VERSION = (0, 8, 0)

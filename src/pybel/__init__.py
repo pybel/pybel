@@ -78,7 +78,7 @@ __all__ = (
     cache_manager.__all__
 )
 
-__version__ = '0.8.1-dev'
+__version__ = '0.8.1'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'
