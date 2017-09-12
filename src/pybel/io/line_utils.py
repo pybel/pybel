@@ -26,7 +26,7 @@ from ..constants import (
     GRAPH_ANNOTATION_LIST
 )
 from ..exceptions import PyBelWarning
-from ..manager.manager import Manager
+from ..manager import Manager
 from ..parser import BelParser
 from ..parser import MetadataParser
 from ..parser.parse_exceptions import (

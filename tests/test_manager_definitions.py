@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 from pybel.manager import models
-from pybel.manager.cache import Manager
+from pybel.manager import Manager
 from tests.constants import (
     FleetingTemporaryCacheMixin,
     HGNC_URL,

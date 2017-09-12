@@ -12,7 +12,7 @@ import logging
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 
-from .manager import Manager
+from .cache_manager import Manager
 
 __all__ = [
     'to_database',

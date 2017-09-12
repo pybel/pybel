@@ -8,20 +8,20 @@ downloading and parsing upon each compilation.
 
 """
 
-from . import manager
+from . import base_manager
+from . import cache_manager
 from . import database_io
 from . import make_json_serializable
 from . import models
-from . import base_manager
-from .manager import *
+from . import query_manager
+from .base_manager import *
+from .cache_manager import *
 from .database_io import *
 from .models import *
 from .query_manager import *
-from .base_manager import  *
-from . import query_manager
 
 __all__ = (
-    manager.__all__ +
+    cache_manager.__all__ +
     database_io.__all__ +
     models.__all__ +
     base_manager.__all__ +

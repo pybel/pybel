@@ -10,7 +10,7 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
-from pybel.manager.cache import Manager
+from pybel.manager import Manager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches

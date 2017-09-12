@@ -12,8 +12,8 @@ import pybel
 from pybel import BELGraph, from_database, to_database, from_path
 from pybel.constants import *
 from pybel.manager import models
-from pybel.manager.cache import hash_citation
 from pybel.manager.models import Namespace, NamespaceEntry, Node
+from pybel.utils import hash_citation
 from tests import constants
 from tests.constants import (
     FleetingTemporaryCacheMixin,
@@ -889,17 +889,27 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertIn(citation_1, author_dict_list)
 
         # author list, data
-        author_dict_list2 = self.manager.query_citations(author=["Example Author", "Example Author2"], as_dict_list=True)
+        author_dict_list2 = self.manager.query_citations(
+            author=["Example Author", "Example Author2"],
+            as_dict_list=True
+        )
         self.assertIn(citation_1, author_dict_list2)
 
         # type, name, data
-        name_dict_list = self.manager.query_citations(type=CITATION_TYPE_PUBMED, name="That other article from last week",
-                                                      as_dict_list=True)
+        name_dict_list = self.manager.query_citations(
+            type=CITATION_TYPE_PUBMED,
+            name="That other article from last week",
+            as_dict_list=True
+        )
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(citation_2, name_dict_list)
 
         # type, name like, data
-        name_dict_list2 = self.manager.query_citations(type=CITATION_TYPE_PUBMED, name="%article from%", as_dict_list=True)
+        name_dict_list2 = self.manager.query_citations(
+            type=CITATION_TYPE_PUBMED,
+            name="%article from%",
+            as_dict_list=True
+        )
         self.assertEqual(len(name_dict_list2), 2)
         self.assertIn(citation_1, name_dict_list2)
         self.assertIn(citation_2, name_dict_list2)
