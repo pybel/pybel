@@ -798,11 +798,11 @@ class InsertManager(NamespaceManager, AnnotationManager):
             self.ensure_namespace(GOCC_LATEST)
 
         for node in graph.nodes_iter():
-            if node in self.node_model:
-                node_object = self.node_model[node]
-            else:
+            try:
                 node_object = self.get_or_create_node(graph, node)
                 self.node_model[node] = node_object
+            except:
+                continue
 
             if node_object not in network.nodes:  # FIXME when would the network ever have nodes in it already?
                 network.nodes.append(node_object)
@@ -810,6 +810,13 @@ class InsertManager(NamespaceManager, AnnotationManager):
         self.session.flush()
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
+            if u not in self.node_model:
+                log.debug('Skipping uncached node: %s', u)
+                continue
+
+            if v not in self.node_model:
+                log.debug('Skipping uncached node: %s', v)
+                continue
 
             if EVIDENCE not in data:
                 continue
@@ -903,25 +910,28 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
 
-        if result is None:
-            type = node_data[FUNCTION]
+        if result is not None:
+            self.object_cache_node[node_hash] = result
+            return result
 
-            result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+        type = node_data[FUNCTION]
 
-            if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
-                namespace = node_data[NAMESPACE]
-                url = graph.namespace_url[namespace]
-                result.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
+        result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
-            elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
-                result.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+        if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
+            namespace = node_data[NAMESPACE]
+            url = graph.namespace_url[namespace]
+            result.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
-            if VARIANTS in node_data or FUSION in node_data:
-                result.is_variant = True
-                result.fusion = FUSION in node_data
-                result.modifications = self.get_or_create_modification(graph, node_data)
+        elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
+            result.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
 
-            self.session.add(result)
+        if VARIANTS in node_data or FUSION in node_data:
+            result.is_variant = True
+            result.fusion = FUSION in node_data
+            result.modifications = self.get_or_create_modification(graph, node_data)
+
+        self.session.add(result)
 
         self.object_cache_node[node_hash] = result
 
