@@ -49,7 +49,7 @@ class MetadataParser(BaseParser):
                  annotations_regex=None, default_namespace=None, allow_redefinition=False):
         """
         :param manager: A cache manager
-        :type manager: pybel.manager.cache.Manager
+        :type manager: pybel.manager.Manager
         :param namespace_dict: A dictionary of pre-loaded, enumerated namespaces from 
                                 {namespace keyword: set of valid values}
         :type namespace_dict: dict

@@ -25,7 +25,7 @@ from .canonicalize import to_bel
 from .constants import PYBEL_LOG_DIR, get_cache_connection, config, PYBEL_CONNECTION
 from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
 from .manager import defaults
-from .manager.cache import Manager
+from .manager import Manager
 from .manager.database_io import to_database, from_database
 from .manager.models import Network, Namespace, Annotation, Base
 from .utils import set_default_connection, set_default_mysql_connection

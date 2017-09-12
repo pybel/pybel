@@ -1,17 +1,28 @@
 Cache
 =====
 
-Cache Manager
--------------
+Manager API
+-----------
 
-.. autoclass:: pybel.manager.base_cache.BaseCacheManager
+The BaseManager takes care of building and maintaining the connection to the database via SQLAlchemy.
+
+.. autoclass:: pybel.manager.BaseManager
     :members:
 
-.. autoclass:: pybel.manager.cache.Manager
+The Manager collates multiple groups of functions for interacting with the database. For sake of code clarity, they
+are separated across multiple classes that are documented below.
+
+.. autoclass:: pybel.manager.Manager
     :members:
     :show-inheritance:
 
-.. autoclass:: pybel.manager.query_manager.QueryManager
+Manager Components
+------------------
+
+.. autoclass:: pybel.manager.NetworkManager
+    :members:
+
+.. autoclass:: pybel.manager.QueryManager
     :members:
 
 Database Models

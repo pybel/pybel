@@ -10,7 +10,6 @@ enable this option, but can specify a database location if they choose.
 import logging
 import time
 
-import warnings
 from collections import defaultdict
 from copy import deepcopy
 from six import string_types
@@ -51,28 +50,12 @@ from ..utils import (
 
 __all__ = [
     'Manager',
-    'build_manager',
+    'NetworkManager',
 ]
 
 log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
-
-
-def build_manager(connection=None, **kwargs):
-    """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
-    
-    :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
-                        for default connection
-    :type connection: None or str or Manager
-    :param kwargs: Arguments to pass ot the constructor of
-    :rtype: Manager
-    """
-    warnings.warn('build_manager is deprecated. Use Manager.ensure instead')
-
-    if isinstance(connection, Manager):
-        return connection
-    return Manager(connection=connection, **kwargs)
 
 
 class NamespaceManager(BaseManager):
@@ -608,7 +591,7 @@ class EquivalenceManager(NamespaceManager):
 
 
 class NetworkManager(NamespaceManager, AnnotationManager):
-    """Manages database networks"""
+    """Groups functions for inserting and querying networks in the database's network store."""
 
     def count_networks(self):
         """Counts the number of networks in the cache
@@ -635,6 +618,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
     def has_name_version(self, name, version):
         """Checks if the name/version combination is already in the database
 
+        :param str name: The network name
+        :param str version: The network version
         :rtype: bool
         """
         return self.session.query(exists().where(Network.name == name, Network.version == version)).scalar()
@@ -644,7 +629,6 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         :param int network_id: The network's database identifier
         """
-
         network = self.session.query(Network).get(network_id)
         self.session.delete(network)
         self.session.commit()
@@ -661,7 +645,10 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param str name: The name of the network to query
         :rtype: set[str]
         """
-        return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
+        return {
+            version
+            for version, in self.session.query(Network.version).filter(Network.name == name).all()
+        }
 
     def get_network_by_name_version(self, name, version):
         """Loads most recently added graph with the given name, or allows for specification of version
@@ -694,7 +681,6 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Gets a network from the database by its identifier.
 
         :param int network_id: The network's database identifier
-        :return: A Network object
         :rtype: Network
         """
         return self.session.query(Network).get(network_id)
@@ -1261,9 +1247,3 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
         if isinstance(connection, Manager):
             return connection
         return Manager(connection=connection, **kwargs)
-
-
-class CacheManager(Manager):
-    def __init__(self, *args, **kwargs):
-        super(CacheManager, self).__init__(*args, **kwargs)
-        warnings.warn('CacheManager renamed to Manager')

@@ -355,7 +355,7 @@ class QueryManager(BaseManager):
         :param date: Publishing date of the citation.
         :type date: str or datetime.date
         :param bool evidence: Weather or not supporting text should be included in the return.
-        :param evidence_text:
+        :param str evidence_text:
         :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
                             :class:`Citation` objects.
         :return: List of :class:`Citation` objects or corresponding dicts.
