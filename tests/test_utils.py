@@ -6,10 +6,11 @@ import networkx as nx
 
 import pybel.utils
 from pybel.canonicalize import postpend_location, node_to_bel
-from pybel.constants import FUNCTION
+from pybel.constants import *
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.utils import nest
+from pybel.utils import flatten_citation
 from pybel.utils import get_bel_resource, list2tuple, tokenize_version
 from tests.constants import test_an_1
 from tests.mocks import mock_bel_resources
@@ -161,3 +162,39 @@ class TestUtils(unittest.TestCase):
 
         for u, v, k in expected.edges(keys=True):
             self.assertEqual(expected[u][v][k], result[u][v][k])
+
+
+class TestFlattenCitation(unittest.TestCase):
+    def test_double(self):
+        d = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: '1234',
+        }
+        self.assertEqual('"PubMed","1234"', flatten_citation(d))
+
+    def test_name(self):
+        d = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: '1234',
+            CITATION_NAME: 'Test Name'
+        }
+        self.assertEqual('"PubMed","Test Name","1234"', flatten_citation(d))
+
+    def test_date(self):
+        d = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: '1234',
+            CITATION_NAME: 'Test Name',
+            CITATION_DATE: '1999-01-01'
+        }
+        self.assertEqual('"PubMed","Test Name","1234","1999-01-01"', flatten_citation(d))
+
+    def test_authors(self):
+        d = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: '1234',
+            CITATION_NAME: 'Test Name',
+            CITATION_DATE: '1999-01-01',
+            CITATION_AUTHORS: 'Author A|Author B'
+        }
+        self.assertEqual('"PubMed","Test Name","1234","1999-01-01","Author A|Author B"', flatten_citation(d))
