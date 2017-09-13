@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.8.0 <https://github.com/pybel/pybel/compare/v0.7.3...v0.8.9>`_ - 2017-09-08
+------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Made new minimum unpickle version 0.8.0. From now on, all unpickle changes (before a 1.0.0 release) will be accompanied by a minor version bump.
+- Overall better handling of citation insertion
+- Updated data models. Added to Citation model and renamed namespaceEntry in Node model.
+- Better init function for BELGraph
+- Force name and version to not be null in the database
+- Update pickle references to use six module
+- Update base cache manager - better connection handling and more exposed arguments
+
+Added
+~~~~~
+- Get graph functions to cache manager
+- Added more useful functions to cache manager
+- Kwargs for setting name, version, and description in BELGraph init
+- Getters and setters for version and description in BELGraph
+- Node date to tuple functions (https://github.com/pybel/pybel/issues/145)
+
+`0.7.3 <https://github.com/pybel/pybel/compare/v0.7.2...v0.7.3>`_ - 2017-09-05
+------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Update logging for parsing of bad version strings
+- Change where kwargs go in parse_lines function
+- Make non-standard parsing modes part of kwargs
+
+Fixed
+~~~~~
+- On-purpose singletons now properly identified (https://github.com/pybel/pybel/issues/218)
+
+Added
+~~~~~
+- CLI command for set connection (https://github.com/pybel/pybel/issues/220)
+- GEF and GAP activities added for INDRA
 
 `0.7.2 <https://github.com/pybel/pybel/compare/v0.7.1...v0.7.2>`_ - 2017-08-10
 ------------------------------------------------------------------------------

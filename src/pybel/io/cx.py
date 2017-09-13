@@ -19,9 +19,10 @@ of Cytoscape.
 import json
 import logging
 import time
+
 from collections import defaultdict
 
-from ..canonicalize import decanonicalize_node
+from ..canonicalize import node_to_bel
 from ..constants import *
 from ..struct import BELGraph
 from ..utils import flatten_dict, expand_dict, hash_node
@@ -64,7 +65,7 @@ def calculate_canonical_cx_identifier(graph, node):
         return '{}:{}'.format(graph.node[node][NAMESPACE], graph.node[node][NAME])
 
     if VARIANTS in data or FUSION in data or data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
-        return decanonicalize_node(graph, node)
+        return node_to_bel(graph, node)
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
         return '{}:{}'.format(graph.node[node][NAMESPACE], graph.node[node][NAME])

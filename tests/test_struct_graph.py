@@ -18,15 +18,33 @@ class TestStruct(unittest.TestCase):
 
     def test_str(self):
         g = BELGraph(**{GRAPH_METADATA: {METADATA_NAME: 'test', METADATA_VERSION: '1.0.0'}})
+
+        self.assertEqual('test', g.name)
+        self.assertEqual('1.0.0', g.version)
+
+        self.assertEqual('test v1.0.0', str(g))
+
+    def test_str_kwargs(self):
+        g = BELGraph(name='test', version='1.0.0', description='test description')
+
+        self.assertEqual('test', g.name)
+        self.assertEqual('1.0.0', g.version)
+        self.assertEqual('test description', g.description)
+
         self.assertEqual('test v1.0.0', str(g))
 
     def test_name(self):
-        g = BELGraph(**{GRAPH_METADATA: {METADATA_NAME: 'test'}})
+        g = BELGraph()
+
+        g.name = 'test'
+        g.version = '1.0.0'
+        g.description = 'test description'
+
         self.assertEqual('test', g.name)
+        self.assertEqual('1.0.0', g.version)
+        self.assertEqual('test description', g.description)
 
-        g.name = 'other test'
-        self.assertEqual('other test', g.name)
-
+        self.assertEqual('test v1.0.0', str(g))
 
 if __name__ == '__main__':
     unittest.main()

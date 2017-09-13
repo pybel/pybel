@@ -64,7 +64,9 @@ from . import io
 from . import struct
 from .canonicalize import *
 from .io import *
+from .manager import cache_manager
 from .manager import database_io
+from .manager.cache_manager import *
 from .manager.database_io import *
 from .struct import *
 
@@ -72,10 +74,11 @@ __all__ = (
     struct.__all__ +
     io.__all__ +
     canonicalize.__all__ +
-    database_io.__all__
+    database_io.__all__ +
+    cache_manager.__all__
 )
 
-__version__ = '0.7.3-dev'
+__version__ = '0.8.2-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'

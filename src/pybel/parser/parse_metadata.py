@@ -7,8 +7,8 @@ This module supports the relation parser by handling statements.
 """
 
 import logging
-import re
 
+import re
 from pyparsing import Suppress, And, Word, Optional, MatchFirst
 from pyparsing import pyparsing_common as ppc
 
@@ -36,6 +36,7 @@ SEMANTIC_VERSION_STRING_RE = re.compile(
 
 MALFORMED_VERSION_STRING_RE = re.compile('(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?')
 
+
 class MetadataParser(BaseParser):
     """A parser for the document and definitions section of a BEL document.
 
@@ -45,10 +46,10 @@ class MetadataParser(BaseParser):
     """
 
     def __init__(self, manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
-                 annotations_regex=None, default_namespace=None):
+                 annotations_regex=None, default_namespace=None, allow_redefinition=False):
         """
         :param manager: A cache manager
-        :type manager: pybel.manager.cache.CacheManager
+        :type manager: pybel.manager.Manager
         :param namespace_dict: A dictionary of pre-loaded, enumerated namespaces from 
                                 {namespace keyword: set of valid values}
         :type namespace_dict: dict
@@ -66,6 +67,8 @@ class MetadataParser(BaseParser):
         """
         #: This metadata parser's internal definition cache manager
         self.manager = manager
+
+        self.disallow_redefinition = not allow_redefinition
 
         #: A dictionary of cached {namespace keyword: set of values}
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
@@ -154,23 +157,18 @@ class MetadataParser(BaseParser):
         self.document_metadata[norm_key] = value
 
         if norm_key == METADATA_VERSION:
-
-            if not SEMANTIC_VERSION_STRING_RE.match(value) and MALFORMED_VERSION_STRING_RE.match(value):
-                k = value.split('.')
-                while len(k) < 3:
-                    k.append('0')
-                self.document_metadata[norm_key] = ".".join(k)
-
             self.check_version(line, position, value)
 
         return tokens
 
+    def raise_for_redefined_namespace(self, line, position, namespace):
+        if self.disallow_redefinition and self.has_namespace(namespace):
+            raise RedefinedNamespaceError(self.line_number, line, position, namespace)
+
     def handle_namespace_url(self, line, position, tokens):
         """Handles statements like ``DEFINE NAMESPACE X AS URL "Y"``"""
         namespace = tokens['name']
-
-        if self.has_namespace(namespace):
-            raise RedefinedNamespaceError(self.line_number, line, position, namespace)
+        self.raise_for_redefined_namespace(line, position, namespace)
 
         url = tokens['url']
         terms = self.manager.get_namespace(url)
@@ -183,9 +181,7 @@ class MetadataParser(BaseParser):
     def handle_namespace_owl(self, line, position, tokens):
         """Handles statements like ``DEFINE NAMESPACE X AS OWL "Y"``"""
         namespace = tokens['name']
-
-        if self.has_namespace(namespace):
-            raise RedefinedNamespaceError(self.line_number, line, position, namespace)
+        self.raise_for_redefined_namespace(line, position, namespace)
 
         functions = set(tokens['functions'] if 'functions' in tokens else belns_encodings)
 
@@ -201,9 +197,7 @@ class MetadataParser(BaseParser):
     def handle_namespace_pattern(self, line, position, tokens):
         """Handles statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``"""
         namespace = tokens['name']
-
-        if self.has_namespace(namespace):
-            raise RedefinedNamespaceError(self.line_number, line, position, namespace)
+        self.raise_for_redefined_namespace(line, position, namespace)
 
         value = tokens['value']
 
@@ -212,12 +206,15 @@ class MetadataParser(BaseParser):
 
         return tokens
 
+    def raise_for_redefined_annotation(self, line, position, annotation):
+        if self.disallow_redefinition and self.has_annotation(annotation):
+            raise RedefinedAnnotationError(self.line_number, line, position, annotation)
+
     def handle_annotation_owl(self, line, position, tokens):
         """Handles statements like ``DEFINE ANNOTATION X AS OWL "Y"``"""
         annotation = tokens['name']
 
-        if self.has_annotation(annotation):
-            raise RedefinedAnnotationError(self.line_number, line, position, annotation)
+        self.raise_for_redefined_annotation(line, position, annotation)
 
         url = tokens['url']
 
@@ -231,9 +228,7 @@ class MetadataParser(BaseParser):
     def handle_annotations_url(self, line, position, tokens):
         """Handles statements like ``DEFINE ANNOTATION X AS URL "Y"``"""
         annotation = tokens['name']
-
-        if self.has_annotation(annotation):
-            raise RedefinedAnnotationError(self.line_number, line, position, annotation)
+        self.raise_for_redefined_annotation(line, position, annotation)
 
         url = tokens['url']
 
@@ -245,9 +240,7 @@ class MetadataParser(BaseParser):
     def handle_annotation_list(self, line, position, tokens):
         """Handles statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``"""
         annotation = tokens['name']
-
-        if self.has_annotation(annotation):
-            raise RedefinedAnnotationError(self.line_number, line, position, annotation)
+        self.raise_for_redefined_annotation(line, position, annotation)
 
         values = set(tokens['values'])
 
@@ -259,9 +252,7 @@ class MetadataParser(BaseParser):
     def handle_annotation_pattern(self, line, position, tokens):
         """Handles statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``"""
         annotation = tokens['name']
-
-        if self.has_annotation(annotation):
-            raise RedefinedAnnotationError(self.line_number, line, position, annotation)
+        self.raise_for_redefined_annotation(line, position, annotation)
 
         value = tokens['value']
 
@@ -303,3 +294,18 @@ class MetadataParser(BaseParser):
 
         if not SEMANTIC_VERSION_STRING_RE.match(s):
             raise VersionFormatWarning(self.line_number, line, position, s)
+
+
+def extend_version(value):
+    """
+
+    :param str value: A version string, that might not be a semantic one
+    :return:
+    """
+    if not SEMANTIC_VERSION_STRING_RE.match(value) and MALFORMED_VERSION_STRING_RE.match(value):
+        k = value.split('.')
+        while len(k) < 3:
+            k.append('0')
+        return ".".join(k)
+
+    return value

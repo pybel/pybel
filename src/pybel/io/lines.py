@@ -2,8 +2,9 @@
 
 """This module contains IO functions for BEL scripts"""
 
-import codecs
 import logging
+
+import codecs
 import os
 
 from .line_utils import parse_lines
@@ -20,25 +21,22 @@ log = logging.getLogger(__name__)
 
 
 def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-               citation_clearing=True, warn_on_singleton=True, no_identifier_validation=False, **kwargs):
+               citation_clearing=True, no_identifier_validation=False, **kwargs):
     """Loads a BEL graph from an iterable over the lines of a BEL script
 
     :param iter[str] lines: An iterable of strings (the lines in a BEL script)
-    :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
-                        or None to use default cache
-    :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
+    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
+    :type manager: None or str or pybel.manager.Manager
     :param bool allow_naked_names: if true, turn off naked namespace failures
     :param bool allow_nested: if true, turn off nested statement failures
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
-    :param bool warn_on_singleton: Should the parser thorugh warnings on singletons? Only disable this if you're
-                                        sure your BEL Script is syntactically and semantically valid.
-    :param dict kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
     :return: A BEL graph
     :rtype: BELGraph
     """
-    graph = BELGraph(**kwargs)
+    graph = BELGraph()
     parse_lines(
         graph=graph,
         lines=lines,
@@ -47,31 +45,28 @@ def from_lines(lines, manager=None, allow_naked_names=False, allow_nested=False,
         allow_nested=allow_nested,
         allow_unqualified_translocations=allow_unqualified_translocations,
         citation_clearing=citation_clearing,
-        warn_on_singleton=warn_on_singleton,
         no_identifier_validation=no_identifier_validation,
+        **kwargs
     )
     return graph
 
 
 def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
-              warn_on_singleton=True, no_identifier_validation=False, encoding='utf-8', **kwargs):
+              no_identifier_validation=False, encoding='utf-8', **kwargs):
     """Loads a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str path: A file path
-    :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
-                        or None to use default cache
-    :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
+    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
+    :type manager: None or str or pybel.manager.Manager
     :param bool allow_naked_names: if true, turn off naked namespace failures
     :param bool allow_nested: if true, turn off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
-    :param bool warn_on_singleton: Should the parser thorugh warnings on singletons? Only disable this if you're
-                                        sure your BEL Script is syntactically and semantically valid.
     :param str encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`.
                      See the python `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a
                      list of standard encodings. For example, files starting with a UTF-8 BOM should use
                      :code:`utf_8_sig`
-    :param dict kwargs: Keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
     :return: A BEL graph
     :rtype: BELGraph
     """
@@ -83,27 +78,22 @@ def from_path(path, manager=None, allow_naked_names=False, allow_nested=False, c
             allow_naked_names=allow_naked_names,
             allow_nested=allow_nested,
             citation_clearing=citation_clearing,
-            warn_on_singleton=warn_on_singleton,
             no_identifier_validation=no_identifier_validation,
             **kwargs
         )
 
 
-def from_url(url, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True,
-             warn_on_singleton=True, **kwargs):
+def from_url(url, manager=None, allow_naked_names=False, allow_nested=False, citation_clearing=True, **kwargs):
     """Loads a BEL graph from a URL resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str url: A valid URL pointing to a BEL resource
-    :param manager: database connection string to cache, pre-built CacheManager, pre-built MetadataParser
-                        or None to use default cache
-    :type manager: str or :class:`pybel.manager.CacheManager` or :class:`pybel.parser.MetadataParser`
+    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
+    :type manager: None or str or pybel.manager.Manager
     :param bool allow_naked_names: if true, turn off naked namespace failures
     :param bool allow_nested: if true, turn off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
-    :param bool warn_on_singleton: Should the parser thorugh warnings on singletons? Only disable this if you're
-                                        sure your BEL Script is syntactically and semantically valid.
-    :param dict kwargs: Keyword arguments to pass to :class:`networkx.MultiDiGraph`
+    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
     :return: A BEL graph
     :rtype: BELGraph
     """
@@ -118,6 +108,5 @@ def from_url(url, manager=None, allow_naked_names=False, allow_nested=False, cit
         allow_naked_names=allow_naked_names,
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
-        warn_on_singleton=warn_on_singleton,
         **kwargs
     )

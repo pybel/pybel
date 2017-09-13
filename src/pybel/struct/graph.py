@@ -6,12 +6,8 @@ import networkx
 
 from .operations import left_full_join, left_outer_join
 from ..constants import *
+from ..parser.canonicalize import node_to_tuple, tuple_to_data
 from ..utils import get_version, subdict_matches
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
 __all__ = [
     'BELGraph',
@@ -19,16 +15,29 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
+RESOURCE_DICTIONARY_NAMES = (
+    GRAPH_NAMESPACE_URL,
+    GRAPH_NAMESPACE_OWL,
+    GRAPH_NAMESPACE_PATTERN,
+    GRAPH_ANNOTATION_URL,
+    GRAPH_ANNOTATION_OWL,
+    GRAPH_ANNOTATION_PATTERN,
+    GRAPH_ANNOTATION_LIST,
+)
+
 
 class BELGraph(networkx.MultiDiGraph):
     """This class represents biological knowledge assembled in BEL as a network by extending the
     :class:`networkx.MultiDiGraph`.
     """
 
-    def __init__(self, data=None, **kwargs):
+    def __init__(self, name=None, version=None, description=None, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
-        
+
+        :param str name: The graph's name
+        :param str version: The graph's version. Recommended to use semantic versioning or YYYYMMDD format.
+        :param str description: A description of the graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         """
@@ -39,32 +48,21 @@ class BELGraph(networkx.MultiDiGraph):
         if GRAPH_METADATA not in self.graph:
             self.graph[GRAPH_METADATA] = {}
 
+        if name:
+            self.graph[GRAPH_METADATA][METADATA_NAME] = name
+
+        if version:
+            self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+
+        if description:
+            self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
 
-        if GRAPH_NAMESPACE_URL not in self.graph:
-            self.graph[GRAPH_NAMESPACE_URL] = {}
-
-        if GRAPH_NAMESPACE_OWL not in self.graph:
-            self.graph[GRAPH_NAMESPACE_OWL] = {}
-
-        if GRAPH_NAMESPACE_PATTERN not in self.graph:
-            self.graph[GRAPH_NAMESPACE_PATTERN] = {}
-
-        if GRAPH_ANNOTATION_URL not in self.graph:
-            self.graph[GRAPH_ANNOTATION_URL] = {}
-
-        if GRAPH_ANNOTATION_OWL not in self.graph:
-            self.graph[GRAPH_ANNOTATION_OWL] = {}
-
-        if GRAPH_ANNOTATION_PATTERN not in self.graph:
-            self.graph[GRAPH_ANNOTATION_PATTERN] = {}
-
-        if GRAPH_ANNOTATION_LIST not in self.graph:
-            self.graph[GRAPH_ANNOTATION_LIST] = {}
-
-        #: Is true if during BEL Parsing, a term that is not part of a relation is found
-        self.has_singleton_terms = False
+        for resource_dict in RESOURCE_DICTIONARY_NAMES:
+            if resource_dict not in self.graph:
+                self.graph[resource_dict] = {}
 
     @property
     def document(self):
@@ -75,12 +73,11 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def name(self, *attrs):
-        """Gets the graph's name. Requires a weird hack in the signature since it's overriding a property"""
+        """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script"""
         return self.graph[GRAPH_METADATA].get(METADATA_NAME, '')
 
     @name.setter
     def name(self, *attrs, **kwargs):
-        """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script"""
         self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
 
     @property
@@ -88,10 +85,18 @@ class BELGraph(networkx.MultiDiGraph):
         """The graph's version, from the ``SET DOCUMENT Version = "..."`` entry in the source BEL script"""
         return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
 
+    @version.setter
+    def version(self, version):
+        self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+
     @property
     def description(self):
         """The graph's description, from the ``SET DOCUMENT Description = "..."`` entry in the source BEL Script"""
         return self.graph[GRAPH_METADATA].get(METADATA_DESCRIPTION)
+
+    @description.setter
+    def description(self, description):
+        self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
 
     @property
     def namespace_url(self):
@@ -187,15 +192,33 @@ class BELGraph(networkx.MultiDiGraph):
             else:
                 yield n
 
+    def add_node_from_tuple(self, node_tuple):
+        """Converts a PyBEL node tuple to a canonical PyBEL node data dictionary then adds it to the graph
+
+        :param tuple node_tuple: A PyBEL node tuple
+        """
+        if node_tuple not in self:
+            node_data = tuple_to_data(node_tuple)
+            self.add_node(node_tuple, attr_dict=node_data)
+
+    def add_node_from_data(self, node_data):
+        """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple then adds it to the graph
+
+        :param dict node_data: A PyBEL node data dictionary
+        """
+        node_tuple = node_to_tuple(node_data)
+        if node_tuple not in self:
+            self.add_node(node_tuple, attr_dict=node_data)
+
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
 
-        :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.RNA`,
-                        :data:`pybel.constants.PROTEIN`, etc)
-        :param str namespace: The namespace
-        :param str name: The name of the node
+        :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.PROTEIN`, etc)
+        :param str namespace: The node's namespace
+        :param str name: The node's name
         """
         node = function, namespace, name
+        # self.add_node_from_tuple(node)
         if node not in self:
             self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
 

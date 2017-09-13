@@ -98,6 +98,10 @@ dictionary in :mod:`networkx`. After parsing, :code:`p(HGNC:GSK3B)` becomes:
         NAME: 'GSK3B'
     }
 
+This section describes the structure of the data dictionaries created for each type of node available in BEL.
+Programatically, these dictionaries can be converted to tuples, which are used as the keys for the network with the
+:func:`pybel.parser.canonicalize.node_to_tuple` function.
+
 .. automodule:: pybel.parser.modifiers.variant
 
 .. automodule:: pybel.parser.modifiers.gene_substitution
@@ -252,13 +256,20 @@ Below is the "skeleton" for the edge data model in PyBEL:
         },
         EVIDENCE: '...',
         CITATION : {
-            # ... citation information
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: '...',
+            CITATION_DATE: 'YYYY-MM-DD',
+            CITATION_AUTHORS: 'Jon Snow|John Doe',
         }
         ANNOTATIONS: {
+            'Disease': 'Colorectal Cancer',
             # ... additional annotations as key:value pairs
         }
     }
 
+Each edge must contain the ``RELATION``, ``EVIDENCE``, ``CITATION``, and ``ANNOTATIONS`` entries. The ``CITATION``
+must minimally contain ``CITATION_TYPE`` and ``CITATION_REFERENCE`` since these can be used to look up additional
+metadata.
 
 Activities
 ~~~~~~~~~~

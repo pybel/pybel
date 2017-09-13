@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 from pybel.manager import models
-from pybel.manager.cache import CacheManager
+from pybel.manager import Manager
 from tests.constants import (
     FleetingTemporaryCacheMixin,
     HGNC_URL,
@@ -34,7 +34,7 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
         self.manager.ensure_namespace(HGNC_URL)
         help_check_hgnc(self, {HGNC_KEYWORD: self.manager.namespace_cache[HGNC_URL]})
 
-        alternate_manager = CacheManager(connection=self.connection)
+        alternate_manager = Manager(connection=self.connection)
         alternate_manager.ensure_namespace(HGNC_URL)
         help_check_hgnc(self, {HGNC_KEYWORD: alternate_manager.namespace_cache[HGNC_URL]})
 

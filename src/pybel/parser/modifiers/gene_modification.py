@@ -51,7 +51,7 @@ __all__ = [
     'GmodParser',
 ]
 
-gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, identifier=KIND)
+gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, name=KIND)
 
 
 class GmodParser(BaseParser):

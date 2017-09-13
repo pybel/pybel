@@ -1,32 +1,64 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
-import tempfile
 import time
 import unittest
 from pathlib import Path
 
 import networkx as nx
+import os
+import tempfile
 from six import BytesIO, StringIO
 
-from pybel import BELGraph
-from pybel import to_bel_lines, from_lines
-from pybel import to_bytes, from_bytes, to_graphml, from_path, from_url
-from pybel import to_cx, from_cx, to_cx_jsons, from_cx_jsons
-from pybel import to_json, from_json, to_jsons, from_jsons
-from pybel import to_ndex, from_ndex, to_pickle, from_pickle, to_json_file, from_json_file
+from pybel import (
+    BELGraph,
+    to_bel_lines,
+    from_lines,
+    to_bytes,
+    from_bytes,
+    to_graphml,
+    from_path,
+    from_url,
+    to_cx,
+    from_cx,
+    to_cx_jsons,
+    from_cx_jsons,
+    to_json,
+    from_json,
+    to_jsons,
+    from_jsons,
+    to_ndex,
+    from_ndex,
+    to_pickle,
+    from_pickle,
+    to_json_file,
+    from_json_file,
+)
 from pybel.constants import *
 from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_fmt
-from pybel.io.utils import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.utils import hash_node
-from tests.constants import AKT1, EGFR, CASP8, FADD, citation_1, evidence_1
-from tests.constants import BelReconstitutionMixin, TemporaryCacheClsMixin, TestTokenParserBase
-from tests.constants import test_bel_isolated, test_bel_misordered
-from tests.constants import test_bel_simple, test_citation_dict, test_set_evidence, \
-    test_bel_thorough, test_bel_slushy, test_evidence_text, update_provenance
+from tests.constants import (
+    AKT1,
+    EGFR,
+    CASP8,
+    FADD,
+    citation_1,
+    evidence_1,
+    BelReconstitutionMixin,
+    TemporaryCacheClsMixin,
+    TestTokenParserBase,
+    test_bel_isolated,
+    test_bel_misordered,
+    test_bel_simple,
+    test_citation_dict,
+    test_set_evidence,
+    test_bel_thorough,
+    test_bel_slushy,
+    test_evidence_text,
+    update_provenance
+)
 from tests.mocks import mock_bel_resources
 
 logging.getLogger('requests').setLevel(logging.WARNING)

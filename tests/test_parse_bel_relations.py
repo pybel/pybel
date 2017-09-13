@@ -2,9 +2,11 @@
 
 import logging
 
-from pybel.canonicalize import decanonicalize_node, decanonicalize_edge
+from pyparsing import ParseException
+
+from pybel.canonicalize import node_to_bel, edge_to_bel
 from pybel.constants import *
-from pybel.parser.parse_bel import canonicalize_node
+from pybel.parser.parse_bel import node_to_tuple
 from pybel.parser.parse_exceptions import NestedRelationWarning, RelabelWarning
 from tests.constants import TestTokenParserBase
 from tests.constants import default_identifier, test_citation_dict, test_evidence_text, update_provenance
@@ -45,10 +47,41 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual(1, self.parser.graph.number_of_nodes())
         self.assertHasNode(gene, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
+    def test_singleton(self):
+        """Test singleton composite in subject."""
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42"))'
+        result = self.parser.statement.parseString(statement)
+
+        expected = [
+            COMPOSITE,
+            [PROTEIN, ['HGNC', 'CASP8']],
+            [PROTEIN, ['HGNC', 'FADD']],
+            [ABUNDANCE, ['ADO', 'Abeta_42']]
+        ]
+        self.assertEqual(expected, result.asList())
+
+        sub = node_to_tuple(result)
+        self.assertHasNode(sub)
+
+        sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
+        self.assertHasNode(sub_member_1)
+
+        sub_member_2 = PROTEIN, 'HGNC', 'FADD'
+        self.assertHasNode(sub_member_2)
+
+        self.assertHasEdge(sub, sub_member_1, relation='hasComponent')
+        self.assertHasEdge(sub, sub_member_2, relation='hasComponent')
+
+    def test_predicate_failure(self):
+        """Checks that if there's a problem with the relation/object, that an error gets thrown"""
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> nope(GOBP:"neuron apoptotic process")'
+
+        with self.assertRaises(ParseException):
+            self.parser.relation.parseString(statement)
+
     def test_increases(self):
-        """
-        3.1.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases
-        Test composite in subject
+        """Test composite in subject. See BEL 2.0 specification
+        `3.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases>`_
         """
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")'
         result = self.parser.relation.parseString(statement)
@@ -61,7 +94,7 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = node_to_tuple(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
@@ -79,9 +112,8 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(sub, obj, relation='increases')
 
     def test_directlyIncreases_withTlocObject(self):
-        """
-        3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
-        Test translocation in object
+        """Test translocation in object. See BEL 2.0 specification
+        `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
         """
         statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESHCS:"Cell Membrane"),' \
                     'toLoc(MESHCS:"Intracellular Space"))'
@@ -168,7 +200,7 @@ class TestRelations(TestTokenParserBase):
         sub = PROTEIN, 'SFAM', 'CAPN Family'
         self.assertHasNode(sub)
 
-        obj = canonicalize_node(result[OBJECT])
+        obj = node_to_tuple(result[OBJECT])
         self.assertHasNode(obj)
 
         obj_member_1 = PROTEIN, 'HGNC', 'CDK5R1'
@@ -390,7 +422,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = node_to_tuple(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_member_1 = PROTEIN, 'HGNC', 'F3'
@@ -594,7 +626,7 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(sub, obj, **{RELATION: TRANSLATED_TO})
 
         self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
-                         decanonicalize_edge(self.parser.graph, sub, obj, 0))
+                         edge_to_bel(self.parser.graph, sub, obj, 0))
 
     def test_component_list(self):
         s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
@@ -700,7 +732,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = canonicalize_node(result[SUBJECT])
+        expected_node = node_to_tuple(result[SUBJECT])
 
         self.assertHasNode(expected_node)
         self.assertIn(LABEL, self.parser.graph.node[expected_node])
@@ -772,7 +804,7 @@ class TestRelations(TestTokenParserBase):
                            [BIOPROCESS, ['GOBP', 'cholesterol biosynthetic process']]]
         self.assertEqual(expected_result, result.asList())
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = node_to_tuple(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
@@ -815,8 +847,8 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(expected_parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
         self.assertHasNode(expected_child)
 
-        self.assertEqual('g(HGNC:AKT1)', decanonicalize_node(self.parser.graph, expected_parent))
-        self.assertEqual('g(HGNC:AKT1, gmod(Me))', decanonicalize_node(self.parser.graph, expected_child))
+        self.assertEqual('g(HGNC:AKT1)', node_to_bel(self.parser.graph, expected_parent))
+        self.assertEqual('g(HGNC:AKT1, gmod(Me))', node_to_bel(self.parser.graph, expected_child))
 
         self.assertHasEdge(expected_parent, expected_child, **{RELATION: HAS_VARIANT})
 
@@ -826,7 +858,7 @@ class TestRelations(TestTokenParserBase):
                     hasReactant a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA")'
         result = self.parser.relation.parseString(statement)
 
-        sub = canonicalize_node(result[SUBJECT])
+        sub = node_to_tuple(result[SUBJECT])
         self.assertHasNode(sub)
 
         sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
@@ -881,5 +913,5 @@ class TestWrite(TestTokenParserBase):
             source_bel, expected_bel = case if 2 == len(case) else (case, case)
 
             result = self.parser.bel_term.parseString(source_bel)
-            bel = decanonicalize_node(self.parser.graph, canonicalize_node(result))
+            bel = node_to_bel(self.parser.graph, node_to_tuple(result))
             self.assertEqual(expected_bel, bel)

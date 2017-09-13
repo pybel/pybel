@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
-import tempfile
 import unittest
 from json import dumps
 
+import os
+import tempfile
+from requests.compat import urlparse
+
 from pybel import BELGraph
 from pybel.constants import *
-from pybel.manager.cache import CacheManager
+from pybel.manager import Manager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches
-from requests.compat import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -166,6 +167,21 @@ class TestGraphMixin(unittest.TestCase):
         assertHasEdge(self, u, v, g, **kwargs)
 
 
+class TemporaryCacheMixin(unittest.TestCase):
+    def setUp(self):
+        self.fd, self.path = tempfile.mkstemp()
+        self.connection = 'sqlite:///' + self.path
+        log.info('Test generated connection string %s', self.connection)
+
+        self.manager = Manager(connection=self.connection)
+        self.manager.create_all()
+
+    def tearDown(self):
+        self.manager.session.close()
+        os.close(self.fd)
+        os.remove(self.path)
+
+
 class TemporaryCacheClsMixin(unittest.TestCase):
     """Facilitates generating a database in a temporary file on a class-by-class basis"""
 
@@ -180,7 +196,7 @@ class TemporaryCacheClsMixin(unittest.TestCase):
             cls.connection = 'sqlite:///' + cls.path
             log.info('Test generated connection string %s', cls.connection)
 
-        cls.manager = CacheManager(connection=cls.connection)
+        cls.manager = Manager(connection=cls.connection)
         cls.manager.create_all()
 
     @classmethod
@@ -994,7 +1010,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
-        self.assertFalse(graph.has_singleton_terms)
 
         if check_metadata:
             self.assertEqual(expected_test_simple_metadata, graph.document)
@@ -1086,7 +1101,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
-        self.assertFalse(graph.has_singleton_terms)
 
         if check_warnings:
             self.assertEqual(0, len(graph.warnings),
@@ -1181,7 +1195,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
-        self.assertTrue(graph.has_singleton_terms)
 
         a = PATHOLOGY, 'MESHD', 'Achlorhydria'
         b = PROTEIN, 'HGNC', 'ADGRB1'

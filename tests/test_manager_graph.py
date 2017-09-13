@@ -1,22 +1,30 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
 import time
 import unittest
+
+import os
+import sqlalchemy.exc
 from collections import Counter
 
-import sqlalchemy.exc
-
 import pybel
-from pybel import from_database, to_database
-from pybel import from_path
+from pybel import BELGraph, from_database, to_database, from_path
 from pybel.constants import *
 from pybel.manager import models
+from pybel.manager.models import Namespace, NamespaceEntry, Node
+from pybel.utils import hash_citation
 from tests import constants
-from tests.constants import FleetingTemporaryCacheMixin, BelReconstitutionMixin, TemporaryCacheClsMixin
-from tests.constants import test_bel_simple, expected_test_simple_metadata
-from tests.constants import test_bel_thorough, expected_test_thorough_metadata
+from tests.constants import (
+    FleetingTemporaryCacheMixin,
+    BelReconstitutionMixin,
+    TemporaryCacheClsMixin,
+    TemporaryCacheMixin,
+    test_bel_simple,
+    expected_test_simple_metadata,
+    test_bel_thorough,
+    expected_test_thorough_metadata,
+)
 from tests.mocks import mock_bel_resources
 
 log = logging.getLogger(__name__)
@@ -80,6 +88,125 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual('1.0.1', exact_name_version.version)
 
 
+class TestEnsure(TemporaryCacheMixin):
+    def test_get_or_create_citation(self):
+        citation_dict = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_NAME: 'TestCitation_basic',
+            CITATION_REFERENCE: '1234AB',
+        }
+
+        citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
+
+        citation = self.manager.get_or_create_citation(**citation_dict)
+        self.assertIsInstance(citation, models.Citation)
+        self.assertEqual(citation_dict, citation.to_json())
+        self.assertIn(citation_hash, self.manager.object_cache_citation)
+        self.assertEqual(1, len(self.manager.object_cache_citation))
+
+        citation_reloaded = self.manager.get_or_create_citation(**citation_dict)
+        self.assertEqual(citation, citation_reloaded)
+        self.assertEqual(1, len(self.manager.object_cache_citation))
+
+    def test_get_or_create_citation_full(self):
+        citation_dict = {
+            CITATION_TYPE: 'Other',
+            CITATION_NAME: 'TestCitation_full',
+            CITATION_REFERENCE: 'CD5678',
+            CITATION_DATE: '2017-04-11',
+            CITATION_AUTHORS: 'Jackson M|Lajoie J'
+        }
+
+        citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
+
+        citation = self.manager.get_or_create_citation(**citation_dict)
+        self.assertIsInstance(citation, models.Citation)
+        self.assertEqual(citation_dict, citation.to_json())
+        self.assertIn(citation_hash, self.manager.object_cache_citation)
+        self.assertEqual(1, len(self.manager.object_cache_citation))
+
+        citation_reloaded = self.manager.get_or_create_citation(**citation_dict)
+        self.assertEqual(citation, citation_reloaded)
+        self.assertEqual(1, len(self.manager.object_cache_citation))
+
+        full_citation_basic = {
+            CITATION_TYPE: 'Other',
+            CITATION_NAME: 'TestCitation_full',
+            CITATION_REFERENCE: 'CD5678'
+        }
+
+        citation_truncated = self.manager.get_or_create_citation(**full_citation_basic)
+        self.assertEqual(citation, citation_truncated)
+
+
+class TestNodes(TemporaryCacheMixin):
+    def setUp(self):
+        super(TestNodes, self).setUp()
+
+        self.hgnc_keyword = 'HGNC'
+        self.hgnc_url = 'http://localhost/hgnc.belns'
+        self.hgnc = Namespace(
+            keyword=self.hgnc_keyword,
+            url=self.hgnc_url,
+        )
+        self.manager.session.add(self.hgnc)
+        self.manager.session.add(Namespace(keyword='GOCC', url='http://localhost/gocc.belns'))
+
+        self.yfg = NamespaceEntry(
+            name='YFG',
+            namespace=self.hgnc,
+            encoding='P',
+        )
+        self.manager.session.add(self.yfg)
+        self.manager.session.commit()
+
+        self.graph = BELGraph(name='TestNode', version='0.0.0')
+        self.graph.namespace_url[self.hgnc_keyword] = self.hgnc_url
+
+    def help_test_round_trip(self, node_tuple, node_data):
+        """Helps run the round trip test of inserting a node, getting it, and reconstituting it in multiple forms
+
+        :param tuple tuple node_tuple: A PyBEL node tuple
+        :param dict node_data: A PyBEL node data dictionary
+        """
+        self.graph.add_node(node_tuple, attr_dict=node_data)
+        self.manager.insert_graph(self.graph, store_parts=True)
+
+        node_model = self.manager.get_node_by_tuple(node_tuple)
+        self.assertIsNotNone(node_model)
+        self.assertIsInstance(node_model, Node)
+
+        self.assertEqual(node_tuple, node_model.to_tuple())
+
+    def test_1(self):
+        node_tuple = PROTEIN, 'HGNC', 'YFG'
+
+        node_data = {
+            FUNCTION: PROTEIN,
+            NAMESPACE: 'HGNC',
+            NAME: 'YFG'
+        }
+
+        self.help_test_round_trip(node_tuple, node_data)
+
+    def test_2(self):
+        node_tuple = PROTEIN, 'HGNC', 'YFG', (HGVS, 'p.Glu600Arg')
+
+        node_data = {
+            FUNCTION: PROTEIN,
+            NAMESPACE: 'HGNC',
+            NAME: 'YFG',
+            VARIANTS: [
+                {
+                    KIND: HGVS,
+                    IDENTIFIER: 'p.Glu600Arg'
+                }
+            ]
+        }
+
+        self.help_test_round_trip(node_tuple, node_data)
+
+
 # FIXME @kono need proper deletion cascades
 # @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
 class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
@@ -101,17 +228,26 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         citations = self.manager.session.query(models.Citation).all()
         self.assertEqual(2, len(citations))
 
-        citations_strs = {'123455', '123456'}
-        self.assertEqual(citations_strs, {e.reference for e in citations})
+        citation_references = {'123455', '123456'}
+        self.assertEqual(citation_references, {
+            citation.reference
+            for citation in citations
+        })
 
         authors = {'Example Author', 'Example Author2'}
-        self.assertEqual(authors, {a.name for a in self.manager.session.query(models.Author).all()})
+        self.assertEqual(authors, {
+            author.name
+            for author in self.manager.session.query(models.Author).all()
+        })
 
         evidences = self.manager.session.query(models.Evidence).all()
         self.assertEqual(3, len(evidences))
 
-        evidences_strs = {'Evidence 1 w extra notes', 'Evidence 2', 'Evidence 3'}
-        self.assertEqual(evidences_strs, {e.text for e in evidences})
+        evidences_texts = {'Evidence 1 w extra notes', 'Evidence 2', 'Evidence 3'}
+        self.assertEqual(evidences_texts, {
+            evidence.text
+            for evidence in evidences
+        })
 
         nodes = self.manager.session.query(models.Node).all()
         self.assertEqual(4, len(nodes))
@@ -134,8 +270,11 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         network_edge_associations = self.manager.session.query(models.network_edge).filter_by(
             network_id=self.network.id).all()
-        self.assertEqual({nea.edge_id for nea in network_edge_associations},
-                         {edge.id for edge in edges})
+
+        self.assertEqual(
+            {network_edge_association.edge_id for network_edge_association in network_edge_associations},
+            {edge.id for edge in edges}
+        )
 
         g2 = self.manager.get_network_by_name_version(
             expected_test_simple_metadata[METADATA_NAME],
@@ -143,62 +282,10 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         )
         self.bel_simple_reconstituted(g2)
 
-    # ============================================================
-    #
-    # @mock_bel_resources
-    # def test_get_or_create_citation(self, mock_get):
-    #     basic_citation = {
-    #         CITATION_TYPE: 'PubMed',
-    #         CITATION_NAME: 'TestCitation_basic',
-    #         CITATION_REFERENCE: '1234AB',
-    #     }
-    #     full_citation = {
-    #         CITATION_TYPE: 'Other',
-    #         CITATION_NAME: 'TestCitation_full',
-    #         CITATION_REFERENCE: 'CD5678',
-    #         CITATION_DATE: '2017-04-11',
-    #         CITATION_AUTHORS: 'Jackson M|Lajoie J'
-    #     }
-    #     full_citation_basic = {
-    #         CITATION_TYPE: 'Other',
-    #         CITATION_NAME: 'TestCitation_full',
-    #         CITATION_REFERENCE: 'CD5678'
-    #     }
-    #     basic_citation_sha512 = hashlib.sha512(json.dumps(basic_citation, sort_keys=True).encode('utf-8')).hexdigest()
-    #     full_citation_sha512 = hashlib.sha512(
-    #         json.dumps(full_citation_basic, sort_keys=True).encode('utf-8')).hexdigest()
-    #
-    #     # Create
-    #     basic = self.manager.get_or_create_citation(**basic_citation)
-    #     self.assertIsInstance(basic, models.Citation)
-    #     self.assertEqual(basic.data, basic_citation)
-    #     self.assertIn(basic_citation_sha512, self.manager.object_cache['citation'])
-    #
-    #     full = self.manager.get_or_create_citation(**full_citation)
-    #     self.assertIsInstance(full, models.Citation)
-    #     self.assertEqual(full.data, full_citation)
-    #     self.assertIn(full_citation_sha512, self.manager.object_cache['citation'])
-    #
-    #     # Different objects created
-    #     self.assertNotEqual(basic, full)
-    #
-    #     # Two ojbects in object_cache
-    #     self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
-    #
-    #     # Reload from object cache
-    #     reloaded_basic = self.manager.get_or_create_citation(**basic_citation)
-    #     self.assertEqual(basic, reloaded_basic)
-    #
-    #     reloaded_full = self.manager.get_or_create_citation(**full_citation)
-    #     self.assertEqual(full, reloaded_full)
-    #
-    #     # No new entries in object_cache
-    #     self.assertEqual(2, len(self.manager.object_cache['citation'].keys()))
-    #
     # @mock_bel_resources
     # def test_get_or_create_evidence(self, mock_get):
     #     basic_citation = {
-    #         CITATION_TYPE: 'PubMed',
+    #         CITATION_TYPE: CITATION_TYPE_PUBMED,
     #         CITATION_NAME: 'TestCitation_basic',
     #         CITATION_REFERENCE: '1234AB',
     #     }
@@ -274,7 +361,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     #         },
     #         'participant': SUBJECT
     #     }
-    #     edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')][0]
+    #     edge_data = self.simple_graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')][0]
     #
     #     activity_hash = hashlib.sha512(json.dumps({
     #         'participant': SUBJECT,
@@ -364,9 +451,9 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     # @mock_bel_resources
     # def test_get_or_create_edge(self, mock_get):
     #
-    #     edge_data = self.simple_graph.edge[('Protein', 'HGNC', 'AKT1')][('Protein', 'HGNC', 'EGFR')]
-    #     source_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'AKT1'))
-    #     target_node = self.manager.get_or_create_node(self.simple_graph, ('Protein', 'HGNC', 'EGFR'))
+    #     edge_data = self.simple_graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')]
+    #     source_node = self.manager.get_or_create_node(self.simple_graph, (PROTEIN, 'HGNC', 'AKT1'))
+    #     target_node = self.manager.get_or_create_node(self.simple_graph, (PROTEIN, 'HGNC', 'EGFR'))
     #     citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
     #     evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
     #     properties = self.manager.get_or_create_property(self.simple_graph, edge_data[0])
@@ -683,7 +770,6 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @mock_bel_resources
     def test_query_node(self, mock_get):
         akt1_dict = {
-            'key': (PROTEIN, 'HGNC', 'AKT1'),
             'data': {
                 FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
@@ -692,41 +778,35 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
             'bel': 'p(HGNC:AKT1)'
         }
 
-        node_list = self.manager.get_node(bel='p(HGNC:AKT1)')
+        node_list = self.manager.query_nodes(bel='p(HGNC:AKT1)')
         self.assertEqual(len(node_list), 1)
 
-        node_dict_list = self.manager.get_node(bel='p(HGNC:AKT1)', as_dict_list=True)
+        node_dict_list = self.manager.query_nodes(bel='p(HGNC:AKT1)', as_dict_list=True)
         self.assertIn(akt1_dict, node_dict_list)
 
-        node_dict_list2 = self.manager.get_node(namespace='HG%', as_dict_list=True)
+        node_dict_list2 = self.manager.query_nodes(namespace='HG%', as_dict_list=True)
         self.assertEqual(len(node_dict_list2), 4)
         self.assertIn(akt1_dict, node_dict_list2)
 
-        node_dict_list3 = self.manager.get_node(name='%A%', as_dict_list=True)
+        node_dict_list3 = self.manager.query_nodes(name='%A%', as_dict_list=True)
         self.assertEqual(len(node_dict_list3), 3)
         self.assertIn(akt1_dict, node_dict_list3)
 
-        protein_list = self.manager.get_node(type=PROTEIN)
+        protein_list = self.manager.query_nodes(type=PROTEIN)
         self.assertEqual(len(protein_list), 4)
 
     @mock_bel_resources
     def test_query_edge(self, mock_get):
         fadd_casp = {
             'source': {
-                'node': ((PROTEIN, 'HGNC', 'FADD'), {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'FADD'
-                }),
-                'key': (PROTEIN, 'HGNC', 'FADD')
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'FADD'
             },
             'target': {
-                'node': ((PROTEIN, 'HGNC', 'CASP8'), {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'CASP8'
-                }),
-                'key': (PROTEIN, 'HGNC', 'CASP8')
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'CASP8'
             },
             'data': {
                 RELATION: 'increases',
@@ -742,39 +822,39 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
             },
         }
 
-        edge_list = self.manager.get_edge(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
+        edge_list = self.manager.query_edges(bel="p(HGNC:EGFR) decreases p(HGNC:FADD)")
         self.assertEqual(len(edge_list), 1)
 
         # relation like, data
-        increased_list = self.manager.get_edge(relation='increase%', as_dict_list=True)
+        increased_list = self.manager.query_edges(relation='increase%', as_dict_list=True)
         self.assertEqual(len(increased_list), 2)
         self.assertIn(fadd_casp, increased_list)
 
         # evidence like, data
-        evidence_list = self.manager.get_edge(evidence='%3%', as_dict_list=True)
+        evidence_list = self.manager.query_edges(evidence='%3%', as_dict_list=True)
         self.assertEqual(len(increased_list), 2)
         self.assertIn(fadd_casp, evidence_list)
 
         # no result
-        empty_list = self.manager.get_edge(source='p(HGNC:EGFR)', relation='increases', as_dict_list=True)
+        empty_list = self.manager.query_edges(source='p(HGNC:EGFR)', relation='increases', as_dict_list=True)
         self.assertEqual(len(empty_list), 0)
 
         # source, relation, data
-        source_list = self.manager.get_edge(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
+        source_list = self.manager.query_edges(source='p(HGNC:FADD)', relation='increases', as_dict_list=True)
         self.assertEqual(len(source_list), 1)
         self.assertIn(fadd_casp, source_list)
 
     @mock_bel_resources
     def test_query_citation(self, mock_get):
         citation_1 = {
-            CITATION_TYPE: "PubMed",
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
             CITATION_NAME: "That one article from last week",
             CITATION_REFERENCE: "123455",
             CITATION_DATE: "2012-01-31",
             CITATION_AUTHORS: "Example Author|Example Author2"
         }
         citation_2 = {
-            CITATION_TYPE: "PubMed",
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
             CITATION_NAME: "That other article from last week",
             CITATION_REFERENCE: "123456"
         }
@@ -792,46 +872,58 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         }
 
         # type
-        object_list = self.manager.get_citation(type='PubMed')
+        object_list = self.manager.query_citations(type=CITATION_TYPE_PUBMED)
         self.assertEqual(len(object_list), 2)
 
         # type, reference, data
-        reference_list = self.manager.get_citation(type='PubMed', reference='123456', as_dict_list=True)
+        reference_list = self.manager.query_citations(type=CITATION_TYPE_PUBMED, reference='123456', as_dict_list=True)
         self.assertEqual(len(reference_list), 1)
         self.assertIn(citation_2, reference_list)
 
         # author
-        author_list = self.manager.get_citation(author="Example%")
+        author_list = self.manager.query_citations(author="Example%")
         self.assertEqual(len(author_list), 1)
 
         # author, data
-        author_dict_list = self.manager.get_citation(author="Example Author", as_dict_list=True)
+        author_dict_list = self.manager.query_citations(author="Example Author", as_dict_list=True)
         self.assertIn(citation_1, author_dict_list)
 
         # author list, data
-        author_dict_list2 = self.manager.get_citation(author=["Example Author", "Example Author2"], as_dict_list=True)
+        author_dict_list2 = self.manager.query_citations(
+            author=["Example Author", "Example Author2"],
+            as_dict_list=True
+        )
         self.assertIn(citation_1, author_dict_list2)
 
         # type, name, data
-        name_dict_list = self.manager.get_citation(type='PubMed', name="That other article from last week",
-                                                   as_dict_list=True)
+        name_dict_list = self.manager.query_citations(
+            type=CITATION_TYPE_PUBMED,
+            name="That other article from last week",
+            as_dict_list=True
+        )
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(citation_2, name_dict_list)
 
         # type, name like, data
-        name_dict_list2 = self.manager.get_citation(type='PubMed', name="%article from%", as_dict_list=True)
+        name_dict_list2 = self.manager.query_citations(
+            type=CITATION_TYPE_PUBMED,
+            name="%article from%",
+            as_dict_list=True
+        )
         self.assertEqual(len(name_dict_list2), 2)
         self.assertIn(citation_1, name_dict_list2)
         self.assertIn(citation_2, name_dict_list2)
 
         # type, name, evidence, data
-        evidence_dict_list = self.manager.get_citation(type='PubMed', name="That other article from last week",
-                                                       evidence=True, as_dict_list=True)
+        evidence_dict_list = self.manager.query_citations(type=CITATION_TYPE_PUBMED,
+                                                          name="That other article from last week",
+                                                          evidence=True, as_dict_list=True)
         self.assertEqual(len(name_dict_list), 1)
         self.assertIn(evidence_citation_3, evidence_dict_list)
 
         # type, evidence like, data
-        evidence_dict_list2 = self.manager.get_citation(type='PubMed', evidence_text='%Evi%', as_dict_list=True)
+        evidence_dict_list2 = self.manager.query_citations(type=CITATION_TYPE_PUBMED, evidence_text='%Evi%',
+                                                           as_dict_list=True)
         self.assertEqual(len(evidence_dict_list2), 3)
         self.assertIn(evidence_citation, evidence_dict_list2)
         self.assertIn(evidence_citation_2, evidence_dict_list2)

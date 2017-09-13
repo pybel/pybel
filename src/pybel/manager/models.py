@@ -4,6 +4,7 @@
 
 import datetime
 
+from six.moves.cPickle import loads
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, event, DDL
 from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boolean
 from sqlalchemy.ext.declarative import declarative_base
@@ -11,6 +12,7 @@ from sqlalchemy.orm import relationship, backref
 
 from ..constants import *
 from ..io.gpickle import from_bytes
+from ..parser.canonicalize import node_to_tuple
 
 __all__ = [
     'Base',
@@ -130,10 +132,11 @@ class Namespace(Base):
     __tablename__ = NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    uploaded = Column(DateTime, default=datetime.datetime.utcnow, doc='The date of upload')
 
+    uploaded = Column(DateTime, nullable=False, default=datetime.datetime.utcnow, doc='The date of upload')
     url = Column(String(255), nullable=False, unique=True, index=True,
                  doc='Source url of the given namespace definition file (.belns)')
+
     keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
     name = Column(String(255), doc='Name of the given namespace')
     domain = Column(String(255), doc='Domain for which this namespace is valid')
@@ -160,9 +163,11 @@ class Namespace(Base):
     def __str__(self):
         return self.keyword
 
-    @property
-    def data(self):
-        """Returns the table entry as a dictionary without the SQLAlchemy instance information."""
+    def to_json(self):
+        """Returns the table entry as a dictionary without the SQLAlchemy instance information.
+
+        :rtype: dict
+        """
         return {
             'id': self.id,
             'uploaded': self.uploaded,
@@ -205,24 +210,27 @@ class NamespaceEntry(Base):
     children = relationship(
         'NamespaceEntry',
         secondary=namespace_hierarchy,
-        primaryjoin=id == namespace_hierarchy.c.left_id,
-        secondaryjoin=id == namespace_hierarchy.c.right_id
+        primaryjoin=(id == namespace_hierarchy.c.left_id),
+        secondaryjoin=(id == namespace_hierarchy.c.right_id),
     )
 
     def __str__(self):
         return '{}:{}'.format(self.namespace, self.name)
 
-    @property
-    def data(self):
-        """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name."""
-        return {
+    def to_json(self, include_id=False):
+        """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name.
+
+        :rtype: dict
+        """
+        result = {
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
         }
 
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 class NamespaceEntryEquivalence(Base):
@@ -260,10 +268,12 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    @property
-    def data(self):
-        return {
-            'id': self.id,
+    def to_json(self, include_id=False):
+        """Returns this annotation as a JSON dictionary
+
+        :rtype: dict
+        """
+        result = {
             'uploaded': self.uploaded,
             'url': self.url,
             'keyword': self.keyword,
@@ -282,6 +292,11 @@ class Annotation(Base):
             'citation_published': self.citation_published,
             'citation_url': self.citation_url
         }
+
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 class AnnotationEntry(Base):
@@ -304,17 +319,20 @@ class AnnotationEntry(Base):
         secondaryjoin=id == annotation_hierarchy.c.right_id
     )
 
-    @property
-    def data(self):
-        """Describes the annotationEntry as dictionary of Annotation-Keyword and Annotation-Name."""
-        return {
+    def to_json(self, include_id=False):
+        """Describes the annotationEntry as dictionary of Annotation-Keyword and Annotation-Name.
+
+        :rtype: dict
+        """
+        result = {
             'annotation_keyword': self.annotation.keyword,
             'annotation': self.name
         }
 
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 network_edge = Table(
@@ -336,8 +354,8 @@ class Network(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), index=True, doc='Name of the given Network (from the BEL file)')
-    version = Column(String(16), doc='Release version of the given Network (from the BEL file)')
+    name = Column(String(255), nullable=False, index=True, doc='Name of the given Network (from the BEL file)')
+    version = Column(String(16), nullable=False, doc='Release version of the given Network (from the BEL file)')
 
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact information extracted from the underlying BEL file')
@@ -356,31 +374,39 @@ class Network(Base):
         UniqueConstraint(name, version),
     )
 
-    @property
-    def data(self):
-        # TODO switch to using constants from :mod:`pybel.constants`
+    def to_json(self, include_id=False):
+        """Returns this network as JSON
 
-        network_data = {
-            'id': self.id,
-            'name': self.name,
-            'version': self.version,
-            'created': self.created
+        :rtype: dict
+        """
+        result = {
+            'created': self.created,
+            METADATA_NAME: self.name,
+            METADATA_VERSION: self.version,
         }
 
-        if self.authors:
-            network_data['authors'] = self.authors
-        if self.contact:
-            network_data['contact'] = self.contact
-        if self.description:
-            network_data['description'] = self.description
-        if self.copyright:
-            network_data['copyright'] = self.copyright
-        if self.disclaimer:
-            network_data['disclaimer'] = self.disclaimer
-        if self.licenses:
-            network_data['licenses'] = self.licenses
+        if include_id:
+            result[ID] = self.id
 
-        return network_data
+        if self.authors:
+            result[METADATA_AUTHORS] = self.authors
+
+        if self.contact:
+            result[METADATA_CONTACT] = self.contact
+
+        if self.description:
+            result[METADATA_DESCRIPTION] = self.description
+
+        if self.copyright:
+            result[METADATA_COPYRIGHT] = self.copyright
+
+        if self.disclaimer:
+            result[METADATA_DISCLAIMER] = self.disclaimer
+
+        if self.licenses:
+            result[METADATA_LICENSES] = self.licenses
+
+        return result
 
     def __repr__(self):
         return '{} v{}'.format(self.name, self.version)
@@ -398,8 +424,8 @@ class Network(Base):
 
 node_modification = Table(
     NODE_MODIFICATION_TABLE_NAME, Base.metadata,
-    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME))),
-    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)))
+    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True),
+    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -410,9 +436,9 @@ class Node(Base):
     id = Column(Integer, primary_key=True)
 
     type = Column(String(255), nullable=False, doc='The type of the represented biological entity e.g. Protein or Gene')
-    namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
-    namespaceEntry = relationship('NamespaceEntry', foreign_keys=[namespaceEntry_id])
-    namespacePattern = Column(String(255), nullable=True, doc="Contains regex pattern for value identification.")
+    namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    namespace_entry = relationship('NamespaceEntry', foreign_keys=[namespace_entry_id])
+    namespace_pattern = Column(String(255), nullable=True, doc="Contains regex pattern for value identification.")
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
     fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
 
@@ -426,35 +452,45 @@ class Node(Base):
     def __str__(self):
         return self.bel
 
-    @property
-    def data(self):
-        node_key = [self.type]
-        node_data = {
+    def to_json(self, include_id=False):
+        """Serializes this node the same way a PyBEL node data dictionary would
+
+        :rtype: dict
+        """
+        # node_key = [self.type]
+        result = {
             FUNCTION: self.type,
         }
-        if self.namespaceEntry:
-            namespace_entry = self.namespaceEntry.data
-            node_data.update(namespace_entry)
-            node_key.append(namespace_entry[NAMESPACE])
-            node_key.append(namespace_entry[NAME])
+
+        if include_id:
+            result[ID] = self.id
+
+        if self.namespace_entry:
+            namespace_entry = self.namespace_entry.to_json()
+            result.update(namespace_entry)
+            # node_key.append(namespace_entry[NAMESPACE])
+            # node_key.append(namespace_entry[NAME])
 
         if self.is_variant:
             if self.fusion:
                 mod = self.modifications[0].data
-                node_data[FUSION] = mod['mod_data']
-                [node_key.append(key_element) for key_element in mod['mod_key']]
+                result[FUSION] = mod['mod_data']
+                # [node_key.append(key_element) for key_element in mod['mod_key']]
             else:
-                node_data[VARIANTS] = []
+                result[VARIANTS] = []
                 for modification in self.modifications:
                     mod = modification.data
-                    node_data[VARIANTS].append(mod['mod_data'])
-                    node_key.append(tuple(mod['mod_key']))
+                    result[VARIANTS].append(mod['mod_data'])
+                    # node_key.append(tuple(mod['mod_key']))
 
-        return {'key': tuple(node_key), 'data': node_data}
+        return result
 
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data['key']
+    def to_tuple(self):
+        """Converts this node to a PyBEL tuple
+
+        :rtype: tuple
+        """
+        return node_to_tuple(self.to_json())
 
 
 class Modification(Base):
@@ -500,8 +536,8 @@ class Modification(Base):
         mod_key = []
         if self.modType == FUSION:
             mod_dict.update({
-                PARTNER_3P: self.p3Partner.data,
-                PARTNER_5P: self.p5Partner.data,
+                PARTNER_3P: self.p3Partner.to_json(),
+                PARTNER_5P: self.p5Partner.to_json(),
                 RANGE_3P: {},
                 RANGE_5P: {}
             })
@@ -582,14 +618,17 @@ class Modification(Base):
         }
 
     def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
+        """Enables json serialization for the class this method is defined in.
+
+        :rtype: dict
+        """
         return self.data['mod_key']
 
 
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
-    Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME))),
-    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+    Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), primary_key=True),
+    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True)
 )
 
 
@@ -598,7 +637,7 @@ class Author(Base):
     __tablename__ = AUTHOR_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False, index=True)
+    name = Column(String(255), nullable=False, unique=True, index=True)
 
     def __str__(self):
         return self.name
@@ -609,16 +648,23 @@ class Citation(Base):
     __tablename__ = CITATION_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
+
     type = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
-    name = Column(String(255), nullable=False, doc='Title of the publication')
     reference = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
-    date = Column(Date, nullable=True, doc='Publication date')
     sha512 = Column(String(255), index=True)
+
+    name = Column(String(255), nullable=True, doc='Journal name')
+    title = Column(Text, nullable=True, doc='Title of the publication')
+    volume = Column(Text, nullable=True, doc='Volume of the journal')
+    issue = Column(Text, nullable=True, doc='Issue within the volume')
+    pages = Column(Text, nullable=True, doc='Pages of the publication')
+    date = Column(Date, nullable=True, doc='Publication date')
+    first = Column(Text, nullable=True, doc='First author name')
+    last = Column(Text, nullable=True, doc='Last author name')
 
     authors = relationship("Author", secondary=author_citation, backref='citations')
     evidences = relationship("Evidence", backref='citation')
 
-    # TODO: Check for same type reference citations??
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
     )
@@ -626,29 +672,48 @@ class Citation(Base):
     def __str__(self):
         return '{}:{}'.format(self.type, self.reference)
 
-    @property
-    def data(self):
+    def to_json(self, include_id=False):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         :rtype: dict
         """
-        citation_dict = {
-            CITATION_NAME: self.name,
+        result = {
             CITATION_REFERENCE: self.reference,
             CITATION_TYPE: self.type
         }
-        if self.authors:
-            citation_dict[CITATION_AUTHORS] = "|".join(
-                author.name for author in sorted(self.authors, key=lambda auth: auth.name))
+
+        if include_id:
+            result[ID] = self.id
+
+        if self.name:
+            result[CITATION_NAME] = self.name
+
+        if self.title:
+            result[CITATION_TITLE] = self.title
+
+        if self.volume:
+            result[CITATION_VOLUME] = self.volume
+
+        if self.pages:
+            result[CITATION_PAGES] = self.pages
+
         if self.date:
-            citation_dict[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
+            result[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
 
-        return citation_dict
+        if self.first:
+            result[CITATION_FIRST_AUTHOR] = self.first
 
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data
+        if self.last:
+            result[CITATION_LAST_AUTHOR] = self.last
+
+        if self.authors:
+            result[CITATION_AUTHORS] = "|".join(sorted(
+                author.name
+                for author in self.authors
+            ))
+
+        return result
 
 
 class Evidence(Base):
@@ -665,21 +730,21 @@ class Evidence(Base):
     def __str__(self):
         return '{}:{}'.format(self.citation, self.text)
 
-    @property
-    def data(self):
+    def to_json(self, include_id=False):
         """Creates a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
 
         :return: Dictionary containing citation and evidence for a :class:`BELGraph` edge.
         :rtype: dict
         """
-        return {
-            CITATION: self.citation.data,
+        result = {
+            CITATION: self.citation.to_json(),
             EVIDENCE: self.text
         }
 
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
-        return self.data
+        if include_id:
+            result[ID] = self.id
+
+        return result
 
 
 edge_annotation = Table(
@@ -726,75 +791,57 @@ class Edge(Base):
     def __str__(self):
         return self.bel
 
-    @property
-    def data(self):
+    def to_json(self, include_id=False):
         """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
         :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
                  and edge data information.
         :rtype: dict
         """
-        source_node = self.source.data
-        target_node = self.target.data
-        edge_dict = {
-            'source': {
-                'node': (source_node['key'], source_node['data']),
-                'key': source_node['key']
-            },
-            'target': {
-                'node': (target_node['key'], target_node['data']),
-                'key': target_node['key']
-            },
-            'data': {
-                'relation': self.relation,
-                ANNOTATIONS: {
-                    anno.annotation.keyword: anno.name
-                    for anno in self.annotations
-                }
-            },
-        }
-        if self.evidence:
-            edge_dict['data'].update(self.evidence.data)
-
-        for prop in self.properties:
-            prop_info = prop.data
-            if prop_info['participant'] in edge_dict['data']:
-                edge_dict['data'][prop_info['participant']].update(prop_info['data'])
-            else:
-                edge_dict['data'].update(prop_info['data'])
-
-        return edge_dict
-
-    @property
-    def data_min(self):
-        min_dict = {
-            'db_id': self.id,
-            'bel': self.bel,
-            'source': {
-                'db_id': self.source.id,
-                'bel': self.source.bel
-            },
-            'target': {
-                'db_id': self.target.id,
-                'bel': self.target.bel
-            },
-            'data': {
-                'relation': self.relation,
-                ANNOTATIONS: {
-                    anno.annotation.keyword: anno.name
-                    for anno in self.annotations
-                }
+        data = {
+            RELATION: self.relation,
+            ANNOTATIONS: {
+                entry.annotation.keyword: entry.name
+                for entry in self.annotations
             }
         }
+
         if self.evidence:
-            min_dict['data'].update(self.evidence.data)
+            data.update(self.evidence.to_json())
+
         for prop in self.properties:
             prop_info = prop.data
-            if prop_info['participant'] in min_dict['data']:
-                min_dict['data'][prop_info['participant']].update(prop_info['data'][prop_info['participant']])
+            if prop_info['participant'] in data:
+                data[prop_info['participant']].update(prop_info['data'])
             else:
-                min_dict['data'].update(prop_info['data'])
-        return min_dict
+                data.update(prop_info['data'])
+
+        result = {
+            'source': self.source.to_json(),
+            'target': self.target.to_json(),
+            'data': data
+        }
+
+        if include_id:
+            result[ID] = self.id
+
+        return result
+
+    def insert_into_graph(self, graph):
+        """Inserts this edge into a BEL Graph
+
+        :param BELGraph graph: A BEL graph
+        """
+        source_tuple = self.source.to_tuple()
+        target_tuple = self.target.to_tuple()
+
+        if source_tuple not in graph:
+            graph.add_node(source_tuple, attr_dict=loads(self.source.blob))
+
+        if self.target.id not in graph:
+            graph.add_node(target_tuple, attr_dict=loads(self.target.blob))
+
+        graph.add_edge(source_tuple, target_tuple, attr_dict=loads(self.blob))
 
 
 class Property(Base):
@@ -831,12 +878,12 @@ class Property(Base):
 
         if self.modifier == LOCATION:
             prop_dict['data'][self.participant] = {
-                LOCATION: self.namespaceEntry.data
+                LOCATION: self.namespaceEntry.to_json()
             }
 
         if self.relativeKey:
             prop_dict['data'][self.participant][EFFECT] = {
-                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.data
+                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.to_json()
             }
         elif self.effectNamespace:
             prop_dict['data'][self.participant][EFFECT] = {
@@ -847,7 +894,10 @@ class Property(Base):
         return prop_dict
 
     def to_json(self):
-        """Enables json serialization for the class this method is defined in."""
+        """Enables json serialization for the class this method is defined in.
+
+        :rtype: dict
+        """
         return self.data['data']
 
 

@@ -7,18 +7,16 @@ Under the hood, PyBEL caches namespace and annotation files for quick recall on 
 enable this option, but can specify a database location if they choose.
 """
 
-import datetime
-import hashlib
-import json
 import logging
 import time
+
 from collections import defaultdict
 from copy import deepcopy
-
 from six import string_types
-from sqlalchemy import func
+from six.moves.cPickle import dumps
+from sqlalchemy import func, exists
 
-from .base_cache import BaseCacheManager
+from .base_manager import BaseManager
 from .models import (
     Network,
     Annotation,
@@ -34,21 +32,25 @@ from .models import (
     Author,
     Modification,
 )
+from .query_manager import QueryManager
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
-from ..canonicalize import decanonicalize_edge, decanonicalize_node
+from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
 from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
-from ..utils import get_bel_resource, parse_datetime, subdict_matches, hash_edge, hash_node
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+from ..utils import (
+    get_bel_resource,
+    parse_datetime,
+    hash_edge,
+    hash_node,
+    hash_evidence,
+    hash_citation,
+    hash_dump,
+)
 
 __all__ = [
-    'CacheManager',
-    'build_manager',
+    'Manager',
+    'NetworkManager',
 ]
 
 log = logging.getLogger(__name__)
@@ -56,38 +58,11 @@ log = logging.getLogger(__name__)
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
-def build_manager(connection=None, echo=False):
-    """A convenience method for turning a string into a connection, or passing a :class:`CacheManager` through.
-    
-    :param connection: An RFC-1738 database connection string, a pre-built :class:`CacheManager`, or ``None`` 
-                        for default connection
-    :type connection: None or str or CacheManager
-    :type echo: bool
-    :return: A cache manager
-    :rtype: CacheManager
-    """
-    if isinstance(connection, CacheManager):
-        return connection
-    return CacheManager(connection=connection, echo=echo)
+class NamespaceManager(BaseManager):
+    """Manages BEL namespaces"""
 
-
-def hash_dump(d):
-    return hashlib.sha512(json.dumps(d, sort_keys=True).encode('utf-8')).hexdigest()
-
-
-def hash_citation(type, reference):
-    return hash_dump((type, reference))
-
-
-def hash_evidence(text, citation):
-    return hash_dump({EVIDENCE: text, CITATION: citation})
-
-
-class NamespaceManager(BaseCacheManager):
-    """Manages namespace database"""
-
-    def __init__(self, connection=None, echo=False):
-        super(NamespaceManager, self).__init__(connection=connection, echo=echo)
+    def __init__(self, *args, **kwargs):
+        super(NamespaceManager, self).__init__(*args, **kwargs)
 
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
@@ -103,8 +78,11 @@ class NamespaceManager(BaseCacheManager):
         self.namespace_edge_cache = {}
 
     def list_namespaces(self):
-        """Returns a list of all namespace keyword/url pairs"""
-        return list(self.session.query(Namespace.keyword, Namespace.version, Namespace.url).all())
+        """Returns a list of all namespaces
+
+        :rtype: list[Namespace]
+        """
+        return self.session.query(Namespace).all()
 
     def drop_namespaces(self):
         """Drops all namespaces"""
@@ -138,7 +116,7 @@ class NamespaceManager(BaseCacheManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
         """
-        log.info('inserting namespace %s', url)
+        log.info('downloading namespace %s', url)
 
         bel_resource = get_bel_resource(url)
 
@@ -146,6 +124,8 @@ class NamespaceManager(BaseCacheManager):
 
         if bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
             return values
+
+        log.info('inserting namespace %s', url)
 
         namespace_insert_values = {
             'name': bel_resource['Namespace']['NameString'],
@@ -255,6 +235,7 @@ class NamespaceManager(BaseCacheManager):
 
         return results
 
+    # TODO merge get_namespace and ensure_namespace
     def get_namespace(self, url):
         """Returns a dict of names and their encodings for the given namespace URL.
 
@@ -268,6 +249,14 @@ class NamespaceManager(BaseCacheManager):
         else:
             # self.ensure_namespace makes sure it's in the cache if its not cachable
             return self.namespace_cache[url]
+
+    def get_namespace_by_url(self, url):
+        """Looks up a namespace by url
+
+        :param str url:
+        :rtype: Namespace
+        """
+        return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
     def get_namespace_entry(self, url, value):
         """Gets a given NamespaceEntry object.
@@ -372,11 +361,11 @@ class OwlNamespaceManager(NamespaceManager):
         return self.namespace_edge_cache[iri]
 
 
-class AnnotationManager(BaseCacheManager):
-    """Manages database annotations"""
+class AnnotationManager(BaseManager):
+    """Manages BEL annotations"""
 
-    def __init__(self, connection=None, echo=False):
-        super(AnnotationManager, self).__init__(connection=connection, echo=echo)
+    def __init__(self, *args, **kwargs):
+        super(AnnotationManager, self).__init__(*args, **kwargs)
 
         #: A dictionary from {annotation URL: {name: label}}
         self.annotation_cache = defaultdict(dict)
@@ -390,6 +379,13 @@ class AnnotationManager(BaseCacheManager):
 
         #: A dictionary from {annotation URL: set of (parent, child) tuples}
         self.annotation_edge_cache = {}
+
+    def list_annotations(self):
+        """Return a list of all annotations
+
+        :rtype: list[Annotation]
+        """
+        return self.session.query(Annotation).all()
 
     def drop_annotations(self):
         """Drops all annotations"""
@@ -476,6 +472,7 @@ class AnnotationManager(BaseCacheManager):
 
         return results
 
+    # TODO merge get_annotation and ensure_annotation
     def get_annotation(self, url):
         """Returns a dict of annotations and their labels for the given annotation file
 
@@ -483,6 +480,14 @@ class AnnotationManager(BaseCacheManager):
         """
         self.ensure_annotation(url)
         return self.annotation_cache[url]
+
+    def get_annotation_by_url(self, url):
+        """Gets an annotation by URL
+
+        :param str url:
+        :rtype: Annotation
+        """
+        return self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
 
     def get_annotation_entry(self, url, value):
         """Gets a given AnnotationEntry object.
@@ -570,7 +575,7 @@ class OwlAnnotationManager(AnnotationManager):
 
 
 class EquivalenceManager(NamespaceManager):
-    """Manages database equivalences"""
+    """Manages BEL equivalences"""
 
     def drop_equivalences(self):
         """Drops all equivalence classes"""
@@ -640,7 +645,7 @@ class EquivalenceManager(NamespaceManager):
 
 
 class NetworkManager(NamespaceManager, AnnotationManager):
-    """Manages database networks"""
+    """Groups functions for inserting and querying networks in the database's network store."""
 
     def count_networks(self):
         """Counts the number of networks in the cache
@@ -656,12 +661,28 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).all()
 
+    def list_recent_networks(self):
+        """Lists the most recently uploaded version of each network
+
+        :rtype: list[Network]
+        """
+        return self.session.query(Network).group_by(Network.name).having(func.max(Network.created)).order_by(
+            Network.created.desc()).all()
+
+    def has_name_version(self, name, version):
+        """Checks if the name/version combination is already in the database
+
+        :param str name: The network name
+        :param str version: The network version
+        :rtype: bool
+        """
+        return self.session.query(exists().where(Network.name == name, Network.version == version)).scalar()
+
     def drop_network_by_id(self, network_id):
         """Drops a network by its database identifier
 
         :param int network_id: The network's database identifier
         """
-
         network = self.session.query(Network).get(network_id)
         self.session.delete(network)
         self.session.commit()
@@ -678,7 +699,10 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param str name: The name of the network to query
         :rtype: set[str]
         """
-        return {x for x, in self.session.query(Network.version).filter(Network.name == name).all()}
+        return {
+            version
+            for version, in self.session.query(Network.version).filter(Network.name == name).all()
+        }
 
     def get_network_by_name_version(self, name, version):
         """Loads most recently added graph with the given name, or allows for specification of version
@@ -711,10 +735,18 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Gets a network from the database by its identifier.
 
         :param int network_id: The network's database identifier
-        :return: A Network object
         :rtype: Network
         """
         return self.session.query(Network).get(network_id)
+
+    def get_graph_by_id(self, network_id):
+        """Gets a network from the database by its identifier and converts to a BEL graph
+
+        :param int network_id: The network's database identifier
+        :rtype: BELGraph
+        """
+        network = self.get_network_by_id(network_id)
+        return network.as_bel()
 
     def get_networks_by_ids(self, network_ids):
         """Gets a list of networks with the given identifiers. Note: order is not necessarily preserved.
@@ -724,19 +756,28 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).filter(Network.id.in_(network_ids)).all()
 
-    def get_network_by_ids(self, network_ids):
-        """Gets a networks by a list of database identifiers
+    def get_graphs_by_ids(self, network_ids):
+        """Gets a list of networks with the given identifiers and converts to BEL graphs. Note: order is not
+        necessarily preserved.
 
-        :param list[int] network_ids: A network identifier or list of network identifiers
+        :param iter[int] network_ids: The identifiers of networks in the database
+        :rtype: list[BELGraph]
+        """
+        return [
+            self.get_graph_by_id(network_id)
+            for network_id in network_ids
+        ]
+
+    def get_graph_by_ids(self, network_ids):
+        """Gets a combine BEL Graph from a list of network identifiers
+
+        :param list[int] network_ids: A list of network identifiers
         :rtype: pybel.BELGraph
         """
         if len(network_ids) == 1:
-            return self.get_network_by_id(network_ids[0]).as_bel()
+            return self.get_graph_by_id(network_ids[0])
 
-        return union(
-            network.as_bel()
-            for network in self.get_networks_by_ids(network_ids)
-        )
+        return union(self.get_graphs_by_ids(network_ids))
 
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
@@ -746,6 +787,12 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :return: A Network object
         :rtype: Network
         """
+        if not graph.name:
+            raise ValueError('Can not upload a graph without a name')
+
+        if not graph.version:
+            raise ValueError('Can not upload a graph without a version')
+
         log.debug('inserting %s v%s', graph.name, graph.version)
 
         t = time.time()
@@ -763,10 +810,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         })
 
         if store_parts:
-            if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
-                self.ensure_namespace(GOCC_LATEST)
-
-            self.store_graph_parts(network, graph)
+            self._store_graph_parts(network, graph)
 
         self.session.add(network)
         self.session.commit()
@@ -775,16 +819,16 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         return network
 
-    def store_graph_parts(self, network, graph):
+    def _store_graph_parts(self, network, graph):
         """Stores graph parts. Needs to be overridden."""
         raise NotImplementedError
 
 
-class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
-    """Manages the edge store"""
+class InsertManager(NamespaceManager, AnnotationManager):
+    """Manages inserting data into the edge store"""
 
     def __init__(self, *args, **kwargs):
-        super(EdgeStoreInsertManager, self).__init__(*args, **kwargs)
+        super(InsertManager, self).__init__(*args, **kwargs)
 
         #: A dictionary that maps node tuples to their models
         self.node_model = {}
@@ -798,18 +842,21 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         self.object_cache_evidence = {}
         self.object_cache_author = {}
 
-    def store_graph_parts(self, network, graph):
+    def _store_graph_parts(self, network, graph):
         """Stores the given graph into the edge store.
 
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
         """
+        if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
+            self.ensure_namespace(GOCC_LATEST)
+
         for node in graph.nodes_iter():
-            if node in self.node_model:
-                node_object = self.node_model[node]
-            else:
+            try:
                 node_object = self.get_or_create_node(graph, node)
                 self.node_model[node] = node_object
+            except:
+                continue
 
             if node_object not in network.nodes:  # FIXME when would the network ever have nodes in it already?
                 network.nodes.append(node_object)
@@ -817,30 +864,46 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         self.session.flush()
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
+            if u not in self.node_model:
+                log.debug('Skipping uncached node: %s', u)
+                continue
 
-            if CITATION not in data or EVIDENCE not in data:
-                evidence = None
+            if v not in self.node_model:
+                log.debug('Skipping uncached node: %s', v)
+                continue
 
-            else:
-                citation_dict = data[CITATION]
+            if EVIDENCE not in data:
+                continue
 
-                citation = self.get_or_create_citation(
-                    type=citation_dict.get(CITATION_TYPE),
-                    name=citation_dict.get(CITATION_NAME),
-                    reference=citation_dict.get(CITATION_REFERENCE),
-                    date=citation_dict.get(CITATION_DATE),
-                    authors=citation_dict.get(CITATION_AUTHORS),
-                )
-                evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
+            if CITATION not in data:
+                continue
+
+            citation_dict = data[CITATION]
+
+            if CITATION_TYPE not in citation_dict or CITATION_REFERENCE not in citation_dict:
+                continue
+
+            citation = self.get_or_create_citation(
+                type=citation_dict.get(CITATION_TYPE),
+                reference=citation_dict.get(CITATION_REFERENCE),
+                name=citation_dict.get(CITATION_NAME),
+                date=citation_dict.get(CITATION_DATE),
+                authors=citation_dict.get(CITATION_AUTHORS),
+            )
+
+            evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
 
             properties = self.get_or_create_property(graph, data)
-            annotations = [
-                self.annotation_object_cache[graph.annotation_url[key]][value]
-                for key, value in data[ANNOTATIONS].items()
-                if key in graph.annotation_url
-            ]
 
-            bel = decanonicalize_edge(graph, u, v, k)
+            annotations = []
+
+            for key, value in data[ANNOTATIONS].items():
+                if key in graph.annotation_url:
+                    annotations.append(self.annotation_object_cache[graph.annotation_url[key]][value])
+                elif key in graph.annotation_owl:
+                    annotations.append(self.annotation_object_cache[graph.annotation_owl[key]][value])
+
+            bel = edge_to_bel(graph, u, v, k)
 
             edge_hash = hash_edge(u, v, k, data)
 
@@ -852,7 +915,7 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
                 bel=bel,
                 properties=properties,
                 annotations=annotations,
-                blob=pickle.dumps(data),
+                blob=dumps(data),
                 edge_hash=edge_hash,
             )
 
@@ -868,11 +931,13 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         :return: An Evidence object
         :rtype: Evidence
         """
-        evidence_hash = hash_evidence(text, citation)
+        evidence_hash = hash_evidence(text, citation.type, citation.reference)
+
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
 
-        result = self.session.query(Evidence).filter_by(text=text, citation=citation).one_or_none()
+        result = self.session.query(Evidence).filter_by(sha512=evidence_hash).one_or_none()
+
         if result is None:
             result = Evidence(text=text, citation=citation, sha512=evidence_hash)
             self.session.add(result)
@@ -893,37 +958,34 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         if node_hash in self.object_cache_node:
             return self.object_cache_node[node_hash]
 
-        bel = decanonicalize_node(graph, node)
-        blob = pickle.dumps(graph.node[node])
+        bel = node_to_bel(graph, node)
+        blob = dumps(graph.node[node])
         node_data = graph.node[node]
 
         result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
 
-        if result is None:
-            type = node_data[FUNCTION]
+        if result is not None:
+            self.object_cache_node[node_hash] = result
+            return result
 
-            if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
-                namespace = node_data[NAMESPACE]
-                url = graph.namespace_url[namespace]
-                namespace_entry = self.get_namespace_entry(url, node_data[NAME])
+        type = node_data[FUNCTION]
 
-                result = Node(type=type, namespaceEntry=namespace_entry, bel=bel, blob=blob,
-                              sha512=node_hash)
+        result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
-            elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
-                namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
-                result = Node(type=type, namespacePattern=namespace_pattern, bel=bel, blob=blob,
-                              sha512=node_hash)
+        if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
+            namespace = node_data[NAMESPACE]
+            url = graph.namespace_url[namespace]
+            result.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
-            else:
-                result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+        elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
+            result.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
 
-            if VARIANTS in node_data or FUSION in node_data:
-                result.is_variant = True
-                result.fusion = FUSION in node_data
-                result.modifications = self.get_or_create_modification(graph, node_data)
+        if VARIANTS in node_data or FUSION in node_data:
+            result.is_variant = True
+            result.fusion = FUSION in node_data
+            result.modifications = self.get_or_create_modification(graph, node_data)
 
-            self.session.add(result)
+        self.session.add(result)
 
         self.object_cache_node[node_hash] = result
 
@@ -982,13 +1044,13 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
 
         return result
 
-    def get_or_create_citation(self, type, name, reference, date=None, authors=None):
+    def get_or_create_citation(self, type, reference, name=None, date=None, authors=None):
         """Creates entry for given citation if it does not exist.
 
         :param str type: Citation type (e.g. PubMed)
-        :param str name: Title of the publication that is cited
         :param str reference: Identifier of the given citation (e.g. PubMed id)
-        :param str date: Date of publication in ISO 8601 format
+        :param str name: Title of the publication that is cited
+        :param str date: Date of publication in ISO 8601 (YYYY-MM-DD) format
         :param str or list[str] authors: Either a list of authors separated by |, or an actual list of authors
         :return: A Citation object
         :rtype: Citation
@@ -996,35 +1058,37 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         type = type.strip()
         reference = reference.strip()
 
-        citation_dict = {
-            'type': type,
-            'name': name.strip(),
-            'reference': reference
-        }
-
         citation_hash = hash_citation(type, reference)
 
         if citation_hash in self.object_cache_citation:
             return self.object_cache_citation[citation_hash]
 
-        result = self.session.query(Citation).filter_by(sha512=citation_hash).one_or_none()
+        result = self.session.query(Citation).filter(Citation.sha512 == citation_hash).one_or_none()
 
-        if result is None:
-            if date:
-                date = parse_datetime(date)
-                citation_dict['date'] = date
+        if result is not None:
+            self.object_cache_citation[citation_hash] = result
+            return result
 
-            citation_dict['sha512'] = citation_hash
-            result = Citation(**citation_dict)
+        result = Citation(
+            type=type,
+            reference=reference,
+            sha512=citation_hash
+        )
 
-            if authors is not None:
-                for author in authors.split('|') if isinstance(authors, string_types) else authors:
-                    result.authors.append(self.get_or_create_author(author))
+        if name is not None:
+            result.name = name.strip()
 
-            self.session.add(result)
+        if date is not None:
+            result.date = parse_datetime(date)
 
+        if authors is not None:
+            for author in (authors.split('|') if isinstance(authors, string_types) else authors):
+                author_model = self.get_or_create_author(author)
+                if author_model not in result.authors:
+                    result.authors.append(author_model)
+
+        self.session.add(result)
         self.object_cache_citation[citation_hash] = result
-
         return result
 
     def get_or_create_author(self, name):
@@ -1039,14 +1103,15 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         if name in self.object_cache_author:
             return self.object_cache_author[name]
 
-        result = self.session.query(Author).filter_by(name=name).one_or_none()
+        result = self.session.query(Author).filter(Author.name == name).one_or_none()
 
-        if result is None:
-            result = Author(name=name)
-            self.session.add(result)
+        if result is not None:
+            self.object_cache_author[name] = result
+            return result
 
+        result = Author(name=name)
+        self.session.add(result)
         self.object_cache_author[name] = result
-
         return result
 
     def get_or_create_modification(self, graph, node_data):
@@ -1227,381 +1292,22 @@ class EdgeStoreInsertManager(NamespaceManager, AnnotationManager):
         return properties
 
 
-class EdgeStoreQueryManager(BaseCacheManager):
-    """Groups queries over the edge store"""
-
-    def rebuild_by_edge_filter(self, **annotations):
-        """Gets all edges matching the given query annotation values
-
-        :param dict[str,str] annotations: dictionary of {key: value}
-        :return: A graph composed of the filtered edges
-        :rtype: pybel.BELGraph
-        """
-        graph = BELGraph()
-        for annotation_key, annotation_value in annotations.items():
-
-            annotation_def = self.session.query(Annotation).filter_by(keyword=annotation_key).first()
-            annotation = self.session.query(AnnotationEntry).filter_by(annotation=annotation_def,
-                                                                       name=annotation_value).first()
-
-            # Add Annotations to belGraph.annotation_url
-            # Add Namespaces to belGraph.namespace_url
-            # What about meta information?
-            edges = self.session.query(Edge).filter(Edge.annotations.contains(annotation)).all()
-            for edge in edges:
-                edge_data = edge.data
-
-                if len(edge_data['source']['key']) == 1:
-                    edge_data['source'] = self.help_rebuild_list_components(edge.source)
-
-                if len(edge_data['target']['key']) == 1:
-                    edge_data['target'] = self.help_rebuild_list_components(edge.target)
-
-                graph.add_nodes_from((edge_data['source']['node'], edge_data['target']['node']))
-
-                graph.add_edge(
-                    edge_data['source']['key'],
-                    edge_data['target']['key'],
-                    key=(
-                        unqualified_edge_code[edge_data['data']['relation']]
-                        if edge_data['data']['relation'] in UNQUALIFIED_EDGES
-                        else None
-                    ),
-                    attr_dict=edge_data['data']
-                )
-
-        return graph
-
-    def help_rebuild_list_components(self, node):
-        """Builds data and identifier for list node objects.
-
-        :param Node node: Node object defined in models
-        :return: Dictionary with 'key' and 'node' keys.
-        :rtype: dict[str,str]
-        """
-        node_info = node.data
-        key = list(node_info['key'])
-        data = node_info['data']
-        if node.type in (COMPLEX, COMPOSITE):
-            components = self.session.query(Edge).filter_by(source=node, relation=HAS_COMPONENT).all()
-            for component in components:
-                component_key = component.target.data['key']
-                key.append(component_key)
-
-        elif node.type == REACTION:
-            reactant_components = self.session.query(Edge).filter_by(source=node, relation=HAS_REACTANT).all()
-            product_components = self.session.query(Edge).filter_by(source=node, relation=HAS_PRODUCT).all()
-            reactant_keys = tuple(reactant.target.data['key'] for reactant in reactant_components)
-            product_keys = tuple(product.target.data['key'] for product in product_components)
-            key.append(reactant_keys)
-            key.append(product_keys)
-
-        return {'key': tuple(key), 'node': (tuple(key), data)}
-
-    def get_edge_iter_by_filter(self, **annotations):
-        """Returns an iterator over Edge object that match the given annotations
-
-        :param dict[str,str] annotations: dictionary of {URL: values}
-        :return: An iterator over Edge object that match the given annotations
-        :rtype: iter[Edge]
-        """
-        # TODO make smarter
-        for edge in self.session.query(Edge).all():
-            ad = {a.annotation.name: a.name for a in edge.annotations}
-            if subdict_matches(ad, annotations):
-                yield edge
-
-    def get_graph_by_filter(self, **annotations):
-        """Fills a BEL graph with edges retrieved from a filter
-
-        :param dict[str,str] annotations: dictionary of {URL: values}
-        :return: A BEL graph
-        :rtype: pybel.BELGraph
-        """
-        graph = BELGraph()
-
-        for edge in self.get_edge_iter_by_filter(**annotations):
-            if edge.source.id not in graph:
-                graph.add_node(edge.source.id, attr_dict=pickle.loads(edge.source.blob))
-
-            if edge.target.id not in graph:
-                graph.add_node(edge.target.id, attr_dict=pickle.loads(edge.target.blob))
-
-            graph.add_edge(edge.source.id, edge.target.id, attr_dict=pickle.loads(edge.blob))
-
-        return graph
-
-    def get_node(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
-                 modification_name=None, as_dict_list=False):
-        """Builds and runs a query over all nodes in the PyBEL cache.
-
-        :param int node_id: The node ID to get
-        :param str bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
-        :param str type: Type of the biological entity. e.g. Protein
-        :param str namespace: Namespace keyword that is used in BEL. e.g. HGNC
-        :param str name: Name of the biological entity. e.g. APP
-        :param str modification_name:
-        :param str modification_type:
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`Node` objects.
-        :return: A list of the fitting nodes as :class:`Node` objects or dicts.
-        :rtype: list[Node]
-        """
-        q = self.session.query(Node)
-
-        if node_id and isinstance(node_id, int):
-            q = q.filter_by(id=node_id)
-
-        else:
-            if bel:
-                q = q.filter(Node.bel.like(bel))
-
-            if type:
-                q = q.filter(Node.type.like(type))
-
-            if namespace or name:
-                q = q.join(NamespaceEntry)
-                if namespace:
-                    q = q.join(Namespace).filter(Namespace.keyword.like(namespace))
-                if name:
-                    q = q.filter(NamespaceEntry.name.like(name))
-
-            if modification_type or modification_name:
-                q = q.join(Modification)
-                if modification_type:
-                    q = q.filter(Modification.modType.like(modification_type))
-                if modification_name:
-                    q = q.filter(Modification.modName.like(modification_name))
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        dict_list = []
-
-        for node in result:
-            node_dict = node.data
-            node_dict['bel'] = node.bel
-            dict_list.append(node_dict)
-
-        return dict_list
-
-    def count_nodes(self):
-        """Counts the number of nodes in the cache
-
-        :rtype: int
-        """
-        return self.session.query(func.count(Node.id)).scalar()
-
-    def count_edges(self):
-        """Counts the number of edges in the cache
-
-        :rtype: int
-        """
-        return self.session.query(func.count(Edge.id)).scalar()
-
-    def get_edge(self, edge_id=None, bel=None, source=None, target=None, relation=None, citation=None,
-                 evidence=None, annotation=None, property=None, as_dict_list=False):
-        """Builds and runs a query over all edges in the PyBEL cache.
-
-        :param int edge_id: The edge identifier
-        :param str bel: BEL statement that represents the desired edge.
-        :param str or Node source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :param str or Node target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :param str relation: The relation that should be present between source and target node.
-        :param str or Citation citation: The citation that backs the edge up. It is possible to use the reference_id
-                         or a Citation object.
-        :param str or Evidence evidence: The supporting text of the edge
-        :param dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
-                                        annotationValue parameter as string.
-        :param property: An edge property object or a corresponding database identifier.
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                                    :class:`Edge` objects.
-        """
-        q = self.session.query(Edge)
-
-        if edge_id and isinstance(edge_id, int):
-            q = q.filter_by(id=edge_id)
-
-        else:
-            if bel:
-                q = q.filter(Edge.bel.like(bel))
-
-            if relation:
-                q = q.filter(Edge.relation.like(relation))
-
-            if annotation:
-                q = q.join(AnnotationEntry, Edge.annotations)
-                if isinstance(annotation, dict):
-                    q = q.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
-                    q = q.filter(AnnotationEntry.name.in_(list(annotation.values())))
-
-                elif isinstance(annotation, str):
-                    q = q.filter(AnnotationEntry.name.like(annotation))
-
-            if source:
-                if isinstance(source, str):
-                    source = self.get_node(bel=source)[0]
-
-                if isinstance(source, Node):
-                    q = q.filter(Edge.source == source)
-
-                    # ToDo: in_() not yet supported for relations
-                    # elif isinstance(source, list) and len(source) > 0:
-                    #    if isinstance(source[0], Node):
-                    #        q = q.filter(Edge.source.in_(source))
-
-            if target:
-                if isinstance(target, str):
-                    target = self.get_node(bel=target)[0]
-
-                if isinstance(target, Node):
-                    q = q.filter(Edge.target == target)
-
-                    # elif isinstance(target, list) and len(target) > 0:
-                    #    if isinstance(target[0], Node):
-                    #        q = q.filter(Edge.source.in_(target))
-
-            if citation or evidence:
-                q = q.join(Evidence)
-
-                if citation:
-                    if isinstance(citation, Citation):
-                        q = q.filter(Evidence.citation == citation)
-
-                    elif isinstance(citation, list) and isinstance(citation[0], Citation):
-                        q = q.filter(Evidence.citation.in_(citation))
-
-                    elif isinstance(citation, str):
-                        q = q.join(Citation).filter(Citation.reference.like(citation))
-
-                if evidence:
-                    if isinstance(evidence, Evidence):
-                        q = q.filter(Edge.evidence == evidence)
-
-                    elif isinstance(evidence, str):
-                        q = q.filter(Evidence.text.like(evidence))
-
-            if property:
-                q = q.join(Property, Edge.properties)
-
-                if isinstance(property, Property):
-                    q = q.filter(Property.id == property.id)
-                elif isinstance(property, int):
-                    q = q.filter(Property.id == property)
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        return [
-            edge.data
-            for edge in result
-        ]
-
-    def get_citation(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
-                     evidence=False, evidence_text=None, as_dict_list=False):
-        """Builds and runs a query over all citations in the PyBEL cache.
-
-        :param int citation_id:
-        :param str type: Type of the citation. e.g. PubMed
-        :param str reference: The identifier used for the citation. e.g. PubMed_ID
-        :param str name: Title of the citation.
-        :param str or list[str] author: The name or a list of names of authors participated in the citation.
-        :param date: Publishing date of the citation.
-        :type date: str or datetime.date
-        :param bool evidence: Weather or not supporting text should be included in the return.
-        :param evidence_text:
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`Citation` objects.
-        :return: List of :class:`Citation` objects or corresponding dicts.
-        :rtype: list[Citation] or dict
-        """
-        q = self.session.query(Citation)
-
-        if citation_id and isinstance(citation_id, int):
-            q = q.filter_by(id=citation_id)
-
-        else:
-            if author is not None:
-                q = q.join(Author, Citation.authors)
-                if isinstance(author, str):
-                    q = q.filter(Author.name.like(author))
-                elif isinstance(author, list):
-                    q = q.filter(Author.name.in_(author))
-
-            if type:
-                q = q.filter(Citation.type.like(type))
-
-            if reference:
-                q = q.filter(Citation.reference == reference)
-
-            if name:
-                q = q.filter(Citation.name.like(name))
-
-            if date:
-                if isinstance(date, datetime.date):
-                    q = q.filter(Citation.date == date)
-                elif isinstance(date, str):
-                    q = q.filter(Citation.date == parse_datetime(date))
-
-            if evidence_text:
-                q = q.join(Evidence).filter(Evidence.text.like(evidence_text))
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        if not (evidence or evidence_text):
-            return [
-                cit.data
-                for cit in result
-            ]
-
-        return [
-            evidence.data
-            for citation in result
-            for evidence in citation.evidences
-        ]
-
-    def get_property(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
-        """Builds and runs a query over all property entries in the database.
-
-        :param int property_id: Database primary identifier.
-        :param str participant: The participant that is effected by the property (OBJECT or SUBJECT)
-        :param str modifier: The modifier of the property.
-        :param bool as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
-                             :class:`Property` objects.
-        :rtype: list[Property]
-        """
-        q = self.session.query(Property)
-
-        if property_id:
-            q = q.filter_by(id=property_id)
-
-        else:
-            if participant:
-                q = q.filter(Property.participant.like(participant))
-
-            if modifier:
-                q = q.filter(Property.modifier.like(modifier))
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        return [
-            prop.data
-            for prop in result
-        ]
-
-
-class CacheManager(EdgeStoreQueryManager, EdgeStoreInsertManager, NetworkManager, EquivalenceManager,
-                   OwlNamespaceManager, OwlAnnotationManager):
+class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, OwlNamespaceManager,
+              OwlAnnotationManager):
     """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
     SQLite by default for speed and lightness, but any database can be used with its SQLAlchemy interface.
     """
+
+    @staticmethod
+    def ensure(connection=None, **kwargs):
+        """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
+
+        :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
+                            for default connection
+        :type connection: None or str or Manager
+        :param kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
+        :rtype: Manager
+        """
+        if isinstance(connection, Manager):
+            return connection
+        return Manager(connection=connection, **kwargs)

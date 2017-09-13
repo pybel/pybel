@@ -16,6 +16,7 @@ from ..constants import *
 
 log = logging.getLogger(__name__)
 
+#: A dictionary of activity labels used in the ma() function in activity(p(X), ma(Y))
 activity_labels = {
     'catalyticActivity': 'cat',
     'cat': 'cat',
@@ -35,7 +36,13 @@ activity_labels = {
     'tscript': 'tscript',
     'transportActivity': 'tport',
     'tport': 'tport',
-    'molecularActivity': 'molecularActivity'
+    'molecularActivity': 'molecularActivity',
+
+    # Added by PyBEL
+    'guanineNucleotideExchangeFactorActivity': 'gef',
+    'gef': 'gef',
+    'gtpaseActivatingProteinActivity': 'gap',
+    'gap': 'gap',
 }
 
 # TODO fill out

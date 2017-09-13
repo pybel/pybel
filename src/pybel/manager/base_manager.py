@@ -8,14 +8,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from .models import Base
-from ..constants import get_cache_connection
+from ..constants import get_cache_connection, config
 
-__all__ = ['BaseCacheManager']
+__all__ = [
+    'BaseManager'
+]
 
 log = logging.getLogger(__name__)
 
 
-class BaseCacheManager(object):
+class BaseManager(object):
     """Creates a connection to database and a persistent session using SQLAlchemy
     
     A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,  
@@ -32,34 +34,55 @@ class BaseCacheManager(object):
     `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
     """
 
-    def __init__(self, connection=None, echo=False):
+    def __init__(self, connection=None, echo=False, autoflush=None, autocommit=None, expire_on_commit=None):
         """
         :param str connection: An RFC-1738 database connection string. If ``None``, tries to load from the environment
                                 variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json``
                                 whose value for ``PYBEL_CONNECTION`` defaults to 
                                 :data:`pybel.constants.DEFAULT_CACHE_LOCATION`
-        :param bool echo: Turn on echoing sql
-        """
-        if connection is not None:
-            self.connection = connection
-            log.info('connected to user-defined cache: %s', self.connection)
-        else:
-            self.connection = get_cache_connection()
 
+        :param bool echo: Turn on echoing sql
+        :param bool autoflush: Defaults to True if not specified in kwargs or configuration.
+        :param bool autocommit: Defaults to False if not specified in kwargs or configuration.
+        :param bool expire_on_commit: Defaults to False if not specified in kwargs or configuration.
+        """
+        self.connection = get_cache_connection(connection)
         self.engine = create_engine(self.connection, echo=echo)
+        self.autoflush = autoflush if autoflush is not None else config.get('PYBEL_MANAGER_AUTOFLUSH', False)
+        self.autocommit = autocommit if autocommit is not None else config.get('PYBEL_MANAGER_AUTOCOMMIT', False)
+
+        if expire_on_commit is not None:
+            self.expire_on_commit = expire_on_commit
+        else:
+            self.expire_on_commit = config.get('PYBEL_MANAGER_AUTOEXPIRE', True)
+
+        log.info(
+            'auto flush: %s, auto commit: %s, expire on commmit: %s',
+            self.autoflush,
+            self.autoflush,
+            self.expire_on_commit
+        )
 
         #: A SQLAlchemy session maker
-        self.sessionmaker = sessionmaker(bind=self.engine, autoflush=False, expire_on_commit=False)
+        self.session_maker = sessionmaker(
+            bind=self.engine,
+            autoflush=self.autoflush,
+            autocommit=self.autocommit,
+            expire_on_commit=self.expire_on_commit,
+        )
 
         #: A SQLAlchemy session object
-        self.session = scoped_session(self.sessionmaker)
+        self.session = scoped_session(self.session_maker)
 
         self.create_all()
 
     def create_all(self, checkfirst=True):
-        """Creates the PyBEL cache's database and tables"""
+        """Creates the PyBEL cache's database and tables
+
+        :param bool checkfirst: Check if the database is made before trying to re-make it
+        """
         Base.metadata.create_all(self.engine, checkfirst=checkfirst)
 
-    def drop_database(self):
+    def drop_all(self):
         """Drops all data, tables, and databases for the PyBEL cache"""
         Base.metadata.drop_all(self.engine)

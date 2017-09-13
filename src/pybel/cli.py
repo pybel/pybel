@@ -15,19 +15,20 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
-import os
 import sys
 import time
 
 import click
+import os
 
 from .canonicalize import to_bel
-from .constants import PYBEL_LOG_DIR, get_cache_connection
+from .constants import PYBEL_LOG_DIR, get_cache_connection, config, PYBEL_CONNECTION
 from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
 from .manager import defaults
-from .manager.cache import CacheManager
+from .manager import Manager
 from .manager.database_io import to_database, from_database
 from .manager.models import Network, Namespace, Annotation, Base
+from .utils import set_default_connection, set_default_mysql_connection
 
 log = logging.getLogger('pybel')
 
@@ -68,19 +69,18 @@ def main():
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--allow-unqualified-translocations', is_flag=True,
               help="Enable lenient parsing for unqualified translocations")
-@click.option('--suppress-singleton-warnings', is_flag=True)
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--debug', count=True)
 def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
             neo_context, store_default, store_connection, allow_naked_names, allow_nested,
-            allow_unqualified_translocations, suppress_singleton_warnings, no_citation_clearing, debug):
+            allow_unqualified_translocations, no_citation_clearing, debug):
     """Convert BEL"""
     if debug == 1:
         log.setLevel(20)
     elif debug == 2:
         log.setLevel(10)
 
-    manager = CacheManager(connection=connection)
+    manager = Manager(connection=connection)
 
     if database_name:
         g = from_database(database_name, connection=manager)
@@ -93,7 +93,6 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
-            warn_on_singleton=(not suppress_singleton_warnings),
         )
 
     else:
@@ -104,7 +103,6 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
-            warn_on_singleton=(not suppress_singleton_warnings),
         )
 
     if csv:
@@ -141,11 +139,11 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 
     if store_default:
         log.info('Storing to database')
-        to_database(g)
+        to_database(g, store_parts=True)
 
     if store_connection:
         log.info('Storing to database: %s', store_connection)
-        to_database(g, connection=store_connection)
+        to_database(g, connection=store_connection, store_parts=True)
 
     if neo:
         import py2neo
@@ -157,12 +155,41 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
     sys.exit(0 if 0 == len(g.warnings) else 1)
 
 
+@main.group(help="Edit connection settings. Set to: {}".format(config[PYBEL_CONNECTION]))
+def connection():
+    pass
+
+
+@connection.command()
+@click.argument('value')
+def set(value):
+    """Set custom connection string"""
+    set_default_connection(value)
+
+
+@connection.command()
+@click.option('--user')
+@click.option('--password')
+@click.option('--host')
+@click.option('--database')
+@click.option('--charset')
+def set_mysql(user, password, host, database, charset):
+    """Sets MySQL connection string"""
+    set_default_mysql_connection(
+        user=user,
+        password=password,
+        host=host,
+        database=database,
+        charset=charset
+    )
+
+
 @main.group()
 @click.option('-c', '--connection', help='Cache connection. Defaults to {}'.format(get_cache_connection()))
 @click.pass_context
 def manage(ctx, connection):
     """Manage database"""
-    ctx.obj = CacheManager(connection)
+    ctx.obj = Manager(connection)
     Base.metadata.bind = ctx.obj.engine
     Base.query = ctx.obj.session.query_property()
 
@@ -182,7 +209,7 @@ def setup(manager, debug):
 def remove(manager, yes):
     """Drops cache"""
     if yes or click.confirm('Drop database?'):
-        manager.drop_database()
+        manager.drop_all()
 
 
 @manage.group()

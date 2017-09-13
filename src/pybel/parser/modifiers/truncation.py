@@ -49,7 +49,7 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, identifier=KIND)
+truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, name=KIND)
 
 
 class TruncationParser(BaseParser):
