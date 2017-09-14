@@ -361,6 +361,7 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'networkx': ('https://networkx.github.io/', None),
     'py2neo': ('http://py2neo.org/v3/', None),
+    'sqlalchemy': ('http://www.sqlalchemy.org/docs/', None)
 }
 
 autodoc_member_order = 'bysource'
