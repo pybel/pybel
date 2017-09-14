@@ -100,37 +100,46 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def namespace_url(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS file"""
+        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS files from the
+        ``DEFINE NAMESPACE [key] AS URL "[value]"`` entries in the definitions section.
+        """
         return self.graph[GRAPH_NAMESPACE_URL]
 
     @property
     def namespace_owl(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL file"""
+        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL files from the
+        ``DEFINE NAMESPACE [key] AS OWL "[value]"`` entries in the definitions section"""
         return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
     def namespace_pattern(self):
-        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns"""
+        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns from the
+        ``DEFINE NAMESPACE [key] AS PATTERN "[value]"`` entries in the definitions section"""
         return self.graph[GRAPH_NAMESPACE_PATTERN]
 
     @property
     def annotation_url(self):
-        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO file"""
+        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO files
+        from the ``DEFINE ANNOTATION [key] AS URL "[value]"`` entries in the definitions section"""
         return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
     def annotation_owl(self):
-        """A dictionary mapping the annotation keywords to the URL of the OWL file"""
+        """A dictionary mapping the annotation keywords used to creat ethis graph to the URLs of the OWL files
+        from the ``DEFINE ANNOTATION [key] AS OWL "[value]"`` entries in the definitions section"""
         return self.graph[GRAPH_ANNOTATION_OWL]
 
     @property
     def annotation_pattern(self):
-        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns"""
+        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns
+        from the ``DEFINE ANNOTATION [key] AS PATTERN "[value]"`` entries in the definitions section
+        """
         return self.graph[GRAPH_ANNOTATION_PATTERN]
 
     @property
     def annotation_list(self):
-        """A dictionary mapping the keywords of locally defined annotations to a set of their values"""
+        """A dictionary mapping the keywords of locally defined annotations to a set of their values
+        from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section"""
         return self.graph[GRAPH_ANNOTATION_LIST]
 
     @property
