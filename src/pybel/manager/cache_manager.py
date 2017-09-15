@@ -163,7 +163,7 @@ class NamespaceManager(BaseManager):
         """
         if url in self.namespace_model:
             log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
-            results = self.namespace_model[url]
+            return self.namespace_model[url]
 
         else:
             t = time.time()
@@ -195,13 +195,13 @@ class NamespaceManager(BaseManager):
         return results
 
     # TODO merge get_namespace and ensure_namespace
-    def get_namespace(self, url):
+    def get_namespace(self, url, cache_objects=False):
         """Returns a dict of names and their encodings for the given namespace URL.
 
-        :param url: the location of the namespace file
-        :type url: str
+        :param str url: the location of the namespace file
+        :param bool cache_objects: Indicates if the object_cache should be filed with :class:`NamespaceEntry` objects.
         """
-        result = self.ensure_namespace(url)
+        result = self.ensure_namespace(url, cache_objects=cache_objects)
 
         if isinstance(result, dict):
             return result
@@ -225,18 +225,11 @@ class NamespaceManager(BaseManager):
         :return: An NamespaceEntry object
         :rtype: NamespaceEntry
         """
-        if self.namespace_object_cache:
-            namespace_entry = self.namespace_object_cache[url][value]
-        else:
-            namespace = self.session.query(Namespace).filter_by(url=url).one()
+        if self.namespace_object_cache and url in self.namespace_object_cache:
+            return self.namespace_object_cache[url][value]
 
-            # FIXME @kono reinvestigate this
-            try:
-                namespace_entry = self.session.query(NamespaceEntry). \
-                    filter_by(namespace=namespace, name=value).one_or_none()
-            except:
-                namespace_entry = self.session.query(NamespaceEntry). \
-                    filter_by(namespace=namespace, name=value).first()
+        namespace = self.session.query(Namespace).filter_by(url=url).one()
+        namespace_entry = self.session.query(NamespaceEntry).filter_by(namespace=namespace, name=value).one_or_none()
 
         return namespace_entry
 
@@ -384,11 +377,11 @@ class AnnotationManager(BaseManager):
 
         return annotation
 
-    def ensure_annotation(self, url, objects=False):
+    def ensure_annotation(self, url, cache_objects=False):
         """Caches an annotation file if not already in the cache
 
         :param str url: the location of the annotation file
-        :param bool objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
+        :param bool cache_objects: Indicates if the object_cache should be filed with :class:`AnnotationEntry` objects.
         :return: The ensured annotation instance
         :rtype: Annotation
         """
@@ -411,7 +404,7 @@ class AnnotationManager(BaseManager):
                 self.annotation_cache[url][entry.name] = entry.label
                 self.annotation_id_cache[url][entry.name] = entry.id
 
-        if objects and url not in self.annotation_object_cache:
+        if cache_objects and url not in self.annotation_object_cache:
             log.debug('loading annotation objects: %s (%d)', url, len(self.annotation_cache[url]))
             for entry in results.entries:
                 self.annotation_object_cache[url][entry.name] = entry
@@ -747,7 +740,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
             self.ensure_namespace(url, cache_objects=store_parts)
 
         for url in graph.annotation_url.values():
-            self.ensure_annotation(url, objects=store_parts)
+            self.ensure_annotation(url, cache_objects=store_parts)
 
         network = Network(blob=to_bytes(graph), **{
             key: value
@@ -794,8 +787,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
         """
-        if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
-            self.ensure_namespace(GOCC_LATEST)
+        self.ensure_namespace(GOCC_LATEST, cache_objects=True)
 
         for node in graph.nodes_iter():
             try:
@@ -835,6 +827,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
                 name=citation_dict.get(CITATION_NAME),
                 date=citation_dict.get(CITATION_DATE),
                 authors=citation_dict.get(CITATION_AUTHORS),
+                # TODO add other fields that get enriched
             )
 
             evidence = self.get_or_create_evidence(citation, data[EVIDENCE])

@@ -980,5 +980,43 @@ class TestFilter(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
         compare(reloaded, check_metadata=False)
 
 
+class TestInsert(FleetingTemporaryCacheMixin):
+    def test_translocation(self):
+        graph = BELGraph(name='dummy', version='0.0.1')
+        u = (PROTEIN, 'HGNC', 'YFG')
+        v = (PROTEIN, 'HGNC', 'YFG2')
+        graph.add_simple_node(*u)
+        graph.add_simple_node(*v)
+
+        graph.add_edge(u, v, attr_dict={
+            SUBJECT: {
+                MODIFIER: TRANSLOCATION,
+                EFFECT: {
+                    FROM_LOC: {
+                        NAMESPACE: GOCC_KEYWORD,
+                        NAME: 'intracellular'
+                    },
+                    TO_LOC: {
+                        NAMESPACE: GOCC_KEYWORD,
+                        NAME: 'extracellular space'
+                    }
+                }
+            },
+            EVIDENCE: 'dummy text',
+            CITATION: {CITATION_TYPE: CITATION_TYPE_PUBMED, CITATION_REFERENCE: '1234'},
+            ANNOTATIONS: {},
+            RELATION: ASSOCIATION
+        })
+
+        hgnc_namespace = Namespace(keyword='HGNC', url='dummy url')
+        yfg = NamespaceEntry(name='YFG')
+        yfg2 = NamespaceEntry(name='YFG2')
+        hgnc_namespace.entries = [yfg, yfg2]
+        self.manager.session.add(hgnc_namespace)
+        self.manager.session.commit()
+
+        self.manager.insert_graph(graph, store_parts=True)
+
+
 if __name__ == '__main__':
     unittest.main()
