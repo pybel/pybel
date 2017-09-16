@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.8.2-dev <https://github.com/pybel/pybel/compare/v0.81...HEAD>`_ - 2017-09-08
-----------------------------------------------------------------------------------
+`Unreleased <https://github.com/pybel/pybel/compare/v0.8.1...HEAD>`_
+--------------------------------------------------------------------
 Added
 ~~~~~
 - Option for setting scopefunc in Manager
