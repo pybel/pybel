@@ -5,7 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.8.0 <https://github.com/pybel/pybel/compare/v0.7.3...v0.8.9>`_ - 2017-09-08
+`0.8.2-dev <https://github.com/pybel/pybel/compare/v0.81...HEAD>`_ - 2017-09-08
+----------------------------------------------------------------------------------
+Added
+~~~~~
+- Option for setting scopefunc in Manager
+
+Changed
+~~~~~~~
+- Added members lists to the node data dictionaries for complex and composite nodes
+- Added reactants and products lists to the node data dictionaries for reaction nodes
+
+Fixed
+~~~~~~~
+- GOCC and other location caching problem
+- Node tuples for reactions are now using standard node tuples for reactants and products. This was a huge issue
+  but it had never come up before. DANGER - this means all old code will still work, but any node-tuple reliant
+  code will have unexpected results. This also means that the node hashes in the database for all reactions will
+  now be outdated, so the minimum version is being bumped.
+
+`0.8.1 <https://github.com/pybel/pybel/compare/v0.8.0...v0.8.1>`_ - 2017-09-08
+------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Change CacheManager class name to Manager
+- Change references from build_manager to Manager.ensure
+- Automatically update default database to minimum import version
+- Constants for extra citation fields and update to_json for Citation model
+
+Fixed
+~~~~~
+- Bug in author insertion for non-unique authors
+
+`0.8.0 <https://github.com/pybel/pybel/compare/v0.7.3...v0.8.0>`_ - 2017-09-08
 ------------------------------------------------------------------------------
 Changed
 ~~~~~~~
