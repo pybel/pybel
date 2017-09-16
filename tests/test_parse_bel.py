@@ -1506,17 +1506,19 @@ class TestComplex(TestTokenParserBase):
 
 
 class TestComposite(TestTokenParserBase):
-    """2.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA"""
+    """Tests the parsing of the composite function
+
+    .. seealso::
+
+            `BEL 2.0 Specification 2.1.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
+    """
 
     def setUp(self):
         self.parser.clear()
         self.parser.composite_abundance.setParseAction(self.parser.handle_term)
 
     def test_213a(self):
-        """This example comes from the following text: ``IL-6 and IL-23 synergistically induce Th17 differentiation.``
-
-        See http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcompositeA
-        """
+        """Evidence: ``IL-6 and IL-23 synergistically induce Th17 differentiation"""
         statement = 'composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex"))'
         result = self.parser.composite_abundance.parseString(statement)
 

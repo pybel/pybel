@@ -23,6 +23,7 @@ def identifier_to_tuple(tokens):
     """Extracts the namespace and name pair from the tokens and creates a 2-tuple
 
     :param dict tokens: A dictionary or slicable
+    :type tokens: ParseResult or dict
     :rtype: tuple
     """
     return tokens[NAMESPACE], tokens[NAME]
@@ -30,6 +31,10 @@ def identifier_to_tuple(tokens):
 
 # TODO figure out how to just get dictionary rather than slicing it up like this
 def fusion_range_po_to_dict(tokens):
+    """
+    :type tokens: ParseResult
+    :rtype: dict
+    """
     if FUSION_MISSING in tokens:
         return {
             FUSION_MISSING: '?'
@@ -45,7 +50,8 @@ def fusion_range_po_to_dict(tokens):
 def fusion_po_to_dict(tokens):
     """Converts a PyParsing data dictionary to a PyBEL fusion data dictionary
 
-    :param ParseResult tokens: A PyParsing data dictionary representing a fusion
+    :param tokens: A PyParsing data dictionary representing a fusion
+    :type tokens: ParseResult
     :rtype: dict
     """
     return {
@@ -68,7 +74,7 @@ def fusion_po_to_dict(tokens):
 def variant_po_to_dict_helper(tokens):
     """Converts a PyParsing data dictionary to a PyBEL variant data dictionary
 
-    :param tokens:
+    :type tokens: ParseResult
     :rtype: dict
     """
     return [
@@ -80,7 +86,7 @@ def variant_po_to_dict_helper(tokens):
 def variant_po_to_dict(tokens):
     """Converts a PyParsing data dictionary to a PyBEL variant data dictionary
 
-    :param tokens:
+    :type tokens: ParseResult
     :rtype: dict
     """
     attr_data = simple_po_to_dict(tokens)
@@ -90,8 +96,7 @@ def variant_po_to_dict(tokens):
 
 def fusion_range_po_to_tuple(tokens, tag):
     """
-
-    :param tokens:
+    :type tokens: ParseResult
     :param str tag: either :data:`pybel.constants.RANGE_3P` or :data:`pybel.constants.RANGE_5P`
     :rtype: tuple
     """
@@ -113,7 +118,7 @@ def fusion_range_po_to_tuple(tokens, tag):
 def fusion_po_to_tuple(tokens):
     """Converts a PyParsing data dictionary to PyBEL node tuple
 
-    :param ParseObject tokens:
+    :type tokens: ParseResult
     :rtype: tuple
     """
     function = tokens[FUNCTION]
@@ -205,7 +210,7 @@ def simple_po_to_dict(tokens):
 def simple_to_tuple(tokens):
     """Converts the tokens returned by PyParsing for a simple node to a PyBEL node tuple
 
-    :param dict tokens:
+    :type tokens: ParseResult or dict
     :rtype: tuple
     """
     if IDENTIFIER in tokens:  # Means we're using PyParsing format
@@ -220,7 +225,7 @@ def simple_to_tuple(tokens):
 
 def hgvs_po_to_tuple(tokens):
     """
-    :type tokens: ParseResult
+    :type tokens: ParseResult or dict
     :rtype: tuple
     """
     return tokens[KIND], tokens[IDENTIFIER]
@@ -285,7 +290,7 @@ def variant_po_to_tuple(tokens):
 def _canonicalize_variants_helper(tokens):
     """Looks at the tokens[VARIANTS] dictionary
 
-    :param tokens:
+    :type tokens: ParseResult
     :rtype: tuple
     """
     return tuple(sorted(
