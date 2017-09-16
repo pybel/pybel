@@ -78,9 +78,11 @@ def variant_po_to_dict_helper(tokens):
     :type tokens: ParseResult
     :rtype: dict
     """
+    variants = sorted(tokens[VARIANTS], key=variant_po_to_tuple)
+
     return [
-        variant.asDict()
-        for variant in tokens[VARIANTS]
+        safe_get_dict(variant)
+        for variant in variants
     ]
 
 
