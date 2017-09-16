@@ -45,6 +45,7 @@ activity_labels = {
     'gap': 'gap',
 }
 
+#: Maps the default BEL molecular activities to Gene Ontology Molecular Functions
 activity_go_mapping = {
     'cat': {NAMESPACE: 'GOMF', NAME: 'catalytic activity', ID: 'GO:0003824'},
     'chap': {NAMESPACE: 'GOMF', NAME: 'protein binding involved in protein folding', ID: 'GO:0044183'},
@@ -96,6 +97,7 @@ rev_abundance_labels = {
     COMPOSITE: 'composite'
 }
 
+#: Maps the BEL abundance types to the Systems Biology Ontology
 abundance_sbo_mapping = {
     MIRNA: {NAMESPACE: 'SBO', NAME:'microRNA', ID:'SBO:0000316'},
     BIOPROCESS: {NAMESPACE: 'SBO', NAME:'process', ID:'SBO:0000375'},
