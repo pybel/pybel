@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from ..constants import *
-from ..utils import list2tuple
 
 __all__ = [
     'node_to_tuple',
@@ -29,16 +28,8 @@ def identifier_to_tuple(tokens):
     return tokens[NAMESPACE], tokens[NAME]
 
 
-def canonicalize_simple_to_dict(tokens):
-    return {
-        FUNCTION: tokens[FUNCTION],
-        NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
-        NAME: tokens[IDENTIFIER][NAME]
-    }
-
-
 # TODO figure out how to just get dictionary rather than slicing it up like this
-def canonicalize_fusion_range_to_dict(tokens):
+def fusion_range_po_to_dict(tokens):
     if FUSION_MISSING in tokens:
         return {
             FUSION_MISSING: '?'
@@ -51,10 +42,10 @@ def canonicalize_fusion_range_to_dict(tokens):
         }
 
 
-def canonicalize_fusion_to_dict(tokens):
+def fusion_po_to_dict(tokens):
     """Converts a PyParsing data dictionary to a PyBEL fusion data dictionary
 
-    :param ParseObject tokens: A PyParsing data dictionary representing a fusion
+    :param ParseResult tokens: A PyParsing data dictionary representing a fusion
     :rtype: dict
     """
     return {
@@ -64,14 +55,26 @@ def canonicalize_fusion_to_dict(tokens):
                 NAMESPACE: tokens[FUSION][PARTNER_5P][NAMESPACE],
                 NAME: tokens[FUSION][PARTNER_5P][NAME]
             },
-            RANGE_5P: canonicalize_fusion_range_to_dict(tokens[FUSION][RANGE_5P]),
+            RANGE_5P: fusion_range_po_to_dict(tokens[FUSION][RANGE_5P]),
             PARTNER_3P: {
                 NAMESPACE: tokens[FUSION][PARTNER_3P][NAMESPACE],
                 NAME: tokens[FUSION][PARTNER_3P][NAME]
             },
-            RANGE_3P: canonicalize_fusion_range_to_dict(tokens[FUSION][RANGE_3P])
+            RANGE_3P: fusion_range_po_to_dict(tokens[FUSION][RANGE_3P])
         }
     }
+
+
+def variant_po_to_dict_helper(tokens):
+    """Converts a PyParsing data dictionary to a PyBEL variant data dictionary
+
+    :param tokens:
+    :rtype: dict
+    """
+    return [
+        variant.asDict()
+        for variant in tokens[VARIANTS]
+    ]
 
 
 def variant_po_to_dict(tokens):
@@ -80,15 +83,12 @@ def variant_po_to_dict(tokens):
     :param tokens:
     :rtype: dict
     """
-    attr_data = canonicalize_simple_to_dict(tokens)
-    attr_data[VARIANTS] = [
-        variant.asDict()
-        for variant in tokens[VARIANTS]
-    ]
+    attr_data = simple_po_to_dict(tokens)
+    attr_data[VARIANTS] = variant_po_to_dict_helper(tokens)
     return attr_data
 
 
-def fusion_range_to_tuple(tokens, tag):
+def fusion_range_po_to_tuple(tokens, tag):
     """
 
     :param tokens:
@@ -110,7 +110,7 @@ def fusion_range_to_tuple(tokens, tag):
     )
 
 
-def canonicalize_fusion(tokens):
+def fusion_po_to_tuple(tokens):
     """Converts a PyParsing data dictionary to PyBEL node tuple
 
     :param ParseObject tokens:
@@ -121,8 +121,8 @@ def canonicalize_fusion(tokens):
 
     partner5p = identifier_to_tuple(fusion[PARTNER_5P])
     partner3p = identifier_to_tuple(fusion[PARTNER_3P])
-    range5p = fusion_range_to_tuple(fusion, RANGE_5P)
-    range3p = fusion_range_to_tuple(fusion, RANGE_3P)
+    range5p = fusion_range_po_to_tuple(fusion, RANGE_5P)
+    range3p = fusion_range_po_to_tuple(fusion, RANGE_3P)
 
     return (
         function,
@@ -133,33 +133,73 @@ def canonicalize_fusion(tokens):
     )
 
 
-def reaction_part_to_tuple(tokens):
+def reaction_part_po_to_tuple(tokens):
     """
-
-    :param tokens:
+    :type tokens: ParseResult
     :rtype: tuple
     """
-    l = tokens.asList()
-    return tuple(sorted(list2tuple(l)))
+    return tuple(sorted(
+        po_to_tuple(member)
+        for member in tokens
+    ))
+
+
+def reaction_part_po_to_dict(tokens):
+    """
+    :type tokens: ParseResult
+    :rtype: dict
+    """
+    return [
+        po_to_dict(token)
+        for token in sorted(tokens, key=po_to_tuple)
+    ]
 
 
 def reaction_po_to_tuple(tokens):
     """Converts a PyParsing ParseObject to PyBEL node tuple
 
-    :param ParseObject tokens:
+    :type tokens: ParseResult
     :rtype: tuple
     """
-    reactants = reaction_part_to_tuple(tokens[REACTANTS])
-    products = reaction_part_to_tuple(tokens[PRODUCTS])
+    reactants = reaction_part_po_to_tuple(tokens[REACTANTS])
+    products = reaction_part_po_to_tuple(tokens[PRODUCTS])
     return (tokens[FUNCTION],) + (reactants,) + (products,)
 
 
+def reaction_po_to_dict(tokens):
+    """
+    :type tokens: ParseResult
+    :rtype: dict
+    """
+    return {
+        FUNCTION: REACTION,
+        REACTANTS: reaction_part_po_to_dict(tokens[REACTANTS]),
+        PRODUCTS: reaction_part_po_to_dict(tokens[PRODUCTS]),
+    }
+
+
 def simple_po_to_tuple(tokens):
+    """
+    :type tokens: ParseResult
+    :rtype: tuple
+    """
     return (
         tokens[FUNCTION],
         tokens[IDENTIFIER][NAMESPACE],
         tokens[IDENTIFIER][NAME]
     )
+
+
+def simple_po_to_dict(tokens):
+    """
+    :type tokens: ParseResult
+    :rtype: dict
+    """
+    return {
+        FUNCTION: tokens[FUNCTION],
+        NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
+        NAME: tokens[IDENTIFIER][NAME]
+    }
 
 
 def simple_to_tuple(tokens):
@@ -178,19 +218,17 @@ def simple_to_tuple(tokens):
     )
 
 
-def canonicalize_hgvs(tokens):
+def hgvs_po_to_tuple(tokens):
     """
-
-    :param tokens:
+    :type tokens: ParseResult
     :rtype: tuple
     """
     return tokens[KIND], tokens[IDENTIFIER]
 
 
-def canonicalize_pmod(tokens):
+def pmod_po_to_tuple(tokens):
     """
-
-    :param tokens:
+    :type tokens: ParseResult
     :rtype: tuple
     """
     identifier = identifier_to_tuple(tokens[IDENTIFIER])
@@ -198,10 +236,9 @@ def canonicalize_pmod(tokens):
     return (PMOD,) + (identifier,) + params
 
 
-def canonicalize_gmod(tokens):
+def gmod_po_to_tuple(tokens):
     """
-
-    :param tokens:
+    :type tokens: ParseResult
     :rtype: tuple
     """
     identifier = identifier_to_tuple(tokens[IDENTIFIER])
@@ -209,10 +246,9 @@ def canonicalize_gmod(tokens):
     return (GMOD,) + (identifier,) + params
 
 
-def canonicalize_frag(tokens):
+def fragment_po_to_tuple(tokens):
     """
-
-    :param tokens:
+    :type tokens: ParseResult
     :rtype: tuple
     """
     if FRAGMENT_MISSING in tokens:
@@ -226,23 +262,22 @@ def canonicalize_frag(tokens):
     return result
 
 
-def canonicalize_variant(tokens):
+def variant_po_to_tuple(tokens):
     """
-
-    :param tokens:
+    :type tokens: pyparsing.ParseResults
     :rtype: tuple
     """
     if tokens[KIND] == HGVS:
-        return canonicalize_hgvs(tokens)
+        return hgvs_po_to_tuple(tokens)
 
     elif tokens[KIND] == PMOD:
-        return canonicalize_pmod(tokens)
+        return pmod_po_to_tuple(tokens)
 
     elif tokens[KIND] == GMOD:
-        return canonicalize_gmod(tokens)
+        return gmod_po_to_tuple(tokens)
 
     elif tokens[KIND] == FRAGMENT:
-        return canonicalize_frag(tokens)
+        return fragment_po_to_tuple(tokens)
 
     raise ValueError('Invalid value for tokens[KIND]: {}'.format(tokens[KIND]))
 
@@ -254,12 +289,12 @@ def _canonicalize_variants_helper(tokens):
     :rtype: tuple
     """
     return tuple(sorted(
-        canonicalize_variant(safe_get_dict(token))
+        variant_po_to_tuple(safe_get_dict(token))
         for token in tokens
     ))
 
 
-def canonicalize_variant_node(tokens):
+def variant_node_po_to_tuple(tokens):
     """Converts the tokens returned by PyParsing for a node with variants to a PyBEL node tuple
 
     :param dict tokens:
@@ -268,13 +303,33 @@ def canonicalize_variant_node(tokens):
     return simple_to_tuple(tokens) + _canonicalize_variants_helper(tokens[VARIANTS])
 
 
-def list_node_to_tuple(tokens):
+def list_po_to_tuple(tokens):
     """
-
-    :param tokens:
+    :param tokens: PyParsing ParseObject
     :rtype: tuple
     """
-    return (tokens[FUNCTION],) + tuple(sorted(node_to_tuple(member) for member in tokens[MEMBERS]))
+    list_entries = tuple(sorted(
+        po_to_tuple(member)
+        for member in tokens[MEMBERS]
+    ))
+
+    return (tokens[FUNCTION],) + list_entries
+
+
+def list_po_to_dict(tokens):
+    """
+    :param tokens: PyParsing ParseObject
+    :rtype: dict
+    """
+    list_entries = [
+        po_to_dict(token)
+        for token in sorted(tokens[MEMBERS], key=po_to_tuple)
+    ]
+
+    return {
+        FUNCTION: tokens[FUNCTION],
+        MEMBERS: list_entries
+    }
 
 
 def node_to_tuple(tokens):
@@ -285,22 +340,56 @@ def node_to_tuple(tokens):
     :type tokens: ParseObject or dict
     :rtype: tuple
     """
+    return po_to_tuple(tokens)
+
+
+def po_to_tuple(tokens):
+    """Given tokens from either PyParsing, or following the PyBEL node data dictionary model, create a PyBEL
+    node tuple.
+
+    :param tokens: Either a PyParsing ParseObject or a PyBEL node data dictionary
+    :type tokens: ParseObject or dict
+    :rtype: tuple
+    """
     if MODIFIER in tokens:
-        return node_to_tuple(tokens[TARGET])
+        return po_to_tuple(tokens[TARGET])
 
     elif REACTION == tokens[FUNCTION]:
         return reaction_po_to_tuple(tokens)
 
     elif VARIANTS in tokens:
-        return canonicalize_variant_node(tokens)
+        return variant_node_po_to_tuple(tokens)
 
     elif MEMBERS in tokens:
-        return list_node_to_tuple(tokens)
+        return list_po_to_tuple(tokens)
 
     elif FUSION in tokens:
-        return canonicalize_fusion(tokens)
+        return fusion_po_to_tuple(tokens)
 
     return simple_to_tuple(tokens)
+
+
+def po_to_dict(tokens):
+    """
+    :type tokens: ParseResult
+    :rtype: dict
+    """
+    if MODIFIER in tokens:
+        return po_to_dict(tokens[TARGET])
+
+    elif REACTION == tokens[FUNCTION]:
+        return reaction_po_to_dict(tokens)
+
+    elif VARIANTS in tokens:
+        return variant_po_to_dict(tokens)
+
+    elif MEMBERS in tokens:
+        return list_po_to_dict(tokens)
+
+    elif FUSION in tokens:
+        return fusion_po_to_dict(tokens)
+
+    return simple_po_to_dict(tokens)
 
 
 def modifier_po_to_dict(tokens):

@@ -379,10 +379,18 @@ BEL_THOROUGH_NODES = {
     (PROTEIN, 'HGNC', 'GSK3B'),
     (PATHOLOGY, 'MESHD', 'Psoriasis'),
     (PATHOLOGY, 'MESHD', 'Skin Diseases'),
-    (REACTION,
-     ((ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-      (ABUNDANCE, ('CHEBI', 'hydron'))),
-     ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    (
+        REACTION,
+        (
+            (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+            (ABUNDANCE, 'CHEBI', 'NADPH'),
+            (ABUNDANCE, 'CHEBI', 'hydron')
+        ),
+        (
+            (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+            (ABUNDANCE, 'CHEBI', 'mevalonate')
+        )
+    ),
     (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
     (ABUNDANCE, 'CHEBI', 'NADPH'),
     (ABUNDANCE, 'CHEBI', 'hydron'),
@@ -403,7 +411,15 @@ BEL_THOROUGH_NODES = {
     (BIOPROCESS, 'GOBP', 'apoptotic process'),
     (COMPOSITE, (ABUNDANCE, 'TESTNS2', 'Abeta_42'), (PROTEIN, 'HGNC', 'CASP8'),
      (PROTEIN, 'HGNC', 'FADD')),
-    (REACTION, ((PROTEIN, ('HGNC', 'CDK5R1')),), ((PROTEIN, ('HGNC', 'CDK5')),)),
+    (
+        REACTION,
+        (
+            (PROTEIN, 'HGNC', 'CDK5R1'),
+        ),
+        (
+            (PROTEIN, 'HGNC', 'CDK5'),
+        )
+    ),
     (PROTEIN, 'HGNC', 'PRKCB'),
     (COMPLEX, 'TESTNS2', 'AP-1 Complex'),
     (PROTEIN, 'HGNC', 'PRKCE'),
@@ -901,50 +917,97 @@ BEL_THOROUGH_EDGES = [
          RELATION: IS_A,
          ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'), {
          RELATION: HAS_REACTANT,
          ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (ABUNDANCE, 'CHEBI', 'NADPH'), {
          RELATION: HAS_REACTANT,
          ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (ABUNDANCE, 'CHEBI', 'hydron'), {
          RELATION: HAS_REACTANT,
          ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate'))
+     ),
      (ABUNDANCE, 'CHEBI', 'mevalonate'), {
          RELATION: HAS_PRODUCT,
          ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (ABUNDANCE, 'CHEBI', 'NADP(+)'), {
          RELATION: HAS_PRODUCT,
          ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'),
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
