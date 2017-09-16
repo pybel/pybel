@@ -36,16 +36,16 @@ https://github.com/OpenBEL/resource-generator and distributed at http://resource
 
 This code has not been maintained to reflect the changes in the underlying resources, so this repository has been
 forked and updated at https://github.com/pybel/resource-generator to reflect the most recent versions of the underlying
-namespaces. The files are now distributed using the Fraunhofer SCAI ownCloud server. An example list of these namespaces
-can be found in the `template BEL script <https://github.com/pybel/pybel-resources/blob/master/template.bel>`_ in the
-`PyBEL Resources <https://github.com/pybel/pybel-resources>`_ repository on GitHub.
+namespaces. The files are now distributed using the Fraunhofer SCAI
+`Artifactory server <https://arty.scai.fraunhofer.de/artifactory/bel/>`_.
+
 
 Generating New Namespaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 In some cases, it is appropriate to design a new namespace, using the
 `custom namespace specification <http://openbel-framework.readthedocs.io/en/latest/tutorials/building_custom_namespaces.html>`_
-provided by the OpenBEL Framework. Scripts for generating additional resource files have been posted to the
-`PyBEL Notebooks <https://github.com/pybel/pybel-notebooks/tree/master/resources>`_ repository on GitHub.
+provided by the OpenBEL Framework. Packages for generating namespace, annotation, and knowledge resources have
+been grouped in the `Bio2BEL <https://github.com/bio2bel>`_ organization on GitHub.
 
 Synonym Issues
 ~~~~~~~~~~~~~~
@@ -199,8 +199,8 @@ Indirect
 The relationship between two entities can be coded in BEL, even if the process is not well understood.
 
 - :code:`A -> B` means that `A` indirectly increases `B`. There are hidden elements in `X` that mediate this interaction
-  through a pathway direct interactions :code:`A (=> or =|) X_1 (=> or =|) ... X_n (=> or =|) B`, or through an entire
-  network.
+  through a pathway direct interactions :code:`A (=> or =|) X_1 (=> or =|) ... X_n (=> or =|) B`, or through a set of
+  multiple pathways that constitute a network.
 
 - :code:`A -| B` means that `A` indirectly decreases `B`. Like for :code:`A -> B`, this process involves hidden
   components with varying activities.
@@ -248,9 +248,10 @@ amount of ambiguity.
 
 Recommendations for Use in PyBEL
 ********************************
-We considered the ambiguity of nested statements to be too great of a risk to include their usage in the PyBEL compiler.
-In our group at Fraunhofer SCAI, curators resolved these statements to single statements to improve the precision and
-readability of our BEL documents.
+We considered the ambiguity of nested statements to be a great risk to clarity and have disabled the usage of
+nested statements by default. See the Input and Output section for different parser settings. In our group at Fraunhofer
+SCAI, curators resolved these statements to single statements to improve the precision and readability of our BEL
+documents.
 
 While most statements in the form :code:`A rel1 (B rel2 C)` can be reasonably expanded to :code:`A rel1 B` and
 :code:`B rel2 C`, the few that cannot are the difficult-to-interpret cases that we need to be careful about in our

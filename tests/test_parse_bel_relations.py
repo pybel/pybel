@@ -6,7 +6,7 @@ from pyparsing import ParseException
 
 from pybel.canonicalize import node_to_bel, edge_to_bel
 from pybel.constants import *
-from pybel.parser.parse_bel import node_to_tuple
+from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_exceptions import NestedRelationWarning, RelabelWarning
 from tests.constants import TestTokenParserBase
 from tests.constants import default_identifier, test_citation_dict, test_evidence_text, update_provenance

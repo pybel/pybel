@@ -6,7 +6,7 @@ import networkx
 
 from .operations import left_full_join, left_outer_join
 from ..constants import *
-from ..parser.canonicalize import node_to_tuple, tuple_to_data
+from ..parser.canonicalize import add_node_from_data
 from ..utils import get_version, subdict_matches
 
 __all__ = [
@@ -100,37 +100,46 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def namespace_url(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS file"""
+        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS files from the
+        ``DEFINE NAMESPACE [key] AS URL "[value]"`` entries in the definitions section.
+        """
         return self.graph[GRAPH_NAMESPACE_URL]
 
     @property
     def namespace_owl(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL file"""
+        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL files from the
+        ``DEFINE NAMESPACE [key] AS OWL "[value]"`` entries in the definitions section"""
         return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
     def namespace_pattern(self):
-        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns"""
+        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns from the
+        ``DEFINE NAMESPACE [key] AS PATTERN "[value]"`` entries in the definitions section"""
         return self.graph[GRAPH_NAMESPACE_PATTERN]
 
     @property
     def annotation_url(self):
-        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO file"""
+        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO files
+        from the ``DEFINE ANNOTATION [key] AS URL "[value]"`` entries in the definitions section"""
         return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
     def annotation_owl(self):
-        """A dictionary mapping the annotation keywords to the URL of the OWL file"""
+        """A dictionary mapping the annotation keywords used to creat ethis graph to the URLs of the OWL files
+        from the ``DEFINE ANNOTATION [key] AS OWL "[value]"`` entries in the definitions section"""
         return self.graph[GRAPH_ANNOTATION_OWL]
 
     @property
     def annotation_pattern(self):
-        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns"""
+        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns
+        from the ``DEFINE ANNOTATION [key] AS PATTERN "[value]"`` entries in the definitions section
+        """
         return self.graph[GRAPH_ANNOTATION_PATTERN]
 
     @property
     def annotation_list(self):
-        """A dictionary mapping the keywords of locally defined annotations to a set of their values"""
+        """A dictionary mapping the keywords of locally defined annotations to a set of their values
+        from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section"""
         return self.graph[GRAPH_ANNOTATION_LIST]
 
     @property
@@ -192,23 +201,14 @@ class BELGraph(networkx.MultiDiGraph):
             else:
                 yield n
 
-    def add_node_from_tuple(self, node_tuple):
-        """Converts a PyBEL node tuple to a canonical PyBEL node data dictionary then adds it to the graph
+    def add_node_from_data(self, attr_dict):
+        """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
-        :param tuple node_tuple: A PyBEL node tuple
+        :param dict attr_dict: A PyBEL node data dictionary
+        :return: The PyBEL node tuple representing this node
+        :rtype: tuple
         """
-        if node_tuple not in self:
-            node_data = tuple_to_data(node_tuple)
-            self.add_node(node_tuple, attr_dict=node_data)
-
-    def add_node_from_data(self, node_data):
-        """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple then adds it to the graph
-
-        :param dict node_data: A PyBEL node data dictionary
-        """
-        node_tuple = node_to_tuple(node_data)
-        if node_tuple not in self:
-            self.add_node(node_tuple, attr_dict=node_data)
+        return add_node_from_data(self, attr_dict)
 
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
@@ -216,11 +216,14 @@ class BELGraph(networkx.MultiDiGraph):
         :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.PROTEIN`, etc)
         :param str namespace: The node's namespace
         :param str name: The node's name
+        :return: The PyBEL node tuple representing this node
+        :rtype: tuple
         """
-        node = function, namespace, name
-        # self.add_node_from_tuple(node)
-        if node not in self:
-            self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
+        return self.add_node_from_data({
+            FUNCTION: function,
+            NAMESPACE: namespace,
+            NAME: name
+        })
 
     def has_edge_citation(self, u, v, key):
         """Does the given edge have a citation?"""

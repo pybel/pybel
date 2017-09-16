@@ -14,7 +14,7 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
                 NAME: 'lysozome'
             }
         },
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             MODIFIER: ACTIVITY,
             EFFECT: {

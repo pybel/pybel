@@ -13,11 +13,8 @@ from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWi
 
 from .baseparser import BaseParser
 from .canonicalize import (
-    node_to_tuple,
     modifier_po_to_dict,
-    variant_po_to_dict,
-    canonicalize_simple_to_dict,
-    canonicalize_fusion_to_dict
+    po_to_dict
 )
 from .language import activity_labels, activities
 from .modifiers import *
@@ -203,7 +200,9 @@ class BelParser(BaseParser):
 
         #: `2.1.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
         self.composite_abundance = composite_abundance_tag + nest(
-            delimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location)
+            delimitedList(Group(self.simple_abundance))(MEMBERS) +
+            opt_location
+        )
 
         self.abundance = self.simple_abundance | self.composite_abundance
 
@@ -212,9 +211,11 @@ class BelParser(BaseParser):
 
         molecular_activity_default = oneOf(list(activity_labels)).setParseAction(handle_molecular_activity_default)
 
+        #: `2.4.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA>`_
         self.molecular_activity = molecular_activity_tags + nest(
-            molecular_activity_default | self.identifier_parser.language)
-        """`2.4.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmolecularA>`_"""
+            molecular_activity_default |
+            self.identifier_parser.language
+        )
 
         # 2.3 Process Functions
 
@@ -228,7 +229,9 @@ class BelParser(BaseParser):
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
-            Group(self.abundance)(TARGET) + Optional(WCW + Group(self.molecular_activity)(EFFECT)))
+            Group(self.abundance)(TARGET) +
+            Optional(WCW + Group(self.molecular_activity)(EFFECT))
+        )
 
         activity_legacy_tags = oneOf(activities)(MODIFIER)
         self.activity_legacy = activity_legacy_tags + nest(Group(self.abundance)(TARGET))
@@ -249,11 +252,16 @@ class BelParser(BaseParser):
         self.cell_surface_expression = cell_surface_expression_tag + nest(Group(self.simple_abundance)(TARGET))
 
         self.translocation_standard = nest(
-            Group(self.simple_abundance)(TARGET) + WCW + Group(from_loc + WCW + to_loc)(EFFECT))
+            Group(self.simple_abundance)(TARGET) +
+            WCW +
+            Group(from_loc + WCW + to_loc)(EFFECT)
+        )
 
         self.translocation_legacy = nest(
-            Group(self.simple_abundance)(TARGET) + WCW + Group(identifier(FROM_LOC) + WCW + identifier(TO_LOC))(
-                EFFECT))
+            Group(self.simple_abundance)(TARGET) +
+            WCW +
+            Group(identifier(FROM_LOC) + WCW + identifier(TO_LOC))(EFFECT)
+        )
 
         self.translocation_legacy.addParseAction(handle_legacy_tloc)
         self.translocation_unqualified = nest(Group(self.simple_abundance)(TARGET))
@@ -351,13 +359,19 @@ class BelParser(BaseParser):
 
         #: `3.1.5 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof>`_
         rate_limit_tag = oneOf(['rateLimitingStepOf']).setParseAction(replaceWith(RATE_LIMITING_STEP_OF))
-        self.rate_limit = triple(MatchFirst([self.biological_process, self.activity, self.transformation]),
-                                 rate_limit_tag, self.biological_process)
+        self.rate_limit = triple(
+            MatchFirst([self.biological_process, self.activity, self.transformation]),
+            rate_limit_tag,
+            self.biological_process
+        )
 
         #: `3.4.6 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_subprocessof>`_
         subprocess_of_tag = oneOf(['subProcessOf']).setParseAction(replaceWith(SUBPROCESS_OF))
-        self.subprocess_of = triple(MatchFirst([self.process, self.activity, self.transformation]), subprocess_of_tag,
-                                    self.process)
+        self.subprocess_of = triple(
+            MatchFirst([self.process, self.activity, self.transformation]),
+            subprocess_of_tag,
+            self.process
+        )
 
         #: `3.3.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_transcribedto>`_
         transcribed_tag = oneOf([':>', 'transcribedTo']).setParseAction(replaceWith(TRANSCRIBED_TO))
@@ -386,8 +400,11 @@ class BelParser(BaseParser):
 
         # `3.4.3 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hascomponent>`_
         has_component_tag = oneOf(['hasComponent']).setParseAction(replaceWith(HAS_COMPONENT))
-        self.has_component = triple(self.complex_abundances | self.composite_abundance, has_component_tag,
-                                    self.abundance)
+        self.has_component = triple(
+            self.complex_abundances | self.composite_abundance,
+            has_component_tag,
+            self.abundance
+        )
 
         #: `3.5.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_biomarkerfor>`_
         biomarker_tag = oneOf(['biomarkerFor']).setParseAction(replaceWith(BIOMARKER_FOR))
@@ -440,8 +457,11 @@ class BelParser(BaseParser):
             directly_increases_tag
         ])
 
-        self.nested_causal_relationship = triple(self.bel_term, causal_relation_tags,
-                                                 nest(triple(self.bel_term, causal_relation_tags, self.bel_term)))
+        self.nested_causal_relationship = triple(
+            self.bel_term,
+            causal_relation_tags,
+            nest(triple(self.bel_term, causal_relation_tags, self.bel_term))
+        )
 
         self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
@@ -526,7 +546,10 @@ class BelParser(BaseParser):
         if self.allow_naked_names and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
-        valid_functions = set(itt.chain.from_iterable(belns_encodings[k] for k in self.namespace_dict[namespace][name]))
+        valid_functions = set(itt.chain.from_iterable(
+            belns_encodings[k]
+            for k in self.namespace_dict[namespace][name]
+        ))
 
         if tokens[FUNCTION] not in valid_functions:
             raise InvalidFunctionSemantic(self.line_number, line, position, tokens[FUNCTION], namespace, name,
@@ -539,10 +562,11 @@ class BelParser(BaseParser):
         return tokens
 
     def _handle_list_helper(self, tokens, relation):
-        parent = self.ensure_node(tokens[0])
+        """Provides the functionality for :meth:`handle_has_members` and :meth:`handle_has_components`"""
+        parent_node_tuple, parent_node_attr = self.ensure_node(tokens[0])
         for child_tokens in tokens[2]:
-            child = self.ensure_node(child_tokens)
-            self.graph.add_unqualified_edge(parent, child, relation)
+            child_node_tuple, child_node_attr = self.ensure_node(child_tokens)
+            self.graph.add_unqualified_edge(parent_node_tuple, child_node_tuple, relation)
         return tokens
 
     def handle_has_members(self, line, position, tokens):
@@ -570,8 +594,8 @@ class BelParser(BaseParser):
         if not self.control_parser.evidence:
             raise MissingSupportWarning(self.line_number, line, position)
 
-        sub = self.ensure_node(tokens[SUBJECT])
-        obj = self.ensure_node(tokens[OBJECT])
+        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
+        object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
 
         q = {
             RELATION: tokens[RELATION],
@@ -594,17 +618,17 @@ class BelParser(BaseParser):
             annots = attrs.copy()
             annots.update(single_annotation)
 
-            self.graph.add_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
+            self.graph.add_edge(subject_node_tuple, object_node_tuple, attr_dict=q, **{ANNOTATIONS: annots})
             if tokens[RELATION] in TWO_WAY_RELATIONS:
-                self.add_reverse_edge(sub, obj, attr_dict=q, **{ANNOTATIONS: annots})
+                self.add_reverse_edge(subject_node_tuple, object_node_tuple, attr_dict=q, **{ANNOTATIONS: annots})
 
         return tokens
 
     def handle_unqualified_relation(self, line, position, tokens):
-        sub = self.ensure_node(tokens[SUBJECT])
-        obj = self.ensure_node(tokens[OBJECT])
+        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
+        object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
         rel = tokens[RELATION]
-        self.graph.add_unqualified_edge(sub, obj, rel)
+        self.graph.add_unqualified_edge(subject_node_tuple, object_node_tuple, rel)
 
     def add_reverse_edge(self, sub, obj, attr_dict, **attr):
         new_attrs = {k: v for k, v in attr_dict.items() if k not in {SUBJECT, OBJECT}}
@@ -617,104 +641,35 @@ class BelParser(BaseParser):
         self.graph.add_edge(obj, sub, attr_dict=new_attrs, **attr)
 
     def handle_label_relation(self, line, position, tokens):
-        subject = self.ensure_node(tokens[SUBJECT])
+        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
         label = tokens[OBJECT]
 
-        if LABEL in self.graph.node[subject]:
-            raise RelabelWarning(self.line_number, line, position, self.graph.node, self.graph.node[subject][LABEL],
-                                 label)
+        if LABEL in self.graph.node[subject_node_tuple]:
+            raise RelabelWarning(
+                self.line_number,
+                line,
+                position,
+                self.graph.node,
+                self.graph.node[subject_node_tuple][LABEL],
+                label
+            )
 
-        self.graph.node[subject][LABEL] = label
-
-    def _ensure_reaction(self, name, tokens):
-        self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
-
-        for reactant_tokens in tokens[REACTANTS]:
-            reactant_name = self.ensure_node(reactant_tokens)
-            self.graph.add_unqualified_edge(name, reactant_name, HAS_REACTANT)
-
-        for product_tokens in tokens[PRODUCTS]:
-            product_name = self.ensure_node(product_tokens)
-            self.graph.add_unqualified_edge(name, product_name, HAS_PRODUCT)
-
-        return name
-
-    def _ensure_members(self, name, tokens):
-        self.graph.add_node(name, **{FUNCTION: tokens[FUNCTION]})
-
-        for token in tokens[MEMBERS]:
-            member_name = self.ensure_node(token)
-            self.graph.add_unqualified_edge(name, member_name, HAS_COMPONENT)
-        return name
-
-    def _ensure_variants(self, name, tokens):
-        self.graph.add_node(name, **variant_po_to_dict(tokens))
-
-        c = {
-            FUNCTION: tokens[FUNCTION],
-            IDENTIFIER: tokens[IDENTIFIER]
-        }
-
-        parent = self.ensure_node(c)
-        self.graph.add_unqualified_edge(parent, name, HAS_VARIANT)
-        return name
-
-    def _ensure_fusion(self, name, tokens):
-        self.graph.add_node(name, **canonicalize_fusion_to_dict(tokens))
-        return name
-
-    def _ensure_simple_abundance(self, name, tokens):
-        self.graph.add_node(name, **canonicalize_simple_to_dict(tokens))
-        return name
-
-    def _ensure_rna(self, name, tokens):
-        self._ensure_simple_abundance(name, tokens)
-        return name
-
-    def _ensure_protein(self, name, tokens):
-        self._ensure_simple_abundance(name, tokens)
-        return name
+        self.graph.node[subject_node_tuple][LABEL] = label
 
     def ensure_node(self, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
 
-        :return: the canonical name of the node
-        :rtype: str
+        :param pyparsing.ParseResult tokens: Tokens from PyParsing
+        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
+        :rtype: tuple[tuple, dict]
         """
-
         if MODIFIER in tokens:
             return self.ensure_node(tokens[TARGET])
 
-        name = node_to_tuple(tokens)
+        node_attr_dict = po_to_dict(tokens)
+        node_tuple = self.graph.add_node_from_data(node_attr_dict)
 
-        if name in self.graph:
-            return name
-
-        if REACTION == tokens[FUNCTION]:
-            return self._ensure_reaction(name, tokens)
-
-        elif MEMBERS in tokens:
-            return self._ensure_members(name, tokens)
-
-        elif VARIANTS in tokens:
-            return self._ensure_variants(name, tokens)
-
-        elif FUSION in tokens:
-            return self._ensure_fusion(name, tokens)
-
-        # You're just a boring abundance
-        # elif FUNCTION in tokens and IDENTIFIER in tokens:
-
-        elif tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY, BIOPROCESS, ABUNDANCE, COMPLEX}:
-            return self._ensure_simple_abundance(name, tokens)
-
-        elif tokens[FUNCTION] == RNA:
-            return self._ensure_rna(name, tokens)
-
-        # Finally, you're just a boring old protein
-        # elif tokens[FUNCTION] == PROTEIN:
-
-        return self._ensure_protein(name, tokens)
+        return node_tuple, node_attr_dict
 
     def handle_translocation_illegal(self, line, position, tokens):
         raise MalformedTranslocationWarning(self.line_number, line, position, tokens)

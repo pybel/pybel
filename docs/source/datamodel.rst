@@ -102,6 +102,20 @@ This section describes the structure of the data dictionaries created for each t
 Programatically, these dictionaries can be converted to tuples, which are used as the keys for the network with the
 :func:`pybel.parser.canonicalize.node_to_tuple` function.
 
+Variants
+~~~~~~~~
+
+The addition of a variant tag results in an entry called 'variants' in the data dictionary associated with a given
+node. This entry is a list with dictionaries describing each of the variants. All variants have the entry 'kind' to
+identify whether it is a post-translational modification (PTM), gene modification, fragment, or HGVS variant.
+
+.. warning::
+
+    The canonical ordering for the elements of the ``VARIANTS`` list correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`pybel.BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
+
 .. automodule:: pybel.parser.modifiers.variant
 
 .. automodule:: pybel.parser.modifiers.gene_substitution
@@ -116,8 +130,10 @@ Programatically, these dictionaries can be converted to tuples, which are used a
 
 .. automodule:: pybel.parser.modifiers.protein_modification
 
-.. automodule:: pybel.parser.modifiers.fusion
+Fusions
+~~~~~~~
 
+.. automodule:: pybel.parser.modifiers.fusion
 
 Unqualified Edges
 -----------------
@@ -130,19 +146,39 @@ Variant and Modifications' Parent Relations
 All variants, modifications, fragments, and truncations are connected to their parent entity with an edge having
 the relationship :code:`hasParent`
 
+For :code:`p(HGNC:GSK3B, var(p.Gly123Arg))`, the following edge is inferred:
+
+.. code::
+
+    p(HGNC:GSK3B, var(p.Gly123Arg)) hasParent p(HGNC:GSK3B)
+
+All variants have this relationship to their reference node. BEL does not specify relationships between variants,
+such as the case when a given phosphorylation is necessary to make another one. This knowledge could be encoded
+directly like BEL, since PyBEL does not restrict users from manually asserting unqualified edges.
 
 List Abundances
 ~~~~~~~~~~~~~~~
-Complexes and composites that are defined by lists do not recieve information about the identifier, and are only
-described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
+Complexes and composites that are defined by lists. As of version 0.9.0, they contain a list of the data dictionaries
+that describe their members. For example :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 
 .. code::
 
     {
-        FUNCTION: COMPLEX
+        FUNCTION: COMPLEX,
+        MEMBERS: [
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'FOS'
+            }, {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'JUN'
+            }
+        ]
     }
 
-The following edges are inferred:
+The following edges are also inferred:
 
 .. code::
 
@@ -159,7 +195,18 @@ Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
 .. code::
 
     {
-        FUNCTION: COMPOSITE
+        FUNCTION: COMPOSITE,
+        MEMBERS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'malonate'
+            }, {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'JUN'
+            }
+        ]
     }
 
 The following edges are inferred:
@@ -169,6 +216,13 @@ The following edges are inferred:
     composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent a(CHEBI:malonate)
     composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent p(HGNC:JUN)
 
+
+.. warning::
+
+    The canonical ordering for the elements of the ``MEMBERS`` list correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
 
 .. seealso::
 
@@ -185,13 +239,47 @@ added to the network for
     rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"), a(CHEBI:"NADPH"), \
         a(CHEBI:"hydron")), products(a(CHEBI:"mevalonate"), a(CHEBI:"NADP(+)")))
 
-results in the following data:
+As of version 0.9.0, the reactants' and products' data dictionaries are included as sub-lists keyed ``REACTANTS`` and
+``PRODUCTS``. It becomes:
 
 .. code::
 
     {
         FUNCTION: REACTION
+        REACTANTS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: '(3S)-3-hydroxy-3-methylglutaryl-CoA'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'NADPH'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'hydron'
+            }
+        ],
+        PRODUCTS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'mevalonate'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'NADP(+)'
+            }
+        ]
     }
+
+.. warning::
+
+    The canonical ordering for the elements of the ``REACTANTS`` and ``PRODUCTS`` lists correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
 
 The following edges are inferred, where :code:`X` represents the previous reaction, for brevity:
 
@@ -236,10 +324,8 @@ the information about the translocation qualifies that the object is undergoing 
 This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
 just the keyword :code:`p`
 
-
 Example Edge Data Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Because this data is associated with an edge, the node data for the subject and object are not included explicitly.
 However, information about the activities, modifiers, and transformations on the subject and object are included.
 Below is the "skeleton" for the edge data model in PyBEL:
@@ -250,7 +336,7 @@ Below is the "skeleton" for the edge data model in PyBEL:
         SUBJECT: {
             # ... modifications to the subject node. Only present if non-empty.
         },
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             # ... modifications to the object node. Only present if non-empty.
         },
@@ -279,7 +365,7 @@ Modifiers are added to this structure as well. Under this schema,
 .. code::
 
     {
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             MODIFIER: ACTIVITY,
             EFFECT: {
@@ -298,7 +384,7 @@ schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
 .. code::
 
     {
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             MODIFIER: ACTIVITY
         },
@@ -321,7 +407,7 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 .. code::
 
     {
-        RELATION: 'increases',
+        RELATION: INCREASES,
         OBJECT: {
             MODIFIER: TRANSLOCATION,
             EFFECT: {
@@ -352,7 +438,7 @@ Degradations are more simple, because there's no ::data:`pybel.constants.EFFECT`
 .. code::
 
     {
-        RELATION: 'increases',
+        RELATION: INCREASES,
         OBJECT: {
             MODIFIER: DEGRADATION
         },
