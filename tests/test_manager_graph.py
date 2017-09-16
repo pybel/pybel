@@ -980,7 +980,7 @@ class TestFilter(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
         compare(reloaded, check_metadata=False)
 
 
-class TestInsert(FleetingTemporaryCacheMixin):
+class TestInsert(TemporaryCacheMixin):
     def test_translocation(self):
         graph = BELGraph(name='dummy', version='0.0.1')
         u = (PROTEIN, 'HGNC', 'YFG')
