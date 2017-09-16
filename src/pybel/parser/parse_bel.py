@@ -13,13 +13,8 @@ from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWi
 
 from .baseparser import BaseParser
 from .canonicalize import (
-    po_to_tuple,
     modifier_po_to_dict,
-    variant_po_to_dict,
-    simple_po_to_dict,
-    fusion_po_to_dict,
-    list_po_to_dict,
-    reaction_po_to_dict,
+    po_to_dict
 )
 from .language import activity_labels, activities
 from .modifiers import *
@@ -661,102 +656,6 @@ class BelParser(BaseParser):
 
         self.graph.node[subject_node_tuple][LABEL] = label
 
-    def _ensure_reaction(self, node_tuple, tokens):
-        """
-        :param tuple node_tuple: A PyBEL Node tuple
-        :param pyparsing.ParseResult tokens: Tokens from PyParsing
-        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: tuple[tuple, dict]
-        """
-        node_attr_dict = reaction_po_to_dict(tokens)
-        self.graph.add_node(node_tuple, attr_dict=node_attr_dict)
-
-        for reactant_tokens in tokens[REACTANTS]:
-            reactant_node_tuple, reaction_node_attr = self.ensure_node(reactant_tokens)
-            self.graph.add_unqualified_edge(node_tuple, reactant_node_tuple, HAS_REACTANT)
-
-        for product_tokens in tokens[PRODUCTS]:
-            product_node_tuple, product_node_attr = self.ensure_node(product_tokens)
-            self.graph.add_unqualified_edge(node_tuple, product_node_tuple, HAS_PRODUCT)
-
-        return node_tuple, node_attr_dict
-
-    def _ensure_members(self, node_tuple, tokens):
-        """
-        :param tuple node_tuple: A PyBEL Node tuple
-        :param pyparsing.ParseResult tokens: Tokens from PyParsing
-        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: tuple[tuple, dict]
-        """
-        node_attr_dict = list_po_to_dict(tokens)
-        self.graph.add_node(node_tuple, attr_dict=node_attr_dict)
-
-        for token in tokens[MEMBERS]:
-            member_node_tuple, member_node_attr = self.ensure_node(token)
-            self.graph.add_unqualified_edge(node_tuple, member_node_tuple, HAS_COMPONENT)
-
-        return node_tuple, node_attr_dict
-
-    def _ensure_variants(self, node_tuple, tokens):
-        """
-        :param tuple node_tuple: A PyBEL Node tuple
-        :param pyparsing.ParseResult tokens: Tokens from PyParsing
-        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: tuple[tuple, dict]
-        """
-        node_attr = variant_po_to_dict(tokens)
-        self.graph.add_node(node_tuple, attr_dict=node_attr)
-
-        c = {
-            FUNCTION: tokens[FUNCTION],
-            IDENTIFIER: tokens[IDENTIFIER]
-        }
-
-        parent_node_tuple, _ = self.ensure_node(c)
-        self.graph.add_unqualified_edge(parent_node_tuple, node_tuple, HAS_VARIANT)
-
-        return node_tuple, node_attr
-
-    def _ensure_fusion(self, node_tuple, tokens):
-        """
-        :param tuple node_tuple: A PyBEL Node tuple
-        :param pyparsing.ParseResult tokens: Tokens from PyParsing
-        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: tuple[tuple, dict]
-        """
-        node_attr = fusion_po_to_dict(tokens)
-        self.graph.add_node(node_tuple, attr_dict=node_attr)
-        return node_tuple, node_attr
-
-    def _ensure_simple_abundance(self, node_tuple, tokens):
-        """
-        :param tuple node_tuple: A PyBEL Node tuple
-        :param pyparsing.ParseResult tokens: Tokens from PyParsing
-        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: tuple[tuple, dict]
-        """
-        node_attr = simple_po_to_dict(tokens)
-        self.graph.add_node(node_tuple, attr_dict=node_attr)
-        return node_tuple, node_attr
-
-    def _ensure_rna(self, node_tuple, tokens):
-        """
-        :param tuple node_tuple: A PyBEL Node tuple
-        :param pyparsing.ParseResult tokens: Tokens from PyParsing
-        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: tuple[tuple, dict]
-        """
-        return self._ensure_simple_abundance(node_tuple, tokens)
-
-    def _ensure_protein(self, node_tuple, tokens):
-        """
-        :param tuple node_tuple: A PyBEL Node tuple
-        :param pyparsing.ParseResult tokens: Tokens from PyParsing
-        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: tuple[tuple, dict]
-        """
-        return self._ensure_simple_abundance(node_tuple, tokens)
-
     def ensure_node(self, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
 
@@ -767,36 +666,10 @@ class BelParser(BaseParser):
         if MODIFIER in tokens:
             return self.ensure_node(tokens[TARGET])
 
-        node_tuple = po_to_tuple(tokens)
+        node_attr_dict = po_to_dict(tokens)
+        node_tuple = self.graph.add_node_from_data(node_attr_dict)
 
-        if node_tuple in self.graph:
-            return node_tuple, self.graph.node[node_tuple]
-
-        if REACTION == tokens[FUNCTION]:
-            return self._ensure_reaction(node_tuple, tokens)
-
-        elif MEMBERS in tokens:
-            return self._ensure_members(node_tuple, tokens)
-
-        elif VARIANTS in tokens:
-            return self._ensure_variants(node_tuple, tokens)
-
-        elif FUSION in tokens:
-            return self._ensure_fusion(node_tuple, tokens)
-
-        elif FUNCTION in tokens and IDENTIFIER in tokens:
-            if tokens[FUNCTION] in {GENE, MIRNA, PATHOLOGY, BIOPROCESS, ABUNDANCE, COMPLEX}:
-                return self._ensure_simple_abundance(node_tuple, tokens)
-
-            elif tokens[FUNCTION] == RNA:
-                return self._ensure_rna(node_tuple, tokens)
-
-            elif tokens[FUNCTION] == PROTEIN:
-                return self._ensure_protein(node_tuple, tokens)
-
-            raise ValueError('Illegal FUNCTION value: {}'.format(tokens[FUNCTION]))
-
-        raise ValueError('Malformed tokens')
+        return node_tuple, node_attr_dict
 
     def handle_translocation_illegal(self, line, position, tokens):
         raise MalformedTranslocationWarning(self.line_number, line, position, tokens)

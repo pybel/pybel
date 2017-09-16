@@ -133,16 +133,27 @@ the relationship :code:`hasParent`
 
 List Abundances
 ~~~~~~~~~~~~~~~
-Complexes and composites that are defined by lists do not recieve information about the identifier, and are only
-described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
+Complexes and composites that are defined by lists. As of version 0.9.0, they contain a list of the data dictionaries
+that describe their members. For example :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 
 .. code::
 
     {
-        FUNCTION: COMPLEX
+        FUNCTION: COMPLEX,
+        MEMBERS: [
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'FOS'
+            }, {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'JUN'
+            }
+        ]
     }
 
-The following edges are inferred:
+The following edges are also inferred:
 
 .. code::
 
@@ -159,7 +170,18 @@ Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
 .. code::
 
     {
-        FUNCTION: COMPOSITE
+        FUNCTION: COMPOSITE,
+        MEMBERS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'malonate'
+            }, {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'JUN'
+            }
+        ]
     }
 
 The following edges are inferred:
@@ -185,12 +207,39 @@ added to the network for
     rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"), a(CHEBI:"NADPH"), \
         a(CHEBI:"hydron")), products(a(CHEBI:"mevalonate"), a(CHEBI:"NADP(+)")))
 
-results in the following data:
+As of version 0.9.0, the reactants' and products' data dictionaries are included as sub-lists keyed ``REACTANTS`` and
+``PRODUCTS``. It becomes:
 
 .. code::
 
     {
         FUNCTION: REACTION
+        REACTANTS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: '(3S)-3-hydroxy-3-methylglutaryl-CoA'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'NADPH'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'hydron'
+            }
+        ],
+        PRODUCTS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'mevalonate'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'NADP(+)'
+            }
+        ]
     }
 
 The following edges are inferred, where :code:`X` represents the previous reaction, for brevity:
@@ -236,10 +285,8 @@ the information about the translocation qualifies that the object is undergoing 
 This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
 just the keyword :code:`p`
 
-
 Example Edge Data Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Because this data is associated with an edge, the node data for the subject and object are not included explicitly.
 However, information about the activities, modifiers, and transformations on the subject and object are included.
 Below is the "skeleton" for the edge data model in PyBEL:
@@ -250,7 +297,7 @@ Below is the "skeleton" for the edge data model in PyBEL:
         SUBJECT: {
             # ... modifications to the subject node. Only present if non-empty.
         },
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             # ... modifications to the object node. Only present if non-empty.
         },
@@ -279,7 +326,7 @@ Modifiers are added to this structure as well. Under this schema,
 .. code::
 
     {
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             MODIFIER: ACTIVITY,
             EFFECT: {
@@ -298,7 +345,7 @@ schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
 .. code::
 
     {
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             MODIFIER: ACTIVITY
         },
@@ -321,7 +368,7 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 .. code::
 
     {
-        RELATION: 'increases',
+        RELATION: INCREASES,
         OBJECT: {
             MODIFIER: TRANSLOCATION,
             EFFECT: {
@@ -352,7 +399,7 @@ Degradations are more simple, because there's no ::data:`pybel.constants.EFFECT`
 .. code::
 
     {
-        RELATION: 'increases',
+        RELATION: INCREASES,
         OBJECT: {
             MODIFIER: DEGRADATION
         },
