@@ -4,6 +4,7 @@ from ..constants import *
 
 __all__ = [
     'node_to_tuple',
+    'sort_dict_list',
 ]
 
 
@@ -149,6 +150,11 @@ def reaction_part_po_to_tuple(tokens):
     ))
 
 
+def sort_dict_list(tokens):
+    """Sorts a list of PyBEL data dictionaries to their canonical ordering"""
+    return sorted(tokens, key=po_to_tuple)
+
+
 def reaction_part_po_to_dict(tokens):
     """
     :type tokens: ParseResult
@@ -156,7 +162,7 @@ def reaction_part_po_to_dict(tokens):
     """
     return [
         po_to_dict(token)
-        for token in sorted(tokens, key=po_to_tuple)
+        for token in sort_dict_list(tokens)
     ]
 
 
@@ -328,7 +334,7 @@ def list_po_to_dict(tokens):
     """
     list_entries = [
         po_to_dict(token)
-        for token in sorted(tokens[MEMBERS], key=po_to_tuple)
+        for token in sort_dict_list(tokens[MEMBERS])
     ]
 
     return {

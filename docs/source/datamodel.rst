@@ -102,6 +102,20 @@ This section describes the structure of the data dictionaries created for each t
 Programatically, these dictionaries can be converted to tuples, which are used as the keys for the network with the
 :func:`pybel.parser.canonicalize.node_to_tuple` function.
 
+Variants
+~~~~~~~~
+
+The addition of a variant tag results in an entry called 'variants' in the data dictionary associated with a given
+node. This entry is a list with dictionaries describing each of the variants. All variants have the entry 'kind' to
+identify whether it is a post-translational modification (PTM), gene modification, fragment, or HGVS variant.
+
+.. warning::
+
+    The canonical ordering for the elements of the ``VARIANTS`` list correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`pybel.BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
+
 .. automodule:: pybel.parser.modifiers.variant
 
 .. automodule:: pybel.parser.modifiers.gene_substitution
@@ -116,8 +130,10 @@ Programatically, these dictionaries can be converted to tuples, which are used a
 
 .. automodule:: pybel.parser.modifiers.protein_modification
 
-.. automodule:: pybel.parser.modifiers.fusion
+Fusions
+~~~~~~~
 
+.. automodule:: pybel.parser.modifiers.fusion
 
 Unqualified Edges
 -----------------
@@ -130,6 +146,15 @@ Variant and Modifications' Parent Relations
 All variants, modifications, fragments, and truncations are connected to their parent entity with an edge having
 the relationship :code:`hasParent`
 
+For :code:`p(HGNC:GSK3B, var(p.Gly123Arg))`, the following edge is inferred:
+
+.. code::
+
+    p(HGNC:GSK3B, var(p.Gly123Arg)) hasParent p(HGNC:GSK3B)
+
+All variants have this relationship to their reference node. BEL does not specify relationships between variants,
+such as the case when a given phosphorylation is necessary to make another one. This knowledge could be encoded
+directly like BEL, since PyBEL does not restrict users from manually asserting unqualified edges.
 
 List Abundances
 ~~~~~~~~~~~~~~~
@@ -192,6 +217,13 @@ The following edges are inferred:
     composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent p(HGNC:JUN)
 
 
+.. warning::
+
+    The canonical ordering for the elements of the ``MEMBERS`` list correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
+
 .. seealso::
 
     BEL 2.0 specification on `composite abundances <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
@@ -241,6 +273,13 @@ As of version 0.9.0, the reactants' and products' data dictionaries are included
             }
         ]
     }
+
+.. warning::
+
+    The canonical ordering for the elements of the ``REACTANTS`` and ``PRODUCTS`` lists correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
 
 The following edges are inferred, where :code:`X` represents the previous reaction, for brevity:
 
