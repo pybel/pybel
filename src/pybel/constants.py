@@ -19,10 +19,10 @@ from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
 
-VERSION = '0.8.2-dev'
+VERSION = '0.9.0-dev'
 
 #: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = (0, 8, 0)
+PYBEL_MINIMUM_IMPORT_VERSION = 0, 9, 0
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
