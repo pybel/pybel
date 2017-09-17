@@ -10,6 +10,7 @@ from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boole
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
+from .utils import int_or_str
 from ..constants import *
 from ..io.gpickle import from_bytes
 from ..parser.canonicalize import node_to_tuple
@@ -168,7 +169,7 @@ class Namespace(Base):
 
         :rtype: dict
         """
-        result =  {
+        result = {
             'uploaded': self.uploaded,
             'url': self.url,
             'keyword': self.keyword,
@@ -535,11 +536,12 @@ class Modification(Base):
 
     modNamespace = Column(String(255), nullable=True, doc='Namespace for the modification name')
     modName = Column(String(255), nullable=True, doc='Name of the given modification (used for pmod or gmod)')
-    aminoA = Column(String(3), nullable=True, doc='Three letter amino accid code')
+    aminoA = Column(String(3), nullable=True, doc='Three letter amino acid code')
     position = Column(Integer, nullable=True, doc='Position')
 
     sha512 = Column(String(255), index=True)
 
+    # TODO wreck this
     @property
     def data(self):
         """Recreates a is_variant dictionary for :class:`BELGraph`
@@ -566,8 +568,8 @@ class Modification(Base):
             else:
                 mod_dict[RANGE_5P].update({
                     FUSION_REFERENCE: self.p5Reference,
-                    FUSION_START: self.p5Start,
-                    FUSION_STOP: self.p5Stop
+                    FUSION_START: int_or_str(self.p5Start),
+                    FUSION_STOP: int_or_str(self.p5Stop),
                 })
                 mod_key.append((self.p5Reference, self.p5Start, self.p5Stop,))
 
@@ -580,8 +582,8 @@ class Modification(Base):
             else:
                 mod_dict[RANGE_3P].update({
                     FUSION_REFERENCE: self.p3Reference,
-                    FUSION_START: self.p3Start,
-                    FUSION_STOP: self.p3Stop
+                    FUSION_START: int_or_str(self.p3Start),
+                    FUSION_STOP: int_or_str(self.p3Stop)
                 })
                 mod_key.append((self.p3Reference, self.p3Start, self.p3Stop,))
 
@@ -597,8 +599,8 @@ class Modification(Base):
                     mod_key.append(self.p3Missing)
                 else:
                     mod_dict.update({
-                        FRAGMENT_START: self.p3Start,
-                        FRAGMENT_STOP: self.p3Stop
+                        FRAGMENT_START: int_or_str(self.p3Start),
+                        FRAGMENT_STOP: int_or_str(self.p3Stop)
                     })
                     mod_key.append((self.p3Start, self.p3Stop,))
 
@@ -786,10 +788,10 @@ class Edge(Base):
     bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
-    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
+    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)),  nullable=False)
     source = relationship('Node', foreign_keys=[source_id], backref=backref('out_edges', lazy='dynamic'))
 
-    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
+    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
     target = relationship('Node', foreign_keys=[target_id], backref=backref('in_edges', lazy='dynamic'))
 
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
