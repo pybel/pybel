@@ -184,7 +184,7 @@ class NamespaceManager(BaseManager):
             self.namespace_model[url] = results
 
             for entry in results.entries:
-                self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
+                self.namespace_cache[url][entry.name] = list(entry.encoding if entry.encoding else belns_encodings)
                 self.namespace_id_cache[url][entry.name] = entry.id
 
         if cache_objects and url not in self.namespace_object_cache:
