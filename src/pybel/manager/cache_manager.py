@@ -222,7 +222,6 @@ class NamespaceManager(BaseManager):
 
         :param str url: The url of the namespace source
         :param str value: The value of the namespace from the given url's document
-        :return: An NamespaceEntry object
         :rtype: NamespaceEntry
         """
         if self.namespace_object_cache and url in self.namespace_object_cache:
@@ -241,6 +240,9 @@ class OwlNamespaceManager(NamespaceManager):
         """Caches an ontology at the given IRI
 
         :param str iri: the location of the ontology
+        :param str keyword:
+        :param str encoding:
+        :rtype: Namespace
         """
         log.info('inserting owl %s', iri)
 
@@ -264,32 +266,35 @@ class OwlNamespaceManager(NamespaceManager):
 
         return namespace
 
-    def ensure_namespace_owl(self, iri, keyword=None):
-        """Caches an ontology at the given IRI if it is not already in the cache
+    def ensure_namespace_owl(self, url, keyword=None):
+        """Caches an ontology at the given URL if it is not already in the cache
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword:
+        :rtype: Namespace
         """
-        if iri in self.namespace_cache:
+        if url in self.namespace_cache:
             return
 
-        results = self.session.query(Namespace).filter(Namespace.url == iri).one_or_none()
+        results = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+
         if results is None:
-            results = self.insert_namespace_owl(iri, keyword)
+            results = self.insert_namespace_owl(url, keyword)
 
         for entry in results.entries:
-            self.namespace_cache[iri][entry.name] = list(entry.encoding)  # set()
-            self.namespace_id_cache[iri][entry.name] = entry.id
+            self.namespace_cache[url][entry.name] = list(entry.encoding if entry.encoding else belns_encodings)
+            self.namespace_id_cache[url][entry.name] = entry.id
 
-        self.namespace_edge_cache[iri] = {
+        self.namespace_edge_cache[url] = {
             (sub.name, sup.name)
             for sub in results.entries for sup in sub.children
         }
 
         return results
 
-    def get_namespace_owl_terms(self, iri, keyword=None):
-        self.ensure_namespace_owl(iri, keyword)
-        return self.namespace_cache[iri]
+    def get_namespace_owl_terms(self, url, keyword=None):
+        self.ensure_namespace_owl(url, keyword)
+        return self.namespace_cache[url]
 
     def get_namespace_owl_edges(self, iri, keyword=None):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
@@ -784,6 +789,12 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
     @staticmethod
     def _map_annotations_dict(graph, data):
+        """Iterates over the key/value pairs in this edge data dictionary normalized to their source URLs
+
+        :param BELGraph graph: A BEL graph
+        :param dict data: A PyBEL edge data dictionary
+        :rtype: iter[tuple[str,str]]
+        """
         for key, value in data.items():
             if key in graph.annotation_url:
                 url = graph.annotation_url[key]
@@ -793,7 +804,13 @@ class InsertManager(NamespaceManager, AnnotationManager):
                 raise ValueError('Graph resources does not contain keyword: {}'.format(key))
             yield url, value
 
-    def get_annotations(self, graph, data):
+    def _get_annotation_entries(self, graph, data):
+        """Gets the annotation entries for this edge's data
+
+        :param BELGraph graph: A BEL graph
+        :param dict data: A PyBEL edge data dictionary
+        :rtype: list[AnnotationEntry]
+        """
         return [
             self.get_annotation_entry(url, value)
             for url, value in self._map_annotations_dict(graph, data)
@@ -818,7 +835,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
         properties = self.get_or_create_properties(graph, data)
-        annotations = self.get_annotations(graph, data[ANNOTATIONS])
+        annotations = self._get_annotation_entries(graph, data[ANNOTATIONS])
 
         bel = edge_to_bel(graph, u, v, k)
         edge_hash = hash_edge(u, v, k, data)

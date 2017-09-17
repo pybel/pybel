@@ -10,6 +10,8 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_
 Added
 ~~~~~
 - Option for setting scopefunc in Manager
+- Include extra citation information on inserting graph to database that might have come from citation enrichment
+- Node model to tuple and json functions are now complete
 
 Changed
 ~~~~~~~
@@ -55,7 +57,7 @@ Added
 - Added more useful functions to cache manager
 - Kwargs for setting name, version, and description in BELGraph init
 - Getters and setters for version and description in BELGraph
-- Node date to tuple functions (https://github.com/pybel/pybel/issues/145)
+- Node data to tuple functions (https://github.com/pybel/pybel/issues/145)
 
 `0.7.3 <https://github.com/pybel/pybel/compare/v0.7.2...v0.7.3>`_ - 2017-09-05
 ------------------------------------------------------------------------------
