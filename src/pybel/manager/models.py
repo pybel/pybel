@@ -680,7 +680,7 @@ class Citation(Base):
     last = Column(Text, nullable=True, doc='Last author name')
 
     authors = relationship("Author", secondary=author_citation, backref='citations')
-    evidences = relationship("Evidence", backref='citation')
+
 
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
@@ -738,9 +738,10 @@ class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')
+    text = Column(Text, nullable=False, doc='Supporting text from a given publication')
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+    citation = relationship('Citation', backref=backref('evidences', lazy='dynamic'))
 
     sha512 = Column(String(255), index=True)
 

@@ -782,6 +782,23 @@ class InsertManager(NamespaceManager, AnnotationManager):
         self.object_cache_evidence = {}
         self.object_cache_author = {}
 
+    @staticmethod
+    def _map_annotations_dict(graph, data):
+        for key, value in data.items():
+            if key in graph.annotation_url:
+                url = graph.annotation_url[key]
+            elif key in graph.annotation_owl:
+                url = graph.annotation_owl[key]
+            else:
+                raise ValueError('Graph resources does not contain keyword: {}'.format(key))
+            yield url, value
+
+    def get_annotations(self, graph, data):
+        return [
+            self.get_annotation_entry(url, value)
+            for url, value in self._map_annotations_dict(graph, data)
+        ]
+
     def _add_qualified_edge(self, network, graph, u, v, k, data):
         citation_dict = data[CITATION]
 
@@ -801,22 +818,10 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
         properties = self.get_or_create_properties(graph, data)
-        annotations = []
-
-        for key, value in data[ANNOTATIONS].items():
-            if key in graph.annotation_url:
-                url = graph.annotation_url[key]
-            elif key in graph.annotation_owl:
-                url = graph.annotation_owl[key]
-            else:
-                raise ValueError('Graph resources does not contain keyword: {}'.format(key))
-            entry = self.get_annotation_entry(url, value)
-            annotations.append(entry)
+        annotations = self.get_annotations(graph, data[ANNOTATIONS])
 
         bel = edge_to_bel(graph, u, v, k)
-
         edge_hash = hash_edge(u, v, k, data)
-
         edge = self.get_or_create_edge(
             source=self.node_model[u],
             target=self.node_model[v],
@@ -828,7 +833,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
             properties=properties,
             annotations=annotations,
         )
-
         network.edges.append(edge)
 
     def _add_unqualified_edge(self, network, graph, u, v, k, data):
@@ -895,7 +899,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         :param Citation citation: Citation object obtained from :func:`get_or_create_citation`
         :param str text: Evidence text
-        :return: An Evidence object
         :rtype: Evidence
         """
         evidence_hash = hash_evidence(text, citation.type, citation.reference)
@@ -905,12 +908,18 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         result = self.session.query(Evidence).filter(Evidence.sha512 == evidence_hash).one_or_none()
 
-        if result is None:
-            result = Evidence(text=text, citation=citation, sha512=evidence_hash)
-            self.session.add(result)
+        if result is not None:
+            self.object_cache_evidence[evidence_hash] = result
+            return result
 
+        result = Evidence(
+            text=text,
+            citation=citation,
+            sha512=evidence_hash
+        )
+
+        self.session.add(result)
         self.object_cache_evidence[evidence_hash] = result
-
         return result
 
     def get_or_create_node(self, graph, node):
@@ -959,9 +968,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
             result.modifications = self.get_or_create_modification(graph, node_data)
 
         self.session.add(result)
-
         self.object_cache_node[node_hash] = result
-
         return result
 
     def drop_nodes(self):
@@ -976,7 +983,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
             self.session.delete(edge)
         self.session.commit()
 
-    def get_or_create_edge(self, source, target, bel, relation, blob, edge_hash, evidence=None, annotations=None,
+    def get_or_create_edge(self, source, target, relation, bel, blob, edge_hash, evidence=None, annotations=None,
                            properties=None):
         """Creates entry for given edge if it does not exist.
 
@@ -985,6 +992,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         :param str relation: Type of the relation between source and target node
         :param str bel: BEL statement that describes the relation
         :param bytes blob: A blob of the edge data object.
+        :param str edge_hash: A hash of the edge
         :param Evidence evidence: Evidence object that proves the given relation
         :param list[Property] properties: List of all properties that belong to the edge
         :param list[AnnotationEntry] annotations: List of all annotations that belong to the edge
@@ -993,33 +1001,37 @@ class InsertManager(NamespaceManager, AnnotationManager):
         if edge_hash in self.object_cache_edge:
             return self.object_cache_edge[edge_hash]
 
-        # Edge already in DB?
         result = self.session.query(Edge).filter(Edge.sha512 == edge_hash).one_or_none()
 
-        if result is None:
-            # Create new edge and add it to db_session
-            result = Edge(
-                source=source,
-                target=target,
-                bel=bel,
-                relation=relation,
-                blob=blob,
-                sha512=edge_hash,
-            )
-            if evidence is not None:
-                result.evidence = evidence,
-            if properties is not None:
-                result.properties = properties
-            if annotations is not None:
-                result.annotations = annotations
+        if result is not None:
+            self.object_cache_edge[edge_hash] = result
+            return result
 
-            self.session.add(result)
+        result = Edge(
+            source=source,
+            target=target,
+            relation=relation,
+            bel=bel,
+            blob=blob,
+            sha512=edge_hash,
+        )
+        if evidence is not None:
+            log.warning('type of evidence: %s', type(evidence))
+            log.warning('evidence: %s', evidence)
+            result.evidence = evidence,
+        if properties is not None:
+            log.warning('type of properties: %s', type(properties))
+            log.warning('properties: %s', properties)
+            result.properties = properties
+        if annotations is not None:
+            result.annotations = annotations
 
+        self.session.add(result)
         self.object_cache_edge[edge_hash] = result
-
         return result
 
-    def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None, date=None, first=None, last=None, authors=None):
+    def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None,
+                               date=None, first=None, last=None, authors=None):
         """Creates entry for given citation if it does not exist.
 
         :param str type: Citation type (e.g. PubMed)
@@ -1027,7 +1039,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
         :param str name: Title of the publication that is cited
         :param str date: Date of publication in ISO 8601 (YYYY-MM-DD) format
         :param str or list[str] authors: Either a list of authors separated by |, or an actual list of authors
-        :return: A Citation object
         :rtype: Citation
         """
         type = type.strip()
