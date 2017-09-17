@@ -741,7 +741,7 @@ class Evidence(Base):
     text = Column(Text, nullable=False, doc='Supporting text from a given publication')
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
-    citation = relationship('Citation', backref=backref('evidences', lazy='dynamic', uselist=False))
+    citation = relationship('Citation', backref=backref('evidences'))
 
     sha512 = Column(String(255), index=True)
 

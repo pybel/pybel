@@ -179,7 +179,8 @@ class TestNodes(TemporaryCacheMixin):
 
         self.assertEqual(node_tuple, node_model.to_tuple())
 
-    def test_1(self):
+    @mock_bel_resources
+    def test_1(self, mock):
         node_tuple = PROTEIN, 'HGNC', 'YFG'
 
         node_data = {
@@ -190,7 +191,8 @@ class TestNodes(TemporaryCacheMixin):
 
         self.help_test_round_trip(node_tuple, node_data)
 
-    def test_2(self):
+    @mock_bel_resources
+    def test_2(self, mock):
         node_tuple = PROTEIN, 'HGNC', 'YFG', (HGVS, 'p.Glu600Arg')
 
         node_data = {
@@ -222,7 +224,12 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
             return pybel.from_path(test_bel_simple, manager=cls.manager, allow_nested=True)
 
         cls.graph = get_graph()
-        cls.network = cls.manager.insert_graph(cls.graph, store_parts=True)
+
+        @mock_bel_resources
+        def insert_graph(mock):
+            cls.network = cls.manager.insert_graph(cls.graph, store_parts=True)
+
+        insert_graph()
 
     @mock_bel_resources
     def test_get_or_create_node(self, mock_get):
@@ -982,7 +989,8 @@ class TestFilter(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
 
 
 class TestInsert(TemporaryCacheMixin):
-    def test_translocation(self):
+    @mock_bel_resources
+    def test_translocation(self, mock):
         graph = BELGraph(name='dummy', version='0.0.1')
         u = (PROTEIN, 'HGNC', 'YFG')
         v = (PROTEIN, 'HGNC', 'YFG2')
@@ -1242,7 +1250,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         node_hash = hash_node(node_tuple)
         self.assertEqual(node_tuple, self.manager.get_node_tuple_by_hash(node_hash))
 
-    def test_simple(self):
+    @mock_bel_resources
+    def test_simple(self, mock):
         node_tuple = PROTEIN, 'HGNC', 'YFG'
         node_data = {
             FUNCTION: PROTEIN,
@@ -1256,7 +1265,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         number_edges = 0
         self.help_reconstitute(node_tuple, node_data, namespaces, number_nodes, number_edges)
 
-    def test_single_variant(self):
+    @mock_bel_resources
+    def test_single_variant(self, mock):
         node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')
         node_data = {
             FUNCTION: GENE,
@@ -1272,7 +1282,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         namespaces = {'HGNC': ['AKT1']}
         self.help_reconstitute(node_tuple, node_data, namespaces, 2, 1)
 
-    def test_multiple_variants(self):
+    @mock_bel_resources
+    def test_multiple_variants(self, mock):
         node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del'), (HGVS, 'p.Phe509del')
         node_data = {
             FUNCTION: GENE,
@@ -1291,7 +1302,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         namespaces = {'HGNC': ['AKT1']}
         self.help_reconstitute(node_tuple, node_data, namespaces, 2, 1)
 
-    def test_fusion(self):
+    @mock_bel_resources
+    def test_fusion(self, mock):
         node_tuple = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
         node_data = {
             FUNCTION: GENE,
@@ -1314,7 +1326,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         namespaces = {'HGNC': ['TMPRSS2', 'ERG']}
         self.help_reconstitute(node_tuple, node_data, namespaces, 1, 0)
 
-    def test_composite(self):
+    @mock_bel_resources
+    def test_composite(self, mock):
         node_tuple = COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')
         node_data = {
             FUNCTION: COMPOSITE,
@@ -1334,7 +1347,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         namespaces = {'GOCC': ['interleukin-23 complex'], 'HGNC': ['IL6']}
         self.help_reconstitute(node_tuple, node_data, namespaces, 3, 2)
 
-    def test_reaction(self):
+    @mock_bel_resources
+    def test_reaction(self, mock):
         superoxide_node = ABUNDANCE, 'CHEBI', 'superoxide'
         hydrogen_peroxide = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
         oxygen_node = ABUNDANCE, 'CHEBI', 'oxygen'
@@ -1366,7 +1380,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         namespaces = {'CHEBI': ['superoxide', 'hydrogen peroxide', 'oxygen']}
         self.help_reconstitute(node_tuple, node_data, namespaces, 4, 3)
 
-    def test_complex(self):
+    @mock_bel_resources
+    def test_complex(self, mock):
         node_tuple = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
         node_data = {
             FUNCTION: COMPLEX,

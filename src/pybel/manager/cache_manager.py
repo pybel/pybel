@@ -1015,12 +1015,8 @@ class InsertManager(NamespaceManager, AnnotationManager):
             sha512=edge_hash,
         )
         if evidence is not None:
-            log.warning('type of evidence: %s', type(evidence))
-            log.warning('evidence: %s', evidence)
-            result.evidence = evidence,
+            result.evidence = evidence
         if properties is not None:
-            log.warning('type of properties: %s', type(properties))
-            log.warning('properties: %s', properties)
             result.properties = properties
         if annotations is not None:
             result.annotations = annotations
