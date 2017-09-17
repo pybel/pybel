@@ -1036,7 +1036,6 @@ def make_dummy_namespaces(manager, graph, namespaces):
 
 
 class TestAddNodeFromData(unittest.TestCase):
-
     def setUp(self):
         self.graph = BELGraph()
 
@@ -1215,9 +1214,8 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][jun][has_component_code][RELATION])
 
 
-
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
-    def help_reconstitute(self, node_tuple, node_data, namespace_dict):
+    def help_reconstitute(self, node_tuple, node_data, namespace_dict, number_nodes, number_edges):
         """Helps test the round-trip conversion from PyBEL data dictionary to node model, then back to PyBEL node
         data dictionary and PyBEL node tuple.
 
@@ -1230,6 +1228,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         self.assertEqual(node_tuple, calculated_node_tuple)
 
         self.manager.insert_graph(graph, store_parts=True)
+        self.assertEqual(number_nodes, self.manager.count_nodes())
+        self.assertEqual(number_edges, self.manager.count_edges())
 
         node = self.manager.get_or_create_node(graph, node_tuple)
         self.manager.session.commit()
@@ -1252,7 +1252,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         namespaces = {
             'HGNC': ['YFG']
         }
-        self.help_reconstitute(node_tuple, node_data, namespaces)
+        number_nodes = 1
+        number_edges = 0
+        self.help_reconstitute(node_tuple, node_data, namespaces, number_nodes, number_edges)
 
     def test_single_variant(self):
         node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')
@@ -1268,7 +1270,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             ]
         }
         namespaces = {'HGNC': ['AKT1']}
-        self.help_reconstitute(node_tuple, node_data, namespaces)
+        self.help_reconstitute(node_tuple, node_data, namespaces, 2, 1)
 
     def test_multiple_variants(self):
         node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del'), (HGVS, 'p.Phe509del')
@@ -1287,7 +1289,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             ]
         }
         namespaces = {'HGNC': ['AKT1']}
-        self.help_reconstitute(node_tuple, node_data, namespaces)
+        self.help_reconstitute(node_tuple, node_data, namespaces, 2, 1)
 
     def test_fusion(self):
         node_tuple = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
@@ -1310,7 +1312,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             }
         }
         namespaces = {'HGNC': ['TMPRSS2', 'ERG']}
-        self.help_reconstitute(node_tuple, node_data, namespaces)
+        self.help_reconstitute(node_tuple, node_data, namespaces, 1, 0)
 
     def test_composite(self):
         node_tuple = COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')
@@ -1330,7 +1332,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             ]
         }
         namespaces = {'GOCC': ['interleukin-23 complex'], 'HGNC': ['IL6']}
-        self.help_reconstitute(node_tuple, node_data, namespaces)
+        self.help_reconstitute(node_tuple, node_data, namespaces, 3, 2)
 
     def test_reaction(self):
         superoxide_node = ABUNDANCE, 'CHEBI', 'superoxide'
@@ -1362,7 +1364,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             ]
         }
         namespaces = {'CHEBI': ['superoxide', 'hydrogen peroxide', 'oxygen']}
-        self.help_reconstitute(node_tuple, node_data, namespaces)
+        self.help_reconstitute(node_tuple, node_data, namespaces, 4, 3)
 
     def test_complex(self):
         node_tuple = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
@@ -1382,7 +1384,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             ]
         }
         namespaces = {'HGNC': ['FOS', 'JUN']}
-        self.help_reconstitute(node_tuple, node_data, namespaces)
+        self.help_reconstitute(node_tuple, node_data, namespaces, 3, 2)
 
 
 if __name__ == '__main__':
