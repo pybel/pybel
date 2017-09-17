@@ -228,7 +228,7 @@ class NamespaceManager(BaseManager):
         if self.namespace_object_cache and url in self.namespace_object_cache:
             return self.namespace_object_cache[url][value]
 
-        namespace = self.session.query(Namespace).filter_by(url=url).one()
+        namespace = self.session.query(Namespace).filter(Namespace.url == url).one()
         namespace_entry = self.session.query(NamespaceEntry).filter_by(namespace=namespace, name=value).one_or_none()
 
         return namespace_entry
@@ -405,9 +405,11 @@ class AnnotationManager(BaseManager):
                 self.annotation_id_cache[url][entry.name] = entry.id
 
         if cache_objects and url not in self.annotation_object_cache:
-            log.debug('loading annotation objects: %s (%d)', url, len(self.annotation_cache[url]))
-            for entry in results.entries:
-                self.annotation_object_cache[url][entry.name] = entry
+            log.debug('caching annotation objects: %s (%d)', url, len(self.annotation_cache[url]))
+            self.annotation_object_cache[url] = {
+                entry.name: entry
+                for entry in results.entries
+            }
 
         return results
 
@@ -432,14 +434,13 @@ class AnnotationManager(BaseManager):
         """Gets a given AnnotationEntry object.
 
         :param str url: The url of the annotation source
-        :param str value: The value of the annotation from the given url's document
-        :return: An AnnotationEntry object
+        :param str value: The name of the annotation entry from the given url's document
         :rtype: AnnotationEntry
         """
         if self.annotation_object_cache:
             annotation_entry = self.annotation_object_cache[url][value]
         else:
-            annotation = self.session.query(Annotation).filter_by(url=url).one()
+            annotation = self.session.query(Annotation).filter(Annotation.url == url).one()
             annotation_entry = self.session.query(AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
         return annotation_entry
@@ -541,7 +542,7 @@ class EquivalenceManager(NamespaceManager):
         config = get_bel_resource(url)
         values = config['Values']
 
-        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
+        ns = self.session.query(Namespace).filter(Namespace.url == namespace_url).one()
 
         for entry in ns.entries:
             equivalence_label = values[entry.name]
@@ -555,7 +556,7 @@ class EquivalenceManager(NamespaceManager):
         """Check if the equivalence file is already loaded, and if not, load it"""
         self.ensure_namespace(namespace_url)
 
-        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
+        ns = self.get_namespace_by_url(namespace_url)
 
         if not ns.has_equivalences:
             self.insert_equivalences(url, namespace_url)
@@ -567,7 +568,7 @@ class EquivalenceManager(NamespaceManager):
         :param str name: the name of the entry in the namespace
         :return: the equivalence class of the entry in the given namespace
         """
-        namespace = self.session.query(Namespace).filter_by(url=url).one()
+        namespace = self.get_namespace_by_url(url)
         entry = self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace_id == namespace.id,
                                                           NamespaceEntry.name == name).one()
         return entry.equivalence
@@ -875,7 +876,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
 
-        result = self.session.query(Evidence).filter_by(sha512=evidence_hash).one_or_none()
+        result = self.session.query(Evidence).filter(Evidence.sha512 == evidence_hash).one_or_none()
 
         if result is None:
             result = Evidence(text=text, citation=citation, sha512=evidence_hash)
@@ -901,7 +902,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         blob = dumps(graph.node[node])
         node_data = graph.node[node]
 
-        result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
+        result = self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
 
         if result is not None:
             self.object_cache_node[node_hash] = result
@@ -966,7 +967,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
             return self.object_cache_edge[edge_hash]
 
         # Edge already in DB?
-        result = self.session.query(Edge).filter_by(sha512=edge_hash).one_or_none()
+        result = self.session.query(Edge).filter(Edge.sha512 == edge_hash).one_or_none()
 
         if result is None:
             # Create new edge and add it to db_session
@@ -1154,7 +1155,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
                 mod = self.object_cache_modification[mod_hash]
 
             else:
-                mod = self.session.query(Modification).filter_by(sha512=mod_hash).one_or_none()
+                mod = self.session.query(Modification).filter(Modification.sha512 == mod_hash).one_or_none()
                 if not mod:
                     modification['sha512'] = mod_hash
                     mod = Modification(**modification)
@@ -1224,7 +1225,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
             if property_hash in self.object_cache_property:
                 edge_property = self.object_cache_property[property_hash]
             else:
-                edge_property = self.session.query(Property).filter_by(sha512=property_hash).one_or_none()
+                edge_property = self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
 
                 if not edge_property:
                     property_def['sha512'] = property_hash
