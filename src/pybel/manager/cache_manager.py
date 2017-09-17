@@ -800,7 +800,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         )
 
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
-        properties = self.get_or_create_property(graph, data)
+        properties = self.get_or_create_properties(graph, data)
         annotations = []
 
         for key, value in data[ANNOTATIONS].items():
@@ -1201,7 +1201,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         return modifications
 
-    def get_or_create_property(self, graph, edge_data):
+    def get_or_create_properties(self, graph, edge_data):
         """Creates a list of all subject and object related properties of the edge.
 
         :param pybel.BELGraph graph: A BEL graph
