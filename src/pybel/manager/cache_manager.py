@@ -789,9 +789,14 @@ class InsertManager(NamespaceManager, AnnotationManager):
             type=citation_dict.get(CITATION_TYPE),
             reference=citation_dict.get(CITATION_REFERENCE),
             name=citation_dict.get(CITATION_NAME),
+            title=citation_dict.get(CITATION_TITLE),
+            volume=citation_dict.get(CITATION_VOLUME),
+            issue=citation_dict.get(CITATION_ISSUE),
+            pages=citation_dict.get(CITATION_PAGES),
             date=citation_dict.get(CITATION_DATE),
+            first=citation_dict.get(CITATION_FIRST_AUTHOR),
+            last=citation_dict.get(CITATION_LAST_AUTHOR),
             authors=citation_dict.get(CITATION_AUTHORS),
-            # TODO add other fields that get enriched
         )
 
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
@@ -1014,7 +1019,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         return result
 
-    def get_or_create_citation(self, type, reference, name=None, date=None, authors=None):
+    def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None, date=None, first=None, last=None, authors=None):
         """Creates entry for given citation if it does not exist.
 
         :param str type: Citation type (e.g. PubMed)
@@ -1042,14 +1047,21 @@ class InsertManager(NamespaceManager, AnnotationManager):
         result = Citation(
             type=type,
             reference=reference,
-            sha512=citation_hash
+            sha512=citation_hash,
+            name=name,
+            title=title,
+            volume=volume,
+            issue=issue,
+            pages=pages
         )
-
-        if name is not None:
-            result.name = name.strip()
-
         if date is not None:
             result.date = parse_datetime(date)
+
+        if first is not None:
+            result.first = self.get_or_create_author(first)
+
+        if last is not None:
+            result.last = self.get_or_create_author(last)
 
         if authors is not None:
             for author in (authors.split('|') if isinstance(authors, string_types) else authors):
