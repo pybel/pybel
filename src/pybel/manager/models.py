@@ -13,7 +13,7 @@ from sqlalchemy.orm import relationship, backref
 from .utils import int_or_str
 from ..constants import *
 from ..io.gpickle import from_bytes
-from ..parser.canonicalize import node_to_tuple
+from ..parser.canonicalize import node_to_tuple, sort_dict_list, sort_variant_dict_list
 
 __all__ = [
     'Base',
@@ -478,26 +478,30 @@ class Node(Base):
                 mod = self.modifications[0].data
                 result[FUSION] = mod['mod_data']
             else:
-                result[VARIANTS] = []
-                for modification in self.modifications:
-                    mod = modification.data
-                    result[VARIANTS].append(mod['mod_data'])
+                result[VARIANTS] = sort_variant_dict_list(
+                    modification.data['mod_data']
+                    for modification in self.modifications
+                )
 
         if self.type == REACTION:
-            result[REACTANTS] = []
-            result[PRODUCTS] = []
+            reactants = []
+            products = []
 
             for edge in self.out_edges:
                 if edge.relation == HAS_REACTANT:
-                    result[REACTANTS].append(edge.target.to_json())
+                    reactants.append(edge.target.to_json())
                 elif edge.relation == HAS_PRODUCT:
-                    result[PRODUCTS].append(edge.target.to_json())
+                    products.append(edge.target.to_json())
+
+            result[REACTANTS] = sort_dict_list(reactants)
+            result[PRODUCTS] = sort_dict_list(products)
 
         if self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
-            result[MEMBERS] = []
-            for edge in self.out_edges:
-                if edge.relation == HAS_COMPONENT:
-                    result[MEMBERS].append(edge.target.to_json())
+            result[MEMBERS] = sort_dict_list(
+                edge.target.to_json()
+                for edge in self.out_edges
+                if edge.relation == HAS_COMPONENT
+            )
 
         return result
 
@@ -681,7 +685,6 @@ class Citation(Base):
 
     authors = relationship("Author", secondary=author_citation, backref='citations')
 
-
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
     )
@@ -789,7 +792,7 @@ class Edge(Base):
     bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
-    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)),  nullable=False)
+    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
     source = relationship('Node', foreign_keys=[source_id], backref=backref('out_edges', lazy='dynamic'))
 
     target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
