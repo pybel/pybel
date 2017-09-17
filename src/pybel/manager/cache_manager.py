@@ -927,7 +927,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         :param BELGraph graph: A BEL graph
         :param tuple node: A BEL node
-        :return: A Node object
         :rtype: Node
         """
         node_hash = hash_node(node)
@@ -1088,7 +1087,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
         """Gets an author by name, or creates one
 
         :param str name: An author's name
-        :return: An Author object
         :rtype: Author
         """
         name = name.strip()
