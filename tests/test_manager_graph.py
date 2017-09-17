@@ -1035,10 +1035,12 @@ def make_dummy_namespaces(manager, graph, namespaces):
 
         namespace = Namespace(keyword=keyword, url=url)
         manager.session.add(namespace)
+        manager.namespace_model[url] = namespace
 
         for name in names:
             entry = NamespaceEntry(name=name, namespace=namespace)
             manager.session.add(entry)
+            manager.namespace_object_cache[url][entry.name] = entry
 
         manager.session.commit()
 
