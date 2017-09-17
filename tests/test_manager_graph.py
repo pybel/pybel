@@ -3,6 +3,7 @@
 import logging
 import time
 import unittest
+from uuid import uuid4
 
 import os
 import sqlalchemy.exc
@@ -13,7 +14,7 @@ from pybel import BELGraph, from_database, to_database, from_path
 from pybel.constants import *
 from pybel.manager import models
 from pybel.manager.models import Namespace, NamespaceEntry, Node
-from pybel.utils import hash_citation
+from pybel.utils import hash_citation, hash_node
 from tests import constants
 from tests.constants import (
     FleetingTemporaryCacheMixin,
@@ -1016,6 +1017,372 @@ class TestInsert(TemporaryCacheMixin):
         self.manager.session.commit()
 
         self.manager.insert_graph(graph, store_parts=True)
+
+
+def make_dummy_namespaces(manager, graph, namespaces):
+    """Useful for testing purposes"""
+    for keyword, names in namespaces.items():
+        url = str(uuid4())
+        graph.namespace_url[keyword] = url
+
+        namespace = Namespace(keyword=keyword, url=url)
+        manager.session.add(namespace)
+
+        for name in names:
+            entry = NamespaceEntry(name=name, namespace=namespace)
+            manager.session.add(entry)
+
+        manager.session.commit()
+
+
+class TestAddNodeFromData(unittest.TestCase):
+
+    def setUp(self):
+        self.graph = BELGraph()
+
+    def test_simple(self):
+        node_tuple = PROTEIN, 'HGNC', 'YFG'
+        node_data = {
+            FUNCTION: PROTEIN,
+            NAMESPACE: 'HGNC',
+            NAME: 'YFG'
+        }
+
+    def test_single_variant(self):
+        node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')
+        node_data = {
+            FUNCTION: GENE,
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
+            VARIANTS: [
+                {
+                    KIND: HGVS,
+                    IDENTIFIER: 'p.Phe508del'
+                }
+            ]
+        }
+
+    def test_multiple_variants(self):
+        node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del'), (HGVS, 'p.Phe509del')
+        node_data = {
+            FUNCTION: GENE,
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
+            VARIANTS: [
+                {
+                    KIND: HGVS,
+                    IDENTIFIER: 'p.Phe508del'
+                }, {
+                    KIND: HGVS,
+                    IDENTIFIER: 'p.Phe509del'
+                }
+            ]
+        }
+
+    def test_fusion(self):
+        node_tuple = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
+        node_data = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 1,
+                    FUSION_STOP: 79
+
+                },
+                RANGE_3P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
+                }
+            }
+        }
+
+    def test_composite(self):
+        il23 = COMPLEX, 'GOCC', 'interleukin-23 complex'
+        il6 = PROTEIN, 'HGNC', 'IL6'
+        node_tuple = COMPOSITE, il23, il6
+        node_data = {
+            FUNCTION: COMPOSITE,
+            MEMBERS: [
+                {
+                    FUNCTION: COMPLEX,
+                    NAMESPACE: 'GOCC',
+                    NAME: 'interleukin-23 complex'
+                },
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'IL6'
+                }
+            ]
+        }
+        has_component_code = unqualified_edge_code[HAS_COMPONENT]
+        self.graph.add_node_from_data(node_data)
+        self.assertIn(node_tuple, self.graph)
+        self.assertEqual(3, self.graph.number_of_nodes())
+        self.assertIn(il6, self.graph)
+        self.assertIn(il23, self.graph)
+        self.assertEqual(2, self.graph.number_of_edges())
+        self.assertIn(il6, self.graph.edge[node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[node_tuple][il6])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][il6][has_component_code][RELATION])
+        self.assertIn(il23, self.graph.edge[node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[node_tuple][il23])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][il23][has_component_code][RELATION])
+
+    def test_reaction(self):
+        superoxide_node = ABUNDANCE, 'CHEBI', 'superoxide'
+        hydrogen_peroxide = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
+        oxygen_node = ABUNDANCE, 'CHEBI', 'oxygen'
+
+        node_tuple = REACTION, (superoxide_node,), (hydrogen_peroxide, oxygen_node)
+        node_data = {
+            FUNCTION: REACTION,
+            REACTANTS: [
+                {
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'superoxide'
+                }
+            ],
+            PRODUCTS: [
+                {
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'hydrogen peroxide'
+                },
+                {
+
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'oxygen'
+                }
+            ]
+        }
+        has_reactant_code = unqualified_edge_code[HAS_REACTANT]
+        has_product_code = unqualified_edge_code[HAS_PRODUCT]
+        self.graph.add_node_from_data(node_data)
+        self.assertIn(node_tuple, self.graph)
+        self.assertEqual(4, self.graph.number_of_nodes())
+        self.assertIn(superoxide_node, self.graph)
+        self.assertIn(hydrogen_peroxide, self.graph)
+        self.assertIn(oxygen_node, self.graph)
+        self.assertEqual(3, self.graph.number_of_edges())
+        self.assertIn(superoxide_node, self.graph.edge[node_tuple])
+        self.assertIn(has_reactant_code, self.graph.edge[node_tuple][superoxide_node])
+        self.assertEqual(HAS_REACTANT, self.graph.edge[node_tuple][superoxide_node][has_reactant_code][RELATION])
+        self.assertIn(hydrogen_peroxide, self.graph.edge[node_tuple])
+        self.assertIn(has_product_code, self.graph.edge[node_tuple][hydrogen_peroxide])
+        self.assertEqual(HAS_PRODUCT, self.graph.edge[node_tuple][hydrogen_peroxide][has_product_code][RELATION])
+        self.assertIn(oxygen_node, self.graph.edge[node_tuple])
+        self.assertIn(has_product_code, self.graph.edge[node_tuple][oxygen_node])
+        self.assertEqual(HAS_PRODUCT, self.graph.edge[node_tuple][oxygen_node][has_product_code][RELATION])
+
+    def test_complex(self):
+        fos = (PROTEIN, 'HGNC', 'FOS')
+        jun = (PROTEIN, 'HGNC', 'JUN')
+        has_component_code = unqualified_edge_code[HAS_COMPONENT]
+        node_tuple = COMPLEX, fos, jun
+        node_data = {
+            FUNCTION: COMPLEX,
+            MEMBERS: [
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'FOS'
+                },
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'JUN'
+                }
+            ]
+        }
+        self.graph.add_node_from_data(node_data)
+        self.assertIn(node_tuple, self.graph)
+        self.assertEqual(3, self.graph.number_of_nodes())
+        self.assertIn(fos, self.graph)
+        self.assertIn(jun, self.graph)
+        self.assertEqual(2, self.graph.number_of_edges())
+        self.assertIn(fos, self.graph.edge[node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[node_tuple][fos])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][fos][has_component_code][RELATION])
+        self.assertIn(jun, self.graph.edge[node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[node_tuple][jun])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][jun][has_component_code][RELATION])
+
+
+
+class TestReconstituteNodeTuples(TemporaryCacheMixin):
+    def help_reconstitute(self, node_tuple, node_data, namespace_dict):
+        """Helps test the round-trip conversion from PyBEL data dictionary to node model, then back to PyBEL node
+        data dictionary and PyBEL node tuple.
+
+        :param dict node_data: PyBEL node data dictionary
+        """
+        graph = BELGraph(name='test', version='0.0.0')
+        make_dummy_namespaces(self.manager, graph, namespace_dict)
+
+        calculated_node_tuple = graph.add_node_from_data(node_data)
+        self.assertEqual(node_tuple, calculated_node_tuple)
+
+        self.manager.insert_graph(graph, store_parts=True)
+
+        node = self.manager.get_or_create_node(graph, node_tuple)
+        self.manager.session.commit()
+
+        self.assertEqual(node_data, node.to_json())
+        self.assertEqual(node_tuple, node.to_tuple())
+
+        self.assertEqual(node, self.manager.get_node_by_tuple(node_tuple))
+
+        node_hash = hash_node(node_tuple)
+        self.assertEqual(node_tuple, self.manager.get_node_tuple_by_hash(node_hash))
+
+    def test_simple(self):
+        node_tuple = PROTEIN, 'HGNC', 'YFG'
+        node_data = {
+            FUNCTION: PROTEIN,
+            NAMESPACE: 'HGNC',
+            NAME: 'YFG'
+        }
+        namespaces = {
+            'HGNC': ['YFG']
+        }
+        self.help_reconstitute(node_tuple, node_data, namespaces)
+
+    def test_single_variant(self):
+        node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')
+        node_data = {
+            FUNCTION: GENE,
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
+            VARIANTS: [
+                {
+                    KIND: HGVS,
+                    IDENTIFIER: 'p.Phe508del'
+                }
+            ]
+        }
+        namespaces = {'HGNC': ['AKT1']}
+        self.help_reconstitute(node_tuple, node_data, namespaces)
+
+    def test_multiple_variants(self):
+        node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del'), (HGVS, 'p.Phe509del')
+        node_data = {
+            FUNCTION: GENE,
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
+            VARIANTS: [
+                {
+                    KIND: HGVS,
+                    IDENTIFIER: 'p.Phe508del'
+                }, {
+                    KIND: HGVS,
+                    IDENTIFIER: 'p.Phe509del'
+                }
+            ]
+        }
+        namespaces = {'HGNC': ['AKT1']}
+        self.help_reconstitute(node_tuple, node_data, namespaces)
+
+    def test_fusion(self):
+        node_tuple = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
+        node_data = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 1,
+                    FUSION_STOP: 79
+
+                },
+                RANGE_3P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
+                }
+            }
+        }
+        namespaces = {'HGNC': ['TMPRSS2', 'ERG']}
+        self.help_reconstitute(node_tuple, node_data, namespaces)
+
+    def test_composite(self):
+        node_tuple = COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')
+        node_data = {
+            FUNCTION: COMPOSITE,
+            MEMBERS: [
+                {
+                    FUNCTION: COMPLEX,
+                    NAMESPACE: 'GOCC',
+                    NAME: 'interleukin-23 complex'
+                },
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'IL6'
+                }
+            ]
+        }
+        namespaces = {'GOCC': ['interleukin-23 complex'], 'HGNC': ['IL6']}
+        self.help_reconstitute(node_tuple, node_data, namespaces)
+
+    def test_reaction(self):
+        superoxide_node = ABUNDANCE, 'CHEBI', 'superoxide'
+        hydrogen_peroxide = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
+        oxygen_node = ABUNDANCE, 'CHEBI', 'oxygen'
+
+        node_tuple = REACTION, (superoxide_node,), (hydrogen_peroxide, oxygen_node)
+        node_data = {
+            FUNCTION: REACTION,
+            REACTANTS: [
+                {
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'superoxide'
+                }
+            ],
+            PRODUCTS: [
+                {
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'hydrogen peroxide'
+                },
+                {
+
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'oxygen'
+                }
+            ]
+        }
+        namespaces = {'CHEBI': ['superoxide', 'hydrogen peroxide', 'oxygen']}
+        self.help_reconstitute(node_tuple, node_data, namespaces)
+
+    def test_complex(self):
+        node_tuple = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
+        node_data = {
+            FUNCTION: COMPLEX,
+            MEMBERS: [
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'FOS'
+                },
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'JUN'
+                }
+            ]
+        }
+        namespaces = {'HGNC': ['FOS', 'JUN']}
+        self.help_reconstitute(node_tuple, node_data, namespaces)
 
 
 if __name__ == '__main__':

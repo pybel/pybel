@@ -163,13 +163,12 @@ class Namespace(Base):
     def __str__(self):
         return self.keyword
 
-    def to_json(self):
+    def to_json(self, include_id=True):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information.
 
         :rtype: dict
         """
-        return {
-            'id': self.id,
+        result =  {
             'uploaded': self.uploaded,
             'url': self.url,
             'keyword': self.keyword,
@@ -190,6 +189,11 @@ class Namespace(Base):
             'citation_url': self.citation_url,
             'has_equivalences': self.has_equivalences
         }
+
+        if include_id:
+            result['id'] = self.id
+
+        return result
 
 
 class NamespaceEntry(Base):
@@ -457,7 +461,6 @@ class Node(Base):
 
         :rtype: dict
         """
-        # node_key = [self.type]
         result = {
             FUNCTION: self.type,
         }
@@ -468,20 +471,32 @@ class Node(Base):
         if self.namespace_entry:
             namespace_entry = self.namespace_entry.to_json()
             result.update(namespace_entry)
-            # node_key.append(namespace_entry[NAMESPACE])
-            # node_key.append(namespace_entry[NAME])
 
         if self.is_variant:
             if self.fusion:
                 mod = self.modifications[0].data
                 result[FUSION] = mod['mod_data']
-                # [node_key.append(key_element) for key_element in mod['mod_key']]
             else:
                 result[VARIANTS] = []
                 for modification in self.modifications:
                     mod = modification.data
                     result[VARIANTS].append(mod['mod_data'])
-                    # node_key.append(tuple(mod['mod_key']))
+
+        if self.type == REACTION:
+            result[REACTANTS] = []
+            result[PRODUCTS] = []
+
+            for edge in self.out_edges:
+                if edge.relation == HAS_REACTANT:
+                    result[REACTANTS].append(edge.target.to_json())
+                elif edge.relation == HAS_PRODUCT:
+                    result[PRODUCTS].append(edge.target.to_json())
+
+        if self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
+            result[MEMBERS] = []
+            for edge in self.out_edges:
+                if edge.relation == HAS_COMPONENT:
+                    result[MEMBERS].append(edge.target.to_json())
 
         return result
 
@@ -772,10 +787,10 @@ class Edge(Base):
     relation = Column(String(255), nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
-    source = relationship('Node', foreign_keys=[source_id])
+    source = relationship('Node', foreign_keys=[source_id], backref=backref('out_edges', lazy='dynamic'))
 
     target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
-    target = relationship('Node', foreign_keys=[target_id])
+    target = relationship('Node', foreign_keys=[target_id], backref=backref('in_edges', lazy='dynamic'))
 
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship("Evidence")
