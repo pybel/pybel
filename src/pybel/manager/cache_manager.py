@@ -911,13 +911,19 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
-        if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
+        if NAMESPACE not in node_data:
+            pass
+
+        elif node_data[NAMESPACE] in graph.namespace_url:
             namespace = node_data[NAMESPACE]
             url = graph.namespace_url[namespace]
             result.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
-        elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
+        elif node_data[NAMESPACE] in graph.namespace_pattern:
             result.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+
+        else:
+            raise ValueError("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))
 
         if VARIANTS in node_data or FUSION in node_data:
             result.is_variant = True
