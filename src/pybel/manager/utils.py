@@ -106,3 +106,10 @@ def extract_shared_optional(config, definition_header='Namespace'):
         result['citation_published'] = parse_datetime(config['Citation']['PublishedDate'])
 
     return result
+
+
+def int_or_str(v):
+    try:
+        return int(v)
+    except:
+        return v

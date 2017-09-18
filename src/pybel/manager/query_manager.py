@@ -150,13 +150,23 @@ class QueryManager(BaseManager):
         """
         return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
 
+    def get_node_tuple_by_hash(self, node_hash):
+        """Looks up a node by the hash and returns the corresponding PyBEL node tuple
+
+        :param str node_hash: The hash of a PyBEL node tuple from :func:`pybel.utils.hash_node`
+        :rtype: tuple
+        """
+        node = self.get_node_by_hash(node_hash)
+        return node.to_tuple()
+
     def get_node_by_tuple(self, node):
         """Looks up a node by the PyBEL node tuple
 
         :param tuple node: A PyBEL node tuple
         :rtype: Node
         """
-        return self.get_node_by_hash(hash_node(node))
+        node_hash = hash_node(node)
+        return self.get_node_by_hash(node_hash)
 
     def query_nodes(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
                     modification_name=None, as_dict_list=False):
