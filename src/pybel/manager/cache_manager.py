@@ -96,6 +96,7 @@ def _get_annotation_insert_values(config):
 
     return annotation_insert_values
 
+
 def not_resource_cachable(bel_resource):
     """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
     return bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}
@@ -759,6 +760,25 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         return union(self.get_graphs_by_ids(network_ids))
 
+
+class InsertManager(NamespaceManager, AnnotationManager):
+    """Manages inserting data into the edge store"""
+
+    def __init__(self, *args, **kwargs):
+        super(InsertManager, self).__init__(*args, **kwargs)
+
+        #: A dictionary that maps node tuples to their models
+        self.node_model = {}
+
+        # A set of dictionaries that contains objects of the type described by the key
+        self.object_cache_modification = {}
+        self.object_cache_property = {}
+        self.object_cache_node = {}
+        self.object_cache_edge = {}
+        self.object_cache_citation = {}
+        self.object_cache_evidence = {}
+        self.object_cache_author = {}
+
     def insert_graph(self, graph, store_parts=False):
         """Inserts a graph in the database.
 
@@ -800,27 +820,50 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return network
 
     def _store_graph_parts(self, network, graph):
-        """Stores graph parts. Needs to be overridden."""
-        raise NotImplementedError
+        """Stores the given graph into the edge store.
 
+        :param Network network: A SQLAlchemy PyBEL Network object
+        :param BELGraph graph: A BEL Graph
+        """
+        self.ensure_namespace(GOCC_LATEST)
 
-class InsertManager(NamespaceManager, AnnotationManager):
-    """Manages inserting data into the edge store"""
+        for node in graph.nodes_iter():
+            try:
+                node_object = self.get_or_create_node(graph, node)
+                self.node_model[node] = node_object
+            except:
+                continue
 
-    def __init__(self, *args, **kwargs):
-        super(InsertManager, self).__init__(*args, **kwargs)
+            if node_object not in network.nodes:  # FIXME when would the network ever have nodes in it already?
+                network.nodes.append(node_object)
 
-        #: A dictionary that maps node tuples to their models
-        self.node_model = {}
+        self.session.flush()
 
-        # A set of dictionaries that contains objects of the type described by the key
-        self.object_cache_modification = {}
-        self.object_cache_property = {}
-        self.object_cache_node = {}
-        self.object_cache_edge = {}
-        self.object_cache_citation = {}
-        self.object_cache_evidence = {}
-        self.object_cache_author = {}
+        for u, v, k, data in graph.edges_iter(data=True, keys=True):
+            if u not in self.node_model:
+                log.debug('Skipping uncached node: %s', u)
+                continue
+
+            if v not in self.node_model:
+                log.debug('Skipping uncached node: %s', v)
+                continue
+
+            if RELATION not in data:
+                continue
+
+            if data[RELATION] in UNQUALIFIED_EDGES:
+                self._add_unqualified_edge(network, graph, u, v, k, data)
+
+            elif EVIDENCE not in data or CITATION not in data:
+                continue
+
+            elif CITATION_TYPE not in data[CITATION] or CITATION_REFERENCE not in data[CITATION]:
+                continue
+
+            else:
+                self._add_qualified_edge(network, graph, u, v, k, data)
+
+        self.session.flush()
 
     @staticmethod
     def _map_annotations_dict(graph, data):
@@ -899,52 +942,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
             edge_hash=edge_hash,
         )
         network.edges.append(edge)
-
-    def _store_graph_parts(self, network, graph):
-        """Stores the given graph into the edge store.
-
-        :param Network network: A SQLAlchemy PyBEL Network object
-        :param BELGraph graph: A BEL Graph
-        """
-        self.ensure_namespace(GOCC_LATEST)
-
-        for node in graph.nodes_iter():
-            try:
-                node_object = self.get_or_create_node(graph, node)
-                self.node_model[node] = node_object
-            except:
-                continue
-
-            if node_object not in network.nodes:  # FIXME when would the network ever have nodes in it already?
-                network.nodes.append(node_object)
-
-        self.session.flush()
-
-        for u, v, k, data in graph.edges_iter(data=True, keys=True):
-            if u not in self.node_model:
-                log.debug('Skipping uncached node: %s', u)
-                continue
-
-            if v not in self.node_model:
-                log.debug('Skipping uncached node: %s', v)
-                continue
-
-            if RELATION not in data:
-                continue
-
-            if data[RELATION] in UNQUALIFIED_EDGES:
-                self._add_unqualified_edge(network, graph, u, v, k, data)
-
-            elif EVIDENCE not in data or CITATION not in data:
-                continue
-
-            elif CITATION_TYPE not in data[CITATION] or CITATION_REFERENCE not in data[CITATION]:
-                continue
-
-            else:
-                self._add_qualified_edge(network, graph, u, v, k, data)
-
-        self.session.flush()
 
     def get_or_create_evidence(self, citation, text):
         """Creates entry and object for given evidence if it does not exist.
