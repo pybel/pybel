@@ -3,7 +3,6 @@
 import logging
 import time
 import unittest
-from uuid import uuid4
 
 import os
 import sqlalchemy.exc
@@ -27,6 +26,7 @@ from tests.constants import (
     expected_test_thorough_metadata,
 )
 from tests.mocks import mock_bel_resources
+from tests.utils import make_dummy_namespaces
 
 log = logging.getLogger(__name__)
 
@@ -1027,24 +1027,6 @@ class TestInsert(TemporaryCacheMixin):
         self.manager.insert_graph(graph, store_parts=True)
 
 
-def make_dummy_namespaces(manager, graph, namespaces):
-    """Useful for testing purposes"""
-    for keyword, names in namespaces.items():
-        url = str(uuid4())
-        graph.namespace_url[keyword] = url
-
-        namespace = Namespace(keyword=keyword, url=url)
-        manager.session.add(namespace)
-        manager.namespace_model[url] = namespace
-
-        for name in names:
-            entry = NamespaceEntry(name=name, namespace=namespace)
-            manager.session.add(entry)
-            manager.namespace_object_cache[url][entry.name] = entry
-
-        manager.session.commit()
-
-
 class TestAddNodeFromData(unittest.TestCase):
     def setUp(self):
         self.graph = BELGraph()
@@ -1056,6 +1038,9 @@ class TestAddNodeFromData(unittest.TestCase):
             NAMESPACE: 'HGNC',
             NAME: 'YFG'
         }
+        self.graph.add_node_from_data(node_data)
+        self.assertIn(node_tuple, self.graph)
+        self.assertEqual(1, self.graph.number_of_nodes())
 
     def test_single_variant(self):
         node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')
@@ -1070,6 +1055,21 @@ class TestAddNodeFromData(unittest.TestCase):
                 }
             ]
         }
+
+        node_parent_tuple = GENE, 'HGNC', 'AKT1'
+        node_parent_data = {
+            FUNCTION: GENE,
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1'
+        }
+
+        self.graph.add_node_from_data(node_data)
+        self.assertIn(node_tuple, self.graph)
+        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertIn(node_parent_tuple, self.graph)
+        self.assertEqual(node_parent_data, self.graph.node[node_parent_tuple])
+        self.assertEqual(2, self.graph.number_of_nodes())
+        self.assertEqual(1, self.graph.number_of_edges())
 
     def test_multiple_variants(self):
         node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del'), (HGVS, 'p.Phe509del')
@@ -1087,6 +1087,21 @@ class TestAddNodeFromData(unittest.TestCase):
                 }
             ]
         }
+
+        node_parent_tuple = GENE, 'HGNC', 'AKT1'
+        node_parent_data = {
+            FUNCTION: GENE,
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1'
+        }
+
+        self.graph.add_node_from_data(node_data)
+        self.assertIn(node_tuple, self.graph)
+        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertIn(node_parent_tuple, self.graph)
+        self.assertEqual(node_parent_data, self.graph.node[node_parent_tuple])
+        self.assertEqual(2, self.graph.number_of_nodes())
+        self.assertEqual(1, self.graph.number_of_edges())
 
     def test_fusion(self):
         node_tuple = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
@@ -1108,6 +1123,12 @@ class TestAddNodeFromData(unittest.TestCase):
                 }
             }
         }
+
+        self.graph.add_node_from_data(node_data)
+        self.assertIn(node_tuple, self.graph)
+        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertEqual(1, self.graph.number_of_nodes())
+        self.assertEqual(0, self.graph.number_of_edges())
 
     def test_composite(self):
         il23 = COMPLEX, 'GOCC', 'interleukin-23 complex'
