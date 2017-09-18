@@ -1335,7 +1335,7 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
     """
 
     @staticmethod
-    def ensure(connection=None, **kwargs):
+    def ensure(connection=None, *args, **kwargs):
         """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
 
         :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
@@ -1344,6 +1344,7 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
         :param kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
         :rtype: Manager
         """
-        if isinstance(connection, Manager):
-            return connection
-        return Manager(connection=connection, **kwargs)
+        if connection is None or isinstance(connection, string_types):
+            return Manager(connection=connection, *args, **kwargs)
+
+        return connection
