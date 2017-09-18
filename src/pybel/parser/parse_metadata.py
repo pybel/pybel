@@ -171,7 +171,7 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_namespace(line, position, namespace)
 
         url = tokens['url']
-        terms = self.manager.get_namespace(url)
+        terms = self.manager.get_namespace_encodings(url)
 
         self.namespace_dict[namespace] = terms
         self.namespace_url_dict[namespace] = url

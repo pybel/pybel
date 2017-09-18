@@ -58,6 +58,49 @@ log = logging.getLogger(__name__)
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
+def _get_namespace_insert_values(bel_resource):
+    namespace_insert_values = {
+        'name': bel_resource['Namespace']['NameString'],
+        'domain': bel_resource['Namespace']['DomainString']
+    }
+
+    namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
+    namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
+
+    namespace_mapping = {
+        'species': ('Namespace', 'SpeciesString'),
+        'query_url': ('Namespace', 'QueryValueURL')
+    }
+
+    for database_column, (section, key) in namespace_mapping.items():
+        if section in bel_resource and key in bel_resource[section]:
+            namespace_insert_values[database_column] = bel_resource[section][key]
+
+    return namespace_insert_values
+
+
+def _get_annotation_insert_values(config):
+    annotation_insert_values = {
+        'type': config['AnnotationDefinition']['TypeString'],
+    }
+    annotation_insert_values.update(extract_shared_required(config, 'AnnotationDefinition'))
+    annotation_insert_values.update(extract_shared_optional(config, 'AnnotationDefinition'))
+
+    annotation_mapping = {
+        'name': ('Citation', 'NameString')
+    }
+
+    for database_column, (section, key) in annotation_mapping.items():
+        if section in config and key in config[section]:
+            annotation_insert_values[database_column] = config[section][key]
+
+    return annotation_insert_values
+
+def not_resource_cachable(bel_resource):
+    """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
+    return bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}
+
+
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces"""
 
@@ -66,8 +109,6 @@ class NamespaceManager(BaseManager):
 
         #: A dictionary from {namespace URL: {name: set of encodings}}
         self.namespace_cache = defaultdict(dict)
-        #: A dictionary from {namespace URL: {name: database ID}}
-        self.namespace_id_cache = defaultdict(dict)
         #: A dictionary from {namespace URL: Namespace}
         self.namespace_model = {}
 
@@ -87,7 +128,6 @@ class NamespaceManager(BaseManager):
     def drop_namespaces(self):
         """Drops all namespaces"""
         self.namespace_cache.clear()
-        self.namespace_id_cache.clear()
         self.namespace_object_cache.clear()
         self.namespace_model.clear()
         self.namespace_edge_cache.clear()
@@ -120,94 +160,89 @@ class NamespaceManager(BaseManager):
 
         bel_resource = get_bel_resource(url)
 
-        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in bel_resource['Values'].items() if c}
+        values = {
+            name: encoding if encoding else DEFAULT_BELNS_ENCODING
+            for name, encoding in bel_resource['Values'].items()
+            if name
+        }
 
-        if bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
+        if not_resource_cachable(bel_resource):
+            log.info('not caching namespace: %s', url)
             return values
 
-        log.info('inserting namespace %s', url)
+        namespace_insert_values = _get_namespace_insert_values(bel_resource)
 
-        namespace_insert_values = {
-            'name': bel_resource['Namespace']['NameString'],
-            'url': url,
-            'domain': bel_resource['Namespace']['DomainString']
-        }
+        namespace = Namespace(
+            url=url,
+            **namespace_insert_values
+        )
+        namespace.entries = [
+            NamespaceEntry(name=name, encoding=encoding)
+            for name, encoding in values.items()
+        ]
 
-        namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
-        namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
-
-        namespace_mapping = {
-            'species': ('Namespace', 'SpeciesString'),
-            'query_url': ('Namespace', 'QueryValueURL')
-        }
-
-        for database_column, (section, key) in namespace_mapping.items():
-            if section in bel_resource and key in bel_resource[section]:
-                namespace_insert_values[database_column] = bel_resource[section][key]
-
-        namespace = Namespace(**namespace_insert_values)
-        namespace.entries = [NamespaceEntry(name=c, encoding=e) for c, e in values.items()]
+        log.info('inserted namespace: %s (%d)', url, len(values))
 
         self.session.add(namespace)
         self.session.commit()
 
         return namespace
 
-    def ensure_namespace(self, url, cache_objects=False):
-        """Caches a namespace file if not already in the cache. If not cachable, returns a dict of the values
+    def _cache_namespace(self, namespace):
+        """Caches a namespace
+
+        :param Namespace namespace:
+        """
+        if namespace.url in self.namespace_model:
+            return
+
+        url = namespace.url
+
+        self.namespace_model[url] = namespace
+
+        for entry in namespace.entries:
+            self.namespace_object_cache[url][entry.name] = entry
+            self.namespace_cache[url][entry.name] = list(entry.encoding if entry.encoding else belns_encodings)
+
+    def ensure_namespace(self, url):
+        """Gets or creates a namespace by its URL. Stores in the database and cache if it's cachable, otherwise
+        returns a dictionary of {names: encodings}
 
         :param str url: the location of the namespace file
-        :param bool cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
-        :return: The namespace instance
-        :rtype: Namespace or dict
+        :rtype: Namespace or dict[str,set]
         """
         if url in self.namespace_model:
             log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
             return self.namespace_model[url]
 
-        else:
-            t = time.time()
-            results = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+        result = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
-            if results is None:
-                results = self.insert_namespace(url)
-            else:
-                log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
+        if result is not None:
+            log.debug('loaded namespace: %s (%d)', url, len(result.entries))
+            self._cache_namespace(result)
+            return result
 
-            if results is None:
-                raise ValueError('No results for {}'.format(url))
-            elif isinstance(results, dict):
-                return results
-            elif not results.entries:
-                raise ValueError('No entries for {}'.format(url))
-
-            self.namespace_model[url] = results
-
-            for entry in results.entries:
-                self.namespace_cache[url][entry.name] = list(entry.encoding if entry.encoding else belns_encodings)
-                self.namespace_id_cache[url][entry.name] = entry.id
-
-        if cache_objects and url not in self.namespace_object_cache:
-            log.debug('loading namespace cache_objects: %s (%d)', url, len(self.namespace_cache[url]))
-            for entry in results.entries:
-                self.namespace_object_cache[url][entry.name] = entry
-
-        return results
-
-    # TODO merge get_namespace and ensure_namespace
-    def get_namespace(self, url, cache_objects=False):
-        """Returns a dict of names and their encodings for the given namespace URL.
-
-        :param str url: the location of the namespace file
-        :param bool cache_objects: Indicates if the object_cache should be filed with :class:`NamespaceEntry` objects.
-        """
-        result = self.ensure_namespace(url, cache_objects=cache_objects)
+        result = self.insert_namespace(url)
 
         if isinstance(result, dict):
             return result
-        else:
-            # self.ensure_namespace makes sure it's in the cache if its not cachable
-            return self.namespace_cache[url]
+
+        self._cache_namespace(result)
+
+        return result
+
+    def get_namespace_encodings(self, url):
+        """Returns a dict of names and their encodings for the given namespace URL.
+
+        :param str url: the location of the namespace file
+        :rtype: dict[str,set]
+        """
+        result = self.ensure_namespace(url)
+
+        if isinstance(result, dict):
+            return result
+
+        return self.namespace_cache[url]
 
     def get_namespace_by_url(self, url):
         """Looks up a namespace by url. Fails if not inserted already into database.
@@ -283,7 +318,6 @@ class OwlNamespaceManager(NamespaceManager):
 
         for entry in results.entries:
             self.namespace_cache[url][entry.name] = list(entry.encoding if entry.encoding else belns_encodings)
-            self.namespace_id_cache[url][entry.name] = entry.id
 
         self.namespace_edge_cache[url] = {
             (sub.name, sup.name)
@@ -313,8 +347,6 @@ class AnnotationManager(BaseManager):
 
         #: A dictionary from {annotation URL: {name: label}}
         self.annotation_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: {name: database ID}}
-        self.annotation_id_cache = defaultdict(dict)
         #: A dictionary from {annotation URL: Annotation}
         self.annotation_model = {}
 
@@ -333,9 +365,7 @@ class AnnotationManager(BaseManager):
 
     def drop_annotations(self):
         """Drops all annotations"""
-
         self.annotation_cache.clear()
-        self.annotation_id_cache.clear()
         self.annotation_object_cache.clear()
         self.annotation_model.clear()
         self.annotation_edge_cache.clear()
@@ -348,35 +378,45 @@ class AnnotationManager(BaseManager):
         self.session.query(Annotation).delete()
         self.session.commit()
 
+    def _cache_annotation(self, annotation):
+        """Caches an annotation
+
+        :param Annotation annotation:
+        """
+        url = annotation.url
+
+        if url in self.annotation_model:
+            return
+
+        self.annotation_model[url] = annotation
+
+        for entry in annotation.entries:
+            self.annotation_cache[url][entry.name] = entry.label
+            self.annotation_object_cache[url][entry.name] = entry
+
     def insert_annotation(self, url):
         """Inserts the namespace file at the given location to the cache
 
         :param str url: the location of the namespace file
-        :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Annotation
         """
         log.info('inserting annotation %s', url)
 
-        config = get_bel_resource(url)
+        bel_resource = get_bel_resource(url)
 
-        annotation_insert_values = {
-            'type': config['AnnotationDefinition']['TypeString'],
-            'url': url
-        }
-        annotation_insert_values.update(extract_shared_required(config, 'AnnotationDefinition'))
-        annotation_insert_values.update(extract_shared_optional(config, 'AnnotationDefinition'))
+        annotation_insert_values = _get_annotation_insert_values(bel_resource)
 
-        annotation_mapping = {
-            'name': ('Citation', 'NameString')
-        }
+        annotation = Annotation(
+            url=url,
+            **annotation_insert_values
+        )
+        annotation.entries = [
+            AnnotationEntry(name=name, label=label)
+            for name, label in bel_resource['Values'].items()
+            if name
+        ]
 
-        for database_column, (section, key) in annotation_mapping.items():
-            if section in config and key in config[section]:
-                annotation_insert_values[database_column] = config[section][key]
-
-        annotation = Annotation(**annotation_insert_values)
-        annotation.entries = [AnnotationEntry(name=c, label=l) for c, l in config['Values'].items() if c]
-
+        self._cache_annotation(annotation)
         self.session.add(annotation)
         self.session.commit()
 
@@ -387,36 +427,20 @@ class AnnotationManager(BaseManager):
 
         :param str url: the location of the annotation file
         :param bool cache_objects: Indicates if the object_cache should be filed with :class:`AnnotationEntry` objects.
-        :return: The ensured annotation instance
         :rtype: Annotation
         """
         if url in self.annotation_model:
             log.debug('already in memory: %s (%d)', url, len(self.annotation_cache[url]))
-            results = self.annotation_model[url]
+            return self.annotation_model[url]
 
-        else:
-            t = time.time()
-            results = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+        result = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
 
-            if results is None:
-                results = self.insert_annotation(url)
-            else:
-                log.debug('loaded annotation: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
+        if result is not None:
+            log.debug('loaded annotation: %s (%d)', url, len(result.entries))
+            self._cache_annotation(result)
+            return result
 
-            self.annotation_model[url] = results
-
-            for entry in results.entries:
-                self.annotation_cache[url][entry.name] = entry.label
-                self.annotation_id_cache[url][entry.name] = entry.id
-
-        if cache_objects and url not in self.annotation_object_cache:
-            log.debug('caching annotation objects: %s (%d)', url, len(self.annotation_cache[url]))
-            self.annotation_object_cache[url] = {
-                entry.name: entry
-                for entry in results.entries
-            }
-
-        return results
+        return self.insert_annotation(url)
 
     # TODO merge get_annotation and ensure_annotation
     def get_annotation(self, url):
@@ -493,7 +517,6 @@ class OwlAnnotationManager(AnnotationManager):
 
         for entry in results.entries:
             self.annotation_cache[iri][entry.name] = entry.label
-            self.annotation_id_cache[iri][entry.name] = entry.id
 
         self.annotation_edge_cache[iri] = {
             (sub.name, sup.name)
@@ -538,16 +561,17 @@ class EquivalenceManager(NamespaceManager):
 
         return result
 
-    def insert_equivalences(self, url, namespace_url):
+    def insert_equivalences(self, equivalence_url, namespace_url):
         """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
-        self.ensure_namespace(namespace_url)
+        namespace = self.ensure_namespace(namespace_url)
 
-        log.info('inserting equivalences: %s', url)
+        if isinstance(namespace, dict):
+            raise ValueError("Can't insert equivalences for non-cachable namespace")
 
-        equivalence_resource = get_bel_resource(url)
+        log.info('inserting equivalences: %s', equivalence_url)
+
+        equivalence_resource = get_bel_resource(equivalence_url)
         values = equivalence_resource['Values']
-
-        namespace = self.get_namespace_by_url(url)
 
         for entry in namespace.entries:
             label = values[entry.name]
@@ -754,7 +778,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         t = time.time()
 
         for url in graph.namespace_url.values():
-            self.ensure_namespace(url, cache_objects=store_parts)
+            self.ensure_namespace(url)
 
         for url in graph.annotation_url.values():
             self.ensure_annotation(url, cache_objects=store_parts)
@@ -882,7 +906,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
         """
-        self.ensure_namespace(GOCC_LATEST, cache_objects=True)
+        self.ensure_namespace(GOCC_LATEST)
 
         for node in graph.nodes_iter():
             try:
