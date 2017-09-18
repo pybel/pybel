@@ -412,11 +412,11 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
             MODIFIER: TRANSLOCATION,
             EFFECT: {
                 FROM_LOC: {
-                    NAMESPACE: 'GOMF',
+                    NAMESPACE: 'GOCC',
                     NAME: 'intracellular'
                 },
                 TO_LOC: {
-                    NAMESPACE: 'GOMF',
+                    NAMESPACE: 'GOCC',
                     NAME: 'extracellular space'
                 }
             }
