@@ -9,6 +9,7 @@ enable this option, but can specify a database location if they choose.
 
 import logging
 import time
+from itertools import groupby
 
 from collections import defaultdict
 from copy import deepcopy
@@ -642,19 +643,17 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).all()
 
+    # FIXME there must be a better way to do this on the server without getting problems with logical inconsistencies
     def list_recent_networks(self):
-        """Lists the most recently uploaded version of each network
+        """Lists the most recently created version of each network (by name)
 
         :rtype: list[Network]
         """
-        network_ids = self.session.query(Network.id). \
-            group_by(Network.name). \
-            having(func.max(Network.created)). \
-            order_by(Network.created.desc()).all()
-
-        network_ids = [network_id for network_id, in network_ids]
-
-        return self.get_networks_by_ids(network_ids)
+        networks = self.session.query(Network).order_by(Network.name, Network.created.desc())
+        return [
+            next(si)
+            for k, si in groupby(networks, lambda n: n.name)
+        ]
 
     def has_name_version(self, name, version):
         """Checks if the name/version combination is already in the database
