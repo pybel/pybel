@@ -184,8 +184,10 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
-        recent_networks = self.manager.list_recent_networks()  # just try it to see if it fails
+        recent_networks = list(self.manager.list_recent_networks())  # just try it to see if it fails
         self.assertIsNotNone(recent_networks)
+        self.assertEqual(1, len(recent_networks))
+        self.assertEqual('1.0.1', recent_networks[0].version)
 
 
 class TestTemporaryInsertNetwork(TemporaryCacheMixin):

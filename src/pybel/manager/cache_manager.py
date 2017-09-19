@@ -647,8 +647,14 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         :rtype: list[Network]
         """
-        return self.session.query(Network).group_by(Network.name).having(func.max(Network.created)).order_by(
-            Network.created.desc()).all()
+        network_ids = self.session.query(Network.id). \
+            group_by(Network.name). \
+            having(func.max(Network.created)). \
+            order_by(Network.created.desc()).all()
+
+        network_ids = [network_id for network_id, in network_ids]
+
+        return self.get_networks_by_ids(network_ids)
 
     def has_name_version(self, name, version):
         """Checks if the name/version combination is already in the database
