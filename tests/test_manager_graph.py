@@ -188,6 +188,31 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertIsNotNone(recent_networks)
 
 
+class TestTemporaryInsertNetwork(TemporaryCacheMixin):
+    @mock_bel_resources
+    def test_insert_with_list_annotations(self, mock):
+        """This test checks that graphs that contain list annotations, which aren't cached, can be loaded properly
+        into the database."""
+        graph = BELGraph(name='test', version='0.0.0')
+        graph.annotation_list['TEST'] = {'a', 'b', 'c'}
+
+        u = graph.add_node_from_data(fos_data)
+        v = graph.add_node_from_data(jun_data)
+
+        graph.add_edge(u, v, attr_dict={
+            RELATION: INCREASES,
+            EVIDENCE: test_evidence_text,
+            CITATION: test_citation_dict,
+            ANNOTATIONS: {
+                'TEST': 'a'
+            }
+        })
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['FOS', 'JUN']})
+
+        self.manager.insert_graph(graph, store_parts=True)
+
+
 class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_citation(self):
         citation_dict = {
