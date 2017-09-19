@@ -30,6 +30,11 @@ from tests.utils import make_dummy_namespaces
 
 log = logging.getLogger(__name__)
 
+fos = PROTEIN, 'HGNC', 'FOS'
+jun = PROTEIN, 'HGNC', 'JUN'
+yfg = PROTEIN, 'HGNC', 'YFG'
+has_component_code = unqualified_edge_code[HAS_COMPONENT]
+
 
 class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
     @mock_bel_resources
@@ -88,8 +93,9 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
-        recent_networks = self.manager.list_recent_networks() # just try it to see if it fails
+        recent_networks = self.manager.list_recent_networks()  # just try it to see if it fails
         self.assertIsNotNone(recent_networks)
+
 
 class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_citation(self):
@@ -1151,7 +1157,7 @@ class TestAddNodeFromData(unittest.TestCase):
                 }
             ]
         }
-        has_component_code = unqualified_edge_code[HAS_COMPONENT]
+
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
@@ -1214,8 +1220,6 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(HAS_PRODUCT, self.graph.edge[node_tuple][oxygen_node][has_product_code][RELATION])
 
     def test_complex(self):
-        fos = (PROTEIN, 'HGNC', 'FOS')
-        jun = (PROTEIN, 'HGNC', 'JUN')
         has_component_code = unqualified_edge_code[HAS_COMPONENT]
         node_tuple = COMPLEX, fos, jun
         node_data = {
@@ -1245,6 +1249,59 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(jun, self.graph.edge[node_tuple])
         self.assertIn(has_component_code, self.graph.edge[node_tuple][jun])
         self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][jun][has_component_code][RELATION])
+
+    def test_nested_complex(self):
+        """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
+        inner_node_tuple = COMPLEX, fos, jun
+        inner_node_data = {
+            FUNCTION: COMPLEX,
+            MEMBERS: [
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'FOS'
+                },
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'JUN'
+                }
+            ]
+        }
+
+        outer_node_tuple = COMPLEX, inner_node_tuple, yfg
+        outer_node_data = {
+            FUNCTION: COMPLEX,
+            MEMBERS: [
+                inner_node_data,
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'YFG'
+                }
+            ]
+        }
+        self.graph.add_node_from_data(outer_node_data)
+        self.assertIn(outer_node_tuple, self.graph)
+        self.assertEqual(5, self.graph.number_of_nodes())
+        self.assertIn(fos, self.graph)
+        self.assertIn(jun, self.graph)
+        self.assertIn(yfg, self.graph)
+        self.assertIn(inner_node_tuple, self.graph)
+        self.assertEqual(4, self.graph.number_of_edges())
+        self.assertIn(fos, self.graph.edge[inner_node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[inner_node_tuple][fos])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[inner_node_tuple][fos][has_component_code][RELATION])
+        self.assertIn(jun, self.graph.edge[inner_node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[inner_node_tuple][jun])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[inner_node_tuple][jun][has_component_code][RELATION])
+
+        self.assertIn(has_component_code, self.graph.edge[outer_node_tuple][inner_node_tuple])
+        self.assertEqual(HAS_COMPONENT,
+                         self.graph.edge[outer_node_tuple][inner_node_tuple][has_component_code][RELATION])
+
+        self.assertIn(has_component_code, self.graph.edge[outer_node_tuple][yfg])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[outer_node_tuple][yfg][has_component_code][RELATION])
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
@@ -1407,7 +1464,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_complex(self, mock):
-        node_tuple = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
+        node_tuple = COMPLEX, fos, jun
         node_data = {
             FUNCTION: COMPLEX,
             MEMBERS: [
@@ -1425,6 +1482,40 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         }
         namespaces = {'HGNC': ['FOS', 'JUN']}
         self.help_reconstitute(node_tuple, node_data, namespaces, 3, 2)
+
+    @mock_bel_resources
+    def test_nested_complex(self, mock):
+        inner_node_tuple = COMPLEX, fos, jun
+        inner_node_data = {
+            FUNCTION: COMPLEX,
+            MEMBERS: [
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'FOS'
+                },
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'JUN'
+                }
+            ]
+        }
+
+        outer_node_tuple = COMPLEX, inner_node_tuple, yfg
+        outer_node_data = {
+            FUNCTION: COMPLEX,
+            MEMBERS: [
+                inner_node_data,
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'YFG'
+                }
+            ]
+        }
+        namespaces = {'HGNC': ['FOS', 'JUN', 'YFG']}
+        self.help_reconstitute(outer_node_tuple, outer_node_data, namespaces, 5, 4)
 
 
 if __name__ == '__main__':
