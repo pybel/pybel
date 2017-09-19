@@ -24,6 +24,8 @@ from tests.constants import (
     expected_test_simple_metadata,
     test_bel_thorough,
     expected_test_thorough_metadata,
+    test_evidence_text,
+    test_citation_dict
 )
 from tests.mocks import mock_bel_resources
 from tests.utils import make_dummy_namespaces
@@ -43,27 +45,41 @@ def protein(name):
     return protein_tuple(name), protein_data(name)
 
 
-fos, fos_data = protein('FOS')
-jun, jun_data = protein('JUN')
+def complex_tuple(names):
+    return COMPLEX, + names
 
-ap1_complex = COMPLEX, fos, jun
+
+def complex_data(names):
+    return {FUNCTION: COMPLEX, MEMBERS: names}
+
+
+def complex(names):
+    """Names is a list of pairs of node tuples and node data"""
+    tuple_names, data_names = zip(*names)
+    return complex_tuple(tuple_names), complex_data(data_names)
+
+
+fos = fos_tuple, fos_data = protein('FOS')
+jun = jun_tuple, jun_data = protein('JUN')
+
+ap1_complex_tuple = COMPLEX, fos_tuple, jun_tuple
 ap1_complex_data = {
     FUNCTION: COMPLEX,
     MEMBERS: [fos_data, jun_data]
 }
 
-egfr, egfr_data = protein('EGFR')
-egfr_dimer = COMPLEX, egfr, egfr
+egfr_tuple, egfr_data = protein('EGFR')
+egfr_dimer = COMPLEX, egfr_tuple, egfr_tuple
 egfr_dimer_data = {
     FUNCTION: COMPLEX,
     MEMBERS: [egfr_data, egfr_data]
 }
 
-yfg, yfg_data = protein('YFG')
+yfg_tuple, yfg_data = protein('YFG')
 
-e2f4, e2f4_data = protein('E2F4')
+e2f4 = e2f4_tuple, e2f4_data = protein('E2F4')
 
-bound_ap1_e2f4 = COMPLEX, ap1_complex, e2f4
+bound_ap1_e2f4_tuple = COMPLEX, ap1_complex_tuple, e2f4_tuple
 bound_ap1_e2f4_data = {
     FUNCTION: COMPLEX,
     MEMBERS: [
@@ -72,7 +88,43 @@ bound_ap1_e2f4_data = {
     ]
 }
 
+
+def chemical_tuple(name):
+    return ABUNDANCE, 'CHEBI', name
+
+
+def chemical_data(name):
+    return {FUNCTION: ABUNDANCE, NAMESPACE: 'CHEBI', NAME: name}
+
+
+def chemical(name):
+    return chemical_tuple(name), chemical_data(name)
+
+
+superoxide = superoxide_tuple, superoxide_data = chemical('superoxide')
+hydrogen_peroxide = hydrogen_peroxide_tuple, hydrogen_peroxide_data = chemical('hydrogen peroxide')
+oxygen = oxygen_tuple, oxygen_data = chemical('oxygen')
+
+
+def reaction_tuple(reactants, products):
+    return REACTION, reactants, products
+
+
+def reaction_data(reactants, products):
+    return {FUNCTION: REACTION, REACTANTS: reactants, PRODUCTS: products}
+
+
+def reaction(reactants, products):
+    reactants_tuple, reactants_data = zip(*reactants)
+    products_tuple, products_data = zip(*products)
+    return reaction_tuple(reactants_tuple, products_tuple), reaction_data(reactants_data, products_data)
+
+
+reaction_1 = reaction_1_tuple, reaction_1_data = reaction([superoxide], [hydrogen_peroxide, oxygen])
+
 has_component_code = unqualified_edge_code[HAS_COMPONENT]
+has_reactant_code = unqualified_edge_code[HAS_REACTANT]
+has_product_code = unqualified_edge_code[HAS_PRODUCT]
 
 
 class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
@@ -1231,8 +1283,6 @@ class TestAddNodeFromData(unittest.TestCase):
                 }
             ]
         }
-        has_reactant_code = unqualified_edge_code[HAS_REACTANT]
-        has_product_code = unqualified_edge_code[HAS_PRODUCT]
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
         self.assertEqual(4, self.graph.number_of_nodes())
@@ -1252,7 +1302,7 @@ class TestAddNodeFromData(unittest.TestCase):
 
     def test_complex(self):
         has_component_code = unqualified_edge_code[HAS_COMPONENT]
-        node_tuple = ap1_complex
+        node_tuple = ap1_complex_tuple
         node_data = {
             FUNCTION: COMPLEX,
             MEMBERS: [
@@ -1263,58 +1313,58 @@ class TestAddNodeFromData(unittest.TestCase):
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
-        self.assertIn(fos, self.graph)
-        self.assertIn(jun, self.graph)
+        self.assertIn(fos_tuple, self.graph)
+        self.assertIn(jun_tuple, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
-        self.assertIn(fos, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][fos])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][fos][has_component_code][RELATION])
-        self.assertIn(jun, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][jun])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][jun][has_component_code][RELATION])
+        self.assertIn(fos_tuple, self.graph.edge[node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[node_tuple][fos_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][fos_tuple][has_component_code][RELATION])
+        self.assertIn(jun_tuple, self.graph.edge[node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[node_tuple][jun_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][jun_tuple][has_component_code][RELATION])
 
     def test_dimer_complex(self):
         """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
         self.graph.add_node_from_data(egfr_dimer_data)
 
-        self.assertIn(egfr, self.graph)
+        self.assertIn(egfr_tuple, self.graph)
         self.assertIn(egfr_dimer, self.graph)
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
-        self.assertIn(egfr, self.graph.edge[egfr_dimer])
-        self.assertIn(has_component_code, self.graph.edge[egfr_dimer][egfr])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[egfr_dimer][egfr][has_component_code][RELATION])
+        self.assertIn(egfr_tuple, self.graph.edge[egfr_dimer])
+        self.assertIn(has_component_code, self.graph.edge[egfr_dimer][egfr_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[egfr_dimer][egfr_tuple][has_component_code][RELATION])
 
     def test_nested_complex(self):
         """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
-        inner_node_tuple = ap1_complex
+        inner_node_tuple = ap1_complex_tuple
         inner_node_data = ap1_complex_data
 
-        outer_node_tuple = bound_ap1_e2f4
+        outer_node_tuple = bound_ap1_e2f4_tuple
         outer_node_data = bound_ap1_e2f4_data
 
         self.graph.add_node_from_data(outer_node_data)
         self.assertIn(outer_node_tuple, self.graph)
         self.assertEqual(5, self.graph.number_of_nodes())
-        self.assertIn(fos, self.graph)
-        self.assertIn(jun, self.graph)
-        self.assertIn(yfg, self.graph)
+        self.assertIn(fos_tuple, self.graph)
+        self.assertIn(jun_tuple, self.graph)
+        self.assertIn(yfg_tuple, self.graph)
         self.assertIn(inner_node_tuple, self.graph)
         self.assertEqual(4, self.graph.number_of_edges())
-        self.assertIn(fos, self.graph.edge[inner_node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[inner_node_tuple][fos])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[inner_node_tuple][fos][has_component_code][RELATION])
-        self.assertIn(jun, self.graph.edge[inner_node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[inner_node_tuple][jun])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[inner_node_tuple][jun][has_component_code][RELATION])
+        self.assertIn(fos_tuple, self.graph.edge[inner_node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[inner_node_tuple][fos_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[inner_node_tuple][fos_tuple][has_component_code][RELATION])
+        self.assertIn(jun_tuple, self.graph.edge[inner_node_tuple])
+        self.assertIn(has_component_code, self.graph.edge[inner_node_tuple][jun_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[inner_node_tuple][jun_tuple][has_component_code][RELATION])
 
         self.assertIn(has_component_code, self.graph.edge[outer_node_tuple][inner_node_tuple])
         self.assertEqual(HAS_COMPONENT,
                          self.graph.edge[outer_node_tuple][inner_node_tuple][has_component_code][RELATION])
 
-        self.assertIn(has_component_code, self.graph.edge[outer_node_tuple][yfg])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[outer_node_tuple][yfg][has_component_code][RELATION])
+        self.assertIn(has_component_code, self.graph.edge[outer_node_tuple][yfg_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[outer_node_tuple][yfg_tuple][has_component_code][RELATION])
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
@@ -1347,7 +1397,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_simple(self, mock):
-        node_tuple = PROTEIN, 'HGNC', 'YFG'
+        node_tuple = yfg_tuple
         node_data = yfg_data
         namespaces = {
             'HGNC': ['YFG']
@@ -1440,11 +1490,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_reaction(self, mock):
-        superoxide_node = ABUNDANCE, 'CHEBI', 'superoxide'
-        hydrogen_peroxide = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
-        oxygen_node = ABUNDANCE, 'CHEBI', 'oxygen'
-
-        node_tuple = REACTION, (superoxide_node,), (hydrogen_peroxide, oxygen_node)
+        node_tuple = REACTION, (superoxide_tuple,), (hydrogen_peroxide_tuple, oxygen_tuple)
         node_data = {
             FUNCTION: REACTION,
             REACTANTS: [
@@ -1473,42 +1519,13 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_complex(self, mock):
-        node_tuple = ap1_complex
-        node_data = {
-            FUNCTION: COMPLEX,
-            MEMBERS: [
-                fos_data,
-                jun_data
-            ]
-        }
         namespaces = {'HGNC': ['FOS', 'JUN']}
-        self.help_reconstitute(node_tuple, node_data, namespaces, 3, 2)
+        self.help_reconstitute(ap1_complex_tuple, ap1_complex_data, namespaces, 3, 2)
 
     @mock_bel_resources
     def test_nested_complex(self, mock):
-        inner_node_tuple = ap1_complex
-        inner_node_data = {
-            FUNCTION: COMPLEX,
-            MEMBERS: [
-                fos_data,
-                jun_data
-            ]
-        }
-
-        outer_node_tuple = COMPLEX, inner_node_tuple, yfg
-        outer_node_data = {
-            FUNCTION: COMPLEX,
-            MEMBERS: [
-                inner_node_data,
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'YFG'
-                }
-            ]
-        }
-        namespaces = {'HGNC': ['FOS', 'JUN', 'YFG']}
-        self.help_reconstitute(outer_node_tuple, outer_node_data, namespaces, 5, 4)
+        namespaces = {'HGNC': ['FOS', 'JUN', 'E2F4']}
+        self.help_reconstitute(bound_ap1_e2f4_tuple, bound_ap1_e2f4_data, namespaces, 5, 4)
 
 
 if __name__ == '__main__':
