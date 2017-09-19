@@ -30,9 +30,48 @@ from tests.utils import make_dummy_namespaces
 
 log = logging.getLogger(__name__)
 
-fos = PROTEIN, 'HGNC', 'FOS'
-jun = PROTEIN, 'HGNC', 'JUN'
-yfg = PROTEIN, 'HGNC', 'YFG'
+
+def protein_tuple(name):
+    return PROTEIN, 'HGNC', name
+
+
+def protein_data(name):
+    return {FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: name}
+
+
+def protein(name):
+    return protein_tuple(name), protein_data(name)
+
+
+fos, fos_data = protein('FOS')
+jun, jun_data = protein('JUN')
+
+ap1_complex = COMPLEX, fos, jun
+ap1_complex_data = {
+    FUNCTION: COMPLEX,
+    MEMBERS: [fos_data, jun_data]
+}
+
+egfr, egfr_data = protein('EGFR')
+egfr_dimer = COMPLEX, egfr, egfr
+egfr_dimer_data = {
+    FUNCTION: COMPLEX,
+    MEMBERS: [egfr_data, egfr_data]
+}
+
+yfg, yfg_data = protein('YFG')
+
+e2f4, e2f4_data = protein('E2F4')
+
+bound_ap1_e2f4 = COMPLEX, ap1_complex, e2f4
+bound_ap1_e2f4_data = {
+    FUNCTION: COMPLEX,
+    MEMBERS: [
+        ap1_complex_data,
+        e2f4_data
+    ]
+}
+
 has_component_code = unqualified_edge_code[HAS_COMPONENT]
 
 
@@ -191,11 +230,7 @@ class TestNodes(TemporaryCacheMixin):
     def test_1(self, mock):
         node_tuple = PROTEIN, 'HGNC', 'YFG'
 
-        node_data = {
-            FUNCTION: PROTEIN,
-            NAMESPACE: 'HGNC',
-            NAME: 'YFG'
-        }
+        node_data = yfg_data
 
         self.help_test_round_trip(node_tuple, node_data)
 
@@ -1041,11 +1076,7 @@ class TestAddNodeFromData(unittest.TestCase):
 
     def test_simple(self):
         node_tuple = PROTEIN, 'HGNC', 'YFG'
-        node_data = {
-            FUNCTION: PROTEIN,
-            NAMESPACE: 'HGNC',
-            NAME: 'YFG'
-        }
+        node_data = yfg_data
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
         self.assertEqual(1, self.graph.number_of_nodes())
@@ -1221,20 +1252,12 @@ class TestAddNodeFromData(unittest.TestCase):
 
     def test_complex(self):
         has_component_code = unqualified_edge_code[HAS_COMPONENT]
-        node_tuple = COMPLEX, fos, jun
+        node_tuple = ap1_complex
         node_data = {
             FUNCTION: COMPLEX,
             MEMBERS: [
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'FOS'
-                },
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'JUN'
-                }
+                fos_data,
+                jun_data
             ]
         }
         self.graph.add_node_from_data(node_data)
@@ -1250,37 +1273,27 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(has_component_code, self.graph.edge[node_tuple][jun])
         self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][jun][has_component_code][RELATION])
 
+    def test_dimer_complex(self):
+        """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
+        self.graph.add_node_from_data(egfr_dimer_data)
+
+        self.assertIn(egfr, self.graph)
+        self.assertIn(egfr_dimer, self.graph)
+        self.assertEqual(2, self.graph.number_of_nodes())
+        self.assertEqual(1, self.graph.number_of_edges())
+
+        self.assertIn(egfr, self.graph.edge[egfr_dimer])
+        self.assertIn(has_component_code, self.graph.edge[egfr_dimer][egfr])
+        self.assertEqual(HAS_COMPONENT, self.graph.edge[egfr_dimer][egfr][has_component_code][RELATION])
+
     def test_nested_complex(self):
         """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
-        inner_node_tuple = COMPLEX, fos, jun
-        inner_node_data = {
-            FUNCTION: COMPLEX,
-            MEMBERS: [
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'FOS'
-                },
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'JUN'
-                }
-            ]
-        }
+        inner_node_tuple = ap1_complex
+        inner_node_data = ap1_complex_data
 
-        outer_node_tuple = COMPLEX, inner_node_tuple, yfg
-        outer_node_data = {
-            FUNCTION: COMPLEX,
-            MEMBERS: [
-                inner_node_data,
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'YFG'
-                }
-            ]
-        }
+        outer_node_tuple = bound_ap1_e2f4
+        outer_node_data = bound_ap1_e2f4_data
+
         self.graph.add_node_from_data(outer_node_data)
         self.assertIn(outer_node_tuple, self.graph)
         self.assertEqual(5, self.graph.number_of_nodes())
@@ -1335,11 +1348,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     @mock_bel_resources
     def test_simple(self, mock):
         node_tuple = PROTEIN, 'HGNC', 'YFG'
-        node_data = {
-            FUNCTION: PROTEIN,
-            NAMESPACE: 'HGNC',
-            NAME: 'YFG'
-        }
+        node_data = yfg_data
         namespaces = {
             'HGNC': ['YFG']
         }
@@ -1464,20 +1473,12 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_complex(self, mock):
-        node_tuple = COMPLEX, fos, jun
+        node_tuple = ap1_complex
         node_data = {
             FUNCTION: COMPLEX,
             MEMBERS: [
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'FOS'
-                },
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'JUN'
-                }
+                fos_data,
+                jun_data
             ]
         }
         namespaces = {'HGNC': ['FOS', 'JUN']}
@@ -1485,20 +1486,12 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_nested_complex(self, mock):
-        inner_node_tuple = COMPLEX, fos, jun
+        inner_node_tuple = ap1_complex
         inner_node_data = {
             FUNCTION: COMPLEX,
             MEMBERS: [
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'FOS'
-                },
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'JUN'
-                }
+                fos_data,
+                jun_data
             ]
         }
 
