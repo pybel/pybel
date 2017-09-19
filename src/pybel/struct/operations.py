@@ -31,9 +31,9 @@ def left_full_join(g, h, use_hash=True):
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     """
     if use_hash:
-        return _left_full_hash_join(g, h)
+        _left_full_hash_join(g, h)
     else:
-        return _left_full_exhaustive_join(g, h)
+        _left_full_exhaustive_join(g, h)
 
 
 def _left_full_exhaustive_join(g, h):

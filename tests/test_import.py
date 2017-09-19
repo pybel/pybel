@@ -240,7 +240,8 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_isolated_compile(self):
         self.bel_isolated_reconstituted(self.isolated_graph)
 
-    def test_isolated_upgrade(self):
+    @mock_bel_resources
+    def test_isolated_upgrade(self, mock):
         lines = to_bel_lines(self.isolated_graph)
         reconstituted = from_lines(lines, manager=self.manager)
         self.bel_isolated_reconstituted(reconstituted)

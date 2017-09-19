@@ -19,7 +19,7 @@ from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
 
-VERSION = '0.9.0-dev'
+VERSION = '0.9.0'
 
 #: The last PyBEL version where the graph data definition changed
 PYBEL_MINIMUM_IMPORT_VERSION = 0, 9, 0
@@ -87,14 +87,14 @@ def get_cache_connection(connection=None):
     :rtype: str
     """
     if connection is not None:
-        log.info('connected to user-defined cache: %s', connection)
+        log.info('getting user-defined connection: %s', connection)
         return connection
 
     if PYBEL_CONNECTION in environ:
-        log.info('connecting to environment-defined database: %s', environ[PYBEL_CONNECTION])
+        log.info('getting environment-defined connection: %s', environ[PYBEL_CONNECTION])
         return environ[PYBEL_CONNECTION]
 
-    log.info('connecting to %s', config[PYBEL_CONNECTION])
+    log.info('getting default connection %s', config[PYBEL_CONNECTION])
     return config[PYBEL_CONNECTION]
 
 

@@ -79,12 +79,12 @@ class TestEquivalenceManager(FleetingTemporaryCacheMixin):
     def test_insert(self, mock_get):
         self.manager.ensure_namespace(ns1)
 
-        ns = self.manager.session.query(models.Namespace).filter_by(url=ns1).one()
+        ns = self.manager.get_namespace_by_url(ns1)
         self.assertFalse(ns.has_equivalences)
 
         self.manager.insert_equivalences(Path(test_eq_1).as_uri(), ns1)
+        ns = self.manager.get_namespace_by_url(ns1)
 
-        ns = self.manager.session.query(models.Namespace).filter_by(url=ns1).one()
         self.assertTrue(ns.has_equivalences)
 
     @mock_bel_resources

@@ -8,6 +8,7 @@ from networkx import DiGraph
 from onto2nx.ontospy import Ontospy
 
 from pybel.manager.utils import urldefrag, OWLParser
+from pybel.constants import GOCC_LATEST
 from tests.constants import (
     belns_dir_path,
     get_uri_name,
@@ -31,7 +32,9 @@ class MockResponse:
     """See http://stackoverflow.com/questions/15753390/python-mock-requests-and-the-response"""
 
     def __init__(self, mock_url):
-        if mock_url.endswith('.belns'):
+        if mock_url == GOCC_LATEST:
+            self.path = os.path.join(belns_dir_path, 'go-cellular-component.belns')
+        elif mock_url.endswith('.belns'):
             self.path = os.path.join(belns_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.belanno'):
             self.path = os.path.join(belanno_dir_path, get_uri_name(mock_url))

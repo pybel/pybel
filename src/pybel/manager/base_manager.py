@@ -96,6 +96,6 @@ class BaseManager(object):
         """
         Base.metadata.create_all(self.engine, checkfirst=checkfirst)
 
-    def drop_all(self):
+    def drop_all(self, checkfirst=True):
         """Drops all data, tables, and databases for the PyBEL cache"""
-        Base.metadata.drop_all(self.engine)
+        Base.metadata.drop_all(self.engine, checkfirst=checkfirst)

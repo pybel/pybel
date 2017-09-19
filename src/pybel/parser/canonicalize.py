@@ -5,6 +5,7 @@ from ..constants import *
 __all__ = [
     'node_to_tuple',
     'sort_dict_list',
+    'sort_variant_dict_list'
 ]
 
 
@@ -72,17 +73,19 @@ def fusion_po_to_dict(tokens):
     }
 
 
+def sort_variant_dict_list(variants):
+    return sorted(variants, key=variant_po_to_tuple)
+
+
 def variant_po_to_dict_helper(tokens):
     """Converts a PyParsing data dictionary to a PyBEL variant data dictionary
 
     :type tokens: ParseResult
     :rtype: dict
     """
-    variants = sorted(tokens[VARIANTS], key=variant_po_to_tuple)
-
     return [
         safe_get_dict(variant)
-        for variant in variants
+        for variant in sort_variant_dict_list(tokens[VARIANTS])
     ]
 
 

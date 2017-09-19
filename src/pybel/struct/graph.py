@@ -3,6 +3,7 @@
 import logging
 
 import networkx
+from copy import deepcopy
 
 from .operations import left_full_join, left_outer_join
 from ..constants import *
@@ -265,6 +266,12 @@ class BELGraph(networkx.MultiDiGraph):
         """Sets the description for a given node"""
         self.node[node][DESCRIPTION] = description
 
+    def __add__(self, other):
+        """Allows g + h to full join g and h and return a new graph"""
+        result = deepcopy(self)
+        left_full_join(result, other)
+        return result
+
     def __iadd__(self, other):
         """Allows g += h to full join h into g"""
         left_full_join(self, other)
@@ -272,3 +279,9 @@ class BELGraph(networkx.MultiDiGraph):
     def __iand__(self, other):
         """Allows g &= h to outer join h into g"""
         left_outer_join(self, other)
+
+    def __and__(self, other):
+        """Allows g & h to outer join h and g and return a new graph"""
+        result = deepcopy(self)
+        left_outer_join(result, other)
+        return result
