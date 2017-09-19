@@ -346,7 +346,7 @@ Below is the "skeleton" for the edge data model in PyBEL:
             CITATION_REFERENCE: '...',
             CITATION_DATE: 'YYYY-MM-DD',
             CITATION_AUTHORS: 'Jon Snow|John Doe',
-        }
+        },
         ANNOTATIONS: {
             'Disease': 'Colorectal Cancer',
             # ... additional annotations as key:value pairs
@@ -373,7 +373,7 @@ Modifiers are added to this structure as well. Under this schema,
                 NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         },
-        CITATION: { ... }
+        CITATION: { ... },
         EVIDENCE: '...',
         ANNOTATIONS: { ... }
     }
@@ -388,7 +388,7 @@ schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
         OBJECT: {
             MODIFIER: ACTIVITY
         },
-        CITATION: { ... }
+        CITATION: { ... },
         EVIDENCE: '...',
         ANNOTATIONS: { ... }
     }
@@ -421,7 +421,7 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
                 }
             }
         },
-        CITATION: { ... }
+        CITATION: { ... },
         EVIDENCE: '...',
         ANNOTATIONS: { ... }
     }
@@ -442,7 +442,7 @@ Degradations are more simple, because there's no ::data:`pybel.constants.EFFECT`
         OBJECT: {
             MODIFIER: DEGRADATION
         },
-        CITATION: { ... }
+        CITATION: { ... },
         EVIDENCE: '...',
         ANNOTATIONS: { ... }
     }
