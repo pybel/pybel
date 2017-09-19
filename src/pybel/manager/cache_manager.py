@@ -878,6 +878,8 @@ class InsertManager(NamespaceManager, AnnotationManager):
                 url = graph.annotation_url[key]
             elif key in graph.annotation_owl:
                 url = graph.annotation_owl[key]
+            elif key in graph.annotation_list:
+                continue  # skip those
             else:
                 raise ValueError('Graph resources does not contain keyword: {}'.format(key))
             yield url, value
