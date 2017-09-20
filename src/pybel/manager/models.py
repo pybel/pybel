@@ -680,8 +680,12 @@ class Citation(Base):
     issue = Column(Text, nullable=True, doc='Issue within the volume')
     pages = Column(Text, nullable=True, doc='Pages of the publication')
     date = Column(Date, nullable=True, doc='Publication date')
-    first = Column(Text, nullable=True, doc='First author name')
-    last = Column(Text, nullable=True, doc='Last author name')
+
+    first_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='First author')
+    first = relationship("Author", foreign_keys=[first_id])
+
+    last_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='Last author')
+    last = relationship("Author", foreign_keys=[last_id])
 
     authors = relationship("Author", secondary=author_citation, backref='citations')
 
