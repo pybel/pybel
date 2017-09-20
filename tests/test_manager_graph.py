@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import logging
 import time
 import unittest
@@ -12,8 +14,8 @@ import pybel
 from pybel import BELGraph, from_database, to_database, from_path
 from pybel.constants import *
 from pybel.manager import models
-from pybel.manager.models import Namespace, NamespaceEntry, Node
-from pybel.utils import hash_citation, hash_node
+from pybel.manager.models import Namespace, NamespaceEntry, Node, Author, Evidence
+from pybel.utils import hash_citation, hash_node, hash_evidence
 from tests import constants
 from tests.constants import (
     FleetingTemporaryCacheMixin,
@@ -414,33 +416,20 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         )
         self.bel_simple_reconstituted(g2)
 
-    # @mock_bel_resources
-    # def test_get_or_create_evidence(self, mock_get):
-    #     basic_citation = {
-    #         CITATION_TYPE: CITATION_TYPE_PUBMED,
-    #         CITATION_NAME: 'TestCitation_basic',
-    #         CITATION_REFERENCE: '1234AB',
-    #     }
-    #     basic_citation = self.manager.get_or_create_citation(**basic_citation)
-    #     evidence_txt = "Yes, all the information is true!"
-    #     evidence_data = {
-    #         CITATION: basic_citation.data,
-    #         EVIDENCE: evidence_txt
-    #     }
-    #
-    #     evidence_hash = hashlib.sha512(json.dumps(evidence_data, sort_keys=True).encode('utf-8')).hexdigest()
-    #
-    #     # Create
-    #     evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
-    #     self.assertIsInstance(evidence, models.Evidence)
-    #     self.assertEqual(evidence.data, evidence_data)
-    #
-    #     self.assertIn(evidence_hash, self.manager.object_cache['evidence'])
-    #     self.assertEqual(1, len(self.manager.object_cache['evidence']))
-    #
-    #     # Objects cached?
-    #     reloaded_evidence = self.manager.get_or_create_evidence(basic_citation, evidence_txt)
-    #     self.assertEqual(evidence, reloaded_evidence)
+    @mock_bel_resources
+    def test_get_or_create_evidence(self, mock_get):
+        basic_citation = self.manager.get_or_create_citation(**test_citation_dict)
+        utf8_test_evidence = "Yes, all the information is true! This contains a unicode alpha: α"
+        evidence_hash = hash_evidence(utf8_test_evidence, CITATION_TYPE_PUBMED, test_citation_dict[CITATION_REFERENCE])
+
+        evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
+        self.assertIsInstance(evidence, Evidence)
+        self.assertIn(evidence_hash, self.manager.object_cache_evidence)
+
+        # Objects cached?
+        reloaded_evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
+        self.assertEqual(evidence, reloaded_evidence)
+
     #
     # @mock_bel_resources
     # def test_get_or_create_property(self, mock_get):
@@ -646,23 +635,23 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     #
     #     self.assertEqual(1, len(self.manager.object_cache['edge'].keys()))
     #
-    # @mock_bel_resources
-    # def test_get_or_create_author(self, mock_get):
-    #     author_name = "Jackson M"
-    #
-    #     # Create
-    #     author = self.manager.get_or_create_author(author_name)
-    #     self.assertIsInstance(author, models.Author)
-    #     self.assertEqual(author.name, author_name)
-    #
-    #     self.assertIn(author_name, self.manager.object_cache['author'])
-    #
-    #     # Get
-    #     reloaded_author = self.manager.get_or_create_author(author_name)
-    #     self.assertEqual(author.name, reloaded_author.name)
-    #     self.assertEqual(author, reloaded_author)
-    #
-    #     self.assertEqual(1, len(self.manager.object_cache['author'].keys()))
+    @mock_bel_resources
+    def test_get_or_create_author(self, mock_get):
+        """This tests getting or creating author"""
+        author_name = "Jαckson M"
+
+        # Create
+        author = self.manager.get_or_create_author(author_name)
+        self.assertIsInstance(author, Author)
+        self.assertEqual(author.name, author_name)
+
+        self.assertIn(author_name, self.manager.object_cache_author)
+
+        # Get
+        reloaded_author = self.manager.get_or_create_author(author_name)
+        self.assertEqual(author.name, reloaded_author.name)
+        self.assertEqual(author, reloaded_author)
+
     #
     # @mock_bel_resources
     # def test_get_or_create_modification(self, mock_get):
