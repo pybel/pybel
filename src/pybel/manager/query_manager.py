@@ -294,7 +294,10 @@ class QueryManager(BaseManager):
 
             if source:
                 if isinstance(source, str):
-                    source = self.query_nodes(bel=source)[0]
+                    source = self.query_nodes(bel=source)
+                    if len(source) == 0:
+                        return []
+                    source = source[0]
 
                 if isinstance(source, Node):
                     q = q.filter(Edge.source == source)
@@ -354,7 +357,7 @@ class QueryManager(BaseManager):
         ]
 
     def query_citations(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
-                        evidence=False, evidence_text=None, as_dict_list=False):
+                        evidence_text=None, as_dict_list=False):
         """Builds and runs a query over all citations in the PyBEL cache.
 
         :param int citation_id:
@@ -364,7 +367,6 @@ class QueryManager(BaseManager):
         :param str or list[str] author: The name or a list of names of authors participated in the citation.
         :param date: Publishing date of the citation.
         :type date: str or datetime.date
-        :param bool evidence: Weather or not supporting text should be included in the return.
         :param str evidence_text:
         :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
                             :class:`Citation` objects.
@@ -407,16 +409,9 @@ class QueryManager(BaseManager):
         if not as_dict_list:
             return citations
 
-        if not (evidence or evidence_text):
-            return [
-                citation.to_json()
-                for citation in citations
-            ]
-
         return [
-            evidence.to_json()
+            citation.to_json()
             for citation in citations
-            for evidence in citation.evidences
         ]
 
     def query_node_properties(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
