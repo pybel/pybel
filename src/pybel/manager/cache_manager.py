@@ -885,6 +885,9 @@ class InsertManager(NamespaceManager, AnnotationManager):
                 url = graph.annotation_owl[key]
             elif key in graph.annotation_list:
                 continue  # skip those
+            elif key in graph.annotation_pattern:
+                log.warning('pattern annotation in database not implemented yet not implemented') # FIXME
+                continue
             else:
                 raise ValueError('Graph resources does not contain keyword: {}'.format(key))
             yield url, value
