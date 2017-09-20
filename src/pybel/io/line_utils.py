@@ -59,11 +59,17 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
 
+    .. warning::
 
-    Deprecated options for kwargs
+        These options allow concessions for parsing BEL that is either **WRONG** or **UNSCIENTIFIC**. Use them at
+        risk to reproducibility and validity of your results.
 
     :param bool allow_naked_names: If true, turns off naked namespace failures
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    :param bool no_identifier_validation: If true, turns off namespace validation
+
+
+
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
