@@ -82,20 +82,20 @@ def _get_namespace_insert_values(bel_resource):
     return namespace_insert_values
 
 
-def _get_annotation_insert_values(config):
+def _get_annotation_insert_values(bel_resource):
     annotation_insert_values = {
-        'type': config['AnnotationDefinition']['TypeString'],
+        'type': bel_resource['AnnotationDefinition']['TypeString'],
     }
-    annotation_insert_values.update(extract_shared_required(config, 'AnnotationDefinition'))
-    annotation_insert_values.update(extract_shared_optional(config, 'AnnotationDefinition'))
+    annotation_insert_values.update(extract_shared_required(bel_resource, 'AnnotationDefinition'))
+    annotation_insert_values.update(extract_shared_optional(bel_resource, 'AnnotationDefinition'))
 
     annotation_mapping = {
         'name': ('Citation', 'NameString')
     }
 
     for database_column, (section, key) in annotation_mapping.items():
-        if section in config and key in config[section]:
-            annotation_insert_values[database_column] = config[section][key]
+        if section in bel_resource and key in bel_resource[section]:
+            annotation_insert_values[database_column] = bel_resource[section][key]
 
     return annotation_insert_values
 
