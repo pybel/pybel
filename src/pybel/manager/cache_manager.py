@@ -329,7 +329,7 @@ class OwlNamespaceManager(NamespaceManager):
         """Caches an ontology at the given URL if it is not already in the cache
 
         :param str url: The location of the ontology
-        :param str keyword: The keyword for the namespace
+        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
         :rtype: Namespace
         """
         if url in self.namespace_model:
@@ -349,7 +349,7 @@ class OwlNamespaceManager(NamespaceManager):
         """
 
         :param str url: The location of the ontology
-        :param str keyword: The keyword for the namespace
+        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
         :rtype: dict[str,str]
         """
         namespace = self.ensure_namespace_owl(url, keyword)
@@ -363,7 +363,7 @@ class OwlNamespaceManager(NamespaceManager):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
 
         :param str url: The location of the ontology
-        :param str keyword: The keyword for the namespace
+        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
         :rtype: list[tuple[str,str]]
         """
         namespace = self.ensure_namespace_owl(url, keyword=keyword)
@@ -454,11 +454,10 @@ class AnnotationManager(BaseManager):
 
         return annotation
 
-    def ensure_annotation(self, url, cache_objects=False):
+    def ensure_annotation(self, url):
         """Caches an annotation file if not already in the cache
 
         :param str url: the location of the annotation file
-        :param bool cache_objects: Indicates if the object_cache should be filed with :class:`AnnotationEntry` objects.
         :rtype: Annotation
         """
         if url in self.annotation_model:
@@ -535,43 +534,46 @@ class OwlAnnotationManager(AnnotationManager):
 
         return annotation
 
-    def ensure_annotation_owl(self, iri, keyword=None):
+    def ensure_annotation_owl(self, url, keyword=None):
         """Caches an ontology as an annotation from the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
         """
-        if iri in self.annotation_cache:
+        if url in self.annotation_cache:
             return
 
-        results = self.session.query(Annotation).filter(Annotation.url == iri).one_or_none()
+        results = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
         if results is None:
-            results = self.insert_annotation_owl(iri, keyword)
+            results = self.insert_annotation_owl(url, keyword)
 
         for entry in results.entries:
-            self.annotation_cache[iri][entry.name] = entry.label
+            self.annotation_cache[url][entry.name] = entry.label
 
-        self.annotation_edge_cache[iri] = {
+        self.annotation_edge_cache[url] = {
             (sub.name, sup.name)
             for sub in results.entries for sup in sub.children
         }
 
         return results
 
-    def get_annotation_owl_terms(self, iri, keyword=None):
+    def get_annotation_owl_terms(self, url, keyword=None):
         """Gets a set of classes and individuals in the ontology at the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
         """
-        self.ensure_annotation_owl(iri, keyword)
-        return self.annotation_cache[iri]
+        self.ensure_annotation_owl(url, keyword)
+        return self.annotation_cache[url]
 
-    def get_annotation_owl_edges(self, iri, keyword=None):
+    def get_annotation_owl_edges(self, url, keyword=None):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
         """
-        self.ensure_annotation_owl(iri, keyword=keyword)
-        return self.annotation_edge_cache[iri]
+        self.ensure_annotation_owl(url, keyword=keyword)
+        return self.annotation_edge_cache[url]
 
 
 class EquivalenceManager(NamespaceManager):
