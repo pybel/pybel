@@ -277,7 +277,11 @@ class TestQuery(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, graph, {'HGNC': ['FOS', 'JUN']})
 
-        self.manager.insert_graph(graph, store_parts=True)
+        @mock_bel_resources
+        def insert(mock):
+            self.manager.insert_graph(graph, store_parts=True)
+
+        insert()
 
     def test_query_node_bel_1(self):
         rv = self.manager.query_nodes(bel='p(HGNC:FOS)')
