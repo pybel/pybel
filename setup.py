@@ -31,7 +31,7 @@ CLASSIFIERS = [
 INSTALL_REQUIRES = [
     'requests',
     'requests_file',
-    'networkx',
+    'networkx==1.11',
     'pyparsing',
     'py2neo',
     'click',
