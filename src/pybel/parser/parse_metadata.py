@@ -156,7 +156,7 @@ class MetadataParser(BaseParser):
         self.document_metadata[norm_key] = value
 
         if norm_key == METADATA_VERSION:
-            self.check_version(line, position, value)
+            self.raise_for_version(line, position, value)
 
         return tokens
 
@@ -349,7 +349,7 @@ class MetadataParser(BaseParser):
         """
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
 
-    def check_version(self, line, position, version):
+    def raise_for_version(self, line, position, version):
         """Checks that a version string is valid for BEL documents, meaning it's either in the YYYYMMDD or semantic version
         format
 
