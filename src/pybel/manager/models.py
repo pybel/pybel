@@ -164,6 +164,28 @@ class Namespace(Base):
     def __str__(self):
         return self.keyword
 
+    def to_values(self):
+        """Returns this namespace as a dictionary of names to their encodings. Encodings are represented as a
+        string, and lookup operations take constant time O(8).
+
+        :rtype: dict[str,str]
+        """
+        return {
+            entry.name: entry.encoding if entry.encoding else BELNS_ENCODING_STR
+            for entry in self.entries
+        }
+
+    def to_tree_list(self):
+        """Returns an edge set of the tree represented by this namespace's hierarchy
+
+        :rtype: set[tuple[str,str]]
+        """
+        return {
+            (parent.name, child.name)
+            for parent in self.entries
+            for child in parent.children
+        }
+
     def to_json(self, include_id=True):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information.
 
@@ -207,7 +229,7 @@ class NamespaceEntry(Base):
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
     namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), index=True)
-    namespace = relationship('Namespace', backref=backref('entries'))
+    namespace = relationship('Namespace', backref=backref('entries', lazy='dynamic'))
 
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
     equivalence = relationship('NamespaceEntryEquivalence', backref=backref('members'))

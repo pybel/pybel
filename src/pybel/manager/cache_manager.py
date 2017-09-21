@@ -108,19 +108,31 @@ def not_resource_cachable(bel_resource):
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, use_namespace_cache=True, *args, **kwargs):
+        """
+        :param use_namespace_cache: Should namespaces be cached in-memory?
+        """
         super(NamespaceManager, self).__init__(*args, **kwargs)
 
-        #: A dictionary from {namespace URL: {name: set of encodings}}
-        self.namespace_cache = defaultdict(dict)
-        #: A dictionary from {namespace URL: Namespace}
-        self.namespace_model = {}
+        self.use_namespace_cache = use_namespace_cache
+        self._namespace_model = {}
+        self._namespace_object_cache = defaultdict(dict)
 
-        #: A dictionary from {namespace URL: {name: NamespaceEntry}}
-        self.namespace_object_cache = defaultdict(dict)
+    @property
+    def namespace_model(self):
+        """A dictionary from {namespace URL: Namespace}
 
-        #: A dictionary from {namespace URL: set of (parent, child) tuples}
-        self.namespace_edge_cache = {}
+        :rtype: dict[str,Namespace]
+        """
+        return self._namespace_model
+
+    @property
+    def namespace_object_cache(self):
+        """A dictionary from {namespace URL: {entry name: NamespaceEntry}}
+
+        :rtype: dict[str,dict[str,NamespaceEntry]]
+        """
+        return self._namespace_object_cache
 
     def list_namespaces(self):
         """Returns a list of all namespaces
@@ -131,10 +143,8 @@ class NamespaceManager(BaseManager):
 
     def drop_namespaces(self):
         """Drops all namespaces"""
-        self.namespace_cache.clear()
         self.namespace_object_cache.clear()
         self.namespace_model.clear()
-        self.namespace_edge_cache.clear()
 
         for namespace in self.session.query(NamespaceEntry).all():
             namespace.children[:] = []
@@ -152,7 +162,7 @@ class NamespaceManager(BaseManager):
         self.session.query(Namespace).filter(Namespace.url == url).delete()
         self.session.commit()
 
-    def insert_namespace(self, url):
+    def get_or_create_namespace(self, url):
         """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
         the values of this namespace.
 
@@ -160,19 +170,25 @@ class NamespaceManager(BaseManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
         """
+        result = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+
+        if result is not None:
+            return result
+
         log.info('downloading namespace %s', url)
 
         bel_resource = get_bel_resource(url)
 
-        values = {
-            name: encoding if encoding else DEFAULT_BELNS_ENCODING
+        # Clean up values dictionary
+        bel_resource['Values'] = {
+            name: (encoding if encoding else DEFAULT_BELNS_ENCODING)
             for name, encoding in bel_resource['Values'].items()
             if name
         }
 
         if not_resource_cachable(bel_resource):
             log.info('not caching namespace: %s', url)
-            return values
+            return bel_resource['Values']
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
 
@@ -182,10 +198,10 @@ class NamespaceManager(BaseManager):
         )
         namespace.entries = [
             NamespaceEntry(name=name, encoding=encoding)
-            for name, encoding in values.items()
+            for name, encoding in bel_resource['Values'].items()
         ]
 
-        log.info('inserted namespace: %s (%d)', url, len(values))
+        log.info('inserted namespace: %s (%d)', url, len(bel_resource['Values']))
 
         self.session.add(namespace)
         self.session.commit()
@@ -193,65 +209,62 @@ class NamespaceManager(BaseManager):
         return namespace
 
     def _cache_namespace(self, namespace):
-        """Caches a namespace
+        """Caches a namespace's model
 
         :param Namespace namespace:
         """
-        if namespace.url in self.namespace_model:
-            return
+        self.namespace_model[namespace.url] = namespace
 
-        url = namespace.url
+    def _cache_namespace_entries(self, namespace):
+        """Caches a namespace's entries' models
 
-        self.namespace_model[url] = namespace
-
+        :param Namespace namespace:
+        """
         for entry in namespace.entries:
-            self.namespace_object_cache[url][entry.name] = entry
-            self.namespace_cache[url][entry.name] = list(entry.encoding if entry.encoding else belns_encodings)
+            self.namespace_object_cache[namespace.url][entry.name] = entry
 
     def ensure_namespace(self, url):
         """Gets or creates a namespace by its URL. Stores in the database and cache if it's cachable, otherwise
         returns a dictionary of {names: encodings}
 
         :param str url: the location of the namespace file
-        :rtype: Namespace or dict[str,set]
+        :rtype: Namespace or dict[str,str]
         """
-        if url in self.namespace_model:
-            log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
+        if self.use_namespace_cache and url in self.namespace_model:
+            log.debug('already in memory: %s (%d)', url)
             return self.namespace_model[url]
 
-        result = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+        namespace = self.get_or_create_namespace(url)
 
-        if result is not None:
-            log.debug('loaded namespace: %s (%d)', url, len(result.entries))
-            self._cache_namespace(result)
-            return result
+        if isinstance(namespace, dict):
+            log.debug('loaded uncached namespace: %s (%d)', url, len(namespace))
+            return namespace
 
-        result = self.insert_namespace(url)
+        log.debug('loaded namespace: %s (%d)', url)
 
-        if isinstance(result, dict):
-            return result
+        if self.use_namespace_cache:
+            self._cache_namespace(namespace)
+            self._cache_namespace_entries(namespace)
 
-        self._cache_namespace(result)
-
-        return result
+        return namespace
 
     def get_namespace_encodings(self, url):
         """Returns a dict of names and their encodings for the given namespace URL.
 
-        :param str url: the location of the namespace file
-        :rtype: dict[str,set]
+        :param str url: The URL of the namespace
+        :rtype: dict[str,str]
         """
-        result = self.ensure_namespace(url)
+        namespace = self.ensure_namespace(url)
 
-        if isinstance(result, dict):
-            return result
+        if isinstance(namespace, dict):
+            return namespace
 
-        return self.namespace_cache[url]
+        return namespace.to_values()
 
     def get_namespace_by_url(self, url):
         """Looks up a namespace by url. Fails if not inserted already into database.
 
-        :param str url:
+        :param str url: The URL of the namespace
         :rtype: Namespace
         """
         return self.session.query(Namespace).filter(Namespace.url == url).one()
@@ -275,30 +288,37 @@ class NamespaceManager(BaseManager):
 class OwlNamespaceManager(NamespaceManager):
     """Manages OWL namespaces"""
 
-    def insert_namespace_owl(self, iri, keyword=None, encoding=None):
+    def get_or_create_owl_namespace(self, url, keyword=None, encoding=None):
         """Caches an ontology at the given IRI
 
-        :param str iri: the location of the ontology
-        :param str keyword:
-        :param str encoding:
+        :param str url: The location of the ontology
+        :param str keyword: The keyword for the namespace
+        :param str encoding: The encoding for the entries in the namespace
         :rtype: Namespace
         """
-        log.info('inserting owl %s', iri)
+        namespace = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
-        namespace = Namespace(url=iri, keyword=keyword)
+        if namespace is not None:
+            return namespace
 
-        graph = parse_owl(iri)
+        log.info('inserting owl %s', url)
 
-        encoding = encoding if encoding else DEFAULT_BELNS_ENCODING
+        namespace = Namespace(url=url, keyword=keyword)
 
-        entries = {
-            node: NamespaceEntry(name=node, namespace=namespace, encoding=encoding)
+        graph = parse_owl(url)
+
+        encoding = encoding if encoding else BELNS_ENCODING_STR
+
+        name_to_entry = {
+            node: NamespaceEntry(name=node, encoding=encoding)
             for node in graph.nodes_iter()
         }
-        namespace.entries = list(entries.values())
+        namespace.entries = list(name_to_entry.values())
 
-        for u, v in graph.edges_iter():
-            entries[u].children.append(entries[v])
+        for parent, child in graph.edges_iter():
+            parent_entry = name_to_entry[parent]
+            child_entry = name_to_entry[child]
+            parent_entry.children.append(child_entry)
 
         self.session.add(namespace)
         self.session.commit()
@@ -308,39 +328,47 @@ class OwlNamespaceManager(NamespaceManager):
     def ensure_namespace_owl(self, url, keyword=None):
         """Caches an ontology at the given URL if it is not already in the cache
 
-        :param str url: the location of the ontology
-        :param str keyword:
+        :param str url: The location of the ontology
+        :param str keyword: The keyword for the namespace
         :rtype: Namespace
         """
-        if url in self.namespace_cache:
-            return
+        if url in self.namespace_model:
+            return self.namespace_model[url]
 
-        results = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+        namespace = self.get_or_create_owl_namespace(url, keyword)
 
-        if results is None:
-            results = self.insert_namespace_owl(url, keyword)
+        if not self.use_namespace_cache:
+            return namespace
 
-        for entry in results.entries:
-            self.namespace_cache[url][entry.name] = list(entry.encoding if entry.encoding else belns_encodings)
+        for entry in namespace.entries:
+            self.namespace_object_cache[namespace.url][entry.name] = entry
 
-        self.namespace_edge_cache[url] = {
-            (sub.name, sup.name)
-            for sub in results.entries for sup in sub.children
-        }
-
-        return results
+        return namespace
 
     def get_namespace_owl_terms(self, url, keyword=None):
-        self.ensure_namespace_owl(url, keyword)
-        return self.namespace_cache[url]
+        """
 
-    def get_namespace_owl_edges(self, iri, keyword=None):
+        :param str url: The location of the ontology
+        :param str keyword: The keyword for the namespace
+        :rtype: dict[str,str]
+        """
+        namespace = self.ensure_namespace_owl(url, keyword)
+
+        if isinstance(namespace, dict):
+            return namespace
+
+        return namespace.to_values()
+
+    def get_namespace_owl_edges(self, url, keyword=None):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: The location of the ontology
+        :param str keyword: The keyword for the namespace
+        :rtype: list[tuple[str,str]]
         """
-        self.ensure_namespace_owl(iri, keyword=keyword)
-        return self.namespace_edge_cache[iri]
+        namespace = self.ensure_namespace_owl(url, keyword=keyword)
+
+        return namespace.to_tree_list()
 
 
 class AnnotationManager(BaseManager):

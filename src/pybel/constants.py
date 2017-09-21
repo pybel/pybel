@@ -541,3 +541,5 @@ belns_encodings = {
     'O': {PATHOLOGY},
     'C': {COMPLEX}
 }
+
+BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))

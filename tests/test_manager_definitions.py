@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import os
 from pathlib import Path
 
-from pybel.manager import models
+import os
+
 from pybel.manager import Manager
+from pybel.manager import models
 from tests.constants import (
     FleetingTemporaryCacheMixin,
     HGNC_URL,
-    help_check_hgnc,
     CELL_LINE_URL,
-    HGNC_KEYWORD,
     test_eq_1,
     test_eq_2,
     belns_dir_path,
@@ -29,14 +28,33 @@ ns2_url = 'http://resources.openbel.org/belframework/20150611/namespace/mesh-dis
 
 
 class TestDefinitionManagers(FleetingTemporaryCacheMixin):
+    def _help_check_hgnc(self, manager):
+        entry = manager.get_namespace_entry(HGNC_URL, 'MHS2')
+        self.assertIsNotNone(entry)
+        self.assertEqual('MHS2', entry.name)
+        self.assertIn('G', entry.encoding)
+
+        entry = manager.get_namespace_entry(HGNC_URL, 'MIATNB')
+        self.assertIsNotNone(entry)
+        self.assertEqual('MIATNB', entry.name)
+        self.assertIn('G', entry.encoding)
+        self.assertIn('R', entry.encoding)
+
+        entry = manager.get_namespace_entry(HGNC_URL, 'MIA')
+        self.assertIsNotNone(entry)
+        self.assertEqual('MIA', entry.name)
+        self.assertIn('G', entry.encoding)
+        self.assertIn('P', entry.encoding)
+        self.assertIn('R', entry.encoding)
+
     @mock_bel_resources
     def test_insert_namespace_persistent(self, mock_get):
         self.manager.ensure_namespace(HGNC_URL)
-        help_check_hgnc(self, {HGNC_KEYWORD: self.manager.namespace_cache[HGNC_URL]})
+        self._help_check_hgnc(self.manager)
 
         alternate_manager = Manager(connection=self.connection)
         alternate_manager.ensure_namespace(HGNC_URL)
-        help_check_hgnc(self, {HGNC_KEYWORD: alternate_manager.namespace_cache[HGNC_URL]})
+        self._help_check_hgnc(alternate_manager)
 
     @mock_bel_resources
     def test_insert_namespace_nocache(self, mock):
@@ -59,9 +77,16 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
     @mock_parse_owl_pybel
     def test_insert_owl(self, m1, m2):
         self.manager.ensure_namespace_owl(wine_iri)
-        self.assertIn(wine_iri, self.manager.namespace_cache)
-        self.assertIn('ChateauMorgon', self.manager.namespace_cache[wine_iri])
-        self.assertIn('Winery', self.manager.namespace_cache[wine_iri])
+
+        entry = self.manager.get_namespace_entry(wine_iri, 'ChateauMorgon')
+        self.assertIsNotNone(entry)
+        self.assertEqual('ChateauMorgon', entry.name)
+        self.assertIsNotNone(entry.encoding)
+
+        entry = self.manager.get_namespace_entry(wine_iri, 'Winery')
+        self.assertIsNotNone(entry)
+        self.assertEqual('Winery', entry.name)
+        self.assertIsNotNone(entry.encoding)
 
 
 class TestEquivalenceManager(FleetingTemporaryCacheMixin):
