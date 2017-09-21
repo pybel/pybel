@@ -67,9 +67,6 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool allow_naked_names: If true, turns off naked namespace failures
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool no_identifier_validation: If true, turns off namespace validation
-
-
-
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
@@ -276,11 +273,14 @@ def split_file_to_annotations_and_definitions(file):
 
 
 def _log_graph_summary(graph):
-    """Logs simple information about a graph"""
+    """Logs simple information about a graph
+
+    :param BELGraph graph: A BEL graph
+    """
     counter = defaultdict(lambda: defaultdict(int))
 
-    for n, d in graph.nodes_iter(data=True):
-        counter[d[FUNCTION]][d[NAMESPACE] if NAMESPACE in d else 'DEFAULT'] += 1
+    for _, data in graph.nodes_iter(data=True):
+        counter[data[FUNCTION]][data.get(NAMESPACE, "DEFAULT")] += 1
 
     for fn, nss in sorted(counter.items()):
         log.debug(' %s: %d', fn, sum(nss.values()))
