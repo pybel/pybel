@@ -295,6 +295,27 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
+    def get_entries(self):
+        """Gets a set of the names of all etries
+
+        :rtype: set[str]
+        """
+        return {
+            entry.name
+            for entry in self.entries
+        }
+
+    def to_tree_list(self):
+        """Returns an edge set of the tree represented by this namespace's hierarchy
+
+        :rtype: set[tuple[str,str]]
+        """
+        return {
+            (parent.name, child.name)
+            for parent in self.entries
+            for child in parent.children
+        }
+
     def to_json(self, include_id=False):
         """Returns this annotation as a JSON dictionary
 
@@ -336,8 +357,8 @@ class AnnotationEntry(Base):
                   doc='Name that is defined in the corresponding annotation definition file')
     label = Column(String(255), nullable=True)
 
-    annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
-    annotation = relationship('Annotation', backref=backref('entries'))
+    annotation_id = Column(Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), index=True)
+    annotation = relationship('Annotation', backref=backref('entries', lazy='dynamic'))
 
     children = relationship(
         'AnnotationEntry',

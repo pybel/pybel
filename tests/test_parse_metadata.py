@@ -144,8 +144,13 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
     def test_parse_annotation_url_file(self):
         """Tests parsing an annotation by file URL"""
-        s = '''DEFINE ANNOTATION TESTAN1 AS URL "{}"'''.format(Path(test_an_1).as_uri())
-        self.parser.parseString(s)
+        keyword = 'TESTAN1'
+        url = Path(test_an_1).as_uri()
+        line = 'DEFINE ANNOTATION {keyword} AS URL "{url}"'.format(
+            keyword=keyword,
+            url=url,
+        )
+        self.parser.parseString(line)
 
         expected_values = {
             'TestAnnot1': 'O',
@@ -155,8 +160,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             'TestAnnot5': 'O'
         }
 
-        self.assertIn('TESTAN1', self.parser.annotations_dict)
-        self.assertEqual(expected_values, self.parser.annotations_dict['TESTAN1'])
+        self.assertEqual(set(expected_values), self.parser.manager.get_annotation_entries(url))
 
     # FIXME
     '''

@@ -296,11 +296,11 @@ def ls(manager, url):
 
     else:
         if url.endswith('.belanno'):
-            res = manager.get_annotation(url)
+            annotation = manager.ensure_annotation(url)
         else:
-            res = manager.get_annotation_owl_terms(url)
+            annotation = manager.ensure_annotation_owl(url)
 
-        for l in res:
+        for l in annotation.get_entries():
             click.echo(l)
 
 

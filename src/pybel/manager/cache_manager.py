@@ -374,19 +374,28 @@ class OwlNamespaceManager(NamespaceManager):
 class AnnotationManager(BaseManager):
     """Manages BEL annotations"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, use_annotation_cache=True, *args, **kwargs):
         super(AnnotationManager, self).__init__(*args, **kwargs)
 
-        #: A dictionary from {annotation URL: {name: label}}
-        self.annotation_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: Annotation}
-        self.annotation_model = {}
+        self.use_annotation_cache = use_annotation_cache
+        self._annotation_model = {}
+        self._annotation_object_cache = defaultdict(dict)
 
-        #: A dictionary from {annotation URL: {name: AnnotationEntry}}
-        self.annotation_object_cache = defaultdict(dict)
+    @property
+    def annotation_model(self):
+        """A dictionary from {annotation URL: Annotation}
 
-        #: A dictionary from {annotation URL: set of (parent, child) tuples}
-        self.annotation_edge_cache = {}
+        :rtype: dict[str:Annotation]
+        """
+        return self._annotation_model
+
+    @property
+    def annotation_object_cache(self):
+        """A dictionary from {annotation URL: {name: AnnotationEntry}}
+
+        :rtype: dict[str,dict[str,AnnotationEntry]]
+        """
+        return self._annotation_object_cache
 
     def list_annotations(self):
         """Return a list of all annotations
@@ -397,10 +406,8 @@ class AnnotationManager(BaseManager):
 
     def drop_annotations(self):
         """Drops all annotations"""
-        self.annotation_cache.clear()
         self.annotation_object_cache.clear()
         self.annotation_model.clear()
-        self.annotation_edge_cache.clear()
 
         for annotation in self.session.query(AnnotationEntry).all():
             annotation.children[:] = []
@@ -423,16 +430,20 @@ class AnnotationManager(BaseManager):
         self.annotation_model[url] = annotation
 
         for entry in annotation.entries:
-            self.annotation_cache[url][entry.name] = entry.label
             self.annotation_object_cache[url][entry.name] = entry
 
-    def insert_annotation(self, url):
+    def get_or_create_annotation(self, url):
         """Inserts the namespace file at the given location to the cache
 
         :param str url: the location of the namespace file
         :rtype: Annotation
         """
-        log.info('inserting annotation %s', url)
+        annotation = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+
+        if annotation is not None:
+            return annotation
+
+        log.info('downloading annotation %s', url)
 
         bel_resource = get_bel_resource(url)
 
@@ -461,7 +472,7 @@ class AnnotationManager(BaseManager):
         :rtype: Annotation
         """
         if url in self.annotation_model:
-            log.debug('already in memory: %s (%d)', url, len(self.annotation_cache[url]))
+            log.debug('already in memory: %s (%d)', url, len(self.annotation_object_cache[url]))
             return self.annotation_model[url]
 
         result = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
@@ -471,16 +482,16 @@ class AnnotationManager(BaseManager):
             self._cache_annotation(result)
             return result
 
-        return self.insert_annotation(url)
+        return self.get_or_create_annotation(url)
 
-    # TODO merge get_annotation and ensure_annotation
-    def get_annotation(self, url):
+    def get_annotation_entries(self, url):
         """Returns a dict of annotations and their labels for the given annotation file
 
         :param str url: the location of the annotation file
+        :rtype: set[str]
         """
-        self.ensure_annotation(url)
-        return self.annotation_cache[url]
+        annotation = self.ensure_annotation(url)
+        return annotation.get_entries()
 
     def get_annotation_by_url(self, url):
         """Gets an annotation by URL
@@ -509,16 +520,23 @@ class AnnotationManager(BaseManager):
 class OwlAnnotationManager(AnnotationManager):
     """Manages OWL annotations"""
 
-    def insert_annotation_owl(self, iri, keyword=None):
+    def get_or_create_owl_annotation(self, url, keyword=None):
         """Caches an ontology as a namespace from the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
+        :rtype: Annotation
         """
-        log.info('inserting owl %s', iri)
+        annotation = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
 
-        annotation = Annotation(url=iri, keyword=keyword)
+        if annotation is not None:
+            return annotation
 
-        graph = parse_owl(iri)
+        log.info('inserting owl %s', url)
+
+        annotation = Annotation(url=url, keyword=keyword)
+
+        graph = parse_owl(url)
 
         entries = {
             node: AnnotationEntry(name=node, annotation=annotation)  # TODO add label
@@ -539,32 +557,27 @@ class OwlAnnotationManager(AnnotationManager):
 
         :param str url: the location of the ontology
         :param str keyword: The optional keyword to use for the annotation if it gets downloaded
+        :rtype: Annotation
         """
-        if url in self.annotation_cache:
-            return
+        if url in self.annotation_model:
+            return self.annotation_model[url]
 
-        results = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
-        if results is None:
-            results = self.insert_annotation_owl(url, keyword)
+        annotation = self.get_or_create_owl_annotation(url, keyword)
 
-        for entry in results.entries:
-            self.annotation_cache[url][entry.name] = entry.label
+        for entry in annotation.entries:
+            self.annotation_object_cache[url][entry.name] = entry
 
-        self.annotation_edge_cache[url] = {
-            (sub.name, sup.name)
-            for sub in results.entries for sup in sub.children
-        }
-
-        return results
+        return annotation
 
     def get_annotation_owl_terms(self, url, keyword=None):
         """Gets a set of classes and individuals in the ontology at the given IRI
 
         :param str url: the location of the ontology
         :param str keyword: The optional keyword to use for the annotation if it gets downloaded
+        :rtype: set[str]
         """
-        self.ensure_annotation_owl(url, keyword)
-        return self.annotation_cache[url]
+        annotation = self.ensure_annotation_owl(url, keyword)
+        return annotation.get_entries()
 
     def get_annotation_owl_edges(self, url, keyword=None):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
@@ -572,8 +585,8 @@ class OwlAnnotationManager(AnnotationManager):
         :param str url: the location of the ontology
         :param str keyword: The optional keyword to use for the annotation if it gets downloaded
         """
-        self.ensure_annotation_owl(url, keyword=keyword)
-        return self.annotation_edge_cache[url]
+        annotation = self.ensure_annotation_owl(url, keyword=keyword)
+        return annotation.to_tree_list()
 
 
 class EquivalenceManager(NamespaceManager):
@@ -599,7 +612,7 @@ class EquivalenceManager(NamespaceManager):
         """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
         namespace = self.ensure_namespace(namespace_url)
 
-        if isinstance(namespace, dict):
+        if not isinstance(namespace, Namespace):
             raise ValueError("Can't insert equivalences for non-cachable namespace")
 
         log.info('inserting equivalences: %s', equivalence_url)
@@ -838,7 +851,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
             self.ensure_namespace(url)
 
         for url in graph.annotation_url.values():
-            self.ensure_annotation(url, cache_objects=store_parts)
+            self.ensure_annotation(url)
 
         network = Network(blob=to_bytes(graph), **{
             key: value
@@ -1122,8 +1135,14 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         :param str type: Citation type (e.g. PubMed)
         :param str reference: Identifier of the given citation (e.g. PubMed id)
-        :param str name: Title of the publication that is cited
+        :param str name: Name of the publication
+        :param str title: Title of article
+        :param str volume: Volume of publication
+        :param str issue: Issue of publication
+        :param str pages: Pages of issue
         :param str date: Date of publication in ISO 8601 (YYYY-MM-DD) format
+        :param str first: Name of first author
+        :param str last: Name of last author
         :param str or list[str] authors: Either a list of authors separated by |, or an actual list of authors
         :rtype: Citation
         """

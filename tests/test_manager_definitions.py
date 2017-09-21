@@ -68,10 +68,12 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
 
     @mock_bel_resources
     def test_insert_annotation(self, mock_get):
-        self.manager.ensure_annotation(CELL_LINE_URL)
-        self.assertIn(CELL_LINE_URL, self.manager.annotation_cache)
-        self.assertIn('1321N1 cell', self.manager.annotation_cache[CELL_LINE_URL])
-        self.assertEqual('CLO_0001072', self.manager.annotation_cache[CELL_LINE_URL]['1321N1 cell'])
+        annotation = self.manager.ensure_annotation(CELL_LINE_URL)
+        self.assertEqual(CELL_LINE_URL, annotation.url)
+
+        entry = self.manager.get_annotation_entry(CELL_LINE_URL, '1321N1 cell')
+        self.assertEqual('1321N1 cell', entry.name)
+        self.assertEqual('CLO_0001072', entry.label)
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel

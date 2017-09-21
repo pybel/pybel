@@ -48,7 +48,7 @@ class MetadataParser(BaseParser):
     def __init__(self, manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
                  annotations_regex=None, default_namespace=None, allow_redefinition=False):
         """
-        :param pybel.manager.Managermanager: A cache manager
+        :param pybel.manager.Manager manager: A cache manager
         :param dict[str,set[str]] namespace_dict: A dictionary of pre-loaded, enumerated namespaces from
                                 {namespace keyword: set of valid values}
         :param dict[str,set[str] annotation_dict: A dictionary of pre-loaded, enumerated annotations from
@@ -263,13 +263,13 @@ class MetadataParser(BaseParser):
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
-        annotation = tokens['name']
-        self.raise_for_redefined_annotation(line, position, annotation)
+        keyword = tokens['name']
+        self.raise_for_redefined_annotation(line, position, keyword)
 
         url = tokens['url']
 
-        self.annotations_dict[annotation] = self.manager.get_annotation(url)
-        self.annotation_url_dict[annotation] = url
+        self.annotations_dict[keyword] = self.manager.get_annotation_entries(url)
+        self.annotation_url_dict[keyword] = url
 
         return tokens
 
