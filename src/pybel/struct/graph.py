@@ -174,34 +174,6 @@ class BELGraph(networkx.MultiDiGraph):
         if not self.has_edge(u, v, key):
             self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
 
-    # TODO better implementation using edge filters
-    def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
-        """Allows for filtering by checking keyword arguments are a sub-dictionary of each edges' data.
-            See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
-        for u, v, k, d in super(BELGraph, self).edges_iter(nbunch=nbunch, data=True, keys=True, default=default):
-            if not subdict_matches(d, kwargs):
-                continue
-            elif keys and data:
-                yield u, v, k, d
-            elif data:
-                yield u, v, d
-            elif keys:
-                yield u, v, k
-            else:
-                yield u, v
-
-    # TODO better implementation using node filters
-    def nodes_iter(self, data=False, **kwargs):
-        """Allows for filtering by checking keyword arguments are a sub-dictionary of each nodes' data.
-            See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
-        for n, d in super(BELGraph, self).nodes_iter(data=True):
-            if not subdict_matches(d, kwargs):
-                continue
-            elif data:
-                yield n, d
-            else:
-                yield n
-
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
