@@ -108,13 +108,17 @@ def not_resource_cachable(bel_resource):
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces"""
 
-    def __init__(self, use_namespace_cache=True, *args, **kwargs):
+    def __init__(self, use_namespace_cache=False, *args, **kwargs):
         """
         :param use_namespace_cache: Should namespaces be cached in-memory?
         """
         super(NamespaceManager, self).__init__(*args, **kwargs)
 
-        self.use_namespace_cache = use_namespace_cache
+        self.use_namespace_cache = (
+            use_namespace_cache
+            if use_namespace_cache is not None
+            else config.get('PYBEL_IN_MEMORY_NAMESPACE_CACHE', False)
+        )
         self._namespace_model = {}
         self._namespace_object_cache = defaultdict(dict)
 
@@ -374,10 +378,14 @@ class OwlNamespaceManager(NamespaceManager):
 class AnnotationManager(BaseManager):
     """Manages BEL annotations"""
 
-    def __init__(self, use_annotation_cache=True, *args, **kwargs):
+    def __init__(self, use_annotation_cache=None, *args, **kwargs):
         super(AnnotationManager, self).__init__(*args, **kwargs)
 
-        self.use_annotation_cache = use_annotation_cache
+        self.use_annotation_cache = (
+            use_annotation_cache
+            if use_annotation_cache is not None
+            else config.get('PYBEL_IN_MEMORY_ANNOTATION_CACHE', False)
+        )
         self._annotation_model = {}
         self._annotation_object_cache = defaultdict(dict)
 
