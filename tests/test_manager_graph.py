@@ -374,7 +374,7 @@ class TestQuery(TemporaryCacheMixin):
             reference=test_citation_dict[CITATION_REFERENCE]
         )
         self.assertEqual(1, len(rv))
-        self.assertIn(test_citation_dict, rv[0].to_json())
+        self.assertEqual(test_citation_dict, rv[0].to_json())
 
     @unittest.skip
     def test_query_by_author_wildcard(self):
