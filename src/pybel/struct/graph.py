@@ -8,7 +8,7 @@ from copy import deepcopy
 from .operations import left_full_join, left_outer_join
 from ..constants import *
 from ..parser.canonicalize import add_node_from_data
-from ..utils import get_version, subdict_matches
+from ..utils import get_version
 
 __all__ = [
     'BELGraph',
@@ -37,7 +37,8 @@ class BELGraph(networkx.MultiDiGraph):
         the :mod:`pybel.io` module
 
         :param str name: The graph's name
-        :param str version: The graph's version. Recommended to use semantic versioning or YYYYMMDD format.
+        :param str version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
+                            ``YYYYMMDD`` format.
         :param str description: A description of the graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
@@ -239,21 +240,67 @@ class BELGraph(networkx.MultiDiGraph):
         self.node[node][DESCRIPTION] = description
 
     def __add__(self, other):
-        """Allows g + h to full join g and h and return a new graph"""
+        """Creates a deep copy of this graph and full joins another graph with it using
+        :func:`pybel.struct.left_full_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g + h
+        """
         result = deepcopy(self)
         left_full_join(result, other)
         return result
 
     def __iadd__(self, other):
-        """Allows g += h to full join h into g"""
+        """Full joins another graph into this one using :func:`pybel.struct.left_full_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> g += h
+        """
         left_full_join(self, other)
 
-    def __iand__(self, other):
-        """Allows g &= h to outer join h into g"""
-        left_outer_join(self, other)
-
     def __and__(self, other):
-        """Allows g & h to outer join h and g and return a new graph"""
+        """Creates a deep copy of this graph and outer joins another graph with it using
+        :func:`pybel.struct.left_outer_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g & h
+        """
         result = deepcopy(self)
         left_outer_join(result, other)
         return result
+
+    def __iand__(self, other):
+        """Outer joins another graph into this one using :func:`pybel.struct.left_outer_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> g &= h
+        """
+        left_outer_join(self, other)

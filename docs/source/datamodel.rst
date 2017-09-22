@@ -85,10 +85,20 @@ Graph
     :exclude-members: nodes_iter, edges_iter, add_warning
     :members:
 
+    .. automethod:: __add__
+    .. automethod:: __iadd__
+    .. automethod:: __and__
+    .. automethod:: __iand__
+
+.. autofunction:: pybel.struct.left_full_join
+.. autofunction:: pybel.struct.left_outer_join
+.. autofunction:: pybel.struct.union
+
 Nodes
 -----
 Nodes are used to represent physical entities' abundances. The relevant data about a node is stored in its associated
-dictionary in :mod:`networkx`. After parsing, :code:`p(HGNC:GSK3B)` becomes:
+data dictionary in :mod:`networkx` that can be accessed with ``my_bel_graph.node[node]``. After parsing,
+:code:`p(HGNC:GSK3B)` becomes:
 
 .. code::
 
