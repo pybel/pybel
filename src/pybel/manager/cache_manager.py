@@ -122,6 +122,8 @@ class NamespaceManager(BaseManager):
         self._namespace_model = {}
         self._namespace_object_cache = defaultdict(dict)
 
+        log.debug('namespace manager caching: %s', self.use_namespace_cache)
+
     @property
     def namespace_model(self):
         """A dictionary from {namespace URL: Namespace}
@@ -329,7 +331,7 @@ class OwlNamespaceManager(NamespaceManager):
 
         return namespace
 
-    def ensure_namespace_owl(self, url, keyword=None):
+    def ensure_namespace_owl(self, url, keyword=None, encoding=None):
         """Caches an ontology at the given URL if it is not already in the cache
 
         :param str url: The location of the ontology
@@ -339,7 +341,7 @@ class OwlNamespaceManager(NamespaceManager):
         if url in self.namespace_model:
             return self.namespace_model[url]
 
-        namespace = self.get_or_create_owl_namespace(url, keyword)
+        namespace = self.get_or_create_owl_namespace(url, keyword=keyword, encoding=encoding)
 
         if not self.use_namespace_cache:
             return namespace
@@ -349,14 +351,14 @@ class OwlNamespaceManager(NamespaceManager):
 
         return namespace
 
-    def get_namespace_owl_terms(self, url, keyword=None):
+    def get_namespace_owl_terms(self, url, keyword=None, encoding=None):
         """
 
         :param str url: The location of the ontology
         :param str keyword: The optional keyword to use for the namespace if it gets downloaded
         :rtype: dict[str,str]
         """
-        namespace = self.ensure_namespace_owl(url, keyword)
+        namespace = self.ensure_namespace_owl(url, keyword=keyword, encoding=encoding)
 
         if isinstance(namespace, dict):
             return namespace
@@ -388,6 +390,8 @@ class AnnotationManager(BaseManager):
         )
         self._annotation_model = {}
         self._annotation_object_cache = defaultdict(dict)
+
+        log.debug('annotation manager caching: %s', self.use_annotation_cache)
 
     @property
     def annotation_model(self):
@@ -470,6 +474,8 @@ class AnnotationManager(BaseManager):
         self._cache_annotation(annotation)
         self.session.add(annotation)
         self.session.commit()
+
+        log.info('inserted annotation: %s (%d)', url, len(bel_resource['Values']))
 
         return annotation
 
