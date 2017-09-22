@@ -336,6 +336,7 @@ class OwlNamespaceManager(NamespaceManager):
 
         :param str url: The location of the ontology
         :param str keyword: The optional keyword to use for the namespace if it gets downloaded
+        :param str encoding: The optional encoding to use for the namespace if it gets downloaded
         :rtype: Namespace
         """
         if url in self.namespace_model:
@@ -356,6 +357,7 @@ class OwlNamespaceManager(NamespaceManager):
 
         :param str url: The location of the ontology
         :param str keyword: The optional keyword to use for the namespace if it gets downloaded
+        :param str encoding: The optional encoding to use for the namespace if it gets downloaded
         :rtype: dict[str,str]
         """
         namespace = self.ensure_namespace_owl(url, keyword=keyword, encoding=encoding)
