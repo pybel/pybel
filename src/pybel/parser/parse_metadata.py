@@ -311,6 +311,7 @@ class MetadataParser(BaseParser):
         """Checks if this annotation is defined by an enumeration
 
         :param str annotation: The keyword of a annotation
+        :rtype: bool
         """
         return annotation in self.annotations_dict
 
@@ -318,6 +319,7 @@ class MetadataParser(BaseParser):
         """Checks if this annotation is defined by a regular expression
 
         :param str annotation: The keyword of a annotation
+        :rtype: bool
         """
         return annotation in self.annotations_regex
 
@@ -325,6 +327,7 @@ class MetadataParser(BaseParser):
         """Checks if this annotation is defined
 
         :param str annotation: The keyword of a annotation
+        :rtype: bool
         """
         return self.has_enumerated_annotation(annotation) or self.has_regex_annotation(annotation)
 
@@ -332,6 +335,7 @@ class MetadataParser(BaseParser):
         """Checks if this namespace is defined by an enumeration
 
         :param str namespace: The keyword of a namespace
+        :rtype: bool
         """
         return namespace in self.namespace_dict
 
@@ -339,6 +343,7 @@ class MetadataParser(BaseParser):
         """Checks if this namespace is defined by a regular expression
 
         :param str namespace: The keyword of a namespace
+        :rtype: bool
         """
         return namespace in self.namespace_regex
 
@@ -346,6 +351,7 @@ class MetadataParser(BaseParser):
         """Checks if this namespace is defined
 
         :param str namespace: The keyword of a namespace
+        :rtype: bool
         """
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
 
