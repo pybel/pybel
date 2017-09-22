@@ -313,11 +313,11 @@ class OwlNamespaceManager(NamespaceManager):
 
         graph = parse_owl(url)
 
-        encoding = encoding if encoding else BELNS_ENCODING_STR
+        encoding = BELNS_ENCODING_STR if encoding is None else encoding
 
         name_to_entry = {
             node: NamespaceEntry(name=node, encoding=encoding)
-            for node in graph.nodes_iter()
+            for node in graph
         }
         namespace.entries = list(name_to_entry.values())
 

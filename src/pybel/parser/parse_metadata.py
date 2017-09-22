@@ -177,9 +177,7 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_namespace(line, position, namespace)
 
         url = tokens['url']
-        terms = self.manager.get_namespace_encodings(url)
-
-        self.namespace_dict[namespace] = terms
+        self.namespace_dict[namespace] = self.manager.get_namespace_encodings(url)
         self.namespace_url_dict[namespace] = url
 
         return tokens
@@ -194,7 +192,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
 
-        functions = set(tokens['functions'] if 'functions' in tokens else belns_encodings)
+        functions = str(tokens['functions']) if 'functions' in tokens else BELNS_ENCODING_STR
 
         url = tokens['url']
 
@@ -215,9 +213,7 @@ class MetadataParser(BaseParser):
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
 
-        value = tokens['value']
-
-        self.namespace_regex[namespace] = value
+        self.namespace_regex[namespace] = tokens['value']
 
         return tokens
 
@@ -239,14 +235,10 @@ class MetadataParser(BaseParser):
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
         annotation = tokens['name']
-
         self.raise_for_redefined_annotation(line, position, annotation)
 
         url = tokens['url']
-
-        terms = self.manager.get_annotation_owl_terms(url, annotation)
-
-        self.annotation_dict[annotation] = set(terms)
+        self.annotation_dict[annotation] = self.manager.get_annotation_owl_terms(url, annotation)
         self.annotations_owl_dict[annotation] = url
 
         return tokens
@@ -262,7 +254,6 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_annotation(line, position, keyword)
 
         url = tokens['url']
-
         self.annotation_dict[keyword] = self.manager.get_annotation_entries(url)
         self.annotation_url_dict[keyword] = url
 
@@ -294,11 +285,7 @@ class MetadataParser(BaseParser):
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
-
-        value = tokens['value']
-
-        self.annotations_regex[annotation] = value
-
+        self.annotations_regex[annotation] = tokens['value']
         return tokens
 
     def has_enumerated_annotation(self, annotation):
