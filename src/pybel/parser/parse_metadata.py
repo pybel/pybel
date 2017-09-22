@@ -49,8 +49,8 @@ class MetadataParser(BaseParser):
                  annotations_regex=None, default_namespace=None, allow_redefinition=False):
         """
         :param pybel.manager.Manager manager: A cache manager
-        :param dict[str,set[str]] namespace_dict: A dictionary of pre-loaded, enumerated namespaces from
-                                {namespace keyword: set of valid values}
+        :param dict[str,dict[str,str]] namespace_dict: A dictionary of pre-loaded, enumerated namespaces from
+                                {namespace keyword: {name: encoding}}
         :param dict[str,set[str] annotation_dict: A dictionary of pre-loaded, enumerated annotations from
                                 {annotation keyword: set of valid values}
         :param dict[str,str] namespace_regex: A dictionary of pre-loaded, regular expression namespaces from
@@ -64,20 +64,16 @@ class MetadataParser(BaseParser):
 
         self.disallow_redefinition = not allow_redefinition
 
-        #: A dictionary of cached {namespace keyword: set of values}
+        #: A dictionary of cached {namespace keyword: {name: encoding}}
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
         #: A dictionary of cached {annotation keyword: set of values}
-        self.annotations_dict = {} if annotation_dict is None else annotation_dict
+        self.annotation_dict = {} if annotation_dict is None else annotation_dict
         #: A dictionary of {namespace keyword: regular expression string}
         self.namespace_regex = {} if namespace_regex is None else namespace_regex
-        #: A dictionary of {namespace keyword: compiled regular expression}
-        self.namespace_regex_compiled = {ns: re.compile(pat) for ns, pat in self.namespace_regex.items()}
         #: A set of names that can be used without a namespace
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         #: A dictionary of {annotation keyword: regular expression string}
         self.annotations_regex = {} if annotations_regex is None else annotations_regex
-        #: A dictionary of {annotation keyword: compiled regular expression}
-        self.annotations_regex_compiled = {ns: re.compile(pat) for ns, pat in self.annotations_regex.items()}
 
         #: A dictionary containing the document metadata
         self.document_metadata = {}
@@ -222,7 +218,6 @@ class MetadataParser(BaseParser):
         value = tokens['value']
 
         self.namespace_regex[namespace] = value
-        self.namespace_regex_compiled[namespace] = re.compile(value)
 
         return tokens
 
@@ -251,7 +246,7 @@ class MetadataParser(BaseParser):
 
         terms = self.manager.get_annotation_owl_terms(url, annotation)
 
-        self.annotations_dict[annotation] = set(terms)
+        self.annotation_dict[annotation] = set(terms)
         self.annotations_owl_dict[annotation] = url
 
         return tokens
@@ -268,7 +263,7 @@ class MetadataParser(BaseParser):
 
         url = tokens['url']
 
-        self.annotations_dict[keyword] = self.manager.get_annotation_entries(url)
+        self.annotation_dict[keyword] = self.manager.get_annotation_entries(url)
         self.annotation_url_dict[keyword] = url
 
         return tokens
@@ -285,7 +280,7 @@ class MetadataParser(BaseParser):
 
         values = set(tokens['values'])
 
-        self.annotations_dict[annotation] = values
+        self.annotation_dict[annotation] = values
         self.annotation_lists.add(annotation)
 
         return tokens
@@ -303,7 +298,6 @@ class MetadataParser(BaseParser):
         value = tokens['value']
 
         self.annotations_regex[annotation] = value
-        self.annotations_regex_compiled[annotation] = re.compile(value)
 
         return tokens
 
@@ -313,7 +307,7 @@ class MetadataParser(BaseParser):
         :param str annotation: The keyword of a annotation
         :rtype: bool
         """
-        return annotation in self.annotations_dict
+        return annotation in self.annotation_dict
 
     def has_regex_annotation(self, annotation):
         """Checks if this annotation is defined by a regular expression

@@ -59,11 +59,11 @@ class GmodParser(BaseParser):
         """
         :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
         """
-        self.namespace_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
+        self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
 
         gmod_default_ns = oneOf(list(language.gmod_namespace.keys())).setParseAction(self.handle_gmod_default)
 
-        gmod_identifier = Group(self.namespace_parser.identifier_qualified) | Group(gmod_default_ns)
+        gmod_identifier = Group(self.identifier_parser.identifier_qualified) | Group(gmod_default_ns)
 
         self.language = gmod_tag + nest(gmod_identifier(IDENTIFIER))
 

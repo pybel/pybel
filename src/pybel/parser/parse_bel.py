@@ -62,7 +62,7 @@ class BelParser(BaseParser):
                  citation_clearing=True, no_identifier_validation=False, autostreamline=True):
         """
         :param BELGraph graph: The BEL Graph to use to store the network
-        :param dict[str,set[str]] namespace_dict: A dictionary of {namespace: set of members}.
+        :param dict[str,dict[str,str]] namespace_dict: A dictionary of {namespace: {name: encoding}}.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param dict[str,set[str]] annotation_dict: A dictionary of {annotation: set of values}.
                                     Delegated to :class:`pybel.parser.ControlParser`
@@ -84,7 +84,7 @@ class BelParser(BaseParser):
         self.allow_nested = allow_nested
 
         self.control_parser = ControlParser(
-            annotation_dicts=annotation_dict,
+            annotation_dict=annotation_dict,
             annotation_regex=annotation_regex,
             citation_clearing=citation_clearing
         )
@@ -487,22 +487,43 @@ class BelParser(BaseParser):
 
     @property
     def namespace_dict(self):
+        """The dictionary of {namespace: {name: encoding}} stored in :ivar:`BelParser.identifier_parser`
+
+        :rtype: dict[str,dict[str,str]]
+        """
         return self.identifier_parser.namespace_dict
 
     @property
     def namespace_regex(self):
+        """The dictionary of {namespace keyword: compiled regular expression} stored in
+        :ivar:`BelParser.identifier_parser`
+
+        :rtype: dict[str,re]
+        """
         return self.identifier_parser.namespace_regex_compiled
 
     @property
     def annotation_dict(self):
+        """A dictionary of annotaions to their set of values
+
+        :rtype: dict[str,set[str]]
+        """
         return self.control_parser.annotation_dict
 
     @property
     def annotation_regex(self):
+        """A dictioary of annotations defined by regular expressions {annotation keyword: string regular expression}
+
+        :return: dict[str,str]
+        """
         return self.control_parser.annotation_regex
 
     @property
     def allow_naked_names(self):
+        """Should naked names be parsed, or should errors be thrown?
+
+        :rtype: bool
+        """
         return self.identifier_parser.allow_naked_names
 
     def get_annotations(self):
@@ -558,6 +579,12 @@ class BelParser(BaseParser):
         return tokens
 
     def handle_term(self, line, position, tokens):
+        """Handles BEL terms (the subject and object of BEL relations)
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         self.ensure_node(tokens)
         return tokens
 
@@ -570,12 +597,25 @@ class BelParser(BaseParser):
         return tokens
 
     def handle_has_members(self, line, position, tokens):
+        """Handles list relations like ``p(X) hasMembers list(p(Y), p(Z), ...)``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         return self._handle_list_helper(tokens, HAS_MEMBER)
 
     def handle_has_components(self, line, position, tokens):
+        """Handles list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         return self._handle_list_helper(tokens, HAS_COMPONENT)
 
     def _build_attrs(self):
+        """Helper function for building cartesian product of edges based on current annotations"""
         attrs = {}
         list_attrs = {}
 
@@ -588,6 +628,12 @@ class BelParser(BaseParser):
         return attrs, list_attrs
 
     def handle_relation(self, line, position, tokens):
+        """Handles BEL relations
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         if not self.control_parser.citation:
             raise MissingCitationException(self.line_number, line, position)
 
@@ -625,13 +671,31 @@ class BelParser(BaseParser):
         return tokens
 
     def handle_unqualified_relation(self, line, position, tokens):
+        """Handles unqualified relations
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
         object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
         rel = tokens[RELATION]
         self.graph.add_unqualified_edge(subject_node_tuple, object_node_tuple, rel)
 
     def add_reverse_edge(self, sub, obj, attr_dict, **attr):
-        new_attrs = {k: v for k, v in attr_dict.items() if k not in {SUBJECT, OBJECT}}
+        """
+
+        :param sub:
+        :param obj:
+        :param attr_dict:
+        :param attr:
+        :return:
+        """
+        new_attrs = {
+            key: value
+            for key, value in attr_dict.items()
+            if key not in {SUBJECT, OBJECT}
+        }
         attrs_subject, attrs_object = attr_dict.get(SUBJECT), attr_dict.get(OBJECT)
         if attrs_subject:
             new_attrs[OBJECT] = attrs_subject
@@ -641,6 +705,12 @@ class BelParser(BaseParser):
         self.graph.add_edge(obj, sub, attr_dict=new_attrs, **attr)
 
     def handle_label_relation(self, line, position, tokens):
+        """Handles statements like ``p(X) label "Label for X"``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
         label = tokens[OBJECT]
 
@@ -678,6 +748,12 @@ class BelParser(BaseParser):
 # HANDLERS
 
 def handle_molecular_activity_default(line, position, tokens):
+    """Handles BEL 2.0 style molecular activites with BEL 1.0 default names
+
+    :param str line: The line being parsed
+    :param int position: The position in the line being parsed
+    :param pyparsing.ParseResult tokens: The tokens from PyParsing
+    """
     upgraded = activity_labels[tokens[0]]
     log.debug('upgraded legacy activity to %s', upgraded)
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
@@ -686,6 +762,12 @@ def handle_molecular_activity_default(line, position, tokens):
 
 
 def handle_activity_legacy(line, position, tokens):
+    """Handles nodes with BEL 1.0 activities
+
+    :param str line: The line being parsed
+    :param int position: The position in the line being parsed
+    :param pyparsing.ParseResult tokens: The tokens from PyParsing
+    """
     legacy_cls = activity_labels[tokens[MODIFIER]]
     tokens[MODIFIER] = ACTIVITY
     tokens[EFFECT] = {
@@ -697,5 +779,11 @@ def handle_activity_legacy(line, position, tokens):
 
 
 def handle_legacy_tloc(line, position, tokens):
+    """Handles translocations that lack the ``fromLoc`` and ``toLoc`` entries
+
+    :param str line: The line being parsed
+    :param int position: The position in the line being parsed
+    :param pyparsing.ParseResult tokens: The tokens from PyParsing
+    """
     log.debug('legacy translocation statement: %s', line)
     return tokens

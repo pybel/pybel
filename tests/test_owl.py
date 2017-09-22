@@ -308,8 +308,8 @@ class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
         parser = MetadataParser(self.manager)
         parser.parseString(s)
 
-        self.assertIn('Pizza', parser.annotations_dict)
-        self.assertEqual(EXPECTED_PIZZA_NODES, set(parser.annotations_dict['Pizza']))
+        self.assertIn('Pizza', parser.annotation_dict)
+        self.assertEqual(EXPECTED_PIZZA_NODES, set(parser.annotation_dict['Pizza']))
 
 
 class TestWine(TestGraphMixin, FleetingTemporaryCacheMixin):
@@ -339,8 +339,8 @@ class TestWine(TestGraphMixin, FleetingTemporaryCacheMixin):
         parser = MetadataParser(self.manager)
         parser.parseString(s)
 
-        self.assertIn('Wine', parser.annotations_dict)
-        self.assertLessEqual(wine_nodes, set(parser.annotations_dict['Wine']))
+        self.assertIn('Wine', parser.annotation_dict)
+        self.assertLessEqual(wine_nodes, set(parser.annotation_dict['Wine']))
 
         with self.assertRaises(RedefinedAnnotationError):
             parser.parseString(s)

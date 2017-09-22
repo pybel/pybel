@@ -86,7 +86,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     bel_parser = BelParser(
         graph=graph,
         namespace_dict=metadata_parser.namespace_dict,
-        annotation_dict=metadata_parser.annotations_dict,
+        annotation_dict=metadata_parser.annotation_dict,
         namespace_regex=metadata_parser.namespace_regex,
         annotation_regex=metadata_parser.annotations_regex,
         allow_nested=allow_nested,
@@ -168,7 +168,7 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
         GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
         GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_regex.copy(),
         GRAPH_ANNOTATION_LIST: {
-            keyword: metadata_parser.annotations_dict[keyword]
+            keyword: metadata_parser.annotation_dict[keyword]
             for keyword in metadata_parser.annotation_lists
         }
     })
