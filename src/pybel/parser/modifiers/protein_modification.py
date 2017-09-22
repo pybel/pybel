@@ -70,7 +70,7 @@ twice to become active. This results in the following:
 
 .. seealso::
 
-    BEL 2.0 specification on `protein modifications <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod>`_
+    BEL 2.0 specification on `protein modifications <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod>`_
 """
 
 import logging
