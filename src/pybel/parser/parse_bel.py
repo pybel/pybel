@@ -449,7 +449,7 @@ class BelParser(BaseParser):
 
         self.unqualified_relation.setParseAction(self.handle_unqualified_relation)
 
-        #: 3.1 Causal Relationships - nested. Explicitly not supported because of ambiguity
+        #: 3.1 Causal Relationships - nested. Not enabled by default.
         causal_relation_tags = MatchFirst([
             increases_tag,
             decreases_tag,
@@ -487,7 +487,7 @@ class BelParser(BaseParser):
 
     @property
     def namespace_dict(self):
-        """The dictionary of {namespace: {name: encoding}} stored in :ivar:`BelParser.identifier_parser`
+        """The dictionary of {namespace: {name: encoding}} stored in the internal identifier parser
 
         :rtype: dict[str,dict[str,str]]
         """
@@ -495,8 +495,7 @@ class BelParser(BaseParser):
 
     @property
     def namespace_regex(self):
-        """The dictionary of {namespace keyword: compiled regular expression} stored in
-        :ivar:`BelParser.identifier_parser`
+        """The dictionary of {namespace keyword: compiled regular expression} stored the internal identifier parser
 
         :rtype: dict[str,re]
         """
@@ -514,7 +513,7 @@ class BelParser(BaseParser):
     def annotation_regex(self):
         """A dictioary of annotations defined by regular expressions {annotation keyword: string regular expression}
 
-        :return: dict[str,str]
+        :rtype: dict[str,str]
         """
         return self.control_parser.annotation_regex
 
