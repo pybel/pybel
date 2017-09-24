@@ -75,14 +75,14 @@ system is used to store graphs for high-performance querying.
 Extensions to BEL
 -----------------
 The PyBEL compiler is fully compliant with both BEL v1.0 and v2.0 and automatically upgrades legacy statements.
-Additionally, we have included several additions to the BEL specification to enable expression of important concepts
+Additionally, PyBEL includes several additions to the BEL specification to enable expression of important concepts
 in molecular biology that were previously missing and to facilitate integrating new data types. A short example is the
 inclusion of protein oxidation in the default BEL namespace for protein modifications. Other, more elaborate additions
 are outlined below.
 
 Syntax for Epigenetics
 ~~~~~~~~~~~~~~~~~~~~~~
-We introduce the gene modification function, gmod(), as a syntax for encoding epigenetic modifications. Its usage
+PyBEL introduces the gene modification function, gmod(), as a syntax for encoding epigenetic modifications. Its usage
 mirrors the pmod() function for proteins and includes arguments for methylation.
 
 For example, the methylation of NDUFB6 was found to be negatively correlated with its expression in a study of insulin
@@ -99,7 +99,7 @@ Definition of Namespaces as Regular Expressions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 BEL imposes the constraint that each identifier must be qualified with an enumerated namespace to enable semantic
 interoperability and data integration. However, enumerating a namespace with potentially billions of names, such as
-dbSNP, poses a computational issue. We introduce syntax for defining namespaces with a consistent pattern using a
+dbSNP, poses a computational issue. PyBEL introduces syntax for defining namespaces with a consistent pattern using a
 regular expression to overcome this issue. For these namespaces, semantic validation can be perform in post-processing
 against the underlying database. The dbSNP namespace can be defined with a syntax familiar to BEL annotation
 definitions with regular expressions as follows:
@@ -211,7 +211,7 @@ BEL also allows object of a relationship to be another statement.
 
 - :code:`A => (B => C)` means that `A` increases the process by which `B` increases `C`. The example in the BEL Spec
   :code:`p(HGNC:GATA1) => (act(p(HGNC:ZBTB16)) => r(HGNC:MPL))` represents GATA1 directly increasing the process by
-  which ZBTB16 directly increases MPL. Before, we were using directly increasing to specify physical contact, so it's
+  which ZBTB16 directly increases MPL. Before, directly increasing was used to specify physical contact, so it's
   reasonable to conclude that  :code:`p(HGNC:GATA1) => act(p(HGNC:ZBTB16))`. The specification cites examples when `B`
   is an activity that only is affected in the context of `A` and `C`. This complicated enough that it is both
   impractical to standardize during curation, and impractical to represent in a network.
@@ -248,8 +248,8 @@ amount of ambiguity.
 
 Recommendations for Use in PyBEL
 ********************************
-We considered the ambiguity of nested statements to be a great risk to clarity and have disabled the usage of
-nested statements by default. See the Input and Output section for different parser settings. In our group at Fraunhofer
+After considering the ambiguity of nested statements to be a great risk to clarity, and PyBEL disables the usage of
+nested statements by default. See the Input and Output section for different parser settings. At Fraunhofer
 SCAI, curators resolved these statements to single statements to improve the precision and readability of our BEL
 documents.
 

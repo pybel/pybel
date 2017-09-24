@@ -52,6 +52,7 @@ Links
    manager
    utilities
    logging
+   extensions
 
 .. toctree::
    :caption: Project
