@@ -503,7 +503,7 @@ class BelParser(BaseParser):
 
     @property
     def annotation_dict(self):
-        """A dictionary of annotaions to their set of values
+        """A dictionary of annotations to their set of values
 
         :rtype: dict[str,set[str]]
         """
@@ -511,7 +511,7 @@ class BelParser(BaseParser):
 
     @property
     def annotation_regex(self):
-        """A dictioary of annotations defined by regular expressions {annotation keyword: string regular expression}
+        """A dictionary of annotations defined by regular expressions {annotation keyword: string regular expression}
 
         :rtype: dict[str,str]
         """
