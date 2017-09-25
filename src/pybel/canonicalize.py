@@ -108,6 +108,13 @@ def get_targets_by_relation(graph, node, relation):
     }
 
 
+def _node_list_to_bel(graph, nodes):
+    return sorted(map(lambda n: node_to_bel(graph, n), nodes))
+
+def _node_list_to_bel_helper(graph, node, relation):
+    nodes = get_targets_by_relation(graph, node, relation)
+    return _node_list_to_bel(graph, nodes)
+
 def node_to_bel(graph, node):
     """Returns a node from a graph as a BEL string
 
@@ -118,16 +125,13 @@ def node_to_bel(graph, node):
     data = graph.node[node]
 
     if data[FUNCTION] == REACTION:
-        reactants = get_targets_by_relation(graph, node, HAS_REACTANT)
-        reactants_canon = sorted(map(lambda n: node_to_bel(graph, n), reactants))
-        products = get_targets_by_relation(graph, node, HAS_PRODUCT)
-        products_canon = sorted(map(lambda n: node_to_bel(graph, n), products))
-        return 'rxn(reactants({}), products({}))'.format(', '.join(reactants_canon), ', '.join(products_canon))
+        reactants = _node_list_to_bel_helper(graph, node, HAS_REACTANT)
+        products = _node_list_to_bel_helper(graph, node, HAS_PRODUCT)
+        return 'rxn(reactants({}), products({}))'.format(', '.join(reactants), ', '.join(products))
 
     if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
-        members = get_targets_by_relation(graph, node, HAS_COMPONENT)
-        members_canon = sorted(map(lambda n: node_to_bel(graph, n), members))
-        return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members_canon))
+        members = _node_list_to_bel_helper(graph, node, HAS_COMPONENT)
+        return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members))
 
     if VARIANTS in data:
         variants_canon = sorted(map(variant_to_bel, data[VARIANTS]))
