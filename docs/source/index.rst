@@ -40,6 +40,7 @@ Links
 
    datamodel
    io
+   filters
    cookbook
    troubleshooting
 

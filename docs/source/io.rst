@@ -99,26 +99,5 @@ Database
 
 INDRA
 -----
-After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a list of
-:class:`indra.statements.Statement` can be converted to a :class:`pybel.BELGraph` with
-:class:`indra.assemblers.PybelAssembler`.
-
-.. code-block:: python
-
-    from indra.assemblers import PybelAssembler
-    import pybel
-
-    stmts = [
-        # A list of INDRA statements
-    ]
-
-    pba = PybelAssembler(
-        stmts,
-        name='Graph Name',
-        version='0.0.1',
-        description='Graph Description'
-    )
-    graph = pba.make_model()
-
-    # Write to BEL file
-    pybel.to_bel_path(belgraph, 'simple_pybel.bel')
+.. automodule:: pybel.io.indra
+    :members:
