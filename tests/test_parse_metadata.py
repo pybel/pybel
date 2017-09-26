@@ -57,34 +57,34 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
         s = 'DEFINE ANNOTATION {} AS URL "{}"'.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL)
         self.parser.parseString(s)
-        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_dict)
 
         s = 'DEFINE ANNOTATION {} AS LIST {{"A","B","C"}}'.format(MESH_DISEASES_KEYWORD)
         with self.assertRaises(RedefinedAnnotationError):
             self.parser.parseString(s)
 
-        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
-        self.assertNotIn('A', self.parser.annotations_dict[MESH_DISEASES_KEYWORD])
-        self.assertIn('46, XX Disorders of Sex Development', self.parser.annotations_dict[MESH_DISEASES_KEYWORD])
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_dict)
+        self.assertNotIn('A', self.parser.annotation_dict[MESH_DISEASES_KEYWORD])
+        self.assertIn('46, XX Disorders of Sex Development', self.parser.annotation_dict[MESH_DISEASES_KEYWORD])
 
     def test_annotation_name_persistience_2(self):
         """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
         s = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
-        self.assertIn('TextLocation', self.parser.annotations_dict)
+        self.assertIn('TextLocation', self.parser.annotation_dict)
 
         s = 'DEFINE ANNOTATION TextLocation AS URL "{}"'.format(MESH_DISEASES_URL)
         with self.assertRaises(RedefinedAnnotationError):
             self.parser.parseString(s)
 
-        self.assertIn('TextLocation', self.parser.annotations_dict)
-        self.assertIn('Abstract', self.parser.annotations_dict['TextLocation'])
+        self.assertIn('TextLocation', self.parser.annotation_dict)
+        self.assertIn('Abstract', self.parser.annotation_dict['TextLocation'])
 
     def test_underscore(self):
         """Tests that an underscore is a valid character in an annotation name"""
         s = 'DEFINE ANNOTATION Text_Location AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
-        self.assertIn('Text_Location', self.parser.annotations_dict)
+        self.assertIn('Text_Location', self.parser.annotation_dict)
 
     @mock_bel_resources
     def test_control_compound(self, mock_get):
@@ -95,9 +95,9 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         ]
         self.parser.parse_lines(lines)
 
-        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotations_dict)
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_dict)
         self.assertIn(HGNC_KEYWORD, self.parser.namespace_dict)
-        self.assertIn('TextLocation', self.parser.annotations_dict)
+        self.assertIn('TextLocation', self.parser.annotation_dict)
 
     @unittest.skipUnless('PYBEL_BASE' in os.environ, "Need local files to test local files")
     def test_squiggly_filepath(self):
@@ -144,8 +144,13 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
     def test_parse_annotation_url_file(self):
         """Tests parsing an annotation by file URL"""
-        s = '''DEFINE ANNOTATION TESTAN1 AS URL "{}"'''.format(Path(test_an_1).as_uri())
-        self.parser.parseString(s)
+        keyword = 'TESTAN1'
+        url = Path(test_an_1).as_uri()
+        line = 'DEFINE ANNOTATION {keyword} AS URL "{url}"'.format(
+            keyword=keyword,
+            url=url,
+        )
+        self.parser.parseString(line)
 
         expected_values = {
             'TestAnnot1': 'O',
@@ -155,8 +160,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             'TestAnnot5': 'O'
         }
 
-        self.assertIn('TESTAN1', self.parser.annotations_dict)
-        self.assertEqual(expected_values, self.parser.annotations_dict['TESTAN1'])
+        self.assertEqual(set(expected_values), self.parser.manager.get_annotation_entries(url))
 
     # FIXME
     '''
@@ -176,7 +180,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         s = 'DEFINE ANNOTATION Test AS PATTERN "\w+"'
         self.parser.parseString(s)
 
-        self.assertNotIn('Test', self.parser.annotations_dict)
+        self.assertNotIn('Test', self.parser.annotation_dict)
         self.assertIn('Test', self.parser.annotations_regex)
         self.assertEqual('\w+', self.parser.annotations_regex['Test'])
 

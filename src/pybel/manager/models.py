@@ -164,6 +164,28 @@ class Namespace(Base):
     def __str__(self):
         return self.keyword
 
+    def to_values(self):
+        """Returns this namespace as a dictionary of names to their encodings. Encodings are represented as a
+        string, and lookup operations take constant time O(8).
+
+        :rtype: dict[str,str]
+        """
+        return {
+            entry.name: entry.encoding if entry.encoding else BELNS_ENCODING_STR
+            for entry in self.entries
+        }
+
+    def to_tree_list(self):
+        """Returns an edge set of the tree represented by this namespace's hierarchy
+
+        :rtype: set[tuple[str,str]]
+        """
+        return {
+            (parent.name, child.name)
+            for parent in self.entries
+            for child in parent.children
+        }
+
     def to_json(self, include_id=True):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information.
 
@@ -207,7 +229,7 @@ class NamespaceEntry(Base):
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
     namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), index=True)
-    namespace = relationship('Namespace', backref=backref('entries'))
+    namespace = relationship('Namespace', backref=backref('entries', lazy='dynamic'))
 
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
     equivalence = relationship('NamespaceEntryEquivalence', backref=backref('members'))
@@ -273,6 +295,27 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
+    def get_entries(self):
+        """Gets a set of the names of all etries
+
+        :rtype: set[str]
+        """
+        return {
+            entry.name
+            for entry in self.entries
+        }
+
+    def to_tree_list(self):
+        """Returns an edge set of the tree represented by this namespace's hierarchy
+
+        :rtype: set[tuple[str,str]]
+        """
+        return {
+            (parent.name, child.name)
+            for parent in self.entries
+            for child in parent.children
+        }
+
     def to_json(self, include_id=False):
         """Returns this annotation as a JSON dictionary
 
@@ -314,8 +357,8 @@ class AnnotationEntry(Base):
                   doc='Name that is defined in the corresponding annotation definition file')
     label = Column(String(255), nullable=True)
 
-    annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
-    annotation = relationship('Annotation', backref=backref('entries'))
+    annotation_id = Column(Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), index=True)
+    annotation = relationship('Annotation', backref=backref('entries', lazy='dynamic'))
 
     children = relationship(
         'AnnotationEntry',
@@ -680,8 +723,12 @@ class Citation(Base):
     issue = Column(Text, nullable=True, doc='Issue within the volume')
     pages = Column(Text, nullable=True, doc='Pages of the publication')
     date = Column(Date, nullable=True, doc='Publication date')
-    first = Column(Text, nullable=True, doc='First author name')
-    last = Column(Text, nullable=True, doc='Last author name')
+
+    first_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='First author')
+    first = relationship("Author", foreign_keys=[first_id])
+
+    last_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='Last author')
+    last = relationship("Author", foreign_keys=[last_id])
 
     authors = relationship("Author", secondary=author_citation, backref='citations')
 

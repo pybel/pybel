@@ -70,7 +70,7 @@ twice to become active. This results in the following:
 
 .. seealso::
 
-    BEL 2.0 specification on `protein modifications <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod>`_
+    BEL 2.0 specification on `protein modifications <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod>`_
 """
 
 import logging
@@ -101,13 +101,13 @@ class PmodParser(BaseParser):
         """
         :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
         """
-        self.namespace_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
+        self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
 
         pmod_default_ns = oneOf(list(pmod_namespace.keys())).setParseAction(self.handle_pmod_default_ns)
         pmod_legacy_ns = oneOf(list(pmod_legacy_labels.keys())).setParseAction(self.handle_pmod_legacy_ns)
 
         pmod_identifier = MatchFirst([
-            Group(self.namespace_parser.identifier_qualified),
+            Group(self.identifier_parser.identifier_qualified),
             Group(pmod_default_ns),
             Group(pmod_legacy_ns)
         ])

@@ -19,7 +19,7 @@ from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
 
-VERSION = '0.9.0'
+VERSION = '0.9.1'
 
 #: The last PyBEL version where the graph data definition changed
 PYBEL_MINIMUM_IMPORT_VERSION = 0, 9, 0
@@ -541,3 +541,5 @@ belns_encodings = {
     'O': {PATHOLOGY},
     'C': {COMPLEX}
 }
+
+BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))

@@ -48,42 +48,32 @@ class MetadataParser(BaseParser):
     def __init__(self, manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
                  annotations_regex=None, default_namespace=None, allow_redefinition=False):
         """
-        :param manager: A cache manager
-        :type manager: pybel.manager.Manager
-        :param namespace_dict: A dictionary of pre-loaded, enumerated namespaces from 
-                                {namespace keyword: set of valid values}
-        :type namespace_dict: dict
-        :param annotation_dict: A dictionary of pre-loaded, enumerated annotations from
+        :param pybel.manager.Manager manager: A cache manager
+        :param dict[str,dict[str,str]] namespace_dict: A dictionary of pre-loaded, enumerated namespaces from
+                                {namespace keyword: {name: encoding}}
+        :param dict[str,set[str] annotation_dict: A dictionary of pre-loaded, enumerated annotations from
                                 {annotation keyword: set of valid values}
-        :type annotation_dict: dict
-        :param namespace_regex: A dictionary of pre-loaded, regular expression namespaces from
+        :param dict[str,str] namespace_regex: A dictionary of pre-loaded, regular expression namespaces from
                                 {namespace keyword: regex string}
-        :type namespace_regex: dict
-        :param annotations_regex: A dictionary of pre-loaded, regular expression annotations from 
+        :param dict[str,str] annotations_regex: A dictionary of pre-loaded, regular expression annotations from
                                 {annotation keyword: regex string}
-        :type annotations_regex: dict
-        :param default_namespace: A set of strings that can be used without a namespace
-        :type default_namespace: set of str
+        :param set[str] default_namespace: A set of strings that can be used without a namespace
         """
         #: This metadata parser's internal definition cache manager
         self.manager = manager
 
         self.disallow_redefinition = not allow_redefinition
 
-        #: A dictionary of cached {namespace keyword: set of values}
+        #: A dictionary of cached {namespace keyword: {name: encoding}}
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
         #: A dictionary of cached {annotation keyword: set of values}
-        self.annotations_dict = {} if annotation_dict is None else annotation_dict
+        self.annotation_dict = {} if annotation_dict is None else annotation_dict
         #: A dictionary of {namespace keyword: regular expression string}
         self.namespace_regex = {} if namespace_regex is None else namespace_regex
-        #: A dictionary of {namespace keyword: compiled regular expression}
-        self.namespace_regex_compiled = {ns: re.compile(pat) for ns, pat in self.namespace_regex.items()}
         #: A set of names that can be used without a namespace
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         #: A dictionary of {annotation keyword: regular expression string}
         self.annotations_regex = {} if annotations_regex is None else annotations_regex
-        #: A dictionary of {annotation keyword: compiled regular expression}
-        self.annotations_regex_compiled = {ns: re.compile(pat) for ns, pat in self.annotations_regex.items()}
 
         #: A dictionary containing the document metadata
         self.document_metadata = {}
@@ -141,7 +131,12 @@ class MetadataParser(BaseParser):
         super(MetadataParser, self).__init__(self.language)
 
     def handle_document(self, line, position, tokens):
-        """Handles statements like ``SET DOCUMENT X = "Y"``"""
+        """Handles statements like ``SET DOCUMENT X = "Y"``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         key = tokens['key']
         value = tokens['value']
 
@@ -157,33 +152,47 @@ class MetadataParser(BaseParser):
         self.document_metadata[norm_key] = value
 
         if norm_key == METADATA_VERSION:
-            self.check_version(line, position, value)
+            self.raise_for_version(line, position, value)
 
         return tokens
 
     def raise_for_redefined_namespace(self, line, position, namespace):
+        """Raises an exception if a namespace is already defined
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param str namespace: The namespace being parsed
+        """
         if self.disallow_redefinition and self.has_namespace(namespace):
             raise RedefinedNamespaceError(self.line_number, line, position, namespace)
 
     def handle_namespace_url(self, line, position, tokens):
-        """Handles statements like ``DEFINE NAMESPACE X AS URL "Y"``"""
+        """Handles statements like ``DEFINE NAMESPACE X AS URL "Y"``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
 
         url = tokens['url']
-        terms = self.manager.get_namespace_encodings(url)
-
-        self.namespace_dict[namespace] = terms
+        self.namespace_dict[namespace] = self.manager.get_namespace_encodings(url)
         self.namespace_url_dict[namespace] = url
 
         return tokens
 
     def handle_namespace_owl(self, line, position, tokens):
-        """Handles statements like ``DEFINE NAMESPACE X AS OWL "Y"``"""
+        """Handles statements like ``DEFINE NAMESPACE X AS OWL "Y"``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
 
-        functions = set(tokens['functions'] if 'functions' in tokens else belns_encodings)
+        functions = str(tokens['functions']) if 'functions' in tokens else BELNS_ENCODING_STR
 
         url = tokens['url']
 
@@ -195,112 +204,157 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_pattern(self, line, position, tokens):
-        """Handles statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``"""
+        """Handles statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
 
-        value = tokens['value']
-
-        self.namespace_regex[namespace] = value
-        self.namespace_regex_compiled[namespace] = re.compile(value)
+        self.namespace_regex[namespace] = tokens['value']
 
         return tokens
 
     def raise_for_redefined_annotation(self, line, position, annotation):
+        """Raises an exception if the given annotation is already defined
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param str annotation: The annotation being parsed
+        """
         if self.disallow_redefinition and self.has_annotation(annotation):
             raise RedefinedAnnotationError(self.line_number, line, position, annotation)
 
     def handle_annotation_owl(self, line, position, tokens):
-        """Handles statements like ``DEFINE ANNOTATION X AS OWL "Y"``"""
-        annotation = tokens['name']
+        """Handles statements like ``DEFINE ANNOTATION X AS OWL "Y"``
 
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
+        annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
 
         url = tokens['url']
-
-        terms = self.manager.get_annotation_owl_terms(url, annotation)
-
-        self.annotations_dict[annotation] = set(terms)
+        self.annotation_dict[annotation] = self.manager.get_annotation_owl_terms(url, annotation)
         self.annotations_owl_dict[annotation] = url
 
         return tokens
 
     def handle_annotations_url(self, line, position, tokens):
-        """Handles statements like ``DEFINE ANNOTATION X AS URL "Y"``"""
-        annotation = tokens['name']
-        self.raise_for_redefined_annotation(line, position, annotation)
+        """Handles statements like ``DEFINE ANNOTATION X AS URL "Y"``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
+        keyword = tokens['name']
+        self.raise_for_redefined_annotation(line, position, keyword)
 
         url = tokens['url']
-
-        self.annotations_dict[annotation] = self.manager.get_annotation(url)
-        self.annotation_url_dict[annotation] = url
+        self.annotation_dict[keyword] = self.manager.get_annotation_entries(url)
+        self.annotation_url_dict[keyword] = url
 
         return tokens
 
     def handle_annotation_list(self, line, position, tokens):
-        """Handles statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``"""
+        """Handles statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
 
         values = set(tokens['values'])
 
-        self.annotations_dict[annotation] = values
+        self.annotation_dict[annotation] = values
         self.annotation_lists.add(annotation)
 
         return tokens
 
     def handle_annotation_pattern(self, line, position, tokens):
-        """Handles statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``"""
+        """Handles statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
-
-        value = tokens['value']
-
-        self.annotations_regex[annotation] = value
-        self.annotations_regex_compiled[annotation] = re.compile(value)
-
+        self.annotations_regex[annotation] = tokens['value']
         return tokens
 
     def has_enumerated_annotation(self, annotation):
-        """Checks if this annotation is defined by an enumeration"""
-        return annotation in self.annotations_dict
+        """Checks if this annotation is defined by an enumeration
+
+        :param str annotation: The keyword of a annotation
+        :rtype: bool
+        """
+        return annotation in self.annotation_dict
 
     def has_regex_annotation(self, annotation):
-        """Checks if this annotation is defined by a regular expression"""
+        """Checks if this annotation is defined by a regular expression
+
+        :param str annotation: The keyword of a annotation
+        :rtype: bool
+        """
         return annotation in self.annotations_regex
 
     def has_annotation(self, annotation):
-        """Checks if this annotation is defined"""
+        """Checks if this annotation is defined
+
+        :param str annotation: The keyword of a annotation
+        :rtype: bool
+        """
         return self.has_enumerated_annotation(annotation) or self.has_regex_annotation(annotation)
 
     def has_enumerated_namespace(self, namespace):
-        """Checks if this namespace is defined by an enumeration"""
+        """Checks if this namespace is defined by an enumeration
+
+        :param str namespace: The keyword of a namespace
+        :rtype: bool
+        """
         return namespace in self.namespace_dict
 
     def has_regex_namespace(self, namespace):
-        """Checks if this namespace is defined by a regular expression"""
+        """Checks if this namespace is defined by a regular expression
+
+        :param str namespace: The keyword of a namespace
+        :rtype: bool
+        """
         return namespace in self.namespace_regex
 
     def has_namespace(self, namespace):
-        """Checks if this namespace is defined"""
+        """Checks if this namespace is defined
+
+        :param str namespace: The keyword of a namespace
+        :rtype: bool
+        """
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
 
-    def check_version(self, line, position, s):
+    def raise_for_version(self, line, position, version):
         """Checks that a version string is valid for BEL documents, meaning it's either in the YYYYMMDD or semantic version
         format
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param str version: A version string
         """
-        if valid_date_version(s):
+        if valid_date_version(version):
             return
 
-        if not SEMANTIC_VERSION_STRING_RE.match(s):
-            raise VersionFormatWarning(self.line_number, line, position, s)
+        if not SEMANTIC_VERSION_STRING_RE.match(version):
+            raise VersionFormatWarning(self.line_number, line, position, version)
 
 
 def extend_version(value):
     """
-
     :param str value: A version string, that might not be a semantic one
-    :return:
+    :rtype: str
     """
     if not SEMANTIC_VERSION_STRING_RE.match(value) and MALFORMED_VERSION_STRING_RE.match(value):
         k = value.split('.')

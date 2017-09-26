@@ -2,6 +2,8 @@
 
 """This module contains the base class for connection managers in SQLAlchemy"""
 
+from __future__ import unicode_literals
+
 import logging
 
 from sqlalchemy import create_engine
@@ -94,8 +96,8 @@ class BaseManager(object):
 
         :param bool checkfirst: Check if the database is made before trying to re-make it
         """
-        Base.metadata.create_all(self.engine, checkfirst=checkfirst)
+        Base.metadata.create_all(bind=self.engine, checkfirst=checkfirst)
 
     def drop_all(self, checkfirst=True):
         """Drops all data, tables, and databases for the PyBEL cache"""
-        Base.metadata.drop_all(self.engine, checkfirst=checkfirst)
+        Base.metadata.drop_all(bind=self.engine, checkfirst=checkfirst)

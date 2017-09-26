@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
+
 from pybel import BELGraph
 from pybel.constants import *
 from tests.constants import TemporaryCacheMixin, test_citation_dict, test_evidence_text
+from tests.mocks import mock_bel_resources
 from tests.utils import make_dummy_namespaces, make_dummy_annotations
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
-    def test_simple(self):
+    @mock_bel_resources
+    def test_simple(self, mock):
         """This test checks that the network can be added and dropped"""
         graph = BELGraph(name='test', version='0.0.0')
 

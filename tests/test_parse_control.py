@@ -26,7 +26,7 @@ class TestParseControl(unittest.TestCase):
         }
 
         self.parser = ControlParser(
-            annotation_dicts=self.custom_annotation_dicts,
+            annotation_dict=self.custom_annotation_dicts,
             annotation_regex=self.custom_annotation_expressions
         )
 

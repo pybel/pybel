@@ -5,10 +5,10 @@ import logging
 import networkx
 from copy import deepcopy
 
-from .operations import left_full_join, left_outer_join
+from .operations import left_full_join, left_outer_join, left_node_intersection_join
 from ..constants import *
 from ..parser.canonicalize import add_node_from_data
-from ..utils import get_version, subdict_matches
+from ..utils import get_version
 
 __all__ = [
     'BELGraph',
@@ -37,7 +37,8 @@ class BELGraph(networkx.MultiDiGraph):
         the :mod:`pybel.io` module
 
         :param str name: The graph's name
-        :param str version: The graph's version. Recommended to use semantic versioning or YYYYMMDD format.
+        :param str version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
+                            ``YYYYMMDD`` format.
         :param str description: A description of the graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
@@ -174,34 +175,6 @@ class BELGraph(networkx.MultiDiGraph):
         if not self.has_edge(u, v, key):
             self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
 
-    # TODO better implementation using edge filters
-    def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
-        """Allows for filtering by checking keyword arguments are a sub-dictionary of each edges' data.
-            See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
-        for u, v, k, d in super(BELGraph, self).edges_iter(nbunch=nbunch, data=True, keys=True, default=default):
-            if not subdict_matches(d, kwargs):
-                continue
-            elif keys and data:
-                yield u, v, k, d
-            elif data:
-                yield u, v, d
-            elif keys:
-                yield u, v, k
-            else:
-                yield u, v
-
-    # TODO better implementation using node filters
-    def nodes_iter(self, data=False, **kwargs):
-        """Allows for filtering by checking keyword arguments are a sub-dictionary of each nodes' data.
-            See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
-        for n, d in super(BELGraph, self).nodes_iter(data=True):
-            if not subdict_matches(d, kwargs):
-                continue
-            elif data:
-                yield n, d
-            else:
-                yield n
-
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
@@ -267,21 +240,83 @@ class BELGraph(networkx.MultiDiGraph):
         self.node[node][DESCRIPTION] = description
 
     def __add__(self, other):
-        """Allows g + h to full join g and h and return a new graph"""
+        """Creates a deep copy of this graph and full joins another graph with it using
+        :func:`pybel.struct.left_full_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g + h
+        """
         result = deepcopy(self)
         left_full_join(result, other)
         return result
 
     def __iadd__(self, other):
-        """Allows g += h to full join h into g"""
-        left_full_join(self, other)
+        """Full joins another graph into this one using :func:`pybel.struct.left_full_join`.
 
-    def __iand__(self, other):
-        """Allows g &= h to outer join h into g"""
-        left_outer_join(self, other)
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> g += h
+        """
+        left_full_join(self, other)
+        return self
 
     def __and__(self, other):
-        """Allows g & h to outer join h and g and return a new graph"""
+        """Creates a deep copy of this graph and outer joins another graph with it using
+        :func:`pybel.struct.left_outer_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g & h
+        """
         result = deepcopy(self)
         left_outer_join(result, other)
         return result
+
+    def __iand__(self, other):
+        """Outer joins another graph into this one using :func:`pybel.struct.left_outer_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> g &= h
+        """
+        left_outer_join(self, other)
+        return self
+
+    def __xor__(self, other):
+        """Node intersection joins another graph using :func:`pybel.struct.left_node_intersection_join`
+
+        :param BELGraph other: Another BEL graph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g ^ h
+        """
+        return left_node_intersection_join(self, other)

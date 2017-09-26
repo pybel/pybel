@@ -31,7 +31,7 @@ CLASSIFIERS = [
 INSTALL_REQUIRES = [
     'requests',
     'requests_file',
-    'networkx',
+    'networkx==1.11',
     'pyparsing',
     'py2neo',
     'click',
@@ -44,7 +44,9 @@ INSTALL_REQUIRES = [
 if sys.version_info < (3, ):
     INSTALL_REQUIRES.append('configparser')
 
-EXTRAS_REQUIRE = {}
+EXTRAS_REQUIRE = {
+    'indra': ['indra']
+}
 TESTS_REQUIRE = [
     'mock',
     'pathlib',

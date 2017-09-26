@@ -1,4 +1,4 @@
-networkx
+networkx==1.11
 requests
 requests_file
 pyparsing

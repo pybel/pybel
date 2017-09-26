@@ -33,16 +33,3 @@ Load, compile, and export to Cytoscape format:
     $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
 
 In Cytoscape, open with :code:`Import > Network > From File`.
-
-Get the latest PyBEL Suite
---------------------------
-Here is a list of all of the things you can install:
-
-.. code::
-
-    python3 -m pip uninstall pybel_web_validator
-    python3 -m pip uninstall pybel_tools
-    python3 -m pip uninstall pybel
-    python3 -m pip install git+https://github.com/pybel/pybel.git@develop
-    python3 -m pip install git+https://github.com/pybel/pybel-tools.git@develop
-    python3 -m pip install git+https://github.com/pybel/pybel-web-validator.git

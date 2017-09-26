@@ -2,7 +2,14 @@
 
 import unittest
 
+try:
+    import pybel_test_extension
+    run_test_extensions = True
+except ModuleNotFoundError:
+    run_test_extensions = False
 
+
+@unittest.skipUnless(run_test_extensions, 'PyBEL test extension is not installed')
 class TestExtensions(unittest.TestCase):
     def test_import_extension(self):
         import pybel.ext.test

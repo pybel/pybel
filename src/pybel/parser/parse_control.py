@@ -45,19 +45,19 @@ class ControlParser(BaseParser):
         BEL 1.0 specification on `control records <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_control_records>`_
     """
 
-    def __init__(self, annotation_dicts=None, annotation_regex=None, citation_clearing=True):
+    def __init__(self, annotation_dict=None, annotation_regex=None, citation_clearing=True):
         """
-        :param dict[str,set[str]] annotation_dicts: A dictionary of {annotation: set of valid values} for parsing
+        :param dict[str,set[str]] annotation_dict: A dictionary of {annotation: set of valid values} for parsing
         :param dict[str,str] annotation_regex: A dictionary of {annotation: regular expression string}
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
         """
         self.citation_clearing = citation_clearing
 
-        self.annotation_dict = {} if annotation_dicts is None else annotation_dicts
-        self.annotation_regex = {} if annotation_regex is None else annotation_regex
-        self.annotation_regex_compiled = {
-            k: re.compile(v)
-            for k, v in self.annotation_regex.items()
+        self._annotation_dict = {} if annotation_dict is None else annotation_dict
+        self._annotation_regex = {} if annotation_regex is None else annotation_regex
+        self._annotation_regex_compiled = {
+            keyword: re.compile(value)
+            for keyword, value in self.annotation_regex.items()
         }
 
         self.statement_group = None
@@ -115,6 +115,30 @@ class ControlParser(BaseParser):
         self.language = self.set_statements | self.unset_statements
 
         super(ControlParser, self).__init__(self.language)
+
+    @property
+    def annotation_dict(self):
+        """A dictionary of annotaions to their set of values
+
+        :rtype: dict[str,set[str]]
+        """
+        return self._annotation_dict
+
+    @property
+    def annotation_regex(self):
+        """A dictioary of annotations defined by regular expressions {annotation keyword: string regular expression}
+
+        :return: dict[str,str]
+        """
+        return self._annotation_regex
+
+    @property
+    def annotation_regex_compiled(self):
+        """A dictionary of annotations defined by regular expressions {annotation keyword: compiled regular expression}
+
+        :rtype: dict[str,re]
+        """
+        return self._annotation_regex_compiled
 
     def raise_for_undefined_annotation(self, line, position, annotation):
         if not self.annotation_dict and not self.annotation_regex:
@@ -243,12 +267,14 @@ class ControlParser(BaseParser):
             raise MissingAnnotationKeyWarning(self.line_number, line, position, key)
 
     def handle_unset_command(self, line, position, tokens):
+        """Handles ``UNSET X``"""
         key = tokens['key']
         self.validate_unset_command(line, position, key)
         del self.annotations[key]
         return tokens
 
     def handle_unset_list(self, line, position, tokens):
+        """Handles ``UNSET {A, B, ...}``"""
         for key in tokens['values']:
             if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
                 self.evidence = None
@@ -259,11 +285,12 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_all(self, line, position, tokens):
+        """Handles ``UNSET_ALL``"""
         self.clear()
         return tokens
 
     def get_annotations(self):
-        """
+        """Gets the current anotations
 
         :return: The currently stored BEL annotations
         :rtype: dict

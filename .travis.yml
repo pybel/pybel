@@ -28,7 +28,7 @@ matrix:
 before_install:
     - pip install codecov
     - pip install pymysql
-    - mysql -e 'CREATE DATABASE pybel;'
+    - mysql -e 'CREATE DATABASE pybel CHARACTER SET utf8 COLLATE utf8_general_ci;'
     - mysql -e "GRANT ALL PRIVILEGES ON pybel.* to 'travis'@'%' WITH GRANT OPTION;"
 
 install:
