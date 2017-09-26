@@ -5,7 +5,7 @@ import logging
 import networkx
 from copy import deepcopy
 
-from .operations import left_full_join, left_outer_join
+from .operations import left_full_join, left_outer_join, left_node_intersection_join
 from ..constants import *
 from ..parser.canonicalize import add_node_from_data
 from ..utils import get_version
@@ -271,6 +271,7 @@ class BELGraph(networkx.MultiDiGraph):
         >>> g += h
         """
         left_full_join(self, other)
+        return self
 
     def __and__(self, other):
         """Creates a deep copy of this graph and outer joins another graph with it using
@@ -304,3 +305,18 @@ class BELGraph(networkx.MultiDiGraph):
         >>> g &= h
         """
         left_outer_join(self, other)
+        return self
+
+    def __xor__(self, other):
+        """Node intersection joins another graph using :func:`pybel.struct.left_node_intersection_join`
+
+        :param BELGraph other: Another BEL graph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g ^ h
+        """
+        return left_node_intersection_join(self, other)
