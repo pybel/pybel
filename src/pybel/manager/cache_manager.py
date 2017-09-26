@@ -494,8 +494,8 @@ class AnnotationManager(BaseManager):
         result = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
 
         if result is not None:
-            log.debug('loaded annotation: %s (%d)', url, len(result.entries))
             self._cache_annotation(result)
+            log.debug('cached annotation: %s (%d)', url, len(self.annotation_object_cache[url]))
             return result
 
         return self.get_or_create_annotation(url)
