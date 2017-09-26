@@ -30,11 +30,17 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
 
 from six.moves.cPickle import load
 
+__all__ = [
+    'from_indra_statments',
+    'from_indra_pickle',
+    'to_indra',
+]
 
-def from_indra(path, name=None, version=None, description=None):
+
+def from_indra_statments(statements, name=None, version=None, description=None):
     """Imports a model from INDRA.
 
-    :param str path: Path to pickled list of :class:`indra.statements.Statement`
+    :param list[indra.statement.Statements] statments: A list of statements
     :param str name: The name for the BEL graph
     :param str version: The version of the BEL graph
     :param str description: The description of the BEL graph
@@ -42,11 +48,8 @@ def from_indra(path, name=None, version=None, description=None):
     """
     from indra.assemblers import PybelAssembler
 
-    with open(path) as f:
-        statments = load(f)
-
     pba = PybelAssembler(
-        stmts=statments,
+        stmts=statements,
         name=name,
         version=version,
         description=description
@@ -55,6 +58,26 @@ def from_indra(path, name=None, version=None, description=None):
     graph = pba.make_model()
 
     return graph
+
+
+def from_indra_pickle(path, name=None, version=None, description=None):
+    """Imports a model from INDRA.
+
+    :param str path: Path to pickled list of :class:`indra.statements.Statement`
+    :param str name: The name for the BEL graph
+    :param str version: The version of the BEL graph
+    :param str description: The description of the BEL graph
+    :rtype: pybel.BELGraph
+    """
+    with open(path, 'rb') as f:
+        statements = load(f)
+
+    return from_indra_statments(
+        statements=statements,
+        name=name,
+        version=version,
+        description=description
+    )
 
 
 def to_indra(graph):

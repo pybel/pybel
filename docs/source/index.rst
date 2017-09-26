@@ -9,7 +9,8 @@ complex disease networks with several thousands of relationships.
 PyBEL is a Python software package that parses BEL scripts, validates their semantics, and facilitates data
 interchange between common formats and database systems like JSON, CSV, Excel, SQL, CX, and Neo4J. Its companion
 package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
-biological networks.
+biological networks. For result-oriented guides, see the `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_
+repository.
 
 Installation is as easy as getting the code from `PyPI <https://pypi.python.org/pypi/pybel>`_ with
 :code:`python3 -m pip install pybel`
