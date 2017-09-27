@@ -769,10 +769,10 @@ class Citation(Base):
             result[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
 
         if self.first:
-            result[CITATION_FIRST_AUTHOR] = self.first
+            result[CITATION_FIRST_AUTHOR] = self.first.name
 
         if self.last:
-            result[CITATION_LAST_AUTHOR] = self.last
+            result[CITATION_LAST_AUTHOR] = self.last.name
 
         if self.authors:
             result[CITATION_AUTHORS] = "|".join(sorted(
