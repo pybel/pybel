@@ -237,7 +237,7 @@ class NamespaceManager(BaseManager):
         :rtype: Namespace or dict[str,str]
         """
         if self.use_namespace_cache and url in self.namespace_model:
-            log.debug('already in memory: %s (%d)', url)
+            log.debug('already in memory: %s', url)
             return self.namespace_model[url]
 
         namespace = self.get_or_create_namespace(url)
@@ -246,7 +246,7 @@ class NamespaceManager(BaseManager):
             log.debug('loaded uncached namespace: %s (%d)', url, len(namespace))
             return namespace
 
-        log.debug('loaded namespace: %s (%d)', url)
+        log.debug('loaded namespace: %s', url)
 
         if self.use_namespace_cache:
             self._cache_namespace(namespace)
