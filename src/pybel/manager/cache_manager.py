@@ -1170,13 +1170,13 @@ class InsertManager(NamespaceManager, AnnotationManager):
         if citation_hash in self.object_cache_citation:
             return self.object_cache_citation[citation_hash]
 
-        result = self.session.query(Citation).filter(Citation.sha512 == citation_hash).one_or_none()
+        citation = self.session.query(Citation).filter(Citation.sha512 == citation_hash).one_or_none()
 
-        if result is not None:
-            self.object_cache_citation[citation_hash] = result
-            return result
+        if citation is not None:
+            self.object_cache_citation[citation_hash] = citation
+            return citation
 
-        result = Citation(
+        citation = Citation(
             type=type,
             reference=reference,
             sha512=citation_hash,
@@ -1187,23 +1187,23 @@ class InsertManager(NamespaceManager, AnnotationManager):
             pages=pages
         )
         if date is not None:
-            result.date = parse_datetime(date)
+            citation.date = parse_datetime(date)
 
         if first is not None:
-            result.first = self.get_or_create_author(first)
+            citation.first = self.get_or_create_author(first)
 
         if last is not None:
-            result.last = self.get_or_create_author(last)
+            citation.last = self.get_or_create_author(last)
 
         if authors is not None:
             for author in (authors.split('|') if isinstance(authors, string_types) else authors):
                 author_model = self.get_or_create_author(author)
-                if author_model not in result.authors:
-                    result.authors.append(author_model)
+                if author_model not in citation.authors:
+                    citation.authors.append(author_model)
 
-        self.session.add(result)
-        self.object_cache_citation[citation_hash] = result
-        return result
+        self.session.add(citation)
+        self.object_cache_citation[citation_hash] = citation
+        return citation
 
     def get_or_create_author(self, name):
         """Gets an author by name, or creates one
@@ -1216,16 +1216,16 @@ class InsertManager(NamespaceManager, AnnotationManager):
         if name in self.object_cache_author:
             return self.object_cache_author[name]
 
-        result = self.session.query(Author).filter(Author.name == name).one_or_none()
+        author = self.session.query(Author).filter(Author.name == name).one_or_none()
 
-        if result is not None:
-            self.object_cache_author[name] = result
-            return result
+        if author is not None:
+            self.object_cache_author[name] = author
+            return author
 
-        result = Author(name=name)
-        self.session.add(result)
-        self.object_cache_author[name] = result
-        return result
+        author = Author(name=name)
+        self.session.add(author)
+        self.object_cache_author[name] = author
+        return author
 
     def get_or_create_modification(self, graph, node_data):
         """Creates a list of modification objects (Modification) that belong to the node described by
