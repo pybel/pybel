@@ -218,22 +218,21 @@ def _decanonicalize_edge_node(graph, node, edge_data, node_position):
     return node_str
 
 
-def edge_to_bel(graph, u, v, k, sep=' '):
+def edge_to_bel(graph, u, v, data, sep=' '):
     """Takes two nodes and gives back a BEL string representing the statement
 
     :param BELGraph graph: A BEL graph
     :param tuple u: The edge's source's PyBEL node tuple
     :param tuple v: The edge's target's PyBEL node tuple
-    :param int k: The edge's key
+    :param dict data: The edge's data dictionary
+    :param str sep: The separator between the source, relation, and target
     :return: The canonical BEL for this edge
     :rtype: str
     """
-    data = graph.edge[u][v][k]
-
     u_str = _decanonicalize_edge_node(graph, u, data, node_position=SUBJECT)
     v_str = _decanonicalize_edge_node(graph, v, data, node_position=OBJECT)
 
-    return sep.join([u_str, data[RELATION], v_str])
+    return sep.join((u_str, data[RELATION], v_str))
 
 
 def sort_dict_items(d):
@@ -251,7 +250,7 @@ def _sort_qualified_edges_helper(edge_tuple):
         d[CITATION][CITATION_TYPE],
         d[CITATION][CITATION_REFERENCE],
         d[EVIDENCE],
-        hash_edge(u,v,k,d)
+        hash_edge(u, v, k, d)
     )
 
 
@@ -264,6 +263,7 @@ def sort_qualified_edges(graph):
     qualified_edges_iter = iter_qualified_edges(graph)
     qualified_edges = sorted(qualified_edges_iter, key=_sort_qualified_edges_helper)
     return qualified_edges
+
 
 def to_bel_lines(graph):
     """Returns an iterable over the lines of the BEL graph as a canonical BEL Script (.bel)
@@ -315,11 +315,11 @@ def to_bel_lines(graph):
         for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3][EVIDENCE]):
             yield 'SET SupportingText = "{}"'.format(evidence)
 
-            for u, v, k, data in evidence_edges:
+            for u, v, _, data in evidence_edges:
                 keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else {}
                 for key in keys:
                     yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
-                yield edge_to_bel(graph, u, v, k)
+                yield edge_to_bel(graph, u, v, data=data)
                 if keys:
                     yield 'UNSET {{{}}}'.format(', '.join('"{}"'.format(key) for key in keys))
             yield 'UNSET SupportingText'

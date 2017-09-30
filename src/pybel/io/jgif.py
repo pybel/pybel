@@ -284,10 +284,10 @@ def to_jgif(graph):
     for u, v in graph.edges_iter():
         relation_evidences = defaultdict(list)
 
-        for key, data in graph.edge[u][v].items():
+        for data in graph.edge[u][v].values():
 
             if (u, v, data[RELATION]) not in u_v_r_bel:
-                u_v_r_bel[u, v, data[RELATION]] = edge_to_bel(graph, u, v, key)
+                u_v_r_bel[u, v, data[RELATION]] = edge_to_bel(graph, u, v, data=data)
 
             bel = u_v_r_bel[u, v, data[RELATION]]
 

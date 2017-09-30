@@ -989,7 +989,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         properties = self.get_or_create_properties(graph, data)
         annotations = self._get_annotation_entries(graph, data)
 
-        bel = edge_to_bel(graph, u, v, k)
+        bel = edge_to_bel(graph, u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
             source=self.node_model[u],
@@ -1005,7 +1005,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         network.edges.append(edge)
 
     def _add_unqualified_edge(self, network, graph, u, v, k, data):
-        bel = edge_to_bel(graph, u, v, k)
+        bel = edge_to_bel(graph, u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
             source=self.node_model[u],

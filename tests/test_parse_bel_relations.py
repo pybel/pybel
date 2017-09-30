@@ -615,18 +615,19 @@ class TestRelations(TestTokenParserBase):
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
 
-        sub = RNA, 'HGNC', 'AKT1'
-        self.assertHasNode(sub)
+        source = RNA, 'HGNC', 'AKT1'
+        self.assertHasNode(source)
 
-        obj = PROTEIN, 'HGNC', 'AKT1'
-        self.assertHasNode(obj)
+        target = PROTEIN, 'HGNC', 'AKT1'
+        self.assertHasNode(target)
 
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
-        self.assertHasEdge(sub, obj, **{RELATION: TRANSLATED_TO})
+        self.assertHasEdge(source, target, **{RELATION: TRANSLATED_TO})
 
+        data = self.parser.graph.edge[source][target][0]
         self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
-                         edge_to_bel(self.parser.graph, sub, obj, 0))
+                         edge_to_bel(self.parser.graph, source, target, data=data))
 
     def test_component_list(self):
         s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
