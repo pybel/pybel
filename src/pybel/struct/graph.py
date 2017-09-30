@@ -233,7 +233,7 @@ class BELGraph(networkx.MultiDiGraph):
         })
 
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
-                           object_modifier=None, **attrs):
+                           object_modifier=None, **attr):
         """Adds an edge, qualified with a relation, evidence, citation, and optional annotations, subject modifications,
         and object modifications
 
@@ -246,13 +246,15 @@ class BELGraph(networkx.MultiDiGraph):
         :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
         :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
         """
-        attr = attrs.copy()
         attr.update({
             RELATION: relation,
             EVIDENCE: evidence,
             CITATION: citation,
-            ANNOTATIONS: annotations or {}
+
         })
+
+        if annotations:
+            attr[ANNOTATIONS] = annotations
 
         if subject_modifier:
             attr[SUBJECT] = subject_modifier

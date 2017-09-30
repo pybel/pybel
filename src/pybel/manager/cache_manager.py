@@ -960,9 +960,12 @@ class InsertManager(NamespaceManager, AnnotationManager):
         :param dict data: A PyBEL edge data dictionary
         :rtype: list[AnnotationEntry]
         """
+        if ANNOTATIONS not in data:
+            return
+
         return [
             self.get_annotation_entry(url, value)
-            for url, value in self._map_annotations_dict(graph, data)
+            for url, value in self._map_annotations_dict(graph, data[ANNOTATIONS])
         ]
 
     def _add_qualified_edge(self, network, graph, u, v, k, data):
@@ -984,7 +987,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
         properties = self.get_or_create_properties(graph, data)
-        annotations = self._get_annotation_entries(graph, data[ANNOTATIONS])
+        annotations = self._get_annotation_entries(graph, data)
 
         bel = edge_to_bel(graph, u, v, k)
         edge_hash = hash_edge(u, v, k, data)

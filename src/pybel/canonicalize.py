@@ -315,13 +315,13 @@ def to_bel_lines(graph):
         for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3][EVIDENCE]):
             yield 'SET SupportingText = "{}"'.format(evidence)
 
-            for u, v, k, d in evidence_edges:
-                dkeys = sorted(d[ANNOTATIONS])
-                for dk in dkeys:
-                    yield 'SET {} = "{}"'.format(dk, d[ANNOTATIONS][dk])
+            for u, v, k, data in evidence_edges:
+                keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else {}
+                for key in keys:
+                    yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
                 yield edge_to_bel(graph, u, v, k)
-                if dkeys:
-                    yield 'UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys))
+                if keys:
+                    yield 'UNSET {{{}}}'.format(', '.join('"{}"'.format(key) for key in keys))
             yield 'UNSET SupportingText'
         yield 'UNSET Citation\n'
 
@@ -342,8 +342,8 @@ def to_bel_lines(graph):
         yield 'SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}'
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
-        for u, v, d in unqualified_edges_to_serialize:
-            yield '{} {} {}'.format(node_to_bel(graph, u), d[RELATION], node_to_bel(graph, v))
+        for u, v, data in unqualified_edges_to_serialize:
+            yield '{} {} {}'.format(node_to_bel(graph, u), data[RELATION], node_to_bel(graph, v))
 
         for node in isolated_nodes_to_serialize:
             yield node_to_bel(graph, node)

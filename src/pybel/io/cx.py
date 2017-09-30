@@ -167,12 +167,13 @@ def to_cx(graph):
                     'v': v
                 })
 
-        for k, v in d[ANNOTATIONS].items():
-            edge_attributes_entry.append({
-                'po': eid,
-                'n': k,
-                'v': v
-            })
+        if ANNOTATIONS in d:
+            for annotation, value in d[ANNOTATIONS].items():
+                edge_attributes_entry.append({
+                    'po': eid,
+                    'n': annotation,
+                    'v': value
+                })
 
         if SUBJECT in d:
             for k, v in flatten_dict(d[SUBJECT]).items():

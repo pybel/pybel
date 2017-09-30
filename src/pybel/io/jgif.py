@@ -284,25 +284,27 @@ def to_jgif(graph):
     for u, v in graph.edges_iter():
         relation_evidences = defaultdict(list)
 
-        for k, d in graph.edge[u][v].items():
+        for key, data in graph.edge[u][v].items():
 
-            if (u, v, d[RELATION]) not in u_v_r_bel:
-                u_v_r_bel[u, v, d[RELATION]] = edge_to_bel(graph, u, v, k)
+            if (u, v, data[RELATION]) not in u_v_r_bel:
+                u_v_r_bel[u, v, data[RELATION]] = edge_to_bel(graph, u, v, key)
 
-            bel = u_v_r_bel[u, v, d[RELATION]]
+            bel = u_v_r_bel[u, v, data[RELATION]]
 
             evidence_dict = {
                 'bel_statement': bel,
-                'experiment_context': d[ANNOTATIONS],
             }
 
-            if EVIDENCE in d:
-                evidence_dict['summary_text'] = d[EVIDENCE]
+            if ANNOTATIONS in data:
+                evidence_dict['experiment_context'] = data[ANNOTATIONS]
 
-            if CITATION in d:
-                evidence_dict['citation'] = d[CITATION]
+            if EVIDENCE in data:
+                evidence_dict['summary_text'] = data[EVIDENCE]
 
-            relation_evidences[d[RELATION]].append(evidence_dict)
+            if CITATION in data:
+                evidence_dict['citation'] = data[CITATION]
+
+            relation_evidences[data[RELATION]].append(evidence_dict)
 
         for relation, evidences in relation_evidences.items():
             edges_entry.append({
