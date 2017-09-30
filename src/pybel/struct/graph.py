@@ -232,6 +232,42 @@ class BELGraph(networkx.MultiDiGraph):
             NAME: name
         })
 
+    def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
+                           object_modifier=None, **attrs):
+        """Adds an edge, qualified with a relation, evidence, citation, and optional annotations, subject modifications,
+        and object modifications
+
+        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param str relation: The type of relation this edge represents
+        :param str evidence: The evidence string from an article
+        :param dict[str,str] citation: The citation data dictionary for this evidence
+        :param dict[str,str] annotations: The annotations data dictionary
+        :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
+        :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+        """
+        attr = attrs.copy()
+        attr.update({
+            RELATION: relation,
+            EVIDENCE: evidence,
+            CITATION: citation,
+            ANNOTATIONS: annotations or {}
+        })
+
+        if subject_modifier:
+            attr[SUBJECT] = subject_modifier
+
+        if object_modifier:
+            attr[OBJECT] = object_modifier
+
+        if isinstance(u, dict):
+            u = self.add_node_from_data(u)
+
+        if isinstance(v, dict):
+            v = self.add_node_from_data(v)
+
+        self.add_edge(u, v, **attr)
+
     def has_edge_citation(self, u, v, key):
         """Does the given edge have a citation?"""
         return CITATION in self.edge[u][v][key]

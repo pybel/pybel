@@ -642,30 +642,39 @@ class BelParser(BaseParser):
         subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
         object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
 
-        q = {
-            RELATION: tokens[RELATION],
-            EVIDENCE: self.control_parser.evidence,
-            CITATION: self.control_parser.citation.copy(),
-            LINE: self.line_number,
-        }
-
+        relation = tokens[RELATION]
         sub_mod = modifier_po_to_dict(tokens[SUBJECT])
-        if sub_mod:
-            q[SUBJECT] = sub_mod
-
         obj_mod = modifier_po_to_dict(tokens[OBJECT])
-        if obj_mod:
-            q[OBJECT] = obj_mod
-
         attrs, list_attrs = self._build_attrs()
 
         for single_annotation in cartesian_dictionary(list_attrs):
-            annots = attrs.copy()
-            annots.update(single_annotation)
+            annotations = attrs.copy()
+            annotations.update(single_annotation)
 
-            self.graph.add_edge(subject_node_tuple, object_node_tuple, attr_dict=q, **{ANNOTATIONS: annots})
-            if tokens[RELATION] in TWO_WAY_RELATIONS:
-                self.add_reverse_edge(subject_node_tuple, object_node_tuple, attr_dict=q, **{ANNOTATIONS: annots})
+            self.graph.add_qualified_edge(
+                subject_node_tuple,
+                object_node_tuple,
+                relation=relation,
+                evidence=self.control_parser.evidence,
+                citation=self.control_parser.citation.copy(),
+                annotations=annotations,
+                subject_modifier=sub_mod,
+                object_modifier=obj_mod,
+                **{LINE: self.line_number}
+            )
+
+            if relation in TWO_WAY_RELATIONS:
+                self.graph.add_qualified_edge(
+                    object_node_tuple,
+                    subject_node_tuple,
+                    relation=relation,
+                    evidence=self.control_parser.evidence,
+                    citation=self.control_parser.citation.copy(),
+                    annotations=annotations,
+                    object_modifier=sub_mod,
+                    subject_modifier=obj_mod,
+                    **{LINE: self.line_number}
+                )
 
         return tokens
 
@@ -680,28 +689,6 @@ class BelParser(BaseParser):
         object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
         rel = tokens[RELATION]
         self.graph.add_unqualified_edge(subject_node_tuple, object_node_tuple, rel)
-
-    def add_reverse_edge(self, sub, obj, attr_dict, **attr):
-        """
-
-        :param sub:
-        :param obj:
-        :param attr_dict:
-        :param attr:
-        :return:
-        """
-        new_attrs = {
-            key: value
-            for key, value in attr_dict.items()
-            if key not in {SUBJECT, OBJECT}
-        }
-        attrs_subject, attrs_object = attr_dict.get(SUBJECT), attr_dict.get(OBJECT)
-        if attrs_subject:
-            new_attrs[OBJECT] = attrs_subject
-        if attrs_object:
-            new_attrs[SUBJECT] = attrs_object
-
-        self.graph.add_edge(obj, sub, attr_dict=new_attrs, **attr)
 
     def handle_label_relation(self, line, position, tokens):
         """Handles statements like ``p(X) label "Label for X"``
