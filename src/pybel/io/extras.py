@@ -57,10 +57,10 @@ def to_csv(graph, file=None, sep='\t'):
     :param file file: A writable file or file-like. Defaults to stdout.
     :param str sep: The separator. Defaults to tab.
     """
-    for u, v, k, d in graph.edges_iter(keys=True, data=True):
+    for u, v, data in graph.edges_iter(data=True):
         print(
-            edge_to_bel(graph, u, v, k, sep=sep),
-            json.dumps(d),
+            edge_to_bel(graph, u, v, data=data, sep=sep),
+            json.dumps(data),
             sep=sep,
             file=file
         )
@@ -80,9 +80,9 @@ def to_sif(graph, file=None, sep='\t'):
     :param file file: A writable file or file-like. Defaults to stdout.
     :param str sep: The separator. Defaults to tab.
     """
-    for u, v, k in graph.edges_iter(keys=True):
+    for u, v, data in graph.edges_iter(data=True):
         print(
-            edge_to_bel(graph, u, v, k, sep=sep),
+            edge_to_bel(graph, u, v, data=data, sep=sep),
             file=file
         )
 
