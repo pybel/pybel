@@ -24,6 +24,8 @@ matrix:
           env: TOXENV=docs
         - python: 3.6
           env: TOXENV=manifest
+        - python: 3.6
+          env: TOXENV=rst-lint
 
 before_install:
     - pip install codecov
