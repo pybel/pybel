@@ -22,7 +22,7 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def to_database(graph, connection=None, store_parts=False):
+def to_database(graph, connection=None, store_parts=True):
     """Stores a graph in a database.
 
     :param BELGraph graph: A BEL graph

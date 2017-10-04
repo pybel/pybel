@@ -135,7 +135,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         """Tests that a graph with the same name and version can't be added twice"""
         self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
 
-        to_database(self.graph, connection=self.manager)
+        to_database(self.graph, connection=self.manager, store_parts=True)
 
         self.assertEqual(1, self.manager.count_networks())
 

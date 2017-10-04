@@ -845,7 +845,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         self.object_cache_evidence = {}
         self.object_cache_author = {}
 
-    def insert_graph(self, graph, store_parts=False):
+    def insert_graph(self, graph, store_parts=True):
         """Inserts a graph in the database.
 
         :param BELGraph graph: A BEL graph
