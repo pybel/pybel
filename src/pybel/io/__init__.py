@@ -17,6 +17,7 @@ from . import lines
 from . import ndex_utils
 from . import neo4j
 from . import nodelink
+from . import web
 from .cx import *
 from .extras import *
 from .gpickle import *
@@ -26,6 +27,7 @@ from .lines import *
 from .ndex_utils import *
 from .neo4j import *
 from .nodelink import *
+from .web import *
 
 __all__ = (
     lines.__all__ +
@@ -36,5 +38,6 @@ __all__ = (
     extras.__all__ +
     ndex_utils.__all__ +
     jgif.__all__ +
-    indra.__all__
+    indra.__all__ +
+    web.__all__
 )
