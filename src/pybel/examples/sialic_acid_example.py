@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""This is the first attempt at curating an excerpt from the research article, **Genetics ignite focus on microglial
-inflammation in Alzheimer's disease**."""
+"""This is the first attempt at curating an excerpt from the research article, "Genetics ignite focus on microglial
+inflammation in Alzheimer's disease"."""
 
 from ..constants import *
-from ..struct import BELGraph
+from ..struct.graph import BELGraph
 
 __all__ = [
     'sialic_acid_graph'

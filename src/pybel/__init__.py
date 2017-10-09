@@ -76,8 +76,7 @@ __all__ = (
     io.__all__ +
     canonicalize.__all__ +
     database_io.__all__ +
-    cache_manager.__all__ +
-    examples.__all__
+    cache_manager.__all__
 )
 
 __version__ = '0.9.3-dev'

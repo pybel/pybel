@@ -40,6 +40,7 @@ Links
    :name: topics
 
    datamodel
+   examples
    io
    filters
    cookbook
