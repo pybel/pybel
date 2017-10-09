@@ -30,8 +30,8 @@ Links
    :caption: Getting Started
    :name: start
 
-   installation
    overview
+   installation
 
 
 .. toctree::

@@ -6,8 +6,6 @@ as well as the Bio2BEL project.
 
 PyBEL
 -----
-- Integration with INDRA to enable import of SBML, BioPAX, and text mining results.
-- Import and export of JGIF
 - Performance improvements
     - Parallelization of parsing
     - On-the-fly validation with OLS or MIRIAM
