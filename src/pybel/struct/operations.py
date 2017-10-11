@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import networkx as nx
-from collections import defaultdict
+
+from .utils import stratify_hash_edges
 
 __all__ = [
     'left_full_join',
     'left_outer_join',
-    'left_full_join_networks',
-    'left_outer_join_networks',
     'union',
+    'left_node_intersection_join',
+    'node_intersection',
 ]
 
 
-def left_full_node_join(g, h):
-    """Adds all nodes from H to G, in-place for G
+def _left_full_node_join(g, h):
+    """Adds all nodes from ``h`` to ``g``, in-place for ``g``
 
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
@@ -24,16 +25,23 @@ def left_full_node_join(g, h):
 
 
 def left_full_join(g, h, use_hash=True):
-    """Adds all nodes and edges from H to G, in-place for G
+    """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g``
 
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> merged = left_full_join(g, h)
     """
     if use_hash:
-        return _left_full_hash_join(g, h)
+        _left_full_hash_join(g, h)
     else:
-        return _left_full_exhaustive_join(g, h)
+        _left_full_exhaustive_join(g, h)
 
 
 def _left_full_exhaustive_join(g, h):
@@ -43,7 +51,7 @@ def _left_full_exhaustive_join(g, h):
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
     """
-    left_full_node_join(g, h)
+    _left_full_node_join(g, h)
 
     for u, v, k, d in h.edges_iter(keys=True, data=True):
         if k < 0:  # unqualified edge that's not in G yet
@@ -64,7 +72,7 @@ def _left_full_hash_join(g, h):
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
     """
-    left_full_node_join(g, h)
+    _left_full_node_join(g, h)
 
     g_qualified_edges, g_unqualified_edges = stratify_hash_edges(g)
     h_qualified_edges, h_unqualified_edges = stratify_hash_edges(h)
@@ -89,58 +97,24 @@ def _left_full_hash_join(g, h):
                     g.add_edge(u, v, attr_dict=h.edge[u][v][h_qualified_edges[u, v][d_hash]])
 
 
-def hash_dict(d):
-    """Hashes a dictionary
-
-    :param dict d: A dictionary to recursively hash
-    :return: the hash value of the dictionary
-    :rtype: int
-    """
-    h = 0
-    for k, v in sorted(d.items()):
-        h += hash(k)
-
-        if isinstance(v, (set, list)):
-            h += hash(tuple(sorted(v)))
-
-        if isinstance(v, dict):
-            h += hash_dict(v)
-
-        if isinstance(v, (bool, int, tuple, str)):
-            h += hash(v)
-
-    return hash(h)
-
-
-def stratify_hash_edges(graph):
-    """Splits all qualified and unqualified edges by different indexing strategies
-
-    :param BELGraph graph: A BEL network
-    :rtype dict[tuple, dict[int, int]], dict[tuple, dict[int, set[int]]]
-    """
-    qualified_edges = defaultdict(dict)
-    unqualified_edges = defaultdict(lambda: defaultdict(set))
-
-    for u, v, k, d in graph.edges_iter(keys=True, data=True):
-        hashed_data = hash_dict(d)
-
-        if k < 0:
-            unqualified_edges[u, v][k].add(hashed_data)
-        else:
-            qualified_edges[u, v][hashed_data] = k
-
-    return dict(qualified_edges), dict(unqualified_edges)
-
-
 def left_outer_join(g, h, use_hash=True):
-    """Only adds components from the right graph that are touching the left graph.
+    """Only adds components from the ``h`` that are touching ``g``.
 
-    1. Identify all weakly connected components in H
-    2. Add those that have an intersection with the original graph
+    Algorithm:
+
+    1. Identify all weakly connected components in ``h``
+    2. Add those that have an intersection with the ``g``
 
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> merged = left_outer_join(g, h)
     """
     g_nodes = set(g.nodes_iter())
     for comp in nx.weakly_connected_components(h):
@@ -148,7 +122,7 @@ def left_outer_join(g, h, use_hash=True):
             left_full_join(g, h.subgraph(comp), use_hash=use_hash)
 
 
-def left_full_join_networks(target, networks, use_hash=True):
+def _left_full_join_networks(target, networks, use_hash=True):
     """Full joins a list of networks to a target network
 
     The order of the networks will not impact the result.
@@ -156,14 +130,14 @@ def left_full_join_networks(target, networks, use_hash=True):
     :param BELGraph target: A BEL network
     :param iter[BELGraph] networks: An iterator of BEL networks
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
-    :return:
+    :rtype: BELGraph
     """
     for network in networks:
         left_full_join(target, network, use_hash=use_hash)
     return target
 
 
-def left_outer_join_networks(target, networks, use_hash=True):
+def _left_outer_join_networks(target, networks, use_hash=True):
     """Outer joins a list of networks to a target network.
 
     Note: the order of networks will have significant results!
@@ -171,7 +145,7 @@ def left_outer_join_networks(target, networks, use_hash=True):
     :param BELGraph target: A BEL network
     :param iter[BELGraph] networks: An iterator of BEL networks
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
-    :return:
+    :rtype: BELGraph
     """
     for network in networks:
         left_outer_join(target, network, use_hash=use_hash)
@@ -179,16 +153,25 @@ def left_outer_join_networks(target, networks, use_hash=True):
 
 
 def union(networks, use_hash=True):
-    """Takes the union over a collection of networks into a new network.
+    """Takes the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
+    infinite.
 
     :param iter[BELGraph] networks: An iterator over BEL networks
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     :return: A merged network
     :rtype: BELGraph
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> k = pybel.from_path('...')
+    >>> merged = union([g, h, k])
     """
     networks_iter = iter(networks)
     target = next(networks_iter).copy()
-    return left_full_join_networks(target, networks_iter, use_hash=use_hash)
+    return _left_full_join_networks(target, networks_iter, use_hash=use_hash)
 
 
 def left_node_intersection_join(g, h, use_hash=True):
@@ -199,6 +182,13 @@ def left_node_intersection_join(g, h, use_hash=True):
     :param BELGraph h: A BEL network
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     :rtype: BELGraph
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> merged = left_node_intersection_join(g, h)
     """
     intersecting = set(g.nodes_iter()).intersection(set(h.nodes_iter()))
 
@@ -218,13 +208,27 @@ def node_intersection(networks, use_hash=True):
                                     tuple first, so this isn't a safe operation for infinite lists.
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     :rtype: BELGraph
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> k = pybel.from_path('...')
+    >>> merged = node_intersection([g, h, k])
     """
     networks = tuple(networks)
 
-    nodes = set.intersection(
-        set(network.nodes_iter())
-        for network in networks
-    )
+    if len(networks) == 0:
+        raise ValueError('No networks given')
+    elif len(networks) == 1:
+        return networks[1]
+
+    nodes = set()
+
+    for network in networks:
+        nodes.update(network.nodes_iter())
+
     subgraphs = (
         network.subgraph(nodes)
         for network in networks

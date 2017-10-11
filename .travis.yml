@@ -24,11 +24,13 @@ matrix:
           env: TOXENV=docs
         - python: 3.6
           env: TOXENV=manifest
+        - python: 3.6
+          env: TOXENV=rst-lint
 
 before_install:
     - pip install codecov
     - pip install pymysql
-    - mysql -e 'CREATE DATABASE pybel;'
+    - mysql -e 'CREATE DATABASE pybel CHARACTER SET utf8 COLLATE utf8_general_ci;'
     - mysql -e "GRANT ALL PRIVILEGES ON pybel.* to 'travis'@'%' WITH GRANT OPTION;"
 
 install:
@@ -49,12 +51,22 @@ addons:
         repo_token: e8d763f60ca5495b8bce79682b7c1e2e462a776f8de5c4540ceb01f52458f891
 
 deploy:
-    provider: pypi
-    user: cthoyt
-    password:
-        secure: WK8SA0Vtdn9a4RMdpn8L0CFbHs/3a+mOJrwYLaL4kzzZNWjL3yt0ygnhY5138pQoy5ygQ/bLT/COJIE9cN0qP0uUyBMgerUPWozkXryoz79zsQxe2HXHkG/XMhxuNjvPwRKjw9+tmz/wWoCeMFQ0JczNvOg2DYFcT4ruqLY5muHBuMErVB5pwjGSpYmDAEpI30x6KEJTXz5VIDxRpLhI6uehpItBW195Yj5GRAWllnGTqn9zRTeZR7SME1/p2Af1RVOlam4Ur/3hSXYDMUqErNj/vrxvxgpO9lDakfpSUV0U7pETgwQ+g8mp0fgm8I643jfu4Zoj8lITf9ewl9CteiaC80gV4Nj9JA9mdGiiaZwmpkEPUiMq6YLaqef6QDJEL2kx1q40+cOOsnTWe3PjnmRx9oAovQR9koqz1kztr3F++D3H65s6Y+LF46mmAlQs5mQ2sjGGGzd8agBcmoBzAG/Y/oTpkLbZ1Xq1qMSTQML7b0AHgbkWsy0QYUm56pX35uMrcl+r5BezJ5dAG+p3FDfEurD9iR9I0pUoWcE3zZldA1EFNsX6tnrLUwXGrAX7YGT7ul9DgHnD/h8hsS2qcrktTgzWIBIEZSpXiWUoM7Wy0TMbBq+iU+83lhCfQqnOb8fiMaH09v2neMmmsaazIIdF9JIMS9Caq5x7Q/iujeI=
-    on:
+    - provider: pypi
+      user: cthoyt
+      password:
+          secure: WK8SA0Vtdn9a4RMdpn8L0CFbHs/3a+mOJrwYLaL4kzzZNWjL3yt0ygnhY5138pQoy5ygQ/bLT/COJIE9cN0qP0uUyBMgerUPWozkXryoz79zsQxe2HXHkG/XMhxuNjvPwRKjw9+tmz/wWoCeMFQ0JczNvOg2DYFcT4ruqLY5muHBuMErVB5pwjGSpYmDAEpI30x6KEJTXz5VIDxRpLhI6uehpItBW195Yj5GRAWllnGTqn9zRTeZR7SME1/p2Af1RVOlam4Ur/3hSXYDMUqErNj/vrxvxgpO9lDakfpSUV0U7pETgwQ+g8mp0fgm8I643jfu4Zoj8lITf9ewl9CteiaC80gV4Nj9JA9mdGiiaZwmpkEPUiMq6YLaqef6QDJEL2kx1q40+cOOsnTWe3PjnmRx9oAovQR9koqz1kztr3F++D3H65s6Y+LF46mmAlQs5mQ2sjGGGzd8agBcmoBzAG/Y/oTpkLbZ1Xq1qMSTQML7b0AHgbkWsy0QYUm56pX35uMrcl+r5BezJ5dAG+p3FDfEurD9iR9I0pUoWcE3zZldA1EFNsX6tnrLUwXGrAX7YGT7ul9DgHnD/h8hsS2qcrktTgzWIBIEZSpXiWUoM7Wy0TMbBq+iU+83lhCfQqnOb8fiMaH09v2neMmmsaazIIdF9JIMS9Caq5x7Q/iujeI=
+      distributions: "sdist bdist_wheel"
+      on:
         tags: true
-        distributions: "sdist bdist_wheel"
+        repo: pybel/pybel
+        branch: master
+    - provider: pypi
+      server: https://arty.scai.fraunhofer.de/artifactory/api/pypi/pypi/
+      user: choyt
+      distributions: "sdist bdist_wheel"
+      password:
+        secure: aPuLEMH+2dYJ6VB2jK2INaISpwQuCbO+JlkXA7nFuzEDiQF3IHp9Q5tsPvA8MAt5gmNXCUSfBzv3RcZu8wVZriU11FsBYmQ9CJmKM0vvDn7NDmbqEeQNmjW6IEo25+0dOyHsuLt1Kbg67ymwPV/PhN4QYG3I3kOmCOEJake48vU9954oAnnNhtlYnwzlETi63JyWyS/x9hSW1CfUGgIVt9QnoHJHFleYEHVziXDTGJCT5qoGRQ9Cr63tC63uue/LUDvmwtw//NZBVu+cU+WmQKPt6lUnYAyLfAdDujLgSJeqnLfwKf+zPXAQl4/w5Fz1inUcyd0L/eXAdGIGVKzGrYEcZpQmZWctmjpJFvxv9O7JQJKPIBjjqgPmUKAL5/qSmtlS71L9Bop8AOqbW2zKFX1jNqIPXcgQro2tU2U2OTOBnV5j/lqWLMx7m++3R2ImbPCuDn+NhSrL5d0gPFdd7J795rCjCDkDgCS2SgnW/xigK9ajOuipYkorEGmFzR6hRrL5GbubXbWATL5PvKfCBwnOvnkcs0EybU/9qLMuCP/Bsf3qBQALAWLpM+dlzHQ/EvVdRnC3bRq00NObIx7VZckAXOHY6yzk4jUArLJyNlGMZKfndRsDtObXqIFI3PQBe+hPaeD2WnAQbBiMhIPnbT6X7GKPYnW3MZfH5nIbbUw=
+      on:
+        tags: true
         repo: pybel/pybel
         branch: master

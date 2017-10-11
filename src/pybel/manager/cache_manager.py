@@ -7,8 +7,11 @@ Under the hood, PyBEL caches namespace and annotation files for quick recall on 
 enable this option, but can specify a database location if they choose.
 """
 
+from __future__ import unicode_literals
+
 import logging
 import time
+from itertools import groupby
 
 from collections import defaultdict
 from copy import deepcopy
@@ -33,6 +36,7 @@ from .models import (
     Modification,
 )
 from .query_manager import QueryManager
+from .lookup_manager import LookupManager
 from .utils import parse_owl, extract_shared_required, extract_shared_optional
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
@@ -58,24 +62,84 @@ log = logging.getLogger(__name__)
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
+def _get_namespace_insert_values(bel_resource):
+    namespace_insert_values = {
+        'name': bel_resource['Namespace']['NameString'],
+        'domain': bel_resource['Namespace']['DomainString']
+    }
+
+    namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
+    namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
+
+    namespace_mapping = {
+        'species': ('Namespace', 'SpeciesString'),
+        'query_url': ('Namespace', 'QueryValueURL')
+    }
+
+    for database_column, (section, key) in namespace_mapping.items():
+        if section in bel_resource and key in bel_resource[section]:
+            namespace_insert_values[database_column] = bel_resource[section][key]
+
+    return namespace_insert_values
+
+
+def _get_annotation_insert_values(bel_resource):
+    annotation_insert_values = {
+        'type': bel_resource['AnnotationDefinition']['TypeString'],
+    }
+    annotation_insert_values.update(extract_shared_required(bel_resource, 'AnnotationDefinition'))
+    annotation_insert_values.update(extract_shared_optional(bel_resource, 'AnnotationDefinition'))
+
+    annotation_mapping = {
+        'name': ('Citation', 'NameString')
+    }
+
+    for database_column, (section, key) in annotation_mapping.items():
+        if section in bel_resource and key in bel_resource[section]:
+            annotation_insert_values[database_column] = bel_resource[section][key]
+
+    return annotation_insert_values
+
+
+def not_resource_cachable(bel_resource):
+    """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
+    return bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}
+
+
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, use_namespace_cache=False, *args, **kwargs):
+        """
+        :param use_namespace_cache: Should namespaces be cached in-memory?
+        """
         super(NamespaceManager, self).__init__(*args, **kwargs)
 
-        #: A dictionary from {namespace URL: {name: set of encodings}}
-        self.namespace_cache = defaultdict(dict)
-        #: A dictionary from {namespace URL: {name: database ID}}
-        self.namespace_id_cache = defaultdict(dict)
-        #: A dictionary from {namespace URL: Namespace}
-        self.namespace_model = {}
+        self.use_namespace_cache = (
+            use_namespace_cache
+            if use_namespace_cache is not None
+            else config.get('PYBEL_IN_MEMORY_NAMESPACE_CACHE', False)
+        )
+        self._namespace_model = {}
+        self._namespace_object_cache = defaultdict(dict)
 
-        #: A dictionary from {namespace URL: {name: NamespaceEntry}}
-        self.namespace_object_cache = defaultdict(dict)
+        log.debug('namespace manager caching: %s', self.use_namespace_cache)
 
-        #: A dictionary from {namespace URL: set of (parent, child) tuples}
-        self.namespace_edge_cache = {}
+    @property
+    def namespace_model(self):
+        """A dictionary from {namespace URL: Namespace}
+
+        :rtype: dict[str,Namespace]
+        """
+        return self._namespace_model
+
+    @property
+    def namespace_object_cache(self):
+        """A dictionary from {namespace URL: {entry name: NamespaceEntry}}
+
+        :rtype: dict[str,dict[str,NamespaceEntry]]
+        """
+        return self._namespace_object_cache
 
     def list_namespaces(self):
         """Returns a list of all namespaces
@@ -86,11 +150,8 @@ class NamespaceManager(BaseManager):
 
     def drop_namespaces(self):
         """Drops all namespaces"""
-        self.namespace_cache.clear()
-        self.namespace_id_cache.clear()
         self.namespace_object_cache.clear()
         self.namespace_model.clear()
-        self.namespace_edge_cache.clear()
 
         for namespace in self.session.query(NamespaceEntry).all():
             namespace.children[:] = []
@@ -108,7 +169,15 @@ class NamespaceManager(BaseManager):
         self.session.query(Namespace).filter(Namespace.url == url).delete()
         self.session.commit()
 
-    def insert_namespace(self, url):
+    def get_namespace_by_url(self, url):
+        """Looks up a namespace by url. Fails if not inserted already into database.
+
+        :param str url: The URL of the namespace
+        :rtype: Namespace
+        """
+        return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+
+    def get_or_create_namespace(self, url):
         """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
         the values of this namespace.
 
@@ -116,181 +185,109 @@ class NamespaceManager(BaseManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
         """
+        result = self.get_namespace_by_url(url)
+
+        if result is not None:
+            return result
+
         log.info('downloading namespace %s', url)
 
         bel_resource = get_bel_resource(url)
 
-        values = {c: e if e else DEFAULT_BELNS_ENCODING for c, e in bel_resource['Values'].items() if c}
-
-        if bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}:
-            return values
-
-        log.info('inserting namespace %s', url)
-
-        namespace_insert_values = {
-            'name': bel_resource['Namespace']['NameString'],
-            'url': url,
-            'domain': bel_resource['Namespace']['DomainString']
+        # Clean up values dictionary
+        bel_resource['Values'] = {
+            name: (encoding if encoding else DEFAULT_BELNS_ENCODING)
+            for name, encoding in bel_resource['Values'].items()
+            if name
         }
 
-        namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
-        namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
+        if not_resource_cachable(bel_resource):
+            log.info('not caching namespace: %s', url)
+            return bel_resource['Values']
 
-        namespace_mapping = {
-            'species': ('Namespace', 'SpeciesString'),
-            'query_url': ('Namespace', 'QueryValueURL')
-        }
+        namespace_insert_values = _get_namespace_insert_values(bel_resource)
 
-        for database_column, (section, key) in namespace_mapping.items():
-            if section in bel_resource and key in bel_resource[section]:
-                namespace_insert_values[database_column] = bel_resource[section][key]
+        namespace = Namespace(
+            url=url,
+            **namespace_insert_values
+        )
+        namespace.entries = [
+            NamespaceEntry(name=name, encoding=encoding)
+            for name, encoding in bel_resource['Values'].items()
+        ]
 
-        namespace = Namespace(**namespace_insert_values)
-        namespace.entries = [NamespaceEntry(name=c, encoding=e) for c, e in values.items()]
+        log.info('inserted namespace: %s (%d)', url, len(bel_resource['Values']))
 
         self.session.add(namespace)
         self.session.commit()
 
         return namespace
 
-    def old_ensure_namespace(self, url, cache_objects=False):
-        """Caches a namespace file if not already in the cache. If not cachable, returns a dict of the values
+    def _cache_namespace(self, namespace):
+        """Caches a namespace's model
+
+        :param Namespace namespace:
+        """
+        self.namespace_model[namespace.url] = namespace
+
+    def _cache_namespace_entries(self, namespace):
+        """Caches a namespace's entries' models
+
+        :param Namespace namespace:
+        """
+        for entry in namespace.entries:
+            self.namespace_object_cache[namespace.url][entry.name] = entry
+
+    def ensure_namespace(self, url):
+        """Gets or creates a namespace by its URL. Stores in the database and cache if it's cachable, otherwise
+        returns a dictionary of {names: encodings}
 
         :param str url: the location of the namespace file
-        :param bool cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
-        :return: The namespace instance
-        :rtype: Namespace or dict
+        :rtype: Namespace or dict[str,str]
         """
-        if url in self.namespace_model:
-            log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
-            results = self.namespace_model[url]
+        if self.use_namespace_cache and url in self.namespace_model:
+            log.debug('already in memory: %s', url)
+            return self.namespace_model[url]
 
-        else:
-            t = time.time()
-            results = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+        namespace = self.get_or_create_namespace(url)
 
-            if results is None:
-                results = self.insert_namespace(url)
-            else:
-                log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
+        if isinstance(namespace, dict):
+            log.debug('loaded uncached namespace: %s (%d)', url, len(namespace))
+            return namespace
 
-            if results is None:
-                raise ValueError('No results for {}'.format(url))
-            elif isinstance(results, dict):
-                return results
-            elif not results.entries:
-                raise ValueError('No entries for {}'.format(url))
+        log.debug('loaded namespace: %s', url)
 
-            self.namespace_model[url] = results
+        if self.use_namespace_cache:
+            self._cache_namespace(namespace)
+            self._cache_namespace_entries(namespace)
 
-            for entry in results.entries:
-                self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
-                self.namespace_id_cache[url][entry.name] = entry.id
+        return namespace
 
-        if cache_objects and url not in self.namespace_object_cache:
-            log.debug('loading namespace cache_objects: %s (%d)', url, len(self.namespace_cache[url]))
-            for entry in results.entries:
-                self.namespace_object_cache[url][entry.name] = entry
-
-        return results
-
-    def ensure_namespace(self, url, cache_objects=False):
-        """Caches a namespace file if not already in the cache. If not cachable, returns a dict of the values
-
-        :param str url: the location of the namespace file
-        :param bool cache_objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
-        :return: The namespace instance
-        :rtype: Namespace or dict
-        """
-        if url in self.namespace_model:
-            log.debug('already in memory: %s (%d)', url, len(self.namespace_cache[url]))
-            results = self.namespace_model[url]
-
-        else:
-            t = time.time()
-            results = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
-
-            if results is None:
-                results = self.insert_namespace(url)
-            else:
-                log.debug('loaded namespace: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
-
-            if results is None:
-                raise ValueError('No results for {}'.format(url))
-            elif isinstance(results, dict):
-                return results
-            elif not results.entries:
-                raise ValueError('No entries for {}'.format(url))
-
-            self.namespace_model[url] = results
-
-            for entry in results.entries:
-                self.namespace_cache[url][entry.name] = list(entry.encoding)  # set()
-                self.namespace_id_cache[url][entry.name] = entry.id
-
-        if cache_objects and url not in self.namespace_object_cache:
-            log.debug('loading namespace cache_objects: %s (%d)', url, len(self.namespace_cache[url]))
-            for entry in results.entries:
-                self.namespace_object_cache[url][entry.name] = entry
-
-        return results
-
-    # TODO merge get_namespace and ensure_namespace
-    def get_namespace(self, url):
+    def get_namespace_encodings(self, url):
         """Returns a dict of names and their encodings for the given namespace URL.
 
-        :param url: the location of the namespace file
-        :type url: str
+        :param str url: The URL of the namespace
+        :rtype: dict[str,str]
         """
-        result = self.ensure_namespace(url)
+        namespace = self.ensure_namespace(url)
 
-        if isinstance(result, dict):
-            return result
-        else:
-            # self.ensure_namespace makes sure it's in the cache if its not cachable
-            return self.namespace_cache[url]
+        if isinstance(namespace, dict):
+            return namespace
 
-    def get_namespace_by_url(self, url):
-        """Looks up a namespace by url
+        return namespace.to_values()
 
-        :param str url:
-        :rtype: Namespace
-        """
-        return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
-
-    def get_namespace_entry(self, url, value):
+    def get_namespace_entry(self, url, name):
         """Gets a given NamespaceEntry object.
 
         :param str url: The url of the namespace source
-        :param str value: The value of the namespace from the given url's document
-        :return: An NamespaceEntry object
+        :param str name: The value of the namespace from the given url's document
         :rtype: NamespaceEntry
         """
-        # if self.namespace_object_cache:
-        # namespace_object_cache is in use
+        if self.namespace_object_cache and url in self.namespace_object_cache:
+            return self.namespace_object_cache[url][name]
 
-        if url in self.namespace_object_cache and value in self.namespace_object_cache[url]:
-            # URL is present in cache and value is present in cache[url]
-            namespace_entry = self.namespace_object_cache[url][value]
-
-        else:
-            # URL not in cache or value not in cache[url]
-            namespace_entry = self.session.query(Namespace).join(NamespaceEntry).filter(Namespace.url == url). \
-                filter(NamespaceEntry.name == value).first()
-
-            self.namespace_object_cache[url][value] = namespace_entry
-
-        # else:
-        #     # namespace_object_cache NOT in use
-        #     namespace = self.session.query(Namespace).filter_by(url=url).one()
-        #
-        #     # FIXME @kono reinvestigate this
-        #     try:
-        #         namespace_entry = self.session.query(NamespaceEntry). \
-        #             filter_by(namespace=namespace, name=value).one_or_none()
-        #     except:
-        #         namespace_entry = self.session.query(NamespaceEntry). \
-        #             filter_by(namespace=namespace, name=value).first()
+        namespace = self.session.query(Namespace).filter(Namespace.url == url).one()
+        namespace_entry = self.session.query(NamespaceEntry).filter_by(namespace=namespace, name=name).one_or_none()
 
         return namespace_entry
 
@@ -298,87 +295,122 @@ class NamespaceManager(BaseManager):
 class OwlNamespaceManager(NamespaceManager):
     """Manages OWL namespaces"""
 
-    def insert_namespace_owl(self, iri, keyword=None, encoding=None):
+    def get_or_create_owl_namespace(self, url, keyword=None, encoding=None):
         """Caches an ontology at the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: The location of the ontology
+        :param str keyword: The keyword for the namespace
+        :param str encoding: The encoding for the entries in the namespace
+        :rtype: Namespace
         """
-        log.info('inserting owl %s', iri)
+        namespace = self.get_namespace_by_url(url)
 
-        namespace = Namespace(url=iri, keyword=keyword)
+        if namespace is not None:
+            return namespace
 
-        graph = parse_owl(iri)
+        log.info('inserting owl %s', url)
 
-        encoding = encoding if encoding else DEFAULT_BELNS_ENCODING
+        namespace = Namespace(url=url, keyword=keyword)
 
-        entries = {
-            node: NamespaceEntry(name=node, namespace=namespace, encoding=encoding)
-            for node in graph.nodes_iter()
+        graph = parse_owl(url)
+
+        encoding = BELNS_ENCODING_STR if encoding is None else encoding
+
+        name_to_entry = {
+            node: NamespaceEntry(name=node, encoding=encoding)
+            for node in graph
         }
-        namespace.entries = list(entries.values())
+        namespace.entries = list(name_to_entry.values())
 
-        for u, v in graph.edges_iter():
-            entries[u].children.append(entries[v])
+        for parent, child in graph.edges_iter():
+            parent_entry = name_to_entry[parent]
+            child_entry = name_to_entry[child]
+            parent_entry.children.append(child_entry)
 
         self.session.add(namespace)
         self.session.commit()
 
         return namespace
 
-    def ensure_namespace_owl(self, iri, keyword=None):
-        """Caches an ontology at the given IRI if it is not already in the cache
+    def ensure_namespace_owl(self, url, keyword=None, encoding=None):
+        """Caches an ontology at the given URL if it is not already in the cache
 
-        :param str iri: the location of the ontology
+        :param str url: The location of the ontology
+        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
+        :param str encoding: The optional encoding to use for the namespace if it gets downloaded
+        :rtype: Namespace
         """
-        if iri in self.namespace_cache:
-            return
+        if url in self.namespace_model:
+            return self.namespace_model[url]
 
-        results = self.session.query(Namespace).filter(Namespace.url == iri).one_or_none()
-        if results is None:
-            results = self.insert_namespace_owl(iri, keyword)
+        namespace = self.get_or_create_owl_namespace(url, keyword=keyword, encoding=encoding)
 
-        for entry in results.entries:
-            self.namespace_cache[iri][entry.name] = list(entry.encoding)  # set()
-            self.namespace_id_cache[iri][entry.name] = entry.id
+        if not self.use_namespace_cache:
+            return namespace
 
-        self.namespace_edge_cache[iri] = {
-            (sub.name, sup.name)
-            for sub in results.entries for sup in sub.children
-        }
+        for entry in namespace.entries:
+            self.namespace_object_cache[namespace.url][entry.name] = entry
 
-        return results
+        return namespace
 
-    def get_namespace_owl_terms(self, iri, keyword=None):
-        self.ensure_namespace_owl(iri, keyword)
-        return self.namespace_cache[iri]
+    def get_namespace_owl_terms(self, url, keyword=None, encoding=None):
+        """
 
-    def get_namespace_owl_edges(self, iri, keyword=None):
+        :param str url: The location of the ontology
+        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
+        :param str encoding: The optional encoding to use for the namespace if it gets downloaded
+        :rtype: dict[str,str]
+        """
+        namespace = self.ensure_namespace_owl(url, keyword=keyword, encoding=encoding)
+
+        if isinstance(namespace, dict):
+            return namespace
+
+        return namespace.to_values()
+
+    def get_namespace_owl_edges(self, url, keyword=None):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: The location of the ontology
+        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
+        :rtype: list[tuple[str,str]]
         """
-        self.ensure_namespace_owl(iri, keyword=keyword)
-        return self.namespace_edge_cache[iri]
+        namespace = self.ensure_namespace_owl(url, keyword=keyword)
+
+        return namespace.to_tree_list()
 
 
 class AnnotationManager(BaseManager):
     """Manages BEL annotations"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, use_annotation_cache=None, *args, **kwargs):
         super(AnnotationManager, self).__init__(*args, **kwargs)
 
-        #: A dictionary from {annotation URL: {name: label}}
-        self.annotation_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: {name: database ID}}
-        self.annotation_id_cache = defaultdict(dict)
-        #: A dictionary from {annotation URL: Annotation}
-        self.annotation_model = {}
+        self.use_annotation_cache = (
+            use_annotation_cache
+            if use_annotation_cache is not None
+            else config.get('PYBEL_IN_MEMORY_ANNOTATION_CACHE', False)
+        )
+        self._annotation_model = {}
+        self._annotation_object_cache = defaultdict(dict)
 
-        #: A dictionary from {annotation URL: {name: AnnotationEntry}}
-        self.annotation_object_cache = defaultdict(dict)
+        log.debug('annotation manager caching: %s', self.use_annotation_cache)
 
-        #: A dictionary from {annotation URL: set of (parent, child) tuples}
-        self.annotation_edge_cache = {}
+    @property
+    def annotation_model(self):
+        """A dictionary from {annotation URL: Annotation}
+
+        :rtype: dict[str:Annotation]
+        """
+        return self._annotation_model
+
+    @property
+    def annotation_object_cache(self):
+        """A dictionary from {annotation URL: {name: AnnotationEntry}}
+
+        :rtype: dict[str,dict[str,AnnotationEntry]]
+        """
+        return self._annotation_object_cache
 
     def list_annotations(self):
         """Return a list of all annotations
@@ -389,12 +421,8 @@ class AnnotationManager(BaseManager):
 
     def drop_annotations(self):
         """Drops all annotations"""
-
-        self.annotation_cache.clear()
-        self.annotation_id_cache.clear()
         self.annotation_object_cache.clear()
         self.annotation_model.clear()
-        self.annotation_edge_cache.clear()
 
         for annotation in self.session.query(AnnotationEntry).all():
             annotation.children[:] = []
@@ -404,82 +432,20 @@ class AnnotationManager(BaseManager):
         self.session.query(Annotation).delete()
         self.session.commit()
 
-    def insert_annotation(self, url):
-        """Inserts the namespace file at the given location to the cache
+    def _cache_annotation(self, annotation):
+        """Caches an annotation
 
-        :param str url: the location of the namespace file
-        :return: SQL Alchemy model instance, populated with data from URL
-        :rtype: Annotation
+        :param Annotation annotation:
         """
-        log.info('inserting annotation %s', url)
+        url = annotation.url
 
-        config = get_bel_resource(url)
-
-        annotation_insert_values = {
-            'type': config['AnnotationDefinition']['TypeString'],
-            'url': url
-        }
-        annotation_insert_values.update(extract_shared_required(config, 'AnnotationDefinition'))
-        annotation_insert_values.update(extract_shared_optional(config, 'AnnotationDefinition'))
-
-        annotation_mapping = {
-            'name': ('Citation', 'NameString')
-        }
-
-        for database_column, (section, key) in annotation_mapping.items():
-            if section in config and key in config[section]:
-                annotation_insert_values[database_column] = config[section][key]
-
-        annotation = Annotation(**annotation_insert_values)
-        annotation.entries = [AnnotationEntry(name=c, label=l) for c, l in config['Values'].items() if c]
-
-        self.session.add(annotation)
-        self.session.commit()
-
-        return annotation
-
-    def ensure_annotation(self, url, objects=False):
-        """Caches an annotation file if not already in the cache
-
-        :param str url: the location of the annotation file
-        :param bool objects: Indicates if the object_cache should be filed with NamespaceEntry objects.
-        :return: The ensured annotation instance
-        :rtype: Annotation
-        """
         if url in self.annotation_model:
-            log.debug('already in memory: %s (%d)', url, len(self.annotation_cache[url]))
-            results = self.annotation_model[url]
+            return
 
-        else:
-            t = time.time()
-            results = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+        self.annotation_model[url] = annotation
 
-            if results is None:
-                results = self.insert_annotation(url)
-            else:
-                log.debug('loaded annotation: %s (%d, %.2fs)', url, len(results.entries), time.time() - t)
-
-            self.annotation_model[url] = results
-
-            for entry in results.entries:
-                self.annotation_cache[url][entry.name] = entry.label
-                self.annotation_id_cache[url][entry.name] = entry.id
-
-        if objects and url not in self.annotation_object_cache:
-            log.debug('loading annotation objects: %s (%d)', url, len(self.annotation_cache[url]))
-            for entry in results.entries:
-                self.annotation_object_cache[url][entry.name] = entry
-
-        return results
-
-    # TODO merge get_annotation and ensure_annotation
-    def get_annotation(self, url):
-        """Returns a dict of annotations and their labels for the given annotation file
-
-        :param str url: the location of the annotation file
-        """
-        self.ensure_annotation(url)
-        return self.annotation_cache[url]
+        for entry in annotation.entries:
+            self.annotation_object_cache[url][entry.name] = entry
 
     def get_annotation_by_url(self, url):
         """Gets an annotation by URL
@@ -489,18 +455,80 @@ class AnnotationManager(BaseManager):
         """
         return self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
 
+    def get_or_create_annotation(self, url):
+        """Inserts the namespace file at the given location to the cache
+
+        :param str url: the location of the namespace file
+        :rtype: Annotation
+        """
+        annotation = self.get_annotation_by_url(url)
+
+        if annotation is not None:
+            return annotation
+
+        log.info('downloading annotation %s', url)
+
+        bel_resource = get_bel_resource(url)
+
+        annotation_insert_values = _get_annotation_insert_values(bel_resource)
+
+        annotation = Annotation(
+            url=url,
+            **annotation_insert_values
+        )
+        annotation.entries = [
+            AnnotationEntry(name=name, label=label)
+            for name, label in bel_resource['Values'].items()
+            if name
+        ]
+
+        self._cache_annotation(annotation)
+        self.session.add(annotation)
+        self.session.commit()
+
+        log.info('inserted annotation: %s (%d)', url, len(bel_resource['Values']))
+
+        return annotation
+
+    def ensure_annotation(self, url):
+        """Caches an annotation file if not already in the cache
+
+        :param str url: the location of the annotation file
+        :rtype: Annotation
+        """
+        if url in self.annotation_model:
+            log.debug('already in memory: %s (%d)', url, len(self.annotation_object_cache[url]))
+            return self.annotation_model[url]
+
+        result = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+
+        if result is not None:
+            self._cache_annotation(result)
+            log.debug('cached annotation: %s (%d)', url, len(self.annotation_object_cache[url]))
+            return result
+
+        return self.get_or_create_annotation(url)
+
+    def get_annotation_entries(self, url):
+        """Returns a dict of annotations and their labels for the given annotation file
+
+        :param str url: the location of the annotation file
+        :rtype: set[str]
+        """
+        annotation = self.ensure_annotation(url)
+        return annotation.get_entries()
+
     def get_annotation_entry(self, url, value):
         """Gets a given AnnotationEntry object.
 
         :param str url: The url of the annotation source
-        :param str value: The value of the annotation from the given url's document
-        :return: An AnnotationEntry object
+        :param str value: The name of the annotation entry from the given url's document
         :rtype: AnnotationEntry
         """
         if self.annotation_object_cache:
             annotation_entry = self.annotation_object_cache[url][value]
         else:
-            annotation = self.session.query(Annotation).filter_by(url=url).one()
+            annotation = self.session.query(Annotation).filter(Annotation.url == url).one()
             annotation_entry = self.session.query(AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
         return annotation_entry
@@ -509,16 +537,23 @@ class AnnotationManager(BaseManager):
 class OwlAnnotationManager(AnnotationManager):
     """Manages OWL annotations"""
 
-    def insert_annotation_owl(self, iri, keyword=None):
+    def get_or_create_owl_annotation(self, url, keyword=None):
         """Caches an ontology as a namespace from the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
+        :rtype: Annotation
         """
-        log.info('inserting owl %s', iri)
+        annotation = self.get_annotation_by_url(url)
 
-        annotation = Annotation(url=iri, keyword=keyword)
+        if annotation is not None:
+            return annotation
 
-        graph = parse_owl(iri)
+        log.info('inserting owl %s', url)
+
+        annotation = Annotation(url=url, keyword=keyword)
+
+        graph = parse_owl(url)
 
         entries = {
             node: AnnotationEntry(name=node, annotation=annotation)  # TODO add label
@@ -534,44 +569,41 @@ class OwlAnnotationManager(AnnotationManager):
 
         return annotation
 
-    def ensure_annotation_owl(self, iri, keyword=None):
+    def ensure_annotation_owl(self, url, keyword=None):
         """Caches an ontology as an annotation from the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
+        :rtype: Annotation
         """
-        if iri in self.annotation_cache:
-            return
+        if url in self.annotation_model:
+            return self.annotation_model[url]
 
-        results = self.session.query(Annotation).filter(Annotation.url == iri).one_or_none()
-        if results is None:
-            results = self.insert_annotation_owl(iri, keyword)
+        annotation = self.get_or_create_owl_annotation(url, keyword)
 
-        for entry in results.entries:
-            self.annotation_cache[iri][entry.name] = entry.label
-            self.annotation_id_cache[iri][entry.name] = entry.id
+        for entry in annotation.entries:
+            self.annotation_object_cache[url][entry.name] = entry
 
-        self.annotation_edge_cache[iri] = {
-            (sub.name, sup.name)
-            for sub in results.entries for sup in sub.children
-        }
+        return annotation
 
-        return results
-
-    def get_annotation_owl_terms(self, iri, keyword=None):
+    def get_annotation_owl_terms(self, url, keyword=None):
         """Gets a set of classes and individuals in the ontology at the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
+        :rtype: set[str]
         """
-        self.ensure_annotation_owl(iri, keyword)
-        return self.annotation_cache[iri]
+        annotation = self.ensure_annotation_owl(url, keyword)
+        return annotation.get_entries()
 
-    def get_annotation_owl_edges(self, iri, keyword=None):
+    def get_annotation_owl_edges(self, url, keyword=None):
         """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
 
-        :param str iri: the location of the ontology
+        :param str url: the location of the ontology
+        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
         """
-        self.ensure_annotation_owl(iri, keyword=keyword)
-        return self.annotation_edge_cache[iri]
+        annotation = self.ensure_annotation_owl(url, keyword=keyword)
+        return annotation.to_tree_list()
 
 
 class EquivalenceManager(NamespaceManager):
@@ -581,6 +613,15 @@ class EquivalenceManager(NamespaceManager):
         """Drops all equivalence classes"""
         self.session.query(NamespaceEntryEquivalence).delete()
         self.session.commit()
+
+    def get_equivalence_by_label(self, label):
+        """Gets an equivalence class by its label.
+
+        :param str label: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
+                                    for Alzheimer's Disease
+        :rtype: NamespaceEntryEquivalence
+        """
+        return self.session.query(NamespaceEntryEquivalence).filter(NamespaceEntryEquivalence.label == label).one()
 
     def ensure_equivalence_class(self, label):
         """Ensures the equivalence class is loaded in the database"""
@@ -593,54 +634,57 @@ class EquivalenceManager(NamespaceManager):
 
         return result
 
-    def insert_equivalences(self, url, namespace_url):
+    def insert_equivalences(self, equivalence_url, namespace_url):
         """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
-        self.ensure_namespace(namespace_url)
+        namespace = self.ensure_namespace(namespace_url)
 
-        log.info('inserting equivalences: %s', url)
+        if not isinstance(namespace, Namespace):
+            raise ValueError("Can't insert equivalences for non-cachable namespace")
 
-        config = get_bel_resource(url)
-        values = config['Values']
+        log.info('inserting equivalences: %s', equivalence_url)
 
-        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
+        equivalence_resource = get_bel_resource(equivalence_url)
+        values = equivalence_resource['Values']
 
-        for entry in ns.entries:
-            equivalence_label = values[entry.name]
-            entry.equivalence = self.ensure_equivalence_class(equivalence_label)
+        for entry in namespace.entries:
+            label = values[entry.name]
+            entry.equivalence = self.ensure_equivalence_class(label=label)
 
-        ns.has_equivalences = True
+        namespace.has_equivalences = True
 
         self.session.commit()
 
     def ensure_equivalences(self, url, namespace_url):
-        """Check if the equivalence file is already loaded, and if not, load it"""
+        """Check if the equivalence file is already loaded, and if not, load it
+
+        :param str url: The URL of the equivalence file corresponding to the namespace file
+        :param str namespace_url: The URL of the namespace file
+        """
         self.ensure_namespace(namespace_url)
 
-        ns = self.session.query(Namespace).filter_by(url=namespace_url).one()
+        ns = self.get_namespace_by_url(namespace_url)
 
         if not ns.has_equivalences:
             self.insert_equivalences(url, namespace_url)
 
     def get_equivalence_by_entry(self, url, name):
-        """Gets the equivalence class
+        """Gets the equivalence class of the entry in the given namespace
 
-        :param str url: the URL of the namespace
-        :param str name: the name of the entry in the namespace
-        :return: the equivalence class of the entry in the given namespace
+        :param str url: The url of the namespace source
+        :param str name: The value of the namespace from the given url's document
+        :rtype: NamespaceEntryEquivalence
         """
-        namespace = self.session.query(Namespace).filter_by(url=url).one()
-        entry = self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace_id == namespace.id,
-                                                          NamespaceEntry.name == name).one()
+        entry = self.get_namespace_entry(url, name)
         return entry.equivalence
 
-    def get_equivalence_members(self, equivalence_class):
+    def get_equivalence_members(self, label):
         """Gets all members of the given equivalence class
 
-        :param equivalence_class: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
+        :param str label: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
                                     for Alzheimer's Disease
-        :return: a list of members of the class
+        :rtype: list[NamespaceEntry]
         """
-        eq = self.session.query(NamespaceEntryEquivalence).filter_by(label=equivalence_class).one()
+        eq = self.get_equivalence_by_label(label)
         return eq.members
 
 
@@ -661,13 +705,17 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).all()
 
+    # FIXME there must be a better way to do this on the server without getting problems with logical inconsistencies
     def list_recent_networks(self):
-        """Lists the most recently uploaded version of each network
+        """Lists the most recently created version of each network (by name)
 
         :rtype: list[Network]
         """
-        return self.session.query(Network).group_by(Network.name).having(func.max(Network.created)).order_by(
-            Network.created.desc()).all()
+        networks = self.session.query(Network).order_by(Network.name, Network.created.desc())
+        return [
+            next(si)
+            for k, si in groupby(networks, lambda n: n.name)
+        ]
 
     def has_name_version(self, name, version):
         """Checks if the name/version combination is already in the database
@@ -779,7 +827,24 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         return union(self.get_graphs_by_ids(network_ids))
 
-    def insert_graph(self, graph, store_parts=False):
+
+class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
+    """Manages inserting data into the edge store"""
+
+    def __init__(self, *args, **kwargs):
+        super(InsertManager, self).__init__(*args, **kwargs)
+
+        #: A dictionary that maps node tuples to their models
+        self.node_model = {}
+
+        # A set of dictionaries that contains objects of the type described by the key
+        self.object_cache_modification = {}
+        self.object_cache_property = {}
+        self.object_cache_node = {}
+        self.object_cache_edge = {}
+        self.object_cache_evidence = {}
+
+    def insert_graph(self, graph, store_parts=True):
         """Inserts a graph in the database.
 
         :param BELGraph graph: A BEL graph
@@ -798,10 +863,10 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         t = time.time()
 
         for url in graph.namespace_url.values():
-            self.ensure_namespace(url, cache_objects=store_parts)
+            self.ensure_namespace(url)
 
         for url in graph.annotation_url.values():
-            self.ensure_annotation(url, objects=store_parts)
+            self.ensure_annotation(url)
 
         network = Network(blob=to_bytes(graph), **{
             key: value
@@ -820,38 +885,16 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return network
 
     def _store_graph_parts(self, network, graph):
-        """Stores graph parts. Needs to be overridden."""
-        raise NotImplementedError
-
-
-class InsertManager(NamespaceManager, AnnotationManager):
-    """Manages inserting data into the edge store"""
-
-    def __init__(self, *args, **kwargs):
-        super(InsertManager, self).__init__(*args, **kwargs)
-
-        #: A dictionary that maps node tuples to their models
-        self.node_model = {}
-
-        # A set of dictionaries that contains objects of the type described by the key
-        self.object_cache_modification = {}
-        self.object_cache_property = {}
-        self.object_cache_node = {}
-        self.object_cache_edge = {}
-        self.object_cache_citation = {}
-        self.object_cache_evidence = {}
-        self.object_cache_author = {}
-
-    def _store_graph_parts(self, network, graph):
         """Stores the given graph into the edge store.
 
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
         """
-        if not self.session.query(Namespace).filter_by(keyword=GOCC_KEYWORD).first():
-            self.ensure_namespace(GOCC_LATEST)
+        self.ensure_namespace(GOCC_LATEST)
 
-        for node in graph.nodes_iter():
+        log.debug('storing graph parts: nodes')
+
+        for node in graph:
             try:
                 node_object = self.get_or_create_node(graph, node)
                 self.node_model[node] = node_object
@@ -863,6 +906,8 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         self.session.flush()
 
+        log.debug('storing graph parts: edges')
+
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
             if u not in self.node_model:
                 log.debug('Skipping uncached node: %s', u)
@@ -872,63 +917,114 @@ class InsertManager(NamespaceManager, AnnotationManager):
                 log.debug('Skipping uncached node: %s', v)
                 continue
 
-            if EVIDENCE not in data:
+            if RELATION not in data:
                 continue
 
-            if CITATION not in data:
+            if data[RELATION] in UNQUALIFIED_EDGES:
+                self._add_unqualified_edge(network, graph, u, v, k, data)
+
+            elif EVIDENCE not in data or CITATION not in data:
                 continue
 
-            citation_dict = data[CITATION]
-
-            if CITATION_TYPE not in citation_dict or CITATION_REFERENCE not in citation_dict:
+            elif CITATION_TYPE not in data[CITATION] or CITATION_REFERENCE not in data[CITATION]:
                 continue
 
-            citation = self.get_or_create_citation(
-                type=citation_dict.get(CITATION_TYPE),
-                reference=citation_dict.get(CITATION_REFERENCE),
-                name=citation_dict.get(CITATION_NAME),
-                date=citation_dict.get(CITATION_DATE),
-                authors=citation_dict.get(CITATION_AUTHORS),
-            )
-
-            evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
-
-            properties = self.get_or_create_property(graph, data)
-
-            annotations = []
-
-            for key, value in data[ANNOTATIONS].items():
-                if key in graph.annotation_url:
-                    annotations.append(self.annotation_object_cache[graph.annotation_url[key]][value])
-                elif key in graph.annotation_owl:
-                    annotations.append(self.annotation_object_cache[graph.annotation_owl[key]][value])
-
-            bel = edge_to_bel(graph, u, v, k)
-
-            edge_hash = hash_edge(u, v, k, data)
-
-            edge = self.get_or_create_edge(
-                source=self.node_model[u],
-                target=self.node_model[v],
-                relation=data[RELATION],
-                evidence=evidence,
-                bel=bel,
-                properties=properties,
-                annotations=annotations,
-                blob=dumps(data),
-                edge_hash=edge_hash,
-            )
-
-            network.edges.append(edge)
+            else:
+                self._add_qualified_edge(network, graph, u, v, k, data)
 
         self.session.flush()
+
+    @staticmethod
+    def _map_annotations_dict(graph, data):
+        """Iterates over the key/value pairs in this edge data dictionary normalized to their source URLs
+
+        :param BELGraph graph: A BEL graph
+        :param dict data: A PyBEL edge data dictionary
+        :rtype: iter[tuple[str,str]]
+        """
+        for key, value in data.items():
+            if key in graph.annotation_url:
+                url = graph.annotation_url[key]
+            elif key in graph.annotation_owl:
+                url = graph.annotation_owl[key]
+            elif key in graph.annotation_list:
+                continue  # skip those
+            elif key in graph.annotation_pattern:
+                log.debug('pattern annotation in database not implemented yet not implemented')  # FIXME
+                continue
+            else:
+                raise ValueError('Graph resources does not contain keyword: {}'.format(key))
+            yield url, value
+
+    def _get_annotation_entries(self, graph, data):
+        """Gets the annotation entries for this edge's data
+
+        :param BELGraph graph: A BEL graph
+        :param dict data: A PyBEL edge data dictionary
+        :rtype: list[AnnotationEntry]
+        """
+        if ANNOTATIONS not in data:
+            return
+
+        return [
+            self.get_annotation_entry(url, value)
+            for url, value in self._map_annotations_dict(graph, data[ANNOTATIONS])
+        ]
+
+    def _add_qualified_edge(self, network, graph, u, v, k, data):
+        citation_dict = data[CITATION]
+
+        citation = self.get_or_create_citation(
+            type=citation_dict.get(CITATION_TYPE),
+            reference=citation_dict.get(CITATION_REFERENCE),
+            name=citation_dict.get(CITATION_NAME),
+            title=citation_dict.get(CITATION_TITLE),
+            volume=citation_dict.get(CITATION_VOLUME),
+            issue=citation_dict.get(CITATION_ISSUE),
+            pages=citation_dict.get(CITATION_PAGES),
+            date=citation_dict.get(CITATION_DATE),
+            first=citation_dict.get(CITATION_FIRST_AUTHOR),
+            last=citation_dict.get(CITATION_LAST_AUTHOR),
+            authors=citation_dict.get(CITATION_AUTHORS),
+        )
+
+        evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
+        properties = self.get_or_create_properties(graph, data)
+        annotations = self._get_annotation_entries(graph, data)
+
+        bel = edge_to_bel(graph, u, v, data=data)
+        edge_hash = hash_edge(u, v, k, data)
+        edge = self.get_or_create_edge(
+            source=self.node_model[u],
+            target=self.node_model[v],
+            relation=data[RELATION],
+            bel=bel,
+            blob=dumps(data),
+            edge_hash=edge_hash,
+            evidence=evidence,
+            properties=properties,
+            annotations=annotations,
+        )
+        network.edges.append(edge)
+
+    def _add_unqualified_edge(self, network, graph, u, v, k, data):
+        bel = edge_to_bel(graph, u, v, data=data)
+        edge_hash = hash_edge(u, v, k, data)
+        edge = self.get_or_create_edge(
+            source=self.node_model[u],
+            target=self.node_model[v],
+            relation=data[RELATION],
+            bel=bel,
+            blob=dumps(data),
+            edge_hash=edge_hash,
+        )
+        network.edges.append(edge)
 
     def get_or_create_evidence(self, citation, text):
         """Creates entry and object for given evidence if it does not exist.
 
         :param Citation citation: Citation object obtained from :func:`get_or_create_citation`
         :param str text: Evidence text
-        :return: An Evidence object
         :rtype: Evidence
         """
         evidence_hash = hash_evidence(text, citation.type, citation.reference)
@@ -936,14 +1032,20 @@ class InsertManager(NamespaceManager, AnnotationManager):
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
 
-        result = self.session.query(Evidence).filter_by(sha512=evidence_hash).one_or_none()
+        result = self.get_evidence_by_hash(evidence_hash)
 
-        if result is None:
-            result = Evidence(text=text, citation=citation, sha512=evidence_hash)
-            self.session.add(result)
+        if result is not None:
+            self.object_cache_evidence[evidence_hash] = result
+            return result
 
+        result = Evidence(
+            text=text,
+            citation=citation,
+            sha512=evidence_hash
+        )
+
+        self.session.add(result)
         self.object_cache_evidence[evidence_hash] = result
-
         return result
 
     def get_or_create_node(self, graph, node):
@@ -951,7 +1053,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         :param BELGraph graph: A BEL graph
         :param tuple node: A BEL node
-        :return: A Node object
         :rtype: Node
         """
         node_hash = hash_node(node)
@@ -962,7 +1063,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         blob = dumps(graph.node[node])
         node_data = graph.node[node]
 
-        result = self.session.query(Node).filter_by(sha512=node_hash).one_or_none()
+        result = self.get_node_by_hash(node_hash)
 
         if result is not None:
             self.object_cache_node[node_hash] = result
@@ -972,13 +1073,19 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
-        if NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_url:
+        if NAMESPACE not in node_data:
+            pass
+
+        elif node_data[NAMESPACE] in graph.namespace_url:
             namespace = node_data[NAMESPACE]
             url = graph.namespace_url[namespace]
             result.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
-        elif NAMESPACE in node_data and node_data[NAMESPACE] in graph.namespace_pattern:
+        elif node_data[NAMESPACE] in graph.namespace_pattern:
             result.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+
+        else:
+            raise ValueError("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))
 
         if VARIANTS in node_data or FUSION in node_data:
             result.is_variant = True
@@ -986,9 +1093,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
             result.modifications = self.get_or_create_modification(graph, node_data)
 
         self.session.add(result)
-
         self.object_cache_node[node_hash] = result
-
         return result
 
     def drop_nodes(self):
@@ -1003,116 +1108,121 @@ class InsertManager(NamespaceManager, AnnotationManager):
             self.session.delete(edge)
         self.session.commit()
 
-    def get_or_create_edge(self, source, target, evidence, bel, relation, properties, annotations, blob, edge_hash):
+    def get_or_create_edge(self, source, target, relation, bel, blob, edge_hash, evidence=None, annotations=None,
+                           properties=None):
         """Creates entry for given edge if it does not exist.
 
         :param Node source: Source node of the relation
         :param Node target: Target node of the relation
-        :param Evidence evidence: Evidence object that proves the given relation
-        :param str bel: BEL statement that describes the relation
         :param str relation: Type of the relation between source and target node
+        :param str bel: BEL statement that describes the relation
+        :param bytes blob: A blob of the edge data object.
+        :param str edge_hash: A hash of the edge
+        :param Evidence evidence: Evidence object that proves the given relation
         :param list[Property] properties: List of all properties that belong to the edge
         :param list[AnnotationEntry] annotations: List of all annotations that belong to the edge
-        :param bytes blob: A blob of the edge data object.
-        :return: An Edge object
         :rtype: Edge
         """
         if edge_hash in self.object_cache_edge:
             return self.object_cache_edge[edge_hash]
 
-        # Edge already in DB?
-        result = self.session.query(Edge).filter_by(sha512=edge_hash).one_or_none()
+        result = self.get_edge_by_hash(edge_hash)
 
-        if result is None:
-            # Create new edge and add it to db_session
-            edge_dict = {
-                'source': source,
-                'target': target,
-                'evidence': evidence,
-                'bel': bel,
-                'relation': relation,
-                'blob': blob,
-                'sha512': edge_hash,
-            }
-            result = Edge(**edge_dict)
-            self.session.add(result)
+        if result is not None:
+            self.object_cache_edge[edge_hash] = result
+            return result
 
+        result = Edge(
+            source=source,
+            target=target,
+            relation=relation,
+            bel=bel,
+            blob=blob,
+            sha512=edge_hash,
+        )
+        if evidence is not None:
+            result.evidence = evidence
+        if properties is not None:
             result.properties = properties
+        if annotations is not None:
             result.annotations = annotations
 
+        self.session.add(result)
         self.object_cache_edge[edge_hash] = result
-
         return result
 
-    def get_or_create_citation(self, type, reference, name=None, date=None, authors=None):
+    def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None,
+                               date=None, first=None, last=None, authors=None):
         """Creates entry for given citation if it does not exist.
 
         :param str type: Citation type (e.g. PubMed)
         :param str reference: Identifier of the given citation (e.g. PubMed id)
-        :param str name: Title of the publication that is cited
+        :param str name: Name of the publication
+        :param str title: Title of article
+        :param str volume: Volume of publication
+        :param str issue: Issue of publication
+        :param str pages: Pages of issue
         :param str date: Date of publication in ISO 8601 (YYYY-MM-DD) format
+        :param str first: Name of first author
+        :param str last: Name of last author
         :param str or list[str] authors: Either a list of authors separated by |, or an actual list of authors
-        :return: A Citation object
         :rtype: Citation
         """
         type = type.strip()
         reference = reference.strip()
 
-        citation_hash = hash_citation(type, reference)
+        citation = self.get_citation_by_reference(type, reference)
 
-        if citation_hash in self.object_cache_citation:
-            return self.object_cache_citation[citation_hash]
+        if citation is not None:
+            return citation
 
-        result = self.session.query(Citation).filter(Citation.sha512 == citation_hash).one_or_none()
-
-        if result is not None:
-            self.object_cache_citation[citation_hash] = result
-            return result
-
-        result = Citation(
+        citation = Citation(
             type=type,
             reference=reference,
-            sha512=citation_hash
+            sha512=hash_citation(type, reference),
+            name=name,
+            title=title,
+            volume=volume,
+            issue=issue,
+            pages=pages
         )
-
-        if name is not None:
-            result.name = name.strip()
-
         if date is not None:
-            result.date = parse_datetime(date)
+            citation.date = parse_datetime(date)
+
+        if first is not None:
+            citation.first = self.get_or_create_author(first)
+
+        if last is not None:
+            citation.last = self.get_or_create_author(last)
 
         if authors is not None:
             for author in (authors.split('|') if isinstance(authors, string_types) else authors):
                 author_model = self.get_or_create_author(author)
-                if author_model not in result.authors:
-                    result.authors.append(author_model)
+                if author_model not in citation.authors:
+                    citation.authors.append(author_model)
 
-        self.session.add(result)
-        self.object_cache_citation[citation_hash] = result
-        return result
+        self.session.add(citation)
+
+
+        self.session.commit()
+        return citation
 
     def get_or_create_author(self, name):
         """Gets an author by name, or creates one
 
         :param str name: An author's name
-        :return: An Author object
         :rtype: Author
         """
         name = name.strip()
 
-        if name in self.object_cache_author:
-            return self.object_cache_author[name]
+        author = self.get_author_by_name(name)
 
-        result = self.session.query(Author).filter(Author.name == name).one_or_none()
+        if author is not None:
+            return author
 
-        if result is not None:
-            self.object_cache_author[name] = result
-            return result
-
-        result = Author(name=name)
-        self.session.add(result)
-        self.object_cache_author[name] = result
-        return result
+        author = Author(name=name)
+        self.session.add(author)
+        return author
 
     def get_or_create_modification(self, graph, node_data):
         """Creates a list of modification objects (Modification) that belong to the node described by
@@ -1207,9 +1317,8 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
             if mod_hash in self.object_cache_modification:
                 mod = self.object_cache_modification[mod_hash]
-
             else:
-                mod = self.session.query(Modification).filter_by(sha512=mod_hash).one_or_none()
+                mod = self.session.query(Modification).filter(Modification.sha512 == mod_hash).one_or_none()
                 if not mod:
                     modification['sha512'] = mod_hash
                     mod = Modification(**modification)
@@ -1219,7 +1328,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         return modifications
 
-    def get_or_create_property(self, graph, edge_data):
+    def get_or_create_properties(self, graph, edge_data):
         """Creates a list of all subject and object related properties of the edge.
 
         :param pybel.BELGraph graph: A BEL graph
@@ -1279,7 +1388,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
             if property_hash in self.object_cache_property:
                 edge_property = self.object_cache_property[property_hash]
             else:
-                edge_property = self.session.query(Property).filter_by(sha512=property_hash).one_or_none()
+                edge_property = self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
 
                 if not edge_property:
                     property_def['sha512'] = property_hash
@@ -1299,7 +1408,7 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
     """
 
     @staticmethod
-    def ensure(connection=None, **kwargs):
+    def ensure(connection=None, *args, **kwargs):
         """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
 
         :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
@@ -1308,6 +1417,7 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
         :param kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
         :rtype: Manager
         """
-        if isinstance(connection, Manager):
-            return connection
-        return Manager(connection=connection, **kwargs)
+        if connection is None or isinstance(connection, string_types):
+            return Manager(connection=connection, *args, **kwargs)
+
+        return connection

@@ -437,4 +437,11 @@ def hash_citation(type, reference):
 
 
 def hash_evidence(text, type, reference):
+    """Creates a hash for an evidence and its citation
+
+    :param str text: The evidence text
+    :param str type: The corresponding citation type
+    :param str reference: The citation reference
+    :return:
+    """
     return hash_dump((type, reference, text))

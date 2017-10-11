@@ -274,8 +274,8 @@ class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
     def test_metadata_parse_pizza_namespace(self, m1, m2):
-        functions = set('A')
-        s = 'DEFINE NAMESPACE PIZZA AS OWL {} "{}"'.format(''.join(functions), pizza_iri)
+        functions = 'A'
+        s = 'DEFINE NAMESPACE PIZZA AS OWL {} "{}"'.format(functions, pizza_iri)
         parser = MetadataParser(self.manager)
         parser.parseString(s)
 
@@ -284,7 +284,7 @@ class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
         names = set(parser.namespace_dict['PIZZA'].keys())
         for node in EXPECTED_PIZZA_NODES:
             self.assertIn(node, names)
-            self.assertEqual(functions, parser.namespace_dict['PIZZA'][node])
+            self.assertEqual(set(functions), set(parser.namespace_dict['PIZZA'][node]))
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
@@ -295,11 +295,10 @@ class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
 
         self.assertIn('PIZZA', parser.namespace_dict)
 
-        functions = set(belns_encodings.keys())
         names = set(parser.namespace_dict['PIZZA'].keys())
         for node in EXPECTED_PIZZA_NODES:
             self.assertIn(node, names)
-            self.assertEqual(functions, parser.namespace_dict['PIZZA'][node])
+            self.assertEqual(set(BELNS_ENCODING_STR), set(parser.namespace_dict['PIZZA'][node]))
 
     @mock_parse_owl_rdf
     @mock_parse_owl_pybel
@@ -308,8 +307,8 @@ class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
         parser = MetadataParser(self.manager)
         parser.parseString(s)
 
-        self.assertIn('Pizza', parser.annotations_dict)
-        self.assertEqual(EXPECTED_PIZZA_NODES, set(parser.annotations_dict['Pizza']))
+        self.assertIn('Pizza', parser.annotation_dict)
+        self.assertEqual(EXPECTED_PIZZA_NODES, set(parser.annotation_dict['Pizza']))
 
 
 class TestWine(TestGraphMixin, FleetingTemporaryCacheMixin):
@@ -339,8 +338,8 @@ class TestWine(TestGraphMixin, FleetingTemporaryCacheMixin):
         parser = MetadataParser(self.manager)
         parser.parseString(s)
 
-        self.assertIn('Wine', parser.annotations_dict)
-        self.assertLessEqual(wine_nodes, set(parser.annotations_dict['Wine']))
+        self.assertIn('Wine', parser.annotation_dict)
+        self.assertLessEqual(wine_nodes, set(parser.annotation_dict['Wine']))
 
         with self.assertRaises(RedefinedAnnotationError):
             parser.parseString(s)

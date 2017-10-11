@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Variants
-~~~~~~~~
-
-The addition of a variant tag results in an entry called 'variants' in the data dictionary associated with a given
-node. This entry is a list with dictionaries describing each of the variants. All variants have the entry 'kind' to
-identify whether it is a PTM, gene modification, fragment, or HGVS variant. The 'kind' value for a variant
-is 'hgvs', but best described by :data:`pybel.constants.HGVS`
-
-
+HGVS Variants
+~~~~~~~~~~~~~
 For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented with the following:
 
 .. code::
@@ -29,7 +22,7 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
 
 .. seealso::
 
-    - BEL 2.0 specification on `variants <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_variant_var>`_
+    - BEL 2.0 specification on `variants <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variant_var>`_
     - HVGS `conventions <http://www.hgvs.org/mutnomen/recs.html>`_
 """
 

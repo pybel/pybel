@@ -2,6 +2,8 @@
 
 """This module contains the base class for connection managers in SQLAlchemy"""
 
+from __future__ import unicode_literals
+
 import logging
 
 from sqlalchemy import create_engine
@@ -34,7 +36,8 @@ class BaseManager(object):
     `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
     """
 
-    def __init__(self, connection=None, echo=False, autoflush=None, autocommit=None, expire_on_commit=None):
+    def __init__(self, connection=None, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
+                 scopefunc=None):
         """
         :param str connection: An RFC-1738 database connection string. If ``None``, tries to load from the environment
                                 variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json``
@@ -45,6 +48,16 @@ class BaseManager(object):
         :param bool autoflush: Defaults to True if not specified in kwargs or configuration.
         :param bool autocommit: Defaults to False if not specified in kwargs or configuration.
         :param bool expire_on_commit: Defaults to False if not specified in kwargs or configuration.
+        :param scopefunc: Scoped function to pass to :func:`sqlalchemy.orm.scoped_session`
+
+
+        From the Flask-SQLAlchemy documentation:
+
+        An extra key ``'scopefunc'`` can be set on the ``options`` dict to
+        specify a custom scope function.  If it's not provided, Flask's app
+        context stack identity is used. This will ensure that sessions are
+        created and removed with the request/response cycle, and should be fine
+        in most cases.
         """
         self.connection = get_cache_connection(connection)
         self.engine = create_engine(self.connection, echo=echo)
@@ -71,8 +84,10 @@ class BaseManager(object):
             expire_on_commit=self.expire_on_commit,
         )
 
+        self.scopefunc = scopefunc
+
         #: A SQLAlchemy session object
-        self.session = scoped_session(self.session_maker)
+        self.session = scoped_session(self.session_maker, scopefunc=self.scopefunc)
 
         self.create_all()
 
@@ -81,8 +96,8 @@ class BaseManager(object):
 
         :param bool checkfirst: Check if the database is made before trying to re-make it
         """
-        Base.metadata.create_all(self.engine, checkfirst=checkfirst)
+        Base.metadata.create_all(bind=self.engine, checkfirst=checkfirst)
 
-    def drop_all(self):
+    def drop_all(self, checkfirst=True):
         """Drops all data, tables, and databases for the PyBEL cache"""
-        Base.metadata.drop_all(self.engine)
+        Base.metadata.drop_all(bind=self.engine, checkfirst=checkfirst)

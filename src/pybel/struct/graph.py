@@ -3,11 +3,12 @@
 import logging
 
 import networkx
+from copy import deepcopy
 
-from .operations import left_full_join, left_outer_join
+from .operations import left_full_join, left_outer_join, left_node_intersection_join
 from ..constants import *
-from ..parser.canonicalize import node_to_tuple, tuple_to_data
-from ..utils import get_version, subdict_matches
+from ..parser.canonicalize import add_node_from_data
+from ..utils import get_version
 
 __all__ = [
     'BELGraph',
@@ -36,7 +37,8 @@ class BELGraph(networkx.MultiDiGraph):
         the :mod:`pybel.io` module
 
         :param str name: The graph's name
-        :param str version: The graph's version. Recommended to use semantic versioning or YYYYMMDD format.
+        :param str version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
+                            ``YYYYMMDD`` format.
         :param str description: A description of the graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
@@ -68,13 +70,18 @@ class BELGraph(networkx.MultiDiGraph):
     def document(self):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
         according to :data:`pybel.constants.DOCUMENT_KEYS`
+
+        :rtype: dict
         """
         return self.graph[GRAPH_METADATA]
 
     @property
     def name(self, *attrs):
-        """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script"""
-        return self.graph[GRAPH_METADATA].get(METADATA_NAME, '')
+        """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script
+
+        :rtype: str
+        """
+        return self.graph[GRAPH_METADATA].get(METADATA_NAME)
 
     @name.setter
     def name(self, *attrs, **kwargs):
@@ -82,7 +89,10 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def version(self):
-        """The graph's version, from the ``SET DOCUMENT Version = "..."`` entry in the source BEL script"""
+        """The graph's version, from the ``SET DOCUMENT Version = "..."`` entry in the source BEL script
+
+        :rtype: str
+        """
         return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
 
     @version.setter
@@ -91,7 +101,10 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def description(self):
-        """The graph's description, from the ``SET DOCUMENT Description = "..."`` entry in the source BEL Script"""
+        """The graph's description, from the ``SET DOCUMENT Description = "..."`` entry in the source BEL Script
+
+        :rtype: str
+        """
         return self.graph[GRAPH_METADATA].get(METADATA_DESCRIPTION)
 
     @description.setter
@@ -100,42 +113,70 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def namespace_url(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS file"""
+        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS files from the
+        ``DEFINE NAMESPACE [key] AS URL "[value]"`` entries in the definitions section.
+
+        :rtype: dict[str,str]
+        """
         return self.graph[GRAPH_NAMESPACE_URL]
 
     @property
     def namespace_owl(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL file"""
+        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL files from the
+        ``DEFINE NAMESPACE [key] AS OWL "[value]"`` entries in the definitions section
+
+        :rtype: dict[str,str]
+        """
         return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
     def namespace_pattern(self):
-        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns"""
+        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns from the
+        ``DEFINE NAMESPACE [key] AS PATTERN "[value]"`` entries in the definitions section
+
+        :rtype: dict[str,str]
+        """
         return self.graph[GRAPH_NAMESPACE_PATTERN]
 
     @property
     def annotation_url(self):
-        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO file"""
+        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO files
+        from the ``DEFINE ANNOTATION [key] AS URL "[value]"`` entries in the definitions section
+
+        :rtype: dict[str,str]
+        """
         return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
     def annotation_owl(self):
-        """A dictionary mapping the annotation keywords to the URL of the OWL file"""
+        """A dictionary mapping the annotation keywords used to creat ethis graph to the URLs of the OWL files
+        from the ``DEFINE ANNOTATION [key] AS OWL "[value]"`` entries in the definitions section
+
+        :rtype: dict[str,str]
+        """
         return self.graph[GRAPH_ANNOTATION_OWL]
 
     @property
     def annotation_pattern(self):
-        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns"""
+        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns
+        from the ``DEFINE ANNOTATION [key] AS PATTERN "[value]"`` entries in the definitions section
+
+        :rtype: dict[str,str]
+        """
         return self.graph[GRAPH_ANNOTATION_PATTERN]
 
     @property
     def annotation_list(self):
-        """A dictionary mapping the keywords of locally defined annotations to a set of their values"""
+        """A dictionary mapping the keywords of locally defined annotations to a set of their values
+        from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section"""
         return self.graph[GRAPH_ANNOTATION_LIST]
 
     @property
     def pybel_version(self):
-        """Stores the version of PyBEL with which this graph was produced as a string"""
+        """Stores the version of PyBEL with which this graph was produced as a string
+
+        :rtype: str
+        """
         return self.graph[GRAPH_PYBEL_VERSION]
 
     @property
@@ -143,10 +184,13 @@ class BELGraph(networkx.MultiDiGraph):
         """Warnings are stored in a list of 4-tuples that is a property of the graph object.
         This tuple respectively contains the line number, the line text, the exception instance, and the context
         dictionary from the parser at the time of error.
+
+        :rtype: list[tuple[int,str,Exception,dict[str,str]]]
         """
         return self._warnings
 
     def __str__(self):
+        """Stringifies this graph as its name and version pair"""
         return '{} v{}'.format(self.name, self.version)
 
     def add_warning(self, line_number, line, exception, context=None):
@@ -162,53 +206,16 @@ class BELGraph(networkx.MultiDiGraph):
         """
         key = unqualified_edge_code[relation]
         if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})
+            self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})  # TODO make annotations optional?
 
-    # TODO better implementation using edge filters
-    def edges_iter(self, nbunch=None, data=False, keys=False, default=None, **kwargs):
-        """Allows for filtering by checking keyword arguments are a sub-dictionary of each edges' data.
-            See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
-        for u, v, k, d in super(BELGraph, self).edges_iter(nbunch=nbunch, data=True, keys=True, default=default):
-            if not subdict_matches(d, kwargs):
-                continue
-            elif keys and data:
-                yield u, v, k, d
-            elif data:
-                yield u, v, d
-            elif keys:
-                yield u, v, k
-            else:
-                yield u, v
+    def add_node_from_data(self, attr_dict):
+        """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
-    # TODO better implementation using node filters
-    def nodes_iter(self, data=False, **kwargs):
-        """Allows for filtering by checking keyword arguments are a sub-dictionary of each nodes' data.
-            See :py:meth:`networkx.MultiDiGraph.edges_iter`"""
-        for n, d in super(BELGraph, self).nodes_iter(data=True):
-            if not subdict_matches(d, kwargs):
-                continue
-            elif data:
-                yield n, d
-            else:
-                yield n
-
-    def add_node_from_tuple(self, node_tuple):
-        """Converts a PyBEL node tuple to a canonical PyBEL node data dictionary then adds it to the graph
-
-        :param tuple node_tuple: A PyBEL node tuple
+        :param dict attr_dict: A PyBEL node data dictionary
+        :return: The PyBEL node tuple representing this node
+        :rtype: tuple
         """
-        if node_tuple not in self:
-            node_data = tuple_to_data(node_tuple)
-            self.add_node(node_tuple, attr_dict=node_data)
-
-    def add_node_from_data(self, node_data):
-        """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple then adds it to the graph
-
-        :param dict node_data: A PyBEL node data dictionary
-        """
-        node_tuple = node_to_tuple(node_data)
-        if node_tuple not in self:
-            self.add_node(node_tuple, attr_dict=node_data)
+        return add_node_from_data(self, attr_dict)
 
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
@@ -216,11 +223,52 @@ class BELGraph(networkx.MultiDiGraph):
         :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.PROTEIN`, etc)
         :param str namespace: The node's namespace
         :param str name: The node's name
+        :return: The PyBEL node tuple representing this node
+        :rtype: tuple
         """
-        node = function, namespace, name
-        # self.add_node_from_tuple(node)
-        if node not in self:
-            self.add_node(node, **{FUNCTION: function, NAMESPACE: namespace, NAME: name})
+        return self.add_node_from_data({
+            FUNCTION: function,
+            NAMESPACE: namespace,
+            NAME: name
+        })
+
+    def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
+                           object_modifier=None, **attr):
+        """Adds an edge, qualified with a relation, evidence, citation, and optional annotations, subject modifications,
+        and object modifications
+
+        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param str relation: The type of relation this edge represents
+        :param str evidence: The evidence string from an article
+        :param dict[str,str] citation: The citation data dictionary for this evidence
+        :param dict[str,str] annotations: The annotations data dictionary
+        :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
+        :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+        """
+        attr.update({
+            RELATION: relation,
+            EVIDENCE: evidence,
+            CITATION: citation,
+
+        })
+
+        if annotations:
+            attr[ANNOTATIONS] = annotations
+
+        if subject_modifier:
+            attr[SUBJECT] = subject_modifier
+
+        if object_modifier:
+            attr[OBJECT] = object_modifier
+
+        if isinstance(u, dict):
+            u = self.add_node_from_data(u)
+
+        if isinstance(v, dict):
+            v = self.add_node_from_data(v)
+
+        self.add_edge(u, v, **attr)
 
     def has_edge_citation(self, u, v, key):
         """Does the given edge have a citation?"""
@@ -262,10 +310,84 @@ class BELGraph(networkx.MultiDiGraph):
         """Sets the description for a given node"""
         self.node[node][DESCRIPTION] = description
 
+    def __add__(self, other):
+        """Creates a deep copy of this graph and full joins another graph with it using
+        :func:`pybel.struct.left_full_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g + h
+        """
+        result = deepcopy(self)
+        left_full_join(result, other)
+        return result
+
     def __iadd__(self, other):
-        """Allows g += h to full join h into g"""
+        """Full joins another graph into this one using :func:`pybel.struct.left_full_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> g += h
+        """
         left_full_join(self, other)
+        return self
+
+    def __and__(self, other):
+        """Creates a deep copy of this graph and outer joins another graph with it using
+        :func:`pybel.struct.left_outer_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g & h
+        """
+        result = deepcopy(self)
+        left_outer_join(result, other)
+        return result
 
     def __iand__(self, other):
-        """Allows g &= h to outer join h into g"""
+        """Outer joins another graph into this one using :func:`pybel.struct.left_outer_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> g &= h
+        """
         left_outer_join(self, other)
+        return self
+
+    def __xor__(self, other):
+        """Node intersection joins another graph using :func:`pybel.struct.left_node_intersection_join`
+
+        :param BELGraph other: Another BEL graph
+
+        Example usage:
+
+        >>> import pybel
+        >>> g = pybel.from_path('...')
+        >>> h = pybel.from_path('...')
+        >>> k = g ^ h
+        """
+        return left_node_intersection_join(self, other)

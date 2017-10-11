@@ -10,9 +10,10 @@ from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boole
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
+from .utils import int_or_str
 from ..constants import *
 from ..io.gpickle import from_bytes
-from ..parser.canonicalize import node_to_tuple
+from ..parser.canonicalize import node_to_tuple, sort_dict_list, sort_variant_dict_list
 
 __all__ = [
     'Base',
@@ -163,13 +164,34 @@ class Namespace(Base):
     def __str__(self):
         return self.keyword
 
-    def to_json(self):
+    def to_values(self):
+        """Returns this namespace as a dictionary of names to their encodings. Encodings are represented as a
+        string, and lookup operations take constant time O(8).
+
+        :rtype: dict[str,str]
+        """
+        return {
+            entry.name: entry.encoding if entry.encoding else BELNS_ENCODING_STR
+            for entry in self.entries
+        }
+
+    def to_tree_list(self):
+        """Returns an edge set of the tree represented by this namespace's hierarchy
+
+        :rtype: set[tuple[str,str]]
+        """
+        return {
+            (parent.name, child.name)
+            for parent in self.entries
+            for child in parent.children
+        }
+
+    def to_json(self, include_id=True):
         """Returns the table entry as a dictionary without the SQLAlchemy instance information.
 
         :rtype: dict
         """
-        return {
-            'id': self.id,
+        result = {
             'uploaded': self.uploaded,
             'url': self.url,
             'keyword': self.keyword,
@@ -191,6 +213,11 @@ class Namespace(Base):
             'has_equivalences': self.has_equivalences
         }
 
+        if include_id:
+            result['id'] = self.id
+
+        return result
+
 
 class NamespaceEntry(Base):
     """Represents a name within a BEL namespace"""
@@ -202,7 +229,7 @@ class NamespaceEntry(Base):
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
     namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), index=True)
-    namespace = relationship('Namespace', backref=backref('entries'))
+    namespace = relationship('Namespace', backref=backref('entries', lazy='dynamic'))
 
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
     equivalence = relationship('NamespaceEntryEquivalence', backref=backref('members'))
@@ -268,6 +295,27 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
+    def get_entries(self):
+        """Gets a set of the names of all etries
+
+        :rtype: set[str]
+        """
+        return {
+            entry.name
+            for entry in self.entries
+        }
+
+    def to_tree_list(self):
+        """Returns an edge set of the tree represented by this namespace's hierarchy
+
+        :rtype: set[tuple[str,str]]
+        """
+        return {
+            (parent.name, child.name)
+            for parent in self.entries
+            for child in parent.children
+        }
+
     def to_json(self, include_id=False):
         """Returns this annotation as a JSON dictionary
 
@@ -309,8 +357,8 @@ class AnnotationEntry(Base):
                   doc='Name that is defined in the corresponding annotation definition file')
     label = Column(String(255), nullable=True)
 
-    annotation_id = Column(Integer, ForeignKey(ANNOTATION_TABLE_NAME + '.id'), index=True)
-    annotation = relationship('Annotation', backref=backref('entries'))
+    annotation_id = Column(Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), index=True)
+    annotation = relationship('Annotation', backref=backref('entries', lazy='dynamic'))
 
     children = relationship(
         'AnnotationEntry',
@@ -457,7 +505,6 @@ class Node(Base):
 
         :rtype: dict
         """
-        # node_key = [self.type]
         result = {
             FUNCTION: self.type,
         }
@@ -468,20 +515,36 @@ class Node(Base):
         if self.namespace_entry:
             namespace_entry = self.namespace_entry.to_json()
             result.update(namespace_entry)
-            # node_key.append(namespace_entry[NAMESPACE])
-            # node_key.append(namespace_entry[NAME])
 
         if self.is_variant:
             if self.fusion:
                 mod = self.modifications[0].data
                 result[FUSION] = mod['mod_data']
-                # [node_key.append(key_element) for key_element in mod['mod_key']]
             else:
-                result[VARIANTS] = []
-                for modification in self.modifications:
-                    mod = modification.data
-                    result[VARIANTS].append(mod['mod_data'])
-                    # node_key.append(tuple(mod['mod_key']))
+                result[VARIANTS] = sort_variant_dict_list(
+                    modification.data['mod_data']
+                    for modification in self.modifications
+                )
+
+        if self.type == REACTION:
+            reactants = []
+            products = []
+
+            for edge in self.out_edges:
+                if edge.relation == HAS_REACTANT:
+                    reactants.append(edge.target.to_json())
+                elif edge.relation == HAS_PRODUCT:
+                    products.append(edge.target.to_json())
+
+            result[REACTANTS] = sort_dict_list(reactants)
+            result[PRODUCTS] = sort_dict_list(products)
+
+        if self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
+            result[MEMBERS] = sort_dict_list(
+                edge.target.to_json()
+                for edge in self.out_edges
+                if edge.relation == HAS_COMPONENT
+            )
 
         return result
 
@@ -520,11 +583,12 @@ class Modification(Base):
 
     modNamespace = Column(String(255), nullable=True, doc='Namespace for the modification name')
     modName = Column(String(255), nullable=True, doc='Name of the given modification (used for pmod or gmod)')
-    aminoA = Column(String(3), nullable=True, doc='Three letter amino accid code')
+    aminoA = Column(String(3), nullable=True, doc='Three letter amino acid code')
     position = Column(Integer, nullable=True, doc='Position')
 
     sha512 = Column(String(255), index=True)
 
+    # TODO wreck this
     @property
     def data(self):
         """Recreates a is_variant dictionary for :class:`BELGraph`
@@ -551,8 +615,8 @@ class Modification(Base):
             else:
                 mod_dict[RANGE_5P].update({
                     FUSION_REFERENCE: self.p5Reference,
-                    FUSION_START: self.p5Start,
-                    FUSION_STOP: self.p5Stop
+                    FUSION_START: int_or_str(self.p5Start),
+                    FUSION_STOP: int_or_str(self.p5Stop),
                 })
                 mod_key.append((self.p5Reference, self.p5Start, self.p5Stop,))
 
@@ -565,8 +629,8 @@ class Modification(Base):
             else:
                 mod_dict[RANGE_3P].update({
                     FUSION_REFERENCE: self.p3Reference,
-                    FUSION_START: self.p3Start,
-                    FUSION_STOP: self.p3Stop
+                    FUSION_START: int_or_str(self.p3Start),
+                    FUSION_STOP: int_or_str(self.p3Stop)
                 })
                 mod_key.append((self.p3Reference, self.p3Start, self.p3Stop,))
 
@@ -582,8 +646,8 @@ class Modification(Base):
                     mod_key.append(self.p3Missing)
                 else:
                     mod_dict.update({
-                        FRAGMENT_START: self.p3Start,
-                        FRAGMENT_STOP: self.p3Stop
+                        FRAGMENT_START: int_or_str(self.p3Start),
+                        FRAGMENT_STOP: int_or_str(self.p3Stop)
                     })
                     mod_key.append((self.p3Start, self.p3Stop,))
 
@@ -659,11 +723,14 @@ class Citation(Base):
     issue = Column(Text, nullable=True, doc='Issue within the volume')
     pages = Column(Text, nullable=True, doc='Pages of the publication')
     date = Column(Date, nullable=True, doc='Publication date')
-    first = Column(Text, nullable=True, doc='First author name')
-    last = Column(Text, nullable=True, doc='Last author name')
+
+    first_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='First author')
+    first = relationship("Author", foreign_keys=[first_id])
+
+    last_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='Last author')
+    last = relationship("Author", foreign_keys=[last_id])
 
     authors = relationship("Author", secondary=author_citation, backref='citations')
-    evidences = relationship("Evidence", backref='citation')
 
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
@@ -702,10 +769,10 @@ class Citation(Base):
             result[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
 
         if self.first:
-            result[CITATION_FIRST_AUTHOR] = self.first
+            result[CITATION_FIRST_AUTHOR] = self.first.name
 
         if self.last:
-            result[CITATION_LAST_AUTHOR] = self.last
+            result[CITATION_LAST_AUTHOR] = self.last.name
 
         if self.authors:
             result[CITATION_AUTHORS] = "|".join(sorted(
@@ -721,9 +788,10 @@ class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    text = Column(Text, nullable=False, doc='Supporting text that is cited from a given publication')
+    text = Column(Text, nullable=False, doc='Supporting text from a given publication')
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+    citation = relationship('Citation', backref=backref('evidences'))
 
     sha512 = Column(String(255), index=True)
 
@@ -771,11 +839,11 @@ class Edge(Base):
     bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
     relation = Column(String(255), nullable=False)
 
-    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
-    source = relationship('Node', foreign_keys=[source_id])
+    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
+    source = relationship('Node', foreign_keys=[source_id], backref=backref('out_edges', lazy='dynamic'))
 
-    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)))
-    target = relationship('Node', foreign_keys=[target_id])
+    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
+    target = relationship('Node', foreign_keys=[target_id], backref=backref('in_edges', lazy='dynamic'))
 
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship("Evidence")

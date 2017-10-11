@@ -1,17 +1,14 @@
 PyBEL |develop_build| |develop_coverage| |develop_documentation| |zenodo|
 =========================================================================
-`PyBEL <http://pybel.readthedocs.io>`_ is a Python package for compilation and validation of biological networks
-encoded in the
+`PyBEL <http://pybel.readthedocs.io>`_ is a Python package for parsing and handling biological networks encoded in the
 `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
 It also facilitates data interchange between common formats and databases such as
-`NetworkX <http://networkx.github.io/>`_, JSON, CSV, Excel, `Cytoscape <http://www.cytoscape.org/>`_,
+`NetworkX <http://networkx.github.io/>`_, JSON, CSV, SIF, `Cytoscape <http://www.cytoscape.org/>`_,
 `CX <http://www.home.ndexbio.org/data-model/>`_, `NDEx <https://github.com/pybel/pybel2cx>`_, SQL, and
-`Neo4J <https://neo4j.com>`_. Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
-suite of functions and workflows for analyzing the resulting biological networks.
+`Neo4J <https://neo4j.com>`_.
 
-This package was originally developed as part of the master's work of `Charles Tapley Hoyt <https://github.com/cthoyt>`_
-at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_ with support from the `IMI <https://www.imi.europa.eu/>`_
-projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and `PHAGO <http://www.phago.eu/>`_.
+Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
+suite of functions and workflows for analyzing the resulting biological networks.
 
 Getting Started
 ---------------
@@ -31,7 +28,7 @@ More examples can be found in the `documentation <http://pybel.readthedocs.io>`_
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
 PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
-conversion. In this example, a BEL file is exported to GraphML for viewing in Cytoscape.
+conversion. In this example, a BEL Script is exported to GraphML for viewing in Cytoscape.
 
 .. code-block:: sh
 
@@ -64,6 +61,10 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 
 Acknowledgements
 ----------------
+- This package was originally developed as part of the master's work of
+  `Charles Tapley Hoyt <https://github.com/cthoyt>`_ at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_ with
+  support from the `IMI <https://www.imi.europa.eu/>`_ projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and
+  `PHAGO <http://www.phago.eu/>`_.
 - This software is proudly built with Paul McGuire's `PyParsing <http://pyparsing.wikispaces.com/>`_ package.
 - `Scott Colby <https://github.com/scolby33>`_ designed our `logo <https://github.com/pybel/pybel-art>`_ and provided
   sage advice

@@ -2,8 +2,8 @@
 
 """
 
-NDEx
-~~~~
+Network Data Exchange (NDEx)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This package provides a wrapper around :func:`pybel.to_cx` and NDEx
 `client <https://github.com/ndexbio/ndex-python>`_ to allow for easy upload and download of BEL documents to the
 `NDEx <http://www.ndexbio.org/>`_ database.

@@ -14,7 +14,7 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGN
                 NAME: 'lysozome'
             }
         },
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             MODIFIER: ACTIVITY,
             EFFECT: {
@@ -38,7 +38,7 @@ This calls for thoughtful consideration of the following two statements:
 
 .. seealso::
 
-    BEL 2.0 specification on `cellular location (2.2.4) <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
+    BEL 2.0 specification on `cellular location (2.2.4) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
 """
 
 from pyparsing import Suppress, oneOf, Group

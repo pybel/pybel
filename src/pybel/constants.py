@@ -19,10 +19,10 @@ from os import path, mkdir, environ, makedirs
 
 log = getLogger(__name__)
 
-VERSION = '0.8.2-dev'
+VERSION = '0.9.3-dev'
 
 #: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = (0, 8, 0)
+PYBEL_MINIMUM_IMPORT_VERSION = 0, 9, 0
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
@@ -87,14 +87,14 @@ def get_cache_connection(connection=None):
     :rtype: str
     """
     if connection is not None:
-        log.info('connected to user-defined cache: %s', connection)
+        log.info('getting user-defined connection: %s', connection)
         return connection
 
     if PYBEL_CONNECTION in environ:
-        log.info('connecting to environment-defined database: %s', environ[PYBEL_CONNECTION])
+        log.info('getting environment-defined connection: %s', environ[PYBEL_CONNECTION])
         return environ[PYBEL_CONNECTION]
 
-    log.info('connecting to %s', config[PYBEL_CONNECTION])
+    log.info('getting default connection %s', config[PYBEL_CONNECTION])
     return config[PYBEL_CONNECTION]
 
 
@@ -541,3 +541,5 @@ belns_encodings = {
     'O': {PATHOLOGY},
     'C': {COMPLEX}
 }
+
+BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))

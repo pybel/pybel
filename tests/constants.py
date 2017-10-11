@@ -379,10 +379,18 @@ BEL_THOROUGH_NODES = {
     (PROTEIN, 'HGNC', 'GSK3B'),
     (PATHOLOGY, 'MESHD', 'Psoriasis'),
     (PATHOLOGY, 'MESHD', 'Skin Diseases'),
-    (REACTION,
-     ((ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-      (ABUNDANCE, ('CHEBI', 'hydron'))),
-     ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    (
+        REACTION,
+        (
+            (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+            (ABUNDANCE, 'CHEBI', 'NADPH'),
+            (ABUNDANCE, 'CHEBI', 'hydron')
+        ),
+        (
+            (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+            (ABUNDANCE, 'CHEBI', 'mevalonate')
+        )
+    ),
     (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
     (ABUNDANCE, 'CHEBI', 'NADPH'),
     (ABUNDANCE, 'CHEBI', 'hydron'),
@@ -403,7 +411,15 @@ BEL_THOROUGH_NODES = {
     (BIOPROCESS, 'GOBP', 'apoptotic process'),
     (COMPOSITE, (ABUNDANCE, 'TESTNS2', 'Abeta_42'), (PROTEIN, 'HGNC', 'CASP8'),
      (PROTEIN, 'HGNC', 'FADD')),
-    (REACTION, ((PROTEIN, ('HGNC', 'CDK5R1')),), ((PROTEIN, ('HGNC', 'CDK5')),)),
+    (
+        REACTION,
+        (
+            (PROTEIN, 'HGNC', 'CDK5R1'),
+        ),
+        (
+            (PROTEIN, 'HGNC', 'CDK5'),
+        )
+    ),
     (PROTEIN, 'HGNC', 'PRKCB'),
     (COMPLEX, 'TESTNS2', 'AP-1 Complex'),
     (PROTEIN, 'HGNC', 'PRKCE'),
@@ -456,52 +472,42 @@ BEL_THOROUGH_EDGES = [
     }),
     ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'AKT1'), (ABUNDANCE, 'CHEBI', 'oxygen atom'), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: DECREASES, SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
         OBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'AKT1'),
      (GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'c.308G>A'), (HGVS, 'p.Phe508del')), {
          RELATION: HAS_VARIANT,
-         ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: TRANSCRIBED_TO,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), (PROTEIN, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: DIRECTLY_DECREASES,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'),
      (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')), {
          RELATION: HAS_VARIANT,
-         ANNOTATIONS: {}
      }),
     ((PROTEIN, 'HGNC', 'AKT1'),
      (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')), {
@@ -510,42 +516,35 @@ BEL_THOROUGH_EDGES = [
          RELATION: DIRECTLY_DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          OBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-         ANNOTATIONS: {}
      }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: DEGRADATION},
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1521_1523delcuu')), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1653_1655delcuu')), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: ACTIVITY},
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'EGFR'), {
         EVIDENCE: 'These are mostly made up',
@@ -559,7 +558,6 @@ BEL_THOROUGH_EDGES = [
             }
         },
         OBJECT: {MODIFIER: DEGRADATION},
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'EGFR'), {
         EVIDENCE: 'These are mostly made up',
@@ -576,14 +574,12 @@ BEL_THOROUGH_EDGES = [
                 TO_LOC: {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
             }
         },
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
      (GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
          RELATION: CAUSES_NO_CHANGE,
-         ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
      (GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'c.308G>A'), (HGVS, 'p.Phe508del')), {
@@ -591,7 +587,6 @@ BEL_THOROUGH_EDGES = [
          CITATION: citation_1,
          RELATION: INCREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-         ANNOTATIONS: {}
      }),
     ((MIRNA, 'HGNC', 'MIR21'),
      (GENE, ('HGNC', 'BCR'), ('c', '?', 1875), ('HGNC', 'JAK2'), ('c', 2626, '?')),
@@ -599,7 +594,6 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
          RELATION: DIRECTLY_INCREASES,
-         ANNOTATIONS: {}
      }),
     ((MIRNA, 'HGNC', 'MIR21'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
      {
@@ -607,11 +601,9 @@ BEL_THOROUGH_EDGES = [
          CITATION: citation_1,
          RELATION: DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-         ANNOTATIONS: {}
      }),
     ((MIRNA, 'HGNC', 'MIR21'), (MIRNA, 'HGNC', 'MIR21', (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), (PROTEIN, 'HGNC', 'AKT1'),
      {
@@ -619,25 +611,21 @@ BEL_THOROUGH_EDGES = [
          CITATION: citation_1,
          RELATION: INCREASES,
          OBJECT: {MODIFIER: DEGRADATION},
-         ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'CFTR'), (GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'CFTR'), (GENE, 'HGNC', 'CFTR', (HGVS, 'g.117199646_117199648delCTT')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'CFTR'), (GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'CFTR', (HGVS, 'g.117199646_117199648delCTT')),
      (GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: INCREASES, ANNOTATIONS: {}
+         RELATION: INCREASES,
      }),
     ((MIRNA, 'HGNC', 'MIR21', (HGVS, 'p.Phe508del')), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')),
      {
@@ -645,26 +633,25 @@ BEL_THOROUGH_EDGES = [
          CITATION: citation_1,
          RELATION: INCREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-         ANNOTATIONS: {}
      }),
     ((GENE, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
      (PROTEIN, ('HGNC', 'TMPRSS2'), ('p', 1, 79), ('HGNC', 'ERG'), ('p', 312, 5034)), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: INCREASES, ANNOTATIONS: {}
+         RELATION: INCREASES,
      }),
     ((PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')),
      (PROTEIN, ('HGNC', 'BCR'), ('p', '?', 1875), ('HGNC', 'JAK2'), ('p', 2626, '?')), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: INCREASES, ANNOTATIONS: {}
+         RELATION: INCREASES,
      }),
     ((PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')),
      (PROTEIN, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
      {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: INCREASES, ANNOTATIONS: {}
+         RELATION: INCREASES,
      }),
     ((PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')), (PROTEIN, 'HGNC', 'EGFR'), {
         EVIDENCE: 'These are mostly made up',
@@ -677,29 +664,23 @@ BEL_THOROUGH_EDGES = [
                 TO_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'}
             }
         },
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'CFTR'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'CFTR'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'CFTR'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'CFTR'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
-    ((PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')), (PATHOLOGY, 'MESHD', 'Adenocarcinoma'),
-     {
+    ((PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')), (PATHOLOGY, 'MESHD', 'Adenocarcinoma'), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
-         RELATION: INCREASES, ANNOTATIONS: {}
+         RELATION: INCREASES,
      }),
     ((PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (5, 20))), (COMPLEX, 'GOCC', 'interleukin-23 complex'), {
         EVIDENCE: 'These are mostly made up',
@@ -712,23 +693,18 @@ BEL_THOROUGH_EDGES = [
                 TO_LOC: {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
             }
         },
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'MIA'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (5, 20))), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'MIA'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (1, '?'))), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'MIA'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'MIA'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?', '55kD')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (1, '?'))), (PROTEIN, 'HGNC', 'EGFR'), {
         EVIDENCE: 'These are mostly made up',
@@ -740,7 +716,6 @@ BEL_THOROUGH_EDGES = [
                 FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
                 TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}
         },
-        ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'EGFR'), {
         EVIDENCE: 'These are mostly made up',
@@ -749,39 +724,32 @@ BEL_THOROUGH_EDGES = [
         OBJECT: {MODIFIER: TRANSLOCATION, EFFECT: {
             FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
             TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}},
-        ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: TRANSLATED_TO,
-        ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')),
      (RNA, ('HGNC', 'TMPRSS2'), ('r', 1, 79), ('HGNC', 'ERG'), ('r', 312, 5034)), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
          RELATION: DIRECTLY_INCREASES,
-         ANNOTATIONS: {}
      }),
     ((RNA, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('?',)),
      (COMPLEX, (GENE, 'HGNC', 'NCF1'), (PROTEIN, 'HGNC', 'HBP1')), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
          RELATION: INCREASES,
-         ANNOTATIONS: {}
      }),
     ((COMPLEX, (GENE, 'HGNC', 'NCF1'), (PROTEIN, 'HGNC', 'HBP1')), (PROTEIN, 'HGNC', 'HBP1'), {
         RELATION: HAS_COMPONENT,
-        ANNOTATIONS: {}
     }),
     ((COMPLEX, (GENE, 'HGNC', 'NCF1'), (PROTEIN, 'HGNC', 'HBP1')), (GENE, 'HGNC', 'NCF1'), {
         RELATION: HAS_COMPONENT,
-        ANNOTATIONS: {}
     }),
     ((RNA, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
      (COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')),
@@ -789,168 +757,183 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
          RELATION: INCREASES,
-         ANNOTATIONS: {}
      }),
     ((COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')), (PROTEIN, 'HGNC', 'FOS'), {
         RELATION: HAS_COMPONENT,
-        ANNOTATIONS: {}
     }),
     ((COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')), (PROTEIN, 'HGNC', 'JUN'), {
         RELATION: HAS_COMPONENT,
-        ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'CFTR'), (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1521_1523delcuu')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((RNA, 'HGNC', 'CFTR'), (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1653_1655delcuu')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
-    ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')),
-     (PROTEIN, 'HGNC', 'IL6'), {
+    ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')), (PROTEIN, 'HGNC', 'IL6'), {
          RELATION: HAS_COMPONENT,
-         ANNOTATIONS: {}
      }),
     ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')),
      (COMPLEX, 'GOCC', 'interleukin-23 complex'), {
          RELATION: HAS_COMPONENT,
-         ANNOTATIONS: {}
      }),
     ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')),
      (BIOPROCESS, 'GOBP', 'cell cycle arrest'), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
          RELATION: DECREASES,
-         ANNOTATIONS: {}
      }),
-    ((PROTEIN, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'),
-     {
+    ((PROTEIN, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: DIRECTLY_DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-         ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: DIRECTLY_DECREASES,
         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-        ANNOTATIONS: {}
     }),
     ((PROTEIN, 'HGNC', 'HMGCR'), (BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: RATE_LIMITING_STEP_OF,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')), (PATHOLOGY, 'MESHD', 'Alzheimer Disease'),
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: CAUSES_NO_CHANGE,
-         ANNOTATIONS: {}
      }),
     ((GENE, 'HGNC', 'APP'), (GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
     ((COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')), (PROTEIN, 'HGNC', 'F3'), {
         RELATION: HAS_COMPONENT,
-        ANNOTATIONS: {}
     }),
     ((COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')), (PROTEIN, 'HGNC', 'F7'), {
         RELATION: HAS_COMPONENT,
-        ANNOTATIONS: {}
     }),
-    ((COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')), (PROTEIN, 'HGNC', 'F9'),
-     {
+    ((COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')), (PROTEIN, 'HGNC', 'F9'), {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: REGULATES,
          SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
          OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
-         ANNOTATIONS: {}
      }),
-    ((PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), (PROTEIN, 'HGNC', 'GSK3B'),
-     {
+    ((PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), (PROTEIN, 'HGNC', 'GSK3B'), {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: POSITIVE_CORRELATION,
          OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
-         ANNOTATIONS: {}
      }),
     ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), {
         RELATION: HAS_VARIANT,
-        ANNOTATIONS: {}
     }),
-    ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)),
-     {
+    ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: POSITIVE_CORRELATION,
          SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
-         ANNOTATIONS: {}
      }),
-    ((PATHOLOGY, 'MESHD', 'Psoriasis'), (PATHOLOGY, 'MESHD', 'Skin Diseases'),
-     {
+    ((PATHOLOGY, 'MESHD', 'Psoriasis'), (PATHOLOGY, 'MESHD', 'Skin Diseases'), {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: IS_A,
-         ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'), {
          RELATION: HAS_REACTANT,
-         ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (ABUNDANCE, 'CHEBI', 'NADPH'), {
          RELATION: HAS_REACTANT,
-         ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (ABUNDANCE, 'CHEBI', 'hydron'), {
          RELATION: HAS_REACTANT,
-         ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate'))
+     ),
      (ABUNDANCE, 'CHEBI', 'mevalonate'), {
          RELATION: HAS_PRODUCT,
-         ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (ABUNDANCE, 'CHEBI', 'NADP(+)'), {
          RELATION: HAS_PRODUCT,
-         ANNOTATIONS: {}
      }),
-    ((REACTION, (
-        (ABUNDANCE, ('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA')), (ABUNDANCE, ('CHEBI', 'NADPH')),
-        (ABUNDANCE, ('CHEBI', 'hydron'))),
-      ((ABUNDANCE, ('CHEBI', 'NADP(+)')), (ABUNDANCE, ('CHEBI', 'mevalonate')))),
+    ((
+         REACTION,
+         (
+             (ABUNDANCE, 'CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+             (ABUNDANCE, 'CHEBI', 'NADPH'),
+             (ABUNDANCE, 'CHEBI', 'hydron')
+         ),
+         (
+             (ABUNDANCE, 'CHEBI', 'NADP(+)'),
+             (ABUNDANCE, 'CHEBI', 'mevalonate')
+         )
+     ),
      (BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'),
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: SUBPROCESS_OF,
-         ANNOTATIONS: {}
      }),
     ((ABUNDANCE, 'CHEBI', 'nitric oxide'),
      (COMPLEX, (PROTEIN, 'HGNC', 'ITGAV'), (PROTEIN, 'HGNC', 'ITGB3')), {
@@ -964,37 +947,30 @@ BEL_THOROUGH_EDGES = [
                  TO_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'}
              }
          },
-         ANNOTATIONS: {}
      }),
     ((COMPLEX, (PROTEIN, 'HGNC', 'ITGAV'), (PROTEIN, 'HGNC', 'ITGB3')), (PROTEIN, 'HGNC', 'ITGAV'), {
         RELATION: HAS_COMPONENT,
-        ANNOTATIONS: {}
     }),
     ((COMPLEX, (PROTEIN, 'HGNC', 'ITGAV'), (PROTEIN, 'HGNC', 'ITGB3')), (PROTEIN, 'HGNC', 'ITGB3'), {
         RELATION: HAS_COMPONENT,
-        ANNOTATIONS: {}
     }),
     ((GENE, 'HGNC', 'ARRDC2'), (GENE, 'HGNC', 'ARRDC3'), {
         RELATION: EQUIVALENT_TO,
-        ANNOTATIONS: {},
         CITATION: citation_2,
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification'
     }),
     ((GENE, 'HGNC', 'ARRDC3'), (GENE, 'HGNC', 'ARRDC2'), {
         RELATION: EQUIVALENT_TO,
-        ANNOTATIONS: {},
         CITATION: citation_2,
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification'
     }),
     ((GENE, 'dbSNP', 'rs123456'), (GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), {
         RELATION: ASSOCIATION,
-        ANNOTATIONS: {},
         CITATION: citation_2,
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification'
     }),
     ((GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), (GENE, 'dbSNP', 'rs123456'), {
         RELATION: ASSOCIATION,
-        ANNOTATIONS: {},
         CITATION: citation_2,
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification'
     }),
@@ -1122,7 +1098,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
             self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 
-        self.assertEqual(set(BEL_THOROUGH_NODES), set(graph.nodes_iter()))
+        self.assertEqual(set(BEL_THOROUGH_NODES), set(graph))
 
         # FIXME
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))

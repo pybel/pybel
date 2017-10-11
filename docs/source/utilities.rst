@@ -9,6 +9,11 @@ General Utilities
 .. automodule:: pybel.utils
     :members:
 
+IO Utilities
+~~~~~~~~~~~~
+
+.. autofunction:: pybel.io.line_utils.parse_lines
+
 Parser Utilities
 ~~~~~~~~~~~~~~~~
 

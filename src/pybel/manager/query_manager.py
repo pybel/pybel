@@ -5,7 +5,7 @@ import uuid
 
 from sqlalchemy import func
 
-from .base_manager import BaseManager
+from .lookup_manager import LookupManager
 from .models import (
     Annotation,
     AnnotationEntry,
@@ -33,7 +33,7 @@ __all__ = [
 ]
 
 
-class QueryManager(BaseManager):
+class QueryManager(LookupManager):
     """Groups queries over the edge store"""
 
     def rebuild_by_edge_filter(self, **annotations):
@@ -142,13 +142,14 @@ class QueryManager(BaseManager):
         """
         return self.session.query(func.count(Node.id)).scalar()
 
-    def get_node_by_hash(self, node_hash):
-        """Looks up a node by the hash of a PyBEL node tuple
+    def get_node_tuple_by_hash(self, node_hash):
+        """Looks up a node by the hash and returns the corresponding PyBEL node tuple
 
         :param str node_hash: The hash of a PyBEL node tuple from :func:`pybel.utils.hash_node`
-        :rtype: Node
+        :rtype: tuple
         """
-        return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
+        node = self.get_node_by_hash(node_hash)
+        return node.to_tuple()
 
     def get_node_by_tuple(self, node):
         """Looks up a node by the PyBEL node tuple
@@ -156,7 +157,8 @@ class QueryManager(BaseManager):
         :param tuple node: A PyBEL node tuple
         :rtype: Node
         """
-        return self.get_node_by_hash(hash_node(node))
+        node_hash = hash_node(node)
+        return self.get_node_by_hash(node_hash)
 
     def query_nodes(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
                     modification_name=None, as_dict_list=False):
@@ -224,14 +226,6 @@ class QueryManager(BaseManager):
         """
         return self.session.query(func.count(Edge.id)).scalar()
 
-    def get_edge_by_hash(self, edge_hash):
-        """Looks up an edge by the hash of a PyBEL edge data dictionary
-
-        :param str edge_hash: The hash of a PyBEL edge data dictionary from :func:`pybel.utils.hash_edge`
-        :rtype: Edge
-        """
-        return self.session.query(Edge).filter(Edge.sha512 == edge_hash).one_or_none()
-
     def get_edge_by_tuple(self, u, v, d):
         """Looks up an edge by PyBEL edge tuple
 
@@ -284,7 +278,10 @@ class QueryManager(BaseManager):
 
             if source:
                 if isinstance(source, str):
-                    source = self.query_nodes(bel=source)[0]
+                    source = self.query_nodes(bel=source)
+                    if len(source) == 0:
+                        return []
+                    source = source[0]
 
                 if isinstance(source, Node):
                     q = q.filter(Edge.source == source)
@@ -344,7 +341,7 @@ class QueryManager(BaseManager):
         ]
 
     def query_citations(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
-                        evidence=False, evidence_text=None, as_dict_list=False):
+                        evidence_text=None, as_dict_list=False):
         """Builds and runs a query over all citations in the PyBEL cache.
 
         :param int citation_id:
@@ -354,7 +351,6 @@ class QueryManager(BaseManager):
         :param str or list[str] author: The name or a list of names of authors participated in the citation.
         :param date: Publishing date of the citation.
         :type date: str or datetime.date
-        :param bool evidence: Weather or not supporting text should be included in the return.
         :param str evidence_text:
         :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
                             :class:`Citation` objects.
@@ -397,16 +393,9 @@ class QueryManager(BaseManager):
         if not as_dict_list:
             return citations
 
-        if not (evidence or evidence_text):
-            return [
-                citation.to_json()
-                for citation in citations
-            ]
-
         return [
-            evidence.to_json()
+            citation.to_json()
             for citation in citations
-            for evidence in citation.evidences
         ]
 
     def query_node_properties(self, property_id=None, participant=None, modifier=None, as_dict_list=False):

@@ -45,16 +45,20 @@ activity_labels = {
     'gap': 'gap',
 }
 
-# TODO fill out
-activity_ns = {
-    'cat': dict(namespace='GOMF', name='catalytic activity'),
-    'gtp': dict(namespace='GOMF', name='GTP binding'),
-    'pep': dict(namespace='GOMF', name='peptidase activity'),
-    'tscript': dict(namespace='GOMF', name='nucleic acid binding transcription factor activity'),
-    'tport': dict(namespace='GOMF', name='transporter activity'),
-    # 'chap': dict(namespace='GOMF', name=''),
-    # 'phos': dict(namespace='GOMF', name=''),
-    # 'ribo': dict(namespace='GOMF', name=''),
+#: Maps the default BEL molecular activities to Gene Ontology Molecular Functions
+activity_go_mapping = {
+    'cat': {NAMESPACE: 'GOMF', NAME: 'catalytic activity', ID: 'GO:0003824'},
+    'chap': {NAMESPACE: 'GOMF', NAME: 'protein binding involved in protein folding', ID: 'GO:0044183'},
+    'gtp': {NAMESPACE: 'GOMF', NAME: 'GTP binding', ID: 'GO:0005525'},
+    'kin': {NAMESPACE: 'GOMF', NAME: 'kinase activity', ID: 'GO:0016301'},
+    'pep': {NAMESPACE: 'GOMF', NAME: 'peptidase activity', ID: 'GO:0008233'},
+    'phos': {NAMESPACE: 'GOMF', NAME: 'phosphatase activity', ID: 'GO:0016791'},
+    'ribo': {NAMESPACE: 'GOMF', NAME: 'NAD(P)+-protein-arginine ADP-ribosyltransferase activity', ID: 'GO:0003956'},
+    'tscript': {NAMESPACE: 'GOMF', NAME: 'nucleic acid binding transcription factor activity', ID: 'GO:0001071'},
+    'tport': {NAMESPACE: 'GOMF', NAME: 'transporter activity', ID: 'GO:0005215'},
+    'molecularActivity': {NAMESPACE: 'GOMF', NAME: 'molecular_function', ID: 'GO:0003674'},
+    'gef': {NAMESPACE: 'GOMF', NAME: 'guanyl-nucleotide exchange factor activity', ID: 'GO:0005085'},
+    'gap': {NAMESPACE: 'GOMF', NAME: 'GTPase activating protein binding', ID: 'GO:0032794'}
 }
 
 activities = list(activity_labels.keys())
@@ -91,6 +95,20 @@ rev_abundance_labels = {
     PATHOLOGY: 'path',
     COMPLEX: 'complex',
     COMPOSITE: 'composite'
+}
+
+#: Maps the BEL abundance types to the Systems Biology Ontology
+abundance_sbo_mapping = {
+    MIRNA: {NAMESPACE: 'SBO', NAME:'microRNA', ID:'SBO:0000316'},
+    BIOPROCESS: {NAMESPACE: 'SBO', NAME:'process', ID:'SBO:0000375'},
+    GENE: {NAMESPACE: 'SBO', NAME:'gene', ID:'SBO:0000243'},
+    RNA: {NAMESPACE: 'SBO', NAME:'messenger RNA', ID:'SBO:0000278'},
+    COMPLEX: {NAMESPACE: 'SBO', NAME:'protein complex', ID:'SBO:0000297'},
+}
+
+relation_sbo_mapping = {
+    TRANSLATED_TO: {NAMESPACE: 'SBO', NAME:'translation', ID:'SBO:0000184'},
+    TRANSCRIBED_TO: {NAMESPACE: 'SBO', NAME:'transcription', ID:'SBO:0000183'},
 }
 
 amino_acid_dict = {

@@ -95,3 +95,14 @@ Database
 .. automodule:: pybel.io.ndex_utils
 .. autofunction:: pybel.from_ndex
 .. autofunction:: pybel.to_ndex
+
+PyBEL Web
+---------
+
+.. automodule:: pybel.io.web
+    :members:
+
+INDRA
+-----
+.. automodule:: pybel.io.indra
+    :members:

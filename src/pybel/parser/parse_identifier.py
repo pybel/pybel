@@ -6,8 +6,13 @@ import re
 from pyparsing import Suppress
 
 from .baseparser import BaseParser
-from .parse_exceptions import UndefinedNamespaceWarning, NakedNameWarning, MissingNamespaceNameWarning, \
-    MissingDefaultNameWarning, MissingNamespaceRegexWarning
+from .parse_exceptions import (
+    UndefinedNamespaceWarning,
+    NakedNameWarning,
+    MissingNamespaceNameWarning,
+    MissingDefaultNameWarning,
+    MissingNamespaceRegexWarning,
+)
 from .utils import word, quote
 from ..constants import DIRTY, NAMESPACE, NAME
 
@@ -20,20 +25,19 @@ class IdentifierParser(BaseParser):
     """A parser for identifiers in the form of namespace:name. Can be made more lenient when given a default namespace
     or enabling the use of naked names"""
 
-    def __init__(self, namespace_dict=None, namespace_regex=None, default_namespace=None,
-                 allow_naked_names=False):
+    def __init__(self, namespace_dict=None, namespace_regex=None, default_namespace=None, allow_naked_names=False):
         """
-        :param dict[str,set[str]] namespace_dict: A dictionary of {namespace: set of names}
+        :param dict[str,dict[str,str]] namespace_dict: A dictionary of {namespace: {name: encoding}}
         :param dict[str,str] namespace_regex: A dictionary of {namespace: regular expression string} to compile
         :param set[str] default_namespace: A set of strings that can be used without a namespace
         :param bool allow_naked_names: If true, turn off naked namespace failures
         """
-        #: A dictionary of cached {namespace keyword: set of values}
-        self.namespace_dict = namespace_dict
-        #: A dictionary of {namespace keyword: regular expression string}
-        self.namespace_regex = {} if namespace_regex is None else namespace_regex
-        #: A dictionary of {namespace keyword: compiled regular expression}
-        self.namespace_regex_compiled = {k: re.compile(v) for k, v in self.namespace_regex.items()}
+        self._namespace_dict = namespace_dict
+        self._namespace_regex = {} if namespace_regex is None else namespace_regex
+        self._namespace_regex_compiled = {
+            keyword: re.compile(pattern)
+            for keyword, pattern in self.namespace_regex.items()
+        }
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
 
@@ -52,6 +56,30 @@ class IdentifierParser(BaseParser):
             self.identifier_bare.setParseAction(self.handle_namespace_invalid)
 
         super(IdentifierParser, self).__init__(self.identifier_qualified | self.identifier_bare)
+
+    @property
+    def namespace_dict(self):
+        """A dictionary of {namespace: {name: encodings}}
+
+        :rtype: dict[str,dict[str,str]]
+        """
+        return self._namespace_dict
+
+    @property
+    def namespace_regex(self):
+        """A dictionary of {namespace keyword: regular expression string}
+
+        :rtype: dict[str,str]
+        """
+        return self._namespace_regex
+
+    @property
+    def namespace_regex_compiled(self):
+        """A dictionary of {namespace keyword: compiled regular expression}
+
+        :rtype: dict[str,re]
+        """
+        return self._namespace_regex_compiled
 
     def has_enumerated_namespace(self, namespace):
         """Checks that the namespace has been defined by an enumeration"""

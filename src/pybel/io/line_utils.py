@@ -59,11 +59,14 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
 
+    .. warning::
 
-    Deprecated options for kwargs
+        These options allow concessions for parsing BEL that is either **WRONG** or **UNSCIENTIFIC**. Use them at
+        risk to reproducibility and validity of your results.
 
     :param bool allow_naked_names: If true, turns off naked namespace failures
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    :param bool no_identifier_validation: If true, turns off namespace validation
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
@@ -83,7 +86,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     bel_parser = BelParser(
         graph=graph,
         namespace_dict=metadata_parser.namespace_dict,
-        annotation_dict=metadata_parser.annotations_dict,
+        annotation_dict=metadata_parser.annotation_dict,
         namespace_regex=metadata_parser.namespace_regex,
         annotation_regex=metadata_parser.annotations_regex,
         allow_nested=allow_nested,
@@ -165,7 +168,7 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
         GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
         GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_regex.copy(),
         GRAPH_ANNOTATION_LIST: {
-            keyword: metadata_parser.annotations_dict[keyword]
+            keyword: metadata_parser.annotation_dict[keyword]
             for keyword in metadata_parser.annotation_lists
         }
     })
@@ -203,6 +206,12 @@ def parse_statements(graph, statements, bel_parser):
 
 
 def sanitize_file_line_iter(f, note_char=':'):
+    """Enumerates the given lines and removes empty lines/comments
+
+    :param iter[str] f: An iterable over strings
+    :param str note_char: The character sequence denoting a special note
+    :rtype: iter[tuple[int,str]]
+    """
     for line_number, line in enumerate(f, start=1):
         line = line.strip()
 
@@ -218,9 +227,11 @@ def sanitize_file_line_iter(f, note_char=':'):
 
 
 def sanitize_file_lines(f):
-    """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned"""
-    # it = (line.strip() for line in f)
-    # it = ((line_number, line) for line_number, line in enumerate(it, start=1) if line and not line.startswith('#'))
+    """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned
+
+    :param iter[str] f: An iterable of strings
+    :rtype: iter[tuple[int,str]]
+    """
     it = sanitize_file_line_iter(f)
 
     for line_number, line in it:
@@ -255,26 +266,43 @@ def sanitize_file_lines(f):
 
 
 def split_file_to_annotations_and_definitions(file):
-    """Enumerates a line iterable and splits into 3 parts"""
+    """Enumerates a line iterable and splits into 3 parts
+
+    :param iter[str] file:
+    :rtype: tuple[list[str],list[str],list[str]]
+    """
     content = list(sanitize_file_lines(file))
 
-    end_document_section = 1 + max(j for j, (i, l) in enumerate(content) if l.startswith('SET DOCUMENT'))
-    end_definitions_section = 1 + max(j for j, (i, l) in enumerate(content) if METADATA_LINE_RE.match(l))
+    end_document_section_index = 1 + max(
+        index
+        for index, (_, line) in enumerate(content)
+        if line.startswith('SET DOCUMENT')
+    )
+
+    end_definitions_section_index = 1 + max(
+        index
+        for index, (_, line)
+        in enumerate(content)
+        if METADATA_LINE_RE.match(line)
+    )
 
     log.info('File length: %d lines', len(content))
-    documents = content[:end_document_section]
-    definitions = content[end_document_section:end_definitions_section]
-    statements = content[end_definitions_section:]
+    documents = content[:end_document_section_index]
+    definitions = content[end_document_section_index:end_definitions_section_index]
+    statements = content[end_definitions_section_index:]
 
     return documents, definitions, statements
 
 
 def _log_graph_summary(graph):
-    """Logs simple information about a graph"""
+    """Logs simple information about a graph
+
+    :param BELGraph graph: A BEL graph
+    """
     counter = defaultdict(lambda: defaultdict(int))
 
-    for n, d in graph.nodes_iter(data=True):
-        counter[d[FUNCTION]][d[NAMESPACE] if NAMESPACE in d else 'DEFAULT'] += 1
+    for _, data in graph.nodes_iter(data=True):
+        counter[data[FUNCTION]][data.get(NAMESPACE, "DEFAULT")] += 1
 
     for fn, nss in sorted(counter.items()):
         log.debug(' %s: %d', fn, sum(nss.values()))

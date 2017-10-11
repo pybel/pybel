@@ -7,7 +7,8 @@ from pybel import BELGraph
 from pybel.canonicalize import node_to_bel
 from pybel.constants import *
 from pybel.parser import BelParser
-from pybel.parser.parse_bel import modifier_po_to_dict, node_to_tuple
+from pybel.parser.canonicalize import node_to_tuple
+from pybel.parser.parse_bel import modifier_po_to_dict
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
 from tests.constants import TestTokenParserBase, build_variant_dict
 from tests.constants import assertHasNode, assertHasEdge
@@ -1432,7 +1433,11 @@ class TestComplex(TestTokenParserBase):
 
         expected_node = COMPLEX, 'SCOMP', 'AP-1 Complex'
         self.assertEqual(expected_node, node_to_tuple(result))
-        self.assertHasNode(expected_node, **{FUNCTION: COMPLEX, NAMESPACE: 'SCOMP', NAME: 'AP-1 Complex'})
+        self.assertHasNode(expected_node, **{
+            FUNCTION: COMPLEX,
+            NAMESPACE: 'SCOMP',
+            NAME: 'AP-1 Complex'
+        })
 
         canonical_bel = node_to_bel(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1447,13 +1452,19 @@ class TestComplex(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: COMPLEX,
-            'members': [
+            MEMBERS: [
                 {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'FOS'}
+                    IDENTIFIER: {
+                        NAMESPACE: 'HGNC',
+                        NAME: 'FOS'
+                    }
                 }, {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'JUN'}
+                    IDENTIFIER: {
+                        NAMESPACE: 'HGNC',
+                        NAME: 'JUN'
+                    }
                 }
             ]
         }
@@ -1461,7 +1472,21 @@ class TestComplex(TestTokenParserBase):
 
         expected_node = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
         self.assertEqual(expected_node, node_to_tuple(result))
-        self.assertHasNode(expected_node, **{FUNCTION: COMPLEX})
+        self.assertHasNode(expected_node, **{
+            FUNCTION: COMPLEX,
+            MEMBERS: [
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'FOS'
+                },
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'JUN'
+                }
+            ]
+        })
 
         canonical_bel = node_to_bel(self.parser.graph, expected_node)
         expected_canonical_bel = statement
@@ -1481,13 +1506,19 @@ class TestComplex(TestTokenParserBase):
 
 
 class TestComposite(TestTokenParserBase):
-    """2.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA"""
+    """Tests the parsing of the composite function
+
+    .. seealso::
+
+            `BEL 2.0 Specification 2.1.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
+    """
 
     def setUp(self):
         self.parser.clear()
         self.parser.composite_abundance.setParseAction(self.parser.handle_term)
 
     def test_213a(self):
+        """Evidence: ``IL-6 and IL-23 synergistically induce Th17 differentiation"""
         statement = 'composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex"))'
         result = self.parser.composite_abundance.parseString(statement)
 
@@ -1510,6 +1541,31 @@ class TestComposite(TestTokenParserBase):
 
         expected_node = COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')
         self.assertEqual(expected_node, node_to_tuple(result))
+
+        self.assertIn(expected_node, self.graph)
+        expected_node_dict = {
+            FUNCTION: COMPOSITE,
+            MEMBERS: [
+                {
+                    FUNCTION: COMPLEX,
+                    NAMESPACE: 'GOCC',
+                    NAME: 'interleukin-23 complex'
+                },
+                {
+                    FUNCTION: PROTEIN,
+                    NAMESPACE: 'HGNC',
+                    NAME: 'IL6'
+                }
+            ]
+        }
+        self.assertIn(FUNCTION, self.graph.node[expected_node])
+        self.assertIn(COMPOSITE, self.graph.node[expected_node][FUNCTION])
+        self.assertIn(MEMBERS, self.graph.node[expected_node])
+        self.assertIsInstance(self.graph.node[expected_node][MEMBERS], (list, tuple))
+        self.assertEqual(2, len(self.graph.node[expected_node][MEMBERS]))
+        self.assertEqual(expected_node_dict[MEMBERS][0], self.graph.node[expected_node][MEMBERS][0])
+        self.assertEqual(expected_node_dict[MEMBERS][1], self.graph.node[expected_node][MEMBERS][1])
+        self.assertEqual(expected_node_dict, self.graph.node[expected_node])
 
         canonical_bel = node_to_bel(self.parser.graph, expected_node)
         expected_canonical_bel = 'composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))'  # sorted
@@ -2018,23 +2074,61 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = REACTION, ((ABUNDANCE, ('CHEBI', 'superoxide')),), (
-            (ABUNDANCE, ('CHEBI', 'hydrogen peroxide')), (ABUNDANCE, ('CHEBI', 'oxygen')))
+        superoxide_node = ABUNDANCE, 'CHEBI', 'superoxide'
+        hydrogen_peroxide = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
+        oxygen_node = ABUNDANCE, 'CHEBI', 'oxygen'
+
+        expected_node = REACTION, (superoxide_node,), (hydrogen_peroxide, oxygen_node)
         self.assertEqual(expected_node, node_to_tuple(result))
-        self.assertHasNode(expected_node)
+        self.assertHasNode(expected_node, **{
+            FUNCTION: REACTION,
+            REACTANTS: [
+                {
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'superoxide'
+                }
+            ],
+            PRODUCTS: [
+                {
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'hydrogen peroxide'
+                },
+                {
+
+                    FUNCTION: ABUNDANCE,
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'oxygen'
+                }
+            ]
+        })
 
         canonical_bel = node_to_bel(self.parser.graph, expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
-        self.assertHasNode((ABUNDANCE, 'CHEBI', 'superoxide'))
-        self.assertHasEdge(expected_node, (ABUNDANCE, 'CHEBI', 'superoxide'))
+        self.assertHasNode(superoxide_node)
+        self.assertHasEdge(expected_node, superoxide_node)
 
-        self.assertHasNode((ABUNDANCE, 'CHEBI', 'hydrogen peroxide'))
-        self.assertHasEdge(expected_node, (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'))
+        self.assertHasNode(hydrogen_peroxide)
+        self.assertHasEdge(expected_node, hydrogen_peroxide)
 
-        self.assertHasNode((ABUNDANCE, 'CHEBI', 'oxygen'))
-        self.assertHasEdge(expected_node, (ABUNDANCE, 'CHEBI', 'oxygen'))
+        self.assertHasNode(oxygen_node)
+        self.assertHasEdge(expected_node, oxygen_node)
+
+    def test_reaction_2(self):
+        statement = 'rxn(reactants(p(HGNC:APP)), products(p(HGNC:APP, frag(672_713))))'
+        result = self.parser.transformation.parseString(statement)
+
+        app_tuple = PROTEIN, 'HGNC', 'APP'
+        self.assertIn(app_tuple, self.graph)
+
+        app_frag_tuple = PROTEIN, 'HGNC', 'APP', (FRAGMENT, (672, 713))
+        self.assertIn(app_frag_tuple, self.graph)
+
+        expected_node = REACTION, (app_tuple,), (app_frag_tuple,)
+        self.assertIn(expected_node, self.graph)
 
     def test_clearance(self):
         """Tests that after adding things, the graph and parser can be cleared properly"""

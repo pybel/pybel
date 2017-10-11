@@ -32,49 +32,30 @@ Function Nomenclature
 The following table shows PyBEL's internal mapping from BEL functions to its own constants. This can be accessed
 programatically via :data:`pybel.parser.language.abundance_labels`
 
-+--------------------+----------------+
-| BEL Function       | PyBEL Constant |
-+====================+================+
-| a                  | ABUNDANCE      |
-+--------------------+----------------+
-| abundance          | ABUNDANCE      |
-+--------------------+----------------+
-| geneAbundance      | GENE           |
-+--------------------+----------------+
-| g                  | GENE           |
-+--------------------+----------------+
-| rnaAbunance        | RNA            |
-+--------------------+----------------+
-| r                  | RNA            |
-+--------------------+----------------+
-| microRNAAbundance  | MIRNA          |
-+--------------------+----------------+
-| m                  | MIRNA          |
-+--------------------+----------------+
-| proteinAbundance   | PROTEIN        |
-+--------------------+----------------+
-| p                  | PROTEIN        |
-+--------------------+----------------+
-| biologicalProcess  | BIOPROCESS     |
-+--------------------+----------------+
-| bp                 | BIOPROCESS     |
-+--------------------+----------------+
-| pathology          | PATHOLOGY      |
-+--------------------+----------------+
-| path               | PATHOLOGY      |
-+--------------------+----------------+
-| complexAbundance   | COMPLEX        |
-+--------------------+----------------+
-| complex            | COMPLEX        |
-+--------------------+----------------+
-| compositeAbundance | COMPOSITE      |
-+--------------------+----------------+
-| composite          | COMPOSITE      |
-+--------------------+----------------+
-| reaction           | REACTION       |
-+--------------------+----------------+
-| rxn                | REACTION       |
-+--------------------+----------------+
++-------------------------------------------+----------------------------------------+
+| BEL Function                              | PyBEL Constant                         |
++===========================================+========================================+
+| ``a()``, ``abundance()``                  | :data:`pybel.constants.ABUNDANCE`      |
++-------------------------------------------+----------------------------------------+
+| ``g()``, ``geneAbundance()``              | :data:`pybel.constants.GENE`           |
++-------------------------------------------+----------------------------------------+
+| ``r()``, ``rnaAbunance()``                | :data:`pybel.constants.RNA`            |
++-------------------------------------------+----------------------------------------+
+| ``m()``, ``microRNAAbundance()``          | :data:`pybel.constants.MIRNA`          |
++-------------------------------------------+----------------------------------------+
+| ``p()``, ``proteinAbundance()``           | :data:`pybel.constants.PROTEIN`        |
++-------------------------------------------+----------------------------------------+
+| ``bp()``, ``biologicalProcess()``         | :data:`pybel.constants.BIOPROCESS`     |
++-------------------------------------------+----------------------------------------+
+| ``path()``, ``pathology()``               | :data:`pybel.constants.PATHOLOGY`      |
++-------------------------------------------+----------------------------------------+
+| ``complex()``, ``complexAbundance()``     | :data:`pybel.constants.COMPLEX`        |
++-------------------------------------------+----------------------------------------+
+| ``composite()``, ``compositeAbundance()`` | :data:`pybel.constants.COMPOSITE`      |
++-------------------------------------------+----------------------------------------+
+| ``rxn()``, ``reaction()``                 | :data:`pybel.constants.REACTION`       |
++-------------------------------------------+----------------------------------------+
+
 
 Graph
 -----
@@ -85,10 +66,20 @@ Graph
     :exclude-members: nodes_iter, edges_iter, add_warning
     :members:
 
+    .. automethod:: __add__
+    .. automethod:: __iadd__
+    .. automethod:: __and__
+    .. automethod:: __iand__
+
+.. autofunction:: pybel.struct.left_full_join
+.. autofunction:: pybel.struct.left_outer_join
+.. autofunction:: pybel.struct.union
+
 Nodes
 -----
 Nodes are used to represent physical entities' abundances. The relevant data about a node is stored in its associated
-dictionary in :mod:`networkx`. After parsing, :code:`p(HGNC:GSK3B)` becomes:
+data dictionary in :mod:`networkx` that can be accessed with ``my_bel_graph.node[node]``. After parsing,
+:code:`p(HGNC:GSK3B)` becomes:
 
 .. code::
 
@@ -101,6 +92,20 @@ dictionary in :mod:`networkx`. After parsing, :code:`p(HGNC:GSK3B)` becomes:
 This section describes the structure of the data dictionaries created for each type of node available in BEL.
 Programatically, these dictionaries can be converted to tuples, which are used as the keys for the network with the
 :func:`pybel.parser.canonicalize.node_to_tuple` function.
+
+Variants
+~~~~~~~~
+
+The addition of a variant tag results in an entry called 'variants' in the data dictionary associated with a given
+node. This entry is a list with dictionaries describing each of the variants. All variants have the entry 'kind' to
+identify whether it is a post-translational modification (PTM), gene modification, fragment, or HGVS variant.
+
+.. warning::
+
+    The canonical ordering for the elements of the ``VARIANTS`` list correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`pybel.BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
 
 .. automodule:: pybel.parser.modifiers.variant
 
@@ -116,8 +121,10 @@ Programatically, these dictionaries can be converted to tuples, which are used a
 
 .. automodule:: pybel.parser.modifiers.protein_modification
 
-.. automodule:: pybel.parser.modifiers.fusion
+Fusions
+~~~~~~~
 
+.. automodule:: pybel.parser.modifiers.fusion
 
 Unqualified Edges
 -----------------
@@ -130,19 +137,39 @@ Variant and Modifications' Parent Relations
 All variants, modifications, fragments, and truncations are connected to their parent entity with an edge having
 the relationship :code:`hasParent`
 
+For :code:`p(HGNC:GSK3B, var(p.Gly123Arg))`, the following edge is inferred:
+
+.. code::
+
+    p(HGNC:GSK3B, var(p.Gly123Arg)) hasParent p(HGNC:GSK3B)
+
+All variants have this relationship to their reference node. BEL does not specify relationships between variants,
+such as the case when a given phosphorylation is necessary to make another one. This knowledge could be encoded
+directly like BEL, since PyBEL does not restrict users from manually asserting unqualified edges.
 
 List Abundances
 ~~~~~~~~~~~~~~~
-Complexes and composites that are defined by lists do not recieve information about the identifier, and are only
-described by their function. :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
+Complexes and composites that are defined by lists. As of version 0.9.0, they contain a list of the data dictionaries
+that describe their members. For example :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 
 .. code::
 
     {
-        FUNCTION: COMPLEX
+        FUNCTION: COMPLEX,
+        MEMBERS: [
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'FOS'
+            }, {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'JUN'
+            }
+        ]
     }
 
-The following edges are inferred:
+The following edges are also inferred:
 
 .. code::
 
@@ -159,7 +186,18 @@ Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
 .. code::
 
     {
-        FUNCTION: COMPOSITE
+        FUNCTION: COMPOSITE,
+        MEMBERS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'malonate'
+            }, {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'HGNC',
+                NAME: 'JUN'
+            }
+        ]
     }
 
 The following edges are inferred:
@@ -169,6 +207,13 @@ The following edges are inferred:
     composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent a(CHEBI:malonate)
     composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent p(HGNC:JUN)
 
+
+.. warning::
+
+    The canonical ordering for the elements of the ``MEMBERS`` list correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
 
 .. seealso::
 
@@ -185,13 +230,47 @@ added to the network for
     rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"), a(CHEBI:"NADPH"), \
         a(CHEBI:"hydron")), products(a(CHEBI:"mevalonate"), a(CHEBI:"NADP(+)")))
 
-results in the following data:
+As of version 0.9.0, the reactants' and products' data dictionaries are included as sub-lists keyed ``REACTANTS`` and
+``PRODUCTS``. It becomes:
 
 .. code::
 
     {
         FUNCTION: REACTION
+        REACTANTS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: '(3S)-3-hydroxy-3-methylglutaryl-CoA'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'NADPH'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'hydron'
+            }
+        ],
+        PRODUCTS: [
+            {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'mevalonate'
+            }, {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'NADP(+)'
+            }
+        ]
     }
+
+.. warning::
+
+    The canonical ordering for the elements of the ``REACTANTS`` and ``PRODUCTS`` lists correspond to the sorted
+    order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
+    directly modifying the BELGraph's structure, use :meth:`BELGraph.add_node_from_data`, which takes care of
+    automatically canonicalizing this dictionary.
 
 The following edges are inferred, where :code:`X` represents the previous reaction, for brevity:
 
@@ -236,10 +315,8 @@ the information about the translocation qualifies that the object is undergoing 
 This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
 just the keyword :code:`p`
 
-
 Example Edge Data Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Because this data is associated with an edge, the node data for the subject and object are not included explicitly.
 However, information about the activities, modifiers, and transformations on the subject and object are included.
 Below is the "skeleton" for the edge data model in PyBEL:
@@ -250,7 +327,7 @@ Below is the "skeleton" for the edge data model in PyBEL:
         SUBJECT: {
             # ... modifications to the subject node. Only present if non-empty.
         },
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             # ... modifications to the object node. Only present if non-empty.
         },
@@ -260,7 +337,7 @@ Below is the "skeleton" for the edge data model in PyBEL:
             CITATION_REFERENCE: '...',
             CITATION_DATE: 'YYYY-MM-DD',
             CITATION_AUTHORS: 'Jon Snow|John Doe',
-        }
+        },
         ANNOTATIONS: {
             'Disease': 'Colorectal Cancer',
             # ... additional annotations as key:value pairs
@@ -279,7 +356,7 @@ Modifiers are added to this structure as well. Under this schema,
 .. code::
 
     {
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             MODIFIER: ACTIVITY,
             EFFECT: {
@@ -287,7 +364,7 @@ Modifiers are added to this structure as well. Under this schema,
                 NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         },
-        CITATION: { ... }
+        CITATION: { ... },
         EVIDENCE: '...',
         ANNOTATIONS: { ... }
     }
@@ -298,11 +375,11 @@ schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
 .. code::
 
     {
-        RELATION: 'positiveCorrelation',
+        RELATION: POSITIVE_CORRELATION,
         OBJECT: {
             MODIFIER: ACTIVITY
         },
-        CITATION: { ... }
+        CITATION: { ... },
         EVIDENCE: '...',
         ANNOTATIONS: { ... }
     }
@@ -321,21 +398,21 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 .. code::
 
     {
-        RELATION: 'increases',
+        RELATION: INCREASES,
         OBJECT: {
             MODIFIER: TRANSLOCATION,
             EFFECT: {
                 FROM_LOC: {
-                    NAMESPACE: 'GOMF',
+                    NAMESPACE: 'GOCC',
                     NAME: 'intracellular'
                 },
                 TO_LOC: {
-                    NAMESPACE: 'GOMF',
+                    NAMESPACE: 'GOCC',
                     NAME: 'extracellular space'
                 }
             }
         },
-        CITATION: { ... }
+        CITATION: { ... },
         EVIDENCE: '...',
         ANNOTATIONS: { ... }
     }
@@ -352,11 +429,11 @@ Degradations are more simple, because there's no ::data:`pybel.constants.EFFECT`
 .. code::
 
     {
-        RELATION: 'increases',
+        RELATION: INCREASES,
         OBJECT: {
             MODIFIER: DEGRADATION
         },
-        CITATION: { ... }
+        CITATION: { ... },
         EVIDENCE: '...',
         ANNOTATIONS: { ... }
     }
