@@ -893,7 +893,9 @@ class InsertManager(NamespaceManager, AnnotationManager):
         """
         self.ensure_namespace(GOCC_LATEST)
 
-        for node in graph.nodes_iter():
+        log.debug('storing graph parts: nodes')
+
+        for node in graph:
             try:
                 node_object = self.get_or_create_node(graph, node)
                 self.node_model[node] = node_object
@@ -904,6 +906,8 @@ class InsertManager(NamespaceManager, AnnotationManager):
                 network.nodes.append(node_object)
 
         self.session.flush()
+
+        log.debug('storing graph parts: edges')
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
             if u not in self.node_model:
