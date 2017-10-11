@@ -843,7 +843,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
         self.object_cache_edge = {}
         self.object_cache_citation = {}
         self.object_cache_evidence = {}
-        self.object_cache_author = {}
 
     def insert_graph(self, graph, store_parts=True):
         """Inserts a graph in the database.
@@ -1212,6 +1211,15 @@ class InsertManager(NamespaceManager, AnnotationManager):
         self.object_cache_citation[citation_hash] = citation
         return citation
 
+    def get_author_by_name(self, name):
+        """Gets an author by name if they exist in the database
+
+        :param str name: An author's name
+        :rtype: Optional[Author]
+        """
+        return self.session.query(Author).filter(Author.name == name).one_or_none()
+
+
     def get_or_create_author(self, name):
         """Gets an author by name, or creates one
 
@@ -1220,18 +1228,13 @@ class InsertManager(NamespaceManager, AnnotationManager):
         """
         name = name.strip()
 
-        if name in self.object_cache_author:
-            return self.object_cache_author[name]
-
-        author = self.session.query(Author).filter(Author.name == name).one_or_none()
+        author = self.get_author_by_name(name)
 
         if author is not None:
-            self.object_cache_author[name] = author
             return author
 
         author = Author(name=name)
         self.session.add(author)
-        self.object_cache_author[name] = author
         return author
 
     def get_or_create_modification(self, graph, node_data):
@@ -1327,7 +1330,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
             if mod_hash in self.object_cache_modification:
                 mod = self.object_cache_modification[mod_hash]
-
             else:
                 mod = self.session.query(Modification).filter(Modification.sha512 == mod_hash).one_or_none()
                 if not mod:
