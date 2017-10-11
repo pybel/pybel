@@ -5,7 +5,7 @@ import uuid
 
 from sqlalchemy import func
 
-from .base_manager import BaseManager
+from .lookup_manager import LookupManager
 from .models import (
     Annotation,
     AnnotationEntry,
@@ -33,7 +33,7 @@ __all__ = [
 ]
 
 
-class QueryManager(BaseManager):
+class QueryManager(LookupManager):
     """Groups queries over the edge store"""
 
     def rebuild_by_edge_filter(self, **annotations):
@@ -142,14 +142,6 @@ class QueryManager(BaseManager):
         """
         return self.session.query(func.count(Node.id)).scalar()
 
-    def get_node_by_hash(self, node_hash):
-        """Looks up a node by the hash of a PyBEL node tuple
-
-        :param str node_hash: The hash of a PyBEL node tuple from :func:`pybel.utils.hash_node`
-        :rtype: Node
-        """
-        return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
-
     def get_node_tuple_by_hash(self, node_hash):
         """Looks up a node by the hash and returns the corresponding PyBEL node tuple
 
@@ -233,14 +225,6 @@ class QueryManager(BaseManager):
         :rtype: int
         """
         return self.session.query(func.count(Edge.id)).scalar()
-
-    def get_edge_by_hash(self, edge_hash):
-        """Looks up an edge by the hash of a PyBEL edge data dictionary
-
-        :param str edge_hash: The hash of a PyBEL edge data dictionary from :func:`pybel.utils.hash_edge`
-        :rtype: Edge
-        """
-        return self.session.query(Edge).filter(Edge.sha512 == edge_hash).one_or_none()
 
     def get_edge_by_tuple(self, u, v, d):
         """Looks up an edge by PyBEL edge tuple
