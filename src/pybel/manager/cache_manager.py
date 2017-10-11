@@ -17,40 +17,21 @@ from collections import defaultdict
 from copy import deepcopy
 from six import string_types
 from six.moves.cPickle import dumps
-from sqlalchemy import func, exists
+from sqlalchemy import exists, func
 
 from .base_manager import BaseManager
+from .lookup_manager import LookupManager
 from .models import (
-    Network,
-    Annotation,
-    AnnotationEntry,
-    Namespace,
-    NamespaceEntryEquivalence,
-    NamespaceEntry,
-    Node,
-    Edge,
-    Evidence,
-    Citation,
-    Property,
-    Author,
-    Modification,
+    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
+    NamespaceEntry, NamespaceEntryEquivalence, Network, Node, Property,
 )
 from .query_manager import QueryManager
-from .lookup_manager import LookupManager
-from .utils import parse_owl, extract_shared_required, extract_shared_optional
+from .utils import extract_shared_optional, extract_shared_required, parse_owl
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
 from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
-from ..utils import (
-    get_bel_resource,
-    parse_datetime,
-    hash_edge,
-    hash_node,
-    hash_evidence,
-    hash_citation,
-    hash_dump,
-)
+from ..utils import get_bel_resource, hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
 
 __all__ = [
     'Manager',
@@ -147,6 +128,13 @@ class NamespaceManager(BaseManager):
         :rtype: list[Namespace]
         """
         return self.session.query(Namespace).all()
+
+    def count_namespaces(self):
+        """Count the number of namespaces in the database
+
+        :rtype: int
+        """
+        return self.session.query(Namespace).count()
 
     def drop_namespaces(self):
         """Drops all namespaces"""
@@ -418,6 +406,13 @@ class AnnotationManager(BaseManager):
         :rtype: list[Annotation]
         """
         return self.session.query(Annotation).all()
+
+    def count_annotations(self):
+        """Count the number of annotations in the database
+
+        :rtype: int
+        """
+        return self.session.query(Annotation).count()
 
     def drop_annotations(self):
         """Drops all annotations"""
@@ -1202,7 +1197,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     citation.authors.append(author_model)
 
         self.session.add(citation)
-
 
         self.session.commit()
         return citation
