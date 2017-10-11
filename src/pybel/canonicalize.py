@@ -127,12 +127,12 @@ def node_to_bel(graph, node):
     data = graph.node[node]
 
     if data[FUNCTION] == REACTION:
-        reactants = _node_list_to_bel_helper(graph, node, HAS_REACTANT)
-        products = _node_list_to_bel_helper(graph, node, HAS_PRODUCT)
+        reactants = _node_list_to_bel_helper(graph, node, HAS_REACTANT)  # TODO refactor to use node data
+        products = _node_list_to_bel_helper(graph, node, HAS_PRODUCT)  # TODO refactor to use node data
         return 'rxn(reactants({}), products({}))'.format(', '.join(reactants), ', '.join(products))
 
     if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
-        members = _node_list_to_bel_helper(graph, node, HAS_COMPONENT)
+        members = _node_list_to_bel_helper(graph, node, HAS_COMPONENT)  # TODO refactor to use node data
         return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members))
 
     if VARIANTS in data:

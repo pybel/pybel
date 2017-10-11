@@ -16,7 +16,7 @@ def _add_identifier(rv, namespace, name, identifier=None):
         rv[ID] = identifier
 
 
-def protein(namespace, name, identifier=None):
+def protein(namespace, name, identifier=None): # TODO make name first, and namespace default to HGNC
     """Returns the node data dictionary for a protein
 
     :param str namespace: The name of the database used to identify this protein
