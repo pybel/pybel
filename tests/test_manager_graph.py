@@ -14,7 +14,7 @@ from pybel import BELGraph, from_database, to_database, from_path
 from pybel.constants import *
 from pybel.manager import models
 from pybel.manager.models import Namespace, NamespaceEntry, Node, Author, Evidence
-from pybel.utils import hash_citation, hash_node, hash_evidence
+from pybel.utils import hash_citation, hash_node, hash_evidence, hash_dump
 from tests import constants
 from tests.constants import (
     FleetingTemporaryCacheMixin,
@@ -589,6 +589,7 @@ class TestNodes(TemporaryCacheMixin):
 
         self.help_test_round_trip(node_tuple, node_data)
 
+
 # @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
 class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
@@ -596,7 +597,6 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
         super(TestEdgeStore, cls).setUpClass()
-
         @mock_bel_resources
         def get_graph(mock):
             return pybel.from_path(test_bel_simple, manager=cls.manager, allow_nested=True)
@@ -672,144 +672,144 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         )
         self.bel_simple_reconstituted(g2)
 
-        # @mock_bel_resources
-        # def test_get_or_create_properties(self, mock_get):
-        #     activity = {
-        #         'data': {
-        #             SUBJECT: {
-        #                 EFFECT: {
-        #                     NAME: 'pep',
-        #                     NAMESPACE: BEL_DEFAULT_NAMESPACE
-        #                 },
-        #                 MODIFIER: ACTIVITY
-        #             }
-        #         },
-        #         'participant': SUBJECT
-        #     }
-        #     translocation = {
-        #         'data': {
-        #             SUBJECT: {
-        #                 EFFECT: {
-        #                     FROM_LOC: {
-        #                         NAME: 'host intracellular organelle',
-        #                         NAMESPACE: GOCC_KEYWORD
-        #                     },
-        #                     TO_LOC: {
-        #                         NAME: 'host outer membrane',
-        #                         NAMESPACE: GOCC_KEYWORD
-        #                     },
-        #                 },
-        #                 MODIFIER: TRANSLOCATION
-        #             }
-        #         },
-        #         'participant': SUBJECT
-        #     }
-        #     location = {
-        #         'data': {
-        #             SUBJECT: {
-        #                 LOCATION: {
-        #                     NAMESPACE: GOCC_KEYWORD,
-        #                     NAME: 'Herring body'
-        #                 }
-        #             }
-        #         },
-        #         'participant': SUBJECT
-        #     }
-        #     degradation = {
-        #         'data': {
-        #             SUBJECT: {
-        #                 MODIFIER: DEGRADATION
-        #             }
-        #         },
-        #         'participant': SUBJECT
-        #     }
-        #
-        #     edge_data = self.graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')][0]
-        #
-        #     activity_hash = hashlib.sha512(json.dumps({
-        #         'participant': SUBJECT,
-        #         'modifier': ACTIVITY,
-        #         'effectNamespace': BEL_DEFAULT_NAMESPACE,
-        #         'effectName': 'pep'
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     translocation_from_hash = hashlib.sha512(json.dumps({
-        #         'participant': SUBJECT,
-        #         'modifier': TRANSLOCATION,
-        #         'relativeKey': FROM_LOC,
-        #         'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'host intracellular organelle')
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     translocation_to_hash = hashlib.sha512(json.dumps({
-        #         'participant': SUBJECT,
-        #         'modifier': TRANSLOCATION,
-        #         'relativeKey': TO_LOC,
-        #         'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'host outer membrane')
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     location_hash = hashlib.sha512(json.dumps({
-        #         'participant': SUBJECT,
-        #         'modifier': LOCATION,
-        #         'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'Herring body')
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     degradation_hash = hashlib.sha512(json.dumps({
-        #         'participant': SUBJECT,
-        #         'modifier': DEGRADATION
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #
-        #     # Create
-        #     edge_data.update(activity['data'])
-        #     activity_ls = self.manager.get_or_create_properties(self.graph, edge_data)
-        #     self.assertIsInstance(activity_ls, list)
-        #     self.assertIsInstance(activity_ls[0], models.Property)
-        #     self.assertEqual(activity_ls[0].data, activity)
-        #
-        #     # Activity was stored with hash in object cache
-        #     self.assertIn(activity_hash, self.manager.object_cache_property)
-        #     self.assertEqual(1, len(self.manager.object_cache_property.keys()))
-        #
-        #     reloaded_activity_ls = self.manager.get_or_create_properties(self.graph, edge_data)
-        #     self.assertEqual(activity_ls, reloaded_activity_ls)
-        #
-        #     # No new activity object was created
-        #     self.assertEqual(1, len(self.manager.object_cache_property.keys()))
-        #
-        #     # Create
-        #     edge_data.update(location['data'])
-        #     location_ls = self.manager.get_or_create_properties(self.graph, edge_data)
-        #     self.assertEqual(location_ls[0].data, location)
-        #
-        #     self.assertIn(location_hash, self.manager.object_cache_property)
-        #     self.assertEqual(2, len(self.manager.object_cache_property.keys()))
-        #
-        #     # Get
-        #     reloaded_location_ls = self.manager.get_or_create_properties(self.graph, edge_data)
-        #     self.assertEqual(location_ls, reloaded_location_ls)
-        #
-        #     # No second location property object was created
-        #     self.assertEqual(2, len(self.manager.object_cache_property.keys()))
-        #
-        #     # Create
-        #     edge_data.update(degradation['data'])
-        #     degradation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
-        #     self.assertEqual(degradation_ls[0].data, degradation)
-        #
-        #     self.assertIn(degradation_hash, self.manager.object_cache_property)
-        #     self.assertEqual(3, len(self.manager.object_cache_property.keys()))
-        #
-        #     # Get
-        #     reloaded_degradation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
-        #     self.assertEqual(degradation_ls, reloaded_degradation_ls)
-        #
-        #     # No second degradation property object was created
-        #     self.assertEqual(3, len(self.manager.object_cache_property.keys()))
-        #
-        #     # Create
-        #     edge_data.update(translocation['data'])
-        #     translocation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
-        #     # self.assertEqual(translocation_ls[0].data, translocation)
-        #
-        #     # 2 translocation objects addaed
-        #     self.assertEqual(5, len(self.manager.object_cache_property.keys()))
-        #     self.assertIn(translocation_from_hash, self.manager.object_cache_property)
-        #     self.assertIn(translocation_to_hash, self.manager.object_cache_property)
+    @mock_bel_resources
+    def test_get_or_create_properties(self, mock_get):
+        activity = {
+            'data': {
+                SUBJECT: {
+                    EFFECT: {
+                        NAME: 'pep',
+                        NAMESPACE: BEL_DEFAULT_NAMESPACE
+                    },
+                    MODIFIER: ACTIVITY
+                }
+            },
+            'participant': SUBJECT
+        }
+        translocation = {
+            'data': {
+                SUBJECT: {
+                    EFFECT: {
+                        FROM_LOC: {
+                            NAME: 'host intracellular organelle',
+                            NAMESPACE: GOCC_KEYWORD
+                        },
+                        TO_LOC: {
+                            NAME: 'host outer membrane',
+                            NAMESPACE: GOCC_KEYWORD
+                        },
+                    },
+                    MODIFIER: TRANSLOCATION
+                }
+            },
+            'participant': SUBJECT
+        }
+        location = {
+            'data': {
+                SUBJECT: {
+                    LOCATION: {
+                        NAMESPACE: GOCC_KEYWORD,
+                        NAME: 'intine'
+                    }
+                }
+            },
+            'participant': SUBJECT
+        }
+        degradation = {
+            'data': {
+                SUBJECT: {
+                    MODIFIER: DEGRADATION
+                }
+            },
+            'participant': SUBJECT
+        }
+
+        edge_data = self.graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')][0]
+
+        activity_hash = hash_dump({
+            'participant': SUBJECT,
+            'modifier': ACTIVITY,
+            'effectNamespace': BEL_DEFAULT_NAMESPACE,
+            'effectName': 'pep'
+        })
+        translocation_from_hash = hash_dump({
+            'participant': SUBJECT,
+            'modifier': TRANSLOCATION,
+            'relativeKey': FROM_LOC,
+            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'host intracellular organelle')
+        })
+        translocation_to_hash = hash_dump({
+            'participant': SUBJECT,
+            'modifier': TRANSLOCATION,
+            'relativeKey': TO_LOC,
+            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'host outer membrane')
+        })
+        location_hash = hash_dump({
+            'participant': SUBJECT,
+            'modifier': LOCATION,
+            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'Herring body')
+        })
+        degradation_hash = hash_dump({
+            'participant': SUBJECT,
+            'modifier': DEGRADATION
+        })
+
+        # Create
+        edge_data.update(activity['data'])
+        activity_ls = self.manager.get_or_create_properties(self.graph, edge_data)
+        self.assertIsInstance(activity_ls, list)
+        self.assertIsInstance(activity_ls[0], models.Property)
+        self.assertEqual(activity_ls[0].data, activity)
+
+        # Activity was stored with hash in object cache
+        self.assertIn(activity_hash, self.manager.object_cache_property)
+        self.assertEqual(1, len(self.manager.object_cache_property.keys()))
+
+        reloaded_activity_ls = self.manager.get_or_create_properties(self.graph, edge_data)
+        self.assertEqual(activity_ls, reloaded_activity_ls)
+
+        # No new activity object was created
+        self.assertEqual(1, len(self.manager.object_cache_property.keys()))
+
+        # Create
+        edge_data.update(location['data'])
+        location_ls = self.manager.get_or_create_properties(self.graph, edge_data)
+        self.assertEqual(location_ls[0].data, location)
+
+        self.assertIn(location_hash, self.manager.object_cache_property)
+        self.assertEqual(2, len(self.manager.object_cache_property.keys()))
+
+        # Get
+        reloaded_location_ls = self.manager.get_or_create_properties(self.graph, edge_data)
+        self.assertEqual(location_ls, reloaded_location_ls)
+
+        # No second location property object was created
+        self.assertEqual(2, len(self.manager.object_cache_property.keys()))
+
+        # Create
+        edge_data.update(degradation['data'])
+        degradation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
+        self.assertEqual(degradation_ls[0].data, degradation)
+
+        self.assertIn(degradation_hash, self.manager.object_cache_property)
+        self.assertEqual(3, len(self.manager.object_cache_property.keys()))
+
+        # Get
+        reloaded_degradation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
+        self.assertEqual(degradation_ls, reloaded_degradation_ls)
+
+        # No second degradation property object was created
+        self.assertEqual(3, len(self.manager.object_cache_property.keys()))
+
+        # Create
+        edge_data.update(translocation['data'])
+        translocation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
+        # self.assertEqual(translocation_ls[0].data, translocation)
+
+        # 2 translocation objects addaed
+        self.assertEqual(5, len(self.manager.object_cache_property.keys()))
+        self.assertIn(translocation_from_hash, self.manager.object_cache_property)
+        self.assertIn(translocation_to_hash, self.manager.object_cache_property)
 
         # @mock_bel_resources
         # def test_get_or_create_edge(self, mock_get):

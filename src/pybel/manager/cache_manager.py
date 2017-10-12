@@ -906,7 +906,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         for url in graph.namespace_url.values():
             self.ensure_namespace(url)
 
-        if GOCC_KEYWORD not in graph.namespace_url:
+        if GOCC_LATEST not in graph.namespace_url.values():
             self.ensure_namespace(GOCC_LATEST)
 
         for url in graph.annotation_url.values():
@@ -1419,11 +1419,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     namespace_url = GOCC_LATEST
                 else:
                     namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
-
                 property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url,
                                                                            participant_data[LOCATION][NAME])
-
-                print('Location:\n', property_dict)
 
                 property_list.append(property_dict)
 
