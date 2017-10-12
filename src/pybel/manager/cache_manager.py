@@ -29,7 +29,6 @@ from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
-from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
 from ..utils import get_bel_resource, hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
 
@@ -863,11 +862,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         for url in graph.annotation_url.values():
             self.ensure_annotation(url)
 
-        network = Network(blob=to_bytes(graph), **{
+        network = Network(**{
             key: value
             for key, value in graph.document.items()
             if key in METADATA_INSERT_KEYS
         })
+
+        network.store_bel(graph)
 
         if store_parts:
             self._store_graph_parts(network, graph)
