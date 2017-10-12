@@ -415,8 +415,8 @@ class Network(Base):
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
-    nodes = relationship('Node', secondary=network_node, lazy="dynamic")  # backref='networks'
-    edges = relationship('Edge', secondary=network_edge, lazy="dynamic")  # backref='networks'
+    nodes = relationship('Node', secondary=network_node, lazy="dynamic")
+    edges = relationship('Edge', secondary=network_edge, lazy="dynamic")
 
     __table_args__ = (
         UniqueConstraint(name, version),
@@ -846,10 +846,10 @@ class Edge(Base):
     target = relationship('Node', foreign_keys=[target_id], backref=backref('in_edges', lazy='dynamic'))
 
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
-    evidence = relationship("Evidence")
+    evidence = relationship("Evidence", backref=backref('edges', lazy='dynamic'))
 
-    annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic")  # , backref='edges'
-    properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
+    annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic")
+    properties = relationship('Property', secondary=edge_property, lazy="dynamic")
     networks = relationship('Network', secondary=network_edge, lazy="dynamic")
 
     blob = Column(LargeBinary)
@@ -928,6 +928,8 @@ class Property(Base):
     namespaceEntry = relationship('NamespaceEntry')
     sha512 = Column(String(255), index=True)
 
+    edges = relationship('Edge', secondary=edge_property, lazy="dynamic")
+
     @property
     def data(self):
         """Creates a property dict that is used to recreate an edge dictionary for a :class:`BELGraph`.
@@ -967,52 +969,3 @@ class Property(Base):
         :rtype: dict
         """
         return self.data['data']
-
-
-trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
-    trigger_name='drop_orphan_edge_annotation_relations',
-    trigger_tablename=NETWORK_TABLE_NAME,
-    # PROPERTY_TABLE_NAME,
-    orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
-    reference_tablename=NETWORK_EDGE_TABLE_NAME,
-    reference_column='edge_id',
-    orphan_column='edge_id'
-)
-event.listen(Network.__table__, 'after_create', trigger_drop_orphan_edge_annotation_relations)
-
-trigger_drop_orphan_edge_property_relations = build_orphan_trigger(
-    trigger_name='drop_orphan_edge_property_relations',
-    trigger_tablename=EDGE_ANNOTATION_TABLE_NAME,
-    orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
-    reference_tablename=NETWORK_EDGE_TABLE_NAME,
-    reference_column='edge_id',
-    orphan_column='edge_id'
-)
-event.listen(edge_annotation, 'after_create', trigger_drop_orphan_edge_property_relations)
-
-trigger_drop_orphan_properties = build_orphan_trigger(
-    trigger_name='drop_orphan_properties',
-    trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
-    orphan_tablename=PROPERTY_TABLE_NAME,
-    reference_tablename=EDGE_PROPERTY_TABLE_NAME,
-    reference_column='property_id'
-)
-event.listen(edge_property, 'after_create', trigger_drop_orphan_properties)
-
-trigger_drop_orphan_edges = build_orphan_trigger(
-    trigger_name='drop_orphan_edges',
-    trigger_tablename=PROPERTY_TABLE_NAME,
-    orphan_tablename=EDGE_TABLE_NAME,
-    reference_tablename=NETWORK_EDGE_TABLE_NAME,
-    reference_column='edge_id'
-)
-event.listen(Property.__table__, 'after_create', trigger_drop_orphan_edges)
-
-trigger_drop_orphan_modifications = build_orphan_trigger(
-    trigger_name='drop_orphan_modifications',
-    trigger_tablename=NODE_TABLE_NAME,
-    orphan_tablename=MODIFICATION_TABLE_NAME,
-    reference_tablename=NODE_MODIFICATION_TABLE_NAME,
-    reference_column='modification_id'
-)
-event.listen(Node.__table__, 'after_create', trigger_drop_orphan_modifications)

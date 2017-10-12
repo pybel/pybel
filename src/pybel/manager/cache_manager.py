@@ -732,8 +732,55 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param int network_id: The network's database identifier
         """
         network = self.session.query(Network).get(network_id)
+        edges = network.edges.all()
         self.session.delete(network)
+        self.session.flush()
+
+        if edges:
+            self._drop_edges(edges)
+
         self.session.commit()
+
+    def _drop_edges(self, edge_list):
+        """Helper to drop orphan edges.
+
+        :param list edge_list: List of edge objects that should be checked for orphanity.
+        """
+
+        properties = []
+        evidences = []
+        for edge in edge_list:
+            if not edge.networks.all():
+                properties = list(set(properties + edge.properties.all()))
+                if edge.evidence not in evidences:
+                    evidences.append(edge.evidence)
+                self.session.delete(edge)
+        self.session.flush()
+
+        if evidences:
+            self._drop_evidences(evidences)
+        if properties:
+            self._drop_properties(properties)
+
+    def _drop_properties(self, property_list):
+        """Helper to drop orphan properties.
+
+        :param list property_list: List of property objects that should be checked for orphanity.
+        """
+
+        for property in property_list:
+            if not property.edges.all():
+                self.session.delete(property)
+
+    def _drop_evidences(self, evidence_list):
+        """Helper to drop orphan evidences.
+
+        :param list evidence_list: List of evidence objects that should be checked for orphanity.
+        """
+
+        for evidence in evidence_list:
+            if evidence and not evidence.edges.all():
+                self.session.delete(evidence)
 
     def drop_networks(self):
         """Drops all networks"""
