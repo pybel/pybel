@@ -5,14 +5,16 @@
 import datetime
 
 from six.moves.cPickle import loads
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, event, DDL
-from sqlalchemy import Integer, String, DateTime, Text, Date, LargeBinary, Boolean
+from sqlalchemy import (
+    Boolean, Column, DDL, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text,
+    UniqueConstraint, event,
+)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
 from ..constants import *
-from ..io.gpickle import from_bytes
+from ..io.gpickle import from_bytes, to_bytes
 from ..parser.canonicalize import node_to_tuple, sort_dict_list, sort_variant_dict_list
 
 __all__ = [
@@ -468,6 +470,13 @@ class Network(Base):
         :rtype: BELGraph
         """
         return from_bytes(self.blob)
+
+    def store_bel(self, graph):
+        """Inserts a bel graph
+
+        :param BELGraph graph: A BEL Graph
+        """
+        self.blob = to_bytes(graph)
 
 
 node_modification = Table(
