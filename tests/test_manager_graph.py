@@ -3,14 +3,13 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 import time
 import unittest
-
-import os
-import sqlalchemy.exc
 from collections import Counter
 
 import pybel
+import sqlalchemy.exc
 from pybel import BELGraph, from_database, to_database, from_path
 from pybel.constants import *
 from pybel.manager import models
@@ -590,8 +589,6 @@ class TestNodes(TemporaryCacheMixin):
 
         self.help_test_round_trip(node_tuple, node_data)
 
-
-# FIXME @kono need proper deletion cascades
 # @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
 class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     """Tests that the cache can be queried"""
@@ -675,9 +672,8 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         )
         self.bel_simple_reconstituted(g2)
 
-        #
         # @mock_bel_resources
-        # def test_get_or_create_property(self, mock_get):
+        # def test_get_or_create_properties(self, mock_get):
         #     activity = {
         #         'data': {
         #             SUBJECT: {
@@ -727,7 +723,8 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         #         },
         #         'participant': SUBJECT
         #     }
-        #     edge_data = self.simple_graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')][0]
+        #
+        #     edge_data = self.graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')][0]
         #
         #     activity_hash = hashlib.sha512(json.dumps({
         #         'participant': SUBJECT,
@@ -739,18 +736,18 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         #         'participant': SUBJECT,
         #         'modifier': TRANSLOCATION,
         #         'relativeKey': FROM_LOC,
-        #         'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['host intracellular organelle']
+        #         'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'host intracellular organelle')
         #     }, sort_keys=True).encode('utf-8')).hexdigest()
         #     translocation_to_hash = hashlib.sha512(json.dumps({
         #         'participant': SUBJECT,
         #         'modifier': TRANSLOCATION,
         #         'relativeKey': TO_LOC,
-        #         'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['host outer membrane']
+        #         'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'host outer membrane')
         #     }, sort_keys=True).encode('utf-8')).hexdigest()
         #     location_hash = hashlib.sha512(json.dumps({
         #         'participant': SUBJECT,
         #         'modifier': LOCATION,
-        #         'namespaceEntry': self.manager.namespace_object_cache[GOCC_LATEST]['Herring body']
+        #         'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'Herring body')
         #     }, sort_keys=True).encode('utf-8')).hexdigest()
         #     degradation_hash = hashlib.sha512(json.dumps({
         #         'participant': SUBJECT,
@@ -759,70 +756,70 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         #
         #     # Create
         #     edge_data.update(activity['data'])
-        #     activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        #     activity_ls = self.manager.get_or_create_properties(self.graph, edge_data)
         #     self.assertIsInstance(activity_ls, list)
         #     self.assertIsInstance(activity_ls[0], models.Property)
         #     self.assertEqual(activity_ls[0].data, activity)
         #
         #     # Activity was stored with hash in object cache
-        #     self.assertIn(activity_hash, self.manager.object_cache['property'])
-        #     self.assertEqual(1, len(self.manager.object_cache['property'].keys()))
+        #     self.assertIn(activity_hash, self.manager.object_cache_property)
+        #     self.assertEqual(1, len(self.manager.object_cache_property.keys()))
         #
-        #     reloaded_activity_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        #     reloaded_activity_ls = self.manager.get_or_create_properties(self.graph, edge_data)
         #     self.assertEqual(activity_ls, reloaded_activity_ls)
         #
         #     # No new activity object was created
-        #     self.assertEqual(1, len(self.manager.object_cache['property'].keys()))
+        #     self.assertEqual(1, len(self.manager.object_cache_property.keys()))
         #
         #     # Create
         #     edge_data.update(location['data'])
-        #     location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        #     location_ls = self.manager.get_or_create_properties(self.graph, edge_data)
         #     self.assertEqual(location_ls[0].data, location)
         #
-        #     self.assertIn(location_hash, self.manager.object_cache['property'])
-        #     self.assertEqual(2, len(self.manager.object_cache['property'].keys()))
+        #     self.assertIn(location_hash, self.manager.object_cache_property)
+        #     self.assertEqual(2, len(self.manager.object_cache_property.keys()))
         #
         #     # Get
-        #     reloaded_location_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        #     reloaded_location_ls = self.manager.get_or_create_properties(self.graph, edge_data)
         #     self.assertEqual(location_ls, reloaded_location_ls)
         #
         #     # No second location property object was created
-        #     self.assertEqual(2, len(self.manager.object_cache['property'].keys()))
+        #     self.assertEqual(2, len(self.manager.object_cache_property.keys()))
         #
         #     # Create
         #     edge_data.update(degradation['data'])
-        #     degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        #     degradation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
         #     self.assertEqual(degradation_ls[0].data, degradation)
         #
-        #     self.assertIn(degradation_hash, self.manager.object_cache['property'])
-        #     self.assertEqual(3, len(self.manager.object_cache['property'].keys()))
+        #     self.assertIn(degradation_hash, self.manager.object_cache_property)
+        #     self.assertEqual(3, len(self.manager.object_cache_property.keys()))
         #
         #     # Get
-        #     reloaded_degradation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        #     reloaded_degradation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
         #     self.assertEqual(degradation_ls, reloaded_degradation_ls)
         #
         #     # No second degradation property object was created
-        #     self.assertEqual(3, len(self.manager.object_cache['property'].keys()))
+        #     self.assertEqual(3, len(self.manager.object_cache_property.keys()))
         #
         #     # Create
         #     edge_data.update(translocation['data'])
-        #     translocation_ls = self.manager.get_or_create_property(self.simple_graph, edge_data)
+        #     translocation_ls = self.manager.get_or_create_properties(self.graph, edge_data)
         #     # self.assertEqual(translocation_ls[0].data, translocation)
         #
         #     # 2 translocation objects addaed
-        #     self.assertEqual(5, len(self.manager.object_cache['property'].keys()))
-        #     self.assertIn(translocation_from_hash, self.manager.object_cache['property'])
-        #     self.assertIn(translocation_to_hash, self.manager.object_cache['property'])
-        #
+        #     self.assertEqual(5, len(self.manager.object_cache_property.keys()))
+        #     self.assertIn(translocation_from_hash, self.manager.object_cache_property)
+        #     self.assertIn(translocation_to_hash, self.manager.object_cache_property)
+
         # @mock_bel_resources
         # def test_get_or_create_edge(self, mock_get):
         #
-        #     edge_data = self.simple_graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')]
-        #     source_node = self.manager.get_or_create_node(self.simple_graph, (PROTEIN, 'HGNC', 'AKT1'))
-        #     target_node = self.manager.get_or_create_node(self.simple_graph, (PROTEIN, 'HGNC', 'EGFR'))
+        #     edge_data = self.graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')]
+        #     source_node = self.manager.get_or_create_node(self.graph, (PROTEIN, 'HGNC', 'AKT1'))
+        #     target_node = self.manager.get_or_create_node(self.graph, (PROTEIN, 'HGNC', 'EGFR'))
         #     citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
         #     evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
-        #     properties = self.manager.get_or_create_property(self.simple_graph, edge_data[0])
+        #     properties = self.manager.get_or_create_property(self.graph, edge_data[0])
         #     annotations = []
         #     basic_edge = {
         #         'graph_key': 0,
@@ -879,10 +876,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         #     self.assertEqual(edge, reloaded_edge)
         #
         #     self.assertEqual(1, len(self.manager.object_cache['edge'].keys()))
-        #
 
-
-        #
         # @mock_bel_resources
         # def test_get_or_create_modification(self, mock_get):
         #     # self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
@@ -1115,8 +1109,6 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         #
         #     # Every modification was added only once to the object cache
         #     self.assertEqual(8, len(self.manager.object_cache['modification'].keys()))
-
-        # ============================================================
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')

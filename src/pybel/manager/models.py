@@ -7,8 +7,7 @@ import datetime
 from six.moves.cPickle import loads
 from sqlalchemy import (
     Boolean, Column, DDL, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text,
-    UniqueConstraint, event,
-)
+    UniqueConstraint, )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 
@@ -158,8 +157,6 @@ class Namespace(Base):
     citation_version = Column(String(255), nullable=True)
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
-
-    # entries = relationship('NamespaceEntry', backref='namespace', cascade='all, delete-orphan')
 
     has_equivalences = Column(Boolean, default=False)
 

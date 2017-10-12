@@ -11,10 +11,10 @@ from __future__ import unicode_literals
 
 import logging
 import time
-from itertools import groupby
-
 from collections import defaultdict
 from copy import deepcopy
+from itertools import groupby
+
 from six import string_types
 from six.moves.cPickle import dumps
 from sqlalchemy import exists, func
@@ -906,6 +906,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         for url in graph.namespace_url.values():
             self.ensure_namespace(url)
 
+        if GOCC_KEYWORD not in graph.namespace_url:
+            self.ensure_namespace(GOCC_LATEST)
+
         for url in graph.annotation_url.values():
             self.ensure_annotation(url)
 
@@ -933,7 +936,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
         """
-        self.ensure_namespace(GOCC_LATEST)
 
         log.debug('storing graph parts: nodes')
 
@@ -1417,8 +1419,12 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     namespace_url = GOCC_LATEST
                 else:
                     namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
+
                 property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url,
                                                                            participant_data[LOCATION][NAME])
+
+                print('Location:\n', property_dict)
+
                 property_list.append(property_dict)
 
             else:
