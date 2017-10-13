@@ -1,63 +1,30 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
+import tempfile
 import time
 import unittest
 from pathlib import Path
 
 import networkx as nx
-import os
-import tempfile
 from six import BytesIO, StringIO
 
 from pybel import (
-    BELGraph,
-    to_bel_lines,
-    from_lines,
-    to_bytes,
-    from_bytes,
-    to_graphml,
-    from_path,
-    from_url,
-    to_cx,
-    from_cx,
-    to_cx_jsons,
-    from_cx_jsons,
-    to_json,
-    from_json,
-    to_jsons,
-    from_jsons,
-    to_ndex,
-    from_ndex,
-    to_pickle,
-    from_pickle,
-    to_json_file,
-    from_json_file,
+    BELGraph, from_bytes, from_cx, from_cx_jsons, from_json, from_json_file, from_jsons, from_lines,
+    from_ndex, from_path, from_pickle, from_url, to_bel_lines, to_bytes, to_cx, to_cx_jsons, to_graphml, to_json,
+    to_json_file, to_jsons, to_ndex, to_pickle,
 )
 from pybel.constants import *
 from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
+from pybel.summary import get_syntax_errors
 from pybel.utils import hash_node
 from tests.constants import (
-    AKT1,
-    EGFR,
-    CASP8,
-    FADD,
-    citation_1,
-    evidence_1,
-    BelReconstitutionMixin,
-    TemporaryCacheClsMixin,
-    TestTokenParserBase,
-    test_bel_isolated,
-    test_bel_misordered,
-    test_bel_simple,
-    test_citation_dict,
-    test_set_evidence,
-    test_bel_thorough,
-    test_bel_slushy,
-    test_evidence_text,
-    update_provenance
+    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin,
+    TestTokenParserBase, citation_1, evidence_1, test_bel_isolated, test_bel_misordered, test_bel_simple,
+    test_bel_slushy, test_bel_thorough, test_citation_dict, test_evidence_text, test_set_evidence, update_provenance,
 )
 from tests.mocks import mock_bel_resources
 
@@ -196,6 +163,11 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         graph_bytes = to_bytes(self.slushy_graph)
         graph = from_bytes(graph_bytes)
         self.bel_slushy_reconstituted(graph)
+
+    def test_slushy_syntax_errors(self):
+        syntax_errors = get_syntax_errors(self.slushy_graph)
+        self.assertEqual(1, len(syntax_errors))
+        self.assertEqual(98, syntax_errors[0][0])
 
     def test_slushy_json(self):
         graph_json = to_json(self.slushy_graph)
