@@ -23,7 +23,7 @@ from ..constants import (
     GRAPH_ANNOTATION_URL,
     GRAPH_ANNOTATION_OWL,
     GRAPH_ANNOTATION_PATTERN,
-    GRAPH_ANNOTATION_LIST
+    GRAPH_ANNOTATION_LIST,
 )
 from ..exceptions import PyBelWarning
 from ..manager import Manager
@@ -38,6 +38,7 @@ from ..parser.parse_exceptions import (
     RedefinedNamespaceError,
     RedefinedAnnotationError,
     PyBelParserWarning,
+    BelSyntaxError,
 )
 
 log = logging.getLogger(__name__)
@@ -190,7 +191,7 @@ def parse_statements(graph, statements, bel_parser):
             bel_parser.parseString(line, line_number=line_number)
         except ParseException as e:
             parse_log.error('Line %07d - General Parser Failure: %s', line_number, line)
-            graph.add_warning(line_number, line, PyBelParserWarning(line_number, line, e.loc),
+            graph.add_warning(line_number, line, BelSyntaxError(line_number, line, e.loc),
                               bel_parser.get_annotations())
         except PyBelWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
