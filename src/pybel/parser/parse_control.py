@@ -18,7 +18,7 @@ from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .parse_exceptions import *
-from .utils import is_int, quote, delimitedSet, qid
+from .utils import is_int, quote, delimited_quoted_list, qid, delimited_unquoted_list
 from ..constants import *
 from ..utils import valid_date
 
@@ -33,7 +33,7 @@ unset_all = Suppress(BEL_KEYWORD_ALL)
 supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
 
 set_statement_group_stub = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), qid('group')])
-set_citation_stub = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimitedSet('values')])
+set_citation_stub = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimited_quoted_list('values')])
 set_evidence_stub = And([Suppress(supporting_text_tags), Suppress('='), quote('value')])
 
 
@@ -75,7 +75,7 @@ class ControlParser(BaseParser):
         self.set_command = set_command_prefix + qid('value')
         self.set_command.setParseAction(self.handle_set_command)
 
-        self.set_command_list = set_command_prefix + delimitedSet('values')
+        self.set_command_list = set_command_prefix + delimited_quoted_list('values')
         self.set_command_list.setParseAction(self.handle_set_command_list)
 
         self.unset_command = annotation_key('key')
@@ -90,7 +90,7 @@ class ControlParser(BaseParser):
         self.unset_statement_group = Suppress(BEL_KEYWORD_STATEMENT_GROUP)
         self.unset_statement_group.setParseAction(self.handle_unset_statement_group)
 
-        self.unset_list = delimitedSet('values')
+        self.unset_list = delimited_unquoted_list('values')
         self.unset_list.setParseAction(self.handle_unset_list)
 
         self.unset_all = unset_all.setParseAction(self.handle_unset_all)
@@ -184,7 +184,7 @@ class ControlParser(BaseParser):
         if citation_type not in CITATION_TYPES:
             raise InvalidCitationType(self.line_number, line, position, citation_type)
 
-        if 2 == len(values) :
+        if 2 == len(values):
             return self.handle_set_citation_double(line, position, tokens)
 
         citation_reference = values[2]
