@@ -36,6 +36,9 @@ class TestEdgeStore(BelReconstitutionMixin):
         self.network = self.setup_insert()
 
     def tearDown(self):
+        # Commiting the session to close the reading transaction (metadata lock)
+        self.manager.session.commit()
+        self.manager.drop_all()
         self.manager.session.close()
 
         if not self.test_connection:
