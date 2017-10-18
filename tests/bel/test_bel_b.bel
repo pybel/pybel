@@ -1,0 +1,49 @@
+##################################################################################
+# Document Properties Section
+
+SET DOCUMENT Name = "PyBEL Test Overlapping"
+SET DOCUMENT Description = "Made for testing PyBEL deletion cascade"
+SET DOCUMENT Version = "1.0.0"
+SET DOCUMENT Copyright = "Copyright (c) andrej Konotopez Hoyt. All Rights Reserved."
+SET DOCUMENT Authors = "Andrej Konotopez"
+SET DOCUMENT Licenses = "WTF License"
+SET DOCUMENT ContactInfo = "andrej.konotopez@scai.fraunhofer.de"
+SET DOCUMENT Project = "PyBEL Testing"
+
+##################################################################################
+# Definitions Section
+
+DEFINE NAMESPACE CHEBI AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=chebi.belns"
+DEFINE NAMESPACE HGNC AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=hgnc-human-genes.belns"
+DEFINE ANNOTATION Species AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=species-taxonomy-id.belanno"
+DEFINE ANNOTATION CellLine AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=cell-line.belanno"
+
+##################################################################################
+# Statements Section
+
+SET STATEMENT_GROUP = "Group with new and overlapping edges to test_bel"
+
+# The following statements have overlap with test_bel
+
+SET Citation = {"PubMed","That one article from last week","123455","2012-01-31","Example Author|Example Author2"}
+SET Species = "9606"
+
+SET Evidence = "Evidence 1 \
+w extra notes"
+
+p(HGNC:AKT1) -> p(HGNC:EGFR)
+
+SET Evidence = "Evidence 2"
+SET CellLine = "10B9 cell"
+
+p(HGNC:EGFR) -| p(HGNC:FADD)
+
+# The following statements do not have overlap and should be deleted by cascade
+r(HGNC:AKT1) >> p(HGNC:AKT1)
+
+SET Citation = {"PubMed", "The new article that survives cascade wipe", "4711345", "2016-07-12", "New Author|Example Author2"}
+SET Evidence = "An evidence that will be deleted by cascade"
+
+p(HGNC:AKT1) =| act(p(HGNC:GSK3B), ma(kin))
+
+
