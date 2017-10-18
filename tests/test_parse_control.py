@@ -3,8 +3,10 @@
 import logging
 import unittest
 
-from pybel.constants import EVIDENCE, CITATION, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE, CITATION_AUTHORS, \
-    CITATION_DATE, CITATION_COMMENTS, ANNOTATIONS
+from pybel.constants import (
+    EVIDENCE, CITATION, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE, CITATION_AUTHORS,
+    CITATION_DATE, CITATION_COMMENTS, ANNOTATIONS,
+)
 from pybel.io.line_utils import sanitize_file_lines
 from pybel.parser import ControlParser
 from pybel.parser.parse_control import set_citation_stub
@@ -65,6 +67,32 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
         ]
         with self.assertRaises(UndefinedAnnotationWarning):
             self.parser.parse_lines(s)
+
+    def test_unset_list_compact(self):
+        """Tests unsetting an annotation list, without spaces in it"""
+        s = [
+            SET_CITATION_TEST,
+            'SET Custom1 = "Custom1_A"',
+            'SET Custom2 = "Custom2_A"',
+        ]
+        self.parser.parse_lines(s)
+        self.assertIn('Custom1', self.parser.annotations)
+        self.assertIn('Custom2', self.parser.annotations)
+        self.parser.parseString('UNSET {Custom1,Custom2}')
+        self.assertFalse(self.parser.annotations)
+
+    def test_unset_list_spaced(self):
+        """Tests unsetting an annotation list, with spaces in it"""
+        s = [
+            SET_CITATION_TEST,
+            'SET Custom1 = "Custom1_A"',
+            'SET Custom2 = "Custom2_A"',
+        ]
+        self.parser.parse_lines(s)
+        self.assertIn('Custom1', self.parser.annotations)
+        self.assertIn('Custom2', self.parser.annotations)
+        self.parser.parseString('UNSET {Custom1, Custom2}')
+        self.assertFalse(self.parser.annotations)
 
 
 class TestSetCitation(unittest.TestCase):
@@ -328,7 +356,7 @@ class TestParseControl2(TestParseControl):
         self.assertEqual('Test Reference 2', self.parser.citation[CITATION_NAME])
         self.assertEqual('22222', self.parser.citation[CITATION_REFERENCE])
 
-        self.parser.parseString('UNSET {"Custom1","Evidence"}')
+        self.parser.parseString('UNSET {Custom1,Evidence}')
         self.assertNotIn('Custom1', self.parser.annotations)
         self.assertIsNone(self.parser.evidence)
         self.assertIn('Custom2', self.parser.annotations)
