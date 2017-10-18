@@ -5,8 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`Unreleased <https://github.com/pybel/pybel/compare/v0.8.1...HEAD>`_
---------------------------------------------------------------------
+`0.9.3 <https://github.com/pybel/pybel/compare/v0.9.2...0.9.3>`_ - 2017-10-18
+-----------------------------------------------------------------------------
+Added
+~~~~~
+- Convenience functions for adding qualified and unqualified edges to BELGraph class
+- Sialic Acid Example BEL Graph
+- EGF Example BEL Graph
+- Added PyBEL Web export and stub for import
+- BioPAX Import
+- Dedicated BEL Syntax error
+
+Changed
+~~~~~~~
+- Update the BEL Script canonicalization rules to group citations then evidences better
+- Removed requirement of annotation entry in edge data dictionaries
+- Confident enough to make using the edge store True by default
+
+Fixed
+~~~~~
+- Fixed unset list parsing so it doesn't need quotes (#234)
+
+Removed
+~~~~~~~
+- In-memory caching of authors
+
+`0.9.2 <https://github.com/pybel/pybel/compare/v0.9.1...0.9.2>`_ - 2017-09-27
+-----------------------------------------------------------------------------
+Fixed
+~~~~~
+- JSON Serialization bug for authors in Citation Model
+
+`0.9.1 <https://github.com/pybel/pybel/compare/v0.9.0...0.9.1>`_ - 2017-09-26
+-----------------------------------------------------------------------------
+Added
+~~~~~
+- INDRA Import
+- Usage of built-in operators on BEL Graphs
+
+Changed
+~~~~~~~
+- Update list recent networks function to work better with SQL 99 compliant (basically everything except the
+  old version of MySQL and SQLite) RDBMS
+- Better tests for queries to edge store
+- Better testing when extensions not installed (c1ac850)
+- Update documentation to new OpenBEL website links
+
+Fixed
+~~~~~
+- Fix crash when uploading network to edge store that has annotation pattern definitions (still needs some work though)
+- Added foreign keys for first and last authors in Citation model (requires database rebuild)
+- Froze NetworkX version at 1.11 since 2.0 breaks everything
+
+Removed
+~~~~~~~
+- Don't cache SQLAlchemy models locally (3d7d238)
+
+`0.9.0 <https://github.com/pybel/pybel/compare/v0.8.1...0.9.0>`_ - 2017-09-19
+-----------------------------------------------------------------------------
 Added
 ~~~~~
 - Option for setting scopefunc in Manager
