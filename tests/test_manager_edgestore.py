@@ -298,235 +298,235 @@ class TestEdgeStore(BelReconstitutionMixin):
         #
         #     self.assertEqual(1, len(self.manager.object_cache_edge.keys()))
 
-        # @mock_bel_resources
-        # def test_get_or_create_modification(self, mock_get):
-        #     # self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
-        #     node_data = self.simple_graph.node[(PROTEIN, 'HGNC', 'FADD')]
-        #     fusion_missing = {
-        #         FUSION: {
-        #             PARTNER_3P: {
-        #                 NAMESPACE: 'HGNC',
-        #                 NAME: 'AKT1',
-        #             },
-        #             RANGE_3P: {
-        #                 FUSION_MISSING: '?',
-        #             },
-        #             PARTNER_5P: {
-        #                 NAMESPACE: 'HGNC',
-        #                 NAME: 'EGFR'
-        #             },
-        #             RANGE_5P: {
-        #                 FUSION_MISSING: '?',
-        #             }
-        #         }
-        #     }
-        #     fusion_full = {
-        #         FUSION: {
-        #             PARTNER_3P: {
-        #                 NAMESPACE: 'HGNC',
-        #                 NAME: 'AKT1',
-        #             },
-        #             RANGE_3P: {
-        #                 FUSION_REFERENCE: 'A',
-        #                 FUSION_START: 'START_1',
-        #                 FUSION_STOP: 'STOP_1',
-        #             },
-        #             PARTNER_5P: {
-        #                 NAMESPACE: 'HGNC',
-        #                 NAME: 'EGFR'
-        #             },
-        #             RANGE_5P: {
-        #                 FUSION_REFERENCE: 'E',
-        #                 FUSION_START: 'START_2',
-        #                 FUSION_STOP: 'STOP_2',
-        #             }
-        #         }
-        #     }
-        #     hgvs = {
-        #         KIND: HGVS,
-        #         IDENTIFIER: 'hgvs_ident'
-        #     }
-        #     fragment_missing = {
-        #         KIND: FRAGMENT,
-        #         FRAGMENT_MISSING: '?',
-        #     }
-        #     fragment_full = {
-        #         KIND: FRAGMENT,
-        #         FRAGMENT_START: 'START_FRAG',
-        #         FRAGMENT_STOP: 'STOP_FRAG'
-        #     }
-        #     gmod = {
-        #         KIND: GMOD,
-        #         IDENTIFIER: {
-        #             NAMESPACE: 'test_NS',
-        #             NAME: 'test_GMOD'
-        #         }
-        #     }
-        #     pmod_simple = {
-        #         KIND: PMOD,
-        #         IDENTIFIER: {
-        #             NAMESPACE: 'test_NS',
-        #             NAME: 'test_PMOD'
-        #         }
-        #     }
-        #     pmod_full = {
-        #         KIND: PMOD,
-        #         IDENTIFIER: {
-        #             NAMESPACE: 'test_NS',
-        #             NAME: 'test_PMOD_2'
-        #         },
-        #         PMOD_CODE: 'Tst',
-        #         PMOD_POSITION: 12,
-        #     }
-        #
-        #     hgnc_url = self.simple_graph.namespace_url['HGNC']
-        #     AKT1_object = self.manager.namespace_object_cache[hgnc_url]['AKT1']
-        #     EGFR_object = self.manager.namespace_object_cache[hgnc_url]['EGFR']
-        #
-        #     fusion_missing_hash = hashlib.sha512(json.dumps({
-        #         'modType': FUSION,
-        #         'p3Partner': AKT1_object,
-        #         'p5Partner': EGFR_object,
-        #         'p3Missing': '?',
-        #         'p5Missing': '?',
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     fusion_full_hash = hashlib.sha512(json.dumps({
-        #         'modType': FUSION,
-        #         'p3Partner': AKT1_object,
-        #         'p5Partner': EGFR_object,
-        #         'p3Reference': 'A',
-        #         'p3Start': 'START_1',
-        #         'p3Stop': 'STOP_1',
-        #         'p5Reference': 'E',
-        #         'p5Start': 'START_2',
-        #         'p5Stop': 'STOP_2'
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     hgvs_hash = hashlib.sha512(json.dumps({
-        #         'modType': HGVS,
-        #         'variantString': 'hgvs_ident'
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     fragment_missing_hash = hashlib.sha512(json.dumps({
-        #         'modType': FRAGMENT,
-        #         'p3Missing': '?'
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     fragment_full_hash = hashlib.sha512(json.dumps({
-        #         'modType': FRAGMENT,
-        #         'p3Start': 'START_FRAG',
-        #         'p3Stop': 'STOP_FRAG'
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     gmod_hash = hashlib.sha512(json.dumps({
-        #         'modType': GMOD,
-        #         'modNamespace': 'test_NS',
-        #         'modName': 'test_GMOD'
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     pmod_simple_hash = hashlib.sha512(json.dumps({
-        #         'modType': PMOD,
-        #         'modNamespace': 'test_NS',
-        #         'modName': 'test_PMOD',
-        #         'aminoA': None,
-        #         'position': None
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #     pmod_full_hash = hashlib.sha512(json.dumps({
-        #         'modType': PMOD,
-        #         'modNamespace': 'test_NS',
-        #         'modName': 'test_PMOD_2',
-        #         'aminoA': 'Tst',
-        #         'position': 12
-        #     }, sort_keys=True).encode('utf-8')).hexdigest()
-        #
-        #     # Create
-        #     node_data.update(fusion_missing)
-        #     fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertIsInstance(fusion_missing_ls, list)
-        #     self.assertIsInstance(fusion_missing_ls[0], models.Modification)
-        #     self.assertEqual(fusion_missing[FUSION], fusion_missing_ls[0].data['mod_data'])
-        #
-        #     self.assertIn(fusion_missing_hash, self.manager.object_cache['modification'])
-        #
-        #     # Get
-        #     reloaded_fusion_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(fusion_missing_ls, reloaded_fusion_missing_ls)
-        #
-        #     # Create
-        #     node_data.update(fusion_full)
-        #     fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertIsInstance(fusion_full_ls, list)
-        #     self.assertIsInstance(fusion_full_ls[0], models.Modification)
-        #     self.assertEqual(fusion_full[FUSION], fusion_full_ls[0].data['mod_data'])
-        #
-        #     self.assertIn(fusion_full_hash, self.manager.object_cache['modification'])
-        #
-        #     # Get
-        #     reloaded_fusion_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(fusion_full_ls, reloaded_fusion_full_ls)
-        #
-        #     del node_data[FUSION]
-        #
-        #     # Create
-        #     node_data[VARIANTS] = [hgvs]
-        #     hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(hgvs, hgvs_ls[0].data['mod_data'])
-        #
-        #     self.assertIn(hgvs_hash, self.manager.object_cache['modification'])
-        #
-        #     # Get
-        #     reloaded_hgvs_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(hgvs_ls, reloaded_hgvs_ls)
-        #
-        #     # Create
-        #     node_data[VARIANTS] = [fragment_missing]
-        #     fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(fragment_missing, fragment_missing_ls[0].data['mod_data'])
-        #
-        #     self.assertIn(fragment_missing_hash, self.manager.object_cache['modification'])
-        #
-        #     # Get
-        #     reloaded_fragment_missing_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(fragment_missing_ls, reloaded_fragment_missing_ls)
-        #
-        #     # Create
-        #     node_data[VARIANTS] = [fragment_full]
-        #     fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(fragment_full, fragment_full_ls[0].data['mod_data'])
-        #
-        #     self.assertIn(fragment_full_hash, self.manager.object_cache['modification'])
-        #
-        #     # Get
-        #     reloaded_fragment_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(fragment_full_ls, reloaded_fragment_full_ls)
-        #
-        #     # Create
-        #     node_data[VARIANTS] = [gmod]
-        #     gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(gmod, gmod_ls[0].data['mod_data'])
-        #
-        #     self.assertIn(gmod_hash, self.manager.object_cache['modification'])
-        #
-        #     # Get
-        #     reloaded_gmod_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(gmod_ls, reloaded_gmod_ls)
-        #
-        #     # Create
-        #     node_data[VARIANTS] = [pmod_simple]
-        #     pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(pmod_simple, pmod_simple_ls[0].data['mod_data'])
-        #
-        #     self.assertIn(pmod_simple_hash, self.manager.object_cache['modification'])
-        #
-        #     # Get
-        #     reloaded_pmod_simple_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(pmod_simple_ls, reloaded_pmod_simple_ls)
-        #
-        #     # Create
-        #     node_data[VARIANTS] = [pmod_full]
-        #     pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(pmod_full, pmod_full_ls[0].data['mod_data'])
-        #
-        #     self.assertIn(pmod_full_hash, self.manager.object_cache['modification'])
-        #
-        #     # Get
-        #     reloaded_pmod_full_ls = self.manager.get_or_create_modification(self.simple_graph, node_data)
-        #     self.assertEqual(pmod_full_ls, reloaded_pmod_full_ls)
-        #
-        #     # Every modification was added only once to the object cache
-        #     self.assertEqual(8, len(self.manager.object_cache['modification'].keys()))
+    @mock_bel_resources
+    def test_get_or_create_modification(self, mock_get):
+        # self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
+        node_data = self.graph.node[(PROTEIN, 'HGNC', 'FADD')]
+        fusion_missing = {
+            FUSION: {
+                PARTNER_3P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'AKT1',
+                },
+                RANGE_3P: {
+                    FUSION_MISSING: '?',
+                },
+                PARTNER_5P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'EGFR'
+                },
+                RANGE_5P: {
+                    FUSION_MISSING: '?',
+                }
+            }
+        }
+        fusion_full = {
+            FUSION: {
+                PARTNER_3P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'AKT1',
+                },
+                RANGE_3P: {
+                    FUSION_REFERENCE: 'A',
+                    FUSION_START: 'START_1',
+                    FUSION_STOP: 'STOP_1',
+                },
+                PARTNER_5P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'EGFR'
+                },
+                RANGE_5P: {
+                    FUSION_REFERENCE: 'E',
+                    FUSION_START: 'START_2',
+                    FUSION_STOP: 'STOP_2',
+                }
+            }
+        }
+        hgvs = {
+            KIND: HGVS,
+            IDENTIFIER: 'hgvs_ident'
+        }
+        fragment_missing = {
+            KIND: FRAGMENT,
+            FRAGMENT_MISSING: '?',
+        }
+        fragment_full = {
+            KIND: FRAGMENT,
+            FRAGMENT_START: 'START_FRAG',
+            FRAGMENT_STOP: 'STOP_FRAG'
+        }
+        gmod = {
+            KIND: GMOD,
+            IDENTIFIER: {
+                NAMESPACE: 'test_NS',
+                NAME: 'test_GMOD'
+            }
+        }
+        pmod_simple = {
+            KIND: PMOD,
+            IDENTIFIER: {
+                NAMESPACE: 'test_NS',
+                NAME: 'test_PMOD'
+            }
+        }
+        pmod_full = {
+            KIND: PMOD,
+            IDENTIFIER: {
+                NAMESPACE: 'test_NS',
+                NAME: 'test_PMOD_2'
+            },
+            PMOD_CODE: 'Tst',
+            PMOD_POSITION: 12,
+        }
+
+        hgnc_url = self.graph.namespace_url['HGNC']
+        AKT1_object = self.manager.get_namespace_entry(url=hgnc_url, name='AKT1')
+        EGFR_object = self.manager.get_namespace_entry(url=hgnc_url, name='EGFR')
+
+        fusion_missing_hash = hash_dump({
+            'modType': FUSION,
+            'p3Partner': AKT1_object,
+            'p5Partner': EGFR_object,
+            'p3Missing': '?',
+            'p5Missing': '?',
+        })
+        fusion_full_hash = hash_dump({
+            'modType': FUSION,
+            'p3Partner': AKT1_object,
+            'p5Partner': EGFR_object,
+            'p3Reference': 'A',
+            'p3Start': 'START_1',
+            'p3Stop': 'STOP_1',
+            'p5Reference': 'E',
+            'p5Start': 'START_2',
+            'p5Stop': 'STOP_2'
+        })
+        hgvs_hash = hash_dump({
+            'modType': HGVS,
+            'variantString': 'hgvs_ident'
+        })
+        fragment_missing_hash = hash_dump({
+            'modType': FRAGMENT,
+            'p3Missing': '?'
+        })
+        fragment_full_hash = hash_dump({
+            'modType': FRAGMENT,
+            'p3Start': 'START_FRAG',
+            'p3Stop': 'STOP_FRAG'
+        })
+        gmod_hash = hash_dump({
+            'modType': GMOD,
+            'modNamespace': 'test_NS',
+            'modName': 'test_GMOD'
+        })
+        pmod_simple_hash = hash_dump({
+            'modType': PMOD,
+            'modNamespace': 'test_NS',
+            'modName': 'test_PMOD',
+            'aminoA': None,
+            'position': None
+        })
+        pmod_full_hash = hash_dump({
+            'modType': PMOD,
+            'modNamespace': 'test_NS',
+            'modName': 'test_PMOD_2',
+            'aminoA': 'Tst',
+            'position': 12
+        })
+
+        # Create
+        node_data.update(fusion_missing)
+        fusion_missing_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertIsInstance(fusion_missing_ls, list)
+        self.assertIsInstance(fusion_missing_ls[0], models.Modification)
+        self.assertEqual(fusion_missing[FUSION], fusion_missing_ls[0].data['mod_data'])
+
+        self.assertIn(fusion_missing_hash, self.manager.object_cache_modification)
+
+        # Get
+        reloaded_fusion_missing_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(fusion_missing_ls, reloaded_fusion_missing_ls)
+
+        # Create
+        node_data.update(fusion_full)
+        fusion_full_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertIsInstance(fusion_full_ls, list)
+        self.assertIsInstance(fusion_full_ls[0], models.Modification)
+        self.assertEqual(fusion_full[FUSION], fusion_full_ls[0].data['mod_data'])
+
+        self.assertIn(fusion_full_hash, self.manager.object_cache_modification)
+
+        # Get
+        reloaded_fusion_full_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(fusion_full_ls, reloaded_fusion_full_ls)
+
+        del node_data[FUSION]
+
+        # Create
+        node_data[VARIANTS] = [hgvs]
+        hgvs_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(hgvs, hgvs_ls[0].data['mod_data'])
+
+        self.assertIn(hgvs_hash, self.manager.object_cache_modification)
+
+        # Get
+        reloaded_hgvs_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(hgvs_ls, reloaded_hgvs_ls)
+
+        # Create
+        node_data[VARIANTS] = [fragment_missing]
+        fragment_missing_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(fragment_missing, fragment_missing_ls[0].data['mod_data'])
+
+        self.assertIn(fragment_missing_hash, self.manager.object_cache_modification)
+
+        # Get
+        reloaded_fragment_missing_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(fragment_missing_ls, reloaded_fragment_missing_ls)
+
+        # Create
+        node_data[VARIANTS] = [fragment_full]
+        fragment_full_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(fragment_full, fragment_full_ls[0].data['mod_data'])
+
+        self.assertIn(fragment_full_hash, self.manager.object_cache_modification)
+
+        # Get
+        reloaded_fragment_full_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(fragment_full_ls, reloaded_fragment_full_ls)
+
+        # Create
+        node_data[VARIANTS] = [gmod]
+        gmod_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(gmod, gmod_ls[0].data['mod_data'])
+
+        self.assertIn(gmod_hash, self.manager.object_cache_modification)
+
+        # Get
+        reloaded_gmod_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(gmod_ls, reloaded_gmod_ls)
+
+        # Create
+        node_data[VARIANTS] = [pmod_simple]
+        pmod_simple_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(pmod_simple, pmod_simple_ls[0].data['mod_data'])
+
+        self.assertIn(pmod_simple_hash, self.manager.object_cache_modification)
+
+        # Get
+        reloaded_pmod_simple_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(pmod_simple_ls, reloaded_pmod_simple_ls)
+
+        # Create
+        node_data[VARIANTS] = [pmod_full]
+        pmod_full_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(pmod_full, pmod_full_ls[0].data['mod_data'])
+
+        self.assertIn(pmod_full_hash, self.manager.object_cache_modification)
+
+        # Get
+        reloaded_pmod_full_ls = self.manager.get_or_create_modification(self.graph, node_data)
+        self.assertEqual(pmod_full_ls, reloaded_pmod_full_ls)
+
+        # Every modification was added only once to the object cache
+        self.assertEqual(8, len(self.manager.object_cache_modification.keys()))
