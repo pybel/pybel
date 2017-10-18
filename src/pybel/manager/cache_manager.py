@@ -1028,46 +1028,46 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
 
-        result = self.get_evidence_by_hash(evidence_hash)
+        evidence = self.get_evidence_by_hash(evidence_hash)
 
-        if result is not None:
-            self.object_cache_evidence[evidence_hash] = result
-            return result
+        if evidence is not None:
+            self.object_cache_evidence[evidence_hash] = evidence
+            return evidence
 
-        result = Evidence(
+        evidence = Evidence(
             text=text,
             citation=citation,
             sha512=evidence_hash
         )
 
-        self.session.add(result)
-        self.object_cache_evidence[evidence_hash] = result
-        return result
+        self.session.add(evidence)
+        self.object_cache_evidence[evidence_hash] = evidence
+        return evidence
 
-    def get_or_create_node(self, graph, node):
+    def get_or_create_node(self, graph, node_identifier):
         """Creates entry and object for given node if it does not exist.
 
         :param BELGraph graph: A BEL graph
-        :param tuple node: A BEL node
+        :param tuple node_identifier: A PyBEL node tuple
         :rtype: Node
         """
-        node_hash = hash_node(node)
+        node_hash = hash_node(node_identifier)
         if node_hash in self.object_cache_node:
             return self.object_cache_node[node_hash]
 
-        bel = node_to_bel(graph, node)
-        blob = dumps(graph.node[node])
-        node_data = graph.node[node]
+        bel = node_to_bel(graph, node_identifier)
+        blob = dumps(graph.node[node_identifier])
+        node_data = graph.node[node_identifier]
 
-        result = self.get_node_by_hash(node_hash)
+        node = self.get_node_by_hash(node_hash)
 
-        if result is not None:
-            self.object_cache_node[node_hash] = result
-            return result
+        if node is not None:
+            self.object_cache_node[node_hash] = node
+            return node
 
         type = node_data[FUNCTION]
 
-        result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+        node = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
         if NAMESPACE not in node_data:
             pass
@@ -1075,22 +1075,22 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         elif node_data[NAMESPACE] in graph.namespace_url:
             namespace = node_data[NAMESPACE]
             url = graph.namespace_url[namespace]
-            result.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
+            node.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
         elif node_data[NAMESPACE] in graph.namespace_pattern:
-            result.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+            node.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
 
         else:
             raise ValueError("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))
 
         if VARIANTS in node_data or FUSION in node_data:
-            result.is_variant = True
-            result.fusion = FUSION in node_data
-            result.modifications = self.get_or_create_modification(graph, node_data)
+            node.is_variant = True
+            node.fusion = FUSION in node_data
+            node.modifications = self.get_or_create_modification(graph, node_data)
 
-        self.session.add(result)
-        self.object_cache_node[node_hash] = result
-        return result
+        self.session.add(node)
+        self.object_cache_node[node_hash] = node
+        return node
 
     def drop_nodes(self):
         """Drops all nodes in RDB"""
@@ -1122,13 +1122,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         if edge_hash in self.object_cache_edge:
             return self.object_cache_edge[edge_hash]
 
-        result = self.get_edge_by_hash(edge_hash)
+        edge = self.get_edge_by_hash(edge_hash)
 
-        if result is not None:
-            self.object_cache_edge[edge_hash] = result
-            return result
+        if edge is not None:
+            self.object_cache_edge[edge_hash] = edge
+            return edge
 
-        result = Edge(
+        edge = Edge(
             source=source,
             target=target,
             relation=relation,
@@ -1137,15 +1137,15 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             sha512=edge_hash,
         )
         if evidence is not None:
-            result.evidence = evidence
+            edge.evidence = evidence
         if properties is not None:
-            result.properties = properties
+            edge.properties = properties
         if annotations is not None:
-            result.annotations = annotations
+            edge.annotations = annotations
 
-        self.session.add(result)
-        self.object_cache_edge[edge_hash] = result
-        return result
+        self.session.add(edge)
+        self.object_cache_edge[edge_hash] = edge
+        return edge
 
     def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None,
                                date=None, first=None, last=None, authors=None):

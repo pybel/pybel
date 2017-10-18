@@ -1148,7 +1148,7 @@ class BelReconstitutionMixin(TestGraphMixin):
                 (89, NestedRelationWarning),
                 (92, InvalidFunctionSemantic),
                 # (95, Exception),
-                (98, PyBelParserWarning),
+                (98, BelSyntaxError),
             ]
 
             for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):

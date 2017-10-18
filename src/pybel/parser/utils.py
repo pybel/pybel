@@ -2,24 +2,14 @@
 
 import itertools as itt
 import logging
-
 import re
+
 from pyparsing import (
-    Suppress,
-    ZeroOrMore,
-    White,
-    Word,
-    alphanums,
-    dblQuotedString,
-    removeQuotes,
-    And,
-    delimitedList,
-    oneOf,
-    replaceWith,
-    Group,
+    And, Group, Suppress, White, Word, ZeroOrMore, alphanums, dblQuotedString, delimitedList, oneOf,
+    removeQuotes, replaceWith,
 )
 
-from ..constants import SUBJECT, RELATION, OBJECT
+from ..constants import OBJECT, RELATION, SUBJECT
 from ..utils import subdict_matches
 
 log = logging.getLogger('pybel')
@@ -90,7 +80,8 @@ word = Word(alphanums)
 identifier = Word(alphanums + '_')
 quote = dblQuotedString().setParseAction(removeQuotes)
 qid = quote | identifier
-delimitedSet = And([Suppress('{'), delimitedList(quote), Suppress('}')])
+delimited_quoted_list = And([Suppress('{'), delimitedList(quote), Suppress('}')])
+delimited_unquoted_list = And([Suppress('{'), delimitedList(identifier), Suppress('}')])
 
 
 def nest(*content):
