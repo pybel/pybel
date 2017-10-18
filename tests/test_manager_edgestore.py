@@ -300,7 +300,6 @@ class TestEdgeStore(BelReconstitutionMixin):
 
     @mock_bel_resources
     def test_get_or_create_modification(self, mock_get):
-        # self.manager.ensure_graph_definitions(self.simple_graph, cache_objects=True)
         node_data = self.graph.node[(PROTEIN, 'HGNC', 'FADD')]
         fusion_missing = {
             FUSION: {
