@@ -11,6 +11,7 @@ import sqlalchemy.exc
 from collections import Counter
 
 import pybel
+from pybel.dsl import protein as dsl_protein
 from pybel import BELGraph, from_database, to_database, from_path
 from pybel.constants import *
 from pybel.manager import models
@@ -40,7 +41,7 @@ def protein_tuple(name):
 
 
 def protein_data(name):
-    return {FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: name}
+    return dsl_protein('HGNC', name)
 
 
 def protein(name):
@@ -65,30 +66,18 @@ fos = fos_tuple, fos_data = protein('FOS')
 jun = jun_tuple, jun_data = protein('JUN')
 
 ap1_complex_tuple = COMPLEX, fos_tuple, jun_tuple
-ap1_complex_data = {
-    FUNCTION: COMPLEX,
-    MEMBERS: [fos_data, jun_data]
-}
+ap1_complex_data = complex_data([fos_data, jun_data])
 
 egfr_tuple, egfr_data = protein('EGFR')
 egfr_dimer = COMPLEX, egfr_tuple, egfr_tuple
-egfr_dimer_data = {
-    FUNCTION: COMPLEX,
-    MEMBERS: [egfr_data, egfr_data]
-}
+egfr_dimer_data = complex_data([egfr_data, egfr_data])
 
 yfg_tuple, yfg_data = protein('YFG')
 
 e2f4 = e2f4_tuple, e2f4_data = protein('E2F4')
 
 bound_ap1_e2f4_tuple = COMPLEX, ap1_complex_tuple, e2f4_tuple
-bound_ap1_e2f4_data = {
-    FUNCTION: COMPLEX,
-    MEMBERS: [
-        ap1_complex_data,
-        e2f4_data
-    ]
-}
+bound_ap1_e2f4_data = complex_data([ap1_complex_data, e2f4_data])
 
 
 def chemical_tuple(name):
