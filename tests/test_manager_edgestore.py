@@ -138,11 +138,11 @@ class TestEdgeStore(BelReconstitutionMixin):
                 SUBJECT: {
                     EFFECT: {
                         FROM_LOC: {
-                            NAME: 'host intracellular organelle',
+                            NAME: 'cell surface',
                             NAMESPACE: GOCC_KEYWORD
                         },
                         TO_LOC: {
-                            NAME: 'host outer membrane',
+                            NAME: 'extracellular space',
                             NAMESPACE: GOCC_KEYWORD
                         },
                     },
@@ -156,7 +156,7 @@ class TestEdgeStore(BelReconstitutionMixin):
                 SUBJECT: {
                     LOCATION: {
                         NAMESPACE: GOCC_KEYWORD,
-                        NAME: 'intine'
+                        NAME: 'interleukin-23 complex'
                     }
                 }
             },
@@ -183,18 +183,18 @@ class TestEdgeStore(BelReconstitutionMixin):
             'participant': SUBJECT,
             'modifier': TRANSLOCATION,
             'relativeKey': FROM_LOC,
-            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'host intracellular organelle')
+            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'cell surface')
         })
         translocation_to_hash = hash_dump({
             'participant': SUBJECT,
             'modifier': TRANSLOCATION,
             'relativeKey': TO_LOC,
-            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'host outer membrane')
+            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'extracellular space')
         })
         location_hash = hash_dump({
             'participant': SUBJECT,
             'modifier': LOCATION,
-            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'intine')
+            'namespaceEntry': self.manager.get_namespace_entry(GOCC_LATEST, 'interleukin-23 complex')
         })
         degradation_hash = hash_dump({
             'participant': SUBJECT,
@@ -221,6 +221,8 @@ class TestEdgeStore(BelReconstitutionMixin):
         # Create
         edge_data.update(location['data'])
         location_ls = self.manager.get_or_create_properties(self.graph, edge_data)
+        print(location_ls[0].participant)
+
         self.assertEqual(location_ls[0].data, location)
 
         self.assertIn(location_hash, self.manager.object_cache_property)
