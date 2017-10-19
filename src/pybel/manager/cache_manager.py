@@ -748,8 +748,9 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         for edge in edges:
             if not edge.networks.all():
                 if edge_list:
-                    properties = list(set(properties + edge.properties.all()))
-                    if edge.evidence not in evidences:
+                    if edge.properties.all():
+                        properties = list(set(properties + edge.properties.all()))
+                    if edge.evidence and edge.evidence not in evidences:
                         evidences.append(edge.evidence)
 
                 self.session.delete(edge)
@@ -765,8 +766,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         :param list property_list: List of property objects that should be checked for orphanity.
         """
-
-        for property in property_list:
+        properties = (property_list or self.session.query(Property).all())
+        for property in properties:
             if not property.edges.all() or not property_list:
                 self.session.delete(property)
 
@@ -775,8 +776,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         :param list evidence_list: List of evidence objects that should be checked for orphanity.
         """
-
-        for evidence in evidence_list:
+        evidences = (evidence_list or self.session.query(Evidence).all())
+        for evidence in evidences:
             if not evidence.edges.all() or not evidence_list:
                 self.session.delete(evidence)
 
@@ -784,9 +785,10 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Drops all networks"""
         for network in self.session.query(Network).all():
             self.session.delete(network)
-            self.session.commit()
+            self.session.flush()
 
         self._drop_edges()
+        self.session.commit()
 
     def get_network_versions(self, name):
         """Returns all of the versions of a network with the given name
