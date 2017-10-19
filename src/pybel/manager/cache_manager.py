@@ -735,7 +735,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         self.session.commit()
 
-    def _drop_edges(self, edge_list):
+    def _drop_edges(self, edge_list=None):
         """Helper to drop orphan edges.
 
         :param list edge_list: List of edge objects that should be checked for orphanity.
@@ -743,37 +743,41 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         properties = []
         evidences = []
-        for edge in edge_list:
+        edges = (edge_list or self.session.query(Edge).all())
+
+        for edge in edges:
             if not edge.networks.all():
-                properties = list(set(properties + edge.properties.all()))
-                if edge.evidence not in evidences:
-                    evidences.append(edge.evidence)
+                if edge_list:
+                    properties = list(set(properties + edge.properties.all()))
+                    if edge.evidence not in evidences:
+                        evidences.append(edge.evidence)
+
                 self.session.delete(edge)
         self.session.flush()
 
-        if evidences:
+        if evidences or not edge_list:
             self._drop_evidences(evidences)
-        if properties:
+        if properties or not edge_list:
             self._drop_properties(properties)
 
-    def _drop_properties(self, property_list):
+    def _drop_properties(self, property_list=None):
         """Helper to drop orphan properties.
 
         :param list property_list: List of property objects that should be checked for orphanity.
         """
 
         for property in property_list:
-            if not property.edges.all():
+            if not property.edges.all() or not property_list:
                 self.session.delete(property)
 
-    def _drop_evidences(self, evidence_list):
+    def _drop_evidences(self, evidence_list=None):
         """Helper to drop orphan evidences.
 
         :param list evidence_list: List of evidence objects that should be checked for orphanity.
         """
 
         for evidence in evidence_list:
-            if evidence and not evidence.edges.all():
+            if not evidence.edges.all() or not evidence_list:
                 self.session.delete(evidence)
 
     def drop_networks(self):
@@ -781,6 +785,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         for network in self.session.query(Network).all():
             self.session.delete(network)
             self.session.commit()
+
+        self._drop_edges()
 
     def get_network_versions(self, name):
         """Returns all of the versions of a network with the given name
