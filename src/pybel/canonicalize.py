@@ -321,7 +321,7 @@ def to_bel_lines(graph):
                     yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
                 yield edge_to_bel(graph, u, v, data=data)
                 if keys:
-                    yield 'UNSET {{{}}}'.format(', '.join('"{}"'.format(key) for key in keys))
+                    yield 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
             yield 'UNSET SupportingText'
         yield 'UNSET Citation\n'
 
