@@ -14,7 +14,7 @@ from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .parse_exceptions import *
-from .utils import word, quote, delimitedSet, qid
+from .utils import word, quote, delimited_quoted_list, qid
 from ..constants import *
 from ..utils import valid_date_version
 
@@ -105,7 +105,7 @@ class MetadataParser(BaseParser):
         annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ppc.identifier('name'), as_tag])
         self.annotation_url = And([annotation_tag, url_tag, quote('url')])
         self.annotation_owl = And([annotation_tag, owl_tag, quote('url')])
-        self.annotation_list = And([annotation_tag, list_tag, delimitedSet('values')])
+        self.annotation_list = And([annotation_tag, list_tag, delimited_quoted_list('values')])
         self.annotation_pattern = And([annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote('value')])
 
         self.document.setParseAction(self.handle_document)

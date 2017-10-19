@@ -13,7 +13,7 @@ from operator import itemgetter
 
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .struct.filters import filter_provenance_edges
+from .struct.filters import iter_qualified_edges
 from .utils import ensure_quotes, flatten_citation, get_version, hash_edge
 
 __all__ = [
@@ -111,9 +111,11 @@ def get_targets_by_relation(graph, node, relation):
 def _node_list_to_bel(graph, nodes):
     return sorted(map(lambda n: node_to_bel(graph, n), nodes))
 
+
 def _node_list_to_bel_helper(graph, node, relation):
     nodes = get_targets_by_relation(graph, node, relation)
     return _node_list_to_bel(graph, nodes)
+
 
 def node_to_bel(graph, node):
     """Returns a node from a graph as a BEL string
@@ -125,12 +127,12 @@ def node_to_bel(graph, node):
     data = graph.node[node]
 
     if data[FUNCTION] == REACTION:
-        reactants = _node_list_to_bel_helper(graph, node, HAS_REACTANT)
-        products = _node_list_to_bel_helper(graph, node, HAS_PRODUCT)
+        reactants = _node_list_to_bel_helper(graph, node, HAS_REACTANT)  # TODO refactor to use node data
+        products = _node_list_to_bel_helper(graph, node, HAS_PRODUCT)  # TODO refactor to use node data
         return 'rxn(reactants({}), products({}))'.format(', '.join(reactants), ', '.join(products))
 
     if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
-        members = _node_list_to_bel_helper(graph, node, HAS_COMPONENT)
+        members = _node_list_to_bel_helper(graph, node, HAS_COMPONENT)  # TODO refactor to use node data
         return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members))
 
     if VARIANTS in data:
@@ -216,22 +218,21 @@ def _decanonicalize_edge_node(graph, node, edge_data, node_position):
     return node_str
 
 
-def edge_to_bel(graph, u, v, k, sep=' '):
+def edge_to_bel(graph, u, v, data, sep=' '):
     """Takes two nodes and gives back a BEL string representing the statement
 
     :param BELGraph graph: A BEL graph
     :param tuple u: The edge's source's PyBEL node tuple
     :param tuple v: The edge's target's PyBEL node tuple
-    :param int k: The edge's key
+    :param dict data: The edge's data dictionary
+    :param str sep: The separator between the source, relation, and target
     :return: The canonical BEL for this edge
     :rtype: str
     """
-    data = graph.edge[u][v][k]
-
     u_str = _decanonicalize_edge_node(graph, u, data, node_position=SUBJECT)
     v_str = _decanonicalize_edge_node(graph, v, data, node_position=OBJECT)
 
-    return sep.join([u_str, data[RELATION], v_str])
+    return sep.join((u_str, data[RELATION], v_str))
 
 
 def sort_dict_items(d):
@@ -241,6 +242,27 @@ def sort_dict_items(d):
     :rtype: iter[tuple]
     """
     return sorted(d.items(), key=itemgetter(0))
+
+
+def _sort_qualified_edges_helper(edge_tuple):
+    u, v, k, d = edge_tuple
+    return (
+        d[CITATION][CITATION_TYPE],
+        d[CITATION][CITATION_REFERENCE],
+        d[EVIDENCE],
+        hash_edge(u, v, k, d)
+    )
+
+
+def sort_qualified_edges(graph):
+    """Returns the qualified edges, sorted first by citation, then by evidence, then by annotations
+
+    :param BELGraph graph: A BEL graph
+    :rtype: tuple[tuple,tuple,dict]
+    """
+    qualified_edges_iter = iter_qualified_edges(graph)
+    qualified_edges = sorted(qualified_edges_iter, key=_sort_qualified_edges_helper)
+    return qualified_edges
 
 
 def to_bel_lines(graph):
@@ -285,9 +307,7 @@ def to_bel_lines(graph):
 
     yield '###############################################\n'
 
-    # sort by citation, then supporting text
-    qualified_edges_iter = filter_provenance_edges(graph)
-    qualified_edges = sorted(qualified_edges_iter, key=lambda edge: hash_edge(*edge))
+    qualified_edges = sort_qualified_edges(graph)
 
     for citation, citation_edges in itt.groupby(qualified_edges, key=lambda t: flatten_citation(t[3][CITATION])):
         yield 'SET Citation = {{{}}}'.format(citation)
@@ -295,35 +315,41 @@ def to_bel_lines(graph):
         for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3][EVIDENCE]):
             yield 'SET SupportingText = "{}"'.format(evidence)
 
-            for u, v, k, d in evidence_edges:
-                dkeys = sorted(d[ANNOTATIONS])
-                for dk in dkeys:
-                    yield 'SET {} = "{}"'.format(dk, d[ANNOTATIONS][dk])
-                yield edge_to_bel(graph, u, v, k)
-                if dkeys:
-                    yield 'UNSET {{{}}}'.format(', '.join('"{}"'.format(dk) for dk in dkeys))
+            for u, v, _, data in evidence_edges:
+                keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else {}
+                for key in keys:
+                    yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
+                yield edge_to_bel(graph, u, v, data=data)
+                if keys:
+                    yield 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
             yield 'UNSET SupportingText'
         yield 'UNSET Citation\n'
 
-    yield '###############################################\n'
-    yield 'SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}'
-    yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
+    unqualified_edges_to_serialize = [
+        (u, v, d)
+        for u, v, d in graph.edges_iter(data=True)
+        if d[RELATION] in unqualified_edge_code and EVIDENCE not in d
+    ]
 
-    for u, v, d in graph.edges_iter(data=True):
-        if d[RELATION] not in unqualified_edge_code:
-            continue
+    isolated_nodes_to_serialize = [
+        node
+        for node in graph
+        if not graph.pred[node] and not graph.succ[node]
+    ]
 
-        if EVIDENCE in d:
-            continue
+    if unqualified_edges_to_serialize or isolated_nodes_to_serialize:
+        yield '###############################################\n'
+        yield 'SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}'
+        yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
-        yield '{} {} {}'.format(node_to_bel(graph, u), d[RELATION], node_to_bel(graph, v))
+        for u, v, data in unqualified_edges_to_serialize:
+            yield '{} {} {}'.format(node_to_bel(graph, u), data[RELATION], node_to_bel(graph, v))
 
-    for node in graph.nodes_iter():
-        if not graph.pred[node] and not graph.succ[node]:
+        for node in isolated_nodes_to_serialize:
             yield node_to_bel(graph, node)
 
-    yield 'UNSET SupportingText'
-    yield 'UNSET Citation'
+        yield 'UNSET SupportingText'
+        yield 'UNSET Citation'
 
 
 def to_bel(graph, file=None):

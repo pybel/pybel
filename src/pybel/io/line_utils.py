@@ -23,7 +23,7 @@ from ..constants import (
     GRAPH_ANNOTATION_URL,
     GRAPH_ANNOTATION_OWL,
     GRAPH_ANNOTATION_PATTERN,
-    GRAPH_ANNOTATION_LIST
+    GRAPH_ANNOTATION_LIST,
 )
 from ..exceptions import PyBelWarning
 from ..manager import Manager
@@ -38,6 +38,7 @@ from ..parser.parse_exceptions import (
     RedefinedNamespaceError,
     RedefinedAnnotationError,
     PyBelParserWarning,
+    BelSyntaxError,
 )
 
 log = logging.getLogger(__name__)
@@ -190,7 +191,7 @@ def parse_statements(graph, statements, bel_parser):
             bel_parser.parseString(line, line_number=line_number)
         except ParseException as e:
             parse_log.error('Line %07d - General Parser Failure: %s', line_number, line)
-            graph.add_warning(line_number, line, PyBelParserWarning(line_number, line, e.loc),
+            graph.add_warning(line_number, line, BelSyntaxError(line_number, line, e.loc),
                               bel_parser.get_annotations())
         except PyBelWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
@@ -206,6 +207,12 @@ def parse_statements(graph, statements, bel_parser):
 
 
 def sanitize_file_line_iter(f, note_char=':'):
+    """Enumerates the given lines and removes empty lines/comments
+
+    :param iter[str] f: An iterable over strings
+    :param str note_char: The character sequence denoting a special note
+    :rtype: iter[tuple[int,str]]
+    """
     for line_number, line in enumerate(f, start=1):
         line = line.strip()
 
@@ -221,9 +228,11 @@ def sanitize_file_line_iter(f, note_char=':'):
 
 
 def sanitize_file_lines(f):
-    """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned"""
-    # it = (line.strip() for line in f)
-    # it = ((line_number, line) for line_number, line in enumerate(it, start=1) if line and not line.startswith('#'))
+    """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned
+
+    :param iter[str] f: An iterable of strings
+    :rtype: iter[tuple[int,str]]
+    """
     it = sanitize_file_line_iter(f)
 
     for line_number, line in it:
@@ -258,16 +267,30 @@ def sanitize_file_lines(f):
 
 
 def split_file_to_annotations_and_definitions(file):
-    """Enumerates a line iterable and splits into 3 parts"""
+    """Enumerates a line iterable and splits into 3 parts
+
+    :param iter[str] file:
+    :rtype: tuple[list[str],list[str],list[str]]
+    """
     content = list(sanitize_file_lines(file))
 
-    end_document_section = 1 + max(j for j, (i, l) in enumerate(content) if l.startswith('SET DOCUMENT'))
-    end_definitions_section = 1 + max(j for j, (i, l) in enumerate(content) if METADATA_LINE_RE.match(l))
+    end_document_section_index = 1 + max(
+        index
+        for index, (_, line) in enumerate(content)
+        if line.startswith('SET DOCUMENT')
+    )
+
+    end_definitions_section_index = 1 + max(
+        index
+        for index, (_, line)
+        in enumerate(content)
+        if METADATA_LINE_RE.match(line)
+    )
 
     log.info('File length: %d lines', len(content))
-    documents = content[:end_document_section]
-    definitions = content[end_document_section:end_definitions_section]
-    statements = content[end_definitions_section:]
+    documents = content[:end_document_section_index]
+    definitions = content[end_document_section_index:end_definitions_section_index]
+    statements = content[end_definitions_section_index:]
 
     return documents, definitions, statements
 

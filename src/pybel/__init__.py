@@ -60,6 +60,7 @@ PyBEL will build a new database and populate it on the next run.
 
 from . import canonicalize
 from . import constants
+from . import examples
 from . import io
 from . import struct
 from .canonicalize import *
@@ -78,7 +79,7 @@ __all__ = (
     cache_manager.__all__
 )
 
-__version__ = '0.9.2'
+__version__ = '0.9.3'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'

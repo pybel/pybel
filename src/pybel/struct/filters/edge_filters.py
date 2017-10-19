@@ -18,7 +18,7 @@ __all__ = [
     'concatenate_edge_filters',
     'filter_edges',
     'count_passed_edge_filter',
-    'filter_provenance_edges',
+    'iter_qualified_edges',
 ]
 
 
@@ -120,7 +120,7 @@ def edge_has_provenance(graph, u, v, k, d):
     return graph.has_edge_citation(u, v, k) and graph.has_edge_evidence(u, v, k)
 
 
-def filter_provenance_edges(graph):
+def iter_qualified_edges(graph):
     """Returns an iterator over edges with citation and evidence
 
     :param BELGraph graph: A BEL graph

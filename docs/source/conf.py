@@ -68,7 +68,7 @@ author = u'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.9.2'
+release = '0.9.3'
 
 # The short X.Y version.
 parsed_version = re.match(

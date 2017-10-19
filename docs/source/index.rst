@@ -30,8 +30,8 @@ Links
    :caption: Getting Started
    :name: start
 
-   installation
    overview
+   installation
 
 
 .. toctree::
@@ -40,6 +40,7 @@ Links
    :name: topics
 
    datamodel
+   examples
    io
    filters
    cookbook

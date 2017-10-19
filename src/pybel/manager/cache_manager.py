@@ -17,39 +17,20 @@ from collections import defaultdict
 from copy import deepcopy
 from six import string_types
 from six.moves.cPickle import dumps
-from sqlalchemy import func, exists
+from sqlalchemy import exists, func
 
 from .base_manager import BaseManager
+from .lookup_manager import LookupManager
 from .models import (
-    Network,
-    Annotation,
-    AnnotationEntry,
-    Namespace,
-    NamespaceEntryEquivalence,
-    NamespaceEntry,
-    Node,
-    Edge,
-    Evidence,
-    Citation,
-    Property,
-    Author,
-    Modification,
+    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
+    NamespaceEntry, NamespaceEntryEquivalence, Network, Node, Property,
 )
 from .query_manager import QueryManager
-from .utils import parse_owl, extract_shared_required, extract_shared_optional
+from .utils import extract_shared_optional, extract_shared_required, parse_owl
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
-from ..io.gpickle import to_bytes
 from ..struct import BELGraph, union
-from ..utils import (
-    get_bel_resource,
-    parse_datetime,
-    hash_edge,
-    hash_node,
-    hash_evidence,
-    hash_citation,
-    hash_dump,
-)
+from ..utils import get_bel_resource, hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
 
 __all__ = [
     'Manager',
@@ -147,6 +128,13 @@ class NamespaceManager(BaseManager):
         """
         return self.session.query(Namespace).all()
 
+    def count_namespaces(self):
+        """Count the number of namespaces in the database
+
+        :rtype: int
+        """
+        return self.session.query(Namespace).count()
+
     def drop_namespaces(self):
         """Drops all namespaces"""
         self.namespace_object_cache.clear()
@@ -168,6 +156,14 @@ class NamespaceManager(BaseManager):
         self.session.query(Namespace).filter(Namespace.url == url).delete()
         self.session.commit()
 
+    def get_namespace_by_url(self, url):
+        """Looks up a namespace by url. Fails if not inserted already into database.
+
+        :param str url: The URL of the namespace
+        :rtype: Namespace
+        """
+        return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+
     def get_or_create_namespace(self, url):
         """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
         the values of this namespace.
@@ -176,7 +172,7 @@ class NamespaceManager(BaseManager):
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
         """
-        result = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+        result = self.get_namespace_by_url(url)
 
         if result is not None:
             return result
@@ -237,7 +233,7 @@ class NamespaceManager(BaseManager):
         :rtype: Namespace or dict[str,str]
         """
         if self.use_namespace_cache and url in self.namespace_model:
-            log.debug('already in memory: %s (%d)', url)
+            log.debug('already in memory: %s', url)
             return self.namespace_model[url]
 
         namespace = self.get_or_create_namespace(url)
@@ -246,7 +242,7 @@ class NamespaceManager(BaseManager):
             log.debug('loaded uncached namespace: %s (%d)', url, len(namespace))
             return namespace
 
-        log.debug('loaded namespace: %s (%d)', url)
+        log.debug('loaded namespace: %s', url)
 
         if self.use_namespace_cache:
             self._cache_namespace(namespace)
@@ -266,14 +262,6 @@ class NamespaceManager(BaseManager):
             return namespace
 
         return namespace.to_values()
-
-    def get_namespace_by_url(self, url):
-        """Looks up a namespace by url. Fails if not inserted already into database.
-
-        :param str url: The URL of the namespace
-        :rtype: Namespace
-        """
-        return self.session.query(Namespace).filter(Namespace.url == url).one()
 
     def get_namespace_entry(self, url, name):
         """Gets a given NamespaceEntry object.
@@ -302,7 +290,7 @@ class OwlNamespaceManager(NamespaceManager):
         :param str encoding: The encoding for the entries in the namespace
         :rtype: Namespace
         """
-        namespace = self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
+        namespace = self.get_namespace_by_url(url)
 
         if namespace is not None:
             return namespace
@@ -418,6 +406,13 @@ class AnnotationManager(BaseManager):
         """
         return self.session.query(Annotation).all()
 
+    def count_annotations(self):
+        """Count the number of annotations in the database
+
+        :rtype: int
+        """
+        return self.session.query(Annotation).count()
+
     def drop_annotations(self):
         """Drops all annotations"""
         self.annotation_object_cache.clear()
@@ -446,13 +441,21 @@ class AnnotationManager(BaseManager):
         for entry in annotation.entries:
             self.annotation_object_cache[url][entry.name] = entry
 
+    def get_annotation_by_url(self, url):
+        """Gets an annotation by URL
+
+        :param str url:
+        :rtype: Annotation
+        """
+        return self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+
     def get_or_create_annotation(self, url):
         """Inserts the namespace file at the given location to the cache
 
         :param str url: the location of the namespace file
         :rtype: Annotation
         """
-        annotation = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+        annotation = self.get_annotation_by_url(url)
 
         if annotation is not None:
             return annotation
@@ -509,14 +512,6 @@ class AnnotationManager(BaseManager):
         annotation = self.ensure_annotation(url)
         return annotation.get_entries()
 
-    def get_annotation_by_url(self, url):
-        """Gets an annotation by URL
-
-        :param str url:
-        :rtype: Annotation
-        """
-        return self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
-
     def get_annotation_entry(self, url, value):
         """Gets a given AnnotationEntry object.
 
@@ -543,7 +538,7 @@ class OwlAnnotationManager(AnnotationManager):
         :param str keyword: The optional keyword to use for the annotation if it gets downloaded
         :rtype: Annotation
         """
-        annotation = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+        annotation = self.get_annotation_by_url(url)
 
         if annotation is not None:
             return annotation
@@ -613,6 +608,15 @@ class EquivalenceManager(NamespaceManager):
         self.session.query(NamespaceEntryEquivalence).delete()
         self.session.commit()
 
+    def get_equivalence_by_label(self, label):
+        """Gets an equivalence class by its label.
+
+        :param str label: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
+                                    for Alzheimer's Disease
+        :rtype: NamespaceEntryEquivalence
+        """
+        return self.session.query(NamespaceEntryEquivalence).filter(NamespaceEntryEquivalence.label == label).one()
+
     def ensure_equivalence_class(self, label):
         """Ensures the equivalence class is loaded in the database"""
         result = self.session.query(NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
@@ -666,15 +670,6 @@ class EquivalenceManager(NamespaceManager):
         """
         entry = self.get_namespace_entry(url, name)
         return entry.equivalence
-
-    def get_equivalence_by_label(self, label):
-        """Gets an equivalence class by its label.
-
-        :param str label: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
-                                    for Alzheimer's Disease
-        :rtype: NamespaceEntryEquivalence
-        """
-        return self.session.query(NamespaceEntryEquivalence).filter(NamespaceEntryEquivalence.label == label).one()
 
     def get_equivalence_members(self, label):
         """Gets all members of the given equivalence class
@@ -827,7 +822,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return union(self.get_graphs_by_ids(network_ids))
 
 
-class InsertManager(NamespaceManager, AnnotationManager):
+class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
     """Manages inserting data into the edge store"""
 
     def __init__(self, *args, **kwargs):
@@ -841,11 +836,9 @@ class InsertManager(NamespaceManager, AnnotationManager):
         self.object_cache_property = {}
         self.object_cache_node = {}
         self.object_cache_edge = {}
-        self.object_cache_citation = {}
         self.object_cache_evidence = {}
-        self.object_cache_author = {}
 
-    def insert_graph(self, graph, store_parts=False):
+    def insert_graph(self, graph, store_parts=True):
         """Inserts a graph in the database.
 
         :param BELGraph graph: A BEL graph
@@ -869,11 +862,13 @@ class InsertManager(NamespaceManager, AnnotationManager):
         for url in graph.annotation_url.values():
             self.ensure_annotation(url)
 
-        network = Network(blob=to_bytes(graph), **{
+        network = Network(**{
             key: value
             for key, value in graph.document.items()
             if key in METADATA_INSERT_KEYS
         })
+
+        network.store_bel(graph)
 
         if store_parts:
             self._store_graph_parts(network, graph)
@@ -893,7 +888,9 @@ class InsertManager(NamespaceManager, AnnotationManager):
         """
         self.ensure_namespace(GOCC_LATEST)
 
-        for node in graph.nodes_iter():
+        log.debug('storing graph parts: nodes')
+
+        for node in graph:
             try:
                 node_object = self.get_or_create_node(graph, node)
                 self.node_model[node] = node_object
@@ -904,6 +901,8 @@ class InsertManager(NamespaceManager, AnnotationManager):
                 network.nodes.append(node_object)
 
         self.session.flush()
+
+        log.debug('storing graph parts: edges')
 
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
             if u not in self.node_model:
@@ -960,9 +959,12 @@ class InsertManager(NamespaceManager, AnnotationManager):
         :param dict data: A PyBEL edge data dictionary
         :rtype: list[AnnotationEntry]
         """
+        if ANNOTATIONS not in data:
+            return
+
         return [
             self.get_annotation_entry(url, value)
-            for url, value in self._map_annotations_dict(graph, data)
+            for url, value in self._map_annotations_dict(graph, data[ANNOTATIONS])
         ]
 
     def _add_qualified_edge(self, network, graph, u, v, k, data):
@@ -984,9 +986,9 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
         properties = self.get_or_create_properties(graph, data)
-        annotations = self._get_annotation_entries(graph, data[ANNOTATIONS])
+        annotations = self._get_annotation_entries(graph, data)
 
-        bel = edge_to_bel(graph, u, v, k)
+        bel = edge_to_bel(graph, u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
             source=self.node_model[u],
@@ -1002,7 +1004,7 @@ class InsertManager(NamespaceManager, AnnotationManager):
         network.edges.append(edge)
 
     def _add_unqualified_edge(self, network, graph, u, v, k, data):
-        bel = edge_to_bel(graph, u, v, k)
+        bel = edge_to_bel(graph, u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
             source=self.node_model[u],
@@ -1026,46 +1028,46 @@ class InsertManager(NamespaceManager, AnnotationManager):
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
 
-        result = self.session.query(Evidence).filter(Evidence.sha512 == evidence_hash).one_or_none()
+        evidence = self.get_evidence_by_hash(evidence_hash)
 
-        if result is not None:
-            self.object_cache_evidence[evidence_hash] = result
-            return result
+        if evidence is not None:
+            self.object_cache_evidence[evidence_hash] = evidence
+            return evidence
 
-        result = Evidence(
+        evidence = Evidence(
             text=text,
             citation=citation,
             sha512=evidence_hash
         )
 
-        self.session.add(result)
-        self.object_cache_evidence[evidence_hash] = result
-        return result
+        self.session.add(evidence)
+        self.object_cache_evidence[evidence_hash] = evidence
+        return evidence
 
-    def get_or_create_node(self, graph, node):
+    def get_or_create_node(self, graph, node_identifier):
         """Creates entry and object for given node if it does not exist.
 
         :param BELGraph graph: A BEL graph
-        :param tuple node: A BEL node
+        :param tuple node_identifier: A PyBEL node tuple
         :rtype: Node
         """
-        node_hash = hash_node(node)
+        node_hash = hash_node(node_identifier)
         if node_hash in self.object_cache_node:
             return self.object_cache_node[node_hash]
 
-        bel = node_to_bel(graph, node)
-        blob = dumps(graph.node[node])
-        node_data = graph.node[node]
+        bel = node_to_bel(graph, node_identifier)
+        blob = dumps(graph.node[node_identifier])
+        node_data = graph.node[node_identifier]
 
-        result = self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
+        node = self.get_node_by_hash(node_hash)
 
-        if result is not None:
-            self.object_cache_node[node_hash] = result
-            return result
+        if node is not None:
+            self.object_cache_node[node_hash] = node
+            return node
 
         type = node_data[FUNCTION]
 
-        result = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+        node = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
 
         if NAMESPACE not in node_data:
             pass
@@ -1073,22 +1075,22 @@ class InsertManager(NamespaceManager, AnnotationManager):
         elif node_data[NAMESPACE] in graph.namespace_url:
             namespace = node_data[NAMESPACE]
             url = graph.namespace_url[namespace]
-            result.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
+            node.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
 
         elif node_data[NAMESPACE] in graph.namespace_pattern:
-            result.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+            node.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
 
         else:
             raise ValueError("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))
 
         if VARIANTS in node_data or FUSION in node_data:
-            result.is_variant = True
-            result.fusion = FUSION in node_data
-            result.modifications = self.get_or_create_modification(graph, node_data)
+            node.is_variant = True
+            node.fusion = FUSION in node_data
+            node.modifications = self.get_or_create_modification(graph, node_data)
 
-        self.session.add(result)
-        self.object_cache_node[node_hash] = result
-        return result
+        self.session.add(node)
+        self.object_cache_node[node_hash] = node
+        return node
 
     def drop_nodes(self):
         """Drops all nodes in RDB"""
@@ -1120,13 +1122,13 @@ class InsertManager(NamespaceManager, AnnotationManager):
         if edge_hash in self.object_cache_edge:
             return self.object_cache_edge[edge_hash]
 
-        result = self.session.query(Edge).filter(Edge.sha512 == edge_hash).one_or_none()
+        edge = self.get_edge_by_hash(edge_hash)
 
-        if result is not None:
-            self.object_cache_edge[edge_hash] = result
-            return result
+        if edge is not None:
+            self.object_cache_edge[edge_hash] = edge
+            return edge
 
-        result = Edge(
+        edge = Edge(
             source=source,
             target=target,
             relation=relation,
@@ -1135,15 +1137,15 @@ class InsertManager(NamespaceManager, AnnotationManager):
             sha512=edge_hash,
         )
         if evidence is not None:
-            result.evidence = evidence
+            edge.evidence = evidence
         if properties is not None:
-            result.properties = properties
+            edge.properties = properties
         if annotations is not None:
-            result.annotations = annotations
+            edge.annotations = annotations
 
-        self.session.add(result)
-        self.object_cache_edge[edge_hash] = result
-        return result
+        self.session.add(edge)
+        self.object_cache_edge[edge_hash] = edge
+        return edge
 
     def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None,
                                date=None, first=None, last=None, authors=None):
@@ -1165,21 +1167,15 @@ class InsertManager(NamespaceManager, AnnotationManager):
         type = type.strip()
         reference = reference.strip()
 
-        citation_hash = hash_citation(type, reference)
+        citation = self.get_citation_by_reference(type, reference)
 
-        if citation_hash in self.object_cache_citation:
-            return self.object_cache_citation[citation_hash]
+        if citation is not None:
+            return citation
 
-        result = self.session.query(Citation).filter(Citation.sha512 == citation_hash).one_or_none()
-
-        if result is not None:
-            self.object_cache_citation[citation_hash] = result
-            return result
-
-        result = Citation(
+        citation = Citation(
             type=type,
             reference=reference,
-            sha512=citation_hash,
+            sha512=hash_citation(type, reference),
             name=name,
             title=title,
             volume=volume,
@@ -1187,23 +1183,24 @@ class InsertManager(NamespaceManager, AnnotationManager):
             pages=pages
         )
         if date is not None:
-            result.date = parse_datetime(date)
+            citation.date = parse_datetime(date)
 
         if first is not None:
-            result.first = self.get_or_create_author(first)
+            citation.first = self.get_or_create_author(first)
 
         if last is not None:
-            result.last = self.get_or_create_author(last)
+            citation.last = self.get_or_create_author(last)
 
         if authors is not None:
             for author in (authors.split('|') if isinstance(authors, string_types) else authors):
                 author_model = self.get_or_create_author(author)
-                if author_model not in result.authors:
-                    result.authors.append(author_model)
+                if author_model not in citation.authors:
+                    citation.authors.append(author_model)
 
-        self.session.add(result)
-        self.object_cache_citation[citation_hash] = result
-        return result
+        self.session.add(citation)
+
+        self.session.commit()
+        return citation
 
     def get_or_create_author(self, name):
         """Gets an author by name, or creates one
@@ -1213,19 +1210,14 @@ class InsertManager(NamespaceManager, AnnotationManager):
         """
         name = name.strip()
 
-        if name in self.object_cache_author:
-            return self.object_cache_author[name]
+        author = self.get_author_by_name(name)
 
-        result = self.session.query(Author).filter(Author.name == name).one_or_none()
+        if author is not None:
+            return author
 
-        if result is not None:
-            self.object_cache_author[name] = result
-            return result
-
-        result = Author(name=name)
-        self.session.add(result)
-        self.object_cache_author[name] = result
-        return result
+        author = Author(name=name)
+        self.session.add(author)
+        return author
 
     def get_or_create_modification(self, graph, node_data):
         """Creates a list of modification objects (Modification) that belong to the node described by
@@ -1320,7 +1312,6 @@ class InsertManager(NamespaceManager, AnnotationManager):
 
             if mod_hash in self.object_cache_modification:
                 mod = self.object_cache_modification[mod_hash]
-
             else:
                 mod = self.session.query(Modification).filter(Modification.sha512 == mod_hash).one_or_none()
                 if not mod:

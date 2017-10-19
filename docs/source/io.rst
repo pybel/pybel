@@ -96,6 +96,11 @@ Database
 .. autofunction:: pybel.from_ndex
 .. autofunction:: pybel.to_ndex
 
+PyBEL Web
+---------
+
+.. automodule:: pybel.io.web
+    :members:
 
 INDRA
 -----
