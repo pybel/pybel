@@ -4,7 +4,7 @@
 SET DOCUMENT Name = "PyBEL Test Overlapping"
 SET DOCUMENT Description = "Made for testing PyBEL deletion cascade"
 SET DOCUMENT Version = "1.0.0"
-SET DOCUMENT Copyright = "Copyright (c) andrej Konotopez Hoyt. All Rights Reserved."
+SET DOCUMENT Copyright = "Copyright (c) Andrej Konotopez. All Rights Reserved."
 SET DOCUMENT Authors = "Andrej Konotopez"
 SET DOCUMENT Licenses = "WTF License"
 SET DOCUMENT ContactInfo = "andrej.konotopez@scai.fraunhofer.de"
