@@ -10,6 +10,7 @@ from tests import constants
 from tests.constants import (
     BelReconstitutionMixin,
     test_bel_simple,
+    test_bel_simple_b,
     expected_test_simple_metadata,
 )
 from tests.mocks import mock_bel_resources
@@ -32,8 +33,7 @@ class TestEdgeStore(BelReconstitutionMixin):
         self.manager = Manager(connection=self.connection)
         self.manager.create_all()
 
-        self.graph = self.setup_graph()
-        self.network = self.setup_insert()
+        self.setup_graph_and_network()
 
     def tearDown(self):
         # Commiting the session to close the reading transaction (metadata lock)
@@ -46,11 +46,9 @@ class TestEdgeStore(BelReconstitutionMixin):
             os.remove(self.path)
 
     @mock_bel_resources
-    def setup_graph(self, mock):
-        return pybel.from_path(path=test_bel_simple, manager=self.manager, allow_nested=True)
-
-    def setup_insert(self):
-        return self.manager.insert_graph(self.graph)
+    def setup_graph_and_network(self, mock_get):
+        self.graph = pybel.from_path(path=test_bel_simple, manager=self.manager, allow_nested=True)
+        self.network = self.manager.insert_graph(self.graph)
 
     def test_citations(self):
         citations = self.manager.session.query(models.Citation).all()
@@ -114,6 +112,12 @@ class TestEdgeStore(BelReconstitutionMixin):
             expected_test_simple_metadata[METADATA_VERSION]
         )
         self.bel_simple_reconstituted(g2)
+
+    def test_get_or_create_node(self):
+        pass
+
+    def test_get_or_create_edge(self):
+        pass
 
     @mock_bel_resources
     def test_get_or_create_properties(self, mock_get):
@@ -252,54 +256,6 @@ class TestEdgeStore(BelReconstitutionMixin):
         self.assertEqual(5, len(self.manager.object_cache_property.keys()))
         self.assertIn(translocation_from_hash, self.manager.object_cache_property)
         self.assertIn(translocation_to_hash, self.manager.object_cache_property)
-
-        # @mock_bel_resources
-        # def test_get_or_create_edge(self, mock_get):
-        #
-        #     edge_data = self.graph.edge[(PROTEIN, 'HGNC', 'AKT1')][(PROTEIN, 'HGNC', 'EGFR')]
-        #     source_node = self.manager.get_or_create_node(self.graph, (PROTEIN, 'HGNC', 'AKT1'))
-        #     target_node = self.manager.get_or_create_node(self.graph, (PROTEIN, 'HGNC', 'EGFR'))
-        #     citation = self.manager.get_or_create_citation(**edge_data[0][CITATION])
-        #     evidence = self.manager.get_or_create_evidence(citation, edge_data[0][EVIDENCE])
-        #     properties = self.manager.get_or_create_properties(self.graph, edge_data[0])
-        #     annotations = []
-        #     edge_hash = hash_edge(u=source_node, v=target_node, k=0, d=edge_data)
-        #     basic_edge = {
-        #         'source': source_node,
-        #         'target': target_node,
-        #         'edge_hash': edge_hash,
-        #         'evidence': evidence,
-        #         'bel': 'p(HGNC:AKT1) -> p(HGNC:EGFR)',
-        #         'relation': edge_data[0][RELATION],
-        #         'properties': properties,
-        #         'annotations': annotations,
-        #         'blob': dumps(edge_data[0])
-        #     }
-        #     database_data = {
-        #         'source': source_node.to_json(),
-        #         'target': target_node.to_json(),
-        #         'data': {
-        #             RELATION: edge_data[0][RELATION],
-        #             CITATION: citation.to_json(),
-        #             EVIDENCE: evidence.to_json(),
-        #             ANNOTATIONS: {}
-        #         },
-        #         'key': 0
-        #     }
-        #
-        #     # Create
-        #     edge = self.manager.get_or_create_edge(**basic_edge)
-        #     self.assertIsInstance(edge, models.Edge)
-        #     self.assertEqual(edge.to_json(), database_data)
-        #
-        #     self.assertIn(edge_hash, self.manager.object_cache_edge)
-        #
-        #     # Get
-        #     reloaded_edge = self.manager.get_or_create_edge(**basic_edge)
-        #     self.assertEqual(edge.to_json(), reloaded_edge.to_json())
-        #     self.assertEqual(edge, reloaded_edge)
-        #
-        #     self.assertEqual(1, len(self.manager.object_cache_edge.keys()))
 
     @mock_bel_resources
     def test_get_or_create_modification(self, mock_get):
@@ -532,3 +488,135 @@ class TestEdgeStore(BelReconstitutionMixin):
 
         # Every modification was added only once to the object cache
         self.assertEqual(8, len(self.manager.object_cache_modification.keys()))
+
+
+class TestDeletionCascade(BelReconstitutionMixin):
+    def setUp(self):
+        self.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
+
+        if self.test_connection:
+            self.connection = self.test_connection
+        else:
+            self.fd, self.path = tempfile.mkstemp()
+            self.connection = 'sqlite:///' + self.path
+
+        log.info('Test generated connection string %s', self.connection)
+
+        self.manager = Manager(connection=self.connection)
+        self.manager.create_all()
+
+        self.setup_graphs_and_networks()
+
+        self.network_list = self.manager.list_networks()
+
+    def tearDown(self):
+        # Commiting the session to close the reading transaction (metadata lock)
+        self.manager.session.commit()
+        self.manager.drop_all()
+        self.manager.session.close()
+
+        if not self.test_connection:
+            os.close(self.fd)
+            os.remove(self.path)
+
+    @mock_bel_resources
+    def setup_graphs_and_networks(self, mock_get):
+        self.graph_a = pybel.from_path(path=test_bel_simple, manager=self.manager, allow_nested=True)
+        self.graph_b = pybel.from_path(path=test_bel_simple_b, manager=self.manager, allow_nested=True)
+        self.network_a = self.manager.insert_graph(self.graph_a)
+        self.network_b = self.manager.insert_graph(self.graph_b)
+
+    def test_cascade_deletion_setup(self):
+
+        # 1. Check how many networks are present
+        self.assertEqual(2, self.manager.count_networks())
+        self.assertIn(self.network_a, self.network_list)
+        self.assertIn(self.network_b, self.network_list)
+
+        # 2. Check number of edges
+        self.assertEqual(8, self.manager.count_edges())
+
+        # 3. Check number of nodes
+        self.assertEqual(6, self.manager.count_nodes())
+
+        # 4. Check number of edge_properties
+
+        # 5. Check the node / edge overlap between networks
+        edges_in_a = self.network_a.edges.all()
+        edges_in_b = self.network_b.edges.all()
+
+        self.assertEqual(4, len(set(edges_in_a) - set(edges_in_b)))
+        self.assertEqual(2, len(set(edges_in_b) - set(edges_in_a)))
+        self.assertEqual(2, len(set(edges_in_a) & set(edges_in_b)))
+
+        nodes_in_a = self.network_a.nodes.all()
+        nodes_in_b = self.network_b.nodes.all()
+
+        self.assertEqual(1, len(set(nodes_in_a) - set(nodes_in_b)))
+        self.assertEqual(2, len(set(nodes_in_b) - set(nodes_in_a)))
+        self.assertEqual(3, len(set(nodes_in_a) & set(nodes_in_b)))
+
+        # 6. Check number of properties
+        self.assertEqual(1, self.manager.session.query(models.Property).count())
+
+        # 7. Check number of citations
+        self.assertEqual(3, self.manager.session.query(models.Citation).count())
+
+        # 8. Check number of evidences
+        self.assertEqual(4, self.manager.session.query(models.Evidence).count())
+
+        # 9. Check number of authors
+        self.assertEqual(3, self.manager.session.query(models.Author).count())
+
+    def test_deletion_one(self):
+        self.assertTrue(self.network_a in self.network_list and self.network_b in self.network_list)
+
+        # Delete Network B
+        self.manager.drop_network_by_id(network_id=self.network_b.id)
+        new_network_list = self.manager.list_networks()
+        self.assertNotIn(self.network_b, new_network_list)
+
+        # Check if the edges where deleted
+        self.assertEqual(6, self.manager.count_edges())
+
+        # Check if nodes where not deleted
+        self.assertEqual(6, self.manager.count_nodes())
+
+        # Check that the edge_property was deleted
+        self.assertEqual(0, self.manager.session.query(models.Property).count())
+
+        # Check if all evidences where deleted
+        self.assertEqual(3, self.manager.session.query(models.Evidence).count())
+
+        # Check if citations where not deleted
+        self.assertEqual(3, self.manager.session.query(models.Citation).count())
+
+        # Check if authors where not deleted
+        self.assertEqual(3, self.manager.session.query(models.Author).count())
+
+    def test_deletion_all(self):
+        self.assertTrue(self.network_a in self.network_list and self.network_b in self.network_list)
+
+        # Delete Network B
+        self.manager.drop_networks()
+        new_network_list = self.manager.list_networks()
+        self.assertNotIn(self.network_a, new_network_list)
+        self.assertNotIn(self.network_b, new_network_list)
+
+        # Check if the edges where deleted
+        self.assertEqual(0, self.manager.count_edges())
+
+        # Check if nodes where not deleted
+        self.assertEqual(6, self.manager.count_nodes())
+
+        # Check that the edge_property was deleted
+        self.assertEqual(0, self.manager.session.query(models.Property).count())
+
+        # Check if all evidences where deleted
+        self.assertEqual(0, self.manager.session.query(models.Evidence).count())
+
+        # Check if citations where not deleted
+        self.assertEqual(3, self.manager.session.query(models.Citation).count())
+
+        # Check if authors where not deleted
+        self.assertEqual(3, self.manager.session.query(models.Author).count())

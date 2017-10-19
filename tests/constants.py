@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import unittest
-from json import dumps
-
 import os
 import tempfile
-from requests.compat import urlparse
+import unittest
+from json import dumps
 
 from pybel import BELGraph
 from pybel.constants import *
@@ -14,6 +12,7 @@ from pybel.manager import Manager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.parser.utils import any_subdict_matches
+from requests.compat import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -25,6 +24,7 @@ belanno_dir_path = os.path.join(dir_path, 'belanno')
 beleq_dir_path = os.path.join(dir_path, 'beleq')
 
 test_bel_simple = os.path.join(bel_dir_path, 'test_bel.bel')
+test_bel_simple_b = os.path.join(bel_dir_path, 'test_bel_b.bel')
 test_bel_extensions = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
