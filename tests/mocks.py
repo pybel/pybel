@@ -80,7 +80,7 @@ class MockSession:
         pass
 
 
-def parse_owl_pybel_resolver(iri):
+def parse_owl_xml_resolver(iri):
     path = os.path.join(owl_dir_path, get_uri_name(iri))
 
     if not os.path.exists(path) and '.' not in path:
@@ -109,5 +109,5 @@ def parse_owl_rdf_resolver(iri):
 
 
 mock_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)
-mock_parse_owl_pybel = mock.patch('pybel.manager.utils.parse_owl_pybel', side_effect=parse_owl_pybel_resolver)
+mock_parse_owl_xml = mock.patch('pybel.manager.utils.parse_owl_xml', side_effect=parse_owl_xml_resolver)
 mock_parse_owl_rdf = mock.patch('pybel.manager.utils.parse_owl_rdf', side_effect=parse_owl_rdf_resolver)

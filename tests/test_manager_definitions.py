@@ -16,7 +16,7 @@ from tests.constants import (
     test_ns_nocache,
     wine_iri
 )
-from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_pybel
+from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_xml
 
 ns1 = Path(os.path.join(belns_dir_path, 'disease-ontology.belns')).as_uri()
 ns1_eq = Path(test_eq_1).as_uri()
@@ -76,7 +76,7 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
         self.assertEqual('CLO_0001072', entry.label)
 
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_insert_owl(self, m1, m2):
         self.manager.ensure_namespace_owl(wine_iri)
 
