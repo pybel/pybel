@@ -63,7 +63,7 @@ class BELGraph(networkx.MultiDiGraph):
             self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
 
         if authors:
-            self.graph[GRAPH_METADATA][METADATA_AUTHORS] = description
+            self.graph[GRAPH_METADATA][METADATA_AUTHORS] = authors
 
         if contact:
             self.graph[GRAPH_METADATA][METADATA_CONTACT] = contact
