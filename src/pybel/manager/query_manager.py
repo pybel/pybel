@@ -3,30 +3,16 @@
 import datetime
 import uuid
 
-from sqlalchemy import func
+from sqlalchemy import and_, func, or_
 
 from .lookup_manager import LookupManager
 from .models import (
-    Annotation,
-    AnnotationEntry,
-    Namespace,
-    NamespaceEntry,
-    Node,
-    Edge,
-    Evidence,
-    Citation,
-    Property,
-    Author,
-    Modification,
+    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
+    NamespaceEntry, Node, Property,
 )
 from ..constants import *
 from ..struct import BELGraph
-from ..utils import (
-    parse_datetime,
-    subdict_matches,
-    hash_edge,
-    hash_node,
-)
+from ..utils import hash_edge, hash_node, parse_datetime, subdict_matches
 
 __all__ = [
     'QueryManager'
@@ -429,3 +415,38 @@ class QueryManager(LookupManager):
             prop.data
             for prop in result
         ]
+
+    def query_edges_by_pmid(self, pubmed_identifiers):
+        """Gets all edges annotated to the given documents
+
+        :param list[str] pubmed_identifiers: A list of PubMed document identifiers
+        :rtype: list[Edge]
+        """
+        return self.session.query(Edge) \
+            .join(Evidence).join(Citation) \
+            .filter(Citation.type == CITATION_TYPE_PUBMED,
+                    Citation.reference.in_(pubmed_identifiers)).all()
+
+    def query_induction(self, nodes):
+        """Gets all edges between any of the given nodes
+
+        :param list[Node] nodes: A list of nodes (length > 2)
+        :rtype: list[Edge]
+        """
+        if len(nodes) < 2:
+            raise ValueError
+
+        node_ids = [node.id for node in nodes]
+
+        return self.session.query(Edge).filter(and_(Edge.source_id.in_(node_ids),
+                                                    Edge.target_id.in_(node_ids))).all()
+
+    def query_neighbors(self, nodes):
+        """Gets all edges incident to any of the given nodes
+
+        :param list[Node] nodes: A list of nodes
+        :rtype: list[Edge]
+        """
+        node_ids = [node.id for node in nodes]
+        return self.session.query(Edge).filter(or_(Edge.source_id.in_(node_ids),
+                                                   Edge.target_id.in_(node_ids))).all()

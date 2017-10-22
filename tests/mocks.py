@@ -34,6 +34,16 @@ class MockResponse:
     def __init__(self, mock_url):
         if mock_url == GOCC_LATEST:
             self.path = os.path.join(belns_dir_path, 'go-cellular-component.belns')
+        elif mock_url.endswith('hgnc-human-genes-20170725.belns'):
+            self.path = os.path.join(belns_dir_path, 'hgnc-human-genes.belns')
+        elif mock_url.endswith('chebi-20170725.belns'):
+            self.path = os.path.join(belns_dir_path, 'chebi.belns')
+        elif mock_url.endswith('go-biological-process-20170725.belns'):
+            self.path = os.path.join(belns_dir_path, 'go-biological-process.belns')
+        elif mock_url.endswith('species-taxonomy-id-20170511.belanno'):
+            self.path = os.path.join(belanno_dir_path, 'species-taxonomy-id.belanno')
+        elif mock_url.endswith('confidence-1.0.0.belanno'):
+            self.path = os.path.join(belanno_dir_path, 'confidence-1.0.0.belanno')
         elif mock_url.endswith('.belns'):
             self.path = os.path.join(belns_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.belanno'):
