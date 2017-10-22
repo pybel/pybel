@@ -82,7 +82,16 @@ def update_provenance(bel_parser):
 
 
 def any_dict_matches(dict_of_dicts, query_dict):
-    return any(query_dict == sd for sd in dict_of_dicts.values())
+    """
+
+    :param dict_of_dicts:
+    :param query_dict:
+    :return:
+    """
+    return any(
+        query_dict == sd
+        for sd in dict_of_dicts.values()
+    )
 
 
 def assertHasNode(self, node, graph, **kwargs):
@@ -108,15 +117,10 @@ def assertHasNode(self, node, graph, **kwargs):
 def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
     """A helper function for checking if an edge with the given properties is contained within a graph
 
-    :param self: A TestCase
-    :type self: unittest.TestCase
-    :param u: source node
-    :type u: tuple
-    :param v: target node
-    :type v: tuple
-    :param graph: underlying graph
-    :type graph: BELGraph
-    :param kwargs: splat the data to match
+    :param unittest.TestCase self: A TestCase
+    :param tuple u: source node
+    :param tuple v: target node
+    :param BELGraph graph: underlying graph
     """
     self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
 
@@ -306,6 +310,10 @@ def help_check_hgnc(self, namespace_dict):
     self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
     self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
 
+akt1 = (PROTEIN, 'HGNC', 'AKT1')
+cftr = (PROTEIN, 'HGNC', 'CFTR')
+mia=(PROTEIN, 'HGNC', 'MIA')
+
 
 BEL_THOROUGH_NODES = {
     (ABUNDANCE, 'CHEBI', 'oxygen atom'),
@@ -333,13 +341,13 @@ BEL_THOROUGH_NODES = {
     (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')),
     (PROTEIN, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
     (PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')),
-    (PROTEIN, 'HGNC', 'CFTR'),
+    cftr,
     (PROTEIN, 'HGNC', 'EGFR'),
     (PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')),
     (PATHOLOGY, 'MESHD', 'Adenocarcinoma'),
     (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Phe508del')),
     (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (5, 20))),
-    (PROTEIN, 'HGNC', 'MIA'),
+    mia,
     (COMPLEX, 'GOCC', 'interleukin-23 complex'),
     (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (1, '?'))),
     (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')),
@@ -451,6 +459,7 @@ citation_2 = {
 
 evidence_1 = "Evidence 1"
 
+
 BEL_THOROUGH_EDGES = [
     ((ABUNDANCE, 'CHEBI', 'oxygen atom'), (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
         EVIDENCE: 'These are mostly made up',
@@ -494,22 +503,22 @@ BEL_THOROUGH_EDGES = [
         CITATION: citation_2,
         RELATION: TRANSCRIBED_TO,
     }),
-    ((GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), (PROTEIN, 'HGNC', 'AKT1'), {
+    ((GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), akt1, {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: DIRECTLY_DECREASES,
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)), {
+    (akt1, (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')), {
+    (akt1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'),
+    (akt1,
      (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')), {
          RELATION: HAS_VARIANT,
      }),
-    ((PROTEIN, 'HGNC', 'AKT1'),
+    (akt1,
      (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')), {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
@@ -517,36 +526,36 @@ BEL_THOROUGH_EDGES = [
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          OBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
      }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')), {
+    (akt1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')), {
+    (akt1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')), {
+    (akt1, (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: DEGRADATION},
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')), {
+    (akt1, (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1521_1523delcuu')), {
+    (akt1, (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1521_1523delcuu')), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1653_1655delcuu')), {
+    (akt1, (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1653_1655delcuu')), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: ACTIVITY},
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'EGFR'), {
+    (akt1, (PROTEIN, 'HGNC', 'EGFR'), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
@@ -559,7 +568,7 @@ BEL_THOROUGH_EDGES = [
         },
         OBJECT: {MODIFIER: DEGRADATION},
     }),
-    ((PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'EGFR'), {
+    (akt1, (PROTEIN, 'HGNC', 'EGFR'), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
@@ -605,7 +614,7 @@ BEL_THOROUGH_EDGES = [
     ((MIRNA, 'HGNC', 'MIR21'), (MIRNA, 'HGNC', 'MIR21', (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
     }),
-    ((GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), (PROTEIN, 'HGNC', 'AKT1'),
+    ((GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), akt1,
      {
          EVIDENCE: 'These are mostly made up',
          CITATION: citation_1,
@@ -665,16 +674,16 @@ BEL_THOROUGH_EDGES = [
             }
         },
     }),
-    ((PROTEIN, 'HGNC', 'CFTR'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')), {
+    (cftr, (PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'CFTR'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')), {
+    (cftr, (PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'CFTR'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Phe508del')), {
+    (cftr, (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'CFTR'), (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')), {
+    (cftr, (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')), {
         RELATION: HAS_VARIANT,
     }),
     ((PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')), (PATHOLOGY, 'MESHD', 'Adenocarcinoma'), {
@@ -694,16 +703,16 @@ BEL_THOROUGH_EDGES = [
             }
         },
     }),
-    ((PROTEIN, 'HGNC', 'MIA'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (5, 20))), {
+    (mia, (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (5, 20))), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'MIA'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (1, '?'))), {
+    (mia, (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (1, '?'))), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'MIA'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')), {
+    (mia, (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'MIA'), (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?', '55kD')), {
+    (mia, (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?', '55kD')), {
         RELATION: HAS_VARIANT,
     }),
     ((PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (1, '?'))), (PROTEIN, 'HGNC', 'EGFR'), {
@@ -728,7 +737,7 @@ BEL_THOROUGH_EDGES = [
     ((RNA, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
     }),
-    ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT1'), {
+    ((RNA, 'HGNC', 'AKT1'), akt1, {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: TRANSLATED_TO,
