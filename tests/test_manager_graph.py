@@ -538,13 +538,13 @@ class TestNodes(TemporaryCacheMixin):
         self.graph = BELGraph(name='TestNode', version='0.0.0')
         self.graph.namespace_url[self.hgnc_keyword] = self.hgnc_url
 
-    def help_test_round_trip(self, node_tuple, node_data):
+    def help_test_round_trip(self, node_data):
         """Helps run the round trip test of inserting a node, getting it, and reconstituting it in multiple forms
 
         :param tuple tuple node_tuple: A PyBEL node tuple
         :param dict node_data: A PyBEL node data dictionary
         """
-        self.graph.add_node(node_tuple, attr_dict=node_data)
+        node_tuple = self.graph.add_node_from_data(node_data)
         self.manager.insert_graph(self.graph, store_parts=True)
 
         node_model = self.manager.get_node_by_tuple(node_tuple)
@@ -555,16 +555,10 @@ class TestNodes(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_1(self, mock):
-        node_tuple = PROTEIN, 'HGNC', 'YFG'
-
-        node_data = yfg_data
-
-        self.help_test_round_trip(node_tuple, node_data)
+        self.help_test_round_trip(yfg_data)
 
     @mock_bel_resources
     def test_2(self, mock):
-        node_tuple = PROTEIN, 'HGNC', 'YFG', (HGVS, 'p.Glu600Arg')
-
         node_data = {
             FUNCTION: PROTEIN,
             NAMESPACE: 'HGNC',
