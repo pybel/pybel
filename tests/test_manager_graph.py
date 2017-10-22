@@ -11,24 +11,17 @@ import sqlalchemy.exc
 from collections import Counter
 
 import pybel
-from pybel.dsl import protein as dsl_protein
-from pybel import BELGraph, from_database, to_database, from_path
+from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
+from pybel.dsl import protein as dsl_protein
 from pybel.manager import models
-from pybel.manager.models import Namespace, NamespaceEntry, Node, Author, Evidence
-from pybel.utils import hash_citation, hash_node, hash_evidence
+from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
+from pybel.utils import hash_citation, hash_evidence, hash_node
 from tests import constants
 from tests.constants import (
-    FleetingTemporaryCacheMixin,
-    BelReconstitutionMixin,
-    TemporaryCacheClsMixin,
-    TemporaryCacheMixin,
-    test_bel_simple,
-    expected_test_simple_metadata,
-    test_bel_thorough,
-    expected_test_thorough_metadata,
-    test_evidence_text,
-    test_citation_dict,
+    BelReconstitutionMixin, FleetingTemporaryCacheMixin, TemporaryCacheClsMixin,
+    TemporaryCacheMixin, expected_test_simple_metadata, expected_test_thorough_metadata, test_bel_simple,
+    test_bel_thorough, test_citation_dict, test_evidence_text,
 )
 from tests.mocks import mock_bel_resources
 from tests.utils import make_dummy_namespaces
@@ -571,7 +564,7 @@ class TestNodes(TemporaryCacheMixin):
             ]
         }
 
-        self.help_test_round_trip(node_tuple, node_data)
+        self.help_test_round_trip(node_data)
 
 
 # FIXME @kono need proper deletion cascades
