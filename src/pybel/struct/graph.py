@@ -4,8 +4,9 @@ import logging
 
 import networkx
 from copy import deepcopy
+from six import string_types
 
-from .operations import left_full_join, left_outer_join, left_node_intersection_join
+from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..constants import *
 from ..parser.canonicalize import add_node_from_data
 from ..utils import get_version
@@ -32,7 +33,7 @@ class BELGraph(networkx.MultiDiGraph):
     :class:`networkx.MultiDiGraph`.
     """
 
-    def __init__(self, name=None, version=None, description=None, data=None, **kwargs):
+    def __init__(self, name=None, version=None, description=None, authors=None, contact=None, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
 
@@ -40,6 +41,8 @@ class BELGraph(networkx.MultiDiGraph):
         :param str version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
                             ``YYYYMMDD`` format.
         :param str description: A description of the graph
+        :param str authors: The authors of this graph
+        :param str contact: The contact email for this graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         """
@@ -58,6 +61,12 @@ class BELGraph(networkx.MultiDiGraph):
 
         if description:
             self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+
+        if authors:
+            self.graph[GRAPH_METADATA][METADATA_AUTHORS] = description
+
+        if contact:
+            self.graph[GRAPH_METADATA][METADATA_CONTACT] = contact
 
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
@@ -241,7 +250,8 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
         :param str relation: The type of relation this edge represents
         :param str evidence: The evidence string from an article
-        :param dict[str,str] citation: The citation data dictionary for this evidence
+        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
+                                                assumes it's a PubMed identifier and autofills the citation type.
         :param dict[str,str] annotations: The annotations data dictionary
         :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
         :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
@@ -249,9 +259,17 @@ class BELGraph(networkx.MultiDiGraph):
         attr.update({
             RELATION: relation,
             EVIDENCE: evidence,
-            CITATION: citation,
-
         })
+
+        if isinstance(citation, string_types):
+            attr[CITATION] = {
+                CITATION_TYPE: CITATION_TYPE_PUBMED,
+                CITATION_REFERENCE: citation
+            }
+        elif isinstance(citation, dict):
+            attr[CITATION] = citation
+        else:
+            raise TypeError
 
         if annotations:
             attr[ANNOTATIONS] = annotations
