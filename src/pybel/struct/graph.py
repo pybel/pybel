@@ -215,7 +215,7 @@ class BELGraph(networkx.MultiDiGraph):
         """
         key = unqualified_edge_code[relation]
         if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})  # TODO make annotations optional?
+            self.add_edge(u, v, key=key, **{RELATION: relation})
 
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
