@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from .base_manager import BaseManager
-from .models import Node, Edge, Citation, Evidence, Author
+from .models import Author, Citation, Edge, Evidence, Node
+from ..parser.canonicalize import hash_node_dict
 from ..utils import hash_citation
 
 
@@ -15,6 +16,14 @@ class LookupManager(BaseManager):
         :rtype: Node
         """
         return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
+
+    def get_node_by_dict(self, node_dict):
+        """Looks up a node by its data dictionary by hashing it then using :func:`get_node_by_hash`
+
+        :param dict node_dict: A PyBEL node data dictionary
+        :rtype: Node
+        """
+        return self.get_node_by_hash(hash_node_dict(node_dict))
 
     def get_edge_by_hash(self, edge_hash):
         """Looks up an edge by the hash of a PyBEL edge data dictionary

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ..constants import *
+from ..utils import hash_node
 
 __all__ = [
     'node_to_tuple',
@@ -383,6 +384,15 @@ def po_to_tuple(tokens):
         return fusion_po_to_tuple(tokens)
 
     return simple_to_tuple(tokens)
+
+
+def hash_node_dict(node_dict):
+    """Hashes a PyBEL node data dictionary
+
+    :param dict node_dict:
+    :rtype: str
+    """
+    return hash_node(po_to_tuple(node_dict))
 
 
 def po_to_dict(tokens):
