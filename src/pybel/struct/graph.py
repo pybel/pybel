@@ -8,7 +8,7 @@ from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..constants import *
-from ..parser.canonicalize import add_node_from_data
+from ..parser.canonicalize import po_to_tuple
 from ..utils import get_version
 
 __all__ = [
@@ -221,10 +221,35 @@ class BELGraph(networkx.MultiDiGraph):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
         :param dict attr_dict: A PyBEL node data dictionary
-        :return: The PyBEL node tuple representing this node
+        :return: A PyBEL node tuple
         :rtype: tuple
         """
-        return add_node_from_data(self, attr_dict)
+        node_tuple = po_to_tuple(attr_dict)
+
+        if node_tuple in self:
+            return node_tuple
+
+        self.add_node(node_tuple, attr_dict=attr_dict)
+
+        if VARIANTS in attr_dict:
+            parent_node_tuple = self.add_simple_node(attr_dict[FUNCTION], attr_dict[NAMESPACE], attr_dict[NAME])
+            self.add_unqualified_edge(parent_node_tuple, node_tuple, HAS_VARIANT)
+
+        elif MEMBERS in attr_dict:
+            for member in attr_dict[MEMBERS]:
+                member_node_tuple = self.add_node_from_data(member)
+                self.add_unqualified_edge(node_tuple, member_node_tuple, HAS_COMPONENT)
+
+        elif PRODUCTS in attr_dict and REACTANTS in attr_dict:
+            for reactant_tokens in attr_dict[REACTANTS]:
+                reactant_node_tuple = self.add_node_from_data(reactant_tokens)
+                self.add_unqualified_edge(node_tuple, reactant_node_tuple, HAS_REACTANT)
+
+            for product_tokens in attr_dict[PRODUCTS]:
+                product_node_tuple = self.add_node_from_data(product_tokens)
+                self.add_unqualified_edge(node_tuple, product_node_tuple, HAS_PRODUCT)
+
+        return node_tuple
 
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
