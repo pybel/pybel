@@ -39,7 +39,7 @@ def to_json(graph):
         k: list(sorted(v))
         for k, v in graph_json_dict['graph'][GRAPH_ANNOTATION_LIST].items()
     }
-    graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = set(graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES])
+    graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = list(graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES])
 
     return graph_json_dict
 
