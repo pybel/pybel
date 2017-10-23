@@ -7,14 +7,13 @@ This module supports the relation parser by handling statements.
 """
 
 import logging
-
 import re
-from pyparsing import Suppress, And, Word, Optional, MatchFirst
-from pyparsing import pyparsing_common as ppc
+
+from pyparsing import And, MatchFirst, Optional, Suppress, Word, pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .parse_exceptions import *
-from .utils import word, quote, delimited_quoted_list, qid
+from .utils import delimited_quoted_list, qid, quote, word
 from ..constants import *
 from ..utils import valid_date_version
 

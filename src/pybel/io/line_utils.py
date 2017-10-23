@@ -3,11 +3,11 @@
 """This module contains helper functions for reading BEL scripts"""
 
 import logging
-import time
-
 import re
+import time
+from collections import Counter, defaultdict
+
 import requests.exceptions
-from collections import defaultdict, Counter
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 
@@ -27,18 +27,10 @@ from ..constants import (
 )
 from ..exceptions import PyBelWarning
 from ..manager import Manager
-from ..parser import BelParser
-from ..parser import MetadataParser
+from ..parser import BelParser, MetadataParser
 from ..parser.parse_exceptions import (
-    VersionFormatWarning,
-    MissingMetadataException,
-    MalformedMetadataException,
-    MetadataException,
-    MissingBelResource,
-    RedefinedNamespaceError,
-    RedefinedAnnotationError,
-    PyBelParserWarning,
-    BelSyntaxError,
+    BelSyntaxError, MalformedMetadataException, MetadataException, MissingBelResource,
+    MissingMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
 )
 
 log = logging.getLogger(__name__)
