@@ -250,19 +250,6 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
-    def get_namespace_encodings(self, url):
-        """Returns a dict of names and their encodings for the given namespace URL.
-
-        :param str url: The URL of the namespace
-        :rtype: dict[str,str]
-        """
-        namespace = self.ensure_namespace(url)
-
-        if isinstance(namespace, dict):
-            return namespace
-
-        return namespace.to_values()
-
     def get_namespace_entry(self, url, name):
         """Gets a given NamespaceEntry object.
 

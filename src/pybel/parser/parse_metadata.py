@@ -74,6 +74,9 @@ class MetadataParser(BaseParser):
         #: A dictionary of {annotation keyword: regular expression string}
         self.annotations_regex = {} if annotations_regex is None else annotations_regex
 
+        #: A set of namespaces that can't be cached
+        self.uncachable_namespaces = set()
+
         #: A dictionary containing the document metadata
         self.document_metadata = {}
 
@@ -176,7 +179,15 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_namespace(line, position, namespace)
 
         url = tokens['url']
-        self.namespace_dict[namespace] = self.manager.get_namespace_encodings(url)
+
+        namespace_result = self.manager.ensure_namespace(url)
+
+        if isinstance(namespace_result, dict):
+            self.namespace_dict[namespace] = namespace_result
+            self.uncachable_namespaces.add(url)
+        else:
+            self.namespace_dict[namespace] = namespace_result.to_values()
+
         self.namespace_url_dict[namespace] = url
 
         return tokens
