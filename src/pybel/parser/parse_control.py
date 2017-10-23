@@ -217,12 +217,10 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_set_evidence(self, line, position, tokens):
-        log.debug('Setting evidence: %s', tokens)
         self.evidence = tokens['value']
         return tokens
 
     def handle_set_command(self, line, position, tokens):
-        log.debug('Setting annotation: %s', tokens)
         key = tokens['key']
         value = tokens['value']
 
@@ -232,7 +230,6 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_set_command_list(self, line, position, tokens):
-        log.debug('Setting annotation list: %s', tokens)
         key = tokens['key']
         values = tokens['values']
 
