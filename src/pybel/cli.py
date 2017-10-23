@@ -277,7 +277,8 @@ def ls(manager, url):
 
     else:
         if url.endswith('.belns'):
-            res = manager.get_namespace_encodings(url)
+            res = manager.ensure_namespace(url).to_values()
+
         else:
             res = manager.get_namespace_owl_terms(url)
 
