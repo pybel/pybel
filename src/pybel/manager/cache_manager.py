@@ -255,7 +255,7 @@ class NamespaceManager(BaseManager):
 
         :param str url: The url of the namespace source
         :param str name: The value of the namespace from the given url's document
-        :rtype: NamespaceEntry
+        :rtype: Optional[NamespaceEntry]
         """
         if self.namespace_object_cache and url in self.namespace_object_cache:
             return self.namespace_object_cache[url][name]
@@ -430,7 +430,7 @@ class AnnotationManager(BaseManager):
         """Gets an annotation by URL
 
         :param str url:
-        :rtype: Annotation
+        :rtype: Optional[Annotation]
         """
         return self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
 
