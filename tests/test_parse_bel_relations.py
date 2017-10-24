@@ -1,15 +1,23 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import unittest
 
 from pyparsing import ParseException
 
-from pybel.canonicalize import node_to_bel, edge_to_bel
+from pybel import BELGraph
+from pybel.canonicalize import edge_to_bel, node_to_bel
 from pybel.constants import *
+from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
-from pybel.parser.parse_exceptions import NestedRelationWarning, RelabelWarning
-from tests.constants import TestTokenParserBase
-from tests.constants import default_identifier, test_citation_dict, test_evidence_text, update_provenance
+from pybel.parser.parse_exceptions import (
+    MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning,
+    UndefinedNamespaceWarning,
+)
+from tests.constants import (
+    TestTokenParserBase, default_identifier, test_citation_dict, test_evidence_text,
+    update_provenance,
+)
 
 log = logging.getLogger(__name__)
 
@@ -181,7 +189,8 @@ class TestRelations(TestTokenParserBase):
                 },
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE},
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
+                },
             },
             RELATION: 'decreases',
             OBJECT: {
@@ -882,6 +891,47 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(sub, sub_product_1, relation='hasProduct')
         self.assertHasEdge(sub, sub_product_2, relation='hasProduct')
         self.assertHasEdge(sub, sub_product_3, relation='hasProduct')
+
+
+class TestCustom(unittest.TestCase):
+    def setUp(self):
+        graph = BELGraph()
+
+        namespace_dict = {
+            'HGNC': {
+                'AKT1': 'GRP',
+                'YFG': 'GRP'
+            },
+            'MESHCS': {
+                'nucleus': 'A'
+            }
+        }
+
+        self.parser = BelParser(graph, namespace_dict=namespace_dict, autostreamline=False)
+
+    def test_tloc_undefined_namespace(self):
+        s = 'tloc(p(HGNC:AKT1), fromLoc(MESHCS:nucleus), toLoc(MISSING:"undefined"))'
+
+        with self.assertRaises(UndefinedNamespaceWarning):
+            self.parser.translocation.parseString(s)
+
+    def test_tloc_undefined_name(self):
+        s = 'tloc(p(HGNC:AKT1), fromLoc(MESHCS:nucleus), toLoc(MESHCS:"undefined"))'
+
+        with self.assertRaises(MissingNamespaceNameWarning):
+            self.parser.translocation.parseString(s)
+
+    def test_location_undefined_namespace(self):
+        s = 'p(HGNC:AKT1, loc(MISSING:"nucleus")'
+
+        with self.assertRaises(UndefinedNamespaceWarning):
+            self.parser.protein.parseString(s)
+
+    def test_location_undefined_name(self):
+        s = 'p(HGNC:AKT1, loc(MESHCS:"undefined")'
+
+        with self.assertRaises(MissingNamespaceNameWarning):
+            self.parser.protein.parseString(s)
 
 
 class TestWrite(TestTokenParserBase):
