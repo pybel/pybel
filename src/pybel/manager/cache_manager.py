@@ -260,10 +260,8 @@ class NamespaceManager(BaseManager):
         if self.namespace_object_cache and url in self.namespace_object_cache:
             return self.namespace_object_cache[url][name]
 
-        namespace = self.session.query(Namespace).filter(Namespace.url == url).one()
-        namespace_entry = self.session.query(NamespaceEntry).filter_by(namespace=namespace, name=name).one_or_none()
-
-        return namespace_entry
+        return self.session.query(NamespaceEntry).join(Namespace).filter(Namespace.url == url,
+                                                                         NamespaceEntry.name == name).one_or_none()
 
 
 class OwlNamespaceManager(NamespaceManager):
