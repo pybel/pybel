@@ -45,7 +45,7 @@ class EdgeAddError(RuntimeError):
     """When there's a problem inserting an edge"""
 
     def __str__(self):
-        "Error adding edge from line {} to database. Check the encodings".format(self.args)
+        return "Error adding edge from line {} to database. Check the encodings".format(self.args)
 
 
 def _get_namespace_insert_values(bel_resource):
