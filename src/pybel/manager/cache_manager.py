@@ -11,12 +11,11 @@ from __future__ import unicode_literals
 
 import logging
 import time
-from itertools import groupby
-
 from collections import defaultdict
 from copy import deepcopy
+from itertools import groupby
+
 from six import string_types
-from six.moves.cPickle import dumps
 from sqlalchemy import exists, func
 
 from .base_manager import BaseManager
@@ -40,6 +39,13 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
+
+
+class EdgeAddError(RuntimeError):
+    """When there's a problem inserting an edge"""
+
+    def __str__(self):
+        "Error adding edge from line {} to database. Check the encodings".format(self.args)
 
 
 def _get_namespace_insert_values(bel_resource):
@@ -845,6 +851,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         for url in graph.namespace_url.values():
             if url in graph.uncached_namespaces:
+                log.debug('not re-ensuring uncachable namespace: %s', url)
                 continue
 
             self.ensure_namespace(url)
@@ -879,20 +886,28 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.ensure_namespace(GOCC_LATEST)
 
         log.debug('storing graph parts: nodes')
+        t = time.time()
 
         for node in graph:
-            try:
-                node_object = self.get_or_create_node(graph, node)
-                self.node_model[node] = node_object
-            except:
-                continue
+            namespace = graph.node[node].get(NAMESPACE)
+
+            if namespace is not None and namespace in graph.uncached_namespaces:
+                continue  # already know this node won't be cached
 
             node_object = self.get_or_create_node(graph, node)
 
-        self.session.flush()
+            if node_object is None:
+                continue
 
+            self.node_model[node] = node_object
+
+            if node not in network.nodes:
+                network.nodes.append(node_object)
+
+        log.debug('stored nodes in %.2f', time.time() - t)
         log.debug('storing graph parts: edges')
-
+        t = time.time()
+        c = 0
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
             if u not in self.node_model:
                 log.debug('Skipping uncached node: %s', u)
@@ -906,7 +921,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 continue
 
             if data[RELATION] in UNQUALIFIED_EDGES:
-                self._add_unqualified_edge(network, graph, u, v, k, data)
+                try:
+                    self._add_unqualified_edge(network, graph, u, v, k, data)
+                except:
+                    self.session.rollback()
+                    raise EdgeAddError(data.get(LINE))
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -915,9 +934,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 continue
 
             else:
-                self._add_qualified_edge(network, graph, u, v, k, data)
+                try:
+                    self._add_qualified_edge(network, graph, u, v, k, data)
+                except:
+                    self.session.rollback()
+                    raise EdgeAddError(data.get(LINE))
 
-        self.session.flush()
+        log.debug('stored edges in %.2f', time.time() - t)
+        log.info('Skipped %d edges', c)
 
     @staticmethod
     def _map_annotations_dict(graph, data):
@@ -1059,15 +1083,22 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             pass
 
         elif node_data[NAMESPACE] in graph.namespace_url:
-            namespace = node_data[NAMESPACE]
-            url = graph.namespace_url[namespace]
-            node.namespace_entry = self.get_namespace_entry(url, node_data[NAME])
+            url = graph.namespace_url[node_data[NAMESPACE]]
+            name = node_data[NAME]
+            entry = self.get_namespace_entry(url, name)
+
+            if entry is None:
+                log.debug('skipping node with identifier %s: %s', url, name)
+                return
+
+            node.namespace_entry = entry
 
         elif node_data[NAMESPACE] in graph.namespace_pattern:
             node.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
 
         else:
-            raise ValueError("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))
+            log.warning("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))
+            return
 
         if VARIANTS in node_data or FUSION in node_data:
             node.is_variant = True
@@ -1120,6 +1151,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             bel=bel,
             sha512=edge_hash,
         )
+
         if evidence is not None:
             edge.evidence = evidence
         if properties is not None:
