@@ -347,6 +347,9 @@ class Annotation(Base):
 
         return result
 
+    def __str__(self):
+        return self.keyword
+
 
 class AnnotationEntry(Base):
     """Represents a value within a BEL Annotation"""
