@@ -80,8 +80,9 @@ def get_citations_by_pmids(pmids, group_size=200, sleep_time=1, return_errors=Fa
     errors = set()
     t = time.time()
 
-    for pmid_group_index, pmid_list in enumerate(grouper(group_size, unresolved_pmids)):
-        log.info('Getting group %d of %d PubMed identifiers', pmid_group_index, group_size)
+    for pmid_group_index, pmid_list in enumerate(grouper(group_size, unresolved_pmids), start=1):
+        pmid_list = list(pmid_list)
+        log.info('Getting group %d having %d PubMed identifiers', pmid_group_index, len(pmid_list))
         url = EUTILS_URL_FMT.format(','.join(pmid for pmid in pmid_list if pmid))
         response_raw = requests.get(url)
         response = response_raw.json()
