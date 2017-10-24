@@ -844,7 +844,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         t = time.time()
 
         for url in graph.namespace_url.values():
-            if url in graph.graph[GRAPH_UNCACHED_NAMESPACES]:
+            if url in graph.uncached_namespaces:
                 continue
 
             self.ensure_namespace(url)
