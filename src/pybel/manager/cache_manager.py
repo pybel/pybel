@@ -885,6 +885,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         """
         self.ensure_namespace(GOCC_LATEST)
 
+        log.info('inserting %s into edge store', graph)
         log.debug('storing graph parts: nodes')
         t = time.time()
 
