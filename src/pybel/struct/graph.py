@@ -75,6 +75,9 @@ class BELGraph(networkx.MultiDiGraph):
             if resource_dict not in self.graph:
                 self.graph[resource_dict] = {}
 
+        if GRAPH_UNCACHED_NAMESPACES not in self.graph:
+            self.graph[GRAPH_UNCACHED_NAMESPACES] = set()
+
     @property
     def document(self):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
@@ -137,6 +140,15 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: dict[str,str]
         """
         return self.graph[GRAPH_NAMESPACE_OWL]
+
+    @property
+    def uncached_namespaces(self):
+        """Returns a list of namespaces that are present in the graph, but cannot be cached due to their
+        corresponding resources' cachable flags being set to "no."
+
+        :rtype: set[str]
+        """
+        return self.graph[GRAPH_UNCACHED_NAMESPACES]
 
     @property
     def namespace_pattern(self):
