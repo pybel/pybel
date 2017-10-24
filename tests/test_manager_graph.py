@@ -476,7 +476,11 @@ class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_evidence(self):
         basic_citation = self.manager.get_or_create_citation(**test_citation_dict)
         utf8_test_evidence = "Yes, all the information is true! This contains a unicode alpha: α"
-        evidence_hash = hash_evidence(utf8_test_evidence, CITATION_TYPE_PUBMED, test_citation_dict[CITATION_REFERENCE])
+        evidence_hash = hash_evidence(
+            text=utf8_test_evidence,
+            type=CITATION_TYPE_PUBMED,
+            reference=test_citation_dict[CITATION_REFERENCE]
+        )
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
         self.assertIsInstance(evidence, Evidence)

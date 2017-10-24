@@ -40,7 +40,7 @@ class LookupManager(BaseManager):
         :param str reference: The identifier in the source (e.g., PubMed identifier)
         :rtype: Optional[Citation]
         """
-        citation_hash = hash_citation(type, reference)
+        citation_hash = hash_citation(type=type, reference=reference)
         return self.get_citation_by_hash(citation_hash)
 
     def get_citation_by_hash(self, citation_hash):

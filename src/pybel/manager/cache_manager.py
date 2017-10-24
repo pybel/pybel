@@ -1035,7 +1035,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param str text: Evidence text
         :rtype: Evidence
         """
-        evidence_hash = hash_evidence(text, citation.type, citation.reference)
+        evidence_hash = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
 
         if evidence_hash in self.object_cache_evidence:
             return self.object_cache_evidence[evidence_hash]
@@ -1184,7 +1184,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         type = type.strip()
         reference = reference.strip()
 
-        citation_hash = hash_citation(type, reference)
+        citation_hash = hash_citation(type=type, reference=reference)
 
         if citation_hash in self.object_cache_citation:
             return self.object_cache_citation[citation_hash]
@@ -1198,7 +1198,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         citation = Citation(
             type=type,
             reference=reference,
-            sha512=hash_citation(type, reference),
+            sha512=citation_hash,
             name=name,
             title=title,
             volume=volume,
