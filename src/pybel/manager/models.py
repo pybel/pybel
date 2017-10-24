@@ -499,7 +499,6 @@ class Node(Base):
     fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
 
     bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
-    blob = Column(LargeBinary)
 
     sha512 = Column(String(255), index=True)
 
@@ -860,8 +859,6 @@ class Edge(Base):
     annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic")  # , backref='edges'
     properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
     networks = relationship('Network', secondary=network_edge, lazy="dynamic")
-
-    blob = Column(LargeBinary)
 
     sha512 = Column(String(255), index=True)
 

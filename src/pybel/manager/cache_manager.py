@@ -987,7 +987,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             target=self.node_model[v],
             relation=data[RELATION],
             bel=bel,
-            blob=dumps(data),
             edge_hash=edge_hash,
             evidence=evidence,
             properties=properties,
@@ -1003,7 +1002,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             target=self.node_model[v],
             relation=data[RELATION],
             bel=bel,
-            blob=dumps(data),
             edge_hash=edge_hash,
         )
         network.edges.append(edge)
@@ -1048,7 +1046,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             return self.object_cache_node[node_hash]
 
         bel = node_to_bel(graph, node_identifier)
-        blob = dumps(graph.node[node_identifier])
         node_data = graph.node[node_identifier]
 
         node = self.get_node_by_hash(node_hash)
@@ -1059,7 +1056,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         type = node_data[FUNCTION]
 
-        node = Node(type=type, bel=bel, blob=blob, sha512=node_hash)
+        node = Node(type=type, bel=bel, sha512=node_hash)
 
         if NAMESPACE not in node_data:
             pass
@@ -1096,7 +1093,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             self.session.delete(edge)
         self.session.commit()
 
-    def get_or_create_edge(self, source, target, relation, bel, blob, edge_hash, evidence=None, annotations=None,
+    def get_or_create_edge(self, source, target, relation, bel, edge_hash, evidence=None, annotations=None,
                            properties=None):
         """Creates entry for given edge if it does not exist.
 
@@ -1104,7 +1101,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param Node target: Target node of the relation
         :param str relation: Type of the relation between source and target node
         :param str bel: BEL statement that describes the relation
-        :param bytes blob: A blob of the edge data object.
         :param str edge_hash: A hash of the edge
         :param Evidence evidence: Evidence object that proves the given relation
         :param list[Property] properties: List of all properties that belong to the edge
@@ -1125,7 +1121,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             target=target,
             relation=relation,
             bel=bel,
-            blob=blob,
             sha512=edge_hash,
         )
         if evidence is not None:
