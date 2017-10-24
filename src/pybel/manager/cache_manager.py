@@ -824,6 +824,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_node = {}
         self.object_cache_edge = {}
         self.object_cache_evidence = {}
+        self.object_cache_citation = {}
+        self.object_cache_author = {}
 
     def insert_graph(self, graph, store_parts=True):
         """Inserts a graph in the database.
@@ -1157,9 +1159,15 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         type = type.strip()
         reference = reference.strip()
 
-        citation = self.get_citation_by_reference(type, reference)
+        citation_hash = hash_citation(type, reference)
+
+        if citation_hash in self.object_cache_citation:
+            return self.object_cache_citation[citation_hash]
+
+        citation = self.get_citation_by_hash(citation_hash)
 
         if citation is not None:
+            self.object_cache_citation[citation_hash] = citation
             return citation
 
         citation = Citation(
@@ -1188,8 +1196,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     citation.authors.append(author_model)
 
         self.session.add(citation)
-
-        self.session.commit()
+        self.object_cache_citation[citation_hash] = citation
         return citation
 
     def get_or_create_author(self, name):
@@ -1200,13 +1207,18 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         """
         name = name.strip()
 
+        if name in self.object_cache_author:
+            return self.object_cache_author[name]
+
         author = self.get_author_by_name(name)
 
         if author is not None:
+            self.object_cache_author[name] = author
             return author
 
         author = Author(name=name)
         self.session.add(author)
+        self.object_cache_author[name] = author
         return author
 
     def get_or_create_modification(self, graph, node_data):
