@@ -4,10 +4,9 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import *
+from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids
 from pybel.manager.models import Citation
-from pybel.manager.citation_utils import get_citations_by_pmids
-from pybel_tools.mutation import enrich_pubmed_citations
-from pybel_tools.summary.provenance import get_pubmed_identifiers
+from pybel.summary.provenance import get_pubmed_identifiers
 from tests.constants import TemporaryCacheMixin
 
 
