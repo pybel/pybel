@@ -887,8 +887,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             except:
                 continue
 
-            if node_object not in network.nodes:  # FIXME when would the network ever have nodes in it already?
-                network.nodes.append(node_object)
+            node_object = self.get_or_create_node(graph, node)
 
         self.session.flush()
 
