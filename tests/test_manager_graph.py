@@ -3,12 +3,12 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 import time
 import unittest
-
-import os
-import sqlalchemy.exc
 from collections import Counter
+
+import sqlalchemy.exc
 
 import pybel
 from pybel import BELGraph, from_database, from_path, to_database
@@ -203,14 +203,18 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
     @mock_bel_resources
     def test_translocation(self, mock):
         """This test checks that a translocation gets in the database properly"""
-        graph = BELGraph(name='dummy', version='0.0.1')
-        u = (PROTEIN, 'HGNC', 'YFG')
-        v = (PROTEIN, 'HGNC', 'YFG2')
-        graph.add_simple_node(*u)
-        graph.add_simple_node(*v)
+        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
 
-        graph.add_edge(u, v, attr_dict={
-            SUBJECT: {
+        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
+        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+
+        graph.add_qualified_edge(
+            u,
+            v,
+            evidence='dummy text',
+            citation='1234',
+            relation=ASSOCIATION,
+            subject_modifier={
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
                     FROM_LOC: {
@@ -222,19 +226,10 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
                         NAME: 'extracellular space'
                     }
                 }
-            },
-            EVIDENCE: 'dummy text',
-            CITATION: {CITATION_TYPE: CITATION_TYPE_PUBMED, CITATION_REFERENCE: '1234'},
-            ANNOTATIONS: {},
-            RELATION: ASSOCIATION
-        })
+            }
+        )
 
-        hgnc_namespace = Namespace(keyword='HGNC', url='dummy url')
-        yfg = NamespaceEntry(name='YFG')
-        yfg2 = NamespaceEntry(name='YFG2')
-        hgnc_namespace.entries = [yfg, yfg2]
-        self.manager.session.add(hgnc_namespace)
-        self.manager.session.commit()
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
 
         self.manager.insert_graph(graph, store_parts=True)
 
