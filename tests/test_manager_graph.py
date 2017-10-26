@@ -6,6 +6,7 @@ import logging
 import os
 import time
 import unittest
+import sqlalchemy.exc
 
 import pybel
 from pybel import BELGraph, from_database, from_path, to_database
