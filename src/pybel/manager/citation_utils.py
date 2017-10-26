@@ -141,7 +141,9 @@ def get_citations_by_pmids(pmids, group_size=None, sleep_time=None, return_error
             if CITATION_DATE in result[pmid]:
                 citation.date = datetime.strptime(result[pmid][CITATION_DATE], '%Y-%m-%d')
 
-            manager.session.commit()  # commit in groups
+            manager.session.add(citation)
+
+        manager.session.commit()  # commit in groups
 
         # Don't want to hit that rate limit
         time.sleep(sleep_time)
