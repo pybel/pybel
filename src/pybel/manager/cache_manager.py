@@ -11,10 +11,10 @@ from __future__ import unicode_literals
 
 import logging
 import time
-from collections import defaultdict
-from copy import deepcopy
 from itertools import groupby
 
+from collections import defaultdict
+from copy import deepcopy
 from six import string_types
 from sqlalchemy import exists, func
 
@@ -45,7 +45,8 @@ class EdgeAddError(RuntimeError):
     """When there's a problem inserting an edge"""
 
     def __str__(self):
-        return "Error adding edge from line {} to database. Check the encodings".format(self.args)
+        return ("Error adding edge from line {} to database. Check this line in the file and make sure the citation, "
+                "evidence, and annotations all use valid UTF-8 characters".format(self.args[0]))
 
 
 def _get_namespace_insert_values(bel_resource):
@@ -917,7 +918,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_unqualified_edge(network, graph, u, v, k, data)
                 except:
                     self.session.rollback()
-                    raise EdgeAddError(data.get(LINE))
+                    raise EdgeAddError(data.get(LINE), data)
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -930,7 +931,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_qualified_edge(network, graph, u, v, k, data)
                 except:
                     self.session.rollback()
-                    raise EdgeAddError(data.get(LINE))
+                    raise EdgeAddError(data.get(LINE), data[EVIDENCE])
 
         log.debug('stored edges in %.2f', time.time() - t)
         log.info('Skipped %d edges', c)
