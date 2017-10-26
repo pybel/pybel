@@ -819,9 +819,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
     def __init__(self, *args, **kwargs):
         super(InsertManager, self).__init__(*args, **kwargs)
 
-        #: A dictionary that maps node tuples to their models
-        self.node_model = {}
-
         # A set of dictionaries that contains objects of the type described by the key
         self.object_cache_modification = {}
         self.object_cache_property = {}
@@ -896,25 +893,19 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 continue  # already know this node won't be cached
 
             node_object = self.get_or_create_node(graph, node)
-
-            if node_object is None:
-                continue
-
-            self.node_model[node] = node_object
-
-            if node not in network.nodes:
-                network.nodes.append(node_object)
+            network.nodes.append(node_object)
 
         log.debug('stored nodes in %.2f', time.time() - t)
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
-            if u not in self.node_model:
+
+            if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue
 
-            if v not in self.node_model:
+            if hash_node(v) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', v)
                 continue
 
@@ -1005,8 +996,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         bel = edge_to_bel(graph, u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
-            source=self.node_model[u],
-            target=self.node_model[v],
+            source=self.object_cache_node[hash_node(u)],
+            target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
             edge_hash=edge_hash,
@@ -1020,8 +1011,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         bel = edge_to_bel(graph, u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
-            source=self.node_model[u],
-            target=self.node_model[v],
+            source=self.object_cache_node[hash_node(u)],
+            target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
             edge_hash=edge_hash,
