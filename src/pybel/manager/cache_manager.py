@@ -1029,7 +1029,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         evidence_hash = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
 
         if evidence_hash in self.object_cache_evidence:
-            return self.object_cache_evidence[evidence_hash]
+            evidence = self.object_cache_evidence[evidence_hash]
+            self.session.add(evidence)
+            return evidence
 
         evidence = self.get_evidence_by_hash(evidence_hash)
 
@@ -1128,7 +1130,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :rtype: Edge
         """
         if edge_hash in self.object_cache_edge:
-            return self.object_cache_edge[edge_hash]
+            edge = self.object_cache_edge[edge_hash]
+            self.session.add(edge)
+            return edge
 
         edge = self.get_edge_by_hash(edge_hash)
 
@@ -1178,7 +1182,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         citation_hash = hash_citation(type=type, reference=reference)
 
         if citation_hash in self.object_cache_citation:
-            return self.object_cache_citation[citation_hash]
+            citation = self.object_cache_citation[citation_hash]
+            self.session.add(citation)
+            return citation
 
         citation = self.get_citation_by_hash(citation_hash)
 
@@ -1224,7 +1230,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         name = name.strip()
 
         if name in self.object_cache_author:
-            return self.object_cache_author[name]
+            author = self.object_cache_author[name]
+            self.session.add(author)
+            return author
 
         author = self.get_author_by_name(name)
 
