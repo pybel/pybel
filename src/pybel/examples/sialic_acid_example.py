@@ -49,7 +49,9 @@ proteins, possibly including TREM2/DAP12 (Fig. 1, [70, 71]).
 sialic_acid_graph = BELGraph(
     name='Sialic Acid Graph',
     version='1.0.0',
-    description="The downstream effects of sialic acid in immune signaling"
+    description="The downstream effects of sialic acid in immune signaling",
+    authors='Charles Tapley Hoyt',
+    contact='charles.hoyt@scai.fraunhofer.de',
 )
 
 sialic_acid_graph.namespace_url.update({

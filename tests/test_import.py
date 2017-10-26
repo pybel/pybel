@@ -15,6 +15,7 @@ from pybel import (
 )
 from pybel.constants import *
 from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_fmt
+from pybel.io.ndex_utils import NDEX_PASSWORD, NDEX_USERNAME
 from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.summary import get_syntax_errors
@@ -140,6 +141,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
 
+    @unittest.skipUnless(NDEX_USERNAME in os.environ and NDEX_PASSWORD in os.environ, 'Need NDEx credentials')
     def test_thorough_ndex(self):
         """Tests that a document can be uploaded and downloaded. Sleeps in the middle so that NDEx can process"""
         network_id = to_ndex(self.thorough_graph)

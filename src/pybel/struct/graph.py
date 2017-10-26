@@ -4,10 +4,11 @@ import logging
 
 import networkx
 from copy import deepcopy
+from six import string_types
 
-from .operations import left_full_join, left_outer_join, left_node_intersection_join
+from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..constants import *
-from ..parser.canonicalize import add_node_from_data
+from ..parser.canonicalize import po_to_tuple
 from ..utils import get_version
 
 __all__ = [
@@ -32,7 +33,7 @@ class BELGraph(networkx.MultiDiGraph):
     :class:`networkx.MultiDiGraph`.
     """
 
-    def __init__(self, name=None, version=None, description=None, data=None, **kwargs):
+    def __init__(self, name=None, version=None, description=None, authors=None, contact=None, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
 
@@ -40,6 +41,8 @@ class BELGraph(networkx.MultiDiGraph):
         :param str version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
                             ``YYYYMMDD`` format.
         :param str description: A description of the graph
+        :param str authors: The authors of this graph
+        :param str contact: The contact email for this graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         """
@@ -59,12 +62,21 @@ class BELGraph(networkx.MultiDiGraph):
         if description:
             self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
 
+        if authors:
+            self.graph[GRAPH_METADATA][METADATA_AUTHORS] = authors
+
+        if contact:
+            self.graph[GRAPH_METADATA][METADATA_CONTACT] = contact
+
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
 
         for resource_dict in RESOURCE_DICTIONARY_NAMES:
             if resource_dict not in self.graph:
                 self.graph[resource_dict] = {}
+
+        if GRAPH_UNCACHED_NAMESPACES not in self.graph:
+            self.graph[GRAPH_UNCACHED_NAMESPACES] = set()
 
     @property
     def document(self):
@@ -128,6 +140,15 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: dict[str,str]
         """
         return self.graph[GRAPH_NAMESPACE_OWL]
+
+    @property
+    def uncached_namespaces(self):
+        """Returns a list of namespaces that are present in the graph, but cannot be cached due to their
+        corresponding resources' cachable flags being set to "no."
+
+        :rtype: set[str]
+        """
+        return self.graph[GRAPH_UNCACHED_NAMESPACES]
 
     @property
     def namespace_pattern(self):
@@ -206,16 +227,41 @@ class BELGraph(networkx.MultiDiGraph):
         """
         key = unqualified_edge_code[relation]
         if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **{RELATION: relation, ANNOTATIONS: {}})  # TODO make annotations optional?
+            self.add_edge(u, v, key=key, **{RELATION: relation})
 
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
         :param dict attr_dict: A PyBEL node data dictionary
-        :return: The PyBEL node tuple representing this node
+        :return: A PyBEL node tuple
         :rtype: tuple
         """
-        return add_node_from_data(self, attr_dict)
+        node_tuple = po_to_tuple(attr_dict)
+
+        if node_tuple in self:
+            return node_tuple
+
+        self.add_node(node_tuple, attr_dict=attr_dict)
+
+        if VARIANTS in attr_dict:
+            parent_node_tuple = self.add_simple_node(attr_dict[FUNCTION], attr_dict[NAMESPACE], attr_dict[NAME])
+            self.add_unqualified_edge(parent_node_tuple, node_tuple, HAS_VARIANT)
+
+        elif MEMBERS in attr_dict:
+            for member in attr_dict[MEMBERS]:
+                member_node_tuple = self.add_node_from_data(member)
+                self.add_unqualified_edge(node_tuple, member_node_tuple, HAS_COMPONENT)
+
+        elif PRODUCTS in attr_dict and REACTANTS in attr_dict:
+            for reactant_tokens in attr_dict[REACTANTS]:
+                reactant_node_tuple = self.add_node_from_data(reactant_tokens)
+                self.add_unqualified_edge(node_tuple, reactant_node_tuple, HAS_REACTANT)
+
+            for product_tokens in attr_dict[PRODUCTS]:
+                product_node_tuple = self.add_node_from_data(product_tokens)
+                self.add_unqualified_edge(node_tuple, product_node_tuple, HAS_PRODUCT)
+
+        return node_tuple
 
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
@@ -241,7 +287,8 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
         :param str relation: The type of relation this edge represents
         :param str evidence: The evidence string from an article
-        :param dict[str,str] citation: The citation data dictionary for this evidence
+        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
+                                                assumes it's a PubMed identifier and autofills the citation type.
         :param dict[str,str] annotations: The annotations data dictionary
         :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
         :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
@@ -249,9 +296,17 @@ class BELGraph(networkx.MultiDiGraph):
         attr.update({
             RELATION: relation,
             EVIDENCE: evidence,
-            CITATION: citation,
-
         })
+
+        if isinstance(citation, string_types):
+            attr[CITATION] = {
+                CITATION_TYPE: CITATION_TYPE_PUBMED,
+                CITATION_REFERENCE: citation
+            }
+        elif isinstance(citation, dict):
+            attr[CITATION] = citation
+        else:
+            raise TypeError
 
         if annotations:
             attr[ANNOTATIONS] = annotations

@@ -7,14 +7,13 @@ This module supports the relation parser by handling statements.
 """
 
 import logging
-
 import re
-from pyparsing import Suppress, And, Word, Optional, MatchFirst
-from pyparsing import pyparsing_common as ppc
+
+from pyparsing import And, MatchFirst, Optional, Suppress, Word, pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .parse_exceptions import *
-from .utils import word, quote, delimited_quoted_list, qid
+from .utils import delimited_quoted_list, qid, quote, word
 from ..constants import *
 from ..utils import valid_date_version
 
@@ -74,6 +73,9 @@ class MetadataParser(BaseParser):
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         #: A dictionary of {annotation keyword: regular expression string}
         self.annotations_regex = {} if annotations_regex is None else annotations_regex
+
+        #: A set of namespaces that can't be cached
+        self.uncachable_namespaces = set()
 
         #: A dictionary containing the document metadata
         self.document_metadata = {}
@@ -177,7 +179,15 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_namespace(line, position, namespace)
 
         url = tokens['url']
-        self.namespace_dict[namespace] = self.manager.get_namespace_encodings(url)
+
+        namespace_result = self.manager.ensure_namespace(url)
+
+        if isinstance(namespace_result, dict):
+            self.namespace_dict[namespace] = namespace_result
+            self.uncachable_namespaces.add(url)
+        else:
+            self.namespace_dict[namespace] = namespace_result.to_values()
+
         self.namespace_url_dict[namespace] = url
 
         return tokens
