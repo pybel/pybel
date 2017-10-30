@@ -17,7 +17,6 @@ from collections import defaultdict
 from copy import deepcopy
 from six import string_types
 from sqlalchemy import and_, exists, func
-from sqlalchemy.orm.exc import MultipleResultsFound
 
 from .base_manager import BaseManager
 from .lookup_manager import LookupManager
@@ -270,11 +269,15 @@ class NamespaceManager(BaseManager):
 
         entry_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
 
-        try:
-            return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
-        except MultipleResultsFound as e:
-            log.exception('URL: %s, name: %s', url, name)
-            raise e
+        result = self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).all()
+
+        if 0 == len(result):
+            return
+
+        if 1 < len(result):
+            log.warning('result for get_namespace_entry is too long. Returning first of %s', result)
+
+        return result[0]
 
 
 class OwlNamespaceManager(NamespaceManager):
