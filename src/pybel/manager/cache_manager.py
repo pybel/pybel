@@ -17,6 +17,7 @@ from collections import defaultdict
 from copy import deepcopy
 from six import string_types
 from sqlalchemy import and_, exists, func
+from sqlalchemy.orm.exc import MultipleResultsFound
 
 from .base_manager import BaseManager
 from .lookup_manager import LookupManager
@@ -269,7 +270,11 @@ class NamespaceManager(BaseManager):
 
         entry_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
 
-        return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
+        try:
+            return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
+        except MultipleResultsFound as e:
+            log.exception('URL: %s, name: %s')
+            raise e
 
 
 class OwlNamespaceManager(NamespaceManager):
