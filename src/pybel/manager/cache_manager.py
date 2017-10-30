@@ -1082,12 +1082,12 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             url = graph.namespace_url[node_data[NAMESPACE]]
             name = node_data[NAME]
             entry = self.get_namespace_entry(url, name)
-            self.session.add(entry)
 
             if entry is None:
                 log.debug('skipping node with identifier %s: %s', url, name)
                 return
 
+            self.session.add(entry)
             node.namespace_entry = entry
 
         elif node_data[NAMESPACE] in graph.namespace_pattern:
