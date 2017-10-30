@@ -16,7 +16,7 @@ from itertools import groupby
 from collections import defaultdict
 from copy import deepcopy
 from six import string_types
-from sqlalchemy import exists, func
+from sqlalchemy import and_, exists, func
 
 from .base_manager import BaseManager
 from .lookup_manager import LookupManager
@@ -267,8 +267,9 @@ class NamespaceManager(BaseManager):
         if self.namespace_object_cache and url in self.namespace_object_cache:
             return self.namespace_object_cache[url][name]
 
-        return self.session.query(NamespaceEntry).join(Namespace).filter(Namespace.url == url,
-                                                                         NamespaceEntry.name == name).one_or_none()
+        entry_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
+
+        return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
 
 
 class OwlNamespaceManager(NamespaceManager):
