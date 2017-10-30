@@ -273,7 +273,7 @@ class NamespaceManager(BaseManager):
         try:
             return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
         except MultipleResultsFound as e:
-            log.exception('URL: %s, name: %s')
+            log.exception('URL: %s, name: %s', url, name)
             raise e
 
 
