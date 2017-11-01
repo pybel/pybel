@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
+import tempfile
 import unittest
 from json import dumps
 
-import os
-import tempfile
 from requests.compat import urlparse
 
 from pybel import BELGraph
@@ -25,6 +25,7 @@ belanno_dir_path = os.path.join(dir_path, 'belanno')
 beleq_dir_path = os.path.join(dir_path, 'beleq')
 
 test_bel_simple = os.path.join(bel_dir_path, 'test_bel.bel')
+test_bel_simple_b = os.path.join(bel_dir_path, 'test_bel_b.bel')
 test_bel_extensions = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')

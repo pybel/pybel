@@ -156,7 +156,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_upgrade(self):
         lines = to_bel_lines(self.thorough_graph)
         reconstituted = from_lines(lines, manager=self.manager)
-        self.bel_thorough_reconstituted(reconstituted)
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
 
     def test_slushy(self):
         self.bel_slushy_reconstituted(self.slushy_graph)

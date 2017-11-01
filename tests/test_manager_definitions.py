@@ -1,20 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import os
 from pathlib import Path
 
-import os
-
-from pybel.manager import Manager
-from pybel.manager import models
+from pybel.manager import Manager, models
 from tests.constants import (
-    FleetingTemporaryCacheMixin,
-    HGNC_URL,
-    CELL_LINE_URL,
-    test_eq_1,
-    test_eq_2,
-    belns_dir_path,
-    test_ns_nocache,
-    wine_iri
+    CELL_LINE_URL, FleetingTemporaryCacheMixin, HGNC_URL, belns_dir_path, test_eq_1, test_eq_2,
+    test_ns_nocache, wine_iri,
 )
 from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_xml
 

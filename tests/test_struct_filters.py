@@ -4,12 +4,8 @@ import unittest
 
 from pybel import BELGraph
 from pybel.struct.filters import (
-    keep_node_permissive,
-    filter_edges,
-    keep_edge_permissive,
-    get_nodes,
-    count_passed_node_filter,
-    count_passed_edge_filter,
+    count_passed_edge_filter, count_passed_node_filter, filter_edges, get_nodes,
+    keep_edge_permissive, keep_node_permissive,
 )
 
 

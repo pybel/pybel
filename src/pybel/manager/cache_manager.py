@@ -727,14 +727,69 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param int network_id: The network's database identifier
         """
         network = self.session.query(Network).get(network_id)
+        edges = network.edges.all()
         self.session.delete(network)
+        self.session.flush()
+
+        if edges:
+            self._drop_edges(edges)
+
         self.session.commit()
+
+    def _drop_edges(self, edge_list=None):
+        """Helper to drop orphan edges.
+
+        :param list edge_list: List of edge objects that should be checked for orphanity.
+        """
+
+        properties = []
+        evidences = []
+        edges = (edge_list or self.session.query(Edge).all())
+
+        for edge in edges:
+            if not edge.networks.all():
+                if edge_list:
+                    if edge.properties.all():
+                        properties = list(set(properties + edge.properties.all()))
+                    if edge.evidence and edge.evidence not in evidences:
+                        evidences.append(edge.evidence)
+
+                self.session.delete(edge)
+        self.session.flush()
+
+        if evidences or not edge_list:
+            self._drop_evidences(evidences)
+        if properties or not edge_list:
+            self._drop_properties(properties)
+
+    def _drop_properties(self, property_list=None):
+        """Helper to drop orphan properties.
+
+        :param list property_list: List of property objects that should be checked for orphanity.
+        """
+        properties = (property_list or self.session.query(Property).all())
+        for property in properties:
+            if not property.edges.all() or not property_list:
+                self.session.delete(property)
+
+    def _drop_evidences(self, evidence_list=None):
+        """Helper to drop orphan evidences.
+
+        :param list evidence_list: List of evidence objects that should be checked for orphanity.
+        """
+        evidences = (evidence_list or self.session.query(Evidence).all())
+        for evidence in evidences:
+            if not evidence.edges.all() or not evidence_list:
+                self.session.delete(evidence)
 
     def drop_networks(self):
         """Drops all networks"""
         for network in self.session.query(Network).all():
             self.session.delete(network)
-            self.session.commit()
+            self.session.flush()
+
+        self._drop_edges()
+        self.session.commit()
 
     def get_network_versions(self, name):
         """Returns all of the versions of a network with the given name
@@ -863,6 +918,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             self.ensure_namespace(url)
 
+        if GOCC_LATEST not in graph.namespace_url.values():
+            self.ensure_namespace(GOCC_LATEST)
+
         for url in graph.annotation_url.values():
             self.ensure_annotation(url)
 
@@ -890,7 +948,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
         """
-        self.ensure_namespace(GOCC_LATEST)
 
         log.info('inserting %s into edge store', graph)
         log.debug('storing graph parts: nodes')
@@ -1409,6 +1466,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
                 property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url,
                                                                            participant_data[LOCATION][NAME])
+
                 property_list.append(property_dict)
 
             else:
