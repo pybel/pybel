@@ -55,6 +55,19 @@ class TestCitations(TemporaryCacheMixin):
         citation = self.manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference='25818332')
         self.assertIsNotNone(citation)
 
+    def test_enrich_list_grouped(self):
+        pmids = [
+            '25818332',
+            '27003210',
+            '26438529',
+            '26649137',
+        ]
+
+        get_citations_by_pmids(pmids, manager=self.manager, group_size=2)
+
+        citation = self.manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference='25818332')
+        self.assertIsNotNone(citation)
+
     def test_enrich_overwrite(self):
         citation = self.manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference=self.pmid)
         self.manager.session.commit()

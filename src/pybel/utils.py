@@ -303,14 +303,14 @@ def parse_datetime(s):
                 raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
-def hash_node(node):
+def hash_node(node_tuple):
     """Converts a PyBEL node tuple to a hash
 
-    :param tuple node: A BEL node
+    :param tuple node_tuple: A BEL node
     :return: A hashed version of the node tuple using md5 hash of the binary pickle dump
     :rtype: str
     """
-    return hashlib.sha512(pickle.dumps(node)).hexdigest()
+    return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
 
 
 def extract_pybel_data(data):

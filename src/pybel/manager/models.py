@@ -226,7 +226,7 @@ class NamespaceEntry(Base):
     name = Column(Text, nullable=False, doc='Name that is defined in the corresponding namespace definition file')
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
-    namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), index=True)
+    namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), nullable=False, index=True)
     namespace = relationship('Namespace', backref=backref('entries', lazy='dynamic'))
 
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)

@@ -11,12 +11,12 @@ from __future__ import unicode_literals
 
 import logging
 import time
-from collections import defaultdict
-from copy import deepcopy
 from itertools import groupby
 
+from collections import defaultdict
+from copy import deepcopy
 from six import string_types
-from sqlalchemy import exists, func
+from sqlalchemy import and_, exists, func
 
 from .base_manager import BaseManager
 from .lookup_manager import LookupManager
@@ -45,7 +45,8 @@ class EdgeAddError(RuntimeError):
     """When there's a problem inserting an edge"""
 
     def __str__(self):
-        return "Error adding edge from line {} to database. Check the encodings".format(self.args)
+        return ("Error adding edge from line {} to database. Check this line in the file and make sure the citation, "
+                "evidence, and annotations all use valid UTF-8 characters".format(self.args[0]))
 
 
 def _get_namespace_insert_values(bel_resource):
@@ -266,8 +267,17 @@ class NamespaceManager(BaseManager):
         if self.namespace_object_cache and url in self.namespace_object_cache:
             return self.namespace_object_cache[url][name]
 
-        return self.session.query(NamespaceEntry).join(Namespace).filter(Namespace.url == url,
-                                                                         NamespaceEntry.name == name).one_or_none()
+        entry_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
+
+        result = self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).all()
+
+        if 0 == len(result):
+            return
+
+        if 1 < len(result):
+            log.warning('result for get_namespace_entry is too long. Returning first of %s', result)
+
+        return result[0]
 
 
 class OwlNamespaceManager(NamespaceManager):
@@ -874,9 +884,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
     def __init__(self, *args, **kwargs):
         super(InsertManager, self).__init__(*args, **kwargs)
 
-        #: A dictionary that maps node tuples to their models
-        self.node_model = {}
-
         # A set of dictionaries that contains objects of the type described by the key
         self.object_cache_modification = {}
         self.object_cache_property = {}
@@ -953,25 +960,19 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 continue  # already know this node won't be cached
 
             node_object = self.get_or_create_node(graph, node)
-
-            if node_object is None:
-                continue
-
-            self.node_model[node] = node_object
-
-            if node not in network.nodes:
-                network.nodes.append(node_object)
+            network.nodes.append(node_object)
 
         log.debug('stored nodes in %.2f', time.time() - t)
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
         for u, v, k, data in graph.edges_iter(data=True, keys=True):
-            if u not in self.node_model:
+
+            if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue
 
-            if v not in self.node_model:
+            if hash_node(v) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', v)
                 continue
 
@@ -983,7 +984,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_unqualified_edge(network, graph, u, v, k, data)
                 except:
                     self.session.rollback()
-                    raise EdgeAddError(data.get(LINE))
+                    raise EdgeAddError(data.get(LINE), data)
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -996,7 +997,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_qualified_edge(network, graph, u, v, k, data)
                 except:
                     self.session.rollback()
-                    raise EdgeAddError(data.get(LINE))
+                    raise EdgeAddError(data.get(LINE), data[EVIDENCE])
 
         log.debug('stored edges in %.2f', time.time() - t)
         log.info('Skipped %d edges', c)
@@ -1062,8 +1063,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         bel = edge_to_bel(graph, u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
-            source=self.node_model[u],
-            target=self.node_model[v],
+            source=self.object_cache_node[hash_node(u)],
+            target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
             edge_hash=edge_hash,
@@ -1077,8 +1078,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         bel = edge_to_bel(graph, u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
-            source=self.node_model[u],
-            target=self.node_model[v],
+            source=self.object_cache_node[hash_node(u)],
+            target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
             edge_hash=edge_hash,
@@ -1095,7 +1096,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         evidence_hash = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
 
         if evidence_hash in self.object_cache_evidence:
-            return self.object_cache_evidence[evidence_hash]
+            evidence = self.object_cache_evidence[evidence_hash]
+            self.session.add(evidence)
+            return evidence
 
         evidence = self.get_evidence_by_hash(evidence_hash)
 
@@ -1149,6 +1152,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 log.debug('skipping node with identifier %s: %s', url, name)
                 return
 
+            self.session.add(entry)
             node.namespace_entry = entry
 
         elif node_data[NAMESPACE] in graph.namespace_pattern:
@@ -1194,7 +1198,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :rtype: Edge
         """
         if edge_hash in self.object_cache_edge:
-            return self.object_cache_edge[edge_hash]
+            edge = self.object_cache_edge[edge_hash]
+            self.session.add(edge)
+            return edge
 
         edge = self.get_edge_by_hash(edge_hash)
 
@@ -1244,7 +1250,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         citation_hash = hash_citation(type=type, reference=reference)
 
         if citation_hash in self.object_cache_citation:
-            return self.object_cache_citation[citation_hash]
+            citation = self.object_cache_citation[citation_hash]
+            self.session.add(citation)
+            return citation
 
         citation = self.get_citation_by_hash(citation_hash)
 
@@ -1290,7 +1298,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         name = name.strip()
 
         if name in self.object_cache_author:
-            return self.object_cache_author[name]
+            author = self.object_cache_author[name]
+            self.session.add(author)
+            return author
 
         author = self.get_author_by_name(name)
 
