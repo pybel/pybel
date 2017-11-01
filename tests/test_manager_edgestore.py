@@ -1,54 +1,33 @@
-import os
-import tempfile
+# -*- coding: utf-8 -*-
+
 from collections import Counter
 
 import pybel
 from pybel.constants import *
-from pybel.manager import models, Manager
+from pybel.manager import models
 from pybel.utils import hash_dump
 from tests import constants
 from tests.constants import (
-    BelReconstitutionMixin,
-    test_bel_simple,
-    test_bel_simple_b,
-    expected_test_simple_metadata,
+    BelReconstitutionMixin, TemporaryCacheClsMixin, TemporaryCacheMixin,
+    expected_test_simple_metadata, test_bel_simple, test_bel_simple_b,
 )
 from tests.mocks import mock_bel_resources
 
 
-class TestEdgeStore(BelReconstitutionMixin):
+class TestEdgeStore(BelReconstitutionMixin, TemporaryCacheClsMixin):
     """Tests that the cache can be queried"""
 
-    def setUp(self):
-        self.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
+    @classmethod
+    def setUpClass(cls):
+        super(TestEdgeStore, cls).setUpClass()
 
-        if self.test_connection:
-            self.connection = self.test_connection
-        else:
-            self.fd, self.path = tempfile.mkstemp()
-            self.connection = 'sqlite:///' + self.path
+        @mock_bel_resources
+        def setup_graph_and_network(mock_get):
+            graph = pybel.from_path(path=test_bel_simple, manager=cls.manager, allow_nested=True)
+            network = cls.manager.insert_graph(graph)
+            return graph, network
 
-        log.info('Test generated connection string %s', self.connection)
-
-        self.manager = Manager(connection=self.connection)
-        self.manager.create_all()
-
-        self.setup_graph_and_network()
-
-    def tearDown(self):
-        # Commiting the session to close the reading transaction (metadata lock)
-        self.manager.session.commit()
-        self.manager.drop_all()
-        self.manager.session.close()
-
-        if not self.test_connection:
-            os.close(self.fd)
-            os.remove(self.path)
-
-    @mock_bel_resources
-    def setup_graph_and_network(self, mock_get):
-        self.graph = pybel.from_path(path=test_bel_simple, manager=self.manager, allow_nested=True)
-        self.network = self.manager.insert_graph(self.graph)
+        cls.graph, cls.network = setup_graph_and_network()
 
     def test_citations(self):
         citations = self.manager.session.query(models.Citation).all()
@@ -58,14 +37,14 @@ class TestEdgeStore(BelReconstitutionMixin):
         self.assertEqual(citation_references, {
             citation.reference
             for citation in citations
-            })
+        })
 
     def test_authors(self):
         authors = {'Example Author', 'Example Author2'}
         self.assertEqual(authors, {
             author.name
             for author in self.manager.session.query(models.Author).all()
-            })
+        })
 
     def test_evidences(self):
         evidences = self.manager.session.query(models.Evidence).all()
@@ -75,7 +54,7 @@ class TestEdgeStore(BelReconstitutionMixin):
         self.assertEqual(evidences_texts, {
             evidence.text
             for evidence in evidences
-            })
+        })
 
     def test_nodes(self):
         nodes = self.manager.session.query(models.Node).all()
@@ -492,44 +471,22 @@ class TestEdgeStore(BelReconstitutionMixin):
         self.assertEqual(8, len(self.manager.object_cache_modification.keys()))
 
 
-class TestDeletionCascade(BelReconstitutionMixin):
+class TestDeletionCascade(BelReconstitutionMixin, TemporaryCacheMixin):
     def setUp(self):
-        self.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
+        super(TestDeletionCascade, self).setUp()
 
-        if self.test_connection:
-            self.connection = self.test_connection
-        else:
-            self.fd, self.path = tempfile.mkstemp()
-            self.connection = 'sqlite:///' + self.path
+        @mock_bel_resources
+        def setup_graphs_and_networks(mock_get):
+            graph_a = pybel.from_path(path=test_bel_simple, manager=self.manager, allow_nested=True)
+            graph_b = pybel.from_path(path=test_bel_simple_b, manager=self.manager, allow_nested=True)
+            network_a = self.manager.insert_graph(graph_a)
+            network_b = self.manager.insert_graph(graph_b)
+            return graph_a, graph_b, network_a, network_b
 
-        log.info('Test generated connection string %s', self.connection)
-
-        self.manager = Manager(connection=self.connection)
-        self.manager.create_all()
-
-        self.setup_graphs_and_networks()
-
+        self.graph_a, self.graph_b, self.network_a, self.network_b = setup_graphs_and_networks()
         self.network_list = self.manager.list_networks()
 
-    def tearDown(self):
-        # Commiting the session to close the reading transaction (metadata lock)
-        self.manager.session.commit()
-        self.manager.drop_all()
-        self.manager.session.close()
-
-        if not self.test_connection:
-            os.close(self.fd)
-            os.remove(self.path)
-
-    @mock_bel_resources
-    def setup_graphs_and_networks(self, mock_get):
-        self.graph_a = pybel.from_path(path=test_bel_simple, manager=self.manager, allow_nested=True)
-        self.graph_b = pybel.from_path(path=test_bel_simple_b, manager=self.manager, allow_nested=True)
-        self.network_a = self.manager.insert_graph(self.graph_a)
-        self.network_b = self.manager.insert_graph(self.graph_b)
-
     def test_cascade_deletion_setup(self):
-
         # 1. Check how many networks are present
         self.assertEqual(2, self.manager.count_networks())
         self.assertIn(self.network_a, self.network_list)
