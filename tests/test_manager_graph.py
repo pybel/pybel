@@ -6,6 +6,7 @@ import logging
 import os
 import time
 import unittest
+
 import sqlalchemy.exc
 
 import pybel
@@ -15,10 +16,9 @@ from pybel.dsl import protein as dsl_protein
 from pybel.manager import models
 from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
 from pybel.utils import hash_citation, hash_evidence, hash_node
-from tests import constants
 from tests.constants import (
-    BelReconstitutionMixin, FleetingTemporaryCacheMixin, TemporaryCacheClsMixin,
-    TemporaryCacheMixin, expected_test_simple_metadata, expected_test_thorough_metadata, test_bel_simple,
+    BelReconstitutionMixin, FleetingTemporaryCacheMixin, TemporaryCacheMixin, expected_test_thorough_metadata,
+    test_bel_simple,
     test_bel_thorough, test_citation_dict, test_evidence_text,
 )
 from tests.mocks import mock_bel_resources

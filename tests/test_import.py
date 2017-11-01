@@ -8,6 +8,8 @@ import unittest
 from pathlib import Path
 
 import networkx as nx
+from six import BytesIO, StringIO
+
 from pybel import (
     BELGraph, from_bytes, from_cx, from_cx_jsons, from_json, from_json_file, from_jsons, from_lines,
     from_ndex, from_path, from_pickle, from_url, to_bel_lines, to_bytes, to_cx, to_cx_jsons, to_graphml, to_json,
@@ -20,7 +22,6 @@ from pybel.parser import BelParser
 from pybel.parser.parse_exceptions import *
 from pybel.summary import get_syntax_errors
 from pybel.utils import hash_node
-from six import BytesIO, StringIO
 from tests.constants import (
     AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin,
     TestTokenParserBase, citation_1, evidence_1, test_bel_isolated, test_bel_misordered, test_bel_simple,
