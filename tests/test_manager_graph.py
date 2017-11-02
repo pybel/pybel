@@ -7,6 +7,7 @@ import os
 import time
 import unittest
 from collections import Counter
+from uuid import uuid4
 
 import sqlalchemy.exc
 
@@ -1536,6 +1537,125 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     def test_nested_complex(self, mock):
         namespaces = {'HGNC': ['FOS', 'JUN', 'E2F4']}
         self.help_reconstitute(bound_ap1_e2f4_tuple, bound_ap1_e2f4_data, namespaces, 5, 4)
+
+
+class TestNoAddNode(TemporaryCacheMixin):
+    def test_no_node_name(self):
+        """Test that a node whose namespace is in the uncached namespaces set can't be added"""
+        node_data = {
+            FUNCTION: PROTEIN,
+            NAMESPACE: 'nope',
+            NAME: 'nope'
+        }
+
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+        graph.add_node_from_data(node_data)
+
+        network = self.manager.insert_graph(graph)
+        self.assertEqual(0, len(network.nodes.all()))
+
+    def test_no_node_fusion_3p(self):
+        """Test that a node whose namespace is in the uncached namespaces set can't be added"""
+        node_data = {
+            FUNCTION: PROTEIN,
+            FUSION: {
+                PARTNER_3P: {
+                    NAMESPACE: 'nope',
+                    NAME: 'AKT1',
+                },
+                RANGE_3P: {
+                    FUSION_MISSING: '?',
+                },
+                PARTNER_5P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'YFG'
+                },
+                RANGE_5P: {
+                    FUSION_MISSING: '?',
+                }
+            }
+        }
+
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+        graph.add_node_from_data(node_data)
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        network = self.manager.insert_graph(graph)
+        self.assertEqual(0, len(network.nodes.all()))
+
+    def test_no_node_fusion_5p(self):
+        """Test that a node whose namespace is in the uncached namespaces set can't be added"""
+        node_data = {
+            FUNCTION: PROTEIN,
+            FUSION: {
+                PARTNER_3P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'YFG',
+                },
+                RANGE_3P: {
+                    FUSION_MISSING: '?',
+                },
+                PARTNER_5P: {
+                    NAMESPACE: 'nope',
+                    NAME: 'YFG'
+                },
+                RANGE_5P: {
+                    FUSION_MISSING: '?',
+                }
+            }
+        }
+
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+        graph.add_node_from_data(node_data)
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        network = self.manager.insert_graph(graph)
+        self.assertEqual(0, len(network.nodes.all()))
+
+    def test_no_translocation(self):
+        """This test checks that a translocation using custom namespaces doesn't get stored"""
+        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
+        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+
+        graph.add_qualified_edge(
+            u,
+            v,
+            evidence='dummy text',
+            citation='1234',
+            relation=ASSOCIATION,
+            subject_modifier={
+                MODIFIER: TRANSLOCATION,
+                EFFECT: {
+                    FROM_LOC: {
+                        NAMESPACE: 'nope',
+                        NAME: 'intracellular'
+                    },
+                    TO_LOC: {
+                        NAMESPACE: 'GOCC',
+                        NAME: 'extracellular space'
+                    }
+                }
+            }
+        )
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['extracellular space']})
+
+        network = self.manager.insert_graph(graph, store_parts=True)
+
+        self.assertEqual(2, len(network.nodes.all()))
+        self.assertEqual(0, len(network.edges.all()))
 
 
 if __name__ == '__main__':

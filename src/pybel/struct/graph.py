@@ -143,7 +143,7 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def uncached_namespaces(self):
-        """Returns a list of namespaces that are present in the graph, but cannot be cached due to their
+        """Returns a list of namespaces's URLs that are present in the graph, but cannot be cached due to their
         corresponding resources' cachable flags being set to "no."
 
         :rtype: set[str]
@@ -213,6 +213,18 @@ class BELGraph(networkx.MultiDiGraph):
     def __str__(self):
         """Stringifies this graph as its name and version pair"""
         return '{} v{}'.format(self.name, self.version)
+
+    def skip_storing_namespace(self, namespace):
+        """Checks if the namespace should be skipped
+
+        :param Optional[str] namespace:
+        :rtype: bool
+        """
+        return (
+            namespace is not None and
+            namespace in self.namespace_url and
+            self.namespace_url[namespace] in self.uncached_namespaces
+        )
 
     def add_warning(self, line_number, line, exception, context=None):
         """Adds a warning to the internal warning log in the graph, with optional context information"""

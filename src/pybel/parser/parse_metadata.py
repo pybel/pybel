@@ -74,7 +74,7 @@ class MetadataParser(BaseParser):
         #: A dictionary of {annotation keyword: regular expression string}
         self.annotations_regex = {} if annotations_regex is None else annotations_regex
 
-        #: A set of namespaces that can't be cached
+        #: A set of namespaces's URLs that can't be cached
         self.uncachable_namespaces = set()
 
         #: A dictionary containing the document metadata

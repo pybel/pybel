@@ -11,10 +11,10 @@ from __future__ import unicode_literals
 
 import logging
 import time
-from itertools import groupby
-
 from collections import defaultdict
 from copy import deepcopy
+from itertools import groupby
+
 from six import string_types
 from sqlalchemy import and_, exists, func
 
@@ -855,10 +855,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('inserting %s v%s', graph.name, graph.version)
 
         t = time.time()
-
         for url in graph.namespace_url.values():
             if url in graph.uncached_namespaces:
-                log.debug('not re-ensuring uncachable namespace: %s', url)
                 continue
 
             self.ensure_namespace(url)
@@ -899,10 +897,15 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         for node in graph:
             namespace = graph.node[node].get(NAMESPACE)
 
-            if namespace is not None and namespace in graph.uncached_namespaces:
+            if graph.skip_storing_namespace(namespace):
                 continue  # already know this node won't be cached
 
             node_object = self.get_or_create_node(graph, node)
+
+            if node_object is None:
+                log.warning('can not add node %s', node)
+                continue
+
             network.nodes.append(node_object)
 
         log.debug('stored nodes in %.2f', time.time() - t)
@@ -1000,7 +1003,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         )
 
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
+
         properties = self.get_or_create_properties(graph, data)
+        if properties is None:
+            return
+
         annotations = self._get_annotation_entries(graph, data)
 
         bel = edge_to_bel(graph, u, v, data=data)
@@ -1108,7 +1115,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         if VARIANTS in node_data or FUSION in node_data:
             node.is_variant = True
             node.fusion = FUSION in node_data
-            node.modifications = self.get_or_create_modification(graph, node_data)
+
+            modifications = self.get_or_create_modification(graph, node_data)
+
+            if modifications is None:
+                log.warning('could not create %s because had an uncachable modification', bel)
+                return
+
+            node.modifications = modifications
 
         self.session.add(node)
         self.object_cache_node[node_hash] = node
@@ -1270,10 +1284,26 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             mod_type = FUSION
             node_data = node_data[FUSION]
             p3_namespace_url = graph.namespace_url[node_data[PARTNER_3P][NAMESPACE]]
-            p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, node_data[PARTNER_3P][NAME])
+
+            p3_name = node_data[PARTNER_3P][NAME]
+            p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, p3_name)
+
+            if p3_namespace_entry is None:
+                log.warning('Could not find namespace entry %s %s', p3_namespace_url, p3_name)
+                return
 
             p5_namespace_url = graph.namespace_url[node_data[PARTNER_5P][NAMESPACE]]
-            p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, node_data[PARTNER_5P][NAME])
+
+            if p5_namespace_url in graph.uncached_namespaces:
+                log.warning('Could not find entry for uncached namespace %s', p5_namespace_url)
+                return
+
+            p5_name = node_data[PARTNER_5P][NAME]
+            p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, p5_name)
+
+            if p5_namespace_entry is None:
+                log.warning('Could not find namespace entry %s %s', p5_namespace_url, p5_name)
+                return
 
             fusion_dict = {
                 'modType': mod_type,
@@ -1361,7 +1391,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return modifications
 
     def get_or_create_properties(self, graph, edge_data):
-        """Creates a list of all subject and object related properties of the edge.
+        """Creates a list of all subject and object related properties of the edge. Returns None if the property cannot
+        be constructed due to missing cache entries.
 
         :param pybel.BELGraph graph: A BEL graph
         :param dict edge_data: Describes the context of the given edge.
@@ -1386,11 +1417,27 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     tmp_dict = deepcopy(property_dict)
                     tmp_dict['relativeKey'] = effect_type
                     if NAMESPACE in effect_value:
-                        if effect_value[NAMESPACE] == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
+
+                        effect_namespace = effect_value[NAMESPACE]
+
+                        if effect_namespace == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
                             namespace_url = GOCC_LATEST
+                        elif effect_namespace in graph.namespace_url:
+                            namespace_url = graph.namespace_url[effect_namespace]
                         else:
-                            namespace_url = graph.namespace_url[effect_value[NAMESPACE]]
-                        tmp_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, effect_value[NAME])
+                            log.warning('namespace not enumerated in modifier %s', effect_namespace)
+                            return
+
+                        if namespace_url in graph.uncached_namespaces:
+                            log.warning('can not cache translocation because uncached namespace %s', effect_namespace)
+                            return
+
+                        effect_name = effect_value[NAME]
+                        tmp_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, effect_name)
+
+                        if tmp_dict['namespaceEntry'] is None:
+                            raise IndexError('Effect namespace entry is none: {} {}'.format(namespace_url, effect_name))
+
                     else:
                         tmp_dict['propValue'] = effect_value
 
@@ -1407,8 +1454,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     namespace_url = GOCC_LATEST
                 else:
                     namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
-                property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url,
-                                                                           participant_data[LOCATION][NAME])
+
+                participant_name = participant_data[LOCATION][NAME]
+                property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, participant_name)
+
+                if property_dict['namespaceEntry'] is None:
+                    raise IndexError('Could not create namespace entry {} {}'.format(namespace_url, participant_name))
+
                 property_list.append(property_dict)
 
             else:
