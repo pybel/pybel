@@ -243,7 +243,7 @@ class NamespaceEntry(Base):
     )
 
     def __str__(self):
-        return '{}:{}'.format(self.namespace, self.name)
+        return '{}:{}'.format(self.namespace.url, self.name)
 
     def to_json(self, include_id=False):
         """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name.
@@ -305,7 +305,6 @@ class Annotation(Base):
             entry.name
             for entry in self.entries
         }
-
     def to_tree_list(self):
         """Returns an edge set of the tree represented by this namespace's hierarchy
 

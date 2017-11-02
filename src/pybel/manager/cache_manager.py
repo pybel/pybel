@@ -275,7 +275,7 @@ class NamespaceManager(BaseManager):
             return
 
         if 1 < len(result):
-            log.warning('result for get_namespace_entry is too long. Returning first of %s', result)
+            log.warning('result for get_namespace_entry is too long. Returning first of %s', [str(r) for r in result])
 
         return result[0]
 
