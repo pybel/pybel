@@ -14,7 +14,7 @@ python:
 
 env:
   global:
-    - PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/pybel?charset=utf8'
+    - PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8'
   matrix:
     - TOXENV=py
 
@@ -28,10 +28,8 @@ matrix:
           env: TOXENV=rst-lint
 
 before_install:
-    - pip install codecov
-    - pip install pymysql
-    - mysql -e 'CREATE DATABASE pybel CHARACTER SET utf8 COLLATE utf8_general_ci;'
-    - mysql -e "GRANT ALL PRIVILEGES ON pybel.* to 'travis'@'%' WITH GRANT OPTION;"
+  - pip install codecov
+  - pip install pymysql
 
 install:
     - pip install tox
