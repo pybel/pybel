@@ -1657,6 +1657,37 @@ class TestNoAddNode(TemporaryCacheMixin):
         self.assertEqual(2, len(network.nodes.all()))
         self.assertEqual(0, len(network.edges.all()))
 
+    def test_no_location(self):
+        """Tests that when using a custom namespace in the location the edge doesn't get stored"""
+        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
+        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+
+        graph.add_qualified_edge(
+            u,
+            v,
+            evidence='dummy text',
+            citation='1234',
+            relation=ASSOCIATION,
+            subject_modifier={
+                LOCATION: {
+                    NAMESPACE: 'nope',
+                    NAME: 'lysozome'
+                }
+            }
+        )
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+
+        network = self.manager.insert_graph(graph, store_parts=True)
+
+        self.assertEqual(2, len(network.nodes.all()))
+        self.assertEqual(0, len(network.edges.all()))
+
 
 if __name__ == '__main__':
     unittest.main()

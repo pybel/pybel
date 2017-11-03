@@ -1459,7 +1459,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, participant_name)
 
                 if property_dict['namespaceEntry'] is None:
-                    raise IndexError('Could not create namespace entry {} {}'.format(namespace_url, participant_name))
+                    return
 
                 property_list.append(property_dict)
 
