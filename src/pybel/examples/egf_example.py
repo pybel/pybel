@@ -51,7 +51,9 @@ __all__ = [
 egf_graph = BELGraph(
     name='EGF Pathway',
     version='1.0.0',
-    description="The downstream effects of EFG"
+    description="The downstream effects of EFG",
+    authors='Charles Tapley Hoyt',
+    contact='charles.hoyt@scai.fraunhofer.de',
 )
 
 egf_graph.namespace_url.update({
@@ -90,10 +92,7 @@ egf_graph.add_qualified_edge(
     ar,
     egf,
     relation=INCREASES,
-    citation={
-        CITATION_TYPE: CITATION_TYPE_PUBMED,
-        CITATION_REFERENCE: '12855613'
-    },
+    citation='12855613',
     evidence='This induction was not seen either when LNCaP cells were treated with flutamide or conditioned medium were pretreated with antibody to the epidermal growth factor (EGF)',
     annotations={'Species': '9606'},
     subject_modifier={
@@ -109,10 +108,7 @@ egf_graph.add_qualified_edge(
     ifna1,
     egf,
     relation=DECREASES,
-    citation={
-        CITATION_TYPE: CITATION_TYPE_PUBMED,
-        CITATION_REFERENCE: '9639405'
-    },
+    citation='9639405',
     evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN gamma reduction more significant.',
     annotations={'Species': '9606'}
 )
@@ -121,10 +117,7 @@ egf_graph.add_qualified_edge(
     ifng,
     egf,
     relation=DECREASES,
-    citation={
-        CITATION_TYPE: CITATION_TYPE_PUBMED,
-        CITATION_REFERENCE: '9639405'
-    },
+    citation='9639405',
     evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN gamma reduction more significant.',
     annotations={'Species': '9606'}
 )
@@ -133,10 +126,7 @@ egf_graph.add_qualified_edge(
     egf,
     vcp,
     relation=INCREASES,
-    citation={
-        CITATION_TYPE: CITATION_TYPE_PUBMED,
-        CITATION_REFERENCE: '10855792'
-    },
+    citation='10855792',
     evidence='Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be translocated from the nucleus after stimulation with epidermal growth factor.',
     annotations={'Species': '9606'},
     object_modifier={
@@ -152,10 +142,7 @@ egf_graph.add_qualified_edge(
     vcp,
     nfkb_complex,
     relation=INCREASES,
-    citation={
-        CITATION_TYPE: CITATION_TYPE_PUBMED,
-        CITATION_REFERENCE: '12560433'
-    },
+    citation='12560433',
     evidence="Valosin-containing protein (VCP; also known as p97) has been shown to be associated with antiapoptotic function and metastasis via activation of the nuclear factor-kappaB signaling pathway.",
     annotations={'Species': '9606'},
     subject_modifier={
@@ -178,10 +165,7 @@ egf_graph.add_qualified_edge(
     nfkb_complex,
     apoptosis,
     relation=DECREASES,
-    citation={
-        CITATION_TYPE: CITATION_TYPE_PUBMED,
-        CITATION_REFERENCE: '12560433'
-    },
+    citation='12560433',
     evidence="Valosin-containing protein (VCP; also known as p97) has been shown to be associated with antiapoptotic function and metastasis via activation of the nuclear factor-kappaB signaling pathway.",
     annotations={'Species': '9606'},
     subject_modifier={

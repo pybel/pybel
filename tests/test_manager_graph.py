@@ -5,30 +5,23 @@ from __future__ import unicode_literals
 import logging
 import time
 import unittest
-
-import os
-import sqlalchemy.exc
 from collections import Counter
+from uuid import uuid4
+
+import sqlalchemy.exc
 
 import pybel
-from pybel.dsl import protein as dsl_protein
-from pybel import BELGraph, from_database, to_database, from_path
+from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
+from pybel.dsl import protein as dsl_protein
 from pybel.manager import models
-from pybel.manager.models import Namespace, NamespaceEntry, Node, Author, Evidence
-from pybel.utils import hash_citation, hash_node, hash_evidence
+from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
+from pybel.utils import hash_citation, hash_evidence, hash_node
 from tests import constants
 from tests.constants import (
-    FleetingTemporaryCacheMixin,
-    BelReconstitutionMixin,
-    TemporaryCacheClsMixin,
-    TemporaryCacheMixin,
-    test_bel_simple,
-    expected_test_simple_metadata,
-    test_bel_thorough,
-    expected_test_thorough_metadata,
-    test_evidence_text,
-    test_citation_dict,
+    BelReconstitutionMixin, FleetingTemporaryCacheMixin, TemporaryCacheClsMixin,
+    TemporaryCacheMixin, expected_test_simple_metadata, expected_test_thorough_metadata, test_bel_simple,
+    test_bel_thorough, test_citation_dict, test_evidence_text,
 )
 from tests.mocks import mock_bel_resources
 from tests.utils import make_dummy_namespaces
@@ -210,14 +203,18 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
     @mock_bel_resources
     def test_translocation(self, mock):
         """This test checks that a translocation gets in the database properly"""
-        graph = BELGraph(name='dummy', version='0.0.1')
-        u = (PROTEIN, 'HGNC', 'YFG')
-        v = (PROTEIN, 'HGNC', 'YFG2')
-        graph.add_simple_node(*u)
-        graph.add_simple_node(*v)
+        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
 
-        graph.add_edge(u, v, attr_dict={
-            SUBJECT: {
+        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
+        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+
+        graph.add_qualified_edge(
+            u,
+            v,
+            evidence='dummy text',
+            citation='1234',
+            relation=ASSOCIATION,
+            subject_modifier={
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
                     FROM_LOC: {
@@ -229,19 +226,10 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
                         NAME: 'extracellular space'
                     }
                 }
-            },
-            EVIDENCE: 'dummy text',
-            CITATION: {CITATION_TYPE: CITATION_TYPE_PUBMED, CITATION_REFERENCE: '1234'},
-            ANNOTATIONS: {},
-            RELATION: ASSOCIATION
-        })
+            }
+        )
 
-        hgnc_namespace = Namespace(keyword='HGNC', url='dummy url')
-        yfg = NamespaceEntry(name='YFG')
-        yfg2 = NamespaceEntry(name='YFG2')
-        hgnc_namespace.entries = [yfg, yfg2]
-        self.manager.session.add(hgnc_namespace)
-        self.manager.session.commit()
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
 
         self.manager.insert_graph(graph, store_parts=True)
 
@@ -483,7 +471,11 @@ class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_evidence(self):
         basic_citation = self.manager.get_or_create_citation(**test_citation_dict)
         utf8_test_evidence = "Yes, all the information is true! This contains a unicode alpha: α"
-        evidence_hash = hash_evidence(utf8_test_evidence, CITATION_TYPE_PUBMED, test_citation_dict[CITATION_REFERENCE])
+        evidence_hash = hash_evidence(
+            text=utf8_test_evidence,
+            type=CITATION_TYPE_PUBMED,
+            reference=test_citation_dict[CITATION_REFERENCE]
+        )
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
         self.assertIsInstance(evidence, Evidence)
@@ -538,13 +530,13 @@ class TestNodes(TemporaryCacheMixin):
         self.graph = BELGraph(name='TestNode', version='0.0.0')
         self.graph.namespace_url[self.hgnc_keyword] = self.hgnc_url
 
-    def help_test_round_trip(self, node_tuple, node_data):
+    def help_test_round_trip(self, node_data):
         """Helps run the round trip test of inserting a node, getting it, and reconstituting it in multiple forms
 
         :param tuple tuple node_tuple: A PyBEL node tuple
         :param dict node_data: A PyBEL node data dictionary
         """
-        self.graph.add_node(node_tuple, attr_dict=node_data)
+        node_tuple = self.graph.add_node_from_data(node_data)
         self.manager.insert_graph(self.graph, store_parts=True)
 
         node_model = self.manager.get_node_by_tuple(node_tuple)
@@ -555,16 +547,10 @@ class TestNodes(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_1(self, mock):
-        node_tuple = PROTEIN, 'HGNC', 'YFG'
-
-        node_data = yfg_data
-
-        self.help_test_round_trip(node_tuple, node_data)
+        self.help_test_round_trip(yfg_data)
 
     @mock_bel_resources
     def test_2(self, mock):
-        node_tuple = PROTEIN, 'HGNC', 'YFG', (HGVS, 'p.Glu600Arg')
-
         node_data = {
             FUNCTION: PROTEIN,
             NAMESPACE: 'HGNC',
@@ -577,7 +563,7 @@ class TestNodes(TemporaryCacheMixin):
             ]
         }
 
-        self.help_test_round_trip(node_tuple, node_data)
+        self.help_test_round_trip(node_data)
 
 
 # FIXME @kono need proper deletion cascades
@@ -1108,56 +1094,6 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         # ============================================================
 
 
-@unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestFilter(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
-    """Tests that a graph can be reconstructed from the edge and node relational tables in the database
-
-    1. Load graph (test BEL 1 or test thorough)
-    2. Add sentinel annotation to ALL edges
-    3. Store graph
-    4. Query for all edges with sentinel annotation
-    5. Compare to original graph
-    """
-
-    def setUp(self):
-        super(TestFilter, self).setUp()
-        self.graph = pybel.from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
-
-    @mock_bel_resources
-    def test_database_edge_filter(self, mock_get):
-        self.help_database_edge_filter(test_bel_simple, self.bel_simple_reconstituted)
-
-    @mock_bel_resources
-    def test_database_edge_filter(self, mock_get):
-        self.help_database_edge_filter(test_bel_thorough, self.bel_thorough_reconstituted)
-
-    # TODO switch sentinel annotation to cell line
-    def help_database_edge_filter(self, path, compare, annotation_tag='CellLine',
-                                  value_tag='mouse x rat hybridoma cell line cell'):
-        """Helps to test the graph that is created by a specific annotation.
-
-        :param str path: Path to the test BEL file.
-        :param types.FunctionType compare: Method that should be used to compare the original and resulting graph.
-        :param str annotation_tag: Annotation that marks the nodes with an annotation.
-        :param str value_tag: Annotation value for the given sentinel_annotation.
-        """
-        original = pybel.from_path(path, manager=self.manager)
-
-        compare(original)
-
-        for u, v, k in original.edges(keys=True):
-            original.edge[u][v][k][annotation_tag] = value_tag
-
-        self.manager.insert_graph(original, store_parts=True)
-
-        reloaded = self.manager.rebuild_by_edge_filter(**{ANNOTATIONS: {annotation_tag: value_tag}})
-
-        for u, v, k in reloaded.edges(keys=True):
-            del reloaded.edge[u][v][k][annotation_tag]
-
-        compare(reloaded, check_metadata=False)
-
-
 class TestAddNodeFromData(unittest.TestCase):
     def setUp(self):
         self.graph = BELGraph()
@@ -1550,6 +1486,156 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     def test_nested_complex(self, mock):
         namespaces = {'HGNC': ['FOS', 'JUN', 'E2F4']}
         self.help_reconstitute(bound_ap1_e2f4_tuple, bound_ap1_e2f4_data, namespaces, 5, 4)
+
+
+class TestNoAddNode(TemporaryCacheMixin):
+    def test_no_node_name(self):
+        """Test that a node whose namespace is in the uncached namespaces set can't be added"""
+        node_data = {
+            FUNCTION: PROTEIN,
+            NAMESPACE: 'nope',
+            NAME: 'nope'
+        }
+
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+        graph.add_node_from_data(node_data)
+
+        network = self.manager.insert_graph(graph)
+        self.assertEqual(0, len(network.nodes.all()))
+
+    def test_no_node_fusion_3p(self):
+        """Test that a node whose namespace is in the uncached namespaces set can't be added"""
+        node_data = {
+            FUNCTION: PROTEIN,
+            FUSION: {
+                PARTNER_3P: {
+                    NAMESPACE: 'nope',
+                    NAME: 'AKT1',
+                },
+                RANGE_3P: {
+                    FUSION_MISSING: '?',
+                },
+                PARTNER_5P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'YFG'
+                },
+                RANGE_5P: {
+                    FUSION_MISSING: '?',
+                }
+            }
+        }
+
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+        graph.add_node_from_data(node_data)
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        network = self.manager.insert_graph(graph)
+        self.assertEqual(0, len(network.nodes.all()))
+
+    def test_no_node_fusion_5p(self):
+        """Test that a node whose namespace is in the uncached namespaces set can't be added"""
+        node_data = {
+            FUNCTION: PROTEIN,
+            FUSION: {
+                PARTNER_3P: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'YFG',
+                },
+                RANGE_3P: {
+                    FUSION_MISSING: '?',
+                },
+                PARTNER_5P: {
+                    NAMESPACE: 'nope',
+                    NAME: 'YFG'
+                },
+                RANGE_5P: {
+                    FUSION_MISSING: '?',
+                }
+            }
+        }
+
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+        graph.add_node_from_data(node_data)
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        network = self.manager.insert_graph(graph)
+        self.assertEqual(0, len(network.nodes.all()))
+
+    def test_no_translocation(self):
+        """This test checks that a translocation using custom namespaces doesn't get stored"""
+        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
+        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+
+        graph.add_qualified_edge(
+            u,
+            v,
+            evidence='dummy text',
+            citation='1234',
+            relation=ASSOCIATION,
+            subject_modifier={
+                MODIFIER: TRANSLOCATION,
+                EFFECT: {
+                    FROM_LOC: {
+                        NAMESPACE: 'nope',
+                        NAME: 'intracellular'
+                    },
+                    TO_LOC: {
+                        NAMESPACE: 'GOCC',
+                        NAME: 'extracellular space'
+                    }
+                }
+            }
+        )
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['extracellular space']})
+
+        network = self.manager.insert_graph(graph, store_parts=True)
+
+        self.assertEqual(2, len(network.nodes.all()))
+        self.assertEqual(0, len(network.edges.all()))
+
+    def test_no_location(self):
+        """Tests that when using a custom namespace in the location the edge doesn't get stored"""
+        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
+        dummy_url = str(uuid4())
+        graph.namespace_url['nope'] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
+        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+
+        graph.add_qualified_edge(
+            u,
+            v,
+            evidence='dummy text',
+            citation='1234',
+            relation=ASSOCIATION,
+            subject_modifier={
+                LOCATION: {
+                    NAMESPACE: 'nope',
+                    NAME: 'lysozome'
+                }
+            }
+        )
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+
+        network = self.manager.insert_graph(graph, store_parts=True)
+
+        self.assertEqual(2, len(network.nodes.all()))
+        self.assertEqual(0, len(network.edges.all()))
 
 
 if __name__ == '__main__':

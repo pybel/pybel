@@ -1,139 +1,40 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import uuid
 
-from sqlalchemy import func
+from sqlalchemy import and_, func, or_
 
 from .lookup_manager import LookupManager
 from .models import (
-    Annotation,
-    AnnotationEntry,
-    Namespace,
-    NamespaceEntry,
-    Node,
-    Edge,
-    Evidence,
-    Citation,
-    Property,
-    Author,
-    Modification,
+    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
+    NamespaceEntry, Node, Property,
 )
 from ..constants import *
 from ..struct import BELGraph
-from ..utils import (
-    parse_datetime,
-    subdict_matches,
-    hash_edge,
-    hash_node,
-)
+from ..utils import hash_edge, hash_node, parse_datetime
 
 __all__ = [
     'QueryManager'
 ]
 
 
+def graph_from_edges(edges, **kwargs):
+    """Builds a BEL graph from edges
+
+    :param iter[Edge] edges: An iterable of edges from the database
+    :param kwargs: Arguments to pass to :class:`pybel.BELGraph`
+    :rtype: BELGraph
+    """
+    graph = BELGraph(**kwargs)
+
+    for edge in edges:
+        edge.insert_into_graph(graph)
+
+    return graph
+
+
 class QueryManager(LookupManager):
     """Groups queries over the edge store"""
-
-    def rebuild_by_edge_filter(self, **annotations):
-        """Gets all edges matching the given query annotation values
-
-        :param dict[str,str] annotations: dictionary of {key: value}
-        :return: A graph composed of the filtered edges
-        :rtype: pybel.BELGraph
-        """
-        graph = BELGraph()
-        for annotation_key, annotation_value in annotations.items():
-            # TODO write get most recent by keyword function
-            annotation_def = self.session.query(Annotation).filter_by(keyword=annotation_key).first()
-            annotation = self.session.query(AnnotationEntry).filter_by(annotation=annotation_def,
-                                                                       name=annotation_value).first()
-
-            # Add Annotations to belGraph.annotation_url
-            # Add Namespaces to belGraph.namespace_url
-            # What about meta information?
-            edges = self.session.query(Edge).filter(Edge.annotations.contains(annotation)).all()
-            for edge in edges:
-                edge_data = edge.data
-
-                if len(edge_data['source']['key']) == 1:
-                    edge_data['source'] = self.help_rebuild_list_components(edge.source)
-
-                if len(edge_data['target']['key']) == 1:
-                    edge_data['target'] = self.help_rebuild_list_components(edge.target)
-
-                graph.add_nodes_from((edge_data['source']['node'], edge_data['target']['node']))
-
-                graph.add_edge(
-                    edge_data['source']['key'],
-                    edge_data['target']['key'],
-                    key=(
-                        unqualified_edge_code[edge_data['data']['relation']]
-                        if edge_data['data']['relation'] in UNQUALIFIED_EDGES
-                        else None
-                    ),
-                    attr_dict=edge_data['data']
-                )
-
-        return graph
-
-    def help_rebuild_list_components(self, node):
-        """Builds data and identifier for list node objects.
-
-        :param Node node: Node object defined in models
-        :return: Dictionary with 'key' and 'node' keys.
-        :rtype: dict[str,str]
-        """
-        node_info = node.to_json()
-        key = list(node_info['key'])
-        data = node_info['data']
-        if node.type in (COMPLEX, COMPOSITE):
-            components = self.session.query(Edge).filter_by(source=node, relation=HAS_COMPONENT).all()
-            for component in components:
-                component_key = component.target.data['key']
-                key.append(component_key)
-
-        elif node.type == REACTION:
-            reactant_components = self.session.query(Edge).filter_by(source=node, relation=HAS_REACTANT).all()
-            product_components = self.session.query(Edge).filter_by(source=node, relation=HAS_PRODUCT).all()
-            reactant_keys = tuple(reactant.target.data['key'] for reactant in reactant_components)
-            product_keys = tuple(product.target.data['key'] for product in product_components)
-            key.append(reactant_keys)
-            key.append(product_keys)
-
-        return {'key': tuple(key), 'node': (tuple(key), data)}
-
-    def get_edge_iter_by_filter(self, **annotations):
-        """Returns an iterator over Edge object that match the given annotations
-
-        :param dict[str,str] annotations: dictionary of {URL: values}
-        :return: An iterator over Edge object that match the given annotations
-        :rtype: iter[Edge]
-        """
-        # TODO make smarter
-        for edge in self.session.query(Edge).all():
-            ad = {a.annotation.name: a.name for a in edge.annotations}
-            if subdict_matches(ad, annotations):
-                yield edge
-
-    def get_graph_by_filter(self, **annotations):
-        """Fills a BEL graph with edges retrieved from a filter
-
-        :param dict[str,str] annotations: dictionary of {URL: values}
-        :return: A BEL graph
-        :rtype: pybel.BELGraph
-        """
-        graph = BELGraph(
-            name=uuid.uuid4(),
-            version='1.0.0',
-            description='This BEL Graph was generated by querying with: {}'.format(annotations)
-        )
-
-        for edge in self.get_edge_iter_by_filter(**annotations):
-            edge.insert_into_graph(graph)
-
-        return graph
 
     def count_nodes(self):
         """Counts the number of nodes in the cache
@@ -429,3 +330,38 @@ class QueryManager(LookupManager):
             prop.data
             for prop in result
         ]
+
+    def query_edges_by_pmid(self, pubmed_identifiers):
+        """Gets all edges annotated to the given documents
+
+        :param list[str] pubmed_identifiers: A list of PubMed document identifiers
+        :rtype: list[Edge]
+        """
+        return self.session.query(Edge) \
+            .join(Evidence).join(Citation) \
+            .filter(Citation.type == CITATION_TYPE_PUBMED,
+                    Citation.reference.in_(pubmed_identifiers)).all()
+
+    def query_induction(self, nodes):
+        """Gets all edges between any of the given nodes
+
+        :param list[Node] nodes: A list of nodes (length > 2)
+        :rtype: list[Edge]
+        """
+        if len(nodes) < 2:
+            raise ValueError
+
+        node_ids = [node.id for node in nodes]
+
+        return self.session.query(Edge).filter(and_(Edge.source_id.in_(node_ids),
+                                                    Edge.target_id.in_(node_ids))).all()
+
+    def query_neighbors(self, nodes):
+        """Gets all edges incident to any of the given nodes
+
+        :param list[Node] nodes: A list of nodes
+        :rtype: list[Edge]
+        """
+        node_ids = [node.id for node in nodes]
+        return self.session.query(Edge).filter(or_(Edge.source_id.in_(node_ids),
+                                                   Edge.target_id.in_(node_ids))).all()

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ..constants import *
+from ..utils import hash_node
 
 __all__ = [
     'node_to_tuple',
@@ -385,6 +386,15 @@ def po_to_tuple(tokens):
     return simple_to_tuple(tokens)
 
 
+def hash_node_dict(node_dict):
+    """Hashes a PyBEL node data dictionary
+
+    :param dict node_dict:
+    :rtype: str
+    """
+    return hash_node(po_to_tuple(node_dict))
+
+
 def po_to_dict(tokens):
     """
     :type tokens: ParseResult
@@ -458,40 +468,3 @@ def modifier_po_to_dict(tokens):
         raise ValueError('Invalid value for tokens[MODIFIER]: {}'.format(tokens[MODIFIER]))
 
     return attrs
-
-
-def add_node_from_data(graph, attr_dict):
-    """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
-
-    :param BELGraph graph: A BEL graph
-    :param dict attr_dict: A PyBEL node data dictionary
-    :return: A PyBEL node tuple
-    :rtype: tuple
-    """
-    node_tuple = po_to_tuple(attr_dict)
-
-    if node_tuple in graph:
-        return node_tuple
-
-    graph.add_node(node_tuple, attr_dict=attr_dict)
-
-    if VARIANTS in attr_dict:
-        graph.add_node(node_tuple, attr_dict=attr_dict)
-        parent_node_tuple = graph.add_simple_node(attr_dict[FUNCTION], attr_dict[NAMESPACE], attr_dict[NAME])
-        graph.add_unqualified_edge(parent_node_tuple, node_tuple, HAS_VARIANT)
-
-    elif MEMBERS in attr_dict:
-        for member in attr_dict[MEMBERS]:
-            member_node_tuple = add_node_from_data(graph, member)
-            graph.add_unqualified_edge(node_tuple, member_node_tuple, HAS_COMPONENT)
-
-    elif PRODUCTS in attr_dict and REACTANTS in attr_dict:
-        for reactant_tokens in attr_dict[REACTANTS]:
-            reactant_node_tuple = add_node_from_data(graph, reactant_tokens)
-            graph.add_unqualified_edge(node_tuple, reactant_node_tuple, HAS_REACTANT)
-
-        for product_tokens in attr_dict[PRODUCTS]:
-            product_node_tuple = add_node_from_data(graph, product_tokens)
-            graph.add_unqualified_edge(node_tuple, product_node_tuple, HAS_PRODUCT)
-
-    return node_tuple

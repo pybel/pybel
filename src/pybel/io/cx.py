@@ -19,13 +19,12 @@ of Cytoscape.
 import json
 import logging
 import time
-
 from collections import defaultdict
 
 from ..canonicalize import node_to_bel
 from ..constants import *
 from ..struct import BELGraph
-from ..utils import flatten_dict, expand_dict, hash_node
+from ..utils import expand_dict, flatten_dict, hash_node
 
 __all__ = [
     'to_cx',
@@ -132,6 +131,14 @@ def to_cx(graph):
                     'n': 'identifier',
                     'v': v
                 })
+
+            elif k in {PRODUCTS, REACTANTS, MEMBERS}:
+                node_attributes_entry.append({
+                    'po': node_id,
+                    'n': k,
+                    'v': json.dumps(v)
+                })
+
             else:
                 node_attributes_entry.append({
                     'po': node_id,
@@ -331,7 +338,6 @@ def from_cx(cx):
     """Rebuilds a BELGraph from CX JSON output from PyBEL
 
     :param list cx: The CX JSON for this graph
-    :return: A BEL graph
     :rtype: BELGraph
     """
     graph = BELGraph()
@@ -413,6 +419,8 @@ def from_cx(cx):
             elif k.startswith(VARIANTS):
                 _, i, vls = k.split('_', 2)
                 node_data_variants[nid][i][vls] = v
+            elif k in {PRODUCTS, REACTANTS, MEMBERS}:
+                node_data_pp[nid][k] = json.loads(v)
             else:
                 node_data_pp[nid][k] = v
 

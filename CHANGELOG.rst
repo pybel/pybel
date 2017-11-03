@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.9.4 <https://github.com/pybel/pybel/compare/v0.9.3...0.9.4>`_ - 2017-11-03
+-----------------------------------------------------------------------------
+Fixed
+~~~~~
+- Problem with uploading products, reactants, and members to NDEx (#230)
+- Checking for adding uncachable nodes when populating edge store
+
+Added
+~~~~~
+- Database seeding functions
+- Citation management
+- Added PubMed Central as type in citation
+
+Removed
+~~~~~~~
+- Don't keep blobs in node or edge cache anymore
+
 `0.9.3 <https://github.com/pybel/pybel/compare/v0.9.2...0.9.3>`_ - 2017-10-19
 -----------------------------------------------------------------------------
 Added

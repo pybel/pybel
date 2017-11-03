@@ -63,7 +63,7 @@ def main():
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
-@click.option('--store-default', is_flag=True, help="Stores to default cache at {}".format(get_cache_connection()))
+@click.option('-s', '--store-default', is_flag=True, help="Stores to default cache at {}".format(get_cache_connection()))
 @click.option('--store-connection', help="Database connection string")
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
@@ -277,7 +277,8 @@ def ls(manager, url):
 
     else:
         if url.endswith('.belns'):
-            res = manager.get_namespace_encodings(url)
+            res = manager.ensure_namespace(url).to_values()
+
         else:
             res = manager.get_namespace_owl_terms(url)
 

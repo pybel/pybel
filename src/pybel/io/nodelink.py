@@ -13,7 +13,7 @@ import json
 from networkx.readwrite.json_graph import node_link_data, node_link_graph
 
 from .utils import ensure_version
-from ..constants import GRAPH_ANNOTATION_LIST
+from ..constants import GRAPH_ANNOTATION_LIST, GRAPH_UNCACHED_NAMESPACES
 from ..struct import BELGraph
 from ..utils import list2tuple
 
@@ -39,6 +39,8 @@ def to_json(graph):
         k: list(sorted(v))
         for k, v in graph_json_dict['graph'][GRAPH_ANNOTATION_LIST].items()
     }
+    graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = list(graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES])
+
     return graph_json_dict
 
 

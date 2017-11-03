@@ -1,22 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
 from pathlib import Path
 
-import os
-
-from pybel.manager import Manager
-from pybel.manager import models
+from pybel.manager import Manager, models
 from tests.constants import (
-    FleetingTemporaryCacheMixin,
-    HGNC_URL,
-    CELL_LINE_URL,
-    test_eq_1,
-    test_eq_2,
-    belns_dir_path,
-    test_ns_nocache,
-    wine_iri
+    CELL_LINE_URL, FleetingTemporaryCacheMixin, HGNC_URL, belns_dir_path, test_eq_1, test_eq_2,
+    test_ns_nocache, wine_iri,
 )
-from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_pybel
+from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_xml
 
 ns1 = Path(os.path.join(belns_dir_path, 'disease-ontology.belns')).as_uri()
 ns1_eq = Path(test_eq_1).as_uri()
@@ -29,6 +21,10 @@ ns2_url = 'http://resources.openbel.org/belframework/20150611/namespace/mesh-dis
 
 class TestDefinitionManagers(FleetingTemporaryCacheMixin):
     def _help_check_hgnc(self, manager):
+        """Helps check the HGNC namespace was loaded properly
+
+        :param Manager manager:
+        """
         entry = manager.get_namespace_entry(HGNC_URL, 'MHS2')
         self.assertIsNotNone(entry)
         self.assertEqual('MHS2', entry.name)
@@ -76,7 +72,7 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
         self.assertEqual('CLO_0001072', entry.label)
 
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_insert_owl(self, m1, m2):
         self.manager.ensure_namespace_owl(wine_iri)
 

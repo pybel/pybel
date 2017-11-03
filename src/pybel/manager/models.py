@@ -4,7 +4,6 @@
 
 import datetime
 
-from six.moves.cPickle import loads
 from sqlalchemy import (
     Boolean, Column, DDL, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text,
     UniqueConstraint, event,
@@ -230,7 +229,7 @@ class NamespaceEntry(Base):
     name = Column(Text, nullable=False, doc='Name that is defined in the corresponding namespace definition file')
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
-    namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), index=True)
+    namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), nullable=False, index=True)
     namespace = relationship('Namespace', backref=backref('entries', lazy='dynamic'))
 
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
@@ -244,7 +243,7 @@ class NamespaceEntry(Base):
     )
 
     def __str__(self):
-        return '{}:{}'.format(self.namespace, self.name)
+        return '{}:{}'.format(self.namespace.url, self.name)
 
     def to_json(self, include_id=False):
         """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name.
@@ -306,7 +305,6 @@ class Annotation(Base):
             entry.name
             for entry in self.entries
         }
-
     def to_tree_list(self):
         """Returns an edge set of the tree represented by this namespace's hierarchy
 
@@ -347,6 +345,9 @@ class Annotation(Base):
             result[ID] = self.id
 
         return result
+
+    def __str__(self):
+        return self.keyword
 
 
 class AnnotationEntry(Base):
@@ -500,7 +501,6 @@ class Node(Base):
     fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
 
     bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
-    blob = Column(LargeBinary)
 
     sha512 = Column(String(255), index=True)
 
@@ -510,8 +510,9 @@ class Node(Base):
         return self.bel
 
     def to_json(self, include_id=False):
-        """Serializes this node the same way a PyBEL node data dictionary would
+        """Serializes this node as a PyBEL node data dictionary
 
+        :param bool include_id: Include the database identifier?
         :rtype: dict
         """
         result = {
@@ -861,18 +862,14 @@ class Edge(Base):
     properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
     networks = relationship('Network', secondary=network_edge, lazy="dynamic")
 
-    blob = Column(LargeBinary)
-
     sha512 = Column(String(255), index=True)
 
     def __str__(self):
         return self.bel
 
-    def to_json(self, include_id=False):
-        """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
+    def get_data_json(self):
+        """Gets the PyBEL edge data dictionary this edge represents
 
-        :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
-                 and edge data information.
         :rtype: dict
         """
         data = {
@@ -888,15 +885,26 @@ class Edge(Base):
 
         for prop in self.properties:
             prop_info = prop.data
-            if prop_info['participant'] in data:
-                data[prop_info['participant']].update(prop_info['data'])
-            else:
-                data.update(prop_info['data'])
+            prop_info_data = prop_info['data']
 
+            if prop_info['participant'] in data:  # TODO reinvestigate this
+                data[prop_info['participant']].update(prop_info_data)
+            else:
+                data.update(prop_info_data)
+
+        return data
+
+    def to_json(self, include_id=False):
+        """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
+
+        :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
+                 and edge data information.
+        :rtype: dict
+        """
         result = {
             'source': self.source.to_json(),
             'target': self.target.to_json(),
-            'data': data
+            'data': self.get_data_json()
         }
 
         if include_id:
@@ -907,18 +915,12 @@ class Edge(Base):
     def insert_into_graph(self, graph):
         """Inserts this edge into a BEL Graph
 
-        :param BELGraph graph: A BEL graph
+        :param pybel.BELGraph graph: A BEL graph
         """
-        source_tuple = self.source.to_tuple()
-        target_tuple = self.target.to_tuple()
+        u = graph.add_node_from_data(self.source.to_json())
+        v = graph.add_node_from_data(self.target.to_json())
 
-        if source_tuple not in graph:
-            graph.add_node(source_tuple, attr_dict=loads(self.source.blob))
-
-        if self.target.id not in graph:
-            graph.add_node(target_tuple, attr_dict=loads(self.target.blob))
-
-        graph.add_edge(source_tuple, target_tuple, attr_dict=loads(self.blob))
+        graph.add_edge(u, v, attr_dict=self.get_data_json())
 
 
 class Property(Base):
@@ -927,15 +929,19 @@ class Property(Base):
 
     id = Column(Integer, primary_key=True)
 
+    # TODO refactor participant to be a boolean, for_subject, since it can only be SUBJECT or OBJECT
     participant = Column(String(255), doc='Identifies which participant of the edge if affected by the given property')
     modifier = Column(String(255), doc='The modifier to the corresponding participant')
-    effectNamespace = Column(String(255), nullable=True, doc='Optional namespace that defines modifier value')
-    effectName = Column(String(255), nullable=True, doc='Value for specific modifiers e.g. Activity')
     relativeKey = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
     propValue = Column(String(255), nullable=True, doc='Value of the effect')
+    sha512 = Column(String(255), index=True)
+
+    # TODO refactor effect to reference NamespaceEntry
+    effectNamespace = Column(String(255), nullable=True, doc='Optional namespace that defines modifier value')
+    effectName = Column(String(255), nullable=True, doc='Value for specific modifiers e.g. Activity')
+
     namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespaceEntry = relationship('NamespaceEntry')
-    sha512 = Column(String(255), index=True)
 
     @property
     def data(self):
@@ -963,7 +969,7 @@ class Property(Base):
                 self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.to_json()
             }
         elif self.effectNamespace:
-            prop_dict['data'][self.participant][EFFECT] = {
+            prop_dict['data'][self.participant][EFFECT] = {  # TODO reference NamespaceEntry dictionary?
                 NAMESPACE: self.effectNamespace,
                 NAME: self.effectName
             }
