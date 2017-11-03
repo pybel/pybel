@@ -1293,17 +1293,21 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             node_data = node_data[FUSION]
             p3_namespace_url = graph.namespace_url[node_data[PARTNER_3P][NAMESPACE]]
 
+            if p3_namespace_url in graph.uncached_namespaces:
+                log.warning('uncached namespace %s in fusion()', p3_namespace_url)
+                return
+
             p3_name = node_data[PARTNER_3P][NAME]
             p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, p3_name)
 
             if p3_namespace_entry is None:
                 log.warning('Could not find namespace entry %s %s', p3_namespace_url, p3_name)
-                return
+                return  # FIXME raise?
 
             p5_namespace_url = graph.namespace_url[node_data[PARTNER_5P][NAMESPACE]]
 
             if p5_namespace_url in graph.uncached_namespaces:
-                log.warning('Could not find entry for uncached namespace %s', p5_namespace_url)
+                log.warning('uncached namespace %s in fusion()', p5_namespace_url)
                 return
 
             p5_name = node_data[PARTNER_5P][NAME]
@@ -1311,7 +1315,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             if p5_namespace_entry is None:
                 log.warning('Could not find namespace entry %s %s', p5_namespace_url, p5_name)
-                return
+                return  # FIXME raise?
 
             fusion_dict = {
                 'modType': mod_type,
@@ -1437,14 +1441,16 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                             return
 
                         if namespace_url in graph.uncached_namespaces:
-                            log.warning('can not cache translocation because uncached namespace %s', effect_namespace)
+                            log.warning('uncached namespace %s in tloc() on line %s ', effect_namespace,
+                                        edge_data.get(LINE))
                             return
 
                         effect_name = effect_value[NAME]
                         tmp_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, effect_name)
 
                         if tmp_dict['namespaceEntry'] is None:
-                            raise IndexError('Effect namespace entry is none: {} {}'.format(namespace_url, effect_name))
+                            log.warning('could not find tloc() %s %s', namespace_url, effect_name)
+                            return  # FIXME raise?
 
                     else:
                         tmp_dict['propValue'] = effect_value
@@ -1458,16 +1464,24 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 property_list.append(property_dict)
 
             elif modifier == LOCATION:
-                if participant_data[LOCATION][NAMESPACE] == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
+
+                location_namespace = participant_data[LOCATION][NAMESPACE]
+
+                if location_namespace == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
                     namespace_url = GOCC_LATEST
                 else:
-                    namespace_url = graph.namespace_url[participant_data[LOCATION][NAMESPACE]]
+                    namespace_url = graph.namespace_url[location_namespace]
+
+                    if namespace_url in graph.uncached_namespaces:
+                        log.warning('uncached namespace %s in loc() on line %s', location_namespace,
+                                    edge_data.get(LINE))
+                        return
 
                 participant_name = participant_data[LOCATION][NAME]
                 property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, participant_name)
 
                 if property_dict['namespaceEntry'] is None:
-                    return
+                    raise IndexError
 
                 property_list.append(property_dict)
 
