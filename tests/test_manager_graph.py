@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import logging
-import os
 import time
 import unittest
 from collections import Counter
@@ -1093,56 +1092,6 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         #     self.assertEqual(8, len(self.manager.object_cache['modification'].keys()))
 
         # ============================================================
-
-
-@unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')
-class TestFilter(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
-    """Tests that a graph can be reconstructed from the edge and node relational tables in the database
-
-    1. Load graph (test BEL 1 or test thorough)
-    2. Add sentinel annotation to ALL edges
-    3. Store graph
-    4. Query for all edges with sentinel annotation
-    5. Compare to original graph
-    """
-
-    def setUp(self):
-        super(TestFilter, self).setUp()
-        self.graph = pybel.from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
-
-    @mock_bel_resources
-    def test_database_edge_filter(self, mock_get):
-        self.help_database_edge_filter(test_bel_simple, self.bel_simple_reconstituted)
-
-    @mock_bel_resources
-    def test_database_edge_filter(self, mock_get):
-        self.help_database_edge_filter(test_bel_thorough, self.bel_thorough_reconstituted)
-
-    # TODO switch sentinel annotation to cell line
-    def help_database_edge_filter(self, path, compare, annotation_tag='CellLine',
-                                  value_tag='mouse x rat hybridoma cell line cell'):
-        """Helps to test the graph that is created by a specific annotation.
-
-        :param str path: Path to the test BEL file.
-        :param types.FunctionType compare: Method that should be used to compare the original and resulting graph.
-        :param str annotation_tag: Annotation that marks the nodes with an annotation.
-        :param str value_tag: Annotation value for the given sentinel_annotation.
-        """
-        original = pybel.from_path(path, manager=self.manager)
-
-        compare(original)
-
-        for u, v, k in original.edges(keys=True):
-            original.edge[u][v][k][annotation_tag] = value_tag
-
-        self.manager.insert_graph(original, store_parts=True)
-
-        reloaded = self.manager.rebuild_by_edge_filter(**{ANNOTATIONS: {annotation_tag: value_tag}})
-
-        for u, v, k in reloaded.edges(keys=True):
-            del reloaded.edge[u][v][k][annotation_tag]
-
-        compare(reloaded, check_metadata=False)
 
 
 class TestAddNodeFromData(unittest.TestCase):
