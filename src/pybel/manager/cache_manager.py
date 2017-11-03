@@ -46,7 +46,15 @@ class EdgeAddError(RuntimeError):
 
     def __str__(self):
         return ("Error adding edge from line {} to database. Check this line in the file and make sure the citation, "
-                "evidence, and annotations all use valid UTF-8 characters".format(self.args[0]))
+                "evidence, and annotations all use valid UTF-8 characters".format(self.line))
+
+    @property
+    def data(self):
+        return self.args[0]
+
+    @property
+    def line(self):
+        return self.data.get(LINE)
 
 
 def _get_namespace_insert_values(bel_resource):
@@ -930,7 +938,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_unqualified_edge(network, graph, u, v, k, data)
                 except:
                     self.session.rollback()
-                    raise EdgeAddError(data.get(LINE), data)
+                    raise EdgeAddError(data)
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -943,7 +951,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_qualified_edge(network, graph, u, v, k, data)
                 except:
                     self.session.rollback()
-                    raise EdgeAddError(data.get(LINE), data[EVIDENCE])
+                    raise EdgeAddError(data)
 
         log.debug('stored edges in %.2f', time.time() - t)
         log.info('Skipped %d edges', c)
