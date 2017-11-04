@@ -14,6 +14,7 @@ from .constants import (
     NAMESPACE_PATTERN_FMT, NAMESPACE_URL_FMT, format_annotation_list,
 )
 from .utils import download, is_url
+from .definitions import get_lines
 from ..constants import VERSION
 
 log = logging.getLogger(__name__)
@@ -110,22 +111,17 @@ def split_file_to_annotations_and_definitions(file):
 
 def get_bel_knowledge_hash(location):
     """Hashes the statements section of a BEL document"""
-    if is_url(location):
-        res = download(location)
-        lines = list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
-    else:
-        with open(os.path.expanduser(location)) as f:
-            lines = list(f)
+    lines = get_lines(location)
 
-    _, _, statements = split_file_to_annotations_and_definitions(lines)
+    _, _, lines = split_file_to_annotations_and_definitions(lines)
 
-    statements = [
-        s
-        for i, s in statements
-        if s.strip()
+    lines = [
+        line
+        for index, line in lines
+        if line.strip()
     ]
 
-    return hashlib.md5(json.dumps(statements).encode('utf-8')).hexdigest()
+    return hashlib.md5(json.dumps(lines).encode('utf-8')).hexdigest()
 
 
 def make_document_metadata(name, version=None, contact=None, description=None, authors=None, copyright=None,
