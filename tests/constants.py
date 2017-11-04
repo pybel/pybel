@@ -10,11 +10,11 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
-from pybel.dsl.utils import make_translocation_modifier_dict
+from pybel.dsl.utils import entity, make_translocation_modifier_dict
 from pybel.manager import Manager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
-from pybel.parser.utils import any_subdict_matches
+from tests.utils import any_dict_matches, any_subdict_matches
 
 log = logging.getLogger(__name__)
 
@@ -83,19 +83,6 @@ def update_provenance(bel_parser):
     bel_parser.control_parser.evidence = test_evidence_text
 
 
-def any_dict_matches(dict_of_dicts, query_dict):
-    """
-
-    :param dict_of_dicts:
-    :param query_dict:
-    :return:
-    """
-    return any(
-        query_dict == sd
-        for sd in dict_of_dicts.values()
-    )
-
-
 def assertHasNode(self, node, graph, **kwargs):
     """A helper function for checking if a node with the given properties is contained within a graph
 
@@ -149,7 +136,7 @@ def identifier(namespace, name):
 
 def default_identifier(name):
     """Convenience function for building a default namespace/name pair"""
-    return identifier(BEL_DEFAULT_NAMESPACE, name)
+    return entity(name=name, namespace=BEL_DEFAULT_NAMESPACE)
 
 
 class TestGraphMixin(unittest.TestCase):

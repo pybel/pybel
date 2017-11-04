@@ -10,10 +10,7 @@ from datetime import datetime
 import networkx as nx
 from six import string_types
 
-from .constants import (
-    CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, PYBEL_CONFIG_PATH, PYBEL_CONNECTION, PYBEL_EDGE_DATA_KEYS,
-    VERSION,
-)
+from .constants import CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, PYBEL_EDGE_DATA_KEYS, VERSION
 
 log = logging.getLogger(__name__)
 
@@ -280,49 +277,6 @@ def subdict_matches(target, query, partial_match=True):
             return False
 
     return True
-
-
-def set_default(key, value):
-    """Sets the default setting for this key/value pair. Does NOT update the current config.
-
-    :param str key:
-    :param str value:
-    """
-    with open(PYBEL_CONFIG_PATH) as f:
-        default_config = json.load(f)
-
-    default_config[key] = value
-
-    with open(PYBEL_CONFIG_PATH, 'w') as f:
-        json.dump(f, default_config)
-
-
-def set_default_connection(value):
-    """Sets the default connection string with the given value. See
-    http://docs.sqlalchemy.org/en/latest/core/engines.html for examples"""
-    set_default(PYBEL_CONNECTION, value)
-
-
-def set_default_mysql_connection(user=None, password=None, host=None, database=None, charset=None):
-    """Sets the default connection string with MySQL settings
-
-    :param host: MySQL database host
-    :param user: MySQL database user
-    :param password: MySQL database password. Can be None if no password is used.
-    :param database: MySQL database name
-    :param charset: MySQL database character set
-    """
-    kwargs = dict(
-        user=user or 'pybel',
-        host=host or 'localhost',
-        password=password,
-        database=database or 'pybel',
-        charset=charset or 'utf8'
-    )
-
-    fmt = PYBEL_MYSQL_FMT_NOPASS if password is None else PYBEL_MYSQL_FMT_PASS
-
-    set_default_connection(fmt.format(**kwargs))
 
 
 def hash_dump(d):
