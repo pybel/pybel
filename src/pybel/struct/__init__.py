@@ -11,8 +11,7 @@ Convenient property definitions are given for these attributes.
 
 """
 
-from . import graph
-from . import operations
+from . import graph, operations
 from .graph import *
 from .operations import *
 

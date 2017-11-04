@@ -8,7 +8,6 @@ import itertools as itt
 import logging
 import sys
 import time
-
 from operator import itemgetter
 
 from .constants import *

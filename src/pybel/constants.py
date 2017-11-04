@@ -12,10 +12,9 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 :data:`pybel.constants.config`.
 """
 
-from json import load, dump
+from json import dump, load
 from logging import getLogger
-
-from os import path, mkdir, environ, makedirs
+from os import environ, makedirs, mkdir, path
 
 log = getLogger(__name__)
 

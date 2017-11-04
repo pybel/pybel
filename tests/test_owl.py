@@ -7,22 +7,14 @@ from pathlib import Path
 
 from pybel import from_path
 from pybel.constants import *
-from pybel.manager.utils import parse_owl, OWLParser
+from pybel.manager.utils import OWLParser, parse_owl
 from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import (
-    FleetingTemporaryCacheMixin,
-    TestGraphMixin,
-    test_bel_extensions,
-    wine_iri,
-    pizza_iri,
-    test_owl_pizza,
-    test_owl_wine,
-    expected_test_bel_4_metadata,
-    HGNC_URL,
-    test_owl_ado
+    FleetingTemporaryCacheMixin, HGNC_URL, TestGraphMixin, expected_test_bel_4_metadata,
+    pizza_iri, test_bel_extensions, test_owl_ado, test_owl_pizza, test_owl_wine, wine_iri,
 )
-from tests.mocks import mock_bel_resources, mock_parse_owl_xml, mock_parse_owl_rdf
+from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_xml
 
 EXPECTED_PIZZA_NODES = {
     'Pizza',

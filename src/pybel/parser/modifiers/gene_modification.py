@@ -38,13 +38,13 @@ compilers probably won't support these standards. If you agree that this is usef
 the OpenBEL community.
 """
 
-from pyparsing import oneOf, Group
+from pyparsing import Group, oneOf
 
 from .. import language
 from ..baseparser import BaseParser
 from ..parse_identifier import IdentifierParser
 from ..utils import nest, one_of_tags
-from ...constants import KIND, GMOD, BEL_DEFAULT_NAMESPACE, IDENTIFIER, NAME, NAMESPACE
+from ...constants import BEL_DEFAULT_NAMESPACE, GMOD, IDENTIFIER, KIND, NAME, NAMESPACE
 
 __all__ = [
     'gmod_tag',

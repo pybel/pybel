@@ -8,16 +8,7 @@ ability of other existing software is excluded due the immaturity of the BEL to 
 
 """
 
-from . import cx
-from . import extras
-from . import gpickle
-from . import indra
-from . import jgif
-from . import lines
-from . import ndex_utils
-from . import neo4j
-from . import nodelink
-from . import web
+from . import cx, extras, gpickle, indra, jgif, lines, ndex_utils, neo4j, nodelink, web
 from .cx import *
 from .extras import *
 from .gpickle import *

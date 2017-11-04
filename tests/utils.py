@@ -2,12 +2,7 @@
 
 from uuid import uuid4
 
-from pybel.manager.models import (
-    Namespace,
-    NamespaceEntry,
-    Annotation,
-    AnnotationEntry,
-)
+from pybel.manager.models import Annotation, AnnotationEntry, Namespace, NamespaceEntry
 
 
 def make_dummy_namespaces(manager, graph, namespaces):

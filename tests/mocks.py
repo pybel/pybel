@@ -7,19 +7,11 @@ import os
 from networkx import DiGraph
 from onto2nx.ontospy import Ontospy
 
-from pybel.manager.utils import urldefrag, OWLParser
 from pybel.constants import GOCC_LATEST
+from pybel.manager.utils import OWLParser, urldefrag
 from tests.constants import (
-    belns_dir_path,
-    get_uri_name,
-    belanno_dir_path,
-    beleq_dir_path,
-    bel_dir_path,
-    wine_iri,
-    test_owl_wine,
-    pizza_iri,
-    test_owl_pizza,
-    owl_dir_path
+    bel_dir_path, belanno_dir_path, beleq_dir_path, belns_dir_path, get_uri_name, owl_dir_path,
+    pizza_iri, test_owl_pizza, test_owl_wine, wine_iri,
 )
 
 try:

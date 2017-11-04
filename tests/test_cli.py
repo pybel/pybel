@@ -11,11 +11,13 @@ import py2neo.database.status
 from click.testing import CliRunner
 
 from pybel import cli
-from pybel.constants import PYBEL_CONTEXT_TAG, METADATA_NAME
-from pybel.io import from_pickle, from_json, from_path
+from pybel.constants import METADATA_NAME, PYBEL_CONTEXT_TAG
+from pybel.io import from_json, from_path, from_pickle
 from pybel.manager.database_io import from_database
-from tests.constants import BelReconstitutionMixin, FleetingTemporaryCacheMixin
-from tests.constants import test_bel_simple, test_bel_thorough, expected_test_thorough_metadata
+from tests.constants import (
+    BelReconstitutionMixin, FleetingTemporaryCacheMixin, expected_test_thorough_metadata,
+    test_bel_simple, test_bel_thorough,
+)
 from tests.mocks import mock_bel_resources
 
 log = logging.getLogger(__name__)

@@ -15,18 +15,17 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
+import os
 import sys
 import time
 
 import click
-import os
 
 from .canonicalize import to_bel
-from .constants import PYBEL_LOG_DIR, get_cache_connection, config, PYBEL_CONNECTION
-from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
-from .manager import Manager
-from .manager import defaults
-from .manager.database_io import to_database, from_database
+from .constants import PYBEL_CONNECTION, PYBEL_LOG_DIR, config, get_cache_connection
+from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
+from .manager import Manager, defaults
+from .manager.database_io import from_database, to_database
 from .manager.models import Base
 from .utils import set_default_connection, set_default_mysql_connection
 
