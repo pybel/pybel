@@ -3,6 +3,29 @@
 from ..constants import *
 
 
+def entity(name, namespace, identifier=None, location=None):
+    """Creates a dictionary representing a reference to an entity
+
+    :param str name: The name of the entity
+    :param str namespace: The namespace to which the entity belongs
+    :param str identifier: The identifier of the entity in the namespace
+    :param str location: The location of the namespace
+    :rtype: dict
+    """
+    rv = {
+        NAME: name,
+        NAMESPACE: namespace
+    }
+
+    if identifier:
+        rv[ID] = identifier
+
+    if location:
+        rv['location'] = location
+
+    return rv
+
+
 def add_identifier(rv, name, namespace, identifier=None):
     """Adds identifier information to the given dict"""
     rv[NAME] = name
