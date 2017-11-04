@@ -1,35 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
+import json
 import logging
 import os
+from collections import Iterable
 from configparser import ConfigParser
 
-import requests
-from requests.compat import urlparse
-from requests_file import FileAdapter
-
-from .constants import BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN
 from .exc import EmptyResourceError, MissingSectionError
+from .utils import download, is_url
 
 log = logging.getLogger(__name__)
-
-
-def download(url):
-    """Uses requests to download an URL, maybe from a file"""
-    session = requests.Session()
-    session.mount('file://', FileAdapter())
-
-    if url.startswith(BELFRAMEWORK_DOMAIN):
-        url = url.replace(BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN)
-        log.warning('%s has expired. Redirecting to %s', BELFRAMEWORK_DOMAIN, url)
-
-    try:
-        res = session.get(url)
-    except requests.exceptions.ConnectionError as e:
-        raise e
-
-    res.raise_for_status()
-    return res
 
 
 def get_bel_resource_kvp(line, delimiter):
@@ -74,16 +55,6 @@ def parse_bel_resource(lines):
     return res
 
 
-def is_url(s):
-    """Checks if a string is a valid URL
-
-    :param str s: An input string
-    :return: Is the string a valid URL?
-    :rtype: bool
-    """
-    return urlparse(s).scheme != ""
-
-
 def get_lines(location):
     if is_url(location):
         res = download(location)
@@ -112,3 +83,89 @@ def get_bel_resource(location):
         raise EmptyResourceError(location)
 
     return result
+
+
+def names_to_bytes(names):
+    """Reproducibly converts an iterable of strings to bytes
+
+    :param iter[str] names: An iterable of strings
+    :rtype: bytes
+    """
+    names = sorted(names)
+    names_bytes = json.dumps(names).encode('utf8')
+    return names_bytes
+
+
+def hash_names(names, hash_function=None):
+    """Returns the hash of an iterable of strings, or a dict if multiple hash functions given.
+
+    :param iter[str] names: An iterable of strings
+    :param hash_function: A hash function or list of hash functions, like :func:`hashlib.md5` or :func:`hashlib.sha512`
+    :rtype: str
+    """
+    names_bytes = names_to_bytes(names)
+
+    if hash_function is None:
+        hash_function = hashlib.md5
+
+    if isinstance(hash_function, Iterable):
+        return {
+            hf.__name__: hf(names_bytes).hexdigest()
+            for hf in hash_function
+        }
+
+    return hash_function(names_bytes).hexdigest()
+
+
+def hash_bel_resource(file, hash_function=None):
+    """Semantically hashes a BEL resource file
+
+    :param file file: A readable file or file-like
+    :param hash_function: A hash function or list of hash functions, like :func:`hashlib.md5` or :code:`hashlib.sha512`
+    :rtype: str
+    """
+    resource = parse_bel_resource(file)
+
+    return hash_names(
+        resource['Values'],
+        hash_function=hash_function
+    )
+
+
+def get_bel_resource_hash(location, hash_function=None):
+    """Gets a BEL resource file and returns its semantic hash
+
+    :param str location: URL of a resource
+    :param hash_function: A hash function or list of hash functions, like :func:`hashlib.md5` or :code:`hashlib.sha512`
+    :return: The hexadecimal digest of the hash of the values in the resource
+    :rtype: str
+    """
+    resource = get_bel_resource(location)
+
+    return hash_names(
+        resource['Values'],
+        hash_function=hash_function
+    )
+
+
+def check_cacheable(config):
+    """Checks the config returned by :func:`pybel.utils.get_bel_resource` to determine if the resource should be cached.
+
+    If cannot be determined, returns ``False``
+
+    :param dict config: A configuration dictionary representing a BEL resource
+    :return: Should this resource be cached
+    :rtype: bool
+    """
+
+    if 'Processing' in config and 'CacheableFlag' in config['Processing']:
+        flag = config['Processing']['CacheableFlag']
+
+        if 'yes' == flag:
+            return True
+        elif 'no' == flag:
+            return False
+        else:
+            return ValueError('Invalid value for CacheableFlag: {}'.format(flag))
+
+    return False
