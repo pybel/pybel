@@ -28,8 +28,9 @@ from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
+from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
-from ..utils import get_bel_resource, hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
+from ..utils import hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
 
 __all__ = [
     'Manager',

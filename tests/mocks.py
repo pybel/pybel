@@ -118,6 +118,6 @@ def parse_owl_rdf_resolver(iri):
     return g
 
 
-mock_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)
+mock_bel_resources = mock.patch('pybel.resources.definitions.requests.Session', side_effect=MockSession)
 mock_parse_owl_xml = mock.patch('pybel.manager.utils.parse_owl_xml', side_effect=parse_owl_xml_resolver)
 mock_parse_owl_rdf = mock.patch('pybel.manager.utils.parse_owl_rdf', side_effect=parse_owl_rdf_resolver)

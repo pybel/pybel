@@ -5,8 +5,8 @@ import unittest
 
 import networkx as nx
 
-from pybel.io.line_utils import sanitize_file_lines
 from pybel.parser.utils import any_subdict_matches, cartesian_dictionary
+from pybel.resources.document import sanitize_file_lines
 from pybel.utils import ensure_quotes, subdict_matches
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

@@ -2,14 +2,13 @@
 
 """This module contains IO functions for BEL scripts"""
 
-import logging
-
 import codecs
+import logging
 import os
 
 from .line_utils import parse_lines
+from ..resources.definitions import download
 from ..struct import BELGraph
-from ..utils import download
 
 __all__ = [
     'from_lines',

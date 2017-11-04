@@ -5,13 +5,13 @@ import unittest
 import networkx as nx
 
 import pybel.utils
-from pybel.canonicalize import postpend_location, node_to_bel
+from pybel.canonicalize import node_to_bel, postpend_location
 from pybel.constants import *
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.utils import nest
-from pybel.utils import flatten_citation
-from pybel.utils import get_bel_resource, list2tuple, tokenize_version
+from pybel.resources.definitions import get_bel_resource
+from pybel.utils import flatten_citation, list2tuple, tokenize_version
 from tests.constants import test_an_1
 from tests.mocks import mock_bel_resources
 
