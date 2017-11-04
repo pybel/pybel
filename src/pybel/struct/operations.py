@@ -19,9 +19,10 @@ def _left_full_node_join(g, h):
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
     """
-    for node in h.nodes_iter():
-        if node not in g:
-            g.add_node(node, attr_dict=h.node[node])
+    for node in h:
+        if node in g:
+            continue
+        g.add_node(node, attr_dict=h.node[node])
 
 
 def left_full_join(g, h, use_hash=True):
