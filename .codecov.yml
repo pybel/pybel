@@ -9,3 +9,4 @@ coverage:
   ignore:
     - "tests/*"
     - "src/pybel/cli.py"
+    - "src/pybel/__main__.py"
