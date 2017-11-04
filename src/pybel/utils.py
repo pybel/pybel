@@ -1,31 +1,24 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
 import json
 import logging
+import os
 import pickle
+from collections import MutableMapping, defaultdict
 from configparser import ConfigParser
 from datetime import datetime
 
-import hashlib
 import networkx as nx
-import os
 import requests
 import requests.exceptions
-from collections import defaultdict, MutableMapping
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
 
 from .constants import (
-    CITATION_ENTRIES,
-    BELFRAMEWORK_DOMAIN,
-    OPENBEL_DOMAIN,
-    PYBEL_EDGE_DATA_KEYS,
-    VERSION,
-    PYBEL_CONFIG_PATH,
-    PYBEL_CONNECTION,
-    CITATION_TYPE,
-    CITATION_REFERENCE,
+    BELFRAMEWORK_DOMAIN, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, OPENBEL_DOMAIN,
+    PYBEL_CONFIG_PATH, PYBEL_CONNECTION, PYBEL_EDGE_DATA_KEYS, VERSION,
 )
 from .exceptions import EmptyResourceError, MissingSectionError
 
@@ -53,6 +46,19 @@ def download(url):
     return res
 
 
+def get_bel_resource_kvp(line, delimiter):
+    """
+
+    :param str line:
+    :param str delimiter:
+    :rtype: tuple[str,str]
+    """
+    split_line = line.rsplit(delimiter, 1)
+    key = split_line[0].strip()
+    value = split_line[1].strip() if 2 == len(split_line) else None
+    return key, value
+
+
 def parse_bel_resource(lines):
     """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
     
@@ -70,12 +76,10 @@ def parse_bel_resource(lines):
 
     delimiter = metadata_config['Processing']['DelimiterString']
 
-    value_dict = {}
-    for line in lines[value_line:]:
-        sline = line.rsplit(delimiter, 1)
-        key = sline[0].strip()
-
-        value_dict[key] = sline[1].strip() if len(sline) == 2 else None
+    value_dict = dict(
+        get_bel_resource_kvp(line, delimiter)
+        for line in lines[value_line:]
+    )
 
     res = {}
     res.update({k: dict(v) for k, v in metadata_config.items()})
