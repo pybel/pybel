@@ -9,7 +9,7 @@ This module contains IO functions for interconversion between BEL graphs and pyt
 """
 
 from networkx import read_gpickle, write_gpickle
-from six.moves.cPickle import loads, dumps, HIGHEST_PROTOCOL
+from six.moves.cPickle import HIGHEST_PROTOCOL, dumps, loads
 
 from .utils import raise_for_not_bel, raise_for_old_graph
 from ..struct import BELGraph

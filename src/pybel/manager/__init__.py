@@ -8,12 +8,7 @@ downloading and parsing upon each compilation.
 
 """
 
-from . import base_manager
-from . import cache_manager
-from . import database_io
-from . import make_json_serializable
-from . import models
-from . import query_manager
+from . import base_manager, cache_manager, database_io, make_json_serializable, models, query_manager
 from .base_manager import *
 from .cache_manager import *
 from .database_io import *

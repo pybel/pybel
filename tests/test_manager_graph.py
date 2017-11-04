@@ -6,7 +6,6 @@ import logging
 import os
 import time
 import unittest
-from collections import Counter
 
 import sqlalchemy.exc
 

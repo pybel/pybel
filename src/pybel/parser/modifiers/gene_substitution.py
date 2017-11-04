@@ -36,7 +36,7 @@ from pyparsing import pyparsing_common as ppc
 from ..baseparser import BaseParser
 from ..language import dna_nucleotide
 from ..utils import nest, one_of_tags
-from ...constants import GSUB_REFERENCE, GSUB_POSITION, GSUB_VARIANT, HGVS, KIND, IDENTIFIER
+from ...constants import GSUB_POSITION, GSUB_REFERENCE, GSUB_VARIANT, HGVS, IDENTIFIER, KIND
 
 __all__ = [
     'gsub_tag',

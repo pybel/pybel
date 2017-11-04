@@ -6,7 +6,8 @@ import datetime
 
 from sqlalchemy import (
     Boolean, Column, DDL, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text,
-    UniqueConstraint, )
+    UniqueConstraint,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 

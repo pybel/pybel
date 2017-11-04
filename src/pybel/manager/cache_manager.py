@@ -11,10 +11,10 @@ from __future__ import unicode_literals
 
 import logging
 import time
-from itertools import groupby
-
 from collections import defaultdict
 from copy import deepcopy
+from itertools import groupby
+
 from six import string_types
 from sqlalchemy import and_, exists, func
 

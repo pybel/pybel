@@ -1,31 +1,24 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
 import json
 import logging
+import os
 import pickle
+from collections import MutableMapping, defaultdict
 from configparser import ConfigParser
 from datetime import datetime
 
-import hashlib
 import networkx as nx
-import os
 import requests
 import requests.exceptions
-from collections import defaultdict, MutableMapping
 from requests.compat import urlparse
 from requests_file import FileAdapter
 from six import string_types
 
 from .constants import (
-    CITATION_ENTRIES,
-    BELFRAMEWORK_DOMAIN,
-    OPENBEL_DOMAIN,
-    PYBEL_EDGE_DATA_KEYS,
-    VERSION,
-    PYBEL_CONFIG_PATH,
-    PYBEL_CONNECTION,
-    CITATION_TYPE,
-    CITATION_REFERENCE,
+    BELFRAMEWORK_DOMAIN, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, OPENBEL_DOMAIN,
+    PYBEL_CONFIG_PATH, PYBEL_CONNECTION, PYBEL_EDGE_DATA_KEYS, VERSION,
 )
 from .exceptions import EmptyResourceError, MissingSectionError
 

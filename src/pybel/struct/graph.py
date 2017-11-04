@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from copy import deepcopy
 
 import networkx
-from copy import deepcopy
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join

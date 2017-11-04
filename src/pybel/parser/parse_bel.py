@@ -9,27 +9,23 @@ This module handles parsing BEL relations and validation of semantics.
 import itertools as itt
 import logging
 
-from pyparsing import Suppress, delimitedList, oneOf, Optional, Group, replaceWith, MatchFirst, And, StringEnd
+from pyparsing import And, Group, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
 
 from .baseparser import BaseParser
 from .canonicalize import (
     modifier_po_to_dict,
-    po_to_dict
+    po_to_dict,
 )
-from .language import activity_labels, activities
+from .language import activities, activity_labels
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_exceptions import (
-    NestedRelationWarning,
-    MalformedTranslocationWarning,
-    MissingCitationException,
-    InvalidFunctionSemantic,
-    MissingSupportWarning,
-    RelabelWarning,
+    InvalidFunctionSemantic, MalformedTranslocationWarning, MissingCitationException,
+    MissingSupportWarning, NestedRelationWarning, RelabelWarning,
 )
 from .parse_identifier import IdentifierParser
-from .utils import cartesian_dictionary, WCW, nest, one_of_tags, triple, quote
+from .utils import WCW, cartesian_dictionary, nest, one_of_tags, quote, triple
 from ..constants import *
 
 __all__ = ['BelParser']

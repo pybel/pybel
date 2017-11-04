@@ -5,7 +5,7 @@ from onto2nx.ontospy import Ontospy
 from onto2nx.parse_owl_xml import OWLParser
 from requests.compat import urldefrag
 
-from ..utils import parse_datetime, download
+from ..utils import download, parse_datetime
 
 
 def parse_owl(url):

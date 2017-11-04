@@ -56,11 +56,11 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
    BEL 2.0 specification on `proteolytic fragments (2.2.3) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
 """
 
-from pyparsing import pyparsing_common as ppc, Keyword, Optional
+from pyparsing import Keyword, Optional, pyparsing_common as ppc
 
 from ..baseparser import BaseParser
-from ..utils import WCW, word, nest, one_of_tags
-from ...constants import FRAGMENT, KIND, FRAGMENT_START, FRAGMENT_STOP, FRAGMENT_MISSING, FRAGMENT_DESCRIPTION
+from ..utils import WCW, nest, one_of_tags, word
+from ...constants import FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, KIND
 
 __all__ = [
     'fragment_tag',
