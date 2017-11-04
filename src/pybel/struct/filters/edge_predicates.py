@@ -8,6 +8,20 @@ __all__ = [
 ]
 
 
+def keep_edge_permissive(graph, u, v, k, d):
+    """Passes for all edges
+
+    :param BELGraph graph: A BEL Graph
+    :param tuple u: A BEL node
+    :param tuple v: A BEL node
+    :param int k: The edge key between the given nodes
+    :param dict d: The edge data dictionary
+    :return: Always returns :code:`True`
+    :rtype: bool
+    """
+    return True
+
+
 def edge_data_has_pubmed_citation(data):
     """Checks if the edge data dictionary has a PubMed citation
 
@@ -30,3 +44,17 @@ def edge_has_pubmed_citation(graph, u, v, k, data):
     :rtype: bool
     """
     return edge_data_has_pubmed_citation(data)
+
+
+def edge_has_provenance(graph, u, v, k, d):
+    """Passes for edges with provenance information (i.e. citation and evidence)
+
+    :param BELGraph graph: A BEL Graph
+    :param tuple u: A BEL node
+    :param tuple v: A BEL node
+    :param int k: The edge key between the given nodes
+    :param dict d: The edge data dictionary
+    :return: If the edge has both a citation and and evidence entry
+    :rtype: bool
+    """
+    return graph.has_edge_citation(u, v, k) and graph.has_edge_evidence(u, v, k)

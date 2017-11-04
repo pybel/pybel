@@ -13,8 +13,9 @@ A general use for a node filter function is to use the built-in :func:`filter` i
 :code:`filter(your_node_filter, graph.nodes_iter())`
 """
 
+from collections import Iterable
+
 __all__ = [
-    'keep_node_permissive',
     'concatenate_node_filters',
     'filter_nodes',
     'get_nodes',
@@ -22,26 +23,11 @@ __all__ = [
 ]
 
 
-def keep_node_permissive(graph, node):
-    """A default node filter that always evaluates to :data:`True`.
-
-    Given BEL graph :code:`graph`, applying :func:`keep_node_permissive` with a filter on the nodes iterable
-    as in :code:`filter(keep_node_permissive, graph.nodes_iter())` will result in the same iterable as
-    :meth:`BELGraph.nodes_iter`
-
-    :param BELGraph graph: A BEL graph
-    :param tuple node: The node
-    :return: Always returns :data:`True`
-    :rtype: bool
-    """
-    return True
-
-
-def concatenate_node_filters(filters=None):
+def concatenate_node_filters(node_filters=None):
     """Concatenates multiple node filters to a new filter that requires all filters to be met
 
-    :param filters: A predicate or list of predicates (graph, node) -> bool
-    :type filters: types.FunctionType or iter[types.FunctionType]
+    :param node_filters: A predicate or list of predicates (graph, node) -> bool
+    :type node_filters: types.FunctionType or iter[types.FunctionType]
     :return: A combine filter (graph, node) -> bool
     :rtype: types.FunctionType
 
@@ -52,20 +38,19 @@ def concatenate_node_filters(filters=None):
     >>> app_filter = node_exclusion_filter_builder([(PROTEIN, 'HGNC', 'APP'), (GENE, 'HGNC', 'APP')])
     >>> my_filter = concatenate_node_filters([path_filter, app_filter])
     """
-
     # If no filters are given, then return the trivially permissive filter
-    if not filters:
-        return keep_node_permissive
+    if not node_filters:
+        return lambda graph, node: True
 
     # If a filter outside a list is given, just return it
-    if not isinstance(filters, (list, tuple, set)):
-        return filters
+    if not isinstance(node_filters, Iterable):
+        return node_filters
 
-    filters = list(filters)
+    node_filters = list(node_filters)
 
     # If only one filter is given, don't bother wrapping it
-    if 1 == len(filters):
-        return filters[0]
+    if 1 == len(node_filters):
+        return node_filters[0]
 
     def concatenated_node_filter(graph, node):
         """Passes only for a nodes that pass all enclosed filters
@@ -75,7 +60,10 @@ def concatenate_node_filters(filters=None):
         :return: If the node passes all enclosed filters
         :rtype: bool
         """
-        return all(f(graph, node) for f in filters)
+        return all(
+            node_filter(graph, node)
+            for node_filter in node_filters
+        )
 
     return concatenated_node_filter
 
@@ -92,11 +80,11 @@ def filter_nodes(graph, node_filters=None):
 
     # If no filters are given, return the standard node iterator
     if not node_filters:
-        for node in graph.nodes_iter():
+        for node in graph:
             yield node
     else:
-        concatenated_filter = concatenate_node_filters(node_filters)
-        for node in graph.nodes_iter():
+        concatenated_filter = concatenate_node_filters(node_filters=node_filters)
+        for node in graph:
             if concatenated_filter(graph, node):
                 yield node
 
@@ -122,4 +110,4 @@ def count_passed_node_filter(graph, node_filters=None):
     :return: The number of nodes passing the given set of filters
     :rtype: int
     """
-    return sum(1 for _ in filter_nodes(graph, node_filters))
+    return sum(1 for _ in filter_nodes(graph, node_filters=node_filters))

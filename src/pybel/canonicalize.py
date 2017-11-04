@@ -13,7 +13,7 @@ from operator import itemgetter
 
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .struct.filters import iter_qualified_edges
+from .struct.filters import filter_qualified_edges
 from .utils import ensure_quotes, flatten_citation, get_version, hash_edge
 
 __all__ = [
@@ -260,7 +260,7 @@ def sort_qualified_edges(graph):
     :param BELGraph graph: A BEL graph
     :rtype: tuple[tuple,tuple,dict]
     """
-    qualified_edges_iter = iter_qualified_edges(graph)
+    qualified_edges_iter = filter_qualified_edges(graph)
     qualified_edges = sorted(qualified_edges_iter, key=_sort_qualified_edges_helper)
     return qualified_edges
 

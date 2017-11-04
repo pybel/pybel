@@ -8,9 +8,10 @@ __all__ = [
 
 
 def get_syntax_errors(graph):
-    """Gets only the syntax errors from the graph
+    """Gets a list of the syntax errors from the BEL script underlying the graph.
 
-    :param pybel.BELGraph graph:
+    :param pybel.BELGraph graph: A BEL graph
+    :return: A list of 4-tuples of line number, line text, exception, and annotations present in the parser
     :rtype: list[tuple]
     """
     return [

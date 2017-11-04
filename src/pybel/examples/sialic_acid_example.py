@@ -25,6 +25,7 @@ inflammation in Alzheimer's disease".
 """
 
 from ..constants import *
+from ..dsl.nodes import abundance, complex_abundance, protein
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -65,27 +66,14 @@ sialic_acid_graph.annotation_url.update({
     'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno'
 })
 
-sialic_acid = {
-    FUNCTION: ABUNDANCE,
-    NAMESPACE: 'CHEBI',
-    NAME: 'sialic acid',
-    ID: '26667'
-}
-
-cd33 = {
-    FUNCTION: PROTEIN,
-    NAMESPACE: 'HGNC',
-    NAME: 'CD33',
-    ID: '1659'
-}
-
-sialic_acid_cd33_complex = {
-    FUNCTION: COMPLEX,
-    MEMBERS: [
-        sialic_acid,
-        cd33
-    ]
-}
+sialic_acid = abundance(name='sialic acid', namespace='CHEBI', identifier='26667')
+cd33 = protein(name='CD33', namespace='HGNC', identifier='1659')
+sialic_acid_cd33_complex = complex_abundance([sialic_acid, cd33])
+shp1 = protein(namespace='HGNC', name='PTPN6', identifier='9658')
+shp2 = protein(namespace='HGNC', name='PTPN11', identifier='9644')
+syk = protein(namespace='HGNC', name='SYK', identifier='11491')
+dap12 = protein(namespace='HGNC', name='TYROBP', identifier='12449')
+trem2 = protein(namespace='HGNC', name='TREM2', identifier='17761')
 
 cd33_phosphorylated = {
     FUNCTION: PROTEIN,
@@ -101,41 +89,6 @@ cd33_phosphorylated = {
         }
     ],
     ID: '1659'
-}
-
-shp1 = {
-    FUNCTION: PROTEIN,
-    NAMESPACE: 'HGNC',
-    NAME: 'PTPN6',
-    ID: '9658'
-}
-
-shp2 = {
-    FUNCTION: PROTEIN,
-    NAMESPACE: 'HGNC',
-    NAME: 'PTPN11',
-    ID: '9644'
-}
-
-syk = {
-    FUNCTION: PROTEIN,
-    NAMESPACE: 'HGNC',
-    NAME: 'SYK',
-    ID: '11491'
-}
-
-dap12 = {
-    FUNCTION: PROTEIN,
-    NAMESPACE: 'HGNC',
-    NAME: 'TYROBP',
-    ID: '12449'
-}
-
-trem2 = {
-    FUNCTION: PROTEIN,
-    NAMESPACE: 'HGNC',
-    NAME: 'TREM2',
-    ID: '17761'
 }
 
 immune_response = {

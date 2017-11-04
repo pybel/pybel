@@ -16,11 +16,6 @@ def safe_get_dict(tokens):
     return dict(tokens)
 
 
-def safe_get_list(tokens):
-    if hasattr(tokens, 'asList'):
-        return tokens.asList()
-    return list(tokens)
-
 
 def identifier_to_tuple(tokens):
     """Extracts the namespace and name pair from the tokens and creates a 2-tuple

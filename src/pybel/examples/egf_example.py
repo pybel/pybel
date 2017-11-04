@@ -41,7 +41,7 @@
 """
 
 from ..constants import *
-from ..dsl.nodes import protein, protein_complex
+from ..dsl.nodes import protein, complex_abundance
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -79,7 +79,7 @@ rel = protein('REL', 'HGNC')
 rela = protein('RELA', 'HGNC')
 relb = protein('RELB', 'HGNC')
 
-nfkb_complex = protein_complex([nfkb1, nfkb2, rel, rela, relb])
+nfkb_complex = complex_abundance([nfkb1, nfkb2, rel, rela, relb])
 
 apoptosis = {
     FUNCTION: BIOPROCESS,

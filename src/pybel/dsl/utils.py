@@ -3,10 +3,10 @@
 from ..constants import *
 
 
-def add_identifier(rv, namespace, name, identifier=None):
+def add_identifier(rv, name, namespace, identifier=None):
     """Adds identifier information to the given dict"""
-    rv[NAMESPACE] = namespace
     rv[NAME] = name
+    rv[NAMESPACE] = namespace
 
     if identifier:
         rv[ID] = identifier

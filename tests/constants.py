@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
+import tempfile
 import unittest
 from json import dumps
 
-import os
-import tempfile
 from requests.compat import urlparse
 
 from pybel import BELGraph

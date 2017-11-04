@@ -4,13 +4,10 @@ import unittest
 
 from pybel import BELGraph
 from pybel.struct.filters import (
-    keep_node_permissive,
-    filter_edges,
-    keep_edge_permissive,
-    get_nodes,
-    count_passed_node_filter,
-    count_passed_edge_filter,
+    count_passed_edge_filter, count_passed_node_filter, filter_edges, get_nodes,
 )
+from pybel.struct.filters.edge_predicates import keep_edge_permissive
+from pybel.struct.filters.node_predicates import keep_node_permissive
 
 
 def make_edge_iterator_set(it):
