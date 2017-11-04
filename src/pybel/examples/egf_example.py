@@ -41,7 +41,7 @@
 """
 
 from ..constants import *
-from ..dsl.nodes import protein, complex_abundance
+from ..dsl.nodes import bioprocess, complex_abundance, protein
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -81,12 +81,7 @@ relb = protein('RELB', 'HGNC')
 
 nfkb_complex = complex_abundance([nfkb1, nfkb2, rel, rela, relb])
 
-apoptosis = {
-    FUNCTION: BIOPROCESS,
-    NAMESPACE: 'GOBP',
-    NAME: 'apoptotic process',
-    ID: '0006915'
-}
+apoptosis = bioprocess(namespace='GOBP', name='apoptotic process', identifier='0006915')
 
 egf_graph.add_qualified_edge(
     ar,

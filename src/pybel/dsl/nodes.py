@@ -15,26 +15,65 @@ def _make_abundance(func, name, namespace, identifier=None):
     return rv
 
 
-def protein(name, namespace, identifier=None):
-    """Returns the node data dictionary for a protein
+def pmod(name, code=None, position=None, namespace=None, identifier=None):
+    """Builds a protein modification dict
 
-    :param str name: The database's preferred name or label for this protein
-    :param str namespace: The name of the database used to identify this protein
-    :param str identifier: The database's identifier for this protein
+    :param str name: The name of the modification
+    :param str code: The three letter amino acid code for the affected residue
+    :param int position: The position of the affected residue
+    :param str namespace: The namespace to which the name of this modification belongs
+    :param str identifier: The identifier of the name of the modification
     :rtype: dict
     """
-    return _make_abundance(PROTEIN, name=name, namespace=namespace, identifier=identifier)
+    rv = {KIND: PMOD, IDENTIFIER: {}}
+    add_identifier(rv[IDENTIFIER], name=name, namespace=(namespace or BEL_DEFAULT_NAMESPACE), identifier=identifier)
+
+    if code:
+        rv[PMOD_CODE] = code
+
+    if position:
+        rv[PMOD_POSITION] = position
+
+    return rv
+
+
+def protein(name, namespace, identifier=None, variants=None):
+    """Returns the node data dictionary for a protein
+
+    :param str name: The database's preferred name or label for this entity
+    :param str namespace: The name of the database used to identify this entity
+    :param str identifier: The database's identifier for this entity
+    :param list variants: A list of variants
+    :rtype: dict
+    """
+    rv = _make_abundance(PROTEIN, name=name, namespace=namespace, identifier=identifier)
+
+    if variants:
+        rv[VARIANTS] = variants
+
+    return rv
 
 
 def abundance(name, namespace, identifier=None):
     """Returns the node data dictionary for an abundance
 
-    :param str name: The database's preferred name or label for this abundance
-    :param str namespace: The name of the database used to identify this abundance
-    :param str identifier: The database's identifier for this abundance
+    :param str name: The database's preferred name or label for this entity
+    :param str namespace: The name of the database used to identify this entity
+    :param str identifier: The database's identifier for this entity
     :rtype: dict
     """
     return _make_abundance(ABUNDANCE, name=name, namespace=namespace, identifier=identifier)
+
+
+def bioprocess(name, namespace, identifier=None):
+    """Returns the node data dictionary for a biological process
+
+    :param str name: The database's preferred name or label for this entity
+    :param str namespace: The name of the database used to identify this entity
+    :param str identifier: The database's identifier for this entity
+    :rtype: dict
+    """
+    return _make_abundance(BIOPROCESS, name=name, namespace=namespace, identifier=identifier)
 
 
 def complex_abundance(members, name=None, namespace=None, identifier=None):

@@ -25,7 +25,7 @@ inflammation in Alzheimer's disease".
 """
 
 from ..constants import *
-from ..dsl.nodes import abundance, complex_abundance, protein
+from ..dsl.nodes import abundance, bioprocess, complex_abundance, pmod, protein
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -74,29 +74,8 @@ shp2 = protein(namespace='HGNC', name='PTPN11', identifier='9644')
 syk = protein(namespace='HGNC', name='SYK', identifier='11491')
 dap12 = protein(namespace='HGNC', name='TYROBP', identifier='12449')
 trem2 = protein(namespace='HGNC', name='TREM2', identifier='17761')
-
-cd33_phosphorylated = {
-    FUNCTION: PROTEIN,
-    NAMESPACE: 'HGNC',
-    NAME: 'CD33',
-    VARIANTS: [
-        {
-            KIND: PMOD,
-            IDENTIFIER: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'Ph'
-            }
-        }
-    ],
-    ID: '1659'
-}
-
-immune_response = {
-    FUNCTION: BIOPROCESS,
-    NAMESPACE: 'GOBP',
-    NAME: 'immune response',
-    ID: '0006955'
-}
+cd33_phosphorylated = protein(name='CD33', namespace='HGNC', identifier='1659', variants=[pmod('Ph')])
+immune_response = bioprocess(name='immune response', namespace='GOBP', identifier='0006955')
 
 sialic_acid_graph.add_qualified_edge(
     sialic_acid_cd33_complex,
