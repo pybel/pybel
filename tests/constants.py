@@ -10,6 +10,7 @@ from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
+from pybel.dsl.utils import make_translocation_modifier_dict
 from pybel.manager import Manager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
@@ -310,10 +311,10 @@ def help_check_hgnc(self, namespace_dict):
     self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
     self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
 
+
 akt1 = (PROTEIN, 'HGNC', 'AKT1')
 cftr = (PROTEIN, 'HGNC', 'CFTR')
-mia=(PROTEIN, 'HGNC', 'MIA')
-
+mia = (PROTEIN, 'HGNC', 'MIA')
 
 BEL_THOROUGH_NODES = {
     (ABUNDANCE, 'CHEBI', 'oxygen atom'),
@@ -459,7 +460,6 @@ citation_2 = {
 
 evidence_1 = "Evidence 1"
 
-
 BEL_THOROUGH_EDGES = [
     ((ABUNDANCE, 'CHEBI', 'oxygen atom'), (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
         EVIDENCE: 'These are mostly made up',
@@ -576,13 +576,10 @@ BEL_THOROUGH_EDGES = [
             MODIFIER: ACTIVITY,
             EFFECT: {NAME: 'kin', NAMESPACE: BEL_DEFAULT_NAMESPACE}
         },
-        OBJECT: {
-            MODIFIER: TRANSLOCATION,
-            EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
-            }
-        },
+        OBJECT: make_translocation_modifier_dict(
+            {NAMESPACE: 'GOCC', NAME: 'intracellular'},
+            {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
+        ),
     }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
      (GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)), {
@@ -687,10 +684,10 @@ BEL_THOROUGH_EDGES = [
         RELATION: HAS_VARIANT,
     }),
     ((PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')), (PATHOLOGY, 'MESHD', 'Adenocarcinoma'), {
-         EVIDENCE: 'These are mostly made up',
-         CITATION: citation_1,
-         RELATION: INCREASES,
-     }),
+        EVIDENCE: 'These are mostly made up',
+        CITATION: citation_1,
+        RELATION: INCREASES,
+    }),
     ((PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (5, 20))), (COMPLEX, 'GOCC', 'interleukin-23 complex'), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
@@ -723,16 +720,20 @@ BEL_THOROUGH_EDGES = [
             MODIFIER: TRANSLOCATION,
             EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+            }
         },
     }),
     ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'EGFR'), {
         EVIDENCE: 'These are mostly made up',
         CITATION: citation_1,
         RELATION: INCREASES,
-        OBJECT: {MODIFIER: TRANSLOCATION, EFFECT: {
-            FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-            TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}},
+        OBJECT: {
+            MODIFIER: TRANSLOCATION, EFFECT: {
+                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+            }
+        },
     }),
     ((RNA, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
@@ -780,8 +781,8 @@ BEL_THOROUGH_EDGES = [
         RELATION: HAS_VARIANT,
     }),
     ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')), (PROTEIN, 'HGNC', 'IL6'), {
-         RELATION: HAS_COMPONENT,
-     }),
+        RELATION: HAS_COMPONENT,
+    }),
     ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')),
      (COMPLEX, 'GOCC', 'interleukin-23 complex'), {
          RELATION: HAS_COMPONENT,
@@ -793,11 +794,11 @@ BEL_THOROUGH_EDGES = [
          RELATION: DECREASES,
      }),
     ((PROTEIN, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: DIRECTLY_DECREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: DIRECTLY_DECREASES,
+        SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
+    }),
     ((GENE, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
@@ -826,32 +827,32 @@ BEL_THOROUGH_EDGES = [
         RELATION: HAS_COMPONENT,
     }),
     ((COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')), (PROTEIN, 'HGNC', 'F9'), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: REGULATES,
-         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
-         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: REGULATES,
+        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
+    }),
     ((PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), (PROTEIN, 'HGNC', 'GSK3B'), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: POSITIVE_CORRELATION,
-         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: POSITIVE_CORRELATION,
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+    }),
     ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), {
         RELATION: HAS_VARIANT,
     }),
     ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: POSITIVE_CORRELATION,
-         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: POSITIVE_CORRELATION,
+        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+    }),
     ((PATHOLOGY, 'MESHD', 'Psoriasis'), (PATHOLOGY, 'MESHD', 'Skin Diseases'), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: IS_A,
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: IS_A,
+    }),
     ((
          REACTION,
          (

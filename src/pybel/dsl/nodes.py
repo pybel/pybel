@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .utils import add_identifier
 from ..constants import *
 
 __all__ = [
@@ -8,19 +9,11 @@ __all__ = [
 ]
 
 
-def _add_identifier(rv, namespace, name, identifier=None):
-    rv[NAMESPACE] = namespace
-    rv[NAME] = name
-
-    if identifier:
-        rv[ID] = identifier
-
-
-def protein(namespace, name, identifier=None): # TODO make name first, and namespace default to HGNC
+def protein(name, namespace, identifier=None):
     """Returns the node data dictionary for a protein
 
-    :param str namespace: The name of the database used to identify this protein
     :param str name: The database's preferred name or label for this protein
+    :param str namespace: The name of the database used to identify this protein
     :param str identifier: The database's identifier for this protein
     :rtype: dict
     """
@@ -28,18 +21,18 @@ def protein(namespace, name, identifier=None): # TODO make name first, and names
         FUNCTION: PROTEIN,
     }
 
-    _add_identifier(rv, namespace, name, identifier=identifier)
+    add_identifier(rv, namespace, name, identifier=identifier)
 
     return rv
 
 
-def protein_complex(proteins, namespace=None, name=None, identifier=None):
+def protein_complex(proteins, name=None, namespace=None, identifier=None):
     """Returns the node data dictionary for a protein complex
 
     :param list[dict] proteins:
-    :param str namespace:
-    :param str name:
-    :param str identifier:
+    :param str name: The name of the complex
+    :param str namespace: The namespace from which the name originates
+    :param str identifier: The identifier in the namespace in which the name originates
     :rtype: dict
     """
     rv = {
@@ -48,6 +41,6 @@ def protein_complex(proteins, namespace=None, name=None, identifier=None):
     }
 
     if namespace and name:
-        _add_identifier(rv, namespace, name, identifier=identifier)
+        add_identifier(rv, namespace, name, identifier=identifier)
 
     return rv

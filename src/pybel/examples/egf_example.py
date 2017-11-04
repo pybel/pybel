@@ -67,17 +67,17 @@ egf_graph.annotation_url.update({
     'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno'
 })
 
-ar = protein('HGNC', 'AR')
-egf = protein('HGNC', 'AR')
-ifna1 = protein('HGNC', 'IFNA1')
-ifng = protein('HGNC', 'IFNG')
-vcp = protein('HGNC', 'VCP')
+ar = protein('AR', 'HGNC')
+egf = protein('AR', 'HGNC')
+ifna1 = protein('IFNA1', 'HGNC')
+ifng = protein('IFNG', 'HGNC')
+vcp = protein('VCP', 'HGNC')
 
-nfkb1 = protein('HGNC', 'NFKB1')
-nfkb2 = protein('HGNC', 'NFKB2')
-rel = protein('HGNC', 'REL')
-rela = protein('HGNC', 'RELA')
-relb = protein('HGNC', 'RELB')
+nfkb1 = protein('NFKB1', 'HGNC')
+nfkb2 = protein('NFKB2', 'HGNC')
+rel = protein('REL', 'HGNC')
+rela = protein('RELA', 'HGNC')
+relb = protein('RELB', 'HGNC')
 
 nfkb_complex = protein_complex([nfkb1, nfkb2, rel, rela, relb])
 

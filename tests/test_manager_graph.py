@@ -13,7 +13,7 @@ import sqlalchemy.exc
 import pybel
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
-from pybel.dsl import protein as dsl_protein
+from pybel.dsl import protein
 from pybel.manager import models
 from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
 from pybel.utils import hash_citation, hash_evidence, hash_node
@@ -33,12 +33,8 @@ def protein_tuple(name):
     return PROTEIN, 'HGNC', name
 
 
-def protein_data(name):
-    return dsl_protein('HGNC', name)
-
-
-def protein(name):
-    return protein_tuple(name), protein_data(name)
+def protein_pair(name):
+    return protein_tuple(name), protein(name, namespace='HGNC')
 
 
 def complex_tuple(names):
@@ -55,19 +51,19 @@ def complex(names):
     return complex_tuple(tuple_names), complex_data(data_names)
 
 
-fos = fos_tuple, fos_data = protein('FOS')
-jun = jun_tuple, jun_data = protein('JUN')
+fos = fos_tuple, fos_data = protein_pair('FOS')
+jun = jun_tuple, jun_data = protein_pair('JUN')
 
 ap1_complex_tuple = COMPLEX, fos_tuple, jun_tuple
 ap1_complex_data = complex_data([fos_data, jun_data])
 
-egfr_tuple, egfr_data = protein('EGFR')
+egfr_tuple, egfr_data = protein_pair('EGFR')
 egfr_dimer = COMPLEX, egfr_tuple, egfr_tuple
 egfr_dimer_data = complex_data([egfr_data, egfr_data])
 
-yfg_tuple, yfg_data = protein('YFG')
+yfg_tuple, yfg_data = protein_pair('YFG')
 
-e2f4 = e2f4_tuple, e2f4_data = protein('E2F4')
+e2f4 = e2f4_tuple, e2f4_data = protein_pair('E2F4')
 
 bound_ap1_e2f4_tuple = COMPLEX, ap1_complex_tuple, e2f4_tuple
 bound_ap1_e2f4_data = complex_data([ap1_complex_data, e2f4_data])
@@ -203,10 +199,10 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
     @mock_bel_resources
     def test_translocation(self, mock):
         """This test checks that a translocation gets in the database properly"""
-        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
+        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test translocation network")
 
-        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
-        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+        u = graph.add_node_from_data(protein('YFG', 'HGNC'))
+        v = graph.add_node_from_data(protein('YFG2', 'HGNC'))
 
         graph.add_qualified_edge(
             u,
@@ -1575,8 +1571,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url['nope'] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
 
-        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
-        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+        u = graph.add_node_from_data(protein('YFG', 'HGNC'))
+        v = graph.add_node_from_data(protein('YFG2', 'HGNC'))
 
         graph.add_qualified_edge(
             u,
@@ -1613,8 +1609,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url['nope'] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
 
-        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
-        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+        u = graph.add_node_from_data(protein('YFG', 'HGNC'))
+        v = graph.add_node_from_data(protein('YFG2', 'HGNC'))
 
         graph.add_qualified_edge(
             u,

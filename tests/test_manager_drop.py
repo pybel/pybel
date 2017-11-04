@@ -7,8 +7,8 @@ from tests.constants import TemporaryCacheMixin, test_citation_dict, test_eviden
 from tests.mocks import mock_bel_resources
 from tests.utils import make_dummy_annotations, make_dummy_namespaces
 
-yfg1 = protein('HGNC', 'YFG1')
-yfg2 = protein('HGNC', 'YFG1')
+yfg1 = protein('YFG1', 'HGNC')
+yfg2 = protein('YFG1', 'HGNC')
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
