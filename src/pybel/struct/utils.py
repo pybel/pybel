@@ -2,28 +2,7 @@
 
 from collections import defaultdict
 
-
-def hash_dict(d):
-    """Hashes a dictionary
-
-    :param dict d: A dictionary to recursively hash
-    :return: the hash value of the dictionary
-    :rtype: int
-    """
-    h = 0
-    for k, v in sorted(d.items()):
-        h += hash(k)
-
-        if isinstance(v, (set, list)):
-            h += hash(tuple(sorted(v)))
-
-        if isinstance(v, dict):
-            h += hash_dict(v)
-
-        if isinstance(v, (bool, int, tuple, str)):
-            h += hash(v)
-
-    return hash(h)
+from ..utils import hash_edge
 
 
 def stratify_hash_edges(graph):
@@ -36,7 +15,7 @@ def stratify_hash_edges(graph):
     unqualified_edges = defaultdict(lambda: defaultdict(set))
 
     for u, v, k, d in graph.edges_iter(keys=True, data=True):
-        hashed_data = hash_dict(d)
+        hashed_data = hash_edge(u, v, k, d)
 
         if k < 0:
             unqualified_edges[u, v][k].add(hashed_data)
