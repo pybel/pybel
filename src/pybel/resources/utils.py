@@ -7,8 +7,6 @@ import requests
 from requests.compat import urlparse
 from requests_file import FileAdapter
 
-from .constants import BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN
-
 log = logging.getLogger(__name__)
 
 
@@ -34,10 +32,6 @@ def download(url):
     """Uses requests to download an URL, maybe from a file"""
     session = requests.Session()
     session.mount('file://', FileAdapter())
-
-    if url.startswith(BELFRAMEWORK_DOMAIN):
-        url = url.replace(BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN)
-        log.warning('%s has expired. Redirecting to %s', BELFRAMEWORK_DOMAIN, url)
 
     try:
         res = session.get(url)

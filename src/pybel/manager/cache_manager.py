@@ -99,7 +99,7 @@ def _get_annotation_insert_values(bel_resource):
 
 def not_resource_cachable(bel_resource):
     """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
-    return bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}
+    return bel_resource['Processing'].get('CacheableFlag') not in {'yes', 'Yes', 'True', 'true'}
 
 
 class NamespaceManager(BaseManager):

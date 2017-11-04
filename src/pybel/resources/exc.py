@@ -14,10 +14,3 @@ class EmptyResourceError(ResourceError):
 
     def __str__(self):
         return 'Downloaded empty resource at {}'.format(self.location)
-
-
-class MissingSectionError(ResourceError):
-    """Raised when downloading a resource without a [Values] Section"""
-
-    def __str__(self):
-        return 'No [Values] section found in {}'.format(self.location)
