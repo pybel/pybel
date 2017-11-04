@@ -22,8 +22,8 @@ DEFINE NAMESPACE MESHD AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/J
 SET Citation = {"PubMed","That one article from last week","123455"}
 SET Evidence = "These are mostly made up"
 
-# Test that there's an isolated node that makes it
+#: Test that there's an isolated node that makes it
 path(MESHD:Achlorhydria)
 
-# Test an isolated node that gets some extra stuff induced
+#: Test an isolated node that gets some extra stuff induced
 complex(p(HGNC:ADGRB1), p(HGNC:ADGRB2))
