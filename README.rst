@@ -1,5 +1,5 @@
-PyBEL |develop_build| |develop_coverage| |develop_documentation| |zenodo|
-=========================================================================
+PyBEL |develop_build| |develop_windows_build| |develop_coverage| |develop_documentation| |zenodo|
+=================================================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a Python package for parsing and handling biological networks encoded in the
 `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
 It also facilitates data interchange between common formats and databases such as
@@ -102,6 +102,10 @@ Links
 .. |develop_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
     :target: https://travis-ci.org/pybel/pybel
     :alt: Development Build Status
+
+.. |develop_windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true
+    :target: https://ci.appveyor.com/project/cthoyt/pybel
+    :alt: Development Windows Build Status
 
 .. |develop_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
     :target: https://codecov.io/gh/pybel/pybel?branch=develop
