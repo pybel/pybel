@@ -71,9 +71,9 @@ class TestSummary(unittest.TestCase):
 
         n = fusion(
             PROTEIN,
-            protein('A', 'HGNC'),
+            protein(name='A', namespace='HGNC'),
             fusion_range('p', 1, 15),
-            protein('B', 'HGNC'),
+            protein(name='B', namespace='HGNC'),
             fusion_range('p', 1, 100)
         )
 

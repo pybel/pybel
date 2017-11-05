@@ -386,6 +386,10 @@ class BELGraph(networkx.MultiDiGraph):
         """Gets the node's name, or return None if no name"""
         return self.node[node].get(NAME)
 
+    def get_node_identifier(self, node):
+        """Gets the identifier for a given node from the database (not the same as the node hash)"""
+        return self.node[node].get(IDENTIFIER)
+
     def get_node_label(self, node):
         """Gets the label for a given node"""
         return self.node[node].get(LABEL)

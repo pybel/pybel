@@ -7,8 +7,8 @@ from tests.constants import TemporaryCacheMixin, test_citation_dict, test_eviden
 from tests.mocks import mock_bel_resources
 from tests.utils import make_dummy_annotations, make_dummy_namespaces
 
-yfg1 = protein('YFG1', 'HGNC')
-yfg2 = protein('YFG1', 'HGNC')
+yfg1 = protein(name='YFG1', namespace='HGNC')
+yfg2 = protein(name='YFG1', namespace='HGNC')
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
@@ -16,9 +16,6 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     def test_simple(self, mock):
         """This test checks that the network can be added and dropped"""
         graph = BELGraph(name='test', version='0.0.0')
-
-        node_1 = graph.add_node_from_data(yfg1)
-        node_2 = graph.add_node_from_data(yfg2)
 
         namespaces = {
             'HGNC': ['YFG1', 'YFG2']
@@ -30,6 +27,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, graph, namespaces)
         make_dummy_annotations(self.manager, graph, annotations)
+
+        node_1 = graph.add_node_from_data(yfg1)
+        node_2 = graph.add_node_from_data(yfg2)
 
         graph.add_qualified_edge(
             node_1,

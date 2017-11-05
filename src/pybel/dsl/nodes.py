@@ -9,7 +9,18 @@ __all__ = [
 ]
 
 
-def _make_abundance(func, name, namespace, identifier=None):
+def _make_abundance(func, namespace, name=None, identifier=None):
+    """
+
+    :param str func: The PyBEL function
+    :param str namespace: The name of the namespace
+    :param Optional[str] name:
+    :param Optional[str] identifier:
+    :return:
+    """
+    if name is None and identifier is None:
+        raise ValueError('Either name or identifier must be specified')
+
     rv = {FUNCTION: func}
     add_identifier(rv, name=name, namespace=namespace, identifier=identifier)
     return rv
@@ -37,11 +48,11 @@ def pmod(name, code=None, position=None, namespace=None, identifier=None):
     return rv
 
 
-def protein(name, namespace, identifier=None, variants=None):
+def protein(name=None, namespace=None, identifier=None, variants=None):
     """Returns the node data dictionary for a protein
 
-    :param str name: The database's preferred name or label for this entity
     :param str namespace: The name of the database used to identify this entity
+    :param str name: The database's preferred name or label for this entity
     :param str identifier: The database's identifier for this entity
     :param list variants: A list of variants
     :rtype: dict
@@ -54,34 +65,34 @@ def protein(name, namespace, identifier=None, variants=None):
     return rv
 
 
-def abundance(name, namespace, identifier=None):
+def abundance(namespace, name=None, identifier=None):
     """Returns the node data dictionary for an abundance
 
-    :param str name: The database's preferred name or label for this entity
     :param str namespace: The name of the database used to identify this entity
+    :param str name: The database's preferred name or label for this entity
     :param str identifier: The database's identifier for this entity
     :rtype: dict
     """
     return _make_abundance(ABUNDANCE, name=name, namespace=namespace, identifier=identifier)
 
 
-def bioprocess(name, namespace, identifier=None):
+def bioprocess(namespace, name=None, identifier=None):
     """Returns the node data dictionary for a biological process
 
-    :param str name: The database's preferred name or label for this entity
     :param str namespace: The name of the database used to identify this entity
+    :param str name: The database's preferred name or label for this entity
     :param str identifier: The database's identifier for this entity
     :rtype: dict
     """
     return _make_abundance(BIOPROCESS, name=name, namespace=namespace, identifier=identifier)
 
 
-def complex_abundance(members, name=None, namespace=None, identifier=None):
+def complex_abundance(members, namespace=None, name=None, identifier=None):
     """Returns the node data dictionary for a protein complex
 
     :param list[dict] members: A list of PyBEL node data dictionaries
-    :param str name: The name of the complex
     :param str namespace: The namespace from which the name originates
+    :param str name: The name of the complex
     :param str identifier: The identifier in the namespace in which the name originates
     :rtype: dict
     """

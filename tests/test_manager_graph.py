@@ -34,7 +34,7 @@ def protein_tuple(name):
 
 
 def protein_pair(name):
-    return protein_tuple(name), protein(name, namespace='HGNC')
+    return protein_tuple(name), protein(name=name, namespace='HGNC')
 
 
 def complex_tuple(names):
@@ -201,8 +201,8 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
         """This test checks that a translocation gets in the database properly"""
         graph = BELGraph(name='dummy graph', version='0.0.1', description="Test translocation network")
 
-        u = graph.add_node_from_data(protein('YFG', 'HGNC'))
-        v = graph.add_node_from_data(protein('YFG2', 'HGNC'))
+        u = graph.add_node_from_data(protein(name='YFG', namespace='HGNC'))
+        v = graph.add_node_from_data(protein(name='YFG2', namespace='HGNC'))
 
         graph.add_qualified_edge(
             u,
@@ -1571,8 +1571,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url['nope'] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
 
-        u = graph.add_node_from_data(protein('YFG', 'HGNC'))
-        v = graph.add_node_from_data(protein('YFG2', 'HGNC'))
+        u = graph.add_node_from_data(protein(name='YFG', namespace='HGNC'))
+        v = graph.add_node_from_data(protein(name='YFG2', namespace='HGNC'))
 
         graph.add_qualified_edge(
             u,
@@ -1609,8 +1609,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url['nope'] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
 
-        u = graph.add_node_from_data(protein('YFG', 'HGNC'))
-        v = graph.add_node_from_data(protein('YFG2', 'HGNC'))
+        u = graph.add_node_from_data(protein(name='YFG', namespace='HGNC'))
+        v = graph.add_node_from_data(protein(name='YFG2', namespace='HGNC'))
 
         graph.add_qualified_edge(
             u,
