@@ -4,8 +4,14 @@ from .utils import add_identifier
 from ..constants import *
 
 __all__ = [
+    'abundance',
+    'gene',
+    'rna',
+    'mirna',
     'protein',
     'complex_abundance',
+    'bioprocess',
+    'pathology',
 ]
 
 
@@ -130,6 +136,17 @@ def bioprocess(namespace, name=None, identifier=None):
     :rtype: dict
     """
     return _make_abundance(BIOPROCESS, name=name, namespace=namespace, identifier=identifier)
+
+
+def pathology(namespace, name=None, identifier=None):
+    """Returns the node data dictionary for a pathology
+
+    :param str namespace: The name of the database used to identify this entity
+    :param str name: The database's preferred name or label for this entity
+    :param str identifier: The database's identifier for this entity
+    :rtype: dict
+    """
+    return _make_abundance(PATHOLOGY, name=name, namespace=namespace, identifier=identifier)
 
 
 def complex_abundance(members, namespace=None, name=None, identifier=None):
