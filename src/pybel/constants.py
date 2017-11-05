@@ -379,6 +379,7 @@ unqualified_edges = [
     TRANSLATED_TO,
     HAS_MEMBER,
     IS_A,
+    EQUIVALENT_TO,
 ]
 
 UNQUALIFIED_EDGES = set(unqualified_edges)
