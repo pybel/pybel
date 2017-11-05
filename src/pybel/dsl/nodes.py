@@ -48,6 +48,55 @@ def pmod(name, code=None, position=None, namespace=None, identifier=None):
     return rv
 
 
+def _make_cd_abundance(func, name=None, namespace=None, identifier=None, variants=None):
+    """Make central dogma abundance (meaning it can have variants)"""
+    rv = _make_abundance(func, name=name, namespace=namespace, identifier=identifier)
+
+    if variants:
+        rv[VARIANTS] = variants
+
+    return rv
+
+
+def gene(name=None, namespace=None, identifier=None, variants=None):
+    """Returns the node data dictionary for a gene
+
+    :param str namespace: The name of the database used to identify this entity
+    :param str name: The database's preferred name or label for this entity
+    :param str identifier: The database's identifier for this entity
+    :param list variants: A list of variants
+    :rtype: dict
+    """
+    rv = _make_cd_abundance(GENE, name=name, namespace=namespace, identifier=identifier, variants=variants)
+    return rv
+
+
+def rna(name=None, namespace=None, identifier=None, variants=None):
+    """Returns the node data dictionary for an RNA
+
+    :param str namespace: The name of the database used to identify this entity
+    :param str name: The database's preferred name or label for this entity
+    :param str identifier: The database's identifier for this entity
+    :param list variants: A list of variants
+    :rtype: dict
+    """
+    rv = _make_cd_abundance(RNA, name=name, namespace=namespace, identifier=identifier, variants=variants)
+    return rv
+
+
+def mirna(name=None, namespace=None, identifier=None, variants=None):
+    """Returns the node data dictionary for a miRNA
+
+    :param str namespace: The name of the database used to identify this entity
+    :param str name: The database's preferred name or label for this entity
+    :param str identifier: The database's identifier for this entity
+    :param list variants: A list of variants
+    :rtype: dict
+    """
+    rv = _make_cd_abundance(MIRNA, name=name, namespace=namespace, identifier=identifier, variants=variants)
+    return rv
+
+
 def protein(name=None, namespace=None, identifier=None, variants=None):
     """Returns the node data dictionary for a protein
 
@@ -57,11 +106,7 @@ def protein(name=None, namespace=None, identifier=None, variants=None):
     :param list variants: A list of variants
     :rtype: dict
     """
-    rv = _make_abundance(PROTEIN, name=name, namespace=namespace, identifier=identifier)
-
-    if variants:
-        rv[VARIANTS] = variants
-
+    rv = _make_cd_abundance(PROTEIN, name=name, namespace=namespace, identifier=identifier, variants=variants)
     return rv
 
 
