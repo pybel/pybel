@@ -250,7 +250,7 @@ pmod_mappings = {
         'synonyms': ['Ac', 'acetylation'],
         'xrefs': [
             entity(namespace='SBO', identifier='SBO:0000215', name='acetylation'),
-            entity(namespace='GO', identifier='GO:0043543', name='protein acylation'),
+            entity(namespace='GO', identifier='GO:0006473 ', name='protein acetylation'),
         ]
     },
     'ADPRib': {
