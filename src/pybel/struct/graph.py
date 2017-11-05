@@ -300,6 +300,15 @@ class BELGraph(networkx.MultiDiGraph):
 
         return node_tuple
 
+    def has_node_with_data(self, attr_dict):
+        """Checks if this graph has a node with the given data dictionary
+
+        :param dict attr_dict: A PyBEL node data dictionary
+        :rtype: bool
+        """
+        node_tuple = po_to_tuple(attr_dict)
+        return self.has_node(node_tuple)
+
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
 
