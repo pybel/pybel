@@ -6,13 +6,21 @@ import logging
 import os
 from configparser import ConfigParser
 
-from .exc import EmptyResourceError
-from .utils import download, is_url
+from pybel.resources.exc import EmptyResourceError
+from pybel.resources.utils import download, is_url
+
+__all__ = [
+    'parse_bel_resource',
+    'get_lines',
+    'get_bel_resource',
+    'hash_names',
+    'get_bel_resource_hash',
+]
 
 log = logging.getLogger(__name__)
 
 
-def get_bel_resource_kvp(line, delimiter):
+def _get_bel_resource_kvp(line, delimiter):
     """
 
     :param str line:
@@ -47,7 +55,7 @@ def parse_bel_resource(lines):
     delimiter = metadata_config['Processing']['DelimiterString']
 
     value_dict = dict(
-        get_bel_resource_kvp(line, delimiter)
+        _get_bel_resource_kvp(line, delimiter)
         for line in lines[value_line:]
     )
 
@@ -84,7 +92,7 @@ def get_bel_resource(location):
     return result
 
 
-def names_to_bytes(names):
+def _names_to_bytes(names):
     """Reproducibly converts an iterable of strings to bytes
 
     :param iter[str] names: An iterable of strings
@@ -103,7 +111,7 @@ def hash_names(names, hash_function=None):
     :rtype: str
     """
     hash_function = hash_function or hashlib.md5
-    names_bytes = names_to_bytes(names)
+    names_bytes = _names_to_bytes(names)
     return hash_function(names_bytes).hexdigest()
 
 
