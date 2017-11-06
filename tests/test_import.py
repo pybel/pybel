@@ -22,7 +22,7 @@ from pybel.io.ndex_utils import NDEX_PASSWORD, NDEX_USERNAME
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import po_to_tuple
 from pybel.parser.parse_exceptions import *
-from pybel.summary import get_syntax_errors
+from pybel.struct.summary import get_syntax_errors
 from pybel.utils import hash_node
 from tests.constants import (
     AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin,

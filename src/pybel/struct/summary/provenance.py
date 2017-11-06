@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from ..constants import CITATION, CITATION_REFERENCE
-from ..struct.filters.edge_predicates import edge_data_has_pubmed_citation
+from ..filters.edge_predicates import edge_data_has_pubmed_citation
+from ...constants import CITATION, CITATION_REFERENCE
 
 
 def iterate_pubmed_identifiers(graph):

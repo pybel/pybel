@@ -4,7 +4,7 @@
 
 from collections import Counter
 
-from pybel.constants import *
+from ...constants import *
 
 __all__ = [
     'get_functions',

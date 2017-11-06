@@ -12,7 +12,7 @@ from .cache_manager import Manager
 from ..constants import *
 from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import edge_has_pubmed_citation
-from ..summary.provenance import get_pubmed_identifiers
+from ..struct.summary.provenance import get_pubmed_identifiers
 
 __all__ = (
     'get_citations_by_pmids',

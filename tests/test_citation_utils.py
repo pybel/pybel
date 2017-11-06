@@ -6,7 +6,7 @@ from pybel import BELGraph
 from pybel.constants import *
 from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids
 from pybel.manager.models import Citation
-from pybel.summary.provenance import get_pubmed_identifiers
+from pybel.struct.summary.provenance import get_pubmed_identifiers
 from tests.constants import TemporaryCacheMixin
 
 

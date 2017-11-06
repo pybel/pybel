@@ -6,7 +6,7 @@ from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl.nodes import fusion, fusion_range, protein
 from pybel.examples import egf_graph, sialic_acid_graph
-from pybel.summary.node_summary import (
+from pybel.struct.summary.node_summary import (
     count_functions, count_names_by_namespace, count_namespaces, get_functions,
     get_names_by_namespace, get_namespaces,
 )

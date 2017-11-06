@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+Unreleased
+----------
+Added
+~~~~~
+- Updates to DSL
+- More node filters and predicates
+
+Changed
+~~~~~~~
+- Reorganized resources module to reduce dependencies on PyBEL Tools, which has lots of other big requirements
+- Moved ``pybel.summary`` module to ``pybel.struct.summary``
+
+
 `0.9.4 <https://github.com/pybel/pybel/compare/v0.9.3...0.9.4>`_ - 2017-11-03
 -----------------------------------------------------------------------------
 Fixed
