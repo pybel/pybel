@@ -19,13 +19,12 @@ of Cytoscape.
 import json
 import logging
 import time
-
 from collections import defaultdict
 
 from ..canonicalize import node_to_bel
 from ..constants import *
 from ..struct import BELGraph
-from ..utils import flatten_dict, expand_dict, hash_node
+from ..utils import expand_dict, flatten_dict, hash_node
 
 __all__ = [
     'to_cx',

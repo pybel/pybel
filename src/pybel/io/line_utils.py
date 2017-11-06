@@ -3,42 +3,25 @@
 """This module contains helper functions for reading BEL scripts"""
 
 import logging
-import time
-
 import re
+import time
+from collections import Counter, defaultdict
+
 import requests.exceptions
-from collections import defaultdict, Counter
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 
 from ..constants import (
-    FUNCTION,
-    NAMESPACE,
-    REQUIRED_METADATA,
-    INVERSE_DOCUMENT_KEYS,
-    GRAPH_METADATA,
-    GRAPH_NAMESPACE_OWL,
-    GRAPH_NAMESPACE_URL,
-    GRAPH_NAMESPACE_PATTERN,
-    GRAPH_ANNOTATION_URL,
-    GRAPH_ANNOTATION_OWL,
-    GRAPH_ANNOTATION_PATTERN,
-    GRAPH_ANNOTATION_LIST,
+    FUNCTION, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_OWL, GRAPH_ANNOTATION_PATTERN,
+    GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
+    GRAPH_UNCACHED_NAMESPACES, INVERSE_DOCUMENT_KEYS, NAMESPACE, REQUIRED_METADATA,
 )
 from ..exceptions import PyBelWarning
 from ..manager import Manager
-from ..parser import BelParser
-from ..parser import MetadataParser
+from ..parser import BelParser, MetadataParser
 from ..parser.parse_exceptions import (
-    VersionFormatWarning,
-    MissingMetadataException,
-    MalformedMetadataException,
-    MetadataException,
-    MissingBelResource,
-    RedefinedNamespaceError,
-    RedefinedAnnotationError,
-    PyBelParserWarning,
-    BelSyntaxError,
+    BelSyntaxError, MalformedMetadataException, MetadataException, MissingBelResource,
+    MissingMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
 )
 
 log = logging.getLogger(__name__)
@@ -171,7 +154,8 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
         GRAPH_ANNOTATION_LIST: {
             keyword: metadata_parser.annotation_dict[keyword]
             for keyword in metadata_parser.annotation_lists
-        }
+        },
+        GRAPH_UNCACHED_NAMESPACES: metadata_parser.uncachable_namespaces.copy(),
     })
 
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)

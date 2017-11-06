@@ -5,7 +5,7 @@ pyparsing
 configparser
 py2neo
 click
-sqlalchemy
+sqlalchemy==1.1.14
 onto2nx
 ndex
 six

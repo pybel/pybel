@@ -9,7 +9,7 @@ This module contains IO functions for outputting BEL graphs to a Neo4J graph dat
 """
 
 from ..canonicalize import calculate_canonical_name, node_to_bel
-from ..constants import FUNCTION, NAME, RELATION, PYBEL_CONTEXT_TAG
+from ..constants import FUNCTION, NAME, PYBEL_CONTEXT_TAG, RELATION
 from ..utils import flatten_dict
 
 __all__ = ['to_neo4j']

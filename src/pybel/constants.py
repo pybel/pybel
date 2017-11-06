@@ -12,10 +12,9 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 :data:`pybel.constants.config`.
 """
 
-from json import load, dump
+from json import dump, load
 from logging import getLogger
-
-from os import path, mkdir, environ, makedirs
+from os import environ, makedirs, mkdir, path
 
 log = getLogger(__name__)
 
@@ -106,6 +105,7 @@ BEL_DEFAULT_NAMESPACE = 'bel'
 
 CITATION_TYPE_BOOK = 'Book'
 CITATION_TYPE_PUBMED = 'PubMed'
+CITATION_TYPE_PMC = 'PubMed Central'
 CITATION_TYPE_JOURNAL = 'Journal'
 CITATION_TYPE_ONLINE = 'Online Resource'
 CITATION_TYPE_URL = 'URL'
@@ -116,6 +116,7 @@ CITATION_TYPE_OTHER = 'Other'
 CITATION_TYPES = {
     CITATION_TYPE_BOOK,
     CITATION_TYPE_PUBMED,
+    CITATION_TYPE_PMC,
     CITATION_TYPE_JOURNAL,
     CITATION_TYPE_ONLINE,
     CITATION_TYPE_URL,
@@ -429,6 +430,7 @@ GRAPH_ANNOTATION_PATTERN = 'annotation_pattern'
 GRAPH_ANNOTATION_LIST = 'annotation_list'
 GRAPH_WARNINGS = 'warnings'
 GRAPH_PYBEL_VERSION = 'pybel_version'
+GRAPH_UNCACHED_NAMESPACES = 'namespaces_uncached'
 
 #: The key for the document name. Can be accessed by :code:`graph.document[METADATA_NAME]` or by using the property
 #: built into the :class:`pybel.BELGraph` class, :func:`pybel.BELGraph.name`

@@ -7,10 +7,10 @@ from __future__ import unicode_literals
 import logging
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from .models import Base
-from ..constants import get_cache_connection, config
+from ..constants import config, get_cache_connection
 
 __all__ = [
     'BaseManager'

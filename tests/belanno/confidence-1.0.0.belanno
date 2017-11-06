@@ -1,0 +1,29 @@
+[AnnotationDefinition]
+Keyword=Confidence
+TypeString=list
+DescriptionString=Confidence annotations for statements
+UsageString=A curator can use this annotation to indicate the confidence in which they have for the correctness of their statements
+VersionString=20170430
+CreatedDateTime=2017-01-22T12:00:00
+
+[Author]
+NameString=Charles Tapley Hoyt
+CopyrightString=Charles Tapley Hoyt (c) 2017. This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+ContactInfoString=charles.hoyt@scai.fraunhofer.de
+
+[Citation]
+NameString=Confidence
+
+[Processing]
+CaseSensitiveFlag=no
+DelimiterString=|
+CacheableFlag=yes
+
+[Values]
+Wrong|
+Very Low|
+Low|
+Medium|
+High|
+Very High|
+Axiomatic|

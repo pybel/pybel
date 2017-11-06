@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import logging
-
 import re
+
 from pyparsing import Suppress
 
 from .baseparser import BaseParser
 from .parse_exceptions import (
-    UndefinedNamespaceWarning,
-    NakedNameWarning,
-    MissingNamespaceNameWarning,
-    MissingDefaultNameWarning,
-    MissingNamespaceRegexWarning,
+    MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning,
+    NakedNameWarning, UndefinedNamespaceWarning,
 )
-from .utils import word, quote
-from ..constants import DIRTY, NAMESPACE, NAME
+from .utils import quote, word
+from ..constants import DIRTY, NAME, NAMESPACE
 
 __all__ = ['IdentifierParser']
 

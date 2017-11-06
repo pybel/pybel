@@ -5,29 +5,27 @@ from onto2nx.ontospy import Ontospy
 from onto2nx.parse_owl_xml import OWLParser
 from requests.compat import urldefrag
 
-from ..utils import parse_datetime, download
+from ..utils import download, parse_datetime
 
 
 def parse_owl(url):
     """Downloads and parses an OWL resource in OWL/XML or any format supported by onto2nx/ontospy package.
     Is a thin wrapper around :func:`parse_owl_pybel` and :func:`parse_owl_rdf`.
     
-    :param url: The URL to the OWL resource
-    :type url: str
+    :param str url: The URL to the OWL resource
     :return: A directional graph representing the OWL document's hierarchy
     :rtype: networkx.DiGraph
     """
     try:
-        return parse_owl_pybel(url)
+        return parse_owl_xml(url)
     except:
         return parse_owl_rdf(url)
 
 
-def parse_owl_pybel(url):
+def parse_owl_xml(url):
     """Downloads and parses an OWL resource in OWL/XML format
     
-    :param url: The URL to the OWL resource
-    :type url: str 
+    :param str url: The URL to the OWL resource
     :return: A directional graph representing the OWL document's hierarchy
     :rtype: networkx.DiGraph
     """
@@ -36,16 +34,15 @@ def parse_owl_pybel(url):
     return owl
 
 
-def parse_owl_rdf(iri):
+def parse_owl_rdf(url):
     """Downloads and parses an OWL resource in OWL/RDF format
 
-    :param url: The URL to the OWL resource
-    :type url: str 
+    :param str url: The URL to the OWL resource
     :return: A directional graph representing the OWL document's hierarchy
     :rtype: networkx.DiGraph
     """
-    g = nx.DiGraph(IRI=iri)
-    o = Ontospy(iri)
+    g = nx.DiGraph(IRI=url)
+    o = Ontospy(url)
 
     for cls in o.classes:
         g.add_node(cls.locale, type='Class')
@@ -63,11 +60,9 @@ def parse_owl_rdf(iri):
 def extract_shared_required(config, definition_header='Namespace'):
     """Gets the required annotations shared by BEL namespace and annotation resource documents
 
-    :param config: The configuration dictionary representing a BEL resource
-    :type config: dict
-    :param definition_header: ``Namespace`` or ``AnnotationDefinition``
-    :type definition_header: str
-    :return:
+    :param dict config: The configuration dictionary representing a BEL resource
+    :param str definition_header: ``Namespace`` or ``AnnotationDefinition``
+    :rtype: dict
     """
     return {
         'keyword': config[definition_header]['Keyword'],
@@ -80,11 +75,9 @@ def extract_shared_required(config, definition_header='Namespace'):
 def extract_shared_optional(config, definition_header='Namespace'):
     """Gets the optional annotations shared by BEL namespace and annotation resource documents
     
-    :param config: A configuration dictionary representing a BEL resource
-    :type config: dict
-    :param definition_header: ``Namespace`` or ``AnnotationDefinition``
-    :type definition_header: str
-    :return: 
+    :param dict config: A configuration dictionary representing a BEL resource
+    :param str definition_header: ``Namespace`` or ``AnnotationDefinition``
+    :rtype: dict
     """
     s = {
         'description': (definition_header, 'DescriptionString'),

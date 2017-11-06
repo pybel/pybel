@@ -35,14 +35,15 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
     BEL 2.0 specification on `fusions (2.6.1) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
 """
 
-from pyparsing import oneOf, replaceWith, pyparsing_common, Keyword, Suppress, Group, Optional
-from pyparsing import pyparsing_common as ppc
+from pyparsing import Group, Keyword, Optional, Suppress, oneOf, pyparsing_common, pyparsing_common as ppc, replaceWith
 
 from ..baseparser import BaseParser
 from ..parse_identifier import IdentifierParser
 from ..utils import WCW, nest
-from ...constants import FUSION, PARTNER_5P, RANGE_5P, PARTNER_3P, RANGE_3P
-from ...constants import FUSION_REFERENCE, FUSION_START, FUSION_STOP, FUSION_MISSING
+from ...constants import (
+    FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, PARTNER_3P, PARTNER_5P,
+    RANGE_3P, RANGE_5P,
+)
 
 __all__ = [
     'fusion_tags',

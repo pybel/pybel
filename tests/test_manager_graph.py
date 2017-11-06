@@ -7,22 +7,19 @@ import os
 import time
 import unittest
 
-import pybel
 import sqlalchemy.exc
-from pybel import BELGraph, from_database, to_database, from_path
+
+import pybel
+from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
+from pybel.dsl import protein as dsl_protein
 from pybel.manager import models
-from pybel.manager.models import Namespace, NamespaceEntry, Node, Author, Evidence
-from pybel.utils import hash_citation, hash_node, hash_evidence
+from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
+from pybel.utils import hash_citation, hash_evidence, hash_node
 from tests.constants import (
-    FleetingTemporaryCacheMixin,
-    BelReconstitutionMixin,
-    TemporaryCacheMixin,
+    BelReconstitutionMixin, FleetingTemporaryCacheMixin, TemporaryCacheMixin, expected_test_thorough_metadata,
     test_bel_simple,
-    test_bel_thorough,
-    expected_test_thorough_metadata,
-    test_evidence_text,
-    test_citation_dict,
+    test_bel_thorough, test_citation_dict, test_evidence_text,
 )
 from tests.mocks import mock_bel_resources
 from tests.utils import make_dummy_namespaces
@@ -35,7 +32,7 @@ def protein_tuple(name):
 
 
 def protein_data(name):
-    return {FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: name}
+    return dsl_protein('HGNC', name)
 
 
 def protein(name):
@@ -60,30 +57,18 @@ fos = fos_tuple, fos_data = protein('FOS')
 jun = jun_tuple, jun_data = protein('JUN')
 
 ap1_complex_tuple = COMPLEX, fos_tuple, jun_tuple
-ap1_complex_data = {
-    FUNCTION: COMPLEX,
-    MEMBERS: [fos_data, jun_data]
-}
+ap1_complex_data = complex_data([fos_data, jun_data])
 
 egfr_tuple, egfr_data = protein('EGFR')
 egfr_dimer = COMPLEX, egfr_tuple, egfr_tuple
-egfr_dimer_data = {
-    FUNCTION: COMPLEX,
-    MEMBERS: [egfr_data, egfr_data]
-}
+egfr_dimer_data = complex_data([egfr_data, egfr_data])
 
 yfg_tuple, yfg_data = protein('YFG')
 
 e2f4 = e2f4_tuple, e2f4_data = protein('E2F4')
 
 bound_ap1_e2f4_tuple = COMPLEX, ap1_complex_tuple, e2f4_tuple
-bound_ap1_e2f4_data = {
-    FUNCTION: COMPLEX,
-    MEMBERS: [
-        ap1_complex_data,
-        e2f4_data
-    ]
-}
+bound_ap1_e2f4_data = complex_data([ap1_complex_data, e2f4_data])
 
 
 def chemical_tuple(name):
@@ -216,14 +201,18 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
     @mock_bel_resources
     def test_translocation(self, mock):
         """This test checks that a translocation gets in the database properly"""
-        graph = BELGraph(name='dummy', version='0.0.1')
-        u = (PROTEIN, 'HGNC', 'YFG')
-        v = (PROTEIN, 'HGNC', 'YFG2')
-        graph.add_simple_node(*u)
-        graph.add_simple_node(*v)
+        graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
 
-        graph.add_edge(u, v, attr_dict={
-            SUBJECT: {
+        u = graph.add_node_from_data(dsl_protein('HGNC', 'YFG'))
+        v = graph.add_node_from_data(dsl_protein('HGNC', 'YFG2'))
+
+        graph.add_qualified_edge(
+            u,
+            v,
+            evidence='dummy text',
+            citation='1234',
+            relation=ASSOCIATION,
+            subject_modifier={
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
                     FROM_LOC: {
@@ -235,19 +224,10 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
                         NAME: 'extracellular space'
                     }
                 }
-            },
-            EVIDENCE: 'dummy text',
-            CITATION: {CITATION_TYPE: CITATION_TYPE_PUBMED, CITATION_REFERENCE: '1234'},
-            ANNOTATIONS: {},
-            RELATION: ASSOCIATION
-        })
+            }
+        )
 
-        hgnc_namespace = Namespace(keyword='HGNC', url='dummy url')
-        yfg = NamespaceEntry(name='YFG')
-        yfg2 = NamespaceEntry(name='YFG2')
-        hgnc_namespace.entries = [yfg, yfg2]
-        self.manager.session.add(hgnc_namespace)
-        self.manager.session.commit()
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
 
         self.manager.insert_graph(graph, store_parts=True)
 
@@ -489,7 +469,11 @@ class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_evidence(self):
         basic_citation = self.manager.get_or_create_citation(**test_citation_dict)
         utf8_test_evidence = "Yes, all the information is true! This contains a unicode alpha: α"
-        evidence_hash = hash_evidence(utf8_test_evidence, CITATION_TYPE_PUBMED, test_citation_dict[CITATION_REFERENCE])
+        evidence_hash = hash_evidence(
+            text=utf8_test_evidence,
+            type=CITATION_TYPE_PUBMED,
+            reference=test_citation_dict[CITATION_REFERENCE]
+        )
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
         self.assertIsInstance(evidence, Evidence)
@@ -544,13 +528,13 @@ class TestNodes(TemporaryCacheMixin):
         self.graph = BELGraph(name='TestNode', version='0.0.0')
         self.graph.namespace_url[self.hgnc_keyword] = self.hgnc_url
 
-    def help_test_round_trip(self, node_tuple, node_data):
+    def help_test_round_trip(self, node_data):
         """Helps run the round trip test of inserting a node, getting it, and reconstituting it in multiple forms
 
         :param tuple tuple node_tuple: A PyBEL node tuple
         :param dict node_data: A PyBEL node data dictionary
         """
-        self.graph.add_node(node_tuple, attr_dict=node_data)
+        node_tuple = self.graph.add_node_from_data(node_data)
         self.manager.insert_graph(self.graph, store_parts=True)
 
         node_model = self.manager.get_node_by_tuple(node_tuple)
@@ -561,16 +545,10 @@ class TestNodes(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_1(self, mock):
-        node_tuple = PROTEIN, 'HGNC', 'YFG'
-
-        node_data = yfg_data
-
-        self.help_test_round_trip(node_tuple, node_data)
+        self.help_test_round_trip(yfg_data)
 
     @mock_bel_resources
     def test_2(self, mock):
-        node_tuple = PROTEIN, 'HGNC', 'YFG', (HGVS, 'p.Glu600Arg')
-
         node_data = {
             FUNCTION: PROTEIN,
             NAMESPACE: 'HGNC',
@@ -583,7 +561,7 @@ class TestNodes(TemporaryCacheMixin):
             ]
         }
 
-        self.help_test_round_trip(node_tuple, node_data)
+        self.help_test_round_trip(node_data)
 
 
 @unittest.skipUnless('PYBEL_TEST_EXPERIMENTAL' in os.environ, 'Experimental features not ready for Travis')

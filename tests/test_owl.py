@@ -7,22 +7,14 @@ from pathlib import Path
 
 from pybel import from_path
 from pybel.constants import *
-from pybel.manager.utils import parse_owl, OWLParser
+from pybel.manager.utils import OWLParser, parse_owl
 from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import (
-    FleetingTemporaryCacheMixin,
-    TestGraphMixin,
-    test_bel_extensions,
-    wine_iri,
-    pizza_iri,
-    test_owl_pizza,
-    test_owl_wine,
-    expected_test_bel_4_metadata,
-    HGNC_URL,
-    test_owl_ado
+    FleetingTemporaryCacheMixin, HGNC_URL, TestGraphMixin, expected_test_bel_4_metadata,
+    pizza_iri, test_bel_extensions, test_owl_ado, test_owl_pizza, test_owl_wine, wine_iri,
 )
-from tests.mocks import mock_bel_resources, mock_parse_owl_pybel, mock_parse_owl_rdf
+from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_xml
 
 EXPECTED_PIZZA_NODES = {
     'Pizza',
@@ -232,7 +224,7 @@ class TestParse(TestGraphMixin):
         self.assertEqual(EXPECTED_PIZZA_EDGES, set(owl.edges()))
 
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_parse_pizza_url(self, m1, m2):
         owl = parse_owl(pizza_iri)
         self.assertEqual(pizza_iri, owl.graph['IRI'])
@@ -262,7 +254,7 @@ class TestParse(TestGraphMixin):
         self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
 
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_ado(self, mock1, mock2):
         ado_path = 'http://mock.com/ado.owl'
         owl = parse_owl(ado_path)
@@ -272,7 +264,7 @@ class TestParse(TestGraphMixin):
 
 class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_metadata_parse_pizza_namespace(self, m1, m2):
         functions = 'A'
         s = 'DEFINE NAMESPACE PIZZA AS OWL {} "{}"'.format(functions, pizza_iri)
@@ -287,7 +279,7 @@ class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
             self.assertEqual(set(functions), set(parser.namespace_dict['PIZZA'][node]))
 
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_metadata_parser_pizza_namespace_no_function(self, m1, m2):
         s = 'DEFINE NAMESPACE PIZZA AS OWL "{}"'.format(pizza_iri)
         parser = MetadataParser(self.manager)
@@ -301,7 +293,7 @@ class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
             self.assertEqual(set(BELNS_ENCODING_STR), set(parser.namespace_dict['PIZZA'][node]))
 
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_metadata_parse_pizza_annotation(self, m1, m2):
         s = 'DEFINE ANNOTATION Pizza AS OWL "{}"'.format(pizza_iri)
         parser = MetadataParser(self.manager)
@@ -313,7 +305,7 @@ class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
 
 class TestWine(TestGraphMixin, FleetingTemporaryCacheMixin):
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_metadata_parse_wine_namespace(self, m1, m2):
         functions = 'A'
         s = 'DEFINE NAMESPACE Wine AS OWL {} "{}"'.format(functions, wine_iri)
@@ -331,7 +323,7 @@ class TestWine(TestGraphMixin, FleetingTemporaryCacheMixin):
             parser.parseString(s)
 
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_metadata_parse_wine_annotation(self, m1, m2):
         s = 'DEFINE ANNOTATION Wine AS OWL "{}"'.format(wine_iri)
 
@@ -347,7 +339,7 @@ class TestWine(TestGraphMixin, FleetingTemporaryCacheMixin):
 
 class TestOwlManager(TestGraphMixin, FleetingTemporaryCacheMixin):
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_ensure_pizza_namespace(self, m1, m2):
         self.manager.ensure_namespace_owl(pizza_iri)
 
@@ -361,7 +353,7 @@ class TestOwlManager(TestGraphMixin, FleetingTemporaryCacheMixin):
         self.manager.ensure_namespace_owl(pizza_iri)
 
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_ensure_pizza_annotation(self, m1, m2):
         self.manager.ensure_annotation_owl(pizza_iri)
 
@@ -388,7 +380,7 @@ class TestExtensionIo(TestGraphMixin, FleetingTemporaryCacheMixin):
 
     @mock_bel_resources
     @mock_parse_owl_rdf
-    @mock_parse_owl_pybel
+    @mock_parse_owl_xml
     def test_from_path(self, m1, m2, m3):
         graph = from_path(test_bel_extensions, manager=self.manager)
         self.assertEqual(0, len(graph.warnings))

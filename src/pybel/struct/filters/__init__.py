@@ -8,8 +8,7 @@ This module contains functions for filtering node and edge iterables. It relies 
 
 """
 
-from . import edge_filters
-from . import node_filters
+from . import edge_filters, node_filters
 from .edge_filters import *
 from .node_filters import *
 

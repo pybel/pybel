@@ -11,14 +11,13 @@ This module handles parsing control statement, which add annotations and namespa
 """
 
 import logging
-
 import re
-from pyparsing import Suppress, MatchFirst, And, oneOf
-from pyparsing import pyparsing_common as ppc
+
+from pyparsing import And, MatchFirst, Suppress, oneOf, pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .parse_exceptions import *
-from .utils import is_int, quote, delimited_quoted_list, qid, delimited_unquoted_list
+from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
 from ..constants import *
 from ..utils import valid_date
 
@@ -217,12 +216,10 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_set_evidence(self, line, position, tokens):
-        log.debug('Setting evidence: %s', tokens)
         self.evidence = tokens['value']
         return tokens
 
     def handle_set_command(self, line, position, tokens):
-        log.debug('Setting annotation: %s', tokens)
         key = tokens['key']
         value = tokens['value']
 
@@ -232,7 +229,6 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_set_command_list(self, line, position, tokens):
-        log.debug('Setting annotation list: %s', tokens)
         key = tokens['key']
         values = tokens['values']
 

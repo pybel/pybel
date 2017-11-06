@@ -75,16 +75,14 @@ twice to become active. This results in the following:
 
 import logging
 
-from pyparsing import oneOf, MatchFirst, Group, Optional
-from pyparsing import pyparsing_common as ppc
+from pyparsing import Group, MatchFirst, Optional, oneOf, pyparsing_common as ppc
 
 from .. import language
 from ..baseparser import BaseParser
-from ..language import pmod_namespace, pmod_legacy_labels, amino_acid
+from ..language import amino_acid, pmod_legacy_labels, pmod_namespace
 from ..parse_identifier import IdentifierParser
 from ..utils import WCW, nest, one_of_tags
-from ...constants import KIND, PMOD, NAMESPACE, BEL_DEFAULT_NAMESPACE, IDENTIFIER
-from ...constants import PMOD_CODE, PMOD_POSITION
+from ...constants import BEL_DEFAULT_NAMESPACE, IDENTIFIER, KIND, NAMESPACE, PMOD, PMOD_CODE, PMOD_POSITION
 
 __all__ = [
     'pmod_tag',

@@ -4,10 +4,11 @@ import logging
 import unittest
 
 from pybel.constants import *
-from pybel.parser.modifiers import LocationParser, VariantParser, FragmentParser, GmodParser, GsubParser, PmodParser, \
-    PsubParser, TruncationParser, FusionParser
-from tests.constants import build_variant_dict
-from tests.constants import identifier
+from pybel.parser.modifiers import (
+    FragmentParser, FusionParser, GmodParser, GsubParser, LocationParser, PmodParser,
+    PsubParser, TruncationParser, VariantParser,
+)
+from tests.constants import build_variant_dict, identifier
 
 log = logging.getLogger(__name__)
 

@@ -11,10 +11,9 @@ JSON. Interchange with this format provides compatibilty with other software and
 """
 
 import logging
-
 from collections import defaultdict
 
-from ..canonicalize import node_to_bel, edge_to_bel
+from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
 from ..parser import BelParser
 from ..struct import BELGraph

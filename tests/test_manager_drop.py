@@ -2,9 +2,13 @@
 
 from pybel import BELGraph
 from pybel.constants import *
+from pybel.dsl import protein
 from tests.constants import TemporaryCacheMixin, test_citation_dict, test_evidence_text
 from tests.mocks import mock_bel_resources
-from tests.utils import make_dummy_namespaces, make_dummy_annotations
+from tests.utils import make_dummy_annotations, make_dummy_namespaces
+
+yfg1 = protein('HGNC', 'YFG1')
+yfg2 = protein('HGNC', 'YFG1')
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
@@ -13,17 +17,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         """This test checks that the network can be added and dropped"""
         graph = BELGraph(name='test', version='0.0.0')
 
-        node_1 = graph.add_node_from_data({
-            FUNCTION: PROTEIN,
-            NAMESPACE: 'HGNC',
-            NAME: 'YFG1'
-        })
-
-        node_2 = graph.add_node_from_data({
-            FUNCTION: PROTEIN,
-            NAMESPACE: 'HGNC',
-            NAME: 'YFG2'
-        })
+        node_1 = graph.add_node_from_data(yfg1)
+        node_2 = graph.add_node_from_data(yfg2)
 
         namespaces = {
             'HGNC': ['YFG1', 'YFG2']
@@ -36,15 +31,17 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, graph, namespaces)
         make_dummy_annotations(self.manager, graph, annotations)
 
-        graph.add_edge(node_1, node_2, **{
-            RELATION: INCREASES,
-            EVIDENCE: test_evidence_text,
-            CITATION: test_citation_dict,
-            ANNOTATIONS: {
+        graph.add_qualified_edge(
+            node_1,
+            node_2,
+            relation=INCREASES,
+            evidence=test_evidence_text,
+            citation=test_citation_dict,
+            annotations={
                 'Disease': 'Disease1',
                 'Cell': 'Cell1'
             }
-        })
+        )
 
         network = self.manager.insert_graph(graph, store_parts=True)
 

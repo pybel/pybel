@@ -14,8 +14,8 @@ variables: ``NDEX_USERNAME`` and ``NDEX_PASSWORD``.
 """
 
 import logging
-
 import os
+
 from ndex.client import Ndex
 from requests.compat import urlsplit
 
