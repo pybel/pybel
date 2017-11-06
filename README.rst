@@ -69,7 +69,7 @@ Acknowledgements
 ----------------
 - This package was originally developed as part of the master's work of
   `Charles Tapley Hoyt <https://github.com/cthoyt>`_ at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_ with
-  support from the `IMI <https://www.imi.europa.eu/>`_ projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and
+  partial support from the `IMI <https://www.imi.europa.eu/>`_ projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and
   `PHAGO <http://www.phago.eu/>`_.
 - This software is proudly built with Paul McGuire's `PyParsing <http://pyparsing.wikispaces.com/>`_ package.
 - `Scott Colby <https://github.com/scolby33>`_ designed our `logo <https://github.com/pybel/pybel-art>`_ and provided
@@ -85,7 +85,6 @@ Links
 - Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
 - Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
 - Chat on `Gitter <https://gitter.im/pybel/Lobby>`_
-
 
 .. |stable_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=master
     :target: https://travis-ci.org/pybel/pybel
