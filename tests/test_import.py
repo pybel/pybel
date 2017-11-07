@@ -16,11 +16,13 @@ from pybel import (
     to_json_file, to_jsons, to_ndex, to_pickle,
 )
 from pybel.constants import *
+from pybel.dsl import gene
 from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_fmt
 from pybel.io.ndex_utils import NDEX_PASSWORD, NDEX_USERNAME
 from pybel.parser import BelParser
+from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_exceptions import *
-from pybel.summary import get_syntax_errors
+from pybel.struct.summary import get_syntax_errors
 from pybel.utils import hash_node
 from tests.constants import (
     AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin,
@@ -322,12 +324,15 @@ class TestFull(TestTokenParserBase):
 
         self.parser.parse_lines(statements)
 
-        test_node_1 = GENE, 'TESTNS', '1'
-        test_node_2 = GENE, 'TESTNS', '2'
+        test_node_1_dict = gene(namespace='TESTNS', name='1')
+        test_node_2_dict = gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
-        self.assertHasNode(test_node_1)
-        self.assertHasNode(test_node_2)
+        self.assertTrue(self.parser.graph.has_node_with_data(test_node_1_dict))
+        self.assertTrue(self.parser.graph.has_node_with_data(test_node_2_dict))
+
+        test_node_1 = node_to_tuple(test_node_1_dict)
+        test_node_2 = node_to_tuple(test_node_2_dict)
 
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
@@ -351,12 +356,15 @@ class TestFull(TestTokenParserBase):
         ]
         self.parser.parse_lines(statements)
 
-        test_node_1 = GENE, 'TESTNS', '1'
-        test_node_2 = GENE, 'TESTNS', '2'
+        test_node_1_dict = gene(namespace='TESTNS', name='1')
+        test_node_2_dict = gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
-        self.assertHasNode(test_node_1)
-        self.assertHasNode(test_node_2)
+        self.assertTrue(self.parser.graph.has_node_with_data(test_node_1_dict))
+        self.assertTrue(self.parser.graph.has_node_with_data(test_node_2_dict))
+
+        test_node_1 = node_to_tuple(test_node_1_dict)
+        test_node_2 = node_to_tuple(test_node_2_dict)
 
         self.assertEqual(2, self.parser.graph.number_of_edges())
         kwargs = {ANNOTATIONS: {'TestAnnotation1': 'A', 'TestAnnotation2': 'X'}, CITATION: test_citation_dict}
@@ -375,12 +383,15 @@ class TestFull(TestTokenParserBase):
         ]
         self.parser.parse_lines(statements)
 
-        test_node_1 = GENE, 'TESTNS', '1'
-        test_node_2 = GENE, 'TESTNS', '2'
+        test_node_1_dict = gene(namespace='TESTNS', name='1')
+        test_node_2_dict = gene(namespace='TESTNS', name='2')
+
+        test_node_1 = node_to_tuple(test_node_1_dict)
+        test_node_2 = node_to_tuple(test_node_2_dict)
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
-        self.assertHasNode(test_node_1)
-        self.assertHasNode(test_node_2)
+        self.assertTrue(self.parser.graph.has_node_with_data(test_node_1_dict))
+        self.assertTrue(self.parser.graph.has_node_with_data(test_node_2_dict))
 
         self.assertEqual(4, self.parser.graph.number_of_edges())
 

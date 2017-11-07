@@ -1,5 +1,5 @@
-PyBEL |develop_build| |develop_coverage| |develop_documentation| |zenodo|
-=========================================================================
+PyBEL |develop_build| |develop_windows_build| |develop_coverage| |develop_documentation| |zenodo|
+=================================================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a Python package for parsing and handling biological networks encoded in the
 `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
 It also facilitates data interchange between common formats and databases such as
@@ -69,7 +69,7 @@ Acknowledgements
 ----------------
 - This package was originally developed as part of the master's work of
   `Charles Tapley Hoyt <https://github.com/cthoyt>`_ at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_ with
-  support from the `IMI <https://www.imi.europa.eu/>`_ projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and
+  partial support from the `IMI <https://www.imi.europa.eu/>`_ projects: `AETIONOMY <http://www.aetionomy.eu/>`_ and
   `PHAGO <http://www.phago.eu/>`_.
 - This software is proudly built with Paul McGuire's `PyParsing <http://pyparsing.wikispaces.com/>`_ package.
 - `Scott Colby <https://github.com/scolby33>`_ designed our `logo <https://github.com/pybel/pybel-art>`_ and provided
@@ -86,7 +86,6 @@ Links
 - Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
 - Chat on `Gitter <https://gitter.im/pybel/Lobby>`_
 
-
 .. |stable_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=master
     :target: https://travis-ci.org/pybel/pybel
     :alt: Stable Build Status
@@ -102,6 +101,10 @@ Links
 .. |develop_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
     :target: https://travis-ci.org/pybel/pybel
     :alt: Development Build Status
+
+.. |develop_windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true
+    :target: https://ci.appveyor.com/project/cthoyt/pybel
+    :alt: Development Windows Build Status
 
 .. |develop_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
     :target: https://codecov.io/gh/pybel/pybel?branch=develop

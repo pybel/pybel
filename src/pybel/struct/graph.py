@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from copy import deepcopy
 
 import networkx
-from copy import deepcopy
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..constants import *
-from ..parser.canonicalize import po_to_tuple
+from ..parser.canonicalize import node_to_tuple
 from ..utils import get_version
 
 __all__ = [
@@ -142,6 +142,18 @@ class BELGraph(networkx.MultiDiGraph):
         return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
+    def defined_namespace_keywords(self):
+        """Returns the set of all keywords defined as namespaces in this graph
+
+        :rtype: set[str]
+        """
+        return (
+            set(self.namespace_pattern) |
+            set(self.namespace_url) |
+            set(self.namespace_owl)
+        )
+
+    @property
     def uncached_namespaces(self):
         """Returns a list of namespaces's URLs that are present in the graph, but cannot be cached due to their
         corresponding resources' cachable flags being set to "no."
@@ -191,6 +203,19 @@ class BELGraph(networkx.MultiDiGraph):
         """A dictionary mapping the keywords of locally defined annotations to a set of their values
         from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section"""
         return self.graph[GRAPH_ANNOTATION_LIST]
+
+    @property
+    def defined_annotation_keywords(self):
+        """Returns the set of all keywords defined as annotations in this graph
+
+        :rtype: set[str]
+        """
+        return (
+            set(self.annotation_pattern) |
+            set(self.annotation_url) |
+            set(self.annotation_owl) |
+            set(self.annotation_list)
+        )
 
     @property
     def pybel_version(self):
@@ -248,7 +273,7 @@ class BELGraph(networkx.MultiDiGraph):
         :return: A PyBEL node tuple
         :rtype: tuple
         """
-        node_tuple = po_to_tuple(attr_dict)
+        node_tuple = node_to_tuple(attr_dict)
 
         if node_tuple in self:
             return node_tuple
@@ -274,6 +299,15 @@ class BELGraph(networkx.MultiDiGraph):
                 self.add_unqualified_edge(node_tuple, product_node_tuple, HAS_PRODUCT)
 
         return node_tuple
+
+    def has_node_with_data(self, attr_dict):
+        """Checks if this graph has a node with the given data dictionary
+
+        :param dict attr_dict: A PyBEL node data dictionary
+        :rtype: bool
+        """
+        node_tuple = node_to_tuple(attr_dict)
+        return self.has_node(node_tuple)
 
     def add_simple_node(self, function, namespace, name):
         """Adds a simple node, with only a namespace and name
@@ -360,6 +394,10 @@ class BELGraph(networkx.MultiDiGraph):
     def get_node_name(self, node):
         """Gets the node's name, or return None if no name"""
         return self.node[node].get(NAME)
+
+    def get_node_identifier(self, node):
+        """Gets the identifier for a given node from the database (not the same as the node hash)"""
+        return self.node[node].get(IDENTIFIER)
 
     def get_node_label(self, node):
         """Gets the label for a given node"""

@@ -5,30 +5,15 @@ import logging
 import re
 
 from pyparsing import (
-    And, Group, Suppress, White, Word, ZeroOrMore, alphanums, dblQuotedString, delimitedList, oneOf,
-    removeQuotes, replaceWith,
+    And, Group, Suppress, White, Word, ZeroOrMore, alphanums, dblQuotedString, delimitedList, oneOf, removeQuotes,
+    replaceWith,
 )
 
 from ..constants import OBJECT, RELATION, SUBJECT
-from ..utils import subdict_matches
 
 log = logging.getLogger('pybel')
 
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
-
-
-def any_subdict_matches(dict_of_dicts, query_dict):
-    """Checks if dictionary target_dict matches one of the subdictionaries of a
-
-    :param dict[any,dict] dict_of_dicts: dictionary of dictionaries
-    :param dict query_dict: dictionary
-    :return: if dictionary target_dict matches one of the subdictionaries of a
-    :rtype: bool
-    """
-    return any(
-        subdict_matches(sub_dict, query_dict)
-        for sub_dict in dict_of_dicts.values()
-    )
 
 
 def cartesian_dictionary(d):

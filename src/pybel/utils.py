@@ -1,127 +1,21 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
 import json
 import logging
 import pickle
-from configparser import ConfigParser
+from collections import MutableMapping, defaultdict
 from datetime import datetime
 
-import hashlib
 import networkx as nx
-import os
-import requests
-import requests.exceptions
-from collections import defaultdict, MutableMapping
-from requests.compat import urlparse
-from requests_file import FileAdapter
 from six import string_types
 
-from .constants import (
-    CITATION_ENTRIES,
-    BELFRAMEWORK_DOMAIN,
-    OPENBEL_DOMAIN,
-    PYBEL_EDGE_DATA_KEYS,
-    VERSION,
-    PYBEL_CONFIG_PATH,
-    PYBEL_CONNECTION,
-    CITATION_TYPE,
-    CITATION_REFERENCE,
-)
-from .exceptions import EmptyResourceError, MissingSectionError
+from .constants import CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, PYBEL_EDGE_DATA_KEYS, VERSION
 
 log = logging.getLogger(__name__)
 
 PYBEL_MYSQL_FMT_NOPASS = 'mysql+pymysql://{user}@{host}/{database}?charset={charset}'
 PYBEL_MYSQL_FMT_PASS = 'mysql+pymysql://{user}:{password}@{host}/{database}?charset={charset}'
-
-
-def download(url):
-    """Uses requests to download an URL, maybe from a file"""
-    session = requests.Session()
-    session.mount('file://', FileAdapter())
-
-    if url.startswith(BELFRAMEWORK_DOMAIN):
-        url = url.replace(BELFRAMEWORK_DOMAIN, OPENBEL_DOMAIN)
-        log.warning('%s has expired. Redirecting to %s', BELFRAMEWORK_DOMAIN, url)
-
-    try:
-        res = session.get(url)
-    except requests.exceptions.ConnectionError as e:
-        raise e
-
-    res.raise_for_status()
-    return res
-
-
-def parse_bel_resource(lines):
-    """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
-    
-    :param iter[str] lines: An iterable over the lines in a BEL config file
-    :return: A config-style dictionary representing the BEL config file
-    :rtype: dict
-    """
-    lines = list(lines)
-
-    value_line = 1 + max(i for i, line in enumerate(lines) if '[Values]' == line.strip())
-
-    metadata_config = ConfigParser(strict=False)
-    metadata_config.optionxform = lambda option: option
-    metadata_config.read_file(lines[:value_line])
-
-    delimiter = metadata_config['Processing']['DelimiterString']
-
-    value_dict = {}
-    for line in lines[value_line:]:
-        sline = line.rsplit(delimiter, 1)
-        key = sline[0].strip()
-
-        value_dict[key] = sline[1].strip() if len(sline) == 2 else None
-
-    res = {}
-    res.update({k: dict(v) for k, v in metadata_config.items()})
-    res['Values'] = value_dict
-
-    return res
-
-
-def is_url(s):
-    """Checks if a string is a valid URL
-    
-    :param str s: An input string
-    :return: Is the string a valid URL?
-    :rtype: bool
-    """
-    return urlparse(s).scheme != ""
-
-
-def get_lines(location):
-    if is_url(location):
-        res = download(location)
-        return list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
-    else:
-        with open(os.path.expanduser(location)) as f:
-            return list(f)
-
-
-def get_bel_resource(location):
-    """Loads/downloads and parses a config file from the given url or file path
-
-    :param str location: The URL or file path to a BELNS, BELANNO, or BELEQ file to download and parse
-    :return: A config-style dictionary representing the BEL config file
-    :rtype: dict
-    """
-    lines = get_lines(location)
-
-    try:
-        result = parse_bel_resource(lines)
-    except ValueError:
-        log.error('No [Values] section found in %s', location)
-        raise MissingSectionError(location)
-
-    if not result['Values']:
-        raise EmptyResourceError(location)
-
-    return result
 
 
 def expand_dict(flat_dict, sep='_'):
@@ -383,49 +277,6 @@ def subdict_matches(target, query, partial_match=True):
             return False
 
     return True
-
-
-def set_default(key, value):
-    """Sets the default setting for this key/value pair. Does NOT update the current config.
-
-    :param str key:
-    :param str value:
-    """
-    with open(PYBEL_CONFIG_PATH) as f:
-        default_config = json.load(f)
-
-    default_config[key] = value
-
-    with open(PYBEL_CONFIG_PATH, 'w') as f:
-        json.dump(f, default_config)
-
-
-def set_default_connection(value):
-    """Sets the default connection string with the given value. See
-    http://docs.sqlalchemy.org/en/latest/core/engines.html for examples"""
-    set_default(PYBEL_CONNECTION, value)
-
-
-def set_default_mysql_connection(user=None, password=None, host=None, database=None, charset=None):
-    """Sets the default connection string with MySQL settings
-
-    :param host: MySQL database host
-    :param user: MySQL database user
-    :param password: MySQL database password. Can be None if no password is used.
-    :param database: MySQL database name
-    :param charset: MySQL database character set
-    """
-    kwargs = dict(
-        user=user or 'pybel',
-        host=host or 'localhost',
-        password=password,
-        database=database or 'pybel',
-        charset=charset or 'utf8'
-    )
-
-    fmt = PYBEL_MYSQL_FMT_NOPASS if password is None else PYBEL_MYSQL_FMT_PASS
-
-    set_default_connection(fmt.format(**kwargs))
 
 
 def hash_dump(d):

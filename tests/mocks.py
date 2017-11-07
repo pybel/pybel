@@ -7,19 +7,11 @@ import os
 from networkx import DiGraph
 from onto2nx.ontospy import Ontospy
 
-from pybel.manager.utils import urldefrag, OWLParser
 from pybel.constants import GOCC_LATEST
+from pybel.manager.utils import OWLParser, urldefrag
 from tests.constants import (
-    belns_dir_path,
-    get_uri_name,
-    belanno_dir_path,
-    beleq_dir_path,
-    bel_dir_path,
-    wine_iri,
-    test_owl_wine,
-    pizza_iri,
-    test_owl_pizza,
-    owl_dir_path
+    bel_dir_path, belanno_dir_path, beleq_dir_path, belns_dir_path, get_uri_name, owl_dir_path,
+    pizza_iri, test_owl_pizza, test_owl_wine, wine_iri,
 )
 
 try:
@@ -118,6 +110,6 @@ def parse_owl_rdf_resolver(iri):
     return g
 
 
-mock_bel_resources = mock.patch('pybel.utils.requests.Session', side_effect=MockSession)
+mock_bel_resources = mock.patch('pybel.resources.utils.requests.Session', side_effect=MockSession)
 mock_parse_owl_xml = mock.patch('pybel.manager.utils.parse_owl_xml', side_effect=parse_owl_xml_resolver)
 mock_parse_owl_rdf = mock.patch('pybel.manager.utils.parse_owl_rdf', side_effect=parse_owl_rdf_resolver)

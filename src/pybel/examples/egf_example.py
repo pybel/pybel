@@ -41,7 +41,7 @@
 """
 
 from ..constants import *
-from ..dsl.nodes import protein, protein_complex
+from ..dsl.nodes import bioprocess, complex_abundance, protein
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -67,26 +67,21 @@ egf_graph.annotation_url.update({
     'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno'
 })
 
-ar = protein('HGNC', 'AR')
-egf = protein('HGNC', 'AR')
-ifna1 = protein('HGNC', 'IFNA1')
-ifng = protein('HGNC', 'IFNG')
-vcp = protein('HGNC', 'VCP')
+ar = protein(name='AR', namespace='HGNC')
+egf = protein(name='AR', namespace='HGNC')
+ifna1 = protein(name='IFNA1', namespace='HGNC')
+ifng = protein(name='IFNG', namespace='HGNC')
+vcp = protein(name='VCP', namespace='HGNC')
 
-nfkb1 = protein('HGNC', 'NFKB1')
-nfkb2 = protein('HGNC', 'NFKB2')
-rel = protein('HGNC', 'REL')
-rela = protein('HGNC', 'RELA')
-relb = protein('HGNC', 'RELB')
+nfkb1 = protein(name='NFKB1', namespace='HGNC')
+nfkb2 = protein(name='NFKB2', namespace='HGNC')
+rel = protein(name='REL', namespace='HGNC')
+rela = protein(name='RELA', namespace='HGNC')
+relb = protein(name='RELB', namespace='HGNC')
 
-nfkb_complex = protein_complex([nfkb1, nfkb2, rel, rela, relb])
+nfkb_complex = complex_abundance([nfkb1, nfkb2, rel, rela, relb])
 
-apoptosis = {
-    FUNCTION: BIOPROCESS,
-    NAMESPACE: 'GOBP',
-    NAME: 'apoptotic process',
-    ID: '0006915'
-}
+apoptosis = bioprocess(namespace='GOBP', name='apoptotic process', identifier='0006915')
 
 egf_graph.add_qualified_edge(
     ar,

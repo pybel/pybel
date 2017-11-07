@@ -40,7 +40,7 @@ from pyparsing import pyparsing_common as ppc
 
 from ..baseparser import BaseParser
 from ..utils import nest, one_of_tags
-from ...constants import HGVS, KIND, IDENTIFIER, TRUNCATION_POSITION
+from ...constants import HGVS, IDENTIFIER, KIND, TRUNCATION_POSITION
 
 __all__ = [
     'truncation_tag',

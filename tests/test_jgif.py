@@ -9,7 +9,7 @@ import unittest
 
 from pybel import from_cbn_jgif, to_jgif
 from pybel.constants import *
-from tests.constants import bel_dir_path, TestGraphMixin
+from tests.constants import TestGraphMixin, bel_dir_path
 
 test_path = os.path.join(bel_dir_path, 'Cytotoxic T-cell Signaling-2.0-Hs.json')
 

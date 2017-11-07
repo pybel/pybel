@@ -16,12 +16,6 @@ def safe_get_dict(tokens):
     return dict(tokens)
 
 
-def safe_get_list(tokens):
-    if hasattr(tokens, 'asList'):
-        return tokens.asList()
-    return list(tokens)
-
-
 def identifier_to_tuple(tokens):
     """Extracts the namespace and name pair from the tokens and creates a 2-tuple
 
@@ -151,14 +145,14 @@ def reaction_part_po_to_tuple(tokens):
     :rtype: tuple
     """
     return tuple(sorted(
-        po_to_tuple(member)
+        node_to_tuple(member)
         for member in tokens
     ))
 
 
 def sort_dict_list(tokens):
     """Sorts a list of PyBEL data dictionaries to their canonical ordering"""
-    return sorted(tokens, key=po_to_tuple)
+    return sorted(tokens, key=node_to_tuple)
 
 
 def reaction_part_po_to_dict(tokens):
@@ -326,7 +320,7 @@ def list_po_to_tuple(tokens):
     :rtype: tuple
     """
     list_entries = tuple(sorted(
-        po_to_tuple(member)
+        node_to_tuple(member)
         for member in tokens[MEMBERS]
     ))
 
@@ -357,19 +351,8 @@ def node_to_tuple(tokens):
     :type tokens: ParseObject or dict
     :rtype: tuple
     """
-    return po_to_tuple(tokens)
-
-
-def po_to_tuple(tokens):
-    """Given tokens from either PyParsing, or following the PyBEL node data dictionary model, create a PyBEL
-    node tuple.
-
-    :param tokens: Either a PyParsing ParseObject or a PyBEL node data dictionary
-    :type tokens: ParseObject or dict
-    :rtype: tuple
-    """
     if MODIFIER in tokens:
-        return po_to_tuple(tokens[TARGET])
+        return node_to_tuple(tokens[TARGET])
 
     elif REACTION == tokens[FUNCTION]:
         return reaction_po_to_tuple(tokens)
@@ -392,7 +375,7 @@ def hash_node_dict(node_dict):
     :param dict node_dict:
     :rtype: str
     """
-    return hash_node(po_to_tuple(node_dict))
+    return hash_node(node_to_tuple(node_dict))
 
 
 def po_to_dict(tokens):

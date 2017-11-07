@@ -8,6 +8,7 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel, node_to_bel
 from pybel.constants import *
+from pybel.dsl import abundance
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_exceptions import (
@@ -792,6 +793,28 @@ class TestRelations(TestTokenParserBase):
 
         self.assertHasEdge(sub, obj, **{RELATION: EQUIVALENT_TO})
         self.assertHasEdge(obj, sub, **{RELATION: EQUIVALENT_TO})
+
+    def test_partOf(self):
+        statement = 'a(UBERON:"corpus striatum") partOf a(UBERON:"basal ganglion")'
+        self.parser.relation.parseString(statement)
+
+        corpus_striatum = abundance(namespace='UBERON', name='corpus striatum')
+        basal_ganglion = abundance(namespace='UBERON', name='basal ganglion')
+
+        self.assertTrue(self.parser.graph.has_node_with_data(corpus_striatum))
+        self.assertTrue(self.parser.graph.has_node_with_data(basal_ganglion))
+
+        cs_node = node_to_tuple(corpus_striatum)
+        bg_node = node_to_tuple(basal_ganglion)
+
+        self.assertIn(bg_node, self.parser.graph.edge[cs_node])
+
+        v = list(self.parser.graph.edge[cs_node][bg_node].values())
+        self.assertEqual(1, len(v))
+
+        v = v[0]
+        self.assertIn(RELATION, v)
+        self.assertEqual(PART_OF, v[RELATION])
 
     def test_subProcessOf(self):
         """

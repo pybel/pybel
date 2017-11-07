@@ -41,7 +41,7 @@ This calls for thoughtful consideration of the following two statements:
     BEL 2.0 specification on `cellular location (2.2.4) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
 """
 
-from pyparsing import Suppress, oneOf, Group
+from pyparsing import Group, Suppress, oneOf
 
 from ..baseparser import BaseParser
 from ..parse_identifier import IdentifierParser

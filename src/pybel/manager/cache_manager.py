@@ -28,8 +28,9 @@ from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
+from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
-from ..utils import get_bel_resource, hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
+from ..utils import hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
 
 __all__ = [
     'Manager',
@@ -98,7 +99,7 @@ def _get_annotation_insert_values(bel_resource):
 
 def not_resource_cachable(bel_resource):
     """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
-    return bel_resource['Processing']['CacheableFlag'] not in {'yes', 'Yes', 'True', 'true'}
+    return bel_resource['Processing'].get('CacheableFlag') not in {'yes', 'Yes', 'True', 'true'}
 
 
 class NamespaceManager(BaseManager):
@@ -727,7 +728,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param str version: The network version
         :rtype: bool
         """
-        return self.session.query(exists().where(Network.name == name, Network.version == version)).scalar()
+        return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
     def drop_network_by_id(self, network_id):
         """Drops a network by its database identifier

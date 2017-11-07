@@ -7,14 +7,12 @@ from __future__ import print_function
 import itertools as itt
 import logging
 import sys
-import time
-
-from operator import itemgetter
 
 from .constants import *
 from .parser.language import rev_abundance_labels
-from .struct.filters import iter_qualified_edges
-from .utils import ensure_quotes, flatten_citation, get_version, hash_edge
+from .resources.document import make_knowledge_header
+from .struct.filters import filter_qualified_edges
+from .utils import ensure_quotes, flatten_citation, hash_edge
 
 __all__ = [
     'to_bel_lines',
@@ -235,15 +233,6 @@ def edge_to_bel(graph, u, v, data, sep=' '):
     return sep.join((u_str, data[RELATION], v_str))
 
 
-def sort_dict_items(d):
-    """Returns the dictionary's items, sorted by their keys
-
-    :param dict d: A dictionary
-    :rtype: iter[tuple]
-    """
-    return sorted(d.items(), key=itemgetter(0))
-
-
 def _sort_qualified_edges_helper(edge_tuple):
     u, v, k, d = edge_tuple
     return (
@@ -260,7 +249,7 @@ def sort_qualified_edges(graph):
     :param BELGraph graph: A BEL graph
     :rtype: tuple[tuple,tuple,dict]
     """
-    qualified_edges_iter = iter_qualified_edges(graph)
+    qualified_edges_iter = filter_qualified_edges(graph)
     qualified_edges = sorted(qualified_edges_iter, key=_sort_qualified_edges_helper)
     return qualified_edges
 
@@ -268,44 +257,26 @@ def sort_qualified_edges(graph):
 def to_bel_lines(graph):
     """Returns an iterable over the lines of the BEL graph as a canonical BEL Script (.bel)
 
-    :param BELGraph graph: the BEL Graph to output as a BEL Script
+    :param pybel.BELGraph graph: the BEL Graph to output as a BEL Script
     :return: An iterable over the lines of the representative BEL script
     :rtype: iter[str]
     """
-    yield '# Output by PyBEL v{} on {}\n'.format(get_version(), time.asctime())
-
-    for k in sorted(graph.document):
-        yield 'SET DOCUMENT {} = "{}"'.format(INVERSE_DOCUMENT_KEYS[k], graph.document[k])
-
-    yield '###############################################\n'
-
     if GOCC_KEYWORD not in graph.namespace_url:
         graph.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
 
-    for namespace, url in sort_dict_items(graph.namespace_url):
-        yield 'DEFINE NAMESPACE {} AS URL "{}"'.format(namespace, url)
+    header_lines = make_knowledge_header(
+        namespace_url=graph.namespace_url,
+        namespace_owl=graph.namespace_owl,
+        namespace_patterns=graph.namespace_pattern,
+        annotation_url=graph.annotation_url,
+        annotation_owl=graph.annotation_owl,
+        annotation_patterns=graph.annotation_pattern,
+        annotation_list=graph.annotation_list,
+        **graph.document
+    )
 
-    for namespace, url in sort_dict_items(graph.namespace_owl):
-        yield 'DEFINE NAMESPACE {} AS OWL "{}"'.format(namespace, url)
-
-    for namespace, pattern in sort_dict_items(graph.namespace_pattern):
-        yield 'DEFINE NAMESPACE {} AS PATTERN "{}"'.format(namespace, pattern)
-
-    yield '###############################################\n'
-
-    for annotation, url in sort_dict_items(graph.annotation_url):
-        yield 'DEFINE ANNOTATION {} AS URL "{}"'.format(annotation, url)
-
-    for annotation, url in sort_dict_items(graph.annotation_owl):
-        yield 'DEFINE ANNOTATION {} AS OWL "{}"'.format(annotation, url)
-
-    for annotation, pattern in sort_dict_items(graph.annotation_pattern):
-        yield 'DEFINE ANNOTATION {} AS PATTERN "{}"'.format(annotation, pattern)
-
-    for annotation, values in sort_dict_items(graph.annotation_list):
-        yield 'DEFINE ANNOTATION {} AS LIST {{{}}}'.format(annotation, ', '.join('"{}"'.format(e) for e in values))
-
-    yield '###############################################\n'
+    for line in header_lines:
+        yield line
 
     qualified_edges = sort_qualified_edges(graph)
 
@@ -316,7 +287,7 @@ def to_bel_lines(graph):
             yield 'SET SupportingText = "{}"'.format(evidence)
 
             for u, v, _, data in evidence_edges:
-                keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else {}
+                keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else tuple()
                 for key in keys:
                     yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
                 yield edge_to_bel(graph, u, v, data=data)

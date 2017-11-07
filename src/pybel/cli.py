@@ -14,21 +14,21 @@ problems--the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
+import json
 import logging
+import os
 import sys
 import time
 
 import click
-import os
 
 from .canonicalize import to_bel
-from .constants import PYBEL_LOG_DIR, get_cache_connection, config, PYBEL_CONNECTION
-from .io import from_lines, from_url, to_json_file, to_csv, to_graphml, to_neo4j, to_cx_file, to_pickle, to_sif, to_gsea
-from .manager import Manager
-from .manager import defaults
-from .manager.database_io import to_database, from_database
+from .constants import PYBEL_CONFIG_PATH, PYBEL_CONNECTION, PYBEL_LOG_DIR, config, get_cache_connection
+from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
+from .manager import Manager, defaults
+from .manager.database_io import from_database, to_database
 from .manager.models import Base
-from .utils import set_default_connection, set_default_mysql_connection
+from .utils import PYBEL_MYSQL_FMT_NOPASS, PYBEL_MYSQL_FMT_PASS
 
 log = logging.getLogger('pybel')
 
@@ -63,7 +63,8 @@ def main():
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
-@click.option('-s', '--store-default', is_flag=True, help="Stores to default cache at {}".format(get_cache_connection()))
+@click.option('-s', '--store-default', is_flag=True,
+              help="Stores to default cache at {}".format(get_cache_connection()))
 @click.option('--store-connection', help="Database connection string")
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
@@ -153,6 +154,49 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
         to_neo4j(g, neo_graph, neo_context)
 
     sys.exit(0 if 0 == len(g.warnings) else 1)
+
+
+def set_default(key, value):
+    """Sets the default setting for this key/value pair. Does NOT update the current config.
+
+    :param str key:
+    :param str value:
+    """
+    with open(PYBEL_CONFIG_PATH) as f:
+        default_config = json.load(f)
+
+    default_config[key] = value
+
+    with open(PYBEL_CONFIG_PATH, 'w') as f:
+        json.dump(f, default_config)
+
+
+def set_default_connection(value):
+    """Sets the default connection string with the given value. See
+    http://docs.sqlalchemy.org/en/latest/core/engines.html for examples"""
+    set_default(PYBEL_CONNECTION, value)
+
+
+def set_default_mysql_connection(user=None, password=None, host=None, database=None, charset=None):
+    """Sets the default connection string with MySQL settings
+
+    :param host: MySQL database host
+    :param user: MySQL database user
+    :param password: MySQL database password. Can be None if no password is used.
+    :param database: MySQL database name
+    :param charset: MySQL database character set
+    """
+    kwargs = dict(
+        user=user or 'pybel',
+        host=host or 'localhost',
+        password=password,
+        database=database or 'pybel',
+        charset=charset or 'utf8'
+    )
+
+    fmt = PYBEL_MYSQL_FMT_NOPASS if password is None else PYBEL_MYSQL_FMT_PASS
+
+    set_default_connection(fmt.format(**kwargs))
 
 
 @main.group(help="Edit connection settings. Set to: {}".format(config[PYBEL_CONNECTION]))

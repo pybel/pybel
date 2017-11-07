@@ -4,10 +4,33 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import *
-from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids
+from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids, sanitize_date
 from pybel.manager.models import Citation
-from pybel.summary.provenance import get_pubmed_identifiers
+from pybel.struct.summary.provenance import get_pubmed_identifiers
 from tests.constants import TemporaryCacheMixin
+
+
+class TestSanitizeDate(unittest.TestCase):
+    def test_sanitize_1(self):
+        self.assertEqual('2012-12-19', sanitize_date('2012 Dec 19'))
+
+    def test_sanitize_2(self):
+        self.assertEqual('2012-12-01', sanitize_date('2012 Dec'))
+
+    def test_sanitize_3(self):
+        self.assertEqual('2012-01-01', sanitize_date('2012'))
+
+    def test_sanitize_4(self):
+        self.assertEqual('2012-10-01', sanitize_date('2012 Oct-Dec'))
+
+    def test_sanitize_5(self):
+        self.assertEqual('2012-03-01', sanitize_date('2012 Spring'))
+
+    def test_sanitize_6(self):
+        self.assertEqual('2012-12-12', sanitize_date('2012 Dec 12-15'))
+
+    def test_sanitize_nope(self):
+        self.assertEqual(None, sanitize_date('2012 Early Spring'))
 
 
 class TestCitations(TemporaryCacheMixin):

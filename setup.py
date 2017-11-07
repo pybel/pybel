@@ -45,7 +45,8 @@ if sys.version_info < (3, ):
     INSTALL_REQUIRES.append('configparser')
 
 EXTRAS_REQUIRE = {
-    'indra': ['indra']
+    'indra': ['indra'],
+    'deployment': ['artifactory']
 }
 TESTS_REQUIRE = [
     'mock',

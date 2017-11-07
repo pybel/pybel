@@ -10,7 +10,7 @@ import logging
 import networkx as nx
 
 from ..canonicalize import edge_to_bel
-from ..constants import NAMESPACE, NAME
+from ..constants import NAME, NAMESPACE
 from ..struct import BELGraph
 from ..utils import flatten_dict
 

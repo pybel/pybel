@@ -58,15 +58,10 @@ you have any problems working with the database, try removing it either by
 PyBEL will build a new database and populate it on the next run.
 """
 
-from . import canonicalize
-from . import constants
-from . import examples
-from . import io
-from . import struct
+from . import canonicalize, constants, examples, io, struct
 from .canonicalize import *
 from .io import *
-from .manager import cache_manager
-from .manager import database_io
+from .manager import cache_manager, database_io
 from .manager.cache_manager import *
 from .manager.database_io import *
 from .struct import *
@@ -79,7 +74,7 @@ __all__ = (
     cache_manager.__all__
 )
 
-__version__ = '0.9.4'
+__version__ = '0.9.5'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'

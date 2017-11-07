@@ -5,14 +5,15 @@ import unittest
 import networkx as nx
 
 import pybel.utils
-from pybel.canonicalize import postpend_location, node_to_bel
+from pybel.canonicalize import node_to_bel, postpend_location
 from pybel.constants import *
 from pybel.parser.language import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.utils import nest
-from pybel.utils import flatten_citation
-from pybel.utils import get_bel_resource, list2tuple, tokenize_version
-from tests.constants import test_an_1
+from pybel.resources.definitions import get_bel_resource
+from pybel.resources.exc import EmptyResourceError
+from pybel.utils import flatten_citation, list2tuple, tokenize_version
+from tests.constants import test_an_1, test_ns_empty
 from tests.mocks import mock_bel_resources
 
 
@@ -85,6 +86,11 @@ class TestUtils(unittest.TestCase):
         }
 
         self.assertEqual(expected_values, res['Values'])
+
+    @mock_bel_resources
+    def test_download_raises_on_empty(self, mock):
+        with self.assertRaises(EmptyResourceError):
+            get_bel_resource(test_ns_empty)
 
     def test_expand_dict(self):
         flat_dict = {

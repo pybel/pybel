@@ -12,14 +12,13 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 :data:`pybel.constants.config`.
 """
 
-from json import load, dump
+from json import dump, load
 from logging import getLogger
-
-from os import path, mkdir, environ, makedirs
+from os import environ, makedirs, mkdir, path
 
 log = getLogger(__name__)
 
-VERSION = '0.9.4'
+VERSION = '0.9.5'
 
 #: The last PyBEL version where the graph data definition changed
 PYBEL_MINIMUM_IMPORT_VERSION = 0, 9, 0
@@ -344,6 +343,8 @@ BIOMARKER_FOR = 'biomarkerFor'
 PROGONSTIC_BIOMARKER_FOR = 'prognosticBiomarkerFor'
 #: A BEL relationship, added by PyBEL
 EQUIVALENT_TO = 'equivalentTo'
+#: A BEL relationship, added by PyBEL
+PART_OF = 'partOf'
 
 #: A set of all causal relationships that have an increasing effect
 CAUSAL_INCREASE_RELATIONS = {INCREASES, DIRECTLY_INCREASES}
@@ -380,12 +381,14 @@ unqualified_edges = [
     TRANSLATED_TO,
     HAS_MEMBER,
     IS_A,
+    EQUIVALENT_TO,
+    PART_OF,
 ]
 
 UNQUALIFIED_EDGES = set(unqualified_edges)
 
 #: Unqualified edges are given negative keys since the standard NetworkX edge key factory starts at 0 and counts up
-unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}
+unqualified_edge_code = {relation: -i for i, relation in enumerate(unqualified_edges, start=1)}
 
 # BEL Keywords
 

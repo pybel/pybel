@@ -10,10 +10,10 @@ from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import modifier_po_to_dict
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
-from tests.constants import TestTokenParserBase, build_variant_dict
-from tests.constants import assertHasNode, assertHasEdge
-from tests.constants import default_identifier, TestGraphMixin
-from tests.constants import update_provenance
+from tests.constants import (
+    TestGraphMixin, TestTokenParserBase, assertHasEdge, assertHasNode, build_variant_dict,
+    default_identifier, update_provenance,
+)
 
 log = logging.getLogger(__name__)
 

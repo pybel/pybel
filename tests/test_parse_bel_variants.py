@@ -4,10 +4,12 @@ import logging
 import unittest
 
 from pybel.constants import *
-from pybel.parser.modifiers import LocationParser, VariantParser, FragmentParser, GmodParser, GsubParser, PmodParser, \
-    PsubParser, TruncationParser, FusionParser
-from tests.constants import build_variant_dict
-from tests.constants import identifier
+from pybel.dsl.nodes import pmod
+from pybel.parser.modifiers import (
+    FragmentParser, FusionParser, GmodParser, GsubParser, LocationParser, PmodParser,
+    PsubParser, TruncationParser, VariantParser,
+)
+from tests.constants import build_variant_dict, default_identifier, identifier
 
 log = logging.getLogger(__name__)
 
@@ -130,6 +132,8 @@ class TestPmod(unittest.TestCase):
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473
         }
+
+        self.assertEqual(expected, pmod(name='Ph', code='Ser', position=473))
         self.assertEqual(expected, result.asDict())
 
     def test_pmod5(self):
@@ -142,6 +146,8 @@ class TestPmod(unittest.TestCase):
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473
         }
+
+        self.assertEqual(expected, pmod(name='PhosRes', namespace='MOD', code='Ser', position=473))
         self.assertEqual(expected, result.asDict())
 
 
@@ -151,7 +157,7 @@ class TestGmod(unittest.TestCase):
 
         self.expected = {
             KIND: GMOD,
-            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Me')
+            IDENTIFIER: default_identifier('Me')
         }
 
     def test_gmod_short(self):

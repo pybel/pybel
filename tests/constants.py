@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
+import tempfile
 import unittest
 from json import dumps
 
-import os
-import tempfile
 from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
+from pybel.dsl import complex_abundance, pathology, protein
+from pybel.dsl.utils import entity, make_translocation_modifier_dict
 from pybel.manager import Manager
+from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
-from pybel.parser.utils import any_subdict_matches
+from tests.utils import any_dict_matches, any_subdict_matches
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +43,7 @@ test_an_1 = os.path.join(belanno_dir_path, 'test_an_1.belanno')
 test_ns_1 = os.path.join(belns_dir_path, 'test_ns_1.belns')
 test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
 test_ns_nocache = os.path.join(belns_dir_path, 'test_nocache.belns')
+test_ns_empty = os.path.join(belns_dir_path, 'test_ns_empty.belns')
 
 test_eq_1 = os.path.join(beleq_dir_path, 'disease-ontology.beleq')
 test_eq_2 = os.path.join(beleq_dir_path, 'mesh-diseases.beleq')
@@ -65,11 +69,6 @@ MESH_DISEASES_URL = OPENBEL_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
 pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
 wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
 
-AKT1 = (PROTEIN, 'HGNC', 'AKT1')
-EGFR = (PROTEIN, 'HGNC', 'EGFR')
-FADD = (PROTEIN, 'HGNC', 'FADD')
-CASP8 = (PROTEIN, 'HGNC', 'CASP8')
-
 
 def update_provenance(bel_parser):
     """Sticks provenance in a BEL parser
@@ -79,19 +78,6 @@ def update_provenance(bel_parser):
     """
     bel_parser.control_parser.citation.update(test_citation_dict)
     bel_parser.control_parser.evidence = test_evidence_text
-
-
-def any_dict_matches(dict_of_dicts, query_dict):
-    """
-
-    :param dict_of_dicts:
-    :param query_dict:
-    :return:
-    """
-    return any(
-        query_dict == sd
-        for sd in dict_of_dicts.values()
-    )
 
 
 def assertHasNode(self, node, graph, **kwargs):
@@ -147,7 +133,7 @@ def identifier(namespace, name):
 
 def default_identifier(name):
     """Convenience function for building a default namespace/name pair"""
-    return identifier(BEL_DEFAULT_NAMESPACE, name)
+    return entity(name=name, namespace=BEL_DEFAULT_NAMESPACE)
 
 
 class TestGraphMixin(unittest.TestCase):
@@ -310,17 +296,24 @@ def help_check_hgnc(self, namespace_dict):
     self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
     self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
 
-akt1 = (PROTEIN, 'HGNC', 'AKT1')
-cftr = (PROTEIN, 'HGNC', 'CFTR')
-mia=(PROTEIN, 'HGNC', 'MIA')
 
+AKT1 = (PROTEIN, 'HGNC', 'AKT1')
+EGFR = (PROTEIN, 'HGNC', 'EGFR')
+FADD = (PROTEIN, 'HGNC', 'FADD')
+CASP8 = (PROTEIN, 'HGNC', 'CASP8')
+cftr = (PROTEIN, 'HGNC', 'CFTR')
+mia = (PROTEIN, 'HGNC', 'MIA')
+
+akt1_gene = (GENE, 'HGNC', 'AKT1')
+akt1_rna = (RNA, 'HGNC', 'AKT1')
+oxygen_atom = (ABUNDANCE, 'CHEBI', 'oxygen atom')
 
 BEL_THOROUGH_NODES = {
-    (ABUNDANCE, 'CHEBI', 'oxygen atom'),
+    oxygen_atom,
     (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))),
-    (GENE, 'HGNC', 'AKT1'),
+    akt1_gene,
     (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')),
-    (PROTEIN, 'HGNC', 'AKT1'),
+    AKT1,
     (GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
     (GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)),
     (GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'c.308G>A'), (HGVS, 'p.Phe508del')),
@@ -342,7 +335,7 @@ BEL_THOROUGH_NODES = {
     (PROTEIN, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
     (PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')),
     cftr,
-    (PROTEIN, 'HGNC', 'EGFR'),
+    EGFR,
     (PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')),
     (PATHOLOGY, 'MESHD', 'Adenocarcinoma'),
     (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Phe508del')),
@@ -353,7 +346,7 @@ BEL_THOROUGH_NODES = {
     (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')),
     (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?', '55kD')),
     (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')),
-    (RNA, 'HGNC', 'AKT1'),
+    akt1_rna,
     (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')),
     (RNA, ('HGNC', 'TMPRSS2'), ('r', 1, 79), ('HGNC', 'ERG'), ('r', 312, 5034)),
     (RNA, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('?',)),
@@ -458,11 +451,11 @@ citation_2 = {
 }
 
 evidence_1 = "Evidence 1"
-
+dummy_evidence = 'These are mostly made up'
 
 BEL_THOROUGH_EDGES = [
-    ((ABUNDANCE, 'CHEBI', 'oxygen atom'), (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
-        EVIDENCE: 'These are mostly made up',
+    (oxygen_atom, (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         ANNOTATIONS: {
@@ -470,8 +463,8 @@ BEL_THOROUGH_EDGES = [
             'TestRegex': '9000'
         }
     }),
-    ((ABUNDANCE, 'CHEBI', 'oxygen atom'), (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
-        EVIDENCE: 'These are mostly made up',
+    (oxygen_atom, (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         ANNOTATIONS: {
@@ -479,84 +472,84 @@ BEL_THOROUGH_EDGES = [
             'TestRegex': '9000'
         }
     }),
-    ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
+    (akt1_gene, (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
         RELATION: HAS_VARIANT,
     }),
-    ((GENE, 'HGNC', 'AKT1'), (ABUNDANCE, 'CHEBI', 'oxygen atom'), {
-        EVIDENCE: 'These are mostly made up',
+    (akt1_gene, oxygen_atom, {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: DECREASES, SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
         OBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
     }),
-    ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), {
+    (akt1_gene, (GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
     }),
-    ((GENE, 'HGNC', 'AKT1'), (GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')), {
+    (akt1_gene, (GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')), {
         RELATION: HAS_VARIANT,
     }),
-    ((GENE, 'HGNC', 'AKT1'),
+    (akt1_gene,
      (GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'c.308G>A'), (HGVS, 'p.Phe508del')), {
          RELATION: HAS_VARIANT,
      }),
-    ((GENE, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1'), {
+    (akt1_gene, akt1_rna, {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: TRANSCRIBED_TO,
     }),
-    ((GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), akt1, {
-        EVIDENCE: 'These are mostly made up',
+    ((GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')), AKT1, {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: DIRECTLY_DECREASES,
     }),
-    (akt1, (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)), {
+    (AKT1, (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)), {
         RELATION: HAS_VARIANT,
     }),
-    (akt1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')), {
+    (AKT1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')), {
         RELATION: HAS_VARIANT,
     }),
-    (akt1,
+    (AKT1,
      (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')), {
          RELATION: HAS_VARIANT,
      }),
-    (akt1,
+    (AKT1,
      (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Ala127Tyr'), (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser')), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DIRECTLY_DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
          OBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
      }),
-    (akt1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')), {
+    (AKT1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')), {
         RELATION: HAS_VARIANT,
     }),
-    (akt1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')), {
+    (AKT1, (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')), {
         RELATION: HAS_VARIANT,
     }),
-    (akt1, (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')), {
-        EVIDENCE: 'These are mostly made up',
+    (AKT1, (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?')), {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: DEGRADATION},
     }),
-    (akt1, (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')), {
-        EVIDENCE: 'These are mostly made up',
+    (AKT1, (PROTEIN, 'HGNC', 'CFTR', (HGVS, 'p.Gly576Ala')), {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
     }),
-    (akt1, (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1521_1523delcuu')), {
-        EVIDENCE: 'These are mostly made up',
+    (AKT1, (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1521_1523delcuu')), {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
     }),
-    (akt1, (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1653_1655delcuu')), {
-        EVIDENCE: 'These are mostly made up',
+    (AKT1, (RNA, 'HGNC', 'CFTR', (HGVS, 'r.1653_1655delcuu')), {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: ACTIVITY},
     }),
-    (akt1, (PROTEIN, 'HGNC', 'EGFR'), {
-        EVIDENCE: 'These are mostly made up',
+    (AKT1, EGFR, {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {
@@ -568,31 +561,28 @@ BEL_THOROUGH_EDGES = [
         },
         OBJECT: {MODIFIER: DEGRADATION},
     }),
-    (akt1, (PROTEIN, 'HGNC', 'EGFR'), {
-        EVIDENCE: 'These are mostly made up',
+    (AKT1, EGFR, {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {
             MODIFIER: ACTIVITY,
             EFFECT: {NAME: 'kin', NAMESPACE: BEL_DEFAULT_NAMESPACE}
         },
-        OBJECT: {
-            MODIFIER: TRANSLOCATION,
-            EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
-            }
-        },
+        OBJECT: make_translocation_modifier_dict(
+            {NAMESPACE: 'GOCC', NAME: 'intracellular'},
+            {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
+        ),
     }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
      (GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: CAUSES_NO_CHANGE,
      }),
     ((GENE, 'HGNC', 'AKT1', (HGVS, 'c.308G>A')),
      (GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'c.308G>A'), (HGVS, 'p.Phe508del')), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
@@ -600,13 +590,13 @@ BEL_THOROUGH_EDGES = [
     ((MIRNA, 'HGNC', 'MIR21'),
      (GENE, ('HGNC', 'BCR'), ('c', '?', 1875), ('HGNC', 'JAK2'), ('c', 2626, '?')),
      {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DIRECTLY_INCREASES,
      }),
     ((MIRNA, 'HGNC', 'MIR21'), (PROTEIN, 'HGNC', 'AKT1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 473)),
      {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
@@ -614,9 +604,9 @@ BEL_THOROUGH_EDGES = [
     ((MIRNA, 'HGNC', 'MIR21'), (MIRNA, 'HGNC', 'MIR21', (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
     }),
-    ((GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), akt1,
+    ((GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), AKT1,
      {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
          OBJECT: {MODIFIER: DEGRADATION},
@@ -632,38 +622,38 @@ BEL_THOROUGH_EDGES = [
     }),
     ((GENE, 'HGNC', 'CFTR', (HGVS, 'g.117199646_117199648delCTT')),
      (GENE, 'HGNC', 'CFTR', (HGVS, 'c.1521_1523delCTT')), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
     ((MIRNA, 'HGNC', 'MIR21', (HGVS, 'p.Phe508del')), (PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.C40*')),
      {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
      }),
     ((GENE, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
      (PROTEIN, ('HGNC', 'TMPRSS2'), ('p', 1, 79), ('HGNC', 'ERG'), ('p', 312, 5034)), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
     ((PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')),
      (PROTEIN, ('HGNC', 'BCR'), ('p', '?', 1875), ('HGNC', 'JAK2'), ('p', 2626, '?')), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
     ((PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')),
      (PROTEIN, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
      {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
-    ((PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')), (PROTEIN, 'HGNC', 'EGFR'), {
-        EVIDENCE: 'These are mostly made up',
+    ((PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')), EGFR, {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         OBJECT: {
@@ -687,12 +677,12 @@ BEL_THOROUGH_EDGES = [
         RELATION: HAS_VARIANT,
     }),
     ((PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')), (PATHOLOGY, 'MESHD', 'Adenocarcinoma'), {
-         EVIDENCE: 'These are mostly made up',
-         CITATION: citation_1,
-         RELATION: INCREASES,
-     }),
+        EVIDENCE: dummy_evidence,
+        CITATION: citation_1,
+        RELATION: INCREASES,
+    }),
     ((PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (5, 20))), (COMPLEX, 'GOCC', 'interleukin-23 complex'), {
-        EVIDENCE: 'These are mostly made up',
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         OBJECT: {
@@ -715,42 +705,46 @@ BEL_THOROUGH_EDGES = [
     (mia, (PROTEIN, 'HGNC', 'MIA', (FRAGMENT, '?', '55kD')), {
         RELATION: HAS_VARIANT,
     }),
-    ((PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (1, '?'))), (PROTEIN, 'HGNC', 'EGFR'), {
-        EVIDENCE: 'These are mostly made up',
+    ((PROTEIN, 'HGNC', 'MIA', (FRAGMENT, (1, '?'))), EGFR, {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         OBJECT: {
             MODIFIER: TRANSLOCATION,
             EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+            }
         },
     }),
-    ((RNA, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'EGFR'), {
-        EVIDENCE: 'These are mostly made up',
+    (akt1_rna, EGFR, {
+        EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        OBJECT: {MODIFIER: TRANSLOCATION, EFFECT: {
-            FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-            TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}}},
+        OBJECT: {
+            MODIFIER: TRANSLOCATION, EFFECT: {
+                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+            }
+        },
     }),
-    ((RNA, 'HGNC', 'AKT1'), (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')), {
+    (akt1_rna, (RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')), {
         RELATION: HAS_VARIANT,
     }),
-    ((RNA, 'HGNC', 'AKT1'), akt1, {
+    (akt1_rna, AKT1, {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: TRANSLATED_TO,
     }),
     ((RNA, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, 'p.Phe508del')),
      (RNA, ('HGNC', 'TMPRSS2'), ('r', 1, 79), ('HGNC', 'ERG'), ('r', 312, 5034)), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DIRECTLY_INCREASES,
      }),
     ((RNA, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('?',)),
      (COMPLEX, (GENE, 'HGNC', 'NCF1'), (PROTEIN, 'HGNC', 'HBP1')), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
@@ -763,7 +757,7 @@ BEL_THOROUGH_EDGES = [
     ((RNA, ('HGNC', 'CHCHD4'), ('?',), ('HGNC', 'AIFM1'), ('?',)),
      (COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')),
      {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
@@ -780,24 +774,24 @@ BEL_THOROUGH_EDGES = [
         RELATION: HAS_VARIANT,
     }),
     ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')), (PROTEIN, 'HGNC', 'IL6'), {
-         RELATION: HAS_COMPONENT,
-     }),
+        RELATION: HAS_COMPONENT,
+    }),
     ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')),
      (COMPLEX, 'GOCC', 'interleukin-23 complex'), {
          RELATION: HAS_COMPONENT,
      }),
     ((COMPOSITE, (COMPLEX, 'GOCC', 'interleukin-23 complex'), (PROTEIN, 'HGNC', 'IL6')),
      (BIOPROCESS, 'GOBP', 'cell cycle arrest'), {
-         EVIDENCE: 'These are mostly made up',
+         EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DECREASES,
      }),
     ((PROTEIN, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: DIRECTLY_DECREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: DIRECTLY_DECREASES,
+        SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
+    }),
     ((GENE, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', 'hydrogen peroxide'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
@@ -826,32 +820,32 @@ BEL_THOROUGH_EDGES = [
         RELATION: HAS_COMPONENT,
     }),
     ((COMPLEX, (PROTEIN, 'HGNC', 'F3'), (PROTEIN, 'HGNC', 'F7')), (PROTEIN, 'HGNC', 'F9'), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: REGULATES,
-         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
-         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: REGULATES,
+        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
+    }),
     ((PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), (PROTEIN, 'HGNC', 'GSK3B'), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: POSITIVE_CORRELATION,
-         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: POSITIVE_CORRELATION,
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+    }),
     ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), {
         RELATION: HAS_VARIANT,
     }),
     ((PROTEIN, 'HGNC', 'GSK3B'), (PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: POSITIVE_CORRELATION,
-         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: POSITIVE_CORRELATION,
+        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+    }),
     ((PATHOLOGY, 'MESHD', 'Psoriasis'), (PATHOLOGY, 'MESHD', 'Skin Diseases'), {
-         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
-         CITATION: citation_2,
-         RELATION: IS_A,
-     }),
+        EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
+        CITATION: citation_2,
+        RELATION: IS_A,
+    }),
     ((
          REACTION,
          (
@@ -1006,10 +1000,10 @@ class BelReconstitutionMixin(TestGraphMixin):
         # FIXME this should work, but is getting 8 for the upgrade function
         # self.assertEqual(6, graph.number_of_edges(), msg='Edges:\n{}'.format('\n'.join(map(str, graph.edges(keys=True, data=True)))))
 
-        assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
-        assertHasNode(self, EGFR, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'EGFR'})
-        assertHasNode(self, FADD, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'FADD'})
-        assertHasNode(self, CASP8, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CASP8'})
+        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
+        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
+        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='FADD')))
+        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='CASP8')))
 
         bel_simple_citation_1 = {
             CITATION_NAME: "That one article from last week",
@@ -1023,14 +1017,14 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION_TYPE: "PubMed"
         }
 
-        evidence_1 = "Evidence 1 w extra notes"
+        evidence_1_extra = "Evidence 1 w extra notes"
         evidence_2 = 'Evidence 2'
         evidence_3 = 'Evidence 3'
 
         assertHasEdge(self, AKT1, EGFR, graph, **{
             RELATION: INCREASES,
             CITATION: bel_simple_citation_1,
-            EVIDENCE: evidence_1,
+            EVIDENCE: evidence_1_extra,
             ANNOTATIONS: {'Species': "9606"}
         })
         assertHasEdge(self, EGFR, FADD, graph, **{
@@ -1164,8 +1158,8 @@ class BelReconstitutionMixin(TestGraphMixin):
                 self.assertEqual(el, l, msg="Expected different error on line {}. Check line {}".format(el, l))
                 self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
-        assertHasNode(self, AKT1, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
-        assertHasNode(self, EGFR, graph, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'EGFR'})
+        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
+        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
 
         assertHasEdge(self, AKT1, EGFR, graph, **{
             RELATION: INCREASES,
@@ -1181,15 +1175,19 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
-        a = PATHOLOGY, 'MESHD', 'Achlorhydria'
-        b = PROTEIN, 'HGNC', 'ADGRB1'
-        c = PROTEIN, 'HGNC', 'ADGRB2'
-        d = COMPLEX, b, c
+        adgrb1 = protein(namespace='HGNC', name='ADGRB1')
+        adgrb2 = protein(namespace='HGNC', name='ADGRB2')
+        adgrb_complex = complex_abundance([adgrb1, adgrb2])
+        achlorhydria = pathology(namespace='MESHD', name='Achlorhydria')
 
-        assertHasNode(self, a, graph)
-        assertHasNode(self, b, graph)
-        assertHasNode(self, c, graph)
-        assertHasNode(self, d, graph)
+        self.assertTrue(graph.has_node_with_data(adgrb1))
+        self.assertTrue(graph.has_node_with_data(adgrb2))
+        self.assertTrue(graph.has_node_with_data(adgrb_complex))
+        self.assertTrue(graph.has_node_with_data(achlorhydria))
+
+        b = node_to_tuple(adgrb1)
+        c = node_to_tuple(adgrb2)
+        d = node_to_tuple(adgrb_complex)
 
         assertHasEdge(self, d, b, graph)
         assertHasEdge(self, d, c, graph)

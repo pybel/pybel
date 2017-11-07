@@ -4,7 +4,6 @@ from pybel.examples import sialic_acid_graph
 from pybel.examples.sialic_acid_example import cd33, cd33_phosphorylated, shp2, syk, trem2
 from pybel.manager.models import Edge, Namespace, Network
 from pybel.manager.query_manager import graph_from_edges
-from pybel.parser.canonicalize import po_to_tuple
 from tests.constants import TemporaryCacheClsMixin
 from tests.mocks import mock_bel_resources
 
@@ -82,9 +81,9 @@ class TestSeeding(TemporaryCacheClsMixin):
 
         self.assertEqual(3, graph.number_of_nodes(), msg='Nodes: {}'.format(graph.nodes()))
 
-        self.assertIn(po_to_tuple(trem2), graph)
-        self.assertIn(po_to_tuple(syk), graph)
-        self.assertIn(po_to_tuple(shp2), graph)
+        self.assertTrue(graph.has_node_with_data(trem2))
+        self.assertTrue(graph.has_node_with_data(syk))
+        self.assertTrue(graph.has_node_with_data(shp2))
 
         self.assertEqual(2, graph.number_of_edges())
 
@@ -97,9 +96,9 @@ class TestSeeding(TemporaryCacheClsMixin):
 
         self.assertEqual(4, graph.number_of_nodes(), msg='Nodes: {}'.format(graph.nodes()))
 
-        self.assertIn(po_to_tuple(cd33_phosphorylated), graph)
-        self.assertIn(po_to_tuple(cd33), graph)
-        self.assertIn(po_to_tuple(syk), graph)
-        self.assertIn(po_to_tuple(shp2), graph)
+        self.assertTrue(graph.has_node_with_data(cd33_phosphorylated))
+        self.assertTrue(graph.has_node_with_data(cd33))
+        self.assertTrue(graph.has_node_with_data(syk))
+        self.assertTrue(graph.has_node_with_data(shp2))
 
         self.assertEqual(3, graph.number_of_edges())

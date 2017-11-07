@@ -4,13 +4,13 @@ import logging
 import unittest
 
 from pybel.constants import (
-    EVIDENCE, CITATION, CITATION_NAME, CITATION_TYPE, CITATION_REFERENCE, CITATION_AUTHORS,
-    CITATION_DATE, CITATION_COMMENTS, ANNOTATIONS,
+    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_COMMENTS, CITATION_DATE, CITATION_NAME,
+    CITATION_REFERENCE, CITATION_TYPE, EVIDENCE,
 )
-from pybel.io.line_utils import sanitize_file_lines
 from pybel.parser import ControlParser
 from pybel.parser.parse_control import set_citation_stub
 from pybel.parser.parse_exceptions import *
+from pybel.resources.document import sanitize_file_lines
 from tests.constants import SET_CITATION_TEST, test_citation_dict
 
 logging.getLogger("requests").setLevel(logging.WARNING)
