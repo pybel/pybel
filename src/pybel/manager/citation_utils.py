@@ -26,9 +26,41 @@ re1 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}$')
 re2 = re.compile('^[12][0-9]{3} [a-zA-Z]{3}$')
 re3 = re.compile('^[12][0-9]{3}$')
 re4 = re.compile('^[12][0-9]{3} [a-zA-Z]{3}-[a-zA-Z]{3}$')
+re5 = re.compile('^([12][0-9]{3}) (Spring|Fall|Winter|Summer)$')
+re6 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-(\d{1,2})$')
+
+season_map = {'Spring': '03', 'Summer': '06', 'Fall': '09', 'Winter': '12'}
 
 
-# TODO re5 = re.compile('^[12][0-9]{3} Fall|Spring|Winter|Summer$')
+def sanitize_date(publication_date):
+    """Sanitizes lots of different date strings into ISO 8601
+
+    :param str publication_date:
+    :rtype: str
+    """
+    if re1.search(publication_date):
+        return datetime.strptime(publication_date, '%Y %b %d').strftime('%Y-%m-%d')
+
+    if re2.search(publication_date):
+        return datetime.strptime(publication_date, '%Y %b').strftime('%Y-%m-01')
+
+    if re3.search(publication_date):
+        return publication_date + "-01-01"
+
+    if re4.search(publication_date):
+        return datetime.strptime(publication_date[:-4], '%Y %b').strftime('%Y-%m-01')
+
+    s = re5.search(publication_date)
+
+    if s:
+        year, season = s.groups()
+        return '{}-{}-01'.format(year, season_map[season])
+
+    s = re6.search(publication_date)
+
+    if s:
+        return datetime.strptime(publication_date, '%Y %b %d-{}'.format(s.groups()[0])).strftime('%Y-%m-%d')
+
 
 def grouper(n, iterable, fillvalue=None):
     "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
@@ -127,16 +159,12 @@ def get_citations_by_pmids(pmids, group_size=None, sleep_time=None, return_error
 
             publication_date = p['pubdate']
 
-            if re1.search(publication_date):
-                result[pmid][CITATION_DATE] = datetime.strptime(p['pubdate'], '%Y %b %d').strftime('%Y-%m-%d')
-            elif re2.search(publication_date):
-                result[pmid][CITATION_DATE] = datetime.strptime(p['pubdate'], '%Y %b').strftime('%Y-%m-01')
-            elif re3.search(publication_date):
-                result[pmid][CITATION_DATE] = p['pubdate'] + "-01-01"
-            elif re4.search(publication_date):
-                result[pmid][CITATION_DATE] = datetime.strptime(p['pubdate'][:-4], '%Y %b').strftime('%Y-%m-01')
+            sanitized_publication_date = sanitize_date(publication_date)
+
+            if sanitized_publication_date:
+                result[pmid][CITATION_DATE] = sanitized_publication_date
             else:
-                log.info('Date with strange format: %s', p['pubdate'])
+                log.info('PMID {} Date with strange format: %s', pmid, publication_date)
 
             if CITATION_DATE in result[pmid]:
                 citation.date = datetime.strptime(result[pmid][CITATION_DATE], '%Y-%m-%d')
