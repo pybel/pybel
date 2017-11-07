@@ -728,7 +728,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param str version: The network version
         :rtype: bool
         """
-        return self.session.query(exists().where(Network.name == name, Network.version == version)).scalar()
+        return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
     def drop_network_by_id(self, network_id):
         """Drops a network by its database identifier

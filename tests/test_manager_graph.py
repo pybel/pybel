@@ -146,6 +146,11 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         graph_copy.document[METADATA_VERSION] = '1.0.1'
         network_copy = self.manager.insert_graph(graph_copy, store_parts=False)
 
+        self.assertTrue(self.manager.has_name_version(graph_copy.name, graph_copy.version))
+        self.assertFalse(self.manager.has_name_version('wrong name', '0.1.2'))
+        self.assertFalse(self.manager.has_name_version(graph_copy.name, '0.1.2'))
+        self.assertFalse(self.manager.has_name_version('wrong name', graph_copy.version))
+
         self.assertEqual(2, self.manager.count_networks())
 
         self.assertEqual('1.0.1', self.manager.get_most_recent_network_by_name(self.graph.name).version)
