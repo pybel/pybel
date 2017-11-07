@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-Unreleased
-----------
+`0.9.5 <https://github.com/pybel/pybel/compare/v0.9.4...0.9.5>`_ - 2017-11-07
+-----------------------------------------------------------------------------
 Added
 ~~~~~
 - Updates to DSL
 - More node filters and predicates
+- Added "partOf" relationship (https://github.com/pybel/pybel/issues/244)
+- Added more regular expressions for date parsing (https://github.com/pybel/pybel/issues/239)
+
+Fixed
+~~~~~
+- Fixed incorrect checking of network storage (https://github.com/pybel/pybel/issues/246)
 
 Changed
 ~~~~~~~
