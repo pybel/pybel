@@ -343,6 +343,8 @@ BIOMARKER_FOR = 'biomarkerFor'
 PROGONSTIC_BIOMARKER_FOR = 'prognosticBiomarkerFor'
 #: A BEL relationship, added by PyBEL
 EQUIVALENT_TO = 'equivalentTo'
+#: A BEL relationship, added by PyBEL
+PART_OF = 'partOf'
 
 #: A set of all causal relationships that have an increasing effect
 CAUSAL_INCREASE_RELATIONS = {INCREASES, DIRECTLY_INCREASES}
@@ -380,12 +382,13 @@ unqualified_edges = [
     HAS_MEMBER,
     IS_A,
     EQUIVALENT_TO,
+    PART_OF,
 ]
 
 UNQUALIFIED_EDGES = set(unqualified_edges)
 
 #: Unqualified edges are given negative keys since the standard NetworkX edge key factory starts at 0 and counts up
-unqualified_edge_code = {relation: (-1 - i) for i, relation in enumerate(unqualified_edges)}
+unqualified_edge_code = {relation: -i for i, relation in enumerate(unqualified_edges, start=1)}
 
 # BEL Keywords
 

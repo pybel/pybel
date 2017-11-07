@@ -9,7 +9,7 @@ This module handles parsing BEL relations and validation of semantics.
 import itertools as itt
 import logging
 
-from pyparsing import And, Group, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
+from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
 
 from .baseparser import BaseParser
 from .canonicalize import (
@@ -329,10 +329,11 @@ class BelParser(BaseParser):
         orthologous_tag = one_of_tags(['orthologous'], ORTHOLOGOUS)
 
         #: `3.4.5 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_isa>`_
-        is_a_tag = one_of_tags(['isA'], IS_A)
+        is_a_tag = Keyword(IS_A)
 
-        #: PyBEL Variant
+        #: PyBEL Variants
         equivalent_tag = one_of_tags(['eq', EQUIVALENT_TO], EQUIVALENT_TO)
+        partof_tag = Keyword(PART_OF)
 
         self.bel_to_bel_relations = [
             association_tag,
@@ -344,6 +345,7 @@ class BelParser(BaseParser):
             orthologous_tag,
             is_a_tag,
             equivalent_tag,
+            partof_tag,
             directly_increases_tag,
             directly_decreases_tag,
             analogous_tag,

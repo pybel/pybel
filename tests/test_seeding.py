@@ -4,7 +4,6 @@ from pybel.examples import sialic_acid_graph
 from pybel.examples.sialic_acid_example import cd33, cd33_phosphorylated, shp2, syk, trem2
 from pybel.manager.models import Edge, Namespace, Network
 from pybel.manager.query_manager import graph_from_edges
-from pybel.parser.canonicalize import po_to_tuple
 from tests.constants import TemporaryCacheClsMixin
 from tests.mocks import mock_bel_resources
 

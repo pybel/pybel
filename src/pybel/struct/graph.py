@@ -8,7 +8,7 @@ from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..constants import *
-from ..parser.canonicalize import po_to_tuple
+from ..parser.canonicalize import node_to_tuple
 from ..utils import get_version
 
 __all__ = [
@@ -273,7 +273,7 @@ class BELGraph(networkx.MultiDiGraph):
         :return: A PyBEL node tuple
         :rtype: tuple
         """
-        node_tuple = po_to_tuple(attr_dict)
+        node_tuple = node_to_tuple(attr_dict)
 
         if node_tuple in self:
             return node_tuple
@@ -306,7 +306,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param dict attr_dict: A PyBEL node data dictionary
         :rtype: bool
         """
-        node_tuple = po_to_tuple(attr_dict)
+        node_tuple = node_to_tuple(attr_dict)
         return self.has_node(node_tuple)
 
     def add_simple_node(self, function, namespace, name):

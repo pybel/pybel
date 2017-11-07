@@ -13,7 +13,7 @@ from pybel.constants import *
 from pybel.dsl import complex_abundance, pathology, protein
 from pybel.dsl.utils import entity, make_translocation_modifier_dict
 from pybel.manager import Manager
-from pybel.parser.canonicalize import po_to_tuple
+from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
 from tests.utils import any_dict_matches, any_subdict_matches
@@ -1185,9 +1185,9 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertTrue(graph.has_node_with_data(adgrb_complex))
         self.assertTrue(graph.has_node_with_data(achlorhydria))
 
-        b = po_to_tuple(adgrb1)
-        c = po_to_tuple(adgrb2)
-        d = po_to_tuple(adgrb_complex)
+        b = node_to_tuple(adgrb1)
+        c = node_to_tuple(adgrb2)
+        d = node_to_tuple(adgrb_complex)
 
         assertHasEdge(self, d, b, graph)
         assertHasEdge(self, d, c, graph)
