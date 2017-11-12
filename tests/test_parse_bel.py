@@ -6,13 +6,13 @@ import unittest
 from pybel import BELGraph
 from pybel.canonicalize import node_to_bel
 from pybel.constants import *
+from pybel.dsl.nodes import abundance, gene, hgvs, pmod
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import modifier_po_to_dict
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
 from tests.constants import (
-    TestGraphMixin, TestTokenParserBase, assertHasEdge, assertHasNode, build_variant_dict,
-    default_identifier, update_provenance,
+    TestGraphMixin, TestTokenParserBase, assertHasEdge, assertHasNode, default_identifier, update_provenance,
 )
 
 log = logging.getLogger(__name__)
@@ -29,11 +29,7 @@ class TestAbundance(TestTokenParserBase):
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
         self.expected_node = ABUNDANCE, 'CHEBI', 'oxygen atom'
-        self.expected_node_data = {
-            FUNCTION: ABUNDANCE,
-            NAMESPACE: 'CHEBI',
-            NAME: 'oxygen atom'
-        }
+        self.expected_node_data = abundance(namespace='CHEBI', name='oxygen atom')
 
         self.expected_canonical_bel = 'a(CHEBI:"oxygen atom")'
 
@@ -43,22 +39,16 @@ class TestAbundance(TestTokenParserBase):
 
         result = self.parser.general_abundance.parseString(statement)
 
-        expected_result = {
-            FUNCTION: ABUNDANCE,
-            IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'}
-        }
-
-        self.assertEqual(expected_result, result.asDict())
+        self.assertEqual(self.expected_node_data, result.asDict())
 
         node = node_to_tuple(result)
 
         self.assertEqual(self.expected_node, node)
         self.assertEqual(self.expected_canonical_bel, node_to_bel(self.parser.graph, self.expected_node))
 
-        expected_modifier = {}
-        self.assertEqual(expected_modifier, modifier_po_to_dict(result))
+        self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
 
-        self.assertHasNode(node, **self.expected_node_data)
+        self.assertTrue(self.graph.has_node_with_data(self.expected_node_data))
 
     def test_long_abundance(self):
         """small molecule"""
@@ -68,8 +58,12 @@ class TestAbundance(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: ABUNDANCE,
-            IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'oxygen atom'},
-            LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+            NAMESPACE: 'CHEBI',
+            NAME: 'oxygen atom',
+            LOCATION: {
+                NAMESPACE: 'GOCC',
+                NAME: 'intracellular'
+            }
         }
 
         self.assertEqual(expected_result, result.asDict())
@@ -99,15 +93,13 @@ class TestGene(TestTokenParserBase):
         statement = 'g(HGNC:AKT1)'
 
         result = self.parser.gene.parseString(statement)
-        expected_list = [GENE, ['HGNC', 'AKT1']]
+        expected_list = [GENE, 'HGNC', 'AKT1']
         self.assertEqual(expected_list, result.asList())
 
         expected_dict = {
             FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            }
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1'
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -129,10 +121,8 @@ class TestGene(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
             LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
@@ -158,17 +148,9 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
-            VARIANTS: [
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: TEST_PROTEIN_VARIANT
-                }
-            ]
-
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
+            VARIANTS: [hgvs(TEST_PROTEIN_VARIANT)]
         }
         self.assertEqual(expected_result, result.asDict())
 
@@ -202,10 +184,8 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
             VARIANTS: [
                 {
                     KIND: GMOD,
@@ -231,19 +211,12 @@ class TestGene(TestTokenParserBase):
         statement = 'g(HGNC:AKT1,sub(G,308,A))'
         result = self.parser.gene.parseString(statement)
 
-        expected_result = {
-            FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
-            VARIANTS: [
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: TEST_GENE_VARIANT
-                }
-            ]
-        }
+        expected_result = gene(
+            name='AKT1',
+            namespace='HGNC',
+            variants=[hgvs(TEST_GENE_VARIANT)]
+        )
+
         self.assertEqual(expected_result, result.asDict())
 
         expected_node = node_to_tuple(result)
@@ -265,10 +238,8 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
             VARIANTS: [
                 {
                     KIND: HGVS,
@@ -301,14 +272,12 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
             VARIANTS: [
-                build_variant_dict(TEST_PROTEIN_VARIANT),
-                build_variant_dict(TEST_GENE_VARIANT),
-                build_variant_dict('c.1521_1523delCTT')
+                hgvs(TEST_PROTEIN_VARIANT),
+                hgvs(TEST_GENE_VARIANT),
+                hgvs('c.1521_1523delCTT')
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -494,7 +463,7 @@ class TestGene(TestTokenParserBase):
         statement = 'g(SNP:rs113993960, var(c.1521_1523delCTT))'
         result = self.parser.gene.parseString(statement)
 
-        expected_result = [GENE, ['SNP', 'rs113993960'], [HGVS, 'c.1521_1523delCTT']]
+        expected_result = [GENE, 'SNP', 'rs113993960', [HGVS, 'c.1521_1523delCTT']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = node_to_tuple(result)
@@ -514,7 +483,7 @@ class TestGene(TestTokenParserBase):
         statement = 'g(REF:"NC_000007.13", var(g.117199646_117199648delCTT))'
         result = self.parser.gene.parseString(statement)
 
-        expected_result = [GENE, ['REF', 'NC_000007.13'], [HGVS, 'g.117199646_117199648delCTT']]
+        expected_result = [GENE, 'REF', 'NC_000007.13', [HGVS, 'g.117199646_117199648delCTT']]
         self.assertEqual(expected_result, result.asList())
 
         gene_node = GENE, 'REF', 'NC_000007.13'
@@ -531,7 +500,8 @@ class TestGene(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: GENE,
-            IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CFTR'},
+            NAMESPACE: 'HGNC',
+            NAME: 'CFTR',
             VARIANTS: [
                 {KIND: HGVS, IDENTIFIER: 'c.1521_1523delCTT'}
             ]
@@ -562,15 +532,13 @@ class TestMiRNA(TestTokenParserBase):
     def test_short(self):
         statement = 'm(HGNC:MIR21)'
         result = self.parser.mirna.parseString(statement)
-        expected_result = [MIRNA, ['HGNC', 'MIR21']]
+        expected_result = [MIRNA, 'HGNC', 'MIR21']
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: MIRNA,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21'
-            }
+            NAMESPACE: 'HGNC',
+            NAME: 'MIR21'
         }
 
         self.assertEqual(expected_dict, result.asDict())
@@ -584,15 +552,13 @@ class TestMiRNA(TestTokenParserBase):
     def test_long(self):
         statement = 'microRNAAbundance(HGNC:MIR21)'
         result = self.parser.mirna.parseString(statement)
-        expected_result = [MIRNA, ['HGNC', 'MIR21']]
+        expected_result = [MIRNA, 'HGNC', 'MIR21']
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: MIRNA,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21'
-            }
+            NAMESPACE: 'HGNC',
+            NAME: 'MIR21',
         }
 
         self.assertEqual(expected_dict, result.asDict())
@@ -609,10 +575,8 @@ class TestMiRNA(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: MIRNA,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'MIR21',
             LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
@@ -632,10 +596,8 @@ class TestMiRNA(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: MIRNA,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'MIR21',
             VARIANTS: [
                 {
                     KIND: HGVS,
@@ -661,10 +623,8 @@ class TestMiRNA(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: MIRNA,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'MIR21',
             VARIANTS: [
                 {
                     KIND: HGVS,
@@ -700,15 +660,13 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1)'
 
         result = self.parser.protein.parseString(statement)
-        expected_result = [PROTEIN, ['HGNC', 'AKT1']]
+        expected_result = [PROTEIN, 'HGNC', 'AKT1']
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: PROTEIN,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            }
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -728,10 +686,8 @@ class TestProtein(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: PROTEIN,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
             LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
@@ -756,24 +712,15 @@ class TestProtein(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: PROTEIN,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
             LOCATION: {
                 NAMESPACE: 'GOCC',
                 NAME: 'intracellular'
             },
             VARIANTS: [
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: 'p.Ala127Tyr'
-                },
-                {
-                    KIND: PMOD,
-                    IDENTIFIER: default_identifier('Ph'),
-                    'code': 'Ser'
-                }
+                hgvs('p.Ala127Tyr'),
+                pmod(name='Ph', code='Ser')
             ]
         }
 
@@ -900,7 +847,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, var(p.Cys40*))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'AKT1'], [HGVS, 'p.Cys40*']]
+        expected_result = [PROTEIN, 'HGNC', 'AKT1', [HGVS, 'p.Cys40*']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Cys40*')
@@ -920,7 +867,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:AKT1, var(p.Arg1851*))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'AKT1'], [HGVS, 'p.Arg1851*']]
+        expected_result = [PROTEIN, 'HGNC', 'AKT1', [HGVS, 'p.Arg1851*']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.Arg1851*')
@@ -1011,7 +958,7 @@ class TestProtein(TestTokenParserBase):
         """2.2.2 Test reference allele"""
         statement = 'p(HGNC:CFTR, var(=))'
         result = self.parser.protein.parseString(statement)
-        expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, '=']]
+        expected_result = [PROTEIN, 'HGNC', 'CFTR', [HGVS, '=']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = PROTEIN, 'HGNC', 'CFTR', (HGVS, '=')
@@ -1032,7 +979,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:CFTR, var(?))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, '?']]
+        expected_result = [PROTEIN, 'HGNC', 'CFTR', [HGVS, '?']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = PROTEIN, 'HGNC', 'CFTR', (HGVS, '?')
@@ -1052,7 +999,7 @@ class TestProtein(TestTokenParserBase):
         """2.2.2 Test substitution"""
         statement = 'p(HGNC:CFTR, var(p.Gly576Ala))'
         result = self.parser.protein.parseString(statement)
-        expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, 'p.Gly576Ala']]
+        expected_result = [PROTEIN, 'HGNC', 'CFTR', [HGVS, 'p.Gly576Ala']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = node_to_tuple(result)
@@ -1072,7 +1019,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:CFTR, var(p.Phe508del))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, TEST_PROTEIN_VARIANT]]
+        expected_result = [PROTEIN, 'HGNC', 'CFTR', [HGVS, TEST_PROTEIN_VARIANT]]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = node_to_tuple(result)
@@ -1146,7 +1093,7 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:YFG, frag(?))'
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'YFG'], [FRAGMENT, '?']]
+        expected_result = [PROTEIN, 'HGNC', 'YFG', [FRAGMENT, '?']]
         self.assertEqual(expected_result, result.asList())
 
         expected_node = node_to_tuple(result)
@@ -1206,15 +1153,13 @@ class TestRna(TestTokenParserBase):
         statement = 'r(HGNC:AKT1)'
 
         result = self.parser.rna.parseString(statement)
-        expected_result = [RNA, ['HGNC', 'AKT1']]
+        expected_result = [RNA, 'HGNC', 'AKT1']
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: RNA,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            }
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1'
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1233,19 +1178,11 @@ class TestRna(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: RNA,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            },
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1',
             VARIANTS: [
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: TEST_PROTEIN_VARIANT
-                },
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: 'c.1521_1523delCTT'
-                }
+                hgvs(TEST_PROTEIN_VARIANT),
+                hgvs('c.1521_1523delCTT')
             ]
         }
         self.assertEqual(expected_result, result.asDict())
@@ -1382,16 +1319,9 @@ class TestRna(TestTokenParserBase):
 
         expected_dict = {
             FUNCTION: RNA,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'CFTR'
-            },
-            VARIANTS: [
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: 'r.1521_1523delcuu'
-                }
-            ]
+            NAMESPACE: 'HGNC',
+            NAME: 'CFTR',
+            VARIANTS: [hgvs('r.1521_1523delcuu')]
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1419,15 +1349,13 @@ class TestComplex(TestTokenParserBase):
         statement = 'complex(SCOMP:"AP-1 Complex")'
         result = self.parser.complex_abundances.parseString(statement)
 
-        expected_result = [COMPLEX, ['SCOMP', 'AP-1 Complex']]
+        expected_result = [COMPLEX, 'SCOMP', 'AP-1 Complex']
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: COMPLEX,
-            IDENTIFIER: {
-                NAMESPACE: 'SCOMP',
-                NAME: 'AP-1 Complex'
-            }
+            NAMESPACE: 'SCOMP',
+            NAME: 'AP-1 Complex'
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1447,7 +1375,7 @@ class TestComplex(TestTokenParserBase):
         statement = 'complex(p(HGNC:FOS), p(HGNC:JUN))'
         result = self.parser.complex_abundances.parseString(statement)
 
-        expected_result = [COMPLEX, [PROTEIN, ['HGNC', 'FOS']], [PROTEIN, ['HGNC', 'JUN']]]
+        expected_result = [COMPLEX, [PROTEIN, 'HGNC', 'FOS'], [PROTEIN, 'HGNC', 'JUN']]
         self.assertEqual(expected_result, result.asList())
 
         expected_result = {
@@ -1455,16 +1383,12 @@ class TestComplex(TestTokenParserBase):
             MEMBERS: [
                 {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {
-                        NAMESPACE: 'HGNC',
-                        NAME: 'FOS'
-                    }
+                    NAMESPACE: 'HGNC',
+                    NAME: 'FOS'
                 }, {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {
-                        NAMESPACE: 'HGNC',
-                        NAME: 'JUN'
-                    }
+                    NAMESPACE: 'HGNC',
+                    NAME: 'JUN'
                 }
             ]
         }
@@ -1522,7 +1446,7 @@ class TestComposite(TestTokenParserBase):
         statement = 'composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex"))'
         result = self.parser.composite_abundance.parseString(statement)
 
-        expected_result = [COMPOSITE, [PROTEIN, ['HGNC', 'IL6']], [COMPLEX, ['GOCC', 'interleukin-23 complex']]]
+        expected_result = [COMPOSITE, [PROTEIN, 'HGNC', 'IL6'], [COMPLEX, 'GOCC', 'interleukin-23 complex']]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
@@ -1530,10 +1454,12 @@ class TestComposite(TestTokenParserBase):
             MEMBERS: [
                 {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'IL6'}
+                    NAMESPACE: 'HGNC',
+                    NAME: 'IL6'
                 }, {
                     FUNCTION: COMPLEX,
-                    IDENTIFIER: {NAMESPACE: 'GOCC', NAME: 'interleukin-23 complex'}
+                    NAMESPACE: 'GOCC',
+                    NAME: 'interleukin-23 complex'
                 }
             ]
         }
@@ -1593,12 +1519,13 @@ class TestBiologicalProcess(TestTokenParserBase):
         statement = 'bp(GOBP:"cell cycle arrest")'
         result = self.parser.biological_process.parseString(statement)
 
-        expected_result = [BIOPROCESS, ['GOBP', 'cell cycle arrest']]
+        expected_result = [BIOPROCESS, 'GOBP', 'cell cycle arrest']
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: BIOPROCESS,
-            IDENTIFIER: {NAMESPACE: 'GOBP', NAME: 'cell cycle arrest'}
+            NAMESPACE: 'GOBP',
+            NAME: 'cell cycle arrest'
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1624,12 +1551,13 @@ class TestPathology(TestTokenParserBase):
         statement = 'pathology(MESHD:adenocarcinoma)'
         result = self.parser.pathology.parseString(statement)
 
-        expected_result = [PATHOLOGY, ['MESHD', 'adenocarcinoma']]
+        expected_result = [PATHOLOGY, 'MESHD', 'adenocarcinoma']
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: PATHOLOGY,
-            IDENTIFIER: {NAMESPACE: 'MESHD', NAME: 'adenocarcinoma'}
+            NAMESPACE: 'MESHD',
+            NAME: 'adenocarcinoma'
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1656,7 +1584,7 @@ class TestActivity(TestTokenParserBase):
         statement = 'act(p(HGNC:AKT1))'
         result = self.parser.activity.parseString(statement)
 
-        expected_result = [ACTIVITY, [PROTEIN, ['HGNC', 'AKT1']]]
+        expected_result = [ACTIVITY, [PROTEIN, 'HGNC', 'AKT1']]
         self.assertEqual(expected_result, result.asList())
 
         mod = modifier_po_to_dict(result)
@@ -1678,7 +1606,8 @@ class TestActivity(TestTokenParserBase):
             },
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1706,7 +1635,8 @@ class TestActivity(TestTokenParserBase):
             },
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1734,7 +1664,8 @@ class TestActivity(TestTokenParserBase):
             },
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1762,7 +1693,8 @@ class TestActivity(TestTokenParserBase):
             },
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1807,7 +1739,8 @@ class TestTranslocationPermissive(unittest.TestCase):
             MODIFIER: TRANSLOCATION,
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
+                NAMESPACE: 'HGNC',
+                NAME: 'EGFR'
             },
         }
 
@@ -1836,19 +1769,15 @@ class TestTranslocationPermissive(unittest.TestCase):
         expected_dict = {
             SUBJECT: {
                 FUNCTION: ABUNDANCE,
-                IDENTIFIER: {
-                    NAMESPACE: 'ADO',
-                    NAME: 'Abeta_42'
-                }
+                NAMESPACE: 'ADO',
+                NAME: 'Abeta_42'
             },
             RELATION: DIRECTLY_INCREASES,
             OBJECT: {
                 TARGET: {
                     FUNCTION: ABUNDANCE,
-                    IDENTIFIER: {
-                        NAMESPACE: 'CHEBI',
-                        NAME: 'calcium(2+)'
-                    }
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'calcium(2+)'
                 },
                 MODIFIER: TRANSLOCATION,
             }
@@ -1881,14 +1810,15 @@ class TestTransformation(TestTokenParserBase):
         statement = 'deg(p(HGNC:AKT1))'
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = [DEGRADATION, [PROTEIN, ['HGNC', 'AKT1']]]
+        expected_result = [DEGRADATION, [PROTEIN, 'HGNC', 'AKT1']]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             MODIFIER: DEGRADATION,
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'AKT1'}
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1904,14 +1834,15 @@ class TestTransformation(TestTokenParserBase):
         statement = 'degradation(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = [DEGRADATION, [PROTEIN, ['HGNC', 'EGFR']]]
+        expected_result = [DEGRADATION, [PROTEIN, 'HGNC', 'EGFR']]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             MODIFIER: DEGRADATION,
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
+                NAMESPACE: 'HGNC',
+                NAME: 'EGFR'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1935,7 +1866,8 @@ class TestTransformation(TestTokenParserBase):
             MODIFIER: TRANSLOCATION,
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
+                NAMESPACE: 'HGNC',
+                NAME: 'EGFR'
             },
             EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
@@ -1968,7 +1900,8 @@ class TestTransformation(TestTokenParserBase):
             MODIFIER: TRANSLOCATION,
             TARGET: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'EGFR'}
+                NAMESPACE: 'HGNC',
+                NAME: 'EGFR'
             },
             EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
@@ -2002,7 +1935,7 @@ class TestTransformation(TestTokenParserBase):
         statement = 'sec(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = ['CellSecretion', [PROTEIN, ['HGNC', 'EGFR']]]
+        expected_result = ['CellSecretion', [PROTEIN, 'HGNC', 'EGFR']]
         self.assertEqual(expected_result, result.asList())
 
         mod = modifier_po_to_dict(result)
@@ -2024,7 +1957,7 @@ class TestTransformation(TestTokenParserBase):
         statement = 'surf(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = ['CellSurfaceExpression', [PROTEIN, ['HGNC', 'EGFR']]]
+        expected_result = ['CellSurfaceExpression', [PROTEIN, 'HGNC', 'EGFR']]
         self.assertEqual(expected_result, result.asList())
 
         expected_mod = {
@@ -2047,8 +1980,13 @@ class TestTransformation(TestTokenParserBase):
 
         expected_result = [
             REACTION,
-            [[ABUNDANCE, ['CHEBI', 'superoxide']]],
-            [[ABUNDANCE, ['CHEBI', 'hydrogen peroxide']], [ABUNDANCE, ['CHEBI', 'oxygen']]]
+            [
+                [ABUNDANCE, 'CHEBI', 'superoxide']
+            ],
+            [
+                [ABUNDANCE, 'CHEBI', 'hydrogen peroxide'],
+                [ABUNDANCE, 'CHEBI', 'oxygen']
+            ]
         ]
         self.assertEqual(expected_result, result.asList())
 
@@ -2057,17 +1995,20 @@ class TestTransformation(TestTokenParserBase):
             REACTANTS: [
                 {
                     FUNCTION: ABUNDANCE,
-                    IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'superoxide'}
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'superoxide'
                 }
             ],
             PRODUCTS: [
                 {
                     FUNCTION: ABUNDANCE,
-                    IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'hydrogen peroxide'
                 }, {
 
                     FUNCTION: ABUNDANCE,
-                    IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'oxygen'}
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'oxygen'
                 }
 
             ]

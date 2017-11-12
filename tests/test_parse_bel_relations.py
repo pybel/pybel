@@ -40,10 +40,8 @@ class TestRelations(TestTokenParserBase):
 
         expected_result_dict = {
             FUNCTION: GENE,
-            IDENTIFIER: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1'
-            }
+            NAMESPACE: 'HGNC',
+            NAME: 'AKT1'
         }
 
         self.assertEqual(expected_result_dict, result.asDict())
@@ -63,9 +61,9 @@ class TestRelations(TestTokenParserBase):
 
         expected = [
             COMPOSITE,
-            [PROTEIN, ['HGNC', 'CASP8']],
-            [PROTEIN, ['HGNC', 'FADD']],
-            [ABUNDANCE, ['ADO', 'Abeta_42']]
+            [PROTEIN, 'HGNC', 'CASP8'],
+            [PROTEIN, 'HGNC', 'FADD'],
+            [ABUNDANCE, 'ADO', 'Abeta_42']
         ]
         self.assertEqual(expected, result.asList())
 
@@ -78,8 +76,8 @@ class TestRelations(TestTokenParserBase):
         sub_member_2 = PROTEIN, 'HGNC', 'FADD'
         self.assertHasNode(sub_member_2)
 
-        self.assertHasEdge(sub, sub_member_1, relation='hasComponent')
-        self.assertHasEdge(sub, sub_member_2, relation='hasComponent')
+        self.assertHasEdge(sub, sub_member_1, relation=HAS_COMPONENT)
+        self.assertHasEdge(sub, sub_member_2, relation=HAS_COMPONENT)
 
     def test_predicate_failure(self):
         """Checks that if there's a problem with the relation/object, that an error gets thrown"""
@@ -96,10 +94,10 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected = [
-            [COMPOSITE, [PROTEIN, ['HGNC', 'CASP8']], [PROTEIN, ['HGNC', 'FADD']],
-             [ABUNDANCE, ['ADO', 'Abeta_42']]],
-            'increases',
-            [BIOPROCESS, ['GOBP', 'neuron apoptotic process']]
+            [COMPOSITE, [PROTEIN, 'HGNC', 'CASP8'], [PROTEIN, 'HGNC', 'FADD'],
+             [ABUNDANCE, 'ADO', 'Abeta_42']],
+            INCREASES,
+            [BIOPROCESS, 'GOBP', 'neuron apoptotic process']
         ]
         self.assertEqual(expected, result.asList())
 
@@ -112,13 +110,13 @@ class TestRelations(TestTokenParserBase):
         sub_member_2 = PROTEIN, 'HGNC', 'FADD'
         self.assertHasNode(sub_member_2)
 
-        self.assertHasEdge(sub, sub_member_1, relation='hasComponent')
-        self.assertHasEdge(sub, sub_member_2, relation='hasComponent')
+        self.assertHasEdge(sub, sub_member_1, relation=HAS_COMPONENT)
+        self.assertHasEdge(sub, sub_member_2, relation=HAS_COMPONENT)
 
         obj = BIOPROCESS, 'GOBP', 'neuron apoptotic process'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation='increases')
+        self.assertHasEdge(sub, obj, relation=INCREASES)
 
     def test_directlyIncreases_withTlocObject(self):
         """Test translocation in object. See BEL 2.0 specification
@@ -131,19 +129,15 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 FUNCTION: ABUNDANCE,
-                IDENTIFIER: {
-                    NAMESPACE: 'ADO',
-                    NAME: 'Abeta_42'
-                }
+                NAMESPACE: 'ADO',
+                NAME: 'Abeta_42'
             },
-            RELATION: 'directlyIncreases',
+            RELATION: DIRECTLY_INCREASES,
             OBJECT: {
                 TARGET: {
                     FUNCTION: ABUNDANCE,
-                    IDENTIFIER: {
-                        NAMESPACE: 'CHEBI',
-                        NAME: 'calcium(2+)'
-                    }
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'calcium(2+)'
                 },
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
@@ -161,7 +155,7 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(obj)
 
         expected_annotations = {
-            RELATION: 'directlyIncreases',
+            RELATION: DIRECTLY_INCREASES,
             OBJECT: {
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
@@ -185,7 +179,8 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 TARGET: {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {NAMESPACE: 'SFAM', NAME: 'CAPN Family'},
+                    NAMESPACE: 'SFAM',
+                    NAME: 'CAPN Family',
                     LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
                 },
                 EFFECT: {
@@ -197,10 +192,10 @@ class TestRelations(TestTokenParserBase):
             OBJECT: {
                 FUNCTION: REACTION,
                 REACTANTS: [
-                    {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5R1'}}
+                    {FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CDK5R1'}
                 ],
                 PRODUCTS: [
-                    {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CDK5'}}
+                    {FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CDK5'}
                 ]
 
             }
@@ -219,8 +214,8 @@ class TestRelations(TestTokenParserBase):
         obj_member_2 = PROTEIN, 'HGNC', 'CDK5'
         self.assertHasNode(obj_member_2)
 
-        self.assertHasEdge(obj, obj_member_1, relation='hasReactant')
-        self.assertHasEdge(obj, obj_member_2, relation='hasProduct')
+        self.assertHasEdge(obj, obj_member_1, relation=HAS_REACTANT)
+        self.assertHasEdge(obj, obj_member_2, relation=HAS_PRODUCT)
 
         expected_edge_attributes = {
             RELATION: 'decreases',
@@ -245,13 +240,15 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CAT'},
+                NAMESPACE: 'HGNC',
+                NAME: 'CAT',
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
             RELATION: 'directlyDecreases',
             OBJECT: {
                 FUNCTION: ABUNDANCE,
-                IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
+                NAMESPACE: 'CHEBI',
+                NAME: 'hydrogen peroxide'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -288,13 +285,15 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 FUNCTION: GENE,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'CAT'},
+                NAMESPACE: 'HGNC',
+                NAME: 'CAT',
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             },
             RELATION: DIRECTLY_DECREASES,
             OBJECT: {
                 FUNCTION: ABUNDANCE,
-                IDENTIFIER: {NAMESPACE: 'CHEBI', NAME: 'hydrogen peroxide'}
+                NAMESPACE: 'CHEBI',
+                NAME: 'hydrogen peroxide'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -336,7 +335,8 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 TARGET: {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'HMGCR'}
+                    NAMESPACE: 'HGNC',
+                    NAME: 'HMGCR'
                 },
                 EFFECT: {
                     NAME: 'cat',
@@ -346,7 +346,8 @@ class TestRelations(TestTokenParserBase):
             RELATION: 'rateLimitingStepOf',
             OBJECT: {
                 FUNCTION: BIOPROCESS,
-                IDENTIFIER: {NAMESPACE: 'GOBP', NAME: 'cholesterol biosynthetic process'}
+                NAMESPACE: 'GOBP',
+                NAME: 'cholesterol biosynthetic process'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -370,7 +371,8 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 FUNCTION: GENE,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'APP'},
+                NAMESPACE: 'HGNC',
+                NAME: 'APP',
                 VARIANTS: [
                     {
                         KIND: HGVS,
@@ -381,7 +383,8 @@ class TestRelations(TestTokenParserBase):
             RELATION: 'causesNoChange',
             OBJECT: {
                 FUNCTION: PATHOLOGY,
-                IDENTIFIER: {NAMESPACE: 'MESHD', NAME: 'Alzheimer Disease'}
+                NAMESPACE: 'MESHD',
+                NAME: 'Alzheimer Disease'
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -410,13 +413,13 @@ class TestRelations(TestTokenParserBase):
                 },
                 TARGET: {
                     FUNCTION: COMPLEX,
-                    'members': [
-                        {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'F3'}},
-                        {FUNCTION: PROTEIN, IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'F7'}}
+                    MEMBERS: [
+                        {FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'F3'},
+                        {FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'F7'}
                     ]
                 }
             },
-            RELATION: 'regulates',
+            RELATION: REGULATES,
             OBJECT: {
                 MODIFIER: ACTIVITY,
                 EFFECT: {
@@ -425,7 +428,8 @@ class TestRelations(TestTokenParserBase):
                 },
                 TARGET: {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'F9'}
+                    NAMESPACE: 'HGNC',
+                    NAME: 'F9'
                 }
 
             }
@@ -486,13 +490,15 @@ class TestRelations(TestTokenParserBase):
                 },
                 TARGET: {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {NAMESPACE: 'SFAM', NAME: 'GSK3 Family'}
+                    NAMESPACE: 'SFAM',
+                    NAME: 'GSK3 Family'
                 }
             },
-            RELATION: 'negativeCorrelation',
+            RELATION: NEGATIVE_CORRELATION,
             OBJECT: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'MAPT'},
+                NAMESPACE: 'HGNC',
+                NAME: 'MAPT',
                 VARIANTS: [
                     {
                         KIND: PMOD,
@@ -522,7 +528,8 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'GSK3B'},
+                NAMESPACE: 'HGNC',
+                NAME: 'GSK3B',
                 VARIANTS: [
                     {
                         KIND: PMOD,
@@ -537,7 +544,8 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 TARGET: {
                     FUNCTION: PROTEIN,
-                    IDENTIFIER: {NAMESPACE: 'HGNC', NAME: 'GSK3B'}
+                    NAMESPACE: 'HGNC',
+                    NAME: 'GSK3B'
                 },
                 EFFECT: {
                     NAME: 'kin',
@@ -562,7 +570,7 @@ class TestRelations(TestTokenParserBase):
         """
         statement = 'g(HGNC:AKT1) orthologous g(MGI:AKT1)'
         result = self.parser.relation.parseString(statement)
-        expected_result = [[GENE, ['HGNC', 'AKT1']], 'orthologous', [GENE, ['MGI', 'AKT1']]]
+        expected_result = [[GENE, 'HGNC', 'AKT1'], ORTHOLOGOUS, [GENE, 'MGI', 'AKT1']]
         self.assertEqual(expected_result, result.asList())
 
         sub = GENE, 'HGNC', 'AKT1'
@@ -571,8 +579,8 @@ class TestRelations(TestTokenParserBase):
         obj = GENE, 'MGI', 'AKT1'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation='orthologous')
-        self.assertHasEdge(obj, sub, relation='orthologous')
+        self.assertHasEdge(sub, obj, relation=ORTHOLOGOUS)
+        self.assertHasEdge(obj, sub, relation=ORTHOLOGOUS)
 
     def test_transcription(self):
         """
@@ -581,7 +589,7 @@ class TestRelations(TestTokenParserBase):
         statement = 'g(HGNC:AKT1) :> r(HGNC:AKT1)'
         result = self.parser.relation.parseString(statement)
 
-        expected_result = [[GENE, ['HGNC', 'AKT1']], 'transcribedTo', [RNA, ['HGNC', 'AKT1']]]
+        expected_result = [[GENE, 'HGNC', 'AKT1'], TRANSCRIBED_TO, [RNA, 'HGNC', 'AKT1']]
         self.assertEqual(expected_result, result.asList())
 
         sub = GENE, 'HGNC', 'AKT1'
@@ -603,10 +611,8 @@ class TestRelations(TestTokenParserBase):
         expected_result = {
             SUBJECT: {
                 FUNCTION: RNA,
-                IDENTIFIER: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1'
-                },
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1',
                 LOCATION: {
                     NAMESPACE: 'GOCC',
                     NAME: 'intracellular'
@@ -615,10 +621,8 @@ class TestRelations(TestTokenParserBase):
             RELATION: TRANSLATED_TO,
             OBJECT: {
                 FUNCTION: PROTEIN,
-                IDENTIFIER: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1'
-                }
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1',
             }
         }
         self.assertEqual(expected_result, result.asDict())
@@ -644,11 +648,11 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(s)
 
         expected_result_list = [
-            [COMPLEX, ['SCOMP', 'C1 Complex']],
+            [COMPLEX, 'SCOMP', 'C1 Complex'],
             'hasComponents',
             [
-                [PROTEIN, ['HGNC', 'C1QB']],
-                [PROTEIN, ['HGNC', 'C1S']]
+                [PROTEIN, 'HGNC', 'C1QB'],
+                [PROTEIN, 'HGNC', 'C1S']
             ]
         ]
         self.assertEqual(expected_result_list, result.asList())
@@ -669,13 +673,13 @@ class TestRelations(TestTokenParserBase):
         statement = 'p(PKC:a) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))'
         result = self.parser.relation.parseString(statement)
         expected_result = [
-            [PROTEIN, ['PKC', 'a']],
+            [PROTEIN, 'PKC', 'a'],
             'hasMembers',
             [
-                [PROTEIN, ['HGNC', 'PRKCA']],
-                [PROTEIN, ['HGNC', 'PRKCB']],
-                [PROTEIN, ['HGNC', 'PRKCD']],
-                [PROTEIN, ['HGNC', 'PRKCE']]
+                [PROTEIN, 'HGNC', 'PRKCA'],
+                [PROTEIN, 'HGNC', 'PRKCB'],
+                [PROTEIN, 'HGNC', 'PRKCD'],
+                [PROTEIN, 'HGNC', 'PRKCE']
             ]
         ]
         self.assertEqual(expected_result, result.asList())
@@ -707,7 +711,7 @@ class TestRelations(TestTokenParserBase):
         statement = 'pathology(MESH:Psoriasis) isA pathology(MESH:"Skin Diseases")'
         result = self.parser.relation.parseString(statement)
 
-        expected_result = [[PATHOLOGY, ['MESH', 'Psoriasis']], 'isA', [PATHOLOGY, ['MESH', 'Skin Diseases']]]
+        expected_result = [[PATHOLOGY, 'MESH', 'Psoriasis'], 'isA', [PATHOLOGY, 'MESH', 'Skin Diseases']]
         self.assertEqual(expected_result, result.asList())
 
         sub = PATHOLOGY, 'MESH', 'Psoriasis'
@@ -716,7 +720,7 @@ class TestRelations(TestTokenParserBase):
         obj = PATHOLOGY, 'MESH', 'Skin Diseases'
         self.assertHasNode(obj)
 
-        self.assertHasEdge(sub, obj, relation='isA')
+        self.assertHasEdge(sub, obj, relation=IS_A)
 
     def test_label_1(self):
         statement = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
@@ -725,10 +729,8 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 FUNCTION: GENE,
-                IDENTIFIER: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'APOE'
-                },
+                NAMESPACE: 'HGNC',
+                NAME: 'APOE',
                 VARIANTS: [
                     {
                         KIND: HGVS,
@@ -763,18 +765,14 @@ class TestRelations(TestTokenParserBase):
         expected_result = {
             SUBJECT: {
                 FUNCTION: GENE,
-                IDENTIFIER: {
-                    NAMESPACE: 'dbSNP',
-                    NAME: 'rs123456'
-                }
+                NAMESPACE: 'dbSNP',
+                NAME: 'rs123456',
             },
             RELATION: EQUIVALENT_TO,
             OBJECT: {
                 FUNCTION: GENE,
-                IDENTIFIER: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'YFG',
-                },
+                NAMESPACE: 'HGNC',
+                NAME: 'YFG',
                 VARIANTS: [
                     {
                         KIND: HGVS,
@@ -824,17 +822,22 @@ class TestRelations(TestTokenParserBase):
             a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) \
             subProcessOf bp(GOBP:"cholesterol biosynthetic process")'
         result = self.parser.relation.parseString(statement)
-        expected_result = [[REACTION,
-                            [[ABUNDANCE, ['CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA']],
-                             [ABUNDANCE, ['CHEBI', 'NADPH']],
-                             [ABUNDANCE, ['CHEBI', 'hydron']],
-                             ],
-                            [[ABUNDANCE, ['CHEBI', 'mevalonate']],
-                             [ABUNDANCE, ['CHEBI', 'CoA-SH']],
-                             [ABUNDANCE, ['CHEBI', 'NADP(+)']]
-                             ]],
-                           'subProcessOf',
-                           [BIOPROCESS, ['GOBP', 'cholesterol biosynthetic process']]]
+        expected_result = [
+            [
+                REACTION,
+                [
+                    [ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'],
+                    [ABUNDANCE, 'CHEBI', 'NADPH'],
+                    [ABUNDANCE, 'CHEBI', 'hydron'],
+                ],
+                [
+                    [ABUNDANCE, 'CHEBI', 'mevalonate'],
+                    [ABUNDANCE, 'CHEBI', 'CoA-SH'],
+                    [ABUNDANCE, 'CHEBI', 'NADP(+)']
+                ]
+            ],
+            SUBPROCESS_OF,
+            [BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process']]
         self.assertEqual(expected_result, result.asList())
 
         sub = node_to_tuple(result[SUBJECT])
@@ -854,12 +857,12 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(sub_product_2)
         self.assertHasNode(sub_product_3)
 
-        self.assertHasEdge(sub, sub_reactant_1, relation='hasReactant')
-        self.assertHasEdge(sub, sub_reactant_2, relation='hasReactant')
-        self.assertHasEdge(sub, sub_reactant_3, relation='hasReactant')
-        self.assertHasEdge(sub, sub_product_1, relation='hasProduct')
-        self.assertHasEdge(sub, sub_product_2, relation='hasProduct')
-        self.assertHasEdge(sub, sub_product_3, relation='hasProduct')
+        self.assertHasEdge(sub, sub_reactant_1, relation=HAS_REACTANT)
+        self.assertHasEdge(sub, sub_reactant_2, relation=HAS_REACTANT)
+        self.assertHasEdge(sub, sub_reactant_3, relation=HAS_REACTANT)
+        self.assertHasEdge(sub, sub_product_1, relation=HAS_PRODUCT)
+        self.assertHasEdge(sub, sub_product_2, relation=HAS_PRODUCT)
+        self.assertHasEdge(sub, sub_product_3, relation=HAS_PRODUCT)
 
         obj = cls, ns, val = BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'
         self.assertHasNode(obj, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
@@ -908,12 +911,12 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(sub_product_2)
         self.assertHasNode(sub_product_3)
 
-        self.assertHasEdge(sub, sub_reactant_1, relation='hasReactant')
-        self.assertHasEdge(sub, sub_reactant_2, relation='hasReactant')
-        self.assertHasEdge(sub, sub_reactant_3, relation='hasReactant')
-        self.assertHasEdge(sub, sub_product_1, relation='hasProduct')
-        self.assertHasEdge(sub, sub_product_2, relation='hasProduct')
-        self.assertHasEdge(sub, sub_product_3, relation='hasProduct')
+        self.assertHasEdge(sub, sub_reactant_1, relation=HAS_REACTANT)
+        self.assertHasEdge(sub, sub_reactant_2, relation=HAS_REACTANT)
+        self.assertHasEdge(sub, sub_reactant_3, relation=HAS_REACTANT)
+        self.assertHasEdge(sub, sub_product_1, relation=HAS_PRODUCT)
+        self.assertHasEdge(sub, sub_product_2, relation=HAS_PRODUCT)
+        self.assertHasEdge(sub, sub_product_3, relation=HAS_PRODUCT)
 
 
 class TestCustom(unittest.TestCase):

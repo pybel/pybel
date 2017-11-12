@@ -196,8 +196,8 @@ def simple_po_to_tuple(tokens):
     """
     return (
         tokens[FUNCTION],
-        tokens[IDENTIFIER][NAMESPACE],
-        tokens[IDENTIFIER][NAME]
+        tokens[NAMESPACE],
+        tokens[NAME]
     )
 
 
@@ -208,8 +208,8 @@ def simple_po_to_dict(tokens):
     """
     return {
         FUNCTION: tokens[FUNCTION],
-        NAMESPACE: tokens[IDENTIFIER][NAMESPACE],
-        NAME: tokens[IDENTIFIER][NAME]
+        NAMESPACE: tokens[NAMESPACE],
+        NAME: tokens[NAME]
     }
 
 
@@ -219,9 +219,6 @@ def simple_to_tuple(tokens):
     :type tokens: ParseResult or dict
     :rtype: tuple
     """
-    if IDENTIFIER in tokens:  # Means we're using PyParsing format
-        return simple_po_to_tuple(tokens)
-
     return (
         tokens[FUNCTION],
         tokens[NAMESPACE],

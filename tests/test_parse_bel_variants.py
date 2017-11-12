@@ -4,12 +4,12 @@ import logging
 import unittest
 
 from pybel.constants import *
-from pybel.dsl.nodes import pmod
+from pybel.dsl.nodes import hgvs, pmod
 from pybel.parser.modifiers import (
-    FragmentParser, FusionParser, GmodParser, GsubParser, LocationParser, PmodParser,
-    PsubParser, TruncationParser, VariantParser,
+    FragmentParser, FusionParser, GmodParser, GsubParser, LocationParser, PmodParser, PsubParser, TruncationParser,
+    VariantParser,
 )
-from tests.constants import build_variant_dict, default_identifier, identifier
+from tests.constants import default_identifier, identifier
 
 log = logging.getLogger(__name__)
 
@@ -20,68 +20,68 @@ class TestVariantParser(unittest.TestCase):
 
     def test_protein_del(self):
         statement = 'variant(p.Phe508del)'
-        expected = build_variant_dict('p.Phe508del')
+        expected = hgvs('p.Phe508del')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_del_quoted(self):
         statement = 'variant("p.Phe508del")'
-        expected = build_variant_dict('p.Phe508del')
+        expected = hgvs('p.Phe508del')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_mut(self):
         statement = 'var(p.Gly576Ala)'
-        expected = build_variant_dict('p.Gly576Ala')
+        expected = hgvs('p.Gly576Ala')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_unspecified(self):
         statement = 'var(=)'
-        expected = build_variant_dict('=')
+        expected = hgvs('=')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_frameshift(self):
         statement = 'variant(p.Thr1220Lysfs)'
-        expected = build_variant_dict('p.Thr1220Lysfs')
+        expected = hgvs('p.Thr1220Lysfs')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_snp(self):
         statement = 'var(c.1521_1523delCTT)'
-        expected = build_variant_dict('c.1521_1523delCTT')
+        expected = hgvs('c.1521_1523delCTT')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_chromosome_1(self):
         statement = 'variant(g.117199646_117199648delCTT)'
-        expected = build_variant_dict('g.117199646_117199648delCTT')
+        expected = hgvs('g.117199646_117199648delCTT')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_chromosome_2(self):
         statement = 'var(c.1521_1523delCTT)'
-        expected = build_variant_dict('c.1521_1523delCTT')
+        expected = hgvs('c.1521_1523delCTT')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_rna_del(self):
         statement = 'var(r.1653_1655delcuu)'
-        expected = build_variant_dict('r.1653_1655delcuu')
+        expected = hgvs('r.1653_1655delcuu')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_trunc_triple(self):
         statement = 'var(p.Cys65*)'
         result = self.parser.parseString(statement)
-        expected = build_variant_dict('p.Cys65*')
+        expected = hgvs('p.Cys65*')
         self.assertEqual(expected, result.asDict())
 
     def test_protein_trunc_legacy(self):
         statement = 'var(p.65*)'
         result = self.parser.parseString(statement)
-        expected = build_variant_dict('p.65*')
+        expected = hgvs('p.65*')
         self.assertEqual(expected, result.asDict())
 
 
@@ -184,14 +184,14 @@ class TestPsub(unittest.TestCase):
         statement = 'sub(A, 127, Y)'
         result = self.parser.parseString(statement)
 
-        expected_list = build_variant_dict('p.Ala127Tyr')
+        expected_list = hgvs('p.Ala127Tyr')
         self.assertEqual(expected_list, result.asDict())
 
     def test_psub_2(self):
         statement = 'sub(Ala, 127, Tyr)'
         result = self.parser.parseString(statement)
 
-        expected_list = build_variant_dict('p.Ala127Tyr')
+        expected_list = hgvs('p.Ala127Tyr')
         self.assertEqual(expected_list, result.asDict())
 
 
@@ -203,7 +203,7 @@ class TestGsubParser(unittest.TestCase):
         statement = 'sub(G,308,A)'
         result = self.parser.parseString(statement)
 
-        expected_dict = build_variant_dict('c.308G>A')
+        expected_dict = hgvs('c.308G>A')
         self.assertEqual(expected_dict, result.asDict())
 
 
@@ -266,7 +266,7 @@ class TestTruncationParser(unittest.TestCase):
         statement = 'trunc(40)'
         result = self.parser.parseString(statement)
 
-        expected = build_variant_dict('p.40*')
+        expected = hgvs('p.40*')
         self.assertEqual(expected, result.asDict())
 
 

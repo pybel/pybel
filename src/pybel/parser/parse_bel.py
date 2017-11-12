@@ -97,6 +97,7 @@ class BelParser(BaseParser):
             )
 
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
+        ungrouped_identifier = self.identifier_parser.language
 
         # 2.2 Abundance Modifier Functions
 
@@ -134,9 +135,9 @@ class BelParser(BaseParser):
         # 2.1 Abundance Functions
 
         #: `2.1.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
-        self.general_abundance = general_abundance_tags + nest(identifier + opt_location)
+        self.general_abundance = general_abundance_tags + nest(ungrouped_identifier + opt_location)
 
-        self.gene_modified = identifier + Optional(
+        self.gene_modified = ungrouped_identifier + Optional(
             WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
 
         self.gene_fusion = Group(self.fusion)(FUSION)
@@ -149,12 +150,13 @@ class BelParser(BaseParser):
         ]) + opt_location)
         """`2.1.4 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XgeneA>`_"""
 
-        self.mirna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS)) + opt_location
+        self.mirna_modified = ungrouped_identifier + Optional(
+            WCW + delimitedList(Group(self.variant))(VARIANTS)) + opt_location
 
         self.mirna = mirna_tag + nest(self.mirna_modified)
         """`2.1.5 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmicroRNAA>`_"""
 
-        self.protein_modified = identifier + Optional(
+        self.protein_modified = ungrouped_identifier + Optional(
             WCW + delimitedList(Group(MatchFirst([self.pmod, self.variant, self.fragment, self.psub, self.trunc])))(
                 VARIANTS))
 
@@ -168,7 +170,7 @@ class BelParser(BaseParser):
         ]) + opt_location)
         """`2.1.6 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XproteinA>`_"""
 
-        self.rna_modified = identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS))
+        self.rna_modified = ungrouped_identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS))
 
         self.rna_fusion = Group(self.fusion)(FUSION)
         self.rna_fusion_legacy = Group(build_legacy_fusion(identifier, 'r'))(FUSION)
@@ -183,7 +185,7 @@ class BelParser(BaseParser):
         self.single_abundance = MatchFirst([self.general_abundance, self.gene, self.mirna, self.protein, self.rna])
 
         #: `2.1.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
-        self.complex_singleton = complex_tag + nest(identifier + opt_location)
+        self.complex_singleton = complex_tag + nest(ungrouped_identifier + opt_location)
 
         self.complex_list = complex_tag + nest(
             delimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location)
@@ -216,10 +218,10 @@ class BelParser(BaseParser):
         # 2.3 Process Functions
 
         #: `2.3.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_biologicalprocess_bp>`_
-        self.biological_process = biological_process_tag + nest(identifier)
+        self.biological_process = biological_process_tag + nest(ungrouped_identifier)
 
         #: `2.3.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_pathology_path>`_
-        self.pathology = pathology_tag + nest(identifier)
+        self.pathology = pathology_tag + nest(ungrouped_identifier)
 
         self.bp_path = self.biological_process | self.pathology
         self.bp_path.setParseAction(self.check_function_semantics)
@@ -536,6 +538,13 @@ class BelParser(BaseParser):
         self.control_parser.clear()
 
     def handle_nested_relation(self, line, position, tokens):
+        """Handles nested statements. If :code:`allow_nested` is False, raises a warning.
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: NestedRelationWarning
+        """
         if not self.allow_nested:
             raise NestedRelationWarning(self.line_number, line, position)
 
@@ -553,15 +562,22 @@ class BelParser(BaseParser):
         return tokens
 
     def check_function_semantics(self, line, position, tokens):
-        if self.namespace_dict is None or IDENTIFIER not in tokens:
+        """Raises an exception if the function used on the tokens is wrong
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: InvalidFunctionSemantic
+        """
+        if self.namespace_dict is None or NAMESPACE not in tokens:
             return tokens
 
-        namespace, name = tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME]
+        namespace, name = tokens[NAMESPACE], tokens[NAME]
 
         if namespace in self.namespace_regex:
             return tokens
 
-        if self.allow_naked_names and tokens[IDENTIFIER][NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
+        if self.allow_naked_names and tokens[NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
         valid_functions = set(itt.chain.from_iterable(
@@ -694,6 +710,7 @@ class BelParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RelabelWarning
         """
         subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
         label = tokens[OBJECT]
@@ -732,7 +749,7 @@ class BelParser(BaseParser):
 # HANDLERS
 
 def handle_molecular_activity_default(line, position, tokens):
-    """Handles BEL 2.0 style molecular activites with BEL 1.0 default names
+    """Handles BEL 2.0 style molecular activities with BEL 1.0 default names
 
     :param str line: The line being parsed
     :param int position: The position in the line being parsed
