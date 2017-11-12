@@ -267,11 +267,6 @@ expected_test_slushy_metadata = {
 }
 
 
-def build_variant_dict(variant):
-    """A convenience function for building a variant dictionary"""
-    return {KIND: HGVS, IDENTIFIER: variant}
-
-
 def get_uri_name(url):
     """Gets the file name from the end of the URL. Only useful for PyBEL's testing though since it looks specifically
     if the file is from the weird owncloud resources distributed by Fraunhofer"""

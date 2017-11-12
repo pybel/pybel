@@ -54,6 +54,15 @@ def pmod(name, code=None, position=None, namespace=None, identifier=None):
     return rv
 
 
+def hgvs(variant):
+    """A convenience function for building a variant dictionary
+
+    :param str variant:
+    :rtype: dict
+    """
+    return {KIND: HGVS, IDENTIFIER: variant}
+
+
 def _make_cd_abundance(func, name=None, namespace=None, identifier=None, variants=None):
     """Make central dogma abundance (meaning it can have variants)"""
     rv = _make_abundance(func, name=name, namespace=namespace, identifier=identifier)

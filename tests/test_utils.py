@@ -204,3 +204,13 @@ class TestFlattenCitation(unittest.TestCase):
             CITATION_AUTHORS: 'Author A|Author B'
         }
         self.assertEqual('"PubMed","Test Name","1234","1999-01-01","Author A|Author B"', flatten_citation(d))
+
+    def test_authors_list(self):
+        d = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: '1234',
+            CITATION_NAME: 'Test Name',
+            CITATION_DATE: '1999-01-01',
+            CITATION_AUTHORS: ['Author A', 'Author B']
+        }
+        self.assertEqual('"PubMed","Test Name","1234","1999-01-01","Author A|Author B"', flatten_citation(d))

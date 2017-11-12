@@ -106,32 +106,23 @@ def get_targets_by_relation(graph, node, relation):
     }
 
 
-def _node_list_to_bel(graph, nodes):
-    return sorted(map(lambda n: node_to_bel(graph, n), nodes))
+def node_data_to_bel(data):
+    """Returns a node data dictionary as a BEL string
 
-
-def _node_list_to_bel_helper(graph, node, relation):
-    nodes = get_targets_by_relation(graph, node, relation)
-    return _node_list_to_bel(graph, nodes)
-
-
-def node_to_bel(graph, node):
-    """Returns a node from a graph as a BEL string
-
-    :param BELGraph graph: A BEL Graph
-    :param tuple node: a node from the BEL graph
+    :param dict data: A PyBEL node data dictionary
     :rtype: str
     """
-    data = graph.node[node]
-
     if data[FUNCTION] == REACTION:
-        reactants = _node_list_to_bel_helper(graph, node, HAS_REACTANT)  # TODO refactor to use node data
-        products = _node_list_to_bel_helper(graph, node, HAS_PRODUCT)  # TODO refactor to use node data
-        return 'rxn(reactants({}), products({}))'.format(', '.join(reactants), ', '.join(products))
+        return 'rxn(reactants({}), products({}))'.format(
+            ', '.join(node_data_to_bel(reactant_data) for reactant_data in data[REACTANTS]),
+            ', '.join(node_data_to_bel(product_data) for product_data in data[PRODUCTS])
+        )
 
     if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
-        members = _node_list_to_bel_helper(graph, node, HAS_COMPONENT)  # TODO refactor to use node data
-        return '{}({})'.format(rev_abundance_labels[data[FUNCTION]], ', '.join(members))
+        return '{}({})'.format(
+            rev_abundance_labels[data[FUNCTION]],
+            ', '.join(node_data_to_bel(member_data) for member_data in data[MEMBERS])
+        )
 
     if VARIANTS in data:
         variants_canon = sorted(map(variant_to_bel, data[VARIANTS]))
@@ -160,7 +151,17 @@ def node_to_bel(graph, node):
             ensure_quotes(data[NAME])
         )
 
-    raise ValueError('Unknown node data: {} {}'.format(node, data))
+    raise ValueError('Unknown values in node data: {}'.format(data))
+
+
+def node_to_bel(graph, node):
+    """Returns a node from a graph as a BEL string
+
+    :param BELGraph graph: A BEL Graph
+    :param tuple node: a node from the BEL graph
+    :rtype: str
+    """
+    return node_data_to_bel(graph.node[node])
 
 
 def _decanonicalize_edge_node(graph, node, edge_data, node_position):
@@ -310,7 +311,7 @@ def to_bel_lines(graph):
 
     if unqualified_edges_to_serialize or isolated_nodes_to_serialize:
         yield '###############################################\n'
-        yield 'SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}'
+        yield 'SET Citation = {"PubMed","Added by PyBEL","29048466"}'
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
@@ -359,13 +360,13 @@ def calculate_canonical_name(graph, node):
         return graph.node[node][NAME]
 
     if VARIANTS in data:
-        return node_to_bel(graph, node)
+        return node_data_to_bel(data)
 
     if FUSION in data:
-        return node_to_bel(graph, node)
+        return node_data_to_bel(data)
 
     if data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
-        return node_to_bel(graph, node)
+        return node_data_to_bel(data)
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
         return graph.node[node][NAME]

@@ -10,7 +10,10 @@ from datetime import datetime
 import networkx as nx
 from six import string_types
 
-from .constants import CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, PYBEL_EDGE_DATA_KEYS, VERSION
+from .constants import (
+    CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, PYBEL_EDGE_DATA_KEYS,
+    VERSION,
+)
 
 log = logging.getLogger(__name__)
 
@@ -122,7 +125,16 @@ def citation_dict_to_tuple(citation):
         return tuple(citation[x] for x in CITATION_ENTRIES)
 
     if all(x in citation for x in CITATION_ENTRIES[3:5]):
-        return tuple(citation[x] for x in CITATION_ENTRIES[:5])
+        ff = tuple(citation[x] for x in CITATION_ENTRIES[:4])
+
+        if CITATION_AUTHORS not in citation:
+            return ff
+
+        elif isinstance(citation[CITATION_AUTHORS], string_types):
+            return ff + (citation[CITATION_AUTHORS],)
+
+        else:
+            return ff + ('|'.join(citation[CITATION_AUTHORS]),)
 
     if all(x in citation for x in CITATION_ENTRIES[3:4]):
         return tuple(citation[x] for x in CITATION_ENTRIES[:4])

@@ -26,7 +26,7 @@ from .models import (
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl
-from ..canonicalize import edge_to_bel, node_to_bel
+from ..canonicalize import edge_to_bel, node_data_to_bel
 from ..constants import *
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
@@ -1086,8 +1086,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         if node_hash in self.object_cache_node:
             return self.object_cache_node[node_hash]
 
-        bel = node_to_bel(graph, node_identifier)
         node_data = graph.node[node_identifier]
+        bel = node_data_to_bel(node_data)
 
         node = self.get_node_by_hash(node_hash)
 
