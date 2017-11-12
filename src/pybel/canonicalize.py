@@ -311,7 +311,7 @@ def to_bel_lines(graph):
 
     if unqualified_edges_to_serialize or isolated_nodes_to_serialize:
         yield '###############################################\n'
-        yield 'SET Citation = {"Other","Added by PyBEL","https://github.com/pybel/pybel/"}'
+        yield 'SET Citation = {"PubMed","Added by PyBEL","29048466"}'
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
