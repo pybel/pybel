@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.9.6 <https://github.com/pybel/pybel/compare/v0.9.5...0.9.6>`_ - 2017-11-12
+-----------------------------------------------------------------------------
+Added
+~~~~~
+- Additional keyword arguments for JSON output functions
+
+Changed
+~~~~~~~
+- Updated parser intermediate data structure. Should have no affect on end users.
+- Smarter serialization of PyBEL data dictionaries to BEL
+
+Fixed
+~~~~~
+- Better handling of citations that have authors pre-parsed into lists (https://github.com/pybel/pybel/issues/247)
+
 `0.9.5 <https://github.com/pybel/pybel/compare/v0.9.4...0.9.5>`_ - 2017-11-07
 -----------------------------------------------------------------------------
 Added
