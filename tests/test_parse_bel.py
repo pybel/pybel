@@ -131,15 +131,12 @@ class TestGene(TestTokenParserBase):
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = node_to_tuple(result)
         expected_node = cls, ns, val = GENE, 'HGNC', 'AKT1'
-        self.assertEqual(expected_node, node)
+        self.assertEqual(expected_node, node_to_tuple(result))
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
-        expected_canonical_bel = 'g(HGNC:AKT1)'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('g(HGNC:AKT1)', node_to_bel(self.parser.graph, expected_node))
 
-        self.assertHasNode(node, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
+        self.assertHasNode(expected_node, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
 
     def test_214c(self):
         """Test variant"""
@@ -1412,9 +1409,8 @@ class TestComplex(TestTokenParserBase):
             ]
         })
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
         expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual(expected_canonical_bel, node_to_bel(self.parser.graph, expected_node))
 
         child_1 = PROTEIN, 'HGNC', 'FOS'
         self.assertHasNode(child_1)
@@ -1493,9 +1489,8 @@ class TestComposite(TestTokenParserBase):
         self.assertEqual(expected_node_dict[MEMBERS][1], self.graph.node[expected_node][MEMBERS][1])
         self.assertEqual(expected_node_dict, self.graph.node[expected_node])
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
         expected_canonical_bel = 'composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))'  # sorted
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual(expected_canonical_bel, node_to_bel(self.parser.graph, expected_node))
 
         self.assertEqual(3, self.parser.graph.number_of_nodes())
         self.assertHasNode(expected_node)

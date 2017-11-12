@@ -21,7 +21,7 @@ import logging
 import time
 from collections import defaultdict
 
-from ..canonicalize import node_to_bel
+from ..canonicalize import node_data_to_bel
 from ..constants import *
 from ..struct import BELGraph
 from ..utils import expand_dict, flatten_dict, hash_node
@@ -64,7 +64,7 @@ def calculate_canonical_cx_identifier(graph, node):
         return '{}:{}'.format(graph.node[node][NAMESPACE], graph.node[node][NAME])
 
     if VARIANTS in data or FUSION in data or data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
-        return node_to_bel(graph, node)
+        return node_data_to_bel(data)
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
         return '{}:{}'.format(graph.node[node][NAMESPACE], graph.node[node][NAME])
