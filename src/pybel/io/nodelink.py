@@ -44,17 +44,17 @@ def to_json(graph):
     return graph_json_dict
 
 
-def to_json_file(graph, file):
+def to_json_file(graph, file, **kwargs):
     """Writes this graph as Node-Link JSON to a file
 
     :param BELGraph graph: A BEL graph
     :param file file: A write-supporting file or file-like object
     """
     graph_json_dict = to_json(graph)
-    json.dump(graph_json_dict, file, ensure_ascii=False)
+    json.dump(graph_json_dict, file, ensure_ascii=False, **kwargs)
 
 
-def to_jsons(graph):
+def to_jsons(graph, **kwargs):
     """Dumps this graph as a Node-Link JSON object to a string
 
     :param BELGraph graph: A BEL graph
@@ -62,7 +62,7 @@ def to_jsons(graph):
     :rtype: str
     """
     graph_json_str = to_json(graph)
-    return json.dumps(graph_json_str, ensure_ascii=False)
+    return json.dumps(graph_json_str, ensure_ascii=False, **kwargs)
 
 
 def from_json(graph_json_dict, check_version=True):

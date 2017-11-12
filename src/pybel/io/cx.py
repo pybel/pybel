@@ -305,11 +305,12 @@ def to_cx(graph):
     return cx
 
 
-def to_cx_file(graph, file):
+def to_cx_file(graph, file, indent=2, **kwargs):
     """Writes this graph to a JSON file in CX format
 
     :param BELGraph graph: A BEL graph
     :param file file: A writable file or file-like
+    :param Optional[int] indent: How many spaces to use to pretty print. Change to None for no pretty printing
 
     Example:
 
@@ -320,10 +321,10 @@ def to_cx_file(graph, file):
     >>> ... to_cx_file(graph, f)
     """
     graph_cx_json_dict = to_cx(graph)
-    json.dump(graph_cx_json_dict, file, ensure_ascii=False)
+    json.dump(graph_cx_json_dict, file, ensure_ascii=False, indent=indent, **kwargs)
 
 
-def to_cx_jsons(graph):
+def to_cx_jsons(graph, **kwargs):
     """Dumps a BEL graph as CX JSON to a string
     
     :param BELGraph graph: A BEL Graph
@@ -331,7 +332,7 @@ def to_cx_jsons(graph):
     :rtype: str
     """
     graph_cx_json_str = to_cx(graph)
-    return json.dumps(graph_cx_json_str)
+    return json.dumps(graph_cx_json_str, **kwargs)
 
 
 def from_cx(cx):
