@@ -3,9 +3,9 @@ graft tests
 
 recursive-include docs/source *.py
 recursive-include docs/source *.rst
-recursive-include docs Makefile
+include docs/Makefile
 
 global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store *.gpickle
 
 exclude .bumpversion.cfg
-include *.rst *.txt *.yml LICENSE tox.ini docs/Makefile .coveragerc
+include *.rst *.txt *.yml LICENSE tox.ini .coveragerc
