@@ -127,12 +127,8 @@ def citation_dict_to_tuple(citation):
     if all(x in citation for x in CITATION_ENTRIES[3:5]):
         ff = tuple(citation[x] for x in CITATION_ENTRIES[:4])
 
-        if CITATION_AUTHORS not in citation:
-            return ff
-
-        elif isinstance(citation[CITATION_AUTHORS], string_types):
+        if isinstance(citation[CITATION_AUTHORS], string_types):
             return ff + (citation[CITATION_AUTHORS],)
-
         else:
             return ff + ('|'.join(citation[CITATION_AUTHORS]),)
 
