@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ..constants import *
+from ..constants import EFFECT, FROM_LOC, IDENTIFIER, MODIFIER, NAME, NAMESPACE, TO_LOC, TRANSLOCATION
 
 
 def entity(name, namespace, identifier=None):
@@ -17,7 +17,7 @@ def entity(name, namespace, identifier=None):
     }
 
     if identifier is not None:
-        rv[ID] = identifier
+        rv[IDENTIFIER] = identifier
 
     return rv
 
@@ -28,7 +28,7 @@ def add_identifier(rv, name, namespace, identifier=None):
     rv[NAMESPACE] = namespace
 
     if identifier:
-        rv[ID] = identifier
+        rv[IDENTIFIER] = identifier
 
 
 def make_translocation_modifier_dict(from_loc, to_loc):
