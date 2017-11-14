@@ -182,8 +182,8 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         self.parser.parseString(s)
 
         self.assertNotIn('Test', self.parser.annotation_dict)
-        self.assertIn('Test', self.parser.annotations_regex)
-        self.assertEqual('\w+', self.parser.annotations_regex['Test'])
+        self.assertIn('Test', self.parser.annotation_regex)
+        self.assertEqual('\w+', self.parser.annotation_regex['Test'])
 
     def test_define_namespace_regex(self):
         s = 'DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"'

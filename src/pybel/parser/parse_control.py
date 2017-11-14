@@ -286,7 +286,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def get_annotations(self):
-        """Gets the current anotations
+        """Gets the current annotations
 
         :return: The currently stored BEL annotations
         :rtype: dict
