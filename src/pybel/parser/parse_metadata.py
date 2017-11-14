@@ -164,6 +164,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param str namespace: The namespace being parsed
+        :raises: RedefinedNamespaceError
         """
         if self.disallow_redefinition and self.has_namespace(namespace):
             raise RedefinedNamespaceError(self.line_number, line, position, namespace)
@@ -174,6 +175,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedNamespaceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
@@ -198,6 +200,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedNamespaceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
@@ -219,6 +222,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedNamespaceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
@@ -233,6 +237,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param str annotation: The annotation being parsed
+        :raises: RedefinedAnnotationError
         """
         if self.disallow_redefinition and self.has_annotation(annotation):
             raise RedefinedAnnotationError(self.line_number, line, position, annotation)
@@ -243,6 +248,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedAnnotationError
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
@@ -259,6 +265,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedAnnotationError
         """
         keyword = tokens['name']
         self.raise_for_redefined_annotation(line, position, keyword)
@@ -275,6 +282,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedAnnotationError
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
@@ -292,6 +300,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedAnnotationError
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
@@ -353,6 +362,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param str version: A version string
+        :raises: VersionFormatWarning
         """
         if valid_date_version(version):
             return
