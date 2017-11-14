@@ -139,20 +139,31 @@ class ControlParser(BaseParser):
         """
         return self._annotation_regex_compiled
 
+    @property
+    def _in_debug_mode(self):
+        return not self.annotation_dict and not self.annotation_regex
+
+    def has_enumerated_annotation(self, annotation):
+        return annotation in self.annotation_dict
+
+    def has_regex_annotation(self, annotation):
+        return annotation in self.annotation_regex
+
     def raise_for_undefined_annotation(self, line, position, annotation):
-        if not self.annotation_dict and not self.annotation_regex:
+        if self._in_debug_mode:
             return
 
-        if annotation not in self.annotation_dict and annotation not in self.annotation_regex:
+        if not self.has_enumerated_annotation(annotation) and not self.has_regex_annotation(annotation):
             raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
 
     def raise_for_invalid_annotation_value(self, line, position, key, value):
-        if not self.annotation_dict and not self.annotation_regex:
+        if self._in_debug_mode:
             return
 
-        if key in self.annotation_dict and value not in self.annotation_dict[key]:
+        if self.has_enumerated_annotation(key) and value not in self.annotation_dict[key]:
             raise IllegalAnnotationValueWarning(self.line_number, line, position, key, value)
-        elif key in self.annotation_regex_compiled and not self.annotation_regex_compiled[key].match(value):
+
+        elif self.has_regex_annotation(key) and not self.annotation_regex_compiled[key].match(value):
             raise MissingAnnotationRegexWarning(self.line_number, line, position, key, value)
 
     def raise_for_missing_citation(self, line, position):
@@ -286,7 +297,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def get_annotations(self):
-        """Gets the current anotations
+        """Gets the current annotations
 
         :return: The currently stored BEL annotations
         :rtype: dict
