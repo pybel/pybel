@@ -99,9 +99,7 @@ class IdentifierParser(BaseParser):
         return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
 
     def has_namespace_name(self, line, position, namespace, name):
-        if not self.has_namespace(namespace):
-            raise UndefinedNamespaceWarning(self.line_number, line, position, namespace, name)
-
+        self.raise_for_missing_namespace(line, position, namespace, name)
         return self.has_enumerated_namespace_name(namespace, name) or self.has_regex_namespace_name(namespace, name)
 
     def raise_for_missing_namespace(self, line, position, namespace, name):
