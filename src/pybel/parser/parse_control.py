@@ -139,15 +139,18 @@ class ControlParser(BaseParser):
         """
         return self._annotation_regex_compiled
 
+    @property
+    def _in_debug_mode(self):
+        return not self.annotation_dict and not self.annotation_regex
     def raise_for_undefined_annotation(self, line, position, annotation):
-        if not self.annotation_dict and not self.annotation_regex:
+        if self._in_debug_mode:
             return
 
         if annotation not in self.annotation_dict and annotation not in self.annotation_regex:
             raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
 
     def raise_for_invalid_annotation_value(self, line, position, key, value):
-        if not self.annotation_dict and not self.annotation_regex:
+        if self._in_debug_mode:
             return
 
         if key in self.annotation_dict and value not in self.annotation_dict[key]:
