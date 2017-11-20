@@ -18,7 +18,7 @@ from os import environ, makedirs, mkdir, path
 
 log = getLogger(__name__)
 
-VERSION = '0.9.6'
+VERSION = '0.9.7'
 
 #: The last PyBEL version where the graph data definition changed
 PYBEL_MINIMUM_IMPORT_VERSION = 0, 9, 0
@@ -278,9 +278,9 @@ OBJECT = 'object'
 #: The key or an internal edge data dictionary for the line number
 LINE = 'line'
 #: The key representing the hash of the other
-ID = 'id'
+HASH = 'hash'
 
-#: The group of all BEL-provided keys for edge data dictionaries
+#: The group of all BEL-provided keys for edge data dictionaries, used for hashing.
 PYBEL_EDGE_DATA_KEYS = {
     RELATION,
     CITATION,
@@ -290,8 +290,14 @@ PYBEL_EDGE_DATA_KEYS = {
     OBJECT,
 }
 
+#: The group of all PyBEL-specific keys for edge data dictionaries, not used for hashing.
+PYBEL_EDGE_METADATA_KEYS = {
+    LINE,
+    HASH,
+}
+
 #: The group of all PyBEL annotated keys for edge data dictionaries
-PYBEL_EDGE_ALL_KEYS = {LINE, ID} | PYBEL_EDGE_DATA_KEYS
+PYBEL_EDGE_ALL_KEYS = PYBEL_EDGE_DATA_KEYS | PYBEL_EDGE_METADATA_KEYS
 
 #: A BEL relationship
 HAS_REACTANT = 'hasReactant'

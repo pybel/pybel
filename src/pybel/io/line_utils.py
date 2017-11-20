@@ -11,11 +11,7 @@ import requests.exceptions
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 
-from ..constants import (
-    FUNCTION, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_OWL, GRAPH_ANNOTATION_PATTERN,
-    GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_OWL, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
-    GRAPH_UNCACHED_NAMESPACES, INVERSE_DOCUMENT_KEYS, NAMESPACE, REQUIRED_METADATA,
-)
+from ..constants import FUNCTION, GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, NAMESPACE, REQUIRED_METADATA
 from ..exceptions import PyBelWarning
 from ..manager import Manager
 from ..parser import BelParser, MetadataParser
@@ -73,7 +69,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         namespace_dict=metadata_parser.namespace_dict,
         annotation_dict=metadata_parser.annotation_dict,
         namespace_regex=metadata_parser.namespace_regex,
-        annotation_regex=metadata_parser.annotations_regex,
+        annotation_regex=metadata_parser.annotation_regex,
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
         allow_naked_names=kwargs.get('allow_naked_names'),
@@ -121,7 +117,7 @@ def parse_document(graph, document_metadata, metadata_parser):
 def parse_definitions(graph, definitions, metadata_parser, allow_failures=False):
     """Parses the lines in the definitions section of a BEL script.
 
-    :param BELGraph graph: A BEL graph
+    :param pybel.BELGraph graph: A BEL graph
     :param iter[str] definitions: An enumerated iterable over the lines in the definitions section of a BEL script
     :param MetadataParser metadata_parser: A metadata parser
     """
@@ -145,19 +141,18 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
                 parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
                 raise MetadataException(line_number, line)
 
-    graph.graph.update({
-        GRAPH_NAMESPACE_OWL: metadata_parser.namespace_owl_dict.copy(),
-        GRAPH_NAMESPACE_URL: metadata_parser.namespace_url_dict.copy(),
-        GRAPH_NAMESPACE_PATTERN: metadata_parser.namespace_regex.copy(),
-        GRAPH_ANNOTATION_URL: metadata_parser.annotation_url_dict.copy(),
-        GRAPH_ANNOTATION_OWL: metadata_parser.annotations_owl_dict.copy(),
-        GRAPH_ANNOTATION_PATTERN: metadata_parser.annotations_regex.copy(),
-        GRAPH_ANNOTATION_LIST: {
-            keyword: metadata_parser.annotation_dict[keyword]
-            for keyword in metadata_parser.annotation_lists
-        },
-        GRAPH_UNCACHED_NAMESPACES: metadata_parser.uncachable_namespaces.copy(),
+    graph.namespace_url.update(metadata_parser.namespace_url_dict)
+    graph.namespace_owl.update(metadata_parser.namespace_owl_dict)
+    graph.namespace_pattern.update(metadata_parser.namespace_regex)
+
+    graph.annotation_url.update(metadata_parser.annotation_url_dict)
+    graph.annotation_owl.update(metadata_parser.annotation_owl_dict)
+    graph.annotation_pattern.update(metadata_parser.annotation_regex)
+    graph.annotation_list.update({
+        keyword: metadata_parser.annotation_dict[keyword]
+        for keyword in metadata_parser.annotation_lists
     })
+    graph.uncached_namespaces.update(metadata_parser.uncachable_namespaces)
 
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 

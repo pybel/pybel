@@ -256,7 +256,7 @@ class NamespaceEntry(Base):
         }
 
         if include_id:
-            result[ID] = self.id
+            result['id'] = self.id
 
         return result
 
@@ -305,6 +305,7 @@ class Annotation(Base):
             entry.name
             for entry in self.entries
         }
+
     def to_tree_list(self):
         """Returns an edge set of the tree represented by this namespace's hierarchy
 
@@ -342,7 +343,7 @@ class Annotation(Base):
         }
 
         if include_id:
-            result[ID] = self.id
+            result['id'] = self.id
 
         return result
 
@@ -381,7 +382,7 @@ class AnnotationEntry(Base):
         }
 
         if include_id:
-            result[ID] = self.id
+            result['id'] = self.id
 
         return result
 
@@ -437,7 +438,7 @@ class Network(Base):
         }
 
         if include_id:
-            result[ID] = self.id
+            result['id'] = self.id
 
         if self.authors:
             result[METADATA_AUTHORS] = self.authors
@@ -509,18 +510,20 @@ class Node(Base):
     def __str__(self):
         return self.bel
 
-    def to_json(self, include_id=False):
+    def to_json(self, include_id=False, include_hash=False):
         """Serializes this node as a PyBEL node data dictionary
 
         :param bool include_id: Include the database identifier?
+        :param bool include_hash: Include the node hash?
         :rtype: dict
         """
-        result = {
-            FUNCTION: self.type,
-        }
+        result = {FUNCTION: self.type}
 
         if include_id:
-            result[ID] = self.id
+            result['id'] = self.id
+
+        if include_hash:
+            result[HASH] = self.sha512
 
         if self.namespace_entry:
             namespace_entry = self.namespace_entry.to_json()
@@ -761,7 +764,7 @@ class Citation(Base):
         }
 
         if include_id:
-            result[ID] = self.id
+            result['id'] = self.id
 
         if self.name:
             result[CITATION_NAME] = self.name
@@ -820,7 +823,7 @@ class Evidence(Base):
         }
 
         if include_id:
-            result[ID] = self.id
+            result['id'] = self.id
 
         return result
 
@@ -862,7 +865,7 @@ class Edge(Base):
     properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
     networks = relationship('Network', secondary=network_edge, lazy="dynamic")
 
-    sha512 = Column(String(255), index=True)
+    sha512 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
 
     def __str__(self):
         return self.bel
@@ -894,9 +897,11 @@ class Edge(Base):
 
         return data
 
-    def to_json(self, include_id=False):
+    def to_json(self, include_id=False, include_hash=False):
         """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
+        :param bool include_id: Include the database identifier?
+        :param bool include_hash: Include the node hash?
         :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
                  and edge data information.
         :rtype: dict
@@ -904,11 +909,14 @@ class Edge(Base):
         result = {
             'source': self.source.to_json(),
             'target': self.target.to_json(),
-            'data': self.get_data_json()
+            'data': self.get_data_json(),
         }
 
         if include_id:
-            result[ID] = self.id
+            result['id'] = self.id
+
+        if include_hash:
+            result[HASH] = self.sha512
 
         return result
 

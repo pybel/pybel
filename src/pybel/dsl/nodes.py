@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .utils import add_identifier
+from .utils import entity
 from ..constants import *
 
 __all__ = [
@@ -12,6 +12,9 @@ __all__ = [
     'complex_abundance',
     'bioprocess',
     'pathology',
+    'pmod',
+    'gmod',
+    'hgvs',
 ]
 
 
@@ -28,7 +31,7 @@ def _make_abundance(func, namespace, name=None, identifier=None):
         raise ValueError('Either name or identifier must be specified')
 
     rv = {FUNCTION: func}
-    add_identifier(rv, name=name, namespace=namespace, identifier=identifier)
+    rv.update(entity(namespace=namespace, name=name, identifier=identifier))
     return rv
 
 
@@ -42,14 +45,34 @@ def pmod(name, code=None, position=None, namespace=None, identifier=None):
     :param str identifier: The identifier of the name of the modification
     :rtype: dict
     """
-    rv = {KIND: PMOD, IDENTIFIER: {}}
-    add_identifier(rv[IDENTIFIER], name=name, namespace=(namespace or BEL_DEFAULT_NAMESPACE), identifier=identifier)
+    rv = {
+        KIND: PMOD,
+        IDENTIFIER: entity(
+            namespace=(namespace or BEL_DEFAULT_NAMESPACE),
+            name=name,
+            identifier=identifier
+        )
+    }
 
     if code:
         rv[PMOD_CODE] = code
 
     if position:
         rv[PMOD_POSITION] = position
+
+    return rv
+
+
+def gmod(name, namespace=None, identifier=None):
+    """Builds a gene modification dict"""
+    rv = {
+        KIND: GMOD,
+        IDENTIFIER: entity(
+            namespace=(namespace or BEL_DEFAULT_NAMESPACE),
+            name=name,
+            identifier=identifier
+        )
+    }
 
     return rv
 
@@ -63,7 +86,7 @@ def hgvs(variant):
     return {KIND: HGVS, IDENTIFIER: variant}
 
 
-def _make_cd_abundance(func, name=None, namespace=None, identifier=None, variants=None):
+def _make_central_dogma_abundance(func, name=None, namespace=None, identifier=None, variants=None):
     """Make central dogma abundance (meaning it can have variants)"""
     rv = _make_abundance(func, name=name, namespace=namespace, identifier=identifier)
 
@@ -82,7 +105,7 @@ def gene(name=None, namespace=None, identifier=None, variants=None):
     :param list variants: A list of variants
     :rtype: dict
     """
-    rv = _make_cd_abundance(GENE, name=name, namespace=namespace, identifier=identifier, variants=variants)
+    rv = _make_central_dogma_abundance(GENE, name=name, namespace=namespace, identifier=identifier, variants=variants)
     return rv
 
 
@@ -95,7 +118,7 @@ def rna(name=None, namespace=None, identifier=None, variants=None):
     :param list variants: A list of variants
     :rtype: dict
     """
-    rv = _make_cd_abundance(RNA, name=name, namespace=namespace, identifier=identifier, variants=variants)
+    rv = _make_central_dogma_abundance(RNA, name=name, namespace=namespace, identifier=identifier, variants=variants)
     return rv
 
 
@@ -108,7 +131,7 @@ def mirna(name=None, namespace=None, identifier=None, variants=None):
     :param list variants: A list of variants
     :rtype: dict
     """
-    rv = _make_cd_abundance(MIRNA, name=name, namespace=namespace, identifier=identifier, variants=variants)
+    rv = _make_central_dogma_abundance(MIRNA, name=name, namespace=namespace, identifier=identifier, variants=variants)
     return rv
 
 
@@ -121,7 +144,8 @@ def protein(name=None, namespace=None, identifier=None, variants=None):
     :param list variants: A list of variants
     :rtype: dict
     """
-    rv = _make_cd_abundance(PROTEIN, name=name, namespace=namespace, identifier=identifier, variants=variants)
+    rv = _make_central_dogma_abundance(PROTEIN, name=name, namespace=namespace, identifier=identifier,
+                                       variants=variants)
     return rv
 
 
@@ -172,8 +196,8 @@ def complex_abundance(members, namespace=None, name=None, identifier=None):
         MEMBERS: members
     }
 
-    if namespace and name:
-        add_identifier(rv, name=name, namespace=namespace, identifier=identifier)
+    if namespace:
+        rv.update(entity(namespace=namespace, name=name, identifier=identifier))
 
     return rv
 

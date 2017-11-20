@@ -45,7 +45,7 @@ class MetadataParser(BaseParser):
     """
 
     def __init__(self, manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
-                 annotations_regex=None, default_namespace=None, allow_redefinition=False):
+                 annotation_regex=None, default_namespace=None, allow_redefinition=False):
         """
         :param pybel.manager.Manager manager: A cache manager
         :param dict[str,dict[str,str]] namespace_dict: A dictionary of pre-loaded, enumerated namespaces from
@@ -54,7 +54,7 @@ class MetadataParser(BaseParser):
                                 {annotation keyword: set of valid values}
         :param dict[str,str] namespace_regex: A dictionary of pre-loaded, regular expression namespaces from
                                 {namespace keyword: regex string}
-        :param dict[str,str] annotations_regex: A dictionary of pre-loaded, regular expression annotations from
+        :param dict[str,str] annotation_regex: A dictionary of pre-loaded, regular expression annotations from
                                 {annotation keyword: regex string}
         :param set[str] default_namespace: A set of strings that can be used without a namespace
         """
@@ -72,7 +72,7 @@ class MetadataParser(BaseParser):
         #: A set of names that can be used without a namespace
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         #: A dictionary of {annotation keyword: regular expression string}
-        self.annotations_regex = {} if annotations_regex is None else annotations_regex
+        self.annotation_regex = {} if annotation_regex is None else annotation_regex
 
         #: A set of namespaces's URLs that can't be cached
         self.uncachable_namespaces = set()
@@ -87,7 +87,7 @@ class MetadataParser(BaseParser):
         #: A dictionary from {annotation keyword: BEL annotation URL}
         self.annotation_url_dict = {}
         #: A dictionary from {annotation keyword: OWL annotation URL}
-        self.annotations_owl_dict = {}
+        self.annotation_owl_dict = {}
         #: A set of annotation keywords that are defined ad-hoc in the BEL script
         self.annotation_lists = set()
 
@@ -164,6 +164,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param str namespace: The namespace being parsed
+        :raises: RedefinedNamespaceError
         """
         if self.disallow_redefinition and self.has_namespace(namespace):
             raise RedefinedNamespaceError(self.line_number, line, position, namespace)
@@ -174,6 +175,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedNamespaceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
@@ -198,6 +200,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedNamespaceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
@@ -219,6 +222,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedNamespaceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
@@ -233,6 +237,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param str annotation: The annotation being parsed
+        :raises: RedefinedAnnotationError
         """
         if self.disallow_redefinition and self.has_annotation(annotation):
             raise RedefinedAnnotationError(self.line_number, line, position, annotation)
@@ -243,13 +248,14 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedAnnotationError
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
 
         url = tokens['url']
         self.annotation_dict[annotation] = self.manager.get_annotation_owl_terms(url, annotation)
-        self.annotations_owl_dict[annotation] = url
+        self.annotation_owl_dict[annotation] = url
 
         return tokens
 
@@ -259,6 +265,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedAnnotationError
         """
         keyword = tokens['name']
         self.raise_for_redefined_annotation(line, position, keyword)
@@ -275,6 +282,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedAnnotationError
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
@@ -292,10 +300,11 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: RedefinedAnnotationError
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
-        self.annotations_regex[annotation] = tokens['value']
+        self.annotation_regex[annotation] = tokens['value']
         return tokens
 
     def has_enumerated_annotation(self, annotation):
@@ -312,7 +321,7 @@ class MetadataParser(BaseParser):
         :param str annotation: The keyword of a annotation
         :rtype: bool
         """
-        return annotation in self.annotations_regex
+        return annotation in self.annotation_regex
 
     def has_annotation(self, annotation):
         """Checks if this annotation is defined
@@ -353,6 +362,7 @@ class MetadataParser(BaseParser):
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param str version: A version string
+        :raises: VersionFormatWarning
         """
         if valid_date_version(version):
             return

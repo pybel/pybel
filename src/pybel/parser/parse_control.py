@@ -139,28 +139,66 @@ class ControlParser(BaseParser):
         """
         return self._annotation_regex_compiled
 
+    @property
+    def _in_debug_mode(self):
+        return not self.annotation_dict and not self.annotation_regex
+
+    def has_enumerated_annotation(self, annotation):
+        return annotation in self.annotation_dict
+
+    def has_regex_annotation(self, annotation):
+        return annotation in self.annotation_regex
+
     def raise_for_undefined_annotation(self, line, position, annotation):
-        if not self.annotation_dict and not self.annotation_regex:
+        """Raises is an annotation is not defined
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param str annotation: The annotation to check
+        :raises: UndefinedAnnotationWarning
+        """
+        if self._in_debug_mode:
             return
 
-        if annotation not in self.annotation_dict and annotation not in self.annotation_regex:
+        if not self.has_enumerated_annotation(annotation) and not self.has_regex_annotation(annotation):
             raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
 
     def raise_for_invalid_annotation_value(self, line, position, key, value):
-        if not self.annotation_dict and not self.annotation_regex:
+        """Raises is an annotation is not defined
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param str key: The annotation to check
+        :param str value: The entry in the annotation to check
+        :raises: IllegalAnnotationValueWarning or MissingAnnotationRegexWarning
+        """
+        if self._in_debug_mode:
             return
 
-        if key in self.annotation_dict and value not in self.annotation_dict[key]:
+        if self.has_enumerated_annotation(key) and value not in self.annotation_dict[key]:
             raise IllegalAnnotationValueWarning(self.line_number, line, position, key, value)
-        elif key in self.annotation_regex_compiled and not self.annotation_regex_compiled[key].match(value):
+
+        elif self.has_regex_annotation(key) and not self.annotation_regex_compiled[key].match(value):
             raise MissingAnnotationRegexWarning(self.line_number, line, position, key, value)
 
     def raise_for_missing_citation(self, line, position):
+        """Raises if there is no citation present in the parser
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :raises: MissingCitationException
+        """
         if self.citation_clearing and not self.citation:
             raise MissingCitationException(self.line_number, line, position)
 
     def handle_annotation_key(self, line, position, tokens):
-        """Called on all annotation keys before parsing to validate that it's either enumerated or as a regex"""
+        """Called on all annotation keys before parsing to validate that it's either enumerated or as a regex
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raise: MissingCitationException or UndefinedAnnotationWarning
+        """
         key = tokens['key']
         self.raise_for_missing_citation(line, position)
         self.raise_for_undefined_annotation(line, position, key)
@@ -239,12 +277,26 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_statement_group(self, line, position, tokens):
+        """Unsets the statement group, or raises an exception if it is not set.
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: MissingAnnotationKeyWarning
+        """
         if self.statement_group is None:
             raise MissingAnnotationKeyWarning(self.line_number, line, position, BEL_KEYWORD_STATEMENT_GROUP)
         self.statement_group = None
         return tokens
 
     def handle_unset_citation(self, line, position, tokens):
+        """Unsets the citation, or raises an exception if it is not set
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: MissingAnnotationKeyWarning
+        """
         if not self.citation:
             raise MissingAnnotationKeyWarning(self.line_number, line, position, BEL_KEYWORD_CITATION)
 
@@ -253,24 +305,52 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_evidence(self, line, position, tokens):
+        """Unsets the evidence, or throws an exception if it is not already set. The value for ``tokens[EVIDENCE]``
+        corresponds to which alternate of SupportingText or Evidence was used in the BEL script.
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: MissingAnnotationKeyWarning
+        """
         if self.evidence is None:
             raise MissingAnnotationKeyWarning(self.line_number, line, position, tokens[EVIDENCE])
         self.evidence = None
         return tokens
 
     def validate_unset_command(self, line, position, key):
+        """Raises an exception when trying to ``UNSET X`` if ``X`` is not already set.
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param str key: The annotation to check
+        :raises: MissingAnnotationKeyWarning
+        """
         if key not in self.annotations:
             raise MissingAnnotationKeyWarning(self.line_number, line, position, key)
 
     def handle_unset_command(self, line, position, tokens):
-        """Handles ``UNSET X``"""
+        """Handles ``UNSET X`` or raises an exception if it is not already set.
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: MissingAnnotationKeyWarning
+        """
         key = tokens['key']
         self.validate_unset_command(line, position, key)
         del self.annotations[key]
         return tokens
 
     def handle_unset_list(self, line, position, tokens):
-        """Handles ``UNSET {A, B, ...}``"""
+        """Handles ``UNSET {A, B, ...}`` or raises an exception of any of them are not present. Consider that all
+        unsets are in peril if just one of them is wrong!
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        :raises: MissingAnnotationKeyWarning
+        """
         for key in tokens['values']:
             if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
                 self.evidence = None
@@ -286,7 +366,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def get_annotations(self):
-        """Gets the current anotations
+        """Gets the current annotations
 
         :return: The currently stored BEL annotations
         :rtype: dict

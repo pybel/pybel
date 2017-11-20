@@ -1490,7 +1490,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
 
 class TestNoAddNode(TemporaryCacheMixin):
-    def test_no_node_name(self):
+    @mock_bel_resources
+    def test_no_node_name(self, mock):
         """Test that a node whose namespace is in the uncached namespaces set can't be added"""
         node_data = {
             FUNCTION: PROTEIN,
@@ -1507,7 +1508,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         network = self.manager.insert_graph(graph)
         self.assertEqual(0, len(network.nodes.all()))
 
-    def test_no_node_fusion_3p(self):
+    @mock_bel_resources
+    def test_no_node_fusion_3p(self, mock):
         """Test that a node whose namespace is in the uncached namespaces set can't be added"""
         node_data = {
             FUNCTION: PROTEIN,
@@ -1538,7 +1540,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         network = self.manager.insert_graph(graph)
         self.assertEqual(0, len(network.nodes.all()))
 
-    def test_no_node_fusion_5p(self):
+    @mock_bel_resources
+    def test_no_node_fusion_5p(self, mock):
         """Test that a node whose namespace is in the uncached namespaces set can't be added"""
         node_data = {
             FUNCTION: PROTEIN,
@@ -1569,7 +1572,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         network = self.manager.insert_graph(graph)
         self.assertEqual(0, len(network.nodes.all()))
 
-    def test_no_translocation(self):
+    @mock_bel_resources
+    def test_no_translocation(self, mock):
         """This test checks that a translocation using custom namespaces doesn't get stored"""
         graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
         dummy_url = str(uuid4())
@@ -1607,7 +1611,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         self.assertEqual(2, len(network.nodes.all()))
         self.assertEqual(0, len(network.edges.all()))
 
-    def test_no_location(self):
+    @mock_bel_resources
+    def test_no_location(self, mock):
         """Tests that when using a custom namespace in the location the edge doesn't get stored"""
         graph = BELGraph(name='dummy graph', version='0.0.1', description="Test transloaction network")
         dummy_url = str(uuid4())
