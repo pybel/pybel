@@ -48,20 +48,20 @@ activity_labels = {
 
 #: Maps the default BEL molecular activities to Gene Ontology Molecular Functions
 activity_go_mapping = {
-    'cat': entity(namespace='GOMF', name='catalytic activity', identifier='GO:0003824'),
-    'chap': entity(namespace='GOMF', name='protein binding involved in protein folding', identifier='GO:0044183'),
-    'gtp': entity(namespace='GOMF', name='GTP binding', identifier='GO:0005525'),
-    'kin': entity(namespace='GOMF', name='kinase activity', identifier='GO:0016301'),
-    'pep': entity(namespace='GOMF', name='peptidase activity', identifier='GO:0008233'),
-    'phos': entity(namespace='GOMF', name='phosphatase activity', identifier='GO:0016791'),
-    'ribo': entity(namespace='GOMF', name='NAD(P)+-protein-arginine ADP-ribosyltransferase activity',
+    'cat': entity(namespace='GO', name='catalytic activity', identifier='GO:0003824'),
+    'chap': entity(namespace='GO', name='protein binding involved in protein folding', identifier='GO:0044183'),
+    'gtp': entity(namespace='GO', name='GTP binding', identifier='GO:0005525'),
+    'kin': entity(namespace='GO', name='kinase activity', identifier='GO:0016301'),
+    'pep': entity(namespace='GO', name='peptidase activity', identifier='GO:0008233'),
+    'phos': entity(namespace='GO', name='phosphatase activity', identifier='GO:0016791'),
+    'ribo': entity(namespace='GO', name='NAD(P)+-protein-arginine ADP-ribosyltransferase activity',
                    identifier='GO:0003956'),
-    'tscript': entity(namespace='GOMF', name='nucleic acid binding transcription factor activity',
+    'tscript': entity(namespace='GO', name='nucleic acid binding transcription factor activity',
                       identifier='GO:0001071'),
-    'tport': entity(namespace='GOMF', name='transporter activity', identifier='GO:0005215'),
-    'molecularActivity': entity(namespace='GOMF', name='molecular_function', identifier='GO:0003674'),
-    'gef': entity(namespace='GOMF', name='guanyl-nucleotide exchange factor activity', identifier='GO:0005085'),
-    'gap': entity(namespace='GOMF', name='GTPase activating protein binding', identifier='GO:0032794'),
+    'tport': entity(namespace='GO', name='transporter activity', identifier='GO:0005215'),
+    'molecularActivity': entity(namespace='GO', name='molecular_function', identifier='GO:0003674'),
+    'gef': entity(namespace='GO', name='guanyl-nucleotide exchange factor activity', identifier='GO:0005085'),
+    'gap': entity(namespace='GO', name='GTPase activating protein binding', identifier='GO:0032794'),
 }
 
 activities = list(activity_labels.keys())
@@ -250,37 +250,43 @@ pmod_mappings = {
         'synonyms': ['Ac', 'acetylation'],
         'xrefs': [
             entity(namespace='SBO', identifier='SBO:0000215', name='acetylation'),
-            entity(namespace='GO', identifier='GO:0006473 ', name='protein acetylation'),
+            entity(namespace='GO', identifier='GO:0006473', name='protein acetylation'),
+            entity(namespace='MOD', identifier='MOD:00394'),
         ]
     },
     'ADPRib': {
-        'synonyms': ['ADPRib', 'ADP-ribosylation', 'ADPRib', 'adenosine diphosphoribosyl'],
+        'synonyms': ['ADPRib', 'ADP-ribosylation', 'ADPRib', 'ADP-rybosylation', 'adenosine diphosphoribosyl'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0006471', name='protein ADP-ribosylation'),
+            entity(namespace='MOD', identifier='MOD:00752'),
         ]
     },
     'Farn': {
         'synonyms': ['Farn', 'farnesylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0018343', name='protein farnesylation'),
+            entity(namespace='MOD', identifier='MOD:00437'),
         ]
     },
     'Gerger': {
         'synonyms': ['Gerger', 'geranylgeranylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0018344', name='protein geranylgeranylation'),
+            entity(namespace='MOD', identifier='MOD:00441'),
         ]
     },
     'Glyco': {
         'synonyms': ['Glyco', 'glycosylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0006486', name='protein glycosylation'),
+            entity(namespace='MOD', identifier='MOD:00693'),
         ]
     },
     'Hy': {
         'synonyms': ['Hy' 'hydroxylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0018126', name='protein hydroxylation'),
+            entity(namespace='MOD', identifier='MOD:00677'),
         ]
     },
     'ISG': {
@@ -293,34 +299,47 @@ pmod_mappings = {
         'synonyms': ['Me', 'methylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0006479', name='protein methylation'),
+            entity(namespace='MOD', identifier='MOD:00427'),
         ]
 
     },
     'Me1': {
         'synonyms': ['Me1', 'monomethylation', 'mono-methylation'],
+        'xrefs': [
+            entity(namespace='MOD', identifier='MOD:00599', name='monomethylated residue'),
+        ]
     },
     'Me2': {
         'synonyms': ['Me2', 'dimethylation', 'di-methylation'],
+        'xrefs': [
+            entity(namespace='MOD', identifier='MOD:00429', name='dimethylated residue'),
+        ]
     },
     'Me3': {
         'synonyms': ['Me3', 'trimethylation', 'tri-methylation'],
+        'xrefs': [
+            entity(namespace='MOD', identifier='MOD:00430', name='trimethylated residue'),
+        ]
     },
     'Myr': {
         'synonyms': ['Myr', 'myristoylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0018377', name='protein myristoylation'),
+            entity(namespace='MOD', identifier='MOD:00438'),
         ]
     },
     'Nedd': {
         'synonyms': ['Nedd', 'neddylation', 'RUB1-protein conjugation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0045116', name='protein neddylation'),
+            entity(namespace='MOD', identifier='MOD:01150'),
         ]
     },
     'NGlyco': {
         'synonyms': ['NGlyco', 'N-linked glycosylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0006487', name='protein N-linked glycosylation'),
+            entity(namespace='MOD', identifier='MOD:00006'),
         ]
     },
     'NO': {
@@ -339,43 +358,49 @@ pmod_mappings = {
         'synonyms': ['OGlyco', 'O-linked glycosylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0006493', name='protein O-linked glycosylation'),
+            entity(namespace='MOD', identifier='MOD:00396'),
         ]
     },
     'Palm': {
         'synonyms': ['Palm', 'palmitoylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0018345', name='protein palmitoylation'),
+            entity(namespace='MOD', identifier='MOD:00440'),
         ]
     },
     'Ph': {
         'synonyms': ['Ph', 'phosphorylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0006468', name='protein phosphorylation'),
+            entity(namespace='MOD', identifier='MOD:00696'),
         ]
     },
     'Sulf': {
         'synonyms': ['Sulf', 'sulfation', 'sulphation', 'sulfur addition', 'sulphur addition'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0006477', name='protein sulfation'),
+            entity(namespace='MOD', identifier='MOD:00695'),
         ]
     },
     'sulfonation': {
         'synonyms': ['sulfonation', 'sulphonation'],
         'xrefs': [
-            entity(namespace='MOP', identifier='MOP:0000559', name='sulfonation '),
+            entity(namespace='MOP', identifier='MOP:0000559', name='sulfonation'),
         ]
     },
     'Sumo': {
         'synonyms': ['Sumo', 'SUMOylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0016925', name='protein sumoylation'),
+            entity(namespace='MOD', identifier='MOD:01149'),
         ]
     },
     'Ub': {
         'synonyms': ['Ub', 'ubiquitination', 'ubiquitinylation', 'ubiquitylation'],
         'xrefs': [
             entity(namespace='SBO', identifier='SBO:0000224', name='ubiquitination'),
-            entity(namespace='GO', identifier='GO:0016567', name='protein ubiquitination')
+            entity(namespace='GO', identifier='GO:0016567', name='protein ubiquitination'),
+            entity(namespace='MOD', identifier='MOD:01148'),
         ]
     },
     'UbK48': {
