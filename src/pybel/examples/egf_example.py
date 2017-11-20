@@ -126,8 +126,8 @@ egf_graph.add_qualified_edge(
     evidence='Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be translocated from the nucleus after stimulation with epidermal growth factor.',
     annotations={'Species': '9606'},
     object_modifier=make_translocation_modifier_dict(
-        from_loc=entity(name='nucleus', namespace='GOCC', identifier='0005634'),
-        to_loc=entity(name='cytoplasm', namespace='GOCC', identifier='0005737'),
+        from_loc=entity(namespace='GOCC', name='nucleus', identifier='0005634'),
+        to_loc=entity(namespace='GOCC', name='cytoplasm', identifier='0005737'),
     )
 )
 

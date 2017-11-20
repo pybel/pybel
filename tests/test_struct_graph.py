@@ -3,7 +3,11 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import GRAPH_METADATA, METADATA_NAME, METADATA_VERSION
+from pybel.constants import (
+    FUNCTION, GRAPH_METADATA, IDENTIFIER, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
+    PROTEIN,
+)
+from pybel.dsl import *
 
 
 class TestStruct(unittest.TestCase):
@@ -45,6 +49,45 @@ class TestStruct(unittest.TestCase):
         self.assertEqual('test description', g.description)
 
         self.assertEqual('test v1.0.0', str(g))
+
+
+class TestDSL(unittest.TestCase):
+    def test_add_robust_node(self):
+        g = BELGraph()
+
+        p = protein(name='yfg', namespace='test', identifier='1')
+
+        p_tuple = g.add_node_from_data(p)
+
+        self.assertEqual(
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'test',
+                NAME: 'yfg',
+                IDENTIFIER: '1'
+            },
+            g.node[p_tuple]
+        )
+
+    def test_add_identified_node(self):
+        """What happens when a node with only an identifier is added to a graph"""
+        g = BELGraph()
+
+        p = protein(namespace='test', identifier='1')
+
+        self.assertNotIn(NAME, p)
+
+        p_tuple = g.add_node_from_data(p)
+
+        self.assertEqual(
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: 'test',
+                IDENTIFIER: '1'
+            },
+            g.node[p_tuple]
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

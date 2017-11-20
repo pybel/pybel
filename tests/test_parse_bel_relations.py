@@ -8,17 +8,13 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel, node_to_bel
 from pybel.constants import *
-from pybel.dsl import abundance
+from pybel.dsl import abundance, pmod
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_exceptions import (
-    MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning,
-    UndefinedNamespaceWarning,
+    MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
-from tests.constants import (
-    TestTokenParserBase, default_identifier, test_citation_dict, test_evidence_text,
-    update_provenance,
-)
+from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text, update_provenance
 
 log = logging.getLogger(__name__)
 
@@ -499,12 +495,7 @@ class TestRelations(TestTokenParserBase):
                 FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
                 NAME: 'MAPT',
-                VARIANTS: [
-                    {
-                        KIND: PMOD,
-                        IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
-                    }
-                ]
+                VARIANTS: [pmod('Ph')]
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -530,14 +521,7 @@ class TestRelations(TestTokenParserBase):
                 FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
                 NAME: 'GSK3B',
-                VARIANTS: [
-                    {
-                        KIND: PMOD,
-                        IDENTIFIER: default_identifier('Ph'),
-                        PMOD_CODE: 'Ser',
-                        PMOD_POSITION: 9
-                    }
-                ]
+                VARIANTS: [pmod('Ph', position=9, code='Ser')]
             },
             RELATION: 'positiveCorrelation',
             OBJECT: {

@@ -3,32 +3,28 @@
 from ..constants import EFFECT, FROM_LOC, IDENTIFIER, MODIFIER, NAME, NAMESPACE, TO_LOC, TRANSLOCATION
 
 
-def entity(name, namespace, identifier=None):
+def entity(namespace, name=None, identifier=None):
     """Creates a dictionary representing a reference to an entity
 
-    :param str name: The name of the entity
     :param str namespace: The namespace to which the entity belongs
+    :param str name: The name of the entity
     :param str identifier: The identifier of the entity in the namespace
     :rtype: dict
     """
+    if name is None and identifier is None:
+        raise ValueError('cannot create an entity without neither a name nor identifier')
+
     rv = {
-        NAME: name,
         NAMESPACE: namespace,
     }
+
+    if name is not None:
+        rv[NAME] = name
 
     if identifier is not None:
         rv[IDENTIFIER] = identifier
 
     return rv
-
-
-def add_identifier(rv, name, namespace, identifier=None):
-    """Adds identifier information to the given dict"""
-    rv[NAME] = name
-    rv[NAMESPACE] = namespace
-
-    if identifier:
-        rv[IDENTIFIER] = identifier
 
 
 def make_translocation_modifier_dict(from_loc, to_loc):

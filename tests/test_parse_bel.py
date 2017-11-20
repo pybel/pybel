@@ -6,13 +6,13 @@ import unittest
 from pybel import BELGraph
 from pybel.canonicalize import node_to_bel
 from pybel.constants import *
-from pybel.dsl.nodes import abundance, gene, hgvs, pmod
+from pybel.dsl.nodes import abundance, gene, gmod, hgvs, pmod
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import modifier_po_to_dict
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
 from tests.constants import (
-    TestGraphMixin, TestTokenParserBase, assertHasEdge, assertHasNode, default_identifier, update_provenance,
+    TestGraphMixin, TestTokenParserBase, assertHasEdge, assertHasNode, update_provenance,
 )
 
 log = logging.getLogger(__name__)
@@ -183,12 +183,7 @@ class TestGene(TestTokenParserBase):
             FUNCTION: GENE,
             NAMESPACE: 'HGNC',
             NAME: 'AKT1',
-            VARIANTS: [
-                {
-                    KIND: GMOD,
-                    IDENTIFIER: default_identifier('Me')
-                }
-            ]
+            VARIANTS: [gmod('Me')]
         }
         self.assertEqual(expected_result, result.asDict())
 

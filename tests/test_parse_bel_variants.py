@@ -4,12 +4,11 @@ import logging
 import unittest
 
 from pybel.constants import *
-from pybel.dsl.nodes import hgvs, pmod
+from pybel.dsl.nodes import gmod, hgvs, pmod
 from pybel.parser.modifiers import (
     FragmentParser, FusionParser, GmodParser, GsubParser, LocationParser, PmodParser, PsubParser, TruncationParser,
     VariantParser,
 )
-from tests.constants import default_identifier, identifier
 
 log = logging.getLogger(__name__)
 
@@ -85,6 +84,10 @@ class TestVariantParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
 
+def identifier(namespace, name):  # FIXME remove this
+    return {NAMESPACE: namespace, NAME: name}
+
+
 class TestPmod(unittest.TestCase):
     def setUp(self):
         self.parser = PmodParser()
@@ -95,10 +98,12 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
+            IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473
         }
+
+        self.assertEqual(expected, pmod('Ph', code='Ser', position=473))
         self.assertEqual(expected, result.asDict())
 
     def test_pmod2(self):
@@ -107,9 +112,10 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
+            IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
             PMOD_CODE: 'Ser',
         }
+        self.assertEqual(expected, pmod('Ph', code='Ser'))
         self.assertEqual(expected, result.asDict())
 
     def test_pmod3(self):
@@ -118,8 +124,9 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
+            IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
         }
+        self.assertEqual(expected, pmod('Ph'))
         self.assertEqual(expected, result.asDict())
 
     def test_pmod4(self):
@@ -128,7 +135,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: identifier(BEL_DEFAULT_NAMESPACE, 'Ph'),
+            IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473
         }
@@ -155,10 +162,16 @@ class TestGmod(unittest.TestCase):
     def setUp(self):
         self.parser = GmodParser()
 
-        self.expected = {
+        self.expected = gmod('Me')
+
+    def test_dsl(self):
+        self.assertEqual({
             KIND: GMOD,
-            IDENTIFIER: default_identifier('Me')
-        }
+            IDENTIFIER: {
+                NAME: 'Me',
+                NAMESPACE: BEL_DEFAULT_NAMESPACE
+            }
+        }, self.expected)
 
     def test_gmod_short(self):
         statement = 'gmod(M)'

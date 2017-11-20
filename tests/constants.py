@@ -126,16 +126,6 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
     )
     self.assertTrue(matches, msg=msg)
 
-
-def identifier(namespace, name):
-    return {NAMESPACE: namespace, NAME: name}
-
-
-def default_identifier(name):
-    """Convenience function for building a default namespace/name pair"""
-    return entity(name=name, namespace=BEL_DEFAULT_NAMESPACE)
-
-
 class TestGraphMixin(unittest.TestCase):
     def assertHasNode(self, g, n, **kwargs):
         """Helper for asserting node membership
