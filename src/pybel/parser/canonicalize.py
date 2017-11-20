@@ -219,11 +219,20 @@ def simple_to_tuple(tokens):
     :type tokens: ParseResult or dict
     :rtype: tuple
     """
-    return (
-        tokens[FUNCTION],
-        tokens[NAMESPACE],
-        tokens[NAME]
-    )
+    if NAME in tokens:
+        return (
+            tokens[FUNCTION],
+            tokens[NAMESPACE],
+            tokens[NAME]
+        )
+    elif IDENTIFIER in tokens:
+        return (
+            tokens[FUNCTION],
+            tokens[NAMESPACE],
+            tokens[IDENTIFIER]
+        )
+
+    raise IndexError('missing name and identifier')
 
 
 def hgvs_po_to_tuple(tokens):

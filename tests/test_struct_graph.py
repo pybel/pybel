@@ -8,6 +8,7 @@ from pybel.constants import (
     PROTEIN,
 )
 from pybel.dsl import *
+from pybel.dsl.utils import entity
 
 
 class TestStruct(unittest.TestCase):
@@ -87,6 +88,14 @@ class TestDSL(unittest.TestCase):
             },
             g.node[p_tuple]
         )
+
+    def test_missing_information(self):
+        """Checks that entity and abundance functions raise on missing name/identifier"""
+        with self.assertRaises(ValueError):
+            entity(namespace='test')
+
+        with self.assertRaises(ValueError):
+            protein(namespace='test')
 
 
 if __name__ == '__main__':
