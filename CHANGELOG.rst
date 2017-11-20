@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.9.7 <https://github.com/pybel/pybel/compare/v0.9.6...0.9.7>`_ - 2017-11-20
+-----------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Use ``HASH`` as dictionary key instead of ``ID``
+- Allow DSL to create nodes without names but with identifiers
+- Rename instance variables in parsers for consistency
+- Greater usage of DSL in parser
+
 `0.9.6 <https://github.com/pybel/pybel/compare/v0.9.5...0.9.6>`_ - 2017-11-12
 -----------------------------------------------------------------------------
 Added
