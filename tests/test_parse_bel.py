@@ -1751,7 +1751,7 @@ class TestTranslocationPermissive(unittest.TestCase):
         3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
         Test translocation in object
         """
-        update_provenance(self.parser)
+        update_provenance(self.parser.control_parser)
 
         statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"))'
         result = self.parser.relation.parseString(statement)
@@ -2083,7 +2083,7 @@ class TestSemantics(unittest.TestCase):
         graph = BELGraph()
         parser = BelParser(graph, allow_naked_names=True)
 
-        update_provenance(parser)
+        update_provenance(parser.control_parser)
 
         parser.bel_term.addParseAction(parser.handle_term)
         parser.bel_term.parseString('bp(ABASD)')
