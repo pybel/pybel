@@ -91,9 +91,9 @@ class BelParser(BaseParser):
             )
         else:
             self.identifier_parser = IdentifierParser(
+                allow_naked_names=allow_naked_names,
                 namespace_dict=namespace_dict,
                 namespace_regex=namespace_regex,
-                allow_naked_names=allow_naked_names
             )
 
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
