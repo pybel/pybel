@@ -5,7 +5,10 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import *
-from pybel.struct.operations import left_full_join, left_outer_join, left_node_intersection_join, node_intersection
+from pybel.struct.operations import (
+    left_full_join, left_node_intersection_join, left_outer_join, node_intersection,
+    union,
+)
 
 HGNC = 'HGNC'
 
@@ -80,34 +83,68 @@ class TestLeftFullJoin(unittest.TestCase):
         self.g = g
         self.h = h
 
+    def help_check_initial_g(self, g):
+        self.assertEqual(2, g.number_of_nodes())
+        self.assertEqual(1, g.number_of_edges())
+
+    def help_check_initial_h(self, h):
+        self.assertEqual(3, self.h.number_of_nodes())
+        self.assertEqual(3, self.h.number_of_edges())
+
     def test_initial(self):
-        self.assertEqual(2, self.g.number_of_nodes())
-        self.assertEqual(1, self.g.number_of_edges())
-        self.assertEqual(3, self.h.number_of_nodes())
-        self.assertEqual(3, self.h.number_of_edges())
+        self.help_check_initial_g(self.g)
+        self.help_check_initial_h(self.h)
 
-    def help_check(self, g, h):
-        self.assertNotIn('EXTRANEOUS', self.g.node[p1])
-        self.assertIn('EXTRANEOUS', self.g.node[p3])
-        self.assertEqual('MOST DEFINITELY', self.g.node[p3]['EXTRANEOUS'])
+    def help_check(self, j):
+        self.assertNotIn('EXTRANEOUS', j.node[p1])
+        self.assertIn('EXTRANEOUS', j.node[p3])
+        self.assertEqual('MOST DEFINITELY', j.node[p3]['EXTRANEOUS'])
 
-        self.assertEqual(3, self.g.number_of_nodes())
-        self.assertEqual(3, self.g.number_of_edges(),
-                         msg="G edges:\n{}".format(json.dumps(g.edges(data=True), indent=2)))
-        self.assertEqual(3, self.h.number_of_nodes())
-        self.assertEqual(3, self.h.number_of_edges())
+        self.assertEqual(3, j.number_of_nodes())
+        self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format(json.dumps(j.edges(data=True), indent=2)))
+
+    def test_in_place_type_failure(self):
+        with self.assertRaises(TypeError):
+            self.g += None
+
+    def test_type_failure(self):
+        with self.assertRaises(TypeError):
+            self.g + None
 
     def test_magic(self):
         self.g += self.h
-        self.help_check(self.g, self.h)
+        self.help_check(self.g)
+        self.help_check_initial_h(self.h)
 
     def test_full_hash_join(self):
         left_full_join(self.g, self.h, use_hash=True)
-        self.help_check(self.g, self.h)
+        self.help_check(self.g)
+        self.help_check_initial_h(self.h)
 
     def test_full_exhaustive_join(self):
         left_full_join(self.g, self.h, use_hash=False)
-        self.help_check(self.g, self.h)
+        self.help_check(self.g)
+        self.help_check_initial_h(self.h)
+
+    def test_union_hash(self):
+        j = union([self.g, self.h], use_hash=True)
+        self.help_check(j)
+        self.help_check_initial_g(self.g)
+        self.help_check_initial_h(self.h)
+
+    def test_union_exhaustive(self):
+        j = union([self.g, self.h], use_hash=True)
+        self.help_check(j)
+        self.help_check_initial_g(self.g)
+        self.help_check_initial_h(self.h)
+
+    def test_union_failure(self):
+        with self.assertRaises(ValueError):
+            union([])
+
+    def test_union_trivial(self):
+        res = union([self.g])
+        self.assertEqual(self.g, res)
 
 
 class TestLeftFullOuterJoin(unittest.TestCase):
@@ -153,6 +190,14 @@ class TestLeftFullOuterJoin(unittest.TestCase):
         self.assertEqual({1, 3, 4, 5, 6, 7}, set(self.h.nodes_iter()))
         self.assertEqual(3, self.h.number_of_edges())
         self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(self.h.edges_iter()))
+
+    def test_in_place_type_failure(self):
+        with self.assertRaises(TypeError):
+            self.g &= None
+
+    def test_type_failure(self):
+        with self.assertRaises(TypeError):
+            self.g & None
 
     def test_magic(self):
         # left_outer_join(g, h)
@@ -209,6 +254,14 @@ class TestInnerJoin(unittest.TestCase):
         self.assertEqual(1, j.number_of_edges())
         self.assertEqual({(1, 3), }, set(j.edges_iter()))
 
+    def test_in_place_type_failure(self):
+        with self.assertRaises(TypeError):
+            self.g ^ None
+
+    def test_type_failure(self):
+        with self.assertRaises(TypeError):
+            self.g ^= None
+
     def test_magic(self):
         j = self.g ^ self.h
         self.help_check_join(j)
@@ -232,6 +285,14 @@ class TestInnerJoin(unittest.TestCase):
         self.help_check_join(j)
         self.help_check_initialize_h(self.h)
         self.help_check_initialize_g(self.g)
+
+    def test_intersection_failure(self):
+        with self.assertRaises(ValueError):
+            node_intersection([])
+
+    def test_intersection_trivial(self):
+        res = node_intersection([self.g])
+        self.assertEqual(self.g, res)
 
 
 if __name__ == '__main__':

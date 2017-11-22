@@ -14,7 +14,7 @@ from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_exceptions import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
-from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text, update_provenance
+from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class TestRelations(TestTokenParserBase):
 
     def setUp(self):
         super(TestRelations, self).setUp()
-        update_provenance(self.parser)
+        self.add_default_provenance()
 
     def test_ensure_no_dup_nodes(self):
         """Ensure node isn't added twice, even if from different statements"""

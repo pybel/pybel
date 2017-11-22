@@ -6,13 +6,13 @@ import unittest
 from pybel import BELGraph
 from pybel.canonicalize import node_to_bel
 from pybel.constants import *
-from pybel.dsl.nodes import abundance, gene, gmod, hgvs, pmod
+from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import modifier_po_to_dict
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
 from tests.constants import (
-    TestGraphMixin, TestTokenParserBase, assertHasEdge, assertHasNode, update_provenance,
+    TestTokenParserBase, assertHasEdge, assertHasNode, update_provenance,
 )
 
 log = logging.getLogger(__name__)
@@ -2078,15 +2078,16 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(0, len(self.parser.control_parser.citation))
 
 
-class TestSemantics(TestGraphMixin):
+class TestSemantics(unittest.TestCase):
     def test_lenient_semantic_no_failure(self):
-        self.graph = BELGraph()
-        self.parser = BelParser(self.graph, allow_naked_names=True)
+        graph = BELGraph()
+        parser = BelParser(graph, allow_naked_names=True)
 
-        update_provenance(self.parser)
+        update_provenance(parser)
 
-        self.parser.bel_term.addParseAction(self.parser.handle_term)
-        self.parser.bel_term.parseString('bp(ABASD)')
+        parser.bel_term.addParseAction(parser.handle_term)
+        parser.bel_term.parseString('bp(ABASD)')
 
-        node = BIOPROCESS, DIRTY, 'ABASD'
-        self.assertHasNode(self.parser.graph, node)
+        node_data = bioprocess(namespace=DIRTY, name='ABASD')
+
+        self.assertTrue(graph.has_node_with_data(node_data))

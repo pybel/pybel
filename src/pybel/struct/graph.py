@@ -429,6 +429,9 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> k = g + h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         result = deepcopy(self)
         left_full_join(result, other)
         return result
@@ -446,6 +449,9 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> g += h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         left_full_join(self, other)
         return self
 
@@ -463,6 +469,9 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> k = g & h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         result = deepcopy(self)
         left_outer_join(result, other)
         return result
@@ -480,6 +489,9 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> g &= h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         left_outer_join(self, other)
         return self
 
@@ -495,4 +507,7 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> k = g ^ h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         return left_node_intersection_join(self, other)

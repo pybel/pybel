@@ -157,7 +157,7 @@ def union(networks, use_hash=True):
     """Takes the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
     infinite.
 
-    :param iter[BELGraph] networks: An iterator over BEL networks
+    :param iter[BELGraph] networks: An iterator over BEL networks. Can't be infinite.
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     :return: A merged network
     :rtype: BELGraph
@@ -170,9 +170,19 @@ def union(networks, use_hash=True):
     >>> k = pybel.from_path('...')
     >>> merged = union([g, h, k])
     """
-    networks_iter = iter(networks)
-    target = next(networks_iter).copy()
-    return _left_full_join_networks(target, networks_iter, use_hash=use_hash)
+    networks = tuple(networks)
+
+    n_networks = len(networks)
+
+    if n_networks == 0:
+        raise ValueError('no networks given')
+
+    if n_networks == 1:
+        return networks[0]
+
+    target = networks[0].copy()
+
+    return _left_full_join_networks(target, networks[1:], use_hash=use_hash)
 
 
 def left_node_intersection_join(g, h, use_hash=True):
@@ -191,7 +201,7 @@ def left_node_intersection_join(g, h, use_hash=True):
     >>> h = pybel.from_path('...')
     >>> merged = left_node_intersection_join(g, h)
     """
-    intersecting = set(g.nodes_iter()).intersection(set(h.nodes_iter()))
+    intersecting = set(g).intersection(set(h))
 
     g_inter = g.subgraph(intersecting)
     h_inter = h.subgraph(intersecting)
@@ -220,15 +230,18 @@ def node_intersection(networks, use_hash=True):
     """
     networks = tuple(networks)
 
-    if len(networks) == 0:
-        raise ValueError('No networks given')
-    elif len(networks) == 1:
-        return networks[1]
+    n_networks = len(networks)
 
-    nodes = set()
+    if n_networks == 0:
+        raise ValueError('no networks given')
 
-    for network in networks:
-        nodes.update(network.nodes_iter())
+    if n_networks == 1:
+        return networks[0]
+
+    nodes = set(networks[0])
+
+    for network in networks[1:]:
+        nodes.intersection_update(network)
 
     subgraphs = (
         network.subgraph(nodes)
