@@ -116,7 +116,7 @@ def get_bel_knowledge_hash(location):
     _, _, lines = split_file_to_annotations_and_definitions(lines)
 
     lines = [
-        line
+        line.strip()
         for index, line in lines
         if line.strip()
     ]
