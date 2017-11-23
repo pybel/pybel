@@ -15,6 +15,9 @@ __all__ = [
     'pmod',
     'gmod',
     'hgvs',
+    'protein_fusion',
+    'rna_fusion',
+    'gene_fusion',
 ]
 
 
@@ -64,7 +67,15 @@ def pmod(name, code=None, position=None, namespace=None, identifier=None):
 
 
 def gmod(name, namespace=None, identifier=None):
-    """Builds a gene modification dict"""
+    """Builds a gene modification dict
+
+    :param str name: The name of the gene modification
+    :param Optional[str] namespace: The namespace of the gene modification
+    :param Optional[str] identifier: The identifier of the name in the database
+
+    Example:
+    >>> gene(namespace='HGNC', name='AKT1', variants=[gmod('Me')])
+    """
     rv = {
         KIND: GMOD,
         IDENTIFIER: entity(
@@ -80,8 +91,11 @@ def gmod(name, namespace=None, identifier=None):
 def hgvs(variant):
     """A convenience function for building a variant dictionary
 
-    :param str variant:
+    :param str variant: The HGVS variant string
     :rtype: dict
+
+    Example:
+    >>> protein(namespace='HGNC', name='AKT1', variants=[hgvs('p.Ala127Tyr')])
     """
     return {KIND: HGVS, IDENTIFIER: variant}
 
@@ -143,6 +157,18 @@ def protein(name=None, namespace=None, identifier=None, variants=None):
     :param str identifier: The database's identifier for this entity
     :param list variants: A list of variants
     :rtype: dict
+
+    Example: AKT
+
+    >>> protein(namespace='HGNC', name='AKT1')
+
+    Example: AKT with optionally included HGNC database identifier
+
+    >>> protein(namespace='HGNC', name='AKT1', identifier='391')
+
+    Example: AKT with phosphorylation
+
+    >>> protein(namespace='HGNC', name='AKT', variants=[pmod('Ph', code='Thr', position=308)])
     """
     rv = _make_central_dogma_abundance(PROTEIN, name=name, namespace=namespace, identifier=identifier,
                                        variants=variants)
@@ -203,23 +229,29 @@ def complex_abundance(members, namespace=None, name=None, identifier=None):
 
 
 def fusion_range(reference, start, stop):
+    """Creates a fusion range
+
+    :param reference:
+    :param start:
+    :param stop:
+    :rtype: dict
+    """
     return {
         FUSION_REFERENCE: reference,
         FUSION_START: start,
         FUSION_STOP: stop
-
     }
 
 
 def fusion(func, partner_5p, range_5p, partner_3p, range_3p):
-    """
+    """Creates a fusion entry
 
     :param str func: A PyBEL function
-    :param dict partner_5p: A PyBEL node data dictionary
-    :param dict range_5p:
-    :param dict partner_3p: A fusion range produced by :func:`fusion_range`
-    :param dict range_3p: A fusion range produced by :func:`fusion_range`
-    :return:
+    :param dict partner_5p: A PyBEL node data dictionary for the 5-prime partner
+    :param dict range_5p: A fusion range produced by :func:`fusion_range` for the 5-prime partner
+    :param dict partner_3p: A PyBEL node data dictionary for the 3-prime partner
+    :param dict range_3p: A fusion range produced by :func:`fusion_range` for the 3-prime partner
+    :rtype: dict
     """
     return {
         FUNCTION: func,
@@ -230,3 +262,39 @@ def fusion(func, partner_5p, range_5p, partner_3p, range_3p):
             RANGE_3P: range_3p
         }
     }
+
+
+def protein_fusion(partner_5p, range_5p, partner_3p, range_3p):
+    """Creates a protein fusion
+
+    :param dict partner_5p: A PyBEL node data dictionary for the 5-prime partner
+    :param dict range_5p: A fusion range produced by :func:`fusion_range` for the 5-prime partner
+    :param dict partner_3p: A PyBEL node data dictionary for the 3-prime partner
+    :param dict range_3p: A fusion range produced by :func:`fusion_range` for the 3-prime partner
+    :rtype: dict
+    """
+    return fusion(PROTEIN, partner_5p=partner_5p, range_5p=range_5p, partner_3p=partner_3p, range_3p=range_3p)
+
+
+def rna_fusion(partner_5p, range_5p, partner_3p, range_3p):
+    """Creates a RNA fusion
+
+    :param dict partner_5p: A PyBEL node data dictionary for the 5-prime partner
+    :param dict range_5p: A fusion range produced by :func:`fusion_range` for the 5-prime partner
+    :param dict partner_3p: A PyBEL node data dictionary for the 3-prime partner
+    :param dict range_3p: A fusion range produced by :func:`fusion_range` for the 3-prime partner
+    :rtype: dict
+    """
+    return fusion(RNA, partner_5p=partner_5p, range_5p=range_5p, partner_3p=partner_3p, range_3p=range_3p)
+
+
+def gene_fusion(partner_5p, range_5p, partner_3p, range_3p):
+    """Creates a gene fusion
+
+    :param dict partner_5p: A PyBEL node data dictionary for the 5-prime partner
+    :param dict range_5p: A fusion range produced by :func:`fusion_range` for the 5-prime partner
+    :param dict partner_3p: A PyBEL node data dictionary for the 3-prime partner
+    :param dict range_3p: A fusion range produced by :func:`fusion_range` for the 3-prime partner
+    :rtype: dict
+    """
+    return fusion(GENE, partner_5p=partner_5p, range_5p=range_5p, partner_3p=partner_3p, range_3p=range_3p)

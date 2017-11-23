@@ -54,6 +54,7 @@ Links
    parser
    manager
    utilities
+   dsl
    logging
    extensions
 

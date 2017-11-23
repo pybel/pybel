@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains functions for easily building BEL graphs in fluid python"""
+"""PyBEL has a partially implemented domain specific language that makes it much easier to programmatically create and
+populate :py:class:`pybel.BELGraph` instances."""
 
 from . import nodes
 from .nodes import *
