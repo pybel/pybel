@@ -15,6 +15,7 @@ __all__ = [
     'pmod',
     'gmod',
     'hgvs',
+    'fusion_range',
     'protein_fusion',
     'rna_fusion',
     'gene_fusion',
@@ -209,7 +210,7 @@ def pathology(namespace, name=None, identifier=None):
 
 
 def complex_abundance(members, namespace=None, name=None, identifier=None):
-    """Returns the node data dictionary for a protein complex
+    """Returns the node data dictionary for a complex, with optional ability to specify a name
 
     :param list[dict] members: A list of PyBEL node data dictionaries
     :param str namespace: The namespace from which the name originates
@@ -224,6 +225,20 @@ def complex_abundance(members, namespace=None, name=None, identifier=None):
 
     if namespace:
         rv.update(entity(namespace=namespace, name=name, identifier=identifier))
+
+    return rv
+
+
+def composite_abundance(members):
+    """Returns the node data dictionary for a composite
+
+    :param list[dict] members: A list of PyBEL node data dictionaries
+    :rtype: dict
+    """
+    rv = {
+        FUNCTION: COMPOSITE,
+        MEMBERS: members
+    }
 
     return rv
 
