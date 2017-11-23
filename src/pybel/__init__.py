@@ -58,8 +58,9 @@ you have any problems working with the database, try removing it either by
 PyBEL will build a new database and populate it on the next run.
 """
 
-from . import canonicalize, constants, examples, io, struct
+from . import canonicalize, constants, examples, examples, io, struct
 from .canonicalize import *
+from .examples import *
 from .io import *
 from .manager import cache_manager, database_io
 from .manager.cache_manager import *
@@ -71,7 +72,8 @@ __all__ = (
     io.__all__ +
     canonicalize.__all__ +
     database_io.__all__ +
-    cache_manager.__all__
+    cache_manager.__all__ +
+    examples.__all__
 )
 
 __version__ = '0.9.8-dev'
