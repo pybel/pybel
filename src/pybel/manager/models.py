@@ -539,7 +539,7 @@ class Node(Base):
                     for modification in self.modifications
                 )
 
-        if self.type == REACTION:
+        elif self.type == REACTION:
             reactants = []
             products = []
 
@@ -552,7 +552,7 @@ class Node(Base):
             result[REACTANTS] = sort_dict_list(reactants)
             result[PRODUCTS] = sort_dict_list(products)
 
-        if self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
+        elif self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
             result[MEMBERS] = sort_dict_list(
                 edge.target.to_json()
                 for edge in self.out_edges
