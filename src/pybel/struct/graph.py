@@ -263,6 +263,13 @@ class BELGraph(networkx.MultiDiGraph):
         :param str relation: A relationship label from :mod:`pybel.constants`
         """
         key = unqualified_edge_code[relation]
+
+        if isinstance(u, dict):
+            u = self.add_node_from_data(u)
+
+        if isinstance(v, dict):
+            v = self.add_node_from_data(v)
+
         if not self.has_edge(u, v, key):
             self.add_edge(u, v, key=key, **{RELATION: relation})
 
