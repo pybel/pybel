@@ -26,6 +26,8 @@ from ..constants import *
 from ..struct import BELGraph
 from ..utils import expand_dict, flatten_dict, hash_node
 
+CX_NODE_NAME = 'label'
+
 __all__ = [
     'to_cx',
     'to_cx_jsons',
@@ -61,13 +63,13 @@ def calculate_canonical_cx_identifier(graph, node):
     data = graph.node[node]
 
     if data[FUNCTION] == COMPLEX and NAMESPACE in data:
-        return '{}:{}'.format(graph.node[node][NAMESPACE], graph.node[node][NAME])
+        return '{}:{}'.format(data[NAMESPACE], data[NAME])
 
     if VARIANTS in data or FUSION in data or data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
         return node_data_to_bel(data)
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
-        return '{}:{}'.format(graph.node[node][NAMESPACE], graph.node[node][NAME])
+        return '{}:{}'.format(data[NAMESPACE], data[NAME])
 
     raise ValueError('Unexpected node data: {}'.format(data))
 
@@ -77,9 +79,12 @@ def build_node_mapping(graph):
     
     :param BELGraph graph: A BEL graph 
     :return: A mapping from a graph's nodes to their canonical sort order
-    :rtype: dict[tuple, int]
+    :rtype: dict[tuple,int]
     """
-    return {node: node_id for node_id, node in enumerate(sorted(graph.nodes_iter(), key=hash_node))}
+    return {
+        node: node_index
+        for node_index, node in enumerate(sorted(graph, key=hash_node))
+    }
 
 
 def to_cx(graph):
@@ -95,17 +100,17 @@ def to_cx(graph):
         - `PyBEL / NDEx Python Client Wrapper <https://github.com/pybel/pybel2ndex>`_
 
     """
-    node_nid = build_node_mapping(graph)
-    nid_data = {}
+    node_mapping = build_node_mapping(graph)
+    node_index_data = {}
     nodes_entry = []
     node_attributes_entry = []
 
-    for node, node_id in node_nid.items():
+    for node, node_index in node_mapping.items():
         data = graph.node[node]
-        nid_data[node_id] = data
+        node_index_data[node_index] = data
 
         nodes_entry.append({
-            '@id': node_id,
+            '@id': node_index,
             'n': calculate_canonical_cx_identifier(graph, node)
         })
 
@@ -114,34 +119,35 @@ def to_cx(graph):
                 for i, el in enumerate(v):
                     for a, b in flatten_dict(el).items():
                         node_attributes_entry.append({
-                            'po': node_id,
+                            'po': node_index,
                             'n': '{}_{}_{}'.format(k, i, a),
                             'v': b
                         })
             elif k == FUSION:
                 for a, b in flatten_dict(v).items():
                     node_attributes_entry.append({
-                        'po': node_id,
+                        'po': node_index,
                         'n': '{}_{}'.format(k, a),
                         'v': b
                     })
+
             elif k == NAME:
                 node_attributes_entry.append({
-                    'po': node_id,
-                    'n': 'identifier',
+                    'po': node_index,
+                    'n': CX_NODE_NAME,
                     'v': v
                 })
 
             elif k in {PRODUCTS, REACTANTS, MEMBERS}:
                 node_attributes_entry.append({
-                    'po': node_id,
+                    'po': node_index,
                     'n': k,
                     'v': json.dumps(v)
                 })
 
             else:
                 node_attributes_entry.append({
-                    'po': node_id,
+                    'po': node_index,
                     'n': k,
                     'v': v
                 })
@@ -149,12 +155,12 @@ def to_cx(graph):
     edges_entry = []
     edge_attributes_entry = []
 
-    for eid, (source, target, d) in enumerate(graph.edges_iter(data=True)):
-        uid = node_nid[source]
-        vid = node_nid[target]
+    for edge_index, (source, target, d) in enumerate(graph.edges_iter(data=True)):
+        uid = node_mapping[source]
+        vid = node_mapping[target]
 
         edges_entry.append({
-            '@id': eid,
+            '@id': edge_index,
             's': uid,
             't': vid,
             'i': d[RELATION],
@@ -162,14 +168,14 @@ def to_cx(graph):
 
         if EVIDENCE in d:
             edge_attributes_entry.append({
-                'po': eid,
+                'po': edge_index,
                 'n': EVIDENCE,
                 'v': d[EVIDENCE]
             })
 
             for k, v in d[CITATION].items():
                 edge_attributes_entry.append({
-                    'po': eid,
+                    'po': edge_index,
                     'n': '{}_{}'.format(CITATION, k),
                     'v': v
                 })
@@ -177,7 +183,7 @@ def to_cx(graph):
         if ANNOTATIONS in d:
             for annotation, value in d[ANNOTATIONS].items():
                 edge_attributes_entry.append({
-                    'po': eid,
+                    'po': edge_index,
                     'n': annotation,
                     'v': value
                 })
@@ -185,7 +191,7 @@ def to_cx(graph):
         if SUBJECT in d:
             for k, v in flatten_dict(d[SUBJECT]).items():
                 edge_attributes_entry.append({
-                    'po': eid,
+                    'po': edge_index,
                     'n': '{}_{}'.format(SUBJECT, k),
                     'v': v
                 })
@@ -193,7 +199,7 @@ def to_cx(graph):
         if OBJECT in d:
             for k, v in flatten_dict(d[OBJECT]).items():
                 edge_attributes_entry.append({
-                    'po': eid,
+                    'po': edge_index,
                     'n': '{}_{}'.format(OBJECT, k),
                     'v': v
                 })
@@ -432,8 +438,8 @@ def from_cx(cx):
         node_data_pp[nid][VARIANTS] = [expand_dict(d[i]) for i in sorted(d)]
 
     for nid, d in node_data_pp.items():
-        if 'identifier' in d:
-            d[NAME] = d.pop('identifier')
+        if CX_NODE_NAME in d:
+            d[NAME] = d.pop(CX_NODE_NAME)
         graph.add_node(nid, attr_dict=d)
 
     edge_relation = {}
