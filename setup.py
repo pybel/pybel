@@ -37,7 +37,7 @@ INSTALL_REQUIRES = [
     'click',
     'sqlalchemy',
     'onto2nx',
-    'ndex',
+    'ndex2',
     'six',
 ]
 

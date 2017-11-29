@@ -16,7 +16,7 @@ variables: ``NDEX_USERNAME`` and ``NDEX_PASSWORD``.
 import logging
 import os
 
-from ndex.client import Ndex
+from ndex2.client import Ndex2 as Ndex
 from requests.compat import urlsplit
 
 from .cx import from_cx, to_cx
@@ -45,7 +45,7 @@ def build_ndex_client(username=None, password=None, debug=False):
     :param str password: NDEx password
     :param bool debug: If true, turn on NDEx client debugging
     :return: An NDEx client
-    :rtype: ndex.client.Ndex
+    :rtype: Ndex
     """
     if username is None and NDEX_USERNAME in os.environ:
         username = os.environ[NDEX_USERNAME]
