@@ -9,7 +9,7 @@ HGNC_GENE_FAMILIES = get_arty_namespace_url('hgnc-gene-families', '20170515')
 CONFIDENCE = get_arty_annotation_url('confidence', '1.0.0')
 MESHD = get_arty_annotation_url('mesh-diseases', '20170511')
 NEUROMMSIG = get_arty_annotation_url('neurommsig', '1.0.3')
-NIFT = get_arty_namespace_url('imaging-ontology', '1.0.1')
+NIFT = get_arty_namespace_url('imaging-ontology', '1.0.2')
 
 default_namespace_spec = [
     ('ADO', 'alzheimer-disease-ontology', '1.0.2'),
@@ -26,7 +26,7 @@ default_namespace_spec = [
     ('GOCC', 'go-cellular-component', '20170511'),
     ('GFAM', 'hgnc-gene-families', '20170515'),
     ('HGNC', 'hgnc-human-genes', '20170511'),
-    ('NIFT', 'imaging-ontology', '1.0.0'),
+    ('NIFT', 'imaging-ontology', '1.0.2'),
     ('NTN', 'nutrition', '1.0.0'),
     ('MESHCS', 'mesh-cell-structures', '20170511'),
     ('MESHD', 'mesh-diseases', '20170511'),
