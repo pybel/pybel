@@ -139,7 +139,7 @@ class Namespace(Base):
     keyword = Column(String(16), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
 
     # A namespace either needs a URL or a pattern
-    pattern = Column(Text, nullable=True, unique=True, index=True, doc="Contains regex pattern for value identification.")
+    pattern = Column(String(255), nullable=True, unique=True, index=True, doc="Contains regex pattern for value identification.")
 
     url = Column(String(255), nullable=True, unique=True, index=True, doc='BELNS Resource location as URL')
     name = Column(String(255), nullable=True, doc='Name of the given namespace')
