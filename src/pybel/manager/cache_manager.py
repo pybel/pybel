@@ -301,6 +301,7 @@ class NamespaceManager(BaseManager):
         namespace_model = self.session.query(Namespace).filter(ns_filter).one_or_none()
 
         if namespace_model is None:
+            log.info('creating regex namespace: %s:%s', namespace, pattern)
             namespace_model = Namespace(
                 pattern=pattern,
                 keyword=namespace
@@ -319,6 +320,7 @@ class NamespaceManager(BaseManager):
             self.session.add(name_model)
 
         return name_model
+
 
 class OwlNamespaceManager(NamespaceManager):
     """Manages OWL namespaces"""
