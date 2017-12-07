@@ -4,6 +4,10 @@
 populate :py:class:`pybel.BELGraph` instances."""
 
 from . import nodes
+from .exc import PyBELDSLException
 from .nodes import *
 
-__all__ = nodes.__all__
+__all__ = (
+    nodes.__all__ +
+    ['PyBELDSLException']
+)

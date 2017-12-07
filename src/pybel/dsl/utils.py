@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .exc import PyBELDSLException
 from ..constants import EFFECT, FROM_LOC, IDENTIFIER, MODIFIER, NAME, NAMESPACE, TO_LOC, TRANSLOCATION
 
 
@@ -12,7 +13,7 @@ def entity(namespace, name=None, identifier=None):
     :rtype: dict
     """
     if name is None and identifier is None:
-        raise ValueError('cannot create an entity without neither a name nor identifier')
+        raise PyBELDSLException('cannot create an entity without neither a name nor identifier')
 
     rv = {
         NAMESPACE: namespace,

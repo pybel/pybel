@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .parse_exceptions import PyBELCanonicalizeError
 from ..constants import *
 from ..utils import hash_node
 
@@ -225,14 +226,15 @@ def simple_to_tuple(tokens):
             tokens[NAMESPACE],
             tokens[NAME]
         )
-    elif IDENTIFIER in tokens:
+
+    if IDENTIFIER in tokens:
         return (
             tokens[FUNCTION],
             tokens[NAMESPACE],
             tokens[IDENTIFIER]
         )
 
-    raise IndexError('missing name and identifier')
+    raise PyBELCanonicalizeError('missing name and identifier in node data dict: {}'.format(tokens))
 
 
 def hgvs_po_to_tuple(tokens):

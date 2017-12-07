@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .exc import PyBELDSLException
 from .utils import entity
 from ..constants import *
 
@@ -32,7 +33,7 @@ def _make_abundance(func, namespace, name=None, identifier=None):
     :return:
     """
     if name is None and identifier is None:
-        raise ValueError('Either name or identifier must be specified')
+        raise PyBELDSLException('Either name or identifier must be specified')
 
     rv = {FUNCTION: func}
     rv.update(entity(namespace=namespace, name=name, identifier=identifier))
