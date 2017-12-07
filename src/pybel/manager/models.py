@@ -230,6 +230,7 @@ class NamespaceEntry(Base):
 
     name = Column(String(255), index=True, nullable=False,
                   doc='Name that is defined in the corresponding namespace definition file')
+    identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
     namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), nullable=False, index=True)
