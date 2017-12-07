@@ -288,6 +288,37 @@ class NamespaceManager(BaseManager):
 
         return result[0]
 
+    def get_or_create_regex_namespace_entry(self, namespace, pattern, name):
+        """Gets a namespace entry from a regular expression. Need to commit after!
+
+        :param str namespace: The name of the namespace
+        :param str pattern: The regular expression pattern for the namespace
+        :param str name: The entry to get
+        :return:
+        """
+        ns_filter = and_(Namespace.keyword == namespace, Namespace.pattern == pattern)
+
+        namespace_model = self.session.query(Namespace).filter(ns_filter).one_or_none()
+
+        if namespace_model is None:
+            namespace_model = Namespace(
+                pattern=pattern,
+                keyword=namespace
+            )
+            self.session.add(namespace_model)
+
+        n_filter = and_(Namespace.keyword == namespace, Namespace.pattern == pattern, NamespaceEntry.name == name)
+
+        name_model = self.session.query(NamespaceEntry).join(Namespace).filter(n_filter).one_or_none()
+
+        if name_model is None:
+            name_model = NamespaceEntry(
+                namespace=namespace_model,
+                name=name
+            )
+            self.session.add(name_model)
+
+        return name_model
 
 class OwlNamespaceManager(NamespaceManager):
     """Manages OWL namespaces"""
@@ -1096,7 +1127,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             return node
 
         type = node_data[FUNCTION]
-
         node = Node(type=type, bel=bel, sha512=node_hash)
 
         if NAMESPACE not in node_data:
@@ -1115,7 +1145,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             node.namespace_entry = entry
 
         elif node_data[NAMESPACE] in graph.namespace_pattern:
-            node.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+            namespace = node_data[NAMESPACE]
+            name = node_data[NAME]
+            pattern = graph.namespace_pattern[namespace]
+
+            entry = self.get_or_create_regex_namespace_entry(namespace, pattern, name)
+
+            self.session.add(entry)
+            node.namespace_entry = entry
 
         else:
             log.warning("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))

@@ -13,8 +13,9 @@ import sqlalchemy.exc
 import pybel
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
-from pybel.dsl import protein
+from pybel.dsl import protein, gene
 from pybel.manager import models
+from pybel.resources.defaults import DBSNP_PATTERN
 from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
 from pybel.utils import hash_citation, hash_evidence, hash_node
 from tests import constants
@@ -1642,6 +1643,31 @@ class TestNoAddNode(TemporaryCacheMixin):
 
         self.assertEqual(2, len(network.nodes.all()))
         self.assertEqual(0, len(network.edges.all()))
+
+    def test_regex_lookup(self):
+        """Tests that regular expression nodes get love too"""
+        graph = BELGraph(name='Regular Expression Test Graph', description='Help test regular expression namespaces', version='1.0.0')
+        dbsnp = 'dbSNP'
+        graph.namespace_pattern[dbsnp] = DBSNP_PATTERN
+
+        rs1234 = gene(namespace=dbsnp, name='rs1234')
+
+        rs1234_tuple = graph.add_node_from_data(rs1234)
+
+        rs1234_hash = hash_node(rs1234_tuple)
+
+        graph_model = self.manager.insert_graph(graph, store_parts=True)
+
+        lookup = self.manager.get_node_by_hash(rs1234_hash)
+
+        self.assertIsNotNone(lookup)
+        self.assertEqual('Gene', lookup.type)
+        self.assertEqual('g(dbSNP:rs1234)', lookup.bel)
+        self.assertEqual(rs1234_hash, lookup.sha512)
+        self.assertIsNotNone(lookup.namespace_entry)
+        self.assertEqual('rs1234', lookup.namespace_entry.name)
+        self.assertEqual('dbSNP', lookup.namespace_entry.namespace.keyword)
+        self.assertEqual(DBSNP_PATTERN, lookup.namespace_entry.namespace.pattern)
 
 
 if __name__ == '__main__':
