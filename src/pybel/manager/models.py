@@ -228,7 +228,7 @@ class NamespaceEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), index=True, nullable=False,
+    name = Column(String(1023), index=True, nullable=False,
                   doc='Name that is defined in the corresponding namespace definition file')
     identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
