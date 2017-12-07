@@ -13,9 +13,8 @@ import sqlalchemy.exc
 import pybel
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
-from pybel.dsl import protein, gene
+from pybel.dsl import gene, protein
 from pybel.manager import models
-from pybel.resources.defaults import DBSNP_PATTERN
 from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
 from pybel.utils import hash_citation, hash_evidence, hash_node
 from tests import constants
@@ -1648,6 +1647,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Tests that regular expression nodes get love too"""
         graph = BELGraph(name='Regular Expression Test Graph', description='Help test regular expression namespaces', version='1.0.0')
         dbsnp = 'dbSNP'
+        DBSNP_PATTERN = 'rs[0-9]+'
         graph.namespace_pattern[dbsnp] = DBSNP_PATTERN
 
         rs1234 = gene(namespace=dbsnp, name='rs1234')
