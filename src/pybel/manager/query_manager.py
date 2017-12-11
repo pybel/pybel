@@ -61,11 +61,10 @@ class QueryManager(LookupManager):
         node_hash = hash_node(node)
         return self.get_node_by_hash(node_hash)
 
-    def query_nodes(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
+    def query_nodes(self, bel=None, type=None, namespace=None, name=None, modification_type=None,
                     modification_name=None, as_dict_list=False):
         """Builds and runs a query over all nodes in the PyBEL cache.
 
-        :param int node_id: The node ID to get
         :param str bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
         :param str type: Type of the biological entity. e.g. Protein
         :param str namespace: Namespace keyword that is used in BEL. e.g. HGNC
@@ -79,29 +78,27 @@ class QueryManager(LookupManager):
         """
         q = self.session.query(Node)
 
-        if node_id and isinstance(node_id, int):
-            q = q.filter_by(id=node_id)
+        if bel:
+            q = q.filter(Node.bel.like(bel))
 
-        else:
-            if bel:
-                q = q.filter(Node.bel.like(bel))
+        if type:
+            q = q.filter(Node.type.like(type))
 
-            if type:
-                q = q.filter(Node.type.like(type))
+        if namespace or name:
+            q = q.join(NamespaceEntry)
 
-            if namespace or name:
-                q = q.join(NamespaceEntry)
-                if namespace:
-                    q = q.join(Namespace).filter(Namespace.keyword.like(namespace))
-                if name:
-                    q = q.filter(NamespaceEntry.name.like(name))
+            if namespace:
+                q = q.join(Namespace).filter(Namespace.keyword.like(namespace))
 
-            if modification_type or modification_name:
-                q = q.join(Modification)
-                if modification_type:
-                    q = q.filter(Modification.modType.like(modification_type))
-                if modification_name:
-                    q = q.filter(Modification.modName.like(modification_name))
+            if name:
+                q = q.filter(NamespaceEntry.name.like(name))
+
+        if modification_type or modification_name:
+            q = q.join(Modification)
+            if modification_type:
+                q = q.filter(Modification.modType.like(modification_type))
+            if modification_name:
+                q = q.filter(Modification.modName.like(modification_name))
 
         result = q.all()
 
