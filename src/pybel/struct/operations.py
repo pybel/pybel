@@ -25,6 +25,28 @@ def _left_full_node_join(g, h):
         g.add_node(node, attr_dict=h.node[node])
 
 
+def _left_full_metadata_join(g, h):
+    """Adds all metadata from ``h`` to ``g``, in-place for ``g``
+
+    :param pybel.BELGraph g: A BEL network
+    :param pybel.BELGraph h: A BEL network
+    """
+    g.namespace_url.update(h.namespace_url)
+    g.namespace_pattern.update(h.namespace_pattern)
+    g.namespace_owl.update(h.namespace_owl)
+
+    g.annotation_url.update(h.annotation_url)
+    g.annotation_pattern.update(h.annotation_pattern)
+    g.annotation_owl.update(h.annotation_owl)
+
+    for keyword, values in h.annotation_list.items():
+        if keyword not in g.annotation_list:
+            g.annotation_list[keyword] = values
+        else:
+            for value in values:
+                g.annotation_list[keyword].add(value)
+
+
 def left_full_join(g, h, use_hash=True):
     """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g``
 
@@ -53,6 +75,7 @@ def _left_full_exhaustive_join(g, h):
     :param BELGraph h: A BEL network
     """
     _left_full_node_join(g, h)
+    _left_full_metadata_join(g,h)
 
     for u, v, k, d in h.edges_iter(keys=True, data=True):
         if k < 0:  # unqualified edge that's not in G yet
@@ -74,6 +97,7 @@ def _left_full_hash_join(g, h):
     :param BELGraph h: A BEL network
     """
     _left_full_node_join(g, h)
+    _left_full_metadata_join(g, h)
 
     g_qualified_edges, g_unqualified_edges = stratify_hash_edges(g)
     h_qualified_edges, h_unqualified_edges = stratify_hash_edges(h)
