@@ -717,15 +717,15 @@ class BelParser(BaseParser):
 
         if LABEL in self.graph.node[subject_node_tuple]:
             raise RelabelWarning(
-                self.line_number,
-                line,
-                position,
-                self.graph.node,
-                self.graph.node[subject_node_tuple][LABEL],
-                label
+                line_number=self.line_number,
+                line=line,
+                position=position,
+                node=self.graph.node,
+                old_label=self.graph.node[subject_node_tuple][LABEL],
+                new_label=label
             )
 
-        self.graph.node[subject_node_tuple][LABEL] = label
+        self.graph.set_node_label(subject_node_tuple, label)
 
     def ensure_node(self, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph
