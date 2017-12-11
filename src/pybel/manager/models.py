@@ -136,12 +136,15 @@ class Namespace(Base):
     id = Column(Integer, primary_key=True)
 
     uploaded = Column(DateTime, nullable=False, default=datetime.datetime.utcnow, doc='The date of upload')
-    keyword = Column(String(16), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
+    keyword = Column(String(16), nullable=True, index=True,
+                     doc='Keyword that is used in a BEL file to identify a specific namespace')
+
 
     # A namespace either needs a URL or a pattern
     pattern = Column(String(255), nullable=True, unique=True, index=True, doc="Contains regex pattern for value identification.")
 
     url = Column(String(255), nullable=True, unique=True, index=True, doc='BELNS Resource location as URL')
+
     name = Column(String(255), nullable=True, doc='Name of the given namespace')
     domain = Column(String(255), nullable=True, doc='Domain for which this namespace is valid')
     species = Column(String(255), nullable=True, doc='Taxonomy identifiers for which this namespace is valid')

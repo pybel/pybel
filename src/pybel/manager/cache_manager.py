@@ -266,6 +266,31 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
+    def ensure_regex_namespace(self, keyword, pattern):
+        """Gets or creates a regular expression namespace
+
+        :param str keyword: The keyword of a regular expression namespace
+        :param str pattern: The pattern for a regular expression namespace
+        :rtype: Namespace
+        """
+        if pattern is None:
+            raise ValueError('cannot have null pattern')
+
+        f = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
+
+        namespace = self.session.query(Namespace).filter(f).one_or_none()
+
+        if namespace is None:
+            log.info('creating regex namespace: %s:%s', keyword, pattern)
+            namespace = Namespace(
+                keyword=keyword,
+                pattern=pattern
+            )
+            self.session.add(namespace)
+            self.session.commit()
+
+        return namespace
+
     def get_namespace_entry(self, url, name):
         """Gets a given NamespaceEntry object.
 
@@ -296,25 +321,15 @@ class NamespaceManager(BaseManager):
         :param str name: The entry to get
         :return:
         """
-        ns_filter = and_(Namespace.keyword == namespace, Namespace.pattern == pattern)
+        namespace = self.ensure_regex_namespace(namespace, pattern)
 
-        namespace_model = self.session.query(Namespace).filter(ns_filter).one_or_none()
-
-        if namespace_model is None:
-            log.info('creating regex namespace: %s:%s', namespace, pattern)
-            namespace_model = Namespace(
-                pattern=pattern,
-                keyword=namespace
-            )
-            self.session.add(namespace_model)
-
-        n_filter = and_(Namespace.keyword == namespace, Namespace.pattern == pattern, NamespaceEntry.name == name)
+        n_filter = and_(Namespace.pattern == pattern, NamespaceEntry.name == name)
 
         name_model = self.session.query(NamespaceEntry).join(Namespace).filter(n_filter).one_or_none()
 
         if name_model is None:
             name_model = NamespaceEntry(
-                namespace=namespace_model,
+                namespace=namespace,
                 name=name
             )
             self.session.add(name_model)
@@ -903,6 +918,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             self.ensure_namespace(url)
 
+        for keyword, pattern in graph.namespace_pattern.items():
+            self.ensure_regex_namespace(keyword, pattern)
+
         for url in graph.annotation_url.values():
             self.ensure_annotation(url)
 
@@ -1131,11 +1149,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         type = node_data[FUNCTION]
         node = Node(type=type, bel=bel, sha512=node_hash)
 
-        if NAMESPACE not in node_data:
+        namespace = node_data.get(NAMESPACE)
+
+        if namespace is None:
             pass
 
-        elif node_data[NAMESPACE] in graph.namespace_url:
-            url = graph.namespace_url[node_data[NAMESPACE]]
+        elif namespace in graph.namespace_url:
+            url = graph.namespace_url[namespace]
             name = node_data[NAME]
             entry = self.get_namespace_entry(url, name)
 
@@ -1146,11 +1166,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             self.session.add(entry)
             node.namespace_entry = entry
 
-        elif node_data[NAMESPACE] in graph.namespace_pattern:
-            namespace = node_data[NAMESPACE]
+        elif namespace in graph.namespace_pattern:
             name = node_data[NAME]
             pattern = graph.namespace_pattern[namespace]
-
             entry = self.get_or_create_regex_namespace_entry(namespace, pattern, name)
 
             self.session.add(entry)

@@ -1643,7 +1643,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         self.assertEqual(2, len(network.nodes.all()))
         self.assertEqual(0, len(network.edges.all()))
 
-    def test_regex_lookup(self):
+    @mock_bel_resources
+    def test_regex_lookup(self, mock):
         """Tests that regular expression nodes get love too"""
         graph = BELGraph(name='Regular Expression Test Graph', description='Help test regular expression namespaces', version='1.0.0')
         dbsnp = 'dbSNP'
@@ -1651,23 +1652,35 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_pattern[dbsnp] = DBSNP_PATTERN
 
         rs1234 = gene(namespace=dbsnp, name='rs1234')
+        rs1235 = gene(namespace=dbsnp, name='rs1235')
 
         rs1234_tuple = graph.add_node_from_data(rs1234)
+        rs1235_tuple = graph.add_node_from_data(rs1235)
 
         rs1234_hash = hash_node(rs1234_tuple)
+        rs1235_hash = hash_node(rs1235_tuple)
 
-        graph_model = self.manager.insert_graph(graph, store_parts=True)
+        self.manager.insert_graph(graph, store_parts=True)
 
-        lookup = self.manager.get_node_by_hash(rs1234_hash)
+        rs1234_lookup = self.manager.get_node_by_hash(rs1234_hash)
+        self.assertIsNotNone(rs1234_lookup)
+        self.assertEqual('Gene', rs1234_lookup.type)
+        self.assertEqual('g(dbSNP:rs1234)', rs1234_lookup.bel)
+        self.assertEqual(rs1234_hash, rs1234_lookup.sha512)
+        self.assertIsNotNone(rs1234_lookup.namespace_entry)
+        self.assertEqual('rs1234', rs1234_lookup.namespace_entry.name)
+        self.assertEqual('dbSNP', rs1234_lookup.namespace_entry.namespace.keyword)
+        self.assertEqual(DBSNP_PATTERN, rs1234_lookup.namespace_entry.namespace.pattern)
 
-        self.assertIsNotNone(lookup)
-        self.assertEqual('Gene', lookup.type)
-        self.assertEqual('g(dbSNP:rs1234)', lookup.bel)
-        self.assertEqual(rs1234_hash, lookup.sha512)
-        self.assertIsNotNone(lookup.namespace_entry)
-        self.assertEqual('rs1234', lookup.namespace_entry.name)
-        self.assertEqual('dbSNP', lookup.namespace_entry.namespace.keyword)
-        self.assertEqual(DBSNP_PATTERN, lookup.namespace_entry.namespace.pattern)
+        rs1235_lookup = self.manager.get_node_by_hash(rs1235_hash)
+        self.assertIsNotNone(rs1235_lookup)
+        self.assertEqual('Gene', rs1235_lookup.type)
+        self.assertEqual('g(dbSNP:rs1235)', rs1235_lookup.bel)
+        self.assertEqual(rs1235_hash, rs1235_lookup.sha512)
+        self.assertIsNotNone(rs1235_lookup.namespace_entry)
+        self.assertEqual('rs1235', rs1235_lookup.namespace_entry.name)
+        self.assertEqual('dbSNP', rs1235_lookup.namespace_entry.namespace.keyword)
+        self.assertEqual(DBSNP_PATTERN, rs1235_lookup.namespace_entry.namespace.pattern)
 
 
 if __name__ == '__main__':
