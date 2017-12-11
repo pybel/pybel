@@ -12,10 +12,7 @@ import logging
 from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
 
 from .baseparser import BaseParser
-from .canonicalize import (
-    modifier_po_to_dict,
-    po_to_dict,
-)
+from .canonicalize import modifier_po_to_dict, po_to_dict
 from .language import activities, activity_labels
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
@@ -55,9 +52,9 @@ class BelParser(BaseParser):
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
                  allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-                 citation_clearing=True, no_identifier_validation=False, autostreamline=True):
+                 citation_clearing=True, no_identifier_validation=False, relation_policy=None, autostreamline=True):
         """
-        :param BELGraph graph: The BEL Graph to use to store the network
+        :param pybel.BELGraph graph: The BEL Graph to use to store the network
         :param dict[str,dict[str,str]] namespace_dict: A dictionary of {namespace: {name: encoding}}.
                                     Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param dict[str,set[str]] annotation_dict: A dictionary of {annotation: set of values}.
@@ -73,11 +70,14 @@ class BelParser(BaseParser):
         :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
+        :param str relation_policy: Determines the relation addition policy. Current valid values are 'explode' or
+                                    'concatenate'. Defaults to explore
         :param bool autostreamline: Should the parser be streamlined on instantiation?
         """
 
         self.graph = graph
         self.allow_nested = allow_nested
+        self._set_handle_relation_policy(relation_policy)
 
         self.control_parser = ControlParser(
             annotation_dict=annotation_dict,
@@ -438,7 +438,7 @@ class BelParser(BaseParser):
             # self.part_of_reaction,
         ])
 
-        self.relation.setParseAction(self.handle_relation)
+        self.relation.setParseAction(self._handle_relation_harness)
 
         self.unqualified_relation = MatchFirst([
             self.has_member,
@@ -484,6 +484,12 @@ class BelParser(BaseParser):
         self.language.setName('BEL')
 
         super(BelParser, self).__init__(self.language, streamline=autostreamline)
+
+    def _set_handle_relation_policy(self, relation_policy):
+        if relation_policy is None or relation_policy == 'explode':
+            self._handle_relation = self._handle_relation_explode
+        elif relation_policy == 'concatenate':
+            self._handle_relation = self._handle_relation_concatenate
 
     @property
     def namespace_dict(self):
@@ -548,13 +554,13 @@ class BelParser(BaseParser):
         if not self.allow_nested:
             raise NestedRelationWarning(self.line_number, line, position)
 
-        self.handle_relation(line, position, {
+        self._handle_relation_harness(line, position, {
             SUBJECT: tokens[SUBJECT],
             RELATION: tokens[RELATION],
             OBJECT: tokens[OBJECT][SUBJECT]
         })
 
-        self.handle_relation(line, position, {
+        self._handle_relation_harness(line, position, {
             SUBJECT: tokens[OBJECT][SUBJECT],
             RELATION: tokens[OBJECT][RELATION],
             OBJECT: tokens[OBJECT][OBJECT]
@@ -604,9 +610,11 @@ class BelParser(BaseParser):
     def _handle_list_helper(self, tokens, relation):
         """Provides the functionality for :meth:`handle_has_members` and :meth:`handle_has_components`"""
         parent_node_tuple, parent_node_attr = self.ensure_node(tokens[0])
+
         for child_tokens in tokens[2]:
             child_node_tuple, child_node_attr = self.ensure_node(child_tokens)
             self.graph.add_unqualified_edge(parent_node_tuple, child_node_tuple, relation)
+
         return tokens
 
     def handle_has_members(self, line, position, tokens):
@@ -627,6 +635,66 @@ class BelParser(BaseParser):
         """
         return self._handle_list_helper(tokens, HAS_COMPONENT)
 
+    def _add_qualified_edge_helper(self, u, v, relation, annotations, subject_modifier, object_modifier):
+        """Adds a qualified edge from the internal aspects of the parser"""
+        self.graph.add_qualified_edge(
+            u,
+            v,
+            relation=relation,
+            evidence=self.control_parser.evidence,
+            citation=self.control_parser.citation.copy(),
+            annotations=annotations,
+            subject_modifier=subject_modifier,
+            object_modifier=object_modifier,
+            **{LINE: self.line_number}
+        )
+
+    def _add_qualified_edge(self, u, v, relation, annotations, subject_modifier, object_modifier):
+        """Adds an edge, then adds the opposite direction edge if it should"""
+        self._add_qualified_edge_helper(
+            u,
+            v,
+            relation=relation,
+            annotations=annotations,
+            subject_modifier=subject_modifier,
+            object_modifier=object_modifier,
+        )
+
+        if relation in TWO_WAY_RELATIONS:
+            self._add_qualified_edge_helper(
+                v,
+                u,
+                relation=relation,
+                annotations=annotations,
+                object_modifier=subject_modifier,
+                subject_modifier=object_modifier,
+            )
+
+    def _handle_relation_concatenate(self, tokens):
+        """A policy in which all annotations are stored as sets, including single annotations
+
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
+        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
+        object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
+
+        subject_modifier = modifier_po_to_dict(tokens[SUBJECT])
+        object_modifier = modifier_po_to_dict(tokens[OBJECT])
+
+        annotations = {
+            annotation_name: annotation_entry if isinstance(annotation_entry, set) else {annotation_entry}
+            for annotation_name, annotation_entry in self.control_parser.annotations.items()
+        }
+
+        self._add_qualified_edge(
+            subject_node_tuple,
+            object_node_tuple,
+            relation=tokens[RELATION],
+            annotations=annotations,
+            subject_modifier=subject_modifier,
+            object_modifier=object_modifier,
+        )
+
     def _build_attrs(self):
         """Helper function for building cartesian product of edges based on current annotations"""
         attrs = {}
@@ -640,8 +708,41 @@ class BelParser(BaseParser):
 
         return attrs, list_attrs
 
-    def handle_relation(self, line, position, tokens):
-        """Handles BEL relations
+    def _handle_relation_explode(self, tokens):
+        """A policy in which each set of annotations causes a cartesian product
+
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
+        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
+        object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
+
+        subject_modifier = modifier_po_to_dict(tokens[SUBJECT])
+        object_modifier = modifier_po_to_dict(tokens[OBJECT])
+        attrs, list_attrs = self._build_attrs()
+
+        for single_annotation in cartesian_dictionary(list_attrs):
+            annotations = attrs.copy()
+            annotations.update(single_annotation)
+
+            self._add_qualified_edge(
+                subject_node_tuple,
+                object_node_tuple,
+                relation=tokens[RELATION],
+                annotations=annotations,
+                subject_modifier=subject_modifier,
+                object_modifier=object_modifier,
+            )
+
+    def handle_relation(self, tokens):
+        """Handles a BEL relation given the policy. Enables BEL parser to be hackable and other policies added.
+
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
+        self._handle_relation(tokens)
+
+    def _handle_relation_harness(self, line, position, tokens):
+        """Handles BEL relations based on the policy specified on instantiation. Note: this can't be changed after
+        instantiation!
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -653,42 +754,7 @@ class BelParser(BaseParser):
         if not self.control_parser.evidence:
             raise MissingSupportWarning(self.line_number, line, position)
 
-        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
-        object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
-
-        relation = tokens[RELATION]
-        sub_mod = modifier_po_to_dict(tokens[SUBJECT])
-        obj_mod = modifier_po_to_dict(tokens[OBJECT])
-        attrs, list_attrs = self._build_attrs()
-
-        for single_annotation in cartesian_dictionary(list_attrs):
-            annotations = attrs.copy()
-            annotations.update(single_annotation)
-
-            self.graph.add_qualified_edge(
-                subject_node_tuple,
-                object_node_tuple,
-                relation=relation,
-                evidence=self.control_parser.evidence,
-                citation=self.control_parser.citation.copy(),
-                annotations=annotations,
-                subject_modifier=sub_mod,
-                object_modifier=obj_mod,
-                **{LINE: self.line_number}
-            )
-
-            if relation in TWO_WAY_RELATIONS:
-                self.graph.add_qualified_edge(
-                    object_node_tuple,
-                    subject_node_tuple,
-                    relation=relation,
-                    evidence=self.control_parser.evidence,
-                    citation=self.control_parser.citation.copy(),
-                    annotations=annotations,
-                    object_modifier=sub_mod,
-                    subject_modifier=obj_mod,
-                    **{LINE: self.line_number}
-                )
+        self.handle_relation(tokens)
 
         return tokens
 
