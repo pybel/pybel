@@ -201,7 +201,10 @@ class BELGraph(networkx.MultiDiGraph):
     @property
     def annotation_list(self):
         """A dictionary mapping the keywords of locally defined annotations to a set of their values
-        from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section"""
+        from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section
+
+        :rtype: dict[str,set[str]]
+        """
         return self.graph[GRAPH_ANNOTATION_LIST]
 
     @property
