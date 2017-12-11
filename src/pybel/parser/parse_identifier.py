@@ -7,8 +7,8 @@ from pyparsing import Suppress
 
 from .baseparser import BaseParser
 from .parse_exceptions import (
-    MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning,
-    NakedNameWarning, UndefinedNamespaceWarning,
+    MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning,
+    UndefinedNamespaceWarning,
 )
 from .utils import quote, word
 from ..constants import DIRTY, NAME, NAMESPACE
@@ -24,9 +24,9 @@ class IdentifierParser(BaseParser):
 
     def __init__(self, namespace_dict=None, namespace_regex=None, default_namespace=None, allow_naked_names=False):
         """
-        :param dict[str,dict[str,str]] namespace_dict: A dictionary of {namespace: {name: encoding}}
-        :param dict[str,str] namespace_regex: A dictionary of {namespace: regular expression string} to compile
-        :param set[str] default_namespace: A set of strings that can be used without a namespace
+        :param Optional[dict[str,dict[str,str]]] namespace_dict: A dictionary of {namespace: {name: encoding}}
+        :param Optional[dict[str,str]] namespace_regex: A dictionary of {namespace: regular expression string} to compile
+        :param Optional[set[str]] default_namespace: A set of strings that can be used without a namespace
         :param bool allow_naked_names: If true, turn off naked namespace failures
         """
         self._namespace_dict = namespace_dict
@@ -45,12 +45,11 @@ class IdentifierParser(BaseParser):
 
         self.identifier_bare = (word | quote)(NAME)
 
-        if self.default_namespace is not None:
-            self.identifier_bare.setParseAction(self.handle_identifier_default)
-        elif self.allow_naked_names:
-            self.identifier_bare.setParseAction(IdentifierParser.handle_namespace_lenient)
-        else:
-            self.identifier_bare.setParseAction(self.handle_namespace_invalid)
+        self.identifier_bare.setParseAction(
+            self.handle_namespace_default if self.default_namespace else
+            self.handle_namespace_lenient if self.allow_naked_names else
+            self.handle_namespace_invalid
+        )
 
         super(IdentifierParser, self).__init__(self.identifier_qualified | self.identifier_bare)
 
@@ -92,11 +91,11 @@ class IdentifierParser(BaseParser):
 
     def has_enumerated_namespace_name(self, namespace, name):
         """Checks that the namespace is defined by an enumeration and that the name is a member"""
-        return namespace in self.namespace_dict and name in self.namespace_dict[namespace]
+        return self.has_enumerated_namespace(namespace) and name in self.namespace_dict[namespace]
 
     def has_regex_namespace_name(self, namespace, name):
         """Checks that the namespace is defined as a regular expression and the name matches it"""
-        return namespace in self.namespace_regex_compiled and self.namespace_regex_compiled[namespace].match(name)
+        return self.has_regex_namespace(namespace) and self.namespace_regex_compiled[namespace].match(name)
 
     def has_namespace_name(self, line, position, namespace, name):
         self.raise_for_missing_namespace(line, position, namespace, name)
@@ -131,7 +130,7 @@ class IdentifierParser(BaseParser):
 
         return tokens
 
-    def handle_identifier_default(self, line, position, tokens):
+    def handle_namespace_default(self, line, position, tokens):
         name = tokens[NAME]
         self.raise_for_missing_default(line, position, name)
         return tokens
