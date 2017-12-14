@@ -69,7 +69,7 @@ egf_graph.annotation_url.update({
 })
 
 ar = protein(name='AR', namespace='HGNC')
-egf = protein(name='AR', namespace='HGNC')
+egf = protein(name='EGF', namespace='HGNC')
 ifna1 = protein(name='IFNA1', namespace='HGNC')
 ifng = protein(name='IFNG', namespace='HGNC')
 vcp = protein(name='VCP', namespace='HGNC')
