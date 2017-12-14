@@ -358,6 +358,8 @@ CAUSAL_INCREASE_RELATIONS = {INCREASES, DIRECTLY_INCREASES}
 CAUSAL_DECREASE_RELATIONS = {DECREASES, DIRECTLY_DECREASES}
 #: A set of all causal relationships
 CAUSAL_RELATIONS = CAUSAL_INCREASE_RELATIONS | CAUSAL_DECREASE_RELATIONS
+#: A set of direct causal relations
+DIRECT_CAUSAL_RELATIONS = {DIRECTLY_DECREASES, DIRECTLY_INCREASES}
 
 #: A set of all relationships that are inherently directionless, and are therefore added to the graph twice
 TWO_WAY_RELATIONS = {

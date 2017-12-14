@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ...constants import CITATION, CITATION_TYPE, CITATION_TYPE_PUBMED
+from ...constants import CITATION, CITATION_TYPE, CITATION_TYPE_PUBMED, DIRECT_CAUSAL_RELATIONS, RELATION
 
 __all__ = [
     'edge_data_has_pubmed_citation',
@@ -58,3 +58,12 @@ def edge_has_provenance(graph, u, v, k, d):
     :rtype: bool
     """
     return graph.has_edge_citation(u, v, k) and graph.has_edge_evidence(u, v, k)
+
+
+def edge_data_has_direct(data):
+    """Checks if the edge is a direct causal relation
+
+    :param dict data:
+    :rtype: bool
+    """
+    return data[RELATION] in DIRECT_CAUSAL_RELATIONS
