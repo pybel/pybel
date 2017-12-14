@@ -44,7 +44,7 @@ def pmod(name, code=None, position=None, namespace=None, identifier=None):
     """Builds a protein modification dict
 
     :param str name: The name of the modification
-    :param str code: The three letter amino acid code for the affected residue
+    :param str code: The three letter amino acid code for the affected residue. Capital first letter.
     :param int position: The position of the affected residue
     :param str namespace: The namespace to which the name of this modification belongs
     :param str identifier: The identifier of the name of the modification
