@@ -6,7 +6,11 @@ from .utils import entity
 from ..constants import ACTIVITY, BEL_DEFAULT_NAMESPACE, DEGRADATION, EFFECT, FROM_LOC, MODIFIER, TO_LOC, TRANSLOCATION
 
 __all__ = [
-    ''
+    'activity',
+    'degradation',
+    'translocation',
+    'secretion',
+    'cell_surface_expression',
 ]
 
 
