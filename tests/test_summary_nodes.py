@@ -25,7 +25,7 @@ class TestSummary(unittest.TestCase):
 
     def test_functions_egf(self):
         result = {
-            PROTEIN: 9,
+            PROTEIN: 10,
             COMPLEX: 1,
             BIOPROCESS: 1
         }
@@ -44,7 +44,7 @@ class TestSummary(unittest.TestCase):
 
     def test_namespaces_egf(self):
         result = {
-            'HGNC': 9,
+            'HGNC': 10,
             'GOBP': 1,
         }
 
