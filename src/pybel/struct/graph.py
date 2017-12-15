@@ -9,7 +9,7 @@ from six import string_types
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..constants import *
 from ..parser.canonicalize import node_to_tuple
-from ..utils import get_version
+from ..utils import get_version, hash_edge
 
 __all__ = [
     'BELGraph',
@@ -264,6 +264,9 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple u: The source BEL node
         :param tuple v: The target BEL node
         :param str relation: A relationship label from :mod:`pybel.constants`
+
+        :return: The hash of this edge
+        :rtype: str
         """
         key = unqualified_edge_code[relation]
 
@@ -273,8 +276,13 @@ class BELGraph(networkx.MultiDiGraph):
         if isinstance(v, dict):
             v = self.add_node_from_data(v)
 
+        attr = {RELATION: relation}
+        attr[HASH] = hash_edge(u, v, key, attr)
+
         if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **{RELATION: relation})
+            self.add_edge(u, v, key=key, **attr)
+
+        return attr[HASH]
 
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
@@ -348,6 +356,9 @@ class BELGraph(networkx.MultiDiGraph):
         :param dict[str,str] annotations: The annotations data dictionary
         :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
         :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+
+        :return: The hash of the edge
+        :rtype: str
         """
         attr.update({
             RELATION: relation,
@@ -379,7 +390,11 @@ class BELGraph(networkx.MultiDiGraph):
         if isinstance(v, dict):
             v = self.add_node_from_data(v)
 
+        attr[HASH] = hash_edge(u, v, None, attr)
+
         self.add_edge(u, v, **attr)
+
+        return attr[HASH]
 
     def has_edge_citation(self, u, v, key):
         """Does the given edge have a citation?"""
