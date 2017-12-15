@@ -360,7 +360,7 @@ Modifiers are added to this structure as well. Under this schema,
         OBJECT: {
             MODIFIER: ACTIVITY,
             EFFECT: {
-                NAME: 'kin'
+                NAME: 'kin',
                 NAMESPACE: BEL_DEFAULT_NAMESPACE
             }
         },
