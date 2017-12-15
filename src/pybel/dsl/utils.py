@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .exc import PyBELDSLException
-from ..constants import EFFECT, FROM_LOC, IDENTIFIER, MODIFIER, NAME, NAMESPACE, TO_LOC, TRANSLOCATION
+from ..constants import IDENTIFIER, NAME, NAMESPACE
 
 
 def entity(namespace, name=None, identifier=None):
@@ -26,19 +26,3 @@ def entity(namespace, name=None, identifier=None):
         rv[IDENTIFIER] = identifier
 
     return rv
-
-
-def make_translocation_modifier_dict(from_loc, to_loc):
-    """Makes a translocation dict
-
-    :param dict from_loc:
-    :param dict to_loc:
-    :rtype: dict
-    """
-    return {
-        MODIFIER: TRANSLOCATION,
-        EFFECT: {
-            FROM_LOC: from_loc,
-            TO_LOC: to_loc
-        }
-    }

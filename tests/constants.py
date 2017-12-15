@@ -11,7 +11,7 @@ from requests.compat import urlparse
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl import complex_abundance, pathology, protein
-from pybel.dsl.utils import make_translocation_modifier_dict
+from pybel.dsl.edges import translocation
 from pybel.manager import Manager
 from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import BelParser
@@ -586,7 +586,7 @@ BEL_THOROUGH_EDGES = [
             MODIFIER: ACTIVITY,
             EFFECT: {NAME: 'kin', NAMESPACE: BEL_DEFAULT_NAMESPACE}
         },
-        OBJECT: make_translocation_modifier_dict(
+        OBJECT: translocation(
             {NAMESPACE: 'GOCC', NAME: 'intracellular'},
             {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
         ),

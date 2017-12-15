@@ -42,7 +42,8 @@
 
 from ..constants import *
 from ..dsl.nodes import bioprocess, complex_abundance, protein
-from ..dsl.utils import entity, make_translocation_modifier_dict
+from ..dsl.utils import entity
+from pybel.dsl.edges import translocation
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -125,7 +126,7 @@ egf_graph.add_qualified_edge(
     citation='10855792',
     evidence='Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be translocated from the nucleus after stimulation with epidermal growth factor.',
     annotations={'Species': '9606'},
-    object_modifier=make_translocation_modifier_dict(
+    object_modifier=translocation(
         from_loc=entity(namespace='GOCC', name='nucleus', identifier='0005634'),
         to_loc=entity(namespace='GOCC', name='cytoplasm', identifier='0005737'),
     )
