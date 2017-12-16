@@ -8,6 +8,7 @@ import networkx
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
+from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
 from ..parser.canonicalize import node_to_tuple
 from ..utils import get_version, hash_edge
@@ -548,3 +549,22 @@ class BELGraph(networkx.MultiDiGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
 
         return left_node_intersection_join(self, other)
+
+    def node_to_bel(self, n):
+        """Serializes a node as BEL
+
+        :param tuple n: A PyBEL node tuple
+        :rtype: str
+        """
+        return node_to_bel(self.node[n])
+
+    def edge_to_bel(self, u, v, data, sep=None):
+        """Serializes a pair of nodes and related edge data as a BEL relation
+
+        :param tuple u: A PyBEL node tuple for the soure node
+        :param tuple v: A PyBEL node tuple for the target node
+        :param dict data: A PyBEL edge data dictionary
+        :param str sep: The separator between the source, relation, and target. Defaults to ' '
+        :rtype: str
+        """
+        return edge_to_bel(self.node[u], self.node[v], data=data, sep=sep)

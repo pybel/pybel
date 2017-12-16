@@ -10,7 +10,6 @@ import logging
 from .constants import *
 from .language import rev_abundance_labels
 from .resources.document import make_knowledge_header
-from .struct.filters import filter_qualified_edges
 from .utils import ensure_quotes, flatten_citation, hash_edge
 
 __all__ = [
@@ -89,7 +88,7 @@ def fusion_range_to_bel(tokens):
     return '?'
 
 
-def node_data_to_bel(data):
+def node_to_bel(data):
     """Returns a node data dictionary as a BEL string
 
     :param dict data: A PyBEL node data dictionary
@@ -97,14 +96,14 @@ def node_data_to_bel(data):
     """
     if data[FUNCTION] == REACTION:
         return 'rxn(reactants({}), products({}))'.format(
-            ', '.join(node_data_to_bel(reactant_data) for reactant_data in data[REACTANTS]),
-            ', '.join(node_data_to_bel(product_data) for product_data in data[PRODUCTS])
+            ', '.join(node_to_bel(reactant_data) for reactant_data in data[REACTANTS]),
+            ', '.join(node_to_bel(product_data) for product_data in data[PRODUCTS])
         )
 
     if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
         return '{}({})'.format(
             rev_abundance_labels[data[FUNCTION]],
-            ', '.join(node_data_to_bel(member_data) for member_data in data[MEMBERS])
+            ', '.join(node_to_bel(member_data) for member_data in data[MEMBERS])
         )
 
     if VARIANTS in data:
@@ -136,17 +135,6 @@ def node_data_to_bel(data):
 
     raise ValueError('Unknown values in node data: {}'.format(data))
 
-
-def node_to_bel(graph, node):
-    """Returns a node from a graph as a BEL string
-
-    :param BELGraph graph: A BEL Graph
-    :param tuple node: a node from the BEL graph
-    :rtype: str
-    """
-    return node_data_to_bel(graph.node[node])
-
-
 def _decanonicalize_edge_node(node, edge_data, node_position):
     """Writes a node with its modifiers stored in the given edge
 
@@ -158,7 +146,7 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
     if node_position not in {SUBJECT, OBJECT}:
         raise ValueError('invalid node position: {}'.format(node_position))
 
-    node_str = node_data_to_bel(node)
+    node_str = node_to_bel(node)
 
     if node_position not in edge_data:
         return node_str
@@ -199,17 +187,18 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
     return node_str
 
 
-def edge_to_bel(u, v, data, sep=' '):
+def edge_to_bel(u, v, data, sep=None):
     """Takes two nodes and gives back a BEL string representing the statement
 
     :param BELGraph graph: A BEL graph
     :param dict u: The edge's source's PyBEL node data dictionary
     :param dict v: The edge's target's PyBEL node data dictionary
     :param dict data: The edge's data dictionary
-    :param str sep: The separator between the source, relation, and target
+    :param str sep: The separator between the source, relation, and target. Defaults to ' '
     :return: The canonical BEL for this edge
     :rtype: str
     """
+    sep = sep or ' '
     u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
     v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT)
 
@@ -232,7 +221,11 @@ def sort_qualified_edges(graph):
     :param BELGraph graph: A BEL graph
     :rtype: tuple[tuple,tuple,dict]
     """
-    qualified_edges_iter = filter_qualified_edges(graph)
+    qualified_edges_iter = (
+        (u, v, k, d)
+        for u, v, k, d in graph.edges_iter(keys=True, data=True)
+        if graph.has_edge_citation(u, v, k) and graph.has_edge_evidence(u, v, k)
+    )
     qualified_edges = sorted(qualified_edges_iter, key=_sort_qualified_edges_helper)
     return qualified_edges
 
@@ -273,7 +266,7 @@ def to_bel_lines(graph):
                 keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else tuple()
                 for key in keys:
                     yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
-                yield edge_to_bel(graph.node[u], graph.node[v], data=data)
+                yield graph.edge_to_bel(u, v, data)
                 if keys:
                     yield 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
             yield 'UNSET SupportingText'
@@ -297,10 +290,10 @@ def to_bel_lines(graph):
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
-            yield '{} {} {}'.format(node_to_bel(graph, u), data[RELATION], node_to_bel(graph, v))
+            yield '{} {} {}'.format(graph.node_to_bel(u), data[RELATION], graph.node_to_bel(v))
 
         for node in isolated_nodes_to_serialize:
-            yield node_to_bel(graph, node)
+            yield graph.node_to_bel(node)
 
         yield 'UNSET SupportingText'
         yield 'UNSET Citation'
@@ -342,13 +335,13 @@ def calculate_canonical_name(graph, node):
         return graph.node[node][NAME]
 
     if VARIANTS in data:
-        return node_data_to_bel(data)
+        return node_to_bel(data)
 
     if FUSION in data:
-        return node_data_to_bel(data)
+        return node_to_bel(data)
 
     if data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
-        return node_data_to_bel(data)
+        return node_to_bel(data)
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
         return graph.node[node][NAME]

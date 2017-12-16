@@ -6,7 +6,7 @@ import unittest
 from pyparsing import ParseException
 
 from pybel import BELGraph
-from pybel.canonicalize import edge_to_bel, node_to_bel
+from pybel.canonicalize import edge_to_bel
 from pybel.constants import *
 from pybel.dsl import abundance, activity, entity, pmod, protein, rna
 from pybel.parser import BelParser
@@ -890,8 +890,8 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(expected_parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
         self.assertHasNode(expected_child)
 
-        self.assertEqual('g(HGNC:AKT1)', node_to_bel(self.parser.graph, expected_parent))
-        self.assertEqual('g(HGNC:AKT1, gmod(Me))', node_to_bel(self.parser.graph, expected_child))
+        self.assertEqual('g(HGNC:AKT1)', self.graph.node_to_bel(expected_parent))
+        self.assertEqual('g(HGNC:AKT1, gmod(Me))', self.graph.node_to_bel(expected_child))
 
         self.assertHasEdge(expected_parent, expected_child, **{RELATION: HAS_VARIANT})
 
@@ -997,5 +997,5 @@ class TestWrite(TestTokenParserBase):
             source_bel, expected_bel = case if 2 == len(case) else (case, case)
 
             result = self.parser.bel_term.parseString(source_bel)
-            bel = node_to_bel(self.parser.graph, node_to_tuple(result))
+            bel = self.graph.node_to_bel(node_to_tuple(result))
             self.assertEqual(expected_bel, bel)

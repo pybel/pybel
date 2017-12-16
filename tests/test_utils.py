@@ -43,16 +43,10 @@ class TestCanonicalizeHelper(unittest.TestCase):
             postpend_location('', dict(name='failure'))
 
     def test_decanonicalize_node_failure(self):
-        class NotGraph:
-            node = None
-
-        x = NotGraph()
-
-        test_node = ('nope', 'nope', 'nope')
-        x.node = {test_node: {FUNCTION: 'nope'}}
+        test_node = {FUNCTION: 'nope'}
 
         with self.assertRaises(ValueError):
-            node_to_bel(x, test_node)
+            node_to_bel(test_node)
 
 
 class TestRandom(unittest.TestCase):

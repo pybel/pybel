@@ -4,7 +4,6 @@ import logging
 import unittest
 
 from pybel import BELGraph
-from pybel.canonicalize import node_to_bel
 from pybel.constants import *
 from pybel.dsl import cell_surface_expression, entity, secretion, translocation
 from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
@@ -12,9 +11,7 @@ from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import modifier_po_to_dict
 from pybel.parser.parse_exceptions import MalformedTranslocationWarning
-from tests.constants import (
-    TestTokenParserBase, assertHasEdge, assertHasNode, update_provenance,
-)
+from tests.constants import TestTokenParserBase, assertHasEdge, assertHasNode, update_provenance
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +42,7 @@ class TestAbundance(TestTokenParserBase):
         node = node_to_tuple(result)
 
         self.assertEqual(self.expected_node, node)
-        self.assertEqual(self.expected_canonical_bel, node_to_bel(self.parser.graph, self.expected_node))
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
 
@@ -72,7 +69,7 @@ class TestAbundance(TestTokenParserBase):
         node = node_to_tuple(result)
 
         self.assertEqual(self.expected_node, node)
-        self.assertEqual(self.expected_canonical_bel, node_to_bel(self.parser.graph, self.expected_node))
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         modifier = modifier_po_to_dict(result)
         expected_modifier = {
@@ -108,7 +105,7 @@ class TestGene(TestTokenParserBase):
         expected_node = cls, ns, val = GENE, 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'g(HGNC:AKT1)'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -135,7 +132,7 @@ class TestGene(TestTokenParserBase):
         expected_node = cls, ns, val = GENE, 'HGNC', 'AKT1'
         self.assertEqual(expected_node, node_to_tuple(result))
 
-        self.assertEqual('g(HGNC:AKT1)', node_to_bel(self.parser.graph, expected_node))
+        self.assertEqual('g(HGNC:AKT1)', self.graph.node_to_bel(expected_node))
 
         self.assertHasNode(expected_node, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
 
@@ -167,7 +164,7 @@ class TestGene(TestTokenParserBase):
             ]
         })
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'g(HGNC:AKT1, var(p.Phe508del))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -192,7 +189,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: GENE})
 
-        self.assertEqual('g(HGNC:AKT1, gmod(Me))', node_to_bel(self.parser.graph, expected_node))
+        self.assertEqual('g(HGNC:AKT1, gmod(Me))', self.graph.node_to_bel(expected_node))
 
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
@@ -215,7 +212,7 @@ class TestGene(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node, **{FUNCTION: GENE})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'g(HGNC:AKT1, var(c.308G>A))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -249,7 +246,7 @@ class TestGene(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'g(HGNC:AKT1, var(c.308G>A))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -279,7 +276,7 @@ class TestGene(TestTokenParserBase):
             GENE, 'HGNC', 'AKT1', (HGVS, 'c.1521_1523delCTT'), (HGVS, TEST_GENE_VARIANT), (HGVS, TEST_PROTEIN_VARIANT))
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, function=GENE)
-        self.assertEqual(node_to_bel(self.parser.graph, expected_node),
+        self.assertEqual(self.graph.node_to_bel(expected_node),
                          'g(HGNC:AKT1, var(c.1521_1523delCTT), var(c.308G>A), var(p.Phe508del))')
 
         parent = GENE, 'HGNC', 'AKT1'
@@ -317,7 +314,7 @@ class TestGene(TestTokenParserBase):
 
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -351,7 +348,7 @@ class TestGene(TestTokenParserBase):
 
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -382,7 +379,7 @@ class TestGene(TestTokenParserBase):
 
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -420,7 +417,7 @@ class TestGene(TestTokenParserBase):
 
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'g(fus(HGNC:BCR, c.?_1875, HGNC:JAK2, c.2626_?))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -447,7 +444,7 @@ class TestGene(TestTokenParserBase):
 
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -462,7 +459,7 @@ class TestGene(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'g(SNP:rs113993960, var(c.1521_1523delCTT))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -505,7 +502,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, function=GENE)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -668,7 +665,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node)
         self.assertHasNode(node)
 
-        canonical_bel = node_to_bel(self.parser.graph, node)
+        canonical_bel = self.graph.node_to_bel(node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -694,7 +691,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node)
         self.assertHasNode(node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        canonical_bel = node_to_bel(self.parser.graph, node)
+        canonical_bel = self.graph.node_to_bel(node)
         expected_canonical_bel = 'p(HGNC:AKT1)'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -723,7 +720,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(node, node_to_tuple(result))
         self.assertHasNode(node, function=PROTEIN)
 
-        canonical_bel = node_to_bel(self.parser.graph, node)
+        canonical_bel = self.graph.node_to_bel(node)
         expected_canonical_bel = 'p(HGNC:AKT1, pmod(Ph, Ser), var(p.Ala127Tyr))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -759,7 +756,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -792,7 +789,7 @@ class TestProtein(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'p(fus(HGNC:BCR, p.?_1875, HGNC:JAK2, p.2626_?))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -815,7 +812,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'p(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -827,7 +824,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, var(p.40*))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -847,7 +844,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, var(p.Cys40*))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -867,7 +864,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -885,7 +882,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -902,7 +899,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -920,7 +917,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -938,7 +935,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -958,7 +955,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -979,7 +976,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -998,7 +995,7 @@ class TestProtein(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1018,7 +1015,7 @@ class TestProtein(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1036,7 +1033,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1054,7 +1051,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1072,7 +1069,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1092,7 +1089,7 @@ class TestProtein(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1110,7 +1107,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: PROTEIN})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1160,7 +1157,7 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: RNA, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1184,7 +1181,7 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assertHasNode(expected_node, **{FUNCTION: RNA})
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'r(HGNC:AKT1, var(c.1521_1523delCTT), var(p.Phe508del))'  # sorted
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1221,7 +1218,7 @@ class TestRna(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1247,7 +1244,7 @@ class TestRna(TestTokenParserBase):
 
         expected_node = node_to_tuple(result)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1279,7 +1276,7 @@ class TestRna(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'r(fus(HGNC:BCR, r.?_1875, HGNC:JAK2, r.2626_?))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1301,7 +1298,7 @@ class TestRna(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'r(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1321,7 +1318,7 @@ class TestRna(TestTokenParserBase):
         expected_node = node_to_tuple(result)
         self.assertHasNode(expected_node)
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1360,7 +1357,7 @@ class TestComplex(TestTokenParserBase):
             NAME: 'AP-1 Complex'
         })
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1406,7 +1403,7 @@ class TestComplex(TestTokenParserBase):
         })
 
         expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, node_to_bel(self.parser.graph, expected_node))
+        self.assertEqual(expected_canonical_bel, self.graph.node_to_bel(expected_node))
 
         child_1 = PROTEIN, 'HGNC', 'FOS'
         self.assertHasNode(child_1)
@@ -1486,7 +1483,7 @@ class TestComposite(TestTokenParserBase):
         self.assertEqual(expected_node_dict, self.graph.node[expected_node])
 
         expected_canonical_bel = 'composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))'  # sorted
-        self.assertEqual(expected_canonical_bel, node_to_bel(self.parser.graph, expected_node))
+        self.assertEqual(expected_canonical_bel, self.graph.node_to_bel(expected_node))
 
         self.assertEqual(3, self.parser.graph.number_of_nodes())
         self.assertHasNode(expected_node)
@@ -1528,7 +1525,7 @@ class TestBiologicalProcess(TestTokenParserBase):
             NAME: 'cell cycle arrest'
         })
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -1560,7 +1557,7 @@ class TestPathology(TestTokenParserBase):
             NAME: 'adenocarcinoma'
         })
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'path(MESHD:adenocarcinoma)'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
@@ -2022,7 +2019,7 @@ class TestTransformation(TestTokenParserBase):
             ]
         })
 
-        canonical_bel = node_to_bel(self.parser.graph, expected_node)
+        canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
