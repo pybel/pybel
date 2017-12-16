@@ -90,22 +90,6 @@ def fusion_range_to_bel(tokens):
     return '?'
 
 
-def get_targets_by_relation(graph, node, relation):
-    """Gets the set of neighbors of a given node that have a relation of the given type
-
-    :param BELGraph graph: A BEL network
-    :param tuple node: A BEL node
-    :param relation: the relation to follow from the given node
-    :return: A set of BEL nodes
-    :rtype: set[tuple]
-    """
-    return {
-        target
-        for _, target, data in graph.out_edges_iter(node, data=True)
-        if data[RELATION] == relation
-    }
-
-
 def node_data_to_bel(data):
     """Returns a node data dictionary as a BEL string
 

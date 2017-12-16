@@ -1409,11 +1409,11 @@ class TestComplex(TestTokenParserBase):
 
         child_1 = PROTEIN, 'HGNC', 'FOS'
         self.assertHasNode(child_1)
-        self.assertHasEdge(expected_node, child_1, relation='hasComponent')
+        self.assertHasEdge(expected_node, child_1, relation=HAS_COMPONENT)
 
         child_2 = PROTEIN, 'HGNC', 'JUN'
         self.assertHasNode(child_2)
-        self.assertHasEdge(expected_node, child_2, relation='hasComponent')
+        self.assertHasEdge(expected_node, child_2, relation=HAS_COMPONENT)
 
     def test_complex_list_long(self):
         statement = 'complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))'
