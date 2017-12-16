@@ -8,10 +8,9 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel, node_to_bel
 from pybel.constants import *
-from pybel.dsl import abundance, pmod, protein, rna
+from pybel.dsl import abundance, activity, entity, pmod, protein, rna
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
-from pybel.constants import unqualified_edge_code
 from pybel.parser.parse_exceptions import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
@@ -215,7 +214,7 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(obj, obj_member_2, relation=HAS_PRODUCT)
 
         expected_edge_attributes = {
-            RELATION: 'decreases',
+            RELATION: DECREASES,
             SUBJECT: {
                 MODIFIER: ACTIVITY,
                 EFFECT: {
@@ -225,6 +224,10 @@ class TestRelations(TestTokenParserBase):
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             }
         }
+
+        self.assertEqual(expected_edge_attributes[SUBJECT],
+                         activity(name='pep', location=entity(name='intracellular', namespace='GOCC')))
+
         self.assertHasEdge(sub, obj, **expected_edge_attributes)
 
     def test_directlyDecreases(self):

@@ -2,6 +2,7 @@
 
 from .parse_exceptions import PyBELCanonicalizeError
 from ..constants import *
+from ..dsl import secretion, cell_surface_expression
 from ..utils import hash_node
 
 __all__ = [
@@ -442,18 +443,10 @@ def modifier_po_to_dict(tokens):
             attrs[EFFECT] = tokens[EFFECT].asDict()
 
     elif tokens[MODIFIER] == CELL_SECRETION:
-        attrs[MODIFIER] = TRANSLOCATION
-        attrs[EFFECT] = {
-            FROM_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'intracellular'},
-            TO_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'extracellular space'}
-        }
+        attrs.update(secretion())
 
     elif tokens[MODIFIER] == CELL_SURFACE_EXPRESSION:
-        attrs[MODIFIER] = TRANSLOCATION
-        attrs[EFFECT] = {
-            FROM_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'intracellular'},
-            TO_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'cell surface'}
-        }
+        attrs.update(cell_surface_expression())
 
     else:
         raise ValueError('Invalid value for tokens[MODIFIER]: {}'.format(tokens[MODIFIER]))

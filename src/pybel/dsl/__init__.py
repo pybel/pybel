@@ -7,9 +7,10 @@ from . import edges, nodes
 from .edges import *
 from .exc import PyBELDSLException
 from .nodes import *
+from .utils import entity
 
 __all__ = (
     nodes.__all__ +
     edges.__all__ +
-    ['PyBELDSLException']
+    ['PyBELDSLException', 'entity']
 )

@@ -6,6 +6,7 @@ import unittest
 from pybel import BELGraph
 from pybel.canonicalize import node_to_bel
 from pybel.constants import *
+from pybel.dsl import cell_surface_expression, entity, secretion, translocation
 from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
@@ -1868,13 +1869,11 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         mod = modifier_po_to_dict(result)
-        expected_mod = {
-            MODIFIER: TRANSLOCATION,
-            EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
-            }
-        }
+        expected_mod = translocation(
+            from_loc=entity(namespace='GOCC', name='cell surface'),
+            to_loc=entity(namespace='GOCC', name='endosome'),
+        )
+
         self.assertEqual(expected_mod, mod)
 
         node = PROTEIN, 'HGNC', 'EGFR'
@@ -1929,13 +1928,7 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         mod = modifier_po_to_dict(result)
-        expected_mod = {
-            MODIFIER: TRANSLOCATION,
-            EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
-            }
-        }
+        expected_mod = secretion()
         self.assertEqual(expected_mod, mod)
 
         node = PROTEIN, 'HGNC', 'EGFR'
@@ -1950,13 +1943,7 @@ class TestTransformation(TestTokenParserBase):
         expected_result = ['CellSurfaceExpression', [PROTEIN, 'HGNC', 'EGFR']]
         self.assertEqual(expected_result, result.asList())
 
-        expected_mod = {
-            MODIFIER: TRANSLOCATION,
-            EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'}
-            }
-        }
+        expected_mod = cell_surface_expression()
         self.assertEqual(expected_mod, modifier_po_to_dict(result))
 
         node = PROTEIN, 'HGNC', 'EGFR'
