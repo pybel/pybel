@@ -7,7 +7,7 @@ import networkx as nx
 import pybel.utils
 from pybel.canonicalize import node_to_bel, postpend_location
 from pybel.constants import *
-from pybel.parser.language import amino_acid
+from pybel.parser.modifiers.protein_modification import amino_acid
 from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.utils import nest
 from pybel.resources.definitions import get_bel_resource

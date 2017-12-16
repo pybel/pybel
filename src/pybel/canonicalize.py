@@ -9,7 +9,7 @@ import logging
 import sys
 
 from .constants import *
-from .parser.language import rev_abundance_labels
+from .language import rev_abundance_labels
 from .resources.document import make_knowledge_header
 from .struct.filters import filter_qualified_edges
 from .utils import ensure_quotes, flatten_citation, hash_edge

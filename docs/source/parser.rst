@@ -30,3 +30,8 @@ BEL Parser
 ----------
 .. autoclass:: pybel.parser.parse_bel.BelParser
     :members:
+
+Sub-Parsers
+-----------
+.. automodule:: pybel.parser.modifiers
+    :members:

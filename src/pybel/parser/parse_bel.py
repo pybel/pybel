@@ -13,16 +13,16 @@ from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Supp
 
 from .baseparser import BaseParser
 from .canonicalize import modifier_po_to_dict, po_to_dict
-from .language import activities, activity_labels
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_exceptions import (
-    InvalidFunctionSemantic, MalformedTranslocationWarning, MissingCitationException,
-    MissingSupportWarning, NestedRelationWarning, RelabelWarning,
+    InvalidFunctionSemantic, MalformedTranslocationWarning, MissingCitationException, MissingSupportWarning,
+    NestedRelationWarning, RelabelWarning,
 )
 from .parse_identifier import IdentifierParser
 from .utils import WCW, cartesian_dictionary, nest, one_of_tags, quote, triple
+from .. import language
 from ..constants import *
 
 __all__ = ['BelParser']
@@ -102,7 +102,7 @@ class BelParser(BaseParser):
         # 2.2 Abundance Modifier Functions
 
         #: `2.2.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_protein_modifications>`_
-        self.pmod = PmodParser(self.identifier_parser).language
+        self.pmod = ProteinModificationParser(self.identifier_parser).language
 
         #: `2.2.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variant_var>`_
         self.variant = VariantParser().language
@@ -115,17 +115,17 @@ class BelParser(BaseParser):
         opt_location = Optional(WCW + self.location)
 
         #: DEPRECATED: `2.2.X Amino Acid Substitutions <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_amino_acid_substitutions>`_
-        self.psub = PsubParser().language
+        self.psub = ProteinSubstitutionParser().language
 
         #: DEPRECATED: `2.2.X Sequence Variations <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_sequence_variations>`_
-        self.gsub = GsubParser().language
+        self.gsub = GeneSubstitutionParser().language
 
         #: DEPRECATED
         #: `Truncated proteins <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_truncated_proteins>`_
         self.trunc = TruncationParser().language
 
         #: PyBEL BEL Specification variant
-        self.gmod = GmodParser().language
+        self.gmod = GeneModificationParser().language
 
         # 2.6 Other Functions
 
@@ -207,7 +207,8 @@ class BelParser(BaseParser):
         # 2.4 Process Modifier Function
         # backwards compatibility with BEL v1.0
 
-        molecular_activity_default = oneOf(list(activity_labels)).setParseAction(handle_molecular_activity_default)
+        molecular_activity_default = oneOf(list(language.activity_labels)).setParseAction(
+            handle_molecular_activity_default)
 
         #: `2.4.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmolecularA>`_
         self.molecular_activity = molecular_activity_tags + nest(
@@ -231,7 +232,7 @@ class BelParser(BaseParser):
             Optional(WCW + Group(self.molecular_activity)(EFFECT))
         )
 
-        activity_legacy_tags = oneOf(activities)(MODIFIER)
+        activity_legacy_tags = oneOf(language.activities)(MODIFIER)
         self.activity_legacy = activity_legacy_tags + nest(Group(self.abundance)(TARGET))
         self.activity_legacy.setParseAction(handle_activity_legacy)
 
@@ -821,7 +822,7 @@ def handle_molecular_activity_default(line, position, tokens):
     :param int position: The position in the line being parsed
     :param pyparsing.ParseResult tokens: The tokens from PyParsing
     """
-    upgraded = activity_labels[tokens[0]]
+    upgraded = language.activity_labels[tokens[0]]
     log.debug('upgraded legacy activity to %s', upgraded)
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
     tokens[NAME] = upgraded
@@ -835,7 +836,7 @@ def handle_activity_legacy(line, position, tokens):
     :param int position: The position in the line being parsed
     :param pyparsing.ParseResult tokens: The tokens from PyParsing
     """
-    legacy_cls = activity_labels[tokens[MODIFIER]]
+    legacy_cls = language.activity_labels[tokens[MODIFIER]]
     tokens[MODIFIER] = ACTIVITY
     tokens[EFFECT] = {
         NAME: legacy_cls,

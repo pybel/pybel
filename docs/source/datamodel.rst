@@ -111,15 +111,15 @@ identify whether it is a post-translational modification (PTM), gene modificatio
 
 .. automodule:: pybel.parser.modifiers.gene_substitution
 
+.. automodule:: pybel.parser.modifiers.gene_modification
+
 .. automodule:: pybel.parser.modifiers.protein_substitution
+
+.. automodule:: pybel.parser.modifiers.protein_modification
 
 .. automodule:: pybel.parser.modifiers.truncation
 
 .. automodule:: pybel.parser.modifiers.fragment
-
-.. automodule:: pybel.parser.modifiers.gene_modification
-
-.. automodule:: pybel.parser.modifiers.protein_modification
 
 Fusions
 ~~~~~~~

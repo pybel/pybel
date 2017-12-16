@@ -9,11 +9,8 @@ This module contains mappings between PyBEL's internal constants and BEL languag
 
 import logging
 
-from pyparsing import *
-
-from .parse_exceptions import PlaceholderAminoAcidWarning
-from ..constants import *
-from ..dsl.utils import entity
+from .constants import *
+from .dsl import entity
 
 log = logging.getLogger(__name__)
 
@@ -137,33 +134,12 @@ amino_acid_dict = {
     'V': 'Val',
 }
 
-aa_single = oneOf(list(amino_acid_dict.keys()))
-aa_single.setParseAction(lambda s, l, t: [amino_acid_dict[t[0]]])
-
-aa_triple = oneOf(list(amino_acid_dict.values()))
-
-#: In biological literature, the X is used to denote a truncation. Text mining efforts often encode X as an amino
-#: acid, for which we will throw an error using :func:`handle_aa_placeholder`
-aa_placeholder = Keyword('X')
-
-
-def handle_aa_placeholder(line, position, tokens):
-    """Raises an exception when encountering a placeholder amino acid, ``X``"""
-    raise PlaceholderAminoAcidWarning(-1, line, position, tokens[0])
-
-
-aa_placeholder.setParseAction(handle_aa_placeholder)
-
-amino_acid = MatchFirst([aa_triple, aa_single, aa_placeholder])
-
 dna_nucleotide_labels = {
     'A': 'Adenine',
     'T': 'Thymine',
     'C': 'Cytosine',
     'G': 'Guanine'
 }
-
-dna_nucleotide = oneOf(list(dna_nucleotide_labels.keys()))
 
 rna_nucleotide_labels = {
     'a': 'adenine',
@@ -172,7 +148,6 @@ rna_nucleotide_labels = {
     'g': 'guanine'
 }
 
-rna_nucleotide = oneOf(list(rna_nucleotide_labels.keys()))
 
 #: A dictionary of default protein modifications to their preferred value
 pmod_namespace = {

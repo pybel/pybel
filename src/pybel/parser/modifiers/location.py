@@ -38,7 +38,8 @@ This calls for thoughtful consideration of the following two statements:
 
 .. seealso::
 
-    BEL 2.0 specification on `cellular location (2.2.4) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
+    - BEL 2.0 specification on `cellular location (2.2.4) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
+    - PyBEL module :py:class:`pybel.parser.modifiers.LocationParser`
 """
 
 from pyparsing import Group, Suppress, oneOf

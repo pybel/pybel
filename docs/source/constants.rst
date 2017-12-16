@@ -4,5 +4,5 @@ Constants
 .. automodule:: pybel.constants
     :members:
 
-.. automodule:: pybel.parser.language
+.. automodule:: pybel.language
     :members:
