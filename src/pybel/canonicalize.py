@@ -164,11 +164,10 @@ def node_to_bel(graph, node):
     return node_data_to_bel(graph.node[node])
 
 
-def _decanonicalize_edge_node(graph, node, edge_data, node_position):
+def _decanonicalize_edge_node(node, edge_data, node_position):
     """Writes a node with its modifiers stored in the given edge
 
-    :param BELGraph graph: A BEL graph
-    :param tuple node: A PyBEL node tuple
+    :param dict node: A PyBEL node data dictionaru
     :param dict edge_data: A PyBEL edge data dictionary
     :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
     :rtype: str
@@ -176,7 +175,7 @@ def _decanonicalize_edge_node(graph, node, edge_data, node_position):
     if node_position not in {SUBJECT, OBJECT}:
         raise ValueError('invalid node position: {}'.format(node_position))
 
-    node_str = node_to_bel(graph, node)
+    node_str = node_data_to_bel(node)
 
     if node_position not in edge_data:
         return node_str
@@ -217,19 +216,19 @@ def _decanonicalize_edge_node(graph, node, edge_data, node_position):
     return node_str
 
 
-def edge_to_bel(graph, u, v, data, sep=' '):
+def edge_to_bel(u, v, data, sep=' '):
     """Takes two nodes and gives back a BEL string representing the statement
 
     :param BELGraph graph: A BEL graph
-    :param tuple u: The edge's source's PyBEL node tuple
-    :param tuple v: The edge's target's PyBEL node tuple
+    :param dict u: The edge's source's PyBEL node data dictionary
+    :param dict v: The edge's target's PyBEL node data dictionary
     :param dict data: The edge's data dictionary
     :param str sep: The separator between the source, relation, and target
     :return: The canonical BEL for this edge
     :rtype: str
     """
-    u_str = _decanonicalize_edge_node(graph, u, data, node_position=SUBJECT)
-    v_str = _decanonicalize_edge_node(graph, v, data, node_position=OBJECT)
+    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
+    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT)
 
     return sep.join((u_str, data[RELATION], v_str))
 
@@ -291,7 +290,7 @@ def to_bel_lines(graph):
                 keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else tuple()
                 for key in keys:
                     yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
-                yield edge_to_bel(graph, u, v, data=data)
+                yield edge_to_bel(graph.node[u], graph.node[v], data=data)
                 if keys:
                     yield 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
             yield 'UNSET SupportingText'

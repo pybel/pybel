@@ -59,7 +59,7 @@ def to_csv(graph, file=None, sep='\t'):
     """
     for u, v, data in graph.edges_iter(data=True):
         print(
-            edge_to_bel(graph, u, v, data=data, sep=sep),
+            edge_to_bel(graph.node[u], graph.node[v], data=data, sep=sep),
             json.dumps(data),
             sep=sep,
             file=file
@@ -82,7 +82,7 @@ def to_sif(graph, file=None, sep='\t'):
     """
     for u, v, data in graph.edges_iter(data=True):
         print(
-            edge_to_bel(graph, u, v, data=data, sep=sep),
+            edge_to_bel(graph.node[u], graph.node[v], data=data, sep=sep),
             file=file
         )
 

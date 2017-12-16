@@ -8,9 +8,10 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel, node_to_bel
 from pybel.constants import *
-from pybel.dsl import abundance, pmod
+from pybel.dsl import abundance, pmod, protein, rna
 from pybel.parser import BelParser
 from pybel.parser.canonicalize import node_to_tuple
+from pybel.constants import unqualified_edge_code
 from pybel.parser.parse_exceptions import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
@@ -611,21 +612,40 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        self.assertEqual(2, self.parser.graph.number_of_nodes())
+        self.assertEqual(2, self.graph.number_of_nodes())
 
         source = RNA, 'HGNC', 'AKT1'
-        self.assertHasNode(source)
+        source_dict = rna(name='AKT1', namespace='HGNC')
+        self.assertIn(source, self.graph)
+        self.assertEqual(source_dict, self.graph.node[source])
+        self.assertTrue(self.graph.has_node_with_data(source_dict))
 
         target = PROTEIN, 'HGNC', 'AKT1'
-        self.assertHasNode(target)
+        target_dict = protein(name='AKT1', namespace='HGNC')
+        self.assertIn(target, self.graph)
+        self.assertEqual(target_dict, self.graph.node[target])
+        self.assertTrue(self.graph.has_node_with_data(target_dict))
 
-        self.assertEqual(1, self.parser.graph.number_of_edges())
+        self.assertEqual(1, self.graph.number_of_edges())
+        self.assertTrue(self.graph.has_edge(source, target))
 
-        self.assertHasEdge(source, target, **{RELATION: TRANSLATED_TO})
+        key_data = self.parser.graph.edge[source][target]
+        self.assertEqual(1, len(key_data))
 
-        data = self.parser.graph.edge[source][target][0]
-        self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
-                         edge_to_bel(self.parser.graph, source, target, data=data))
+        key = list(key_data)[0]
+        data = key_data[key]
+
+        self.assertIn(RELATION, data)
+        self.assertEqual(TRANSLATED_TO, data[RELATION])
+
+        calculated_source_data = self.graph.node[source]
+        self.assertTrue(calculated_source_data)
+
+        calculated_target_data = self.graph.node[target]
+        self.assertTrue(calculated_target_data)
+
+        calculated_edge_bel = edge_to_bel(calculated_source_data, calculated_target_data, data=data)
+        self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)', calculated_edge_bel)
 
     def test_component_list(self):
         s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
