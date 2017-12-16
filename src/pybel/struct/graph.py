@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import warnings
 from copy import deepcopy
 
 import networkx
@@ -299,7 +300,16 @@ class BELGraph(networkx.MultiDiGraph):
         self.add_node(node_tuple, attr_dict=attr_dict)
 
         if VARIANTS in attr_dict:
-            parent_node_tuple = self.add_simple_node(attr_dict[FUNCTION], attr_dict[NAMESPACE], attr_dict[NAME])
+            parent_node_dict = {
+                key: attr_dict[key]
+                for key in (FUNCTION, NAME, NAMESPACE)
+            }
+
+            if IDENTIFIER in attr_dict:
+                parent_node_dict[IDENTIFIER] = attr_dict[IDENTIFIER]
+
+            parent_node_tuple = self.add_node_from_data(parent_node_dict)
+
             self.add_unqualified_edge(parent_node_tuple, node_tuple, HAS_VARIANT)
 
         elif MEMBERS in attr_dict:
@@ -327,17 +337,19 @@ class BELGraph(networkx.MultiDiGraph):
         node_tuple = node_to_tuple(attr_dict)
         return self.has_node(node_tuple)
 
-    def add_simple_node(self, function, namespace, name):
+    def add_simple_node(self, func, namespace, name):
         """Adds a simple node, with only a namespace and name
 
-        :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.PROTEIN`, etc)
+        :param str func: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.PROTEIN`, etc)
         :param str namespace: The node's namespace
         :param str name: The node's name
         :return: The PyBEL node tuple representing this node
         :rtype: tuple
         """
+        warnings.warn('BELGraph.add_simple_node is deprecated', DeprecationWarning)
+
         return self.add_node_from_data({
-            FUNCTION: function,
+            FUNCTION: func,
             NAMESPACE: namespace,
             NAME: name
         })
