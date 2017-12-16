@@ -6,7 +6,6 @@ from __future__ import print_function
 
 import itertools as itt
 import logging
-import sys
 
 from .constants import *
 from .language import rev_abundance_labels
@@ -313,19 +312,19 @@ def to_bel(graph, file=None):
     :param BELGraph graph: the BEL Graph to output as a BEL Script
     :param file file: A writable file-like object. If None, defaults to standard out.
     """
-    file = sys.stdout if file is None else file
     for line in to_bel_lines(graph):
         print(line, file=file)
 
 
-def to_bel_path(graph, path):
+def to_bel_path(graph, path, mode='w', **kwargs):
     """Writes the BEL graph as a canonical BEL Script to the given path
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
     :param str path: A file path
+    :param str mode: The file opening mode. Defaults to 'w'
     """
-    with open(path, 'w') as f:
-        to_bel(graph, f)
+    with open(path, mode=mode, **kwargs) as bel_file:
+        to_bel(graph, bel_file)
 
 
 def calculate_canonical_name(graph, node):
