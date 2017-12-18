@@ -26,7 +26,7 @@ from .models import (
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl
-from ..canonicalize import edge_to_bel, node_to_bel
+from ..canonicalize import node_to_bel
 from ..constants import *
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
