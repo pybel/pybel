@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from .parse_exceptions import PyBELCanonicalizeError
 from ..constants import *
-from ..dsl import secretion, cell_surface_expression
+from ..dsl import cell_surface_expression, secretion
+from ..exceptions import PyBELCanonicalizeError
 from ..utils import hash_node
 
 __all__ = [

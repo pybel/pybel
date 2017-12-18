@@ -384,7 +384,3 @@ class RelabelWarning(PyBelParserWarning):
 
     def __str__(self):
         return 'Tried to relabel {} from {} to {}'.format(self.node, self.old_label, self.new_label)
-
-
-class PyBELCanonicalizeError(PyBelWarning, IndexError):
-    """Raised when problem canonicalizing a node"""
