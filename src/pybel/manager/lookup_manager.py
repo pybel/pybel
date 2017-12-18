@@ -13,7 +13,7 @@ class LookupManager(BaseManager):
         """Looks up a node by the hash of a PyBEL node tuple
 
         :param str node_hash: The hash of a PyBEL node tuple from :func:`pybel.utils.hash_node`
-        :rtype: Node
+        :rtype: Optional[Node]
         """
         return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
 
@@ -21,7 +21,7 @@ class LookupManager(BaseManager):
         """Looks up a node by its data dictionary by hashing it then using :func:`get_node_by_hash`
 
         :param dict node_dict: A PyBEL node data dictionary
-        :rtype: Node
+        :rtype: Optional[Node]
         """
         return self.get_node_by_hash(hash_node_dict(node_dict))
 
@@ -29,7 +29,7 @@ class LookupManager(BaseManager):
         """Looks up an edge by the hash of a PyBEL edge data dictionary
 
         :param str edge_hash: The hash of a PyBEL edge data dictionary from :func:`pybel.utils.hash_edge`
-        :rtype: Edge
+        :rtype: Optional[Edge]
         """
         return self.session.query(Edge).filter(Edge.sha512 == edge_hash).one_or_none()
 
