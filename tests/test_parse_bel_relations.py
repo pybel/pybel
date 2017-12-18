@@ -10,10 +10,10 @@ from pybel.canonicalize import edge_to_bel
 from pybel.constants import *
 from pybel.dsl import abundance, activity, entity, pmod, protein, rna
 from pybel.parser import BelParser
-from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_exceptions import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
+from pybel.tokens import node_to_tuple
 from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)

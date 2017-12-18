@@ -5,14 +5,12 @@ from ...constants import (
     ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND,
     MODIFIER, OBJECT, PATHOLOGY, PMOD, PROTEIN, RELATION, SUBJECT, TRANSLOCATION, VARIANTS,
 )
+from ...tokens import node_to_tuple
 
 __all__ = [
     'keep_node_permissive',
     'has_protein_modification',
 ]
-
-#: A dictionary of function name to the function for lookup of all registered node predicates
-_node_predicates = {}
 
 
 def node_predicate(fn):
@@ -36,9 +34,6 @@ def node_predicate(fn):
             return fn(*args)
 
         raise ValueError
-
-    # Register this function in case we want to use it later
-    _node_predicates[fn.__name__] = fn
 
     return wrapped
 
@@ -250,3 +245,26 @@ def has_causal_out_edges(graph, node):
         data[RELATION] in CAUSAL_RELATIONS
         for _, _, data in graph.out_edges_iter(node, data=True)
     )
+
+
+def node_exclusion_filter_builder(nodes):
+    """Builds a function that returns true
+
+    :param nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
+    :rtype: types.FunctionType
+    """
+    nodes = {
+        node_to_tuple(node) if isinstance(node, dict) else node
+        for node in nodes
+    }
+
+    @node_predicate
+    def node_exclusion_filter(data):
+        """Returns true if the node is not in the given set of nodes
+
+        :param dict data: A PyBEL data dictionary
+        :rtype: bool
+        """
+        return node_to_tuple(data) not in nodes
+
+    return node_exclusion_filter

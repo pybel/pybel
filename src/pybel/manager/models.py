@@ -14,7 +14,7 @@ from sqlalchemy.orm import backref, relationship
 from .utils import int_or_str
 from ..constants import *
 from ..io.gpickle import from_bytes, to_bytes
-from ..parser.canonicalize import node_to_tuple, sort_dict_list, sort_variant_dict_list
+from ..tokens import node_to_tuple, sort_dict_list, sort_variant_dict_list
 
 __all__ = [
     'Base',

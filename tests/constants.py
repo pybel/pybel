@@ -13,9 +13,9 @@ from pybel.constants import *
 from pybel.dsl import complex_abundance, pathology, protein
 from pybel.dsl.edges import translocation
 from pybel.manager import Manager
-from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
+from pybel.tokens import node_to_tuple
 from pybel.utils import subdict_matches
 
 log = logging.getLogger(__name__)

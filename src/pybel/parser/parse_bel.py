@@ -12,7 +12,6 @@ import logging
 from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
 
 from .baseparser import BaseParser
-from .canonicalize import modifier_po_to_dict, po_to_dict
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
@@ -24,6 +23,7 @@ from .parse_identifier import IdentifierParser
 from .utils import WCW, cartesian_dictionary, nest, one_of_tags, quote, triple
 from .. import language
 from ..constants import *
+from ..tokens import modifier_po_to_dict, po_to_dict
 
 __all__ = ['BelParser']
 

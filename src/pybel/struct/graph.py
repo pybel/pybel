@@ -10,7 +10,7 @@ from six import string_types
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
-from ..parser.canonicalize import node_to_tuple
+from ..tokens import node_to_tuple
 from ..utils import get_version, hash_edge
 
 __all__ = [

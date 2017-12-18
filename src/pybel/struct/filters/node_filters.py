@@ -33,10 +33,12 @@ def concatenate_node_filters(node_filters=None):
 
     Example usage:
 
-    >>> from pybel.constants import GENE, PROTEIN, PATHOLOGY
-    >>> path_filter = function_exclusion_filter_builder(PATHOLOGY)
-    >>> app_filter = node_exclusion_filter_builder([(PROTEIN, 'HGNC', 'APP'), (GENE, 'HGNC', 'APP')])
-    >>> my_filter = concatenate_node_filters([path_filter, app_filter])
+    >>> from pybel.dsl import protein, gene
+    >>> from pybel.struct.filters.node_predicates import not_pathology, node_exclusion_filter_builder
+    >>> app_protein = protein(name='APP', namespace='HGNC')
+    >>> app_gene = gene(name='APP', namespace='HGNC')
+    >>> app_filter = node_exclusion_filter_builder([app_protein, app_gene])
+    >>> my_filter = concatenate_node_filters([not_pathology, app_filter])
     """
     # If no filters are given, then return the trivially permissive filter
     if not node_filters:

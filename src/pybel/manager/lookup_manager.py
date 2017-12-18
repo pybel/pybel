@@ -2,7 +2,7 @@
 
 from .base_manager import BaseManager
 from .models import Author, Citation, Edge, Evidence, Node
-from ..parser.canonicalize import hash_node_dict
+from ..tokens import hash_node_dict
 from ..utils import hash_citation
 
 
