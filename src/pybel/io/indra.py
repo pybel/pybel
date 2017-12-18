@@ -42,7 +42,7 @@ __all__ = [
 def from_indra_statements(statements, name=None, version=None, description=None):
     """Imports a model from :mod:`indra`.
 
-    :param list[indra.statement.Statements] statments: A list of statements
+    :param list[indra.statement.Statement] statements: A list of statements
     :param str name: The name for the BEL graph
     :param str version: The version of the BEL graph
     :param str description: The description of the BEL graph

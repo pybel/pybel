@@ -363,6 +363,7 @@ intersphinx_mapping = {
     'py2neo': ('http://py2neo.org/v3/', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/en/latest', None),
     'indra': ('https://indra.readthedocs.io/en/latest/', None),
+    'requests': ('http://docs.python-requests.org/en/master/', None),
 }
 
 autodoc_member_order = 'bysource'

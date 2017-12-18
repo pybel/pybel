@@ -11,15 +11,31 @@ from ...tokens import node_to_tuple
 
 __all__ = [
     'keep_node_permissive',
+    'is_abundance',
+    'is_gene',
+    'is_protein',
+    'is_pathology',
+    'not_pathology',
+    'has_variant',
     'has_protein_modification',
+    'has_gene_modification',
+    'has_hgvs',
+    'has_fragment',
+    'has_activity',
+    'is_degraded',
+    'is_translocated',
+    'has_causal_in_edges',
+    'has_causal_out_edges',
+    'node_inclusion_filter_builder',
+    'node_exclusion_filter_builder',
 ]
 
 
-def node_predicate(fn):
+def node_predicate(f):
     """Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
     sure that it can also accept a pair of arguments, a BELGraph and a PyBEL node tuple as well.
 
-    :type fn: types.FunctionType
+    :type f: types.FunctionType
     :rtype: types.FunctionType
     """
 
@@ -31,10 +47,10 @@ def node_predicate(fn):
         x = args[0]
 
         if isinstance(x, BELGraph):
-            return fn(x.node[args[1]], *args[2:])
+            return f(x.node[args[1]], *args[2:])
 
         if isinstance(x, dict):
-            return fn(*args)
+            return f(*args)
 
         raise ValueError
 
@@ -250,16 +266,20 @@ def has_causal_out_edges(graph, node):
     )
 
 
-def node_exclusion_filter_builder(nodes):
-    """Builds a function that returns true
-
-    :param nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
-    :rtype: types.FunctionType
-    """
-    nodes = {
+def _hash_node_list(nodes):
+    return {
         node_to_tuple(node) if isinstance(node, dict) else node
         for node in nodes
     }
+
+
+def node_exclusion_filter_builder(nodes):
+    """Builds a function that returns true
+
+    :param list[tuple or dict] nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
+    :rtype: types.FunctionType
+    """
+    nodes = _hash_node_list(nodes)
 
     @node_predicate
     def node_exclusion_filter(data):
@@ -271,3 +291,23 @@ def node_exclusion_filter_builder(nodes):
         return node_to_tuple(data) not in nodes
 
     return node_exclusion_filter
+
+
+def node_inclusion_filter_builder(nodes):
+    """Builds a function that returns true
+
+    :param list[tuple or dict] nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
+    :rtype: types.FunctionType
+    """
+    nodes = _hash_node_list(nodes)
+
+    @node_predicate
+    def node_inclusion_filter(data):
+        """Returns true if the node is in the given set of nodes
+
+        :param dict data: A PyBEL data dictionary
+        :rtype: bool
+        """
+        return node_to_tuple(data) in nodes
+
+    return node_inclusion_filter

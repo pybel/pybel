@@ -600,3 +600,6 @@ belns_encodings = {
 }
 
 BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))
+
+#: The default location of PyBEL Web
+DEFAULT_SERVICE_URL = 'https://pybel.scai.fraunhofer.de'

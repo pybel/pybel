@@ -5,13 +5,12 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_ONLINE, GMOD, INCREASES
 from pybel.dsl import (
-    abundance, activity, degradation, entity, gene, gmod, hgvs, pmod, protein, secretion,
-    translocation,
+    abundance, activity, degradation, entity, gene, gmod, hgvs, pmod, protein, secretion, translocation,
 )
 from pybel.struct.filters.node_predicates import (
-    has_activity, has_causal_in_edges, has_causal_out_edges,
-    has_gene_modification, has_hgvs, has_protein_modification, has_variant, is_abundance, is_degraded, is_gene,
-    is_pathology, is_protein, is_translocated, keep_node_permissive, node_exclusion_filter_builder, not_pathology,
+    has_activity, has_causal_in_edges, has_causal_out_edges, has_gene_modification, has_hgvs, has_protein_modification,
+    has_variant, is_abundance, is_degraded, is_gene, is_pathology, is_protein, is_translocated, keep_node_permissive,
+    node_exclusion_filter_builder, node_inclusion_filter_builder, not_pathology,
 )
 
 p1 = protein(name='BRAF', namespace='HGNC')
@@ -257,3 +256,56 @@ class TestPredicate(unittest.TestCase):
         self.assertTrue(f(g, u))
         self.assertTrue(f(g, v))
         self.assertTrue(f(g, w))
+
+    def test_node_inclusion_data(self):
+        g = BELGraph()
+
+        u = protein(name='S100b', namespace='MGI')
+        v = abundance(name='nitric oxide', namespace='CHEBI')
+        w = abundance(name='cortisol', namespace='CHEBI', identifier='17650')
+
+        g.add_node_from_data(u)
+        g.add_node_from_data(v)
+        g.add_node_from_data(w)
+
+        f = node_inclusion_filter_builder([u])
+
+        self.assertTrue(f(u))
+        self.assertFalse(f(v))
+        self.assertFalse(f(w))
+
+        f = node_inclusion_filter_builder([u, v])
+
+        self.assertTrue(f(u))
+        self.assertTrue(f(v))
+        self.assertFalse(f(w))
+
+        f = node_inclusion_filter_builder([])
+
+        self.assertFalse(f(u))
+        self.assertFalse(f(v))
+        self.assertFalse(f(w))
+
+    def test_node_inclusion_tuples(self):
+        g = BELGraph()
+        u = g.add_node_from_data(protein(name='S100b', namespace='MGI'))
+        v = g.add_node_from_data(abundance(name='nitric oxide', namespace='CHEBI'))
+        w = g.add_node_from_data(abundance(name='cortisol', namespace='CHEBI', identifier='17650'))
+
+        f = node_inclusion_filter_builder([u])
+
+        self.assertTrue(f(g, u))
+        self.assertFalse(f(g, v))
+        self.assertFalse(f(g, w))
+
+        f = node_inclusion_filter_builder([u, v])
+
+        self.assertTrue(f(g, u))
+        self.assertTrue(f(g, v))
+        self.assertFalse(f(g, w))
+
+        f = node_inclusion_filter_builder([])
+
+        self.assertFalse(f(g, u))
+        self.assertFalse(f(g, v))
+        self.assertFalse(f(g, w))

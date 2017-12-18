@@ -49,6 +49,18 @@ def pmod(name, code=None, position=None, namespace=None, identifier=None):
     :param str namespace: The namespace to which the name of this modification belongs
     :param str identifier: The identifier of the name of the modification
     :rtype: dict
+
+    Example from BEL default namespace:
+
+    >>> pmod('Ph', code='Thr', position=308)
+
+    Example from custom namespace:
+
+    >>> pmod(name='protein phosphorylation', namespace='GO', code='Thr', position=308)
+
+    Example from custom namespace additionally qualified with identifier:
+
+    >>> pmod(name='protein phosphorylation', namespace='GO', identifier='GO:0006468', code='Thr', position=308)
     """
     rv = {
         KIND: PMOD,
@@ -75,8 +87,13 @@ def gmod(name, namespace=None, identifier=None):
     :param Optional[str] namespace: The namespace of the gene modification
     :param Optional[str] identifier: The identifier of the name in the database
 
-    Example:
-    >>> gene(namespace='HGNC', name='AKT1', variants=[gmod('Me')])
+    Example from BEL default namespace:
+
+    >>> gmod('Me')
+
+    Example from custom namespace:
+
+    >>> gmod(name='DNA methylation', namespace='GO', identifier='GO:0006306',)
     """
     rv = {
         KIND: GMOD,
@@ -97,6 +114,7 @@ def hgvs(variant):
     :rtype: dict
 
     Example:
+
     >>> protein(namespace='HGNC', name='AKT1', variants=[hgvs('p.Ala127Tyr')])
     """
     return {KIND: HGVS, IDENTIFIER: variant}

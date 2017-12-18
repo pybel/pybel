@@ -5,13 +5,13 @@
 import requests
 
 from .nodelink import to_json
+from ..constants import DEFAULT_SERVICE_URL
 
 __all__ = [
     'to_web',
     'from_web',
 ]
 
-DEFAULT_SERVICE_URL = 'https://pybel.scai.fraunhofer.de'
 RECIEVE_ENDPOINT = '/api/receive'
 
 
@@ -19,7 +19,7 @@ def to_web(graph, host=None):
     """Sends a graph to the receiver service and returns the :mod:`requests` response object
 
     :param pybel.BELGraph graph: A BEL network
-    :param str host: The location of the PyBEL web server. Defaults to :data:`DEFAULT_SERVICE_URL`
+    :param Optional[str] host: The location of the PyBEL web server. Defaults to :data:`pybel.constants.DEFAULT_SERVICE_URL`
     :return: The response object from :mod:`requests`
     :rtype: requests.Response
     """
@@ -33,7 +33,7 @@ def from_web(network_id, service=None):
     authentication.
 
     :param int network_id: The PyBEL web network identifier
-    :param service: The location of the PyBEL web server. Defaults to :data:`DEFAULT_SERVICE_URL`
+    :param Optional[str] service: The location of the PyBEL web server. Defaults to :data:`pybel.constants.DEFAULT_SERVICE_URL`
     :rtype: pybel.BELGraph
 
     .. warning:: This is not implemented yet.

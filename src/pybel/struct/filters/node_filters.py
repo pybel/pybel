@@ -100,7 +100,7 @@ def get_nodes(graph, node_filters=None):
     :return: The set of nodes passing the filters
     :rtype: set[tuple]
     """
-    return set(filter_nodes(graph, node_filters))
+    return set(filter_nodes(graph, node_filters=node_filters))
 
 
 def count_passed_node_filter(graph, node_filters=None):
