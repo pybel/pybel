@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from functools import wraps
+
 from ..graph import BELGraph
 from ...constants import (
     ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND,
@@ -21,6 +23,7 @@ def node_predicate(fn):
     :rtype: types.FunctionType
     """
 
+    @wraps(f)
     def wrapped(*args):
         if not args:
             raise ValueError
