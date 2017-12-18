@@ -15,14 +15,30 @@ A general use for an edge filter function is to use the built-in :func:`filter` 
 
 from collections import Iterable
 
-from .edge_predicates import edge_has_provenance
+from .edge_predicates import has_provenance, keep_edge_permissive
 
 __all__ = [
+    'invert_edge_filter',
     'concatenate_edge_filters',
     'filter_edges',
     'count_passed_edge_filter',
     'filter_qualified_edges',
 ]
+
+
+def invert_edge_filter(edge_filter):
+    """Builds a filter that is the inverse of the given filter
+
+    :param edge_filter: An edge filter function (graph, node, node, key, data) -> bool
+    :type edge_filter: types.FunctionType
+    :return: An edge filter function (graph, node, node, key, data) -> bool
+    :rtype: types.FunctionType
+    """
+
+    def inverse_filter(graph, u, v, k):
+        return not edge_filter(graph, u, v, k)
+
+    return inverse_filter
 
 
 def concatenate_edge_filters(edge_filters=None):
@@ -36,7 +52,7 @@ def concatenate_edge_filters(edge_filters=None):
 
     # If no filters are given, then return the trivially permissive filter
     if not edge_filters:
-        return lambda graph, u, v, k, d: True
+        return keep_edge_permissive
 
     # If something that isn't a list or tuple is given, assume it's a function and return it
     if not isinstance(edge_filters, Iterable):
@@ -48,19 +64,18 @@ def concatenate_edge_filters(edge_filters=None):
     if 1 == len(edge_filters):
         return edge_filters[0]
 
-    def concatenated_edge_filter(graph, u, v, k, d):
+    def concatenated_edge_filter(graph, u, v, k):
         """Passes only for an edge that pass all enclosed filters
 
         :param BELGraph graph: A BEL Graph
         :param tuple u: A BEL node
         :param tuple v: A BEL node
         :param int k: The edge key between the given nodes
-        :param dict d: The edge data dictionary
         :return: If the edge passes all enclosed filters
         :rtype: bool
         """
         return all(
-            edge_filter(graph, u, v, k, d)
+            edge_filter(graph, u, v, k)
             for edge_filter in edge_filters
         )
 
@@ -79,13 +94,13 @@ def filter_edges(graph, edge_filters=None):
 
     # If no filters are given, return the standard edge iterator
     if not edge_filters:
-        for u, v, k, d in graph.edges_iter(keys=True, data=True):
-            yield u, v, k, d
+        for u, v, k in graph.edges_iter(keys=True):
+            yield u, v, k
     else:
-        concatenated_edge_filter = concatenate_edge_filters(edge_filters)
-        for u, v, k, d in graph.edges_iter(keys=True, data=True):
-            if concatenated_edge_filter(graph, u, v, k, d):
-                yield u, v, k, d
+        concatenated_edge_filter = concatenate_edge_filters(edge_filters=edge_filters)
+        for u, v, k in graph.edges_iter(keys=True):
+            if concatenated_edge_filter(graph, u, v, k):
+                yield u, v, k
 
 
 def count_passed_edge_filter(graph, edge_filters=None):
@@ -107,4 +122,4 @@ def filter_qualified_edges(graph):
     :return: An iterator over edges with both a citation and evidence
     :rtype: iter[tuple]
     """
-    return filter_edges(graph, edge_filters=[edge_has_provenance])
+    return filter_edges(graph, edge_filters=[has_provenance])

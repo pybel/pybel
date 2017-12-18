@@ -1,28 +1,70 @@
 # -*- coding: utf-8 -*-
 
-from ...constants import CITATION, CITATION_TYPE, CITATION_TYPE_PUBMED, DIRECT_CAUSAL_RELATIONS, RELATION
+from functools import wraps
+
+from ..graph import BELGraph
+from ...constants import (
+    ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_TYPE, CITATION_TYPE_PUBMED,
+    CORRELATIVE_RELATIONS, DIRECT_CAUSAL_RELATIONS, EVIDENCE, RELATION,
+)
 
 __all__ = [
-    'edge_data_has_pubmed_citation',
-    'edge_has_pubmed_citation',
+    'edge_predicate',
+    'has_pubmed',
+    'has_provenance',
+    'has_authors',
+    'is_causal_relation',
+    'is_direct_causal_relation',
+    'is_associative_relation',
+    'has_polarity',
 ]
 
 
-def keep_edge_permissive(graph, u, v, k, d):
+def edge_predicate(f):
+    """Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
+    sure that it can also accept a pair of arguments, a BELGraph and a PyBEL node tuple as well.
+
+    :type f: types.FunctionType
+    :rtype: types.FunctionType
+    """
+
+    @wraps(f)
+    def wrapped(*args):
+        x = args[0]
+
+        if isinstance(x, BELGraph):
+            u, v, k = args[1:4]
+            return f(x.edge[u][v][k])
+
+        return f(*args)
+
+    return wrapped
+
+
+@edge_predicate
+def keep_edge_permissive(data):
     """Passes for all edges
 
-    :param BELGraph graph: A BEL Graph
-    :param tuple u: A BEL node
-    :param tuple v: A BEL node
-    :param int k: The edge key between the given nodes
-    :param dict d: The edge data dictionary
+    :param dict data: A PyBEL edge data dictionary from a :class:`pybel.BELGraph`
     :return: Always returns :code:`True`
     :rtype: bool
     """
     return True
 
 
-def edge_data_has_pubmed_citation(data):
+@edge_predicate
+def has_provenance(data):
+    """Passes for edges with provenance information (i.e. citation and evidence)
+
+    :param dict data: The edge data dictionary
+    :return: If the edge has both a citation and and evidence entry
+    :rtype: bool
+    """
+    return CITATION in data and EVIDENCE in data
+
+
+@edge_predicate
+def has_pubmed(data):
     """Checks if the edge data dictionary has a PubMed citation
 
     :param dict data: A PyBEL edge data dictionary from a :class:`pybel.BELGraph`
@@ -32,38 +74,54 @@ def edge_data_has_pubmed_citation(data):
     return CITATION in data and CITATION_TYPE_PUBMED == data[CITATION][CITATION_TYPE]
 
 
-def edge_has_pubmed_citation(graph, u, v, k, data):
-    """Passes for edges that have PubMed citations
+@edge_predicate
+def has_authors(data):
+    """Passes for edges that have citations with authors
 
-    :param pybel.BELGraph graph: A BEL Graph
-    :param tuple u: A BEL node
-    :param tuple v: A BEL node
-    :param int k: The edge key between the given nodes
-    :param dict data: The edge data dictionary
-    :return: Is the edge's citation from :data:`PUBMED`?
+    :param dict data: A PyBEL edge data dictionary from a :class:`pybel.BELGraph`
+    :return: Does the edge's citation data dictionary have authors included?
     :rtype: bool
     """
-    return edge_data_has_pubmed_citation(data)
+    return CITATION in data and CITATION_AUTHORS in data[CITATION] and data[CITATION][CITATION_AUTHORS]
 
 
-def edge_has_provenance(graph, u, v, k, d):
-    """Passes for edges with provenance information (i.e. citation and evidence)
+@edge_predicate
+def is_causal_relation(data):
+    """Is the given relation causal?
 
-    :param BELGraph graph: A BEL Graph
-    :param tuple u: A BEL node
-    :param tuple v: A BEL node
-    :param int k: The edge key between the given nodes
-    :param dict d: The edge data dictionary
-    :return: If the edge has both a citation and and evidence entry
+    :param dict data: The PyBEL edge data dictionary
     :rtype: bool
     """
-    return graph.has_edge_citation(u, v, k) and graph.has_edge_evidence(u, v, k)
+    return data[RELATION] in CAUSAL_RELATIONS
 
 
-def edge_data_has_direct(data):
+@edge_predicate
+def is_direct_causal_relation(data):
     """Checks if the edge is a direct causal relation
 
-    :param dict data:
+    :param dict data: The PyBEL edge data dictionary
     :rtype: bool
     """
     return data[RELATION] in DIRECT_CAUSAL_RELATIONS
+
+
+@edge_predicate
+def is_associative_relation(data):
+    """Only passes on associative edges
+
+    :param dict data: The PyBEL edge data dictionary
+    :return: If the edge is a causal edge
+    :rtype: bool
+    """
+    return data[RELATION] == ASSOCIATION
+
+
+@edge_predicate
+def has_polarity(data):
+    """Only passes on polarized edges, belonging to the set :data:`pybel.constants.CAUSAL_RELATIONS` or
+
+    :param dict data: The edge data dictionary
+    :return: If the edge is a polar edge
+    :rtype: bool
+    """
+    return data[RELATION] in CAUSAL_RELATIONS | CORRELATIVE_RELATIONS

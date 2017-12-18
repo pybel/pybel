@@ -3,23 +3,34 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_ONLINE, GMOD, INCREASES
+from pybel.constants import (
+    ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE,
+    CITATION_TYPE, CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
+    EVIDENCE, GMOD, INCREASES, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION,
+)
 from pybel.dsl import (
-    abundance, activity, degradation, entity, gene, gmod, hgvs, pmod, protein, secretion, translocation,
+    abundance, activity, degradation, entity, fragment, gene, gmod, hgvs, pmod, protein, secretion,
+    translocation,
+)
+from pybel.struct.filters.edge_predicates import (
+    has_authors, has_polarity, has_provenance, has_pubmed,
+    is_associative_relation, is_causal_relation, is_direct_causal_relation,
 )
 from pybel.struct.filters.node_predicates import (
-    has_activity, has_causal_in_edges, has_causal_out_edges, has_gene_modification, has_hgvs, has_protein_modification,
-    has_variant, is_abundance, is_degraded, is_gene, is_pathology, is_protein, is_translocated, keep_node_permissive,
-    node_exclusion_filter_builder, node_inclusion_filter_builder, not_pathology,
+    has_activity, has_causal_in_edges, has_causal_out_edges, has_fragment,
+    has_gene_modification, has_hgvs, has_protein_modification, has_variant, is_abundance, is_causal_central,
+    is_causal_sink, is_causal_source, is_degraded, is_gene, is_pathology, is_protein, is_translocated,
+    keep_node_permissive, node_exclusion_filter_builder, node_inclusion_filter_builder, not_pathology,
 )
 
 p1 = protein(name='BRAF', namespace='HGNC')
 p2 = protein(name='BRAF', namespace='HGNC', variants=[hgvs('p.Val600Glu'), pmod('Ph')])
+p3 = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
 
 g1 = gene(name='BRAF', namespace='HGNC', variants=[gmod('Me')])
 
 
-class TestPredicate(unittest.TestCase):
+class TestNodePredicate(unittest.TestCase):
     def test_none(self):
         g = BELGraph()
         p1_tuple = g.add_node_from_data(p1)
@@ -36,6 +47,7 @@ class TestPredicate(unittest.TestCase):
         self.assertFalse(has_protein_modification(p1))
         self.assertFalse(has_gene_modification(p1))
         self.assertFalse(has_hgvs(p1))
+        self.assertFalse(has_fragment(p1))
 
     def test_p1_tuple_variants(self):
         g = BELGraph()
@@ -79,6 +91,19 @@ class TestPredicate(unittest.TestCase):
         self.assertTrue(has_protein_modification(g, p2_tuple))
         self.assertTrue(has_hgvs(g, p2_tuple))
 
+    def test_p3(self):
+        self.assertFalse(is_abundance(p3))
+        self.assertFalse(is_gene(p3))
+        self.assertTrue(is_protein(p3))
+        self.assertFalse(is_pathology(p3))
+        self.assertTrue(not_pathology(p3))
+
+        self.assertTrue(has_variant(p3))
+        self.assertFalse(has_gene_modification(p3))
+        self.assertFalse(has_protein_modification(p3))
+        self.assertFalse(has_hgvs(p3))
+        self.assertTrue(has_fragment(p3))
+
     def test_g1_variants(self):
         self.assertFalse(is_abundance(g1))
         self.assertTrue(is_gene(g1))
@@ -89,6 +114,11 @@ class TestPredicate(unittest.TestCase):
         self.assertTrue(has_gene_modification(g1), msg='Should have {}: {}'.format(GMOD, g1))
         self.assertFalse(has_protein_modification(g1))
         self.assertFalse(has_hgvs(g1))
+
+    def test_fragments(self):
+        self.assertTrue(has_fragment(
+            protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713, description='random text')])))
+        self.assertTrue(has_fragment(protein(name='APP', namespace='HGNC', variants=[fragment()])))
 
     def test_p1_active(self):
         """cat(p(HGNC:HSD11B1)) increases deg(a(CHEBI:cortisol))"""
@@ -309,3 +339,81 @@ class TestPredicate(unittest.TestCase):
         self.assertFalse(f(g, u))
         self.assertFalse(f(g, v))
         self.assertFalse(f(g, w))
+
+    def test_causal_source(self):
+        g = BELGraph()
+
+        g.add_edge(1, 2, relation=INCREASES)
+        g.add_edge(2, 3, relation=INCREASES)
+
+        self.assertTrue(is_causal_source(g, 1))
+        self.assertFalse(is_causal_central(g, 1))
+        self.assertFalse(is_causal_sink(g, 1))
+
+        self.assertFalse(is_causal_source(g, 2))
+        self.assertTrue(is_causal_central(g, 2))
+        self.assertFalse(is_causal_sink(g, 2))
+
+        self.assertFalse(is_causal_source(g, 3))
+        self.assertFalse(is_causal_central(g, 3))
+        self.assertTrue(is_causal_sink(g, 3))
+
+
+class TestEdgePredicate(unittest.TestCase):
+    def test_has_polarity_dict(self):
+        for relation in POLAR_RELATIONS:
+            self.assertTrue(has_polarity({RELATION: relation}))
+
+        self.assertFalse(has_polarity({RELATION: ASSOCIATION}))
+
+    def test_has_polarity(self):
+        g = BELGraph()
+
+        g.add_edge(1, 2, key=0, relation=INCREASES)
+        self.assertTrue(has_polarity(g, 1, 2, 0))
+
+        g.add_edge(2, 3, key=0, relation=ASSOCIATION)
+        self.assertFalse(has_polarity(g, 2, 3, 0))
+
+    def test_has_provenance(self):
+        self.assertFalse(has_provenance({}))
+        self.assertFalse(has_provenance({CITATION: {}}))
+        self.assertFalse(has_provenance({EVIDENCE: ''}))
+        self.assertTrue(has_provenance({CITATION: {}, EVIDENCE: ''}))
+
+    def test_has_pubmed(self):
+        self.assertTrue(has_pubmed({CITATION: {CITATION_TYPE: CITATION_TYPE_PUBMED}}))
+        self.assertFalse(has_pubmed({CITATION: {CITATION_TYPE: CITATION_TYPE_ONLINE}}))
+        self.assertFalse(has_pubmed({}))
+
+    def test_has_authors(self):
+        self.assertFalse(has_authors({}))
+        self.assertFalse(has_authors({CITATION: {}}))
+        self.assertFalse(has_authors({CITATION: {CITATION_AUTHORS: []}}))
+        self.assertTrue(has_authors({CITATION: {CITATION_AUTHORS: ['One guy']}}))
+
+    def test_is_causal(self):
+        self.assertTrue(is_causal_relation({RELATION: INCREASES}))
+        self.assertTrue(is_causal_relation({RELATION: DECREASES}))
+        self.assertTrue(is_causal_relation({RELATION: DIRECTLY_INCREASES}))
+        self.assertTrue(is_causal_relation({RELATION: DIRECTLY_DECREASES}))
+
+        self.assertFalse(is_causal_relation({RELATION: ASSOCIATION}))
+        self.assertFalse(is_causal_relation({RELATION: POSITIVE_CORRELATION}))
+
+    def test_is_direct_causal(self):
+        self.assertTrue(is_direct_causal_relation({RELATION: DIRECTLY_INCREASES}))
+        self.assertTrue(is_direct_causal_relation({RELATION: DIRECTLY_DECREASES}))
+
+        self.assertFalse(is_direct_causal_relation({RELATION: INCREASES}))
+        self.assertFalse(is_direct_causal_relation({RELATION: DECREASES}))
+        self.assertFalse(is_direct_causal_relation({RELATION: ASSOCIATION}))
+        self.assertFalse(is_direct_causal_relation({RELATION: POSITIVE_CORRELATION}))
+
+    def test_is_association(self):
+        self.assertTrue(is_associative_relation({RELATION: ASSOCIATION}))
+        self.assertFalse(is_associative_relation({RELATION: INCREASES}))
+        self.assertFalse(is_associative_relation({RELATION: CAUSES_NO_CHANGE}))
+        self.assertFalse(is_associative_relation({RELATION: DECREASES}))
+        self.assertFalse(is_associative_relation({RELATION: DIRECTLY_INCREASES}))
+        self.assertFalse(is_associative_relation({RELATION: DIRECTLY_DECREASES}))

@@ -28,6 +28,9 @@ __all__ = [
     'has_causal_out_edges',
     'node_inclusion_filter_builder',
     'node_exclusion_filter_builder',
+    'is_causal_source',
+    'is_causal_sink',
+    'is_causal_central',
 ]
 
 
@@ -41,18 +44,14 @@ def node_predicate(f):
 
     @wraps(f)
     def wrapped(*args):
-        if not args:
-            raise ValueError
-
         x = args[0]
 
         if isinstance(x, BELGraph):
             return f(x.node[args[1]], *args[2:])
 
-        if isinstance(x, dict):
-            return f(*args)
-
-        raise ValueError
+        # Assume:
+        # if isinstance(x, dict):
+        return f(*args)
 
     return wrapped
 
@@ -311,3 +310,46 @@ def node_inclusion_filter_builder(nodes):
         return node_to_tuple(data) in nodes
 
     return node_inclusion_filter
+
+
+def is_causal_source(graph, node):
+    """Is the node is a causal source?
+
+    - Doesn't have any causal in edge(s)
+    - Does have causal out edge(s)
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param tuple node: A BEL node
+    :return: If the node is a causal source
+    :rtype: bool
+    """
+    # TODO reimplement to be faster
+    return not has_causal_in_edges(graph, node) and has_causal_out_edges(graph, node)
+
+
+def is_causal_sink(graph, node):
+    """Is the node is a causal sink?
+
+    - Does have causal in edge(s)
+    - Doesn't have any causal out edge(s)
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param tuple node: A BEL node
+    :return: If the node is a causal source
+    :rtype: bool
+    """
+    return has_causal_in_edges(graph, node) and not has_causal_out_edges(graph, node)
+
+
+def is_causal_central(graph, node):
+    """Is the node neither a causal sink nor a causal source?
+
+    - Does have causal in edges(s)
+    - Does have causal out edge(s)
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param tuple node: A BEL node
+    :return: If the node is neither a causal sink nor a causal source
+    :rtype: bool
+    """
+    return has_causal_in_edges(graph, node) and has_causal_out_edges(graph, node)

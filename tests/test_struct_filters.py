@@ -12,7 +12,7 @@ from pybel.struct.filters.node_predicates import keep_node_permissive
 
 
 def make_edge_iterator_set(it):
-    return {(u, v) for u, v, _, _ in it}
+    return {(u, v) for u, v, _ in it}
 
 
 class TestNodeFilters(unittest.TestCase):
@@ -78,10 +78,10 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual({(1, 2)}, edges)
 
     def test_concatenate_multiple_edge_filter(self):
-        def has_odd_source(graph, u, v, k, d):
+        def has_odd_source(graph, u, v, k):
             return u % 2 != 0
 
-        def has_even_target(graph, u, v, k, d):
+        def has_even_target(graph, u, v, k):
             return v % 2 == 0
 
         edges = make_edge_iterator_set(filter_edges(self.universe, [has_odd_source, has_even_target]))

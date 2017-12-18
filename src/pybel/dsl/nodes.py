@@ -16,6 +16,7 @@ __all__ = [
     'pmod',
     'gmod',
     'hgvs',
+    'fragment',
     'fusion_range',
     'protein_fusion',
     'rna_fusion',
@@ -118,6 +119,36 @@ def hgvs(variant):
     >>> protein(namespace='HGNC', name='AKT1', variants=[hgvs('p.Ala127Tyr')])
     """
     return {KIND: HGVS, IDENTIFIER: variant}
+
+
+def fragment(start=None, stop=None, description=None):
+    """Make a protein fragment dictionary
+
+    :param Optional[int or str] start: The starting position
+    :param Optional[int or str] stop: The stopping position
+    :param Optional[str] description: An optional description
+    :rtype: dict
+
+    Example of specified fragment:
+
+    >>> protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
+
+    Example of unspecified fragment:
+
+    >>> protein(name='APP', namespace='HGNC', variants=[fragment()])
+    """
+    rv = {KIND: FRAGMENT}
+
+    if start and stop:
+        rv[FRAGMENT_START] = start
+        rv[FRAGMENT_STOP] = stop
+    else:
+        rv[FRAGMENT_MISSING] = '?'
+
+    if description:
+        rv[FRAGMENT_DESCRIPTION] = description
+
+    return rv
 
 
 def _make_central_dogma_abundance(func, name=None, namespace=None, identifier=None, variants=None):
