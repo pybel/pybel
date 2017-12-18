@@ -29,6 +29,7 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
 """
 
 from six.moves.cPickle import load
+import warnings
 
 __all__ = [
     'from_indra_statements',
@@ -87,9 +88,14 @@ def to_indra(graph):
     :param pybel.BELGraph graph: A BEL graph
     :rtype: list[indra.statements.Statement]
 
-    .. warning:: Not implemented yet!
+    .. warning:: Not fully implemented yet! Needs the pybel_client branch of sorgerlab/indra
     """
-    raise NotImplementedError
+    warnings.warn('export to INDRA is not yet complete')
+    from indra.sources.pybel import PybelProcessor
+
+    pbp = PybelProcessor(graph)
+    pbp.get_statements()
+    return pbp.statements
 
 
 def from_biopax(path, name=None, version=None, description=None):
