@@ -42,7 +42,7 @@ __all__ = [
 def from_indra_statements(statements, name=None, version=None, description=None):
     """Imports a model from :mod:`indra`.
 
-    :param list[indra.statement.Statement] statements: A list of statements
+    :param list[indra.statements.Statement] statements: A list of statements
     :param str name: The name for the BEL graph
     :param str version: The version of the BEL graph
     :param str description: The description of the BEL graph
@@ -83,7 +83,7 @@ def from_indra_pickle(path, name=None, version=None, description=None):
 
 
 def to_indra(graph):
-    """Exports this graph as a list of INDRA statements.
+    """Exports this graph as a list of INDRA statements using `indra.sources.pybel.PybelProcessor`
 
     :param pybel.BELGraph graph: A BEL graph
     :rtype: list[indra.statements.Statement]
