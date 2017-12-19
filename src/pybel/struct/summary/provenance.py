@@ -3,6 +3,11 @@
 from ..filters.edge_predicates import has_pubmed
 from ...constants import CITATION, CITATION_REFERENCE
 
+__all__ = [
+    'iterate_pubmed_identifiers',
+    'get_pubmed_identifiers',
+]
+
 
 def iterate_pubmed_identifiers(graph):
     """Iterates over all PubMed identifiers in a graph

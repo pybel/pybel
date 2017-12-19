@@ -346,7 +346,7 @@ class QueryManager(LookupManager):
         :rtype: list[Edge]
         """
         if len(nodes) < 2:
-            raise ValueError
+            raise ValueError('not enough nodes given to induce over')
 
         node_ids = [node.id for node in nodes]
 

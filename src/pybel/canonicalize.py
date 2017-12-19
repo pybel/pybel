@@ -43,23 +43,24 @@ def postpend_location(bel_string, location_model):
 
 
 def variant_to_bel(tokens):
-    """
+    """Canonicalizes the variant dictionary produced by one of :func:`pybel.dsl.hgvs`, :func:`pybel.dsl.fragment`,
+    :func:`pybel.dsl.pmod`, or :func:`pybel.dsl.gmod`.
 
-    :param tokens:
+    :param dict tokens: A variant data dictionary
     :rtype: str
     """
     if tokens[KIND] == PMOD:
         if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             name = tokens[IDENTIFIER][NAME]
         else:
-            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])
+            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
         return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PMOD_ORDER[2:] if x in tokens))
 
     elif tokens[KIND] == GMOD:
         if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             name = tokens[IDENTIFIER][NAME]
         else:
-            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])
+            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
         return 'gmod({})'.format(name)
 
     elif tokens[KIND] == HGVS:
@@ -76,6 +77,8 @@ def variant_to_bel(tokens):
 
         return 'frag({})'.format(res)
 
+    raise ValueError('token kind was not valid: {}'.format(tokens[KIND]))
+
 
 def fusion_range_to_bel(tokens):
     """
@@ -85,6 +88,7 @@ def fusion_range_to_bel(tokens):
     """
     if FUSION_REFERENCE in tokens:
         return '{}.{}_{}'.format(tokens[FUSION_REFERENCE], tokens[FUSION_START], tokens[FUSION_STOP])
+
     return '?'
 
 
@@ -135,17 +139,15 @@ def node_to_bel(data):
 
     raise ValueError('Unknown values in node data: {}'.format(data))
 
-def _decanonicalize_edge_node(node, edge_data, node_position):
-    """Writes a node with its modifiers stored in the given edge
 
-    :param dict node: A PyBEL node data dictionaru
+def _decanonicalize_edge_node(node, edge_data, node_position):
+    """Canonicalizes a node with its modifiers stored in the given edge to a BEL string
+
+    :param dict node: A PyBEL node data dictionary
     :param dict edge_data: A PyBEL edge data dictionary
     :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
     :rtype: str
     """
-    if node_position not in {SUBJECT, OBJECT}:
-        raise ValueError('invalid node position: {}'.format(node_position))
-
     node_str = node_to_bel(node)
 
     if node_position not in edge_data:
@@ -156,35 +158,45 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
     if LOCATION in node_edge_data:
         node_str = postpend_location(node_str, node_edge_data[LOCATION])
 
-    if MODIFIER in node_edge_data and DEGRADATION == node_edge_data[MODIFIER]:
-        node_str = "deg({})".format(node_str)
+    modifier = node_edge_data.get(MODIFIER)
 
-    elif MODIFIER in node_edge_data and ACTIVITY == node_edge_data[MODIFIER]:
-        node_str = "act({}".format(node_str)
-        if EFFECT in node_edge_data and node_edge_data[EFFECT]:  # TODO remove and node_edge_data[EFFECT]
-            ma = node_edge_data[EFFECT]
+    if modifier is None:
+        return node_str
 
-            if ma[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-                node_str = "{}, ma({}))".format(node_str, ma[NAME])
-            else:
-                node_str = "{}, ma({}:{}))".format(node_str, ma[NAMESPACE], ensure_quotes(ma[NAME]))
-        else:
-            node_str = "{})".format(node_str)
+    if DEGRADATION == modifier:
+        return "deg({})".format(node_str)
 
-    elif MODIFIER in node_edge_data and TRANSLOCATION == node_edge_data[MODIFIER]:
+    effect = node_edge_data.get(EFFECT)
+
+    if ACTIVITY == modifier:
+        if effect is None:
+            return "act({})".format(node_str)
+
+        if effect[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
+            return "act({}, ma({}))".format(node_str, effect[NAME])
+
+        return "act({}, ma({}:{}))".format(node_str, effect[NAMESPACE], ensure_quotes(effect[NAME]))
+
+    if TRANSLOCATION == modifier:
+        if effect is None:
+            return 'tloc({})'.format(node_str)
+
+        to_loc_data = effect[TO_LOC]
+        from_loc_data = effect[FROM_LOC]
+
         from_loc = "fromLoc({}:{})".format(
-            node_edge_data[EFFECT][FROM_LOC][NAMESPACE],
-            ensure_quotes(node_edge_data[EFFECT][FROM_LOC][NAME])
+            from_loc_data[NAMESPACE],
+            ensure_quotes(from_loc_data[NAME])
         )
 
         to_loc = "toLoc({}:{})".format(
-            node_edge_data[EFFECT][TO_LOC][NAMESPACE],
-            ensure_quotes(node_edge_data[EFFECT][TO_LOC][NAME])
+            to_loc_data[NAMESPACE],
+            ensure_quotes(to_loc_data[NAME])
         )
 
-        node_str = "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
+        return "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
 
-    return node_str
+    raise ValueError('invalid modifier: {}'.format(modifier))
 
 
 def edge_to_bel(u, v, data, sep=None):
@@ -361,7 +373,7 @@ def _canonicalize_edge_modifications(data):
     result = []
 
     if data[MODIFIER] == ACTIVITY:
-        t = (ACTIVITY, data[ACTIVITY])
+        t = (ACTIVITY, data[EFFECT])
 
         if EFFECT in data:
             t += (data[EFFECT][NAMESPACE], data[EFFECT][NAME])
