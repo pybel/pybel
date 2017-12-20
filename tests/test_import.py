@@ -11,9 +11,9 @@ import networkx as nx
 from six import BytesIO, StringIO
 
 from pybel import (
-    BELGraph, from_bytes, from_cx, from_cx_jsons, from_json, from_json_file, from_jsons, from_lines,
-    from_ndex, from_path, from_pickle, from_url, to_bel_lines, to_bytes, to_cx, to_cx_jsons, to_graphml, to_json,
-    to_json_file, to_jsons, to_ndex, to_pickle,
+    BELGraph, from_bytes, from_cx, from_cx_jsons, from_json, from_json_file, from_jsons, from_lines, from_ndex,
+    from_path, from_pickle, from_url, to_bel_lines, to_bytes, to_csv, to_cx, to_cx_jsons, to_graphml, to_gsea, to_json,
+    to_json_file, to_jsons, to_ndex, to_pickle, to_sif,
 )
 from pybel.constants import *
 from pybel.dsl import gene
@@ -25,9 +25,9 @@ from pybel.struct.summary import get_syntax_errors
 from pybel.tokens import node_to_tuple
 from pybel.utils import hash_node
 from tests.constants import (
-    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin,
-    TestTokenParserBase, citation_1, evidence_1, test_bel_isolated, test_bel_misordered, test_bel_simple,
-    test_bel_slushy, test_bel_thorough, test_citation_dict, test_evidence_text, test_set_evidence,
+    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin, TestTokenParserBase, citation_1,
+    evidence_1, test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough,
+    test_citation_dict, test_evidence_text, test_set_evidence,
 )
 from tests.mocks import mock_bel_resources
 
@@ -124,6 +124,33 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         with open(path, 'wb') as f:
             to_graphml(self.thorough_graph, f)
+
+        os.close(handle)
+        os.remove(path)
+
+    def test_thorough_csv(self):
+        handle, path = tempfile.mkstemp()
+
+        with open(path, 'wb') as f:
+            to_csv(self.thorough_graph, f)
+
+        os.close(handle)
+        os.remove(path)
+
+    def test_thorough_sif(self):
+        handle, path = tempfile.mkstemp()
+
+        with open(path, 'wb') as f:
+            to_sif(self.thorough_graph, f)
+
+        os.close(handle)
+        os.remove(path)
+
+    def test_thorough_gsea(self):
+        handle, path = tempfile.mkstemp()
+
+        with open(path, 'wb') as f:
+            to_gsea(self.thorough_graph, f)
 
         os.close(handle)
         os.remove(path)
