@@ -29,15 +29,12 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering :: Bio-Informatics'
 ]
 INSTALL_REQUIRES = [
+    'networkx==1.11',
+    'sqlalchemy==1.1.15',
+    'click',
     'requests',
     'requests_file',
-    'networkx==1.11',
     'pyparsing',
-    'py2neo',
-    'click',
-    'sqlalchemy',
-    'onto2nx',
-    'ndex2',
     'six',
 ]
 
@@ -48,7 +45,10 @@ if sys.version_info < (3, ):
 
 EXTRAS_REQUIRE = {
     'indra': ['indra'],
-    'deployment': ['artifactory']
+    'deployment': ['artifactory'],
+    'owl': ['onto2nx'],
+    'ndex': ['ndex2'],
+    'neo4j': ['py2neo'],
 }
 TESTS_REQUIRE = [
     'mock',
