@@ -131,7 +131,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_csv(self):
         handle, path = tempfile.mkstemp()
 
-        with open(path, 'wb') as f:
+        with open(path, 'w') as f:
             to_csv(self.thorough_graph, f)
 
         os.close(handle)
@@ -140,7 +140,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_sif(self):
         handle, path = tempfile.mkstemp()
 
-        with open(path, 'wb') as f:
+        with open(path, 'w') as f:
             to_sif(self.thorough_graph, f)
 
         os.close(handle)
@@ -149,7 +149,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_gsea(self):
         handle, path = tempfile.mkstemp()
 
-        with open(path, 'wb') as f:
+        with open(path, 'w') as f:
             to_gsea(self.thorough_graph, f)
 
         os.close(handle)
