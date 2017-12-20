@@ -367,12 +367,17 @@ def _canonicalize_edge_modifications(data):
     :param dict data: A PyBEL edge data dictionary
     :rtype: tuple
     """
-    if MODIFIER not in data:
-        raise ValueError('Modifier not in data')
+    if data is None:
+        return
+
+    modifier = data.get(MODIFIER)
+
+    if modifier is None:
+        return
 
     result = []
 
-    if data[MODIFIER] == ACTIVITY:
+    if modifier == ACTIVITY:
         t = (ACTIVITY, data[EFFECT])
 
         if EFFECT in data:
@@ -380,11 +385,11 @@ def _canonicalize_edge_modifications(data):
 
         result.append(t)
 
-    elif data[MODIFIER] == DEGRADATION:
+    elif modifier == DEGRADATION:
         t = (DEGRADATION,)
         result.append(t)
 
-    elif data[MODIFIER] == TRANSLOCATION:
+    elif modifier == TRANSLOCATION:
         t = (
             TRANSLOCATION,
             data[EFFECT][FROM_LOC][NAMESPACE],
@@ -416,6 +421,6 @@ def canonicalize_edge(data):
 
     return (
         data[RELATION],
-        _canonicalize_edge_modifications(subject) if subject else tuple(),
-        _canonicalize_edge_modifications(obj) if obj else tuple(),
+        _canonicalize_edge_modifications(subject),
+        _canonicalize_edge_modifications(obj),
     )

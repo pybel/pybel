@@ -16,6 +16,9 @@ __all__ = [
     'cell_surface_expression',
 ]
 
+intracellular = entity(name='intracellular', namespace='GOCC')
+extracellular = entity(name='extracellular space', namespace='GOCC')
+surface = entity(name='cell surface', namespace='GOCC')
 
 def _activity_helper(modifier, location=None):
     """Help make activity function
@@ -84,9 +87,10 @@ def secretion():
     :rtype: dict
     """
     return translocation(
-        from_loc=entity(name='intracellular', namespace='GOCC'),
-        to_loc=entity(name='extracellular space', namespace='GOCC')
+        from_loc=intracellular,
+        to_loc=extracellular
     )
+
 
 def cell_surface_expression():
     """Convenient wrapper representing the :func:`translocation` from the intracellular location to the cell surface
@@ -94,6 +98,6 @@ def cell_surface_expression():
     :rtype: dict
     """
     return translocation(
-        from_loc=entity(name='intracellular', namespace='GOCC'),
-        to_loc=entity(name='cell surface', namespace='GOCC')
+        from_loc=intracellular,
+        to_loc=surface,
     )
