@@ -263,9 +263,9 @@ def complex_abundance(members, namespace=None, name=None, identifier=None):
     """Returns the node data dictionary for a complex, with optional ability to specify a name
 
     :param list[dict] members: A list of PyBEL node data dictionaries
-    :param str namespace: The namespace from which the name originates
-    :param str name: The name of the complex
-    :param str identifier: The identifier in the namespace in which the name originates
+    :param Optional[str] namespace: The namespace from which the name originates
+    :param Optional[str] name: The name of the complex
+    :param Optional[str] identifier: The identifier in the namespace in which the name originates
     :rtype: dict
     """
     rv = {

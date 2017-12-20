@@ -13,7 +13,7 @@ def entity(namespace, name=None, identifier=None):
     :rtype: dict
     """
     if name is None and identifier is None:
-        raise PyBELDSLException('cannot create an entity without neither a name nor identifier')
+        raise PyBELDSLException('cannot create an entity with neither a name nor identifier')
 
     rv = {
         NAMESPACE: namespace,
