@@ -11,8 +11,10 @@ __all__ = [
     'mirna',
     'protein',
     'complex_abundance',
+    'composite_abundance',
     'bioprocess',
     'pathology',
+    'reaction',
     'pmod',
     'gmod',
     'hgvs',
@@ -257,6 +259,20 @@ def pathology(namespace, name=None, identifier=None):
     :rtype: dict
     """
     return _make_abundance(PATHOLOGY, name=name, namespace=namespace, identifier=identifier)
+
+def reaction(reactants, products):
+    """Creates a reaction data dictionary
+
+    :param list[dict] reactants: A list of PyBEL node data dictionaries representing the reactants
+    :param list[dict] products: A list of PyBEL node data dictionaries representing the products
+    :rtype: dict
+    """
+    rv = {
+        FUNCTION: REACTION,
+        REACTANTS: reactants,
+        PRODUCTS: products
+    }
+    return rv
 
 
 def complex_abundance(members, namespace=None, name=None, identifier=None):
