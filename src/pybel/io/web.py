@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""This module facilitates rudimentary data exchange with `PyBEL Web <https://pybel.scai.fraunhofer.de>`_."""
+"""This module facilitates rudimentary data exchange with `PyBEL Web <https://pybel.scai.fraunhofer.de>`_.
+
+.. warning::
+
+    These functions are hard to unit test because they rely on a web service that isn't *exactly* stable yet. Stay
+    tuned!
+"""
 
 import requests
 

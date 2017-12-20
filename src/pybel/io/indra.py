@@ -26,6 +26,11 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
     # Write to BEL file
     pybel.to_bel_path(belgraph, 'simple_pybel.bel')
 
+.. warning::
+
+    These functions are hard to unit test because they rely on a whole set of java dependencies and will likely
+    not be for a while.
+
 """
 
 from six.moves.cPickle import load
