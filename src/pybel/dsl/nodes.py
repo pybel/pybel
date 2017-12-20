@@ -257,8 +257,13 @@ def pathology(namespace, name=None, identifier=None):
     :param str name: The database's preferred name or label for this entity
     :param str identifier: The database's identifier for this entity
     :rtype: dict
+
+    Example:
+
+    >>> pathology(namespace='DO', name='Alzheimer Disease')
     """
     return _make_abundance(PATHOLOGY, name=name, namespace=namespace, identifier=identifier)
+
 
 def reaction(reactants, products):
     """Creates a reaction data dictionary
@@ -266,6 +271,10 @@ def reaction(reactants, products):
     :param list[dict] reactants: A list of PyBEL node data dictionaries representing the reactants
     :param list[dict] products: A list of PyBEL node data dictionaries representing the products
     :rtype: dict
+
+    Example:
+
+    >>> reaction([protein(namespace='HGNC', name='KNG1')], [abundance(namespace='CHEBI', name='bradykinin')])
     """
     rv = {
         FUNCTION: REACTION,
