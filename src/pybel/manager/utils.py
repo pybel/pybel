@@ -22,7 +22,7 @@ def parse_owl(url):
 
 
 def parse_owl_xml(url):
-    """Downloads and parses an OWL resource in OWL/XML format
+    """Downloads and parses an OWL resource in OWL/XML format using :class:`onto2nx.parse_owl_xml.OWLParser`
     
     :param str url: The URL to the OWL resource
     :return: A directional graph representing the OWL document's hierarchy

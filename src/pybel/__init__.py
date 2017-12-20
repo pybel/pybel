@@ -37,6 +37,48 @@ Clone the repository from `GitHub <https://github.com/pybel/pybel>`_ and install
    $ python3 -m pip install -e .
 
 
+Extras
+------
+The ``setup.py`` makes use of the ``extras_require`` argument of :func:`setuptools.setup` in order to make some heavy
+packages that support special features of PyBEL optional to install, in order to make the installation more lean by
+default. A single extra can be installed like :code:`python3 -m pip install -e .[ndex]` or multiple can be installed
+using a list like :code:`python3 -m pip install -e .[ndex,owl]`.The extras are:
+
+ndex
+~~~~
+ndex2 supports download and upload to the `Network Data Exchange <ndexbio.org>`_.
+
+.. seealso::
+
+    - :func:`pybel.to_ndex`
+    - :func:`pybel.from_ndex`
+
+owl
+~~~
+This extra installs support for using OWL ontologies as namespaces via the :mod:`onto2nx` package. In the future,
+this extra will include other wrappers around packages like :mod:`obonet` for OBO support.
+
+neo4j
+~~~~~
+This extension installs the :mod:`py2neo` package to support upload and download to Neo4j databases.
+
+.. seealso::
+
+    - :func:`pybel.to_neo4j`
+
+indra
+~~~~~
+This extra installs support for :mod:`indra`, the integrated network dynamical reasoner and assembler. Because it also
+represents biology in BEL-like statements, many statements from PyBEL can be converted to INDRA, and visa-versa. This
+package also enables the import of BioPAX, SBML, and SBGN into BEL.
+
+.. seealso::
+
+    - :func:`pybel.from_biopax`
+    - :func:`pybel.from_indra_statements`
+    - :func:`pybel.from_indra_pickle`
+    - :func:`pybel.to_indra`
+
 Caveats
 -------
 

@@ -5,6 +5,7 @@ omit =
     src/pybel/__main__.py
     src/pybel/cli.py
     tests/*
+    docs/*
 
 [paths]
 source =
