@@ -2,6 +2,7 @@
 
 import datetime
 
+from six import string_types
 from sqlalchemy import and_, func, or_
 
 from .lookup_manager import LookupManager
@@ -164,11 +165,11 @@ class QueryManager(LookupManager):
                 query = query.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
                 query = query.filter(AnnotationEntry.name.in_(list(annotation.values())))
 
-            elif isinstance(annotation, str):
+            elif isinstance(annotation, string_types):
                 query = query.filter(AnnotationEntry.name.like(annotation))
 
         if source:
-            if isinstance(source, str):
+            if isinstance(source, string_types):
                 source = self.query_nodes(bel=source)
                 if len(source) == 0:
                     return []
@@ -182,7 +183,7 @@ class QueryManager(LookupManager):
                 #        q = q.filter(Edge.source.in_(source))
 
         if target:
-            if isinstance(target, str):
+            if isinstance(target, string_types):
                 target = self.query_nodes(bel=target)[0]
 
             query = query.filter(Edge.target == target)
@@ -201,14 +202,14 @@ class QueryManager(LookupManager):
                 elif isinstance(citation, list) and isinstance(citation[0], Citation):
                     query = query.filter(Evidence.citation.in_(citation))
 
-                elif isinstance(citation, str):
+                elif isinstance(citation, string_types):
                     query = query.join(Citation).filter(Citation.reference.like(citation))
 
             if evidence:
                 if isinstance(evidence, Evidence):
                     query = query.filter(Edge.evidence == evidence)
 
-                elif isinstance(evidence, str):
+                elif isinstance(evidence, string_types):
                     query = query.filter(Evidence.text.like(evidence))
 
         if property:
@@ -243,7 +244,7 @@ class QueryManager(LookupManager):
         else:
             if author is not None:
                 query = query.join(Author, Citation.authors)
-                if isinstance(author, str):
+                if isinstance(author, string_types):
                     query = query.filter(Author.name.like(author))
                 elif isinstance(author, list):
                     query = query.filter(Author.name.in_(author))
@@ -260,7 +261,7 @@ class QueryManager(LookupManager):
             if date:
                 if isinstance(date, datetime.date):
                     query = query.filter(Citation.date == date)
-                elif isinstance(date, str):
+                elif isinstance(date, string_types):
                     query = query.filter(Citation.date == parse_datetime(date))
 
             if evidence_text:
