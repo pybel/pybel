@@ -296,38 +296,6 @@ class QueryManager(LookupManager):
             for citation in citations
         ]
 
-    def query_node_properties(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
-        """Builds and runs a query over all property entries in the database.
-
-        :param int property_id: Database primary identifier.
-        :param str participant: The participant that is effected by the property (OBJECT or SUBJECT)
-        :param str modifier: The modifier of the property.
-        :param bool as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
-                             :class:`Property` objects.
-        :rtype: list[Property]
-        """
-        q = self.session.query(Property)
-
-        if property_id:
-            q = q.filter_by(id=property_id)
-
-        else:
-            if participant:
-                q = q.filter(Property.participant.like(participant))
-
-            if modifier:
-                q = q.filter(Property.modifier.like(modifier))
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        return [
-            prop.data
-            for prop in result
-        ]
-
     def query_edges_by_pmid(self, pubmed_identifiers):
         """Gets all edges annotated to the given documents
 
