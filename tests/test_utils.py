@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import time
 import unittest
 
 import networkx as nx
+from six import string_types
 
 import pybel.utils
 from pybel.canonicalize import node_to_bel, postpend_location
@@ -12,6 +14,7 @@ from pybel.parser.parse_exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.utils import nest
 from pybel.resources.definitions import get_bel_resource
 from pybel.resources.exc import EmptyResourceError
+from pybel.resources.utils import get_iso_8601_date
 from pybel.utils import flatten_citation, list2tuple, tokenize_version
 from tests.constants import test_an_1, test_ns_empty
 from tests.mocks import mock_bel_resources
@@ -64,6 +67,13 @@ class TestRandom(unittest.TestCase):
         t = list2tuple(l)
 
         self.assertEqual(t, e)
+
+    def test_get_date(self):
+        d = get_iso_8601_date()
+        self.assertIsInstance(d, string_types)
+        self.assertEqual(d[:4], time.strftime('%Y'))
+        self.assertEqual(d[4:6], time.strftime('%m'))
+        self.assertEqual(d[6:8], time.strftime('%d'))
 
 
 class TestUtils(unittest.TestCase):

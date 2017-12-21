@@ -13,7 +13,8 @@ import sqlalchemy.exc
 import pybel
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
-from pybel.dsl import gene, protein
+from pybel.dsl import gene, protein, translocation, secretion,cell_surface_expression
+from pybel.dsl.edges import intracellular, extracellular
 from pybel.manager import models
 from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
 from pybel.utils import hash_citation, hash_evidence, hash_node
@@ -201,36 +202,23 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
 
         self.manager.insert_graph(graph, store_parts=True)
 
+        # TODO check that the database doesn't have anything for TEST in it
+
     @mock_bel_resources
     def test_translocation(self, mock):
         """This test checks that a translocation gets in the database properly"""
         graph = BELGraph(name='dummy graph', version='0.0.1', description="Test translocation network")
 
-        u = graph.add_node_from_data(protein(name='YFG', namespace='HGNC'))
-        v = graph.add_node_from_data(protein(name='YFG2', namespace='HGNC'))
-
         graph.add_qualified_edge(
-            u,
-            v,
-            evidence='dummy text',
-            citation='1234',
-            relation=ASSOCIATION,
-            subject_modifier={
-                MODIFIER: TRANSLOCATION,
-                EFFECT: {
-                    FROM_LOC: {
-                        NAMESPACE: GOCC_KEYWORD,
-                        NAME: 'intracellular'
-                    },
-                    TO_LOC: {
-                        NAMESPACE: GOCC_KEYWORD,
-                        NAME: 'extracellular space'
-                    }
-                }
-            }
+            protein(name='F2', namespace='HGNC'),
+            protein(name='EDN1', namespace='HGNC'),
+            evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
+            citation='10473669',
+            relation=INCREASES,
+            subject_modifier=secretion()
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['F2', 'EDN1']})
 
         self.manager.insert_graph(graph, store_parts=True)
 
@@ -294,31 +282,29 @@ class TestQuery(TemporaryCacheMixin):
         rv = self.manager.query_edges(bel="p(HGNC:FOS) increases p(HGNC:JUN)")
         self.assertEqual(1, len(rv))
 
-    @unittest.skip
     def test_query_edge_by_relation_wildcard(self):
         # relation like, data
-        increased_list = self.manager.query_edges(relation='increase%', as_dict_list=True)
-        self.assertEqual(len(increased_list), 2)
+        increased_list = self.manager.query_edges(relation='increase%')
+        self.assertEqual(1, len(increased_list))
         # self.assertIn(..., increased_list)
 
-    @unittest.skip
     def test_query_edge_by_evidence_wildcard(self):
         # evidence like, data
-        evidence_list = self.manager.query_edges(evidence='%3%', as_dict_list=True)
-        self.assertEqual(len(evidence_list), 2)
-        # self.assertIn(..., evidence_list)
+        evidence_list = self.manager.query_edges(evidence='%3%')
+        self.assertEqual(len(evidence_list), 0)
+
+        evidence_list = self.manager.query_edges(evidence='%Twit%')
+        self.assertEqual(len(evidence_list), 1)
 
     def test_query_edge_by_mixed_no_result(self):
         # no result
         empty_list = self.manager.query_edges(source='p(HGNC:FADD)', relation=DECREASES)
         self.assertEqual(len(empty_list), 0)
 
-    @unittest.skip
     def test_query_edge_by_mixed(self):
         # source, relation, data
-        source_list = self.manager.query_edges(source='p(HGNC:FADD)', relation=INCREASES, as_dict_list=True)
+        source_list = self.manager.query_edges(source='p(HGNC:FOS)', relation=INCREASES)
         self.assertEqual(len(source_list), 1)
-        # self.assertIn(..., source_list)
 
     def test_query_citation(self):
         citation_1 = {

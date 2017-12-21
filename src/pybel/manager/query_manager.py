@@ -134,11 +134,10 @@ class QueryManager(LookupManager):
         """
         return self.get_edge_by_hash(hash_edge(u, v, None, d))
 
-    def query_edges(self, edge_id=None, bel=None, source=None, target=None, relation=None, citation=None,
-                    evidence=None, annotation=None, property=None, as_dict_list=False):
+    def query_edges(self, bel=None, source=None, target=None, relation=None, citation=None,
+                    evidence=None, annotation=None, property=None):
         """Builds and runs a query over all edges in the PyBEL cache.
 
-        :param int edge_id: The edge identifier
         :param str bel: BEL statement that represents the desired edge.
         :param str or Node source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
         :param str or Node target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
@@ -149,97 +148,81 @@ class QueryManager(LookupManager):
         :param dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
                                         annotationValue parameter as string.
         :param property: An edge property object or a corresponding database identifier.
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                                    :class:`Edge` objects.
         :rtype: list[Edge]
         """
-        q = self.session.query(Edge)
+        query = self.session.query(Edge)
 
-        if edge_id and isinstance(edge_id, int):
-            q = q.filter_by(id=edge_id)
+        if bel:
+            query = query.filter(Edge.bel.like(bel))
 
-        else:
-            if bel:
-                q = q.filter(Edge.bel.like(bel))
+        if relation:
+            query = query.filter(Edge.relation.like(relation))
 
-            if relation:
-                q = q.filter(Edge.relation.like(relation))
+        if annotation:
+            query = query.join(AnnotationEntry, Edge.annotations)
+            if isinstance(annotation, dict):
+                query = query.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
+                query = query.filter(AnnotationEntry.name.in_(list(annotation.values())))
 
-            if annotation:
-                q = q.join(AnnotationEntry, Edge.annotations)
-                if isinstance(annotation, dict):
-                    q = q.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
-                    q = q.filter(AnnotationEntry.name.in_(list(annotation.values())))
+            elif isinstance(annotation, str):
+                query = query.filter(AnnotationEntry.name.like(annotation))
 
-                elif isinstance(annotation, str):
-                    q = q.filter(AnnotationEntry.name.like(annotation))
+        if source:
+            if isinstance(source, str):
+                source = self.query_nodes(bel=source)
+                if len(source) == 0:
+                    return []
+                source = source[0]
 
-            if source:
-                if isinstance(source, str):
-                    source = self.query_nodes(bel=source)
-                    if len(source) == 0:
-                        return []
-                    source = source[0]
+            query = query.filter(Edge.source == source)
 
-                if isinstance(source, Node):
-                    q = q.filter(Edge.source == source)
+                # ToDo: in_() not yet supported for relations
+                # elif isinstance(source, list) and len(source) > 0:
+                #    if isinstance(source[0], Node):
+                #        q = q.filter(Edge.source.in_(source))
 
-                    # ToDo: in_() not yet supported for relations
-                    # elif isinstance(source, list) and len(source) > 0:
-                    #    if isinstance(source[0], Node):
-                    #        q = q.filter(Edge.source.in_(source))
+        if target:
+            if isinstance(target, str):
+                target = self.query_nodes(bel=target)[0]
 
-            if target:
-                if isinstance(target, str):
-                    target = self.query_nodes(bel=target)[0]
+            query = query.filter(Edge.target == target)
 
-                if isinstance(target, Node):
-                    q = q.filter(Edge.target == target)
+                # elif isinstance(target, list) and len(target) > 0:
+                #    if isinstance(target[0], Node):
+                #        q = q.filter(Edge.source.in_(target))
 
-                    # elif isinstance(target, list) and len(target) > 0:
-                    #    if isinstance(target[0], Node):
-                    #        q = q.filter(Edge.source.in_(target))
+        if citation or evidence:
+            query = query.join(Evidence)
 
-            if citation or evidence:
-                q = q.join(Evidence)
+            if citation:
+                if isinstance(citation, Citation):
+                    query = query.filter(Evidence.citation == citation)
 
-                if citation:
-                    if isinstance(citation, Citation):
-                        q = q.filter(Evidence.citation == citation)
+                elif isinstance(citation, list) and isinstance(citation[0], Citation):
+                    query = query.filter(Evidence.citation.in_(citation))
 
-                    elif isinstance(citation, list) and isinstance(citation[0], Citation):
-                        q = q.filter(Evidence.citation.in_(citation))
+                elif isinstance(citation, str):
+                    query = query.join(Citation).filter(Citation.reference.like(citation))
 
-                    elif isinstance(citation, str):
-                        q = q.join(Citation).filter(Citation.reference.like(citation))
+            if evidence:
+                if isinstance(evidence, Evidence):
+                    query = query.filter(Edge.evidence == evidence)
 
-                if evidence:
-                    if isinstance(evidence, Evidence):
-                        q = q.filter(Edge.evidence == evidence)
+                elif isinstance(evidence, str):
+                    query = query.filter(Evidence.text.like(evidence))
 
-                    elif isinstance(evidence, str):
-                        q = q.filter(Evidence.text.like(evidence))
+        if property:
+            query = query.join(Property, Edge.properties)
 
-            if property:
-                q = q.join(Property, Edge.properties)
+            if isinstance(property, Property):
+                query = query.filter(Property.id == property.id)
+            elif isinstance(property, int):
+                query = query.filter(Property.id == property)
 
-                if isinstance(property, Property):
-                    q = q.filter(Property.id == property.id)
-                elif isinstance(property, int):
-                    q = q.filter(Property.id == property)
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        return [
-            edge.to_json()
-            for edge in result
-        ]
+        return query.all()
 
     def query_citations(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
-                        evidence_text=None, as_dict_list=False):
+                        evidence_text=None):
         """Builds and runs a query over all citations in the PyBEL cache.
 
         :param int citation_id:
@@ -250,51 +233,40 @@ class QueryManager(LookupManager):
         :param date: Publishing date of the citation.
         :type date: str or datetime.date
         :param str evidence_text:
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`Citation` objects.
-        :return: List of :class:`Citation` objects or corresponding dicts.
-        :rtype: list[Citation] or dict
+        :rtype: list[Citation]
         """
-        q = self.session.query(Citation)
+        query = self.session.query(Citation)
 
         if citation_id and isinstance(citation_id, int):
-            q = q.filter_by(id=citation_id)
+            query = query.filter_by(id=citation_id)
 
         else:
             if author is not None:
-                q = q.join(Author, Citation.authors)
+                query = query.join(Author, Citation.authors)
                 if isinstance(author, str):
-                    q = q.filter(Author.name.like(author))
+                    query = query.filter(Author.name.like(author))
                 elif isinstance(author, list):
-                    q = q.filter(Author.name.in_(author))
+                    query = query.filter(Author.name.in_(author))
 
             if type:
-                q = q.filter(Citation.type.like(type))
+                query = query.filter(Citation.type.like(type))
 
             if reference:
-                q = q.filter(Citation.reference == reference)
+                query = query.filter(Citation.reference == reference)
 
             if name:
-                q = q.filter(Citation.name.like(name))
+                query = query.filter(Citation.name.like(name))
 
             if date:
                 if isinstance(date, datetime.date):
-                    q = q.filter(Citation.date == date)
+                    query = query.filter(Citation.date == date)
                 elif isinstance(date, str):
-                    q = q.filter(Citation.date == parse_datetime(date))
+                    query = query.filter(Citation.date == parse_datetime(date))
 
             if evidence_text:
-                q = q.join(Evidence).filter(Evidence.text.like(evidence_text))
+                query = query.join(Evidence).filter(Evidence.text.like(evidence_text))
 
-        citations = q.all()
-
-        if not as_dict_list:
-            return citations
-
-        return [
-            citation.to_json()
-            for citation in citations
-        ]
+        return query.all()
 
     def query_edges_by_pmid(self, pubmed_identifiers):
         """Gets all edges annotated to the given documents
