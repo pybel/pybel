@@ -20,7 +20,7 @@ from pybel.struct.filters.node_predicates import (
     has_activity, has_causal_in_edges, has_causal_out_edges, has_fragment,
     has_gene_modification, has_hgvs, has_protein_modification, has_variant, is_abundance, is_causal_central,
     is_causal_sink, is_causal_source, is_degraded, is_gene, is_pathology, is_protein, is_translocated,
-    keep_node_permissive, node_exclusion_filter_builder, node_inclusion_filter_builder, not_pathology,
+    keep_node_permissive, node_exclusion_predicate_builder, node_inclusion_predicate_builder, not_pathology,
 )
 
 p1 = protein(name='BRAF', namespace='HGNC')
@@ -245,19 +245,19 @@ class TestNodePredicate(unittest.TestCase):
         g.add_node_from_data(v)
         g.add_node_from_data(w)
 
-        f = node_exclusion_filter_builder([u])
+        f = node_exclusion_predicate_builder([u])
 
         self.assertFalse(f(u))
         self.assertTrue(f(v))
         self.assertTrue(f(w))
 
-        f = node_exclusion_filter_builder([u, v])
+        f = node_exclusion_predicate_builder([u, v])
 
         self.assertFalse(f(u))
         self.assertFalse(f(v))
         self.assertTrue(f(w))
 
-        f = node_exclusion_filter_builder([])
+        f = node_exclusion_predicate_builder([])
 
         self.assertTrue(f(u))
         self.assertTrue(f(v))
@@ -269,19 +269,19 @@ class TestNodePredicate(unittest.TestCase):
         v = g.add_node_from_data(abundance(name='nitric oxide', namespace='CHEBI'))
         w = g.add_node_from_data(abundance(name='cortisol', namespace='CHEBI', identifier='17650'))
 
-        f = node_exclusion_filter_builder([u])
+        f = node_exclusion_predicate_builder([u])
 
         self.assertFalse(f(g, u))
         self.assertTrue(f(g, v))
         self.assertTrue(f(g, w))
 
-        f = node_exclusion_filter_builder([u, v])
+        f = node_exclusion_predicate_builder([u, v])
 
         self.assertFalse(f(g, u))
         self.assertFalse(f(g, v))
         self.assertTrue(f(g, w))
 
-        f = node_exclusion_filter_builder([])
+        f = node_exclusion_predicate_builder([])
 
         self.assertTrue(f(g, u))
         self.assertTrue(f(g, v))
@@ -298,19 +298,19 @@ class TestNodePredicate(unittest.TestCase):
         g.add_node_from_data(v)
         g.add_node_from_data(w)
 
-        f = node_inclusion_filter_builder([u])
+        f = node_inclusion_predicate_builder([u])
 
         self.assertTrue(f(u))
         self.assertFalse(f(v))
         self.assertFalse(f(w))
 
-        f = node_inclusion_filter_builder([u, v])
+        f = node_inclusion_predicate_builder([u, v])
 
         self.assertTrue(f(u))
         self.assertTrue(f(v))
         self.assertFalse(f(w))
 
-        f = node_inclusion_filter_builder([])
+        f = node_inclusion_predicate_builder([])
 
         self.assertFalse(f(u))
         self.assertFalse(f(v))
@@ -322,19 +322,19 @@ class TestNodePredicate(unittest.TestCase):
         v = g.add_node_from_data(abundance(name='nitric oxide', namespace='CHEBI'))
         w = g.add_node_from_data(abundance(name='cortisol', namespace='CHEBI', identifier='17650'))
 
-        f = node_inclusion_filter_builder([u])
+        f = node_inclusion_predicate_builder([u])
 
         self.assertTrue(f(g, u))
         self.assertFalse(f(g, v))
         self.assertFalse(f(g, w))
 
-        f = node_inclusion_filter_builder([u, v])
+        f = node_inclusion_predicate_builder([u, v])
 
         self.assertTrue(f(g, u))
         self.assertTrue(f(g, v))
         self.assertFalse(f(g, w))
 
-        f = node_inclusion_filter_builder([])
+        f = node_inclusion_predicate_builder([])
 
         self.assertFalse(f(g, u))
         self.assertFalse(f(g, v))

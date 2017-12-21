@@ -4,7 +4,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.struct.filters import (
-    concatenate_edge_filters, concatenate_node_filters, count_passed_edge_filter,
+    and_edge_predicates, concatenate_node_predicates, count_passed_edge_filter,
     count_passed_node_filter, filter_edges, get_nodes,
 )
 from pybel.struct.filters.edge_predicates import keep_edge_permissive
@@ -42,7 +42,7 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_missing_node_filter(self):
-        nodes = get_nodes(self.universe, node_filters=concatenate_node_filters())
+        nodes = get_nodes(self.universe, concatenate_node_predicates())
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_concatenate_single_node_filter(self):
@@ -70,7 +70,7 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual({(1, 2)}, edges)
 
     def test_missing_edge_filter(self):
-        edges = make_edge_iterator_set(filter_edges(self.graph, concatenate_edge_filters()))
+        edges = make_edge_iterator_set(filter_edges(self.graph, and_edge_predicates()))
         self.assertEqual(({(1, 2)}), edges)
 
     def test_concatenate_single_edge_filter(self):

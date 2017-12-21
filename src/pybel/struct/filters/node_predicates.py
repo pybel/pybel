@@ -26,8 +26,8 @@ __all__ = [
     'is_translocated',
     'has_causal_in_edges',
     'has_causal_out_edges',
-    'node_inclusion_filter_builder',
-    'node_exclusion_filter_builder',
+    'node_inclusion_predicate_builder',
+    'node_exclusion_predicate_builder',
     'is_causal_source',
     'is_causal_sink',
     'is_causal_central',
@@ -57,9 +57,9 @@ def node_predicate(f):
 
 
 def keep_node_permissive(graph, node):
-    """A default node filter that always evaluates to :data:`True`.
+    """A default node predicate that always evaluates to :data:`True`.
 
-    Given BEL graph :code:`graph`, applying :func:`keep_node_permissive` with a filter on the nodes iterable
+    Given BEL graph :code:`graph`, applying :func:`keep_node_permissive` with a predicate on the nodes iterable
     as in :code:`filter(keep_node_permissive, graph.nodes_iter())` will result in the same iterable as
     :meth:`BELGraph.nodes_iter`
 
@@ -272,7 +272,7 @@ def _hash_node_list(nodes):
     }
 
 
-def node_exclusion_filter_builder(nodes):
+def node_exclusion_predicate_builder(nodes):
     """Builds a function that returns true
 
     :param list[tuple or dict] nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
@@ -281,7 +281,7 @@ def node_exclusion_filter_builder(nodes):
     nodes = _hash_node_list(nodes)
 
     @node_predicate
-    def node_exclusion_filter(data):
+    def node_exclusion_predicate(data):
         """Returns true if the node is not in the given set of nodes
 
         :param dict data: A PyBEL data dictionary
@@ -289,10 +289,10 @@ def node_exclusion_filter_builder(nodes):
         """
         return node_to_tuple(data) not in nodes
 
-    return node_exclusion_filter
+    return node_exclusion_predicate
 
 
-def node_inclusion_filter_builder(nodes):
+def node_inclusion_predicate_builder(nodes):
     """Builds a function that returns true
 
     :param list[tuple or dict] nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
@@ -301,7 +301,7 @@ def node_inclusion_filter_builder(nodes):
     nodes = _hash_node_list(nodes)
 
     @node_predicate
-    def node_inclusion_filter(data):
+    def node_inclusion_predicate(data):
         """Returns true if the node is in the given set of nodes
 
         :param dict data: A PyBEL data dictionary
@@ -309,7 +309,7 @@ def node_inclusion_filter_builder(nodes):
         """
         return node_to_tuple(data) in nodes
 
-    return node_inclusion_filter
+    return node_inclusion_predicate
 
 
 def is_causal_source(graph, node):
