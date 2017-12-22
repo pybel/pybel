@@ -40,7 +40,7 @@ INSTALL_REQUIRES = [
 
 if sys.version_info < (3, ):
     INSTALL_REQUIRES.append('configparser')
-    INSTALL_REQUIRES.append('enum34')
+    INSTALL_REQUIRES.append('enum34')  # Only necessary for NDEx?
     INSTALL_REQUIRES.append('functools32')
 
 EXTRAS_REQUIRE = {
