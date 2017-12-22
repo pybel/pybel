@@ -10,6 +10,7 @@ Code Contributors
 -----------------
 - `Andrej Konotopez <https://github.com/lekono>`_
 - `Scott Colby <https://github.com/scolby33>`_
+- `Daniel Domingo-Fernández <https://github.com/ddomingof>`_
 
 Other Contributors
 ------------------

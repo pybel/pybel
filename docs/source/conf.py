@@ -68,7 +68,7 @@ author = u'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.9.7'
+release = '0.10.0'
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -363,6 +363,9 @@ intersphinx_mapping = {
     'py2neo': ('http://py2neo.org/v3/', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/en/latest', None),
     'indra': ('https://indra.readthedocs.io/en/latest/', None),
+    'requests': ('http://docs.python-requests.org/en/master/', None),
+    'onto2nx': ('http://onto2nx.readthedocs.io/en/latest/', None),
+    'setuptools': ('https://setuptools.readthedocs.io/en/latest/', None),
 }
 
 autodoc_member_order = 'bysource'

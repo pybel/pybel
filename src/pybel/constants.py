@@ -18,10 +18,10 @@ from os import environ, makedirs, mkdir, path
 
 log = getLogger(__name__)
 
-VERSION = '0.9.7'
+VERSION = '0.10.0'
 
 #: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = 0, 9, 0
+PYBEL_MINIMUM_IMPORT_VERSION = 0, 10, 0
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
@@ -173,9 +173,7 @@ EFFECT = 'effect'
 TARGET = 'target'
 FROM_LOC = 'fromLoc'
 TO_LOC = 'toLoc'
-MEMBERS = 'members'
-REACTANTS = 'reactants'
-PRODUCTS = 'products'
+
 LOCATION = 'location'
 
 ACTIVITY = 'Activity'
@@ -198,6 +196,13 @@ LABEL = 'label'
 #: The key specifying an optional description for the node
 DESCRIPTION = 'description'
 
+#: They key representing the nodes that are a member of a composite or complex
+MEMBERS = 'members'
+#: The key representing the nodes appearing in the reactant side of a biochemical reaction
+REACTANTS = 'reactants'
+#: The key representing the nodes appearing in the product side of a biochemical reaction
+PRODUCTS = 'products'
+
 #: The node data key specifying a fusion dictionary, containing :data:`PARTNER_3P`, :data:`PARTNER_5P`,
 # :data:`RANGE_3P`, and :data:`RANGE_5P`
 FUSION = 'fusion'
@@ -215,6 +220,7 @@ FUSION_START = 'left'
 FUSION_STOP = 'right'
 FUSION_MISSING = 'missing'
 
+#: The key specifying the node has a list of associated variants
 VARIANTS = 'variants'
 #: The key representing what kind of variation is being represented
 KIND = 'kind'
@@ -227,8 +233,32 @@ GMOD = 'gmod'
 #: The value for :data:`KIND` for a fragment
 FRAGMENT = 'frag'
 
+#: The allowed values for :data:`KIND`
+PYBEL_VARIANT_KINDS = {
+    HGVS,
+    PMOD,
+    GMOD,
+    FRAGMENT
+}
+
+#: The group of all BEL-provided keys for node data dictionaries, used for hashing.
+PYBEL_NODE_DATA_KEYS = {
+    FUNCTION,
+    NAMESPACE,
+    NAME,
+    IDENTIFIER,
+    VARIANTS,
+    FUSION,
+    MEMBERS,
+    REACTANTS,
+    PRODUCTS,
+}
+
 #: Used as a namespace when none is given when lenient parsing mode is turned on. Not recommended!
 DIRTY = 'dirty'
+
+#: Represents the BEL abundance, abundance()
+ABUNDANCE = 'Abundance'
 
 #: Represents the BEL abundance, geneAbundance()
 #: .. seealso:: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#Xabundancea
@@ -237,14 +267,11 @@ GENE = 'Gene'
 #: Represents the BEL abundance, rnaAbundance()
 RNA = 'RNA'
 
-#: Represents the BEL abundance, proteinAbundance()
-PROTEIN = 'Protein'
-
 #: Represents the BEL abundance, microRNAAbundance()
 MIRNA = 'miRNA'
 
-#: Represents the BEL abundance, abundance()
-ABUNDANCE = 'Abundance'
+#: Represents the BEL abundance, proteinAbundance()
+PROTEIN = 'Protein'
 
 #: Represents the BEL function, biologicalProcess()
 BIOPROCESS = 'BiologicalProcess'
@@ -260,6 +287,20 @@ COMPLEX = 'Complex'
 
 #: Represents the BEL transformation, reaction()
 REACTION = 'Reaction'
+
+#: A set of all of the valid PyBEL node functions
+PYBEL_NODE_FUNCTIONS = {
+    ABUNDANCE,
+    GENE,
+    RNA,
+    MIRNA,
+    PROTEIN,
+    BIOPROCESS,
+    PATHOLOGY,
+    COMPOSITE,
+    COMPLEX,
+    REACTION
+}
 
 # Internal edge data keys
 
@@ -356,8 +397,12 @@ PART_OF = 'partOf'
 CAUSAL_INCREASE_RELATIONS = {INCREASES, DIRECTLY_INCREASES}
 #: A set of all causal relationships that have a decreasing effect
 CAUSAL_DECREASE_RELATIONS = {DECREASES, DIRECTLY_DECREASES}
+#: A set of direct causal relations
+DIRECT_CAUSAL_RELATIONS = {DIRECTLY_DECREASES, DIRECTLY_INCREASES}
+#: A set of direct causal relations
+INDIRECT_CAUSAL_RELATIONS = {DECREASES, INCREASES}
 #: A set of all causal relationships
-CAUSAL_RELATIONS = CAUSAL_INCREASE_RELATIONS | CAUSAL_DECREASE_RELATIONS
+CAUSAL_RELATIONS = {INCREASES, DIRECTLY_INCREASES, DECREASES, DIRECTLY_DECREASES}
 
 #: A set of all relationships that are inherently directionless, and are therefore added to the graph twice
 TWO_WAY_RELATIONS = {
@@ -374,6 +419,9 @@ CORRELATIVE_RELATIONS = {
     POSITIVE_CORRELATION,
     NEGATIVE_CORRELATION
 }
+
+#: A set of polar relations
+POLAR_RELATIONS = CAUSAL_RELATIONS | CORRELATIVE_RELATIONS
 
 #: A list of relationship types that don't require annotations or evidence
 #: This must be maintained as a list, since the :data:`unqualified_edge_code` is calculated based on the order
@@ -555,3 +603,6 @@ belns_encodings = {
 }
 
 BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))
+
+#: The default location of PyBEL Web
+DEFAULT_SERVICE_URL = 'https://pybel.scai.fraunhofer.de'

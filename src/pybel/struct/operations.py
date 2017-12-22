@@ -25,6 +25,28 @@ def _left_full_node_join(g, h):
         g.add_node(node, attr_dict=h.node[node])
 
 
+def _left_full_metadata_join(g, h):
+    """Adds all metadata from ``h`` to ``g``, in-place for ``g``
+
+    :param pybel.BELGraph g: A BEL network
+    :param pybel.BELGraph h: A BEL network
+    """
+    g.namespace_url.update(h.namespace_url)
+    g.namespace_pattern.update(h.namespace_pattern)
+    g.namespace_owl.update(h.namespace_owl)
+
+    g.annotation_url.update(h.annotation_url)
+    g.annotation_pattern.update(h.annotation_pattern)
+    g.annotation_owl.update(h.annotation_owl)
+
+    for keyword, values in h.annotation_list.items():
+        if keyword not in g.annotation_list:
+            g.annotation_list[keyword] = values
+        else:
+            for value in values:
+                g.annotation_list[keyword].add(value)
+
+
 def left_full_join(g, h, use_hash=True):
     """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g``
 
@@ -53,6 +75,7 @@ def _left_full_exhaustive_join(g, h):
     :param BELGraph h: A BEL network
     """
     _left_full_node_join(g, h)
+    _left_full_metadata_join(g,h)
 
     for u, v, k, d in h.edges_iter(keys=True, data=True):
         if k < 0:  # unqualified edge that's not in G yet
@@ -74,6 +97,7 @@ def _left_full_hash_join(g, h):
     :param BELGraph h: A BEL network
     """
     _left_full_node_join(g, h)
+    _left_full_metadata_join(g, h)
 
     g_qualified_edges, g_unqualified_edges = stratify_hash_edges(g)
     h_qualified_edges, h_unqualified_edges = stratify_hash_edges(h)
@@ -157,7 +181,7 @@ def union(networks, use_hash=True):
     """Takes the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
     infinite.
 
-    :param iter[BELGraph] networks: An iterator over BEL networks
+    :param iter[BELGraph] networks: An iterator over BEL networks. Can't be infinite.
     :param bool use_hash: If true, uses a hash join algorithm. Else, uses an exhaustive search, which takes much longer.
     :return: A merged network
     :rtype: BELGraph
@@ -170,9 +194,19 @@ def union(networks, use_hash=True):
     >>> k = pybel.from_path('...')
     >>> merged = union([g, h, k])
     """
-    networks_iter = iter(networks)
-    target = next(networks_iter).copy()
-    return _left_full_join_networks(target, networks_iter, use_hash=use_hash)
+    networks = tuple(networks)
+
+    n_networks = len(networks)
+
+    if n_networks == 0:
+        raise ValueError('no networks given')
+
+    if n_networks == 1:
+        return networks[0]
+
+    target = networks[0].copy()
+
+    return _left_full_join_networks(target, networks[1:], use_hash=use_hash)
 
 
 def left_node_intersection_join(g, h, use_hash=True):
@@ -191,7 +225,7 @@ def left_node_intersection_join(g, h, use_hash=True):
     >>> h = pybel.from_path('...')
     >>> merged = left_node_intersection_join(g, h)
     """
-    intersecting = set(g.nodes_iter()).intersection(set(h.nodes_iter()))
+    intersecting = set(g).intersection(set(h))
 
     g_inter = g.subgraph(intersecting)
     h_inter = h.subgraph(intersecting)
@@ -220,15 +254,18 @@ def node_intersection(networks, use_hash=True):
     """
     networks = tuple(networks)
 
-    if len(networks) == 0:
-        raise ValueError('No networks given')
-    elif len(networks) == 1:
-        return networks[1]
+    n_networks = len(networks)
 
-    nodes = set()
+    if n_networks == 0:
+        raise ValueError('no networks given')
 
-    for network in networks:
-        nodes.update(network.nodes_iter())
+    if n_networks == 1:
+        return networks[0]
+
+    nodes = set(networks[0])
+
+    for network in networks[1:]:
+        nodes.intersection_update(network)
 
     subgraphs = (
         network.subgraph(nodes)

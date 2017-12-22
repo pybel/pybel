@@ -4,7 +4,13 @@ source = pybel
 omit =
     src/pybel/__main__.py
     src/pybel/cli.py
+    src/pybel/io/indra.py
+    src/pybel/io/web.py
+    src/pybel/resources/arty.py
+    src/pybel/resources/deploy.py
+    src/pybel/resources/defaults.py
     tests/*
+    docs/*
 
 [paths]
 source =

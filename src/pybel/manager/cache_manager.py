@@ -26,7 +26,7 @@ from .models import (
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl
-from ..canonicalize import edge_to_bel, node_data_to_bel
+from ..canonicalize import node_to_bel
 from ..constants import *
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
@@ -266,6 +266,31 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
+    def ensure_regex_namespace(self, keyword, pattern):
+        """Gets or creates a regular expression namespace
+
+        :param str keyword: The keyword of a regular expression namespace
+        :param str pattern: The pattern for a regular expression namespace
+        :rtype: Namespace
+        """
+        if pattern is None:
+            raise ValueError('cannot have null pattern')
+
+        f = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
+
+        namespace = self.session.query(Namespace).filter(f).one_or_none()
+
+        if namespace is None:
+            log.info('creating regex namespace: %s:%s', keyword, pattern)
+            namespace = Namespace(
+                keyword=keyword,
+                pattern=pattern
+            )
+            self.session.add(namespace)
+            self.session.commit()
+
+        return namespace
+
     def get_namespace_entry(self, url, name):
         """Gets a given NamespaceEntry object.
 
@@ -287,6 +312,29 @@ class NamespaceManager(BaseManager):
             log.warning('result for get_namespace_entry is too long. Returning first of %s', [str(r) for r in result])
 
         return result[0]
+
+    def get_or_create_regex_namespace_entry(self, namespace, pattern, name):
+        """Gets a namespace entry from a regular expression. Need to commit after!
+
+        :param str namespace: The name of the namespace
+        :param str pattern: The regular expression pattern for the namespace
+        :param str name: The entry to get
+        :return:
+        """
+        namespace = self.ensure_regex_namespace(namespace, pattern)
+
+        n_filter = and_(Namespace.pattern == pattern, NamespaceEntry.name == name)
+
+        name_model = self.session.query(NamespaceEntry).join(Namespace).filter(n_filter).one_or_none()
+
+        if name_model is None:
+            name_model = NamespaceEntry(
+                namespace=namespace,
+                name=name
+            )
+            self.session.add(name_model)
+
+        return name_model
 
 
 class OwlNamespaceManager(NamespaceManager):
@@ -870,6 +918,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             self.ensure_namespace(url)
 
+        for keyword, pattern in graph.namespace_pattern.items():
+            self.ensure_regex_namespace(keyword, pattern)
+
         for url in graph.annotation_url.values():
             self.ensure_annotation(url)
 
@@ -1019,7 +1070,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         annotations = self._get_annotation_entries(graph, data)
 
-        bel = edge_to_bel(graph, u, v, data=data)
+        bel = graph.edge_to_bel(u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
@@ -1034,7 +1085,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         network.edges.append(edge)
 
     def _add_unqualified_edge(self, network, graph, u, v, k, data):
-        bel = edge_to_bel(graph, u, v, data=data)
+        bel = graph.edge_to_bel(u, v, data=data)
         edge_hash = hash_edge(u, v, k, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
@@ -1087,7 +1138,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             return self.object_cache_node[node_hash]
 
         node_data = graph.node[node_identifier]
-        bel = node_data_to_bel(node_data)
+        bel = node_to_bel(node_data)
 
         node = self.get_node_by_hash(node_hash)
 
@@ -1096,14 +1147,15 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             return node
 
         type = node_data[FUNCTION]
-
         node = Node(type=type, bel=bel, sha512=node_hash)
 
-        if NAMESPACE not in node_data:
+        namespace = node_data.get(NAMESPACE)
+
+        if namespace is None:
             pass
 
-        elif node_data[NAMESPACE] in graph.namespace_url:
-            url = graph.namespace_url[node_data[NAMESPACE]]
+        elif namespace in graph.namespace_url:
+            url = graph.namespace_url[namespace]
             name = node_data[NAME]
             entry = self.get_namespace_entry(url, name)
 
@@ -1114,8 +1166,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             self.session.add(entry)
             node.namespace_entry = entry
 
-        elif node_data[NAMESPACE] in graph.namespace_pattern:
-            node.namespace_pattern = graph.namespace_pattern[node_data[NAMESPACE]]
+        elif namespace in graph.namespace_pattern:
+            name = node_data[NAME]
+            pattern = graph.namespace_pattern[namespace]
+            entry = self.get_or_create_regex_namespace_entry(namespace, pattern, name)
+
+            self.session.add(entry)
+            node.namespace_entry = entry
 
         else:
             log.warning("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))

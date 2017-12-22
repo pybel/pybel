@@ -128,7 +128,7 @@ class MetadataParser(BaseParser):
             self.annotation_owl,
             self.annotation_pattern,
             self.namespace_pattern
-        ])
+        ]).setName('BEL Metadata')
 
         super(MetadataParser, self).__init__(self.language)
 

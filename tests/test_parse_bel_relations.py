@@ -6,15 +6,15 @@ import unittest
 from pyparsing import ParseException
 
 from pybel import BELGraph
-from pybel.canonicalize import edge_to_bel, node_to_bel
+from pybel.canonicalize import edge_to_bel
 from pybel.constants import *
-from pybel.dsl import abundance, pmod
+from pybel.dsl import abundance, activity, entity, pmod, protein, rna
 from pybel.parser import BelParser
-from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_exceptions import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
-from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text, update_provenance
+from pybel.tokens import node_to_tuple
+from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class TestRelations(TestTokenParserBase):
 
     def setUp(self):
         super(TestRelations, self).setUp()
-        update_provenance(self.parser)
+        self.add_default_provenance()
 
     def test_ensure_no_dup_nodes(self):
         """Ensure node isn't added twice, even if from different statements"""
@@ -214,7 +214,7 @@ class TestRelations(TestTokenParserBase):
         self.assertHasEdge(obj, obj_member_2, relation=HAS_PRODUCT)
 
         expected_edge_attributes = {
-            RELATION: 'decreases',
+            RELATION: DECREASES,
             SUBJECT: {
                 MODIFIER: ACTIVITY,
                 EFFECT: {
@@ -224,6 +224,10 @@ class TestRelations(TestTokenParserBase):
                 LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
             }
         }
+
+        self.assertEqual(expected_edge_attributes[SUBJECT],
+                         activity(name='pep', location=entity(name='intracellular', namespace='GOCC')))
+
         self.assertHasEdge(sub, obj, **expected_edge_attributes)
 
     def test_directlyDecreases(self):
@@ -611,21 +615,40 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        self.assertEqual(2, self.parser.graph.number_of_nodes())
+        self.assertEqual(2, self.graph.number_of_nodes())
 
         source = RNA, 'HGNC', 'AKT1'
-        self.assertHasNode(source)
+        source_dict = rna(name='AKT1', namespace='HGNC')
+        self.assertIn(source, self.graph)
+        self.assertEqual(source_dict, self.graph.node[source])
+        self.assertTrue(self.graph.has_node_with_data(source_dict))
 
         target = PROTEIN, 'HGNC', 'AKT1'
-        self.assertHasNode(target)
+        target_dict = protein(name='AKT1', namespace='HGNC')
+        self.assertIn(target, self.graph)
+        self.assertEqual(target_dict, self.graph.node[target])
+        self.assertTrue(self.graph.has_node_with_data(target_dict))
 
-        self.assertEqual(1, self.parser.graph.number_of_edges())
+        self.assertEqual(1, self.graph.number_of_edges())
+        self.assertTrue(self.graph.has_edge(source, target))
 
-        self.assertHasEdge(source, target, **{RELATION: TRANSLATED_TO})
+        key_data = self.parser.graph.edge[source][target]
+        self.assertEqual(1, len(key_data))
 
-        data = self.parser.graph.edge[source][target][0]
-        self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)',
-                         edge_to_bel(self.parser.graph, source, target, data=data))
+        key = list(key_data)[0]
+        data = key_data[key]
+
+        self.assertIn(RELATION, data)
+        self.assertEqual(TRANSLATED_TO, data[RELATION])
+
+        calculated_source_data = self.graph.node[source]
+        self.assertTrue(calculated_source_data)
+
+        calculated_target_data = self.graph.node[target]
+        self.assertTrue(calculated_target_data)
+
+        calculated_edge_bel = edge_to_bel(calculated_source_data, calculated_target_data, data=data)
+        self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)', calculated_edge_bel)
 
     def test_component_list(self):
         s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
@@ -867,8 +890,8 @@ class TestRelations(TestTokenParserBase):
         self.assertHasNode(expected_parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
         self.assertHasNode(expected_child)
 
-        self.assertEqual('g(HGNC:AKT1)', node_to_bel(self.parser.graph, expected_parent))
-        self.assertEqual('g(HGNC:AKT1, gmod(Me))', node_to_bel(self.parser.graph, expected_child))
+        self.assertEqual('g(HGNC:AKT1)', self.graph.node_to_bel(expected_parent))
+        self.assertEqual('g(HGNC:AKT1, gmod(Me))', self.graph.node_to_bel(expected_child))
 
         self.assertHasEdge(expected_parent, expected_child, **{RELATION: HAS_VARIANT})
 
@@ -974,5 +997,5 @@ class TestWrite(TestTokenParserBase):
             source_bel, expected_bel = case if 2 == len(case) else (case, case)
 
             result = self.parser.bel_term.parseString(source_bel)
-            bel = node_to_bel(self.parser.graph, node_to_tuple(result))
+            bel = self.graph.node_to_bel(node_to_tuple(result))
             self.assertEqual(expected_bel, bel)

@@ -250,7 +250,7 @@ def setup(manager, debug):
 @manage.command()
 @click.option('-y', '--yes', is_flag=True)
 @click.pass_obj
-def remove(manager, yes):
+def drop(manager, yes):
     """Drops cache"""
     if yes or click.confirm('Drop database?'):
         manager.drop_all()
@@ -258,12 +258,12 @@ def remove(manager, yes):
 
 @manage.group()
 def namespaces():
-    """Manage definitions"""
+    """Manage namespaces"""
 
 
 @manage.group()
 def annotations():
-    """Manage definitions"""
+    """Manage annotations"""
 
 
 @namespaces.command()
@@ -379,18 +379,14 @@ def ls(manager):
 
 
 @network.command()
-@click.argument('network_id')
-@click.pass_obj
-def drop(manager, network_id):
-    """Drops a network by its database identifier"""
-    manager.drop_network_by_id(network_id)
-
-
-@network.command()
+@click.argument('-n', '--network-id', type=int)
 @click.option('-y', '--yes', is_flag=True)
 @click.pass_obj
-def dropall(manager, yes):
-    """Drops all networks"""
+def drop(manager, network_id, yes):
+    """Drops a network by its identifier or drops all networks"""
+    if network_id:
+        manager.drop_network_by_id(network_id)
+
     if yes or click.confirm('Drop all networks?'):
         manager.drop_networks()
 
