@@ -20,6 +20,7 @@ __all__ = [
     'hgvs',
     'fragment',
     'fusion_range',
+    'missing_fusion_range',
     'protein_fusion',
     'rna_fusion',
     'gene_fusion',
@@ -316,6 +317,16 @@ def composite_abundance(members):
     }
 
     return rv
+
+
+def missing_fusion_range():
+    """Creates a missing fusion range
+
+    :rtype: dict
+    """
+    return {
+        FUSION_MISSING: '?'
+    }
 
 
 def fusion_range(reference, start, stop):
