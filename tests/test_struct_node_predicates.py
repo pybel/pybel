@@ -4,19 +4,19 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ACTIVITY, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS, POSITIVE_CORRELATION,
-    RELATION, SUBJECT, TRANSLOCATION,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS,
+    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION,
+    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS,
+    POSITIVE_CORRELATION, RELATION, SUBJECT, TRANSLOCATION,
 )
 from pybel.dsl import (
     abundance, activity, degradation, entity, fragment, gene, gmod, hgvs, pmod, protein, secretion,
     translocation,
 )
 from pybel.struct.filters.edge_predicates import (
-    edge_has_activity, edge_has_degradation, edge_has_translocation,
-    has_authors, has_polarity, has_provenance, has_pubmed, is_associative_relation, is_causal_relation,
-    is_direct_causal_relation,
+    edge_has_activity, edge_has_annotation, edge_has_degradation,
+    edge_has_translocation, has_authors, has_polarity, has_provenance, has_pubmed, is_associative_relation,
+    is_causal_relation, is_direct_causal_relation,
 )
 from pybel.struct.filters.node_predicates import (
     has_activity, has_causal_in_edges, has_causal_out_edges, has_fragment,
@@ -453,3 +453,10 @@ class TestEdgePredicate(unittest.TestCase):
         self.assertFalse(edge_has_activity({SUBJECT: {MODIFIER: DEGRADATION}}))
         self.assertFalse(edge_has_activity({OBJECT: {LOCATION: None}}))
         self.assertFalse(edge_has_activity({OBJECT: {MODIFIER: DEGRADATION}}))
+
+    def test_has_annotation(self):
+        self.assertFalse(edge_has_annotation({}, 'Subgraph'))
+        self.assertFalse(edge_has_annotation({ANNOTATIONS: {}}, 'Subgraph'))
+        self.assertFalse(edge_has_annotation({ANNOTATIONS: {'Subgraph': None}}, 'Subgraph'))
+        self.assertTrue(edge_has_annotation({ANNOTATIONS: {'Subgraph': 'value'}}, 'Subgraph'))
+        self.assertFalse(edge_has_annotation({ANNOTATIONS: {'Nope': 'value'}}, 'Subgraph'))

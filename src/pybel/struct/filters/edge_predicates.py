@@ -5,9 +5,9 @@ from functools import wraps
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ACTIVITY, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_TYPE, CITATION_TYPE_PUBMED,
-    CORRELATIVE_RELATIONS, DEGRADATION, DIRECT_CAUSAL_RELATIONS, EVIDENCE, OBJECT, RELATION, SUBJECT,
-    TRANSLOCATION,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS,
+    CITATION_TYPE, CITATION_TYPE_PUBMED, CORRELATIVE_RELATIONS, DEGRADATION, DIRECT_CAUSAL_RELATIONS, EVIDENCE, OBJECT,
+    RELATION, SUBJECT, TRANSLOCATION,
 )
 
 __all__ = [
@@ -21,7 +21,8 @@ __all__ = [
     'has_polarity',
     'edge_has_activity',
     'edge_has_degradation',
-    'edge_has_translocation'
+    'edge_has_translocation',
+    'edge_has_annotation',
 ]
 
 
@@ -178,3 +179,26 @@ def edge_has_degradation(data):
     :rtype: bool
     """
     return _has_modifier(data, DEGRADATION)
+
+
+def edge_has_annotation(data, key):
+    """Checks that ANNOTATION is included in the data dictionary and that the key is also present
+
+    :param dict data: The data dictionary from a BELGraph's edge
+    :param str key: An annotation key
+    :return: If the annotation key is present in the current data dictionary
+    :rtype: Optional[Any]
+
+    For example, it might be useful to print all edges that are annotated with 'Subgraph':
+
+    >>> from pybel.examples import sialic_acid_graph
+    >>> for u, v, data in sialic_acid_graph.edges_iter(data=True):
+    >>>     if edge_has_annotation(data, 'Species')
+    >>>         print(u, v, data)
+    """
+    annotations = data.get(ANNOTATIONS)
+
+    if annotations is None:
+        return
+
+    return annotations.get(key)
