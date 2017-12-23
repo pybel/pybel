@@ -55,6 +55,7 @@ truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, n
 
 
 class TruncationParser(BaseParser):
+    """Parses a protein trunctation and normalizes to HGVS"""
     def __init__(self):
         self.language = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
         self.language.setParseAction(self.handle_trunc_legacy)

@@ -125,7 +125,7 @@ class BelParser(BaseParser):
         self.trunc = TruncationParser().language
 
         #: PyBEL BEL Specification variant
-        self.gmod = GeneModificationParser().language
+        self.gmod = GeneModificationParser().language # FIXME add identifier parser to this
 
         # 2.6 Other Functions
 
@@ -182,7 +182,13 @@ class BelParser(BaseParser):
         ]) + opt_location)
         """`2.1.7 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XrnaA>`_"""
 
-        self.single_abundance = MatchFirst([self.general_abundance, self.gene, self.mirna, self.protein, self.rna])
+        self.single_abundance = MatchFirst([
+            self.general_abundance,
+            self.gene,
+            self.mirna,
+            self.protein,
+            self.rna
+        ])
 
         #: `2.1.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
         self.complex_singleton = complex_tag + nest(ungrouped_identifier + opt_location)
