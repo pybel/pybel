@@ -70,6 +70,7 @@ MESH_DISEASES_URL = OPENBEL_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
 pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
 wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
 
+test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
 
 def update_provenance(control_parser):
     """Sticks provenance in a BEL parser
@@ -196,10 +197,8 @@ class TemporaryCacheClsMixin(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
-
-        if cls.test_connection:
-            cls.connection = cls.test_connection
+        if test_connection:
+            cls.connection = test_connection
         else:
             cls.fd, cls.path = tempfile.mkstemp()
             cls.connection = 'sqlite:///' + cls.path
@@ -211,7 +210,8 @@ class TemporaryCacheClsMixin(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.manager.session.close()
-        if not cls.test_connection:
+
+        if not test_connection:
             os.close(cls.fd)
             os.remove(cls.path)
 
