@@ -64,8 +64,7 @@ class TruncationParser(BaseParser):
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     def handle_trunc_legacy(self, line, position, tokens):
         upgraded = 'p.{}*'.format(tokens[TRUNCATION_POSITION])
-        log.warning(
-            'trunc() is deprecated. Please look up reference terminal amino acid and encode with HGVS: {}'.format(line))
+        log.warning('trunc() is deprecated. Re-encode with reference terminal amino acid in HGVS: %s', line)
         tokens[IDENTIFIER] = upgraded
         del tokens[TRUNCATION_POSITION]
         return tokens
