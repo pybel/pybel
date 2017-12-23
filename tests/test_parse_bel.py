@@ -170,7 +170,7 @@ class TestGene(TestTokenParserBase):
 
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
-        self.assertHasEdge(parent, expected_node, relation='hasVariant')
+        self.assertHasEdge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_gmod(self):
         """Test Gene Modification"""
@@ -194,7 +194,7 @@ class TestGene(TestTokenParserBase):
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        self.assertHasEdge(parent, expected_node, relation='hasVariant')
+        self.assertHasEdge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_214d(self):
         """Test BEL 1.0 gene substitution"""
@@ -219,7 +219,7 @@ class TestGene(TestTokenParserBase):
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        self.assertHasEdge(parent, expected_node, relation='hasVariant')
+        self.assertHasEdge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_variant_location(self):
         """Test BEL 1.0 gene substitution with location tag"""
@@ -253,7 +253,7 @@ class TestGene(TestTokenParserBase):
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        self.assertHasEdge(parent, expected_node, relation='hasVariant')
+        self.assertHasEdge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_multiple_variants(self):
         """Test multiple variants"""
@@ -282,7 +282,7 @@ class TestGene(TestTokenParserBase):
         parent = GENE, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        self.assertHasEdge(parent, expected_node, relation='hasVariant')
+        self.assertHasEdge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_gene_fusion_1(self):
         self.maxDiff = None
@@ -466,7 +466,7 @@ class TestGene(TestTokenParserBase):
         gene_node = GENE, 'SNP', 'rs113993960'
         self.assertHasNode(gene_node, **{FUNCTION: GENE, NAMESPACE: 'SNP', NAME: 'rs113993960'})
 
-        self.assertHasEdge(gene_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(gene_node, expected_node, relation=HAS_VARIANT)
 
     def test_gene_variant_chromosome(self):
         """2.2.2 chromosome"""
@@ -481,7 +481,7 @@ class TestGene(TestTokenParserBase):
 
         self.assertHasNode(gene_node, **{FUNCTION: GENE, NAMESPACE: 'REF', NAME: 'NC_000007.13'})
         self.assertHasNode(expected_node, function=GENE)
-        self.assertHasEdge(gene_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(gene_node, expected_node, relation=HAS_VARIANT)
 
     def test_gene_variant_deletion(self):
         """2.2.2 gene-coding DNA reference sequence"""
@@ -509,7 +509,7 @@ class TestGene(TestTokenParserBase):
         gene_node = GENE, 'HGNC', 'CFTR'
         self.assertHasNode(gene_node, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'CFTR'})
 
-        self.assertHasEdge(gene_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(gene_node, expected_node, relation=HAS_VARIANT)
 
 
 class TestMiRNA(TestTokenParserBase):
@@ -605,7 +605,7 @@ class TestMiRNA(TestTokenParserBase):
         expected_parent = MIRNA, 'HGNC', 'MIR21'
         self.assertHasNode(expected_parent)
 
-        self.assertHasEdge(expected_parent, node, relation='hasVariant')
+        self.assertHasEdge(expected_parent, node, relation=HAS_VARIANT)
 
     def test_mirna_variant_location(self):
         statement = 'm(HGNC:MIR21,var(p.Phe508del),loc(GOCC:intracellular))'
@@ -636,7 +636,7 @@ class TestMiRNA(TestTokenParserBase):
         expected_parent = MIRNA, 'HGNC', 'MIR21'
         self.assertHasNode(expected_parent)
 
-        self.assertHasEdge(expected_parent, node, relation='hasVariant')
+        self.assertHasEdge(expected_parent, node, relation=HAS_VARIANT)
 
 
 class TestProtein(TestTokenParserBase):
@@ -726,7 +726,7 @@ class TestProtein(TestTokenParserBase):
 
         parent = PROTEIN, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
-        self.assertHasEdge(parent, node, relation='hasVariant')
+        self.assertHasEdge(parent, node, relation=HAS_VARIANT)
 
     def test_protein_fusion_1(self):
         statement = 'p(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))'
@@ -831,7 +831,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'AKT1'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_trunc_2(self):
         statement = 'p(HGNC:AKT1, var(p.Cys40*))'
@@ -851,7 +851,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = cls, ns, val = PROTEIN, 'HGNC', 'AKT1'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: ns, NAME: val})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_trunc_3(self):
         statement = 'p(HGNC:AKT1, var(p.Arg1851*))'
@@ -871,7 +871,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = cls, ns, val = PROTEIN, 'HGNC', 'AKT1'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: ns, NAME: val})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_pmod_1(self):
         """2.2.1 Test default BEL namespace and 1-letter amino acid code:"""
@@ -888,7 +888,7 @@ class TestProtein(TestTokenParserBase):
 
         protein_node = PROTEIN, 'HGNC', 'AKT1'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_pmod_2(self):
         """2.2.1 Test default BEL namespace and 3-letter amino acid code:"""
@@ -906,7 +906,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'AKT1'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_pmod_3(self):
         """2.2.1 Test PSI-MOD namespace and 3-letter amino acid code:"""
@@ -924,7 +924,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'AKT1'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_pmod_4(self):
         """2.2.1 Test HRAS palmitoylated at an unspecified residue. Default BEL namespace"""
@@ -942,7 +942,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'HRAS'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'HRAS'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_variant_reference(self):
         """2.2.2 Test reference allele"""
@@ -962,7 +962,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'CFTR'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CFTR'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_variant_unspecified(self):
         """2.2.2 Test unspecified variant"""
@@ -983,7 +983,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'CFTR'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CFTR'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_variant_substitution(self):
         """2.2.2 Test substitution"""
@@ -1002,7 +1002,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'CFTR'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CFTR'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_variant_deletion(self):
         """2.2.2 deletion"""
@@ -1022,7 +1022,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'CFTR'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'CFTR'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_known(self):
         """2.2.3 fragment with known start/stop"""
@@ -1040,7 +1040,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'YFG'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'YFG'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_unbounded(self):
         """2.2.3 amino-terminal fragment of unknown length"""
@@ -1058,7 +1058,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'YFG'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'YFG'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_unboundTerminal(self):
         """2.2.3 carboxyl-terminal fragment of unknown length"""
@@ -1076,7 +1076,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'YFG'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'YFG'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_unknown(self):
         """2.2.3 fragment with unknown start/stop"""
@@ -1096,7 +1096,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'YFG'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'YFG'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_descriptor(self):
         """2.2.3 fragment with unknown start/stop and a descriptor"""
@@ -1114,7 +1114,7 @@ class TestProtein(TestTokenParserBase):
         protein_node = PROTEIN, 'HGNC', 'YFG'
         self.assertHasNode(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'YFG'})
 
-        self.assertHasEdge(protein_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_ensure_no_dup_edges(self):
         """Ensure node and edges aren't added twice, even if from different statements and has origin completion"""
@@ -1188,7 +1188,7 @@ class TestRna(TestTokenParserBase):
         parent = RNA, 'HGNC', 'AKT1'
         self.assertHasNode(parent, **{FUNCTION: RNA, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
-        self.assertHasEdge(parent, expected_node, relation='hasVariant')
+        self.assertHasEdge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_rna_fusion_1(self):
         """2.6.1 RNA abundance of fusion with known breakpoints"""
@@ -1325,7 +1325,7 @@ class TestRna(TestTokenParserBase):
         rna_node = RNA, 'HGNC', 'CFTR'
         self.assertHasNode(rna_node, **{FUNCTION: RNA, NAMESPACE: 'HGNC', NAME: 'CFTR'})
 
-        self.assertHasEdge(rna_node, expected_node, relation='hasVariant')
+        self.assertHasEdge(rna_node, expected_node, relation=HAS_VARIANT)
 
 
 class TestComplex(TestTokenParserBase):
