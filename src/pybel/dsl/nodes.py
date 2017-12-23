@@ -225,6 +225,7 @@ class hgvs(Variant):
     def __str__(self):
         return 'var({})'.format(self[IDENTIFIER])
 
+
 class protein_substitution(hgvs):
     """Builds a HGVS variant dictionary for the given protein substitution"""
 
@@ -494,8 +495,8 @@ class protein_fusion(FusionBase):
 
     def __init__(self, partner_5p, range_5p, partner_3p, range_3p):
         """
-        :param protein partner_5p: A PyBEL node data dictionary for the 5-prime partner
-        :param protein partner_3p: A PyBEL node data dictionary for the 3-prime partner
+        :param pybel.dsl.protein partner_5p: A PyBEL node data dictionary for the 5-prime partner
+        :param pybel.dsl.protein partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
         """
@@ -508,8 +509,8 @@ class rna_fusion(FusionBase):
 
     def __init__(self, partner_5p, range_5p, partner_3p, range_3p):
         """
-        :param rna partner_5p: A PyBEL node data dictionary for the 5-prime partner
-        :param rna partner_3p: A PyBEL node data dictionary for the 3-prime partner
+        :param pybel.dsl.rna partner_5p: A PyBEL node data dictionary for the 5-prime partner
+        :param pybel.dsl.rna partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
 
@@ -539,8 +540,8 @@ class gene_fusion(FusionBase):
 
     def __init__(self, partner_5p, range_5p, partner_3p, range_3p):
         """
-        :param gene partner_5p: A PyBEL node data dictionary for the 5-prime partner
-        :param gene partner_3p: A PyBEL node data dictionary for the 3-prime partner
+        :param pybel.dsl.gene partner_5p: A PyBEL node data dictionary for the 5-prime partner
+        :param pybel.dsl.gene partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
         """
