@@ -60,7 +60,7 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
 from pyparsing import Keyword, Optional, pyparsing_common as ppc
 
 from ..baseparser import BaseParser
-from ..utils import WCW, nest, one_of_tags, word
+from ..utils import WCW, nest, one_of_tags, quote
 from ...constants import FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, KIND
 
 __all__ = [
@@ -78,6 +78,6 @@ class FragmentParser(BaseParser):
 
         self.language = fragment_tag + nest(
             (self.fragment_range | self.missing_fragment(FRAGMENT_MISSING)) + Optional(
-                WCW + word(FRAGMENT_DESCRIPTION)))
+                WCW + quote(FRAGMENT_DESCRIPTION)))
 
         super(FragmentParser, self).__init__(self.language)

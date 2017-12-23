@@ -261,7 +261,7 @@ class TestFragmentParser(unittest.TestCase):
 
     def test_descriptor(self):
         """fragment with unknown start/stop and a descriptor"""
-        s = 'frag(?, 55kD)'
+        s = 'frag(?, "55kD")'
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,

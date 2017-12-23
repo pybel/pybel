@@ -70,7 +70,7 @@ p(HGNC:MIA, frag(1_?)) -> tloc(p(HGNC:EGFR), GOCC:"cell surface", GOCC:endosome)
 
 deg(p(HGNC:AKT1)) -> p(HGNC:MIA, frag(?))
 
-p(HGNC:CFTR, var(p.Phe508del)) -- p(HGNC:MIA, frag(?, 55kD))
+p(HGNC:CFTR, var(p.Phe508del)) -- p(HGNC:MIA, frag(?, "55kD"))
 
 p(HGNC:AKT1) -> p(HGNC:CFTR, var(p.Gly576Ala))
 

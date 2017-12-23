@@ -1100,7 +1100,7 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_fragment_descriptor(self):
         """2.2.3 fragment with unknown start/stop and a descriptor"""
-        statement = 'p(HGNC:YFG, frag(?, 55kD))'
+        statement = 'p(HGNC:YFG, frag(?, "55kD"))'
         result = self.parser.protein.parseString(statement)
 
         expected_node = PROTEIN, 'HGNC', 'YFG', (FRAGMENT, '?', '55kD')
