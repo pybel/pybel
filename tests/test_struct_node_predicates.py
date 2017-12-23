@@ -4,17 +4,19 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
-    EVIDENCE, GMOD, INCREASES, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION,
+    ACTIVITY, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE,
+    CITATION_TYPE, CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
+    DIRECTLY_INCREASES, EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS, POSITIVE_CORRELATION,
+    RELATION, SUBJECT, TRANSLOCATION,
 )
 from pybel.dsl import (
     abundance, activity, degradation, entity, fragment, gene, gmod, hgvs, pmod, protein, secretion,
     translocation,
 )
 from pybel.struct.filters.edge_predicates import (
-    has_authors, has_polarity, has_provenance, has_pubmed,
-    is_associative_relation, is_causal_relation, is_direct_causal_relation,
+    edge_has_activity, edge_has_degradation, edge_has_translocation,
+    has_authors, has_polarity, has_provenance, has_pubmed, is_associative_relation, is_causal_relation,
+    is_direct_causal_relation,
 )
 from pybel.struct.filters.node_predicates import (
     has_activity, has_causal_in_edges, has_causal_out_edges, has_fragment,
@@ -412,8 +414,42 @@ class TestEdgePredicate(unittest.TestCase):
 
     def test_is_association(self):
         self.assertTrue(is_associative_relation({RELATION: ASSOCIATION}))
+
         self.assertFalse(is_associative_relation({RELATION: INCREASES}))
         self.assertFalse(is_associative_relation({RELATION: CAUSES_NO_CHANGE}))
         self.assertFalse(is_associative_relation({RELATION: DECREASES}))
         self.assertFalse(is_associative_relation({RELATION: DIRECTLY_INCREASES}))
         self.assertFalse(is_associative_relation({RELATION: DIRECTLY_DECREASES}))
+
+    def test_has_degradation(self):
+        self.assertTrue(edge_has_degradation({SUBJECT: {MODIFIER: DEGRADATION}}))
+        self.assertTrue(edge_has_degradation({OBJECT: {MODIFIER: DEGRADATION}}))
+
+        self.assertFalse(edge_has_degradation({SUBJECT: {MODIFIER: TRANSLOCATION}}))
+        self.assertFalse(edge_has_degradation({SUBJECT: {MODIFIER: ACTIVITY}}))
+        self.assertFalse(edge_has_degradation({SUBJECT: {LOCATION: None}}))
+        self.assertFalse(edge_has_degradation({OBJECT: {MODIFIER: TRANSLOCATION}}))
+        self.assertFalse(edge_has_degradation({OBJECT: {MODIFIER: ACTIVITY}}))
+        self.assertFalse(edge_has_degradation({OBJECT: {LOCATION: None}}))
+
+    def test_has_translocation(self):
+        self.assertTrue(edge_has_translocation({SUBJECT: {MODIFIER: TRANSLOCATION}}))
+        self.assertTrue(edge_has_translocation({OBJECT: {MODIFIER: TRANSLOCATION}}))
+
+        self.assertFalse(edge_has_translocation({SUBJECT: {MODIFIER: ACTIVITY}}))
+        self.assertFalse(edge_has_translocation({SUBJECT: {LOCATION: None}}))
+        self.assertFalse(edge_has_translocation({SUBJECT: {MODIFIER: DEGRADATION}}))
+        self.assertFalse(edge_has_translocation({OBJECT: {MODIFIER: ACTIVITY}}))
+        self.assertFalse(edge_has_translocation({OBJECT: {LOCATION: None}}))
+        self.assertFalse(edge_has_translocation({OBJECT: {MODIFIER: DEGRADATION}}))
+
+    def test_has_activity(self):
+        self.assertTrue(edge_has_activity({SUBJECT: {MODIFIER: ACTIVITY}}))
+        self.assertTrue(edge_has_activity({OBJECT: {MODIFIER: ACTIVITY}}))
+
+        self.assertFalse(edge_has_activity({SUBJECT: {MODIFIER: TRANSLOCATION}}))
+        self.assertFalse(edge_has_activity({OBJECT: {MODIFIER: TRANSLOCATION}}))
+        self.assertFalse(edge_has_activity({SUBJECT: {LOCATION: None}}))
+        self.assertFalse(edge_has_activity({SUBJECT: {MODIFIER: DEGRADATION}}))
+        self.assertFalse(edge_has_activity({OBJECT: {LOCATION: None}}))
+        self.assertFalse(edge_has_activity({OBJECT: {MODIFIER: DEGRADATION}}))

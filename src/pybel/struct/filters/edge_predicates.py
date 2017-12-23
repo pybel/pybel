@@ -2,10 +2,12 @@
 
 from functools import wraps
 
+from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_TYPE, CITATION_TYPE_PUBMED,
-    CORRELATIVE_RELATIONS, DIRECT_CAUSAL_RELATIONS, EVIDENCE, RELATION,
+    ACTIVITY, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_TYPE, CITATION_TYPE_PUBMED,
+    CORRELATIVE_RELATIONS, DEGRADATION, DIRECT_CAUSAL_RELATIONS, EVIDENCE, OBJECT, RELATION, SUBJECT,
+    TRANSLOCATION,
 )
 
 __all__ = [
@@ -17,6 +19,9 @@ __all__ = [
     'is_direct_causal_relation',
     'is_associative_relation',
     'has_polarity',
+    'edge_has_activity',
+    'edge_has_degradation',
+    'edge_has_translocation'
 ]
 
 
@@ -125,3 +130,51 @@ def has_polarity(data):
     :rtype: bool
     """
     return data[RELATION] in CAUSAL_RELATIONS | CORRELATIVE_RELATIONS
+
+
+def _has_modifier(data, modifier):
+    """Checks if the edge has the given modifier
+
+    :param dict data: The edge data dictionary
+    :param str modifier: The modifier to check. One of :data:`pybel.constants.ACTIVITY`,
+                        :data:`pybel.constants.DEGRADATION`, or :data:`pybel.constants.TRANSLOCATION`.
+    :return: Does either the subject or object have the given modifier
+    :rtype: bool
+    """
+    return (
+        part_has_modifier(data, SUBJECT, modifier) or
+        part_has_modifier(data, OBJECT, modifier)
+    )
+
+
+@edge_predicate
+def edge_has_activity(data):
+    """Checks if the edge contains an activity in either the subject or object
+
+    :param dict data: The edge data dictionary
+    :return: If the edge contains an activity in either the subject or object
+    :rtype: bool
+    """
+    return _has_modifier(data, ACTIVITY)
+
+
+@edge_predicate
+def edge_has_translocation(data):
+    """Checks if the edge has a translocation in either the subject or object
+
+    :param dict data: The edge data dictionary
+    :return: If the edge has a translocation in either the subject or object
+    :rtype: bool
+    """
+    return _has_modifier(data, TRANSLOCATION)
+
+
+@edge_predicate
+def edge_has_degradation(data):
+    """Checks if the edge contains a degradation in either the subject or object
+
+    :param dict data: The edge data dictionary
+    :return: If the edge contains a degradation in either the subject or object
+    :rtype: bool
+    """
+    return _has_modifier(data, DEGRADATION)

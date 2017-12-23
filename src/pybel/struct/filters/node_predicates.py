@@ -2,10 +2,11 @@
 
 from functools import wraps
 
+from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
     ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND,
-    MODIFIER, OBJECT, PATHOLOGY, PMOD, PROTEIN, RELATION, SUBJECT, TRANSLOCATION, VARIANTS,
+    OBJECT, PATHOLOGY, PMOD, PROTEIN, RELATION, SUBJECT, TRANSLOCATION, VARIANTS,
 )
 from ...tokens import node_to_tuple
 
@@ -195,15 +196,17 @@ def _node_has_modifier(graph, node, modifier):
     :return: If the node has a known modifier
     :rtype: bool
     """
-    for _, _, d in graph.in_edges_iter(node, data=True):
-        if OBJECT in d and MODIFIER in d[OBJECT] and d[OBJECT][MODIFIER] == modifier:
-            return True
+    modifier_in_subject = any(
+        part_has_modifier(d, SUBJECT, modifier)
+        for _, _, d in graph.out_edges_iter(node, data=True)
+    )
 
-    for _, _, d in graph.out_edges_iter(node, data=True):
-        if SUBJECT in d and MODIFIER in d[SUBJECT] and d[SUBJECT][MODIFIER] == modifier:
-            return True
+    modifier_in_object = any(
+        part_has_modifier(d, OBJECT, modifier)
+        for _, _, d in graph.in_edges_iter(node, data=True)
+    )
 
-    return False
+    return modifier_in_subject or modifier_in_object
 
 
 def has_activity(graph, node):
