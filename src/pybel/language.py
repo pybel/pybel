@@ -85,18 +85,6 @@ abundance_labels = {
     'complexAbundance': COMPLEX
 }
 
-rev_abundance_labels = {
-    ABUNDANCE: 'a',
-    GENE: 'g',
-    MIRNA: 'm',
-    PROTEIN: 'p',
-    RNA: 'r',
-    BIOPROCESS: 'bp',
-    PATHOLOGY: 'path',
-    COMPLEX: 'complex',
-    COMPOSITE: 'composite'
-}
-
 #: Maps the BEL abundance types to the Systems Biology Ontology
 abundance_sbo_mapping = {
     MIRNA: entity(namespace='SBO', name='microRNA', identifier='SBO:0000316'),

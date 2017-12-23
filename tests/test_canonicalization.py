@@ -21,6 +21,8 @@ class TestCanonicalize(unittest.TestCase):
 
     def test_canonicalize_variant(self):
         self.assertEqual('var(p.Val600Glu)', variant_to_bel(hgvs('p.Val600Glu')))
+        self.assertEqual('var(p.Val600Glu)', variant_to_bel(protein_substitution('Val', 600, 'Glu')))
+
         self.assertEqual('pmod(Ph)', variant_to_bel(pmod('Ph')))
         self.assertEqual('pmod(TEST:Ph)', variant_to_bel(pmod('Ph', namespace='TEST')))
         self.assertEqual('pmod(TEST:Ph, Ser)', variant_to_bel(pmod('Ph', namespace='TEST', code='Ser')))
@@ -28,14 +30,67 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('pmod(GO:"protein phosphorylation", Thr, 308)',
                          variant_to_bel(pmod(name='protein phosphorylation', namespace='GO', code='Thr', position=308)))
 
+        self.assertEqual('frag(?)', variant_to_bel(fragment()))
+        self.assertEqual('frag(672_713)', variant_to_bel(fragment(start=672, stop=713)))
+        self.assertEqual('frag(?, "descr")', variant_to_bel(fragment(description='descr')))
+        self.assertEqual('frag(672_713, "descr")', variant_to_bel(fragment(start=672, stop=713, description='descr')))
+
         self.assertEqual('gmod(Me)', variant_to_bel(gmod('Me')))
         self.assertEqual('gmod(TEST:Me)', variant_to_bel(gmod('Me', namespace='TEST')))
         self.assertEqual('gmod(GO:"DNA Methylation")', variant_to_bel(gmod('DNA Methylation', namespace='GO')))
+
+    def test_canonicalize_variant_dsl(self):
+        """Uses the __str__ functions in the DSL to create BEL instead of external pybel.canonicalize"""
+        self.assertEqual('var(p.Val600Glu)', str(hgvs('p.Val600Glu')))
+        self.assertEqual('var(p.Val600Glu)', str(protein_substitution('Val', 600, 'Glu')))
+
+        self.assertEqual('pmod(Ph)', str(pmod('Ph')))
+        self.assertEqual('pmod(TEST:Ph)', str(pmod('Ph', namespace='TEST')))
+        self.assertEqual('pmod(TEST:Ph, Ser)', str(pmod('Ph', namespace='TEST', code='Ser')))
+        self.assertEqual('pmod(TEST:Ph, Ser, 5)', str(pmod('Ph', namespace='TEST', code='Ser', position=5)))
+        self.assertEqual('pmod(GO:"protein phosphorylation", Thr, 308)',
+                         str(pmod(name='protein phosphorylation', namespace='GO', code='Thr', position=308)))
+
+        self.assertEqual('frag(?)', str(fragment()))
+        self.assertEqual('frag(672_713)', str(fragment(start=672, stop=713)))
+        self.assertEqual('frag(?, "descr")', str(fragment(description='descr')))
+        self.assertEqual('frag(672_713, "descr")', str(fragment(start=672, stop=713, description='descr')))
+
+        self.assertEqual('gmod(Me)', str(gmod('Me')))
+        self.assertEqual('gmod(TEST:Me)', str(gmod('Me', namespace='TEST')))
+        self.assertEqual('gmod(GO:"DNA Methylation")', str(gmod('DNA Methylation', namespace='GO')))
 
     def test_canonicalize_fusion_range(self):
         self.assertEqual('p.1_15', fusion_range_to_bel(fusion_range('p', 1, 15)))
         self.assertEqual('p.*_15', fusion_range_to_bel(fusion_range('p', '*', 15)))
 
+    def test_canonicalize_fusion_range_dsl(self):
+        self.assertEqual('p.1_15', str(fusion_range('p', 1, 15)))
+        self.assertEqual('p.*_15', str(fusion_range('p', '*', 15)))
+
+    def canonicalize_abundances(self):
+        self.assertEqual('path(DO:"Alzheimer disease")', str(pathology(namespace='DO', name='Alzheimer disease')))
+        self.assertEqual('bp(GO:apoptosis)', str(bioprocess(namespace='GO', name='apoptosis')))
+        self.assertEqual('a(CHEBI:water)', str(abundance(namespace='CHEBI', name='water')))
+        self.assertEqual('a(CHEBI:"test name")', str(abundance(namespace='CHEBI', name='test name')))
+        self.assertEqual('p(HGNC:AKT1)', str(protein(namespace='HGNC', name='AKT1')))
+        self.assertEqual('m(HGNC:MIR1)', str(mirna(namespace='HGNC', name='MIR1')))
+        self.assertEqual(
+            'r(fus(HGNC:TMPSS2, r.1_79, HGNC:ERG, r.312_5034)',
+            str(rna_fusion(
+                partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
+                range_5p=fusion_range('r', 1, 79),
+                partner_3p=rna(namespace='HGNC', name='ERG'),
+                range_3p=fusion_range('r', 312, 5034)
+            ))
+        )
+        self.assertEqual(
+            'r(fus(HGNC:TMPSS2, ?, HGNC:ERG, ?)',
+            str(rna_fusion(
+                partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
+                partner_3p=rna(namespace='HGNC', name='ERG'),
+            ))
+        )
 
 class TestCanonicalizeEdge(unittest.TestCase):
     """This class houses all testing for the canonicalization of edges such that the relation/modifications can be used

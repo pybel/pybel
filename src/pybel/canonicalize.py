@@ -8,7 +8,6 @@ import itertools as itt
 import logging
 
 from .constants import *
-from .language import rev_abundance_labels
 from .resources.document import make_knowledge_header
 from .utils import ensure_quotes, flatten_citation, hash_edge
 
@@ -42,7 +41,7 @@ def postpend_location(bel_string, location_model):
     )
 
 
-def variant_to_bel(tokens):
+def variant_to_bel(tokens):  # Replace with class-method of different Variant instances
     """Canonicalizes the variant dictionary produced by one of :func:`pybel.dsl.hgvs`, :func:`pybel.dsl.fragment`,
     :func:`pybel.dsl.pmod`, or :func:`pybel.dsl.gmod`.
 
@@ -73,7 +72,7 @@ def variant_to_bel(tokens):
             res = '{}_{}'.format(tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
 
         if FRAGMENT_DESCRIPTION in tokens:
-            res += ', {}'.format(tokens[FRAGMENT_DESCRIPTION])
+            res += ', "{}"'.format(tokens[FRAGMENT_DESCRIPTION])
 
         return 'frag({})'.format(res)
 

@@ -20,6 +20,7 @@ intracellular = entity(name='intracellular', namespace='GOCC')
 extracellular = entity(name='extracellular space', namespace='GOCC')
 surface = entity(name='cell surface', namespace='GOCC')
 
+
 def _activity_helper(modifier, location=None):
     """Help make activity function
 

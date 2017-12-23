@@ -302,6 +302,19 @@ PYBEL_NODE_FUNCTIONS = {
     REACTION
 }
 
+#: The mapping from PyBEL node functions to BEL strings
+rev_abundance_labels = {
+    ABUNDANCE: 'a',
+    GENE: 'g',
+    MIRNA: 'm',
+    PROTEIN: 'p',
+    RNA: 'r',
+    BIOPROCESS: 'bp',
+    PATHOLOGY: 'path',
+    COMPLEX: 'complex',
+    COMPOSITE: 'composite'
+}
+
 # Internal edge data keys
 
 #: The key for an internal edge data dictionary for the relation string
