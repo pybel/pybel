@@ -52,6 +52,10 @@ class BaseAbundance(dict):
             ensure_quotes(self[NAME])
         )
 
+    def as_tuple(self):
+        """Returns this node as a PyBEL node tuple"""
+        return self[FUNCTION], self[NAMESPACE], self[NAME]
+
 
 class abundance(BaseAbundance):
     """Builds an abundance node data dictionary"""
@@ -376,9 +380,8 @@ class ListAbundance(dict):
 
     def __init__(self, func, members):
         """
-
         :param func:
-        :param list[dict] members: A list of PyBEL node data dictionaries
+        :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
         """
         super(ListAbundance, self).__init__({
             FUNCTION: func,
@@ -388,8 +391,14 @@ class ListAbundance(dict):
     def __str__(self):
         return '{}({})'.format(
             rev_abundance_labels[self[FUNCTION]],
-            ', '.join(str(member) for member in self[MEMBERS])
+            ', '.join(map(str, self[MEMBERS]))  # TODO sorted?
         )
+
+    def as_tuple(self):
+        return (self[FUNCTION],) + tuple(sorted(
+            member.as_tuple()
+            for member in self[MEMBERS]
+        ))
 
 
 class complex_abundance(ListAbundance):

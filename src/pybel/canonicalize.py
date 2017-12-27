@@ -201,7 +201,6 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
 def edge_to_bel(u, v, data, sep=None):
     """Takes two nodes and gives back a BEL string representing the statement
 
-    :param BELGraph graph: A BEL graph
     :param dict u: The edge's source's PyBEL node data dictionary
     :param dict v: The edge's target's PyBEL node data dictionary
     :param dict data: The edge's data dictionary

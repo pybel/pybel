@@ -5,7 +5,10 @@ from uuid import uuid4
 
 from pybel import BELGraph
 from pybel.canonicalize import canonicalize_edge, fusion_range_to_bel, variant_to_bel
-from pybel.constants import BEL_DEFAULT_NAMESPACE, INCREASES, KIND, MODIFIER
+from pybel.constants import (
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, INCREASES, KIND, MODIFIER, PATHOLOGY,
+    PROTEIN,
+)
 from pybel.dsl import *
 from pybel.dsl.edges import extracellular, intracellular
 
@@ -68,13 +71,22 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('p.1_15', str(fusion_range('p', 1, 15)))
         self.assertEqual('p.*_15', str(fusion_range('p', '*', 15)))
 
-    def canonicalize_abundances(self):
-        self.assertEqual('path(DO:"Alzheimer disease")', str(pathology(namespace='DO', name='Alzheimer disease')))
-        self.assertEqual('bp(GO:apoptosis)', str(bioprocess(namespace='GO', name='apoptosis')))
-        self.assertEqual('a(CHEBI:water)', str(abundance(namespace='CHEBI', name='water')))
-        self.assertEqual('a(CHEBI:"test name")', str(abundance(namespace='CHEBI', name='test name')))
+    def test_abundance(self):
+        short = abundance(namespace='CHEBI', name='water')
+        self.assertEqual('a(CHEBI:water)', str(short))
+        self.assertEqual((ABUNDANCE, 'CHEBI', 'water'), short.as_tuple())
+
+        long = abundance(namespace='CHEBI', name='test name')
+        self.assertEqual('a(CHEBI:"test name")', str(long))
+        self.assertEqual((ABUNDANCE, 'CHEBI', 'test name'), long.as_tuple())
+
+    def test_protein_reference(self):
         self.assertEqual('p(HGNC:AKT1)', str(protein(namespace='HGNC', name='AKT1')))
+
+    def test_mirna_reference(self):
         self.assertEqual('m(HGNC:MIR1)', str(mirna(namespace='HGNC', name='MIR1')))
+
+    def test_rna_fusion_specified(self):
         self.assertEqual(
             'r(fus(HGNC:TMPSS2, r.1_79, HGNC:ERG, r.312_5034)',
             str(rna_fusion(
@@ -84,6 +96,8 @@ class TestCanonicalize(unittest.TestCase):
                 range_3p=fusion_range('r', 312, 5034)
             ))
         )
+
+    def test_rna_fusion_unspecified(self):
         self.assertEqual(
             'r(fus(HGNC:TMPSS2, ?, HGNC:ERG, ?)',
             str(rna_fusion(
@@ -91,6 +105,22 @@ class TestCanonicalize(unittest.TestCase):
                 partner_3p=rna(namespace='HGNC', name='ERG'),
             ))
         )
+
+    def test_pathology(self):
+        node = pathology(namespace='DO', name='Alzheimer disease')
+        self.assertEqual('path(DO:"Alzheimer disease")', str(node))
+        self.assertEqual((PATHOLOGY, 'DO', 'Alzheimer disease'), node.as_tuple())
+
+    def test_bioprocess(self):
+        node = bioprocess(namespace='GO', name='apoptosis')
+        self.assertEqual('bp(GO:apoptosis)', str(node))
+        self.assertEqual((BIOPROCESS, 'GO', 'apoptosis'), node.as_tuple())
+
+    def test_complex_abundance(self):
+        node = complex_abundance(members=[protein(namespace='HGNC', name='FOS'), protein(namespace='HGNC', name='JUN')])
+        t = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
+        self.assertEqual(t, node.as_tuple())
+
 
 class TestCanonicalizeEdge(unittest.TestCase):
     """This class houses all testing for the canonicalization of edges such that the relation/modifications can be used
@@ -125,7 +155,6 @@ class TestCanonicalizeEdge(unittest.TestCase):
     def test_failure(self):
         with self.assertRaises(ValueError):
             self.add_edge(subject_modifier={MODIFIER: 'nope'})
-
 
     def test_canonicalize_edge_info(self):
         c1 = self.add_edge(
