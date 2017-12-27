@@ -493,7 +493,7 @@ class FusionBase(dict):
 class protein_fusion(FusionBase):
     """Builds a protein fusion data dictionary"""
 
-    def __init__(self, partner_5p, range_5p, partner_3p, range_3p):
+    def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
         """
         :param pybel.dsl.protein partner_5p: A PyBEL node data dictionary for the 5-prime partner
         :param pybel.dsl.protein partner_3p: A PyBEL node data dictionary for the 3-prime partner
@@ -507,14 +507,14 @@ class protein_fusion(FusionBase):
 class rna_fusion(FusionBase):
     """Builds an RNA fusion data dictionary"""
 
-    def __init__(self, partner_5p, range_5p, partner_3p, range_3p):
+    def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
         """
         :param pybel.dsl.rna partner_5p: A PyBEL node data dictionary for the 5-prime partner
         :param pybel.dsl.rna partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
 
-        Example:
+        Example, with fusion ranges using the 'r' qualifier:
 
         >>> rna_fusion(
         >>> ... partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
@@ -538,12 +538,30 @@ class rna_fusion(FusionBase):
 class gene_fusion(FusionBase):
     """Builds a gene fusion data dictionary"""
 
-    def __init__(self, partner_5p, range_5p, partner_3p, range_3p):
+    def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
         """
         :param pybel.dsl.gene partner_5p: A PyBEL node data dictionary for the 5-prime partner
         :param pybel.dsl.gene partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
+
+
+        Example, using fusion ranges with the 'c' qualifier
+
+        >>> gene_fusion(
+        >>> ... partner_5p=gene(namespace='HGNC', name='TMPRSS2'),
+        >>> ... range_5p=fusion_range('c', 1, 79),
+        >>> ... partner_3p=gene(namespace='HGNC', name='ERG'),
+        >>> ... range_3p=fusion_range('c', 312, 5034)
+        >>> )
+
+
+        Example with missing fusion ranges:
+
+        >>> gene_fusion(
+        >>> ... partner_5p=gene(namespace='HGNC', name='TMPRSS2'),
+        >>> ... partner_3p=gene(namespace='HGNC', name='ERG'),
+        >>> )
         """
         super(gene_fusion, self).__init__(GENE, partner_5p=partner_5p, range_5p=range_5p, partner_3p=partner_3p,
                                           range_3p=range_3p)
