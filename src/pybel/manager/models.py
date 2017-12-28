@@ -140,7 +140,8 @@ class Namespace(Base):
                      doc='Keyword that is used in a BEL file to identify a specific namespace')
 
     # A namespace either needs a URL or a pattern
-    pattern = Column(String(255), nullable=True, unique=True, index=True, doc="Contains regex pattern for value identification.")
+    pattern = Column(String(255), nullable=True, unique=True, index=True,
+                     doc="Contains regex pattern for value identification.")
 
     url = Column(String(255), nullable=True, unique=True, index=True, doc='BELNS Resource location as URL')
 
@@ -535,11 +536,10 @@ class Node(Base):
 
         if self.is_variant:
             if self.fusion:
-                mod = self.modifications[0].data
-                result[FUSION] = mod['mod_data']
+                result[FUSION] = self.modifications[0].to_json()
             else:
                 result[VARIANTS] = sort_variant_dict_list(
-                    modification.data['mod_data']
+                    modification.to_json()
                     for modification in self.modifications
                 )
 
@@ -588,7 +588,7 @@ class Modification(Base):
     p3Reference = Column(String(10), nullable=True)
     p3Start = Column(String(255), nullable=True)
     p3Stop = Column(String(255), nullable=True)
-    p3Missing = Column(String(10), nullable=True)
+    p3Missing = Column(String(10), nullable=True)  # FIXME remove this - it's extraneous information
 
     p5PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     p5Partner = relationship("NamespaceEntry", foreign_keys=[p5PartnerName_id])
@@ -596,7 +596,11 @@ class Modification(Base):
     p5Reference = Column(String(10), nullable=True)
     p5Start = Column(String(255), nullable=True)
     p5Stop = Column(String(255), nullable=True)
-    p5Missing = Column(String(10), nullable=True)
+    p5Missing = Column(String(10), nullable=True)  # FIXME remove this - it's extraneous information
+
+    # TODO change modName to foreign key to NamespaceEntry
+    #modReference_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    #modReference = relationship("NamespaceEntry", foreign_keys=[modReference_id])
 
     modNamespace = Column(String(255), nullable=True, doc='Namespace for the modification name')
     modName = Column(String(255), nullable=True, doc='Name of the given modification (used for pmod or gmod)')
@@ -605,16 +609,13 @@ class Modification(Base):
 
     sha512 = Column(String(255), index=True)
 
-    # TODO wreck this
-    @property
-    def data(self):
+    def to_json(self):
         """Recreates a is_variant dictionary for :class:`BELGraph`
 
         :return: Dictionary that describes a variant or a fusion.
         :rtype: dict
         """
         mod_dict = {}
-        mod_key = []
         if self.modType == FUSION:
             mod_dict.update({
                 PARTNER_3P: self.p3Partner.to_json(),
@@ -623,50 +624,39 @@ class Modification(Base):
                 RANGE_5P: {}
             })
 
-            mod_key.append((mod_dict[PARTNER_5P][NAMESPACE], mod_dict[PARTNER_5P][NAME],))
-
             if self.p5Missing:
                 mod_dict[RANGE_5P] = {FUSION_MISSING: self.p5Missing}
-                mod_key.append((self.p5Missing,))
-
             else:
                 mod_dict[RANGE_5P].update({
                     FUSION_REFERENCE: self.p5Reference,
                     FUSION_START: int_or_str(self.p5Start),
                     FUSION_STOP: int_or_str(self.p5Stop),
                 })
-                mod_key.append((self.p5Reference, self.p5Start, self.p5Stop,))
-
-            mod_key.append((mod_dict[PARTNER_3P][NAMESPACE], mod_dict[PARTNER_3P][NAME],))
 
             if self.p3Missing:
                 mod_dict[RANGE_3P][FUSION_MISSING] = self.p3Missing
-                mod_key.append((self.p3Missing,))
-
             else:
                 mod_dict[RANGE_3P].update({
                     FUSION_REFERENCE: self.p3Reference,
                     FUSION_START: int_or_str(self.p3Start),
                     FUSION_STOP: int_or_str(self.p3Stop)
                 })
-                mod_key.append((self.p3Reference, self.p3Start, self.p3Stop,))
+
+            return mod_dict
 
         else:
             mod_dict[KIND] = self.modType
-            mod_key.append(self.modType)
             if self.modType == HGVS:
                 mod_dict[IDENTIFIER] = self.variantString
 
             elif self.modType == FRAGMENT:
                 if self.p3Missing:
                     mod_dict[FRAGMENT_MISSING] = self.p3Missing
-                    mod_key.append(self.p3Missing)
                 else:
                     mod_dict.update({
                         FRAGMENT_START: int_or_str(self.p3Start),
                         FRAGMENT_STOP: int_or_str(self.p3Stop)
                     })
-                    mod_key.append((self.p3Start, self.p3Stop,))
 
             elif self.modType == GMOD:
                 mod_dict.update({
@@ -675,8 +665,6 @@ class Modification(Base):
                         NAME: self.modName
                     }
                 })
-                mod_key.append((self.modNamespace, self.modName,))
-
             elif self.modType == PMOD:
                 mod_dict.update({
                     IDENTIFIER: {
@@ -684,26 +672,12 @@ class Modification(Base):
                         NAME: self.modName
                     }
                 })
-                mod_key.append((self.modNamespace, self.modName,))
                 if self.aminoA:
                     mod_dict[PMOD_CODE] = self.aminoA
-                    mod_key.append(self.aminoA)
-
                 if self.position:
                     mod_dict[PMOD_POSITION] = self.position
-                    mod_key.append(self.position)
 
-        return {
-            'mod_data': mod_dict,
-            'mod_key': mod_key
-        }
-
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in.
-
-        :rtype: dict
-        """
-        return self.data['mod_key']
+        return mod_dict
 
 
 author_citation = Table(
