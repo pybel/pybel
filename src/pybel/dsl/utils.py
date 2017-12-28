@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .exc import PyBELDSLException
-from ..constants import IDENTIFIER, NAME, NAMESPACE
+from ..constants import EFFECT, FROM_LOC, IDENTIFIER, MODIFIER, NAME, NAMESPACE, TO_LOC, TRANSLOCATION
 
 
 def entity(namespace, name=None, identifier=None):
@@ -13,7 +12,7 @@ def entity(namespace, name=None, identifier=None):
     :rtype: dict
     """
     if name is None and identifier is None:
-        raise PyBELDSLException('cannot create an entity with neither a name nor identifier')
+        raise ValueError('cannot create an entity without neither a name nor identifier')
 
     rv = {
         NAMESPACE: namespace,
@@ -26,3 +25,19 @@ def entity(namespace, name=None, identifier=None):
         rv[IDENTIFIER] = identifier
 
     return rv
+
+
+def make_translocation_modifier_dict(from_loc, to_loc):
+    """Makes a translocation dict
+
+    :param dict from_loc:
+    :param dict to_loc:
+    :rtype: dict
+    """
+    return {
+        MODIFIER: TRANSLOCATION,
+        EFFECT: {
+            FROM_LOC: from_loc,
+            TO_LOC: to_loc
+        }
+    }

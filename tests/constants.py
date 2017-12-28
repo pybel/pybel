@@ -11,12 +11,12 @@ from requests.compat import urlparse
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl import complex_abundance, pathology, protein
-from pybel.dsl.edges import translocation
+from pybel.dsl.utils import entity, make_translocation_modifier_dict
 from pybel.manager import Manager
+from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
-from pybel.tokens import node_to_tuple
-from pybel.utils import subdict_matches
+from tests.utils import any_dict_matches, any_subdict_matches
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +33,6 @@ test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
 test_bel_isolated = os.path.join(bel_dir_path, 'isolated.bel')
 test_bel_misordered = os.path.join(bel_dir_path, 'misordered.bel')
-test_bel_no_identifier_valiation = os.path.join(bel_dir_path, 'no_identifier_validation_test.bel')
 
 test_owl_pizza = os.path.join(owl_dir_path, 'pizza_onto.owl')
 test_owl_wine = os.path.join(owl_dir_path, 'wine.owl')
@@ -71,14 +70,14 @@ pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
 wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
 
 
-def update_provenance(control_parser):
+def update_provenance(bel_parser):
     """Sticks provenance in a BEL parser
     
-    :param pybel.parser.parse_control.ControlParser bel_parser:
+    :param pybel.parser.parse_bel.BelParser bel_parser: 
     :return: 
     """
-    control_parser.citation.update(test_citation_dict)
-    control_parser.evidence = test_evidence_text
+    bel_parser.control_parser.citation.update(test_citation_dict)
+    bel_parser.control_parser.evidence = test_evidence_text
 
 
 def assertHasNode(self, node, graph, **kwargs):
@@ -99,33 +98,6 @@ def assertHasNode(self, node, graph, **kwargs):
                         msg="Missing kwarg in node data")
         self.assertEqual(kwargs, {k: graph.node[node][k] for k in kwargs},
                          msg="Wrong values in node data")
-
-
-def any_dict_matches(dict_of_dicts, query_dict):
-    """
-
-    :param dict_of_dicts:
-    :param query_dict:
-    :return:
-    """
-    return any(
-        query_dict == sd
-        for sd in dict_of_dicts.values()
-    )
-
-
-def any_subdict_matches(dict_of_dicts, query_dict):
-    """Checks if dictionary target_dict matches one of the subdictionaries of a
-
-    :param dict[any,dict] dict_of_dicts: dictionary of dictionaries
-    :param dict query_dict: dictionary
-    :return: if dictionary target_dict matches one of the subdictionaries of a
-    :rtype: bool
-    """
-    return any(
-        subdict_matches(sub_dict, query_dict)
-        for sub_dict in dict_of_dicts.values()
-    )
 
 
 def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
@@ -153,7 +125,6 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
         dumps(graph.edge[u][v], indent=2, sort_keys=True)
     )
     self.assertTrue(matches, msg=msg)
-
 
 class TestGraphMixin(unittest.TestCase):
     def assertHasNode(self, g, n, **kwargs):
@@ -240,13 +211,10 @@ class TestTokenParserBase(unittest.TestCase):
         self.parser.clear()
 
     def assertHasNode(self, member, **kwargs):
-        assertHasNode(self, member, self.graph, **kwargs)
+        assertHasNode(self, member, self.parser.graph, **kwargs)
 
     def assertHasEdge(self, u, v, **kwargs):
-        assertHasEdge(self, u, v, self.graph, **kwargs)
-
-    def add_default_provenance(self):
-        update_provenance(self.parser.control_parser)
+        assertHasEdge(self, u, v, self.parser.graph, **kwargs)
 
 
 expected_test_simple_metadata = {
@@ -586,7 +554,7 @@ BEL_THOROUGH_EDGES = [
             MODIFIER: ACTIVITY,
             EFFECT: {NAME: 'kin', NAMESPACE: BEL_DEFAULT_NAMESPACE}
         },
-        OBJECT: translocation(
+        OBJECT: make_translocation_modifier_dict(
             {NAMESPACE: 'GOCC', NAME: 'intracellular'},
             {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
         ),

@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from ..filters.edge_predicates import has_pubmed
+from ..filters.edge_predicates import edge_data_has_pubmed_citation
 from ...constants import CITATION, CITATION_REFERENCE
-
-__all__ = [
-    'iterate_pubmed_identifiers',
-    'get_pubmed_identifiers',
-]
 
 
 def iterate_pubmed_identifiers(graph):
@@ -19,7 +14,7 @@ def iterate_pubmed_identifiers(graph):
     return (
         data[CITATION][CITATION_REFERENCE].strip()
         for _, _, data in graph.edges_iter(data=True)
-        if has_pubmed(data)
+        if edge_data_has_pubmed_citation(data)
     )
 
 

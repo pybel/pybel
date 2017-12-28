@@ -9,7 +9,6 @@ This module contains IO functions for interconversion between BEL graphs and Nod
 """
 
 import json
-import os
 
 from networkx.readwrite.json_graph import node_link_data, node_link_graph
 
@@ -71,6 +70,7 @@ def from_json(graph_json_dict, check_version=True):
 
     :param dict graph_json_dict: A JSON dictionary representing a graph
     :param bool check_version: Checks if the graph was produced by this version of PyBEL
+    :return: A BEL graph
     :rtype: BELGraph
     """
     for i, node in enumerate(graph_json_dict['nodes']):
@@ -81,22 +81,12 @@ def from_json(graph_json_dict, check_version=True):
     return ensure_version(graph, check_version=check_version)
 
 
-def from_json_path(path, check_version=True):
-    """Builds a graph from a file containing Node-Link JSON
-
-    :param str path: A file path. Expands user.
-    :param bool check_version: Checks if the graph was produced by this version of PyBEL
-    :rtype: BELGraph
-    """
-    with open(os.path.expanduser(path)) as f:
-        return from_json_file(f, check_version=check_version)
-
-
 def from_json_file(file, check_version=True):
     """Builds a graph from the Node-Link JSON contained in the given file
 
     :param file file: A readable file or file-like
     :param bool check_version: Checks if the graph was produced by this version of PyBEL
+    :return: A BEL graph
     :rtype: BELGraph
     """
     graph_json_dict = json.load(file)
@@ -108,6 +98,7 @@ def from_jsons(graph_json_str, check_version=True):
 
     :param str graph_json_str: A Node-Link JSON string produced by PyBEL
     :param bool check_version: Checks if the graph was produced by this version of PyBEL
+    :return: A BEL graph
     :rtype: BELGraph
     """
     graph_json_dict = json.loads(graph_json_str)

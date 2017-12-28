@@ -6,12 +6,14 @@ import hashlib
 import itertools as itt
 import json
 import logging
+import os
 import time
 
 from .constants import (
     ANNOTATION_PATTERN_FMT, ANNOTATION_URL_FMT, METADATA_LINE_RE, NAMESPACE_OWL_FMT,
     NAMESPACE_PATTERN_FMT, NAMESPACE_URL_FMT, format_annotation_list,
 )
+from .utils import download, is_url
 from .definitions import get_lines
 from ..constants import VERSION
 
@@ -114,7 +116,7 @@ def get_bel_knowledge_hash(location):
     _, _, lines = split_file_to_annotations_and_definitions(lines)
 
     lines = [
-        line.strip()
+        line
         for index, line in lines
         if line.strip()
     ]

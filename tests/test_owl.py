@@ -7,7 +7,7 @@ from pathlib import Path
 
 from pybel import from_path
 from pybel.constants import *
-from pybel.manager.utils import parse_owl
+from pybel.manager.utils import OWLParser, parse_owl
 from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import (
@@ -206,6 +206,10 @@ expected_prefixes = {
 
 
 class TestOwlUtils(unittest.TestCase):
+    def test_value_error(self):
+        with self.assertRaises(ValueError):
+            OWLParser()
+
     def test_invalid_owl(self):
         with self.assertRaises(Exception):
             parse_owl('http://example.com/not_owl')

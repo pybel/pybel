@@ -6,8 +6,8 @@ import logging
 import os
 from configparser import ConfigParser
 
-from ..exc import EmptyResourceError
-from ..utils import download, is_url
+from pybel.resources.exc import EmptyResourceError
+from pybel.resources.utils import download, is_url
 
 __all__ = [
     'parse_bel_resource',

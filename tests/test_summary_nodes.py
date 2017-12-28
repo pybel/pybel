@@ -4,7 +4,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import *
-from pybel.dsl.nodes import fusion_range, protein, protein_fusion
+from pybel.dsl.nodes import fusion, fusion_range, protein
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (
     count_functions, count_names_by_namespace, count_namespaces, get_functions,
@@ -25,7 +25,7 @@ class TestSummary(unittest.TestCase):
 
     def test_functions_egf(self):
         result = {
-            PROTEIN: 10,
+            PROTEIN: 9,
             COMPLEX: 1,
             BIOPROCESS: 1
         }
@@ -44,7 +44,7 @@ class TestSummary(unittest.TestCase):
 
     def test_namespaces_egf(self):
         result = {
-            'HGNC': 10,
+            'HGNC': 9,
             'GOBP': 1,
         }
 
@@ -69,11 +69,12 @@ class TestSummary(unittest.TestCase):
         graph = BELGraph()
         graph.namespace_url['HGNC'] = 'http://dummy'
 
-        n = protein_fusion(
-            partner_5p=protein(name='A', namespace='HGNC'),
-            range_5p=fusion_range('p', 1, 15),
-            partner_3p=protein(name='B', namespace='HGNC'),
-            range_3p=fusion_range('p', 1, 100)
+        n = fusion(
+            PROTEIN,
+            protein(name='A', namespace='HGNC'),
+            fusion_range('p', 1, 15),
+            protein(name='B', namespace='HGNC'),
+            fusion_range('p', 1, 100)
         )
 
         graph.add_node_from_data(n)

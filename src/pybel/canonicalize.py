@@ -6,10 +6,12 @@ from __future__ import print_function
 
 import itertools as itt
 import logging
+import sys
 
 from .constants import *
-from .language import rev_abundance_labels
+from .parser.language import rev_abundance_labels
 from .resources.document import make_knowledge_header
+from .struct.filters import filter_qualified_edges
 from .utils import ensure_quotes, flatten_citation, hash_edge
 
 __all__ = [
@@ -43,24 +45,23 @@ def postpend_location(bel_string, location_model):
 
 
 def variant_to_bel(tokens):
-    """Canonicalizes the variant dictionary produced by one of :func:`pybel.dsl.hgvs`, :func:`pybel.dsl.fragment`,
-    :func:`pybel.dsl.pmod`, or :func:`pybel.dsl.gmod`.
+    """
 
-    :param dict tokens: A variant data dictionary
+    :param tokens:
     :rtype: str
     """
     if tokens[KIND] == PMOD:
         if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             name = tokens[IDENTIFIER][NAME]
         else:
-            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
+            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])
         return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PMOD_ORDER[2:] if x in tokens))
 
     elif tokens[KIND] == GMOD:
         if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             name = tokens[IDENTIFIER][NAME]
         else:
-            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
+            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], tokens[IDENTIFIER][NAME])
         return 'gmod({})'.format(name)
 
     elif tokens[KIND] == HGVS:
@@ -77,8 +78,6 @@ def variant_to_bel(tokens):
 
         return 'frag({})'.format(res)
 
-    raise ValueError('token kind was not valid: {}'.format(tokens[KIND]))
-
 
 def fusion_range_to_bel(tokens):
     """
@@ -88,11 +87,26 @@ def fusion_range_to_bel(tokens):
     """
     if FUSION_REFERENCE in tokens:
         return '{}.{}_{}'.format(tokens[FUSION_REFERENCE], tokens[FUSION_START], tokens[FUSION_STOP])
-
     return '?'
 
 
-def node_to_bel(data):
+def get_targets_by_relation(graph, node, relation):
+    """Gets the set of neighbors of a given node that have a relation of the given type
+
+    :param BELGraph graph: A BEL network
+    :param tuple node: A BEL node
+    :param relation: the relation to follow from the given node
+    :return: A set of BEL nodes
+    :rtype: set[tuple]
+    """
+    return {
+        target
+        for _, target, data in graph.out_edges_iter(node, data=True)
+        if data[RELATION] == relation
+    }
+
+
+def node_data_to_bel(data):
     """Returns a node data dictionary as a BEL string
 
     :param dict data: A PyBEL node data dictionary
@@ -100,14 +114,14 @@ def node_to_bel(data):
     """
     if data[FUNCTION] == REACTION:
         return 'rxn(reactants({}), products({}))'.format(
-            ', '.join(node_to_bel(reactant_data) for reactant_data in data[REACTANTS]),
-            ', '.join(node_to_bel(product_data) for product_data in data[PRODUCTS])
+            ', '.join(node_data_to_bel(reactant_data) for reactant_data in data[REACTANTS]),
+            ', '.join(node_data_to_bel(product_data) for product_data in data[PRODUCTS])
         )
 
     if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
         return '{}({})'.format(
             rev_abundance_labels[data[FUNCTION]],
-            ', '.join(node_to_bel(member_data) for member_data in data[MEMBERS])
+            ', '.join(node_data_to_bel(member_data) for member_data in data[MEMBERS])
         )
 
     if VARIANTS in data:
@@ -140,15 +154,29 @@ def node_to_bel(data):
     raise ValueError('Unknown values in node data: {}'.format(data))
 
 
-def _decanonicalize_edge_node(node, edge_data, node_position):
-    """Canonicalizes a node with its modifiers stored in the given edge to a BEL string
+def node_to_bel(graph, node):
+    """Returns a node from a graph as a BEL string
 
-    :param dict node: A PyBEL node data dictionary
+    :param BELGraph graph: A BEL Graph
+    :param tuple node: a node from the BEL graph
+    :rtype: str
+    """
+    return node_data_to_bel(graph.node[node])
+
+
+def _decanonicalize_edge_node(graph, node, edge_data, node_position):
+    """Writes a node with its modifiers stored in the given edge
+
+    :param BELGraph graph: A BEL graph
+    :param tuple node: A PyBEL node tuple
     :param dict edge_data: A PyBEL edge data dictionary
     :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
     :rtype: str
     """
-    node_str = node_to_bel(node)
+    if node_position not in {SUBJECT, OBJECT}:
+        raise ValueError('invalid node position: {}'.format(node_position))
+
+    node_str = node_to_bel(graph, node)
 
     if node_position not in edge_data:
         return node_str
@@ -158,61 +186,50 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
     if LOCATION in node_edge_data:
         node_str = postpend_location(node_str, node_edge_data[LOCATION])
 
-    modifier = node_edge_data.get(MODIFIER)
+    if MODIFIER in node_edge_data and DEGRADATION == node_edge_data[MODIFIER]:
+        node_str = "deg({})".format(node_str)
 
-    if modifier is None:
-        return node_str
+    elif MODIFIER in node_edge_data and ACTIVITY == node_edge_data[MODIFIER]:
+        node_str = "act({}".format(node_str)
+        if EFFECT in node_edge_data and node_edge_data[EFFECT]:  # TODO remove and node_edge_data[EFFECT]
+            ma = node_edge_data[EFFECT]
 
-    if DEGRADATION == modifier:
-        return "deg({})".format(node_str)
+            if ma[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
+                node_str = "{}, ma({}))".format(node_str, ma[NAME])
+            else:
+                node_str = "{}, ma({}:{}))".format(node_str, ma[NAMESPACE], ensure_quotes(ma[NAME]))
+        else:
+            node_str = "{})".format(node_str)
 
-    effect = node_edge_data.get(EFFECT)
-
-    if ACTIVITY == modifier:
-        if effect is None:
-            return "act({})".format(node_str)
-
-        if effect[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-            return "act({}, ma({}))".format(node_str, effect[NAME])
-
-        return "act({}, ma({}:{}))".format(node_str, effect[NAMESPACE], ensure_quotes(effect[NAME]))
-
-    if TRANSLOCATION == modifier:
-        if effect is None:
-            return 'tloc({})'.format(node_str)
-
-        to_loc_data = effect[TO_LOC]
-        from_loc_data = effect[FROM_LOC]
-
+    elif MODIFIER in node_edge_data and TRANSLOCATION == node_edge_data[MODIFIER]:
         from_loc = "fromLoc({}:{})".format(
-            from_loc_data[NAMESPACE],
-            ensure_quotes(from_loc_data[NAME])
+            node_edge_data[EFFECT][FROM_LOC][NAMESPACE],
+            ensure_quotes(node_edge_data[EFFECT][FROM_LOC][NAME])
         )
 
         to_loc = "toLoc({}:{})".format(
-            to_loc_data[NAMESPACE],
-            ensure_quotes(to_loc_data[NAME])
+            node_edge_data[EFFECT][TO_LOC][NAMESPACE],
+            ensure_quotes(node_edge_data[EFFECT][TO_LOC][NAME])
         )
 
-        return "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
+        node_str = "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
 
-    raise ValueError('invalid modifier: {}'.format(modifier))
+    return node_str
 
 
-def edge_to_bel(u, v, data, sep=None):
+def edge_to_bel(graph, u, v, data, sep=' '):
     """Takes two nodes and gives back a BEL string representing the statement
 
     :param BELGraph graph: A BEL graph
-    :param dict u: The edge's source's PyBEL node data dictionary
-    :param dict v: The edge's target's PyBEL node data dictionary
+    :param tuple u: The edge's source's PyBEL node tuple
+    :param tuple v: The edge's target's PyBEL node tuple
     :param dict data: The edge's data dictionary
-    :param str sep: The separator between the source, relation, and target. Defaults to ' '
+    :param str sep: The separator between the source, relation, and target
     :return: The canonical BEL for this edge
     :rtype: str
     """
-    sep = sep or ' '
-    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
-    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT)
+    u_str = _decanonicalize_edge_node(graph, u, data, node_position=SUBJECT)
+    v_str = _decanonicalize_edge_node(graph, v, data, node_position=OBJECT)
 
     return sep.join((u_str, data[RELATION], v_str))
 
@@ -233,11 +250,7 @@ def sort_qualified_edges(graph):
     :param BELGraph graph: A BEL graph
     :rtype: tuple[tuple,tuple,dict]
     """
-    qualified_edges_iter = (
-        (u, v, k, d)
-        for u, v, k, d in graph.edges_iter(keys=True, data=True)
-        if graph.has_edge_citation(u, v, k) and graph.has_edge_evidence(u, v, k)
-    )
+    qualified_edges_iter = filter_qualified_edges(graph)
     qualified_edges = sorted(qualified_edges_iter, key=_sort_qualified_edges_helper)
     return qualified_edges
 
@@ -278,7 +291,7 @@ def to_bel_lines(graph):
                 keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else tuple()
                 for key in keys:
                     yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
-                yield graph.edge_to_bel(u, v, data)
+                yield edge_to_bel(graph, u, v, data=data)
                 if keys:
                     yield 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
             yield 'UNSET SupportingText'
@@ -302,10 +315,10 @@ def to_bel_lines(graph):
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
-            yield '{} {} {}'.format(graph.node_to_bel(u), data[RELATION], graph.node_to_bel(v))
+            yield '{} {} {}'.format(node_to_bel(graph, u), data[RELATION], node_to_bel(graph, v))
 
         for node in isolated_nodes_to_serialize:
-            yield graph.node_to_bel(node)
+            yield node_to_bel(graph, node)
 
         yield 'UNSET SupportingText'
         yield 'UNSET Citation'
@@ -317,19 +330,19 @@ def to_bel(graph, file=None):
     :param BELGraph graph: the BEL Graph to output as a BEL Script
     :param file file: A writable file-like object. If None, defaults to standard out.
     """
+    file = sys.stdout if file is None else file
     for line in to_bel_lines(graph):
         print(line, file=file)
 
 
-def to_bel_path(graph, path, mode='w', **kwargs):
+def to_bel_path(graph, path):
     """Writes the BEL graph as a canonical BEL Script to the given path
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
     :param str path: A file path
-    :param str mode: The file opening mode. Defaults to 'w'
     """
-    with open(path, mode=mode, **kwargs) as bel_file:
-        to_bel(graph, bel_file)
+    with open(path, 'w') as f:
+        to_bel(graph, f)
 
 
 def calculate_canonical_name(graph, node):
@@ -347,13 +360,13 @@ def calculate_canonical_name(graph, node):
         return graph.node[node][NAME]
 
     if VARIANTS in data:
-        return node_to_bel(data)
+        return node_data_to_bel(data)
 
     if FUSION in data:
-        return node_to_bel(data)
+        return node_data_to_bel(data)
 
     if data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
-        return node_to_bel(data)
+        return node_data_to_bel(data)
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
         return graph.node[node][NAME]
@@ -367,29 +380,24 @@ def _canonicalize_edge_modifications(data):
     :param dict data: A PyBEL edge data dictionary
     :rtype: tuple
     """
-    if data is None:
-        return
-
-    modifier = data.get(MODIFIER)
-
-    if modifier is None:
-        return
+    if MODIFIER not in data:
+        raise ValueError('Modifier not in data')
 
     result = []
 
-    if modifier == ACTIVITY:
-        t = (ACTIVITY, data[EFFECT])
+    if data[MODIFIER] == ACTIVITY:
+        t = (ACTIVITY, data[ACTIVITY])
 
         if EFFECT in data:
             t += (data[EFFECT][NAMESPACE], data[EFFECT][NAME])
 
         result.append(t)
 
-    elif modifier == DEGRADATION:
+    elif data[MODIFIER] == DEGRADATION:
         t = (DEGRADATION,)
         result.append(t)
 
-    elif modifier == TRANSLOCATION:
+    elif data[MODIFIER] == TRANSLOCATION:
         t = (
             TRANSLOCATION,
             data[EFFECT][FROM_LOC][NAMESPACE],
@@ -421,6 +429,6 @@ def canonicalize_edge(data):
 
     return (
         data[RELATION],
-        _canonicalize_edge_modifications(subject),
-        _canonicalize_edge_modifications(obj),
+        _canonicalize_edge_modifications(subject) if subject else tuple(),
+        _canonicalize_edge_modifications(obj) if obj else tuple(),
     )

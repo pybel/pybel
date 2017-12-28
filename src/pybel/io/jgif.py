@@ -13,7 +13,7 @@ JSON. Interchange with this format provides compatibilty with other software and
 import logging
 from collections import defaultdict
 
-from ..canonicalize import node_to_bel
+from ..canonicalize import edge_to_bel, node_data_to_bel
 from ..constants import *
 from ..parser import BelParser
 from ..struct import BELGraph
@@ -269,7 +269,7 @@ def to_jgif(graph):
     edges_entry = []
 
     for i, (node, node_data) in enumerate(graph.nodes_iter(data=True)):
-        bel = node_to_bel(node_data)
+        bel = node_data_to_bel(node_data)
         node_bel[node] = bel
 
         nodes_entry.append({
@@ -286,7 +286,7 @@ def to_jgif(graph):
         for data in graph.edge[u][v].values():
 
             if (u, v, data[RELATION]) not in u_v_r_bel:
-                u_v_r_bel[u, v, data[RELATION]] = graph.edge_to_bel(u, v, data=data)
+                u_v_r_bel[u, v, data[RELATION]] = edge_to_bel(graph, u, v, data=data)
 
             bel = u_v_r_bel[u, v, data[RELATION]]
 

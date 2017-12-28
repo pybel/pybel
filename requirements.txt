@@ -1,13 +1,11 @@
 networkx==1.11
-sqlalchemy==1.1.15
-click
 requests
 requests_file
 pyparsing
-six
-
-# Extras
 configparser
 py2neo
+click
+sqlalchemy==1.1.14
 onto2nx
-ndex2
+ndex
+six

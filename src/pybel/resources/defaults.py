@@ -2,6 +2,14 @@
 
 from .arty import get_arty_annotation_url, get_arty_namespace_url
 
+HGNC_HUMAN_GENES = get_arty_namespace_url('hgnc-human-genes', '20170511')
+CHEBI = get_arty_namespace_url('chebi', '20170511')
+CHEBI_IDS = get_arty_namespace_url('chebi-ids', '20170511')
+HGNC_GENE_FAMILIES = get_arty_namespace_url('hgnc-gene-families', '20170515')
+CONFIDENCE = get_arty_annotation_url('confidence', '1.0.0')
+MESHD = get_arty_annotation_url('mesh-diseases', '20170511')
+NEUROMMSIG = get_arty_annotation_url('neurommsig', '1.0.1')
+NIFT = get_arty_namespace_url('imaging-ontology', '1.0.0')
 
 default_namespace_spec = [
     ('ADO', 'alzheimer-disease-ontology', '1.0.2'),
@@ -18,7 +26,7 @@ default_namespace_spec = [
     ('GOCC', 'go-cellular-component', '20170511'),
     ('GFAM', 'hgnc-gene-families', '20170515'),
     ('HGNC', 'hgnc-human-genes', '20170511'),
-    ('NIFT', 'imaging-ontology', '1.0.7'),
+    ('NIFT', 'imaging-ontology', '1.0.0'),
     ('NTN', 'nutrition', '1.0.0'),
     ('MESHCS', 'mesh-cell-structures', '20170511'),
     ('MESHD', 'mesh-diseases', '20170511'),
@@ -36,16 +44,6 @@ default_namespaces = {
     keyword: get_arty_namespace_url(namespace, version)
     for keyword, namespace, version in default_namespace_spec
 }
-
-HGNC_HUMAN_GENES = default_namespaces['HGNC']
-CHEBI = default_namespaces['CHEBI']
-CHEBI_IDS = default_namespaces['CHEBIID']
-HGNC_GENE_FAMILIES = default_namespaces['GFAM']
-NIFT = default_namespaces['NIFT']
-
-CONFIDENCE = get_arty_annotation_url('confidence', '1.0.0')
-MESHD = get_arty_annotation_url('mesh-diseases', '20170511')
-NEUROMMSIG = get_arty_annotation_url('neurommsig', '1.0.3')
 
 # See: https://gist.github.com/lsauer/1312860
 DBSNP_PATTERN = 'rs[0-9]+'

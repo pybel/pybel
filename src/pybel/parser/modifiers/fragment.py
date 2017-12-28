@@ -53,8 +53,7 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
 
 .. seealso::
 
-    - BEL 2.0 specification on `proteolytic fragments (2.2.3) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
-    - PyBEL module :py:class:`pybel.parser.modifiers.FragmentParser`
+   BEL 2.0 specification on `proteolytic fragments (2.2.3) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
 """
 
 from pyparsing import Keyword, Optional, pyparsing_common as ppc

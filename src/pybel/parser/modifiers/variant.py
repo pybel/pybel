@@ -24,7 +24,6 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
 
     - BEL 2.0 specification on `variants <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variant_var>`_
     - HVGS `conventions <http://www.hgvs.org/mutnomen/recs.html>`_
-    - PyBEL module :py:class:`pybel.parser.modifiers.VariantParser`
 """
 
 from pyparsing import Word, alphanums

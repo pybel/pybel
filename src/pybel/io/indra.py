@@ -26,15 +26,9 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
     # Write to BEL file
     pybel.to_bel_path(belgraph, 'simple_pybel.bel')
 
-.. warning::
-
-    These functions are hard to unit test because they rely on a whole set of java dependencies and will likely
-    not be for a while.
-
 """
 
 from six.moves.cPickle import load
-import warnings
 
 __all__ = [
     'from_indra_statements',
@@ -47,7 +41,7 @@ __all__ = [
 def from_indra_statements(statements, name=None, version=None, description=None):
     """Imports a model from :mod:`indra`.
 
-    :param list[indra.statements.Statement] statements: A list of statements
+    :param list[indra.statement.Statements] statments: A list of statements
     :param str name: The name for the BEL graph
     :param str version: The version of the BEL graph
     :param str description: The description of the BEL graph
@@ -88,19 +82,14 @@ def from_indra_pickle(path, name=None, version=None, description=None):
 
 
 def to_indra(graph):
-    """Exports this graph as a list of INDRA statements using `indra.sources.pybel.PybelProcessor`
+    """Exports this graph as a list of INDRA statements.
 
     :param pybel.BELGraph graph: A BEL graph
     :rtype: list[indra.statements.Statement]
 
-    .. warning:: Not fully implemented yet! Needs the pybel_client branch of sorgerlab/indra
+    .. warning:: Not implemented yet!
     """
-    warnings.warn('export to INDRA is not yet complete')
-    from indra.sources.pybel import PybelProcessor
-
-    pbp = PybelProcessor(graph)
-    pbp.get_statements()
-    return pbp.statements
+    raise NotImplementedError
 
 
 def from_biopax(path, name=None, version=None, description=None):

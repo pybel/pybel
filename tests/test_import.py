@@ -11,23 +11,23 @@ import networkx as nx
 from six import BytesIO, StringIO
 
 from pybel import (
-    BELGraph, from_bytes, from_cx, from_cx_jsons, from_json, from_json_file, from_jsons, from_lines, from_ndex,
-    from_path, from_pickle, from_url, to_bel_lines, to_bytes, to_csv, to_cx, to_cx_jsons, to_graphml, to_gsea, to_json,
-    to_json_file, to_jsons, to_ndex, to_pickle, to_sif,
+    BELGraph, from_bytes, from_cx, from_cx_jsons, from_json, from_json_file, from_jsons, from_lines,
+    from_ndex, from_path, from_pickle, from_url, to_bel_lines, to_bytes, to_cx, to_cx_jsons, to_graphml, to_json,
+    to_json_file, to_jsons, to_ndex, to_pickle,
 )
 from pybel.constants import *
 from pybel.dsl import gene
 from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_fmt
 from pybel.io.ndex_utils import NDEX_PASSWORD, NDEX_USERNAME
 from pybel.parser import BelParser
+from pybel.parser.canonicalize import node_to_tuple
 from pybel.parser.parse_exceptions import *
 from pybel.struct.summary import get_syntax_errors
-from pybel.tokens import node_to_tuple
 from pybel.utils import hash_node
 from tests.constants import (
-    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin, TestTokenParserBase, citation_1,
-    evidence_1, test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough,
-    test_citation_dict, test_evidence_text, test_set_evidence,
+    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin,
+    TestTokenParserBase, citation_1, evidence_1, test_bel_isolated, test_bel_misordered, test_bel_simple,
+    test_bel_slushy, test_bel_thorough, test_citation_dict, test_evidence_text, test_set_evidence, update_provenance,
 )
 from tests.mocks import mock_bel_resources
 
@@ -124,33 +124,6 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         with open(path, 'wb') as f:
             to_graphml(self.thorough_graph, f)
-
-        os.close(handle)
-        os.remove(path)
-
-    def test_thorough_csv(self):
-        handle, path = tempfile.mkstemp()
-
-        with open(path, 'w') as f:
-            to_csv(self.thorough_graph, f)
-
-        os.close(handle)
-        os.remove(path)
-
-    def test_thorough_sif(self):
-        handle, path = tempfile.mkstemp()
-
-        with open(path, 'w') as f:
-            to_sif(self.thorough_graph, f)
-
-        os.close(handle)
-        os.remove(path)
-
-    def test_thorough_gsea(self):
-        handle, path = tempfile.mkstemp()
-
-        with open(path, 'w') as f:
-            to_gsea(self.thorough_graph, f)
 
         os.close(handle)
         os.remove(path)
@@ -313,7 +286,7 @@ class TestFull(TestTokenParserBase):
 
     def test_regex_match(self):
         line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
-        self.add_default_provenance()
+        update_provenance(self.parser)
         self.parser.parseString(line)
         self.assertIn((GENE, 'dbSNP', 'rs10234'), self.parser.graph)
         self.assertIn((GENE, 'dbSNP', 'rs10235'), self.parser.graph)
@@ -341,7 +314,7 @@ class TestFull(TestTokenParserBase):
             self.parser.parse_lines(statements)
 
     def test_annotations(self):
-        self.add_default_provenance()
+        update_provenance(self.parser)
 
         statements = [
             'SET TestAnnotation1 = "A"',
@@ -354,9 +327,9 @@ class TestFull(TestTokenParserBase):
         test_node_1_dict = gene(namespace='TESTNS', name='1')
         test_node_2_dict = gene(namespace='TESTNS', name='2')
 
-        self.assertEqual(2, self.graph.number_of_nodes())
-        self.assertTrue(self.graph.has_node_with_data(test_node_1_dict))
-        self.assertTrue(self.graph.has_node_with_data(test_node_2_dict))
+        self.assertEqual(2, self.parser.graph.number_of_nodes())
+        self.assertTrue(self.parser.graph.has_node_with_data(test_node_1_dict))
+        self.assertTrue(self.parser.graph.has_node_with_data(test_node_2_dict))
 
         test_node_1 = node_to_tuple(test_node_1_dict)
         test_node_2 = node_to_tuple(test_node_2_dict)
@@ -374,7 +347,7 @@ class TestFull(TestTokenParserBase):
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_withList(self):
-        self.add_default_provenance()
+        update_provenance(self.parser)
 
         statements = [
             'SET TestAnnotation1 = {"A","B"}',
@@ -400,7 +373,7 @@ class TestFull(TestTokenParserBase):
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_withMultiList(self):
-        self.add_default_provenance()
+        update_provenance(self.parser)
 
         statements = [
             'SET TestAnnotation1 = {"A","B"}',
