@@ -6,8 +6,8 @@ import unittest
 from pybel.constants import *
 from pybel.dsl.nodes import gmod, hgvs, pmod
 from pybel.parser.modifiers import (
-    FragmentParser, FusionParser, GmodParser, GsubParser, LocationParser, PmodParser, PsubParser, TruncationParser,
-    VariantParser,
+    FragmentParser, FusionParser, GeneModificationParser, GeneSubstitutionParser, LocationParser,
+    ProteinModificationParser, ProteinSubstitutionParser, TruncationParser, VariantParser,
 )
 
 log = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ def identifier(namespace, name):  # FIXME remove this
 
 class TestPmod(unittest.TestCase):
     def setUp(self):
-        self.parser = PmodParser()
+        self.parser = ProteinModificationParser()
 
     def test_pmod1(self):
         statement = 'pmod(Ph, Ser, 473)'
@@ -160,7 +160,7 @@ class TestPmod(unittest.TestCase):
 
 class TestGmod(unittest.TestCase):
     def setUp(self):
-        self.parser = GmodParser()
+        self.parser = GeneModificationParser()
 
         self.expected = gmod('Me')
 
@@ -191,7 +191,7 @@ class TestGmod(unittest.TestCase):
 
 class TestPsub(unittest.TestCase):
     def setUp(self):
-        self.parser = PsubParser()
+        self.parser = ProteinSubstitutionParser()
 
     def test_psub_1(self):
         statement = 'sub(A, 127, Y)'
@@ -210,7 +210,7 @@ class TestPsub(unittest.TestCase):
 
 class TestGsubParser(unittest.TestCase):
     def setUp(self):
-        self.parser = GsubParser()
+        self.parser = GeneSubstitutionParser()
 
     def test_gsub(self):
         statement = 'sub(G,308,A)'
@@ -261,7 +261,7 @@ class TestFragmentParser(unittest.TestCase):
 
     def test_descriptor(self):
         """fragment with unknown start/stop and a descriptor"""
-        s = 'frag(?, 55kD)'
+        s = 'frag(?, "55kD")'
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,

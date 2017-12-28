@@ -11,7 +11,7 @@ from six.moves import zip_longest
 from .cache_manager import Manager
 from ..constants import *
 from ..struct.filters import filter_edges
-from ..struct.filters.edge_predicates import edge_has_pubmed_citation
+from ..struct.filters.edge_predicates import has_pubmed
 from ..struct.summary.provenance import get_pubmed_identifiers
 
 __all__ = (
@@ -206,8 +206,8 @@ def enrich_pubmed_citations(graph, manager=None, group_size=None, sleep_time=Non
     pmid_data, errors = get_citations_by_pmids(pmids, group_size=group_size, sleep_time=sleep_time, return_errors=True,
                                                manager=manager)
 
-    for u, v, k, d in filter_edges(graph, edge_has_pubmed_citation):
-        pmid = d[CITATION][CITATION_REFERENCE].strip()
+    for u, v, k in filter_edges(graph, has_pubmed):
+        pmid = graph.edge[u][v][k][CITATION][CITATION_REFERENCE].strip()
 
         if pmid not in pmid_data:
             log.warning('Missing data for PubMed identifier: %s', pmid)

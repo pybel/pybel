@@ -53,13 +53,14 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
 
 .. seealso::
 
-   BEL 2.0 specification on `proteolytic fragments (2.2.3) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
+    - BEL 2.0 specification on `proteolytic fragments (2.2.3) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
+    - PyBEL module :py:class:`pybel.parser.modifiers.FragmentParser`
 """
 
 from pyparsing import Keyword, Optional, pyparsing_common as ppc
 
 from ..baseparser import BaseParser
-from ..utils import WCW, nest, one_of_tags, word
+from ..utils import WCW, nest, one_of_tags, quote
 from ...constants import FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, KIND
 
 __all__ = [
@@ -77,6 +78,6 @@ class FragmentParser(BaseParser):
 
         self.language = fragment_tag + nest(
             (self.fragment_range | self.missing_fragment(FRAGMENT_MISSING)) + Optional(
-                WCW + word(FRAGMENT_DESCRIPTION)))
+                WCW + quote(FRAGMENT_DESCRIPTION)))
 
         super(FragmentParser, self).__init__(self.language)

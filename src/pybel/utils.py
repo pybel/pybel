@@ -4,7 +4,7 @@ import hashlib
 import json
 import logging
 import pickle
-from collections import MutableMapping, defaultdict
+from collections import Iterable, MutableMapping, defaultdict
 from datetime import datetime
 
 import networkx as nx
@@ -269,7 +269,7 @@ def subdict_matches(target, query, partial_match=True):
     for k, v in query.items():
         if k not in target:
             return False
-        elif not isinstance(v, (int, string_types, list, set, dict, tuple)):
+        elif not isinstance(v, (int, string_types, dict, Iterable)):
             raise ValueError('invalid value: {}'.format(v))
         elif isinstance(v, (int, string_types)) and target[k] != v:
             return False
@@ -281,7 +281,7 @@ def subdict_matches(target, query, partial_match=True):
                     return False
             elif not partial_match and target[k] != v:
                 return False
-        elif isinstance(v, (list, set, tuple)) and target[k] not in v:
+        elif isinstance(v, Iterable) and target[k] not in v:
             return False
 
     return True

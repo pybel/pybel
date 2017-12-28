@@ -69,6 +69,10 @@ class TestSeeding(TemporaryCacheClsMixin):
 
         self.assertEqual(0, len(edges))
 
+    def test_seed_by_induction_raise(self):
+        with self.assertRaises(ValueError):
+            self.manager.query_induction([])
+
     def test_seed_by_induction(self):
         shp2_model = self.manager.get_node_by_dict(shp2)
         syk_model = self.manager.get_node_by_dict(syk)

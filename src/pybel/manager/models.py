@@ -14,7 +14,7 @@ from sqlalchemy.orm import backref, relationship
 from .utils import int_or_str
 from ..constants import *
 from ..io.gpickle import from_bytes, to_bytes
-from ..parser.canonicalize import node_to_tuple, sort_dict_list, sort_variant_dict_list
+from ..tokens import node_to_tuple, sort_dict_list, sort_variant_dict_list
 
 __all__ = [
     'Base',
@@ -136,16 +136,20 @@ class Namespace(Base):
     id = Column(Integer, primary_key=True)
 
     uploaded = Column(DateTime, nullable=False, default=datetime.datetime.utcnow, doc='The date of upload')
-    url = Column(String(255), nullable=False, unique=True, index=True,
-                 doc='Source url of the given namespace definition file (.belns)')
+    keyword = Column(String(16), nullable=True, index=True,
+                     doc='Keyword that is used in a BEL file to identify a specific namespace')
 
-    keyword = Column(String(8), index=True, doc='Keyword that is used in a BEL file to identify a specific namespace')
-    name = Column(String(255), doc='Name of the given namespace')
-    domain = Column(String(255), doc='Domain for which this namespace is valid')
+    # A namespace either needs a URL or a pattern
+    pattern = Column(String(255), nullable=True, unique=True, index=True, doc="Contains regex pattern for value identification.")
+
+    url = Column(String(255), nullable=True, unique=True, index=True, doc='BELNS Resource location as URL')
+
+    name = Column(String(255), nullable=True, doc='Name of the given namespace')
+    domain = Column(String(255), nullable=True, doc='Domain for which this namespace is valid')
     species = Column(String(255), nullable=True, doc='Taxonomy identifiers for which this namespace is valid')
     description = Column(Text, nullable=True, doc='Optional short description of the namespace')
     version = Column(String(255), nullable=True, doc='Version of the namespace')
-    created = Column(DateTime, doc='DateTime of the creation of the namespace definition file')
+    created = Column(DateTime, nullable=True, doc='DateTime of the creation of the namespace definition file')
     query_url = Column(Text, nullable=True, doc='URL that can be used to query the namespace (eternally from PyBEL)')
 
     author = Column(String(255), doc='The author of the namespace')
@@ -226,7 +230,9 @@ class NamespaceEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(Text, nullable=False, doc='Name that is defined in the corresponding namespace definition file')
+    name = Column(String(1023), index=True, nullable=False,
+                  doc='Name that is defined in the corresponding namespace definition file')
+    identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
     namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), nullable=False, index=True)
@@ -357,9 +363,9 @@ class AnnotationEntry(Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), nullable=False,
+    name = Column(String(255), nullable=False, index=True,
                   doc='Name that is defined in the corresponding annotation definition file')
-    label = Column(String(255), nullable=True)
+    label = Column(Text, nullable=True)
 
     annotation_id = Column(Integer, ForeignKey('{}.id'.format(ANNOTATION_TABLE_NAME)), index=True)
     annotation = relationship('Annotation', backref=backref('entries', lazy='dynamic'))
@@ -495,15 +501,13 @@ class Node(Base):
     id = Column(Integer, primary_key=True)
 
     type = Column(String(255), nullable=False, doc='The type of the represented biological entity e.g. Protein or Gene')
-    namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
-    namespace_entry = relationship('NamespaceEntry', foreign_keys=[namespace_entry_id])
-    namespace_pattern = Column(String(255), nullable=True, doc="Contains regex pattern for value identification.")
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
     fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
-
     bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
-
     sha512 = Column(String(255), index=True)
+
+    namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    namespace_entry = relationship('NamespaceEntry', foreign_keys=[namespace_entry_id])
 
     modifications = relationship("Modification", secondary=node_modification, backref='nodes')
 
@@ -539,7 +543,7 @@ class Node(Base):
                     for modification in self.modifications
                 )
 
-        if self.type == REACTION:
+        elif self.type == REACTION:
             reactants = []
             products = []
 
@@ -552,7 +556,7 @@ class Node(Base):
             result[REACTANTS] = sort_dict_list(reactants)
             result[PRODUCTS] = sort_dict_list(products)
 
-        if self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
+        elif self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
             result[MEMBERS] = sort_dict_list(
                 edge.target.to_json()
                 for edge in self.out_edges

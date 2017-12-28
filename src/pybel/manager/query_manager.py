@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from collections import Iterable
 
+from six import string_types
 from sqlalchemy import and_, func, or_
 
 from .lookup_manager import LookupManager
 from .models import (
-    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
+    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Namespace,
     NamespaceEntry, Node, Property,
 )
 from ..constants import *
 from ..struct import BELGraph
-from ..utils import hash_edge, hash_node, parse_datetime
+from ..utils import hash_node, parse_datetime
 
 __all__ = [
     'QueryManager'
@@ -61,64 +63,33 @@ class QueryManager(LookupManager):
         node_hash = hash_node(node)
         return self.get_node_by_hash(node_hash)
 
-    def query_nodes(self, node_id=None, bel=None, type=None, namespace=None, name=None, modification_type=None,
-                    modification_name=None, as_dict_list=False):
+    def query_nodes(self, bel=None, type=None, namespace=None, name=None):
         """Builds and runs a query over all nodes in the PyBEL cache.
 
-        :param int node_id: The node ID to get
         :param str bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
         :param str type: Type of the biological entity. e.g. Protein
         :param str namespace: Namespace keyword that is used in BEL. e.g. HGNC
         :param str name: Name of the biological entity. e.g. APP
-        :param str modification_name:
-        :param str modification_type:
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`Node` objects.
-        :return: A list of the fitting nodes as :class:`Node` objects or dicts.
         :rtype: list[Node]
         """
         q = self.session.query(Node)
 
-        if node_id and isinstance(node_id, int):
-            q = q.filter_by(id=node_id)
+        if bel:
+            q = q.filter(Node.bel.like(bel))
 
-        else:
-            if bel:
-                q = q.filter(Node.bel.like(bel))
+        if type:
+            q = q.filter(Node.type.like(type))
 
-            if type:
-                q = q.filter(Node.type.like(type))
+        if namespace or name:
+            q = q.join(NamespaceEntry)
 
-            if namespace or name:
-                q = q.join(NamespaceEntry)
-                if namespace:
-                    q = q.join(Namespace).filter(Namespace.keyword.like(namespace))
-                if name:
-                    q = q.filter(NamespaceEntry.name.like(name))
+            if namespace:
+                q = q.join(Namespace).filter(Namespace.keyword.like(namespace))
 
-            if modification_type or modification_name:
-                q = q.join(Modification)
-                if modification_type:
-                    q = q.filter(Modification.modType.like(modification_type))
-                if modification_name:
-                    q = q.filter(Modification.modName.like(modification_name))
+            if name:
+                q = q.filter(NamespaceEntry.name.like(name))
 
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        dict_list = []
-
-        for node in result:
-            node_dict = node.to_json()
-            node_dict['bel'] = node.bel
-            dict_list.append({
-                'data': node.to_json(),
-                'bel': node.bel
-            })
-
-        return dict_list
+        return q.all()
 
     def count_edges(self):
         """Counts the number of edges in the cache
@@ -127,21 +98,10 @@ class QueryManager(LookupManager):
         """
         return self.session.query(func.count(Edge.id)).scalar()
 
-    def get_edge_by_tuple(self, u, v, d):
-        """Looks up an edge by PyBEL edge tuple
-
-        :param tuple u: A PyBEL node tuple
-        :param tuple v: A PyBEL node tuple
-        :param dict d:
-        :rtype: Edge
-        """
-        return self.get_edge_by_hash(hash_edge(u, v, None, d))
-
-    def query_edges(self, edge_id=None, bel=None, source=None, target=None, relation=None, citation=None,
-                    evidence=None, annotation=None, property=None, as_dict_list=False):
+    def query_edges(self, bel=None, source=None, target=None, relation=None, citation=None, evidence=None,
+                    annotation=None, property=None):
         """Builds and runs a query over all edges in the PyBEL cache.
 
-        :param int edge_id: The edge identifier
         :param str bel: BEL statement that represents the desired edge.
         :param str or Node source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
         :param str or Node target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
@@ -152,100 +112,74 @@ class QueryManager(LookupManager):
         :param dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
                                         annotationValue parameter as string.
         :param property: An edge property object or a corresponding database identifier.
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                                    :class:`Edge` objects.
         :rtype: list[Edge]
         """
-        q = self.session.query(Edge)
+        query = self.session.query(Edge)
 
-        if edge_id and isinstance(edge_id, int):
-            q = q.filter_by(id=edge_id)
+        if bel:
+            query = query.filter(Edge.bel.like(bel))
 
-        else:
-            if bel:
-                q = q.filter(Edge.bel.like(bel))
+        if relation:
+            query = query.filter(Edge.relation.like(relation))
 
-            if relation:
-                q = q.filter(Edge.relation.like(relation))
+        if annotation:
+            query = query.join(AnnotationEntry, Edge.annotations)
+            if isinstance(annotation, dict):
+                query = query.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
+                query = query.filter(AnnotationEntry.name.in_(list(annotation.values())))
 
-            if annotation:
-                q = q.join(AnnotationEntry, Edge.annotations)
-                if isinstance(annotation, dict):
-                    q = q.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
-                    q = q.filter(AnnotationEntry.name.in_(list(annotation.values())))
+            elif isinstance(annotation, string_types):
+                query = query.filter(AnnotationEntry.name.like(annotation))
 
-                elif isinstance(annotation, str):
-                    q = q.filter(AnnotationEntry.name.like(annotation))
+        if source:
+            if isinstance(source, string_types):
+                source = self.query_nodes(bel=source)
+                if len(source) == 0:
+                    return []
+                source = source[0]  # FIXME what if this matches multiple?
 
-            if source:
-                if isinstance(source, str):
-                    source = self.query_nodes(bel=source)
-                    if len(source) == 0:
-                        return []
-                    source = source[0]
+            query = query.filter(Edge.source == source)
 
-                if isinstance(source, Node):
-                    q = q.filter(Edge.source == source)
+        if target:
+            if isinstance(target, string_types):
+                targets = self.query_nodes(bel=target)
+                target = targets[0]  # FIXME what if this matches multiple?
 
-                    # ToDo: in_() not yet supported for relations
-                    # elif isinstance(source, list) and len(source) > 0:
-                    #    if isinstance(source[0], Node):
-                    #        q = q.filter(Edge.source.in_(source))
+            query = query.filter(Edge.target == target)
 
-            if target:
-                if isinstance(target, str):
-                    target = self.query_nodes(bel=target)[0]
+        if citation or evidence:
+            query = query.join(Evidence)
 
-                if isinstance(target, Node):
-                    q = q.filter(Edge.target == target)
+            if citation:
+                if isinstance(citation, Citation):
+                    query = query.filter(Evidence.citation == citation)
 
-                    # elif isinstance(target, list) and len(target) > 0:
-                    #    if isinstance(target[0], Node):
-                    #        q = q.filter(Edge.source.in_(target))
+                elif isinstance(citation, list) and isinstance(citation[0], Citation):
+                    query = query.filter(Evidence.citation.in_(citation))
 
-            if citation or evidence:
-                q = q.join(Evidence)
+                elif isinstance(citation, string_types):
+                    query = query.join(Citation).filter(Citation.reference.like(citation))
 
-                if citation:
-                    if isinstance(citation, Citation):
-                        q = q.filter(Evidence.citation == citation)
+            if evidence:
+                if isinstance(evidence, Evidence):
+                    query = query.filter(Edge.evidence == evidence)
 
-                    elif isinstance(citation, list) and isinstance(citation[0], Citation):
-                        q = q.filter(Evidence.citation.in_(citation))
+                elif isinstance(evidence, string_types):
+                    query = query.filter(Evidence.text.like(evidence))
 
-                    elif isinstance(citation, str):
-                        q = q.join(Citation).filter(Citation.reference.like(citation))
+        if property:
+            query = query.join(Property, Edge.properties)
 
-                if evidence:
-                    if isinstance(evidence, Evidence):
-                        q = q.filter(Edge.evidence == evidence)
+            if isinstance(property, Property):
+                query = query.filter(Property.id == property.id)
+            elif isinstance(property, int):
+                query = query.filter(Property.id == property)
 
-                    elif isinstance(evidence, str):
-                        q = q.filter(Evidence.text.like(evidence))
+        return query.all()
 
-            if property:
-                q = q.join(Property, Edge.properties)
-
-                if isinstance(property, Property):
-                    q = q.filter(Property.id == property.id)
-                elif isinstance(property, int):
-                    q = q.filter(Property.id == property)
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        return [
-            edge.to_json()
-            for edge in result
-        ]
-
-    def query_citations(self, citation_id=None, type=None, reference=None, name=None, author=None, date=None,
-                        evidence_text=None, as_dict_list=False):
+    def query_citations(self, type=None, reference=None, name=None, author=None, date=None, evidence_text=None):
         """Builds and runs a query over all citations in the PyBEL cache.
 
-        :param int citation_id:
         :param str type: Type of the citation. e.g. PubMed
         :param str reference: The identifier used for the citation. e.g. PubMed_ID
         :param str name: Title of the citation.
@@ -253,83 +187,39 @@ class QueryManager(LookupManager):
         :param date: Publishing date of the citation.
         :type date: str or datetime.date
         :param str evidence_text:
-        :param bool as_dict_list: Identifies whether the result should be a list of dictionaries or a list of
-                            :class:`Citation` objects.
-        :return: List of :class:`Citation` objects or corresponding dicts.
-        :rtype: list[Citation] or dict
+        :rtype: list[Citation]
         """
-        q = self.session.query(Citation)
+        query = self.session.query(Citation)
 
-        if citation_id and isinstance(citation_id, int):
-            q = q.filter_by(id=citation_id)
+        if author is not None:
+            query = query.join(Author, Citation.authors)
+            if isinstance(author, string_types):
+                query = query.filter(Author.name.like(author))
+            elif isinstance(author, Iterable):
+                query = query.filter(Author.name.in_(set(author)))
+            else:
+                raise TypeError
 
-        else:
-            if author is not None:
-                q = q.join(Author, Citation.authors)
-                if isinstance(author, str):
-                    q = q.filter(Author.name.like(author))
-                elif isinstance(author, list):
-                    q = q.filter(Author.name.in_(author))
+        if type and not reference:
+            query = query.filter(Citation.type.like(type))
+        elif reference and type:
+            query = query.filter(Citation.reference == reference)
+        elif reference and not type:
+            raise ValueError('reference specified without type')
 
-            if type:
-                q = q.filter(Citation.type.like(type))
+        if name:
+            query = query.filter(Citation.name.like(name))
 
-            if reference:
-                q = q.filter(Citation.reference == reference)
+        if date:
+            if isinstance(date, datetime.date):
+                query = query.filter(Citation.date == date)
+            elif isinstance(date, string_types):
+                query = query.filter(Citation.date == parse_datetime(date))
 
-            if name:
-                q = q.filter(Citation.name.like(name))
+        if evidence_text:
+            query = query.join(Evidence).filter(Evidence.text.like(evidence_text))
 
-            if date:
-                if isinstance(date, datetime.date):
-                    q = q.filter(Citation.date == date)
-                elif isinstance(date, str):
-                    q = q.filter(Citation.date == parse_datetime(date))
-
-            if evidence_text:
-                q = q.join(Evidence).filter(Evidence.text.like(evidence_text))
-
-        citations = q.all()
-
-        if not as_dict_list:
-            return citations
-
-        return [
-            citation.to_json()
-            for citation in citations
-        ]
-
-    def query_node_properties(self, property_id=None, participant=None, modifier=None, as_dict_list=False):
-        """Builds and runs a query over all property entries in the database.
-
-        :param int property_id: Database primary identifier.
-        :param str participant: The participant that is effected by the property (OBJECT or SUBJECT)
-        :param str modifier: The modifier of the property.
-        :param bool as_dict_list: Identifies weather the result should be a list of dictionaries or a list of
-                             :class:`Property` objects.
-        :rtype: list[Property]
-        """
-        q = self.session.query(Property)
-
-        if property_id:
-            q = q.filter_by(id=property_id)
-
-        else:
-            if participant:
-                q = q.filter(Property.participant.like(participant))
-
-            if modifier:
-                q = q.filter(Property.modifier.like(modifier))
-
-        result = q.all()
-
-        if not as_dict_list:
-            return result
-
-        return [
-            prop.data
-            for prop in result
-        ]
+        return query.all()
 
     def query_edges_by_pmid(self, pubmed_identifiers):
         """Gets all edges annotated to the given documents
@@ -349,7 +239,7 @@ class QueryManager(LookupManager):
         :rtype: list[Edge]
         """
         if len(nodes) < 2:
-            raise ValueError
+            raise ValueError('not enough nodes given to induce over')
 
         node_ids = [node.id for node in nodes]
 

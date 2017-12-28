@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.10.1 <https://github.com/pybel/pybel/compare/v0.10.0...0.10.1>`_ - 2017-12-28
+-------------------------------------------------------------------------------
+Fixed
+~~~~~
+- Fixed truncation description parsing to handle double quotes
+
+Changed
+~~~~~~~
+- Made DSL functions into classes to allow inheritance and isinstance checking as well as
+  preliminary to_tuple functionality
+
+Added
+~~~~~
+- Added more edge predicates (has_activity, has_degree, has_translocation, has_annotation)
+
+`0.10.0 <https://github.com/pybel/pybel/compare/v0.9.7...0.10.0>`_ - 2017-12-22
+-------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Updated SQL schema and made new minimum unpickle version 0.10.0.
+- Moved `pybel.parser.language` to `pybel.language`
+- Moved `pybel.parser.canoncalize` to `pybel.tokens`
+- Overhaul of `pybel.struct.filters` - included many more functions, tests, and updated nomenclature
+- Update canoncalize functions to be generally reusable (take node data dictionaries)
+- Make NDEx2, Neo4j, OWL parsing, and INDRA setup.py install extras
+
+Fixed
+~~~~~
+- Names defined by regular expressions can now be included in the database cache (https://github.com/pybel/pybel/issues/250, https://github.com/pybel/pybel/issues/251)
+- Fixed ``Manager.has_name_version`` (https://github.com/pybel/pybel/issues/246)
+- Fixed CX output and upgraded to NDEx2 client
+- When joining graphs, keep their metadata (https://github.com/pybel/pybel/commit/affaecc73d2b4affa8aeecb3834ed7c6f5697cac)
+
+Added
+~~~~~
+- Included partOf relationship in BEL language (https://github.com/pybel/pybel/issues/244)
+- Added additional date formats to parse from PubMed (https://github.com/pybel/pybel/issues/239)
+- Filled out many more DSL functions and added testing
+- Added ability to set relationship parsing policy in BEL Parser (https://github.com/pybel/pybel/commit/09614465d80d2931e901fd54d067a5151e327283)
+- Implemented from PyBEL Web Function
+- Implemented to INDRA function
+
 `0.9.7 <https://github.com/pybel/pybel/compare/v0.9.6...0.9.7>`_ - 2017-11-20
 -----------------------------------------------------------------------------
 Changed

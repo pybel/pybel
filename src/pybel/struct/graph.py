@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import warnings
 from copy import deepcopy
 
 import networkx
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
+from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
-from ..parser.canonicalize import node_to_tuple
-from ..utils import get_version
+from ..tokens import node_to_tuple
+from ..utils import get_version, hash_edge
 
 __all__ = [
     'BELGraph',
@@ -201,7 +203,10 @@ class BELGraph(networkx.MultiDiGraph):
     @property
     def annotation_list(self):
         """A dictionary mapping the keywords of locally defined annotations to a set of their values
-        from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section"""
+        from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section
+
+        :rtype: dict[str,set[str]]
+        """
         return self.graph[GRAPH_ANNOTATION_LIST]
 
     @property
@@ -261,10 +266,34 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple u: The source BEL node
         :param tuple v: The target BEL node
         :param str relation: A relationship label from :mod:`pybel.constants`
+
+        :return: The hash of this edge
+        :rtype: str
         """
         key = unqualified_edge_code[relation]
+
+        if isinstance(u, dict):
+            u = self.add_node_from_data(u)
+
+        if isinstance(v, dict):
+            v = self.add_node_from_data(v)
+
+        attr = {RELATION: relation}
+        attr[HASH] = hash_edge(u, v, key, attr)
+
         if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **{RELATION: relation})
+            self.add_edge(u, v, key=key, **attr)
+
+        return attr[HASH]
+
+    @staticmethod
+    def hash_node(data):
+        """Converts a PyBEL node data dictionary to a PyBEL node tuple
+
+        :param dict data: A PyBEL node data dictionary
+        :rtype: tuple
+        """
+        return node_to_tuple(data)
 
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
@@ -273,7 +302,7 @@ class BELGraph(networkx.MultiDiGraph):
         :return: A PyBEL node tuple
         :rtype: tuple
         """
-        node_tuple = node_to_tuple(attr_dict)
+        node_tuple = self.hash_node(attr_dict)
 
         if node_tuple in self:
             return node_tuple
@@ -281,7 +310,16 @@ class BELGraph(networkx.MultiDiGraph):
         self.add_node(node_tuple, attr_dict=attr_dict)
 
         if VARIANTS in attr_dict:
-            parent_node_tuple = self.add_simple_node(attr_dict[FUNCTION], attr_dict[NAMESPACE], attr_dict[NAME])
+            parent_node_dict = {
+                key: attr_dict[key]
+                for key in (FUNCTION, NAME, NAMESPACE)
+            }
+
+            if IDENTIFIER in attr_dict:
+                parent_node_dict[IDENTIFIER] = attr_dict[IDENTIFIER]
+
+            parent_node_tuple = self.add_node_from_data(parent_node_dict)
+
             self.add_unqualified_edge(parent_node_tuple, node_tuple, HAS_VARIANT)
 
         elif MEMBERS in attr_dict:
@@ -309,17 +347,19 @@ class BELGraph(networkx.MultiDiGraph):
         node_tuple = node_to_tuple(attr_dict)
         return self.has_node(node_tuple)
 
-    def add_simple_node(self, function, namespace, name):
+    def add_simple_node(self, func, namespace, name):
         """Adds a simple node, with only a namespace and name
 
-        :param str function: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.PROTEIN`, etc)
+        :param str func: The node's function (:data:`pybel.constants.GENE`, :data:`pybel.constants.PROTEIN`, etc)
         :param str namespace: The node's namespace
         :param str name: The node's name
         :return: The PyBEL node tuple representing this node
         :rtype: tuple
         """
+        warnings.warn('BELGraph.add_simple_node is deprecated', DeprecationWarning)
+
         return self.add_node_from_data({
-            FUNCTION: function,
+            FUNCTION: func,
             NAMESPACE: namespace,
             NAME: name
         })
@@ -338,6 +378,9 @@ class BELGraph(networkx.MultiDiGraph):
         :param dict[str,str] annotations: The annotations data dictionary
         :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
         :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+
+        :return: The hash of the edge
+        :rtype: str
         """
         attr.update({
             RELATION: relation,
@@ -369,7 +412,11 @@ class BELGraph(networkx.MultiDiGraph):
         if isinstance(v, dict):
             v = self.add_node_from_data(v)
 
+        attr[HASH] = hash_edge(u, v, None, attr)
+
         self.add_edge(u, v, **attr)
+
+        return attr[HASH]
 
     def has_edge_citation(self, u, v, key):
         """Does the given edge have a citation?"""
@@ -429,6 +476,9 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> k = g + h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         result = deepcopy(self)
         left_full_join(result, other)
         return result
@@ -446,6 +496,9 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> g += h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         left_full_join(self, other)
         return self
 
@@ -463,6 +516,9 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> k = g & h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         result = deepcopy(self)
         left_outer_join(result, other)
         return result
@@ -480,6 +536,9 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> g &= h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         left_outer_join(self, other)
         return self
 
@@ -495,4 +554,26 @@ class BELGraph(networkx.MultiDiGraph):
         >>> h = pybel.from_path('...')
         >>> k = g ^ h
         """
+        if not isinstance(other, BELGraph):
+            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+
         return left_node_intersection_join(self, other)
+
+    def node_to_bel(self, n):
+        """Serializes a node as BEL
+
+        :param tuple n: A PyBEL node tuple
+        :rtype: str
+        """
+        return node_to_bel(self.node[n])
+
+    def edge_to_bel(self, u, v, data, sep=None):
+        """Serializes a pair of nodes and related edge data as a BEL relation
+
+        :param tuple u: A PyBEL node tuple for the soure node
+        :param tuple v: A PyBEL node tuple for the target node
+        :param dict data: A PyBEL edge data dictionary
+        :param str sep: The separator between the source, relation, and target. Defaults to ' '
+        :rtype: str
+        """
+        return edge_to_bel(self.node[u], self.node[v], data=data, sep=sep)

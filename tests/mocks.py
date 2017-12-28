@@ -6,9 +6,10 @@ import os
 
 from networkx import DiGraph
 from onto2nx.ontospy import Ontospy
+from onto2nx.parse_owl_xml import OWLParser
 
 from pybel.constants import GOCC_LATEST
-from pybel.manager.utils import OWLParser, urldefrag
+from pybel.manager.utils import urldefrag
 from tests.constants import (
     bel_dir_path, belanno_dir_path, beleq_dir_path, belns_dir_path, get_uri_name, owl_dir_path,
     pizza_iri, test_owl_pizza, test_owl_wine, wine_iri,

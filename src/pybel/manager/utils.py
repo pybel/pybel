@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import networkx as nx
-from onto2nx.ontospy import Ontospy
-from onto2nx.parse_owl_xml import OWLParser
 from requests.compat import urldefrag
 
 from ..resources.utils import download
@@ -24,15 +22,18 @@ def parse_owl(url):
 
 
 def parse_owl_xml(url):
-    """Downloads and parses an OWL resource in OWL/XML format
+    """Downloads and parses an OWL resource in OWL/XML format using :class:`onto2nx.parse_owl_xml.OWLParser`
     
     :param str url: The URL to the OWL resource
     :return: A directional graph representing the OWL document's hierarchy
     :rtype: networkx.DiGraph
     """
+    from onto2nx.parse_owl_xml import OWLParser
+
     res = download(url)
-    owl = OWLParser(content=res.content)
-    return owl
+    rv = OWLParser(content=res.content)
+
+    return rv
 
 
 def parse_owl_rdf(url):
@@ -42,20 +43,22 @@ def parse_owl_rdf(url):
     :return: A directional graph representing the OWL document's hierarchy
     :rtype: networkx.DiGraph
     """
-    g = nx.DiGraph(IRI=url)
+    from onto2nx.ontospy import Ontospy
+
+    rv = nx.DiGraph(IRI=url)
     o = Ontospy(url)
 
     for cls in o.classes:
-        g.add_node(cls.locale, type='Class')
+        rv.add_node(cls.locale, type='Class')
 
         for parent in cls.parents():
-            g.add_edge(cls.locale, parent.locale, type='SubClassOf')
+            rv.add_edge(cls.locale, parent.locale, type='SubClassOf')
 
         for instance in cls.instances():
             _, frag = urldefrag(instance)
-            g.add_edge(frag, cls.locale, type='ClassAssertion')
+            rv.add_edge(frag, cls.locale, type='ClassAssertion')
 
-    return g
+    return rv
 
 
 def extract_shared_required(config, definition_header='Namespace'):

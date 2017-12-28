@@ -1,13 +1,53 @@
 # -*- coding: utf-8 -*-
 
-from ..constants import *
-from ..utils import hash_node
+"""This module helps handle node data dictionaries"""
+
+from .constants import *
+from .dsl import cell_surface_expression, secretion
+from .exceptions import PyBELCanonicalizeError
+from .utils import hash_node
 
 __all__ = [
     'node_to_tuple',
     'sort_dict_list',
-    'sort_variant_dict_list'
+    'sort_variant_dict_list',
+    'hash_node_dict',
 ]
+
+
+def hash_node_dict(node_dict):
+    """Hashes a PyBEL node data dictionary
+
+    :param dict node_dict:
+    :rtype: str
+    """
+    return hash_node(node_to_tuple(node_dict))
+
+
+def node_to_tuple(tokens):
+    """Given tokens from either PyParsing, or following the PyBEL node data dictionary model, create a PyBEL
+    node tuple.
+
+    :param tokens: Either a PyParsing ParseObject or a PyBEL node data dictionary
+    :type tokens: ParseObject or dict
+    :rtype: tuple
+    """
+    if MODIFIER in tokens:
+        return node_to_tuple(tokens[TARGET])
+
+    elif REACTION == tokens[FUNCTION]:
+        return reaction_po_to_tuple(tokens)
+
+    elif VARIANTS in tokens:
+        return variant_node_po_to_tuple(tokens)
+
+    elif MEMBERS in tokens:
+        return list_po_to_tuple(tokens)
+
+    elif FUSION in tokens:
+        return fusion_po_to_tuple(tokens)
+
+    return simple_to_tuple(tokens)
 
 
 def safe_get_dict(tokens):
@@ -225,14 +265,15 @@ def simple_to_tuple(tokens):
             tokens[NAMESPACE],
             tokens[NAME]
         )
-    elif IDENTIFIER in tokens:
+
+    if IDENTIFIER in tokens:
         return (
             tokens[FUNCTION],
             tokens[NAMESPACE],
             tokens[IDENTIFIER]
         )
 
-    raise IndexError('missing name and identifier')
+    raise PyBELCanonicalizeError('missing name and identifier in node data dict: {}'.format(tokens))
 
 
 def hgvs_po_to_tuple(tokens):
@@ -349,41 +390,6 @@ def list_po_to_dict(tokens):
     }
 
 
-def node_to_tuple(tokens):
-    """Given tokens from either PyParsing, or following the PyBEL node data dictionary model, create a PyBEL
-    node tuple.
-
-    :param tokens: Either a PyParsing ParseObject or a PyBEL node data dictionary
-    :type tokens: ParseObject or dict
-    :rtype: tuple
-    """
-    if MODIFIER in tokens:
-        return node_to_tuple(tokens[TARGET])
-
-    elif REACTION == tokens[FUNCTION]:
-        return reaction_po_to_tuple(tokens)
-
-    elif VARIANTS in tokens:
-        return variant_node_po_to_tuple(tokens)
-
-    elif MEMBERS in tokens:
-        return list_po_to_tuple(tokens)
-
-    elif FUSION in tokens:
-        return fusion_po_to_tuple(tokens)
-
-    return simple_to_tuple(tokens)
-
-
-def hash_node_dict(node_dict):
-    """Hashes a PyBEL node data dictionary
-
-    :param dict node_dict:
-    :rtype: str
-    """
-    return hash_node(node_to_tuple(node_dict))
-
-
 def po_to_dict(tokens):
     """
     :type tokens: ParseResult
@@ -440,18 +446,10 @@ def modifier_po_to_dict(tokens):
             attrs[EFFECT] = tokens[EFFECT].asDict()
 
     elif tokens[MODIFIER] == CELL_SECRETION:
-        attrs[MODIFIER] = TRANSLOCATION
-        attrs[EFFECT] = {
-            FROM_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'intracellular'},
-            TO_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'extracellular space'}
-        }
+        attrs.update(secretion())
 
     elif tokens[MODIFIER] == CELL_SURFACE_EXPRESSION:
-        attrs[MODIFIER] = TRANSLOCATION
-        attrs[EFFECT] = {
-            FROM_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'intracellular'},
-            TO_LOC: {NAMESPACE: GOCC_KEYWORD, NAME: 'cell surface'}
-        }
+        attrs.update(cell_surface_expression())
 
     else:
         raise ValueError('Invalid value for tokens[MODIFIER]: {}'.format(tokens[MODIFIER]))

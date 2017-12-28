@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains functions for easily building BEL graphs in fluid python"""
+"""PyBEL has a partially implemented domain specific language that makes it much easier to programmatically create and
+populate :py:class:`pybel.BELGraph` instances."""
 
-from . import nodes
+from . import edges, nodes
+from .edges import *
+from .exc import PyBELDSLException
 from .nodes import *
+from .utils import entity
 
-__all__ = nodes.__all__
+__all__ = (
+    nodes.__all__ +
+    edges.__all__ +
+    ['PyBELDSLException', 'entity']
+)

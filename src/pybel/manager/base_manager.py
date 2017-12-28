@@ -101,3 +101,6 @@ class BaseManager(object):
     def drop_all(self, checkfirst=True):
         """Drops all data, tables, and databases for the PyBEL cache"""
         Base.metadata.drop_all(bind=self.engine, checkfirst=checkfirst)
+
+    def __repr__(self):
+        return '<{} connection={}>'.format(self.__class__.__name__, self.engine.url)

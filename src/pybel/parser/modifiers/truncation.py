@@ -31,7 +31,9 @@ compile these statements, but it's recommended they are upgraded by reexamining 
 looking up the amino acid sequence.
 
 .. seealso::
-    BEL 2.0 specification on `truncations <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
+
+    - BEL 2.0 specification on `truncations <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
+    - PyBEL module :py:class:`pybel.parser.modifiers.TruncationParser`
 """
 
 import logging
@@ -53,6 +55,7 @@ truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, n
 
 
 class TruncationParser(BaseParser):
+    """Parses a protein trunctation and normalizes to HGVS"""
     def __init__(self):
         self.language = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
         self.language.setParseAction(self.handle_trunc_legacy)
@@ -62,8 +65,7 @@ class TruncationParser(BaseParser):
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     def handle_trunc_legacy(self, line, position, tokens):
         upgraded = 'p.{}*'.format(tokens[TRUNCATION_POSITION])
-        log.warning(
-            'trunc() is deprecated. Please look up reference terminal amino acid and encode with HGVS: {}'.format(line))
+        log.warning('trunc() is deprecated. Re-encode with reference terminal amino acid in HGVS: %s', line)
         tokens[IDENTIFIER] = upgraded
         del tokens[TRUNCATION_POSITION]
         return tokens
