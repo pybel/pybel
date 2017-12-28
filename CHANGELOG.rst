@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.10.1 <https://github.com/pybel/pybel/compare/v0.10.0...0.10.1>`_ - 2017-12-28
+-------------------------------------------------------------------------------
+Fixed
+~~~~~
+- Fixed truncation description parsing to handle double quotes
+
+Changed
+~~~~~~~
+- Made DSL functions into classes to allow inheritance and isinstance checking as well as
+  preliminary to_tuple functionality
+
+Added
+~~~~~
+- Added more edge predicates (has_activity, has_degree, has_translocation, has_annotation)
+
 `0.10.0 <https://github.com/pybel/pybel/compare/v0.9.7...0.10.0>`_ - 2017-12-22
 -------------------------------------------------------------------------------
 Changed
