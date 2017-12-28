@@ -88,7 +88,7 @@ class TestCanonicalize(unittest.TestCase):
 
     def test_rna_fusion_specified(self):
         self.assertEqual(
-            'r(fus(HGNC:TMPSS2, r.1_79, HGNC:ERG, r.312_5034)',
+            'r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))',
             str(rna_fusion(
                 partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
                 range_5p=fusion_range('r', 1, 79),
@@ -99,7 +99,7 @@ class TestCanonicalize(unittest.TestCase):
 
     def test_rna_fusion_unspecified(self):
         self.assertEqual(
-            'r(fus(HGNC:TMPSS2, ?, HGNC:ERG, ?)',
+            'r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))',
             str(rna_fusion(
                 partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
                 partner_3p=rna(namespace='HGNC', name='ERG'),
