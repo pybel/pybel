@@ -15,7 +15,7 @@ from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
 from pybel.dsl import entity, gene, missing_fusion_range, protein, protein_fusion, secretion, translocation
 from pybel.manager import models
-from pybel.manager.models import Author, Evidence, Namespace, NamespaceEntry, Node
+from pybel.manager.models import Author, Evidence
 from pybel.utils import hash_citation, hash_evidence, hash_node
 from tests import constants
 from tests.constants import (
@@ -477,66 +477,6 @@ class TestEnsure(TemporaryCacheMixin):
         author_from_get = self.manager.get_or_create_author(author_name)
         self.assertEqual(author.name, author_from_get.name)
         self.assertEqual(author, author_from_get)
-
-
-class TestNodes(TemporaryCacheMixin):
-    def setUp(self):
-        super(TestNodes, self).setUp()
-
-        self.hgnc_keyword = 'HGNC'
-        self.hgnc_url = 'http://localhost/hgnc.belns'
-        self.hgnc = Namespace(
-            keyword=self.hgnc_keyword,
-            url=self.hgnc_url,
-        )
-        self.manager.session.add(self.hgnc)
-        self.manager.session.add(Namespace(keyword='GOCC', url='http://localhost/gocc.belns'))
-
-        self.yfg = NamespaceEntry(
-            name='YFG',
-            namespace=self.hgnc,
-            encoding='P',
-        )
-        self.manager.session.add(self.yfg)
-        self.manager.session.commit()
-
-        self.graph = BELGraph(name='TestNode', version='0.0.0')
-        self.graph.namespace_url[self.hgnc_keyword] = self.hgnc_url
-
-    def help_test_round_trip(self, node_data):
-        """Helps run the round trip test of inserting a node, getting it, and reconstituting it in multiple forms
-
-        :param tuple tuple node_tuple: A PyBEL node tuple
-        :param dict node_data: A PyBEL node data dictionary
-        """
-        node_tuple = self.graph.add_node_from_data(node_data)
-        self.manager.insert_graph(self.graph, store_parts=True)
-
-        node_model = self.manager.get_node_by_tuple(node_tuple)
-        self.assertIsNotNone(node_model)
-        self.assertIsInstance(node_model, Node)
-
-        self.assertEqual(node_tuple, node_model.to_tuple())
-
-    @mock_bel_resources
-    def test_1(self, mock):
-        self.help_test_round_trip(yfg_data)
-
-    @mock_bel_resources
-    def test_2(self, mock):
-        node_data = {
-            FUNCTION: PROTEIN,
-            NAMESPACE: 'HGNC',
-            NAME: 'YFG',
-            VARIANTS: [
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: 'p.Glu600Arg'
-                }
-            ]
-        }
-
-        self.help_test_round_trip(node_data)
 
 
 # FIXME @kono need proper deletion cascades
