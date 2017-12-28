@@ -1247,6 +1247,8 @@ class TestAddNodeFromData(unittest.TestCase):
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
+    """Tests the ability to go from PyBEL to relational database"""
+
     def help_reconstitute(self, node_tuple, node_data, namespace_dict, number_nodes, number_edges):
         """Helps test the round-trip conversion from PyBEL data dictionary to node model, then back to PyBEL node
         data dictionary and PyBEL node tuple.
@@ -1533,7 +1535,8 @@ class TestNoAddNode(TemporaryCacheMixin):
     @mock_bel_resources
     def test_regex_lookup(self, mock):
         """Tests that regular expression nodes get love too"""
-        graph = BELGraph(name='Regular Expression Test Graph', description='Help test regular expression namespaces', version='1.0.0')
+        graph = BELGraph(name='Regular Expression Test Graph', description='Help test regular expression namespaces',
+                         version='1.0.0')
         dbsnp = 'dbSNP'
         DBSNP_PATTERN = 'rs[0-9]+'
         graph.namespace_pattern[dbsnp] = DBSNP_PATTERN
