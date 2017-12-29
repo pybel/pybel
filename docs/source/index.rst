@@ -1,6 +1,5 @@
 PyBEL Documentation
 ===================
-
 Biological Expression Language (BEL) is a domain-specific language that enables the expression of complex molecular
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
@@ -47,12 +46,18 @@ Links
    troubleshooting
 
 .. toctree::
+   :caption: Database
+   :name: database
+
+   manager
+   models
+
+.. toctree::
    :caption: Reference
    :name: reference
 
    constants
    parser
-   manager
    utilities
    dsl
    logging
@@ -66,10 +71,8 @@ Links
    postmortem
    technology
 
-
 Indices and Tables
 ------------------
-
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`

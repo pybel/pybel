@@ -103,15 +103,21 @@ class QueryManager(LookupManager):
         """Builds and runs a query over all edges in the PyBEL cache.
 
         :param str bel: BEL statement that represents the desired edge.
-        :param str or Node source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :param str or Node target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
+        :param source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
+        :type source: str or Node
+        :param target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
+        :type target: str or Node
         :param str relation: The relation that should be present between source and target node.
-        :param str or Citation citation: The citation that backs the edge up. It is possible to use the reference_id
+        :param citation: The citation that backs the edge up. It is possible to use the reference_id
                          or a Citation object.
-        :param str or Evidence evidence: The supporting text of the edge
-        :param dict or str annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
-                                        annotationValue parameter as string.
+        :type citation: str or Citation
+        :param evidence: The supporting text of the edge
+        :type evidence: str or Evidence
+        :param annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
+                           annotationValue parameter as string.
+        :type annotation: str or dict[str,str]
         :param property: An edge property object or a corresponding database identifier.
+        :type property: int or Property
         :rtype: list[Edge]
         """
         query = self.session.query(Edge)

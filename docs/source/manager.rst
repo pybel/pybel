@@ -1,5 +1,5 @@
-Cache
-=====
+Manager
+=======
 
 Manager API
 -----------
@@ -23,10 +23,4 @@ Manager Components
     :members:
 
 .. autoclass:: pybel.manager.QueryManager
-    :members:
-
-Database Models
----------------
-
-.. automodule:: pybel.manager.models
     :members:
