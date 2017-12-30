@@ -302,13 +302,14 @@ def subdict_matches(target, query, partial_match=True):
     return True
 
 
-def hash_dump(d):
+def hash_dump(data):
     """Hashes an arbitrary JSON dictionary by dumping it in sorted order, encoding it in UTF-8, then hashing the bytes
 
-    :param dict d: An arbitrary JSON-serializable object
+    :param data: An arbitrary JSON-serializable object
+    :type data: dict or list or tuple
     :rtype: str
     """
-    return hashlib.sha512(json.dumps(d, sort_keys=True).encode('utf-8')).hexdigest()
+    return hashlib.sha512(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()
 
 
 def hash_citation(type, reference):

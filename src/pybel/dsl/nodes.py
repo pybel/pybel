@@ -406,7 +406,7 @@ class complex_abundance(ListAbundance):
 
     def __init__(self, members, namespace=None, name=None, identifier=None):
         """
-        :param list[dict] members: A list of PyBEL node data dictionaries
+        :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
         :param Optional[str] namespace: The namespace from which the name originates
         :param Optional[str] name: The name of the complex
         :param Optional[str] identifier: The identifier in the namespace in which the name originates
@@ -422,7 +422,7 @@ class composite_abundance(ListAbundance):
 
     def __init__(self, members):
         """
-        :param list[dict] members: A list of PyBEL node data dictionaries
+        :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
         """
         super(composite_abundance, self).__init__(func=COMPOSITE, members=members)
 
@@ -441,6 +441,13 @@ class missing_fusion_range(FusionRangeBase):
 
     def __str__(self):
         return '?'
+
+    def as_tuple(self):
+        """
+
+        :rtype: tuple
+        """
+        return '?',
 
 
 class fusion_range(FusionRangeBase):
@@ -463,6 +470,17 @@ class fusion_range(FusionRangeBase):
             reference=self[FUSION_REFERENCE],
             start=self[FUSION_START],
             stop=self[FUSION_STOP]
+        )
+
+    def as_tuple(self):
+        """
+
+        :rtype: tuple
+        """
+        return (
+            self[FUSION_REFERENCE],
+            self[FUSION_START],
+            self[FUSION_STOP]
         )
 
 
@@ -496,6 +514,26 @@ class FusionBase(dict):
             self[FUSION][PARTNER_3P][NAMESPACE],
             self[FUSION][PARTNER_3P][NAME],
             str(self[FUSION][RANGE_3P])
+        )
+
+    def as_tuple(self):
+        """
+
+        :rtype: tuple
+        """
+        fusion = self[FUSION]
+
+        partner5p = fusion[PARTNER_5P].as_tuple()
+        partner3p = fusion[PARTNER_3P].as_tuple()
+        range5p = fusion[RANGE_5P].as_tuple()
+        range3p = fusion[RANGE_3P].as_tuple()
+
+        return (
+            self[FUNCTION],
+            partner5p,
+            range5p,
+            partner3p,
+            range3p,
         )
 
 

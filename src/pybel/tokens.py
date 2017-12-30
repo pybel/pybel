@@ -229,18 +229,6 @@ def reaction_po_to_dict(tokens):
     }
 
 
-def simple_po_to_tuple(tokens):
-    """
-    :type tokens: ParseResult
-    :rtype: tuple
-    """
-    return (
-        tokens[FUNCTION],
-        tokens[NAMESPACE],
-        tokens[NAME]
-    )
-
-
 def simple_po_to_dict(tokens):
     """
     :type tokens: ParseResult
