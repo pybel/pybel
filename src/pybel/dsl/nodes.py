@@ -523,8 +523,8 @@ class FusionBase(dict):
         """
         fusion = self[FUSION]
 
-        partner5p = fusion[PARTNER_5P].as_tuple()
-        partner3p = fusion[PARTNER_3P].as_tuple()
+        partner5p = fusion[PARTNER_5P][NAMESPACE], fusion[PARTNER_5P][NAME]
+        partner3p = fusion[PARTNER_3P][NAMESPACE], fusion[PARTNER_3P][NAME]
         range5p = fusion[RANGE_5P].as_tuple()
         range3p = fusion[RANGE_3P].as_tuple()
 

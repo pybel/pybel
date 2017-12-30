@@ -44,7 +44,7 @@ activity_labels = {
 }
 
 #: Maps the default BEL molecular activities to Gene Ontology Molecular Functions
-activity_go_mapping = {
+activity_mapping = {
     'cat': entity(namespace='GO', name='catalytic activity', identifier='GO:0003824'),
     'chap': entity(namespace='GO', name='protein binding involved in protein folding', identifier='GO:0044183'),
     'gtp': entity(namespace='GO', name='GTP binding', identifier='GO:0005525'),
@@ -428,3 +428,6 @@ gmod_mappings = {
         ]
     }
 }
+
+BEL_DEFAULT_NAMESPACE_VERSION = '2.1.0'
+BEL_DEFAULT_NAMESPACE_URL = 'http://openbel.org/2.1.0.belns' # just needs something unique... will change later

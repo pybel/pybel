@@ -13,6 +13,7 @@ from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
 from ..constants import *
+from ..dsl import fragment, fusion_range, hgvs, missing_fusion_range
 from ..io.gpickle import from_bytes, to_bytes
 from ..tokens import node_to_tuple, sort_dict_list, sort_variant_dict_list
 
@@ -236,7 +237,7 @@ class NamespaceEntry(Base):
     identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
-    namespace_id = Column(Integer, ForeignKey(NAMESPACE_TABLE_NAME + '.id'), nullable=False, index=True)
+    namespace_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_TABLE_NAME)), nullable=False, index=True)
     namespace = relationship('Namespace', backref=backref('entries', lazy='dynamic'))
 
     equivalence_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_EQUIVALENCE_CLASS_TABLE_NAME)), nullable=True)
@@ -261,6 +262,9 @@ class NamespaceEntry(Base):
             NAMESPACE: self.namespace.keyword,
             NAME: self.name
         }
+
+        if self.identifier:
+            result[IDENTIFIER] = self.identifier
 
         if include_id:
             result['id'] = self.id
@@ -304,7 +308,7 @@ class Annotation(Base):
     citation_url = Column(String(255), nullable=True)
 
     def get_entries(self):
-        """Gets a set of the names of all etries
+        """Gets a set of the names of all entries
 
         :rtype: set[str]
         """
@@ -476,14 +480,14 @@ class Network(Base):
     def as_bel(self):
         """Gets this network and loads it into a :class:`BELGraph`
 
-        :rtype: BELGraph
+        :rtype: pybel.BELGraph
         """
         return from_bytes(self.blob)
 
     def store_bel(self, graph):
         """Inserts a bel graph
 
-        :param BELGraph graph: A BEL Graph
+        :param pybel.BELGraph graph: A BEL Graph
         """
         self.blob = to_bytes(graph)
 
@@ -503,8 +507,8 @@ class Node(Base):
 
     type = Column(String(255), nullable=False, doc='The type of the represented biological entity e.g. Protein or Gene')
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
-    fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
-    bel = Column(String(255), nullable=False, doc='Valid BEL term that represents the given node')
+    has_fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
+    bel = Column(String(255), nullable=False, doc='Canonical BEL term that represents the given node')
     sha512 = Column(String(255), index=True)
 
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
@@ -534,24 +538,24 @@ class Node(Base):
             namespace_entry = self.namespace_entry.to_json()
             result.update(namespace_entry)
 
-        if self.is_variant:
-            if self.fusion:
-                result[FUSION] = self.modifications[0].to_json()
-            else:
-                result[VARIANTS] = sort_variant_dict_list(
-                    modification.to_json()
-                    for modification in self.modifications
-                )
+        if self.has_fusion:
+            result[FUSION] = self.modifications[0].to_json()
+
+        elif self.is_variant:
+            result[VARIANTS] = sort_variant_dict_list(
+                modification.to_json()
+                for modification in self.modifications
+            )
 
         elif self.type == REACTION:
             reactants = []
             products = []
 
-            for edge in self.out_edges:
-                if edge.relation == HAS_REACTANT:
-                    reactants.append(edge.target.to_json())
-                elif edge.relation == HAS_PRODUCT:
-                    products.append(edge.target.to_json())
+            for edge in self.out_edges.filter(Edge.relation == HAS_PRODUCT):
+                products.append(edge.target.to_json())
+
+            for edge in self.out_edges.filter(Edge.relation == HAS_REACTANT):
+                reactants.append(edge.target.to_json())
 
             result[REACTANTS] = sort_dict_list(reactants)
             result[PRODUCTS] = sort_dict_list(products)
@@ -559,8 +563,7 @@ class Node(Base):
         elif self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
             result[MEMBERS] = sort_dict_list(
                 edge.target.to_json()
-                for edge in self.out_edges
-                if edge.relation == HAS_COMPONENT
+                for edge in self.out_edges.filter(Edge.relation == HAS_COMPONENT)
             )
 
         return result
@@ -579,35 +582,62 @@ class Modification(Base):
 
     id = Column(Integer, primary_key=True)
 
-    modType = Column(String(255), doc='Type of the stored modification e.g. Fusion')
-    variantString = Column(String(255), nullable=True)
+    type = Column(String(255), doc='Type of the stored modification e.g. Fusion, gmod, pmod, etc')
 
-    p3PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
-    p3Partner = relationship("NamespaceEntry", foreign_keys=[p3PartnerName_id])
+    variantString = Column(String(255), nullable=True, doc='HGVS string if sequence modification')
 
-    p3Reference = Column(String(10), nullable=True)
-    p3Start = Column(String(255), nullable=True)
-    p3Stop = Column(String(255), nullable=True)
-    p3Missing = Column(String(10), nullable=True)  # FIXME remove this - it's extraneous information
+    p3_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    p3_partner = relationship("NamespaceEntry", foreign_keys=[p3_partner_id])
 
-    p5PartnerName_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
-    p5Partner = relationship("NamespaceEntry", foreign_keys=[p5PartnerName_id])
+    p3_reference = Column(String(10), nullable=True)
+    p3_start = Column(String(255), nullable=True)
+    p3_stop = Column(String(255), nullable=True)
 
-    p5Reference = Column(String(10), nullable=True)
-    p5Start = Column(String(255), nullable=True)
-    p5Stop = Column(String(255), nullable=True)
-    p5Missing = Column(String(10), nullable=True)  # FIXME remove this - it's extraneous information
+    p5_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    p5_partner = relationship("NamespaceEntry", foreign_keys=[p5_partner_id])
 
-    # TODO change modName to foreign key to NamespaceEntry
-    #modReference_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
-    #modReference = relationship("NamespaceEntry", foreign_keys=[modReference_id])
+    p5_reference = Column(String(10), nullable=True)
+    p5_start = Column(String(255), nullable=True)
+    p5_stop = Column(String(255), nullable=True)
 
-    modNamespace = Column(String(255), nullable=True, doc='Namespace for the modification name')
-    modName = Column(String(255), nullable=True, doc='Name of the given modification (used for pmod or gmod)')
-    aminoA = Column(String(3), nullable=True, doc='Three letter amino acid code')
-    position = Column(Integer, nullable=True, doc='Position')
+    identifier_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    identifier = relationship("NamespaceEntry", foreign_keys=[identifier_id])
+
+    residue = Column(String(3), nullable=True, doc='Three letter amino acid code if PMOD')
+    position = Column(Integer, nullable=True, doc='Position of PMOD or GMOD')
 
     sha512 = Column(String(255), index=True)
+
+    def _fusion_to_json(self):
+        """Converts this modification to a FUSION data dictioanry. Don't use this without checking
+        ``self.type == FUSION`` first"""
+        fusion_dict = {}
+        fusion_dict.update({
+            PARTNER_3P: self.p3_partner.to_json(),
+            PARTNER_5P: self.p5_partner.to_json(),
+            RANGE_3P: {},
+            RANGE_5P: {}
+        })
+
+        if self.p5_reference:
+            fusion_dict[RANGE_5P] = fusion_range(
+                reference=str(self.p5_reference),
+                start=int_or_str(self.p5_start),
+                stop=int_or_str(self.p5_stop),
+            )
+        else:
+            fusion_dict[RANGE_5P] = missing_fusion_range()
+
+        if self.p3_reference:
+            fusion_dict[RANGE_3P] = fusion_range(
+                reference=str(self.p3_reference),
+                start=int_or_str(self.p3_start),
+                stop=int_or_str(self.p3_stop),
+            )
+        else:
+            fusion_dict[RANGE_3P] = missing_fusion_range()
+
+        return fusion_dict
 
     def to_json(self):
         """Recreates a is_variant dictionary for :class:`BELGraph`
@@ -615,67 +645,30 @@ class Modification(Base):
         :return: Dictionary that describes a variant or a fusion.
         :rtype: dict
         """
-        mod_dict = {}
-        if self.modType == FUSION:
-            mod_dict.update({
-                PARTNER_3P: self.p3Partner.to_json(),
-                PARTNER_5P: self.p5Partner.to_json(),
-                RANGE_3P: {},
-                RANGE_5P: {}
-            })
+        if self.type == FUSION:
+            return self._fusion_to_json()
 
-            if self.p5Missing:
-                mod_dict[RANGE_5P] = {FUSION_MISSING: self.p5Missing}
-            else:
-                mod_dict[RANGE_5P].update({
-                    FUSION_REFERENCE: self.p5Reference,
-                    FUSION_START: int_or_str(self.p5Start),
-                    FUSION_STOP: int_or_str(self.p5Stop),
-                })
+        if self.type == FRAGMENT:
+            return fragment(
+                start=int_or_str(self.p3_start),
+                stop=int_or_str(self.p3_stop)
+            )
 
-            if self.p3Missing:
-                mod_dict[RANGE_3P][FUSION_MISSING] = self.p3Missing
-            else:
-                mod_dict[RANGE_3P].update({
-                    FUSION_REFERENCE: self.p3Reference,
-                    FUSION_START: int_or_str(self.p3Start),
-                    FUSION_STOP: int_or_str(self.p3Stop)
-                })
+        if self.type == HGVS:
+            return hgvs(str(self.variantString))
 
-            return mod_dict
+        # must be GMOD or PMOD now
+        mod_dict = {
+            KIND: self.type,
+            IDENTIFIER: self.identifier.to_json()
+        }
 
-        else:
-            mod_dict[KIND] = self.modType
-            if self.modType == HGVS:
-                mod_dict[IDENTIFIER] = self.variantString
+        if self.type == PMOD:
+            if self.residue:
+                mod_dict[PMOD_CODE] = self.residue
 
-            elif self.modType == FRAGMENT:
-                if self.p3Missing:
-                    mod_dict[FRAGMENT_MISSING] = self.p3Missing
-                else:
-                    mod_dict.update({
-                        FRAGMENT_START: int_or_str(self.p3Start),
-                        FRAGMENT_STOP: int_or_str(self.p3Stop)
-                    })
-
-            elif self.modType == GMOD:
-                mod_dict.update({
-                    IDENTIFIER: {
-                        NAMESPACE: self.modNamespace,
-                        NAME: self.modName
-                    }
-                })
-            elif self.modType == PMOD:
-                mod_dict.update({
-                    IDENTIFIER: {
-                        NAMESPACE: self.modNamespace,
-                        NAME: self.modName
-                    }
-                })
-                if self.aminoA:
-                    mod_dict[PMOD_CODE] = self.aminoA
-                if self.position:
-                    mod_dict[PMOD_POSITION] = self.position
+            if self.position:
+                mod_dict[PMOD_POSITION] = self.position
 
         return mod_dict
 
@@ -864,14 +857,11 @@ class Edge(Base):
         if self.evidence:
             data.update(self.evidence.to_json())
 
-        for prop in self.properties:
-            prop_info = prop.data
-            prop_info_data = prop_info['data']
-
-            if prop_info['participant'] in data:  # TODO reinvestigate this
-                data[prop_info['participant']].update(prop_info_data)
+        for prop in self.properties: # FIXME this is also probably broken for translocations or mixed activity/degrad
+            if prop.side not in data:
+                data[prop.side] = prop.to_json()
             else:
-                data.update(prop_info_data)
+                data[prop.side].update(prop.to_json())
 
         return data
 
@@ -915,59 +905,53 @@ class Property(Base):
 
     id = Column(Integer, primary_key=True)
 
-    # TODO refactor participant to be a boolean, for_subject, since it can only be SUBJECT or OBJECT
-    participant = Column(String(255), doc='Identifies which participant of the edge if affected by the given property')
-    modifier = Column(String(255), doc='The modifier to the corresponding participant')
-    relativeKey = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
-    propValue = Column(String(255), nullable=True, doc='Value of the effect')
+    is_subject = Column(Boolean, doc='Identifies which participant of the edge if affected by the given property')
+    modifier = Column(String(255),
+                      doc='The modifier to the corresponding participant. One of activity, degradation, location, or translocation')
+
+    relative_key = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
+
     sha512 = Column(String(255), index=True)
 
-    # TODO refactor effect to reference NamespaceEntry
-    effectNamespace = Column(String(255), nullable=True, doc='Optional namespace that defines modifier value')
-    effectName = Column(String(255), nullable=True, doc='Value for specific modifiers e.g. Activity')
-
-    namespaceEntry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
-    namespaceEntry = relationship('NamespaceEntry')
+    effect_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
+    effect = relationship('NamespaceEntry')
 
     @property
-    def data(self):
+    def side(self):
+        """Returns either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
+
+        :rtype: str
+        """
+        return SUBJECT if self.is_subject else OBJECT
+
+    def to_json(self):
         """Creates a property dict that is used to recreate an edge dictionary for a :class:`BELGraph`.
 
         :return: Property dictionary of an edge that is participant (sub/obj) related.
         :rtype: dict
         """
+        participant = self.side
+
         prop_dict = {
-            'data': {
-                self.participant: {
-                    MODIFIER: self.modifier
-                }
-            },
-            'participant': self.participant
+            participant: {
+                MODIFIER: self.modifier  # FIXME this is probably wrong for location
+            }
         }
 
         if self.modifier == LOCATION:
-            prop_dict['data'][self.participant] = {
-                LOCATION: self.namespaceEntry.to_json()
+            prop_dict[participant] = {
+                LOCATION: self.effect.to_json()
             }
+        if self.relative_key:  # for translocations
+            prop_dict[participant][EFFECT] = {
+                self.relative_key: self.effect.to_json()
+            }
+        elif self.effect:  # for activities
+            prop_dict[participant][EFFECT] = self.effect.to_json()
 
-        if self.relativeKey:
-            prop_dict['data'][self.participant][EFFECT] = {
-                self.relativeKey: self.propValue if self.propValue else self.namespaceEntry.to_json()
-            }
-        elif self.effectNamespace:
-            prop_dict['data'][self.participant][EFFECT] = {  # TODO reference NamespaceEntry dictionary?
-                NAMESPACE: self.effectNamespace,
-                NAME: self.effectName
-            }
+        # degradations don't have modifications
 
         return prop_dict
-
-    def to_json(self):
-        """Enables json serialization for the class this method is defined in.
-
-        :rtype: dict
-        """
-        return self.data['data']
 
 
 trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(

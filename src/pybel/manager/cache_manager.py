@@ -13,7 +13,7 @@ import logging
 import time
 from collections import defaultdict
 from copy import deepcopy
-from itertools import groupby
+from itertools import chain, groupby
 
 from six import string_types
 from sqlalchemy import and_, exists, func
@@ -28,6 +28,10 @@ from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl
 from ..canonicalize import node_to_bel
 from ..constants import *
+from ..language import (
+    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings,
+    pmod_mappings,
+)
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
 from ..utils import hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
@@ -47,7 +51,7 @@ class EdgeAddError(RuntimeError):
 
     def __str__(self):
         return ("Error adding edge from line {} to database. Check this line in the file and make sure the citation, "
-                "evidence, and annotations all use valid UTF-8 characters".format(self.line))
+                "evidence, and annotations all use valid UTF-8 characters: {}".format(self.line, self.data))
 
     @property
     def data(self):
@@ -180,6 +184,30 @@ class NamespaceManager(BaseManager):
         """
         return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
+    def ensure_default_namespace(self):
+        """Creates or gets the BEL default namespace
+
+        :rtype: Namespace
+        """
+        filt = and_(Namespace.keyword == BEL_DEFAULT_NAMESPACE, Namespace.version == BEL_DEFAULT_NAMESPACE_VERSION)
+        namespace = self.session.query(Namespace).filter(filt).one_or_none()
+
+        if namespace is None:
+            namespace = Namespace(
+                keyword=BEL_DEFAULT_NAMESPACE,
+                version=BEL_DEFAULT_NAMESPACE_VERSION,
+                url=BEL_DEFAULT_NAMESPACE_URL,
+            )
+
+            for name in set(chain(pmod_mappings, gmod_mappings, activity_mapping)):
+                entry = NamespaceEntry(name=name, namespace=namespace)
+                self.session.add(entry)
+
+            self.session.add(namespace)
+            self.session.commit()
+
+        return namespace
+
     def get_or_create_namespace(self, url):
         """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
         the values of this namespace.
@@ -276,9 +304,9 @@ class NamespaceManager(BaseManager):
         if pattern is None:
             raise ValueError('cannot have null pattern')
 
-        f = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
+        filt = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
 
-        namespace = self.session.query(Namespace).filter(f).one_or_none()
+        namespace = self.session.query(Namespace).filter(filt).one_or_none()
 
         if namespace is None:
             log.info('creating regex namespace: %s:%s', keyword, pattern)
@@ -872,7 +900,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Gets a combine BEL Graph from a list of network identifiers
 
         :param list[int] network_ids: A list of network identifiers
-        :rtype: pybel.BELGraph
+        :rtype: BELGraph
         """
         if len(network_ids) == 1:
             return self.get_graph_by_id(network_ids[0])
@@ -912,6 +940,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('inserting %s v%s', graph.name, graph.version)
 
         t = time.time()
+
+        self.ensure_default_namespace()
+
         for url in graph.namespace_url.values():
             if url in graph.uncached_namespaces:
                 continue
@@ -1001,9 +1032,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             else:
                 try:
                     self._add_qualified_edge(network, graph, u, v, k, data)
-                except:
+                except Exception as e:
                     self.session.rollback()
-                    raise EdgeAddError(data)
+                    # raise EdgeAddError(data)
+                    log.warning('error with edge data: %s', data)
+                    raise e
 
         log.debug('stored edges in %.2f', time.time() - t)
         log.info('Skipped %d edges', c)
@@ -1180,7 +1213,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         if VARIANTS in node_data or FUSION in node_data:
             node.is_variant = True
-            node.fusion = FUSION in node_data
+            node.has_fusion = FUSION in node_data
 
             modifications = self.get_or_create_modification(graph, node_data)
 
@@ -1336,6 +1369,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_author[name] = author
         return author
 
+    def get_modification_by_hash(self, modification_hash):
+        return self.session.query(Modification).filter(Modification.sha512 == modification_hash).one_or_none()
+
     def get_or_create_modification(self, graph, node_data):
         """Creates a list of modification objects (Modification) that belong to the node described by
         node_data.
@@ -1376,31 +1412,25 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 return  # FIXME raise?
 
             fusion_dict = {
-                'modType': mod_type,
-                'p3Partner': p3_namespace_entry,
-                'p5Partner': p5_namespace_entry,
+                'type': mod_type,
+                'p3_partner': p3_namespace_entry,
+                'p5_partner': p5_namespace_entry,
             }
 
-            if FUSION_MISSING in node_data[RANGE_3P]:
+            node_range_3p = node_data.get(RANGE_3P)
+            if node_range_3p and FUSION_REFERENCE in node_range_3p:
                 fusion_dict.update({
-                    'p3Missing': node_data[RANGE_3P][FUSION_MISSING].strip()
-                })
-            else:
-                fusion_dict.update({
-                    'p3Reference': node_data[RANGE_3P][FUSION_REFERENCE].strip(),
-                    'p3Start': node_data[RANGE_3P][FUSION_START],
-                    'p3Stop': node_data[RANGE_3P][FUSION_STOP],
+                    'p3_reference': node_range_3p[FUSION_REFERENCE],
+                    'p3_start': node_range_3p[FUSION_START],
+                    'p3_stop': node_range_3p[FUSION_STOP],
                 })
 
-            if FUSION_MISSING in node_data[RANGE_5P]:
+            node_range_5p = node_data.get(RANGE_5P)
+            if node_range_5p and FUSION_REFERENCE in node_range_5p:
                 fusion_dict.update({
-                    'p5Missing': node_data[RANGE_5P][FUSION_MISSING].strip()
-                })
-            else:
-                fusion_dict.update({
-                    'p5Reference': node_data[RANGE_5P][FUSION_REFERENCE].strip(),
-                    'p5Start': node_data[RANGE_5P][FUSION_START],
-                    'p5Stop': node_data[RANGE_5P][FUSION_STOP],
+                    'p5_reference': node_range_5p[FUSION_REFERENCE],
+                    'p5_start': node_range_5p[FUSION_START],
+                    'p5_stop': node_range_5p[FUSION_STOP],
                 })
 
             modification_list.append(fusion_dict)
@@ -1410,47 +1440,52 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 mod_type = variant[KIND].strip()
                 if mod_type == HGVS:
                     modification_list.append({
-                        'modType': mod_type,
-                        'variantString': variant[IDENTIFIER].strip()
+                        'type': mod_type,
+                        'variantString': variant[IDENTIFIER]
                     })
 
                 elif mod_type == FRAGMENT:
                     if FRAGMENT_MISSING in variant:
                         modification_list.append({
-                            'modType': mod_type,
-                            'p3Missing': variant[FRAGMENT_MISSING].strip()
+                            'type': mod_type,
                         })
                     else:
                         modification_list.append({
-                            'modType': mod_type,
-                            'p3Start': variant[FRAGMENT_START],
-                            'p3Stop': variant[FRAGMENT_STOP]
+                            'type': mod_type,
+                            'p3_start': variant[FRAGMENT_START],
+                            'p3_stop': variant[FRAGMENT_STOP]
                         })
 
-                elif mod_type == GMOD:
-                    modification_list.append({
-                        'modType': mod_type,
-                        'modNamespace': variant[IDENTIFIER][NAMESPACE].strip(),
-                        'modName': variant[IDENTIFIER][NAME].strip()
-                    })
+                elif mod_type in {GMOD, PMOD}:
+                    variant_identifier = variant[IDENTIFIER]
+                    namespace_url = normalize_url(graph, variant_identifier[NAMESPACE])
 
-                elif mod_type == PMOD:
-                    modification_list.append({
-                        'modType': mod_type,
-                        'modNamespace': variant[IDENTIFIER][NAMESPACE].strip(),
-                        'modName': variant[IDENTIFIER][NAME].strip(),
-                        'aminoA': variant[PMOD_CODE].strip() if PMOD_CODE in variant else None,
-                        'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None
-                    })
+                    if namespace_url in graph.uncached_namespaces:
+                        log.warning('uncached namespace %s in fusion()', namespace_url)
+                        return
+
+                    mod_entry = self.get_namespace_entry(namespace_url, variant_identifier[NAME])
+
+                    if mod_type == GMOD:
+                        modification_list.append({
+                            'type': mod_type,
+                            'identifier': mod_entry
+                        })
+                    if mod_type == PMOD:
+                        modification_list.append({
+                            'type': mod_type,
+                            'identifier': mod_entry,
+                            'residue': variant[PMOD_CODE].strip() if PMOD_CODE in variant else None,
+                            'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None
+                        })
 
         modifications = []
         for modification in modification_list:
             mod_hash = hash_dump(modification)
 
-            if mod_hash in self.object_cache_modification:
-                mod = self.object_cache_modification[mod_hash]
-            else:
-                mod = self.session.query(Modification).filter(Modification.sha512 == mod_hash).one_or_none()
+            mod = self.object_cache_modification.get(mod_hash)
+            if mod is None:
+                mod = self.get_modification_by_hash(mod_hash)
                 if not mod:
                     modification['sha512'] = mod_hash
                     mod = Modification(**modification)
@@ -1460,70 +1495,52 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         return modifications
 
-    def get_or_create_properties(self, graph, edge_data):
+    def get_property_by_hash(self, property_hash):
+        """Gets a property by its hash if it exists
+
+        :param str property_hash: The hash of the property to search
+        :rtype: Optional[Property]
+        """
+        return self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
+
+    def _make_property_from_dict(self, property_def):
+        property_hash = hash_dump(property_def)
+
+        edge_property = self.object_cache_property.get(property_hash)
+        if edge_property is None:
+            edge_property = self.get_property_by_hash(property_hash)
+
+            if not edge_property:
+                property_def['sha512'] = property_hash
+                edge_property = Property(**property_def)
+
+            self.object_cache_property[property_hash] = edge_property
+
+        return edge_property
+
+    def get_or_create_properties(self, graph, edge_data):  # TODO make for just single property then loop with other fn.
         """Creates a list of all subject and object related properties of the edge. Returns None if the property cannot
         be constructed due to missing cache entries.
 
-        :param pybel.BELGraph graph: A BEL graph
+        :param BELGraph graph: A BEL graph
         :param dict edge_data: Describes the context of the given edge.
         :return: A list of all subject and object properties of the edge
         :rtype: list[Property]
         """
-        properties = []
         property_list = []
         for participant in (SUBJECT, OBJECT):
-            if participant not in edge_data:
+            participant_data = edge_data.get(participant)
+            if participant_data is None:
                 continue
 
-            participant_data = edge_data[participant]
-            modifier = participant_data[MODIFIER] if MODIFIER in participant_data else LOCATION
-            property_dict = {
-                'participant': participant,
-                'modifier': modifier
-            }
+            location = participant_data.get(LOCATION)
+            if location is not None:
+                location_property_dict = {
+                    'is_subject': participant == SUBJECT,
+                    'modifier': LOCATION
+                }
 
-            if modifier == TRANSLOCATION and EFFECT in participant_data:
-                for effect_type, effect_value in participant_data[EFFECT].items():
-                    tmp_dict = deepcopy(property_dict)
-                    tmp_dict['relativeKey'] = effect_type
-                    if NAMESPACE in effect_value:
-
-                        effect_namespace = effect_value[NAMESPACE]
-
-                        if effect_namespace == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
-                            namespace_url = GOCC_LATEST
-                        elif effect_namespace in graph.namespace_url:
-                            namespace_url = graph.namespace_url[effect_namespace]
-                        else:
-                            log.warning('namespace not enumerated in modifier %s', effect_namespace)
-                            return
-
-                        if namespace_url in graph.uncached_namespaces:
-                            log.warning('uncached namespace %s in tloc() on line %s ', effect_namespace,
-                                        edge_data.get(LINE))
-                            return
-
-                        effect_name = effect_value[NAME]
-                        tmp_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, effect_name)
-
-                        if tmp_dict['namespaceEntry'] is None:
-                            log.warning('could not find tloc() %s %s', namespace_url, effect_name)
-                            return  # FIXME raise?
-
-                    else:
-                        tmp_dict['propValue'] = effect_value
-
-                    property_list.append(tmp_dict)
-
-            elif modifier == ACTIVITY and EFFECT in participant_data:
-                property_dict['effectNamespace'] = participant_data[EFFECT][NAMESPACE]
-                property_dict['effectName'] = participant_data[EFFECT][NAME]
-
-                property_list.append(property_dict)
-
-            elif modifier == LOCATION:
-
-                location_namespace = participant_data[LOCATION][NAMESPACE]
+                location_namespace = location[NAMESPACE]
 
                 if location_namespace == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
                     namespace_url = GOCC_LATEST
@@ -1535,34 +1552,76 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                                     edge_data.get(LINE))
                         return
 
-                participant_name = participant_data[LOCATION][NAME]
-                property_dict['namespaceEntry'] = self.get_namespace_entry(namespace_url, participant_name)
-
-                if property_dict['namespaceEntry'] is None:
+                participant_name = location[NAME]
+                location_property_dict['effect'] = self.get_namespace_entry(namespace_url, participant_name)
+                if location_property_dict['effect'] is None:
                     raise IndexError
 
-                property_list.append(property_dict)
+                property_list.append(location_property_dict)
 
-            else:
-                property_list.append(property_dict)
+            modifier = participant_data.get(MODIFIER)
+            if modifier is not None:
+                modifier_property_dict = {
+                    'is_subject': participant == SUBJECT,
+                    'modifier': modifier
+                }
 
-        for property_def in property_list:
-            property_hash = hash_dump(property_def)
+                if modifier == TRANSLOCATION and EFFECT in participant_data:
+                    for effect_type, effect_value in participant_data[EFFECT].items():
+                        tmp_dict = deepcopy(modifier_property_dict)
+                        tmp_dict['relative_key'] = effect_type
 
-            if property_hash in self.object_cache_property:
-                edge_property = self.object_cache_property[property_hash]
-            else:
-                edge_property = self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
+                        if NAMESPACE not in effect_value:
+                            tmp_dict['propValue'] = effect_value
+                            raise ValueError('shouldnt use propValue')
+                        else:
+                            effect_namespace = effect_value[NAMESPACE]
 
-                if not edge_property:
-                    property_def['sha512'] = property_hash
-                    edge_property = Property(**property_def)
+                            if effect_namespace == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
+                                namespace_url = GOCC_LATEST
+                            elif effect_namespace in graph.namespace_url:
+                                namespace_url = graph.namespace_url[effect_namespace]
+                            else:
+                                log.warning('namespace not enumerated in modifier %s', effect_namespace)
+                                return
 
-                self.object_cache_property[property_hash] = edge_property
+                            if namespace_url in graph.uncached_namespaces:
+                                log.warning('uncached namespace %s in tloc() on line %s ', effect_namespace,
+                                            edge_data.get(LINE))
+                                return
 
-            properties.append(edge_property)
+                            effect_name = effect_value[NAME]
+                            tmp_dict['effect'] = self.get_namespace_entry(namespace_url, effect_name)
 
-        return properties
+                            if tmp_dict['effect'] is None:
+                                log.warning('could not find tloc() %s %s', namespace_url, effect_name)
+                                return  # FIXME raise?
+
+                        property_list.append(tmp_dict)
+
+                elif modifier == ACTIVITY:
+                    effect = participant_data.get(EFFECT)
+                    if effect is not None:
+                        namespace_url = normalize_url(graph, effect[NAMESPACE])
+
+                        if namespace_url in graph.uncached_namespaces:
+                            log.warning('uncached namespace %s in fusion()', namespace_url)
+                            return
+
+                        modifier_property_dict['effect'] = self.get_namespace_entry(namespace_url, effect[NAME])
+
+                    property_list.append(modifier_property_dict)
+
+                elif modifier == DEGRADATION:
+                    property_list.append(modifier_property_dict)
+
+                else:
+                    raise ValueError('unknown modifier: {}'.format(modifier))
+
+        return [
+            self._make_property_from_dict(property_def)
+            for property_def in property_list
+        ]
 
 
 class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, OwlNamespaceManager,
@@ -1585,3 +1644,13 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
             return Manager(connection=connection, *args, **kwargs)
 
         return connection
+
+
+def normalize_url(graph, keyword):
+    if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
+        return BEL_DEFAULT_NAMESPACE_URL
+
+    if keyword == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
+        return GOCC_LATEST
+
+    return graph.namespace_url.get(keyword)

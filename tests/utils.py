@@ -9,7 +9,7 @@ def make_dummy_namespaces(manager, graph, namespaces):
     """
     :param pybel.manager.Manager manager:
     :param pybel.BELGraph graph:
-    :param dict namespaces:
+    :param dict[str,iter[str]] namespaces:
     """
     for keyword, names in namespaces.items():
         url = str(uuid4())
@@ -20,9 +20,8 @@ def make_dummy_namespaces(manager, graph, namespaces):
         manager.namespace_model[url] = namespace
 
         for name in names:
-            entry = NamespaceEntry(name=name, namespace=namespace)
+            entry = manager.namespace_object_cache[url][entry.name] = NamespaceEntry(name=name, namespace=namespace)
             manager.session.add(entry)
-            manager.namespace_object_cache[url][entry.name] = entry
 
         manager.session.commit()
 
@@ -31,7 +30,7 @@ def make_dummy_annotations(manager, graph, annotations):
     """
     :param pybel.manager.Manager manager:
     :param pybel.BELGraph graph:
-    :param dict annotations:
+    :param dict[str,iter[str]] annotations:
     """
     for keyword, names in annotations.items():
         url = str(uuid4())
@@ -42,8 +41,7 @@ def make_dummy_annotations(manager, graph, annotations):
         manager.annotation_model[url] = annotation
 
         for name in names:
-            entry = AnnotationEntry(name=name, annotation=annotation)
+            entry = manager.annotation_object_cache[url][entry.name] = AnnotationEntry(name=name, annotation=annotation)
             manager.session.add(entry)
-            manager.annotation_object_cache[url][entry.name] = entry
 
         manager.session.commit()

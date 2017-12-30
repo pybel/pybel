@@ -106,6 +106,13 @@ def extract_shared_optional(config, definition_header='Namespace'):
 
 
 def int_or_str(v):
+    """Safe converts an string represent an integer to an integer. If it's none, returns none
+
+    :param v:
+    :return:
+    """
+    if v is None:
+        return
     try:
         return int(v)
     except:
