@@ -27,16 +27,7 @@ class TestLeftFullJoin(unittest.TestCase):
         g.add_simple_node(*p1)
         g.add_simple_node(*p2)
 
-        g.add_edge(p1, p2, attr_dict={
-            RELATION: INCREASES,
-            CITATION: {
-                CITATION_TYPE: 'PubMed',
-                CITATION_REFERENCE: 1,
-                CITATION_NAME: 'PMID1'
-            },
-            EVIDENCE: 'Evidence 1',
-            ANNOTATIONS: {}
-        })
+        g.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID1', evidence='Evidence 1')
 
         h = BELGraph()
 
@@ -47,38 +38,9 @@ class TestLeftFullJoin(unittest.TestCase):
         h.node[p1]['EXTRANEOUS'] = 'MOST DEFINITELY'
         h.node[p3]['EXTRANEOUS'] = 'MOST DEFINITELY'
 
-        h.add_edge(p1, p2, attr_dict={
-            RELATION: INCREASES,
-            CITATION: {
-                CITATION_TYPE: 'PubMed',
-                CITATION_REFERENCE: 1,
-                CITATION_NAME: 'PMID1'
-            },
-            EVIDENCE: 'Evidence 1',
-            ANNOTATIONS: {}
-        })
-
-        h.add_edge(p1, p2, attr_dict={
-            RELATION: INCREASES,
-            CITATION: {
-                CITATION_TYPE: 'PubMed',
-                CITATION_REFERENCE: 2,
-                CITATION_NAME: 'PMID2'
-            },
-            EVIDENCE: 'Evidence 2',
-            ANNOTATIONS: {}
-        })
-
-        h.add_edge(p1, p3, attr_dict={
-            RELATION: INCREASES,
-            CITATION: {
-                CITATION_TYPE: 'PubMed',
-                CITATION_REFERENCE: 1,
-                CITATION_NAME: 'PMID1'
-            },
-            EVIDENCE: 'Evidence 3',
-            ANNOTATIONS: {}
-        })
+        h.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID1', evidence='Evidence 1')
+        h.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID2', evidence='Evidence 2')
+        h.add_qualified_edge(p1, p3, relation=INCREASES, citation='PMID1', evidence='Evidence 3')
 
         self.g = g
         self.h = h
@@ -126,6 +88,12 @@ class TestLeftFullJoin(unittest.TestCase):
         self.help_check(self.g)
         self.help_check_initial_h(self.h)
 
+    def test_operator(self):
+        j = self.g + self.h
+        self.help_check(j)
+        self.help_check_initial_g(self.g)
+        self.help_check_initial_h(self.h)
+
     def test_union_hash(self):
         j = union([self.g, self.h], use_hash=True)
         self.help_check(j)
@@ -151,45 +119,36 @@ class TestLeftFullOuterJoin(unittest.TestCase):
     def setUp(self):
         g = BELGraph()
 
-        g.add_node(1)
-        g.add_node(2)
         g.add_edge(1, 2)
 
-        self.assertEqual(2, g.number_of_nodes())
-        self.assertEqual(1, g.number_of_edges())
-
         h = BELGraph()
-        h.add_node(1)
-        h.add_node(3)
-        h.add_node(4)
         h.add_edge(1, 3)
         h.add_edge(1, 4)
 
-        h.add_node(5)
-        h.add_node(6)
         h.add_edge(5, 6)
-
         h.add_node(7)
 
         self.g = g
         self.h = h
 
-    def help(self, g, h):
-        self.assertEqual(4, g.number_of_nodes())
-        self.assertEqual({1, 2, 3, 4}, set(g.nodes_iter()))
-        self.assertEqual(3, g.number_of_edges())
-        self.assertEqual({(1, 2), (1, 3), (1, 4)}, set(g.edges_iter()))
+    def help_check_initial_g(self, g):
+        self.assertEqual(2, g.number_of_nodes())
+        self.assertEqual({1, 2}, set(g.nodes_iter()))
+        self.assertEqual(1, g.number_of_edges())
+        self.assertEqual({(1, 2)}, set(g.edges_iter()))
 
+    def help_check_initial_h(self, h):
         self.assertEqual(6, h.number_of_nodes())
         self.assertEqual({1, 3, 4, 5, 6, 7}, set(h.nodes_iter()))
         self.assertEqual(3, h.number_of_edges())
         self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(h.edges_iter()))
 
-    def test_initial(self):
-        self.assertEqual(6, self.h.number_of_nodes())
-        self.assertEqual({1, 3, 4, 5, 6, 7}, set(self.h.nodes_iter()))
-        self.assertEqual(3, self.h.number_of_edges())
-        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(self.h.edges_iter()))
+    def help_check_result(self, j):
+        """After H has been full outer joined into G, this is what it should be"""
+        self.assertEqual(4, j.number_of_nodes())
+        self.assertEqual({1, 2, 3, 4}, set(j.nodes_iter()))
+        self.assertEqual(3, j.number_of_edges())
+        self.assertEqual({(1, 2), (1, 3), (1, 4)}, set(j.edges_iter()))
 
     def test_in_place_type_failure(self):
         with self.assertRaises(TypeError):
@@ -202,17 +161,26 @@ class TestLeftFullOuterJoin(unittest.TestCase):
     def test_magic(self):
         # left_outer_join(g, h)
         self.g &= self.h
-        self.help(self.g, self.h)
+        self.help_check_initial_h(self.h)
+        self.help_check_result(self.g)
+
+    def test_operator(self):
+        # left_outer_join(g, h)
+        j = self.g & self.h
+        self.help_check_initial_h(self.h)
+        self.help_check_initial_g(self.g)
+        self.help_check_result(j)
 
     def test_left_outer_hash_join(self):
-        self.g &= self.h
         left_outer_join(self.g, self.h, use_hash=True)
-        self.help(self.g, self.h)
+        self.help_check_initial_h(self.h)
+        self.help_check_result(self.g)
 
     def test_left_outer_exhaustive_join(self):
         self.g &= self.h
         left_outer_join(self.g, self.h, use_hash=False)
-        self.help(self.g, self.h)
+        self.help_check_initial_h(self.h)
+        self.help_check_result(self.g)
 
 
 class TestInnerJoin(unittest.TestCase):
