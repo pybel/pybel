@@ -419,47 +419,75 @@ class BELGraph(networkx.MultiDiGraph):
         return attr[HASH]
 
     def has_edge_citation(self, u, v, key):
-        """Does the given edge have a citation?"""
+        """Does the given edge have a citation?
+
+        :rtype: bool
+        """
         return CITATION in self.edge[u][v][key]
 
     def get_edge_citation(self, u, v, key):
-        """Gets the citation for a given edge"""
+        """Gets the citation for a given edge
+
+        :rtype: Optional[dict]
+        """
         return self.edge[u][v][key].get(CITATION)
 
     def has_edge_evidence(self, u, v, key):
-        """Does the given edge have evidence?"""
+        """Does the given edge have evidence?
+
+        :rtype: boolean
+        """
         return EVIDENCE in self.edge[u][v][key]
 
     def get_edge_evidence(self, u, v, key):
-        """Gets the evidence for a given edge"""
+        """Gets the evidence for a given edge
+
+        :rtype: Optional[str]
+        """
         return self.edge[u][v][key].get(EVIDENCE)
 
     def get_edge_annotations(self, u, v, key):
-        """Gets the annotations for a given edge"""
+        """Gets the annotations for a given edge
+
+        :rtype: Optional[dict]
+        """
         return self.edge[u][v][key].get(ANNOTATIONS)
 
     def get_node_name(self, node):
-        """Gets the node's name, or return None if no name"""
+        """Gets the node's name, or return None if no name
+
+        :rtype: Optional[str]
+        """
         return self.node[node].get(NAME)
 
+    def set_node_name(self, node, name):
+        """Sets the name for a given node
+
+        :param tuple node: A PyBEL node tuple
+        :type name: str
+        """
+        self.node[node][NAME] = name
+
     def get_node_identifier(self, node):
-        """Gets the identifier for a given node from the database (not the same as the node hash)"""
+        """Gets the identifier for a given node from the database (not the same as the node hash)
+
+        :rtype: Optional[str]
+        """
         return self.node[node].get(IDENTIFIER)
 
-    def get_node_label(self, node):
-        """Gets the label for a given node"""
-        return self.node[node].get(LABEL)
-
-    def set_node_label(self, node, label):
-        """Sets the label for a given node"""
-        self.node[node][LABEL] = label
-
     def get_node_description(self, node):
-        """Gets the description for a given node"""
+        """Gets the description for a given node
+
+        :rtype: Optional[str]
+        """
         return self.node[node].get(DESCRIPTION)
 
     def set_node_description(self, node, description):
-        """Sets the description for a given node"""
+        """Sets the description for a given node
+
+        :param tuple node: A PyBEL node tuple
+        :type description: str
+        """
         self.node[node][DESCRIPTION] = description
 
     def __add__(self, other):
