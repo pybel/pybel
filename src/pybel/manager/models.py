@@ -561,6 +561,7 @@ class Node(Base):
             result[PRODUCTS] = sort_dict_list(products)
 
         elif self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
+            # FIXME handle when there's a named complex with member list as well
             result[MEMBERS] = sort_dict_list(
                 edge.target.to_json()
                 for edge in self.out_edges.filter(Edge.relation == HAS_COMPONENT)
