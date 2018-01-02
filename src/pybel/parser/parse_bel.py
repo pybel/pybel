@@ -786,19 +786,19 @@ class BelParser(BaseParser):
         :raises: RelabelWarning
         """
         subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
-        label = tokens[OBJECT]
+        description = tokens[OBJECT]
 
-        if LABEL in self.graph.node[subject_node_tuple]:
+        if self.graph.has_node_description(subject_node_tuple):
             raise RelabelWarning(
                 line_number=self.line_number,
                 line=line,
                 position=position,
                 node=self.graph.node,
-                old_label=self.graph.node[subject_node_tuple][LABEL],
-                new_label=label
+                old_label=self.graph.get_node_description(subject_node_tuple),
+                new_label=description
             )
 
-        self.graph.set_node_label(subject_node_tuple, label)
+        self.graph.set_node_description(subject_node_tuple, description)
 
     def ensure_node(self, tokens):
         """Turns parsed tokens into canonical node name and makes sure its in the graph

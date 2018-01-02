@@ -755,8 +755,8 @@ class TestRelations(TestTokenParserBase):
         expected_node = node_to_tuple(result[SUBJECT])
 
         self.assertHasNode(expected_node)
-        self.assertIn(LABEL, self.parser.graph.node[expected_node])
-        self.assertEqual('APOE E2', self.parser.graph.node[expected_node][LABEL])
+        self.assertTrue(self.parser.graph.has_node_description(expected_node))
+        self.assertEqual('APOE E2', self.parser.graph.get_node_description(expected_node))
 
     def test_raise_on_relabel(self):
         s1 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'

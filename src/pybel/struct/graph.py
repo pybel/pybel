@@ -482,6 +482,14 @@ class BELGraph(networkx.MultiDiGraph):
         """
         return self.node[node].get(DESCRIPTION)
 
+    def has_node_description(self, node):
+        """Returns if a node description is already present
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: bool
+        """
+        return DESCRIPTION in self.node[node]
+
     def set_node_description(self, node, description):
         """Sets the description for a given node
 
