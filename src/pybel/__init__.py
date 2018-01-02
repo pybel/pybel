@@ -91,10 +91,10 @@ Upgrading
 ---------
 
 During the current development cycle, programmatic access to the definition and graph caches might become unstable. If 
-you have any problems working with the database, try removing it either by 
+you have any problems working with the database, try removing it with one of the following commands:
 
-1. Running :code:`pybel manage remove` (unix)
-2. Running :code:`python3 -m pybel manage remove` (windows)
+1. Running :code:`pybel manage drop` (unix)
+2. Running :code:`python3 -m pybel manage drop` (windows)
 3. Removing the folder :code:`~/.pybel`
 
 PyBEL will build a new database and populate it on the next run.
