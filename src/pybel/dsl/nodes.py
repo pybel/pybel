@@ -355,8 +355,8 @@ class reaction(dict):
 
     def __init__(self, reactants, products):
         """
-        :param list[dict] reactants: A list of PyBEL node data dictionaries representing the reactants
-        :param list[dict] products: A list of PyBEL node data dictionaries representing the products
+        :param list[BaseAbundance] reactants: A list of PyBEL node data dictionaries representing the reactants
+        :param list[BaseAbundance] products: A list of PyBEL node data dictionaries representing the products
 
         Example:
 
