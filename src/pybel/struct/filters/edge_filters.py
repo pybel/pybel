@@ -15,7 +15,7 @@ A general use for an edge predicate is to use the built-in :func:`filter` in cod
 
 from collections import Iterable
 
-from .edge_predicates import has_provenance, keep_edge_permissive
+from .edge_predicates import keep_edge_permissive
 
 __all__ = [
     'invert_edge_filter',
@@ -88,7 +88,7 @@ def filter_edges(graph, edge_predicates=None):
     :param edge_predicates: A predicate or list of predicates
     :type edge_predicates: types.FunctionType or list[types.FunctionType] or tuple[types.FunctionType]
     :return: An iterable of edges that pass all predicates
-    :rtype: iter
+    :rtype: iter[tuple,tuple,int]
     """
 
     # If no predicates are given, return the standard edge iterator
