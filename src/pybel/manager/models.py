@@ -5,8 +5,8 @@
 import datetime
 
 from sqlalchemy import (
-    Boolean, Column, DDL, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text,
-    UniqueConstraint, event,
+    Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text,
+    UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
@@ -70,50 +70,6 @@ PROPERTY_TABLE_NAME = 'pybel_property'
 LONGBLOB = 4294967295
 
 Base = declarative_base()
-
-
-def reset_tables(engine):
-    """Drops all tables in database"""
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-
-
-def build_orphan_trigger(trigger_name, trigger_tablename, orphan_tablename, reference_tablename, reference_column,
-                         orphan_column='id', trigger_time='AFTER', trigger_action='DELETE'):
-    """builds a trigger to delete orphans in many-to-many relationships after deletion of a table.
-
-    :param str trigger_name: Name that will be used to create the trigger in the database.
-    :param str trigger_tablename: Name of the table that starts the trigger after deletion.
-    :param str orphan_tablename: Name of the table that may contain orphan entries.
-    :param str reference_tablename: Name of the table that should be used as reference to weather delete or not.
-    :param str reference_column: Column in the reference table that should be checked.
-    :param str orphan_column: Column in the orphan table that should be checked agains the reference table.
-    :param str trigger_time: Timepoint the trigger gets called.
-    :param str trigger_action: Action that calls the trigger.
-    :return: :class:`DDL` object.
-    """
-    ddl = DDL('''
-    CREATE TRIGGER {trigger_name} {trigger_time} {trigger_action} ON {trigger_tablename}
-    FOR EACH ROW
-    BEGIN
-    DELETE FROM {orphan_tablename}
-    WHERE {orphan_column} NOT IN (
-        SELECT DISTINCT {reference_column}
-        FROM {reference_tablename}
-    );
-    END;'''.format(
-        trigger_name=trigger_name,
-        trigger_time=trigger_time,
-        trigger_action=trigger_action,
-        trigger_tablename=trigger_tablename,
-        orphan_tablename=orphan_tablename,
-        orphan_column=orphan_column,
-        reference_column=reference_column,
-        reference_tablename=reference_tablename)
-    )
-
-    return ddl
-
 
 namespace_hierarchy = Table(
     NAMESPACE_HIERARCHY_TABLE_NAME,
@@ -430,8 +386,8 @@ class Network(Base):
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
-    nodes = relationship('Node', secondary=network_node, lazy="dynamic")  # backref='networks'
-    edges = relationship('Edge', secondary=network_edge, lazy="dynamic")  # backref='networks'
+    nodes = relationship('Node', secondary=network_node, lazy="dynamic")
+    edges = relationship('Edge', secondary=network_edge, lazy="dynamic")
 
     __table_args__ = (
         UniqueConstraint(name, version),
@@ -509,7 +465,7 @@ class Node(Base):
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
     has_fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
     bel = Column(String(255), nullable=False, doc='Canonical BEL term that represents the given node')
-    sha512 = Column(String(255), nullable=False, index=True)
+    sha512 = Column(String(255), nullable=True, index=True)
 
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespace_entry = relationship('NamespaceEntry', foreign_keys=[namespace_entry_id])
@@ -583,7 +539,7 @@ class Modification(Base):
 
     id = Column(Integer, primary_key=True)
 
-    type = Column(String(255), doc='Type of the stored modification e.g. Fusion, gmod, pmod, etc')
+    type = Column(String(255), nullable=False, doc='Type of the stored modification e.g. Fusion, gmod, pmod, etc')
 
     variantString = Column(String(255), nullable=True, doc='HGVS string if sequence modification')
 
@@ -824,10 +780,12 @@ class Edge(Base):
     relation = Column(String(255), nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
-    source = relationship('Node', foreign_keys=[source_id], backref=backref('out_edges', lazy='dynamic'))
+    source = relationship('Node', foreign_keys=[source_id],
+                          backref=backref('out_edges', lazy='dynamic', cascade='all, delete-orphan'))
 
     target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
-    target = relationship('Node', foreign_keys=[target_id], backref=backref('in_edges', lazy='dynamic'))
+    target = relationship('Node', foreign_keys=[target_id],
+                          backref=backref('in_edges', lazy='dynamic', cascade='all, delete-orphan'))
 
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship("Evidence")
@@ -857,7 +815,7 @@ class Edge(Base):
         if self.evidence:
             data.update(self.evidence.to_json())
 
-        for prop in self.properties: # FIXME this is also probably broken for translocations or mixed activity/degrad
+        for prop in self.properties:  # FIXME this is also probably broken for translocations or mixed activity/degrad
             if prop.side not in data:
                 data[prop.side] = prop.to_json()
             else:
@@ -951,52 +909,3 @@ class Property(Base):
         # degradations don't have modifications
 
         return prop_dict
-
-
-trigger_drop_orphan_edge_annotation_relations = build_orphan_trigger(
-    trigger_name='drop_orphan_edge_annotation_relations',
-    trigger_tablename=NETWORK_TABLE_NAME,
-    # PROPERTY_TABLE_NAME,
-    orphan_tablename=EDGE_ANNOTATION_TABLE_NAME,
-    reference_tablename=NETWORK_EDGE_TABLE_NAME,
-    reference_column='edge_id',
-    orphan_column='edge_id'
-)
-event.listen(Network.__table__, 'after_create', trigger_drop_orphan_edge_annotation_relations)
-
-trigger_drop_orphan_edge_property_relations = build_orphan_trigger(
-    trigger_name='drop_orphan_edge_property_relations',
-    trigger_tablename=EDGE_ANNOTATION_TABLE_NAME,
-    orphan_tablename=EDGE_PROPERTY_TABLE_NAME,
-    reference_tablename=NETWORK_EDGE_TABLE_NAME,
-    reference_column='edge_id',
-    orphan_column='edge_id'
-)
-event.listen(edge_annotation, 'after_create', trigger_drop_orphan_edge_property_relations)
-
-trigger_drop_orphan_properties = build_orphan_trigger(
-    trigger_name='drop_orphan_properties',
-    trigger_tablename=EDGE_PROPERTY_TABLE_NAME,
-    orphan_tablename=PROPERTY_TABLE_NAME,
-    reference_tablename=EDGE_PROPERTY_TABLE_NAME,
-    reference_column='property_id'
-)
-event.listen(edge_property, 'after_create', trigger_drop_orphan_properties)
-
-trigger_drop_orphan_edges = build_orphan_trigger(
-    trigger_name='drop_orphan_edges',
-    trigger_tablename=PROPERTY_TABLE_NAME,
-    orphan_tablename=EDGE_TABLE_NAME,
-    reference_tablename=NETWORK_EDGE_TABLE_NAME,
-    reference_column='edge_id'
-)
-event.listen(Property.__table__, 'after_create', trigger_drop_orphan_edges)
-
-trigger_drop_orphan_modifications = build_orphan_trigger(
-    trigger_name='drop_orphan_modifications',
-    trigger_tablename=NODE_TABLE_NAME,
-    orphan_tablename=MODIFICATION_TABLE_NAME,
-    reference_tablename=NODE_MODIFICATION_TABLE_NAME,
-    reference_column='modification_id'
-)
-event.listen(Node.__table__, 'after_create', trigger_drop_orphan_modifications)

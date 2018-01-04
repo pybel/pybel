@@ -806,14 +806,29 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
+    def drop_network(self, network):
+        """Drops a network, while also cleaning up any edges that are no longer part of any network.
+
+        :param Network network:
+        """
+        edge_ids = {
+            edge.id
+            for edge in network.edges if edge.networks.count() == 1
+        }
+
+        if edge_ids:
+            self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete()
+
+        self.session.delete(network)
+        self.session.commit()
+
     def drop_network_by_id(self, network_id):
         """Drops a network by its database identifier
 
         :param int network_id: The network's database identifier
         """
         network = self.session.query(Network).get(network_id)
-        self.session.delete(network)
-        self.session.commit()
+        self.drop_network(network)
 
     def drop_networks(self):
         """Drops all networks"""
