@@ -509,7 +509,7 @@ class Node(Base):
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
     has_fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
     bel = Column(String(255), nullable=False, doc='Canonical BEL term that represents the given node')
-    sha512 = Column(String(255), index=True)
+    sha512 = Column(String(255), nullable=False, index=True)
 
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespace_entry = relationship('NamespaceEntry', foreign_keys=[namespace_entry_id])
@@ -610,15 +610,14 @@ class Modification(Base):
     sha512 = Column(String(255), index=True)
 
     def _fusion_to_json(self):
-        """Converts this modification to a FUSION data dictioanry. Don't use this without checking
+        """Converts this modification to a FUSION data dictionary. Don't use this without checking
         ``self.type == FUSION`` first"""
-        fusion_dict = {}
-        fusion_dict.update({
+        fusion_dict = {
             PARTNER_3P: self.p3_partner.to_json(),
             PARTNER_5P: self.p5_partner.to_json(),
             RANGE_3P: {},
             RANGE_5P: {}
-        })
+        }
 
         if self.p5_reference:
             fusion_dict[RANGE_5P] = fusion_range(
@@ -775,7 +774,7 @@ class Evidence(Base):
     id = Column(Integer, primary_key=True)
     text = Column(Text, nullable=False, doc='Supporting text from a given publication')
 
-    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)))
+    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), nullable=False)
     citation = relationship('Citation', backref=backref('evidences'))
 
     sha512 = Column(String(255), index=True)
@@ -907,8 +906,7 @@ class Property(Base):
     id = Column(Integer, primary_key=True)
 
     is_subject = Column(Boolean, doc='Identifies which participant of the edge if affected by the given property')
-    modifier = Column(String(255),
-                      doc='The modifier to the corresponding participant. One of activity, degradation, location, or translocation')
+    modifier = Column(String(255), doc='The modifier: one of activity, degradation, location, or translocation')
 
     relative_key = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
 

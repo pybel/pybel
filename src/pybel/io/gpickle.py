@@ -59,7 +59,8 @@ def to_pickle(graph, file, protocol=HIGHEST_PROTOCOL):
     incompatibilities between Python 2 and 3. To export a universally importable pickle, choose 0, 1, or 2.
 
     :param BELGraph graph: A BEL graph
-    :param str or file: A file or filename to write to
+    :param file: A file or filename to write to
+    :type file: str or file
     :param int protocol: Pickling protocol to use
 
     .. seealso:: https://docs.python.org/3.6/library/pickle.html#data-stream-format
@@ -71,7 +72,8 @@ def to_pickle(graph, file, protocol=HIGHEST_PROTOCOL):
 def from_pickle(path, check_version=True):
     """Reads a graph from a gpickle file.
 
-    :param file or str path: File or filename to read. Filenames ending in .gz or .bz2 will be uncompressed.
+    :param path: File or filename to read. Filenames ending in .gz or .bz2 will be uncompressed.
+    :type path: str or file
     :param bool check_version: Checks if the graph was produced by this version of PyBEL
     :return: A BEL graph
     :rtype: BELGraph
