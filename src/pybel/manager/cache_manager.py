@@ -806,18 +806,26 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
+    @staticmethod
+    def iterate_singleton_edges_from_network(network):
+        """Gets all edges that only belong to the given network
+
+        :param Network network:
+        :rtype: list[Edge]
+        """
+        return (  # TODO implement with nested SQLAlchemy query for better speed
+            edge
+            for edge in network.edges
+            if edge.networks.count() == 1
+        )
+
     def drop_network(self, network):
         """Drops a network, while also cleaning up any edges that are no longer part of any network.
 
         :param Network network:
         """
-        edge_ids = {
-            edge.id
-            for edge in network.edges if edge.networks.count() == 1
-        }
-
-        if edge_ids:
-            self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete()
+        for edge in self.iterate_singleton_edges_from_network(network):
+            self.session.delete(edge)
 
         self.session.delete(network)
         self.session.commit()
