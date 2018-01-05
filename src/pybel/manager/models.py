@@ -386,8 +386,8 @@ class Network(Base):
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
-    nodes = relationship('Node', secondary=network_node, lazy="dynamic")
-    edges = relationship('Edge', secondary=network_edge, lazy="dynamic")
+    nodes = relationship('Node', secondary=network_node, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
+    edges = relationship('Edge', secondary=network_edge, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
 
     __table_args__ = (
         UniqueConstraint(name, version),
@@ -792,7 +792,6 @@ class Edge(Base):
 
     annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic")  # , backref='edges'
     properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
-    networks = relationship('Network', secondary=network_edge, lazy="dynamic")
 
     sha512 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
 
