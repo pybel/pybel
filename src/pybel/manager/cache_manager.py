@@ -806,14 +806,37 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
+    @staticmethod
+    def iterate_singleton_edges_from_network(network):
+        """Gets all edges that only belong to the given network
+
+        :type network: Network
+        :rtype: iter[Edge]
+        """
+        return (  # TODO implement with nested SQLAlchemy query for better speed
+            edge
+            for edge in network.edges
+            if edge.networks.count() == 1
+        )
+
+    def drop_network(self, network):
+        """Drops a network, while also cleaning up any edges that are no longer part of any network.
+
+        :type network: Network
+        """
+        for edge in self.iterate_singleton_edges_from_network(network):
+            self.session.delete(edge)
+
+        self.session.delete(network)
+        self.session.commit()
+
     def drop_network_by_id(self, network_id):
         """Drops a network by its database identifier
 
         :param int network_id: The network's database identifier
         """
         network = self.session.query(Network).get(network_id)
-        self.session.delete(network)
-        self.session.commit()
+        self.drop_network(network)
 
     def drop_networks(self):
         """Drops all networks"""
@@ -837,7 +860,6 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         :param str name: The name of the network.
         :param str version: The version string of the network.
-        :return: A BEL graph
         :rtype: BELGraph
         """
         network = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
@@ -868,7 +890,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return self.session.query(Network).get(network_id)
 
     def get_graph_by_id(self, network_id):
-        """Gets a network from the database by its identifier and converts to a BEL graph
+        """Gets a network from the database by its identifier and converts it to a BEL graph
 
         :param int network_id: The network's database identifier
         :rtype: BELGraph
@@ -924,11 +946,10 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_author = {}
 
     def insert_graph(self, graph, store_parts=True):
-        """Inserts a graph in the database.
+        """Inserts a graph in the database and returns the corresponding Network model.
 
         :param BELGraph graph: A BEL graph
         :param bool store_parts: Should the graph be stored in the edge store?
-        :return: A Network object
         :rtype: Network
         """
         if not graph.name:

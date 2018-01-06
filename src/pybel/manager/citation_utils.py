@@ -28,6 +28,7 @@ re3 = re.compile('^[12][0-9]{3}$')
 re4 = re.compile('^[12][0-9]{3} [a-zA-Z]{3}-[a-zA-Z]{3}$')
 re5 = re.compile('^([12][0-9]{3}) (Spring|Fall|Winter|Summer)$')
 re6 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-(\d{1,2})$')
+re7 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-([a-zA-Z]{3} \d{1,2})$')
 
 season_map = {'Spring': '03', 'Summer': '06', 'Fall': '09', 'Winter': '12'}
 
@@ -57,6 +58,11 @@ def sanitize_date(publication_date):
         return '{}-{}-01'.format(year, season_map[season])
 
     s = re6.search(publication_date)
+
+    if s:
+        return datetime.strptime(publication_date, '%Y %b %d-{}'.format(s.groups()[0])).strftime('%Y-%m-%d')
+
+    s = re7.search(publication_date)
 
     if s:
         return datetime.strptime(publication_date, '%Y %b %d-{}'.format(s.groups()[0])).strftime('%Y-%m-%d')
@@ -164,7 +170,7 @@ def get_citations_by_pmids(pmids, group_size=None, sleep_time=None, return_error
             if sanitized_publication_date:
                 result[pmid][CITATION_DATE] = sanitized_publication_date
             else:
-                log.info('PMID {} Date with strange format: %s', pmid, publication_date)
+                log.info('PMID %s had date with strange format: %s', pmid, publication_date)
 
             if CITATION_DATE in result[pmid]:
                 citation.date = datetime.strptime(result[pmid][CITATION_DATE], '%Y-%m-%d')

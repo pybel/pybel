@@ -29,6 +29,9 @@ class TestSanitizeDate(unittest.TestCase):
     def test_sanitize_6(self):
         self.assertEqual('2012-12-12', sanitize_date('2012 Dec 12-15'))
 
+    def test_sanitize_7(self):
+        self.assertEqual('2005-01-29', sanitize_date('2005 Jan 29-Feb 4'))
+
     def test_sanitize_nope(self):
         self.assertEqual(None, sanitize_date('2012 Early Spring'))
 
