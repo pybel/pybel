@@ -1250,15 +1250,21 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
     def drop_nodes(self):
         """Drops all nodes in RDB"""
-        for node in self.session.query(Node).all():
-            self.session.delete(node)
+        t = time.time()
+
+        self.session.query(Node).delete()
         self.session.commit()
+
+        log.info('dropped all nodes in %.2f seconds', time.time() - t)
 
     def drop_edges(self):
         """Drops all edges in RDB"""
-        for edge in self.session.query(Edge).all():
-            self.session.delete(edge)
+        t = time.time()
+
+        self.session.query(Edge).delete()
         self.session.commit()
+
+        log.info('dropped all edges in %.2f seconds', time.time() - t)
 
     def get_or_create_edge(self, source, target, relation, bel, edge_hash, evidence=None, annotations=None,
                            properties=None):
