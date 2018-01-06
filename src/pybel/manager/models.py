@@ -470,7 +470,8 @@ class Node(Base):
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_ENTRY_TABLE_NAME)), nullable=True)
     namespace_entry = relationship('NamespaceEntry', foreign_keys=[namespace_entry_id])
 
-    modifications = relationship("Modification", secondary=node_modification, backref='nodes')
+    modifications = relationship("Modification", secondary=node_modification, lazy='dynamic',
+                                 backref=backref('nodes', lazy='dynamic'))
 
     def __str__(self):
         return self.bel
