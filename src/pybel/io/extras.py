@@ -9,7 +9,7 @@ import logging
 
 import networkx as nx
 
-from ..constants import NAME, NAMESPACE
+from ..constants import FUNCTION, NAME, NAMESPACE
 from ..struct import BELGraph
 from ..utils import flatten_dict
 
@@ -33,7 +33,7 @@ def to_graphml(graph, file):
     g = nx.MultiDiGraph()
 
     for node, data in graph.nodes(data=True):
-        g.add_node(node, json=json.dumps(data))
+        g.add_node(node, json=json.dumps(data), function=data[FUNCTION])
 
     for u, v, key, data in graph.edges(data=True, keys=True):
         g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
