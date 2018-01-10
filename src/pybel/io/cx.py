@@ -181,11 +181,12 @@ def to_cx(graph):
                 })
 
         if ANNOTATIONS in d:
-            for annotation, value in d[ANNOTATIONS].items():
+            for annotation, values in d[ANNOTATIONS].items():
                 edge_attributes_entry.append({
                     'po': edge_index,
                     'n': annotation,
-                    'v': value
+                    'v': sorted(values),
+                    'd': 'list_of_string',
                 })
 
         if SUBJECT in d:
@@ -237,10 +238,10 @@ def to_cx(graph):
     annotation_list_keys_lookup = {keyword: i for i, keyword in enumerate(sorted(graph.annotation_list))}
     annotation_lists_entry = []
     for keyword, values in graph.annotation_list.items():
-        for value in values:
+        for values in values:
             annotation_lists_entry.append({
                 'k': annotation_list_keys_lookup[keyword],
-                'v': value
+                'v': values
             })
 
     context_entry_dict = {}
@@ -488,9 +489,14 @@ def from_cx(cx):
         edge_data_pp[eid][OBJECT] = expand_dict(d)
 
     for eid in edge_relation:
-        edge_data_pp[eid][ANNOTATIONS] = edge_annotations[eid] if eid in edge_annotations else {}
+        if eid not in edge_annotations:
+            continue
+        edge_data_pp[eid][ANNOTATIONS] = {
+            key: {v: True for v in values}
+            for key, values in edge_annotations[eid].items()
+        }
 
-        if eid in edge_citation:
+        if eid in edge_citation:  # FIXME replace with graph.add_qualified_edge
             graph.add_edge(
                 edge_source[eid],
                 edge_target[eid],
@@ -498,11 +504,10 @@ def from_cx(cx):
                 **{RELATION: edge_relation[eid]}
             )
         elif edge_relation[eid] in unqualified_edges:
-            graph.add_edge(
+            graph.add_unqualified_edge(
                 edge_source[eid],
                 edge_target[eid],
-                key=unqualified_edge_code[edge_relation[eid]],
-                **{RELATION: edge_relation[eid], ANNOTATIONS: {}}
+                edge_relation[eid]
             )
         else:
             raise ValueError('problem adding edge: {}'.format(eid))

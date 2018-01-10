@@ -134,29 +134,6 @@ class TestUtils(unittest.TestCase):
 
         self.assertTrue(any_subdict_matches(g.edge[1][2], d))
 
-    def test_cartesian_dictionary(self):
-        d = {
-            'A': {'1', '2'},
-            'B': {'x', 'y', 'z'}
-        }
-        results = cartesian_dictionary(d)
-
-        expected_results = [
-            {'A': '1', 'B': 'x'},
-            {'A': '1', 'B': 'y'},
-            {'A': '1', 'B': 'z'},
-            {'A': '2', 'B': 'x'},
-            {'A': '2', 'B': 'y'},
-            {'A': '2', 'B': 'z'},
-        ]
-
-        for result in results:
-            found = False
-            for expected_result in expected_results:
-                if result == expected_result:
-                    found = True
-            self.assertTrue(found)
-
 
 class TestSanitize(unittest.TestCase):
     def test_a(self):

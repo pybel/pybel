@@ -15,7 +15,7 @@ def stratify_hash_edges(graph):
     unqualified_edges = defaultdict(lambda: defaultdict(set))
 
     for u, v, k, d in graph.edges_iter(keys=True, data=True):
-        hashed_data = hash_edge(u, v, k, d)
+        hashed_data = hash_edge(u, v, d)
 
         if k < 0:
             unqualified_edges[u, v][k].add(hashed_data)

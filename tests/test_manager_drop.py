@@ -41,8 +41,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             evidence=test_evidence_text,
             citation=test_citation_dict,
             annotations={
-                'Disease': 'Disease1',
-                'Cell': 'Cell1'
+                'Disease': {'Disease1': True},
+                'Cell': {'Cell1': True}
             }
         )
 

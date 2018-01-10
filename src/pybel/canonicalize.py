@@ -221,7 +221,6 @@ def _sort_qualified_edges_helper(edge_tuple):
         d[CITATION][CITATION_TYPE],
         d[CITATION][CITATION_REFERENCE],
         d[EVIDENCE],
-        hash_edge(u, v, k, d)
     )
 
 
@@ -229,7 +228,7 @@ def sort_qualified_edges(graph):
     """Returns the qualified edges, sorted first by citation, then by evidence, then by annotations
 
     :param BELGraph graph: A BEL graph
-    :rtype: tuple[tuple,tuple,dict]
+    :rtype: tuple[tuple,tuple,int,dict]
     """
     qualified_edges_iter = (
         (u, v, k, d)
@@ -240,17 +239,58 @@ def sort_qualified_edges(graph):
     return qualified_edges
 
 
-def to_bel_lines(graph):
-    """Returns an iterable over the lines of the BEL graph as a canonical BEL Script (.bel)
+def _citation_sort_key(t):
+    """Makes a confusing 4 tuple sortable by citation
 
-    :param pybel.BELGraph graph: the BEL Graph to output as a BEL Script
-    :return: An iterable over the lines of the representative BEL script
+    :param tuple t: A 4-tuple of source node, target node, key, and data
+    :rtype: tuple[str,str]
+    """
+    return '"{}", "{}"'.format(t[3][CITATION][CITATION_TYPE], t[3][CITATION][CITATION_REFERENCE])
+
+
+def _evidence_sort_key(t):
+    """Makes a confusing 4 tuple sortable by citation
+
+    :param tuple t: A 4-tuple of source node, target node, key, and data
+    :rtype: str
+    """
+    return t[3][EVIDENCE]
+
+
+def _set_annotation_to_str(annotation_data, key):
+    """
+
+    :param dict[str,dict[str,bool] annotation_data:
+    :param key:
+    :return:
+    """
+    value = annotation_data[key]
+
+    if len(value) == 1:
+        return 'SET {} = "{}"'.format(key, list(value)[0])
+
+    x = ('"{}"'.format(v) for v in sorted(value))
+
+    return 'SET {} = {{{}}}'.format(key, ', '.join(x))
+
+def _unset_annotation_to_str(keys):
+
+    if len(keys) == 1:
+        return 'UNSET {}'.format(list(keys)[0])
+
+    return 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
+
+
+def _to_bel_lines_header(graph):
+    """
+
+    :param graph:
     :rtype: iter[str]
     """
     if GOCC_KEYWORD not in graph.namespace_url:
         graph.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
 
-    header_lines = make_knowledge_header(
+    return make_knowledge_header(
         namespace_url=graph.namespace_url,
         namespace_owl=graph.namespace_owl,
         namespace_patterns=graph.namespace_pattern,
@@ -261,27 +301,62 @@ def to_bel_lines(graph):
         **graph.document
     )
 
-    for line in header_lines:
-        yield line
 
+def group_citation_edges(edges_iter):
+    """Returns an iterator over pairs of citation values and their corresponding edge iterators
+
+    :param tuple[tuple,tuple,int,dict] edges_iter: An iterator over the 4-tuples of edges
+    :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
+    """
+    return itt.groupby(edges_iter, key=_citation_sort_key)
+
+
+def group_evidence_edges(edges_iter):
+    """Returns an iterator over pairs of evidence values and their corresponding edge iterators
+
+    :param tuple[tuple,tuple,int,dict] edges_iter: An iterator over the 4-tuples of edges
+    :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
+    """
+    return itt.groupby(edges_iter, key=_evidence_sort_key)
+
+
+def _to_bel_lines_body(graph):
+    """
+
+    :param graph:
+    :rtype: iter[str]
+    """
     qualified_edges = sort_qualified_edges(graph)
 
-    for citation, citation_edges in itt.groupby(qualified_edges, key=lambda t: flatten_citation(t[3][CITATION])):
+    for citation, citation_edges in group_citation_edges(qualified_edges):
+        yield '#' * 80
         yield 'SET Citation = {{{}}}'.format(citation)
 
-        for evidence, evidence_edges in itt.groupby(citation_edges, key=lambda u_v_k_d: u_v_k_d[3][EVIDENCE]):
+        for evidence, evidence_edges in group_evidence_edges(citation_edges):
             yield 'SET SupportingText = "{}"'.format(evidence)
 
             for u, v, _, data in evidence_edges:
-                keys = sorted(data[ANNOTATIONS]) if ANNOTATIONS in data else tuple()
-                for key in keys:
-                    yield 'SET {} = "{}"'.format(key, data[ANNOTATIONS][key])
-                yield graph.edge_to_bel(u, v, data)
-                if keys:
-                    yield 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
-            yield 'UNSET SupportingText'
-        yield 'UNSET Citation\n'
+                annotations_data = data.get(ANNOTATIONS)
 
+                keys = sorted(annotations_data) if annotations_data is not None else tuple()
+                for key in keys:
+                    yield _set_annotation_to_str(annotations_data, key)
+
+                yield graph.edge_to_bel(u, v, data)
+
+                if keys:
+                    yield _unset_annotation_to_str(keys)
+
+            yield 'UNSET SupportingText'
+        yield 'UNSET Citation'
+
+
+def _to_bel_lines_footer(graph):
+    """
+
+    :param graph:
+    :rtype: iter[str]
+    """
     unqualified_edges_to_serialize = [
         (u, v, d)
         for u, v, d in graph.edges_iter(data=True)
@@ -307,6 +382,20 @@ def to_bel_lines(graph):
 
         yield 'UNSET SupportingText'
         yield 'UNSET Citation'
+
+
+def to_bel_lines(graph):
+    """Returns an iterable over the lines of the BEL graph as a canonical BEL Script (.bel)
+
+    :param pybel.BELGraph graph: the BEL Graph to output as a BEL Script
+    :return: An iterable over the lines of the representative BEL script
+    :rtype: iter[str]
+    """
+    return itt.chain(
+        _to_bel_lines_header(graph),
+        _to_bel_lines_body(graph),
+        _to_bel_lines_footer(graph)
+    )
 
 
 def to_bel(graph, file=None):

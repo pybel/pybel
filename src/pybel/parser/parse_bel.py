@@ -20,7 +20,7 @@ from .parse_exceptions import (
     NestedRelationWarning, RelabelWarning,
 )
 from .parse_identifier import IdentifierParser
-from .utils import WCW, cartesian_dictionary, nest, one_of_tags, quote, triple
+from .utils import WCW, nest, one_of_tags, quote, triple
 from .. import language
 from ..constants import *
 from ..tokens import modifier_po_to_dict, po_to_dict
@@ -52,7 +52,7 @@ class BelParser(BaseParser):
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
                  allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-                 citation_clearing=True, no_identifier_validation=False, relation_policy=None, autostreamline=True):
+                 citation_clearing=True, no_identifier_validation=False, autostreamline=True):
         """
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
         :param dict[str,dict[str,str]] namespace_dict: A dictionary of {namespace: {name: encoding}}.
@@ -70,14 +70,10 @@ class BelParser(BaseParser):
         :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                     Delegated to :class:`pybel.parser.ControlParser`
-        :param str relation_policy: Determines the relation addition policy. Current valid values are 'explode' or
-                                    'concatenate'. Defaults to explore
         :param bool autostreamline: Should the parser be streamlined on instantiation?
         """
-
         self.graph = graph
         self.allow_nested = allow_nested
-        self._set_handle_relation_policy(relation_policy)
 
         self.control_parser = ControlParser(
             annotation_dict=annotation_dict,
@@ -125,7 +121,7 @@ class BelParser(BaseParser):
         self.trunc = TruncationParser().language
 
         #: PyBEL BEL Specification variant
-        self.gmod = GeneModificationParser().language # FIXME add identifier parser to this
+        self.gmod = GeneModificationParser().language  # FIXME add identifier parser to this
 
         # 2.6 Other Functions
 
@@ -492,12 +488,6 @@ class BelParser(BaseParser):
 
         super(BelParser, self).__init__(self.language, streamline=autostreamline)
 
-    def _set_handle_relation_policy(self, relation_policy):
-        if relation_policy is None or relation_policy == 'explode':
-            self._handle_relation = self._handle_relation_explode
-        elif relation_policy == 'concatenate':
-            self._handle_relation = self._handle_relation_concatenate
-
     @property
     def namespace_dict(self):
         """The dictionary of {namespace: {name: encoding}} stored in the internal identifier parser
@@ -677,7 +667,7 @@ class BelParser(BaseParser):
                 subject_modifier=object_modifier,
             )
 
-    def _handle_relation_concatenate(self, tokens):
+    def _handle_relation(self, tokens):
         """A policy in which all annotations are stored as sets, including single annotations
 
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
@@ -689,7 +679,14 @@ class BelParser(BaseParser):
         object_modifier = modifier_po_to_dict(tokens[OBJECT])
 
         annotations = {
-            annotation_name: annotation_entry if isinstance(annotation_entry, set) else {annotation_entry}
+            annotation_name: (
+                {
+                    ae: True
+                    for ae in annotation_entry
+                } if isinstance(annotation_entry, set) else {
+                    annotation_entry: True
+                }
+            )
             for annotation_name, annotation_entry in self.control_parser.annotations.items()
         }
 
@@ -701,51 +698,6 @@ class BelParser(BaseParser):
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
         )
-
-    def _build_attrs(self):
-        """Helper function for building cartesian product of edges based on current annotations"""
-        attrs = {}
-        list_attrs = {}
-
-        for annotation_name, annotation_entry in self.control_parser.annotations.copy().items():
-            if isinstance(annotation_entry, set):
-                list_attrs[annotation_name] = annotation_entry
-            else:
-                attrs[annotation_name] = annotation_entry
-
-        return attrs, list_attrs
-
-    def _handle_relation_explode(self, tokens):
-        """A policy in which each set of annotations causes a cartesian product
-
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
-        """
-        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
-        object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
-
-        subject_modifier = modifier_po_to_dict(tokens[SUBJECT])
-        object_modifier = modifier_po_to_dict(tokens[OBJECT])
-        attrs, list_attrs = self._build_attrs()
-
-        for single_annotation in cartesian_dictionary(list_attrs):
-            annotations = attrs.copy()
-            annotations.update(single_annotation)
-
-            self._add_qualified_edge(
-                subject_node_tuple,
-                object_node_tuple,
-                relation=tokens[RELATION],
-                annotations=annotations,
-                subject_modifier=subject_modifier,
-                object_modifier=object_modifier,
-            )
-
-    def handle_relation(self, tokens):
-        """Handles a BEL relation given the policy. Enables BEL parser to be hackable and other policies added.
-
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
-        """
-        self._handle_relation(tokens)
 
     def _handle_relation_harness(self, line, position, tokens):
         """Handles BEL relations based on the policy specified on instantiation. Note: this can't be changed after
@@ -761,7 +713,7 @@ class BelParser(BaseParser):
         if not self.control_parser.evidence:
             raise MissingSupportWarning(self.line_number, line, position)
 
-        self.handle_relation(tokens)
+        self._handle_relation(tokens)
 
         return tokens
 

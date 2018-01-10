@@ -605,7 +605,7 @@ class AnnotationManager(BaseManager):
         :param str value: The name of the annotation entry from the given url's document
         :rtype: AnnotationEntry
         """
-        if self.annotation_object_cache:
+        if self.annotation_object_cache and url in self.annotation_object_cache:
             annotation_entry = self.annotation_object_cache[url][value]
         else:
             annotation = self.session.query(Annotation).filter(Annotation.url == url).one()
@@ -1063,14 +1063,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.info('Skipped %d edges', c)
 
     @staticmethod
-    def _map_annotations_dict(graph, data):
+    def _iter_annotations_from_dict(graph, data):
         """Iterates over the key/value pairs in this edge data dictionary normalized to their source URLs
 
         :param BELGraph graph: A BEL graph
-        :param dict data: A PyBEL edge data dictionary
+        :param dict[str,dict[str,bool]] data: A PyBEL edge data dictionary
         :rtype: iter[tuple[str,str]]
         """
-        for key, value in data.items():
+        for key, values in data.items():
             if key in graph.annotation_url:
                 url = graph.annotation_url[key]
             elif key in graph.annotation_owl:
@@ -1082,7 +1082,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 continue
             else:
                 raise ValueError('Graph resources does not contain keyword: {}'.format(key))
-            yield url, value
+
+            for value in values:
+                yield url, value
 
     def _get_annotation_entries(self, graph, data):
         """Gets the annotation entries for this edge's data
@@ -1091,12 +1093,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param dict data: A PyBEL edge data dictionary
         :rtype: list[AnnotationEntry]
         """
-        if ANNOTATIONS not in data:
+        annotations = data.get(ANNOTATIONS)
+
+        if annotations is None:
             return
 
         return [
             self.get_annotation_entry(url, value)
-            for url, value in self._map_annotations_dict(graph, data[ANNOTATIONS])
+            for url, value in self._iter_annotations_from_dict(graph, annotations)
         ]
 
     def _add_qualified_edge(self, network, graph, u, v, k, data):
@@ -1125,7 +1129,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         annotations = self._get_annotation_entries(graph, data)
 
         bel = graph.edge_to_bel(u, v, data=data)
-        edge_hash = hash_edge(u, v, k, data)
+        edge_hash = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
@@ -1140,7 +1144,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
     def _add_unqualified_edge(self, network, graph, u, v, k, data):
         bel = graph.edge_to_bel(u, v, data=data)
-        edge_hash = hash_edge(u, v, k, data)
+        edge_hash = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],

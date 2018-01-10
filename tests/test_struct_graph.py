@@ -158,9 +158,11 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertIsNotNone(annotations)
         self.assertIsInstance(annotations, dict)
         self.assertIn('Species', annotations)
-        self.assertEqual('9606', annotations['Species'])
+        self.assertIn('9606', annotations['Species'])
+        self.assertTrue(annotations['Species']['9606'])
         self.assertIn('Confidence', annotations)
-        self.assertEqual('Very High', annotations['Confidence'])
+        self.assertIn('Very High', annotations['Confidence'])
+        self.assertTrue(annotations['Confidence']['Very High'])
 
     def test_get_unqualified_edge(self):
         test_source = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG'))

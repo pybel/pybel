@@ -403,7 +403,9 @@ class TestExtensionIo(TestGraphMixin, FleetingTemporaryCacheMixin):
                 CITATION_TYPE: 'PubMed'
             },
             EVIDENCE: 'Made up support, not even qualifying as evidence',
-            ANNOTATIONS: {'Wine': 'Cotturi'}
+            ANNOTATIONS: {
+                'Wine': {'Cotturi':True}
+            }
         }
         self.assertHasEdge(graph, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
         self.assertHasEdge(graph, (ABUNDANCE, "PIZZA", "TomatoTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)

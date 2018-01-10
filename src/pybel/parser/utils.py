@@ -16,30 +16,6 @@ log = logging.getLogger('pybel')
 re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-def cartesian_dictionary(d):
-    """takes a dictionary of sets and provides subdicts
-
-    :param d: a dictionary of sets
-    :type d: dict[any,set[any]]
-    :rtype: list
-
-    >>> cartesian_dictionary({'A': {'1', '2'}, 'B': {'x', 'y'}})
-    [{'A': '1', 'B': 'x'}, {'A': '1', 'B': 'y'}, {'A': '2', 'B': 'x'}, {'A': '2', 'B': 'y'}]
-    """
-    q = [
-        {
-            (key, value)
-            for value in values
-        }
-        for key, values in d.items()
-    ]
-
-    return [
-        dict(values)
-        for values in itt.product(*q)
-    ]
-
-
 def is_int(s):
     """Determines if an object can be cast to an int
 
