@@ -127,7 +127,7 @@ class ProteinModificationParser(BaseParser):
     @staticmethod
     def handle_pmod_legacy_ns(line, position, tokens):
         upgraded = language.pmod_legacy_labels[tokens[0]]
-        log.debug('legacy pmod() value %s upgraded to %s', line, upgraded)
+        log.log(5, 'legacy pmod() value %s upgraded to %s', line, upgraded)
         tokens['namespace'] = BEL_DEFAULT_NAMESPACE
         tokens['name'] = upgraded
         return tokens

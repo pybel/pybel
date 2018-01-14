@@ -781,7 +781,7 @@ def handle_molecular_activity_default(line, position, tokens):
     :param pyparsing.ParseResult tokens: The tokens from PyParsing
     """
     upgraded = language.activity_labels[tokens[0]]
-    log.debug('upgraded legacy activity to %s', upgraded)
+    log.log(5, 'upgraded legacy activity to %s', upgraded)
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
     tokens[NAME] = upgraded
     return tokens
@@ -800,7 +800,7 @@ def handle_activity_legacy(line, position, tokens):
         NAME: legacy_cls,
         NAMESPACE: BEL_DEFAULT_NAMESPACE
     }
-    log.debug('upgraded legacy activity to %s', legacy_cls)
+    log.log(5, 'upgraded legacy activity to %s', legacy_cls)
     return tokens
 
 
@@ -811,5 +811,5 @@ def handle_legacy_tloc(line, position, tokens):
     :param int position: The position in the line being parsed
     :param pyparsing.ParseResult tokens: The tokens from PyParsing
     """
-    log.debug('legacy translocation statement: %s', line)
+    log.log(5, 'legacy translocation statement: %s', line)
     return tokens

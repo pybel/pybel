@@ -32,13 +32,9 @@ from .utils import PYBEL_MYSQL_FMT_NOPASS, PYBEL_MYSQL_FMT_PASS
 
 log = logging.getLogger('pybel')
 
-formatter = logging.Formatter('%(name)s:%(levelname)s - %(message)s')
-logging.basicConfig(format=formatter)
-
 fh_path = os.path.join(PYBEL_LOG_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
 fh = logging.FileHandler(fh_path)
 fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
 log.addHandler(fh)
 
 
@@ -77,9 +73,11 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_unqualified_translocations, no_citation_clearing, debug):
     """Convert BEL"""
     if debug == 1:
-        log.setLevel(20)
+        log.setLevel(logging.INFO)
+        logging.basicConfig(level=logging.INFO, format='%(name)s:%(levelname)s - %(message)s')
     elif debug == 2:
-        log.setLevel(10)
+        log.setLevel(logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format='%(name)s:%(levelname)s - %(message)s')
 
     manager = Manager(connection=connection)
 
