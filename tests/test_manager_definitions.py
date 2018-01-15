@@ -65,6 +65,7 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_insert_annotation(self, mock_get):
         annotation = self.manager.ensure_annotation(CELL_LINE_URL)
+        self.assertIsNotNone(annotation)
         self.assertEqual(CELL_LINE_URL, annotation.url)
 
         entry = self.manager.get_annotation_entry(CELL_LINE_URL, '1321N1 cell')
@@ -74,7 +75,9 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
     @mock_parse_owl_rdf
     @mock_parse_owl_xml
     def test_insert_owl(self, m1, m2):
-        self.manager.ensure_namespace_owl(wine_iri)
+        namespace = self.manager.ensure_namespace_owl(wine_iri)
+        self.assertIsNotNone(namespace)
+        self.assertEqual(wine_iri, namespace.url)
 
         entry = self.manager.get_namespace_entry(wine_iri, 'ChateauMorgon')
         self.assertIsNotNone(entry)
