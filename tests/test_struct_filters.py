@@ -7,6 +7,10 @@ from pybel.struct.filters import (
     and_edge_predicates, concatenate_node_predicates, count_passed_edge_filter,
     count_passed_node_filter, filter_edges, get_nodes,
 )
+from pybel.struct.filters.edge_predicate_builders import (
+    build_annotation_dict_all_filter,
+    build_annotation_dict_any_filter,
+)
 from pybel.struct.filters.edge_predicates import keep_edge_permissive
 from pybel.struct.filters.node_predicates import keep_node_permissive
 
@@ -89,6 +93,41 @@ class TestNodeFilters(unittest.TestCase):
 
         self.assertEqual(3, count_passed_edge_filter(self.universe, [has_odd_source, has_even_target]))
 
+
+class TestEdgeFilters(unittest.TestCase):
+    def test_all_filter(self):
+        graph = BELGraph()
+        graph.add_edge(1, 2, annotations={
+            'A': {'1', '2', '3'}
+        })
+
+        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1'}})))
+        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1', '2'}})))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1', '2', '3'}})))
+
+    def test_all_filter_dict(self):
+        graph = BELGraph()
+        graph.add_edge(1, 2, annotations={
+            'A': {'1', '2', '3'}
+        })
+
+        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1': True}})))
+        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({
+            'A': {'1': True, '2': True}
+        })))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({
+            'A': {'1': True, '2': True, '3': True}
+        })))
+
+    def test_any_filter(self):
+        graph = BELGraph()
+        graph.add_edge(1, 2, annotations={
+            'A': {'1', '2', '3'}
+        })
+
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1'}})))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1', '2'}})))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1', '2', '3'}})))
 
 if __name__ == '__main__':
     unittest.main()
