@@ -1118,6 +1118,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         # FIXME
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))
 
+        self.assertLess(0, graph.number_of_edges())
+
         for u, v, d in BEL_THOROUGH_EDGES:
 
             if not check_citation_name and CITATION in d and CITATION_NAME in d[CITATION]:
@@ -1177,6 +1179,8 @@ class BelReconstitutionMixin(TestGraphMixin):
 
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
+
+        self.assertLess(0, graph.number_of_edges())
 
         assertHasEdge(self, AKT1, EGFR, graph, **{
             RELATION: INCREASES,

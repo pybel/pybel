@@ -44,11 +44,32 @@ NDEX_SOURCE_FORMAT = "ndex:sourceFormat"
 
 
 def _dict_to_cx(d, key_tag='k', value_tag='v'):
-    return [{key_tag: k, value_tag: v} for k, v in d.items()]
+    """
+    :param dict d:
+    :param str key_tag:
+    :param str value_tag:
+    :rtype: list[dict]
+    """
+    return [
+        {
+            key_tag: k,
+            value_tag: v
+        }
+        for k, v in d.items()
+    ]
 
 
 def _cx_to_dict(list_of_dicts, key_tag='k', value_tag='v'):
-    return {d[key_tag]: d[value_tag] for d in list_of_dicts}
+    """
+    :param list[dict] list_of_dicts:
+    :param str key_tag:
+    :param str value_tag:
+    :rtype: dict
+    """
+    return {
+        d[key_tag]: d[value_tag]
+        for d in list_of_dicts
+    }
 
 
 def calculate_canonical_cx_identifier(graph, node):
@@ -342,50 +363,68 @@ def to_cx_jsons(graph, **kwargs):
     return json.dumps(graph_cx_json_str, **kwargs)
 
 
+def _iterate_list_of_dicts(lod):
+    """
+    :type lod: list[dict[A,B]]
+    :rtype: iter[tuple[A,B]]
+    """
+    for l in lod:
+        for k, v in l.items():
+            yield k, v
+
+
 def from_cx(cx):
     """Rebuilds a BELGraph from CX JSON output from PyBEL
 
-    :param list cx: The CX JSON for this graph
+    :param list[dict] cx: The CX JSON for this graph
     :rtype: BELGraph
     """
     graph = BELGraph()
 
-    context_legend_entry = []
-    annotation_lists_entry = []
+    context_legend_aspect = []
+    annotation_lists_aspect = []
     context_entry = {}
-    network_attributes_entry = []
-    node_entries = []
-    node_attributes_entries = []
-    edge_annotations_entries = []
-    edges_entries = []
+    network_attributes_aspect = []
+    nodes_aspect = []
+    node_attributes_aspect = []
+    edge_annotations_aspect = []
+    edges_aspect = []
     meta_entries = defaultdict(list)
 
-    for element in cx:
-        for k, v in element.items():
-            if k == 'context_legend':
-                context_legend_entry.extend(v)
-            elif k == 'annotation_lists':
-                annotation_lists_entry.extend(v)
-            elif k == '@context':
-                context_entry.update(v[0])
-            elif k == 'networkAttributes':
-                network_attributes_entry.extend(v)
-            elif k == 'nodes':
-                node_entries.extend(v)
-            elif k == 'nodeAttributes':
-                node_attributes_entries.extend(v)
-            elif k == 'edges':
-                edges_entries.extend(v)
-            elif k == 'edgeAttributes':
-                edge_annotations_entries.extend(v)
-            else:
-                meta_entries[k].extend(v)
+    for key, value in _iterate_list_of_dicts(cx):
+        if key == 'context_legend':
+            context_legend_aspect.extend(value)
 
-    context_legend = _cx_to_dict(context_legend_entry)
+        elif key == 'annotation_lists':
+            annotation_lists_aspect.extend(value)
+
+        elif key == '@context':
+            context_entry.update(value[0])
+
+        elif key == 'networkAttributes':
+            network_attributes_aspect.extend(value)
+
+        elif key == 'nodes':
+            nodes_aspect.extend(value)
+
+        elif key == 'nodeAttributes':
+            node_attributes_aspect.extend(value)
+
+        elif key == 'edges':
+            log.warning('got edge: %s', value)  # FIXME REMOVE
+            edges_aspect.extend(value)
+
+        elif key == 'edgeAttributes':
+            edge_annotations_aspect.extend(value)
+
+        else:
+            meta_entries[key].extend(value)
+
+    context_legend = _cx_to_dict(context_legend_aspect)
 
     annotation_lists = defaultdict(set)
-    for d in annotation_lists_entry:
-        annotation_lists[d['k']].add(d['v'])
+    for data in annotation_lists_aspect:
+        annotation_lists[data['k']].add(data['v'])
 
     for keyword, entry in context_entry.items():
         if context_legend[keyword] == GRAPH_NAMESPACE_URL:
@@ -403,105 +442,108 @@ def from_cx(cx):
         elif context_legend[keyword] == GRAPH_ANNOTATION_LIST:
             graph.annotation_list[keyword] = annotation_lists[entry]
 
-    for d in network_attributes_entry:
-        if d['n'] == NDEX_SOURCE_FORMAT:
+    for data in network_attributes_aspect:
+        if data['n'] == NDEX_SOURCE_FORMAT:
             continue
-        graph.graph[GRAPH_METADATA][d['n']] = d['v']
+        graph.graph[GRAPH_METADATA][data['n']] = data['v']
 
     node_name = {}
-    for d in node_entries:
-        node_name[d['@id']] = d['n']
+    for data in nodes_aspect:
+        node_name[data['@id']] = data['n']
 
     node_data = defaultdict(dict)
-    for d in node_attributes_entries:
-        node_data[d['po']][d['n']] = d['v']
+    for data in node_attributes_aspect:
+        node_data[data['po']][data['n']] = data['v']
 
     node_data_pp = defaultdict(dict)
     node_data_fusion = defaultdict(dict)
     node_data_variants = defaultdict(lambda: defaultdict(dict))
 
-    for nid, d in node_data.items():
-        for k, v in d.items():
-            if k.startswith(FUSION):
-                node_data_fusion[nid][k] = v
-            elif k.startswith(VARIANTS):
-                _, i, vls = k.split('_', 2)
-                node_data_variants[nid][i][vls] = v
-            elif k in {PRODUCTS, REACTANTS, MEMBERS}:
-                node_data_pp[nid][k] = json.loads(v)
+    for nid, data in node_data.items():
+        for key, value in data.items():
+            if key.startswith(FUSION):
+                node_data_fusion[nid][key] = value
+            elif key.startswith(VARIANTS):
+                _, i, vls = key.split('_', 2)
+                node_data_variants[nid][i][vls] = value
+            elif key in {PRODUCTS, REACTANTS, MEMBERS}:
+                node_data_pp[nid][key] = json.loads(value)
             else:
-                node_data_pp[nid][k] = v
+                node_data_pp[nid][key] = value
 
-    for nid, d in node_data_fusion.items():
-        node_data_pp[nid][FUSION] = expand_dict(d)
+    for nid, data in node_data_fusion.items():
+        node_data_pp[nid][FUSION] = expand_dict(data)
 
-    for nid, d in node_data_variants.items():
-        node_data_pp[nid][VARIANTS] = [expand_dict(d[i]) for i in sorted(d)]
+    for nid, data in node_data_variants.items():
+        node_data_pp[nid][VARIANTS] = [expand_dict(data[i]) for i in sorted(data)]
 
-    for nid, d in node_data_pp.items():
-        if CX_NODE_NAME in d:
-            d[NAME] = d.pop(CX_NODE_NAME)
-        graph.add_node(nid, attr_dict=d)
+    for nid, data in node_data_pp.items():
+        if CX_NODE_NAME in data:
+            data[NAME] = data.pop(CX_NODE_NAME)
+        graph.add_node(nid, attr_dict=data)
 
     edge_relation = {}
     edge_source = {}
     edge_target = {}
-    for d in edges_entries:
-        eid = d['@id']
-        edge_relation[eid] = d['i']
-        edge_source[eid] = d['s']
-        edge_target[eid] = d['t']
+    for data in edges_aspect:
+        eid = data['@id']
+        edge_relation[eid] = data['i']
+        edge_source[eid] = data['s']
+        edge_target[eid] = data['t']
 
     edge_data = defaultdict(dict)
-    for d in edge_annotations_entries:
-        edge_data[d['po']][d['n']] = d['v']
+    for data in edge_annotations_aspect:
+        edge_data[data['po']][data['n']] = data['v']
 
     edge_citation = defaultdict(dict)
     edge_subject = defaultdict(dict)
     edge_object = defaultdict(dict)
-    edge_annotations = defaultdict(dict)
+    edge_annotations = defaultdict(lambda: defaultdict(dict))
 
     edge_data_pp = defaultdict(dict)
 
-    for eid, d in edge_data.items():
-        for k, v in d.items():
-            if k.startswith(CITATION):
-                _, vl = k.split('_', 1)
-                edge_citation[eid][vl] = v
-            elif k.startswith(SUBJECT):
-                _, vl = k.split('_', 1)
-                edge_subject[eid][vl] = v
-            elif k.startswith(OBJECT):
-                _, vl = k.split('_', 1)
-                edge_object[eid][vl] = v
-            elif k == EVIDENCE:
-                edge_data_pp[eid][EVIDENCE] = v
+    for eid, data in edge_data.items():
+        for key, value in data.items():
+            if key.startswith(CITATION):
+                _, vl = key.split('_', 1)
+                edge_citation[eid][vl] = value
+            elif key.startswith(SUBJECT):
+                _, vl = key.split('_', 1)
+                edge_subject[eid][vl] = value
+            elif key.startswith(OBJECT):
+                _, vl = key.split('_', 1)
+                edge_object[eid][vl] = value
+            elif key == EVIDENCE:
+                edge_data_pp[eid][EVIDENCE] = value
             else:
-                edge_annotations[eid][k] = v
+                edge_annotations[eid][key] = value
 
-    for eid, d in edge_citation.items():
-        edge_data_pp[eid][CITATION] = d
+    for eid, data in edge_citation.items():
+        edge_data_pp[eid][CITATION] = data
 
-    for eid, d in edge_subject.items():
-        edge_data_pp[eid][SUBJECT] = expand_dict(d)
+    for eid, data in edge_subject.items():
+        edge_data_pp[eid][SUBJECT] = expand_dict(data)
 
-    for eid, d in edge_object.items():
-        edge_data_pp[eid][OBJECT] = expand_dict(d)
+    for eid, data in edge_object.items():
+        edge_data_pp[eid][OBJECT] = expand_dict(data)
 
     for eid in edge_relation:
-        if eid not in edge_annotations:
-            continue
-        edge_data_pp[eid][ANNOTATIONS] = {
-            key: {v: True for v in values}
-            for key, values in edge_annotations[eid].items()
-        }
+        if eid in edge_annotations: # FIXME stick this in edge_data.items() iteration
+            edge_data_pp[eid][ANNOTATIONS] = {
+                key: {v: True for v in values}
+                for key, values in edge_annotations[eid].items()
+            }
 
-        if eid in edge_citation:  # FIXME replace with graph.add_qualified_edge
-            graph.add_edge(
+        if eid in edge_citation:
+            graph.add_qualified_edge(
                 edge_source[eid],
                 edge_target[eid],
-                attr_dict=edge_data_pp[eid],
-                **{RELATION: edge_relation[eid]}
+                relation=edge_relation[eid],
+                citation=edge_data_pp[eid][CITATION],
+                evidence=edge_data_pp[eid][EVIDENCE],
+                subject_modifier=edge_data_pp[eid].get(SUBJECT),
+                object_modifier=edge_data_pp[eid].get(OBJECT),
+                annotations=edge_data_pp[eid].get(ANNOTATIONS)
             )
         elif edge_relation[eid] in unqualified_edges:
             graph.add_unqualified_edge(
