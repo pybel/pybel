@@ -214,6 +214,8 @@ class TemporaryCacheClsMixin(unittest.TestCase):
         if not test_connection:
             os.close(cls.fd)
             os.remove(cls.path)
+        else:
+            cls.manager.drop_all()
 
 
 class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
