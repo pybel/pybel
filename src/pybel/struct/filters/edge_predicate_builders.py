@@ -35,18 +35,17 @@ def _annotation_dict_all_filter(data, query):
     return True
 
 
-def build_annotation_dict_all_filter(annotations, partial_match=True):
+def build_annotation_dict_all_filter(annotations):
     """Builds a filter that keeps edges whose data dictionaries's annotations entry are super-dictionaries to the given
     dictionary
 
     :param dict annotations: The annotation query dict to match
-    :param bool partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
     :rtype: types.FunctionType
     """
 
     @edge_predicate
     def f(data):
-        return _annotation_dict_all_filter(data, query=annotations, partial_match=partial_match)
+        return _annotation_dict_all_filter(data, query=annotations)
 
     return f
 
