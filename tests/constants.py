@@ -14,7 +14,6 @@ from pybel.dsl import *
 from pybel.manager import Manager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
-from pybel.tokens import node_to_tuple
 from pybel.utils import subdict_matches
 
 log = logging.getLogger(__name__)
@@ -1089,6 +1088,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         :param bool check_metadata: Check the graph's document section is correct
         :param bool check_warnings: Check the graph produced the expected warnings
         :param bool check_provenance: Check the graph's definition section is correct
+        :param bool check_citation_name: Check that the names in the citations get reconstituted. This isn't strictly
+                                         necessary since this data can be looked up
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
