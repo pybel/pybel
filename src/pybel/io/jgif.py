@@ -45,6 +45,11 @@ EXPERIMENT_CONTEXT = 'experiment_context'
 
 
 def get_citation(evidence):
+    """
+
+    :param dict[str,dict[str,str]] evidence:
+    :rtype: dict[str,dict[str,str]]
+    """
     citation = {
         CITATION_TYPE: evidence['citation']['type'].strip(),
         CITATION_REFERENCE: evidence['citation']['id'].strip()
@@ -175,7 +180,6 @@ def from_jgif(graph_jgif_dict):
     """Builds a BEL graph from a JGIF JSON object.
     
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
-    :return: A BEL graph
     :rtype: BELGraph
     """
     graph = BELGraph()
@@ -196,29 +200,36 @@ def from_jgif(graph_jgif_dict):
     parser.bel_term.addParseAction(parser.handle_term)
 
     for node in root['nodes']:
-        if 'label' not in node:
+        node_label = node.get('label')
+
+        if node_label is None:
             log.warning('node missing label: %s', node)
-        node_label = node['label']
+            continue
+
         parser.bel_term.parseString(node_label)
 
     for i, edge in enumerate(root['edges']):
+        relation = edge['relation']
 
-        if edge['relation'] in {'actsIn'}:
+        if relation in {'actsIn'}:
             continue  # don't need legacy BEL format
 
-        if edge['relation'] in UNQUALIFIED_EDGES:
-            pass
+        if relation in UNQUALIFIED_EDGES:
+            pass # FIXME?
 
-        if not edge['relation'] in UNQUALIFIED_EDGES and (
-                        'evidences' not in edge['metadata'] or not edge['metadata']['evidences']):
+        evidences = edge['metadata'].get('evidences')
+
+        if (relation not in UNQUALIFIED_EDGES) and not evidences:
             log.debug('No evidence for edge %s', edge['label'])
             continue
 
-        for evidence in edge['metadata']['evidences']:
-            if 'citation' not in evidence or not evidence['citation']:
+        for evidence in evidences:
+            citation = evidence.get('citation')
+
+            if not citation:
                 continue
 
-            if 'type' not in evidence['citation'] and 'id' not in evidence['citation']:
+            if 'type' not in citation and 'id' not in citation:
                 continue
 
             summary_text = evidence['summary_text'].strip()
@@ -234,7 +245,7 @@ def from_jgif(graph_jgif_dict):
             bel_statement = edge['label']
 
             try:
-                parser.parseString(bel_statement, i)
+                parser.parseString(bel_statement, line_number=i)
             except Exception as e:
                 log.warning('Error %s for %s', e, bel_statement)
 
