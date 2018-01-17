@@ -11,7 +11,7 @@ from pybel.parser.parse_metadata import extend_version
 from pybel.resources.document import split_file_to_annotations_and_definitions
 from tests.constants import (
     FleetingTemporaryCacheMixin, HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD,
-    MESH_DISEASES_URL, help_check_hgnc, test_an_1, test_bel_simple, test_ns_1, test_ns_nocache,
+    MESH_DISEASES_URL, help_check_hgnc, test_an_1, test_bel_simple, test_ns_1, test_ns_nocache_path,
 )
 from tests.mocks import mock_bel_resources
 
@@ -34,7 +34,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
     def test_namespace_nocache(self):
         """Checks namespace is loaded into parser but not cached"""
-        s = 'DEFINE NAMESPACE TESTNS3 AS URL "{}"'.format('file:///' + test_ns_nocache)
+        s = 'DEFINE NAMESPACE TESTNS3 AS URL "{}"'.format(test_ns_nocache_path)
         self.parser.parseString(s)
         self.assertIn('TESTNS3', self.parser.namespace_dict)
         self.assertEqual(0, len(self.manager.list_namespaces()))

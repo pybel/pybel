@@ -6,7 +6,7 @@ from pathlib import Path
 from pybel.manager import Manager, models
 from tests.constants import (
     CELL_LINE_URL, FleetingTemporaryCacheMixin, HGNC_URL, belns_dir_path, test_eq_1, test_eq_2,
-    test_ns_nocache, wine_iri,
+    test_ns_nocache_path, wine_iri,
 )
 from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_xml
 
@@ -52,12 +52,9 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
         alternate_manager.ensure_namespace(HGNC_URL)
         self._help_check_hgnc(alternate_manager)
 
-    @mock_bel_resources
-    def test_insert_namespace_nocache(self, mock):
+    def test_insert_namespace_nocache(self):
         """Test that this namespace isn't cached"""
         self.assertEqual(0, len(self.manager.list_namespaces()))
-
-        test_ns_nocache_path = 'file:///' + test_ns_nocache
         self.manager.ensure_namespace(test_ns_nocache_path)
 
         self.assertEqual(0, len(self.manager.list_namespaces()))
