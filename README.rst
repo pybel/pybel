@@ -8,13 +8,13 @@ It also facilitates data interchange between common formats and databases such a
 `Neo4J <https://neo4j.com>`_.
 
 Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
-suite of functions and workflows for analyzing the resulting biological networks.
+suite of functions and pipelines for analyzing the resulting biological networks.
 
 Citation
 --------
-If you use PyBEL in your work, we ask that you please cite:
+If you use PyBEL in your work, please cite:
 
-Hoyt et al., 2017. PyBEL: a computational framework for Biological Expression Language. Bioinformatics, btx660, https://doi.org/10.1093/bioinformatics/btx660
+.. [1] Hoyt et al., 2017. PyBEL: a computational framework for Biological Expression Language. Bioinformatics, btx660, https://doi.org/10.1093/bioinformatics/btx660
 
 Getting Started
 ---------------
