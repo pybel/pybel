@@ -13,8 +13,8 @@ python:
     - 2.7
 
 env:
-  - TOXENV=py DB=mysql    PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
-  - TOXENV=py DB=postgres PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
+  - TOXENV=py DB=mysql    PYBEL_TEST_CONNECTOR=pymysql  PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
+  - TOXENV=py DB=postgres PYBEL_TEST_CONNECTOR=psycopg2 PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
   - TOXENV=py DB=sqlite
 
 matrix:
@@ -36,8 +36,6 @@ before_script:
 
 before_install:
     - pip install codecov
-    - sh -c "if [ '$DB' = 'postgres' ]; then pip install psycopg2; fi"
-    - sh -c "if [ '$DB' = 'mysql' ]; then pip install pymysql; fi"
 
 install:
     - pip install tox
