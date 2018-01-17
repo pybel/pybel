@@ -5,6 +5,7 @@ import os
 import tempfile
 import unittest
 from json import dumps
+from pathlib import Path
 
 from requests.compat import urlparse
 
@@ -14,7 +15,6 @@ from pybel.dsl import *
 from pybel.manager import Manager
 from pybel.parser.parse_bel import BelParser
 from pybel.parser.parse_exceptions import *
-from pybel.tokens import node_to_tuple
 from pybel.utils import subdict_matches
 
 log = logging.getLogger(__name__)
@@ -44,6 +44,8 @@ test_ns_1 = os.path.join(belns_dir_path, 'test_ns_1.belns')
 test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
 test_ns_nocache = os.path.join(belns_dir_path, 'test_nocache.belns')
 test_ns_empty = os.path.join(belns_dir_path, 'test_ns_empty.belns')
+
+test_ns_nocache_path = Path(test_ns_nocache).as_uri()
 
 test_eq_1 = os.path.join(beleq_dir_path, 'disease-ontology.beleq')
 test_eq_2 = os.path.join(beleq_dir_path, 'mesh-diseases.beleq')
@@ -1089,6 +1091,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         :param bool check_metadata: Check the graph's document section is correct
         :param bool check_warnings: Check the graph produced the expected warnings
         :param bool check_provenance: Check the graph's definition section is correct
+        :param bool check_citation_name: Check that the names in the citations get reconstituted. This isn't strictly
+                                         necessary since this data can be looked up
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)

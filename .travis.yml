@@ -3,20 +3,19 @@ cache: pip
 
 services:
   - mysql
+  - postgres
+  - sqlite
 
 language: python
 
 python:
     - 3.6
-    - 3.5
-#    - 3.4
     - 2.7
 
 env:
-  global:
-    - PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/pybel?charset=utf8'
-  matrix:
-    - TOXENV=py
+  - TOXENV=py DB=mysql    PYBEL_TEST_CONNECTOR=pymysql  PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
+  - TOXENV=py DB=postgres PYBEL_TEST_CONNECTOR=psycopg2 PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
+  - TOXENV=py DB=sqlite
 
 matrix:
     include:
@@ -26,14 +25,17 @@ matrix:
           env: TOXENV=manifest
         - python: 3.6
           env: TOXENV=rst-lint
-#    allow_failures:
-#        - python: 3.4
+
+before_script:
+  - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'DROP DATABASE IF EXISTS tests;' -U postgres; fi"
+  - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'DROP DATABASE IF EXISTS tests_tmp;' -U postgres; fi"
+  - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'CREATE DATABASE tests;' -U postgres; fi"
+  - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'CREATE DATABASE tests_tmp;' -U postgres; fi"
+  - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE test CHARACTER SET utf8 COLLATE utf8_general_ci;'; fi"
+  - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e \"GRANT ALL PRIVILEGES ON test.* to 'travis'@'%' WITH GRANT OPTION;\"; fi"
 
 before_install:
     - pip install codecov
-    - pip install pymysql
-    - mysql -e 'CREATE DATABASE pybel CHARACTER SET utf8 COLLATE utf8_general_ci;'
-    - mysql -e "GRANT ALL PRIVILEGES ON pybel.* to 'travis'@'%' WITH GRANT OPTION;"
 
 install:
     - pip install tox

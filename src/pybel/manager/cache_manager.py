@@ -1024,7 +1024,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
-        for u, v, k, data in graph.edges_iter(data=True, keys=True):
+        for u, v, data in graph.edges_iter(data=True):
 
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
@@ -1039,7 +1039,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             if data[RELATION] in UNQUALIFIED_EDGES:
                 try:
-                    self._add_unqualified_edge(network, graph, u, v, k, data)
+                    self._add_unqualified_edge(network, graph, u, v, data)
                 except:
                     self.session.rollback()
                     raise EdgeAddError(data)
@@ -1052,7 +1052,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             else:
                 try:
-                    self._add_qualified_edge(network, graph, u, v, k, data)
+                    self._add_qualified_edge(network, graph, u, v, data)
                 except Exception as e:
                     self.session.rollback()
                     # raise EdgeAddError(data)
@@ -1103,7 +1103,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             for url, value in self._iter_annotations_from_dict(graph, annotations)
         ]
 
-    def _add_qualified_edge(self, network, graph, u, v, k, data):
+    def _add_qualified_edge(self, network, graph, u, v, data):
         citation_dict = data[CITATION]
 
         citation = self.get_or_create_citation(
@@ -1142,7 +1142,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         )
         network.edges.append(edge)
 
-    def _add_unqualified_edge(self, network, graph, u, v, k, data):
+    def _add_unqualified_edge(self, network, graph, u, v, data):
         bel = graph.edge_to_bel(u, v, data=data)
         edge_hash = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
@@ -1586,7 +1586,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 participant_name = location[NAME]
                 location_property_dict['effect'] = self.get_namespace_entry(namespace_url, participant_name)
                 if location_property_dict['effect'] is None:
-                    raise IndexError
+                    raise IndexError('did not get {}: {}'.format(namespace_url, participant_name))
 
                 property_list.append(location_property_dict)
 
