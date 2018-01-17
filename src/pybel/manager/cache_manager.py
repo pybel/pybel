@@ -1586,7 +1586,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 participant_name = location[NAME]
                 location_property_dict['effect'] = self.get_namespace_entry(namespace_url, participant_name)
                 if location_property_dict['effect'] is None:
-                    raise IndexError
+                    raise IndexError('did not get {}: {}'.format(namespace_url, participant_name))
 
                 property_list.append(location_property_dict)
 
