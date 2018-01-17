@@ -16,7 +16,7 @@ Installation is as easy as getting the code from `PyPI <https://pypi.python.org/
 
 Citation
 --------
-If you use PyBEL in your work, please cite:
+If you use PyBEL in your work, please cite [1]_:
 
 .. [1] Hoyt et al., 2017. PyBEL: a computational framework for Biological Expression Language. Bioinformatics, btx660, https://doi.org/10.1093/bioinformatics/btx660
 
