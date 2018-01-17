@@ -12,16 +12,13 @@ python:
     - 3.6
     - 2.7
 
+env:
+  - TOXENV=py DB=mysql    PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
+  - TOXENV=py DB=postgres PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
+  - TOXENV=py DB=sqlite
+
 matrix:
     include:
-        - python: 3.6
-          env: TOXENV=py DB=mysql PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
-        - python: 3.6
-          env: TOXENV=py DB=postgres PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
-        - python: 2.7
-          env: TOXENV=py DB=mysql PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
-        - python: 2.7
-          env: TOXENV=py DB=postgres PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
         - python: 3.6
           env: TOXENV=docs
         - python: 3.6
