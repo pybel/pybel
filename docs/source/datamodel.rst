@@ -339,7 +339,9 @@ Below is the "skeleton" for the edge data model in PyBEL:
             CITATION_AUTHORS: 'Jon Snow|John Doe',
         },
         ANNOTATIONS: {
-            'Disease': 'Colorectal Cancer',
+            'Disease': {
+                'Colorectal Cancer': True,
+             }
             # ... additional annotations as key:value pairs
         }
     }
@@ -347,6 +349,8 @@ Below is the "skeleton" for the edge data model in PyBEL:
 Each edge must contain the ``RELATION``, ``EVIDENCE``, ``CITATION``, and ``ANNOTATIONS`` entries. The ``CITATION``
 must minimally contain ``CITATION_TYPE`` and ``CITATION_REFERENCE`` since these can be used to look up additional
 metadata.
+
+.. note:: Since version 0.10.2, annotations now always appear as dictionaries, even if only one value is present.
 
 Activities
 ~~~~~~~~~~
