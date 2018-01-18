@@ -6,8 +6,8 @@ from uuid import uuid4
 from pybel import BELGraph
 from pybel.canonicalize import canonicalize_edge, fusion_range_to_bel, variant_to_bel
 from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, GENE, INCREASES, KIND, MODIFIER,
-    PATHOLOGY, PROTEIN, RNA,
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, INCREASES, KIND,
+    MODIFIER, PATHOLOGY, PROTEIN, REACTION, RNA,
 )
 from pybel.dsl import *
 from pybel.dsl.edges import extracellular, intracellular
@@ -131,6 +131,24 @@ class TestCanonicalize(unittest.TestCase):
         node = complex_abundance(members=[protein(namespace='HGNC', name='FOS'), protein(namespace='HGNC', name='JUN')])
         t = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
         self.assertEqual('complex(p(HGNC:FOS), p(HGNC:JUN))', str(node))
+        self.assertEqual(t, node.as_tuple())
+
+    def test_composite_abundance(self):
+        node = composite_abundance(members=[
+            protein(namespace='HGNC', name='FOS'),
+            protein(namespace='HGNC', name='JUN')
+        ])
+        t = COMPOSITE, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
+        self.assertEqual('composite(p(HGNC:FOS), p(HGNC:JUN))', str(node))
+        self.assertEqual(t, node.as_tuple())
+
+    def test_reaction(self):
+        node = reaction(
+            reactants=[abundance(namespace='CHEBI', name='A')],
+            products=[abundance(namespace='CHEBI', name='B')]
+        )
+        t = REACTION, ((ABUNDANCE, 'CHEBI', 'A'),), ((ABUNDANCE, 'CHEBI', 'B'),)
+        self.assertEqual('rxn(reactants(a(CHEBI:A)), products(a(CHEBI:B)))', str(node))
         self.assertEqual(t, node.as_tuple())
 
 

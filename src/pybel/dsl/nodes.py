@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import abc
+
+import six
+
 from .exc import PyBELDSLException
 from .utils import entity
 from ..constants import *
@@ -29,7 +33,26 @@ __all__ = [
 ]
 
 
-class BaseAbundance(dict):
+@six.add_metaclass(abc.ABCMeta)
+class BaseEntity(dict):
+    """This class represents all BEL nodes. It can be converted to a tuple and hashed."""
+
+    def __init__(self, func):
+        """
+        :param str func: The PyBEL function
+        """
+        super(BaseEntity, self).__init__(**{FUNCTION: func})
+
+    @abc.abstractmethod
+    def as_tuple(self):
+        pass
+
+    def __hash__(self):
+        """Use the tuple serialization of this node as the hash"""
+        return hash(self.as_tuple())
+
+
+class BaseAbundance(BaseEntity):
     """The superclass for building node data dictionaries"""
 
     def __init__(self, func, namespace, name=None, identifier=None):
@@ -42,7 +65,7 @@ class BaseAbundance(dict):
         if name is None and identifier is None:
             raise PyBELDSLException('Either name or identifier must be specified')
 
-        super(BaseAbundance, self).__init__(**{FUNCTION: func})
+        super(BaseAbundance, self).__init__(func=func)
         self.update(entity(namespace=namespace, name=name, identifier=identifier))
 
     def __str__(self):
@@ -350,7 +373,26 @@ class protein(CentralDogma):
         super(protein, self).__init__(PROTEIN, name=name, namespace=namespace, identifier=identifier, variants=variants)
 
 
-class reaction(dict):
+def _entity_list_as_tuple(tokens):
+    """A helper function for converting reaction list
+
+    :type tokens: iter[BaseEntity]
+    :rtype: tuple
+    """
+    return tuple(sorted(
+        member.as_tuple()
+        for member in tokens
+    ))
+
+
+def _entity_list_as_bel(tokens):  # TODO sorted?
+    return ', '.join(
+        str(reactant)
+        for reactant in tokens
+    )
+
+
+class reaction(BaseEntity):
     """Builds a reaction node data dictionary"""
 
     def __init__(self, reactants, products):
@@ -362,20 +404,23 @@ class reaction(dict):
 
         >>> reaction([protein(namespace='HGNC', name='KNG1')], [abundance(namespace='CHEBI', name='bradykinin')])
         """
-        super(reaction, self).__init__({
-            FUNCTION: REACTION,
+        super(reaction, self).__init__(func=REACTION)
+        self.update({
             REACTANTS: reactants,
             PRODUCTS: products
         })
 
+    def as_tuple(self):
+        return self[FUNCTION], _entity_list_as_tuple(self[REACTANTS]), _entity_list_as_tuple(self[PRODUCTS])
+
     def __str__(self):
-        'rxn(reactants({}), products({}))'.format(
-            ', '.join(str(reactant) for reactant in self[REACTANTS]),
-            ', '.join(str(product) for product in self[PRODUCTS])
+        return 'rxn(reactants({}), products({}))'.format(
+            _entity_list_as_bel(self[REACTANTS]),
+            _entity_list_as_bel(self[PRODUCTS])
         )
 
 
-class ListAbundance(dict):
+class ListAbundance(BaseEntity):
     """The superclass for building list abundance (complex, abundance) node data dictionaries"""
 
     def __init__(self, func, members):
@@ -383,23 +428,19 @@ class ListAbundance(dict):
         :param func:
         :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
         """
-        super(ListAbundance, self).__init__({
-            FUNCTION: func,
+        super(ListAbundance, self).__init__(func=func)
+        self.update({
             MEMBERS: members
         })
 
     def __str__(self):
         return '{}({})'.format(
             rev_abundance_labels[self[FUNCTION]],
-            ', '.join(map(str, self[MEMBERS]))  # TODO sorted?
+            _entity_list_as_bel(self[MEMBERS])
         )
 
     def as_tuple(self):
-        return (self[FUNCTION],) + tuple(sorted(
-            member.as_tuple()
-            for member in self[MEMBERS]
-        ))
-
+        return (self[FUNCTION],) + _entity_list_as_tuple(self[MEMBERS])
 
 class complex_abundance(ListAbundance):
     """Builds a complex abundance node data dictionary with the optional ability to specificy a name"""
@@ -484,7 +525,7 @@ class fusion_range(FusionRangeBase):
         )
 
 
-class FusionBase(dict):
+class FusionBase(BaseEntity):
     """The superclass for building fusion node data dictionaries"""
 
     def __init__(self, func, partner_5p, partner_3p, range_5p=None, range_3p=None):
@@ -495,7 +536,8 @@ class FusionBase(dict):
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
         """
-        super(FusionBase, self).__init__({
+        super(FusionBase, self).__init__(func=func)
+        self.update({
             FUNCTION: func,
             FUSION: {
                 PARTNER_5P: partner_5p,
@@ -518,7 +560,6 @@ class FusionBase(dict):
 
     def as_tuple(self):
         """
-
         :rtype: tuple
         """
         fusion = self[FUSION]
