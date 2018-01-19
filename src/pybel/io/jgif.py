@@ -15,8 +15,10 @@ from collections import defaultdict
 
 from ..canonicalize import node_to_bel
 from ..constants import *
+from ..parser.parse_exceptions import NakedNameWarning
 from ..parser import BelParser
 from ..struct import BELGraph
+from pyparsing import ParseException
 
 __all__ = [
     'from_cbn_jgif',
@@ -86,9 +88,14 @@ def map_cbn(d):
             new_context = {}
 
             for key, value in evidence[EXPERIMENT_CONTEXT].items():
+                if not value:
+                    log.debug('key %s without value', key)
+                    continue
+
                 value = value.strip()
 
                 if not value:
+                    log.debug('key %s without value', key)
                     continue
 
                 key = key.strip().lower()
@@ -126,7 +133,6 @@ def from_cbn_jgif(graph_jgif_dict):
     builds a BEL graph using :func:`pybel.from_jgif`.
 
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
-    :return: A BEL graph
     :rtype: BELGraph
 
     Example:
@@ -206,48 +212,63 @@ def from_jgif(graph_jgif_dict):
             log.warning('node missing label: %s', node)
             continue
 
-        parser.bel_term.parseString(node_label)
+        try:
+            parser.bel_term.parseString(node_label)
+        except NakedNameWarning as e:
+            log.info('Naked name: %s', e)
+        except ParseException:
+            log.info('Parse exception for %s', node_label)
 
     for i, edge in enumerate(root['edges']):
-        relation = edge['relation']
+        relation = edge.get('relation')
+        if relation is None:
+            log.warning('no relation for edge: %s', edge)
 
-        if relation in {'actsIn'}:
+        if relation in {'actsIn', 'translocates'}:
             continue  # don't need legacy BEL format
+
+        edge_metadata = edge.get('metadata')
+        if edge_metadata is None:
+            log.warning('no metadata for edge: %s', edge)
+            continue
+
+        bel_statement = edge.get('label')
+        if bel_statement is None:
+            log.debug('No BEL statement for edge %s', edge)
+
+        evidences = edge_metadata.get('evidences')
 
         if relation in UNQUALIFIED_EDGES:
             pass # FIXME?
 
-        evidences = edge['metadata'].get('evidences')
-
-        if (relation not in UNQUALIFIED_EDGES) and not evidences:
-            log.debug('No evidence for edge %s', edge['label'])
-            continue
-
-        for evidence in evidences:
-            citation = evidence.get('citation')
-
-            if not citation:
+        else:
+            if not evidences: # is none or is empty list
+                log.debug('No evidence for edge %s', edge)
                 continue
 
-            if 'type' not in citation and 'id' not in citation:
-                continue
+            for evidence in evidences:
+                citation = evidence.get('citation')
 
-            summary_text = evidence['summary_text'].strip()
+                if not citation:
+                    continue
 
-            if not summary_text or summary_text == placeholder_evidence:
-                continue
+                if 'type' not in citation and 'id' not in citation:
+                    continue
 
-            parser.control_parser.clear()
-            parser.control_parser.citation = get_citation(evidence)
-            parser.control_parser.evidence = summary_text
-            parser.control_parser.annotations.update(evidence[EXPERIMENT_CONTEXT])
+                summary_text = evidence['summary_text'].strip()
 
-            bel_statement = edge['label']
+                if not summary_text or summary_text == placeholder_evidence:
+                    continue
 
-            try:
-                parser.parseString(bel_statement, line_number=i)
-            except Exception as e:
-                log.warning('Error %s for %s', e, bel_statement)
+                parser.control_parser.clear()
+                parser.control_parser.citation = get_citation(evidence)
+                parser.control_parser.evidence = summary_text
+                parser.control_parser.annotations.update(evidence[EXPERIMENT_CONTEXT])
+
+                try:
+                    parser.parseString(bel_statement, line_number=i)
+                except Exception as e:
+                    log.warning('JGIF relation parse error: %s for %s', e, bel_statement)
 
     return graph
 
