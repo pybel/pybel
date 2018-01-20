@@ -485,10 +485,9 @@ class missing_fusion_range(FusionRangeBase):
 
     def as_tuple(self):
         """
-
         :rtype: tuple
         """
-        return '?',
+        return self[FUSION_MISSING],
 
 
 class fusion_range(FusionRangeBase):
