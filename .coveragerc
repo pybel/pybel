@@ -11,6 +11,7 @@ omit =
     src/pybel/resources/defaults.py
     tests/*
     docs/*
+    scripts/*
 
 [paths]
 source =
