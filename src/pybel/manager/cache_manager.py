@@ -191,13 +191,22 @@ class NamespaceManager(BaseManager):
         """
         return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
+    def get_namespace_by_keyword_version(self, keyword, version):
+        """Gets a namespace with a given keyword and version
+
+        :param str keyword: The keyword to search
+        :param str version: The version to search
+        :rtype: Optional[Namespace]
+        """
+        filt = and_(Namespace.keyword == keyword, Namespace.version == version)
+        return self.session.query(Namespace).filter(filt).one_or_none()
+
     def ensure_default_namespace(self):
         """Creates or gets the BEL default namespace
 
         :rtype: Namespace
         """
-        filt = and_(Namespace.keyword == BEL_DEFAULT_NAMESPACE, Namespace.version == BEL_DEFAULT_NAMESPACE_VERSION)
-        namespace = self.session.query(Namespace).filter(filt).one_or_none()
+        namespace = self.get_namespace_by_keyword_version(BEL_DEFAULT_NAMESPACE, BEL_DEFAULT_NAMESPACE_VERSION)
 
         if namespace is None:
             namespace = Namespace(
@@ -303,6 +312,16 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
+    def get_namespace_by_keyword_pattern(self, keyword, pattern):
+        """Gets a namespace with a given keyword and pattern
+
+        :param str keyword: The keyword to search
+        :param str pattern: The pattern to search
+        :rtype: Optional[Namespace]
+        """
+        filt = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
+        return self.session.query(Namespace).filter(filt).one_or_none()
+
     def ensure_regex_namespace(self, keyword, pattern):
         """Gets or creates a regular expression namespace
 
@@ -313,9 +332,7 @@ class NamespaceManager(BaseManager):
         if pattern is None:
             raise ValueError('cannot have null pattern')
 
-        filt = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
-
-        namespace = self.session.query(Namespace).filter(filt).one_or_none()
+        namespace = self.get_namespace_by_keyword_pattern(keyword, pattern)
 
         if namespace is None:
             log.info('creating regex namespace: %s:%s', keyword, pattern)
