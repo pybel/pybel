@@ -344,6 +344,15 @@ class rna(CentralDogma):
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
         :param list[Variant] variants: A list of variants
+
+
+        Example: AKT1 protein coding gene's RNA:
+
+        >>> rna(namespace='HGNC', name='AKT1', identifier='391')
+
+        Non-coding RNA's can also be encoded such as `U85 <https://www-snorna.biotoul.fr/plus.php?id=U85>`_:
+
+        >>> rna(namespace='SNORNABASE', identifer='SR0000073')
         """
         super(rna, self).__init__(RNA, namespace, name=name, identifier=identifier, variants=variants)
 
@@ -358,13 +367,14 @@ class mirna(CentralDogma):
         :param str identifier: The database's identifier for this entity
         :param list[Variant] variants: A list of variants
 
-        Human miRNA's are listed on HUGO's `miRNA Gene Family <https://www.genenames.org/cgi-bin/genefamilies/set/476>`_
+        Human miRNA's are listed on HUGO's `MicroRNAs (MIR) <https://www.genenames.org/cgi-bin/genefamilies/set/476>`_
+        gene family.
 
         MIR1-1 from `HGNC <https://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=31499>`_:
 
         >>> mirna(namespace='HGNC', name='MIR1-1', identifier='31499')
 
-        MIR1-1 from 'miRBase <http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=MI0000651>`_:
+        MIR1-1 from `miRBase <http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=MI0000651>`_:
 
         >>> mirna(namespace='MIRBASE', identifier='MI0000651')
 
