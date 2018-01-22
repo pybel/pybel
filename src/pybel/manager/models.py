@@ -353,6 +353,9 @@ class AnnotationEntry(Base):
 
         return result
 
+    def __str__(self):
+        return '{}:{}'.format(self.annotation, self.name)
+
 
 network_edge = Table(
     NETWORK_EDGE_TABLE_NAME, Base.metadata,
