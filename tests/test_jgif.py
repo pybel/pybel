@@ -78,7 +78,6 @@ jgif_expected_edges = [
         EVIDENCE: 'NMDA-mediated influx of calcium led to activated of the calcium-dependent phosphatase calcineurin and the subsequent dephosphorylation and activation of the protein-tyrosine phosphatase STEP',
         CITATION: {
             CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_NAME: 'Nat Neurosci 2003 Jan 6(1) 34-42',
             CITATION_REFERENCE: '12483215'
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'phos'}},
@@ -92,7 +91,6 @@ jgif_expected_edges = [
         EVIDENCE: "\"These data suggested that FOXO3 downregulates the accumulation of CD8 T cells in tissue specific fashion during an acute LCMV [lymphocytic choriomeningitis virus] infection.\" (p. 3)",
         CITATION: {
             CITATION_TYPE: CITATION_TYPE_OTHER,
-            CITATION_NAME: "Sullivan JA, Kim EH, Plisch EH, \"FOXO3 regulates CD8 T cell memory by T cell-intrinsic mechanisms,\" PLoS Pathog, 2012, 8:1002533.",
             CITATION_REFERENCE: "22359505"
         },
         ANNOTATIONS: {
