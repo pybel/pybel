@@ -377,8 +377,8 @@ def ls(manager):
 
 
 @network.command()
-@click.argument('-n', '--network-id', type=int)
-@click.option('-y', '--yes', is_flag=True)
+@click.option('-n', '--network-id', type=int, help='Identifier of network to drop')
+@click.option('-y', '--yes', is_flag=True, help='Drop all networks without confirmation if no identifier is given')
 @click.pass_obj
 def drop(manager, network_id, yes):
     """Drops a network by its identifier or drops all networks"""
