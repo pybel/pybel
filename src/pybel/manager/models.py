@@ -380,8 +380,8 @@ class Network(Base):
     contact = Column(String(255), nullable=True, doc='Contact email from the underlying BEL file')
     description = Column(Text, nullable=True, doc='Descriptive text from the underlying BEL file')
     copyright = Column(Text, nullable=True, doc='Copyright information')
-    disclaimer = Column(String(255), nullable=True, doc='Disclaimer information')
-    licenses = Column(String(255), nullable=True, doc='License information')
+    disclaimer = Column(Text, nullable=True, doc='Disclaimer information')
+    licenses = Column(Text, nullable=True, doc='License information')
 
     created = Column(DateTime, default=datetime.datetime.utcnow)
     blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
