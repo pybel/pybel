@@ -155,6 +155,13 @@ class NamespaceManager(BaseManager):
         """
         return self.session.query(Namespace).count()
 
+    def count_namespace_entries(self):
+        """Count the number of namespace entries in the database
+
+        :rtype: int
+        """
+        return self.session.query(NamespaceEntry).count()
+
     def drop_namespaces(self):
         """Drops all namespaces"""
         self.namespace_object_cache.clear()
@@ -498,6 +505,13 @@ class AnnotationManager(BaseManager):
         :rtype: int
         """
         return self.session.query(Annotation).count()
+
+    def count_annotation_entries(self):
+        """Count the number of annotation entries in the database
+
+        :rtype: int
+        """
+        return self.session.query(AnnotationEntry).count()
 
     def drop_annotations(self):
         """Drops all annotations"""

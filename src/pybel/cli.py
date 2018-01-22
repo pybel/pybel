@@ -27,7 +27,7 @@ from .constants import PYBEL_CONFIG_PATH, PYBEL_CONNECTION, PYBEL_LOG_DIR, confi
 from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
 from .manager import Manager, defaults
 from .manager.database_io import from_database, to_database
-from .manager.models import Base
+from .manager.models import Base, Edge
 from .utils import PYBEL_MYSQL_FMT_NOPASS, PYBEL_MYSQL_FMT_PASS
 
 log = logging.getLogger('pybel')
@@ -387,6 +387,42 @@ def drop(manager, network_id, yes):
 
     if yes or click.confirm('Drop all networks?'):
         manager.drop_networks()
+
+
+@manage.group()
+def edge():
+    """Manage edges"""
+
+
+@edge.command()
+@click.option('--offset', type=int)
+@click.option('--limit', type=int, default=10)
+@click.pass_obj
+def ls(manager, offset, limit):
+    """Lists edges"""
+    q = manager.session.query(Edge)
+
+    if offset:
+        q = q.offset(offset)
+
+    if limit > 0:
+        q = q.limit(limit)
+
+    for e in q:
+        click.echo(e.bel)
+
+
+@manage.command()
+@click.pass_obj
+def summarize(manager):
+    """Summarizes the contents of the database"""
+    click.echo('Networks: {}'.format(manager.count_networks()))
+    click.echo('Edges: {}'.format(manager.count_edges()))
+    click.echo('Nodes: {}'.format(manager.count_nodes()))
+    click.echo('Namespaces: {}'.format(manager.count_namespaces()))
+    click.echo('Namespaces entries: {}'.format(manager.count_namespace_entries()))
+    click.echo('Annotations: {}'.format(manager.count_annotations()))
+    click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
 
 
 if __name__ == '__main__':
