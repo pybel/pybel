@@ -48,6 +48,7 @@ Links
    examples
    io
    filters
+   mutation
    cookbook
    troubleshooting
 
