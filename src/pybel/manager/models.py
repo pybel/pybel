@@ -802,6 +802,21 @@ class Edge(Base):
     def __str__(self):
         return self.bel
 
+    def get_annotations_json(self):
+        """Formats the annotations properly
+
+        :rtype: Optional[dict[str,dict[str,bool]]
+        """
+        annotations = {}
+
+        for entry in self.annotations:
+            if entry.annotation.keyword not in annotations:
+                annotations[entry.annotation.keyword] = {entry.name: True}
+            else:
+                annotations[entry.annotation.keyword][entry.name] = True
+
+        return annotations or None
+
     def get_data_json(self):
         """Gets the PyBEL edge data dictionary this edge represents
 
@@ -809,11 +824,11 @@ class Edge(Base):
         """
         data = {
             RELATION: self.relation,
-            ANNOTATIONS: {
-                entry.annotation.keyword: entry.name
-                for entry in self.annotations
-            }
         }
+
+        annotations = self.get_annotations_json()
+        if annotations:
+            data[ANNOTATIONS] = annotations
 
         if self.evidence:
             data.update(self.evidence.to_json())
