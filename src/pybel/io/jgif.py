@@ -46,21 +46,16 @@ placeholder_evidence = "This Network edge has no supporting evidence.  Please ad
 EXPERIMENT_CONTEXT = 'experiment_context'
 
 
-def get_citation(evidence):
-    """
+def reformat_citation(citation):
+    """Reformats a citation dictionary
 
-    :param dict[str,dict[str,str]] evidence:
-    :rtype: dict[str,dict[str,str]]
+    :type citation: dict[str,str]
+    :rtype: dict[str,str]
     """
-    citation = {
-        CITATION_TYPE: evidence['citation']['type'].strip(),
-        CITATION_REFERENCE: evidence['citation']['id'].strip()
+    return {
+        CITATION_TYPE: citation['type'].strip(),
+        CITATION_REFERENCE: citation['id'].strip()
     }
-
-    if 'name' in evidence['citation']:
-        citation[CITATION_NAME] = evidence['citation']['name'].strip()
-
-    return citation
 
 
 def map_cbn(d):
@@ -252,7 +247,7 @@ def from_jgif(graph_jgif_dict):
                 if not citation:
                     continue
 
-                if 'type' not in citation and 'id' not in citation:
+                if 'type' not in citation or 'id' not in citation:
                     continue
 
                 summary_text = evidence['summary_text'].strip()
@@ -261,7 +256,7 @@ def from_jgif(graph_jgif_dict):
                     continue
 
                 parser.control_parser.clear()
-                parser.control_parser.citation = get_citation(evidence)
+                parser.control_parser.citation = reformat_citation(citation)
                 parser.control_parser.evidence = summary_text
                 parser.control_parser.annotations.update(evidence[EXPERIMENT_CONTEXT])
 
