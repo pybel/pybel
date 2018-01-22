@@ -201,6 +201,8 @@ class NamespaceManager(BaseManager):
 
         if namespace is None:
             namespace = Namespace(
+                name='BEL Default Namespace',
+                contact='charles.hoyt@scai.fraunhofer.de',
                 keyword=BEL_DEFAULT_NAMESPACE,
                 version=BEL_DEFAULT_NAMESPACE_VERSION,
                 url=BEL_DEFAULT_NAMESPACE_URL,
