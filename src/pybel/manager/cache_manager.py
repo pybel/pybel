@@ -28,6 +28,7 @@ from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl
 from ..canonicalize import node_to_bel
 from ..constants import *
+from ..exceptions import PyBelWarning
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings,
     pmod_mappings,
@@ -46,16 +47,22 @@ log = logging.getLogger(__name__)
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
 
-class EdgeAddError(RuntimeError):
+class EdgeAddError(PyBelWarning):
     """When there's a problem inserting an edge"""
 
-    def __str__(self):
-        return ("Error adding edge from line {} to database. Check this line in the file and make sure the citation, "
-                "evidence, and annotations all use valid UTF-8 characters: {}".format(self.line, self.data))
+    def __init__(self, e, u, v, data):
+        super(EdgeAddError, self).__init__(e, u, v, data)
+        self.error = e
+        self.source = u
+        self.target = v
+        self.data = data
 
-    @property
-    def data(self):
-        return self.args[0]
+    def __str__(self):
+        line_s = 'from line {} '.format(self.line) if LINE in self.data else ''
+
+        return ("Error adding edge {}to database. Check this line in the file and make sure the citation, "
+                "evidence, and annotations all use valid UTF-8 characters: {} {} {} with original error:\n "
+                "{}".format(line_s, self.source, self.target, self.data, self.error))
 
     @property
     def line(self):
@@ -1073,9 +1080,10 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             if data[RELATION] in UNQUALIFIED_EDGES:
                 try:
                     self._add_unqualified_edge(network, graph, u, v, data)
-                except:
+                except Exception as e:
                     self.session.rollback()
-                    raise EdgeAddError(data)
+                    log.warning('error storing edge in database. edge data: %s', data)
+                    raise EdgeAddError(e, u, v, data)
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -1088,9 +1096,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_qualified_edge(network, graph, u, v, data)
                 except Exception as e:
                     self.session.rollback()
-                    # raise EdgeAddError(data)
-                    log.warning('error with edge data: %s', data)
-                    raise e
+                    log.warning('error storing edge in database. edge data: %s', data)
+                    raise EdgeAddError(e, u, v, data)
 
         log.debug('stored edges in %.2f', time.time() - t)
         log.info('Skipped %d edges', c)
