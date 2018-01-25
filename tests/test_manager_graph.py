@@ -239,10 +239,10 @@ class TestQuery(TemporaryCacheMixin):
 
     def test_query_edge_by_evidence_wildcard(self):
         # evidence like, data
-        evidence_list = self.manager.query_edges(evidence='%3%')
+        evidence_list = self.manager.search_edges_with_evidence(evidence='%3%')
         self.assertEqual(len(evidence_list), 0)
 
-        evidence_list = self.manager.query_edges(evidence='%Twit%')
+        evidence_list = self.manager.search_edges_with_evidence(evidence='%Twit%')
         self.assertEqual(len(evidence_list), 1)
 
     def test_query_edge_by_mixed_no_result(self):

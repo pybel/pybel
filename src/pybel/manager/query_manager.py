@@ -7,10 +7,7 @@ from six import string_types
 from sqlalchemy import and_, func, or_
 
 from .lookup_manager import LookupManager
-from .models import (
-    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Namespace,
-    NamespaceEntry, Node, Property,
-)
+from .models import Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
 from ..constants import *
 from ..struct import BELGraph
 from ..utils import hash_node, parse_datetime
@@ -98,8 +95,50 @@ class QueryManager(LookupManager):
         """
         return self.session.query(func.count(Edge.id)).scalar()
 
-    def query_edges(self, bel=None, source=None, target=None, relation=None, citation=None, evidence=None,
-                    annotation=None, property=None):
+    def get_edges_with_citation(self, citation):
+        """Gets the edges with the given citation
+
+        :param Citation citation:
+        :rtype: iter[Edge]
+        """
+        return self.session.query(Edge).join(Evidence).filter(Evidence.citation == citation)
+
+    def get_edges_with_citations(self, citations):
+        """Gets the edges with the given citations
+
+        :param iter[Citation] citations:
+        :rtype: list[Edge]
+        """
+        return self.session.query(Edge).join(Evidence).filter(Evidence.citation.in_(citations)).all()
+
+    def search_edges_with_evidence(self, evidence):
+        """Searches edges with the given evidence
+
+        :param str evidence: A string to search evidences. Can use wildcard percent symbol (%).
+        :rtype: list[Edge]
+        """
+        return self.session.query(Edge).join(Evidence).filter(Evidence.text.like(evidence)).all()
+
+    def search_edges_with_bel(self, bel):
+        """Searches edges with given BEL
+
+        :param str bel: A BEL string to use as a search
+        :rtype: list[Edge]
+        """
+        return self.session.query(Edge).filter(Edge.bel.like(bel)).all()
+
+    def get_edges_with_annotation(self, annotation, value):
+        """
+
+        :param str annotation:
+        :param str value:
+        :rtype: list[Edge]
+        """
+        query = self.session.query(Edge).join(AnnotationEntry, Edge.annotations).join(Annotation)
+        query = query.filter(Annotation.keyword == annotation).filter(AnnotationEntry.name == value)
+        return query.all()
+
+    def query_edges(self, bel=None, source=None, target=None, relation=None):
         """Builds and runs a query over all edges in the PyBEL cache.
 
         :param str bel: BEL statement that represents the desired edge.
@@ -108,34 +147,15 @@ class QueryManager(LookupManager):
         :param target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
         :type target: str or Node
         :param str relation: The relation that should be present between source and target node.
-        :param citation: The citation that backs the edge up. It is possible to use the reference_id
-                         or a Citation object.
-        :type citation: str or Citation
-        :param evidence: The supporting text of the edge
-        :type evidence: str or Evidence
-        :param annotation: Dictionary of {annotationKey: annotationValue} parameters or just an
-                           annotationValue parameter as string.
-        :type annotation: str or dict[str,str]
-        :param property: An edge property object or a corresponding database identifier.
-        :type property: int or Property
         :rtype: list[Edge]
         """
-        query = self.session.query(Edge)
-
         if bel:
-            query = query.filter(Edge.bel.like(bel))
+            return self.search_edges_with_bel(bel)
+
+        query = self.session.query(Edge)
 
         if relation:
             query = query.filter(Edge.relation.like(relation))
-
-        if annotation:
-            query = query.join(AnnotationEntry, Edge.annotations)
-            if isinstance(annotation, dict):
-                query = query.join(Annotation).filter(Annotation.keyword.in_(list(annotation.keys())))
-                query = query.filter(AnnotationEntry.name.in_(list(annotation.values())))
-
-            elif isinstance(annotation, string_types):
-                query = query.filter(AnnotationEntry.name.like(annotation))
 
         if source:
             if isinstance(source, string_types):
@@ -143,43 +163,21 @@ class QueryManager(LookupManager):
                 if len(source) == 0:
                     return []
                 source = source[0]  # FIXME what if this matches multiple?
-
-            query = query.filter(Edge.source == source)
+                query = query.filter(Edge.source == source)
+            elif isinstance(source, Node):
+                query = query.filter(Edge.source == source)
+            else:
+                raise TypeError('Invalid type of {}: {}'.format(source, source.__class__.__name__))
 
         if target:
             if isinstance(target, string_types):
                 targets = self.query_nodes(bel=target)
                 target = targets[0]  # FIXME what if this matches multiple?
-
-            query = query.filter(Edge.target == target)
-
-        if citation or evidence:
-            query = query.join(Evidence)
-
-            if citation:
-                if isinstance(citation, Citation):
-                    query = query.filter(Evidence.citation == citation)
-
-                elif isinstance(citation, list) and isinstance(citation[0], Citation):
-                    query = query.filter(Evidence.citation.in_(citation))
-
-                elif isinstance(citation, string_types):
-                    query = query.join(Citation).filter(Citation.reference.like(citation))
-
-            if evidence:
-                if isinstance(evidence, Evidence):
-                    query = query.filter(Edge.evidence == evidence)
-
-                elif isinstance(evidence, string_types):
-                    query = query.filter(Evidence.text.like(evidence))
-
-        if property:
-            query = query.join(Property, Edge.properties)
-
-            if isinstance(property, Property):
-                query = query.filter(Property.id == property.id)
-            elif isinstance(property, int):
-                query = query.filter(Property.id == property)
+                query = query.filter(Edge.target == target)
+            elif isinstance(target, Node):
+                query = query.filter(Edge.target == target)
+            else:
+                raise TypeError('Invalid type of {}: {}'.format(target, target.__class__.__name__))
 
         return query.all()
 
@@ -227,16 +225,24 @@ class QueryManager(LookupManager):
 
         return query.all()
 
-    def query_edges_by_pmid(self, pubmed_identifiers):
+    def query_edges_by_pubmed_identifiers(self, pubmed_identifiers):
         """Gets all edges annotated to the given documents
 
         :param list[str] pubmed_identifiers: A list of PubMed document identifiers
         :rtype: list[Edge]
         """
-        return self.session.query(Edge) \
-            .join(Evidence).join(Citation) \
-            .filter(Citation.type == CITATION_TYPE_PUBMED,
-                    Citation.reference.in_(pubmed_identifiers)).all()
+        fi = and_(Citation.type == CITATION_TYPE_PUBMED, Citation.reference.in_(pubmed_identifiers))
+        return self.session.query(Edge).join(Evidence).join(Citation).filter(fi).all()
+
+    @staticmethod
+    def _edge_both_nodes(node_ids):
+        """
+        :param list[int] node_ids: A list of node identifiers
+        """
+        return and_(
+            Edge.source_id.in_(node_ids),
+            Edge.target_id.in_(node_ids)
+        )
 
     def query_induction(self, nodes):
         """Gets all edges between any of the given nodes
@@ -249,8 +255,18 @@ class QueryManager(LookupManager):
 
         node_ids = [node.id for node in nodes]
 
-        return self.session.query(Edge).filter(and_(Edge.source_id.in_(node_ids),
-                                                    Edge.target_id.in_(node_ids))).all()
+        fi = self._edge_both_nodes(node_ids)
+        return self.session.query(Edge).filter(fi).all()
+
+    @staticmethod
+    def _edge_one_node(node_ids):
+        """
+        :param list[int] node_ids: A list of node identifiers
+        """
+        return or_(
+            Edge.source_id.in_(node_ids),
+            Edge.target_id.in_(node_ids)
+        )
 
     def query_neighbors(self, nodes):
         """Gets all edges incident to any of the given nodes
@@ -259,5 +275,5 @@ class QueryManager(LookupManager):
         :rtype: list[Edge]
         """
         node_ids = [node.id for node in nodes]
-        return self.session.query(Edge).filter(or_(Edge.source_id.in_(node_ids),
-                                                   Edge.target_id.in_(node_ids))).all()
+        fi = self._edge_one_node(node_ids)
+        return self.session.query(Edge).filter(fi).all()

@@ -58,14 +58,14 @@ class TestSeeding(TemporaryCacheClsMixin):
     def test_seed_by_pmid(self):
         pmids = ['26438529']
 
-        edges = self.manager.query_edges_by_pmid(pmids)
+        edges = self.manager.query_edges_by_pubmed_identifiers(pmids)
 
         self.assertLess(0, len(edges))
 
     def test_seed_by_pmid_no_result(self):
         missing_pmids = ['11111']
 
-        edges = self.manager.query_edges_by_pmid(missing_pmids)
+        edges = self.manager.query_edges_by_pubmed_identifiers(missing_pmids)
 
         self.assertEqual(0, len(edges))
 
