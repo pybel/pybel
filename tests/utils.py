@@ -5,6 +5,14 @@ from uuid import uuid4
 from pybel.manager.models import Annotation, AnnotationEntry, Namespace, NamespaceEntry
 
 
+def n():
+    """Returns a UUID string for testing
+
+    :rtype: str
+    """
+    return str(uuid4())
+
+
 def make_dummy_namespaces(manager, graph, namespaces):
     """
     :param pybel.manager.Manager manager:
@@ -12,7 +20,7 @@ def make_dummy_namespaces(manager, graph, namespaces):
     :param dict[str,iter[str]] namespaces:
     """
     for keyword, names in namespaces.items():
-        url = str(uuid4())
+        url = n()
         graph.namespace_url[keyword] = url
 
         namespace = Namespace(keyword=keyword, url=url)
@@ -33,7 +41,7 @@ def make_dummy_annotations(manager, graph, annotations):
     :param dict[str,iter[str]] annotations:
     """
     for keyword, names in annotations.items():
-        url = str(uuid4())
+        url = n()
         graph.annotation_url[keyword] = url
 
         annotation = Annotation(keyword=keyword, url=url)

@@ -6,7 +6,6 @@ import logging
 import time
 import unittest
 from collections import Counter, defaultdict
-from uuid import uuid4
 
 import sqlalchemy.exc
 from sqlalchemy import not_
@@ -15,9 +14,10 @@ import pybel
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import *
 from pybel.dsl import (
-    abundance, activity, complex_abundance, degradation, entity, fragment, gene, gmod, pmod, protein,
-    protein_fusion, reaction, secretion, translocation,
+    activity, complex_abundance, degradation, entity, fragment, gene, gmod, pmod, protein, protein_fusion, reaction,
+    secretion, translocation,
 )
+from pybel.dsl.namespaces import chebi, hgnc
 from pybel.manager import models
 from pybel.manager.models import Author, Evidence
 from pybel.utils import hash_citation, hash_evidence, hash_node
@@ -28,7 +28,7 @@ from tests.constants import (
     test_bel_thorough, test_citation_dict, test_evidence_text,
 )
 from tests.mocks import mock_bel_resources
-from tests.utils import make_dummy_annotations, make_dummy_namespaces
+from tests.utils import make_dummy_annotations, make_dummy_namespaces, n
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def protein_tuple(name):
 
 
 def protein_pair(name):
-    return protein_tuple(name), protein(name=name, namespace='HGNC')
+    return protein_tuple(name), hgnc(name=name)
 
 
 fos = fos_tuple, fos_data = protein_pair('FOS')
@@ -58,11 +58,6 @@ e2f4 = e2f4_tuple, e2f4_data = protein_pair('E2F4')
 bound_ap1_e2f4_tuple = COMPLEX, ap1_complex_tuple, e2f4_tuple
 bound_ap1_e2f4_data = complex_abundance([ap1_complex_data, e2f4_data])
 
-
-def chebi(name):
-    return abundance(namespace='CHEBI', name=name)
-
-
 superoxide = chebi('superoxide')
 hydrogen_peroxide = chebi('hydrogen peroxide')
 oxygen = chebi('oxygen')
@@ -72,14 +67,6 @@ reaction_1 = reaction(reactants=[superoxide], products=[hydrogen_peroxide, oxyge
 has_component_code = unqualified_edge_code[HAS_COMPONENT]
 has_reactant_code = unqualified_edge_code[HAS_REACTANT]
 has_product_code = unqualified_edge_code[HAS_PRODUCT]
-
-
-def n():
-    """Returns a UUID string for testing
-
-    :rtype: str
-    """
-    return str(uuid4())
 
 
 class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):

@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from uuid import uuid4
 
 from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body
 from pybel.constants import INCREASES
 from pybel.dsl import *
-
-n = lambda: str(uuid4())[:8]
+from tests.utils import n
 
 
 class TestSerializeBEL(unittest.TestCase):
     def setUp(self):
-        self.citation = str(uuid4())
-        self.evidence = str(uuid4())
-        self.url = str(uuid4())
+        self.citation = n()
+        self.evidence = n()
+        self.url = n()
         self.graph = BELGraph()
         self.graph.namespace_url['HGNC'] = self.url
 

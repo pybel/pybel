@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from uuid import uuid4
-
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl import protein
 from pybel.manager.models import Edge, Network, Node
 from tests.constants import TemporaryCacheMixin, test_citation_dict, test_evidence_text
 from tests.mocks import mock_bel_resources
-from tests.utils import make_dummy_annotations, make_dummy_namespaces
+from tests.utils import make_dummy_annotations, make_dummy_namespaces, n
 
 yfg1 = protein(name='YFG1', namespace='HGNC')
 yfg2 = protein(name='YFG1', namespace='HGNC')
@@ -31,12 +29,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, graph, namespaces)
         make_dummy_annotations(self.manager, graph, annotations)
 
-        node_1 = graph.add_node_from_data(yfg1)
-        node_2 = graph.add_node_from_data(yfg2)
-
         graph.add_qualified_edge(
-            node_1,
-            node_2,
+            yfg1,
+            yfg2,
             relation=INCREASES,
             evidence=test_evidence_text,
             citation=test_citation_dict,
@@ -61,8 +56,8 @@ class TestCascades(TemporaryCacheMixin):
         self.e1 = Edge(source=self.n1, target=self.n2, relation=INCREASES, bel='p(HGNC:A) increases p(HGNC:B)')
         self.e2 = Edge(source=self.n2, target=self.n3, relation=INCREASES, bel='p(HGNC:B) increases p(HGNC:C)')
         self.e3 = Edge(source=self.n1, target=self.n3, relation=INCREASES, bel='p(HGNC:A) increases p(HGNC:C)')
-        self.g1 = Network(name=str(uuid4()), version=str(uuid4()), edges=[self.e1, self.e2, self.e3])
-        self.g2 = Network(name=str(uuid4()), version=str(uuid4()), edges=[self.e1])
+        self.g1 = Network(name=n(), version=n(), edges=[self.e1, self.e2, self.e3])
+        self.g2 = Network(name=n(), version=n(), edges=[self.e1])
 
         self.manager.session.add_all([self.n1, self.n2, self.n3, self.e1, self.e2, self.e3, self.g1, self.g2])
         self.manager.session.commit()

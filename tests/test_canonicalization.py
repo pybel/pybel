@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from uuid import uuid4
 
 from pybel import BELGraph
 from pybel.canonicalize import canonicalize_edge, fusion_range_to_bel, variant_to_bel
@@ -11,6 +10,7 @@ from pybel.constants import (
 )
 from pybel.dsl import *
 from pybel.dsl.edges import extracellular, intracellular
+from tests.utils import n
 
 
 class TestCanonicalize(unittest.TestCase):
@@ -172,8 +172,8 @@ class TestCanonicalizeEdge(unittest.TestCase):
             self.u,
             self.v,
             relation=INCREASES,
-            evidence=str(uuid4()),
-            citation=str(uuid4()),
+            evidence=n(),
+            citation=n(),
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
             annotations=annotations,
