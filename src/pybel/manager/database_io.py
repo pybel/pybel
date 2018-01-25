@@ -30,18 +30,16 @@ def to_database(graph, connection=None, store_parts=True):
                         default connection
     :type connection: None or str or pybel.manager.Manager
     :param bool store_parts: Should the graph be stored in the edge store?
+    :return: If successful, returns the network object from the database.
+    :rtype: Optional[Network]
     """
     manager = Manager.ensure(connection=connection)
 
     try:
-        manager.insert_graph(graph, store_parts=store_parts)
-    except IntegrityError:
+        return manager.insert_graph(graph, store_parts=store_parts)
+    except (IntegrityError, OperationalError):
         manager.session.rollback()
-        log.warning('Error storing graph - other graph with same metadata'
-                    ' already present. Consider incrementing the version')
-    except OperationalError:
-        manager.session.rollback()
-        log.exception('Error storing graph - operational exception')
+        log.exception('Error storing graph')
     except Exception as e:
         manager.session.rollback()
         raise e
