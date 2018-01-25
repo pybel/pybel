@@ -87,8 +87,11 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
         self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
+        self.assertEqual('1.0.0', self.graph.version)
 
         to_database(self.graph, connection=self.manager, store_parts=False)
+
+        time.sleep(1)
 
         self.assertEqual(1, self.manager.count_networks())
 
@@ -121,6 +124,8 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         graph_copy.document[METADATA_VERSION] = '1.0.1'
         network_copy = self.manager.insert_graph(graph_copy, store_parts=False)
 
+        time.sleep(1)  # Sleep so the first graph always definitely goes in first
+
         self.assertTrue(self.manager.has_name_version(graph_copy.name, graph_copy.version))
         self.assertFalse(self.manager.has_name_version('wrong name', '0.1.2'))
         self.assertFalse(self.manager.has_name_version(graph_copy.name, '0.1.2'))
@@ -144,6 +149,10 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         exact_name_version = from_database(self.graph.name, '1.0.1', connection=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
+        self.assertEqual('1.0.1', exact_name_version.version)
+
+        most_recent_version = from_database(self.graph.name, connection=self.manager)
+        self.assertEqual(self.graph.name, most_recent_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
         recent_networks = list(self.manager.list_recent_networks())  # just try it to see if it fails
