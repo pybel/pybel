@@ -39,7 +39,7 @@ def upload_cbn_dir(dir_path, manager):
             pybel.to_bel(graph, o)
 
         strip_annotations(graph)
-        enrich_pubmed_citations(graph, manager=manager)
+        enrich_pubmed_citations(manager=manager, graph=graph)
         pybel.to_database(graph, connection=manager)
 
         log.info('')

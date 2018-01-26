@@ -63,7 +63,7 @@ class TestCitations(TemporaryCacheMixin):
 
         self.assertEqual(0, len(stored_citations))
 
-        get_citations_by_pmids(pmids, manager=self.manager)
+        get_citations_by_pmids(manager=self.manager, pmids=pmids)
 
         stored_citations = self.manager.session.query(Citation).all()
         self.assertEqual(1, len(stored_citations))
@@ -76,7 +76,7 @@ class TestCitations(TemporaryCacheMixin):
             '26649137',
         ]
 
-        get_citations_by_pmids(pmids, manager=self.manager)
+        get_citations_by_pmids(manager=self.manager, pmids=pmids)
 
         citation = self.manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference='25818332')
         self.assertIsNotNone(citation)
@@ -89,7 +89,7 @@ class TestCitations(TemporaryCacheMixin):
             '26649137',
         ]
 
-        get_citations_by_pmids(pmids, manager=self.manager, group_size=2)
+        get_citations_by_pmids(manager=self.manager, pmids=pmids, group_size=2)
 
         citation = self.manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference='25818332')
         self.assertIsNotNone(citation)
@@ -100,7 +100,7 @@ class TestCitations(TemporaryCacheMixin):
         self.assertIsNone(citation.date)
         self.assertIsNone(citation.name)
 
-        enrich_pubmed_citations(self.graph, manager=self.manager)
+        enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
         _, _, d = self.graph.edges(data=True)[0]
         citation_dict = d[CITATION]
@@ -117,7 +117,7 @@ class TestCitations(TemporaryCacheMixin):
         )
 
     def test_enrich_graph(self):
-        enrich_pubmed_citations(self.graph, manager=self.manager)
+        enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
         _, _, d = self.graph.edges(data=True)[0]
         citation_dict = d[CITATION]
@@ -133,6 +133,27 @@ class TestCitations(TemporaryCacheMixin):
             set(citation_dict[CITATION_AUTHORS])
         )
 
+    def test_accent_duplicate(self):
+        """This tests when two authors, Gomez C and Goméz C are both checked that they are not counted as duplicates"""
+        g1 = 'Gomez C'
+        g2 = 'Gómez C'
+        pmid_1, pmid_2 = pmids = [
+            '29324713',
+            '29359844',
+        ]
+        get_citations_by_pmids(manager=self.manager, pmids=pmids)
+
+        x = self.manager.get_citation_by_pmid(pmid_1)
+        self.assertEqual('Martínez-Guillén JR', x.first.name)
+
+        self.assertIn(g1, self.manager.object_cache_author)
+        self.assertIn(g2, self.manager.object_cache_author)
+
+        a1 = self.manager.get_author_by_name(g1)
+        self.assertEqual(g1, a1.name)
+
+        a2 = self.manager.get_author_by_name(g2)
+        self.assertEqual(g2, a2.name)
 
 if __name__ == '__main__':
     unittest.main()

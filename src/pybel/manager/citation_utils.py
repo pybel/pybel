@@ -74,24 +74,31 @@ def grouper(n, iterable, fillvalue=None):
     return zip_longest(*args, fillvalue=fillvalue)
 
 
-def get_citations_by_pmids(pmids, group_size=None, sleep_time=None, return_errors=False, manager=None):
+def clean_pubmed_identifiers(pmids):
+    """String strips, deduplicates, and sorts a list of PubMed identifiers
+
+    :param iter[str] pmids: An iterable of PubMed identifiers
+    :return:
+    """
+    return sorted({str(pmid).strip() for pmid in pmids})
+
+
+def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
     """Gets the citation information for the given list of PubMed identifiers using the NCBI's eutils service
 
-    :param iter[str] or iter[int] pmids: an iterable of PubMed identifiers
+    :type manager: Manager
+    :param pmids: an iterable of PubMed identifiers
+    :type pmids: iter[str] or iter[int]
     :param int group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
     :param int sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
-    :param bool return_errors: Should a set of erroneous PubMed identifiers be returned?
-    :param manager: An RFC-1738 database connection string, a pre-built :class:`pybel.manager.Manager`,
-                    or ``None`` for default connection
-    :type manager: None or str or Manager
     :return: A dictionary of {pmid: pmid data dictionary} or a pair of this dictionary and a set ot erroneous
             pmids if return_errors is :data:`True`
-    :rtype: dict[str,dict]
+    :rtype: tuple[dict[str,dict],set[str]]
     """
     group_size = group_size if group_size is not None else 200
     sleep_time = sleep_time if sleep_time is not None else 1
 
-    pmids = sorted({str(pmid).strip() for pmid in pmids})
+    pmids = clean_pubmed_identifiers(pmids)
     log.info('Ensuring %d PubMed identifiers', len(pmids))
 
     manager = Manager.ensure(manager)
@@ -113,7 +120,7 @@ def get_citations_by_pmids(pmids, group_size=None, sleep_time=None, return_error
     log.debug('Found %d PubMed identifiers in database', len(pmids) - len(unresolved_pmids))
 
     if not unresolved_pmids:
-        return (result, set()) if return_errors else result
+        return result, set()
 
     total_unresolved_count = len(unresolved_pmids)
     log.info('Querying PubMed for %d identifiers', total_unresolved_count)
@@ -184,23 +191,19 @@ def get_citations_by_pmids(pmids, group_size=None, sleep_time=None, return_error
 
     log.info('retrieved %d PubMed identifiers in %.02f seconds', len(unresolved_pmids), time.time() - t)
 
-    return (result, errors) if return_errors else result
+    return result, errors
 
 
-def enrich_pubmed_citations(graph, manager=None, group_size=None, sleep_time=None):
+def enrich_pubmed_citations(manager, graph, group_size=None, sleep_time=None):
     """Overwrites all PubMed citations with values from NCBI's eUtils lookup service.
 
     Sets authors as list, so probably a good idea to run :func:`pybel_tools.mutation.serialize_authors` before
     exporting.
 
-    :param pybel.BELGraph graph: A BEL graph
-    :param bool stringify_authors: Converts all author lists to author strings using
-                                  :func:`pybel_tools.mutation.serialize_authors`. Defaults to ``False``.
-    :param manager: An RFC-1738 database connection string, a pre-built :class:`pybel.manager.Manager`,
-                    or ``None`` for default connection
-    :type manager: None or str or Manager
-    :param int group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
-    :param int sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
+    :type manager: pybel.manager.Manager
+    :type graph: pybel.BELGraph
+    :param Optional[int] group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
+    :param Optional[int] sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
     :return: A set of PMIDs for which the eUtils service crashed
     :rtype: set[str]
     """
@@ -209,8 +212,7 @@ def enrich_pubmed_citations(graph, manager=None, group_size=None, sleep_time=Non
         return set()
 
     pmids = get_pubmed_identifiers(graph)
-    pmid_data, errors = get_citations_by_pmids(pmids, group_size=group_size, sleep_time=sleep_time, return_errors=True,
-                                               manager=manager)
+    pmid_data, errors = get_citations_by_pmids(manager=manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)
 
     for u, v, k in filter_edges(graph, has_pubmed):
         pmid = graph.edge[u][v][k][CITATION][CITATION_REFERENCE].strip()

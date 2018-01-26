@@ -149,32 +149,22 @@ class Namespace(Base):
             for child in parent.children
         }
 
-    def to_json(self, include_id=True):
-        """Returns the table entry as a dictionary without the SQLAlchemy instance information.
+    def to_json(self, include_id=False):
+        """Returns the most useful entries as a dictionary
 
-        :rtype: dict
+        :param bool include_id: If true, includes the model identifier
+        :rtype: dict[str,str]
         """
         result = {
-            'uploaded': self.uploaded,
-            'url': self.url,
             'keyword': self.keyword,
             'name': self.name,
-            'domain': self.domain,
-            'species': self.species,
-            'description': self.description,
             'version': self.version,
-            'created': self.created,
-            'query_url': self.query_url,
-            'author': self.author,
-            'license': self.license,
-            'contact': self.contact,
-            'citation': self.citation,
-            'citation_description': self.citation_description,
-            'citation_version': self.citation_version,
-            'citation_published': self.citation_published,
-            'citation_url': self.citation_url,
-            'has_equivalences': self.has_equivalences
         }
+
+        if self.url:
+            result['url'] = self.url
+        else:
+            result['pattern'] = self.pattern
 
         if include_id:
             result['id'] = self.id
@@ -212,7 +202,8 @@ class NamespaceEntry(Base):
     def to_json(self, include_id=False):
         """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name.
 
-        :rtype: dict
+        :param bool include_id: If true, includes the model identifier
+        :rtype: dict[str,str]
         """
         result = {
             NAMESPACE: self.namespace.keyword,
@@ -287,26 +278,14 @@ class Annotation(Base):
     def to_json(self, include_id=False):
         """Returns this annotation as a JSON dictionary
 
-        :rtype: dict
+        :param bool include_id: If true, includes the model identifier
+        :rtype: dict[str,str]
         """
         result = {
-            'uploaded': self.uploaded,
             'url': self.url,
             'keyword': self.keyword,
-            'type': self.type,
-            'description': self.description,
-            'usage': self.usage,
             'version': self.version,
-            'created': self.created,
-            'name': self.name,
-            'author': self.author,
-            'license': self.license,
-            'contact': self.contact,
-            'citation': self.citation,
-            'citation_description': self.citation_description,
-            'citation_version': self.citation_version,
-            'citation_published': self.citation_published,
-            'citation_url': self.citation_url
+            'name': self.name
         }
 
         if include_id:
@@ -334,14 +313,15 @@ class AnnotationEntry(Base):
     children = relationship(
         'AnnotationEntry',
         secondary=annotation_hierarchy,
-        primaryjoin=id == annotation_hierarchy.c.left_id,
-        secondaryjoin=id == annotation_hierarchy.c.right_id
+        primaryjoin=(id == annotation_hierarchy.c.left_id),
+        secondaryjoin=(id == annotation_hierarchy.c.right_id)
     )
 
     def to_json(self, include_id=False):
         """Describes the annotationEntry as dictionary of Annotation-Keyword and Annotation-Name.
 
-        :rtype: dict
+        :param bool include_id: If true, includes the model identifier
+        :rtype: dict[str,str]
         """
         result = {
             'annotation_keyword': self.annotation.keyword,
@@ -399,7 +379,8 @@ class Network(Base):
     def to_json(self, include_id=False):
         """Returns this network as JSON
 
-        :rtype: dict
+        :param bool include_id: If true, includes the model identifier
+        :rtype: dict[str,str]
         """
         result = {
             'created': self.created,
@@ -484,7 +465,7 @@ class Node(Base):
 
         :param bool include_id: Include the database identifier?
         :param bool include_hash: Include the node hash?
-        :rtype: dict
+        :rtype: dict[str,str]
         """
         result = {FUNCTION: self.type}
 
@@ -686,8 +667,9 @@ class Citation(Base):
     def to_json(self, include_id=False):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
+        :param bool include_id: If true, includes the model identifier
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
-        :rtype: dict
+        :rtype: dict[str,str]
         """
         result = {
             CITATION_REFERENCE: self.reference,
@@ -745,6 +727,7 @@ class Evidence(Base):
     def to_json(self, include_id=False):
         """Creates a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
 
+        :param bool include_id: If true, includes the model identifier
         :return: Dictionary containing citation and evidence for a :class:`BELGraph` edge.
         :rtype: dict
         """
