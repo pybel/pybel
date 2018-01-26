@@ -1422,10 +1422,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param str name: An author's name
         :rtype: Author
         """
-        name = name.strip()
+        author = self.object_cache_author.get(name)
 
-        if name in self.object_cache_author:
-            author = self.object_cache_author[name]
+        if author is not None:
             self.session.add(author)
             return author
 
@@ -1435,9 +1434,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             self.object_cache_author[name] = author
             return author
 
-        author = Author(name=name)
+        author = self.object_cache_author[name] = Author(name=name)
         self.session.add(author)
-        self.object_cache_author[name] = author
         return author
 
     def get_modification_by_hash(self, modification_hash):
