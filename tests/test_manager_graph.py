@@ -339,7 +339,7 @@ class TestEnsure(TemporaryCacheMixin):
         self.assertIsInstance(citation, models.Citation)
         self.assertEqual(citation_dict, citation.to_json())
 
-        citation_reloaded_from_reference = self.manager.get_citation_by_reference(CITATION_TYPE_PUBMED, reference)
+        citation_reloaded_from_reference = self.manager.get_citation_by_pmid(reference)
         self.assertIsNotNone(citation_reloaded_from_reference)
         self.assertEqual(citation_dict, citation_reloaded_from_reference.to_json())
 
