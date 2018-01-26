@@ -22,19 +22,25 @@ def upload_cbn_dir(dir_path, manager):
     t = time.time()
 
     for jfg_path in os.listdir(dir_path):
+        if not jfg_path.endswith('.jgf'):
+            continue
+
         path = os.path.join(dir_path, jfg_path)
-        out_path = os.path.join(os.path.expanduser('~'), 'Desktop', 'cbn', jfg_path.replace('.jgf', '.bel'))
 
         log.info('opening %s', path)
 
-        with open(path) as f, open(out_path, 'w') as o:
+        with open(path) as f:
             cbn_jgif_dict = json.load(f)
-            graph = pybel.from_cbn_jgif(cbn_jgif_dict)
+
+        graph = pybel.from_cbn_jgif(cbn_jgif_dict)
+
+        out_path = os.path.join(dir_path, jfg_path.replace('.jgf', '.bel'))
+        with open(out_path, 'w') as o:
             pybel.to_bel(graph, o)
 
-            strip_annotations(graph)
-            enrich_pubmed_citations(graph, manager=manager)
-            pybel.to_database(graph, connection=manager)
+        strip_annotations(graph)
+        enrich_pubmed_citations(graph, manager=manager)
+        pybel.to_database(graph, connection=manager)
 
         log.info('')
 
