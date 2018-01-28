@@ -135,8 +135,8 @@ class TestCitations(TemporaryCacheMixin):
 
     def test_accent_duplicate(self):
         """This tests when two authors, Gomez C and Goméz C are both checked that they are not counted as duplicates"""
-        g1 = 'Gomez C'
-        g2 = 'Gómez C'
+        g1 = u'Gomez C'
+        g2 = u'Gómez C'
         pmid_1, pmid_2 = pmids = [
             '29324713',
             '29359844',
@@ -144,7 +144,7 @@ class TestCitations(TemporaryCacheMixin):
         get_citations_by_pmids(manager=self.manager, pmids=pmids)
 
         x = self.manager.get_citation_by_pmid(pmid_1)
-        self.assertEqual('Martínez-Guillén JR', x.first.name)
+        self.assertEqual(u'Martínez-Guillén JR', x.first.name)
 
         self.assertIn(g1, self.manager.object_cache_author)
         self.assertIn(g2, self.manager.object_cache_author)
