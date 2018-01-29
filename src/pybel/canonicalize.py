@@ -14,7 +14,8 @@ from .utils import ensure_quotes, flatten_citation, hash_edge
 __all__ = [
     'to_bel_lines',
     'to_bel',
-    'to_bel_path'
+    'to_bel_path',
+    'node_to_bel',
 ]
 
 log = logging.getLogger(__name__)
