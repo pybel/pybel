@@ -1060,7 +1060,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             network.nodes.append(node_object)
 
-        log.debug('stored nodes in %.2f', time.time() - t)
+        log.debug('stored nodes in %.2f seconds', time.time() - t)
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
@@ -1099,8 +1099,10 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     log.warning('error storing edge in database. edge data: %s', data)
                     raise EdgeAddError(e, u, v, data)
 
-        log.debug('stored edges in %.2f', time.time() - t)
-        log.info('Skipped %d edges', c)
+        log.debug('stored edges in %.2f seconds', time.time() - t)
+
+        if c:
+            log.info('skipped %d edges', c)
 
     @staticmethod
     def _iter_annotations_from_dict(graph, data):
