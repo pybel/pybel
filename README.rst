@@ -1,8 +1,8 @@
 PyBEL |zenodo|
 ==============
-`PyBEL <http://pybel.readthedocs.io>`_ is a Python package for parsing and handling biological networks encoded in the
-`Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
-It also facilitates data interchange between common formats and databases such as
+`PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
+the `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
+(BEL). It also facilitates data interchange between common formats and databases such as
 `NetworkX <http://networkx.github.io/>`_, JSON, CSV, SIF, `Cytoscape <http://www.cytoscape.org/>`_,
 `CX <http://www.home.ndexbio.org/data-model/>`_, `NDEx <https://github.com/pybel/pybel2cx>`_, SQL, and
 `Neo4J <https://neo4j.com>`_.

@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""
-
-PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux using 
-`Travis CI <https://travis-ci.org/pybel/pybel>`_.
-
-.. warning:: PyBEL is not thoroughly tested on Windows.
+"""PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux using
+`Travis CI <https://travis-ci.org/pybel/pybel>`_ as well as on Windows using
+`AppVeyor <https://ci.appveyor.com/project/cthoyt/pybel>`_.
 
 Installation
 ------------
-
 Easiest
 ~~~~~~~
 Download the latest stable code from `PyPI <https://pypi.python.org/pypi/pybel>`_ with:
@@ -41,8 +37,10 @@ Extras
 ------
 The ``setup.py`` makes use of the ``extras_require`` argument of :func:`setuptools.setup` in order to make some heavy
 packages that support special features of PyBEL optional to install, in order to make the installation more lean by
-default. A single extra can be installed like :code:`python3 -m pip install -e .[ndex]` or multiple can be installed
-using a list like :code:`python3 -m pip install -e .[ndex,owl]`.The extras are:
+default. A single extra can be installed from PyPI like :code:`python3 -m pip install -e pybel[ndex]` or multiple can
+be installed using a list like :code:`python3 -m pip install -e pybel[ndex,owl]`. Likewise, for developer installation,
+extras can be installed in editable mode with :code:`python3 -m pip install -e .[ndex]` or multiple can be installed
+using a list like :code:`python3 -m pip install -e .[ndex,owl]`. The avaliable extras are:
 
 ndex
 ~~~~
@@ -81,7 +79,6 @@ package also enables the import of BioPAX, SBML, and SBGN into BEL.
 
 Caveats
 -------
-
 - PyBEL extends the :code:`networkx` for its core data structure. Many of the graphical aspects of :code:`networkx`
   depend on :code:`matplotlib`, which is an optional dependency.
 - If :code:`HTMLlib5` is installed, the test that's supposed to fail on a web page being missing actually tries to
@@ -89,7 +86,6 @@ Caveats
 
 Upgrading
 ---------
-
 During the current development cycle, programmatic access to the definition and graph caches might become unstable. If 
 you have any problems working with the database, try removing it with one of the following commands:
 

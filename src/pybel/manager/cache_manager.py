@@ -25,7 +25,7 @@ from .models import (
     NamespaceEntry, NamespaceEntryEquivalence, Network, Node, Property,
 )
 from .query_manager import QueryManager
-from .utils import extract_shared_optional, extract_shared_required, parse_owl
+from .utils import extract_shared_optional, extract_shared_required, parse_owl, update_insert_values
 from ..canonicalize import node_to_bel
 from ..constants import *
 from ..exceptions import PyBelWarning
@@ -69,6 +69,12 @@ class EdgeAddError(PyBelWarning):
         return self.data.get(LINE)
 
 
+_namespace_mapping = {
+    'species': ('Namespace', 'SpeciesString'),
+    'query_url': ('Namespace', 'QueryValueURL')
+}
+
+
 def _get_namespace_insert_values(bel_resource):
     namespace_insert_values = {
         'name': bel_resource['Namespace']['NameString'],
@@ -78,16 +84,14 @@ def _get_namespace_insert_values(bel_resource):
     namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
     namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
 
-    namespace_mapping = {
-        'species': ('Namespace', 'SpeciesString'),
-        'query_url': ('Namespace', 'QueryValueURL')
-    }
-
-    for database_column, (section, key) in namespace_mapping.items():
-        if section in bel_resource and key in bel_resource[section]:
-            namespace_insert_values[database_column] = bel_resource[section][key]
+    update_insert_values(bel_resource, _namespace_mapping, namespace_insert_values)
 
     return namespace_insert_values
+
+
+_annotation_mapping = {
+    'name': ('Citation', 'NameString')
+}
 
 
 def _get_annotation_insert_values(bel_resource):
@@ -97,13 +101,7 @@ def _get_annotation_insert_values(bel_resource):
     annotation_insert_values.update(extract_shared_required(bel_resource, 'AnnotationDefinition'))
     annotation_insert_values.update(extract_shared_optional(bel_resource, 'AnnotationDefinition'))
 
-    annotation_mapping = {
-        'name': ('Citation', 'NameString')
-    }
-
-    for database_column, (section, key) in annotation_mapping.items():
-        if section in bel_resource and key in bel_resource[section]:
-            annotation_insert_values[database_column] = bel_resource[section][key]
+    update_insert_values(bel_resource, _annotation_mapping, annotation_insert_values)
 
     return annotation_insert_values
 
@@ -111,6 +109,14 @@ def _get_annotation_insert_values(bel_resource):
 def not_resource_cachable(bel_resource):
     """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
     return bel_resource['Processing'].get('CacheableFlag') not in {'yes', 'Yes', 'True', 'true'}
+
+
+def _clean_bel_namespace_values(bel_resource):
+    bel_resource['Values'] = {
+        name: (encoding if encoding else DEFAULT_BELNS_ENCODING)
+        for name, encoding in bel_resource['Values'].items()
+        if name
+    }
 
 
 class NamespaceManager(BaseManager):
@@ -246,20 +252,15 @@ class NamespaceManager(BaseManager):
         if result is not None:
             return result
 
-        log.info('downloading namespace %s', url)
-
         bel_resource = get_bel_resource(url)
 
-        # Clean up values dictionary
-        bel_resource['Values'] = {
-            name: (encoding if encoding else DEFAULT_BELNS_ENCODING)
-            for name, encoding in bel_resource['Values'].items()
-            if name
-        }
+        _clean_bel_namespace_values(bel_resource)
+
+        values = bel_resource['Values']
 
         if not_resource_cachable(bel_resource):
-            log.info('not caching namespace: %s (%d)', url, len(bel_resource['Values']))
-            return bel_resource['Values']
+            log.info('not caching namespace: %s (%d)', url, len(values))
+            return values
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
 
@@ -269,10 +270,10 @@ class NamespaceManager(BaseManager):
         )
         namespace.entries = [
             NamespaceEntry(name=name, encoding=encoding)
-            for name, encoding in bel_resource['Values'].items()
+            for name, encoding in values.items()
         ]
 
-        log.info('inserted namespace: %s (%d)', url, len(bel_resource['Values']))
+        log.info('inserted namespace: %s (%d)', url, len(values))
 
         self.session.add(namespace)
         self.session.commit()
@@ -586,15 +587,11 @@ class AnnotationManager(BaseManager):
         if annotation is not None:
             return annotation
 
-        log.info('downloading annotation %s', url)
-
         bel_resource = get_bel_resource(url)
-
-        annotation_insert_values = _get_annotation_insert_values(bel_resource)
 
         annotation = Annotation(
             url=url,
-            **annotation_insert_values
+            **_get_annotation_insert_values(bel_resource)
         )
         annotation.entries = [
             AnnotationEntry(name=name, label=label)
@@ -761,8 +758,6 @@ class EquivalenceManager(NamespaceManager):
         if not isinstance(namespace, Namespace):
             raise ValueError("Can't insert equivalences for non-cachable namespace")
 
-        log.info('inserting equivalences: %s', equivalence_url)
-
         equivalence_resource = get_bel_resource(equivalence_url)
         values = equivalence_resource['Values']
 
@@ -771,6 +766,8 @@ class EquivalenceManager(NamespaceManager):
             entry.equivalence = self.ensure_equivalence_class(label=label)
 
         namespace.has_equivalences = True
+
+        log.info('inserted equivalences: %s (%d)', equivalence_url, len(values))
 
         self.session.commit()
 
@@ -1707,8 +1704,9 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
 
         :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
                             for default connection
-        :type connection: None or str or Manager
-        :param kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
+        :type connection: Optional[str or Manager]
+        :param list args: Positional arguments to pass to the constructor of :class:`Manager`
+        :param dict kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
         :rtype: Manager
         """
         if connection is None or isinstance(connection, string_types):
@@ -1717,7 +1715,12 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
         return connection
 
 
-def normalize_url(graph, keyword):
+def normalize_url(graph, keyword): # FIXME move to utilities and unit test
+    """
+    :type graph: BELGraph
+    :param str keyword: Namespace URL keyword
+    :rtype: Optional[str]
+    """
     if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
         return BEL_DEFAULT_NAMESPACE_URL
 

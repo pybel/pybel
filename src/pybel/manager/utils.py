@@ -76,14 +76,20 @@ def extract_shared_required(config, definition_header='Namespace'):
     }
 
 
-def extract_shared_optional(config, definition_header='Namespace'):
+def update_insert_values(bel_resource, m, d):
+    for database_column, (section, key) in m.items():
+        if section in bel_resource and key in bel_resource[section]:
+            d[database_column] = bel_resource[section][key]
+
+
+def extract_shared_optional(bel_resource, definition_header='Namespace'):
     """Gets the optional annotations shared by BEL namespace and annotation resource documents
     
-    :param dict config: A configuration dictionary representing a BEL resource
+    :param dict bel_resource: A configuration dictionary representing a BEL resource
     :param str definition_header: ``Namespace`` or ``AnnotationDefinition``
     :rtype: dict
     """
-    s = {
+    shared_mapping = {
         'description': (definition_header, 'DescriptionString'),
         'version': (definition_header, 'VersionString'),
         'license': ('Author', 'CopyrightString'),
@@ -95,12 +101,10 @@ def extract_shared_optional(config, definition_header='Namespace'):
 
     result = {}
 
-    for database_column, (section, key) in s.items():
-        if section in config and key in config[section]:
-            result[database_column] = config[section][key]
+    update_insert_values(bel_resource, shared_mapping, result)
 
-    if 'PublishedDate' in config['Citation']:
-        result['citation_published'] = parse_datetime(config['Citation']['PublishedDate'])
+    if 'PublishedDate' in bel_resource['Citation']:
+        result['citation_published'] = parse_datetime(bel_resource['Citation']['PublishedDate'])
 
     return result
 
@@ -115,5 +119,5 @@ def int_or_str(v):
         return
     try:
         return int(v)
-    except:
+    except Exception:
         return v

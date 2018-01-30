@@ -13,18 +13,21 @@ python:
     - 2.7
 
 env:
-  - TOXENV=py DB=mysql    PYBEL_TEST_CONNECTOR=pymysql  PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
-  - TOXENV=py DB=postgres PYBEL_TEST_CONNECTOR=psycopg2 PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
+  - TOXENV=py DB=mysql
+    PYBEL_TEST_CONNECTOR=pymysql
+    PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
+
+  - TOXENV=py DB=postgres
+    PYBEL_TEST_CONNECTOR=psycopg2
+    PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
+
   - TOXENV=py DB=sqlite
 
 matrix:
     include:
-        - python: 3.6
-          env: TOXENV=docs
-        - python: 3.6
-          env: TOXENV=manifest
-        - python: 3.6
-          env: TOXENV=rst-lint
+        - env: TOXENV=docs
+        - env: TOXENV=manifest
+        - env: TOXENV=rst-lint
 
 before_script:
   - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'DROP DATABASE IF EXISTS tests;' -U postgres; fi"
@@ -64,6 +67,7 @@ deploy:
         tags: true
         repo: pybel/pybel
         branch: master
+
     - provider: pypi
       server: https://arty.scai.fraunhofer.de/artifactory/api/pypi/pypi/
       user: choyt

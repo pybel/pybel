@@ -14,7 +14,8 @@ from .utils import ensure_quotes, flatten_citation, hash_edge
 __all__ = [
     'to_bel_lines',
     'to_bel',
-    'to_bel_path'
+    'to_bel_path',
+    'node_to_bel',
 ]
 
 log = logging.getLogger(__name__)
@@ -41,6 +42,20 @@ def postpend_location(bel_string, location_model):
     )
 
 
+def _get_variant_name(tokens):
+    if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
+        return tokens[IDENTIFIER][NAME]
+    else:
+        return'{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
+
+
+def _get_fragment_range_str(tokens):
+    if FRAGMENT_MISSING in tokens:
+        return'?'
+    else:
+        return '{}_{}'.format(tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
+
+
 def variant_to_bel(tokens):  # Replace with class-method of different Variant instances
     """Canonicalizes the variant dictionary produced by one of :func:`pybel.dsl.hgvs`, :func:`pybel.dsl.fragment`,
     :func:`pybel.dsl.pmod`, or :func:`pybel.dsl.gmod`.
@@ -49,27 +64,18 @@ def variant_to_bel(tokens):  # Replace with class-method of different Variant in
     :rtype: str
     """
     if tokens[KIND] == PMOD:
-        if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-            name = tokens[IDENTIFIER][NAME]
-        else:
-            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
+        name = _get_variant_name(tokens)
         return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PMOD_ORDER[2:] if x in tokens))
 
     elif tokens[KIND] == GMOD:
-        if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-            name = tokens[IDENTIFIER][NAME]
-        else:
-            name = '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
+        name = _get_variant_name(tokens)
         return 'gmod({})'.format(name)
 
     elif tokens[KIND] == HGVS:
         return 'var({})'.format(tokens[IDENTIFIER])
 
     elif tokens[KIND] == FRAGMENT:
-        if FRAGMENT_MISSING in tokens:
-            res = '?'
-        else:
-            res = '{}_{}'.format(tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
+        res = _get_fragment_range_str(tokens)
 
         if FRAGMENT_DESCRIPTION in tokens:
             res += ', "{}"'.format(tokens[FRAGMENT_DESCRIPTION])

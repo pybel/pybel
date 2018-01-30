@@ -7,7 +7,8 @@ pyparsing
 six
 
 # Extras
-configparser
-py2neo
-onto2nx
-ndex2
+indra[indra]
+artifactory[deployment]
+onto2nx[owl]
+ndex2[ndex]
+py2neo[neo4j]
