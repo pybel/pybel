@@ -41,9 +41,9 @@
 """
 
 from ..constants import *
+from ..dsl.edges import translocation
 from ..dsl.nodes import bioprocess, complex_abundance, protein
 from ..dsl.utils import entity
-from pybel.dsl.edges import translocation
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -53,7 +53,7 @@ __all__ = [
 egf_graph = BELGraph(
     name='EGF Pathway',
     version='1.0.0',
-    description="The downstream effects of EFG",
+    description="The downstream effects of EGF",
     authors='Charles Tapley Hoyt',
     contact='charles.hoyt@scai.fraunhofer.de',
 )
@@ -90,7 +90,8 @@ egf_graph.add_qualified_edge(
     egf,
     relation=INCREASES,
     citation='12855613',
-    evidence='This induction was not seen either when LNCaP cells were treated with flutamide or conditioned medium were pretreated with antibody to the epidermal growth factor (EGF)',
+    evidence='This induction was not seen either when LNCaP cells were treated with flutamide or conditioned medium '
+             'were pretreated with antibody to the epidermal growth factor (EGF)',
     annotations={'Species': '9606'},
     subject_modifier={
         MODIFIER: ACTIVITY,
@@ -106,7 +107,8 @@ egf_graph.add_qualified_edge(
     egf,
     relation=DECREASES,
     citation='9639405',
-    evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN gamma reduction more significant.',
+    evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN '
+             'gamma reduction more significant.',
     annotations={'Species': '9606'}
 )
 
@@ -115,7 +117,8 @@ egf_graph.add_qualified_edge(
     egf,
     relation=DECREASES,
     citation='9639405',
-    evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN gamma reduction more significant.',
+    evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN '
+             'gamma reduction more significant.',
     annotations={'Species': '9606'}
 )
 
@@ -124,7 +127,8 @@ egf_graph.add_qualified_edge(
     vcp,
     relation=INCREASES,
     citation='10855792',
-    evidence='Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be translocated from the nucleus after stimulation with epidermal growth factor.',
+    evidence='Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be '
+             'translocated from the nucleus after stimulation with epidermal growth factor.',
     annotations={'Species': '9606'},
     object_modifier=translocation(
         from_loc=entity(namespace='GOCC', name='nucleus', identifier='0005634'),
