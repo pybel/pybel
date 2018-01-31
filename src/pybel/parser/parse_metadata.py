@@ -176,6 +176,7 @@ class MetadataParser(BaseParser):
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         :raises: RedefinedNamespaceError
+        :raises: pybel.resources.exc.ResourceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)

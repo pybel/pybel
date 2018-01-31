@@ -9,6 +9,20 @@ class ResourceError(ValueError):
         self.location = location
 
 
+class MissingResourceError(ResourceError):
+    """Raised when trying to download a file that doesn't exist anymore"""
+
+    def __str__(self):
+        return "Can't locate resource: {}".format(self.location)
+
+
+class InvalidResourceError(ResourceError):
+    """Raise when downloading a file that is not actually a BEL resource file"""
+
+    def __str__(self):
+        return 'URL does not point to a BEL resource: {}'.format(self.location)
+
+
 class EmptyResourceError(ResourceError):
     """Raised when downloading an empty file"""
 

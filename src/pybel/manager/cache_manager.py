@@ -246,6 +246,7 @@ class NamespaceManager(BaseManager):
         :param str url: the location of the namespace file
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
+        :raises: pybel.resources.exc.ResourceError
         """
         result = self.get_namespace_by_url(url)
 
@@ -303,6 +304,7 @@ class NamespaceManager(BaseManager):
 
         :param str url: the location of the namespace file
         :rtype: Namespace or dict[str,str]
+        :raises: pybel.resources.exc.ResourceError
         """
         if self.use_namespace_cache and url in self.namespace_model:
             log.debug('already in memory: %s', url)
@@ -583,6 +585,7 @@ class AnnotationManager(BaseManager):
 
         :param str url: the location of the namespace file
         :rtype: Annotation
+        :raises: pybel.resources.exc.ResourceError
         """
         annotation = self.get_annotation_by_url(url)
 
@@ -607,7 +610,8 @@ class AnnotationManager(BaseManager):
         self.session.add(annotation)
         self.session.commit()
 
-        log.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']), time.time() - t)
+        log.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
+                 time.time() - t)
 
         return annotation
 
@@ -616,6 +620,7 @@ class AnnotationManager(BaseManager):
 
         :param str url: the location of the annotation file
         :rtype: Annotation
+        :raises: pybel.resources.exc.ResourceError
         """
         if url in self.annotation_model:
             log.debug('already in memory: %s (%d)', url, len(self.annotation_object_cache[url]))
@@ -756,7 +761,12 @@ class EquivalenceManager(NamespaceManager):
         return result
 
     def insert_equivalences(self, equivalence_url, namespace_url):
-        """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
+        """Given a url to a .beleq file and its accompanying namespace url, populate the database
+
+        :param str equivalence_url:
+        :param str namespace_url:
+        :raises: pybel.resources.exc.ResourceError
+        """
         namespace = self.ensure_namespace(namespace_url)
 
         if not isinstance(namespace, Namespace):
@@ -771,7 +781,7 @@ class EquivalenceManager(NamespaceManager):
 
         namespace.has_equivalences = True
 
-        log.info('inserted equivalences: %s (%d)', equivalence_url, len(values))
+        log.info('inserted equivalences: %s (%d terms)', equivalence_url, len(values))
 
         self.session.commit()
 
@@ -780,6 +790,7 @@ class EquivalenceManager(NamespaceManager):
 
         :param str url: The URL of the equivalence file corresponding to the namespace file
         :param str namespace_url: The URL of the namespace file
+        :raises: pybel.resources.exc.ResourceError
         """
         self.ensure_namespace(namespace_url)
 
@@ -992,6 +1003,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param BELGraph graph: A BEL graph
         :param bool store_parts: Should the graph be stored in the edge store?
         :rtype: Network
+        :raises: pybel.resources.exc.ResourceError
         """
         if not graph.name:
             raise ValueError('Can not upload a graph without a name')
@@ -1040,6 +1052,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
+        :raises: pybel.resources.exc.ResourceError
+        :raises: EdgeAddError
         """
         self.ensure_namespace(GOCC_LATEST)
 
@@ -1719,7 +1733,7 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
         return connection
 
 
-def normalize_url(graph, keyword): # FIXME move to utilities and unit test
+def normalize_url(graph, keyword):  # FIXME move to utilities and unit test
     """
     :type graph: BELGraph
     :param str keyword: Namespace URL keyword

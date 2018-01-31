@@ -186,13 +186,6 @@ class MalformedMetadataException(MetadataException):
     """Raised when an invalid metadata line is encountered"""
 
 
-class MissingBelResource(MetadataException):
-    """Raised when a missing resource is encountered"""
-
-    def __str__(self):
-        return "Can't locate resource [line:{}] - {}".format(self.line_number, self.line)
-
-
 class InvalidMetadataException(PyBelParserWarning):
     """Raised when an incorrect document metadata key is used. Valid document metadata keys are:
 

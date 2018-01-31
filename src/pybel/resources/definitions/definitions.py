@@ -6,7 +6,10 @@ import logging
 import os
 from configparser import ConfigParser
 
-from ..exc import EmptyResourceError
+import requests.exceptions
+import six
+
+from ..exc import EmptyResourceError, InvalidResourceError, MissingResourceError
 from ..utils import download, is_url
 
 __all__ = [
@@ -67,6 +70,12 @@ def parse_bel_resource(lines):
 
 
 def get_lines(location):
+    """Gets the lines from a location
+
+    :param str location: The URL location to download or a file path to open. File path expands user.
+    :return: list[str]
+    :raises: requests.exceptions.HTTPError
+    """
     if is_url(location):
         res = download(location)
         return list(line.decode('utf-8', errors='ignore').strip() for line in res.iter_lines())
@@ -81,12 +90,19 @@ def get_bel_resource(location):
     :param str location: The URL or file path to a BELNS, BELANNO, or BELEQ file to download and parse
     :return: A config-style dictionary representing the BEL config file
     :rtype: dict
+    :raises: pybel.resources.exc.ResourceError
     """
     log.debug('getting resource: %s', location)
 
-    lines = get_lines(location)
+    try:
+        lines = get_lines(location)
+    except requests.exceptions.HTTPError as e:
+        six.raise_from(MissingResourceError(location), e)
 
-    result = parse_bel_resource(lines)
+    try:
+        result = parse_bel_resource(lines)
+    except ValueError as e:
+        six.raise_from(InvalidResourceError(location), e)
 
     if not result['Values']:
         raise EmptyResourceError(location)
@@ -124,6 +140,7 @@ def get_bel_resource_hash(location, hash_function=None):
     :param hash_function: A hash function or list of hash functions, like :func:`hashlib.md5` or :code:`hashlib.sha512`
     :return: The hexadecimal digest of the hash of the values in the resource
     :rtype: str
+    :raises: pybel.resources.exc.ResourceError
     """
     resource = get_bel_resource(location)
 
