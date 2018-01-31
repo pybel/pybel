@@ -460,6 +460,9 @@ class Node(Base):
     def __str__(self):
         return self.bel
 
+    def __repr__(self):
+        return '<Node {}: {}>'.format(self.sha512[:10], self.bel)
+
     def to_json(self, include_id=False, include_hash=False):
         """Serializes this node as a PyBEL node data dictionary
 
@@ -784,6 +787,9 @@ class Edge(Base):
 
     def __str__(self):
         return self.bel
+
+    def __repr__(self):
+        return '<Edge {}: {}>'.format(self.sha512[:10], self.bel)
 
     def get_annotations_json(self):
         """Formats the annotations properly
