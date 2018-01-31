@@ -1610,6 +1610,8 @@ class TestEquivalentNodes(unittest.TestCase):
 
         n = graph.add_node_from_data(protein(namespace='HGNC', name='CD33', identifier='1659'))
 
+        self.assertEqual({n}, graph.get_equivalent_nodes(n))
+
         self.assertTrue(graph.node_has_namespace(n, 'HGNC'))
 
     def test_indirect_has_namespace(self):
@@ -1619,6 +1621,9 @@ class TestEquivalentNodes(unittest.TestCase):
         b = graph.add_node_from_data(protein(namespace='HGNCID', identifier='1659'))
 
         graph.add_equivalence(a, b)
+
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(a))
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(b))
 
         self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
         self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
@@ -1635,6 +1640,11 @@ class TestEquivalentNodes(unittest.TestCase):
         graph.add_equivalence(b, c)
         graph.add_equivalence(c, a)
         graph.add_equivalence(c, d)
+
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(a))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(b))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(c))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(d))
 
         self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
         self.assertTrue(graph.node_has_namespace(b, 'HGNC'))

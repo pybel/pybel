@@ -631,14 +631,12 @@ class BELGraph(networkx.MultiDiGraph):
         """
         return edge_to_bel(self.node[u], self.node[v], data=data, sep=sep)
 
-    def _equivalent_node_iterator(self, node, visited=None):
+    def _equivalent_node_iterator_helper(self, node, visited):
         """Iterates over nodes and their data that are equal to the given node, starting with the original
 
         :param tuple node: A PyBEL node tuple
         :rtype: iter[tuple]
         """
-        visited = visited or {node}
-
         for v in self.edge[node]:
             if v in visited:
                 continue
@@ -649,13 +647,33 @@ class BELGraph(networkx.MultiDiGraph):
             yield v
             visited.add(v)
 
-            for w in self._equivalent_node_iterator(v, visited):
+            for w in self._equivalent_node_iterator_helper(v, visited):
                 yield w
+
+    def iter_equivalent_nodes(self, node):
+        """Iterates over node tuples that are equivalent to the given node, including the original
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: iter[tuple]
+        """
+        yield node
+
+        for n in self._equivalent_node_iterator_helper(node, {node}):
+            yield n
+
+    def get_equivalent_nodes(self, node):
+        """Gets a set of equivalent nodes to this node. Does not include the given node.
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: set[tuple]
+        """
+        return set(self.iter_equivalent_nodes(node))
 
     def _node_has_namespace_helper(self, node, namespace):
         """Check that the node has namespace information. Might have cross references in future
 
-        :tuple node:
+        :param tuple node: A PyBEL node tuple
+        :rtype: bool
         """
         return namespace == self.node[node].get(NAMESPACE)
 
@@ -666,23 +684,8 @@ class BELGraph(networkx.MultiDiGraph):
         :param str namespace: A namespace
         :rtype: bool
         """
-
-        for n in self._equivalent_node_iterator(node):
+        for n in self.iter_equivalent_nodes(node):
             if self._node_has_namespace_helper(n, namespace):
                 return True
 
         return False
-
-        """
-        if self._node_has_namespace_helper(node, namespace):
-            return True
-
-        for _, v, data in self.out_edges_iter(node, data=True):
-            if data[RELATION] != EQUIVALENT_TO:
-                continue
-
-            if self.node_has_namespace(v, namespace):
-                return True
-
-        return False
-        """
