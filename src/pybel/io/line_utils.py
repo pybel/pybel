@@ -99,9 +99,9 @@ def parse_document(graph, document_metadata, metadata_parser):
         except VersionFormatWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e)
-        except Exception:
+        except Exception as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise MalformedMetadataException(line_number, line)
+            raise MalformedMetadataException(line_number, line) from e
 
     for required in REQUIRED_METADATA:
         if required in metadata_parser.document_metadata and metadata_parser.document_metadata[required]:
@@ -129,17 +129,17 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
         except (RedefinedNamespaceError, RedefinedAnnotationError) as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
-        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError):
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as e:
             parse_log.warning("Line %07d - Can't locate resource - %s", line_number, line)
-            raise MissingBelResource(line_number, line)
+            raise MissingBelResource(line_number, line) from e
         except OperationalError as e:
             parse_log.warning('Need to upgrade database. See '
                               'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
             raise e
-        except Exception:
+        except Exception as e:
             if not allow_failures:
                 parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
-                raise MetadataException(line_number, line)
+                raise MetadataException(line_number, line) from e
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
     graph.namespace_owl.update(metadata_parser.namespace_owl_dict)
