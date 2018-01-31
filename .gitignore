@@ -96,3 +96,5 @@ ENV/
 
 scratch
 scratch/*
+
+.pytest_cache
