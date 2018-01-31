@@ -138,12 +138,20 @@ class QueryManager(LookupManager):
         query = query.filter(Annotation.keyword == annotation).filter(AnnotationEntry.name == value)
         return query.all()
 
-    def query_edges(self, bel=None, source=None, target=None, relation=None):
+    @staticmethod
+    def _add_edge_function_filter(query, edge_node_id, node_type):
+        """See usage in self.query_edges"""
+        return query.join(Node, edge_node_id == Node.id).filter(Node.type == node_type)
+
+    def query_edges(self, bel=None, source_function=None, source=None, target_function=None, target=None,
+                    relation=None):
         """Builds and runs a query over all edges in the PyBEL cache.
 
         :param str bel: BEL statement that represents the desired edge.
+        :param str source_function: Filter source nodes with the given BEL function
         :param source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
         :type source: str or Node
+        :param str target_function: Filter target nodes with the given BEL function
         :param target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
         :type target: str or Node
         :param str relation: The relation that should be present between source and target node.
@@ -156,6 +164,12 @@ class QueryManager(LookupManager):
 
         if relation:
             query = query.filter(Edge.relation.like(relation))
+
+        if source_function:
+            query = self._add_edge_function_filter(query, Edge.source_id, source_function)
+
+        if target_function:
+            query = self._add_edge_function_filter(query, Edge.target_id, target_function)
 
         if source:
             if isinstance(source, string_types):

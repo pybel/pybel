@@ -255,6 +255,20 @@ class TestQuery(TemporaryCacheMixin):
         source_list = self.manager.query_edges(source='p(HGNC:FOS)', relation=INCREASES)
         self.assertEqual(len(source_list), 1)
 
+    def test_query_edge_by_source_function(self):
+        edges = self.manager.query_edges(source_function=PROTEIN)
+        self.assertEqual(1, len(edges), msg='Wrong number of edges: {}'.format(edges))
+
+        edges = self.manager.query_edges(source_function=BIOPROCESS)
+        self.assertEqual(0, len(edges), msg='Wrong number of edges: {}'.format(edges))
+
+    def test_query_edge_by_target_function(self):
+        edges = self.manager.query_edges(target_function=PROTEIN)
+        self.assertEqual(1, len(edges), msg='Wrong number of edges: {}'.format(edges))
+
+        edges = self.manager.query_edges(target_function=PATHOLOGY)
+        self.assertEqual(0, len(edges), msg='Wrong number of edges: {}'.format(edges))
+
     def test_query_citation(self):
         citation_1 = {
             CITATION_TYPE: CITATION_TYPE_PUBMED,
