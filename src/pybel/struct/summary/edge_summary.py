@@ -4,15 +4,17 @@
 
 from collections import defaultdict
 
+from ..filters.edge_predicates import edge_has_annotation
 from ...constants import ANNOTATIONS
 
 __all__ = [
+    'iter_annotation_value_pairs',
     'iter_annotation_values',
     'get_annotation_values_by_annotation',
 ]
 
 
-def iter_annotation_values(graph):
+def iter_annotation_value_pairs(graph):
     """Iterates over the key/value pairs, with duplicates, for each annotation used in a BEL graph
 
     :param pybel.BELGraph graph: A BEL graph
@@ -24,6 +26,21 @@ def iter_annotation_values(graph):
         if ANNOTATIONS in data
         for key, values in data[ANNOTATIONS].items()
         for value in values
+    )
+
+
+def iter_annotation_values(graph, annotation):
+    """Iterates over all of the values for an annotation used in the graph
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param str annotation: The annotation to grab
+    :rtype: iter[str]
+    """
+    return (
+        value
+        for _, _, data in graph.edges_iter(data=True)
+        if edge_has_annotation(data, annotation)
+        for value in data[ANNOTATIONS][annotation]
     )
 
 
@@ -46,4 +63,4 @@ def get_annotation_values_by_annotation(graph):
     :return: A dictionary of {annotation key: set of annotation values}
     :rtype: dict[str, set[str]]
     """
-    return _group_dict_set(iter_annotation_values(graph))
+    return _group_dict_set(iter_annotation_value_pairs(graph))
