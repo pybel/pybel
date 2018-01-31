@@ -5,7 +5,6 @@ import unittest
 
 import networkx as nx
 
-from pybel.parser.utils import cartesian_dictionary
 from pybel.resources.document import sanitize_file_lines
 from pybel.utils import ensure_quotes, subdict_matches
 from tests.constants import any_subdict_matches
@@ -133,29 +132,6 @@ class TestUtils(unittest.TestCase):
         d = {'relation': 'yup'}
 
         self.assertTrue(any_subdict_matches(g.edge[1][2], d))
-
-    def test_cartesian_dictionary(self):
-        d = {
-            'A': {'1', '2'},
-            'B': {'x', 'y', 'z'}
-        }
-        results = cartesian_dictionary(d)
-
-        expected_results = [
-            {'A': '1', 'B': 'x'},
-            {'A': '1', 'B': 'y'},
-            {'A': '1', 'B': 'z'},
-            {'A': '2', 'B': 'x'},
-            {'A': '2', 'B': 'y'},
-            {'A': '2', 'B': 'z'},
-        ]
-
-        for result in results:
-            found = False
-            for expected_result in expected_results:
-                if result == expected_result:
-                    found = True
-            self.assertTrue(found)
 
 
 class TestSanitize(unittest.TestCase):

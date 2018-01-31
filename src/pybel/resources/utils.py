@@ -29,7 +29,12 @@ def is_url(s):
 
 
 def download(url):
-    """Uses requests to download an URL, maybe from a file"""
+    """Uses requests to download an URL, maybe from a file
+
+    :param str url: The URL to download
+    :rtype: requests.Response
+    :raises: requests.exceptions.HTTPError
+    """
     session = requests.Session()
     session.mount('file://', FileAdapter())
 

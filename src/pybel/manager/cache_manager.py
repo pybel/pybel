@@ -19,13 +19,14 @@ from six import string_types
 from sqlalchemy import and_, exists, func
 
 from .base_manager import BaseManager
+from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
     Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
     NamespaceEntry, NamespaceEntryEquivalence, Network, Node, Property,
 )
 from .query_manager import QueryManager
-from .utils import extract_shared_optional, extract_shared_required, parse_owl
+from .utils import extract_shared_optional, extract_shared_required, parse_owl, update_insert_values
 from ..canonicalize import node_to_bel
 from ..constants import *
 from ..language import (
@@ -45,21 +46,10 @@ log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
-
-class EdgeAddError(RuntimeError):
-    """When there's a problem inserting an edge"""
-
-    def __str__(self):
-        return ("Error adding edge from line {} to database. Check this line in the file and make sure the citation, "
-                "evidence, and annotations all use valid UTF-8 characters: {}".format(self.line, self.data))
-
-    @property
-    def data(self):
-        return self.args[0]
-
-    @property
-    def line(self):
-        return self.data.get(LINE)
+_namespace_mapping = {
+    'species': ('Namespace', 'SpeciesString'),
+    'query_url': ('Namespace', 'QueryValueURL')
+}
 
 
 def _get_namespace_insert_values(bel_resource):
@@ -71,16 +61,14 @@ def _get_namespace_insert_values(bel_resource):
     namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
     namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
 
-    namespace_mapping = {
-        'species': ('Namespace', 'SpeciesString'),
-        'query_url': ('Namespace', 'QueryValueURL')
-    }
-
-    for database_column, (section, key) in namespace_mapping.items():
-        if section in bel_resource and key in bel_resource[section]:
-            namespace_insert_values[database_column] = bel_resource[section][key]
+    update_insert_values(bel_resource, _namespace_mapping, namespace_insert_values)
 
     return namespace_insert_values
+
+
+_annotation_mapping = {
+    'name': ('Citation', 'NameString')
+}
 
 
 def _get_annotation_insert_values(bel_resource):
@@ -90,13 +78,7 @@ def _get_annotation_insert_values(bel_resource):
     annotation_insert_values.update(extract_shared_required(bel_resource, 'AnnotationDefinition'))
     annotation_insert_values.update(extract_shared_optional(bel_resource, 'AnnotationDefinition'))
 
-    annotation_mapping = {
-        'name': ('Citation', 'NameString')
-    }
-
-    for database_column, (section, key) in annotation_mapping.items():
-        if section in bel_resource and key in bel_resource[section]:
-            annotation_insert_values[database_column] = bel_resource[section][key]
+    update_insert_values(bel_resource, _annotation_mapping, annotation_insert_values)
 
     return annotation_insert_values
 
@@ -104,6 +86,14 @@ def _get_annotation_insert_values(bel_resource):
 def not_resource_cachable(bel_resource):
     """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
     return bel_resource['Processing'].get('CacheableFlag') not in {'yes', 'Yes', 'True', 'true'}
+
+
+def _clean_bel_namespace_values(bel_resource):
+    bel_resource['Values'] = {
+        name: (encoding if encoding else DEFAULT_BELNS_ENCODING)
+        for name, encoding in bel_resource['Values'].items()
+        if name
+    }
 
 
 class NamespaceManager(BaseManager):
@@ -155,6 +145,13 @@ class NamespaceManager(BaseManager):
         """
         return self.session.query(Namespace).count()
 
+    def count_namespace_entries(self):
+        """Count the number of namespace entries in the database
+
+        :rtype: int
+        """
+        return self.session.query(NamespaceEntry).count()
+
     def drop_namespaces(self):
         """Drops all namespaces"""
         self.namespace_object_cache.clear()
@@ -184,16 +181,27 @@ class NamespaceManager(BaseManager):
         """
         return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
+    def get_namespace_by_keyword_version(self, keyword, version):
+        """Gets a namespace with a given keyword and version
+
+        :param str keyword: The keyword to search
+        :param str version: The version to search
+        :rtype: Optional[Namespace]
+        """
+        filt = and_(Namespace.keyword == keyword, Namespace.version == version)
+        return self.session.query(Namespace).filter(filt).one_or_none()
+
     def ensure_default_namespace(self):
         """Creates or gets the BEL default namespace
 
         :rtype: Namespace
         """
-        filt = and_(Namespace.keyword == BEL_DEFAULT_NAMESPACE, Namespace.version == BEL_DEFAULT_NAMESPACE_VERSION)
-        namespace = self.session.query(Namespace).filter(filt).one_or_none()
+        namespace = self.get_namespace_by_keyword_version(BEL_DEFAULT_NAMESPACE, BEL_DEFAULT_NAMESPACE_VERSION)
 
         if namespace is None:
             namespace = Namespace(
+                name='BEL Default Namespace',
+                contact='charles.hoyt@scai.fraunhofer.de',
                 keyword=BEL_DEFAULT_NAMESPACE,
                 version=BEL_DEFAULT_NAMESPACE_VERSION,
                 url=BEL_DEFAULT_NAMESPACE_URL,
@@ -215,26 +223,24 @@ class NamespaceManager(BaseManager):
         :param str url: the location of the namespace file
         :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
+        :raises: pybel.resources.exc.ResourceError
         """
         result = self.get_namespace_by_url(url)
 
         if result is not None:
             return result
 
-        log.info('downloading namespace %s', url)
+        t = time.time()
 
         bel_resource = get_bel_resource(url)
 
-        # Clean up values dictionary
-        bel_resource['Values'] = {
-            name: (encoding if encoding else DEFAULT_BELNS_ENCODING)
-            for name, encoding in bel_resource['Values'].items()
-            if name
-        }
+        _clean_bel_namespace_values(bel_resource)
+
+        values = bel_resource['Values']
 
         if not_resource_cachable(bel_resource):
-            log.info('not caching namespace: %s (%d)', url, len(bel_resource['Values']))
-            return bel_resource['Values']
+            log.info('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
+            return values
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
 
@@ -244,10 +250,10 @@ class NamespaceManager(BaseManager):
         )
         namespace.entries = [
             NamespaceEntry(name=name, encoding=encoding)
-            for name, encoding in bel_resource['Values'].items()
+            for name, encoding in values.items()
         ]
 
-        log.info('inserted namespace: %s (%d)', url, len(bel_resource['Values']))
+        log.info('inserted namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
 
         self.session.add(namespace)
         self.session.commit()
@@ -275,6 +281,7 @@ class NamespaceManager(BaseManager):
 
         :param str url: the location of the namespace file
         :rtype: Namespace or dict[str,str]
+        :raises: pybel.resources.exc.ResourceError
         """
         if self.use_namespace_cache and url in self.namespace_model:
             log.debug('already in memory: %s', url)
@@ -294,6 +301,16 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
+    def get_namespace_by_keyword_pattern(self, keyword, pattern):
+        """Gets a namespace with a given keyword and pattern
+
+        :param str keyword: The keyword to search
+        :param str pattern: The pattern to search
+        :rtype: Optional[Namespace]
+        """
+        filt = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
+        return self.session.query(Namespace).filter(filt).one_or_none()
+
     def ensure_regex_namespace(self, keyword, pattern):
         """Gets or creates a regular expression namespace
 
@@ -304,9 +321,7 @@ class NamespaceManager(BaseManager):
         if pattern is None:
             raise ValueError('cannot have null pattern')
 
-        filt = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
-
-        namespace = self.session.query(Namespace).filter(filt).one_or_none()
+        namespace = self.get_namespace_by_keyword_pattern(keyword, pattern)
 
         if namespace is None:
             log.info('creating regex namespace: %s:%s', keyword, pattern)
@@ -381,7 +396,7 @@ class OwlNamespaceManager(NamespaceManager):
         if namespace is not None:
             return namespace
 
-        log.info('inserting owl %s', url)
+        log.debug('inserting owl %s', url)
 
         namespace = Namespace(url=url, keyword=keyword)
 
@@ -499,6 +514,13 @@ class AnnotationManager(BaseManager):
         """
         return self.session.query(Annotation).count()
 
+    def count_annotation_entries(self):
+        """Count the number of annotation entries in the database
+
+        :rtype: int
+        """
+        return self.session.query(AnnotationEntry).count()
+
     def drop_annotations(self):
         """Drops all annotations"""
         self.annotation_object_cache.clear()
@@ -540,21 +562,20 @@ class AnnotationManager(BaseManager):
 
         :param str url: the location of the namespace file
         :rtype: Annotation
+        :raises: pybel.resources.exc.ResourceError
         """
         annotation = self.get_annotation_by_url(url)
 
         if annotation is not None:
             return annotation
 
-        log.info('downloading annotation %s', url)
+        t = time.time()
 
         bel_resource = get_bel_resource(url)
 
-        annotation_insert_values = _get_annotation_insert_values(bel_resource)
-
         annotation = Annotation(
             url=url,
-            **annotation_insert_values
+            **_get_annotation_insert_values(bel_resource)
         )
         annotation.entries = [
             AnnotationEntry(name=name, label=label)
@@ -566,7 +587,8 @@ class AnnotationManager(BaseManager):
         self.session.add(annotation)
         self.session.commit()
 
-        log.info('inserted annotation: %s (%d)', url, len(bel_resource['Values']))
+        log.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
+                 time.time() - t)
 
         return annotation
 
@@ -575,6 +597,7 @@ class AnnotationManager(BaseManager):
 
         :param str url: the location of the annotation file
         :rtype: Annotation
+        :raises: pybel.resources.exc.ResourceError
         """
         if url in self.annotation_model:
             log.debug('already in memory: %s (%d)', url, len(self.annotation_object_cache[url]))
@@ -605,7 +628,7 @@ class AnnotationManager(BaseManager):
         :param str value: The name of the annotation entry from the given url's document
         :rtype: AnnotationEntry
         """
-        if self.annotation_object_cache:
+        if self.annotation_object_cache and url in self.annotation_object_cache:
             annotation_entry = self.annotation_object_cache[url][value]
         else:
             annotation = self.session.query(Annotation).filter(Annotation.url == url).one()
@@ -629,7 +652,7 @@ class OwlAnnotationManager(AnnotationManager):
         if annotation is not None:
             return annotation
 
-        log.info('inserting owl %s', url)
+        log.debug('inserting owl %s', url)
 
         annotation = Annotation(url=url, keyword=keyword)
 
@@ -715,13 +738,16 @@ class EquivalenceManager(NamespaceManager):
         return result
 
     def insert_equivalences(self, equivalence_url, namespace_url):
-        """Given a url to a .beleq file and its accompanying namespace url, populate the database"""
+        """Given a url to a .beleq file and its accompanying namespace url, populate the database
+
+        :param str equivalence_url:
+        :param str namespace_url:
+        :raises: pybel.resources.exc.ResourceError
+        """
         namespace = self.ensure_namespace(namespace_url)
 
         if not isinstance(namespace, Namespace):
             raise ValueError("Can't insert equivalences for non-cachable namespace")
-
-        log.info('inserting equivalences: %s', equivalence_url)
 
         equivalence_resource = get_bel_resource(equivalence_url)
         values = equivalence_resource['Values']
@@ -732,6 +758,8 @@ class EquivalenceManager(NamespaceManager):
 
         namespace.has_equivalences = True
 
+        log.info('inserted equivalences: %s (%d terms)', equivalence_url, len(values))
+
         self.session.commit()
 
     def ensure_equivalences(self, url, namespace_url):
@@ -739,6 +767,7 @@ class EquivalenceManager(NamespaceManager):
 
         :param str url: The URL of the equivalence file corresponding to the namespace file
         :param str namespace_url: The URL of the namespace file
+        :raises: pybel.resources.exc.ResourceError
         """
         self.ensure_namespace(namespace_url)
 
@@ -951,6 +980,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param BELGraph graph: A BEL graph
         :param bool store_parts: Should the graph be stored in the edge store?
         :rtype: Network
+        :raises: pybel.resources.exc.ResourceError
         """
         if not graph.name:
             raise ValueError('Can not upload a graph without a name')
@@ -990,7 +1020,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.session.add(network)
         self.session.commit()
 
-        log.info('inserted %s v%s in %.2fs', graph.name, graph.version, time.time() - t)
+        log.info('inserted %s v%s in %.2f seconds', graph.name, graph.version, time.time() - t)
 
         return network
 
@@ -999,10 +1029,12 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
+        :raises: pybel.resources.exc.ResourceError
+        :raises: EdgeAddError
         """
         self.ensure_namespace(GOCC_LATEST)
 
-        log.info('inserting %s into edge store', graph)
+        log.debug('inserting %s into edge store', graph)
         log.debug('storing graph parts: nodes')
         t = time.time()
 
@@ -1020,11 +1052,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             network.nodes.append(node_object)
 
-        log.debug('stored nodes in %.2f', time.time() - t)
+        log.debug('stored nodes in %.2f seconds', time.time() - t)
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
-        for u, v, k, data in graph.edges_iter(data=True, keys=True):
+        for u, v, data in graph.edges_iter(data=True):
 
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
@@ -1039,10 +1071,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             if data[RELATION] in UNQUALIFIED_EDGES:
                 try:
-                    self._add_unqualified_edge(network, graph, u, v, k, data)
-                except:
+                    self._add_unqualified_edge(network, graph, u, v, data)
+                except Exception as e:
                     self.session.rollback()
-                    raise EdgeAddError(data)
+                    log.warning('error storing edge in database. edge data: %s', data)
+                    raise EdgeAddError(e, u, v, data)
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -1052,25 +1085,26 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             else:
                 try:
-                    self._add_qualified_edge(network, graph, u, v, k, data)
+                    self._add_qualified_edge(network, graph, u, v, data)
                 except Exception as e:
                     self.session.rollback()
-                    # raise EdgeAddError(data)
-                    log.warning('error with edge data: %s', data)
-                    raise e
+                    log.warning('error storing edge in database. edge data: %s', data)
+                    raise EdgeAddError(e, u, v, data)
 
-        log.debug('stored edges in %.2f', time.time() - t)
-        log.info('Skipped %d edges', c)
+        log.debug('stored edges in %.2f seconds', time.time() - t)
+
+        if c:
+            log.info('skipped %d edges', c)
 
     @staticmethod
-    def _map_annotations_dict(graph, data):
+    def _iter_annotations_from_dict(graph, data):
         """Iterates over the key/value pairs in this edge data dictionary normalized to their source URLs
 
         :param BELGraph graph: A BEL graph
-        :param dict data: A PyBEL edge data dictionary
+        :param dict[str,dict[str,bool]] data: A PyBEL edge data dictionary
         :rtype: iter[tuple[str,str]]
         """
-        for key, value in data.items():
+        for key, values in data.items():
             if key in graph.annotation_url:
                 url = graph.annotation_url[key]
             elif key in graph.annotation_owl:
@@ -1082,7 +1116,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 continue
             else:
                 raise ValueError('Graph resources does not contain keyword: {}'.format(key))
-            yield url, value
+
+            for value in values:
+                yield url, value
 
     def _get_annotation_entries(self, graph, data):
         """Gets the annotation entries for this edge's data
@@ -1091,15 +1127,17 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param dict data: A PyBEL edge data dictionary
         :rtype: list[AnnotationEntry]
         """
-        if ANNOTATIONS not in data:
+        annotations = data.get(ANNOTATIONS)
+
+        if annotations is None:
             return
 
         return [
             self.get_annotation_entry(url, value)
-            for url, value in self._map_annotations_dict(graph, data[ANNOTATIONS])
+            for url, value in self._iter_annotations_from_dict(graph, annotations)
         ]
 
-    def _add_qualified_edge(self, network, graph, u, v, k, data):
+    def _add_qualified_edge(self, network, graph, u, v, data):
         citation_dict = data[CITATION]
 
         citation = self.get_or_create_citation(
@@ -1125,7 +1163,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         annotations = self._get_annotation_entries(graph, data)
 
         bel = graph.edge_to_bel(u, v, data=data)
-        edge_hash = hash_edge(u, v, k, data)
+        edge_hash = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
@@ -1138,9 +1176,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         )
         network.edges.append(edge)
 
-    def _add_unqualified_edge(self, network, graph, u, v, k, data):
+    def _add_unqualified_edge(self, network, graph, u, v, data):
         bel = graph.edge_to_bel(u, v, data=data)
-        edge_hash = hash_edge(u, v, k, data)
+        edge_hash = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
@@ -1378,10 +1416,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param str name: An author's name
         :rtype: Author
         """
-        name = name.strip()
+        author = self.object_cache_author.get(name)
 
-        if name in self.object_cache_author:
-            author = self.object_cache_author[name]
+        if author is not None:
             self.session.add(author)
             return author
 
@@ -1391,9 +1428,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             self.object_cache_author[name] = author
             return author
 
-        author = Author(name=name)
+        author = self.object_cache_author[name] = Author(name=name)
         self.session.add(author)
-        self.object_cache_author[name] = author
         return author
 
     def get_modification_by_hash(self, modification_hash):
@@ -1582,7 +1618,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 participant_name = location[NAME]
                 location_property_dict['effect'] = self.get_namespace_entry(namespace_url, participant_name)
                 if location_property_dict['effect'] is None:
-                    raise IndexError
+                    raise IndexError('did not get {}: {}'.format(namespace_url, participant_name))
 
                 property_list.append(location_property_dict)
 
@@ -1663,8 +1699,9 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
 
         :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
                             for default connection
-        :type connection: None or str or Manager
-        :param kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
+        :type connection: Optional[str or Manager]
+        :param list args: Positional arguments to pass to the constructor of :class:`Manager`
+        :param dict kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
         :rtype: Manager
         """
         if connection is None or isinstance(connection, string_types):
@@ -1673,7 +1710,12 @@ class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, O
         return connection
 
 
-def normalize_url(graph, keyword):
+def normalize_url(graph, keyword):  # FIXME move to utilities and unit test
+    """
+    :type graph: BELGraph
+    :param str keyword: Namespace URL keyword
+    :rtype: Optional[str]
+    """
     if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
         return BEL_DEFAULT_NAMESPACE_URL
 

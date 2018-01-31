@@ -17,12 +17,12 @@ from pybel import (
 )
 from pybel.constants import *
 from pybel.dsl import gene
-from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_fmt
+from pybel.examples import sialic_acid_graph
+from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.io.ndex_utils import NDEX_PASSWORD, NDEX_USERNAME
 from pybel.parser import BelParser
-from pybel.parser.parse_exceptions import *
+from pybel.parser.exc import *
 from pybel.struct.summary import get_syntax_errors
-from pybel.tokens import node_to_tuple
 from pybel.utils import hash_node
 from tests.constants import (
     AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin, TestTokenParserBase, citation_1,
@@ -50,6 +50,48 @@ def do_remapping(original, reconstituted):
         missing_nodes = set(node_mapping) - set(reconstituted.nodes_iter())
         log.exception('missing %s', [node_mapping[n] for n in missing_nodes])
         raise e
+
+
+class TestExampleInterchange(unittest.TestCase):
+    def help_test_equal(self, graph):
+        """Checks that a graph is equal to the sialic acid graph example
+
+        :type graph: pybel.BELGraph
+        """
+        self.assertEqual(set(sialic_acid_graph.nodes_iter()),
+                         set(graph.nodes_iter()))
+
+        self.assertEqual(set(sialic_acid_graph.edges_iter()),
+                         set(graph.edges_iter()))
+
+    def test_example_bytes(self):
+        graph_bytes = to_bytes(sialic_acid_graph)
+        graph = from_bytes(graph_bytes)
+        self.help_test_equal(graph)
+
+    def test_example_pickle(self):
+        bio = BytesIO()
+        to_pickle(sialic_acid_graph, bio)
+        bio.seek(0)
+        graph = from_pickle(bio)
+        self.help_test_equal(graph)
+
+    def test_thorough_json(self):
+        graph_json_dict = to_json(sialic_acid_graph)
+        graph = from_json(graph_json_dict)
+        self.help_test_equal(graph)
+
+    def test_thorough_jsons(self):
+        graph_json_str = to_jsons(sialic_acid_graph)
+        graph = from_jsons(graph_json_str)
+        self.help_test_equal(graph)
+
+    def test_thorough_json_file(self):
+        sio = StringIO()
+        to_json_file(sialic_acid_graph, sio)
+        sio.seek(0)
+        graph = from_json_file(sio)
+        self.help_test_equal(graph)
 
 
 class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
@@ -180,12 +222,12 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         do_remapping(self.thorough_graph, reconstituted)
 
-        self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
+        self.bel_thorough_reconstituted(reconstituted, check_warnings=False, check_citation_name=False)
 
     def test_thorough_upgrade(self):
         lines = to_bel_lines(self.thorough_graph)
         reconstituted = from_lines(lines, manager=self.manager)
-        self.bel_thorough_reconstituted(reconstituted)
+        self.bel_thorough_reconstituted(reconstituted, check_citation_name=False)
 
     def test_slushy(self):
         self.bel_slushy_reconstituted(self.slushy_graph)
@@ -260,7 +302,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
             CITATION: citation_1,
             EVIDENCE: evidence_1,
             ANNOTATIONS: {
-                'TESTAN1': testan1
+                'TESTAN1': {testan1: True}
             }
         }
         self.assertHasEdge(self.misordered_graph, AKT1, EGFR, **e1)
@@ -270,7 +312,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
             CITATION: citation_1,
             EVIDENCE: evidence_1,
             ANNOTATIONS: {
-                'TESTAN1': testan1
+                'TESTAN1': {testan1: True}
             }
         }
         self.assertHasEdge(self.misordered_graph, EGFR, FADD, **e2)
@@ -280,7 +322,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
             CITATION: citation_1,
             EVIDENCE: evidence_1,
             ANNOTATIONS: {
-                'TESTAN1': testan1
+                'TESTAN1': {testan1: True}
             }
         }
         self.assertHasEdge(self.misordered_graph, EGFR, CASP8, **e3)
@@ -358,22 +400,22 @@ class TestFull(TestTokenParserBase):
         self.assertTrue(self.graph.has_node_with_data(test_node_1_dict))
         self.assertTrue(self.graph.has_node_with_data(test_node_2_dict))
 
-        test_node_1 = node_to_tuple(test_node_1_dict)
-        test_node_2 = node_to_tuple(test_node_2_dict)
+        test_node_1 = test_node_1_dict.as_tuple()
+        test_node_2 = test_node_2_dict.as_tuple()
 
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
         kwargs = {
             ANNOTATIONS: {
-                'TestAnnotation1': 'A',
-                'TestAnnotation2': 'X',
+                'TestAnnotation1': {'A': True},
+                'TestAnnotation2': {'X': True},
             },
             EVIDENCE: test_evidence_text,
             CITATION: test_citation_dict
         }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
-    def test_annotations_withList(self):
+    def test_annotations_with_list(self):
         self.add_default_provenance()
 
         statements = [
@@ -390,16 +432,21 @@ class TestFull(TestTokenParserBase):
         self.assertTrue(self.parser.graph.has_node_with_data(test_node_1_dict))
         self.assertTrue(self.parser.graph.has_node_with_data(test_node_2_dict))
 
-        test_node_1 = node_to_tuple(test_node_1_dict)
-        test_node_2 = node_to_tuple(test_node_2_dict)
+        test_node_1 = test_node_1_dict.as_tuple()
+        test_node_2 = test_node_2_dict.as_tuple()
 
-        self.assertEqual(2, self.parser.graph.number_of_edges())
-        kwargs = {ANNOTATIONS: {'TestAnnotation1': 'A', 'TestAnnotation2': 'X'}, CITATION: test_citation_dict}
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
-        kwargs = {ANNOTATIONS: {'TestAnnotation1': 'B', 'TestAnnotation2': 'X'}, CITATION: test_citation_dict}
+        self.assertEqual(1, self.parser.graph.number_of_edges())
+
+        kwargs = {
+            ANNOTATIONS: {
+                'TestAnnotation1': {'A': True, 'B': True},
+                'TestAnnotation2': {'X': True}
+            },
+            CITATION: test_citation_dict
+        }
         self.assertHasEdge(test_node_1, test_node_2, **kwargs)
 
-    def test_annotations_withMultiList(self):
+    def test_annotations_with_multilist(self):
         self.add_default_provenance()
 
         statements = [
@@ -413,50 +460,20 @@ class TestFull(TestTokenParserBase):
         test_node_1_dict = gene(namespace='TESTNS', name='1')
         test_node_2_dict = gene(namespace='TESTNS', name='2')
 
-        test_node_1 = node_to_tuple(test_node_1_dict)
-        test_node_2 = node_to_tuple(test_node_2_dict)
+        test_node_1 = test_node_1_dict.as_tuple()
+        test_node_2 = test_node_2_dict.as_tuple()
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
         self.assertTrue(self.parser.graph.has_node_with_data(test_node_1_dict))
         self.assertTrue(self.parser.graph.has_node_with_data(test_node_2_dict))
 
-        self.assertEqual(4, self.parser.graph.number_of_edges())
+        self.assertEqual(1, self.parser.graph.number_of_edges())
 
         kwargs = {
             ANNOTATIONS: {
-                'TestAnnotation1': 'A',
-                'TestAnnotation2': 'X',
-                'TestAnnotation3': 'D'
-            },
-            CITATION: test_citation_dict
-        }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
-
-        kwargs = {
-            ANNOTATIONS: {
-                'TestAnnotation1': 'A',
-                'TestAnnotation2': 'X',
-                'TestAnnotation3': 'E'
-            },
-            CITATION: test_citation_dict
-        }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
-
-        kwargs = {
-            ANNOTATIONS: {
-                'TestAnnotation1': 'B',
-                'TestAnnotation2': 'X',
-                'TestAnnotation3': 'D'
-            },
-            CITATION: test_citation_dict
-        }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
-
-        kwargs = {
-            ANNOTATIONS: {
-                'TestAnnotation1': 'B',
-                'TestAnnotation2': 'X',
-                'TestAnnotation3': 'E'
+                'TestAnnotation1': {'A': True, 'B': True},
+                'TestAnnotation2': {'X': True},
+                'TestAnnotation3': {'D': True, 'E': True}
             },
             CITATION: test_citation_dict
         }

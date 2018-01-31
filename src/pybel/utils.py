@@ -11,8 +11,8 @@ import networkx as nx
 from six import string_types
 
 from .constants import (
-    CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, PYBEL_EDGE_DATA_KEYS,
-    VERSION,
+    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
+    PYBEL_EDGE_DATA_KEYS, VERSION,RELATION
 )
 
 log = logging.getLogger(__name__)
@@ -230,7 +230,7 @@ def hash_node(node_tuple):
     return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
 
 
-def extract_pybel_data(data):
+def _extract_pybel_data(data):
     """Extracts only the PyBEL-specific data from the given edge data dictionary
 
     :param dict data: An edge data dictionary
@@ -243,7 +243,7 @@ def extract_pybel_data(data):
     }
 
 
-def edge_to_tuple(u, v, k, data):
+def _edge_to_tuple(u, v, data):
     """Converts an edge to tuple
 
     :param tuple u: The source BEL node
@@ -251,17 +251,20 @@ def edge_to_tuple(u, v, k, data):
     :param dict data: The edge's data dictionary
     :return: A tuple that can be hashed representing this edge. Makes no promises to its structure.
     """
-    extracted_data_dict = extract_pybel_data(data)
+    extracted_data_dict = _extract_pybel_data(data)
     return u, v, json.dumps(extracted_data_dict, ensure_ascii=False, sort_keys=True)
 
 
-def hash_edge(u, v, k, d):
+def hash_edge(u, v, data):
     """Converts an edge tuple to a hash
-
+    
+    :param tuple u: The source BEL node
+    :param tuple v: The target BEL node
+    :param dict data: The edge's data dictionary
     :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
     :rtype: str
     """
-    edge_tuple = edge_to_tuple(u, v, k, d)
+    edge_tuple = _edge_to_tuple(u, v, data)
     edge_tuple_bytes = pickle.dumps(edge_tuple)
     return hashlib.sha512(edge_tuple_bytes).hexdigest()
 

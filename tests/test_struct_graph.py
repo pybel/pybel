@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from uuid import uuid4
 
 from six import string_types
 
@@ -12,6 +11,7 @@ from pybel.constants import (
     unqualified_edge_code,
 )
 from pybel.dsl import *
+from tests.utils import n
 
 
 class TestStruct(unittest.TestCase):
@@ -62,7 +62,7 @@ class TestStruct(unittest.TestCase):
                 protein(namespace='TEST', name='YFG1'),
                 protein(namespace='TEST', name='YFG2'),
                 relation=INCREASES,
-                evidence=str(uuid4()),
+                evidence=n(),
                 citation=5
             )
 
@@ -122,9 +122,9 @@ class TestGetGraphProperties(unittest.TestCase):
     def test_get_qualified_edge(self):
         test_source = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG'))
         test_target = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG2'))
-        test_key = str(uuid4())
-        test_evidence = str(uuid4())
-        test_pmid = str(uuid4())
+        test_key = n()
+        test_evidence = n()
+        test_pmid = n()
 
         self.graph.add_qualified_edge(
             test_source,
@@ -158,9 +158,11 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertIsNotNone(annotations)
         self.assertIsInstance(annotations, dict)
         self.assertIn('Species', annotations)
-        self.assertEqual('9606', annotations['Species'])
+        self.assertIn('9606', annotations['Species'])
+        self.assertTrue(annotations['Species']['9606'])
         self.assertIn('Confidence', annotations)
-        self.assertEqual('Very High', annotations['Confidence'])
+        self.assertIn('Very High', annotations['Confidence'])
+        self.assertTrue(annotations['Confidence']['Very High'])
 
     def test_get_unqualified_edge(self):
         test_source = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG'))
@@ -182,20 +184,20 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertIsNone(annotations)
 
     def test_get_node_name(self):
-        test_identifier = str(uuid4())
+        test_identifier = n()
         node = self.graph.add_node_from_data(protein(namespace='TEST', identifier=test_identifier))
         self.assertIsNone(self.graph.get_node_name(node))
         self.assertIsNotNone(self.graph.get_node_identifier(node))
 
     def test_get_node_identifier(self):
-        test_name = str(uuid4())
+        test_name = n()
         node = self.graph.add_node_from_data(protein(namespace='TEST', name=test_name))
         self.assertIsNotNone(self.graph.get_node_name(node))
         self.assertIsNone(self.graph.get_node_identifier(node))
 
     def test_get_node_properties(self):
-        test_name = str(uuid4())
-        test_identifier = str(uuid4())
+        test_name = n()
+        test_identifier = n()
 
         node = self.graph.add_node_from_data(protein(namespace='TEST', name=test_name, identifier=test_identifier))
 
@@ -204,7 +206,7 @@ class TestGetGraphProperties(unittest.TestCase):
 
         self.assertIsNone(self.graph.get_node_description(node))
 
-        test_description = str(uuid4())
+        test_description = n()
         self.graph.set_node_description(node, test_description)
         self.assertEqual(test_description, self.graph.get_node_description(node))
 

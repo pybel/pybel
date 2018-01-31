@@ -30,8 +30,8 @@ def invert_edge_filter(edge_predicate):
 
     :param edge_predicate: An edge filter function (graph, node, node, key, data) -> bool
     :type edge_predicate: types.FunctionType
-    :return: An edge filter function (graph, node, node, key, data) -> bool
-    :rtype: types.FunctionType
+    :return: An edge filter function
+    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
     def inverse_filter(graph, u, v, k):

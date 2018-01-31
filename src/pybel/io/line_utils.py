@@ -7,7 +7,7 @@ import re
 import time
 from collections import Counter, defaultdict
 
-import requests.exceptions
+import six
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 
@@ -15,11 +15,12 @@ from ..constants import FUNCTION, GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, NAMESPA
 from ..exceptions import PyBelWarning
 from ..manager import Manager
 from ..parser import BelParser, MetadataParser
-from ..parser.parse_exceptions import (
-    BelSyntaxError, MalformedMetadataException, MetadataException, MissingBelResource,
-    MissingMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
+from ..parser.exc import (
+    BelSyntaxError, InconsistentDefinitionError, MalformedMetadataException, MissingMetadataException,
+    VersionFormatWarning,
 )
 from ..resources.document import split_file_to_annotations_and_definitions
+from ..resources.exc import ResourceError
 
 log = logging.getLogger(__name__)
 parse_log = logging.getLogger('pybel.parser')
@@ -99,15 +100,18 @@ def parse_document(graph, document_metadata, metadata_parser):
         except VersionFormatWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e)
-        except:
+        except Exception as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise MalformedMetadataException(line_number, line)
+            six.raise_from(MalformedMetadataException(line_number, line), e)
 
     for required in REQUIRED_METADATA:
-        if required in metadata_parser.document_metadata and metadata_parser.document_metadata[required]:
+        required_metadatum = metadata_parser.document_metadata.get(required)
+        if required_metadatum is not None:
             continue
-        graph.warnings.insert(0, (0, '', MissingMetadataException(INVERSE_DOCUMENT_KEYS[required]), {}))
-        log.error('Missing required document metadata: %s', INVERSE_DOCUMENT_KEYS[required])
+
+        required_metadatum_key = INVERSE_DOCUMENT_KEYS[required]
+        graph.warnings.insert(0, (0, '', MissingMetadataException(required_metadatum_key), {}))
+        log.error('Missing required document metadata: %s', required_metadatum_key)
 
     graph.graph[GRAPH_METADATA] = metadata_parser.document_metadata
 
@@ -120,26 +124,30 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
     :param pybel.BELGraph graph: A BEL graph
     :param iter[str] definitions: An enumerated iterable over the lines in the definitions section of a BEL script
     :param MetadataParser metadata_parser: A metadata parser
+    :param bool allow_failures: If true, allows parser to continue past strange failures
+    :raises: pybel.parser.parse_exceptions.InconsistentDefinitionError
+    :raises: pybel.resources.exc.ResourceError
+    :raises: sqlalchemy.exc.OperationalError
     """
     t = time.time()
 
     for line_number, line in definitions:
         try:
             metadata_parser.parseString(line, line_number=line_number)
-        except (RedefinedNamespaceError, RedefinedAnnotationError) as e:
+        except InconsistentDefinitionError as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
-        except requests.exceptions.ConnectionError as e:
-            parse_log.warning('Line %07d - Resource not found - %s', line_number, line)
-            raise MissingBelResource(line_number, line)
+        except ResourceError as e:
+            parse_log.warning("Line %07d - Can't use resouce - %s", line_number, line)
+            raise e
         except OperationalError as e:
             parse_log.warning('Need to upgrade database. See '
                               'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
             raise e
-        except:
+        except Exception as e:
             if not allow_failures:
                 parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
-                raise MetadataException(line_number, line)
+                six.raise_from(MalformedMetadataException(line_number, line), e)
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
     graph.namespace_owl.update(metadata_parser.namespace_owl_dict)

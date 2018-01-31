@@ -12,7 +12,7 @@ import re
 from pyparsing import And, MatchFirst, Optional, Suppress, Word, pyparsing_common as ppc
 
 from .baseparser import BaseParser
-from .parse_exceptions import *
+from .exc import *
 from .utils import delimited_quoted_list, qid, quote, word
 from ..constants import *
 from ..utils import valid_date_version
@@ -176,6 +176,7 @@ class MetadataParser(BaseParser):
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         :raises: RedefinedNamespaceError
+        :raises: pybel.resources.exc.ResourceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)

@@ -30,6 +30,22 @@ RESOURCE_DICTIONARY_NAMES = (
 )
 
 
+def _clean_annotations(annotations_dict):
+    """Fixes formatting of annotation dict
+
+    :type annotations_dict: dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]
+    :rtype: dict[str,dict[str,bool]]
+    """
+    return {
+        key: (
+            values if isinstance(values, dict) else
+            {v: True for v in values} if isinstance(values, set) else
+            {values: True}
+        )
+        for key, values in annotations_dict.items()
+    }
+
+
 class BELGraph(networkx.MultiDiGraph):
     """This class represents biological knowledge assembled in BEL as a network by extending the
     :class:`networkx.MultiDiGraph`.
@@ -281,7 +297,7 @@ class BELGraph(networkx.MultiDiGraph):
             v = self.add_node_from_data(v)
 
         attr = {RELATION: relation}
-        attr[HASH] = hash_edge(u, v, key, attr)
+        attr[HASH] = hash_edge(u, v, attr)
 
         if not self.has_edge(u, v, key):
             self.add_edge(u, v, key=key, **attr)
@@ -393,6 +409,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
                                                 assumes it's a PubMed identifier and autofills the citation type.
         :param dict[str,str] annotations: The annotations data dictionary
+        :type annotations: dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]
         :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
         :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
 
@@ -414,8 +431,8 @@ class BELGraph(networkx.MultiDiGraph):
         else:
             raise TypeError
 
-        if annotations:
-            attr[ANNOTATIONS] = annotations
+        if annotations:  # clean up annotations
+            attr[ANNOTATIONS] = _clean_annotations(annotations)
 
         if subject_modifier:
             attr[SUBJECT] = subject_modifier
@@ -429,7 +446,7 @@ class BELGraph(networkx.MultiDiGraph):
         if isinstance(v, dict):
             v = self.add_node_from_data(v)
 
-        attr[HASH] = hash_edge(u, v, None, attr)
+        attr[HASH] = hash_edge(u, v, attr)
 
         self.add_edge(u, v, **attr)
 

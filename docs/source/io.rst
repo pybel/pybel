@@ -33,7 +33,6 @@ to re-enable strict parsing.
 
 Reference
 ~~~~~~~~~
-
 .. autofunction:: pybel.from_lines
 .. autofunction:: pybel.from_path
 .. autofunction:: pybel.from_url
@@ -82,7 +81,6 @@ Export
 .. autofunction:: pybel.to_sif
 .. autofunction:: pybel.to_gsea
 
-
 Database
 --------
 .. automodule:: pybel.manager.database_io
@@ -98,7 +96,6 @@ Database
 
 PyBEL Web
 ---------
-
 .. automodule:: pybel.io.web
     :members:
 

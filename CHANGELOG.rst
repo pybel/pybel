@@ -5,8 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`Unreleased <https://github.com/pybel/pybel/compare/v0.10.1...HEAD>`_
+---------------------------------------------------------------------
+Changed
+~~~~~~~
+- Parser now uses a compact representation of annotations instead of exploding to multiple edges (https://github.com/pybel/pybel/issues/261)
+- Update annotation filtering functions to reflect new data format (https://github.com/pybel/pybel/issues/262)
+
+Fixed
+~~~~~
+- Fixed more problems with edge store and testing (https://github.com/pybel/pybel/issues/225, https://github.com/pybel/pybel/issues/256, https://github.com/pybel/pybel/issues/257)
+- Fixed windows testing (https://github.com/pybel/pybel/issues/243)
+
+Added
+~~~~~
+- Additional regex format for date parsing from PubMed (https://github.com/pybel/pybel/issues/259)
+- Add labels to nodes in GraphML output (https://github.com/pybel/pybel/issues/260)
+
 `0.10.1 <https://github.com/pybel/pybel/compare/v0.10.0...0.10.1>`_ - 2017-12-28
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 Fixed
 ~~~~~
 - Fixed truncation description parsing to handle double quotes

@@ -5,7 +5,7 @@ relationships and their context in a machine-readable form. Its simple grammar a
 successful use in the `IMI <https://www.imi.europa.eu/>`_ project, `AETIONOMY <http://www.aetionomy.eu/>`_, to describe
 complex disease networks with several thousands of relationships.
 
-PyBEL is a Python software package that parses BEL scripts, validates their semantics, and facilitates data
+PyBEL is a pure Python software package that parses BEL scripts, validates their semantics, and facilitates data
 interchange between common formats and database systems like JSON, CSV, Excel, SQL, CX, and Neo4J. Its companion
 package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
 biological networks. For result-oriented guides, see the `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_
@@ -13,6 +13,12 @@ repository.
 
 Installation is as easy as getting the code from `PyPI <https://pypi.python.org/pypi/pybel>`_ with
 :code:`python3 -m pip install pybel`
+
+Citation
+--------
+If you use PyBEL in your work, please cite [1]_:
+
+.. [1] Hoyt et al., 2017. PyBEL: a computational framework for Biological Expression Language. Bioinformatics, btx660, https://doi.org/10.1093/bioinformatics/btx660
 
 Links
 -----
@@ -42,6 +48,7 @@ Links
    examples
    io
    filters
+   mutation
    cookbook
    troubleshooting
 

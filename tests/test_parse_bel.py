@@ -8,8 +8,8 @@ from pybel.constants import *
 from pybel.dsl import cell_surface_expression, entity, secretion, translocation
 from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
 from pybel.parser import BelParser
+from pybel.parser.exc import MalformedTranslocationWarning
 from pybel.parser.parse_bel import modifier_po_to_dict
-from pybel.parser.parse_exceptions import MalformedTranslocationWarning
 from pybel.tokens import node_to_tuple
 from tests.constants import TestTokenParserBase, assertHasEdge, assertHasNode, update_provenance
 

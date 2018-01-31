@@ -59,7 +59,6 @@ programatically via :data:`pybel.parser.language.abundance_labels`
 
 Graph
 -----
-
 .. automodule:: pybel.struct
 
 .. autoclass:: pybel.BELGraph
@@ -95,7 +94,6 @@ Programatically, these dictionaries can be converted to tuples, which are used a
 
 Variants
 ~~~~~~~~
-
 The addition of a variant tag results in an entry called 'variants' in the data dictionary associated with a given
 node. This entry is a list with dictionaries describing each of the variants. All variants have the entry 'kind' to
 identify whether it is a post-translational modification (PTM), gene modification, fragment, or HGVS variant.
@@ -123,17 +121,14 @@ identify whether it is a post-translational modification (PTM), gene modificatio
 
 Fusions
 ~~~~~~~
-
 .. automodule:: pybel.parser.modifiers.fusion
 
 Unqualified Edges
 -----------------
-
 Unqualified edges are automatically inferred by PyBEL and do not contain citations or supporting evidence.
 
 Variant and Modifications' Parent Relations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 All variants, modifications, fragments, and truncations are connected to their parent entity with an edge having
 the relationship :code:`hasParent`
 
@@ -289,7 +284,6 @@ The following edges are inferred, where :code:`X` represents the previous reacti
 
 Edges
 -----
-
 Design Choices
 ~~~~~~~~~~~~~~
 In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
@@ -339,14 +333,18 @@ Below is the "skeleton" for the edge data model in PyBEL:
             CITATION_AUTHORS: 'Jon Snow|John Doe',
         },
         ANNOTATIONS: {
-            'Disease': 'Colorectal Cancer',
-            # ... additional annotations as key:value pairs
+            'Disease': {
+                'Colorectal Cancer': True,
+             }
+            # ... additional annotations as tuple[str,dict[str,bool]] pairs
         }
     }
 
-Each edge must contain the ``RELATION``, ``EVIDENCE``, ``CITATION``, and ``ANNOTATIONS`` entries. The ``CITATION``
+Each edge must contain the ``RELATION``, ``EVIDENCE``, and ``CITATION`` entries. The ``CITATION``
 must minimally contain ``CITATION_TYPE`` and ``CITATION_REFERENCE`` since these can be used to look up additional
 metadata.
+
+.. note:: Since version 0.10.2, annotations now always appear as dictionaries, even if only one value is present.
 
 Activities
 ~~~~~~~~~~
