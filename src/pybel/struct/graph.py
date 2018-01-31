@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Contains the main data structure for PyBEL"""
+
 import logging
 import warnings
 from copy import deepcopy
@@ -72,19 +74,19 @@ class BELGraph(networkx.MultiDiGraph):
             self.graph[GRAPH_METADATA] = {}
 
         if name:
-            self.graph[GRAPH_METADATA][METADATA_NAME] = name
+            self.name = name
 
         if version:
-            self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+            self.version = version
 
         if description:
-            self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+            self.description = description
 
         if authors:
-            self.graph[GRAPH_METADATA][METADATA_AUTHORS] = authors
+            self.authors = authors
 
         if contact:
-            self.graph[GRAPH_METADATA][METADATA_CONTACT] = contact
+            self.authors = contact
 
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
@@ -101,21 +103,21 @@ class BELGraph(networkx.MultiDiGraph):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
         according to :data:`pybel.constants.DOCUMENT_KEYS`
 
-        :rtype: dict
+        :rtype: dict[str,str]
         """
         return self.graph[GRAPH_METADATA]
 
     @property
-    def name(self, *attrs):
+    def name(self, *attrs):  # Needs *attrs since it's an override
         """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_NAME)
+        return self.document.get(METADATA_NAME)
 
     @name.setter
-    def name(self, *attrs, **kwargs):
-        self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
+    def name(self, *attrs, **kwargs):  # Needs *attrs and **kwargs since it's an override
+        self.document[METADATA_NAME] = attrs[0]
 
     @property
     def version(self):
@@ -123,11 +125,11 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
+        return self.document.get(METADATA_VERSION)
 
     @version.setter
     def version(self, version):
-        self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+        self.document[METADATA_VERSION] = version
 
     @property
     def description(self):
@@ -135,11 +137,35 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_DESCRIPTION)
+        return self.document.get(METADATA_DESCRIPTION)
 
     @description.setter
     def description(self, description):
-        self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+        self.document[METADATA_DESCRIPTION] = description
+
+    @property
+    def authors(self):
+        """The graph's description, from the ``SET DOCUMENT Authors = "..."`` entry in the source BEL Script
+
+        :rtype: str
+        """
+        return self.document.get(METADATA_AUTHORS)
+
+    @authors.setter
+    def authors(self, authors):
+        self.document[METADATA_AUTHORS] = authors
+
+    @property
+    def contact(self):
+        """The graph's description, from the ``SET DOCUMENT Contact = "..."`` entry in the source BEL Script
+
+        :rtype: str
+        """
+        return self.document.get(METADATA_CONTACT)
+
+    @contact.setter
+    def contact(self, contact):
+        self.document[METADATA_CONTACT] = contact
 
     @property
     def namespace_url(self):
