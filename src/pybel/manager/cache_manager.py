@@ -417,7 +417,7 @@ class OwlNamespaceManager(NamespaceManager):
         if namespace is not None:
             return namespace
 
-        log.info('inserting owl %s', url)
+        log.debug('inserting owl %s', url)
 
         namespace = Namespace(url=url, keyword=keyword)
 
@@ -670,7 +670,7 @@ class OwlAnnotationManager(AnnotationManager):
         if annotation is not None:
             return annotation
 
-        log.info('inserting owl %s', url)
+        log.debug('inserting owl %s', url)
 
         annotation = Annotation(url=url, keyword=keyword)
 
@@ -1043,7 +1043,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         """
         self.ensure_namespace(GOCC_LATEST)
 
-        log.info('inserting %s into edge store', graph)
+        log.debug('inserting %s into edge store', graph)
         log.debug('storing graph parts: nodes')
         t = time.time()
 
