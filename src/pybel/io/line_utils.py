@@ -8,6 +8,7 @@ import time
 from collections import Counter, defaultdict
 
 import requests.exceptions
+import six
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 
@@ -101,7 +102,7 @@ def parse_document(graph, document_metadata, metadata_parser):
             graph.add_warning(line_number, line, e)
         except Exception as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            raise MalformedMetadataException(line_number, line) from e
+            six.raise_from(MalformedMetadataException(line_number, line), e)
 
     for required in REQUIRED_METADATA:
         if required in metadata_parser.document_metadata and metadata_parser.document_metadata[required]:
@@ -131,7 +132,7 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
             raise e
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as e:
             parse_log.warning("Line %07d - Can't locate resource - %s", line_number, line)
-            raise MissingBelResource(line_number, line) from e
+            six.raise_from(MissingBelResource(line_number, line), e)
         except OperationalError as e:
             parse_log.warning('Need to upgrade database. See '
                               'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
@@ -139,7 +140,7 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
         except Exception as e:
             if not allow_failures:
                 parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
-                raise MetadataException(line_number, line) from e
+                six.raise_from(MetadataException(line_number, line), e)
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
     graph.namespace_owl.update(metadata_parser.namespace_owl_dict)
