@@ -252,6 +252,8 @@ class NamespaceManager(BaseManager):
         if result is not None:
             return result
 
+        t = time.time()
+
         bel_resource = get_bel_resource(url)
 
         _clean_bel_namespace_values(bel_resource)
@@ -259,7 +261,7 @@ class NamespaceManager(BaseManager):
         values = bel_resource['Values']
 
         if not_resource_cachable(bel_resource):
-            log.info('not caching namespace: %s (%d)', url, len(values))
+            log.info('not caching namespace: %s (%d in %.2f seconds)', url, len(values), time.time() - t)
             return values
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
@@ -273,7 +275,7 @@ class NamespaceManager(BaseManager):
             for name, encoding in values.items()
         ]
 
-        log.info('inserted namespace: %s (%d)', url, len(values))
+        log.info('inserted namespace: %s (%d in %.2f seconds)', url, len(values), time.time() - t)
 
         self.session.add(namespace)
         self.session.commit()
@@ -587,6 +589,8 @@ class AnnotationManager(BaseManager):
         if annotation is not None:
             return annotation
 
+        t = time.time()
+
         bel_resource = get_bel_resource(url)
 
         annotation = Annotation(
@@ -603,7 +607,7 @@ class AnnotationManager(BaseManager):
         self.session.add(annotation)
         self.session.commit()
 
-        log.info('inserted annotation: %s (%d)', url, len(bel_resource['Values']))
+        log.info('inserted annotation: %s (%d in %.2f seconds)', url, len(bel_resource['Values']), time.time() - t)
 
         return annotation
 
@@ -1027,7 +1031,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.session.add(network)
         self.session.commit()
 
-        log.info('inserted %s v%s in %.2fs', graph.name, graph.version, time.time() - t)
+        log.info('inserted %s v%s in %.2f seconds', graph.name, graph.version, time.time() - t)
 
         return network
 
