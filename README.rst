@@ -100,7 +100,7 @@ Links
     :alt: Stable Windows Build Status
 
 .. |stable_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=master
-    :target: https://codecov.io/gh/pybel/pybel?branch=master
+    :target: https://codecov.io/gh/pybel/pybel/branch/master
     :alt: Stable Coverage Status
 
 .. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=stable
@@ -116,7 +116,7 @@ Links
     :alt: Development Windows Build Status
 
 .. |develop_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
-    :target: https://codecov.io/gh/pybel/pybel?branch=develop
+    :target: https://codecov.io/gh/pybel/pybel/branch/develop
     :alt: Development Coverage Status
 
 .. |develop_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
