@@ -6,7 +6,8 @@ from collections import Counter
 from pybel import BELGraph
 from pybel.constants import INCREASES
 from pybel.dsl import protein
-from pybel.struct.summary.edge_summary import iter_annotation_values
+from pybel.examples import sialic_acid_graph
+from pybel.struct.summary.edge_summary import get_annotation_values_by_annotation, iter_annotation_values
 
 
 class TestEdgeSummary(unittest.TestCase):
@@ -57,3 +58,11 @@ class TestEdgeSummary(unittest.TestCase):
             ('B', 'X'): 1,
             ('C', 'a'): 1,
         }, x)
+
+    def test_get_annotation_values(self):
+        expected = {
+            'Confidence': {'High', 'Low'},
+            'Species': {'9606'}
+        }
+        result = get_annotation_values_by_annotation(sialic_acid_graph)
+        self.assertEqual(expected, result)
