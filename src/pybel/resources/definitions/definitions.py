@@ -82,7 +82,7 @@ def get_bel_resource(location):
     :return: A config-style dictionary representing the BEL config file
     :rtype: dict
     """
-    log.info('getting resource: %s', location)
+    log.debug('getting resource: %s', location)
 
     lines = get_lines(location)
 
