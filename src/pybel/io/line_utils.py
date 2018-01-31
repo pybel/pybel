@@ -15,7 +15,7 @@ from ..constants import FUNCTION, GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, NAMESPA
 from ..exceptions import PyBelWarning
 from ..manager import Manager
 from ..parser import BelParser, MetadataParser
-from ..parser.parse_exceptions import (
+from ..parser.exc import (
     BelSyntaxError, InconsistentDefinitionError, MalformedMetadataException, MissingMetadataException,
     VersionFormatWarning,
 )

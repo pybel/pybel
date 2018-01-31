@@ -13,12 +13,13 @@ JSON. Interchange with this format provides compatibilty with other software and
 import logging
 from collections import defaultdict
 
+from pyparsing import ParseException
+
 from ..canonicalize import node_to_bel
 from ..constants import *
-from ..parser.parse_exceptions import NakedNameWarning
 from ..parser import BelParser
+from ..parser.exc import NakedNameWarning
 from ..struct import BELGraph
-from pyparsing import ParseException
 
 __all__ = [
     'from_cbn_jgif',
@@ -234,10 +235,10 @@ def from_jgif(graph_jgif_dict):
         evidences = edge_metadata.get('evidences')
 
         if relation in UNQUALIFIED_EDGES:
-            pass # FIXME?
+            pass  # FIXME?
 
         else:
-            if not evidences: # is none or is empty list
+            if not evidences:  # is none or is empty list
                 log.debug('No evidence for edge %s', edge)
                 continue
 

@@ -2,7 +2,7 @@
 
 """This module contains helper functions for other IO functions."""
 
-from .io_exceptions import ImportVersionWarning
+from .exc import ImportVersionWarning
 from ..constants import PYBEL_MINIMUM_IMPORT_VERSION
 from ..struct import BELGraph
 from ..utils import tokenize_version

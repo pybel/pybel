@@ -18,10 +18,10 @@ from pybel import (
 from pybel.constants import *
 from pybel.dsl import gene
 from pybel.examples import sialic_acid_graph
-from pybel.io.io_exceptions import ImportVersionWarning, import_version_message_fmt
+from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.io.ndex_utils import NDEX_PASSWORD, NDEX_USERNAME
 from pybel.parser import BelParser
-from pybel.parser.parse_exceptions import *
+from pybel.parser.exc import *
 from pybel.struct.summary import get_syntax_errors
 from pybel.utils import hash_node
 from tests.constants import (

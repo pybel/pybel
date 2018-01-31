@@ -13,8 +13,8 @@ from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl import *
 from pybel.manager import Manager
+from pybel.parser.exc import *
 from pybel.parser.parse_bel import BelParser
-from pybel.parser.parse_exceptions import *
 from pybel.utils import subdict_matches
 
 log = logging.getLogger(__name__)
@@ -1084,7 +1084,8 @@ class BelReconstitutionMixin(TestGraphMixin):
             EVIDENCE: evidence_3,
         })
 
-    def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True, check_citation_name=True):
+    def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True,
+                                   check_citation_name=True):
         """Checks that thorough.bel was loaded properly
 
         :param BELGraph graph: A BEL graph

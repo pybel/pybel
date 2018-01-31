@@ -19,6 +19,7 @@ from six import string_types
 from sqlalchemy import and_, exists, func
 
 from .base_manager import BaseManager
+from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
     Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
@@ -28,7 +29,6 @@ from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, parse_owl, update_insert_values
 from ..canonicalize import node_to_bel
 from ..constants import *
-from ..exceptions import PyBelWarning
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings,
     pmod_mappings,
@@ -45,29 +45,6 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
-
-
-class EdgeAddError(PyBelWarning):
-    """When there's a problem inserting an edge"""
-
-    def __init__(self, e, u, v, data):
-        super(EdgeAddError, self).__init__(e, u, v, data)
-        self.error = e
-        self.source = u
-        self.target = v
-        self.data = data
-
-    def __str__(self):
-        line_s = 'from line {} '.format(self.line) if LINE in self.data else ''
-
-        return ("Error adding edge {}to database. Check this line in the file and make sure the citation, "
-                "evidence, and annotations all use valid UTF-8 characters: {} {} {} with original error:\n "
-                "{}".format(line_s, self.source, self.target, self.data, self.error))
-
-    @property
-    def line(self):
-        return self.data.get(LINE)
-
 
 _namespace_mapping = {
     'species': ('Namespace', 'SpeciesString'),

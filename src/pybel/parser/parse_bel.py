@@ -12,13 +12,13 @@ import logging
 from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
 
 from .baseparser import BaseParser
-from .modifiers import *
-from .modifiers.fusion import build_legacy_fusion
-from .parse_control import ControlParser
-from .parse_exceptions import (
+from .exc import (
     InvalidFunctionSemantic, MalformedTranslocationWarning, MissingCitationException, MissingSupportWarning,
     NestedRelationWarning, RelabelWarning,
 )
+from .modifiers import *
+from .modifiers.fusion import build_legacy_fusion
+from .parse_control import ControlParser
 from .parse_identifier import IdentifierParser
 from .utils import WCW, nest, one_of_tags, quote, triple
 from .. import language

@@ -8,7 +8,7 @@ from pathlib import Path
 from pybel import from_path
 from pybel.constants import *
 from pybel.manager.utils import parse_owl
-from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
+from pybel.parser.exc import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import (
     FleetingTemporaryCacheMixin, HGNC_URL, TestGraphMixin, expected_test_bel_4_metadata,
@@ -404,7 +404,7 @@ class TestExtensionIo(TestGraphMixin, FleetingTemporaryCacheMixin):
             },
             EVIDENCE: 'Made up support, not even qualifying as evidence',
             ANNOTATIONS: {
-                'Wine': {'Cotturi':True}
+                'Wine': {'Cotturi': True}
             }
         }
         self.assertHasEdge(graph, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)

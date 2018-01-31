@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from pybel.parser import MetadataParser
-from pybel.parser.parse_exceptions import *
+from pybel.parser.exc import *
 from pybel.parser.parse_metadata import extend_version
 from pybel.resources.document import split_file_to_annotations_and_definitions
 from tests.constants import (

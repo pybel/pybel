@@ -10,7 +10,7 @@ from pybel.canonicalize import edge_to_bel
 from pybel.constants import *
 from pybel.dsl import abundance, activity, entity, pmod, protein, rna
 from pybel.parser import BelParser
-from pybel.parser.parse_exceptions import (
+from pybel.parser.exc import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
 from pybel.tokens import node_to_tuple

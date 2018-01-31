@@ -12,7 +12,7 @@ import re
 from pyparsing import And, MatchFirst, Optional, Suppress, Word, pyparsing_common as ppc
 
 from .baseparser import BaseParser
-from .parse_exceptions import *
+from .exc import *
 from .utils import delimited_quoted_list, qid, quote, word
 from ..constants import *
 from ..utils import valid_date_version
