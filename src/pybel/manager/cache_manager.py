@@ -15,6 +15,7 @@ from collections import defaultdict
 from copy import deepcopy
 from itertools import chain, groupby
 
+import six
 from six import string_types
 from sqlalchemy import and_, exists, func
 
@@ -1074,8 +1075,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_unqualified_edge(network, graph, u, v, data)
                 except Exception as e:
                     self.session.rollback()
-                    log.warning('error storing edge in database. edge data: %s', data)
-                    raise EdgeAddError(e, u, v, data)
+                    log.exception('error storing edge in database. edge data: %s', data)
+                    six.raise_from(EdgeAddError(e, u, v, data), e)
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -1088,8 +1089,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     self._add_qualified_edge(network, graph, u, v, data)
                 except Exception as e:
                     self.session.rollback()
-                    log.warning('error storing edge in database. edge data: %s', data)
-                    raise EdgeAddError(e, u, v, data)
+                    log.exception('error storing edge in database. edge data: %s', data)
+                    six.raise_from(EdgeAddError(e, u, v, data), e)
 
         log.debug('stored edges in %.2f seconds', time.time() - t)
 
