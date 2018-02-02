@@ -1,6 +1,5 @@
-Examples
-========
-
+Example Networks
+================
 .. automodule:: pybel.examples
 
 .. automodule:: pybel.examples.egf_example

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This directory contains example networks, precompiled as BEL graphs that are appropriate to use in examples"""
+"""This directory contains example networks, precompiled as BEL graphs that are appropriate to use in examples."""
 
 from .egf_example import egf_graph
 from .sialic_acid_example import sialic_acid_graph

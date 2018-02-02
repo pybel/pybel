@@ -38,19 +38,23 @@ Links
    overview
    installation
 
-
 .. toctree::
    :maxdepth: 2
-   :caption: Topic Guide
-   :name: topics
+   :caption: Data Structure
+   :name: data
 
    datamodel
    examples
-   io
+   summary
    filters
    mutation
-   cookbook
-   troubleshooting
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Conversion
+   :name: conversion
+
+   io
 
 .. toctree::
    :caption: Database
@@ -58,6 +62,14 @@ Links
 
    manager
    models
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Topic Guide
+   :name: topics
+
+   cookbook
+   troubleshooting
 
 .. toctree::
    :caption: Reference
