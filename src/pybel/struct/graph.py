@@ -304,6 +304,21 @@ class BELGraph(networkx.MultiDiGraph):
 
         return attr[HASH]
 
+    def _add_two_way_unqualified_edge(self, u, v, relation):
+        """Adds an unqualified edge both ways"""
+        self.add_unqualified_edge(u, v, relation)
+        self.add_unqualified_edge(v, u, relation)
+
+    def add_equivalence(self, u, v):
+        """Adds two equivalence relations for the nodes
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
+
     @staticmethod
     def hash_node(data):
         """Converts a PyBEL node data dictionary to a PyBEL node tuple
@@ -632,3 +647,62 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: str
         """
         return edge_to_bel(self.node[u], self.node[v], data=data, sep=sep)
+
+    def _equivalent_node_iterator_helper(self, node, visited):
+        """Iterates over nodes and their data that are equal to the given node, starting with the original
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: iter[tuple]
+        """
+        for v in self.edge[node]:
+            if v in visited:
+                continue
+
+            if unqualified_edge_code[EQUIVALENT_TO] not in self.edge[node][v]:
+                continue
+
+            yield v
+            visited.add(v)
+
+            for w in self._equivalent_node_iterator_helper(v, visited):
+                yield w
+
+    def iter_equivalent_nodes(self, node):
+        """Iterates over node tuples that are equivalent to the given node, including the original
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: iter[tuple]
+        """
+        yield node
+
+        for n in self._equivalent_node_iterator_helper(node, {node}):
+            yield n
+
+    def get_equivalent_nodes(self, node):
+        """Gets a set of equivalent nodes to this node. Does not include the given node.
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: set[tuple]
+        """
+        return set(self.iter_equivalent_nodes(node))
+
+    def _node_has_namespace_helper(self, node, namespace):
+        """Check that the node has namespace information. Might have cross references in future
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: bool
+        """
+        return namespace == self.node[node].get(NAMESPACE)
+
+    def node_has_namespace(self, node, namespace):
+        """Does the node have the given namespace? This also should look in the equivalent nodes.
+
+        :param tuple node: A PyBEL node tuple
+        :param str namespace: A namespace
+        :rtype: bool
+        """
+        for n in self.iter_equivalent_nodes(node):
+            if self._node_has_namespace_helper(n, namespace):
+                return True
+
+        return False

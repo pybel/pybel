@@ -1629,5 +1629,53 @@ class TestNoAddNode(TemporaryCacheMixin):
         self.assertEqual(DBSNP_PATTERN, rs1235_lookup.namespace_entry.namespace.pattern)
 
 
+class TestEquivalentNodes(unittest.TestCase):
+    def test_direct_has_namespace(self):
+        graph = BELGraph()
+
+        n = graph.add_node_from_data(protein(namespace='HGNC', name='CD33', identifier='1659'))
+
+        self.assertEqual({n}, graph.get_equivalent_nodes(n))
+
+        self.assertTrue(graph.node_has_namespace(n, 'HGNC'))
+
+    def test_indirect_has_namespace(self):
+        graph = BELGraph()
+
+        a = graph.add_node_from_data(protein(namespace='HGNC', name='CD33'))
+        b = graph.add_node_from_data(protein(namespace='HGNCID', identifier='1659'))
+
+        graph.add_equivalence(a, b)
+
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(a))
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(b))
+
+        self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
+        self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
+
+    def test_triangle_has_namespace(self):
+        graph = BELGraph()
+
+        a = graph.add_node_from_data(protein(namespace='A', name='CD33'))
+        b = graph.add_node_from_data(protein(namespace='B', identifier='1659'))
+        c = graph.add_node_from_data(protein(namespace='C', identifier='1659'))
+        d = graph.add_node_from_data(protein(namespace='HGNC', identifier='1659'))
+
+        graph.add_equivalence(a, b)
+        graph.add_equivalence(b, c)
+        graph.add_equivalence(c, a)
+        graph.add_equivalence(c, d)
+
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(a))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(b))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(c))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(d))
+
+        self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
+        self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
+        self.assertTrue(graph.node_has_namespace(c, 'HGNC'))
+        self.assertTrue(graph.node_has_namespace(d, 'HGNC'))
+
+
 if __name__ == '__main__':
     unittest.main()
