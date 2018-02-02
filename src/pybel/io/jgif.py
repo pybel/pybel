@@ -138,6 +138,13 @@ def from_cbn_jgif(graph_jgif_dict):
     >>> apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
     >>> graph_jgif_dict = requests.get(apoptosis_url).json()
     >>> graph = from_cbn_jgif(graph_jgif_dict)
+
+    .. warning::
+
+        Handling the annotations is not yet supported, since the CBN documents do not refer to the resources used
+        to create them. This may be added in the future, but the annotations must be stripped from the graph
+        before uploading to the network store using :func:`pybel.struct.mutation.strip_annotations`
+
     """
     graph_jgif_dict = map_cbn(graph_jgif_dict)
 
