@@ -53,7 +53,8 @@ class BELGraph(networkx.MultiDiGraph):
     :class:`networkx.MultiDiGraph`.
     """
 
-    def __init__(self, name=None, version=None, description=None, authors=None, contact=None, data=None, **kwargs):
+    def __init__(self, name=None, version=None, description=None, authors=None, contact=None, license=None,
+                 copyright=None, disclaimer=None, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
 
@@ -63,6 +64,9 @@ class BELGraph(networkx.MultiDiGraph):
         :param str description: A description of the graph
         :param str authors: The authors of this graph
         :param str contact: The contact email for this graph
+        :param str license: The license for this graph
+        :param str copyright: The copyright for this graph
+        :param str disclaimer: The disclaimer for this graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         """
@@ -86,7 +90,16 @@ class BELGraph(networkx.MultiDiGraph):
             self.authors = authors
 
         if contact:
-            self.authors = contact
+            self.contact = contact
+
+        if license:
+            self.license = license
+
+        if copyright:
+            self.copyright = copyright
+
+        if disclaimer:
+            self.disclaimer = disclaimer
 
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
@@ -149,7 +162,7 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: str
         """
-        return self.document.get(METADATA_AUTHORS)
+        return self.document[METADATA_AUTHORS]
 
     @authors.setter
     def authors(self, authors):
@@ -157,7 +170,7 @@ class BELGraph(networkx.MultiDiGraph):
 
     @property
     def contact(self):
-        """The graph's description, from the ``SET DOCUMENT Contact = "..."`` entry in the source BEL Script
+        """The graph's description, from the ``SET DOCUMENT ContactInfo = "..."`` entry in the source BEL Script
 
         :rtype: str
         """
@@ -166,6 +179,42 @@ class BELGraph(networkx.MultiDiGraph):
     @contact.setter
     def contact(self, contact):
         self.document[METADATA_CONTACT] = contact
+
+    @property
+    def license(self):
+        """The graph's license, from the `SET DOCUMENT Licenses = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_LICENSES)
+
+    @license.setter
+    def license(self, license):
+        self.document[METADATA_LICENSES] = license
+
+    @property
+    def copyright(self):
+        """The graph's copyright, from the `SET DOCUMENT Copyright = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_COPYRIGHT)
+
+    @copyright.setter
+    def copyright(self, copyright):
+        self.document[METADATA_COPYRIGHT] = copyright
+
+    @property
+    def disclaimer(self):
+        """The graph's disclaimer, from the `SET DOCUMENT Disclaimer = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_DISCLAIMER)
+
+    @disclaimer.setter
+    def disclaimer(self, disclaimer):
+        self.document[METADATA_DISCLAIMER] = disclaimer
 
     @property
     def namespace_url(self):
@@ -192,9 +241,9 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-            set(self.namespace_pattern) |
-            set(self.namespace_url) |
-            set(self.namespace_owl)
+                set(self.namespace_pattern) |
+                set(self.namespace_url) |
+                set(self.namespace_owl)
         )
 
     @property
@@ -258,10 +307,10 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-            set(self.annotation_pattern) |
-            set(self.annotation_url) |
-            set(self.annotation_owl) |
-            set(self.annotation_list)
+                set(self.annotation_pattern) |
+                set(self.annotation_url) |
+                set(self.annotation_owl) |
+                set(self.annotation_list)
         )
 
     @property
@@ -293,9 +342,9 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: bool
         """
         return (
-            namespace is not None and
-            namespace in self.namespace_url and
-            self.namespace_url[namespace] in self.uncached_namespaces
+                namespace is not None and
+                namespace in self.namespace_url and
+                self.namespace_url[namespace] in self.uncached_namespaces
         )
 
     def add_warning(self, line_number, line, exception, context=None):
