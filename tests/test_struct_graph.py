@@ -6,53 +6,101 @@ from six import string_types
 
 from pybel import BELGraph
 from pybel.constants import (
-    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION, GRAPH_METADATA,
-    HAS_VARIANT, IDENTIFIER, INCREASES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, PROTEIN,
-    unqualified_edge_code,
+    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION, HAS_VARIANT, IDENTIFIER,
+    INCREASES, NAME, NAMESPACE, PROTEIN, unqualified_edge_code,
 )
 from pybel.dsl import *
+from pybel.examples import sialic_acid_graph
 from tests.utils import n
 
 
 class TestStruct(unittest.TestCase):
+    def test_example_metadata(self):
+        self.assertIsNotNone(sialic_acid_graph.name)
+        self.assertIsNotNone(sialic_acid_graph.version)
+        self.assertIsNotNone(sialic_acid_graph.description)
+        self.assertIsNone(sialic_acid_graph.disclaimer)
+        self.assertIsNone(sialic_acid_graph.copyright)
+        self.assertIsNone(sialic_acid_graph.license)
+
     def test_add_simple(self):
         g = BELGraph()
 
-        g.add_node_from_data(protein(namespace='TEST', name='YFG'))
+        namespace, name = n(), n()
+
+        g.add_node_from_data(protein(namespace=namespace, name=name))
         self.assertEqual(1, g.number_of_nodes())
 
-        g.add_node_from_data(protein(namespace='TEST', name='YFG'))
+        g.add_node_from_data(protein(namespace=namespace, name=name))
         self.assertEqual(1, g.number_of_nodes())
-
-    def test_str(self):
-        g = BELGraph(**{GRAPH_METADATA: {METADATA_NAME: 'test', METADATA_VERSION: '1.0.0'}})
-
-        self.assertEqual('test', g.name)
-        self.assertEqual('1.0.0', g.version)
-
-        self.assertEqual('test v1.0.0', str(g))
 
     def test_str_kwargs(self):
-        g = BELGraph(name='test', version='1.0.0', description='test description')
+        (
+            name,
+            version,
+            description,
+            authors,
+            contact,
+            licenses,
+            copyrights,
+            disclaimer
+        ) = [n() for _ in range(8)]
 
-        self.assertEqual('test', g.name)
-        self.assertEqual('1.0.0', g.version)
-        self.assertEqual('test description', g.description)
+        g = BELGraph(
+            name=name,
+            version=version,
+            description=description,
+            authors=authors,
+            contact=contact,
+            license=licenses,
+            copyright=copyrights,
+            disclaimer=disclaimer
+        )
 
-        self.assertEqual('test v1.0.0', str(g))
+        self.assertEqual(name, g.name)
+        self.assertEqual(version, g.version)
+        self.assertEqual(description, g.description)
+        self.assertEqual(authors, g.authors)
+        self.assertEqual(contact, g.contact)
+        self.assertEqual(licenses, g.license)
+        self.assertEqual(copyrights, g.copyright)
+        self.assertEqual(disclaimer, g.disclaimer)
+
+        self.assertEqual('{name} v{version}'.format(name=name, version=version), str(g))
 
     def test_name(self):
+        (
+            name,
+            version,
+            description,
+            authors,
+            contact,
+            licenses,
+            copyrights,
+            disclaimer
+        ) = [n() for _ in range(8)]
+
         g = BELGraph()
 
-        g.name = 'test'
-        g.version = '1.0.0'
-        g.description = 'test description'
+        g.name = name
+        g.version = version
+        g.description = description
+        g.authors = authors
+        g.contact = contact
+        g.license = licenses
+        g.copyright = copyrights
+        g.disclaimer = disclaimer
 
-        self.assertEqual('test', g.name)
-        self.assertEqual('1.0.0', g.version)
-        self.assertEqual('test description', g.description)
+        self.assertEqual(name, g.name)
+        self.assertEqual(version, g.version)
+        self.assertEqual(description, g.description)
+        self.assertEqual(authors, g.authors)
+        self.assertEqual(contact, g.contact)
+        self.assertEqual(licenses, g.license)
+        self.assertEqual(copyrights, g.copyright)
+        self.assertEqual(disclaimer, g.disclaimer)
 
-        self.assertEqual('test v1.0.0', str(g))
+        self.assertEqual('{name} v{version}'.format(name=name, version=version), str(g))
 
     def test_citation_type_error(self):
         g = BELGraph()
