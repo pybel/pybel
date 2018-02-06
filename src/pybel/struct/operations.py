@@ -75,7 +75,7 @@ def _left_full_exhaustive_join(g, h):
     :param BELGraph h: A BEL network
     """
     _left_full_node_join(g, h)
-    _left_full_metadata_join(g,h)
+    _left_full_metadata_join(g, h)
 
     for u, v, k, d in h.edges_iter(keys=True, data=True):
         if k < 0:  # unqualified edge that's not in G yet

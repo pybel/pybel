@@ -163,7 +163,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
         self.key = 0
 
     def get_data(self, k):
-        return self.g.edge[self.u][self.v][k]
+        return self.g.adj[self.u][self.v][k]
 
     def add_edge(self, subject_modifier=None, object_modifier=None, annotations=None):
         self.key += 1

@@ -5,6 +5,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import *
+from pybel.dsl import protein
 from pybel.struct.operations import (
     left_full_join, left_node_intersection_join, left_outer_join, node_intersection,
     union,
@@ -12,9 +13,9 @@ from pybel.struct.operations import (
 
 HGNC = 'HGNC'
 
-p1 = PROTEIN, HGNC, 'a'
-p2 = PROTEIN, HGNC, 'b'
-p3 = PROTEIN, HGNC, 'c'
+p1 = protein(namespace=HGNC, name='a')
+p2 = protein(namespace=HGNC, name='b')
+p3 = protein(namespace=HGNC, name='c')
 
 
 class TestLeftFullJoin(unittest.TestCase):
@@ -24,16 +25,16 @@ class TestLeftFullJoin(unittest.TestCase):
     def setUp(self):
         g = BELGraph()
 
-        g.add_simple_node(*p1)
-        g.add_simple_node(*p2)
+        g.add_node_from_data(p1)
+        g.add_node_from_data(p2)
 
         g.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID1', evidence='Evidence 1')
 
         h = BELGraph()
 
-        h.add_simple_node(*p1)
-        h.add_simple_node(*p2)
-        h.add_simple_node(*p3)
+        h.add_node_from_data(p1)
+        h.add_node_from_data(p2)
+        h.add_node_from_data(p3)
 
         h.node[p1]['EXTRANEOUS'] = 'MOST DEFINITELY'
         h.node[p3]['EXTRANEOUS'] = 'MOST DEFINITELY'
@@ -135,20 +136,20 @@ class TestLeftFullOuterJoin(unittest.TestCase):
         self.assertEqual(2, g.number_of_nodes())
         self.assertEqual({1, 2}, set(g))
         self.assertEqual(1, g.number_of_edges())
-        self.assertEqual({(1, 2)}, set(g.edges_iter()))
+        self.assertEqual({(1, 2)}, set(g.edges()))
 
     def help_check_initial_h(self, h):
         self.assertEqual(6, h.number_of_nodes())
         self.assertEqual({1, 3, 4, 5, 6, 7}, set(h))
         self.assertEqual(3, h.number_of_edges())
-        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(h.edges_iter()))
+        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(h.edges()))
 
     def help_check_result(self, j):
         """After H has been full outer joined into G, this is what it should be"""
         self.assertEqual(4, j.number_of_nodes())
         self.assertEqual({1, 2, 3, 4}, set(j))
         self.assertEqual(3, j.number_of_edges())
-        self.assertEqual({(1, 2), (1, 3), (1, 4)}, set(j.edges_iter()))
+        self.assertEqual({(1, 2), (1, 3), (1, 4)}, set(j.edges()))
 
     def test_in_place_type_failure(self):
         with self.assertRaises(TypeError):
@@ -210,7 +211,7 @@ class TestInnerJoin(unittest.TestCase):
         self.assertEqual(6, graph.number_of_nodes())
         self.assertEqual({1, 3, 4, 5, 6, 7}, set(graph))
         self.assertEqual(3, graph.number_of_edges())
-        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(graph.edges_iter()))
+        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(graph.edges()))
 
     def test_initialize(self):
         self.help_check_initialize_g(self.g)
@@ -220,7 +221,7 @@ class TestInnerJoin(unittest.TestCase):
         self.assertEqual(2, j.number_of_nodes())
         self.assertEqual({1, 3}, set(j))
         self.assertEqual(1, j.number_of_edges())
-        self.assertEqual({(1, 3), }, set(j.edges_iter()))
+        self.assertEqual({(1, 3), }, set(j.edges()))
 
     def test_in_place_type_failure(self):
         with self.assertRaises(TypeError):
