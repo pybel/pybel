@@ -259,10 +259,10 @@ def to_cx(graph):
     annotation_list_keys_lookup = {keyword: i for i, keyword in enumerate(sorted(graph.annotation_list))}
     annotation_lists_entry = []
     for keyword, values in graph.annotation_list.items():
-        for values in values:
+        for value in values:
             annotation_lists_entry.append({
                 'k': annotation_list_keys_lookup[keyword],
-                'v': values
+                'v': value
             })
 
     context_entry_dict = {}
