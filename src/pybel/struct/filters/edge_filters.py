@@ -29,8 +29,7 @@ def invert_edge_filter(edge_predicate):
     """Builds a filter that is the inverse of the given filter
 
     :param edge_predicate: An edge filter function (graph, node, node, key, data) -> bool
-    :type edge_predicate: types.FunctionType
-    :return: An edge filter function
+    :type edge_predicate: (pybel.BELGraph, tuple, tuple, int) -> bool
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
@@ -43,10 +42,9 @@ def invert_edge_filter(edge_predicate):
 def and_edge_predicates(edge_predicates=None):
     """Concatenates multiple edge predicates to a new predicate that requires all predicates to be met.
 
-    :param edge_predicates: a list of predicates (graph, node, node, key, data) -> bool
-    :type edge_predicates: types.FunctionType or iter[types.FunctionType]
-    :return: A combine filter (graph, node, node, key, data) -> bool
-    :rtype: types.FunctionType
+    :param edge_predicates: a list of predicates
+    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
+    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
     # If no filters are given, then return the trivially permissive filter
@@ -86,7 +84,7 @@ def filter_edges(graph, edge_predicates=None):
 
     :param BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
-    :type edge_predicates: types.FunctionType or list[types.FunctionType] or tuple[types.FunctionType]
+    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
     :return: An iterable of edges that pass all predicates
     :rtype: iter[tuple,tuple,int]
     """
@@ -107,7 +105,7 @@ def count_passed_edge_filter(graph, edge_predicates=None):
 
     :param pybel.BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
-    :type edge_predicates: types.FunctionType or list[types.FunctionType] or tuple[types.FunctionType]
+    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
     :return: The number of edges passing a given set of predicates
     :rtype: int
     """
