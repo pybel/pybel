@@ -62,7 +62,7 @@ def keep_node_permissive(graph, node):
 
     Given BEL graph :code:`graph`, applying :func:`keep_node_permissive` with a predicate on the nodes iterable
     as in :code:`filter(keep_node_permissive, graph)` will result in the same iterable as iterating directly over a
-    :clsdd:`BELGraph`
+    :class:`BELGraph`
 
     :param BELGraph graph: A BEL graph
     :param tuple node: The node
