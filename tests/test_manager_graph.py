@@ -181,7 +181,7 @@ class TestQuery(TemporaryCacheMixin):
         u = graph.add_node_from_data(fos_data)
         v = graph.add_node_from_data(jun_data)
 
-        graph.add_edge(u, v, attr_dict={
+        graph.add_edge(u, v, **{
             RELATION: INCREASES,
             EVIDENCE: test_evidence_text,
             CITATION: test_citation_dict,
@@ -299,7 +299,7 @@ class TestQuery(TemporaryCacheMixin):
         rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED)
         self.assertEqual(1, len(rv))
 
-    def test_query_citaiton_by_reference(self):
+    def test_query_citation_by_reference(self):
         rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED, reference=test_citation_dict[CITATION_REFERENCE])
         self.assertEqual(1, len(rv))
         self.assertEqual(test_citation_dict, rv[0].to_json())
@@ -560,9 +560,9 @@ class TestAddNodeFromData(unittest.TestCase):
 
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertEqual(node_data, self.graph.nodes[node_tuple])
         self.assertIn(node_parent_tuple, self.graph)
-        self.assertEqual(node_parent_data, self.graph.node[node_parent_tuple])
+        self.assertEqual(node_parent_data, self.graph.nodes[node_parent_tuple])
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
@@ -592,9 +592,9 @@ class TestAddNodeFromData(unittest.TestCase):
 
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertEqual(node_data, self.graph.nodes[node_tuple])
         self.assertIn(node_parent_tuple, self.graph)
-        self.assertEqual(node_parent_data, self.graph.node[node_parent_tuple])
+        self.assertEqual(node_parent_data, self.graph.nodes[node_parent_tuple])
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
@@ -621,7 +621,7 @@ class TestAddNodeFromData(unittest.TestCase):
 
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertEqual(node_data, self.graph.nodes[node_tuple])
         self.assertEqual(1, self.graph.number_of_nodes())
         self.assertEqual(0, self.graph.number_of_edges())
 
@@ -651,12 +651,12 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(il6, self.graph)
         self.assertIn(il23, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
-        self.assertIn(il6, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][il6])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][il6][has_component_code][RELATION])
-        self.assertIn(il23, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][il23])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][il23][has_component_code][RELATION])
+        self.assertIn(il6, self.graph[node_tuple])
+        self.assertIn(has_component_code, self.graph[node_tuple][il6])
+        self.assertEqual(HAS_COMPONENT, self.graph[node_tuple][il6][has_component_code][RELATION])
+        self.assertIn(il23, self.graph[node_tuple])
+        self.assertIn(has_component_code, self.graph[node_tuple][il23])
+        self.assertEqual(HAS_COMPONENT, self.graph[node_tuple][il23][has_component_code][RELATION])
 
     def test_reaction(self):
         superoxide_node = ABUNDANCE, 'CHEBI', 'superoxide'
@@ -694,15 +694,15 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(hydrogen_peroxide, self.graph)
         self.assertIn(oxygen_node, self.graph)
         self.assertEqual(3, self.graph.number_of_edges())
-        self.assertIn(superoxide_node, self.graph.edge[node_tuple])
-        self.assertIn(has_reactant_code, self.graph.edge[node_tuple][superoxide_node])
-        self.assertEqual(HAS_REACTANT, self.graph.edge[node_tuple][superoxide_node][has_reactant_code][RELATION])
-        self.assertIn(hydrogen_peroxide, self.graph.edge[node_tuple])
-        self.assertIn(has_product_code, self.graph.edge[node_tuple][hydrogen_peroxide])
-        self.assertEqual(HAS_PRODUCT, self.graph.edge[node_tuple][hydrogen_peroxide][has_product_code][RELATION])
-        self.assertIn(oxygen_node, self.graph.edge[node_tuple])
-        self.assertIn(has_product_code, self.graph.edge[node_tuple][oxygen_node])
-        self.assertEqual(HAS_PRODUCT, self.graph.edge[node_tuple][oxygen_node][has_product_code][RELATION])
+        self.assertIn(superoxide_node, self.graph[node_tuple])
+        self.assertIn(has_reactant_code, self.graph[node_tuple][superoxide_node])
+        self.assertEqual(HAS_REACTANT, self.graph[node_tuple][superoxide_node][has_reactant_code][RELATION])
+        self.assertIn(hydrogen_peroxide, self.graph[node_tuple])
+        self.assertIn(has_product_code, self.graph[node_tuple][hydrogen_peroxide])
+        self.assertEqual(HAS_PRODUCT, self.graph[node_tuple][hydrogen_peroxide][has_product_code][RELATION])
+        self.assertIn(oxygen_node, self.graph[node_tuple])
+        self.assertIn(has_product_code, self.graph[node_tuple][oxygen_node])
+        self.assertEqual(HAS_PRODUCT, self.graph[node_tuple][oxygen_node][has_product_code][RELATION])
 
     def test_complex(self):
         has_component_code = unqualified_edge_code[HAS_COMPONENT]
@@ -720,12 +720,12 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(fos_tuple, self.graph)
         self.assertIn(jun_tuple, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
-        self.assertIn(fos_tuple, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][fos_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][fos_tuple][has_component_code][RELATION])
-        self.assertIn(jun_tuple, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][jun_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][jun_tuple][has_component_code][RELATION])
+        self.assertIn(fos_tuple, self.graph[node_tuple])
+        self.assertIn(has_component_code, self.graph[node_tuple][fos_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph[node_tuple][fos_tuple][has_component_code][RELATION])
+        self.assertIn(jun_tuple, self.graph[node_tuple])
+        self.assertIn(has_component_code, self.graph[node_tuple][jun_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph[node_tuple][jun_tuple][has_component_code][RELATION])
 
     def test_dimer_complex(self):
         """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
@@ -736,9 +736,9 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
-        self.assertIn(egfr_tuple, self.graph.edge[egfr_dimer])
-        self.assertIn(has_component_code, self.graph.edge[egfr_dimer][egfr_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[egfr_dimer][egfr_tuple][has_component_code][RELATION])
+        self.assertIn(egfr_tuple, self.graph[egfr_dimer])
+        self.assertIn(has_component_code, self.graph[egfr_dimer][egfr_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph[egfr_dimer][egfr_tuple][has_component_code][RELATION])
 
     def test_nested_complex(self):
         """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
@@ -750,19 +750,19 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(e2f4_tuple, self.graph)
         self.assertIn(ap1_complex_tuple, self.graph)
         self.assertEqual(4, self.graph.number_of_edges())
-        self.assertIn(fos_tuple, self.graph.edge[ap1_complex_tuple])
-        self.assertIn(has_component_code, self.graph.edge[ap1_complex_tuple][fos_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[ap1_complex_tuple][fos_tuple][has_component_code][RELATION])
-        self.assertIn(jun_tuple, self.graph.edge[ap1_complex_tuple])
-        self.assertIn(has_component_code, self.graph.edge[ap1_complex_tuple][jun_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[ap1_complex_tuple][jun_tuple][has_component_code][RELATION])
+        self.assertIn(fos_tuple, self.graph[ap1_complex_tuple])
+        self.assertIn(has_component_code, self.graph[ap1_complex_tuple][fos_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph[ap1_complex_tuple][fos_tuple][has_component_code][RELATION])
+        self.assertIn(jun_tuple, self.graph[ap1_complex_tuple])
+        self.assertIn(has_component_code, self.graph[ap1_complex_tuple][jun_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph[ap1_complex_tuple][jun_tuple][has_component_code][RELATION])
 
-        self.assertIn(has_component_code, self.graph.edge[bound_ap1_e2f4_tuple][ap1_complex_tuple])
+        self.assertIn(has_component_code, self.graph[bound_ap1_e2f4_tuple][ap1_complex_tuple])
         self.assertEqual(HAS_COMPONENT,
-                         self.graph.edge[bound_ap1_e2f4_tuple][ap1_complex_tuple][has_component_code][RELATION])
+                         self.graph[bound_ap1_e2f4_tuple][ap1_complex_tuple][has_component_code][RELATION])
 
-        self.assertIn(has_component_code, self.graph.edge[bound_ap1_e2f4_tuple][e2f4_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[bound_ap1_e2f4_tuple][e2f4_tuple][has_component_code][RELATION])
+        self.assertIn(has_component_code, self.graph[bound_ap1_e2f4_tuple][e2f4_tuple])
+        self.assertEqual(HAS_COMPONENT, self.graph[bound_ap1_e2f4_tuple][e2f4_tuple][has_component_code][RELATION])
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):

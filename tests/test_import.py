@@ -58,9 +58,9 @@ class TestExampleInterchange(unittest.TestCase):
 
         :type graph: pybel.BELGraph
         """
-        self.assertEqual(set(sialic_acid_graph), set(graph))
+        self.assertEqual(set(sialic_acid_graph), set(graph), msg='nodes are not equal')
 
-        self.assertEqual(set(sialic_acid_graph.edges_iter()), set(graph.edges_iter()))
+        self.assertEqual(set(sialic_acid_graph.edges()), set(graph.edges()), msg='edges are not equal')
 
     def test_example_bytes(self):
         graph_bytes = to_bytes(sialic_acid_graph)

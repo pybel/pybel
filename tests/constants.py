@@ -145,15 +145,15 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
         return
 
     if permissive:
-        matches = any_subdict_matches(graph.edge[u][v], kwargs)
+        matches = any_subdict_matches(graph[u][v], kwargs)
     else:
-        matches = any_dict_matches(graph.edge[u][v], kwargs)
+        matches = any_dict_matches(graph[u][v], kwargs)
 
     msg = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'.format(
         u,
         v,
         dumps(kwargs, indent=2, sort_keys=True),
-        dumps(graph.edge[u][v], indent=2, sort_keys=True)
+        dumps(dict(graph[u][v]), indent=2, sort_keys=True)
     )
     self.assertTrue(matches, msg=msg)
 

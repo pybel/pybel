@@ -4,10 +4,12 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import *
+from pybel.dsl import protein
 from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids, sanitize_date
 from pybel.manager.models import Citation
 from pybel.struct.summary.provenance import get_pubmed_identifiers
 from tests.constants import TemporaryCacheMixin
+from tests.utils import n
 
 
 class TestSanitizeDate(unittest.TestCase):
@@ -47,12 +49,13 @@ class TestCitations(TemporaryCacheMixin):
         g.add_node(1)
         g.add_node(2)
 
-        g.add_edge(1, 2, attr_dict={
-            CITATION: {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: self.pmid
-            }
-        })
+        g.add_qualified_edge(
+            protein(namespace=n(), name=n()),
+            protein(namespace=n(), name=n()),
+            citation=self.pmid,
+            evidence=n(),
+            relation=n()
+        )
 
         self.graph = g
 
@@ -102,7 +105,7 @@ class TestCitations(TemporaryCacheMixin):
 
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
-        _, _, d = self.graph.edges(data=True)[0]
+        _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
 
         self.assertIn(CITATION_NAME, citation_dict)
@@ -119,7 +122,9 @@ class TestCitations(TemporaryCacheMixin):
     def test_enrich_graph(self):
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
-        _, _, d = self.graph.edges(data=True)[0]
+        _, _, d = list(self.graph.edges(data=True))[0]
+
+        self.assertIn(CITATION, d, msg='citations not in {}'.format(d))
         citation_dict = d[CITATION]
 
         self.assertIn(CITATION_NAME, citation_dict)
@@ -154,6 +159,7 @@ class TestCitations(TemporaryCacheMixin):
 
         a2 = self.manager.get_author_by_name(g2)
         self.assertEqual(g2, a2.name)
+
 
 if __name__ == '__main__':
     unittest.main()

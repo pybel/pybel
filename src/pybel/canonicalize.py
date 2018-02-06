@@ -9,7 +9,7 @@ import logging
 
 from .constants import *
 from .resources.document import make_knowledge_header
-from .utils import ensure_quotes, flatten_citation, hash_edge
+from .utils import ensure_quotes
 
 __all__ = [
     'to_bel_lines',
@@ -46,12 +46,12 @@ def _get_variant_name(tokens):
     if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
         return tokens[IDENTIFIER][NAME]
     else:
-        return'{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
+        return '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
 
 
 def _get_fragment_range_str(tokens):
     if FRAGMENT_MISSING in tokens:
-        return'?'
+        return '?'
     else:
         return '{}_{}'.format(tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
 
@@ -236,12 +236,12 @@ def sort_qualified_edges(graph):
     :param BELGraph graph: A BEL graph
     :rtype: tuple[tuple,tuple,int,dict]
     """
-    qualified_edges_iter = (
+    qualified_edges = (
         (u, v, k, d)
-        for u, v, k, d in graph.edges_iter(keys=True, data=True)
+        for u, v, k, d in graph.edges(keys=True, data=True)
         if graph.has_edge_citation(u, v, k) and graph.has_edge_evidence(u, v, k)
     )
-    qualified_edges = sorted(qualified_edges_iter, key=_sort_qualified_edges_helper)
+    qualified_edges = sorted(qualified_edges, key=_sort_qualified_edges_helper)
     return qualified_edges
 
 
@@ -279,8 +279,8 @@ def _set_annotation_to_str(annotation_data, key):
 
     return 'SET {} = {{{}}}'.format(key, ', '.join(x))
 
-def _unset_annotation_to_str(keys):
 
+def _unset_annotation_to_str(keys):
     if len(keys) == 1:
         return 'UNSET {}'.format(list(keys)[0])
 
@@ -308,22 +308,22 @@ def _to_bel_lines_header(graph):
     )
 
 
-def group_citation_edges(edges_iter):
+def group_citation_edges(edges):
     """Returns an iterator over pairs of citation values and their corresponding edge iterators
 
-    :param tuple[tuple,tuple,int,dict] edges_iter: An iterator over the 4-tuples of edges
-    :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
+    :param iter[tuple,tuple,int,dict] edges: An iterator over the 4-tuples of edges
+    :rtype: iter[str,tuple[tuple,tuple,int,dict]]
     """
-    return itt.groupby(edges_iter, key=_citation_sort_key)
+    return itt.groupby(edges, key=_citation_sort_key)
 
 
-def group_evidence_edges(edges_iter):
+def group_evidence_edges(edges):
     """Returns an iterator over pairs of evidence values and their corresponding edge iterators
 
-    :param tuple[tuple,tuple,int,dict] edges_iter: An iterator over the 4-tuples of edges
-    :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
+    :param iter[tuple,tuple,int,dict] edges: An iterator over the 4-tuples of edges
+    :rtype: iter[str,tuple[tuple,tuple,int,dict]]
     """
-    return itt.groupby(edges_iter, key=_evidence_sort_key)
+    return itt.groupby(edges, key=_evidence_sort_key)
 
 
 def _to_bel_lines_body(graph):
@@ -364,9 +364,9 @@ def _to_bel_lines_footer(graph):
     :rtype: iter[str]
     """
     unqualified_edges_to_serialize = [
-        (u, v, d)
-        for u, v, d in graph.edges_iter(data=True)
-        if d[RELATION] in unqualified_edge_code and EVIDENCE not in d
+        (u, v, data)
+        for u, v, data in graph.edges(data=True)
+        if data[RELATION] in unqualified_edge_code and EVIDENCE not in data
     ]
 
     isolated_nodes_to_serialize = [

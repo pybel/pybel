@@ -212,17 +212,18 @@ def enrich_pubmed_citations(manager, graph, group_size=None, sleep_time=None):
         return set()
 
     pmids = get_pubmed_identifiers(graph)
-    pmid_data, errors = get_citations_by_pmids(manager=manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)
+    pmid_data, errors = get_citations_by_pmids(manager=manager, pmids=pmids, group_size=group_size,
+                                               sleep_time=sleep_time)
 
     for u, v, k in filter_edges(graph, has_pubmed):
-        pmid = graph.edge[u][v][k][CITATION][CITATION_REFERENCE].strip()
+        pmid = graph.edges[u, v, k][CITATION][CITATION_REFERENCE].strip()
 
         if pmid not in pmid_data:
             log.warning('Missing data for PubMed identifier: %s', pmid)
             errors.add(pmid)
             continue
 
-        graph.edge[u][v][k][CITATION].update(pmid_data[pmid])
+        graph.edges[u, v, k][CITATION].update(pmid_data[pmid])
 
     graph.graph['PYBEL_ENRICHED_CITATIONS'] = True
 

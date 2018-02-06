@@ -315,7 +315,7 @@ def to_jgif(graph):
             'metadata': {}
         })
 
-    for u, v in graph.edges_iter():
+    for u, v in graph.edges():
         relation_evidences = defaultdict(list)
 
         for data in graph.edge[u][v].values():

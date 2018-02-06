@@ -10,7 +10,7 @@ tuple, a key, and a data dictionary. It returns a boolean representing whether t
 This module contains a set of default functions for filtering lists of edges and building edge predicate functions.
 
 A general use for an edge predicate is to use the built-in :func:`filter` in code like
-:code:`filter(your_edge_predicate, graph.edges_iter(keys=True, data=True))`
+:code:`filter(your_edge_predicate, graph.edges(keys=True, data=True))`
 """
 
 from collections import Iterable
@@ -91,13 +91,12 @@ def filter_edges(graph, edge_predicates=None):
 
     # If no predicates are given, return the standard edge iterator
     if not edge_predicates:
-        for u, v, k in graph.edges_iter(keys=True):
+        return graph.edges(keys=True)
+
+    compound_edge_predicate = and_edge_predicates(edge_predicates=edge_predicates)
+    for u, v, k in graph.edges(keys=True):
+        if compound_edge_predicate(graph, u, v, k):
             yield u, v, k
-    else:
-        compound_edge_predicate = and_edge_predicates(edge_predicates=edge_predicates)
-        for u, v, k in graph.edges_iter(keys=True):
-            if compound_edge_predicate(graph, u, v, k):
-                yield u, v, k
 
 
 def count_passed_edge_filter(graph, edge_predicates=None):

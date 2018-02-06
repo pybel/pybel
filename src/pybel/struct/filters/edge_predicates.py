@@ -40,7 +40,7 @@ def edge_predicate(f):
 
         if isinstance(x, BELGraph):
             u, v, k = args[1:4]
-            return f(x.edge[u][v][k])
+            return f(x.edges[u, v, k])
 
         return f(*args)
 
@@ -192,7 +192,7 @@ def edge_has_annotation(data, key):
     For example, it might be useful to print all edges that are annotated with 'Subgraph':
 
     >>> from pybel.examples import sialic_acid_graph
-    >>> for u, v, data in sialic_acid_graph.edges_iter(data=True):
+    >>> for u, v, data in sialic_acid_graph.edges(data=True):
     >>>     if edge_has_annotation(data, 'Species')
     >>>         print(u, v, data)
     """

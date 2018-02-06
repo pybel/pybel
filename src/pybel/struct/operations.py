@@ -77,7 +77,7 @@ def _left_full_exhaustive_join(g, h):
     _left_full_node_join(g, h)
     _left_full_metadata_join(g, h)
 
-    for u, v, k, d in h.edges_iter(keys=True, data=True):
+    for u, v, k, d in h.edges(keys=True, data=True):
         if k < 0:  # unqualified edge that's not in G yet
             if v not in g.edge[u] or k not in g.edge[u][v]:
                 g.add_edge(u, v, key=k, attr_dict=d)

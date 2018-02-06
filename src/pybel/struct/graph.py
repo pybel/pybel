@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""This module contains the main data structure for PyBEL."""
+
 import logging
 import warnings
 from copy import deepcopy
@@ -324,7 +326,7 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: iter[tuple[tuple,dict]]
         """
-        return self.nodes_iter(data=True)
+        return self.nodes(data=True)
 
     def iter_data(self):
         """Iterates over the node data dictionaries
@@ -333,7 +335,7 @@ class BELGraph(networkx.MultiDiGraph):
         """
         return (
             data
-            for _, data in self.nodes_iter(data=True)
+            for _, data in self.nodes(data=True)
         )
 
     @staticmethod
@@ -357,7 +359,7 @@ class BELGraph(networkx.MultiDiGraph):
         if node_tuple in self:
             return node_tuple
 
-        self.add_node(node_tuple, attr_dict=attr_dict)
+        self.add_node(node_tuple, **attr_dict)
 
         if VARIANTS in attr_dict:
             parent_node_dict = {
@@ -474,42 +476,42 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: bool
         """
-        return CITATION in self.edge[u][v][key]
+        return CITATION in self.edges[u, v, key]
 
     def get_edge_citation(self, u, v, key):
         """Gets the citation for a given edge
 
         :rtype: Optional[dict]
         """
-        return self.edge[u][v][key].get(CITATION)
+        return self.edges[u, v, key].get(CITATION)
 
     def has_edge_evidence(self, u, v, key):
         """Does the given edge have evidence?
 
         :rtype: boolean
         """
-        return EVIDENCE in self.edge[u][v][key]
+        return EVIDENCE in self.edges[u, v, key]
 
     def get_edge_evidence(self, u, v, key):
         """Gets the evidence for a given edge
 
         :rtype: Optional[str]
         """
-        return self.edge[u][v][key].get(EVIDENCE)
+        return self.edges[u, v, key].get(EVIDENCE)
 
     def get_edge_annotations(self, u, v, key):
         """Gets the annotations for a given edge
 
         :rtype: Optional[dict]
         """
-        return self.edge[u][v][key].get(ANNOTATIONS)
+        return self.edges[u, v, key].get(ANNOTATIONS)
 
     def get_node_name(self, node):
         """Gets the node's name, or return None if no name
 
         :rtype: Optional[str]
         """
-        return self.node[node].get(NAME)
+        return self.nodes[node].get(NAME)
 
     def set_node_name(self, node, name):
         """Sets the name for a given node
@@ -517,21 +519,21 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple node: A PyBEL node tuple
         :type name: str
         """
-        self.node[node][NAME] = name
+        self.nodes[node][NAME] = name
 
     def get_node_identifier(self, node):
         """Gets the identifier for a given node from the database (not the same as the node hash)
 
         :rtype: Optional[str]
         """
-        return self.node[node].get(IDENTIFIER)
+        return self.nodes[node].get(IDENTIFIER)
 
     def get_node_description(self, node):
         """Gets the description for a given node
 
         :rtype: Optional[str]
         """
-        return self.node[node].get(DESCRIPTION)
+        return self.nodes[node].get(DESCRIPTION)
 
     def has_node_description(self, node):
         """Returns if a node description is already present
@@ -539,7 +541,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple node: A PyBEL node tuple
         :rtype: bool
         """
-        return DESCRIPTION in self.node[node]
+        return DESCRIPTION in self.nodes[node]
 
     def set_node_description(self, node, description):
         """Sets the description for a given node
@@ -547,7 +549,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple node: A PyBEL node tuple
         :type description: str
         """
-        self.node[node][DESCRIPTION] = description
+        self.nodes[node][DESCRIPTION] = description
 
     def __add__(self, other):
         """Creates a deep copy of this graph and full joins another graph with it using
@@ -646,13 +648,13 @@ class BELGraph(networkx.MultiDiGraph):
 
         return left_node_intersection_join(self, other)
 
-    def node_to_bel(self, n):
+    def node_to_bel(self, node):
         """Serializes a node as BEL
 
-        :param tuple n: A PyBEL node tuple
+        :param tuple node: A PyBEL node tuple
         :rtype: str
         """
-        return node_to_bel(self.node[n])
+        return node_to_bel(self.nodes[node])
 
     def edge_to_bel(self, u, v, data, sep=None):
         """Serializes a pair of nodes and related edge data as a BEL relation
@@ -663,7 +665,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param str sep: The separator between the source, relation, and target. Defaults to ' '
         :rtype: str
         """
-        return edge_to_bel(self.node[u], self.node[v], data=data, sep=sep)
+        return edge_to_bel(self.nodes[u], self.nodes[v], data=data, sep=sep)
 
     def _equivalent_node_iterator_helper(self, node, visited):
         """Iterates over nodes and their data that are equal to the given node, starting with the original
@@ -671,11 +673,11 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple node: A PyBEL node tuple
         :rtype: iter[tuple]
         """
-        for v in self.edge[node]:
+        for v in self[node]:
             if v in visited:
                 continue
 
-            if unqualified_edge_code[EQUIVALENT_TO] not in self.edge[node][v]:
+            if unqualified_edge_code[EQUIVALENT_TO] not in self[node][v]:
                 continue
 
             yield v
@@ -709,7 +711,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple node: A PyBEL node tuple
         :rtype: bool
         """
-        return namespace == self.node[node].get(NAMESPACE)
+        return namespace == self.nodes[node].get(NAMESPACE)
 
     def node_has_namespace(self, node, namespace):
         """Does the node have the given namespace? This also should look in the equivalent nodes.

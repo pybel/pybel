@@ -18,7 +18,7 @@ def iterate_pubmed_identifiers(graph):
     """
     return (
         data[CITATION][CITATION_REFERENCE].strip()
-        for _, _, data in graph.edges_iter(data=True)
+        for _, _, data in graph.edges(data=True)
         if has_pubmed(data)
     )
 

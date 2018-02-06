@@ -22,7 +22,7 @@ def iter_annotation_value_pairs(graph):
     """
     return (
         (key, value)
-        for _, _, data in graph.edges_iter(data=True)
+        for _, _, data in graph.edges(data=True)
         if ANNOTATIONS in data
         for key, values in data[ANNOTATIONS].items()
         for value in values
@@ -38,7 +38,7 @@ def iter_annotation_values(graph, annotation):
     """
     return (
         value
-        for _, _, data in graph.edges_iter(data=True)
+        for _, _, data in graph.edges(data=True)
         if edge_has_annotation(data, annotation)
         for value in data[ANNOTATIONS][annotation]
     )
