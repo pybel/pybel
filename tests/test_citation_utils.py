@@ -61,12 +61,12 @@ class TestCitations(TemporaryCacheMixin):
 
         stored_citations = self.manager.session.query(Citation).all()
 
-        self.assertEqual(0, len(stored_citations))
+        self.assertEqual(0, len(stored_citations), msg='there should not already be citations stored')
 
         get_citations_by_pmids(manager=self.manager, pmids=pmids)
 
         stored_citations = self.manager.session.query(Citation).all()
-        self.assertEqual(1, len(stored_citations))
+        self.assertEqual(1, len(stored_citations), msg='citation was not successfully stored')
 
     def test_enrich_list(self):
         pmids = [
