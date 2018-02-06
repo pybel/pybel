@@ -66,11 +66,12 @@ def main():
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--allow-unqualified-translocations', is_flag=True,
               help="Enable lenient parsing for unqualified translocations")
+@click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--debug', count=True)
 def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
             neo_context, store_default, store_connection, allow_naked_names, allow_nested,
-            allow_unqualified_translocations, no_citation_clearing, debug):
+            allow_unqualified_translocations, no_identifier_validation, no_citation_clearing, debug):
     """Convert BEL"""
     if debug == 1:
         log.setLevel(logging.INFO)
@@ -92,6 +93,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
+            no_identifier_validation=no_identifier_validation,
         )
 
     else:
