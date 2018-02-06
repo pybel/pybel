@@ -197,11 +197,11 @@ def parse_statements(graph, statements, bel_parser):
 def _log_graph_summary(graph):
     """Logs simple information about a graph
 
-    :param BELGraph graph: A BEL graph
+    :param pybel.BELGraph graph: A BEL graph
     """
     counter = defaultdict(lambda: defaultdict(int))
 
-    for _, data in graph.nodes_iter(data=True):
+    for data in graph.iter_data():
         counter[data[FUNCTION]][data.get(NAMESPACE, "DEFAULT")] += 1
 
     for fn, nss in sorted(counter.items()):

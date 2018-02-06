@@ -279,7 +279,7 @@ def from_jgif(graph_jgif_dict):
 def to_jgif(graph):
     """Builds a JGIF dictionary from a BEL graph.
     
-    :param BELGraph graph: A BEL graph
+    :param pybel.BELGraph graph: A BEL graph
     :return: A JGIF dictionary
     :rtype: dict
     
@@ -303,7 +303,7 @@ def to_jgif(graph):
     nodes_entry = []
     edges_entry = []
 
-    for i, (node, node_data) in enumerate(graph.nodes_iter(data=True)):
+    for i, (node, node_data) in enumerate(graph.iter_node_data_pairs()):
         bel = node_to_bel(node_data)
         node_bel[node] = bel
 

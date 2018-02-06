@@ -20,7 +20,7 @@ def _function_iterator(graph):
     """Iterates over the functions in a graph"""
     return (
         data[FUNCTION]
-        for _, data in graph.nodes_iter(data=True)
+        for data in graph.iter_data()
     )
 
 
@@ -47,7 +47,7 @@ def count_functions(graph):
 def _iterate_namespaces(graph):
     return (
         data[NAMESPACE]
-        for _, data in graph.nodes_iter(data=True)
+        for data in graph.iter_data()
         if NAMESPACE in data
     )
 
@@ -84,7 +84,7 @@ def get_unused_namespaces(graph):
 
 def _identifier_filtered_iterator(graph):
     """Iterates over names in the given namespace"""
-    for _, data in graph.nodes_iter(data=True):
+    for data in graph.iter_data():
         if NAMESPACE in data:
             yield data[NAMESPACE], data[NAME]
 

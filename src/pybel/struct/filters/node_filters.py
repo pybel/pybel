@@ -10,7 +10,7 @@ representing whether the node passed the given test.
 This module contains a set of default functions for filtering lists of nodes and building node predicates.
 
 A general use for a node predicate is to use the built-in :func:`filter` in code like
-:code:`filter(your_node_predicate, graph.nodes_iter())`
+:code:`filter(your_node_predicate, graph)`
 """
 
 from collections import Iterable

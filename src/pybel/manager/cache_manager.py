@@ -661,7 +661,7 @@ class OwlAnnotationManager(AnnotationManager):
 
         entries = {
             node: AnnotationEntry(name=node, annotation=annotation)  # TODO add label
-            for node in graph.nodes_iter()
+            for node in graph
         }
         annotation.entries = list(entries.values())
 

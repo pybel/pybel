@@ -319,6 +319,23 @@ class BELGraph(networkx.MultiDiGraph):
         """
         self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
 
+    def iter_node_data_pairs(self):
+        """Iterates over pairs of nodes and their data dictionaries
+
+        :rtype: iter[tuple[tuple,dict]]
+        """
+        return self.nodes_iter(data=True)
+
+    def iter_data(self):
+        """Iterates over the node data dictionaries
+
+        :rtype: iter[dict]
+        """
+        return (
+            data
+            for _, data in self.nodes_iter(data=True)
+        )
+
     @staticmethod
     def hash_node(data):
         """Converts a PyBEL node data dictionary to a PyBEL node tuple

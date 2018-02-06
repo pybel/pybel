@@ -246,7 +246,7 @@ class TestParse(TestGraphMixin):
         ado_path = Path(test_owl_ado).as_uri()
         owl = parse_owl(ado_path)
 
-        self.assertLessEqual(ado_expected_nodes_subset, set(owl.nodes_iter()))
+        self.assertLessEqual(ado_expected_nodes_subset, set(owl))
         self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
 
     @mock_parse_owl_rdf
@@ -254,7 +254,7 @@ class TestParse(TestGraphMixin):
     def test_ado(self, mock1, mock2):
         ado_path = 'http://mock.com/ado.owl'
         owl = parse_owl(ado_path)
-        self.assertLessEqual(ado_expected_nodes_subset, set(owl.nodes_iter()))
+        self.assertLessEqual(ado_expected_nodes_subset, set(owl))
         self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
 
 

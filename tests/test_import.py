@@ -43,11 +43,11 @@ def do_remapping(original, reconstituted):
     :param BELGraph original: The original bel graph 
     :param BELGraph reconstituted: The reconstituted BEL graph from CX input/output
     """
-    node_mapping = dict(enumerate(sorted(original.nodes_iter(), key=hash_node)))
+    node_mapping = dict(enumerate(sorted(original, key=hash_node)))
     try:
         nx.relabel.relabel_nodes(reconstituted, node_mapping, copy=False)
     except KeyError as e:
-        missing_nodes = set(node_mapping) - set(reconstituted.nodes_iter())
+        missing_nodes = set(node_mapping) - set(reconstituted)
         log.exception('missing %s', [node_mapping[n] for n in missing_nodes])
         raise e
 
@@ -58,11 +58,9 @@ class TestExampleInterchange(unittest.TestCase):
 
         :type graph: pybel.BELGraph
         """
-        self.assertEqual(set(sialic_acid_graph.nodes_iter()),
-                         set(graph.nodes_iter()))
+        self.assertEqual(set(sialic_acid_graph), set(graph))
 
-        self.assertEqual(set(sialic_acid_graph.edges_iter()),
-                         set(graph.edges_iter()))
+        self.assertEqual(set(sialic_acid_graph.edges_iter()), set(graph.edges_iter()))
 
     def test_example_bytes(self):
         graph_bytes = to_bytes(sialic_acid_graph)
