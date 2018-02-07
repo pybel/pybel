@@ -114,7 +114,7 @@ __all__ = (
     examples.__all__
 )
 
-__version__ = '0.10.2-dev'
+__version__ = '0.11.0-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, and data exchange of BEL graphs'
