@@ -11,8 +11,8 @@ import networkx as nx
 from six import string_types
 
 from .constants import (
-    CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, PYBEL_EDGE_DATA_KEYS,
-    VERSION,
+    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
+    PYBEL_EDGE_DATA_KEYS, VERSION,RELATION
 )
 
 log = logging.getLogger(__name__)
@@ -26,6 +26,7 @@ def expand_dict(flat_dict, sep='_'):
 
     :param dict flat_dict: a nested dictionary that has been flattened so the keys are composite
     :param str sep: the separator between concatenated keys
+    :rtype: dict
     """
     res = {}
     rdict = defaultdict(list)
@@ -50,6 +51,7 @@ def flatten_dict(d, parent_key='', sep='_'):
     :type d: dict or MutableMapping
     :param str parent_key: The parent's key. This is a value for tail recursion, so don't set it yourself.
     :param str sep: The separator used between dictionary levels
+    :rtype: dict
 
     .. seealso:: http://stackoverflow.com/a/6027615
     """
@@ -84,7 +86,11 @@ def flatten_graph_data(graph):
 
 
 def list2tuple(l):
-    """Recursively converts a nested list to a nested tuple"""
+    """Recursively converts a nested list to a nested tuple
+
+    :type l: list
+    :rtype: tuple
+    """
     if isinstance(l, list):
         return tuple(list2tuple(e) for e in l)
     else:
@@ -117,7 +123,11 @@ def tokenize_version(version_string):
 
 
 def citation_dict_to_tuple(citation):
-    """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple"""
+    """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple
+
+    :param dict citation:
+    :rtype: tuple[str]
+    """
     if len(citation) == 2 and CITATION_TYPE in citation and CITATION_REFERENCE in citation:
         return citation[CITATION_TYPE], citation[CITATION_REFERENCE]
 
@@ -142,6 +152,7 @@ def flatten_citation(citation):
     """Flattens a citation dict, from the ``d[CITATION]`` entry in an edge data dictionary
 
     :param dict[str,str] citation: A PyBEL citation data dictionary
+    :rtype: str
     """
     return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
 
@@ -149,7 +160,7 @@ def flatten_citation(citation):
 def ensure_quotes(s):
     """Quote a string that isn't solely alphanumeric
 
-    :param str s: a string
+    :type s: str
     :rtype: str
     """
     return '"{}"'.format(s) if not s.isalnum() else s
@@ -175,7 +186,11 @@ def valid_date(s):
 
 
 def valid_date_version(s):
-    """Checks that the string is a valid date versions string"""
+    """Checks that the string is a valid date versions string
+
+    :type s: str
+    :rtype: bool
+    """
     try:
         datetime.strptime(s, DATE_VERSION_FMT)
         return True
@@ -215,7 +230,7 @@ def hash_node(node_tuple):
     return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
 
 
-def extract_pybel_data(data):
+def _extract_pybel_data(data):
     """Extracts only the PyBEL-specific data from the given edge data dictionary
 
     :param dict data: An edge data dictionary
@@ -228,7 +243,7 @@ def extract_pybel_data(data):
     }
 
 
-def edge_to_tuple(u, v, k, data):
+def _edge_to_tuple(u, v, data):
     """Converts an edge to tuple
 
     :param tuple u: The source BEL node
@@ -236,17 +251,20 @@ def edge_to_tuple(u, v, k, data):
     :param dict data: The edge's data dictionary
     :return: A tuple that can be hashed representing this edge. Makes no promises to its structure.
     """
-    extracted_data_dict = extract_pybel_data(data)
+    extracted_data_dict = _extract_pybel_data(data)
     return u, v, json.dumps(extracted_data_dict, ensure_ascii=False, sort_keys=True)
 
 
-def hash_edge(u, v, k, d):
+def hash_edge(u, v, data):
     """Converts an edge tuple to a hash
-
+    
+    :param tuple u: The source BEL node
+    :param tuple v: The target BEL node
+    :param dict data: The edge's data dictionary
     :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
     :rtype: str
     """
-    edge_tuple = edge_to_tuple(u, v, k, d)
+    edge_tuple = _edge_to_tuple(u, v, data)
     edge_tuple_bytes = pickle.dumps(edge_tuple)
     return hashlib.sha512(edge_tuple_bytes).hexdigest()
 
@@ -287,11 +305,23 @@ def subdict_matches(target, query, partial_match=True):
     return True
 
 
-def hash_dump(d):
-    return hashlib.sha512(json.dumps(d, sort_keys=True).encode('utf-8')).hexdigest()
+def hash_dump(data):
+    """Hashes an arbitrary JSON dictionary by dumping it in sorted order, encoding it in UTF-8, then hashing the bytes
+
+    :param data: An arbitrary JSON-serializable object
+    :type data: dict or list or tuple
+    :rtype: str
+    """
+    return hashlib.sha512(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()
 
 
 def hash_citation(type, reference):
+    """Creates a hash for a type/reference pair of a citation
+
+    :param str type: The corresponding citation type
+    :param str reference: The citation reference
+    :rtype: str
+    """
     return hash_dump((type, reference))
 
 
@@ -301,6 +331,6 @@ def hash_evidence(text, type, reference):
     :param str text: The evidence text
     :param str type: The corresponding citation type
     :param str reference: The citation reference
-    :return:
+    :rtype: str
     """
     return hash_dump((type, reference, text))

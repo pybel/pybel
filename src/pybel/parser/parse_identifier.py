@@ -6,7 +6,7 @@ import re
 from pyparsing import Suppress
 
 from .baseparser import BaseParser
-from .parse_exceptions import (
+from .exc import (
     MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning,
     UndefinedNamespaceWarning,
 )

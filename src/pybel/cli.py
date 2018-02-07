@@ -27,18 +27,14 @@ from .constants import PYBEL_CONFIG_PATH, PYBEL_CONNECTION, PYBEL_LOG_DIR, confi
 from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
 from .manager import Manager, defaults
 from .manager.database_io import from_database, to_database
-from .manager.models import Base
+from .manager.models import Base, Edge
 from .utils import PYBEL_MYSQL_FMT_NOPASS, PYBEL_MYSQL_FMT_PASS
 
 log = logging.getLogger('pybel')
 
-formatter = logging.Formatter('%(name)s:%(levelname)s - %(message)s')
-logging.basicConfig(format=formatter)
-
 fh_path = os.path.join(PYBEL_LOG_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
 fh = logging.FileHandler(fh_path)
 fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
 log.addHandler(fh)
 
 
@@ -70,16 +66,19 @@ def main():
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--allow-unqualified-translocations', is_flag=True,
               help="Enable lenient parsing for unqualified translocations")
+@click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--debug', count=True)
 def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
             neo_context, store_default, store_connection, allow_naked_names, allow_nested,
-            allow_unqualified_translocations, no_citation_clearing, debug):
+            allow_unqualified_translocations, no_identifier_validation, no_citation_clearing, debug):
     """Convert BEL"""
     if debug == 1:
-        log.setLevel(20)
+        log.setLevel(logging.INFO)
+        logging.basicConfig(level=logging.INFO, format='%(name)s:%(levelname)s - %(message)s')
     elif debug == 2:
-        log.setLevel(10)
+        log.setLevel(logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format='%(name)s:%(levelname)s - %(message)s')
 
     manager = Manager(connection=connection)
 
@@ -94,6 +93,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
+            no_identifier_validation=no_identifier_validation,
         )
 
     else:
@@ -379,8 +379,8 @@ def ls(manager):
 
 
 @network.command()
-@click.argument('-n', '--network-id', type=int)
-@click.option('-y', '--yes', is_flag=True)
+@click.option('-n', '--network-id', type=int, help='Identifier of network to drop')
+@click.option('-y', '--yes', is_flag=True, help='Drop all networks without confirmation if no identifier is given')
 @click.pass_obj
 def drop(manager, network_id, yes):
     """Drops a network by its identifier or drops all networks"""
@@ -389,6 +389,42 @@ def drop(manager, network_id, yes):
 
     if yes or click.confirm('Drop all networks?'):
         manager.drop_networks()
+
+
+@manage.group()
+def edge():
+    """Manage edges"""
+
+
+@edge.command()
+@click.option('--offset', type=int)
+@click.option('--limit', type=int, default=10)
+@click.pass_obj
+def ls(manager, offset, limit):
+    """Lists edges"""
+    q = manager.session.query(Edge)
+
+    if offset:
+        q = q.offset(offset)
+
+    if limit > 0:
+        q = q.limit(limit)
+
+    for e in q:
+        click.echo(e.bel)
+
+
+@manage.command()
+@click.pass_obj
+def summarize(manager):
+    """Summarizes the contents of the database"""
+    click.echo('Networks: {}'.format(manager.count_networks()))
+    click.echo('Edges: {}'.format(manager.count_edges()))
+    click.echo('Nodes: {}'.format(manager.count_nodes()))
+    click.echo('Namespaces: {}'.format(manager.count_namespaces()))
+    click.echo('Namespaces entries: {}'.format(manager.count_namespace_entries()))
+    click.echo('Annotations: {}'.format(manager.count_annotations()))
+    click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
 
 
 if __name__ == '__main__':

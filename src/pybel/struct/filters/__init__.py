@@ -8,8 +8,9 @@ This module contains functions for filtering node and edge iterables. It relies 
 
 """
 
-from . import edge_filters, edge_predicates, node_filters, node_predicates
+from . import edge_filters, edge_predicate_builders, edge_predicates, node_filters, node_predicates
 from .edge_filters import *
+from .edge_predicate_builders import *
 from .edge_predicates import *
 from .node_filters import *
 from .node_predicates import *
@@ -18,5 +19,6 @@ __all__ = (
     node_filters.__all__ +
     edge_filters.__all__ +
     edge_predicates.__all__ +
-    node_predicates.__all__
+    node_predicates.__all__ +
+    edge_predicate_builders.__all__
 )

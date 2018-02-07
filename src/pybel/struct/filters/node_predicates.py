@@ -61,8 +61,8 @@ def keep_node_permissive(graph, node):
     """A default node predicate that always evaluates to :data:`True`.
 
     Given BEL graph :code:`graph`, applying :func:`keep_node_permissive` with a predicate on the nodes iterable
-    as in :code:`filter(keep_node_permissive, graph.nodes_iter())` will result in the same iterable as
-    :meth:`BELGraph.nodes_iter`
+    as in :code:`filter(keep_node_permissive, graph)` will result in the same iterable as iterating directly over a
+    :class:`BELGraph`
 
     :param BELGraph graph: A BEL graph
     :param tuple node: The node

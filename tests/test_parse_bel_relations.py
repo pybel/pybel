@@ -10,7 +10,7 @@ from pybel.canonicalize import edge_to_bel
 from pybel.constants import *
 from pybel.dsl import abundance, activity, entity, pmod, protein, rna
 from pybel.parser import BelParser
-from pybel.parser.parse_exceptions import (
+from pybel.parser.exc import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
 from pybel.tokens import node_to_tuple
@@ -275,7 +275,7 @@ class TestRelations(TestTokenParserBase):
 
         annotations = {
             'ListAnnotation': {'a', 'b'},
-            'ScalarAnnotation': 'c'
+            'ScalarAnnotation': {'c'}
         }
 
         self.parser.control_parser.annotations.update(annotations)
@@ -287,7 +287,10 @@ class TestRelations(TestTokenParserBase):
                 FUNCTION: GENE,
                 NAMESPACE: 'HGNC',
                 NAME: 'CAT',
-                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                LOCATION: {
+                    NAMESPACE: 'GOCC',
+                    NAME: 'intracellular'
+                }
             },
             RELATION: DIRECTLY_DECREASES,
             OBJECT: {
@@ -306,22 +309,18 @@ class TestRelations(TestTokenParserBase):
 
         expected_attrs = {
             SUBJECT: {
-                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                LOCATION: {
+                    NAMESPACE: 'GOCC',
+                    NAME: 'intracellular'
+                }
             },
             RELATION: DIRECTLY_DECREASES,
             CITATION: test_citation_dict,
-            EVIDENCE: test_evidence_text
-        }
-
-        expected_attrs[ANNOTATIONS] = {
-            'ListAnnotation': 'a',
-            'ScalarAnnotation': 'c'
-        }
-        self.assertHasEdge(sub, obj, **expected_attrs)
-
-        expected_attrs[ANNOTATIONS] = {
-            'ListAnnotation': 'b',
-            'ScalarAnnotation': 'c'
+            EVIDENCE: test_evidence_text,
+            ANNOTATIONS: {
+                'ListAnnotation': {'a': True, 'b': True},
+                'ScalarAnnotation': {'c': True}
+            }
         }
         self.assertHasEdge(sub, obj, **expected_attrs)
 
@@ -755,8 +754,8 @@ class TestRelations(TestTokenParserBase):
         expected_node = node_to_tuple(result[SUBJECT])
 
         self.assertHasNode(expected_node)
-        self.assertIn(LABEL, self.parser.graph.node[expected_node])
-        self.assertEqual('APOE E2', self.parser.graph.node[expected_node][LABEL])
+        self.assertTrue(self.parser.graph.has_node_description(expected_node))
+        self.assertEqual('APOE E2', self.parser.graph.get_node_description(expected_node))
 
     def test_raise_on_relabel(self):
         s1 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'

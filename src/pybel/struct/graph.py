@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Contains the main data structure for PyBEL"""
+
 import logging
 import warnings
 from copy import deepcopy
@@ -30,12 +32,29 @@ RESOURCE_DICTIONARY_NAMES = (
 )
 
 
+def _clean_annotations(annotations_dict):
+    """Fixes formatting of annotation dict
+
+    :type annotations_dict: dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]
+    :rtype: dict[str,dict[str,bool]]
+    """
+    return {
+        key: (
+            values if isinstance(values, dict) else
+            {v: True for v in values} if isinstance(values, set) else
+            {values: True}
+        )
+        for key, values in annotations_dict.items()
+    }
+
+
 class BELGraph(networkx.MultiDiGraph):
     """This class represents biological knowledge assembled in BEL as a network by extending the
     :class:`networkx.MultiDiGraph`.
     """
 
-    def __init__(self, name=None, version=None, description=None, authors=None, contact=None, data=None, **kwargs):
+    def __init__(self, name=None, version=None, description=None, authors=None, contact=None, license=None,
+                 copyright=None, disclaimer=None, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
 
@@ -45,6 +64,9 @@ class BELGraph(networkx.MultiDiGraph):
         :param str description: A description of the graph
         :param str authors: The authors of this graph
         :param str contact: The contact email for this graph
+        :param str license: The license for this graph
+        :param str copyright: The copyright for this graph
+        :param str disclaimer: The disclaimer for this graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         """
@@ -56,19 +78,28 @@ class BELGraph(networkx.MultiDiGraph):
             self.graph[GRAPH_METADATA] = {}
 
         if name:
-            self.graph[GRAPH_METADATA][METADATA_NAME] = name
+            self.name = name
 
         if version:
-            self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+            self.version = version
 
         if description:
-            self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+            self.description = description
 
         if authors:
-            self.graph[GRAPH_METADATA][METADATA_AUTHORS] = authors
+            self.authors = authors
 
         if contact:
-            self.graph[GRAPH_METADATA][METADATA_CONTACT] = contact
+            self.contact = contact
+
+        if license:
+            self.license = license
+
+        if copyright:
+            self.copyright = copyright
+
+        if disclaimer:
+            self.disclaimer = disclaimer
 
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
@@ -85,21 +116,21 @@ class BELGraph(networkx.MultiDiGraph):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
         according to :data:`pybel.constants.DOCUMENT_KEYS`
 
-        :rtype: dict
+        :rtype: dict[str,str]
         """
         return self.graph[GRAPH_METADATA]
 
     @property
-    def name(self, *attrs):
+    def name(self, *attrs):  # Needs *attrs since it's an override
         """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_NAME)
+        return self.document.get(METADATA_NAME)
 
     @name.setter
-    def name(self, *attrs, **kwargs):
-        self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
+    def name(self, *attrs, **kwargs):  # Needs *attrs and **kwargs since it's an override
+        self.document[METADATA_NAME] = attrs[0]
 
     @property
     def version(self):
@@ -107,11 +138,11 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
+        return self.document.get(METADATA_VERSION)
 
     @version.setter
     def version(self, version):
-        self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+        self.document[METADATA_VERSION] = version
 
     @property
     def description(self):
@@ -119,11 +150,71 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_DESCRIPTION)
+        return self.document.get(METADATA_DESCRIPTION)
 
     @description.setter
     def description(self, description):
-        self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+        self.document[METADATA_DESCRIPTION] = description
+
+    @property
+    def authors(self):
+        """The graph's description, from the ``SET DOCUMENT Authors = "..."`` entry in the source BEL Script
+
+        :rtype: str
+        """
+        return self.document[METADATA_AUTHORS]
+
+    @authors.setter
+    def authors(self, authors):
+        self.document[METADATA_AUTHORS] = authors
+
+    @property
+    def contact(self):
+        """The graph's description, from the ``SET DOCUMENT ContactInfo = "..."`` entry in the source BEL Script
+
+        :rtype: str
+        """
+        return self.document.get(METADATA_CONTACT)
+
+    @contact.setter
+    def contact(self, contact):
+        self.document[METADATA_CONTACT] = contact
+
+    @property
+    def license(self):
+        """The graph's license, from the `SET DOCUMENT Licenses = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_LICENSES)
+
+    @license.setter
+    def license(self, license):
+        self.document[METADATA_LICENSES] = license
+
+    @property
+    def copyright(self):
+        """The graph's copyright, from the `SET DOCUMENT Copyright = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_COPYRIGHT)
+
+    @copyright.setter
+    def copyright(self, copyright):
+        self.document[METADATA_COPYRIGHT] = copyright
+
+    @property
+    def disclaimer(self):
+        """The graph's disclaimer, from the `SET DOCUMENT Disclaimer = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_DISCLAIMER)
+
+    @disclaimer.setter
+    def disclaimer(self, disclaimer):
+        self.document[METADATA_DISCLAIMER] = disclaimer
 
     @property
     def namespace_url(self):
@@ -150,9 +241,9 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-            set(self.namespace_pattern) |
-            set(self.namespace_url) |
-            set(self.namespace_owl)
+                set(self.namespace_pattern) |
+                set(self.namespace_url) |
+                set(self.namespace_owl)
         )
 
     @property
@@ -216,10 +307,10 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-            set(self.annotation_pattern) |
-            set(self.annotation_url) |
-            set(self.annotation_owl) |
-            set(self.annotation_list)
+                set(self.annotation_pattern) |
+                set(self.annotation_url) |
+                set(self.annotation_owl) |
+                set(self.annotation_list)
         )
 
     @property
@@ -251,9 +342,9 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: bool
         """
         return (
-            namespace is not None and
-            namespace in self.namespace_url and
-            self.namespace_url[namespace] in self.uncached_namespaces
+                namespace is not None and
+                namespace in self.namespace_url and
+                self.namespace_url[namespace] in self.uncached_namespaces
         )
 
     def add_warning(self, line_number, line, exception, context=None):
@@ -263,8 +354,10 @@ class BELGraph(networkx.MultiDiGraph):
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
 
-        :param tuple u: The source BEL node
-        :param tuple v: The target BEL node
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
         :param str relation: A relationship label from :mod:`pybel.constants`
 
         :return: The hash of this edge
@@ -279,12 +372,44 @@ class BELGraph(networkx.MultiDiGraph):
             v = self.add_node_from_data(v)
 
         attr = {RELATION: relation}
-        attr[HASH] = hash_edge(u, v, key, attr)
+        attr[HASH] = hash_edge(u, v, attr)
 
         if not self.has_edge(u, v, key):
             self.add_edge(u, v, key=key, **attr)
 
         return attr[HASH]
+
+    def _add_two_way_unqualified_edge(self, u, v, relation):
+        """Adds an unqualified edge both ways"""
+        self.add_unqualified_edge(u, v, relation)
+        self.add_unqualified_edge(v, u, relation)
+
+    def add_equivalence(self, u, v):
+        """Adds two equivalence relations for the nodes
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
+
+    def iter_node_data_pairs(self):
+        """Iterates over pairs of nodes and their data dictionaries
+
+        :rtype: iter[tuple[tuple,dict]]
+        """
+        return self.nodes_iter(data=True)
+
+    def iter_data(self):
+        """Iterates over the node data dictionaries
+
+        :rtype: iter[dict]
+        """
+        return (
+            data
+            for _, data in self.nodes_iter(data=True)
+        )
 
     @staticmethod
     def hash_node(data):
@@ -376,6 +501,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
                                                 assumes it's a PubMed identifier and autofills the citation type.
         :param dict[str,str] annotations: The annotations data dictionary
+        :type annotations: dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]
         :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
         :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
 
@@ -397,8 +523,8 @@ class BELGraph(networkx.MultiDiGraph):
         else:
             raise TypeError
 
-        if annotations:
-            attr[ANNOTATIONS] = annotations
+        if annotations:  # clean up annotations
+            attr[ANNOTATIONS] = _clean_annotations(annotations)
 
         if subject_modifier:
             attr[SUBJECT] = subject_modifier
@@ -412,54 +538,90 @@ class BELGraph(networkx.MultiDiGraph):
         if isinstance(v, dict):
             v = self.add_node_from_data(v)
 
-        attr[HASH] = hash_edge(u, v, None, attr)
+        attr[HASH] = hash_edge(u, v, attr)
 
         self.add_edge(u, v, **attr)
 
         return attr[HASH]
 
     def has_edge_citation(self, u, v, key):
-        """Does the given edge have a citation?"""
+        """Does the given edge have a citation?
+
+        :rtype: bool
+        """
         return CITATION in self.edge[u][v][key]
 
     def get_edge_citation(self, u, v, key):
-        """Gets the citation for a given edge"""
+        """Gets the citation for a given edge
+
+        :rtype: Optional[dict]
+        """
         return self.edge[u][v][key].get(CITATION)
 
     def has_edge_evidence(self, u, v, key):
-        """Does the given edge have evidence?"""
+        """Does the given edge have evidence?
+
+        :rtype: boolean
+        """
         return EVIDENCE in self.edge[u][v][key]
 
     def get_edge_evidence(self, u, v, key):
-        """Gets the evidence for a given edge"""
+        """Gets the evidence for a given edge
+
+        :rtype: Optional[str]
+        """
         return self.edge[u][v][key].get(EVIDENCE)
 
     def get_edge_annotations(self, u, v, key):
-        """Gets the annotations for a given edge"""
+        """Gets the annotations for a given edge
+
+        :rtype: Optional[dict]
+        """
         return self.edge[u][v][key].get(ANNOTATIONS)
 
     def get_node_name(self, node):
-        """Gets the node's name, or return None if no name"""
+        """Gets the node's name, or return None if no name
+
+        :rtype: Optional[str]
+        """
         return self.node[node].get(NAME)
 
+    def set_node_name(self, node, name):
+        """Sets the name for a given node
+
+        :param tuple node: A PyBEL node tuple
+        :type name: str
+        """
+        self.node[node][NAME] = name
+
     def get_node_identifier(self, node):
-        """Gets the identifier for a given node from the database (not the same as the node hash)"""
+        """Gets the identifier for a given node from the database (not the same as the node hash)
+
+        :rtype: Optional[str]
+        """
         return self.node[node].get(IDENTIFIER)
 
-    def get_node_label(self, node):
-        """Gets the label for a given node"""
-        return self.node[node].get(LABEL)
-
-    def set_node_label(self, node, label):
-        """Sets the label for a given node"""
-        self.node[node][LABEL] = label
-
     def get_node_description(self, node):
-        """Gets the description for a given node"""
+        """Gets the description for a given node
+
+        :rtype: Optional[str]
+        """
         return self.node[node].get(DESCRIPTION)
 
+    def has_node_description(self, node):
+        """Returns if a node description is already present
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: bool
+        """
+        return DESCRIPTION in self.node[node]
+
     def set_node_description(self, node, description):
-        """Sets the description for a given node"""
+        """Sets the description for a given node
+
+        :param tuple node: A PyBEL node tuple
+        :type description: str
+        """
         self.node[node][DESCRIPTION] = description
 
     def __add__(self, other):
@@ -577,3 +739,62 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: str
         """
         return edge_to_bel(self.node[u], self.node[v], data=data, sep=sep)
+
+    def _equivalent_node_iterator_helper(self, node, visited):
+        """Iterates over nodes and their data that are equal to the given node, starting with the original
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: iter[tuple]
+        """
+        for v in self.edge[node]:
+            if v in visited:
+                continue
+
+            if unqualified_edge_code[EQUIVALENT_TO] not in self.edge[node][v]:
+                continue
+
+            yield v
+            visited.add(v)
+
+            for w in self._equivalent_node_iterator_helper(v, visited):
+                yield w
+
+    def iter_equivalent_nodes(self, node):
+        """Iterates over node tuples that are equivalent to the given node, including the original
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: iter[tuple]
+        """
+        yield node
+
+        for n in self._equivalent_node_iterator_helper(node, {node}):
+            yield n
+
+    def get_equivalent_nodes(self, node):
+        """Gets a set of equivalent nodes to this node. Does not include the given node.
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: set[tuple]
+        """
+        return set(self.iter_equivalent_nodes(node))
+
+    def _node_has_namespace_helper(self, node, namespace):
+        """Check that the node has namespace information. Might have cross references in future
+
+        :param tuple node: A PyBEL node tuple
+        :rtype: bool
+        """
+        return namespace == self.node[node].get(NAMESPACE)
+
+    def node_has_namespace(self, node, namespace):
+        """Does the node have the given namespace? This also should look in the equivalent nodes.
+
+        :param tuple node: A PyBEL node tuple
+        :param str namespace: A namespace
+        :rtype: bool
+        """
+        for n in self.iter_equivalent_nodes(node):
+            if self._node_has_namespace_helper(n, namespace):
+                return True
+
+        return False

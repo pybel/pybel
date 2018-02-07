@@ -6,7 +6,7 @@ from pathlib import Path
 from pybel.manager import Manager, models
 from tests.constants import (
     CELL_LINE_URL, FleetingTemporaryCacheMixin, HGNC_URL, belns_dir_path, test_eq_1, test_eq_2,
-    test_ns_nocache, wine_iri,
+    test_ns_nocache_path, wine_iri,
 )
 from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_xml
 
@@ -52,12 +52,9 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
         alternate_manager.ensure_namespace(HGNC_URL)
         self._help_check_hgnc(alternate_manager)
 
-    @mock_bel_resources
-    def test_insert_namespace_nocache(self, mock):
+    def test_insert_namespace_nocache(self):
         """Test that this namespace isn't cached"""
         self.assertEqual(0, len(self.manager.list_namespaces()))
-
-        test_ns_nocache_path = 'file:///' + test_ns_nocache
         self.manager.ensure_namespace(test_ns_nocache_path)
 
         self.assertEqual(0, len(self.manager.list_namespaces()))
@@ -65,6 +62,7 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_insert_annotation(self, mock_get):
         annotation = self.manager.ensure_annotation(CELL_LINE_URL)
+        self.assertIsNotNone(annotation)
         self.assertEqual(CELL_LINE_URL, annotation.url)
 
         entry = self.manager.get_annotation_entry(CELL_LINE_URL, '1321N1 cell')
@@ -74,7 +72,9 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
     @mock_parse_owl_rdf
     @mock_parse_owl_xml
     def test_insert_owl(self, m1, m2):
-        self.manager.ensure_namespace_owl(wine_iri)
+        namespace = self.manager.ensure_namespace_owl(wine_iri)
+        self.assertIsNotNone(namespace)
+        self.assertEqual(wine_iri, namespace.url)
 
         entry = self.manager.get_namespace_entry(wine_iri, 'ChateauMorgon')
         self.assertIsNotNone(entry)

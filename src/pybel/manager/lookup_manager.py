@@ -2,6 +2,7 @@
 
 from .base_manager import BaseManager
 from .models import Author, Citation, Edge, Evidence, Node
+from ..constants import CITATION_TYPE_PUBMED
 from ..tokens import hash_node_dict
 from ..utils import hash_citation
 
@@ -42,6 +43,14 @@ class LookupManager(BaseManager):
         """
         citation_hash = hash_citation(type=type, reference=reference)
         return self.get_citation_by_hash(citation_hash)
+
+    def get_citation_by_pmid(self, pubmed_identifier):
+        """Gets a citation object by its PubMed identifier
+
+        :param str pubmed_identifier: The PubMed identifier
+        :rtype: Optional[Citation]
+        """
+        return self.get_citation_by_reference(reference=pubmed_identifier, type=CITATION_TYPE_PUBMED)
 
     def get_citation_by_hash(self, citation_hash):
         """Gets a citation object by its hash

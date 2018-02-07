@@ -1,20 +1,25 @@
-PyBEL |develop_build| |develop_windows_build| |develop_coverage| |develop_documentation| |zenodo|
-=================================================================================================
-`PyBEL <http://pybel.readthedocs.io>`_ is a Python package for parsing and handling biological networks encoded in the
-`Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ (BEL).
-It also facilitates data interchange between common formats and databases such as
+PyBEL |zenodo|
+==============
+`PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
+the `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
+(BEL). It also facilitates data interchange between common formats and databases such as
 `NetworkX <http://networkx.github.io/>`_, JSON, CSV, SIF, `Cytoscape <http://www.cytoscape.org/>`_,
 `CX <http://www.home.ndexbio.org/data-model/>`_, `NDEx <https://github.com/pybel/pybel2cx>`_, SQL, and
 `Neo4J <https://neo4j.com>`_.
 
 Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
-suite of functions and workflows for analyzing the resulting biological networks.
+suite of functions and pipelines for analyzing the resulting biological networks.
+
+=========== =============== ======================= ================== =======================
+Stable      |stable_build|  |stable_windows_build|  |stable_coverage|  |stable_documentation|
+Development |develop_build| |develop_windows_build| |develop_coverage| |develop_documentation|
+=========== =============== ======================= ================== =======================
 
 Citation
 --------
-If you use PyBEL in your work, we ask that you please cite:
+If you use PyBEL in your work, please cite:
 
-Hoyt et al., 2017. PyBEL: a computational framework for Biological Expression Language. Bioinformatics, btx660, https://doi.org/10.1093/bioinformatics/btx660
+.. [1] Hoyt *et al.*, 2017. `PyBEL: a computational framework for Biological Expression Language <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, btx660
 
 Getting Started
 ---------------
@@ -90,8 +95,12 @@ Links
     :target: https://travis-ci.org/pybel/pybel
     :alt: Stable Build Status
 
+.. |stable_windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/cthoyt/pybel
+    :alt: Stable Windows Build Status
+
 .. |stable_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=master
-    :target: https://codecov.io/gh/pybel/pybel?branch=master
+    :target: https://codecov.io/gh/pybel/pybel/branch/master
     :alt: Stable Coverage Status
 
 .. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=stable
@@ -107,7 +116,7 @@ Links
     :alt: Development Windows Build Status
 
 .. |develop_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
-    :target: https://codecov.io/gh/pybel/pybel?branch=develop
+    :target: https://codecov.io/gh/pybel/pybel/branch/develop
     :alt: Development Coverage Status
 
 .. |develop_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest

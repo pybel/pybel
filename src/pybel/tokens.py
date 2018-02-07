@@ -3,7 +3,7 @@
 """This module helps handle node data dictionaries"""
 
 from .constants import *
-from .dsl import cell_surface_expression, secretion
+from .dsl import cell_surface_expression, fusion_range, missing_fusion_range, secretion
 from .exceptions import PyBELCanonicalizeError
 from .utils import hash_node
 
@@ -73,18 +73,16 @@ def fusion_range_po_to_dict(tokens):
     :rtype: dict
     """
     if FUSION_MISSING in tokens:
-        return {
-            FUSION_MISSING: '?'
-        }
+        return missing_fusion_range()
     else:
-        return {
-            FUSION_REFERENCE: tokens[FUSION_REFERENCE],
-            FUSION_START: tokens[FUSION_START],
-            FUSION_STOP: tokens[FUSION_STOP]
-        }
+        return fusion_range(
+            reference=tokens[FUSION_REFERENCE],
+            start=tokens[FUSION_START],
+            stop=tokens[FUSION_STOP]
+        )
 
 
-def fusion_po_to_dict(tokens):
+def fusion_po_to_dict(tokens):  # FIXME use DSL
     """Converts a PyParsing data dictionary to a PyBEL fusion data dictionary
 
     :param tokens: A PyParsing data dictionary representing a fusion
@@ -227,18 +225,6 @@ def reaction_po_to_dict(tokens):
         REACTANTS: reaction_part_po_to_dict(tokens[REACTANTS]),
         PRODUCTS: reaction_part_po_to_dict(tokens[PRODUCTS]),
     }
-
-
-def simple_po_to_tuple(tokens):
-    """
-    :type tokens: ParseResult
-    :rtype: tuple
-    """
-    return (
-        tokens[FUNCTION],
-        tokens[NAMESPACE],
-        tokens[NAME]
-    )
 
 
 def simple_po_to_dict(tokens):

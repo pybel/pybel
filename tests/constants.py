@@ -5,17 +5,16 @@ import os
 import tempfile
 import unittest
 from json import dumps
+from pathlib import Path
 
 from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
-from pybel.dsl import complex_abundance, pathology, protein
-from pybel.dsl.edges import translocation
+from pybel.dsl import *
 from pybel.manager import Manager
+from pybel.parser.exc import *
 from pybel.parser.parse_bel import BelParser
-from pybel.parser.parse_exceptions import *
-from pybel.tokens import node_to_tuple
 from pybel.utils import subdict_matches
 
 log = logging.getLogger(__name__)
@@ -46,6 +45,8 @@ test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
 test_ns_nocache = os.path.join(belns_dir_path, 'test_nocache.belns')
 test_ns_empty = os.path.join(belns_dir_path, 'test_ns_empty.belns')
 
+test_ns_nocache_path = Path(test_ns_nocache).as_uri()
+
 test_eq_1 = os.path.join(beleq_dir_path, 'disease-ontology.beleq')
 test_eq_2 = os.path.join(beleq_dir_path, 'mesh-diseases.beleq')
 
@@ -71,6 +72,7 @@ pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
 wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
 
 test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
+
 
 def update_provenance(control_parser):
     """Sticks provenance in a BEL parser
@@ -214,6 +216,8 @@ class TemporaryCacheClsMixin(unittest.TestCase):
         if not test_connection:
             os.close(cls.fd)
             os.remove(cls.path)
+        else:
+            cls.manager.drop_all()
 
 
 class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
@@ -476,17 +480,8 @@ BEL_THOROUGH_EDGES = [
         CITATION: citation_1,
         RELATION: INCREASES,
         ANNOTATIONS: {
-            'TESTAN1': '1',
-            'TestRegex': '9000'
-        }
-    }),
-    (oxygen_atom, (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
-        EVIDENCE: dummy_evidence,
-        CITATION: citation_1,
-        RELATION: INCREASES,
-        ANNOTATIONS: {
-            'TESTAN1': '2',
-            'TestRegex': '9000'
+            'TESTAN1': {'1': True, '2': True},
+            'TestRegex': {'9000': True}
         }
     }),
     (akt1_gene, (GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))), {
@@ -1008,7 +1003,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIsInstance(graph, BELGraph)
 
         if check_metadata:
-            self.assertEqual(expected_test_simple_metadata, graph.document)
+            self.assertIsNotNone(graph.document)
             self.assertEqual(expected_test_simple_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_simple_metadata[METADATA_VERSION], graph.version)
 
@@ -1042,13 +1037,15 @@ class BelReconstitutionMixin(TestGraphMixin):
             RELATION: INCREASES,
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_1_extra,
-            ANNOTATIONS: {'Species': "9606"}
+            ANNOTATIONS: {
+                'Species': {'9606': True}
+            }
         })
         assertHasEdge(self, EGFR, FADD, graph, **{
             RELATION: DECREASES,
             ANNOTATIONS: {
-                'Species': "9606",
-                'CellLine': "10B9 cell"
+                'Species': {'9606': True},
+                'CellLine': {'10B9 cell': True}
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2
@@ -1056,8 +1053,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         assertHasEdge(self, EGFR, CASP8, graph, **{
             RELATION: DIRECTLY_DECREASES,
             ANNOTATIONS: {
-                'Species': "9606",
-                'CellLine': "10B9 cell"
+                'Species': {'9606': True},
+                'CellLine': {'10B9 cell': True}
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2,
@@ -1065,7 +1062,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         assertHasEdge(self, FADD, CASP8, graph, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
-                'Species': "10116"
+                'Species': {'10116': True}
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -1073,7 +1070,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         assertHasEdge(self, AKT1, CASP8, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'Species': "10116"
+                'Species': {'10116': True}
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -1081,19 +1078,22 @@ class BelReconstitutionMixin(TestGraphMixin):
         assertHasEdge(self, CASP8, AKT1, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'Species': "10116"
+                'Species': {'10116': True}
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
         })
 
-    def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True):
+    def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True,
+                                   check_citation_name=True):
         """Checks that thorough.bel was loaded properly
 
         :param BELGraph graph: A BEL graph
         :param bool check_metadata: Check the graph's document section is correct
         :param bool check_warnings: Check the graph produced the expected warnings
         :param bool check_provenance: Check the graph's definition section is correct
+        :param bool check_citation_name: Check that the names in the citations get reconstituted. This isn't strictly
+                                         necessary since this data can be looked up
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -1104,8 +1104,6 @@ class BelReconstitutionMixin(TestGraphMixin):
 
         if check_metadata:
             self.assertLessEqual(set(expected_test_thorough_metadata), set(graph.document))
-            gmd = {k: v for k, v in graph.document.items() if k in expected_test_thorough_metadata}
-            self.assertEqual(expected_test_thorough_metadata, gmd)
             self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], graph.version)
             self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description)
@@ -1123,7 +1121,14 @@ class BelReconstitutionMixin(TestGraphMixin):
         # FIXME
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))
 
+        self.assertLess(0, graph.number_of_edges())
+
         for u, v, d in BEL_THOROUGH_EDGES:
+
+            if not check_citation_name and CITATION in d and CITATION_NAME in d[CITATION]:
+                d[CITATION] = d[CITATION].copy()
+                del d[CITATION][CITATION_NAME]
+
             assertHasEdge(self, u, v, graph, permissive=True, **d)
 
     def bel_slushy_reconstituted(self, graph, check_metadata=True, check_warnings=True):
@@ -1137,7 +1142,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIsInstance(graph, BELGraph)
 
         if check_metadata:
-            self.assertEqual(expected_test_slushy_metadata, graph.document)
+            self.assertIsNotNone(graph.document)
+            self.assertIsInstance(graph.document, dict)
             self.assertEqual(expected_test_slushy_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_slushy_metadata[METADATA_VERSION], graph.version)
             self.assertEqual(expected_test_slushy_metadata[METADATA_DESCRIPTION], graph.description)
@@ -1178,6 +1184,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
 
+        self.assertLess(0, graph.number_of_edges())
+
         assertHasEdge(self, AKT1, EGFR, graph, **{
             RELATION: INCREASES,
             CITATION: citation_1,
@@ -1187,7 +1195,7 @@ class BelReconstitutionMixin(TestGraphMixin):
     def bel_isolated_reconstituted(self, graph):
         """Runs the isolated node test
 
-        :param BELGraph graph: A BEL Graph
+        :type graph: BELGraph
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -1202,9 +1210,9 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertTrue(graph.has_node_with_data(adgrb_complex))
         self.assertTrue(graph.has_node_with_data(achlorhydria))
 
-        b = node_to_tuple(adgrb1)
-        c = node_to_tuple(adgrb2)
-        d = node_to_tuple(adgrb_complex)
+        b = adgrb1.as_tuple()
+        c = adgrb2.as_tuple()
+        d = adgrb_complex.as_tuple()
 
         assertHasEdge(self, d, b, graph)
         assertHasEdge(self, d, c, graph)

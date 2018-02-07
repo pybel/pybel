@@ -141,7 +141,7 @@ def left_outer_join(g, h, use_hash=True):
     >>> h = pybel.from_path('...')
     >>> merged = left_outer_join(g, h)
     """
-    g_nodes = set(g.nodes_iter())
+    g_nodes = set(g)
     for comp in nx.weakly_connected_components(h):
         if g_nodes.intersection(comp):
             left_full_join(g, h.subgraph(comp), use_hash=use_hash)

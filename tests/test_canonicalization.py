@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from uuid import uuid4
 
 from pybel import BELGraph
 from pybel.canonicalize import canonicalize_edge, fusion_range_to_bel, variant_to_bel
 from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, INCREASES, KIND, MODIFIER, PATHOLOGY,
-    PROTEIN,
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, INCREASES, KIND,
+    MODIFIER, PATHOLOGY, PROTEIN, REACTION, RNA,
 )
 from pybel.dsl import *
 from pybel.dsl.edges import extracellular, intracellular
+from tests.utils import n
 
 
 class TestCanonicalize(unittest.TestCase):
@@ -87,24 +87,35 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('m(HGNC:MIR1)', str(mirna(namespace='HGNC', name='MIR1')))
 
     def test_rna_fusion_specified(self):
-        self.assertEqual(
-            'r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))',
-            str(rna_fusion(
-                partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
-                range_5p=fusion_range('r', 1, 79),
-                partner_3p=rna(namespace='HGNC', name='ERG'),
-                range_3p=fusion_range('r', 312, 5034)
-            ))
+        node = rna_fusion(
+            partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
+            range_5p=fusion_range('r', 1, 79),
+            partner_3p=rna(namespace='HGNC', name='ERG'),
+            range_3p=fusion_range('r', 312, 5034)
         )
+        self.assertEqual('r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))', str(node))
 
     def test_rna_fusion_unspecified(self):
-        self.assertEqual(
-            'r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))',
-            str(rna_fusion(
-                partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
-                partner_3p=rna(namespace='HGNC', name='ERG'),
-            ))
+        node = rna_fusion(
+            partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
+            partner_3p=rna(namespace='HGNC', name='ERG'),
         )
+        self.assertEqual('r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))', str(node))
+
+        t = RNA, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('?',)
+        self.assertEqual(t, node.as_tuple())
+
+    def test_gene_fusion_specified(self):
+        node = gene_fusion(
+            partner_5p=gene(namespace='HGNC', name='TMPRSS2'),
+            range_5p=fusion_range('c', 1, 79),
+            partner_3p=gene(namespace='HGNC', name='ERG'),
+            range_3p=fusion_range('c', 312, 5034)
+        )
+
+        self.assertEqual('g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))', str(node))
+        t = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
+        self.assertEqual(t, node.as_tuple())
 
     def test_pathology(self):
         node = pathology(namespace='DO', name='Alzheimer disease')
@@ -119,6 +130,25 @@ class TestCanonicalize(unittest.TestCase):
     def test_complex_abundance(self):
         node = complex_abundance(members=[protein(namespace='HGNC', name='FOS'), protein(namespace='HGNC', name='JUN')])
         t = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
+        self.assertEqual('complex(p(HGNC:FOS), p(HGNC:JUN))', str(node))
+        self.assertEqual(t, node.as_tuple())
+
+    def test_composite_abundance(self):
+        node = composite_abundance(members=[
+            protein(namespace='HGNC', name='FOS'),
+            protein(namespace='HGNC', name='JUN')
+        ])
+        t = COMPOSITE, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
+        self.assertEqual('composite(p(HGNC:FOS), p(HGNC:JUN))', str(node))
+        self.assertEqual(t, node.as_tuple())
+
+    def test_reaction(self):
+        node = reaction(
+            reactants=[abundance(namespace='CHEBI', name='A')],
+            products=[abundance(namespace='CHEBI', name='B')]
+        )
+        t = REACTION, ((ABUNDANCE, 'CHEBI', 'A'),), ((ABUNDANCE, 'CHEBI', 'B'),)
+        self.assertEqual('rxn(reactants(a(CHEBI:A)), products(a(CHEBI:B)))', str(node))
         self.assertEqual(t, node.as_tuple())
 
 
@@ -142,8 +172,8 @@ class TestCanonicalizeEdge(unittest.TestCase):
             self.u,
             self.v,
             relation=INCREASES,
-            evidence=str(uuid4()),
-            citation=str(uuid4()),
+            evidence=n(),
+            citation=n(),
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
             annotations=annotations,

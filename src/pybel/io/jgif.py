@@ -13,9 +13,12 @@ JSON. Interchange with this format provides compatibilty with other software and
 import logging
 from collections import defaultdict
 
+from pyparsing import ParseException
+
 from ..canonicalize import node_to_bel
 from ..constants import *
 from ..parser import BelParser
+from ..parser.exc import NakedNameWarning
 from ..struct import BELGraph
 
 __all__ = [
@@ -44,16 +47,16 @@ placeholder_evidence = "This Network edge has no supporting evidence.  Please ad
 EXPERIMENT_CONTEXT = 'experiment_context'
 
 
-def get_citation(evidence):
-    citation = {
-        CITATION_TYPE: evidence['citation']['type'].strip(),
-        CITATION_REFERENCE: evidence['citation']['id'].strip()
+def reformat_citation(citation):
+    """Reformats a citation dictionary
+
+    :type citation: dict[str,str]
+    :rtype: dict[str,str]
+    """
+    return {
+        CITATION_TYPE: citation['type'].strip(),
+        CITATION_REFERENCE: citation['id'].strip()
     }
-
-    if 'name' in evidence['citation']:
-        citation[CITATION_NAME] = evidence['citation']['name'].strip()
-
-    return citation
 
 
 def map_cbn(d):
@@ -81,9 +84,14 @@ def map_cbn(d):
             new_context = {}
 
             for key, value in evidence[EXPERIMENT_CONTEXT].items():
+                if not value:
+                    log.debug('key %s without value', key)
+                    continue
+
                 value = value.strip()
 
                 if not value:
+                    log.debug('key %s without value', key)
                     continue
 
                 key = key.strip().lower()
@@ -121,7 +129,6 @@ def from_cbn_jgif(graph_jgif_dict):
     builds a BEL graph using :func:`pybel.from_jgif`.
 
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
-    :return: A BEL graph
     :rtype: BELGraph
 
     Example:
@@ -131,6 +138,13 @@ def from_cbn_jgif(graph_jgif_dict):
     >>> apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
     >>> graph_jgif_dict = requests.get(apoptosis_url).json()
     >>> graph = from_cbn_jgif(graph_jgif_dict)
+
+    .. warning::
+
+        Handling the annotations is not yet supported, since the CBN documents do not refer to the resources used
+        to create them. This may be added in the future, but the annotations must be stripped from the graph
+        before uploading to the network store using :func:`pybel.struct.mutation.strip_annotations`
+
     """
     graph_jgif_dict = map_cbn(graph_jgif_dict)
 
@@ -175,7 +189,6 @@ def from_jgif(graph_jgif_dict):
     """Builds a BEL graph from a JGIF JSON object.
     
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
-    :return: A BEL graph
     :rtype: BELGraph
     """
     graph = BELGraph()
@@ -196,47 +209,69 @@ def from_jgif(graph_jgif_dict):
     parser.bel_term.addParseAction(parser.handle_term)
 
     for node in root['nodes']:
-        if 'label' not in node:
+        node_label = node.get('label')
+
+        if node_label is None:
             log.warning('node missing label: %s', node)
-        node_label = node['label']
-        parser.bel_term.parseString(node_label)
-
-    for i, edge in enumerate(root['edges']):
-
-        if edge['relation'] in {'actsIn'}:
-            continue  # don't need legacy BEL format
-
-        if edge['relation'] in UNQUALIFIED_EDGES:
-            pass
-
-        if not edge['relation'] in UNQUALIFIED_EDGES and (
-                        'evidences' not in edge['metadata'] or not edge['metadata']['evidences']):
-            log.debug('No evidence for edge %s', edge['label'])
             continue
 
-        for evidence in edge['metadata']['evidences']:
-            if 'citation' not in evidence or not evidence['citation']:
+        try:
+            parser.bel_term.parseString(node_label)
+        except NakedNameWarning as e:
+            log.info('Naked name: %s', e)
+        except ParseException:
+            log.info('Parse exception for %s', node_label)
+
+    for i, edge in enumerate(root['edges']):
+        relation = edge.get('relation')
+        if relation is None:
+            log.warning('no relation for edge: %s', edge)
+
+        if relation in {'actsIn', 'translocates'}:
+            continue  # don't need legacy BEL format
+
+        edge_metadata = edge.get('metadata')
+        if edge_metadata is None:
+            log.warning('no metadata for edge: %s', edge)
+            continue
+
+        bel_statement = edge.get('label')
+        if bel_statement is None:
+            log.debug('No BEL statement for edge %s', edge)
+
+        evidences = edge_metadata.get('evidences')
+
+        if relation in UNQUALIFIED_EDGES:
+            pass  # FIXME?
+
+        else:
+            if not evidences:  # is none or is empty list
+                log.debug('No evidence for edge %s', edge)
                 continue
 
-            if 'type' not in evidence['citation'] and 'id' not in evidence['citation']:
-                continue
+            for evidence in evidences:
+                citation = evidence.get('citation')
 
-            summary_text = evidence['summary_text'].strip()
+                if not citation:
+                    continue
 
-            if not summary_text or summary_text == placeholder_evidence:
-                continue
+                if 'type' not in citation or 'id' not in citation:
+                    continue
 
-            parser.control_parser.clear()
-            parser.control_parser.citation = get_citation(evidence)
-            parser.control_parser.evidence = summary_text
-            parser.control_parser.annotations.update(evidence[EXPERIMENT_CONTEXT])
+                summary_text = evidence['summary_text'].strip()
 
-            bel_statement = edge['label']
+                if not summary_text or summary_text == placeholder_evidence:
+                    continue
 
-            try:
-                parser.parseString(bel_statement, i)
-            except Exception as e:
-                log.warning('Error %s for %s', e, bel_statement)
+                parser.control_parser.clear()
+                parser.control_parser.citation = reformat_citation(citation)
+                parser.control_parser.evidence = summary_text
+                parser.control_parser.annotations.update(evidence[EXPERIMENT_CONTEXT])
+
+                try:
+                    parser.parseString(bel_statement, line_number=i)
+                except Exception as e:
+                    log.warning('JGIF relation parse error: %s for %s', e, bel_statement)
 
     return graph
 
@@ -244,7 +279,7 @@ def from_jgif(graph_jgif_dict):
 def to_jgif(graph):
     """Builds a JGIF dictionary from a BEL graph.
     
-    :param BELGraph graph: A BEL graph
+    :param pybel.BELGraph graph: A BEL graph
     :return: A JGIF dictionary
     :rtype: dict
     
@@ -268,7 +303,7 @@ def to_jgif(graph):
     nodes_entry = []
     edges_entry = []
 
-    for i, (node, node_data) in enumerate(graph.nodes_iter(data=True)):
+    for i, (node, node_data) in enumerate(graph.iter_node_data_pairs()):
         bel = node_to_bel(node_data)
         node_bel[node] = bel
 

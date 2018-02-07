@@ -8,7 +8,7 @@ from pathlib import Path
 from pybel import from_path
 from pybel.constants import *
 from pybel.manager.utils import parse_owl
-from pybel.parser.parse_exceptions import RedefinedAnnotationError, RedefinedNamespaceError
+from pybel.parser.exc import RedefinedAnnotationError, RedefinedNamespaceError
 from pybel.parser.parse_metadata import MetadataParser
 from tests.constants import (
     FleetingTemporaryCacheMixin, HGNC_URL, TestGraphMixin, expected_test_bel_4_metadata,
@@ -246,7 +246,7 @@ class TestParse(TestGraphMixin):
         ado_path = Path(test_owl_ado).as_uri()
         owl = parse_owl(ado_path)
 
-        self.assertLessEqual(ado_expected_nodes_subset, set(owl.nodes_iter()))
+        self.assertLessEqual(ado_expected_nodes_subset, set(owl))
         self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
 
     @mock_parse_owl_rdf
@@ -254,7 +254,7 @@ class TestParse(TestGraphMixin):
     def test_ado(self, mock1, mock2):
         ado_path = 'http://mock.com/ado.owl'
         owl = parse_owl(ado_path)
-        self.assertLessEqual(ado_expected_nodes_subset, set(owl.nodes_iter()))
+        self.assertLessEqual(ado_expected_nodes_subset, set(owl))
         self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
 
 
@@ -403,7 +403,9 @@ class TestExtensionIo(TestGraphMixin, FleetingTemporaryCacheMixin):
                 CITATION_TYPE: 'PubMed'
             },
             EVIDENCE: 'Made up support, not even qualifying as evidence',
-            ANNOTATIONS: {'Wine': 'Cotturi'}
+            ANNOTATIONS: {
+                'Wine': {'Cotturi': True}
+            }
         }
         self.assertHasEdge(graph, (ABUNDANCE, "PIZZA", "MeatTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)
         self.assertHasEdge(graph, (ABUNDANCE, "PIZZA", "TomatoTopping"), (ABUNDANCE, 'WINE', 'Wine'), **annots)

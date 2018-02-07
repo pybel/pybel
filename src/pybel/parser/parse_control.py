@@ -16,7 +16,7 @@ import re
 from pyparsing import And, MatchFirst, Suppress, oneOf, pyparsing_common as ppc
 
 from .baseparser import BaseParser
-from .parse_exceptions import *
+from .exc import *
 from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
 from ..constants import *
 from ..utils import valid_date
