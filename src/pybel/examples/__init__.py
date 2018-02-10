@@ -4,8 +4,10 @@
 
 from .egf_example import egf_graph
 from .sialic_acid_example import sialic_acid_graph
+from .statin_example import statin_graph
 
 __all__ = [
     'egf_graph',
     'sialic_acid_graph',
+    'statin_graph',
 ]
