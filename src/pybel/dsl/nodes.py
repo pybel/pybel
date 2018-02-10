@@ -72,7 +72,7 @@ class BaseAbundance(BaseEntity):
         return "{}({}:{})".format(
             rev_abundance_labels[self[FUNCTION]],
             self[NAMESPACE],
-            ensure_quotes(self[NAME])
+            ensure_quotes(self[NAME] if NAME in self else self[IDENTIFIER])
         )
 
     def as_tuple(self):
