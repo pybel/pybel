@@ -450,6 +450,7 @@ unqualified_edges = [
     IS_A,
     EQUIVALENT_TO,
     PART_OF,
+    ORTHOLOGOUS,
 ]
 
 UNQUALIFIED_EDGES = set(unqualified_edges)
