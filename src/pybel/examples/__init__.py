@@ -4,6 +4,7 @@
 
 from .braf_example import braf_graph
 from .egf_example import egf_graph
+from .homology_example import homology_graph
 from .sialic_acid_example import sialic_acid_graph
 from .statin_example import statin_graph
 
@@ -12,4 +13,5 @@ __all__ = [
     'sialic_acid_graph',
     'statin_graph',
     'braf_graph',
+    'homology_graph'
 ]
