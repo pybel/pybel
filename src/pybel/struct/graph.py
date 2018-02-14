@@ -395,6 +395,16 @@ class BELGraph(networkx.MultiDiGraph):
         """
         self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
 
+    def add_orthology(self, u, v):
+        """Adds two orthology relations for the nodes
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self._add_two_way_unqualified_edge(u, v, ORTHOLOGOUS)
+
     def add_is_a(self, u, v):
         """Adds an isA relationship such that u isA v.
 
