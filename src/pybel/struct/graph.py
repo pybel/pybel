@@ -380,6 +380,26 @@ class BELGraph(networkx.MultiDiGraph):
 
         return attr[HASH]
 
+    def add_transcription(self, u, v):
+        """Adds a transcription relation from a gene to an RNA or miRNA node
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self.add_unqualified_edge(u, v, TRANSCRIBED_TO)
+
+    def add_translation(self, u, v):
+        """Adds a translation relation from a RNA to a protein
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self.add_unqualified_edge(u, v, TRANSLATED_TO)
+
     def _add_two_way_unqualified_edge(self, u, v, relation):
         """Adds an unqualified edge both ways"""
         self.add_unqualified_edge(u, v, relation)
