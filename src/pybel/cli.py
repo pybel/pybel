@@ -16,9 +16,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 
 import json
 import logging
-import os
 import sys
-import time
 
 import click
 
@@ -32,7 +30,10 @@ from .utils import PYBEL_MYSQL_FMT_NOPASS, PYBEL_MYSQL_FMT_PASS
 
 log = logging.getLogger(__name__)
 
-@click.group(help="PyBEL Command Line Utilities on {}".format(sys.executable))
+
+@click.group(
+    help="PyBEL Command Line Utilities on {} using default connection {}".format(sys.executable,
+                                                                                 get_cache_connection()))
 @click.version_option()
 def main():
     """PyBEL Command Line """

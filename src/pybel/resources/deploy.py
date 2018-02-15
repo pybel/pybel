@@ -31,7 +31,7 @@ def _deploy_helper(filename, module_name, get_module, get_today_fn, hash_check=T
     :param tuple[str] auth: A pair of (str username, str password) to give to the auth keyword of the constructor of
                             :class:`artifactory.ArtifactoryPath`. Defaults to the result of :func:`get_arty_auth`.
     :return: The resource path, if it was deployed successfully, else none.
-    :rtype: str
+    :rtype: Optional[str]
     """
     path = ArtifactoryPath(
         get_module(module_name),
@@ -67,7 +67,7 @@ def deploy_namespace(filename, module_name, hash_check=True, auth=None):
     :param tuple[str] auth: A pair of (str username, str password) to give to the auth keyword of the constructor of
                             :class:`artifactory.ArtifactoryPath`. Defaults to the result of :func:`get_arty_auth`.
     :return: The resource path, if it was deployed successfully, else none.
-    :rtype: str
+    :rtype: Optional[str]
     """
     return _deploy_helper(
         filename,
@@ -87,7 +87,7 @@ def deploy_knowledge(filename, module_name, auth=None):
     :param tuple[str] auth: A pair of (str username, str password) to give to the auth keyword of the constructor of
                             :class:`artifactory.ArtifactoryPath`. Defaults to the result of :func:`get_arty_auth`.
     :return: The resource path, if it was deployed successfully, else none.
-    :rtype: str
+    :rtype: Optional[str]
     """
     return _deploy_helper(
         filename,
@@ -108,7 +108,7 @@ def deploy_annotation(filename, module_name, hash_check=True, auth=None):
     :param tuple[str] auth: A pair of (str username, str password) to give to the auth keyword of the constructor of
                             :class:`artifactory.ArtifactoryPath`. Defaults to the result of :func:`get_arty_auth`.
     :return: The resource path, if it was deployed successfully, else none.
-    :rtype: str
+    :rtype: Optional[str]
     """
     return _deploy_helper(
         filename,
@@ -121,7 +121,7 @@ def deploy_annotation(filename, module_name, hash_check=True, auth=None):
 
 
 def deploy_directory(directory, auth=None):
-    """Uploads all stuff from a directory to artifactory
+    """Uploads all stuff from a directory to Artifactory
 
     :param str directory: the path to a directory
     :param tuple[str] auth: A pair of (str username, str password) to give to the auth keyword of the constructor of
