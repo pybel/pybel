@@ -1033,6 +1033,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
+        # FIXME check if GOCC is needed
         self.ensure_namespace(GOCC_LATEST)
 
         log.debug('inserting %s into edge store', graph)
