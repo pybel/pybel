@@ -252,7 +252,7 @@ def drop(manager, yes):
 
 
 @manage.group()
-def namespaces():
+def namespace():
     """Manage namespaces"""
 
 
@@ -261,7 +261,7 @@ def annotations():
     """Manage annotations"""
 
 
-@namespaces.command()
+@namespace.command()
 @click.option('-v', '--debug', count=True)
 @click.pass_obj
 def ensure(manager, debug):
@@ -283,7 +283,7 @@ def ensure(manager, debug):
         manager.ensure_annotation(url)
 
 
-@namespaces.command()
+@namespace.command()
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
@@ -305,7 +305,7 @@ def insert(manager, url):
         manager.ensure_annotation_owl(url)
 
 
-@namespaces.command()
+@namespace.command()
 @click.option('--url', help='Specific resource URL to list')
 @click.pass_obj
 def ls(manager, url):
@@ -344,7 +344,7 @@ def ls(manager, url):
             click.echo(l)
 
 
-@namespaces.command()
+@namespace.command()
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
