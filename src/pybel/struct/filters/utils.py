@@ -2,6 +2,8 @@
 
 from ...constants import MODIFIER
 
+__all__ = ['part_has_modifier']
+
 
 def part_has_modifier(data, part, modifier):
     """Returns true if the modifier is in the given subject/object part
