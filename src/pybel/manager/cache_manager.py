@@ -172,7 +172,9 @@ class NamespaceManager(BaseManager):
 
         :param str url: The URL of the namespace to drop
         """
-        self.session.query(Namespace).filter(Namespace.url == url).delete()
+        namespace = self.get_namespace_by_url(url)
+        self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace == namespace).delete()
+        self.session.delete(namespace)
         self.session.commit()
 
     def get_namespace_by_url(self, url):

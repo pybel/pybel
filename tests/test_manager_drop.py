@@ -3,7 +3,7 @@
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl import protein
-from pybel.manager.models import Edge, Network, Node
+from pybel.manager.models import Edge, Namespace, NamespaceEntry, Network, Node
 from tests.constants import TemporaryCacheMixin, test_citation_dict, test_evidence_text
 from tests.mocks import mock_bel_resources
 from tests.utils import make_dummy_annotations, make_dummy_namespaces, n
@@ -117,3 +117,26 @@ class TestCascades(TemporaryCacheMixin):
 
     def test_drop_property(self):
         """Don't let this happen"""
+
+    def test_drop_namespace(self):
+        keyword, url = n(), n()
+
+        namespace = Namespace(keyword=keyword, url=url)
+        self.manager.session.add(namespace)
+
+        n_entries = 5
+
+        for _ in range(n_entries):
+            entry = NamespaceEntry(name=n(), namespace=namespace)
+            self.manager.session.add(entry)
+
+        self.manager.session.commit()
+
+        self.assertEqual(1, self.manager.count_namespaces(), msg='Should have one namespace')
+        self.assertEqual(n_entries, self.manager.count_namespace_entries(),
+                         msg='Should have {} entries'.format(n_entries))
+
+        self.manager.drop_namespace_by_url(url)
+
+        self.assertEqual(0, self.manager.count_namespaces(), msg='Should have no namespaces')
+        self.assertEqual(0, self.manager.count_namespace_entries(), msg='Entries should have been dropped')
