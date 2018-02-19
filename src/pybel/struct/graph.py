@@ -12,6 +12,7 @@ from six import string_types
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
+from ..dsl import activity
 from ..tokens import node_to_tuple
 from ..utils import get_version, hash_edge
 
@@ -379,6 +380,26 @@ class BELGraph(networkx.MultiDiGraph):
 
         return attr[HASH]
 
+    def add_transcription(self, u, v):
+        """Adds a transcription relation from a gene to an RNA or miRNA node
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self.add_unqualified_edge(u, v, TRANSCRIBED_TO)
+
+    def add_translation(self, u, v):
+        """Adds a translation relation from a RNA to a protein
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self.add_unqualified_edge(u, v, TRANSLATED_TO)
+
     def _add_two_way_unqualified_edge(self, u, v, relation):
         """Adds an unqualified edge both ways"""
         self.add_unqualified_edge(u, v, relation)
@@ -393,6 +414,26 @@ class BELGraph(networkx.MultiDiGraph):
         :type v: tuple or dict
         """
         self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
+
+    def add_orthology(self, u, v):
+        """Adds two orthology relations for the nodes
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self._add_two_way_unqualified_edge(u, v, ORTHOLOGOUS)
+
+    def add_is_a(self, u, v):
+        """Adds an isA relationship such that u isA v.
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self.add_unqualified_edge(u, v, IS_A)
 
     def iter_node_data_pairs(self):
         """Iterates over pairs of nodes and their data dictionaries
@@ -499,11 +540,11 @@ class BELGraph(networkx.MultiDiGraph):
         :param str relation: The type of relation this edge represents
         :param str evidence: The evidence string from an article
         :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and autofills the citation type.
-        :param dict[str,str] annotations: The annotations data dictionary
-        :type annotations: dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]
-        :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
-        :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+                                                assumes it's a PubMed identifier and auto-fills the citation type.
+        :param annotations: The annotations data dictionary
+        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
+        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
+        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model documentation.
 
         :return: The hash of the edge
         :rtype: str
@@ -543,6 +584,32 @@ class BELGraph(networkx.MultiDiGraph):
         self.add_edge(u, v, **attr)
 
         return attr[HASH]
+
+    def add_inhibits(self, u, v, evidence, citation, annotations=None, object_modifier=None):
+        """A more specific version of add_qualified edge that automatically populates the relation and object
+        modifier
+
+        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param str evidence: The evidence string from an article
+        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
+                                                assumes it's a PubMed identifier and autofills the citation type.
+        :param annotations: The annotations data dictionary
+        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
+        :param Optional[dict] object_modifier: A non-default activity.
+
+        :return: The hash of the edge
+        :rtype: str
+        """
+        return self.add_qualified_edge(
+            u,
+            v,
+            relation=DECREASES,
+            evidence=evidence,
+            citation=citation,
+            annotations=annotations,
+            object_modifier=object_modifier or activity()
+        )
 
     def has_edge_citation(self, u, v, key):
         """Does the given edge have a citation?

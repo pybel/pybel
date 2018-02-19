@@ -30,8 +30,8 @@ def edge_predicate(f):
     """Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
     sure that it can also accept a pair of arguments, a BELGraph and a PyBEL node tuple as well.
 
-    :type f: types.FunctionType
-    :rtype: types.FunctionType
+    :type f: (dict) -> bool
+    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
     @wraps(f)

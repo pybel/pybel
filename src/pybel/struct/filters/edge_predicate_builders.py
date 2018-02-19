@@ -40,14 +40,19 @@ def build_annotation_dict_all_filter(annotations):
     dictionary
 
     :param dict annotations: The annotation query dict to match
-    :rtype: types.FunctionType
+    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
     @edge_predicate
-    def f(data):
+    def annotation_dict_all_filter(data):
+        """Checks if the all of the annotations in the enclosed query match
+
+        :param dict data: A PyBEL edge data dictionary
+        :rtype: bool
+        """
         return _annotation_dict_all_filter(data, query=annotations)
 
-    return f
+    return annotation_dict_all_filter
 
 
 def _annotation_dict_any_filter(data, query):
@@ -74,11 +79,16 @@ def build_annotation_dict_any_filter(annotations):
     the target dictionary
 
     :param dict annotations: The annotation query dict to match
-    :rtype: types.FunctionType
+    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
     @edge_predicate
-    def f(data):
+    def annotation_dict_any_filter(data):
+        """Checks if the any of the annotations in the enclosed query match
+
+        :param dict data: A PyBEL edge data dictionary
+        :rtype: bool
+        """
         return _annotation_dict_any_filter(data, query=annotations)
 
-    return f
+    return annotation_dict_any_filter

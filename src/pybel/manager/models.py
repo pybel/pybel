@@ -108,7 +108,7 @@ class Namespace(Base):
     description = Column(Text, nullable=True, doc='Optional short description of the namespace')
     version = Column(String(255), nullable=True, doc='Version of the namespace')
     created = Column(DateTime, nullable=True, doc='DateTime of the creation of the namespace definition file')
-    query_url = Column(Text, nullable=True, doc='URL that can be used to query the namespace (eternally from PyBEL)')
+    query_url = Column(Text, nullable=True, doc='URL that can be used to query the namespace (externally from PyBEL)')
 
     author = Column(String(255), doc='The author of the namespace')
     license = Column(String(255), nullable=True, doc='License information')

@@ -18,7 +18,7 @@ from os import environ, makedirs, mkdir, path
 
 log = getLogger(__name__)
 
-VERSION = '0.11.0'
+VERSION = '0.11.1'
 
 #: The last PyBEL version where the graph data definition changed
 PYBEL_MINIMUM_IMPORT_VERSION = 0, 11, 0
@@ -45,19 +45,9 @@ PYBEL_DIR = environ.get('PYBEL_RESOURCE_DIRECTORY', path.join(path.expanduser('~
 if not path.exists(PYBEL_DIR):
     mkdir(PYBEL_DIR)
 
-#: The default directory where PyBEL logs are stored
-PYBEL_LOG_DIR = path.join(PYBEL_DIR, 'logs')
-if not path.exists(PYBEL_LOG_DIR):
-    mkdir(PYBEL_LOG_DIR)
-
-#: The default directory where PyBEL data are stored
-PYBEL_DATA_DIR = path.join(PYBEL_DIR, 'data')
-if not path.exists(PYBEL_DATA_DIR):
-    mkdir(PYBEL_DATA_DIR)
-
 DEFAULT_CACHE_NAME = 'pybel_{}.{}.{}_cache.db'.format(*PYBEL_MINIMUM_IMPORT_VERSION)
 #: The default cache location is ``~/.pybel/data/pybel_cache.db``
-DEFAULT_CACHE_LOCATION = path.join(PYBEL_DATA_DIR, DEFAULT_CACHE_NAME)
+DEFAULT_CACHE_LOCATION = path.join(PYBEL_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
@@ -450,6 +440,7 @@ unqualified_edges = [
     IS_A,
     EQUIVALENT_TO,
     PART_OF,
+    ORTHOLOGOUS,
 ]
 
 UNQUALIFIED_EDGES = set(unqualified_edges)

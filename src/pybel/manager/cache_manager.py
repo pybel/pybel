@@ -18,6 +18,7 @@ from itertools import chain, groupby
 import six
 from six import string_types
 from sqlalchemy import and_, exists, func
+from tqdm import tqdm
 
 from .base_manager import BaseManager
 from .exc import EdgeAddError
@@ -171,7 +172,9 @@ class NamespaceManager(BaseManager):
 
         :param str url: The URL of the namespace to drop
         """
-        self.session.query(Namespace).filter(Namespace.url == url).delete()
+        namespace = self.get_namespace_by_url(url)
+        self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace == namespace).delete()
+        self.session.delete(namespace)
         self.session.commit()
 
     def get_namespace_by_url(self, url):
@@ -1033,13 +1036,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
+        # FIXME check if GOCC is needed
         self.ensure_namespace(GOCC_LATEST)
 
         log.debug('inserting %s into edge store', graph)
         log.debug('storing graph parts: nodes')
         t = time.time()
 
-        for node in graph:
+        for node in tqdm(graph, total=graph.number_of_nodes(), desc='Nodes'):
             namespace = graph.node[node].get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
@@ -1057,8 +1061,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
-        for u, v, data in graph.edges_iter(data=True):
-
+        for u, v, data in tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges'):
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue

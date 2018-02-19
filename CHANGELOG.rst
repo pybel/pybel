@@ -5,22 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`Unreleased <https://github.com/pybel/pybel/compare/v0.10.1...HEAD>`_
----------------------------------------------------------------------
+`0.11.1 <https://github.com/pybel/pybel/compare/v0.11.0...0.11.1>`_ - 2018-02-19
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Added additional DSL shortcuts for building edges with the BELGraph
+- Added example graphs (statins, BRAF, orthology examples)
+- Added knowledge transfer function
+- Added progress bar for parser
+
+`0.11.0 <https://github.com/pybel/pybel/compare/v0.10.1...0.11.0>`_ - 2018-02-07
+--------------------------------------------------------------------------------
 Changed
 ~~~~~~~
+- Updated SQL schema and made new minimum unpickle version 0.11.0.
 - Parser now uses a compact representation of annotations instead of exploding to multiple edges (https://github.com/pybel/pybel/issues/261)
 - Update annotation filtering functions to reflect new data format (https://github.com/pybel/pybel/issues/262)
+- Update GraphML Output (https://github.com/pybel/pybel/issues/260)
+- Better error message when missing namespace resource (https://github.com/pybel/pybel/issues/265)
 
 Fixed
 ~~~~~
 - Fixed more problems with edge store and testing (https://github.com/pybel/pybel/issues/225, https://github.com/pybel/pybel/issues/256, https://github.com/pybel/pybel/issues/257)
 - Fixed windows testing (https://github.com/pybel/pybel/issues/243)
+- Fixed broken network cascade, but is still slow (https://github.com/pybel/pybel/issues/256, https://github.com/pybel/pybel/issues/257, https://github.com/pybel/pybel/issues/259)
+- Fixed JGIF import (https://github.com/pybel/pybel/issues/266) and added scripts directory (3dc6b1f)
+- Fix extras in setup.py and requirements.txt
 
 Added
 ~~~~~
 - Additional regex format for date parsing from PubMed (https://github.com/pybel/pybel/issues/259)
 - Add labels to nodes in GraphML output (https://github.com/pybel/pybel/issues/260)
+- Add edge predicate builders (https://github.com/pybel/pybel/issues/262)
+- Testing on multiple databases (SQLite, MySQL, PostgreSQL) (https://github.com/pybel/pybel/issues/238)
+- Added ``pybel.struct.mutations`` module
+- Added graph-based equivalency checking
+- Add more documentation to BELGraph (https://github.com/pybel/pybel/issues/271)
 
 `0.10.1 <https://github.com/pybel/pybel/compare/v0.10.0...0.10.1>`_ - 2017-12-28
 --------------------------------------------------------------------------------

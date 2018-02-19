@@ -10,7 +10,7 @@ tuple, a key, and a data dictionary. It returns a boolean representing whether t
 This module contains a set of default functions for filtering lists of edges and building edge predicate functions.
 
 A general use for an edge predicate is to use the built-in :func:`filter` in code like
-:code:`filter(your_edge_predicate, graph.edges_iter(keys=True, data=True))`
+:code:`filter(your_edge_predicate, graph.edges(keys=True, data=True))`
 """
 
 from collections import Iterable
@@ -44,9 +44,9 @@ def and_edge_predicates(edge_predicates=None):
     """Concatenates multiple edge predicates to a new predicate that requires all predicates to be met.
 
     :param edge_predicates: a list of predicates (graph, node, node, key, data) -> bool
-    :type edge_predicates: types.FunctionType or iter[types.FunctionType]
-    :return: A combine filter (graph, node, node, key, data) -> bool
-    :rtype: types.FunctionType
+    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
+    :return: A combine filter
+    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
     # If no filters are given, then return the trivially permissive filter
@@ -86,18 +86,18 @@ def filter_edges(graph, edge_predicates=None):
 
     :param BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
-    :type edge_predicates: types.FunctionType or list[types.FunctionType] or tuple[types.FunctionType]
+    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
     :return: An iterable of edges that pass all predicates
     :rtype: iter[tuple,tuple,int]
     """
 
     # If no predicates are given, return the standard edge iterator
     if not edge_predicates:
-        for u, v, k in graph.edges_iter(keys=True):
+        for u, v, k in graph.edges(keys=True):
             yield u, v, k
     else:
         compound_edge_predicate = and_edge_predicates(edge_predicates=edge_predicates)
-        for u, v, k in graph.edges_iter(keys=True):
+        for u, v, k in graph.edges(keys=True):
             if compound_edge_predicate(graph, u, v, k):
                 yield u, v, k
 
@@ -107,7 +107,7 @@ def count_passed_edge_filter(graph, edge_predicates=None):
 
     :param pybel.BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
-    :type edge_predicates: types.FunctionType or list[types.FunctionType] or tuple[types.FunctionType]
+    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
     :return: The number of edges passing a given set of predicates
     :rtype: int
     """

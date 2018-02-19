@@ -16,29 +16,24 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 
 import json
 import logging
-import os
 import sys
-import time
 
 import click
 
 from .canonicalize import to_bel
-from .constants import PYBEL_CONFIG_PATH, PYBEL_CONNECTION, PYBEL_LOG_DIR, config, get_cache_connection
+from .constants import PYBEL_CONFIG_PATH, PYBEL_CONNECTION, config, get_cache_connection
 from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
 from .manager import Manager, defaults
 from .manager.database_io import from_database, to_database
 from .manager.models import Base, Edge
 from .utils import PYBEL_MYSQL_FMT_NOPASS, PYBEL_MYSQL_FMT_PASS
 
-log = logging.getLogger('pybel')
-
-fh_path = os.path.join(PYBEL_LOG_DIR, time.strftime('pybel_%Y_%m_%d_%H_%M_%S.txt'))
-fh = logging.FileHandler(fh_path)
-fh.setLevel(logging.DEBUG)
-log.addHandler(fh)
+log = logging.getLogger(__name__)
 
 
-@click.group(help="PyBEL Command Line Utilities on {}".format(sys.executable))
+@click.group(
+    help="PyBEL Command Line Utilities on {} using default connection {}".format(sys.executable,
+                                                                                 get_cache_connection()))
 @click.version_option()
 def main():
     """PyBEL Command Line """
@@ -257,7 +252,7 @@ def drop(manager, yes):
 
 
 @manage.group()
-def namespaces():
+def namespace():
     """Manage namespaces"""
 
 
@@ -266,7 +261,7 @@ def annotations():
     """Manage annotations"""
 
 
-@namespaces.command()
+@namespace.command()
 @click.option('-v', '--debug', count=True)
 @click.pass_obj
 def ensure(manager, debug):
@@ -288,7 +283,7 @@ def ensure(manager, debug):
         manager.ensure_annotation(url)
 
 
-@namespaces.command()
+@namespace.command()
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
@@ -310,7 +305,7 @@ def insert(manager, url):
         manager.ensure_annotation_owl(url)
 
 
-@namespaces.command()
+@namespace.command()
 @click.option('--url', help='Specific resource URL to list')
 @click.pass_obj
 def ls(manager, url):
@@ -349,7 +344,7 @@ def ls(manager, url):
             click.echo(l)
 
 
-@namespaces.command()
+@namespace.command()
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
