@@ -452,15 +452,6 @@ class BELGraph(networkx.MultiDiGraph):
             for _, data in self.nodes_iter(data=True)
         )
 
-    @staticmethod
-    def hash_node(data):
-        """Converts a PyBEL node data dictionary to a PyBEL node tuple
-
-        :param dict data: A PyBEL node data dictionary
-        :rtype: tuple
-        """
-        return node_to_tuple(data)
-
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
@@ -468,7 +459,7 @@ class BELGraph(networkx.MultiDiGraph):
         :return: A PyBEL node tuple
         :rtype: tuple
         """
-        node_tuple = self.hash_node(attr_dict)
+        node_tuple = node_to_tuple(attr_dict)
 
         if node_tuple in self:
             return node_tuple
