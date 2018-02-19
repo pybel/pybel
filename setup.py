@@ -36,6 +36,7 @@ INSTALL_REQUIRES = [
     'requests_file',
     'pyparsing',
     'six',
+    'tqdm',
 ]
 
 if sys.version_info < (3, ):

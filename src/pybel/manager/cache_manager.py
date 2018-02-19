@@ -18,6 +18,7 @@ from itertools import chain, groupby
 import six
 from six import string_types
 from sqlalchemy import and_, exists, func
+from tqdm import tqdm
 
 from .base_manager import BaseManager
 from .exc import EdgeAddError
@@ -1040,7 +1041,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: nodes')
         t = time.time()
 
-        for node in graph:
+        for node in tqdm(graph, total=graph.number_of_nodes(), desc='Nodes'):
             namespace = graph.node[node].get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
@@ -1058,8 +1059,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
-        for u, v, data in graph.edges_iter(data=True):
-
+        for u, v, data in tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges'):
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue

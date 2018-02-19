@@ -78,6 +78,10 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         no_identifier_validation=kwargs.get('no_identifier_validation'),
     )
 
+    if kwargs.get('use_tqdm'):
+        from tqdm import tqdm
+        statements = tqdm(statements, desc='Statements', total=len(statements))
+
     parse_statements(graph, statements, bel_parser)
 
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
