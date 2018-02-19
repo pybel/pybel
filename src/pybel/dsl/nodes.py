@@ -7,7 +7,7 @@ import six
 from .exc import PyBELDSLException
 from .utils import entity
 from ..constants import *
-from ..utils import ensure_quotes
+from ..utils import ensure_quotes, hash_node
 
 __all__ = [
     'abundance',
@@ -46,6 +46,13 @@ class BaseEntity(dict):
     @abc.abstractmethod
     def as_tuple(self):
         pass
+
+    def as_sha512(self):
+        """Returns this node as a hash
+
+        :rtype: str
+        """
+        return hash_node(self.as_tuple())
 
     def __hash__(self):
         """Use the tuple serialization of this node as the hash"""

@@ -6,7 +6,7 @@ import unittest
 
 from pybel.constants import ABUNDANCE, COMPLEX
 from pybel.dsl import abundance, complex_abundance, protein
-from pybel.utils import ensure_quotes
+from pybel.utils import ensure_quotes, hash_node
 from tests.utils import n
 
 
@@ -36,6 +36,7 @@ class TestDSL(unittest.TestCase):
 
         self.assertEqual(node_tuple, node.as_tuple())
         self.assertEqual(hash(node_tuple), hash(node))
+        self.assertEqual(hash_node(node_tuple), node.as_sha512())
 
     def test_complex_with_name(self):
         """Tests a what happens with a named complex
@@ -58,6 +59,7 @@ class TestDSL(unittest.TestCase):
 
         self.assertEqual(node_tuple, nine_one_one.as_tuple())
         self.assertEqual(hash(node_tuple), hash(nine_one_one))
+        self.assertEqual(hash_node(node_tuple), nine_one_one.as_sha512())
 
 
 if __name__ == '__main__':
