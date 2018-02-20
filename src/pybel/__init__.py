@@ -51,6 +51,10 @@ ndex2 supports download and upload to the `Network Data Exchange <ndexbio.org>`_
     - :func:`pybel.to_ndex`
     - :func:`pybel.from_ndex`
 
+deployment
+~~~~~~~~~~
+This extra installs support for Artifactory and enables many of the functions in :mod:`pybel.resources`
+
 owl
 ~~~
 This extra installs support for using OWL ontologies as namespaces via the :mod:`onto2nx` package. In the future,
