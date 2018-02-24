@@ -70,6 +70,15 @@ has_product_code = unqualified_edge_code[HAS_PRODUCT]
 
 
 class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
+
+    def test_get_network_missing(self):
+        network = self.manager.get_most_recent_network_by_name('This network is not here')
+        self.assertIsNone(network)
+
+    def test_get_graph_missing(self):
+        network = self.manager.get_graph_by_most_recent('This network is not here')
+        self.assertIsNone(network)
+
     @mock_bel_resources
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
@@ -91,7 +100,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], network.version)
         self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], network.description)
 
-        reconstituted = self.manager.get_network_by_name_version(
+        reconstituted = self.manager.get_graph_by_name_version(
             expected_test_thorough_metadata[METADATA_NAME],
             expected_test_thorough_metadata[METADATA_VERSION]
         )

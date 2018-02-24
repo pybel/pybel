@@ -889,13 +889,28 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         }
 
     def get_network_by_name_version(self, name, version):
+        """Loads most network with the given name and version
+
+        :param str name: The name of the network.
+        :param str version: The version string of the network.
+        :rtype: Optional[Network]
+        """
+        name_version_filter = and_(Network.name == name, Network.version == version)
+        network = self.session.query(Network).filter(name_version_filter).one_or_none()
+        return network
+
+    def get_graph_by_name_version(self, name, version):
         """Loads most recently added graph with the given name, or allows for specification of version
 
         :param str name: The name of the network.
         :param str version: The version string of the network.
-        :rtype: BELGraph
+        :rtype: Optional[BELGraph]
         """
-        network = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
+        network = self.get_network_by_name_version(name, version)
+
+        if network is None:
+            return
+
         return network.as_bel()
 
     def get_networks_by_name(self, name):
@@ -910,9 +925,23 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Gets the most recently created network with the given name.
 
         :param str name: The name of the network
-        :rtype: Network
+        :rtype: Optional[Network]
         """
-        return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+        network = self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+        return network
+
+    def get_graph_by_most_recent(self, name):
+        """Gets the most recently created network with the given name as a :class:`pybel.BELGraph`.
+
+        :param str name: The name of the network
+        :rtype: Optional[BELGraph]
+        """
+        network = self.get_most_recent_network_by_name(name)
+
+        if network is None:
+            return
+
+        return network.as_bel()
 
     def get_network_by_id(self, network_id):
         """Gets a network from the database by its identifier.
