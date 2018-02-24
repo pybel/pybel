@@ -26,7 +26,7 @@ class TestNetwork(unittest.TestCase):
         self.expected = {
             METADATA_NAME: self.name,
             METADATA_VERSION: self.version,
-            'created': self.created,
+            'created': str(self.created),
         }
 
     def test_to_json(self):
@@ -37,7 +37,7 @@ class TestNetwork(unittest.TestCase):
         self.assertIn(METADATA_VERSION, model_json)
         self.assertEqual(self.version, model_json[METADATA_VERSION])
         self.assertIn('created', model_json)
-        self.assertEqual(self.created, model_json['created'])
+        self.assertEqual(str(self.created), model_json['created'])
 
         self.assertEqual(self.expected, model_json)
 
