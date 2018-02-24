@@ -528,7 +528,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         )
 
     def test_reconstitute(self):
-        g2 = self.manager.get_network_by_name_version(
+        g2 = self.manager.get_graph_by_name_version(
             expected_test_simple_metadata[METADATA_NAME],
             expected_test_simple_metadata[METADATA_VERSION]
         )
