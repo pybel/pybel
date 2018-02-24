@@ -164,7 +164,8 @@ def from_cbn_jgif(graph_jgif_dict):
         and biological network models were developed and are maintained as part of a collaboration among 
         Selventa, OrangeBus and ADS. The project is led and funded by Philip Morris International. For more
         information on the focus of Philip Morris International’s research, please visit www.pmi.com.
-        """.replace('\n', '\t')
+        """.replace('\n', '\t'),
+        METADATA_CONTACT: 'CausalBiologicalNetworks.RD@pmi.com',
     })
 
     graph = from_jgif(graph_jgif_dict)
