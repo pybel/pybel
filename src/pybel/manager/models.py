@@ -383,10 +383,12 @@ class Network(Base):
         :rtype: dict[str,str]
         """
         result = {
-            'created': self.created,
             METADATA_NAME: self.name,
             METADATA_VERSION: self.version,
         }
+
+        if self.created:
+            result['created'] = str(self.created)
 
         if include_id:
             result['id'] = self.id
