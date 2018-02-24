@@ -174,6 +174,16 @@ def from_cbn_jgif(graph_jgif_dict):
         'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20150601.belns',
         'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20150601.belns',
         'SFAM': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-protein-families/selventa-protein-families-20150601.belns',
+        'GOCC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-cellular-component/go-cellular-component-20170511.belns',
+        'MESHPP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-processes/mesh-processes-20150601.belns',
+        'MGI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mgi-mouse-genes/mgi-mouse-genes-20150601.belns',
+        'RGD': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/rgd-rat-genes/rgd-rat-genes-20150601.belns',
+        'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20150601.belns',
+        'SCHEM': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-legacy-chemicals/selventa-legacy-chemicals-20150601.belns',
+        'EGID': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/entrez-gene-ids/entrez-gene-ids-20150601.belns',
+        'MESHD': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-diseases/mesh-diseases-20150601.belns',
+        'SDIS': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-legacy-diseases/selventa-legacy-diseases-20150601.belns',
+        'SCOMP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-named-complexes/selventa-named-complexes-20150601.belns',
     })
 
     graph.annotation_url.update({
