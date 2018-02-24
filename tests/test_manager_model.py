@@ -3,11 +3,68 @@
 """This module tests the to_json functions for all of the database models"""
 
 import datetime
+import json
 import unittest
 
 from pybel.constants import *
 from pybel.manager.models import *
 from tests.utils import n
+
+
+class TestNetwork(unittest.TestCase):
+
+    def setUp(self):
+        self.name = n()
+        self.version = n()
+        self.created = datetime.datetime.utcnow()
+
+        self.model = Network(
+            name=self.name,
+            version=self.version,
+            created=self.created,
+        )
+        self.expected = {
+            METADATA_NAME: self.name,
+            METADATA_VERSION: self.version,
+            'created': self.created,
+        }
+
+    def test_to_json(self):
+        model_json = self.model.to_json()
+
+        self.assertIn(METADATA_NAME, model_json)
+        self.assertEqual(self.name, model_json[METADATA_NAME])
+        self.assertIn(METADATA_VERSION, model_json)
+        self.assertEqual(self.version, model_json[METADATA_VERSION])
+        self.assertIn('created', model_json)
+        self.assertEqual(self.created, model_json['created'])
+
+        self.assertEqual(self.expected, model_json)
+
+    def test_dump(self):
+        json.dumps(self.model)
+
+    def test_network(self):
+        self.expected[METADATA_AUTHORS] = self.model.authors = n()
+        self.assertEqual(self.expected, self.model.to_json())
+
+        self.expected[METADATA_CONTACT] = self.model.contact = n()
+        self.assertEqual(self.expected, self.model.to_json())
+
+        self.expected[METADATA_DESCRIPTION] = self.model.description = n()
+        self.assertEqual(self.expected, self.model.to_json())
+
+        self.expected[METADATA_COPYRIGHT] = self.model.copyright = n()
+        self.assertEqual(self.expected, self.model.to_json())
+
+        self.expected[METADATA_DISCLAIMER] = self.model.disclaimer = n()
+        self.assertEqual(self.expected, self.model.to_json())
+
+        self.expected[METADATA_LICENSES] = self.model.licenses = n()
+        self.assertEqual(self.expected, self.model.to_json())
+
+        self.expected['id'] = None
+        self.assertEqual(self.expected, self.model.to_json(include_id=True))
 
 
 class TestModels(unittest.TestCase):
@@ -128,42 +185,6 @@ class TestModels(unittest.TestCase):
         expected['id'] = model.id = 1
 
         self.assertEqual(model.to_json(include_id=True), expected)
-
-    def test_network(self):
-        name = n()
-        version = n()
-        model = Network(
-            name=name,
-            version=version
-        )
-        expected = {
-            METADATA_NAME: name,
-            METADATA_VERSION: version,
-            'created': None,
-        }
-
-        self.assertEqual(expected, model.to_json())
-
-        expected[METADATA_AUTHORS] = model.authors = n()
-        self.assertEqual(expected, model.to_json())
-
-        expected[METADATA_CONTACT] = model.contact = n()
-        self.assertEqual(expected, model.to_json())
-
-        expected[METADATA_DESCRIPTION] = model.description = n()
-        self.assertEqual(expected, model.to_json())
-
-        expected[METADATA_COPYRIGHT] = model.copyright = n()
-        self.assertEqual(expected, model.to_json())
-
-        expected[METADATA_DISCLAIMER] = model.disclaimer = n()
-        self.assertEqual(expected, model.to_json())
-
-        expected[METADATA_LICENSES] = model.licenses = n()
-        self.assertEqual(expected, model.to_json())
-
-        expected['id'] = None
-        self.assertEqual(expected, model.to_json(include_id=True))
 
     def test_citation(self):
         ref = n()

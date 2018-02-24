@@ -366,7 +366,7 @@ class Network(Base):
     disclaimer = Column(Text, nullable=True, doc='Disclaimer information')
     licenses = Column(Text, nullable=True, doc='License information')
 
-    created = Column(DateTime, default=datetime.datetime.utcnow)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
     nodes = relationship('Node', secondary=network_node, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
