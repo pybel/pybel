@@ -1003,7 +1003,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIsInstance(graph, BELGraph)
 
         if check_metadata:
-            self.assertEqual(expected_test_simple_metadata, graph.document)
+            self.assertIsNotNone(graph.document)
             self.assertEqual(expected_test_simple_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_simple_metadata[METADATA_VERSION], graph.version)
 
@@ -1104,8 +1104,6 @@ class BelReconstitutionMixin(TestGraphMixin):
 
         if check_metadata:
             self.assertLessEqual(set(expected_test_thorough_metadata), set(graph.document))
-            gmd = {k: v for k, v in graph.document.items() if k in expected_test_thorough_metadata}
-            self.assertEqual(expected_test_thorough_metadata, gmd)
             self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], graph.version)
             self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description)
@@ -1144,7 +1142,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIsInstance(graph, BELGraph)
 
         if check_metadata:
-            self.assertEqual(expected_test_slushy_metadata, graph.document)
+            self.assertIsNotNone(graph.document)
+            self.assertIsInstance(graph.document, dict)
             self.assertEqual(expected_test_slushy_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_slushy_metadata[METADATA_VERSION], graph.version)
             self.assertEqual(expected_test_slushy_metadata[METADATA_DESCRIPTION], graph.description)

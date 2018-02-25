@@ -144,7 +144,8 @@ def write_namespace_header(namespace_name, namespace_keyword, namespace_domain, 
 def write_namespace_body(values, delimiter='|', functions=None, file=None, value_prefix='', sort_key=None):
     """Writes the [Values] section of a BEL namespace file
 
-    :param iter[str] or dict[str,str] values: An iterable of values (strings) or dictionary of {label:encodings}
+    :param values: An iterable of values (strings) or dictionary of {label:encodings}
+    :type values: iter[str] or dict[str,str]
     :param str delimiter: The delimiter between names and labels in this config file
     :param str functions: The encoding for the elements in this namespace. See :data:`pybel.constants.belns_encodings`
     :param file file: A writable file or file-like
@@ -191,7 +192,8 @@ def write_namespace(namespace_name, namespace_keyword, namespace_domain, author_
                             :data:`pybel.constants.NAMESPACE_DOMAIN_OTHER`
     :param str author_name: The namespace's authors
     :param str citation_name: The name of the citation
-    :param iter[str] values: An iterable of values (strings)
+    :param values: An iterable of values (strings) or dictionary of values to their encodings
+    :type values: iter[str] or dict[str,str]
     :param str namespace_query_url: HTTP URL to query for details on namespace values (must be valid URL)
     :param str namespace_description: Namespace description
     :param str namespace_species: Comma-separated list of species taxonomy id's

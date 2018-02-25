@@ -12,6 +12,7 @@ from six import string_types
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
+from ..dsl import activity
 from ..tokens import node_to_tuple
 from ..utils import get_version, hash_edge
 
@@ -53,7 +54,8 @@ class BELGraph(networkx.MultiDiGraph):
     :class:`networkx.MultiDiGraph`.
     """
 
-    def __init__(self, name=None, version=None, description=None, authors=None, contact=None, data=None, **kwargs):
+    def __init__(self, name=None, version=None, description=None, authors=None, contact=None, license=None,
+                 copyright=None, disclaimer=None, data=None, **kwargs):
         """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
         the :mod:`pybel.io` module
 
@@ -63,6 +65,9 @@ class BELGraph(networkx.MultiDiGraph):
         :param str description: A description of the graph
         :param str authors: The authors of this graph
         :param str contact: The contact email for this graph
+        :param str license: The license for this graph
+        :param str copyright: The copyright for this graph
+        :param str disclaimer: The disclaimer for this graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
         """
@@ -74,19 +79,28 @@ class BELGraph(networkx.MultiDiGraph):
             self.graph[GRAPH_METADATA] = {}
 
         if name:
-            self.graph[GRAPH_METADATA][METADATA_NAME] = name
+            self.name = name
 
         if version:
-            self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+            self.version = version
 
         if description:
-            self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+            self.description = description
 
         if authors:
-            self.graph[GRAPH_METADATA][METADATA_AUTHORS] = authors
+            self.authors = authors
 
         if contact:
-            self.graph[GRAPH_METADATA][METADATA_CONTACT] = contact
+            self.contact = contact
+
+        if license:
+            self.license = license
+
+        if copyright:
+            self.copyright = copyright
+
+        if disclaimer:
+            self.disclaimer = disclaimer
 
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
@@ -103,21 +117,21 @@ class BELGraph(networkx.MultiDiGraph):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
         according to :data:`pybel.constants.DOCUMENT_KEYS`
 
-        :rtype: dict
+        :rtype: dict[str,str]
         """
         return self.graph[GRAPH_METADATA]
 
     @property
-    def name(self, *attrs):
+    def name(self, *attrs):  # Needs *attrs since it's an override
         """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_NAME)
+        return self.document.get(METADATA_NAME)
 
     @name.setter
-    def name(self, *attrs, **kwargs):
-        self.graph[GRAPH_METADATA][METADATA_NAME] = attrs[0]
+    def name(self, *attrs, **kwargs):  # Needs *attrs and **kwargs since it's an override
+        self.document[METADATA_NAME] = attrs[0]
 
     @property
     def version(self):
@@ -125,11 +139,11 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_VERSION)
+        return self.document.get(METADATA_VERSION)
 
     @version.setter
     def version(self, version):
-        self.graph[GRAPH_METADATA][METADATA_VERSION] = version
+        self.document[METADATA_VERSION] = version
 
     @property
     def description(self):
@@ -137,11 +151,71 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: str
         """
-        return self.graph[GRAPH_METADATA].get(METADATA_DESCRIPTION)
+        return self.document.get(METADATA_DESCRIPTION)
 
     @description.setter
     def description(self, description):
-        self.graph[GRAPH_METADATA][METADATA_DESCRIPTION] = description
+        self.document[METADATA_DESCRIPTION] = description
+
+    @property
+    def authors(self):
+        """The graph's description, from the ``SET DOCUMENT Authors = "..."`` entry in the source BEL Script
+
+        :rtype: str
+        """
+        return self.document[METADATA_AUTHORS]
+
+    @authors.setter
+    def authors(self, authors):
+        self.document[METADATA_AUTHORS] = authors
+
+    @property
+    def contact(self):
+        """The graph's description, from the ``SET DOCUMENT ContactInfo = "..."`` entry in the source BEL Script
+
+        :rtype: str
+        """
+        return self.document.get(METADATA_CONTACT)
+
+    @contact.setter
+    def contact(self, contact):
+        self.document[METADATA_CONTACT] = contact
+
+    @property
+    def license(self):
+        """The graph's license, from the `SET DOCUMENT Licenses = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_LICENSES)
+
+    @license.setter
+    def license(self, license):
+        self.document[METADATA_LICENSES] = license
+
+    @property
+    def copyright(self):
+        """The graph's copyright, from the `SET DOCUMENT Copyright = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_COPYRIGHT)
+
+    @copyright.setter
+    def copyright(self, copyright):
+        self.document[METADATA_COPYRIGHT] = copyright
+
+    @property
+    def disclaimer(self):
+        """The graph's disclaimer, from the `SET DOCUMENT Disclaimer = "..."`` entry in the source BEL Script
+
+        :rtype: Optional[str]
+        """
+        return self.document.get(METADATA_DISCLAIMER)
+
+    @disclaimer.setter
+    def disclaimer(self, disclaimer):
+        self.document[METADATA_DISCLAIMER] = disclaimer
 
     @property
     def namespace_url(self):
@@ -168,9 +242,9 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-            set(self.namespace_pattern) |
-            set(self.namespace_url) |
-            set(self.namespace_owl)
+                set(self.namespace_pattern) |
+                set(self.namespace_url) |
+                set(self.namespace_owl)
         )
 
     @property
@@ -234,10 +308,10 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-            set(self.annotation_pattern) |
-            set(self.annotation_url) |
-            set(self.annotation_owl) |
-            set(self.annotation_list)
+                set(self.annotation_pattern) |
+                set(self.annotation_url) |
+                set(self.annotation_owl) |
+                set(self.annotation_list)
         )
 
     @property
@@ -269,9 +343,9 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: bool
         """
         return (
-            namespace is not None and
-            namespace in self.namespace_url and
-            self.namespace_url[namespace] in self.uncached_namespaces
+                namespace is not None and
+                namespace in self.namespace_url and
+                self.namespace_url[namespace] in self.uncached_namespaces
         )
 
     def add_warning(self, line_number, line, exception, context=None):
@@ -306,6 +380,26 @@ class BELGraph(networkx.MultiDiGraph):
 
         return attr[HASH]
 
+    def add_transcription(self, u, v):
+        """Adds a transcription relation from a gene to an RNA or miRNA node
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self.add_unqualified_edge(u, v, TRANSCRIBED_TO)
+
+    def add_translation(self, u, v):
+        """Adds a translation relation from a RNA to a protein
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self.add_unqualified_edge(u, v, TRANSLATED_TO)
+
     def _add_two_way_unqualified_edge(self, u, v, relation):
         """Adds an unqualified edge both ways"""
         self.add_unqualified_edge(u, v, relation)
@@ -320,6 +414,26 @@ class BELGraph(networkx.MultiDiGraph):
         :type v: tuple or dict
         """
         self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
+
+    def add_orthology(self, u, v):
+        """Adds two orthology relations for the nodes
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self._add_two_way_unqualified_edge(u, v, ORTHOLOGOUS)
+
+    def add_is_a(self, u, v):
+        """Adds an isA relationship such that u isA v.
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        self.add_unqualified_edge(u, v, IS_A)
 
     def iter_node_data_pairs(self):
         """Iterates over pairs of nodes and their data dictionaries
@@ -338,15 +452,6 @@ class BELGraph(networkx.MultiDiGraph):
             for _, data in self.nodes(data=True)
         )
 
-    @staticmethod
-    def hash_node(data):
-        """Converts a PyBEL node data dictionary to a PyBEL node tuple
-
-        :param dict data: A PyBEL node data dictionary
-        :rtype: tuple
-        """
-        return node_to_tuple(data)
-
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
@@ -354,7 +459,7 @@ class BELGraph(networkx.MultiDiGraph):
         :return: A PyBEL node tuple
         :rtype: tuple
         """
-        node_tuple = self.hash_node(attr_dict)
+        node_tuple = node_to_tuple(attr_dict)
 
         if node_tuple in self:
             return node_tuple
@@ -426,11 +531,11 @@ class BELGraph(networkx.MultiDiGraph):
         :param str relation: The type of relation this edge represents
         :param str evidence: The evidence string from an article
         :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and autofills the citation type.
-        :param dict[str,str] annotations: The annotations data dictionary
-        :type annotations: dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]
-        :param dict subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
-        :param dict object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+                                                assumes it's a PubMed identifier and auto-fills the citation type.
+        :param annotations: The annotations data dictionary
+        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
+        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
+        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model documentation.
 
         :return: The hash of the edge
         :rtype: str
@@ -470,6 +575,32 @@ class BELGraph(networkx.MultiDiGraph):
         self.add_edge(u, v, **attr)
 
         return attr[HASH]
+
+    def add_inhibits(self, u, v, evidence, citation, annotations=None, object_modifier=None):
+        """A more specific version of add_qualified edge that automatically populates the relation and object
+        modifier
+
+        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param str evidence: The evidence string from an article
+        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
+                                                assumes it's a PubMed identifier and autofills the citation type.
+        :param annotations: The annotations data dictionary
+        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
+        :param Optional[dict] object_modifier: A non-default activity.
+
+        :return: The hash of the edge
+        :rtype: str
+        """
+        return self.add_qualified_edge(
+            u,
+            v,
+            relation=DECREASES,
+            evidence=evidence,
+            citation=citation,
+            annotations=annotations,
+            object_modifier=object_modifier or activity()
+        )
 
     def has_edge_citation(self, u, v, key):
         """Does the given edge have a citation?

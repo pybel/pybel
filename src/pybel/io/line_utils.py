@@ -10,6 +10,7 @@ from collections import Counter, defaultdict
 import six
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
+from tqdm import tqdm
 
 from ..constants import FUNCTION, GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, NAMESPACE, REQUIRED_METADATA
 from ..exceptions import PyBelWarning
@@ -77,6 +78,9 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         allow_unqualified_translocations=kwargs.get('allow_unqualified_translocations'),
         no_identifier_validation=kwargs.get('no_identifier_validation'),
     )
+
+    if kwargs.get('use_tqdm'):
+        statements = tqdm(statements, desc='Statements', total=len(statements))
 
     parse_statements(graph, statements, bel_parser)
 

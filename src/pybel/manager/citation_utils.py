@@ -83,6 +83,59 @@ def clean_pubmed_identifiers(pmids):
     return sorted({str(pmid).strip() for pmid in pmids})
 
 
+def get_pubmed_citation_response(pubmed_identifiers):
+    """Gets the response from PubMed E-Utils for a given list of PubMed identifiers
+
+    :param list[str] pubmed_identifiers:
+    :rtype: dict
+    """
+    pubmed_identifiers = list(pubmed_identifiers)
+    url = EUTILS_URL_FMT.format(','.join(
+        pubmed_identifier
+        for pubmed_identifier in pubmed_identifiers
+        if pubmed_identifier
+    ))
+    response = requests.get(url)
+    return response.json()
+
+
+def enrich_citation_model(manager, citation, p):
+    """
+
+    :param pybel.manager.Manager manager:
+    :param Citation citation:
+    :param dict p:
+    :rtype: bool
+    """
+    if 'error' in p:
+        log.warning('Error downloading PubMed')
+        return
+
+    citation.name = p['fulljournalname']
+    citation.title = p['title']
+    citation.volume = p['volume']
+    citation.issue = p['issue']
+    citation.pages = p['pages']
+    citation.first = manager.get_or_create_author(p['sortfirstauthor'])
+    citation.last = manager.get_or_create_author(p['lastauthor'])
+
+    if 'authors' in p:
+        for author in p['authors']:
+            author_model = manager.get_or_create_author(author['name'])
+            if author_model not in citation.authors:
+                citation.authors.append(author_model)
+
+    publication_date = p['pubdate']
+
+    sanitized_publication_date = sanitize_date(publication_date)
+    if sanitized_publication_date:
+        citation.date = datetime.strptime(sanitized_publication_date, '%Y-%m-%d')
+    else:
+        log.info('result had date with strange format: %s', publication_date)
+
+    return True
+
+
 def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
     """Gets the citation information for the given list of PubMed identifiers using the NCBI's eutils service
 
@@ -131,57 +184,20 @@ def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
     for pmid_group_index, pmid_list in enumerate(grouper(group_size, unresolved_pmids), start=1):
         pmid_list = list(pmid_list)
         log.info('Getting group %d having %d PubMed identifiers', pmid_group_index, len(pmid_list))
-        url = EUTILS_URL_FMT.format(','.join(pmid for pmid in pmid_list if pmid))
-        response_raw = requests.get(url)
-        response = response_raw.json()
+        response = get_pubmed_citation_response(pmid_list)
 
         for pmid in response['result']['uids']:
             p = response['result'][pmid]
+            citation = unresolved_pmids[pmid]
 
-            if 'error' in p:
+            successful_enrichment = enrich_citation_model(manager, citation, p)
+
+            if not successful_enrichment:
                 log.warning("Error downloading PubMed identifier: %s", pmid)
                 errors.add(pmid)
                 continue
 
-            result[pmid] = {
-                'title': p['title'],
-                'last': p['lastauthor'],
-                CITATION_NAME: p['fulljournalname'],
-                'volume': p['volume'],
-                'issue': p['issue'],
-                'pages': p['pages'],
-                'first': p['sortfirstauthor'],
-            }
-
-            citation = unresolved_pmids[pmid]
-
-            citation.name = result[pmid][CITATION_NAME]
-            citation.title = result[pmid]['title']
-            citation.volume = result[pmid]['volume']
-            citation.issue = result[pmid]['issue']
-            citation.pages = result[pmid]['pages']
-            citation.first = manager.get_or_create_author(result[pmid]['first'])
-            citation.last = manager.get_or_create_author(result[pmid]['last'])
-
-            if 'authors' in p:
-                result[pmid][CITATION_AUTHORS] = [author['name'] for author in p['authors']]
-                for author in result[pmid][CITATION_AUTHORS]:
-                    author_model = manager.get_or_create_author(author)
-                    if author_model not in citation.authors:
-                        citation.authors.append(author_model)
-
-            publication_date = p['pubdate']
-
-            sanitized_publication_date = sanitize_date(publication_date)
-
-            if sanitized_publication_date:
-                result[pmid][CITATION_DATE] = sanitized_publication_date
-            else:
-                log.info('PMID %s had date with strange format: %s', pmid, publication_date)
-
-            if CITATION_DATE in result[pmid]:
-                citation.date = datetime.strptime(result[pmid][CITATION_DATE], '%Y-%m-%d')
-
+            result[pmid] = citation.to_json()
             manager.session.add(citation)
 
         manager.session.commit()  # commit in groups

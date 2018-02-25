@@ -56,11 +56,11 @@ def from_database(name, version=None, connection=None):
                         for default connection
     :type connection: None or str or pybel.manager.Manager
     :return: A BEL graph loaded from the database
-    :rtype: BELGraph
+    :rtype: Optional[BELGraph]
     """
     manager = Manager.ensure(connection=connection)
 
     if version is None:
-        return manager.get_most_recent_network_by_name(name)
+        return manager.get_graph_by_most_recent(name)
 
-    return manager.get_network_by_name_version(name, version)
+    return manager.get_graph_by_name_version(name, version)

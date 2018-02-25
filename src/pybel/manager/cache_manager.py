@@ -18,6 +18,7 @@ from itertools import chain, groupby
 import six
 from six import string_types
 from sqlalchemy import and_, exists, func
+from tqdm import tqdm
 
 from .base_manager import BaseManager
 from .exc import EdgeAddError
@@ -171,7 +172,9 @@ class NamespaceManager(BaseManager):
 
         :param str url: The URL of the namespace to drop
         """
-        self.session.query(Namespace).filter(Namespace.url == url).delete()
+        namespace = self.get_namespace_by_url(url)
+        self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace == namespace).delete()
+        self.session.delete(namespace)
         self.session.commit()
 
     def get_namespace_by_url(self, url):
@@ -886,13 +889,28 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         }
 
     def get_network_by_name_version(self, name, version):
+        """Loads most network with the given name and version
+
+        :param str name: The name of the network.
+        :param str version: The version string of the network.
+        :rtype: Optional[Network]
+        """
+        name_version_filter = and_(Network.name == name, Network.version == version)
+        network = self.session.query(Network).filter(name_version_filter).one_or_none()
+        return network
+
+    def get_graph_by_name_version(self, name, version):
         """Loads most recently added graph with the given name, or allows for specification of version
 
         :param str name: The name of the network.
         :param str version: The version string of the network.
-        :rtype: BELGraph
+        :rtype: Optional[BELGraph]
         """
-        network = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
+        network = self.get_network_by_name_version(name, version)
+
+        if network is None:
+            return
+
         return network.as_bel()
 
     def get_networks_by_name(self, name):
@@ -907,9 +925,23 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Gets the most recently created network with the given name.
 
         :param str name: The name of the network
-        :rtype: Network
+        :rtype: Optional[Network]
         """
-        return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+        network = self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+        return network
+
+    def get_graph_by_most_recent(self, name):
+        """Gets the most recently created network with the given name as a :class:`pybel.BELGraph`.
+
+        :param str name: The name of the network
+        :rtype: Optional[BELGraph]
+        """
+        network = self.get_most_recent_network_by_name(name)
+
+        if network is None:
+            return
+
+        return network.as_bel()
 
     def get_network_by_id(self, network_id):
         """Gets a network from the database by its identifier.
@@ -1033,13 +1065,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
+        # FIXME check if GOCC is needed
         self.ensure_namespace(GOCC_LATEST)
 
         log.debug('inserting %s into edge store', graph)
         log.debug('storing graph parts: nodes')
         t = time.time()
 
-        for node in graph:
+        for node in tqdm(graph, total=graph.number_of_nodes(), desc='Nodes'):
             namespace = graph.node[node].get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
@@ -1057,8 +1090,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
-        for u, v, data in graph.edges(data=True):
-
+        for u, v, data in tqdm(graph.edges(data=True), total=graph.number_of_edges(), desc='Edges'):
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue

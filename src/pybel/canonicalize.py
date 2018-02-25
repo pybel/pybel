@@ -16,6 +16,7 @@ __all__ = [
     'to_bel',
     'to_bel_path',
     'node_to_bel',
+    'edge_to_bel',
 ]
 
 log = logging.getLogger(__name__)

@@ -24,7 +24,7 @@ def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, 
 
     :param iter[str] lines: An iterable of strings (the lines in a BEL script)
     :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
-    :type manager: None or str or pybel.manager.Manager
+    :type manager: Optional[str or pybel.manager.Manager]
 
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`

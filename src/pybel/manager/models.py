@@ -108,7 +108,7 @@ class Namespace(Base):
     description = Column(Text, nullable=True, doc='Optional short description of the namespace')
     version = Column(String(255), nullable=True, doc='Version of the namespace')
     created = Column(DateTime, nullable=True, doc='DateTime of the creation of the namespace definition file')
-    query_url = Column(Text, nullable=True, doc='URL that can be used to query the namespace (eternally from PyBEL)')
+    query_url = Column(Text, nullable=True, doc='URL that can be used to query the namespace (externally from PyBEL)')
 
     author = Column(String(255), doc='The author of the namespace')
     license = Column(String(255), nullable=True, doc='License information')
@@ -366,7 +366,7 @@ class Network(Base):
     disclaimer = Column(Text, nullable=True, doc='Disclaimer information')
     licenses = Column(Text, nullable=True, doc='License information')
 
-    created = Column(DateTime, default=datetime.datetime.utcnow)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
     nodes = relationship('Node', secondary=network_node, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
@@ -383,10 +383,12 @@ class Network(Base):
         :rtype: dict[str,str]
         """
         result = {
-            'created': self.created,
             METADATA_NAME: self.name,
             METADATA_VERSION: self.version,
         }
+
+        if self.created:
+            result['created'] = str(self.created)
 
         if include_id:
             result['id'] = self.id
@@ -704,10 +706,10 @@ class Citation(Base):
             result[CITATION_LAST_AUTHOR] = self.last.name
 
         if self.authors:
-            result[CITATION_AUTHORS] = "|".join(sorted(
+            result[CITATION_AUTHORS] = sorted(
                 author.name
                 for author in self.authors
-            ))
+            )
 
         return result
 

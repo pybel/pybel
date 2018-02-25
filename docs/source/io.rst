@@ -58,6 +58,8 @@ All transport pairs are reflective and data-preserving.
 .. autofunction:: pybel.to_json
 .. autofunction:: pybel.from_json_file
 .. autofunction:: pybel.to_json_file
+.. autofunction:: pybel.from_json_path
+.. autofunction:: pybel.to_json_path
 .. autofunction:: pybel.from_jsons
 .. autofunction:: pybel.to_jsons
 

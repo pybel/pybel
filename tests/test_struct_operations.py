@@ -17,6 +17,10 @@ p1 = protein(namespace=HGNC, name='a')
 p2 = protein(namespace=HGNC, name='b')
 p3 = protein(namespace=HGNC, name='c')
 
+p1_tuple = p1.as_tuple()
+p2_tuple = p2.as_tuple()
+p3_tuple = p3.as_tuple()
+
 
 class TestLeftFullJoin(unittest.TestCase):
     """Tests the variants of the left full join, including the exhaustive vs. hash algorithms and calling by function
@@ -36,8 +40,8 @@ class TestLeftFullJoin(unittest.TestCase):
         h.add_node_from_data(p2)
         h.add_node_from_data(p3)
 
-        h.node[p1]['EXTRANEOUS'] = 'MOST DEFINITELY'
-        h.node[p3]['EXTRANEOUS'] = 'MOST DEFINITELY'
+        h.node[p1_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
+        h.node[p3_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
 
         h.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID1', evidence='Evidence 1')
         h.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID2', evidence='Evidence 2')
@@ -47,21 +51,28 @@ class TestLeftFullJoin(unittest.TestCase):
         self.h = h
 
     def help_check_initial_g(self, g):
-        self.assertEqual(2, g.number_of_nodes())
-        self.assertEqual(1, g.number_of_edges())
+        self.assertEqual(2, g.number_of_nodes(), msg='initial graph G had wrong number of nodes')
+        self.assertEqual(1, g.number_of_edges(), msg='initial graph G had wrong number of edges')
 
     def help_check_initial_h(self, h):
-        self.assertEqual(3, self.h.number_of_nodes())
-        self.assertEqual(3, self.h.number_of_edges())
+        self.assertEqual(3, h.number_of_nodes(), msg='initial graph H had wrong number of nodes')
+        self.assertEqual(3, h.number_of_edges(), msg='initial graph H had wrong number of edges')
 
     def test_initial(self):
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
 
-    def help_check(self, j):
-        self.assertNotIn('EXTRANEOUS', j.node[p1])
-        self.assertIn('EXTRANEOUS', j.node[p3])
-        self.assertEqual('MOST DEFINITELY', j.node[p3]['EXTRANEOUS'])
+    def help_check_result(self, j):
+        """Helps check the result of left joining H into G
+
+        :param pybel.BELGraph j: The resulting graph from G += H
+        """
+        self.assertIn('EXTRANEOUS', j.node[p1_tuple])
+        self.assertNotIn('EXTRANEOUS', j.node[p2_tuple])
+        self.assertIn('EXTRANEOUS', j.node[p3_tuple])
+
+        self.assertEqual('MOST DEFINITELY', j.node[p1_tuple]['EXTRANEOUS'])
+        self.assertEqual('MOST DEFINITELY', j.node[p3_tuple]['EXTRANEOUS'])
 
         self.assertEqual(3, j.number_of_nodes())
         self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format(json.dumps(j.edges(data=True), indent=2)))
@@ -76,34 +87,34 @@ class TestLeftFullJoin(unittest.TestCase):
 
     def test_magic(self):
         self.g += self.h
-        self.help_check(self.g)
+        self.help_check_result(self.g)
         self.help_check_initial_h(self.h)
 
     def test_full_hash_join(self):
         left_full_join(self.g, self.h, use_hash=True)
-        self.help_check(self.g)
+        self.help_check_result(self.g)
         self.help_check_initial_h(self.h)
 
     def test_full_exhaustive_join(self):
         left_full_join(self.g, self.h, use_hash=False)
-        self.help_check(self.g)
+        self.help_check_result(self.g)
         self.help_check_initial_h(self.h)
 
     def test_operator(self):
         j = self.g + self.h
-        self.help_check(j)
+        self.help_check_result(j)
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
 
     def test_union_hash(self):
         j = union([self.g, self.h], use_hash=True)
-        self.help_check(j)
+        self.help_check_result(j)
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
 
     def test_union_exhaustive(self):
         j = union([self.g, self.h], use_hash=True)
-        self.help_check(j)
+        self.help_check_result(j)
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
 

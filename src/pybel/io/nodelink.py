@@ -21,9 +21,11 @@ from ..utils import list2tuple
 __all__ = [
     'to_json',
     'to_json_file',
+    'to_json_path',
     'to_jsons',
     'from_json',
     'from_json_file',
+    'from_json_path',
     'from_jsons',
 ]
 
@@ -43,6 +45,16 @@ def to_json(graph):
     graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = list(graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES])
 
     return graph_json_dict
+
+
+def to_json_path(graph, path, **kwargs):
+    """Writes this graph to the given path as a Node-Link JSON
+
+    :param BELGraph graph: A BEL graph
+    :param str path: A file path
+    """
+    with open(os.path.expanduser(path), 'w') as f:
+        return to_json_file(graph, file=f, **kwargs)
 
 
 def to_json_file(graph, file, **kwargs):
