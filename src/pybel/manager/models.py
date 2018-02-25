@@ -706,10 +706,10 @@ class Citation(Base):
             result[CITATION_LAST_AUTHOR] = self.last.name
 
         if self.authors:
-            result[CITATION_AUTHORS] = "|".join(sorted(
+            result[CITATION_AUTHORS] = sorted(
                 author.name
                 for author in self.authors
-            ))
+            )
 
         return result
 

@@ -381,7 +381,7 @@ class TestEnsure(TemporaryCacheMixin):
             CITATION_NAME: 'TestCitation_full',
             CITATION_REFERENCE: reference,
             CITATION_DATE: '2017-04-11',
-            CITATION_AUTHORS: 'Jackson M|Lajoie J'
+            CITATION_AUTHORS: sorted(['Jackson M', 'Lajoie J'])
         }
 
         citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
