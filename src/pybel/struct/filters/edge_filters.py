@@ -97,12 +97,13 @@ def filter_edges(graph, edge_predicates=None):
 
     # If no predicates are given, return the standard edge iterator
     if not edge_predicates:
-        return graph.edges(keys=True)
-
-    compound_edge_predicate = and_edge_predicates(edge_predicates=edge_predicates)
-    for u, v, k in graph.edges(keys=True):
-        if compound_edge_predicate(graph, u, v, k):
-            yield u, v, k
+        for e in graph.edges(keys=True):
+            yield e
+    else:
+        compound_edge_predicate = and_edge_predicates(edge_predicates=edge_predicates)
+        for u, v, k in graph.edges(keys=True):
+            if compound_edge_predicate(graph, u, v, k):
+                yield u, v, k
 
 
 def count_passed_edge_filter(graph, edge_predicates=None):
