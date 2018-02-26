@@ -130,7 +130,7 @@ class TestDSL(unittest.TestCase):
                 NAME: 'yfg',
                 IDENTIFIER: '1'
             },
-            g.node[p_tuple]
+            g.nodes[p_tuple]
         )
 
     def test_add_identified_node(self):
@@ -149,7 +149,7 @@ class TestDSL(unittest.TestCase):
                 NAMESPACE: 'test',
                 IDENTIFIER: '1'
             },
-            g.node[p_tuple]
+            g.nodes[p_tuple]
         )
 
     def test_missing_information(self):

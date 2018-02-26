@@ -77,10 +77,10 @@ def flatten_graph_data(graph):
     g = nx.MultiDiGraph(**graph.graph)
 
     for node, data in graph.nodes(data=True):
-        g.add_node(node, data)
+        g.add_node(node, **data)
 
     for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
+        g.add_edge(u, v, key=key, **flatten_dict(data))
 
     return g
 

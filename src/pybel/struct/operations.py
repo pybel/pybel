@@ -22,7 +22,7 @@ def _left_full_node_join(g, h):
     for node in h:
         if node in g:
             continue
-        g.add_node(node, attr_dict=h.node[node])
+        g.add_node(node, **h.node[node])
 
 
 def _left_full_metadata_join(g, h):
@@ -79,22 +79,22 @@ def _left_full_exhaustive_join(g, h):
 
     for u, v, k, d in h.edges(keys=True, data=True):
         if k < 0:  # unqualified edge that's not in G yet
-            if v not in g.edge[u] or k not in g.edge[u][v]:
-                g.add_edge(u, v, key=k, attr_dict=d)
-        elif v not in g.edge[u]:
-            g.add_edge(u, v, attr_dict=d)
-        elif any(0 <= gk and d == gd for gk, gd in g.edge[u][v].items()):
+            if v not in g[u] or k not in g[u][v]:
+                g.add_edge(u, v, key=k, **d)
+        elif v not in g[u]:
+            g.add_edge(u, v, **d)
+        elif any(0 <= gk and d == gd for gk, gd in g[u][v].items()):
             continue
         else:
-            g.add_edge(u, v, attr_dict=d)
+            g.add_edge(u, v, **d)
 
 
 def _left_full_hash_join(g, h):
     """Adds all nodes and edges from H to G, in-place for G using a hash-based approach for faster speed. Runs
     in O(|E(G)| + |E(H)|)
 
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
+    :param pybel.BELGraph g: A BEL network
+    :param pybel.BELGraph h: A BEL network
     """
     _left_full_node_join(g, h)
     _left_full_metadata_join(g, h)
@@ -106,20 +106,20 @@ def _left_full_hash_join(g, h):
     for u, v in h_unqualified_edges:
         if (u, v) not in g_unqualified_edges:
             for k in h_unqualified_edges[u, v]:
-                g.add_edge(u, v, key=k, attr_dict=h.edge[u][v][k])
+                g.add_edge(u, v, key=k, **h[u][v][k])
         else:
             for k in h_unqualified_edges[u, v]:
-                if k not in g.edge[u][v]:
-                    g.add_edge(u, v, key=k, attr_dict=h.edge[u][v][k])
+                if k not in g[u][v]:
+                    g.add_edge(u, v, key=k, **h[u][v][k])
 
     for u, v in h_qualified_edges:
         if (u, v) not in g_qualified_edges:
-            for attr_dict in h.edge[u][v].values():
-                g.add_edge(u, v, attr_dict=attr_dict)
+            for attr_dict in h[u][v].values():
+                g.add_edge(u, v, **attr_dict)
         else:
             for d_hash in h_qualified_edges[u, v]:
                 if d_hash not in g_qualified_edges[u, v]:
-                    g.add_edge(u, v, attr_dict=h.edge[u][v][h_qualified_edges[u, v][d_hash]])
+                    g.add_edge(u, v, **h[u][v][h_qualified_edges[u, v][d_hash]])
 
 
 def left_outer_join(g, h, use_hash=True):

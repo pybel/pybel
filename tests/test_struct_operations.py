@@ -40,8 +40,8 @@ class TestLeftFullJoin(unittest.TestCase):
         h.add_node_from_data(p2)
         h.add_node_from_data(p3)
 
-        h.node[p1_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
-        h.node[p3_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
+        h.nodes[p1_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
+        h.nodes[p3_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
 
         h.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID1', evidence='Evidence 1')
         h.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID2', evidence='Evidence 2')
@@ -67,12 +67,12 @@ class TestLeftFullJoin(unittest.TestCase):
 
         :param pybel.BELGraph j: The resulting graph from G += H
         """
-        self.assertIn('EXTRANEOUS', j.node[p1_tuple])
-        self.assertNotIn('EXTRANEOUS', j.node[p2_tuple])
-        self.assertIn('EXTRANEOUS', j.node[p3_tuple])
+        self.assertIn('EXTRANEOUS', j.nodes[p1_tuple])
+        self.assertNotIn('EXTRANEOUS', j.nodes[p2_tuple])
+        self.assertIn('EXTRANEOUS', j.nodes[p3_tuple])
 
-        self.assertEqual('MOST DEFINITELY', j.node[p1_tuple]['EXTRANEOUS'])
-        self.assertEqual('MOST DEFINITELY', j.node[p3_tuple]['EXTRANEOUS'])
+        self.assertEqual('MOST DEFINITELY', j.nodes[p1_tuple]['EXTRANEOUS'])
+        self.assertEqual('MOST DEFINITELY', j.nodes[p3_tuple]['EXTRANEOUS'])
 
         self.assertEqual(3, j.number_of_nodes())
         self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format(json.dumps(j.edges(data=True), indent=2)))
