@@ -42,14 +42,9 @@ def invert_edge_filter(edge_predicate):
 def and_edge_predicates(edge_predicates=None):
     """Concatenates multiple edge predicates to a new predicate that requires all predicates to be met.
 
-<<<<<<< HEAD
     :param edge_predicates: a list of predicates
     :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
-=======
-    :param edge_predicates: a list of predicates (graph, node, node, key, data) -> bool
-    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
     :return: A combine filter
->>>>>>> develop
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
