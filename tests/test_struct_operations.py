@@ -10,6 +10,7 @@ from pybel.struct.operations import (
     left_full_join, left_node_intersection_join, left_outer_join, node_intersection,
     union,
 )
+from tests.utils import n
 
 HGNC = 'HGNC'
 
@@ -135,44 +136,64 @@ class TestLeftFullJoin(unittest.TestCase):
 
 class TestLeftFullOuterJoin(unittest.TestCase):
     def setUp(self):
-        g = BELGraph()
+        hgnc_dummy_url = n()
 
-        g.add_edge(1, 2)
+        g = BELGraph()
+        g.namespace_url['HGNC'] = hgnc_dummy_url
+
+        self.n1 = protein(namespace='HGNC', name=n())
+        self.n2 = protein(namespace='HGNC', name=n())
+        self.n3 = protein(namespace='HGNC', name=n())
+        self.n4 = protein(namespace='HGNC', name=n())
+        self.n5 = protein(namespace='HGNC', name=n())
+        self.n6 = protein(namespace='HGNC', name=n())
+        self.n7 = protein(namespace='HGNC', name=n())
+
+        g.add_edge(self.n1, self.n2)
 
         h = BELGraph()
-        h.add_edge(1, 3)
-        h.add_edge(1, 4)
+        h.namespace_url['HGNC'] = hgnc_dummy_url
 
-        h.add_edge(5, 6)
-        h.add_node(7)
+        h.add_edge(self.n1, self.n3)
+        h.add_edge(self.n1, self.n4)
+
+        h.add_edge(self.n5, self.n6)
+        h.add_node(self.n7)
 
         self.g = g
         self.h = h
+
+    def test_namespace_conflict(self):
+        k = BELGraph()
+        k.namespace_url['HGNC'] = n()
+
+        with self.assertRaises(Exception):
+            self.g & k
 
     def help_check_initial_g(self, g):
         self.assertIsNotNone(g)
         self.assertIsInstance(g, BELGraph)
         self.assertEqual(2, g.number_of_nodes())
-        self.assertEqual({1, 2}, set(g))
+        self.assertEqual({self.n1, self.n2}, set(g))
         self.assertEqual(1, g.number_of_edges())
-        self.assertEqual({(1, 2)}, set(g.edges()))
+        self.assertEqual({(self.n1, self.n2)}, set(g.edges()))
 
     def help_check_initial_h(self, h):
         self.assertIsNotNone(h)
         self.assertIsInstance(h, BELGraph)
         self.assertEqual(6, h.number_of_nodes())
-        self.assertEqual({1, 3, 4, 5, 6, 7}, set(h))
+        self.assertEqual({self.n1, self.n3, self.n4, self.n5, self.n6, self.n7}, set(h))
         self.assertEqual(3, h.number_of_edges())
-        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(h.edges()))
+        self.assertEqual({(self.n1, self.n3), (self.n1, self.n4), (self.n5, self.n6)}, set(h.edges()))
 
     def help_check_result(self, j):
         """After H has been full outer joined into G, this is what it should be"""
         self.assertIsNotNone(j)
         self.assertIsInstance(j, BELGraph)
         self.assertEqual(4, j.number_of_nodes())
-        self.assertEqual({1, 2, 3, 4}, set(j))
+        self.assertEqual({self.n1, self.n2, self.n3, self.n4}, set(j))
         self.assertEqual(3, j.number_of_edges())
-        self.assertEqual({(1, 2), (1, 3), (1, 4)}, set(j.edges()))
+        self.assertEqual({(self.n1, self.n2), (self.n1, self.n3), (self.n1, self.n4)}, set(j.edges()))
 
     def test_in_place_type_failure(self):
         with self.assertRaises(TypeError):
@@ -182,13 +203,13 @@ class TestLeftFullOuterJoin(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.g & None
 
-    def test_magic(self):
+    def test_in_place_operator_left_outer_join(self):
         # left_outer_join(g, h)
         self.g &= self.h
         self.help_check_initial_h(self.h)
         self.help_check_result(self.g)
 
-    def test_operator(self):
+    def test_operator_left_outer_join(self):
         # left_outer_join(g, h)
         j = self.g & self.h
         self.help_check_initial_h(self.h)
@@ -201,7 +222,6 @@ class TestLeftFullOuterJoin(unittest.TestCase):
         self.help_check_result(self.g)
 
     def test_left_outer_exhaustive_join(self):
-        self.g &= self.h
         left_outer_join(self.g, self.h, use_hash=False)
         self.help_check_initial_h(self.h)
         self.help_check_result(self.g)

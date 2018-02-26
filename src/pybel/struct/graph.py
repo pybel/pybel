@@ -352,6 +352,8 @@ class BELGraph(networkx.MultiDiGraph):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
+
+
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
 
@@ -364,7 +366,7 @@ class BELGraph(networkx.MultiDiGraph):
         :return: The hash of this edge
         :rtype: str
         """
-        key = unqualified_edge_code[relation]
+        # key = unqualified_edge_code[relation]
 
         if isinstance(u, dict):
             u = self.add_node_from_data(u)
@@ -373,12 +375,12 @@ class BELGraph(networkx.MultiDiGraph):
             v = self.add_node_from_data(v)
 
         attr = {RELATION: relation}
-        attr[HASH] = hash_edge(u, v, attr)
+        key = hash_edge(u, v, attr)
 
         if not self.has_edge(u, v, key):
             self.add_edge(u, v, key=key, **attr)
 
-        return attr[HASH]
+        return key
 
     def add_transcription(self, u, v):
         """Adds a transcription relation from a gene to an RNA or miRNA node
@@ -570,11 +572,11 @@ class BELGraph(networkx.MultiDiGraph):
         if isinstance(v, dict):
             v = self.add_node_from_data(v)
 
-        attr[HASH] = hash_edge(u, v, attr)
+        key = hash_edge(u, v, attr)
 
-        self.add_edge(u, v, **attr)
+        self.add_edge(u, v, key=key, **attr)
 
-        return attr[HASH]
+        return key
 
     def add_inhibits(self, u, v, evidence, citation, annotations=None, object_modifier=None):
         """A more specific version of add_qualified edge that automatically populates the relation and object

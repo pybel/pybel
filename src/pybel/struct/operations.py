@@ -47,7 +47,7 @@ def _left_full_metadata_join(g, h):
                 g.annotation_list[keyword].add(value)
 
 
-def left_full_join(g, h, use_hash=True):
+def left_full_join(g, h, use_hash=True, node_join=True, metadata_join=True):
     """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g``
 
     :param BELGraph g: A BEL network
@@ -61,6 +61,12 @@ def left_full_join(g, h, use_hash=True):
     >>> h = pybel.from_path('...')
     >>> merged = left_full_join(g, h)
     """
+    if node_join:
+        _left_full_node_join(g, h)
+
+    if metadata_join:
+        _left_full_metadata_join(g, h)
+
     if use_hash:
         _left_full_hash_join(g, h)
     else:
@@ -74,9 +80,6 @@ def _left_full_exhaustive_join(g, h):
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
     """
-    _left_full_node_join(g, h)
-    _left_full_metadata_join(g, h)
-
     for u, v, k, d in h.edges(keys=True, data=True):
         if k < 0:  # unqualified edge that's not in G yet
             if v not in g[u] or k not in g[u][v]:
@@ -96,9 +99,6 @@ def _left_full_hash_join(g, h):
     :param pybel.BELGraph g: A BEL network
     :param pybel.BELGraph h: A BEL network
     """
-    _left_full_node_join(g, h)
-    _left_full_metadata_join(g, h)
-
     g_qualified_edges, g_unqualified_edges = stratify_hash_edges(g)
     h_qualified_edges, h_unqualified_edges = stratify_hash_edges(h)
 
@@ -144,7 +144,8 @@ def left_outer_join(g, h, use_hash=True):
     g_nodes = set(g)
     for comp in nx.weakly_connected_components(h):
         if g_nodes.intersection(comp):
-            left_full_join(g, h.subgraph(comp), use_hash=use_hash)
+            left_full_join(g, h.subgraph(comp), use_hash=use_hash, node_join=False, metadata_join=False)
+
 
 
 def _left_full_join_networks(target, networks, use_hash=True):
@@ -225,10 +226,10 @@ def left_node_intersection_join(g, h, use_hash=True):
     >>> h = pybel.from_path('...')
     >>> merged = left_node_intersection_join(g, h)
     """
-    intersecting = set(g).intersection(set(h))
+    intersecting_nodes = set(g).intersection(set(h))
 
-    g_inter = g.subgraph(intersecting)
-    h_inter = h.subgraph(intersecting)
+    g_inter = g.subgraph(intersecting_nodes)
+    h_inter = h.subgraph(intersecting_nodes)
 
     left_full_join(g_inter, h_inter, use_hash=use_hash)
 
