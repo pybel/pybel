@@ -45,7 +45,11 @@ class TestTransfer(unittest.TestCase):
         self.assertIn(mevinolinic_acid.as_tuple(), children, msg='direct child not found')
 
     def test_infer(self):
+        self.assertIsNotNone(statin_graph)
+        self.assertIsInstance(statin_graph, BELGraph)
+
         graph = statin_graph.copy()
+        self.assertIsInstance(graph, BELGraph)
         self.assertEqual(9, graph.number_of_nodes())
         self.assertEqual(8, graph.number_of_edges())
 
