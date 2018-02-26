@@ -15,7 +15,8 @@ from tests.utils import n
 
 
 class TestStruct(unittest.TestCase):
-    def test_example_metadata(self):
+    def test_example_sialic_metadata(self):
+        """Tests the existence of metadata in the Sialic Acid example"""
         self.assertIsNotNone(sialic_acid_graph.name)
         self.assertIsNotNone(sialic_acid_graph.version)
         self.assertIsNotNone(sialic_acid_graph.description)
@@ -23,18 +24,10 @@ class TestStruct(unittest.TestCase):
         self.assertIsNone(sialic_acid_graph.copyright)
         self.assertIsNone(sialic_acid_graph.license)
 
-    def test_add_simple(self):
-        g = BELGraph()
 
-        namespace, name = n(), n()
-
-        g.add_node_from_data(protein(namespace=namespace, name=name))
-        self.assertEqual(1, g.number_of_nodes())
-
-        g.add_node_from_data(protein(namespace=namespace, name=name))
-        self.assertEqual(1, g.number_of_nodes())
 
     def test_str_kwargs(self):
+        """Tests getting graph metadata after constructing from keyword arguments"""
         (
             name,
             version,
@@ -103,6 +96,7 @@ class TestStruct(unittest.TestCase):
         self.assertEqual('{name} v{version}'.format(name=name, version=version), str(g))
 
     def test_citation_type_error(self):
+        """Tests that a type error is thrown when using the wrong type for a qualified edge"""
         g = BELGraph()
 
         with self.assertRaises(TypeError):
