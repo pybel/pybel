@@ -247,7 +247,7 @@ class TestParse(TestGraphMixin):
         owl = parse_owl(ado_path)
 
         self.assertLessEqual(ado_expected_nodes_subset, set(owl))
-        self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
+        self.assertLessEqual(ado_expected_edges_subset, set(owl.edges()))
 
     @mock_parse_owl_rdf
     @mock_parse_owl_xml
@@ -255,7 +255,7 @@ class TestParse(TestGraphMixin):
         ado_path = 'http://mock.com/ado.owl'
         owl = parse_owl(ado_path)
         self.assertLessEqual(ado_expected_nodes_subset, set(owl))
-        self.assertLessEqual(ado_expected_edges_subset, set(owl.edges_iter()))
+        self.assertLessEqual(ado_expected_edges_subset, set(owl.edges()))
 
 
 class TestParsePizza(TestGraphMixin, FleetingTemporaryCacheMixin):
