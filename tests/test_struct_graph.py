@@ -224,7 +224,7 @@ class TestGetGraphProperties(unittest.TestCase):
         evidence = self.graph.get_edge_evidence(test_source, test_target,test_key)
         self.assertIsNone(evidence)
 
-        self.assertFalse(self.graph.has_edge_annotation(test_source, test_target, test_key))
+        self.assertFalse(self.graph.has_edge_annotations(test_source, test_target, test_key))
         annotations = self.graph.get_edge_annotations(test_source, test_target, test_key)
         self.assertIsNone(annotations)
 

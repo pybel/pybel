@@ -18,8 +18,14 @@ def iter_children(graph, node):
     :rtype: iter[tuple]
     """
     for u, _, d in graph.in_edges(node, data=True):
-        if d[RELATION] != IS_A:
-            continue
+        try:
+            if d[RELATION] != IS_A:
+                continue
+
+        except Exception as e:
+            print(d)
+
+            raise e
         yield u
 
 

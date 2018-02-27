@@ -49,6 +49,7 @@ class TestTransfer(unittest.TestCase):
 
         graph = statin_graph.copy()
         self.assertIsInstance(graph, BELGraph)
+
         self.assertEqual(9, graph.number_of_nodes())
         self.assertEqual(8, graph.number_of_edges())
 

@@ -116,6 +116,9 @@ class BELGraph(nx.MultiDiGraph):
         if GRAPH_UNCACHED_NAMESPACES not in self.graph:
             self.graph[GRAPH_UNCACHED_NAMESPACES] = set()
 
+    def fresh_copy(self):  # Necessary to use graph.copy() properly!
+        return BELGraph()
+
     @property
     def document(self):
         """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
@@ -379,8 +382,14 @@ class BELGraph(nx.MultiDiGraph):
         :return: The hash of this edge
         :rtype: str
         """
-        attr = {RELATION: relation}
-        return self._add_edge_helper(u, v, attr)
+        return self._add_edge_helper(u, v, attr={RELATION: relation})
+
+    def _generate_unqualifed_edge_hash(self, u, v, relation):
+        """A helper function for generating the relation"""
+        return hash_edge(u, v, {RELATION: relation})
+
+    def has_unqualified_edge(self, u, v, relation):
+        return self._generate_unqualifed_edge_hash(u, v, relation) in self[u][v]
 
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
                            object_modifier=None, line=None):
@@ -805,13 +814,14 @@ class BELGraph(nx.MultiDiGraph):
         """Iterates over nodes and their data that are equal to the given node, starting with the original
 
         :param tuple node: A PyBEL node tuple
+        :param set[tuple] visited: a set of already visited nodes.
         :rtype: iter[tuple]
         """
         for v in self[node]:
             if v in visited:
                 continue
 
-            if unqualified_edge_code[EQUIVALENT_TO] not in self[node][v]:
+            if not self.has_unqualified_edge(node, v, EQUIVALENT_TO):
                 continue
 
             yield v
@@ -828,8 +838,8 @@ class BELGraph(nx.MultiDiGraph):
         """
         yield node
 
-        for n in self._equivalent_node_iterator_helper(node, {node}):
-            yield n
+        for equivalent_node in self._equivalent_node_iterator_helper(node, {node}):
+            yield equivalent_node
 
     def get_equivalent_nodes(self, node):
         """Gets a set of equivalent nodes to this node. Does not include the given node.
@@ -863,7 +873,7 @@ class BELGraph(nx.MultiDiGraph):
 def _index_nanopubs(graph):
     """Builds index from nanopub hash to edge pair
 
-    :param graph:
+    :param BELGraph graph: A BEL graph
     :rtype: dict[str, tuple[u,v]]
     """
     return {
@@ -875,8 +885,8 @@ def _index_nanopubs(graph):
 def _left_full_node_join(g, h):
     """Adds all nodes from ``h`` to ``g``, in-place for ``g``
 
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
+    :param BELGraph g: A BEL graph
+    :param BELGraph h: A BEL graph
     """
     for node in h:
         if node in g:
@@ -887,8 +897,8 @@ def _left_full_node_join(g, h):
 def _left_full_metadata_join(g, h):
     """Adds all metadata from ``h`` to ``g``, in-place for ``g``
 
-    :param pybel.BELGraph g: A BEL network
-    :param pybel.BELGraph h: A BEL network
+    :param pybel.BELGraph g: A BEL graph
+    :param pybel.BELGraph h: A BEL graph
     """
     g.namespace_url.update(h.namespace_url)
     g.namespace_pattern.update(h.namespace_pattern)
@@ -909,8 +919,8 @@ def _left_full_metadata_join(g, h):
 def left_full_join(g, h, node_join=True, metadata_join=True):
     """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g``
 
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
+    :param BELGraph g: A BEL graph
+    :param BELGraph h: A BEL graph
 
     Example usage:
 
@@ -932,8 +942,8 @@ def _left_full_edge_join(g, h):
     """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g`` using a hash-based approach for faster speed.
     Runs in O(|E(G)| + |E(H)|)
 
-    :param pybel.BELGraph g: A BEL network
-    :param pybel.BELGraph h: A BEL network
+    :param pybel.BELGraph g: A BEL graph
+    :param pybel.BELGraph h: A BEL graph
     """
     g_index = _index_nanopubs(g)
     h_index = _index_nanopubs(h)
@@ -946,15 +956,15 @@ def _left_full_edge_join(g, h):
 
 
 def left_outer_join(g, h):
-    """Only adds components from the ``h`` that are touching ``g``.
+    """Only adds weakly connected components from the ``h`` that share at least one node with ``g``.
 
     Algorithm:
 
     1. Identify all weakly connected components in ``h``
     2. Add those that have an intersection with the ``g``
 
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
+    :param BELGraph g: A BEL graph
+    :param BELGraph h: A BEL graph
 
     Example usage:
 
@@ -964,9 +974,21 @@ def left_outer_join(g, h):
     >>> merged = left_outer_join(g, h)
     """
     g_nodes = set(g)
+    g_index = _index_nanopubs(g)
+
     for comp in nx.weakly_connected_components(h):
-        if g_nodes.intersection(comp):
-            left_full_join(g, h.subgraph(comp), node_join=False, metadata_join=False)
+        if g_nodes.isdisjoint(comp):
+            print('not related component:', comp)
+            continue
+
+        comp_graph = h.subgraph(comp)
+        comp_index = _index_nanopubs(comp_graph)
+
+        for key, (u, v) in comp_index.items():
+            if key in g_index:  # edge already in G
+                continue
+
+            g.add_edge(u, v, key=key, **h.edges[u, v, key])
 
 
 def _left_full_join_networks(target, networks, use_hash=True):
@@ -974,7 +996,7 @@ def _left_full_join_networks(target, networks, use_hash=True):
 
     The order of the networks will not impact the result.
 
-    :param BELGraph target: A BEL network
+    :param BELGraph target: A BEL graph
     :param iter[BELGraph] networks: An iterator of BEL networks
     :rtype: BELGraph
     """
@@ -988,7 +1010,7 @@ def _left_outer_join_networks(target, networks):
 
     Note: the order of networks will have significant results!
 
-    :param BELGraph target: A BEL network
+    :param BELGraph target: A BEL graph
     :param iter[BELGraph] networks: An iterator of BEL networks
     :rtype: BELGraph
     """
@@ -999,9 +1021,9 @@ def _left_outer_join_networks(target, networks):
 
 def union(graphs):
     """Takes the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
-    infinite.
+    infinite. Brings in node data with order precedence from beginning of iterator
 
-    :param iter[BELGraph] networks: An iterator over BEL networks. Can't be infinite.
+    :param iter[BELGraph] graphs: An iterator over BEL networks. Can't be infinite.
     :return: A merged network
     :rtype: BELGraph
 
@@ -1025,8 +1047,9 @@ def union(graphs):
 
     rv = BELGraph()
 
-    for graphs in graphs:
-        _left_full_edge_join(rv, graphs)
+    for graph in graphs:
+        _left_full_node_join(rv, graph)
+        _left_full_edge_join(rv, graph)
 
     return rv
 
@@ -1035,8 +1058,8 @@ def left_node_intersection_join(g, h):
     """Takes the intersection over two networks. This intersection of two graphs is defined by the
      union of the subgraphs induced over the intersection of their nodes
 
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
+    :param BELGraph g: A BEL graph
+    :param BELGraph h: A BEL graph
     :rtype: BELGraph
 
     Example usage:
@@ -1048,12 +1071,24 @@ def left_node_intersection_join(g, h):
     """
     intersecting_nodes = set(g).intersection(set(h))
 
-    g_inter = g.subgraph(intersecting_nodes)  # make new graph based on this subgraph?
+    g_inter = g.subgraph(intersecting_nodes)
     h_inter = h.subgraph(intersecting_nodes)
 
-    left_full_join(g_inter, h_inter)
+    rv = BELGraph()
 
-    return g_inter
+    g_index = _index_nanopubs(g_inter)
+    h_index = _index_nanopubs(h_inter)
+
+    rv.add_nodes_from(g_inter)
+    rv.add_edges_from(g_inter.edges)
+
+    for key, (u, v) in h_index.items():
+        if key in g_index:  # edge already in G
+            continue
+
+        rv.add_edge(u, v, key=key, **h_inter.edges[u, v, key])
+
+    return rv
 
 
 def node_intersection(networks):

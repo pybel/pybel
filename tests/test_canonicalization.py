@@ -3,10 +3,10 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.canonicalize import canonicalize_edge, fusion_range_to_bel, variant_to_bel
+from pybel.canonicalize import fusion_range_to_bel, variant_to_bel
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, INCREASES, KIND,
-    MODIFIER, PATHOLOGY, PROTEIN, REACTION, RNA,
+    PATHOLOGY, PROTEIN, REACTION, RNA,
 )
 from pybel.dsl import *
 from pybel.dsl.edges import extracellular, intracellular
@@ -161,7 +161,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
         self.u = self.g.add_node_from_data(protein(name='u', namespace='TEST'))
         self.v = self.g.add_node_from_data(protein(name='v', namespace='TEST'))
         self.evidence = n()
-        self.citation= n()
+        self.citation = n()
 
     def add_edge_same_provenance(self, subject_modifier=None, object_modifier=None, annotations=None):
         return self.g.add_qualified_edge(
@@ -174,10 +174,6 @@ class TestCanonicalizeEdge(unittest.TestCase):
             object_modifier=object_modifier,
             annotations=annotations,
         )
-
-    def test_failure(self):
-        with self.assertRaises(ValueError):
-            self.add_edge_same_provenance(subject_modifier={MODIFIER: 'nope'})
 
     def test_canonicalize_edge_info(self):
         c1 = self.add_edge_same_provenance(
