@@ -643,7 +643,7 @@ class BelParser(BaseParser):
             annotations=annotations,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
-            **{LINE: self.line_number}
+            line=self.line_number,
         )
 
     def _add_qualified_edge(self, u, v, relation, annotations, subject_modifier, object_modifier):

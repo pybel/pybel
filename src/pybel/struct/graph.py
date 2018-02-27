@@ -6,10 +6,9 @@ import logging
 import warnings
 from copy import deepcopy
 
-import networkx
+import networkx as nx
 from six import string_types
 
-from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
 from ..dsl import activity
@@ -18,6 +17,11 @@ from ..utils import get_version, hash_edge
 
 __all__ = [
     'BELGraph',
+    'left_full_join',
+    'left_outer_join',
+    'union',
+    'left_node_intersection_join',
+    'node_intersection',
 ]
 
 log = logging.getLogger(__name__)
@@ -49,7 +53,7 @@ def _clean_annotations(annotations_dict):
     }
 
 
-class BELGraph(networkx.MultiDiGraph):
+class BELGraph(nx.MultiDiGraph):
     """This class represents biological knowledge assembled in BEL as a network by extending the
     :class:`networkx.MultiDiGraph`.
     """
@@ -352,7 +356,16 @@ class BELGraph(networkx.MultiDiGraph):
         """Adds a warning to the internal warning log in the graph, with optional context information"""
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
+    def _add_edge_helper(self, u, v, attr):
+        if isinstance(u, dict):
+            u = self.add_node_from_data(u)
 
+        if isinstance(v, dict):
+            v = self.add_node_from_data(v)
+
+        key = hash_edge(u, v, attr)
+
+        return self.add_edge(u, v, key=key, **attr)
 
     def add_unqualified_edge(self, u, v, relation):
         """Adds unique edge that has no annotations
@@ -366,21 +379,57 @@ class BELGraph(networkx.MultiDiGraph):
         :return: The hash of this edge
         :rtype: str
         """
-        # key = unqualified_edge_code[relation]
-
-        if isinstance(u, dict):
-            u = self.add_node_from_data(u)
-
-        if isinstance(v, dict):
-            v = self.add_node_from_data(v)
-
         attr = {RELATION: relation}
-        key = hash_edge(u, v, attr)
+        return self._add_edge_helper(u, v, attr)
 
-        if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **attr)
+    def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
+                           object_modifier=None, line=None):
+        """Adds an edge, qualified with a relation, evidence, citation, and optional annotations, subject modifications,
+        and object modifications
 
-        return key
+        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param str relation: The type of relation this edge represents
+        :param str evidence: The evidence string from an article
+        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
+                                                assumes it's a PubMed identifier and auto-fills the citation type.
+        :param annotations: The annotations data dictionary
+        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
+        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
+        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+        :param Optional[int] line: The line from the BEL file where this statement originated
+
+        :return: The hash of the edge
+        :rtype: str
+        """
+        attr = {
+            RELATION: relation,
+            EVIDENCE: evidence,
+        }
+
+        if isinstance(citation, string_types):
+            attr[CITATION] = {
+                CITATION_TYPE: CITATION_TYPE_PUBMED,
+                CITATION_REFERENCE: citation
+            }
+        elif isinstance(citation, dict):
+            attr[CITATION] = citation
+        else:
+            raise TypeError
+
+        if annotations:  # clean up annotations
+            attr[ANNOTATIONS] = _clean_annotations(annotations)
+
+        if subject_modifier:
+            attr[SUBJECT] = subject_modifier
+
+        if object_modifier:
+            attr[OBJECT] = object_modifier
+
+        if line:
+            attr[LINE] = line
+
+        return self._add_edge_helper(u, v, attr)
 
     def add_transcription(self, u, v):
         """Adds a transcription relation from a gene to an RNA or miRNA node
@@ -523,61 +572,6 @@ class BELGraph(networkx.MultiDiGraph):
             NAME: name
         })
 
-    def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
-                           object_modifier=None, **attr):
-        """Adds an edge, qualified with a relation, evidence, citation, and optional annotations, subject modifications,
-        and object modifications
-
-        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
-        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
-        :param str relation: The type of relation this edge represents
-        :param str evidence: The evidence string from an article
-        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and auto-fills the citation type.
-        :param annotations: The annotations data dictionary
-        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
-        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
-        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model documentation.
-
-        :return: The hash of the edge
-        :rtype: str
-        """
-        attr.update({
-            RELATION: relation,
-            EVIDENCE: evidence,
-        })
-
-        if isinstance(citation, string_types):
-            attr[CITATION] = {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: citation
-            }
-        elif isinstance(citation, dict):
-            attr[CITATION] = citation
-        else:
-            raise TypeError
-
-        if annotations:  # clean up annotations
-            attr[ANNOTATIONS] = _clean_annotations(annotations)
-
-        if subject_modifier:
-            attr[SUBJECT] = subject_modifier
-
-        if object_modifier:
-            attr[OBJECT] = object_modifier
-
-        if isinstance(u, dict):
-            u = self.add_node_from_data(u)
-
-        if isinstance(v, dict):
-            v = self.add_node_from_data(v)
-
-        key = hash_edge(u, v, attr)
-
-        self.add_edge(u, v, key=key, **attr)
-
-        return key
-
     def add_inhibits(self, u, v, evidence, citation, annotations=None, object_modifier=None):
         """A more specific version of add_qualified edge that automatically populates the relation and object
         modifier
@@ -631,6 +625,13 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: Optional[str]
         """
         return self.edges[u, v, key].get(EVIDENCE)
+
+    def has_edge_annotations(self, u, v, key):
+        """Does the given edge have annotations?
+
+        :rtype: boolean
+        """
+        return ANNOTATIONS in self.edges[u, v, key]
 
     def get_edge_annotations(self, u, v, key):
         """Gets the annotations for a given edge
@@ -853,8 +854,242 @@ class BELGraph(networkx.MultiDiGraph):
         :param str namespace: A namespace
         :rtype: bool
         """
-        for n in self.iter_equivalent_nodes(node):
-            if self._node_has_namespace_helper(n, namespace):
-                return True
+        return any(
+            self._node_has_namespace_helper(n, namespace)
+            for n in self.iter_equivalent_nodes(node)
+        )
 
-        return False
+
+def _index_nanopubs(graph):
+    """Builds index from nanopub hash to edge pair
+
+    :param graph:
+    :rtype: dict[str, tuple[u,v]]
+    """
+    return {
+        key: (u, v)
+        for u, v, key in graph.edges(keys=True)
+    }
+
+
+def _left_full_node_join(g, h):
+    """Adds all nodes from ``h`` to ``g``, in-place for ``g``
+
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
+    """
+    for node in h:
+        if node in g:
+            continue
+        g.add_node(node, **h.nodes[node])
+
+
+def _left_full_metadata_join(g, h):
+    """Adds all metadata from ``h`` to ``g``, in-place for ``g``
+
+    :param pybel.BELGraph g: A BEL network
+    :param pybel.BELGraph h: A BEL network
+    """
+    g.namespace_url.update(h.namespace_url)
+    g.namespace_pattern.update(h.namespace_pattern)
+    g.namespace_owl.update(h.namespace_owl)
+
+    g.annotation_url.update(h.annotation_url)
+    g.annotation_pattern.update(h.annotation_pattern)
+    g.annotation_owl.update(h.annotation_owl)
+
+    for keyword, values in h.annotation_list.items():
+        if keyword not in g.annotation_list:
+            g.annotation_list[keyword] = values
+        else:
+            for value in values:
+                g.annotation_list[keyword].add(value)
+
+
+def left_full_join(g, h, node_join=True, metadata_join=True):
+    """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g``
+
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> merged = left_full_join(g, h)
+    """
+    if node_join:
+        _left_full_node_join(g, h)
+
+    if metadata_join:
+        _left_full_metadata_join(g, h)
+
+    _left_full_edge_join(g, h)
+
+
+def _left_full_edge_join(g, h):
+    """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g`` using a hash-based approach for faster speed.
+    Runs in O(|E(G)| + |E(H)|)
+
+    :param pybel.BELGraph g: A BEL network
+    :param pybel.BELGraph h: A BEL network
+    """
+    g_index = _index_nanopubs(g)
+    h_index = _index_nanopubs(h)
+
+    for key, (u, v) in h_index.items():
+        if key in g_index:  # edge already in G
+            continue
+
+        g.add_edge(u, v, key=key, **h.edges[u, v, key])
+
+
+def left_outer_join(g, h):
+    """Only adds components from the ``h`` that are touching ``g``.
+
+    Algorithm:
+
+    1. Identify all weakly connected components in ``h``
+    2. Add those that have an intersection with the ``g``
+
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> merged = left_outer_join(g, h)
+    """
+    g_nodes = set(g)
+    for comp in nx.weakly_connected_components(h):
+        if g_nodes.intersection(comp):
+            left_full_join(g, h.subgraph(comp), node_join=False, metadata_join=False)
+
+
+def _left_full_join_networks(target, networks, use_hash=True):
+    """Full joins a list of networks to a target network
+
+    The order of the networks will not impact the result.
+
+    :param BELGraph target: A BEL network
+    :param iter[BELGraph] networks: An iterator of BEL networks
+    :rtype: BELGraph
+    """
+    for network in networks:
+        left_full_join(target, network)
+    return target
+
+
+def _left_outer_join_networks(target, networks):
+    """Outer joins a list of networks to a target network.
+
+    Note: the order of networks will have significant results!
+
+    :param BELGraph target: A BEL network
+    :param iter[BELGraph] networks: An iterator of BEL networks
+    :rtype: BELGraph
+    """
+    for network in networks:
+        left_outer_join(target, network)
+    return target
+
+
+def union(graphs):
+    """Takes the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
+    infinite.
+
+    :param iter[BELGraph] networks: An iterator over BEL networks. Can't be infinite.
+    :return: A merged network
+    :rtype: BELGraph
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> k = pybel.from_path('...')
+    >>> merged = union([g, h, k])
+    """
+    graphs = tuple(graphs)
+
+    n_networks = len(graphs)
+
+    if n_networks == 0:
+        raise ValueError('no networks given')
+
+    if n_networks == 1:
+        return graphs[0]  # FIXME need to copy
+
+    rv = BELGraph()
+
+    for graphs in graphs:
+        _left_full_edge_join(rv, graphs)
+
+    return rv
+
+
+def left_node_intersection_join(g, h):
+    """Takes the intersection over two networks. This intersection of two graphs is defined by the
+     union of the subgraphs induced over the intersection of their nodes
+
+    :param BELGraph g: A BEL network
+    :param BELGraph h: A BEL network
+    :rtype: BELGraph
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> merged = left_node_intersection_join(g, h)
+    """
+    intersecting_nodes = set(g).intersection(set(h))
+
+    g_inter = g.subgraph(intersecting_nodes)  # make new graph based on this subgraph?
+    h_inter = h.subgraph(intersecting_nodes)
+
+    left_full_join(g_inter, h_inter)
+
+    return g_inter
+
+
+def node_intersection(networks):
+    """Takes the node intersection over a collection of networks into a new network. This intersection is defined
+    the same way as by :func:`left_node_intersection_join`
+
+    :param iter[BELGraph] networks: An iterable of networks. Since it's iterated over twice, it gets converted to a
+                                    tuple first, so this isn't a safe operation for infinite lists.
+    :rtype: BELGraph
+
+    Example usage:
+
+    >>> import pybel
+    >>> g = pybel.from_path('...')
+    >>> h = pybel.from_path('...')
+    >>> k = pybel.from_path('...')
+    >>> merged = node_intersection([g, h, k])
+    """
+    networks = tuple(networks)
+
+    n_networks = len(networks)
+
+    if n_networks == 0:
+        raise ValueError('no networks given')
+
+    if n_networks == 1:
+        return networks[0]
+
+    nodes = set(networks[0])
+
+    for network in networks[1:]:
+        nodes.intersection_update(network)
+
+    subgraphs = (
+        network.subgraph(nodes)
+        for network in networks
+    )
+
+    return union(subgraphs)

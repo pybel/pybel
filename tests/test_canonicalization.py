@@ -160,92 +160,92 @@ class TestCanonicalizeEdge(unittest.TestCase):
         self.g = BELGraph()
         self.u = self.g.add_node_from_data(protein(name='u', namespace='TEST'))
         self.v = self.g.add_node_from_data(protein(name='v', namespace='TEST'))
-        self.key = 0
+        self.evidence = n()
+        self.citation= n()
 
-    def get_data(self, k):
-        return self.g.adj[self.u][self.v][k]
-
-    def add_edge(self, subject_modifier=None, object_modifier=None, annotations=None):
-        self.key += 1
-
-        self.g.add_qualified_edge(
+    def add_edge_same_provenance(self, subject_modifier=None, object_modifier=None, annotations=None):
+        return self.g.add_qualified_edge(
             self.u,
             self.v,
             relation=INCREASES,
-            evidence=n(),
-            citation=n(),
+            evidence=self.evidence,
+            citation=self.citation,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
             annotations=annotations,
-            key=self.key
         )
-
-        return canonicalize_edge(self.get_data(self.key))
 
     def test_failure(self):
         with self.assertRaises(ValueError):
-            self.add_edge(subject_modifier={MODIFIER: 'nope'})
+            self.add_edge_same_provenance(subject_modifier={MODIFIER: 'nope'})
 
     def test_canonicalize_edge_info(self):
-        c1 = self.add_edge(
+        c1 = self.add_edge_same_provenance(
             annotations={
                 'Species': '9606'
             }
         )
 
-        c2 = self.add_edge(
+        c2 = self.add_edge_same_provenance(
             annotations={
                 'Species': '9606'
             }
         )
 
-        c3 = self.add_edge(
+        c3 = self.add_edge_same_provenance(
             subject_modifier=activity('tport'),
         )
 
-        c4 = self.add_edge(
+        c4 = self.add_edge_same_provenance(
             subject_modifier=activity('tport', namespace=BEL_DEFAULT_NAMESPACE),
         )
 
+        c5 = self.add_edge_same_provenance(
+            annotations={
+                'Species': {'9606': True}
+            }
+        )
+
         self.assertEqual(c1, c2)
+        self.assertEqual(c2, c5)
         self.assertNotEqual(c1, c3)
         self.assertEqual(c3, c4)
 
     def test_subject_degradation_location(self):
         self.assertEqual(
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation()
             ),
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation()
             )
         )
 
         self.assertEqual(
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
             ),
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
             )
         )
 
         self.assertNotEqual(
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation()
             ),
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
             )
         )
 
     def test_translocation(self):
         self.assertEqual(
-            self.add_edge(subject_modifier=secretion()),
-            self.add_edge(subject_modifier=secretion()),
+            self.add_edge_same_provenance(subject_modifier=secretion()),
+            self.add_edge_same_provenance(subject_modifier=secretion()),
         )
 
         self.assertEqual(
-            self.add_edge(subject_modifier=secretion()),
-            self.add_edge(subject_modifier=translocation(from_loc=intracellular, to_loc=extracellular)),
+            self.add_edge_same_provenance(subject_modifier=secretion()),
+            self.add_edge_same_provenance(subject_modifier=translocation(from_loc=intracellular, to_loc=extracellular)),
         )
