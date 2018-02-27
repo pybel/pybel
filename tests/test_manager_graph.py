@@ -1640,13 +1640,13 @@ class TestEquivalentNodes(unittest.TestCase):
         self.assertFalse(graph._node_has_namespace_helper(a, 'HGNCID'))
 
         b = graph.add_node_from_data(protein(namespace='HGNCID', identifier='1659'))
-        self.assertFalse(graph._node_has_namespace_helper(a, 'HGNC'))
-        self.assertTrue(graph._node_has_namespace_helper(a, 'HGNCID'))
+        self.assertFalse(graph._node_has_namespace_helper(b, 'HGNC'))
+        self.assertTrue(graph._node_has_namespace_helper(b, 'HGNCID'))
 
         graph.add_equivalence(a, b)
 
-        self.assertEqual({a, b}, graph.get_equivalent_nodes(a))
-        self.assertEqual({a, b}, graph.get_equivalent_nodes(b))
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(a), msg='no identifier found for CD33')
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(b), msg='no symbol found for HGNC:1659')
 
         self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
         self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
