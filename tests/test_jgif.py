@@ -82,8 +82,8 @@ jgif_expected_edges = [
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'phos'}},
         ANNOTATIONS: {
-            'Species': {'10116':True},
-            'Cell': {'neuron':True}
+            'Species': {'10116': True},
+            'Cell': {'neuron': True}
         }
     }),
     (foxo3, tcell_proliferation, {
@@ -94,8 +94,8 @@ jgif_expected_edges = [
             CITATION_REFERENCE: "22359505"
         },
         ANNOTATIONS: {
-            'Species': {'10090':True},
-            'Disease': {'Viral infection':True}
+            'Species': {'10090': True},
+            'Disease': {'Viral infection': True}
         }
     }),
     (il15, il2rg, {
@@ -107,7 +107,7 @@ jgif_expected_edges = [
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
         ANNOTATIONS: {
-            'Tissue': {'lung':True}
+            'Tissue': {'lung': True}
         }
     })
 ]
@@ -118,8 +118,8 @@ class TestJgif(TestGraphMixin):
 
     def test_jgif_interchange(self):
         """Tests data from CBN"""
-        with open(test_path) as f:
-            graph_jgif_dict = json.load(f)
+        with open(test_path) as file:
+            graph_jgif_dict = json.load(file)
 
         graph = from_cbn_jgif(graph_jgif_dict)
 
