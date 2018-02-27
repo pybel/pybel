@@ -82,10 +82,10 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         time.sleep(1)
 
-        self.assertEqual(1, self.manager.count_networks())
+        self.assertEqual(1, self.manager.count_networks(), msg='only one network should be in database')
 
         networks = self.manager.list_networks()
-        self.assertEqual(1, len(networks))
+        self.assertEqual(1, len(networks), msg='only one network should be returned')
 
         network = networks[0]
 
@@ -107,14 +107,16 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         time.sleep(1)
 
-        self.assertEqual(1, self.manager.count_networks())
+        self.assertEqual(1, self.manager.count_networks(), msg='should only be one')
 
         graph_copy = self.graph.copy()
         self.assertIsInstance(graph_copy, BELGraph)
-        graph_copy.document[METADATA_VERSION] = '1.0.1'
+        graph_copy.version = '1.0.1'
         network_copy = self.manager.insert_graph(graph_copy, store_parts=False)
 
         time.sleep(1)  # Sleep so the first graph always definitely goes in first
+
+        self.assertNotEqual(network.id, network_copy.id, msg='database identifiers should be different')
 
         self.assertTrue(self.manager.has_name_version(graph_copy.name, graph_copy.version))
         self.assertFalse(self.manager.has_name_version('wrong name', '0.1.2'))
@@ -128,14 +130,15 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         query_ids = {-1, network.id, network_copy.id}
         query_networks_result = self.manager.get_networks_by_ids(query_ids)
         self.assertEqual(2, len(query_networks_result))
-        self.assertEqual({network.id, network_copy.id}, {network.id for network in query_networks_result})
+        query_networks_result_ids = {network.id for network in query_networks_result}
+        self.assertEqual(2, len(query_networks_result_ids), msg='should have returned different identifiers')
+        self.assertEqual({network.id, network_copy.id}, query_networks_result_ids)
 
-        expected_versions = {'1.0.1', self.graph.version}
-        self.assertEqual(expected_versions, set(self.manager.get_network_versions(self.graph.name)))
+        self.assertEqual({'1.0.0', '1.0.1'}, set(self.manager.get_network_versions(self.graph.name)))
 
-        exact_name_version = from_database(self.graph.name, self.graph.version, connection=self.manager)
+        exact_name_version = from_database(self.graph.name, '1.0.0', connection=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
-        self.assertEqual(self.graph.version, exact_name_version.version)
+        self.assertEqual('1.0.0', exact_name_version.version)
 
         exact_name_version = from_database(self.graph.name, '1.0.1', connection=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
@@ -147,8 +150,9 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         recent_networks = list(self.manager.list_recent_networks())  # just try it to see if it fails
         self.assertIsNotNone(recent_networks)
-        self.assertEqual([(network.name, '1.0.1')], [(n.name, n.version) for n in recent_networks])
-        self.assertEqual('1.0.1', recent_networks[0].version)
+        self.assertEqual(1, len(recent_networks))
+        recent_network = recent_networks[0]
+        self.assertEqual('1.0.1', recent_network.version)
 
 
 class TestTemporaryInsertNetwork(TemporaryCacheMixin):
