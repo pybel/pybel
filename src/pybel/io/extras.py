@@ -9,9 +9,8 @@ import logging
 
 import networkx as nx
 
-from ..constants import FUNCTION, NAME, NAMESPACE
+from ..constants import NAME, NAMESPACE, RELATION
 from ..struct import BELGraph
-from ..utils import flatten_dict
 
 __all__ = [
     'to_graphml',
@@ -32,11 +31,11 @@ def to_graphml(graph, file):
     """
     g = nx.MultiDiGraph()
 
-    for node, data in graph.nodes(data=True):
-        g.add_node(node, json=json.dumps(data), function=data[FUNCTION])
+    for node in graph:
+        g.add_node(graph.node_to_bel(node))
 
     for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
+        g.add_edge(graph.node_to_bel(u), graph.node_to_bel(v), key=key, relation=data[RELATION])
 
     nx.write_graphml(g, file)
 
