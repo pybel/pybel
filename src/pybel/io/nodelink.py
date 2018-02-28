@@ -10,8 +10,7 @@ This module contains IO functions for interconversion between BEL graphs and Nod
 
 import json
 import os
-
-from networkx.readwrite.json_graph import node_link_data, node_link_graph
+from itertools import chain
 
 from .utils import ensure_version
 from ..constants import GRAPH_ANNOTATION_LIST, GRAPH_UNCACHED_NAMESPACES
@@ -28,6 +27,64 @@ __all__ = [
     'from_json_path',
     'from_jsons',
 ]
+
+_attrs = dict(
+    source='source',
+    target='target',
+    name='id',
+    key='key',
+    link='links'
+)
+
+
+def node_link_data(G):
+    attrs = _attrs
+    name = attrs['name']
+    source = attrs['source']
+    target = attrs['target']
+    links = attrs['link']
+    # Allow 'key' to be omitted from attrs if the graph is not a multigraph.
+    key = attrs['key']
+
+    data = {
+        'graph': G.graph,
+        'nodes': [
+            dict(chain(G.nodes[n].items(), [(name, n)]))
+            for n in G
+        ]
+    }
+    data[links] = [
+        dict(chain(d.items(), ((source, u), (target, v), (key, k))))
+        for u, v, k, d in G.edges(keys=True, data=True)
+    ]
+    return data
+
+
+def node_link_graph(data):
+    attrs = _attrs
+    graph = BELGraph()
+    name = attrs['name']
+    source = attrs['source']
+    target = attrs['target']
+    links = attrs['link']
+    key = attrs['key']
+
+    graph.graph = data['graph']
+
+    for d in data['nodes']:
+        node = list2tuple(d[name])
+        nodedata = dict((k, v) for k, v in d.items() if k != name)
+        graph.add_node(node, **nodedata)
+
+    for d in data[links]:
+        src = list2tuple(d[source])
+        tgt = list2tuple(d[target])
+        ky = d.get(key, None)
+        edgedata = dict((k, v) for k, v in d.items()
+                        if k != source and k != target and k != key)
+        graph.add_edge(src, tgt, ky, **edgedata)
+
+    return graph
 
 
 def to_json(graph):
@@ -88,8 +145,7 @@ def from_json(graph_json_dict, check_version=True):
     for i, node in enumerate(graph_json_dict['nodes']):
         graph_json_dict['nodes'][i]['id'] = list2tuple(graph_json_dict['nodes'][i]['id'])
 
-    graph = node_link_graph(graph_json_dict, directed=True, multigraph=True)
-    graph = BELGraph(data=graph)
+    graph = node_link_graph(graph_json_dict)
     return ensure_version(graph, check_version=check_version)
 
 
