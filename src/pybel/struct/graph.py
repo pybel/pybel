@@ -116,7 +116,9 @@ class BELGraph(nx.MultiDiGraph):
         if GRAPH_UNCACHED_NAMESPACES not in self.graph:
             self.graph[GRAPH_UNCACHED_NAMESPACES] = set()
 
-    def fresh_copy(self):  # Necessary to use graph.copy() properly!
+    def fresh_copy(self):
+        """Creates an unfilled :class:`BELGraph` as a hook for other networkx functions. Is necessary for .copy() to
+        work"""
         return BELGraph()
 
     @property
