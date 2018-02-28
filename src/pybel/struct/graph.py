@@ -993,34 +993,6 @@ def left_outer_join(g, h):
             g.add_edge(u, v, key=key, **h.edges[u, v, key])
 
 
-def _left_full_join_networks(target, networks, use_hash=True):
-    """Full joins a list of networks to a target network
-
-    The order of the networks will not impact the result.
-
-    :param BELGraph target: A BEL graph
-    :param iter[BELGraph] networks: An iterator of BEL networks
-    :rtype: BELGraph
-    """
-    for network in networks:
-        left_full_join(target, network)
-    return target
-
-
-def _left_outer_join_networks(target, networks):
-    """Outer joins a list of networks to a target network.
-
-    Note: the order of networks will have significant results!
-
-    :param BELGraph target: A BEL graph
-    :param iter[BELGraph] networks: An iterator of BEL networks
-    :rtype: BELGraph
-    """
-    for network in networks:
-        left_outer_join(target, network)
-    return target
-
-
 def union(graphs):
     """Takes the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
     infinite. Brings in node data with order precedence from beginning of iterator
