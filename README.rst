@@ -19,7 +19,7 @@ Citation
 --------
 If you use PyBEL in your work, please cite:
 
-.. [1] Hoyt *et al.*, 2017. `PyBEL: a computational framework for Biological Expression Language <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, btx660
+.. [1] Hoyt, C. T., *et al.* (2017). `PyBEL: a Computational Framework for Biological Expression Language <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, 34(December), 1–2.
 
 Getting Started
 ---------------
