@@ -184,6 +184,9 @@ def from_cbn_jgif(graph_jgif_dict):
         'MESHD': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-diseases/mesh-diseases-20150601.belns',
         'SDIS': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-legacy-diseases/selventa-legacy-diseases-20150601.belns',
         'SCOMP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-named-complexes/selventa-named-complexes-20150601.belns',
+        'MESHC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-chemicals/mesh-chemicals-20170511.belns',
+        'GOBPID': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process-ids/go-biological-process-ids-20150601.belns',
+        'MESHCS': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-cell-structures/mesh-cell-structures-20150601.belns',
     })
 
     graph.annotation_url.update({
