@@ -5,8 +5,8 @@ import unittest
 from pybel import BELGraph
 from pybel.canonicalize import fusion_range_to_bel, variant_to_bel
 from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, INCREASES, KIND,
-    PATHOLOGY, PROTEIN, REACTION, RNA,
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, INCREASES, KIND, PATHOLOGY, PMOD,
+    PROTEIN, REACTION, RNA,
 )
 from pybel.dsl import *
 from pybel.dsl.edges import extracellular, intracellular
@@ -80,8 +80,23 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('a(CHEBI:"test name")', str(long))
         self.assertEqual((ABUNDANCE, 'CHEBI', 'test name'), long.as_tuple())
 
+    def test_gene_reference(self):
+        node = gene(namespace='EGID', name='780')
+        self.assertEqual('g(EGID:780)', str(node))
+        self.assertEqual((GENE, 'EGID', '780'), node.as_tuple())
+
     def test_protein_reference(self):
         self.assertEqual('p(HGNC:AKT1)', str(protein(namespace='HGNC', name='AKT1')))
+
+    def test_protein_pmod(self):
+        node = protein(name='PLCG1', namespace='HGNC', variants=[pmod(name='Ph', code='Tyr')])
+        self.assertEqual('p(HGNC:PLCG1, pmod(Ph, Tyr))', str(node))
+        self.assertEqual((PROTEIN, 'HGNC', 'PLCG1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Tyr')), node.as_tuple())
+
+    def test_protein_fragment(self):
+        node = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
+        self.assertEqual('p(HGNC:APP, frag(672_713))', str(node))
+        self.assertEqual((PROTEIN, 'HGNC', 'APP', ((FRAGMENT, (672, 713)))), node.as_tuple())
 
     def test_mirna_reference(self):
         self.assertEqual('m(HGNC:MIR1)', str(mirna(namespace='HGNC', name='MIR1')))
@@ -126,6 +141,11 @@ class TestCanonicalize(unittest.TestCase):
         node = bioprocess(namespace='GO', name='apoptosis')
         self.assertEqual('bp(GO:apoptosis)', str(node))
         self.assertEqual((BIOPROCESS, 'GO', 'apoptosis'), node.as_tuple())
+
+    def test_named_complex_abundance(self):
+        node = named_complex_abundance(namespace='SCOMP', name='Calcineurin Complex')
+        self.assertEqual('complex(SCOMP:"Calcineurin Complex")', str(node))
+        self.assertEqual((COMPLEX, 'SCOMP', 'Calcineurin Complex'), node.as_tuple())
 
     def test_complex_abundance(self):
         node = complex_abundance(members=[protein(namespace='HGNC', name='FOS'), protein(namespace='HGNC', name='JUN')])
