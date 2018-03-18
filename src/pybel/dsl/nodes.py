@@ -45,7 +45,11 @@ class BaseEntity(dict):
 
     @abc.abstractmethod
     def as_tuple(self):
-        pass
+        """Returns this node as a PyBEL node tuple
+
+        :rtype: tuple
+        """
+        raise NotImplementedError
 
     def as_sha512(self):
         """Returns this node as a hash
