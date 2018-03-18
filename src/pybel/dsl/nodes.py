@@ -150,6 +150,27 @@ class CentralDogma(BaseAbundance):
         if variants:
             self[VARIANTS] = variants
 
+    def _variants_as_tuple(self):
+        """Return the variants as a tuple
+
+        :rtype: tuple
+        """
+        if VARIANTS not in self:
+            raise ValueError
+
+        return tuple(sorted(
+            variant.as_tuple()
+            for variant in self[VARIANTS])
+        )
+
+    def as_tuple(self):
+        t = super(CentralDogma, self).as_tuple()
+
+        if VARIANTS in self:
+            return t + self._variants_as_tuple()
+
+        return t
+
     def __str__(self):
         variants = self.get(VARIANTS)
 
@@ -166,6 +187,7 @@ class CentralDogma(BaseAbundance):
         )
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Variant(dict):
     """The superclass for variant dictionaries"""
 
@@ -174,6 +196,14 @@ class Variant(dict):
         :param str kind: The kind of variant
         """
         super(Variant, self).__init__({KIND: kind})
+
+    @abc.abstractmethod
+    def as_tuple(self):
+        """Returns this node as a PyBEL node tuple
+
+        :rtype: tuple
+        """
+        raise NotImplementedError
 
 
 class pmod(Variant):
@@ -216,6 +246,11 @@ class pmod(Variant):
         if position:
             self[PMOD_POSITION] = position
 
+    def as_tuple(self):
+        identifier = self[IDENTIFIER][NAMESPACE], self[IDENTIFIER][NAME]
+        params = tuple(self[key] for key in PMOD_ORDER[2:] if key in self)
+        return (PMOD,) + (identifier,) + params
+
     def __str__(self):
         return 'pmod({}{})'.format(
             str(self[IDENTIFIER]),
@@ -251,6 +286,11 @@ class gmod(Variant):
             identifier=identifier
         )
 
+    def as_tuple(self):
+        identifier = self[IDENTIFIER][NAMESPACE], self[IDENTIFIER][NAME]
+        params = tuple(self[key] for key in GMOD_ORDER[2:] if key in self)
+        return (GMOD,) + (identifier,) + params
+
     def __str__(self):
         return 'gmod({})'.format(str(self[IDENTIFIER]))
 
@@ -269,6 +309,9 @@ class hgvs(Variant):
         super(hgvs, self).__init__(HGVS)
 
         self[IDENTIFIER] = variant
+
+    def as_tuple(self):
+        return self[KIND], self[IDENTIFIER]
 
     def __str__(self):
         return 'var({})'.format(self[IDENTIFIER])
@@ -316,6 +359,17 @@ class fragment(Variant):
 
         if description:
             self[FRAGMENT_DESCRIPTION] = description
+
+    def as_tuple(self):
+        if FRAGMENT_MISSING in self:
+            result = FRAGMENT, '?'
+        else:
+            result = FRAGMENT, (self[FRAGMENT_START], self[FRAGMENT_STOP])
+
+        if FRAGMENT_DESCRIPTION in self:
+            return result + (self[FRAGMENT_DESCRIPTION],)
+
+        return result
 
     def __str__(self):
         if FRAGMENT_MISSING in self:
