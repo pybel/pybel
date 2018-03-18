@@ -19,6 +19,7 @@ __all__ = [
     'composite_abundance',
     'bioprocess',
     'pathology',
+    'named_complex_abundance',
     'reaction',
     'pmod',
     'gmod',
@@ -137,6 +138,27 @@ class pathology(BaseAbundance):
         >>> pathology(namespace='DO', name='Alzheimer Disease')
         """
         super(pathology, self).__init__(PATHOLOGY, namespace=namespace, name=name, identifier=identifier)
+
+
+class named_complex_abundance(BaseAbundance):
+    """Builds a named complex abundance node data dictionary"""
+
+    def __init__(self, namespace=None, name=None, identifier=None):
+        """
+        :param str namespace: The name of the database used to identify this entity
+        :param str name: The database's preferred name or label for this entity
+        :param str identifier: The database's identifier for this entity
+
+        Example:
+
+        >>> named_complex_abundance(namespace='SCOMP', name='Calcineurin Complex')
+        """
+        super(named_complex_abundance, self).__init__(
+            func=COMPLEX,
+            namespace=namespace,
+            name=name,
+            identifier=identifier
+        )
 
 
 class CentralDogma(BaseAbundance):
