@@ -201,6 +201,12 @@ def parse_datetime(s):
                 raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
+def _hash_tuple(t):
+    t_bytes = pickle.dumps(t)
+    t_hash = hashlib.sha512(t_bytes)
+    return t_hash.hexdigest()
+
+
 def hash_node(node_tuple):
     """Converts a PyBEL node tuple to a hash
 
@@ -208,7 +214,7 @@ def hash_node(node_tuple):
     :return: A hashed version of the node tuple using :func:`hashlib.sha512` hash of the binary pickle dump
     :rtype: str
     """
-    return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
+    return _hash_tuple(node_tuple)
 
 
 def _extract_pybel_data(data):
@@ -246,8 +252,7 @@ def hash_edge(u, v, data):
     :rtype: str
     """
     edge_tuple = _edge_to_tuple(u, v, data)
-    edge_tuple_bytes = pickle.dumps(edge_tuple)
-    return hashlib.sha512(edge_tuple_bytes).hexdigest()
+    return _hash_tuple(edge_tuple)
 
 
 def subdict_matches(target, query, partial_match=True):

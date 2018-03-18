@@ -397,7 +397,7 @@ class gene(CentralDogma):
         :param str identifier: The database's identifier for this entity
         :param list[Variant] variants: A list of variants
         """
-        super(gene, self).__init__(GENE, namespace, name=name,  identifier=identifier, variants=variants)
+        super(gene, self).__init__(GENE, namespace, name=name, identifier=identifier, variants=variants)
 
 
 class rna(CentralDogma):
@@ -552,7 +552,7 @@ class ListAbundance(BaseEntity):
 
 
 class complex_abundance(ListAbundance):
-    """Builds a complex abundance node data dictionary with the optional ability to specificy a name"""
+    """Builds a complex abundance node data dictionary with the optional ability to specify a name"""
 
     def __init__(self, members, namespace=None, name=None, identifier=None):
         """
