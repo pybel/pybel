@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+Unreleased
+----------
+Changed
+~~~~~~~
+- Made parsing of fragments permissive to quoting (https://github.com/pybel/pybel/issues/#282)
+
 `0.11.1 <https://github.com/pybel/pybel/compare/v0.11.0...0.11.1>`_ - 2018-02-19
 --------------------------------------------------------------------------------
 Added
