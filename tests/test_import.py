@@ -58,9 +58,9 @@ class TestExampleInterchange(unittest.TestCase):
 
         :type graph: pybel.BELGraph
         """
-        self.assertEqual(set(sialic_acid_graph), set(graph))
+        self.assertEqual(set(sialic_acid_graph), set(graph), msg='nodes are not equal')
 
-        self.assertEqual(set(sialic_acid_graph.edges_iter()), set(graph.edges_iter()))
+        self.assertEqual(set(sialic_acid_graph.edges()), set(graph.edges()), msg='edges are not equal')
 
     def test_example_bytes(self):
         graph_bytes = to_bytes(sialic_acid_graph)
@@ -72,11 +72,6 @@ class TestExampleInterchange(unittest.TestCase):
         to_pickle(sialic_acid_graph, bio)
         bio.seek(0)
         graph = from_pickle(bio)
-        self.help_test_equal(graph)
-
-    def test_thorough_json(self):
-        graph_json_dict = to_json(sialic_acid_graph)
-        graph = from_json(graph_json_dict)
         self.help_test_equal(graph)
 
     def test_thorough_jsons(self):
@@ -178,13 +173,13 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         os.remove(path)
 
     def test_thorough_sif(self):
-        handle, path = tempfile.mkstemp()
+        handle, sif_path = tempfile.mkstemp()
 
-        with open(path, 'w') as f:
+        with open(sif_path, 'w') as f:
             to_sif(self.thorough_graph, f)
 
         os.close(handle)
-        os.remove(path)
+        os.remove(sif_path)
 
     def test_thorough_gsea(self):
         handle, path = tempfile.mkstemp()
@@ -246,13 +241,13 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.bel_slushy_reconstituted(graph)
 
     def test_slushy_graphml(self):
-        handle, path = tempfile.mkstemp()
+        handle, graphml_path = tempfile.mkstemp()
 
-        with open(path, 'wb') as f:
-            to_graphml(self.slushy_graph, f)
+        with open(graphml_path, 'wb') as graphml_file:
+            to_graphml(self.slushy_graph, graphml_file)
 
         os.close(handle)
-        os.remove(path)
+        os.remove(graphml_path)
 
     def test_slushy_cx(self):
         reconstituted = from_cx(to_cx(self.slushy_graph))

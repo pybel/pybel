@@ -18,9 +18,8 @@ def iter_children(graph, node):
     :rtype: iter[tuple]
     """
     for u, _, d in graph.in_edges(node, data=True):
-        if d[RELATION] != IS_A:
-            continue
-        yield u
+        if d[RELATION] == IS_A:
+            yield u
 
 
 def transfer_causal_edges(graph, source, target):

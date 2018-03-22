@@ -3,7 +3,6 @@
 import time
 import unittest
 
-import networkx as nx
 from six import string_types
 
 import pybel.utils
@@ -154,24 +153,6 @@ class TestUtils(unittest.TestCase):
             'C_E': 'e'
         }
         self.assertEqual(expected, pybel.utils.flatten_dict(d))
-
-    def test_flatten_edges(self):
-        g = nx.MultiDiGraph()
-        g.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}})
-
-        result = pybel.utils.flatten_graph_data(g)
-
-        expected = nx.MultiDiGraph()
-        expected.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B_C': 'c', 'B_D': 'd'})
-
-        self.assertEqual(set(result.nodes()), set(expected.nodes()))
-
-        res_edges = result.edges(keys=True)
-        exp_edges = expected.edges(keys=True)
-        self.assertEqual(set(res_edges), set(exp_edges))
-
-        for u, v, k in expected.edges(keys=True):
-            self.assertEqual(expected[u][v][k], result[u][v][k])
 
 
 class TestFlattenCitation(unittest.TestCase):

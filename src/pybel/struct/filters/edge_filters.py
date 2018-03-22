@@ -29,8 +29,7 @@ def invert_edge_filter(edge_predicate):
     """Builds a filter that is the inverse of the given filter
 
     :param edge_predicate: An edge filter function (graph, node, node, key, data) -> bool
-    :type edge_predicate: types.FunctionType
-    :return: An edge filter function
+    :type edge_predicate: (pybel.BELGraph, tuple, tuple, int) -> bool
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
@@ -43,7 +42,7 @@ def invert_edge_filter(edge_predicate):
 def and_edge_predicates(edge_predicates=None):
     """Concatenates multiple edge predicates to a new predicate that requires all predicates to be met.
 
-    :param edge_predicates: a list of predicates (graph, node, node, key, data) -> bool
+    :param edge_predicates: a list of predicates
     :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
     :return: A combine filter
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
@@ -93,8 +92,8 @@ def filter_edges(graph, edge_predicates=None):
 
     # If no predicates are given, return the standard edge iterator
     if not edge_predicates:
-        for u, v, k in graph.edges(keys=True):
-            yield u, v, k
+        for e in graph.edges(keys=True):
+            yield e
     else:
         compound_edge_predicate = and_edge_predicates(edge_predicates=edge_predicates)
         for u, v, k in graph.edges(keys=True):

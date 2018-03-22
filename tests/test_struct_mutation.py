@@ -19,7 +19,7 @@ class TestMutations(unittest.TestCase):
         y = protein(namespace='HGNC', name='X')
 
         graph = BELGraph()
-        graph.add_qualified_edge(
+        key = graph.add_qualified_edge(
             x,
             y,
             relation=INCREASES,
@@ -28,13 +28,12 @@ class TestMutations(unittest.TestCase):
             annotations={
                 'A': {'B': True}
             },
-            key=1
         )
 
-        self.assertIn(ANNOTATIONS, graph.edge[x.as_tuple()][y.as_tuple()][1])
+        self.assertIn(ANNOTATIONS, graph[x.as_tuple()][y.as_tuple()][key])
 
         strip_annotations(graph)
-        self.assertNotIn(ANNOTATIONS, graph.edge[x.as_tuple()][y.as_tuple()][1])
+        self.assertNotIn(ANNOTATIONS, graph[x.as_tuple()][y.as_tuple()][key])
 
 
 class TestTransfer(unittest.TestCase):
@@ -45,49 +44,54 @@ class TestTransfer(unittest.TestCase):
         self.assertIn(mevinolinic_acid.as_tuple(), children, msg='direct child not found')
 
     def test_infer(self):
+        self.assertIsNotNone(statin_graph)
+        self.assertIsInstance(statin_graph, BELGraph)
+
         graph = statin_graph.copy()
+        self.assertIsInstance(graph, BELGraph)
+
         self.assertEqual(9, graph.number_of_nodes())
         self.assertEqual(8, graph.number_of_edges())
 
-        self.assertNotIn(ec_11134.as_tuple(), graph.edge[fluvastatin.as_tuple()])
-        self.assertNotIn(ec_11188.as_tuple(), graph.edge[fluvastatin.as_tuple()])
-        self.assertNotIn(ec_11134.as_tuple(), graph.edge[avorastatin.as_tuple()])
-        self.assertNotIn(ec_11188.as_tuple(), graph.edge[avorastatin.as_tuple()])
-        self.assertNotIn(ec_11134.as_tuple(), graph.edge[synthetic_statin.as_tuple()])
-        self.assertNotIn(ec_11188.as_tuple(), graph.edge[synthetic_statin.as_tuple()])
-        self.assertNotIn(ec_11134.as_tuple(), graph.edge[statin.as_tuple()])
-        self.assertNotIn(ec_11188.as_tuple(), graph.edge[statin.as_tuple()])
-        self.assertNotIn(ec_11134.as_tuple(), graph.edge[mevinolinic_acid.as_tuple()])
-        self.assertNotIn(ec_11188.as_tuple(), graph.edge[mevinolinic_acid.as_tuple()])
-        self.assertIn(ec_11134.as_tuple(), graph.edge[hmgcr_inhibitor.as_tuple()])
-        self.assertIn(ec_11188.as_tuple(), graph.edge[hmgcr_inhibitor.as_tuple()])
+        self.assertNotIn(ec_11134.as_tuple(), graph[fluvastatin.as_tuple()])
+        self.assertNotIn(ec_11188.as_tuple(), graph[fluvastatin.as_tuple()])
+        self.assertNotIn(ec_11134.as_tuple(), graph[avorastatin.as_tuple()])
+        self.assertNotIn(ec_11188.as_tuple(), graph[avorastatin.as_tuple()])
+        self.assertNotIn(ec_11134.as_tuple(), graph[synthetic_statin.as_tuple()])
+        self.assertNotIn(ec_11188.as_tuple(), graph[synthetic_statin.as_tuple()])
+        self.assertNotIn(ec_11134.as_tuple(), graph[statin.as_tuple()])
+        self.assertNotIn(ec_11188.as_tuple(), graph[statin.as_tuple()])
+        self.assertNotIn(ec_11134.as_tuple(), graph[mevinolinic_acid.as_tuple()])
+        self.assertNotIn(ec_11188.as_tuple(), graph[mevinolinic_acid.as_tuple()])
+        self.assertIn(ec_11134.as_tuple(), graph[hmgcr_inhibitor.as_tuple()])
+        self.assertIn(ec_11188.as_tuple(), graph[hmgcr_inhibitor.as_tuple()])
 
         infer_child_relations(graph, hmgcr_inhibitor)
 
-        self.assertIn(ec_11134.as_tuple(), graph.edge[fluvastatin.as_tuple()])
-        self.assertIn(ec_11188.as_tuple(), graph.edge[fluvastatin.as_tuple()])
-        self.assertIn(ec_11134.as_tuple(), graph.edge[avorastatin.as_tuple()])
-        self.assertIn(ec_11188.as_tuple(), graph.edge[avorastatin.as_tuple()])
-        self.assertIn(ec_11134.as_tuple(), graph.edge[synthetic_statin.as_tuple()])
-        self.assertIn(ec_11188.as_tuple(), graph.edge[synthetic_statin.as_tuple()])
-        self.assertIn(ec_11134.as_tuple(), graph.edge[statin.as_tuple()])
-        self.assertIn(ec_11188.as_tuple(), graph.edge[statin.as_tuple()])
-        self.assertIn(ec_11134.as_tuple(), graph.edge[mevinolinic_acid.as_tuple()])
-        self.assertIn(ec_11188.as_tuple(), graph.edge[mevinolinic_acid.as_tuple()])
-        self.assertIn(ec_11134.as_tuple(), graph.edge[hmgcr_inhibitor.as_tuple()])
-        self.assertIn(ec_11188.as_tuple(), graph.edge[hmgcr_inhibitor.as_tuple()])
+        self.assertIn(ec_11134.as_tuple(), graph[fluvastatin.as_tuple()])
+        self.assertIn(ec_11188.as_tuple(), graph[fluvastatin.as_tuple()])
+        self.assertIn(ec_11134.as_tuple(), graph[avorastatin.as_tuple()])
+        self.assertIn(ec_11188.as_tuple(), graph[avorastatin.as_tuple()])
+        self.assertIn(ec_11134.as_tuple(), graph[synthetic_statin.as_tuple()])
+        self.assertIn(ec_11188.as_tuple(), graph[synthetic_statin.as_tuple()])
+        self.assertIn(ec_11134.as_tuple(), graph[statin.as_tuple()])
+        self.assertIn(ec_11188.as_tuple(), graph[statin.as_tuple()])
+        self.assertIn(ec_11134.as_tuple(), graph[mevinolinic_acid.as_tuple()])
+        self.assertIn(ec_11188.as_tuple(), graph[mevinolinic_acid.as_tuple()])
+        self.assertIn(ec_11134.as_tuple(), graph[hmgcr_inhibitor.as_tuple()])
+        self.assertIn(ec_11188.as_tuple(), graph[hmgcr_inhibitor.as_tuple()])
 
         self.assertEqual(9, graph.number_of_nodes())
         self.assertEqual(18, graph.number_of_edges())
 
         infer_child_relations(graph, ec_11134)
 
-        self.assertIn(hmgcr.as_tuple(), graph.edge[fluvastatin.as_tuple()])
-        self.assertIn(hmgcr.as_tuple(), graph.edge[avorastatin.as_tuple()])
-        self.assertIn(hmgcr.as_tuple(), graph.edge[synthetic_statin.as_tuple()])
-        self.assertIn(hmgcr.as_tuple(), graph.edge[statin.as_tuple()])
-        self.assertIn(hmgcr.as_tuple(), graph.edge[mevinolinic_acid.as_tuple()])
-        self.assertIn(hmgcr.as_tuple(), graph.edge[hmgcr_inhibitor.as_tuple()])
+        self.assertIn(hmgcr.as_tuple(), graph[fluvastatin.as_tuple()])
+        self.assertIn(hmgcr.as_tuple(), graph[avorastatin.as_tuple()])
+        self.assertIn(hmgcr.as_tuple(), graph[synthetic_statin.as_tuple()])
+        self.assertIn(hmgcr.as_tuple(), graph[statin.as_tuple()])
+        self.assertIn(hmgcr.as_tuple(), graph[mevinolinic_acid.as_tuple()])
+        self.assertIn(hmgcr.as_tuple(), graph[hmgcr_inhibitor.as_tuple()])
 
         self.assertEqual(9, graph.number_of_nodes())
         self.assertEqual(24, graph.number_of_edges())

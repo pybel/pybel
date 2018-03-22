@@ -12,6 +12,6 @@ def strip_annotations(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for u, v, k in graph.edges_iter(keys=True):
-        if ANNOTATIONS in graph.edge[u][v][k]:
-            del graph.edge[u][v][k][ANNOTATIONS]
+    for u, v, k in graph.edges(keys=True):
+        if ANNOTATIONS in graph.edges[u, v, k]:
+            del graph.edges[u, v, k][ANNOTATIONS]

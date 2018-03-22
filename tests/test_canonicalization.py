@@ -3,10 +3,10 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.canonicalize import canonicalize_edge, fusion_range_to_bel, variant_to_bel
+from pybel.canonicalize import fusion_range_to_bel, variant_to_bel
 from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, INCREASES, KIND,
-    MODIFIER, PATHOLOGY, PROTEIN, REACTION, RNA,
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, INCREASES, KIND, PATHOLOGY, PMOD,
+    PROTEIN, REACTION, RNA,
 )
 from pybel.dsl import *
 from pybel.dsl.edges import extracellular, intracellular
@@ -80,8 +80,23 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('a(CHEBI:"test name")', str(long))
         self.assertEqual((ABUNDANCE, 'CHEBI', 'test name'), long.as_tuple())
 
+    def test_gene_reference(self):
+        node = gene(namespace='EGID', name='780')
+        self.assertEqual('g(EGID:780)', str(node))
+        self.assertEqual((GENE, 'EGID', '780'), node.as_tuple())
+
     def test_protein_reference(self):
         self.assertEqual('p(HGNC:AKT1)', str(protein(namespace='HGNC', name='AKT1')))
+
+    def test_protein_pmod(self):
+        node = protein(name='PLCG1', namespace='HGNC', variants=[pmod(name='Ph', code='Tyr')])
+        self.assertEqual('p(HGNC:PLCG1, pmod(Ph, Tyr))', str(node))
+        self.assertEqual((PROTEIN, 'HGNC', 'PLCG1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Tyr')), node.as_tuple())
+
+    def test_protein_fragment(self):
+        node = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
+        self.assertEqual('p(HGNC:APP, frag(672_713))', str(node))
+        self.assertEqual((PROTEIN, 'HGNC', 'APP', ((FRAGMENT, (672, 713)))), node.as_tuple())
 
     def test_mirna_reference(self):
         self.assertEqual('m(HGNC:MIR1)', str(mirna(namespace='HGNC', name='MIR1')))
@@ -127,6 +142,11 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('bp(GO:apoptosis)', str(node))
         self.assertEqual((BIOPROCESS, 'GO', 'apoptosis'), node.as_tuple())
 
+    def test_named_complex_abundance(self):
+        node = named_complex_abundance(namespace='SCOMP', name='Calcineurin Complex')
+        self.assertEqual('complex(SCOMP:"Calcineurin Complex")', str(node))
+        self.assertEqual((COMPLEX, 'SCOMP', 'Calcineurin Complex'), node.as_tuple())
+
     def test_complex_abundance(self):
         node = complex_abundance(members=[protein(namespace='HGNC', name='FOS'), protein(namespace='HGNC', name='JUN')])
         t = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
@@ -160,92 +180,88 @@ class TestCanonicalizeEdge(unittest.TestCase):
         self.g = BELGraph()
         self.u = self.g.add_node_from_data(protein(name='u', namespace='TEST'))
         self.v = self.g.add_node_from_data(protein(name='v', namespace='TEST'))
-        self.key = 0
+        self.evidence = n()
+        self.citation = n()
 
-    def get_data(self, k):
-        return self.g.edge[self.u][self.v][k]
-
-    def add_edge(self, subject_modifier=None, object_modifier=None, annotations=None):
-        self.key += 1
-
-        self.g.add_qualified_edge(
+    def add_edge_same_provenance(self, subject_modifier=None, object_modifier=None, annotations=None):
+        return self.g.add_qualified_edge(
             self.u,
             self.v,
             relation=INCREASES,
-            evidence=n(),
-            citation=n(),
+            evidence=self.evidence,
+            citation=self.citation,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
             annotations=annotations,
-            key=self.key
         )
-
-        return canonicalize_edge(self.get_data(self.key))
-
-    def test_failure(self):
-        with self.assertRaises(ValueError):
-            self.add_edge(subject_modifier={MODIFIER: 'nope'})
 
     def test_canonicalize_edge_info(self):
-        c1 = self.add_edge(
+        c1 = self.add_edge_same_provenance(
             annotations={
                 'Species': '9606'
             }
         )
 
-        c2 = self.add_edge(
+        c2 = self.add_edge_same_provenance(
             annotations={
                 'Species': '9606'
             }
         )
 
-        c3 = self.add_edge(
+        c3 = self.add_edge_same_provenance(
             subject_modifier=activity('tport'),
         )
 
-        c4 = self.add_edge(
+        c4 = self.add_edge_same_provenance(
             subject_modifier=activity('tport', namespace=BEL_DEFAULT_NAMESPACE),
         )
 
+        c5 = self.add_edge_same_provenance(
+            annotations={
+                'Species': {'9606': True}
+            }
+        )
+
         self.assertEqual(c1, c2)
+        self.assertEqual(c2, c5)
         self.assertNotEqual(c1, c3)
         self.assertEqual(c3, c4)
 
     def test_subject_degradation_location(self):
         self.assertEqual(
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation()
             ),
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation()
             )
         )
 
         self.assertEqual(
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
             ),
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
             )
         )
 
         self.assertNotEqual(
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation()
             ),
-            self.add_edge(
+            self.add_edge_same_provenance(
                 subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
             )
         )
 
     def test_translocation(self):
         self.assertEqual(
-            self.add_edge(subject_modifier=secretion()),
-            self.add_edge(subject_modifier=secretion()),
+            self.add_edge_same_provenance(subject_modifier=secretion()),
+            self.add_edge_same_provenance(subject_modifier=secretion()),
         )
 
         self.assertEqual(
-            self.add_edge(subject_modifier=secretion()),
-            self.add_edge(subject_modifier=translocation(from_loc=intracellular, to_loc=extracellular)),
+            self.add_edge_same_provenance(subject_modifier=secretion()),
+            self.add_edge_same_provenance(subject_modifier=translocation(from_loc=intracellular, to_loc=extracellular)),
         )

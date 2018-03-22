@@ -81,7 +81,7 @@ def calculate_canonical_cx_identifier(graph, node):
     :return: Appropriate identifier for the node for CX indexing
     :rtype: str
     """
-    data = graph.node[node]
+    data = graph.nodes[node]
 
     if data[FUNCTION] == COMPLEX and NAMESPACE in data:
         return '{}:{}'.format(data[NAMESPACE], data[NAME])
@@ -127,7 +127,7 @@ def to_cx(graph):
     node_attributes_entry = []
 
     for node, node_index in node_mapping.items():
-        data = graph.node[node]
+        data = graph.nodes[node]
         node_index_data[node_index] = data
 
         nodes_entry.append({
@@ -176,7 +176,7 @@ def to_cx(graph):
     edges_entry = []
     edge_attributes_entry = []
 
-    for edge_index, (source, target, d) in enumerate(graph.edges_iter(data=True)):
+    for edge_index, (source, target, d) in enumerate(graph.edges(data=True)):
         uid = node_mapping[source]
         vid = node_mapping[target]
 
@@ -259,10 +259,10 @@ def to_cx(graph):
     annotation_list_keys_lookup = {keyword: i for i, keyword in enumerate(sorted(graph.annotation_list))}
     annotation_lists_entry = []
     for keyword, values in graph.annotation_list.items():
-        for values in values:
+        for value in values:
             annotation_lists_entry.append({
                 'k': annotation_list_keys_lookup[keyword],
-                'v': values
+                'v': value
             })
 
     context_entry_dict = {}

@@ -198,12 +198,12 @@ def _node_has_modifier(graph, node, modifier):
     """
     modifier_in_subject = any(
         part_has_modifier(d, SUBJECT, modifier)
-        for _, _, d in graph.out_edges_iter(node, data=True)
+        for _, _, d in graph.out_edges(node, data=True)
     )
 
     modifier_in_object = any(
         part_has_modifier(d, OBJECT, modifier)
-        for _, _, d in graph.in_edges_iter(node, data=True)
+        for _, _, d in graph.in_edges(node, data=True)
     )
 
     return modifier_in_subject or modifier_in_object
@@ -251,7 +251,7 @@ def has_causal_in_edges(graph, node):
     """
     return any(
         data[RELATION] in CAUSAL_RELATIONS
-        for _, _, data in graph.in_edges_iter(node, data=True)
+        for _, _, data in graph.in_edges(node, data=True)
     )
 
 
@@ -264,7 +264,7 @@ def has_causal_out_edges(graph, node):
     """
     return any(
         data[RELATION] in CAUSAL_RELATIONS
-        for _, _, data in graph.out_edges_iter(node, data=True)
+        for _, _, data in graph.out_edges(node, data=True)
     )
 
 

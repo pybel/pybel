@@ -7,12 +7,11 @@ import pickle
 from collections import Iterable, MutableMapping, defaultdict
 from datetime import datetime
 
-import networkx as nx
 from six import string_types
 
 from .constants import (
-    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
-    PYBEL_EDGE_DATA_KEYS, VERSION,RELATION
+    CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
+    PYBEL_EDGE_DATA_KEYS, VERSION,
 )
 
 log = logging.getLogger(__name__)
@@ -65,24 +64,6 @@ def flatten_dict(d, parent_key='', sep='_'):
         else:
             items.append((new_key, v))
     return dict(items)
-
-
-def flatten_graph_data(graph):
-    """Returns a new graph with flattened edge data dictionaries.
-
-    :param nx.MultiDiGraph graph: A graph with nested edge data dictionaries
-    :return: A graph with flattened edge data dictionaries
-    :rtype: nx.MultiDiGraph
-    """
-    g = nx.MultiDiGraph(**graph.graph)
-
-    for node, data in graph.nodes(data=True):
-        g.add_node(node, data)
-
-    for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
-
-    return g
 
 
 def list2tuple(l):
@@ -220,6 +201,12 @@ def parse_datetime(s):
                 raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
+def _hash_tuple(t):
+    t_bytes = pickle.dumps(t)
+    t_hash = hashlib.sha512(t_bytes)
+    return t_hash.hexdigest()
+
+
 def hash_node(node_tuple):
     """Converts a PyBEL node tuple to a hash
 
@@ -227,7 +214,7 @@ def hash_node(node_tuple):
     :return: A hashed version of the node tuple using :func:`hashlib.sha512` hash of the binary pickle dump
     :rtype: str
     """
-    return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
+    return _hash_tuple(node_tuple)
 
 
 def _extract_pybel_data(data):
@@ -265,8 +252,7 @@ def hash_edge(u, v, data):
     :rtype: str
     """
     edge_tuple = _edge_to_tuple(u, v, data)
-    edge_tuple_bytes = pickle.dumps(edge_tuple)
-    return hashlib.sha512(edge_tuple_bytes).hexdigest()
+    return _hash_tuple(edge_tuple)
 
 
 def subdict_matches(target, query, partial_match=True):

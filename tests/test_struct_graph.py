@@ -15,7 +15,8 @@ from tests.utils import n
 
 
 class TestStruct(unittest.TestCase):
-    def test_example_metadata(self):
+    def test_example_sialic_metadata(self):
+        """Tests the existence of metadata in the Sialic Acid example"""
         self.assertIsNotNone(sialic_acid_graph.name)
         self.assertIsNotNone(sialic_acid_graph.version)
         self.assertIsNotNone(sialic_acid_graph.description)
@@ -23,18 +24,10 @@ class TestStruct(unittest.TestCase):
         self.assertIsNone(sialic_acid_graph.copyright)
         self.assertIsNone(sialic_acid_graph.license)
 
-    def test_add_simple(self):
-        g = BELGraph()
 
-        namespace, name = n(), n()
-
-        g.add_node_from_data(protein(namespace=namespace, name=name))
-        self.assertEqual(1, g.number_of_nodes())
-
-        g.add_node_from_data(protein(namespace=namespace, name=name))
-        self.assertEqual(1, g.number_of_nodes())
 
     def test_str_kwargs(self):
+        """Tests getting graph metadata after constructing from keyword arguments"""
         (
             name,
             version,
@@ -103,6 +96,7 @@ class TestStruct(unittest.TestCase):
         self.assertEqual('{name} v{version}'.format(name=name, version=version), str(g))
 
     def test_citation_type_error(self):
+        """Tests that a type error is thrown when using the wrong type for a qualified edge"""
         g = BELGraph()
 
         with self.assertRaises(TypeError):
@@ -130,7 +124,7 @@ class TestDSL(unittest.TestCase):
                 NAME: 'yfg',
                 IDENTIFIER: '1'
             },
-            g.node[p_tuple]
+            g.nodes[p_tuple]
         )
 
     def test_add_identified_node(self):
@@ -149,7 +143,7 @@ class TestDSL(unittest.TestCase):
                 NAMESPACE: 'test',
                 IDENTIFIER: '1'
             },
-            g.node[p_tuple]
+            g.nodes[p_tuple]
         )
 
     def test_missing_information(self):
@@ -170,11 +164,10 @@ class TestGetGraphProperties(unittest.TestCase):
     def test_get_qualified_edge(self):
         test_source = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG'))
         test_target = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG2'))
-        test_key = n()
         test_evidence = n()
         test_pmid = n()
 
-        self.graph.add_qualified_edge(
+        test_key = self.graph.add_qualified_edge(
             test_source,
             test_target,
             relation=INCREASES,
@@ -184,9 +177,9 @@ class TestGetGraphProperties(unittest.TestCase):
                 'Species': '9606',
                 'Confidence': 'Very High'
             },
-            key=test_key
         )
 
+        self.assertTrue(self.graph.has_edge_citation(test_source, test_target, test_key))
         citation = self.graph.get_edge_citation(test_source, test_target, test_key)
 
         self.assertIsNotNone(citation)
@@ -196,6 +189,7 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertIn(CITATION_REFERENCE, citation)
         self.assertEqual(test_pmid, citation[CITATION_REFERENCE])
 
+        self.assertTrue(self.graph.has_edge_evidence(test_source, test_target, test_key))
         evidence = self.graph.get_edge_evidence(test_source, test_target, test_key)
 
         self.assertIsNotNone(evidence)
@@ -216,19 +210,22 @@ class TestGetGraphProperties(unittest.TestCase):
         test_source = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG'))
         test_target = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG2'))
 
-        self.graph.add_unqualified_edge(
+        test_key = self.graph.add_unqualified_edge(
             test_source,
             test_target,
             relation=HAS_VARIANT,
         )
 
-        citation = self.graph.get_edge_citation(test_source, test_target, unqualified_edge_code[HAS_VARIANT])
+        self.assertFalse(self.graph.has_edge_citation(test_source, test_target, test_key))
+        citation = self.graph.get_edge_citation(test_source, test_target, test_key)
         self.assertIsNone(citation)
 
-        evidence = self.graph.get_edge_evidence(test_source, test_target, unqualified_edge_code[HAS_VARIANT])
+        self.assertFalse(self.graph.has_edge_evidence(test_source, test_target, test_key))
+        evidence = self.graph.get_edge_evidence(test_source, test_target,test_key)
         self.assertIsNone(evidence)
 
-        annotations = self.graph.get_edge_annotations(test_source, test_target, unqualified_edge_code[HAS_VARIANT])
+        self.assertFalse(self.graph.has_edge_annotations(test_source, test_target, test_key))
+        annotations = self.graph.get_edge_annotations(test_source, test_target, test_key)
         self.assertIsNone(annotations)
 
     def test_get_node_name(self):

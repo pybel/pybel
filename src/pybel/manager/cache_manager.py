@@ -414,7 +414,7 @@ class OwlNamespaceManager(NamespaceManager):
         }
         namespace.entries = list(name_to_entry.values())
 
-        for parent, child in graph.edges_iter():
+        for parent, child in graph.edges():
             parent_entry = name_to_entry[parent]
             child_entry = name_to_entry[child]
             parent_entry.children.append(child_entry)
@@ -668,7 +668,7 @@ class OwlAnnotationManager(AnnotationManager):
         }
         annotation.entries = list(entries.values())
 
-        for u, v in graph.edges_iter():
+        for u, v in graph.edges():
             entries[u].children.append(entries[v])
 
         self.session.add(annotation)
@@ -1090,7 +1090,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
-        for u, v, data in tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges'):
+        for u, v, data in tqdm(graph.edges(data=True), total=graph.number_of_edges(), desc='Edges'):
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue
