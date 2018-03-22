@@ -782,7 +782,8 @@ class Edge(Base):
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship("Evidence", backref=backref('edges', lazy='dynamic'))
 
-    annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic")  # , backref='edges'
+    annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic",
+                               backref=backref('edges', lazy='dynamic'))
     properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
 
     sha512 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
