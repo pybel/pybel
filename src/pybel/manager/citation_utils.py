@@ -16,6 +16,7 @@ from ..struct.summary.provenance import get_pubmed_identifiers
 
 __all__ = (
     'get_citations_by_pmids',
+    'enrich_pubmed_citations',
 )
 
 log = logging.getLogger(__name__)
@@ -100,16 +101,16 @@ def get_pubmed_citation_response(pubmed_identifiers):
 
 
 def enrich_citation_model(manager, citation, p):
-    """
+    """Enriches a citation model with the information from PubMed
 
     :param pybel.manager.Manager manager:
-    :param Citation citation:
-    :param dict p:
+    :param Citation citation: A citation model
+    :param dict p: The dictionary from PubMed E-Utils corresponding to d["result"][pmid]
     :rtype: bool
     """
     if 'error' in p:
         log.warning('Error downloading PubMed')
-        return
+        return False
 
     citation.name = p['fulljournalname']
     citation.title = p['title']
@@ -150,45 +151,46 @@ def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
     """
     group_size = group_size if group_size is not None else 200
     sleep_time = sleep_time if sleep_time is not None else 1
+    manager = Manager.ensure(manager)
 
     pmids = clean_pubmed_identifiers(pmids)
     log.info('Ensuring %d PubMed identifiers', len(pmids))
 
-    manager = Manager.ensure(manager)
-
     result = {}
-    unresolved_pmids = {}
+    unenriched_pmids = {}
 
     for pmid in pmids:
         citation = manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference=pmid)
 
         if not citation.date or not citation.name or not citation.authors:
-            unresolved_pmids[pmid] = citation
+            unenriched_pmids[pmid] = citation
             continue
 
         result[pmid] = citation.to_json()
 
     manager.session.commit()
 
-    log.debug('Found %d PubMed identifiers in database', len(pmids) - len(unresolved_pmids))
+    log.debug('Found %d PubMed identifiers in database', len(pmids) - len(unenriched_pmids))
 
-    if not unresolved_pmids:
+    if not unenriched_pmids:
         return result, set()
 
-    total_unresolved_count = len(unresolved_pmids)
-    log.info('Querying PubMed for %d identifiers', total_unresolved_count)
+    number_unenriched = len(unenriched_pmids)
+    log.info('Querying PubMed for %d identifiers', number_unenriched)
 
     errors = set()
     t = time.time()
 
-    for pmid_group_index, pmid_list in enumerate(grouper(group_size, unresolved_pmids), start=1):
+    for pmid_group_index, pmid_list in enumerate(grouper(group_size, unenriched_pmids), start=1):
         pmid_list = list(pmid_list)
         log.info('Getting group %d having %d PubMed identifiers', pmid_group_index, len(pmid_list))
-        response = get_pubmed_citation_response(pmid_list)
 
-        for pmid in response['result']['uids']:
+        response = get_pubmed_citation_response(pmid_list)
+        response_pmids = response['result']['uids']
+
+        for pmid in response_pmids:
             p = response['result'][pmid]
-            citation = unresolved_pmids[pmid]
+            citation = unenriched_pmids[pmid]
 
             successful_enrichment = enrich_citation_model(manager, citation, p)
 
@@ -205,7 +207,7 @@ def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
         # Don't want to hit that rate limit
         time.sleep(sleep_time)
 
-    log.info('retrieved %d PubMed identifiers in %.02f seconds', len(unresolved_pmids), time.time() - t)
+    log.info('retrieved %d PubMed identifiers in %.02f seconds', len(unenriched_pmids), time.time() - t)
 
     return result, errors
 
@@ -223,13 +225,8 @@ def enrich_pubmed_citations(manager, graph, group_size=None, sleep_time=None):
     :return: A set of PMIDs for which the eUtils service crashed
     :rtype: set[str]
     """
-    if 'PYBEL_ENRICHED_CITATIONS' in graph.graph:
-        log.warning('citations have already been enriched in %s', graph)
-        return set()
-
     pmids = get_pubmed_identifiers(graph)
-    pmid_data, errors = get_citations_by_pmids(manager=manager, pmids=pmids, group_size=group_size,
-                                               sleep_time=sleep_time)
+    pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)
 
     for u, v, k in filter_edges(graph, has_pubmed):
         pmid = graph.edge[u][v][k][CITATION][CITATION_REFERENCE].strip()
@@ -240,7 +237,5 @@ def enrich_pubmed_citations(manager, graph, group_size=None, sleep_time=None):
             continue
 
         graph.edge[u][v][k][CITATION].update(pmid_data[pmid])
-
-    graph.graph['PYBEL_ENRICHED_CITATIONS'] = True
 
     return errors
