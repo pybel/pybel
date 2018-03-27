@@ -14,10 +14,10 @@ from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import has_pubmed
 from ..struct.summary.provenance import get_pubmed_identifiers
 
-__all__ = (
+__all__ = [
     'get_citations_by_pmids',
     'enrich_pubmed_citations',
-)
+]
 
 log = logging.getLogger(__name__)
 
