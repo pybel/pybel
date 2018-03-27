@@ -11,6 +11,7 @@ downloading and parsing upon each compilation.
 from . import base_manager, cache_manager, citation_utils, database_io, make_json_serializable, models, query_manager
 from .base_manager import *
 from .cache_manager import *
+from .citation_utils import *
 from .database_io import *
 from .models import *
 from .query_manager import *
