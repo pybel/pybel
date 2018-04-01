@@ -187,17 +187,16 @@ class TestQuery(TemporaryCacheMixin):
         graph = BELGraph(name='test', version='0.0.0')
         graph.annotation_list['TEST'] = {'a', 'b', 'c'}
 
-        u = graph.add_node_from_data(fos_data)
-        v = graph.add_node_from_data(jun_data)
-
-        graph.add_edge(u, v, attr_dict={
-            RELATION: INCREASES,
-            EVIDENCE: test_evidence_text,
-            CITATION: test_citation_dict,
-            ANNOTATIONS: {
+        graph.add_qualified_edge(
+            fos_data,
+            jun_data,
+            relation=INCREASES,
+            evidence=test_evidence_text,
+            citation=test_citation_dict,
+            annotations={
                 'TEST': 'a'
             }
-        })
+        )
 
         make_dummy_namespaces(self.manager, graph, {'HGNC': ['FOS', 'JUN']})
 
