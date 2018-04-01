@@ -306,10 +306,14 @@ class TestQuery(TemporaryCacheMixin):
     def test_query_citation_by_type(self):
         rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED)
         self.assertEqual(1, len(rv))
+        self.assertTrue(rv[0].is_pubmed)
+        self.assertFalse(rv[0].is_enriched)
 
     def test_query_citaiton_by_reference(self):
         rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED, reference=test_citation_dict[CITATION_REFERENCE])
         self.assertEqual(1, len(rv))
+        self.assertTrue(rv[0].is_pubmed)
+        self.assertFalse(rv[0].is_enriched)
         self.assertEqual(test_citation_dict, rv[0].to_json())
 
     @unittest.skip

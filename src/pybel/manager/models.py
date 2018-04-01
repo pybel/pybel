@@ -669,6 +669,22 @@ class Citation(Base):
     def __str__(self):
         return '{}:{}'.format(self.type, self.reference)
 
+    @property
+    def is_pubmed(self):
+        """Returns if this is a PubMed citation
+
+        :rtype:
+        """
+        return CITATION_TYPE_PUBMED == self.type
+
+    @property
+    def is_enriched(self):
+        """Returns if this citation has been enriched for name, title, etc.
+
+        :rtype:
+        """
+        return self.title is not None and self.name is not None
+
     def to_json(self, include_id=False):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
