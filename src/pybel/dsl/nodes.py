@@ -45,18 +45,34 @@ class BaseEntity(dict):
 
     @abc.abstractmethod
     def as_tuple(self):
-        pass
+        """Returns this entity as a canonical tuple
+
+        :rtype: tuple
+        """
+
+    @abc.abstractmethod
+    def as_bel(self):
+        """Returns this entity as canonical BEL
+
+        :rtype: tuple
+        """
 
     def as_sha512(self):
-        """Returns this node as a hash
+        """Returns this entity as a hash
 
         :rtype: str
         """
         return hash_node(self.as_tuple())
 
     def __hash__(self):
-        """Use the tuple serialization of this node as the hash"""
+        """Use the tuple serialization of this node as the hash
+
+        :rtype: int
+        """
         return hash(self.as_tuple())
+
+    def __str__(self):
+        return self.as_bel()
 
 
 class BaseAbundance(BaseEntity):
@@ -75,16 +91,35 @@ class BaseAbundance(BaseEntity):
         super(BaseAbundance, self).__init__(func=func)
         self.update(entity(namespace=namespace, name=name, identifier=identifier))
 
-    def __str__(self):
-        return "{}({}:{})".format(
-            rev_abundance_labels[self[FUNCTION]],
-            self[NAMESPACE],
-            ensure_quotes(self[NAME] if NAME in self else self[IDENTIFIER])
-        )
+    @property
+    def function(self):
+        return self[FUNCTION]
+
+    @property
+    def name(self):
+        return self.get(NAME)
+
+    @property
+    def identifier(self):
+        return self.get(IDENTIFIER)
 
     def as_tuple(self):
-        """Returns this node as a PyBEL node tuple"""
+        """Returns this node as a PyBEL node tuple
+
+        :rtype: tuple
+        """
         return self[FUNCTION], self[NAMESPACE], self[NAME]
+
+    def as_bel(self):
+        """Returns this node as BEL
+
+        :rtype: str
+        """
+        return "{}({}:{})".format(
+            rev_abundance_labels[self.function],
+            self[NAMESPACE],
+            ensure_quotes(self.identifier if self.identifier else self.name)
+        )
 
 
 class abundance(BaseAbundance):
@@ -150,11 +185,11 @@ class CentralDogma(BaseAbundance):
         if variants:
             self[VARIANTS] = variants
 
-    def __str__(self):
+    def as_bel(self):
         variants = self.get(VARIANTS)
 
         if not variants:
-            return super(CentralDogma, self).__str__()
+            return super(CentralDogma, self).as_bel()
 
         variants_canon = sorted(map(str, variants))
 
@@ -166,6 +201,7 @@ class CentralDogma(BaseAbundance):
         )
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Variant(dict):
     """The superclass for variant dictionaries"""
 
@@ -174,6 +210,16 @@ class Variant(dict):
         :param str kind: The kind of variant
         """
         super(Variant, self).__init__({KIND: kind})
+
+    def __str__(self):
+        return self.as_bel()
+
+    @abc.abstractmethod
+    def as_bel(self):
+        """Returns this variant as BEL
+
+        :rtype: str
+        """
 
 
 class pmod(Variant):
@@ -216,7 +262,7 @@ class pmod(Variant):
         if position:
             self[PMOD_POSITION] = position
 
-    def __str__(self):
+    def as_bel(self):
         return 'pmod({}{})'.format(
             str(self[IDENTIFIER]),
             ''.join(', {}'.format(self[x]) for x in PMOD_ORDER[2:] if x in self)
@@ -251,7 +297,7 @@ class gmod(Variant):
             identifier=identifier
         )
 
-    def __str__(self):
+    def as_bel(self):
         return 'gmod({})'.format(str(self[IDENTIFIER]))
 
 
@@ -270,7 +316,7 @@ class hgvs(Variant):
 
         self[IDENTIFIER] = variant
 
-    def __str__(self):
+    def as_bel(self):
         return 'var({})'.format(self[IDENTIFIER])
 
 
@@ -317,7 +363,7 @@ class fragment(Variant):
         if description:
             self[FRAGMENT_DESCRIPTION] = description
 
-    def __str__(self):
+    def as_bel(self):
         if FRAGMENT_MISSING in self:
             res = '?'
         else:
@@ -339,7 +385,7 @@ class gene(CentralDogma):
         :param str identifier: The database's identifier for this entity
         :param list[Variant] variants: A list of variants
         """
-        super(gene, self).__init__(GENE, namespace, name=name,  identifier=identifier, variants=variants)
+        super(gene, self).__init__(GENE, namespace, name=name, identifier=identifier, variants=variants)
 
 
 class rna(CentralDogma):
@@ -463,7 +509,7 @@ class reaction(BaseEntity):
     def as_tuple(self):
         return self[FUNCTION], _entity_list_as_tuple(self[REACTANTS]), _entity_list_as_tuple(self[PRODUCTS])
 
-    def __str__(self):
+    def as_bel(self):
         return 'rxn(reactants({}), products({}))'.format(
             _entity_list_as_bel(self[REACTANTS]),
             _entity_list_as_bel(self[PRODUCTS])
@@ -483,14 +529,14 @@ class ListAbundance(BaseEntity):
             MEMBERS: members
         })
 
-    def __str__(self):
+    def as_tuple(self):
+        return (self[FUNCTION],) + _entity_list_as_tuple(self[MEMBERS])
+
+    def as_bel(self):
         return '{}({})'.format(
             rev_abundance_labels[self[FUNCTION]],
             _entity_list_as_bel(self[MEMBERS])
         )
-
-    def as_tuple(self):
-        return (self[FUNCTION],) + _entity_list_as_tuple(self[MEMBERS])
 
 
 class complex_abundance(ListAbundance):
@@ -561,13 +607,6 @@ class fusion_range(FusionRangeBase):
             FUSION_STOP: stop
         })
 
-    def __str__(self):
-        return '{reference}.{start}_{stop}'.format(
-            reference=self[FUSION_REFERENCE],
-            start=self[FUSION_START],
-            stop=self[FUSION_STOP]
-        )
-
     def as_tuple(self):
         """
 
@@ -578,6 +617,16 @@ class fusion_range(FusionRangeBase):
             self[FUSION_START],
             self[FUSION_STOP]
         )
+
+    def as_bel(self):
+        return '{reference}.{start}_{stop}'.format(
+            reference=self[FUSION_REFERENCE],
+            start=self[FUSION_START],
+            stop=self[FUSION_STOP]
+        )
+
+    def __str__(self):
+        return self.as_bel()
 
 
 class FusionBase(BaseEntity):
@@ -602,7 +651,7 @@ class FusionBase(BaseEntity):
             }
         })
 
-    def __str__(self):
+    def as_bel(self):
         return "{}(fus({}:{}, {}, {}:{}, {}))".format(
             rev_abundance_labels[self[FUNCTION]],
             self[FUSION][PARTNER_5P][NAMESPACE],

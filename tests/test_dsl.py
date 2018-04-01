@@ -7,6 +7,7 @@ import unittest
 from pybel.constants import ABUNDANCE, COMPLEX
 from pybel.dsl import abundance, complex_abundance, protein
 from pybel.utils import ensure_quotes, hash_node
+
 from tests.utils import n
 
 
@@ -14,19 +15,21 @@ class TestDSL(unittest.TestCase):
     def test_str_has_name(self):
         namespace, name = n(), n()
         node = abundance(namespace=namespace, name=name)
-        self.assertEqual('a({namespace}:{name})'.format(namespace=namespace, name=ensure_quotes(name)), str(node))
+        self.assertEqual('a({namespace}:{name})'.format(namespace=namespace, name=ensure_quotes(name)), node.as_bel())
 
     def test_str_has_identifier(self):
         namespace, identifier = n(), n()
         node = abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)), str(node))
+            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            node.as_bel())
 
     def test_str_has_both(self):
         namespace, identifier = n(), n()
         node = abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)), str(node))
+            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            node.as_bel())
 
     def test_as_tuple(self):
         namespace, name = n(), n()
