@@ -25,10 +25,13 @@ from .constants import PYBEL_CONFIG_PATH, PYBEL_CONNECTION, config, get_cache_co
 from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
 from .manager import Manager, defaults
 from .manager.database_io import from_database, to_database
-from .manager.models import Base, Edge
+from .manager.models import Base, Edge, Namespace
 from .utils import PYBEL_MYSQL_FMT_NOPASS, PYBEL_MYSQL_FMT_PASS
 
 log = logging.getLogger(__name__)
+
+def _page(it):
+    click.echo_via_pager('\n'.join(map(str, it)))
 
 
 @click.group(
@@ -307,23 +310,24 @@ def insert(manager, url):
 
 @namespace.command()
 @click.option('--url', help='Specific resource URL to list')
+@click.option('-i', '--namespace-id', help='Specific resource URL to list')
 @click.pass_obj
-def ls(manager, url):
+def ls(manager, url, namespace_id):
     """Lists cached namespaces"""
-    if not url:
-        for namespace, in manager.list_namespaces():
-            click.echo(namespace.url)
+    if url:
+        if url.endswith('.belns'):
+            terms = manager.ensure_namespace(url).to_values()
+        else:
+            terms = manager.get_namespace_owl_terms(url)
+        _page(terms)
+
+    elif namespace_id:
+        n = manager.session.query(Namespace).get(namespace_id)
+        _page(n.entries)
 
     else:
-        if url.endswith('.belns'):
-            res = manager.ensure_namespace(url).to_values()
-
-        else:
-            res = manager.get_namespace_owl_terms(url)
-
-        for l in res:
-            click.echo(l)
-
+        for n in manager.session.query(Namespace).order_by(Namespace.uploaded.desc()):
+            click.echo('\t'.join(map(str, (n.id, n.keyword, n.version, n.url))))
 
 @annotations.command()
 @click.option('--url', help='Specific resource URL to list')
