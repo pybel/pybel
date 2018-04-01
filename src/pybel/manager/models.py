@@ -197,7 +197,7 @@ class NamespaceEntry(Base):
     )
 
     def __str__(self):
-        return '{}:{}'.format(self.namespace.url, self.name)
+        return '[{}]{}:{}'.format(self.namespace.id, self.namespace, self.name)
 
     def to_json(self, include_id=False):
         """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name.
