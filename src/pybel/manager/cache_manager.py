@@ -958,6 +958,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :rtype: BELGraph
         """
         network = self.get_network_by_id(network_id)
+        log.debug('converting network [id=%d] %s to bel graph', network_id, network)
         return network.as_bel()
 
     def get_networks_by_ids(self, network_ids):
@@ -966,7 +967,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param iter[int] network_ids: The identifiers of networks in the database
         :rtype: list[Network]
         """
-        return self.session.query(Network).filter(Network.id.in_(network_ids)).all()
+        log.debug('getting networks by identifiers: %s', network_ids)
+        return self.session.query(Network).filter(Network.id_in(network_ids)).all()
 
     def get_graphs_by_ids(self, network_ids):
         """Gets a list of networks with the given identifiers and converts to BEL graphs. Note: order is not
@@ -975,10 +977,12 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param iter[int] network_ids: The identifiers of networks in the database
         :rtype: list[BELGraph]
         """
-        return [
+        rv = [
             self.get_graph_by_id(network_id)
             for network_id in network_ids
         ]
+        log.debug('returning graphs for network identifiers: %s', network_ids)
+        return rv
 
     def get_graph_by_ids(self, network_ids):
         """Gets a combine BEL Graph from a list of network identifiers
@@ -989,7 +993,13 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         if len(network_ids) == 1:
             return self.get_graph_by_id(network_ids[0])
 
-        return union(self.get_graphs_by_ids(network_ids))
+        log.debug('getting graph by identifiers: %s', network_ids)
+        graphs = self.get_graphs_by_ids(network_ids)
+
+        log.debug('getting union of graphs: %s', network_ids)
+        rv = union(graphs)
+
+        return rv
 
 
 class InsertManager(NamespaceManager, AnnotationManager, LookupManager):

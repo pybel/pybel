@@ -438,7 +438,7 @@ class Network(Base):
     @staticmethod
     def id_in(network_ids):
         """
-        :param list[int] network_ids:
+        :param iter[int] network_ids:
         """
         return Network.id.in_(network_ids)
 
