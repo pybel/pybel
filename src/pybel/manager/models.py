@@ -333,6 +333,14 @@ class AnnotationEntry(Base):
 
         return result
 
+    @staticmethod
+    def name_contains(name_query):
+        """Makes a filter if the name contains a certain substring
+
+        :param str name_query:
+        """
+        return AnnotationEntry.name.contains(name_query)
+
     def __str__(self):
         return '{}:{}'.format(self.annotation, self.name)
 
@@ -413,6 +421,27 @@ class Network(Base):
 
         return result
 
+    @staticmethod
+    def name_contains(name_query):
+        """
+        :param str name_query:
+        """
+        return Network.name.contains(name_query)
+
+    @staticmethod
+    def description_contains(description_query):
+        """
+        :param str description_query:
+        """
+        return Network.description.contains(description_query)
+
+    @staticmethod
+    def id_in(network_ids):
+        """
+        :param list[int] network_ids:
+        """
+        return Network.id.in_(network_ids)
+
     def __repr__(self):
         return '{} v{}'.format(self.name, self.version)
 
@@ -458,6 +487,10 @@ class Node(Base):
 
     modifications = relationship("Modification", secondary=node_modification, lazy='dynamic',
                                  backref=backref('nodes', lazy='dynamic'))
+
+    @staticmethod
+    def bel_contains(bel_query):
+        return Node.bel.contains(bel_query)
 
     def __str__(self):
         return self.bel
@@ -632,6 +665,10 @@ class Author(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True, index=True)
+
+    @staticmethod
+    def name_contains(name_query):
+        return Author.name.contains(name_query)
 
     def __str__(self):
         return self.name
