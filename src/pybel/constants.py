@@ -12,7 +12,7 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 :data:`pybel.constants.config`.
 """
 
-from json import dump, load
+from json import load
 from logging import getLogger
 from os import environ, makedirs, mkdir, path
 
@@ -54,25 +54,42 @@ DEFAULT_CACHE_LOCATION = path.join(PYBEL_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
-PYBEL_CONFIG_DIR = environ.get('PYBEL_CONFIG_DIRECTORY', path.join(path.expanduser('~'), '.config', 'pybel'))
-if not path.exists(PYBEL_CONFIG_DIR):
+
+def get_config_dir():
+    """Returns the path to the directory where configuration is stored for PyBEL. Can be overridden by setting the
+    environment variable ``PYBEL_CONFIG_DIRECTORY``.
+
+    :rtype: str
+    """
+    return environ.get('PYBEL_CONFIG_DIRECTORY', path.join(path.expanduser('~'), '.config', 'pybel'))
+
+
+_config_dir = get_config_dir()
+if not path.exists(_config_dir):
     try:
-        makedirs(PYBEL_CONFIG_DIR)
+        makedirs(_config_dir)
     except FileExistsError:
-        log.debug('config folder was already created: %s', PYBEL_CONFIG_DIR)
+        log.debug('config folder was already created: %s', _config_dir)
 
 #: The global configuration for PyBEL is stored here. By default, it loads from ``~/.config/pybel/config.json``
-config = {}
+config = {
+    PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION
+}
 
-PYBEL_CONFIG_PATH = path.join(PYBEL_CONFIG_DIR, 'config.json')
-if not path.exists(PYBEL_CONFIG_PATH):
-    with open(PYBEL_CONFIG_PATH, 'w') as f:
-        config.update({PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION})
-        dump(config, f)
-else:
-    with open(PYBEL_CONFIG_PATH) as f:
+
+def get_config_path():
+    """Returns the path of the configuration file, which should just be a file called ``config.json`` inside the
+    directory returned by :func:`get_config_dir`
+
+    :rtype: str
+    """
+    return path.join(_config_dir, 'config.json')
+
+
+_config_path = get_config_dir()
+if path.exists(_config_path):
+    with open(_config_path) as f:
         config.update(load(f))
-        config.setdefault(PYBEL_CONNECTION, DEFAULT_CACHE_CONNECTION)
 
 
 def get_cache_connection(connection=None):
