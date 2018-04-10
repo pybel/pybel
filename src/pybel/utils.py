@@ -17,9 +17,6 @@ from .constants import (
 
 log = logging.getLogger(__name__)
 
-PYBEL_MYSQL_FMT_NOPASS = 'mysql+pymysql://{user}@{host}/{database}?charset={charset}'
-PYBEL_MYSQL_FMT_PASS = 'mysql+pymysql://{user}:{password}@{host}/{database}?charset={charset}'
-
 
 def expand_dict(flat_dict, sep='_'):
     """Expands a flattened dictionary
