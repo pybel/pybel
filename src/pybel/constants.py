@@ -86,7 +86,7 @@ def get_config_path():
     return path.join(_config_dir, 'config.json')
 
 
-_config_path = get_config_dir()
+_config_path = get_config_path()
 if path.exists(_config_path):
     with open(_config_path) as f:
         config.update(load(f))
