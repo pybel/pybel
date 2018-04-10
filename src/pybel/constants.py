@@ -43,7 +43,10 @@ PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 #: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
 PYBEL_DIR = environ.get('PYBEL_RESOURCE_DIRECTORY', path.join(path.expanduser('~'), '.pybel'))
 if not path.exists(PYBEL_DIR):
-    mkdir(PYBEL_DIR)
+    try:
+        mkdir(PYBEL_DIR)
+    except FileExistsError:
+        log.debug('pybel data directory was created already: %s', PYBEL_DIR)
 
 DEFAULT_CACHE_NAME = 'pybel_{}.{}.{}_cache.db'.format(*PYBEL_MINIMUM_IMPORT_VERSION)
 #: The default cache location is ``~/.pybel/data/pybel_cache.db``
@@ -53,7 +56,10 @@ DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
 PYBEL_CONFIG_DIR = environ.get('PYBEL_CONFIG_DIRECTORY', path.join(path.expanduser('~'), '.config', 'pybel'))
 if not path.exists(PYBEL_CONFIG_DIR):
-    makedirs(PYBEL_CONFIG_DIR)
+    try:
+        makedirs(PYBEL_CONFIG_DIR)
+    except FileExistsError:
+        log.debug('config folder was already created: %s', PYBEL_CONFIG_DIR)
 
 #: The global configuration for PyBEL is stored here. By default, it loads from ``~/.config/pybel/config.json``
 config = {}
