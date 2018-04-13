@@ -9,9 +9,8 @@ import logging
 
 import networkx as nx
 
-from ..constants import FUNCTION, NAME, NAMESPACE
+from ..constants import FUNCTION, NAME, NAMESPACE, RELATION
 from ..struct import BELGraph
-from ..utils import flatten_dict
 
 __all__ = [
     'to_graphml',
@@ -23,21 +22,26 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def to_graphml(graph, file, keep_edge_data=True):
+def to_graphml(graph, file):
     """Writes this graph to GraphML XML file using :func:`networkx.write_graphml`. The .graphml file extension is
     suggested so Cytoscape can recognize it.
 
     :param BELGraph graph: A BEL graph
     :param file file: A file or file-like object
-    :param bool keep_edge_data: Should the edge data be kept?
     """
     g = nx.MultiDiGraph()
 
     for node, data in graph.nodes(data=True):
-        g.add_node(node, json=json.dumps(data), function=data[FUNCTION])
+        bel = graph.node_to_bel(node)
+        g.add_node(bel, function=data[FUNCTION])
 
     for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=(flatten_dict(data) if keep_edge_data else None))
+        g.add_edge(
+            graph.node_to_bel(u),
+            graph.node_to_bel(v),
+            key=key,
+            relation=data[RELATION]
+        )
 
     nx.write_graphml(g, file)
 
