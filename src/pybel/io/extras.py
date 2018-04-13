@@ -40,7 +40,7 @@ def to_graphml(graph, file):
             graph.node_to_bel(u),
             graph.node_to_bel(v),
             key=key,
-            relation=data[RELATION]
+            interaction=data[RELATION]
         )
 
     nx.write_graphml(g, file)
