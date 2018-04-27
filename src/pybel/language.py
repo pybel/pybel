@@ -352,7 +352,7 @@ pmod_mappings = {
         ]
     },
     'Sumo': {
-        'synonyms': ['Sumo', 'SUMOylation'],
+        'synonyms': ['Sumo', 'SUMOylation', 'Sumoylation'],
         'xrefs': [
             entity(namespace='GO', identifier='GO:0016925', name='protein sumoylation'),
             entity(namespace='MOD', identifier='MOD:01149'),
