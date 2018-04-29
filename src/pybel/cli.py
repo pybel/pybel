@@ -240,13 +240,14 @@ def insert(manager, url):
 @click.option('-i', '--namespace-id', help='Specific resource URL to list')
 @click.pass_obj
 def ls(manager, url, namespace_id):
-    """Lists cached namespaces"""
+    """Lists cached namespaces."""
     if url:
         if url.endswith('.belns'):
-            terms = manager.ensure_namespace(url).to_values()
+            n = manager.ensure_namespace(url)
+            _page(n.entries)
         else:
             terms = manager.get_namespace_owl_terms(url)
-        _page(terms)
+            _page(terms)
 
     elif namespace_id:
         n = manager.session.query(Namespace).get(namespace_id)
