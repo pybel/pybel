@@ -92,6 +92,7 @@ abundance_sbo_mapping = {
     GENE: entity(namespace='SBO', name='gene', identifier='SBO:0000243'),
     RNA: entity(namespace='SBO', name='messenger RNA', identifier='SBO:0000278'),
     COMPLEX: entity(namespace='SBO', name='protein complex', identifier='SBO:0000297'),
+    PATHOLOGY: entity(namespace='SBO', name='phenotype', identifier='SBO:0000358'),
 }
 
 relation_sbo_mapping = {
