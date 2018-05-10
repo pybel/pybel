@@ -1,7 +1,6 @@
 Roadmap
 =======
-
-This project road map documents not only the PyBEL repository, but the PyBEL Tools and PyBEL Web repositories
+This project road map documents not only the PyBEL repository, but the PyBEL Tools and BEL Commons repositories
 as well as the Bio2BEL project.
 
 PyBEL
@@ -14,23 +13,26 @@ Bio2BEL
 -------
 - Generation of new namespaces, equivalencies, and hierarchical knowledge (isA and partOf relations)
     - FlyBase
-    - InterPro
-    - UniProt
-    - ChEBML
+    - InterPro (Done)
+    - UniProt (Done)
     - Human Phenotype Ontology
     - Uber Anatomy Ontology
-    - HGNC Gene Families
-    - Enyzme Classification
+    - HGNC Gene Families (Done)
+    - Enyzme Classification (Done)
 - Integration of knowledge sources
     - ChEMBL
-    - Comparative Toxicogenomics Database
+    - Comparative Toxicogenomics Database (Done)
     - BRENDA
     - MetaCyc
     - Protein complex definitions
-- Integration of analytical pipelines
-    - LD Block Analysis
-    - Gene Co-expression Analysis
-    - Differential Gene Expression Analysis
+
+Data2BEL
+--------
+Integration of analytical pipelines to convert data to BEL
+
+- LD Block Analysis
+- Gene Co-expression Analysis
+- Differential Gene Expression Analysis
 
 PyBEL Tools
 -----------
@@ -46,15 +48,14 @@ PyBEL Tools
     - SST
 - Development of new algorithms
     - Heat diffusion algorithms
-    - AETIONOMY Workflow 1 (Drug Repurposing)
     - Cart Before the Horse
 - Metapath analysis
 - Reasoning and inference rules
 - Subgraph Expansion application in NeuroMMSigDB
 - Chemical Enrichment in NeuroMMSigDB
 
-PyBEL Web
----------
+BEL Commons
+-----------
 - Integration with BELIEF
-- Integration with NeuroMMSigDB
+- Integration with NeuroMMSigDB (Done)
 - Import and export from NDEx

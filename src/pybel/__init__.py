@@ -32,7 +32,6 @@ Clone the repository from `GitHub <https://github.com/pybel/pybel>`_ and install
    $ cd pybel
    $ python3 -m pip install -e .
 
-
 Extras
 ------
 The ``setup.py`` makes use of the ``extras_require`` argument of :func:`setuptools.setup` in order to make some heavy
@@ -121,7 +120,7 @@ __all__ = (
 __version__ = '0.11.2-dev'
 
 __title__ = 'PyBEL'
-__description__ = 'Parsing, validation, and data exchange of BEL graphs'
+__description__ = 'Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)'
 __url__ = 'https://github.com/pybel/pybel'
 
 __author__ = 'Charles Tapley Hoyt'

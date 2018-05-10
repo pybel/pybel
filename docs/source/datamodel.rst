@@ -1,6 +1,5 @@
 Data Model
 ==========
-
 Molecular biology is a directed graph; not a table. BEL expresses how biological entities interact within many
 different contexts, with descriptive annotations. PyBEL represents data as a directional multigraph using an extension
 of :class:`networkx.MultiDiGraph`. Each node and edge has an associated data dictionary for storing relevant/contextual
@@ -12,7 +11,6 @@ Neo4J supports the Cypher querying language so that the same queries can be writ
 
 Constants
 ---------
-
 These documents refer to many aspects of the data model using constants, which can be found in the top-level module
 :mod:`pybel.constants`. In these examples, all constants are imported with the following code:
 
@@ -28,7 +26,6 @@ strings behind these constants change.
 
 Function Nomenclature
 ~~~~~~~~~~~~~~~~~~~~~
-
 The following table shows PyBEL's internal mapping from BEL functions to its own constants. This can be accessed
 programatically via :data:`pybel.parser.language.abundance_labels`
 
@@ -55,7 +52,6 @@ programatically via :data:`pybel.parser.language.abundance_labels`
 +-------------------------------------------+----------------------------------------+
 | ``rxn()``, ``reaction()``                 | :data:`pybel.constants.REACTION`       |
 +-------------------------------------------+----------------------------------------+
-
 
 Graph
 -----
@@ -385,7 +381,6 @@ schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
 
 Locations
 ~~~~~~~~~
-
 .. automodule:: pybel.parser.modifiers.location
 
 
