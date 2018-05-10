@@ -5,11 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-Unreleased
-----------
+`0.11.2 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-05-10
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Calculation of SHA512 hash to DSL abundances
+- Documented the deployment extra for setup.py
+- Added to and from JSON path IO functions
+- PMI Contact for CBN import and more default namespaces
+- Added common query builders to SQLAlchemy models
+
+Fixed
+~~~~~
+- Fixed name/version lookup in the database
+- Safer creation of directories (https://github.com/pybel/pybel/issues/#284)
+- Make export to GraphML more boring and permissive
+
 Changed
 ~~~~~~~
 - Made parsing of fragments permissive to quoting (https://github.com/pybel/pybel/issues/#282)
+- Update citation handling
+- Update namespace methods in CLI
+- Added ``as_bel`` method to DSL
+
+Removed
+~~~~~~~
+- Removed static function ``pybel.BELGraph.hash_node`` since it just wraps ``pybel.utils.node_to_tuple``
+- Removed unnecessary configuration editing from CLI
 
 `0.11.1 <https://github.com/pybel/pybel/compare/v0.11.0...0.11.1>`_ - 2018-02-19
 --------------------------------------------------------------------------------
