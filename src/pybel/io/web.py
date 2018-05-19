@@ -1,49 +1,111 @@
 # -*- coding: utf-8 -*-
 
-"""This module facilitates rudimentary data exchange with `PyBEL Web <https://pybel.scai.fraunhofer.de>`_.
+"""This module facilitates rudimentary data exchange with `BEL Commons <https://bel-commons.scai.fraunhofer.de>`_."""
 
-.. warning::
-
-    These functions are hard to unit test because they rely on a web service that isn't *exactly* stable yet. Stay
-    tuned!
-"""
+import logging
+import os
 
 import requests
 
 from .nodelink import from_json, to_json
-from ..constants import DEFAULT_SERVICE_URL
+from ..constants import DEFAULT_SERVICE_URL, VERSION, config
 
 __all__ = [
     'to_web',
     'from_web',
 ]
 
+log = logging.getLogger(__name__)
+
+PYBEL_REMOTE_HOST = 'PYBEL_REMOTE_HOST'
+PYBEL_REMOTE_USER = 'PYBEL_REMOTE_USER'
+PYBEL_REMOTE_PASSWORD = 'PYBEL_REMOTE_PASSWORD'
 RECIEVE_ENDPOINT = '/api/receive'
 GET_ENDPOINT = '/api/network/{}/export/nodelink'
 
 
-def to_web(graph, host=None):
+def _get_config_or_env(name):
+    return config.get(name) or os.environ.get(name)
+
+
+def _get_host():
+    """Find the host.
+
+    Has three possibilities:
+
+    1. The PyBEL config entry ``PYBEL_REMOTE_HOST``, loaded in :mod:`pybel.constants`
+    2. The environment variable ``PYBEL_REMOTE_HOST``
+    3. The default service URL, :data:`pybel.constants.DEFAULT_SERVICE_URL`
+    """
+    return _get_config_or_env(PYBEL_REMOTE_HOST) or DEFAULT_SERVICE_URL
+
+
+def _get_user():
+    return _get_config_or_env(PYBEL_REMOTE_USER)
+
+
+def _get_password():
+    return _get_config_or_env(PYBEL_REMOTE_PASSWORD)
+
+
+def to_web(graph, host=None, user=None, password=None):
     """Sends a graph to the receiver service and returns the :mod:`requests` response object
 
     :param pybel.BELGraph graph: A BEL network
-    :param Optional[str] host: The location of the PyBEL web server. Defaults to :data:`pybel.constants.DEFAULT_SERVICE_URL`
+    :param Optional[str] host: The location of the BEL Commons server. Defaults to
+     :data:`pybel.constants.DEFAULT_SERVICE_URL`
+    :param Optional[str] user: Username for BEL Commons. Alternatively, looks up in PyBEL config with
+     ``PYBEL_REMOTE_USER`` or the environment as ``PYBEL_REMOTE_USER``
+    :param Optional[str] password: Password for BEL Commons. Alternatively, looks up in PyBEL config with
+     ``PYBEL_REMOTE_PASSWORD`` or the environment as ``PYBEL_REMOTE_PASSWORD``
     :return: The response object from :mod:`requests`
     :rtype: requests.Response
     """
-    host = host or DEFAULT_SERVICE_URL
+    if host is None:
+        host = _get_host()
+        log.debug('using host: %s', host)
+
+    if user is None:
+        user = _get_user()
+
+        if user is None:
+            raise ValueError('no user found')
+
+    if password is None:
+        password = _get_password()
+
+        if password is None:
+            raise ValueError('no password found')
+
     url = host + RECIEVE_ENDPOINT
-    return requests.post(url, json=to_json(graph), headers={'content-type': 'application/json'})
+
+    response = requests.post(
+        url,
+        json=to_json(graph),
+        headers={
+            'content-type': 'application/json',
+            'User-Agent': 'PyBEL v{}'.format(VERSION),
+        },
+        auth=(user, password)
+    )
+    log.debug('received response: %s', response)
+
+    return response
 
 
 def from_web(network_id, host=None):
-    """Retrieves a public network from PyBEL Web. In the future, this function may be extended to support
+    """Retrieves a public network from BEL Commons. In the future, this function may be extended to support
     authentication.
 
-    :param int network_id: The PyBEL Web network identifier
-    :param Optional[str] host: The location of the PyBEL web server. Defaults to :data:`pybel.constants.DEFAULT_SERVICE_URL`
+    :param int network_id: The BEL Commons network identifier
+    :param Optional[str] host: The location of the BEL Commons server. Defaults to
+     :data:`pybel.constants.DEFAULT_SERVICE_URL`, can be overridden with PYBEL_REMOTE_HOST in either the config or
+     the environment
     :rtype: pybel.BELGraph
     """
-    host = host or DEFAULT_SERVICE_URL
+    if host is None:
+        host = _get_host()
+
     url = host + GET_ENDPOINT.format(network_id)
     res = requests.get(url)
     graph_json = res.json()
