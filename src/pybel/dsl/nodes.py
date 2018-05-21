@@ -265,6 +265,12 @@ class Variant(dict):
         return self.as_bel()
 
     @abc.abstractmethod
+    def as_tuple(self):
+        """Returns this entity as a canonical tuple
+        :rtype: tuple
+        """
+
+    @abc.abstractmethod
     def as_bel(self):
         """Returns this variant as BEL
 
