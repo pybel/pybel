@@ -8,7 +8,10 @@ import os
 import requests
 
 from .nodelink import from_json, to_json
-from ..constants import DEFAULT_SERVICE_URL, VERSION, config
+from ..constants import (
+    DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER, VERSION,
+    config,
+)
 
 __all__ = [
     'to_web',
@@ -17,9 +20,6 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-PYBEL_REMOTE_HOST = 'PYBEL_REMOTE_HOST'
-PYBEL_REMOTE_USER = 'PYBEL_REMOTE_USER'
-PYBEL_REMOTE_PASSWORD = 'PYBEL_REMOTE_PASSWORD'
 RECIEVE_ENDPOINT = '/api/receive'
 GET_ENDPOINT = '/api/network/{}/export/nodelink'
 
