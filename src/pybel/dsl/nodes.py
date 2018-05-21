@@ -585,7 +585,8 @@ class protein(CentralDogma):
 
 
 def _tuplable_list_as_tuple(entities):
-    """A helper function for converting reaction list
+    """Help convert a reaction list to tuples
+
     :type entities: iter[BaseEntity]
     :rtype: tuple[tuple]
     """
@@ -593,7 +594,7 @@ def _tuplable_list_as_tuple(entities):
 
 
 def _entity_list_as_tuple(entities):
-    """A helper function for converting reaction list
+    """Help convert a reaction list to tuples
 
     :type entities: iter[BaseEntity]
     :rtype: tuple
@@ -605,7 +606,7 @@ def _entity_list_as_tuple(entities):
 
 
 def _entity_list_as_bel(entities):  # TODO sorted?
-    """A helper function for stringifying a list of BEL entities
+    """Help stringify a list of BEL entities
 
     :type entities: iter[BaseEntity]
     :rtype: str
@@ -617,7 +618,7 @@ def _entity_list_as_bel(entities):  # TODO sorted?
 
 
 class reaction(BaseEntity):
-    """Builds a reaction node data dictionary"""
+    """Build a reaction node data dictionary."""
 
     def __init__(self, reactants, products):
         """
@@ -668,7 +669,7 @@ class ListAbundance(BaseEntity):
 
 
 class complex_abundance(ListAbundance):
-    """Builds a complex abundance node data dictionary with the optional ability to specificy a name"""
+    """Build a complex abundance node data dictionary with the optional ability to specify a name."""
 
     def __init__(self, members, namespace=None, name=None, identifier=None):
         """
@@ -684,14 +685,16 @@ class complex_abundance(ListAbundance):
 
 
 class named_complex_abundance(BaseAbundance):
-    """Builds a named complex abundance node data dictionary"""
+    """Build a named complex abundance node data dictionary."""
 
     def __init__(self, namespace=None, name=None, identifier=None):
         """
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
+
         Example:
+
         >>> named_complex_abundance(namespace='SCOMP', name='Calcineurin Complex')
         """
         super(named_complex_abundance, self).__init__(
@@ -703,7 +706,7 @@ class named_complex_abundance(BaseAbundance):
 
 
 class composite_abundance(ListAbundance):
-    """Builds a composite abundance node data dictionary"""
+    """Build a composite abundance node data dictionary."""
 
     def __init__(self, members):
         """
