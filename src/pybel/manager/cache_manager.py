@@ -990,8 +990,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         for key, values in data.items():
             if key in graph.annotation_url:
                 url = graph.annotation_url[key]
-            elif key in graph.annotation_owl:
-                url = graph.annotation_owl[key]
             elif key in graph.annotation_list:
                 continue  # skip those
             elif key in graph.annotation_pattern:

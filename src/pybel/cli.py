@@ -218,10 +218,7 @@ def ensure(manager, debug):
 @click.pass_obj
 def insert(manager, url):
     """Manually add namespace by URL"""
-    if url.endswith('.belns'):
-        manager.ensure_namespace(url)
-    else:
-        manager.ensure_namespace_owl(url)
+    manager.ensure_namespace(url)
 
 
 @annotations.command()
@@ -229,10 +226,7 @@ def insert(manager, url):
 @click.pass_obj
 def insert(manager, url):
     """Manually add annotation by URL"""
-    if url.endswith('.belanno'):
-        manager.ensure_annotation(url)
-    else:
-        manager.ensure_annotation_owl(url)
+    manager.ensure_annotation(url)
 
 
 @namespace.command()
@@ -242,12 +236,8 @@ def insert(manager, url):
 def ls(manager, url, namespace_id):
     """Lists cached namespaces."""
     if url:
-        if url.endswith('.belns'):
-            n = manager.ensure_namespace(url)
-            _page(n.entries)
-        else:
-            terms = manager.get_namespace_owl_terms(url)
-            _page(terms)
+        n = manager.ensure_namespace(url)
+        _page(n.entries)
 
     elif namespace_id:
         n = manager.session.query(Namespace).get(namespace_id)
@@ -268,11 +258,7 @@ def ls(manager, url):
             click.echo(annotation.url)
 
     else:
-        if url.endswith('.belanno'):
-            annotation = manager.ensure_annotation(url)
-        else:
-            annotation = manager.ensure_annotation_owl(url)
-
+        annotation = manager.ensure_annotation(url)
         for l in annotation.get_entries():
             click.echo(l)
 

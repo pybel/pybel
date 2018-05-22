@@ -155,11 +155,9 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
                 six.raise_from(MalformedMetadataException(line_number, line), e)
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
-    graph.namespace_owl.update(metadata_parser.namespace_owl_dict)
     graph.namespace_pattern.update(metadata_parser.namespace_regex)
 
     graph.annotation_url.update(metadata_parser.annotation_url_dict)
-    graph.annotation_owl.update(metadata_parser.annotation_owl_dict)
     graph.annotation_pattern.update(metadata_parser.annotation_regex)
     graph.annotation_list.update({
         keyword: metadata_parser.annotation_dict[keyword]

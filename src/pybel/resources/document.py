@@ -2,15 +2,16 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-import hashlib
 import itertools as itt
+
+import hashlib
 import json
 import logging
 import time
 
 from .constants import (
-    ANNOTATION_PATTERN_FMT, ANNOTATION_URL_FMT, METADATA_LINE_RE, NAMESPACE_OWL_FMT,
-    NAMESPACE_PATTERN_FMT, NAMESPACE_URL_FMT, format_annotation_list,
+    ANNOTATION_PATTERN_FMT, ANNOTATION_URL_FMT, METADATA_LINE_RE, NAMESPACE_PATTERN_FMT, NAMESPACE_URL_FMT,
+    format_annotation_list,
 )
 from .definitions import get_lines
 from ..constants import VERSION
@@ -167,11 +168,10 @@ def make_document_metadata(name, version=None, contact=None, description=None, a
     yield ''
 
 
-def make_document_namespaces(namespace_url=None, namespace_owl=None, namespace_patterns=None):
+def make_document_namespaces(namespace_url=None, namespace_patterns=None):
     """Builds a list of lines for the namespace definitions
 
     :param dict[str,str] namespace_url: dictionary of {str name: str URL} of namespaces
-    :param dict[str,str] namespace_owl: dictionary of {str name: str URL} of namespaces
     :param dict[str,str] namespace_patterns: A dictionary of {str name: str regex}
     :return: An iterator over the lines for the namespace definitions
     :rtype: iter[str]
@@ -185,12 +185,6 @@ def make_document_namespaces(namespace_url=None, namespace_owl=None, namespace_p
     for name, url in sorted(namespace_url.items()):
         yield NAMESPACE_URL_FMT.format(name, url)
 
-    if namespace_owl:
-        yield '\n# OWL Namespaces\n'
-
-        for namespace, url in sorted(namespace_owl.items()):
-            yield NAMESPACE_OWL_FMT.format(namespace, url)
-
     if namespace_patterns:
         yield '\n# Regular Expression Namespaces\n'
 
@@ -200,28 +194,22 @@ def make_document_namespaces(namespace_url=None, namespace_owl=None, namespace_p
     yield ''
 
 
-def make_document_annotations(annotation_url=None, annotation_owl=None, annotation_patterns=None,
-                              annotation_list=None):
+def make_document_annotations(annotation_url=None, annotation_patterns=None, annotation_list=None):
     """Builds a list of lines for the annotation definitions
 
     :param dict[str,str] annotation_url: A dictionary of {str name: str URL} of annotations
-    :param dict[str,str] annotation_owl: A dictionary of {str name: str URL} of annotations from OWL
     :param dict[str,str] annotation_patterns: A dictionary of {str name: str regex}
     :param dict[str,set[str]] annotation_list: A dictionary of {str name: set of name str}
     :return: An iterator over the lines for the annotation definitions
     :rtype: iter[str]
     """
-    if annotation_url or annotation_owl or annotation_patterns or annotation_list:
+    if annotation_url or annotation_patterns or annotation_list:
         yield '#' * 80
         yield '#| Annotations'
         yield '#' * 80 + '\n'
 
     if annotation_url:
         for name, url in sorted(annotation_url.items()):
-            yield ANNOTATION_URL_FMT.format(name, url)
-
-    if annotation_owl:
-        for name, url in sorted(annotation_owl.items()):
             yield ANNOTATION_URL_FMT.format(name, url)
 
     if annotation_patterns:
@@ -236,9 +224,8 @@ def make_document_annotations(annotation_url=None, annotation_owl=None, annotati
 
 
 def make_knowledge_header(name, version=None, description=None, authors=None, contact=None, copyright=None,
-                          licenses=None, disclaimer=None, namespace_url=None, namespace_owl=None,
-                          namespace_patterns=None, annotation_url=None, annotation_owl=None, annotation_patterns=None,
-                          annotation_list=None, ):
+                          licenses=None, disclaimer=None, namespace_url=None, namespace_patterns=None,
+                          annotation_url=None, annotation_patterns=None, annotation_list=None, ):
     """Iterates over the strings for the header of a BEL document, with standard document metadata, definitions.
 
     :param str name: The unique name for this BEL document
@@ -250,10 +237,8 @@ def make_knowledge_header(name, version=None, description=None, authors=None, co
     :param str licenses: The license applied to this document
     :param str disclaimer: The disclaimer for this document
     :param dict[str,str] namespace_url: an optional dictionary of {str name: str URL} of namespaces
-    :param dict[str,str] namespace_owl: an optional dictionary of {str name: str URL} of namespaces
     :param dict[str,str] namespace_patterns: An optional dictionary of {str name: str regex} namespaces
     :param dict[str,str] annotation_url: An optional dictionary of {str name: str URL} of annotations
-    :param dict[str,str] annotation_owl: An optional dictionary of {str name: str URL} of OWL annotations
     :param dict[str,str] annotation_patterns: An optional dictionary of {str name: str regex} of regex annotations
     :param dict[str,set[str]] annotation_list: An optional dictionary of {str name: set of names} of list annotations
     :rtype: iter[str]
@@ -271,13 +256,11 @@ def make_knowledge_header(name, version=None, description=None, authors=None, co
 
     namespaces_iter = make_document_namespaces(
         namespace_url=namespace_url,
-        namespace_owl=namespace_owl,
         namespace_patterns=namespace_patterns
     )
 
     annotations_iter = make_document_annotations(
         annotation_url=annotation_url,
-        annotation_owl=annotation_owl,
         annotation_patterns=annotation_patterns,
         annotation_list=annotation_list
     )

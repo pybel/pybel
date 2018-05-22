@@ -33,11 +33,9 @@ def _left_full_metadata_join(g, h):
     """
     g.namespace_url.update(h.namespace_url)
     g.namespace_pattern.update(h.namespace_pattern)
-    g.namespace_owl.update(h.namespace_owl)
 
     g.annotation_url.update(h.annotation_url)
     g.annotation_pattern.update(h.annotation_pattern)
-    g.annotation_owl.update(h.annotation_owl)
 
     for keyword, values in h.annotation_list.items():
         if keyword not in g.annotation_list:
