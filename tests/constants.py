@@ -6,7 +6,6 @@ import tempfile
 import unittest
 from json import dumps
 from pathlib import Path
-
 from requests.compat import urlparse
 
 from pybel import BELGraph
@@ -20,23 +19,17 @@ from pybel.utils import subdict_matches
 log = logging.getLogger(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-owl_dir_path = os.path.join(dir_path, 'owl')
 bel_dir_path = os.path.join(dir_path, 'bel')
 belns_dir_path = os.path.join(dir_path, 'belns')
 belanno_dir_path = os.path.join(dir_path, 'belanno')
 beleq_dir_path = os.path.join(dir_path, 'beleq')
 
 test_bel_simple = os.path.join(bel_dir_path, 'test_bel.bel')
-test_bel_extensions = os.path.join(bel_dir_path, 'test_bel_owl_extension.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
 test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
 test_bel_isolated = os.path.join(bel_dir_path, 'isolated.bel')
 test_bel_misordered = os.path.join(bel_dir_path, 'misordered.bel')
 test_bel_no_identifier_valiation = os.path.join(bel_dir_path, 'no_identifier_validation_test.bel')
-
-test_owl_pizza = os.path.join(owl_dir_path, 'pizza_onto.owl')
-test_owl_wine = os.path.join(owl_dir_path, 'wine.owl')
-test_owl_ado = os.path.join(owl_dir_path, 'ado.owl')
 
 test_an_1 = os.path.join(belanno_dir_path, 'test_an_1.belanno')
 
@@ -67,9 +60,6 @@ HGNC_KEYWORD = 'HGNC'
 HGNC_URL = OPENBEL_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
 MESH_DISEASES_URL = OPENBEL_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
-
-pizza_iri = 'http://www.lesfleursdunormal.fr/static/_downloads/pizza_onto.owl'
-wine_iri = 'http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine'
 
 test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
 
@@ -268,16 +258,6 @@ expected_test_thorough_metadata = {
     METADATA_NAME: "PyBEL Test Thorough",
     METADATA_DESCRIPTION: "Statements made up to contain many conceivable variants of nodes from BEL",
     METADATA_VERSION: "1.0.0",
-    METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
-    METADATA_AUTHORS: "Charles Tapley Hoyt",
-    METADATA_LICENSES: "WTF License",
-    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
-}
-
-expected_test_bel_4_metadata = {
-    METADATA_NAME: "PyBEL Test OWL Extension",
-    METADATA_DESCRIPTION: "Tests the use of OWL ontologies as namespaces",
-    METADATA_VERSION: "1.6.0",
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
@@ -1110,9 +1090,7 @@ class BelReconstitutionMixin(TestGraphMixin):
 
         if check_provenance:
             self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
-            self.assertEqual(set(), set(graph.namespace_owl))
             self.assertEqual({'dbSNP'}, set(graph.namespace_pattern))
-            self.assertEqual(set(), set(graph.annotation_owl))
             self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
             self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 

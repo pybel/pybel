@@ -5,10 +5,7 @@
 import os
 
 from pybel.constants import GOCC_LATEST
-from tests.constants import (
-    bel_dir_path, belanno_dir_path, beleq_dir_path, belns_dir_path, get_uri_name, pizza_iri, test_owl_pizza,
-    test_owl_wine, wine_iri,
-)
+from tests.constants import bel_dir_path, belanno_dir_path, beleq_dir_path, belns_dir_path, get_uri_name
 
 try:
     from unittest import mock
@@ -40,10 +37,6 @@ class MockResponse:
             self.path = os.path.join(beleq_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.bel'):
             self.path = os.path.join(bel_dir_path, get_uri_name(mock_url))
-        elif mock_url == wine_iri:
-            self.path = test_owl_wine
-        elif mock_url == pizza_iri:
-            self.path = test_owl_pizza
         else:
             raise ValueError('Invalid extension')
 
