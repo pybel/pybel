@@ -6,9 +6,9 @@ from pathlib import Path
 from pybel.manager import Manager, models
 from tests.constants import (
     CELL_LINE_URL, FleetingTemporaryCacheMixin, HGNC_URL, belns_dir_path, test_eq_1, test_eq_2,
-    test_ns_nocache_path, wine_iri,
+    test_ns_nocache_path,
 )
-from tests.mocks import mock_bel_resources, mock_parse_owl_rdf, mock_parse_owl_xml
+from tests.mocks import mock_bel_resources
 
 ns1 = Path(os.path.join(belns_dir_path, 'disease-ontology.belns')).as_uri()
 ns1_eq = Path(test_eq_1).as_uri()
@@ -68,23 +68,6 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
         entry = self.manager.get_annotation_entry(CELL_LINE_URL, '1321N1 cell')
         self.assertEqual('1321N1 cell', entry.name)
         self.assertEqual('CLO_0001072', entry.label)
-
-    @mock_parse_owl_rdf
-    @mock_parse_owl_xml
-    def test_insert_owl(self, m1, m2):
-        namespace = self.manager.ensure_namespace_owl(wine_iri)
-        self.assertIsNotNone(namespace)
-        self.assertEqual(wine_iri, namespace.url)
-
-        entry = self.manager.get_namespace_entry(wine_iri, 'ChateauMorgon')
-        self.assertIsNotNone(entry)
-        self.assertEqual('ChateauMorgon', entry.name)
-        self.assertIsNotNone(entry.encoding)
-
-        entry = self.manager.get_namespace_entry(wine_iri, 'Winery')
-        self.assertIsNotNone(entry)
-        self.assertEqual('Winery', entry.name)
-        self.assertIsNotNone(entry.encoding)
 
 
 class TestEquivalenceManager(FleetingTemporaryCacheMixin):

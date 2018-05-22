@@ -10,6 +10,5 @@ tqdm
 # Extras
 indra[indra]
 artifactory[deployment]
-onto2nx[owl]
 ndex2[ndex]
 py2neo[neo4j]

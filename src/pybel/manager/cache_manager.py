@@ -9,13 +9,13 @@ enable this option, but can specify a database location if they choose.
 
 from __future__ import unicode_literals
 
-import logging
-import time
 from collections import defaultdict
-from copy import deepcopy
 from itertools import chain, groupby
 
+import logging
 import six
+import time
+from copy import deepcopy
 from six import string_types
 from sqlalchemy import and_, exists, func
 from tqdm import tqdm
@@ -28,7 +28,7 @@ from .models import (
     NamespaceEntry, NamespaceEntryEquivalence, Network, Node, Property,
 )
 from .query_manager import QueryManager
-from .utils import extract_shared_optional, extract_shared_required, parse_owl, update_insert_values
+from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..canonicalize import node_to_bel
 from ..constants import *
 from ..language import (
@@ -384,94 +384,6 @@ class NamespaceManager(BaseManager):
         return name_model
 
 
-class OwlNamespaceManager(NamespaceManager):
-    """Manages OWL namespaces"""
-
-    def get_or_create_owl_namespace(self, url, keyword=None, encoding=None):
-        """Caches an ontology at the given IRI
-
-        :param str url: The location of the ontology
-        :param str keyword: The keyword for the namespace
-        :param str encoding: The encoding for the entries in the namespace
-        :rtype: Namespace
-        """
-        namespace = self.get_namespace_by_url(url)
-
-        if namespace is not None:
-            return namespace
-
-        log.debug('inserting owl %s', url)
-
-        namespace = Namespace(url=url, keyword=keyword)
-
-        graph = parse_owl(url)
-
-        encoding = BELNS_ENCODING_STR if encoding is None else encoding
-
-        name_to_entry = {
-            node: NamespaceEntry(name=node, encoding=encoding)
-            for node in graph
-        }
-        namespace.entries = list(name_to_entry.values())
-
-        for parent, child in graph.edges_iter():
-            parent_entry = name_to_entry[parent]
-            child_entry = name_to_entry[child]
-            parent_entry.children.append(child_entry)
-
-        self.session.add(namespace)
-        self.session.commit()
-
-        return namespace
-
-    def ensure_namespace_owl(self, url, keyword=None, encoding=None):
-        """Caches an ontology at the given URL if it is not already in the cache
-
-        :param str url: The location of the ontology
-        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
-        :param str encoding: The optional encoding to use for the namespace if it gets downloaded
-        :rtype: Namespace
-        """
-        if url in self.namespace_model:
-            return self.namespace_model[url]
-
-        namespace = self.get_or_create_owl_namespace(url, keyword=keyword, encoding=encoding)
-
-        if not self.use_namespace_cache:
-            return namespace
-
-        for entry in namespace.entries:
-            self.namespace_object_cache[namespace.url][entry.name] = entry
-
-        return namespace
-
-    def get_namespace_owl_terms(self, url, keyword=None, encoding=None):
-        """
-
-        :param str url: The location of the ontology
-        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
-        :param str encoding: The optional encoding to use for the namespace if it gets downloaded
-        :rtype: dict[str,str]
-        """
-        namespace = self.ensure_namespace_owl(url, keyword=keyword, encoding=encoding)
-
-        if isinstance(namespace, dict):
-            return namespace
-
-        return namespace.to_values()
-
-    def get_namespace_owl_edges(self, url, keyword=None):
-        """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
-
-        :param str url: The location of the ontology
-        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
-        :rtype: list[tuple[str,str]]
-        """
-        namespace = self.ensure_namespace_owl(url, keyword=keyword)
-
-        return namespace.to_tree_list()
-
-
 class AnnotationManager(BaseManager):
     """Manages BEL annotations"""
 
@@ -639,78 +551,6 @@ class AnnotationManager(BaseManager):
             annotation_entry = self.session.query(AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
         return annotation_entry
-
-
-class OwlAnnotationManager(AnnotationManager):
-    """Manages OWL annotations"""
-
-    def get_or_create_owl_annotation(self, url, keyword=None):
-        """Caches an ontology as a namespace from the given IRI
-
-        :param str url: the location of the ontology
-        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
-        :rtype: Annotation
-        """
-        annotation = self.get_annotation_by_url(url)
-
-        if annotation is not None:
-            return annotation
-
-        log.debug('inserting owl %s', url)
-
-        annotation = Annotation(url=url, keyword=keyword)
-
-        graph = parse_owl(url)
-
-        entries = {
-            node: AnnotationEntry(name=node, annotation=annotation)  # TODO add label
-            for node in graph
-        }
-        annotation.entries = list(entries.values())
-
-        for u, v in graph.edges_iter():
-            entries[u].children.append(entries[v])
-
-        self.session.add(annotation)
-        self.session.commit()
-
-        return annotation
-
-    def ensure_annotation_owl(self, url, keyword=None):
-        """Caches an ontology as an annotation from the given IRI
-
-        :param str url: the location of the ontology
-        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
-        :rtype: Annotation
-        """
-        if url in self.annotation_model:
-            return self.annotation_model[url]
-
-        annotation = self.get_or_create_owl_annotation(url, keyword)
-
-        for entry in annotation.entries:
-            self.annotation_object_cache[url][entry.name] = entry
-
-        return annotation
-
-    def get_annotation_owl_terms(self, url, keyword=None):
-        """Gets a set of classes and individuals in the ontology at the given IRI
-
-        :param str url: the location of the ontology
-        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
-        :rtype: set[str]
-        """
-        annotation = self.ensure_annotation_owl(url, keyword)
-        return annotation.get_entries()
-
-    def get_annotation_owl_edges(self, url, keyword=None):
-        """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
-
-        :param str url: the location of the ontology
-        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
-        """
-        annotation = self.ensure_annotation_owl(url, keyword=keyword)
-        return annotation.to_tree_list()
 
 
 class EquivalenceManager(NamespaceManager):
@@ -1730,8 +1570,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         ]
 
 
-class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, OwlNamespaceManager,
-              OwlAnnotationManager):
+class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager):
     """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
     SQLite by default for speed and lightness, but any database can be used with its SQLAlchemy interface.
     """
