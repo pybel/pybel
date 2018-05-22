@@ -30,7 +30,7 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = [
     'networkx==1.11',
-    'sqlalchemy==1.1.15',
+    'sqlalchemy',
     'click',
     'requests',
     'requests_file',
