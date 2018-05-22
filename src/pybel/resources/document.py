@@ -2,9 +2,8 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-import hashlib
 import itertools as itt
-import json
+
 import logging
 import time
 
@@ -12,7 +11,6 @@ from .constants import (
     ANNOTATION_PATTERN_FMT, ANNOTATION_URL_FMT, METADATA_LINE_RE, NAMESPACE_OWL_FMT,
     NAMESPACE_PATTERN_FMT, NAMESPACE_URL_FMT, format_annotation_list,
 )
-from .definitions import get_lines
 from ..constants import VERSION
 
 log = logging.getLogger(__name__)
@@ -107,33 +105,18 @@ def split_file_to_annotations_and_definitions(file):
     return documents, definitions, statements
 
 
-def get_bel_knowledge_hash(location):
-    """Hashes the statements section of a BEL document"""
-    lines = get_lines(location)
-
-    _, _, lines = split_file_to_annotations_and_definitions(lines)
-
-    lines = [
-        line.strip()
-        for index, line in lines
-        if line.strip()
-    ]
-
-    return hashlib.md5(json.dumps(lines).encode('utf-8')).hexdigest()
-
-
 def make_document_metadata(name, version=None, contact=None, description=None, authors=None, copyright=None,
                            licenses=None, disclaimer=None):
     """Builds a list of lines for the document metadata section of a BEL document
 
     :param str name: The unique name for this BEL document
-    :param str version: The version. Defaults to date in ``YYYYMMDD`` format.
-    :param str description: A description of the contents of this document
-    :param str authors: The authors of this document
-    :param str contact: The email address of the maintainer
-    :param str copyright: Copyright information about this document
-    :param str licenses: The license applied to this document
-    :param str disclaimer: The disclaimer for this document
+    :param Optional[str] version: The version. Defaults to the current date in ``YYYYMMDD`` format.
+    :param Optional[str] description: A description of the contents of this document
+    :param Optional[str] authors: The authors of this document
+    :param Optional[str] contact: The email address of the maintainer
+    :param Optional[str] copyright: Copyright information about this document
+    :param Optional[str] licenses: The license applied to this document
+    :param Optional[str] disclaimer: The disclaimer for this document
     :return: An iterator over the lines for the document metadata section
     :rtype: iter[str]
     """
@@ -170,9 +153,9 @@ def make_document_metadata(name, version=None, contact=None, description=None, a
 def make_document_namespaces(namespace_url=None, namespace_owl=None, namespace_patterns=None):
     """Builds a list of lines for the namespace definitions
 
-    :param dict[str,str] namespace_url: dictionary of {str name: str URL} of namespaces
-    :param dict[str,str] namespace_owl: dictionary of {str name: str URL} of namespaces
-    :param dict[str,str] namespace_patterns: A dictionary of {str name: str regex}
+    :param Optional[dict[str,str]] namespace_url: dictionary of {str name: str URL} of namespaces
+    :param Optional[dict[str,str]] namespace_owl: dictionary of {str name: str URL} of namespaces
+    :param Optional[dict[str,str]] namespace_patterns: A dictionary of {str name: str regex}
     :return: An iterator over the lines for the namespace definitions
     :rtype: iter[str]
     """
@@ -204,10 +187,10 @@ def make_document_annotations(annotation_url=None, annotation_owl=None, annotati
                               annotation_list=None):
     """Builds a list of lines for the annotation definitions
 
-    :param dict[str,str] annotation_url: A dictionary of {str name: str URL} of annotations
-    :param dict[str,str] annotation_owl: A dictionary of {str name: str URL} of annotations from OWL
-    :param dict[str,str] annotation_patterns: A dictionary of {str name: str regex}
-    :param dict[str,set[str]] annotation_list: A dictionary of {str name: set of name str}
+    :param Optional[dict[str,str]] annotation_url: A dictionary of {str name: str URL} of annotations
+    :param Optional[dict[str,str]] annotation_owl: A dictionary of {str name: str URL} of annotations from OWL
+    :param Optional[dict[str,str]] annotation_patterns: A dictionary of {str name: str regex}
+    :param Optional[dict[str,set[str]]] annotation_list: A dictionary of {str name: set of name str}
     :return: An iterator over the lines for the annotation definitions
     :rtype: iter[str]
     """
@@ -249,13 +232,15 @@ def make_knowledge_header(name, version=None, description=None, authors=None, co
     :param str copyright: Copyright information about this document
     :param str licenses: The license applied to this document
     :param str disclaimer: The disclaimer for this document
-    :param dict[str,str] namespace_url: an optional dictionary of {str name: str URL} of namespaces
-    :param dict[str,str] namespace_owl: an optional dictionary of {str name: str URL} of namespaces
-    :param dict[str,str] namespace_patterns: An optional dictionary of {str name: str regex} namespaces
-    :param dict[str,str] annotation_url: An optional dictionary of {str name: str URL} of annotations
-    :param dict[str,str] annotation_owl: An optional dictionary of {str name: str URL} of OWL annotations
-    :param dict[str,str] annotation_patterns: An optional dictionary of {str name: str regex} of regex annotations
-    :param dict[str,set[str]] annotation_list: An optional dictionary of {str name: set of names} of list annotations
+    :param Optional[dict[str,str]] namespace_url: an optional dictionary of {str name: str URL} of namespaces
+    :param Optional[dict[str,str]] namespace_owl: an optional dictionary of {str name: str URL} of namespaces
+    :param Optional[dict[str,str]] namespace_patterns: An optional dictionary of {str name: str regex} namespaces
+    :param Optional[dict[str,str]] annotation_url: An optional dictionary of {str name: str URL} of annotations
+    :param Optional[dict[str,str]] annotation_owl: An optional dictionary of {str name: str URL} of OWL annotations
+    :param Optional[dict[str,str]] annotation_patterns: An optional dictionary of {str name: str regex} of regex
+     annotations
+    :param Optional[dict[str,set[str]]] annotation_list: An optional dictionary of {str name: set of names} of list
+     annotations
     :rtype: iter[str]
     """
     metadata_iter = make_document_metadata(

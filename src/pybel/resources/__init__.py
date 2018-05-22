@@ -8,12 +8,3 @@ from .definitions import *
 from .definitions import *
 from .document import *
 from .exc import *
-
-try:
-    from . import arty, defaults, deploy
-    from .arty import *
-    from .defaults import *
-    from .deploy import *
-
-except ImportError:
-    pass
