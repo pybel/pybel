@@ -6,7 +6,6 @@ import tempfile
 import unittest
 from json import dumps
 from pathlib import Path
-
 from requests.compat import urlparse
 
 from pybel import BELGraph
@@ -46,9 +45,6 @@ test_ns_nocache = os.path.join(belns_dir_path, 'test_nocache.belns')
 test_ns_empty = os.path.join(belns_dir_path, 'test_ns_empty.belns')
 
 test_ns_nocache_path = Path(test_ns_nocache).as_uri()
-
-test_eq_1 = os.path.join(beleq_dir_path, 'disease-ontology.beleq')
-test_eq_2 = os.path.join(beleq_dir_path, 'mesh-diseases.beleq')
 
 test_citation_dict = {
     CITATION_TYPE: 'PubMed',
