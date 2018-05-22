@@ -108,20 +108,9 @@ definitions with regular expressions as follows:
 
 Definition of Resources using OWL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-One constraint imposed by the BEL language is that definitions of namespaces and annotations must follow a specific
-format. However, the creation and maintenance of terminologies in the biological domain has tended towards the usage
-of the Web Ontology Format (OWL). Services such as the Ontology Lookup Service allow for standardized querying and
-search of these resources, and provide an important semantic integration layer that previous software tools for BEL
-did not include. PyBEL allows for these resources to be named directly in definitions with the following syntax:
-
-``DEFINE ANNOTATION CELL AS OWL "http://purl.obolibrary.org/obo/cl/releases/2016-11-23/cl.owl"``
-``DEFINE NAMESPACE DO AS OWL "http://purl.obolibrary.org/obo/doid/releases/2017-05-05/doid.owl"``
-
-This allows PyBEL to import the semantic information from the ontology as well, and provide much more rich
-algorithms that take into account the hierarchy and synonyms provided.
-
-PyBEL uses the `onto2nx <https://github.com/cthoyt/onto2nx>`_ package to parse OWL documents in many different
-formats, including OWL/XML, RDF/XML, and RDF.
+Previous versions of PyBEL until 0.11.2 had an alternative namespace definition. Now it is recommended to either
+generate namespace files with reproducible build scripts following the Bio2BEL framework, or to directly add them to
+the database with the Bio2BEL NamespaceManagerMixin extension.
 
 Explicit Node Labels
 ~~~~~~~~~~~~~~~~~~~~
