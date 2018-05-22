@@ -425,17 +425,6 @@ def to_bel_path(graph, path, mode='w', **kwargs):
         to_bel(graph, bel_file)
 
 
-def _calculate_cvn(variant):
-    return str(variant)
-
-
-def _calculate_canonical_variant_name(variants):
-    return ', '.join(
-        _calculate_cvn(variant)
-        for variant in variants
-    )
-
-
 def calculate_canonical_name(graph, node):
     """Calculates the canonical name for a given node. If it is a simple node, uses the already given name.
     Otherwise, it uses the BEL string.
@@ -448,13 +437,9 @@ def calculate_canonical_name(graph, node):
     data = graph.node[node]
 
     if data[FUNCTION] == COMPLEX and NAMESPACE in data:
-        return data[NAME]
+        return graph.node[node][NAME]
 
-    variants = data.get(VARIANTS)
-    if variants is not None:
-        if len(variants) == 1 and variants[0][KIND] == PMOD:
-            return '{} [{}]'.format(data[NAME], variants[0][IDENTIFIER][NAME], )
-
+    if VARIANTS in data:
         return node_to_bel(data)
 
     if FUSION in data:
