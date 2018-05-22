@@ -24,16 +24,15 @@ from .base_manager import BaseManager
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
-    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
-    NamespaceEntry, NamespaceEntryEquivalence, Network, Node, Property,
+    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
+    Node, Property,
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..canonicalize import node_to_bel
 from ..constants import *
 from ..language import (
-    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings,
-    pmod_mappings,
+    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
 )
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
@@ -551,94 +550,6 @@ class AnnotationManager(BaseManager):
             annotation_entry = self.session.query(AnnotationEntry).filter_by(annotation=annotation, name=value).one()
 
         return annotation_entry
-
-
-class EquivalenceManager(NamespaceManager):
-    """Manages BEL equivalences"""
-
-    def drop_equivalences(self):
-        """Drops all equivalence classes"""
-        self.session.query(NamespaceEntryEquivalence).delete()
-        self.session.commit()
-
-    def get_equivalence_by_label(self, label):
-        """Gets an equivalence class by its label.
-
-        :param str label: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
-                                    for Alzheimer's Disease
-        :rtype: NamespaceEntryEquivalence
-        """
-        return self.session.query(NamespaceEntryEquivalence).filter(NamespaceEntryEquivalence.label == label).one()
-
-    def ensure_equivalence_class(self, label):
-        """Ensures the equivalence class is loaded in the database"""
-        result = self.session.query(NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
-
-        if result is None:
-            result = NamespaceEntryEquivalence(label=label)
-            self.session.add(result)
-            self.session.commit()
-
-        return result
-
-    def insert_equivalences(self, equivalence_url, namespace_url):
-        """Given a url to a .beleq file and its accompanying namespace url, populate the database
-
-        :param str equivalence_url:
-        :param str namespace_url:
-        :raises: pybel.resources.exc.ResourceError
-        """
-        namespace = self.ensure_namespace(namespace_url)
-
-        if not isinstance(namespace, Namespace):
-            raise ValueError("Can't insert equivalences for non-cachable namespace")
-
-        equivalence_resource = get_bel_resource(equivalence_url)
-        values = equivalence_resource['Values']
-
-        for entry in namespace.entries:
-            label = values[entry.name]
-            entry.equivalence = self.ensure_equivalence_class(label=label)
-
-        namespace.has_equivalences = True
-
-        log.info('inserted equivalences: %s (%d terms)', equivalence_url, len(values))
-
-        self.session.commit()
-
-    def ensure_equivalences(self, url, namespace_url):
-        """Check if the equivalence file is already loaded, and if not, load it
-
-        :param str url: The URL of the equivalence file corresponding to the namespace file
-        :param str namespace_url: The URL of the namespace file
-        :raises: pybel.resources.exc.ResourceError
-        """
-        self.ensure_namespace(namespace_url)
-
-        ns = self.get_namespace_by_url(namespace_url)
-
-        if not ns.has_equivalences:
-            self.insert_equivalences(url, namespace_url)
-
-    def get_equivalence_by_entry(self, url, name):
-        """Gets the equivalence class of the entry in the given namespace
-
-        :param str url: The url of the namespace source
-        :param str name: The value of the namespace from the given url's document
-        :rtype: NamespaceEntryEquivalence
-        """
-        entry = self.get_namespace_entry(url, name)
-        return entry.equivalence
-
-    def get_equivalence_members(self, label):
-        """Gets all members of the given equivalence class
-
-        :param str label: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
-                                    for Alzheimer's Disease
-        :rtype: list[NamespaceEntry]
-        """
-        eq = self.get_equivalence_by_label(label)
-        return eq.members
 
 
 class NetworkManager(NamespaceManager, AnnotationManager):

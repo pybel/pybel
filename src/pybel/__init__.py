@@ -50,10 +50,6 @@ ndex2 supports download and upload to the `Network Data Exchange <ndexbio.org>`_
     - :func:`pybel.to_ndex`
     - :func:`pybel.from_ndex`
 
-deployment
-~~~~~~~~~~
-This extra installs support for Artifactory and enables many of the functions in :mod:`pybel.resources`
-
 neo4j
 ~~~~~
 This extension installs the :mod:`py2neo` package to support upload and download to Neo4j databases.

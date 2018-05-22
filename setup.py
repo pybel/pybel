@@ -46,7 +46,6 @@ if sys.version_info < (3, ):
 
 EXTRAS_REQUIRE = {
     'indra': ['indra'],
-    'deployment': ['artifactory'],
     'ndex': ['ndex2'],
     'neo4j': ['py2neo'],
 }
