@@ -28,7 +28,7 @@ from tests.constants import (
     test_bel_thorough, test_citation_dict, test_evidence_text,
 )
 from tests.mocks import mock_bel_resources
-from tests.utils import make_dummy_annotations, make_dummy_namespaces, n
+from tests.utils import make_dummy_annotations, make_dummy_namespaces, n, n8
 
 log = logging.getLogger(__name__)
 
@@ -1067,7 +1067,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         super(TestReconstituteEdges, self).setUp()
         self.graph = BELGraph(
             name=n(),
-            version=n()
+            version=n8()
         )
 
     def help_insert_graph(self):

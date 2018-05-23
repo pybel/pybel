@@ -119,7 +119,7 @@ class TestCascades(TemporaryCacheMixin):
         """Don't let this happen"""
 
     def test_drop_namespace(self):
-        keyword, url = n(), n()
+        keyword, url = n8(), n()
 
         namespace = Namespace(keyword=keyword, url=url)
         self.manager.session.add(namespace)
