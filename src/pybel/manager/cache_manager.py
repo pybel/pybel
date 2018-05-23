@@ -1479,7 +1479,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         ]
 
 
-class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager):
+class Manager(QueryManager, InsertManager, NetworkManager):
     """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
     SQLite by default for speed and lightness, but any database can be used with its SQLAlchemy interface.
     """
