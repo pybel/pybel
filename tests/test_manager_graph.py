@@ -864,7 +864,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         """Tests a gene modification that uses a non-default namespace"""
         dummy_namespace = n8()
         dummy_name = n()
-        dummy_mod_namespace = n()
+        dummy_mod_namespace = n8()
         dummy_mod_name = n()
 
         node_data = gene(namespace=dummy_namespace, name=dummy_name,
@@ -895,7 +895,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     def test_pmod_custom_simple(self, mock):
         dummy_namespace = n8()
         dummy_name = n()
-        dummy_mod_namespace = n()
+        dummy_mod_namespace = n8()
         dummy_mod_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name,
@@ -916,7 +916,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     def test_pmod_custom_with_residue(self, mock):
         dummy_namespace = n8()
         dummy_name = n()
-        dummy_mod_namespace = n()
+        dummy_mod_namespace = n8()
         dummy_mod_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name,
@@ -937,7 +937,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     def test_pmod_custom_full(self, mock):
         dummy_namespace = n8()
         dummy_name = n()
-        dummy_mod_namespace = n()
+        dummy_mod_namespace = n8()
         dummy_mod_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name,
@@ -1168,7 +1168,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     def test_subject_activity_custom(self, mock):
         p1_name = n()
         p2_name = n()
-        dummy_activity_namespace = n()
+        dummy_activity_namespace = n8()
         dummy_activity_name = n()
 
         self.graph.add_qualified_edge(
@@ -1235,7 +1235,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     def test_object_activity_custom(self, mock):
         p1_name = n()
         p2_name = n()
-        dummy_activity_namespace = n()
+        dummy_activity_namespace = n8()
         dummy_activity_name = n()
 
         self.graph.add_qualified_edge(
