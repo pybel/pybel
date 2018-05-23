@@ -13,6 +13,10 @@ def n():
     return str(uuid4())
 
 
+def n8():
+    return n()[:9]
+
+
 def make_dummy_namespaces(manager, graph, namespaces):
     """
     :param pybel.manager.Manager manager:
