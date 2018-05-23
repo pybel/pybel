@@ -168,17 +168,24 @@ class TestGraphMixin(unittest.TestCase):
 
 class TemporaryCacheMixin(unittest.TestCase):
     def setUp(self):
-        self.fd, self.path = tempfile.mkstemp()
-        self.connection = 'sqlite:///' + self.path
-        log.info('Test generated connection string %s', self.connection)
+        if test_connection:
+            self.connection = test_connection
+        else:
+            self.fd, self.path = tempfile.mkstemp()
+            self.connection = 'sqlite:///' + self.path
+            log.info('Test generated connection string %s', self.connection)
 
         self.manager = Manager(connection=self.connection)
         self.manager.create_all()
 
     def tearDown(self):
         self.manager.session.close()
-        os.close(self.fd)
-        os.remove(self.path)
+
+        if not test_connection:
+            os.close(self.fd)
+            os.remove(self.path)
+        else:
+            self.manager.drop_all()
 
 
 class TemporaryCacheClsMixin(unittest.TestCase):
