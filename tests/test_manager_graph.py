@@ -829,7 +829,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_fragment_unspecified(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment()])
         namespaces = {dummy_namespace: [dummy_name]}
@@ -837,7 +837,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_fragment_specified(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start=5, stop=8)])
         namespaces = {dummy_namespace: [dummy_name]}
@@ -845,7 +845,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_fragment_specified_start_only(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start=5, stop='*')])
         namespaces = {dummy_namespace: [dummy_name]}
@@ -853,7 +853,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_fragment_specified_end_only(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start='*', stop=1000)])
         namespaces = {dummy_namespace: [dummy_name]}
@@ -862,7 +862,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     @mock_bel_resources
     def test_gmod_custom(self, mock):
         """Tests a gene modification that uses a non-default namespace"""
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
         dummy_mod_namespace = n()
         dummy_mod_name = n()
@@ -875,7 +875,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     @mock_bel_resources
     def test_gmod_default(self, mock):
         """Tests a gene modification that uses the BEL default namespace"""
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
 
         node_data = gene(namespace=dummy_namespace, name=dummy_name, variants=[gmod('Me')])
@@ -884,7 +884,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_default_simple(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me')])
@@ -893,7 +893,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_custom_simple(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
         dummy_mod_namespace = n()
         dummy_mod_name = n()
@@ -905,7 +905,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_default_with_residue(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me', code='Ser')])
@@ -914,7 +914,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_custom_with_residue(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
         dummy_mod_namespace = n()
         dummy_mod_name = n()
@@ -926,7 +926,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_default_full(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me', code='Ser', position=5)])
@@ -935,7 +935,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_custom_full(self, mock):
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_name = n()
         dummy_mod_namespace = n()
         dummy_mod_name = n()
