@@ -1420,7 +1420,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Test that a node whose namespace is in the uncached namespaces set can't be added"""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
-        dummy_namespace = n()
+        dummy_namespace = n8()
         dummy_url = n()
 
         graph.namespace_url[dummy_namespace] = dummy_url
@@ -1437,7 +1437,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Test that a fusion node whose 3P partner's namespace is in the uncached namespaces set can't be added"""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
-        dummy_namespace_name = n()
+        dummy_namespace_name = n8()
         dummy_url = n()
 
         graph.namespace_url[dummy_namespace_name] = dummy_url
@@ -1457,7 +1457,7 @@ class TestNoAddNode(TemporaryCacheMixin):
     @mock_bel_resources
     def test_no_node_fusion_5p(self, mock):
         """Test that a node whose namespace is in the uncached namespaces set can't be added"""
-        dummy_namespace_name = n()
+        dummy_namespace_name = n8()
 
         node_data = protein_fusion(
             partner_3p=protein(namespace='HGNC', name='YFG'),
@@ -1478,7 +1478,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Test that a protein node whose pmod variant is in the uncached namespaces set can't be added"""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
-        dummy_namespace_name = n()
+        dummy_namespace_name = n8()
         dummy_url = n()
 
         graph.namespace_url[dummy_namespace_name] = dummy_url
@@ -1500,7 +1500,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Test that a gene node whose gmod variant is in the uncached namespaces set can't be added"""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
-        dummy_namespace_name = n()
+        dummy_namespace_name = n8()
         dummy_url = n()
 
         graph.namespace_url[dummy_namespace_name] = dummy_url
@@ -1522,7 +1522,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """This test checks that a translocation using custom namespaces doesn't get stored"""
         graph = BELGraph(name='dummy graph', version='0.0.1')
 
-        dummy_namespace_name = n()
+        dummy_namespace_name = n8()
         dummy_namespace_url = n()
 
         graph.namespace_url[dummy_namespace_name] = dummy_namespace_url
@@ -1551,7 +1551,7 @@ class TestNoAddNode(TemporaryCacheMixin):
     def test_no_location(self, mock):
         """Tests that when using a custom namespace in the location the edge doesn't get stored"""
         graph = BELGraph(name='dummy graph', version='0.0.1')
-        dummy_namespace_name = n()
+        dummy_namespace_name = n8()
         dummy_url = n()
         graph.namespace_url[dummy_namespace_name] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
@@ -1579,7 +1579,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Tests that when an uncached custom namespace is used in the activity on an edge, the edge doesn't get
         stored"""
         graph = BELGraph(name='dummy graph', version='0.0.1')
-        dummy_namespace_name = n()
+        dummy_namespace_name = n8()
         dummy_url = n()
         graph.namespace_url[dummy_namespace_name] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
