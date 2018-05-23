@@ -49,10 +49,13 @@ class TestDefinitionManagers(FleetingTemporaryCacheMixin):
 
     def test_insert_namespace_nocache(self):
         """Test that this namespace isn't cached"""
-        self.assertEqual(0, len(self.manager.list_namespaces()))
+        self.assertEqual(0, self.manager.count_namespaces())
+        self.assertEqual(0, self.manager.count_namespace_entries())
+
         self.manager.ensure_namespace(test_ns_nocache_path)
 
-        self.assertEqual(0, len(self.manager.list_namespaces()))
+        self.assertEqual(0, self.manager.count_namespaces())
+        self.assertEqual(0, self.manager.count_namespace_entries())
 
     @mock_bel_resources
     def test_insert_annotation(self, mock_get):
