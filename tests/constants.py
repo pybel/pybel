@@ -19,10 +19,10 @@ from pybel.utils import subdict_matches
 log = logging.getLogger(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-bel_dir_path = os.path.join(dir_path, 'bel')
-belns_dir_path = os.path.join(dir_path, 'belns')
-belanno_dir_path = os.path.join(dir_path, 'belanno')
-beleq_dir_path = os.path.join(dir_path, 'beleq')
+resources_dir_path = os.path.join(dir_path, 'resources')
+bel_dir_path = os.path.join(resources_dir_path, 'bel')
+belns_dir_path = os.path.join(resources_dir_path, 'belns')
+belanno_dir_path = os.path.join(resources_dir_path, 'belanno')
 
 test_bel_simple = os.path.join(bel_dir_path, 'test_bel.bel')
 test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')

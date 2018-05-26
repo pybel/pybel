@@ -5,7 +5,7 @@
 import os
 
 from pybel.constants import GOCC_LATEST
-from tests.constants import bel_dir_path, belanno_dir_path, beleq_dir_path, belns_dir_path, get_uri_name
+from tests.constants import bel_dir_path, belanno_dir_path, belns_dir_path, get_uri_name
 
 try:
     from unittest import mock
@@ -33,8 +33,6 @@ class MockResponse:
             self.path = os.path.join(belns_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.belanno'):
             self.path = os.path.join(belanno_dir_path, get_uri_name(mock_url))
-        elif mock_url.endswith('.beleq'):
-            self.path = os.path.join(beleq_dir_path, get_uri_name(mock_url))
         elif mock_url.endswith('.bel'):
             self.path = os.path.join(bel_dir_path, get_uri_name(mock_url))
         else:
