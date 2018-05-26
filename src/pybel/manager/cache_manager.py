@@ -538,6 +538,16 @@ class AnnotationManager(BaseManager):
         self.session.query(Annotation).delete()
         self.session.commit()
 
+    def drop_annotation_by_url(self, url):
+        """Drops the annotation at the given URL. Won't work if the edge store is in use.
+
+        :param str url: The URL of the annotation to drop
+        """
+        annotation = self.get_annotation_by_url(url)
+        self.session.query(AnnotationEntry).filter(AnnotationEntry.annotation == annotation).delete()
+        self.session.delete(annotation)
+        self.session.commit()
+
     def _cache_annotation(self, annotation):
         """Caches an annotation
 
