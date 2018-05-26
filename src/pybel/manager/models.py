@@ -664,7 +664,7 @@ class Author(Base):
     __tablename__ = AUTHOR_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False, unique=True, index=True)
+    name = Column(String(255), nullable=False, unique=True, index=True, collation='utf8_unicode_ci')
 
     @staticmethod
     def name_contains(name_query):
