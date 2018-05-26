@@ -14,8 +14,8 @@ python:
 
 env:
   - TOXENV=py DB=mysql
-    PYBEL_TEST_CONNECTOR=pymysql
-    PYBEL_TEST_CONNECTION=mysql+pymysql://travis@localhost/test?charset=utf8
+    PYBEL_TEST_CONNECTOR=mysqlclient
+    PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
 
   - TOXENV=py DB=postgres
     PYBEL_TEST_CONNECTOR=psycopg2
@@ -34,6 +34,7 @@ before_script:
   - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'DROP DATABASE IF EXISTS tests_tmp;' -U postgres; fi"
   - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'CREATE DATABASE tests;' -U postgres; fi"
   - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'CREATE DATABASE tests_tmp;' -U postgres; fi"
+  - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'DROP DATABASE IF EXISTS test;'; fi"
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE test CHARACTER SET utf8 COLLATE utf8_general_ci;'; fi"
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e \"GRANT ALL PRIVILEGES ON test.* to 'travis'@'%' WITH GRANT OPTION;\"; fi"
 

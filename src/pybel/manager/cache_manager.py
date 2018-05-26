@@ -452,7 +452,7 @@ class AnnotationManager(BaseManager):
     def drop_annotation_by_url(self, url):
         """Drops the annotation at the given URL. Won't work if the edge store is in use.
 
-        :param str url: The URL of the namespace to drop
+        :param str url: The URL of the annotation to drop
         """
         annotation = self.get_annotation_by_url(url)
         self.session.query(AnnotationEntry).filter(AnnotationEntry.annotation == annotation).delete()
