@@ -28,7 +28,7 @@ from tests.constants import (
     test_bel_thorough, test_citation_dict, test_evidence_text,
 )
 from tests.mocks import mock_bel_resources
-from tests.utils import make_dummy_annotations, make_dummy_namespaces, n, n8
+from tests.utils import make_dummy_annotations, make_dummy_namespaces, n
 
 log = logging.getLogger(__name__)
 
@@ -829,7 +829,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_fragment_unspecified(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment()])
         namespaces = {dummy_namespace: [dummy_name]}
@@ -837,7 +837,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_fragment_specified(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start=5, stop=8)])
         namespaces = {dummy_namespace: [dummy_name]}
@@ -845,7 +845,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_fragment_specified_start_only(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start=5, stop='*')])
         namespaces = {dummy_namespace: [dummy_name]}
@@ -853,7 +853,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_fragment_specified_end_only(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start='*', stop=1000)])
         namespaces = {dummy_namespace: [dummy_name]}
@@ -862,9 +862,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     @mock_bel_resources
     def test_gmod_custom(self, mock):
         """Tests a gene modification that uses a non-default namespace"""
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
-        dummy_mod_namespace = n8()
+        dummy_mod_namespace = n()
         dummy_mod_name = n()
 
         node_data = gene(namespace=dummy_namespace, name=dummy_name,
@@ -875,7 +875,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     @mock_bel_resources
     def test_gmod_default(self, mock):
         """Tests a gene modification that uses the BEL default namespace"""
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
 
         node_data = gene(namespace=dummy_namespace, name=dummy_name, variants=[gmod('Me')])
@@ -884,7 +884,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_default_simple(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me')])
@@ -893,9 +893,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_custom_simple(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
-        dummy_mod_namespace = n8()
+        dummy_mod_namespace = n()
         dummy_mod_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name,
@@ -905,7 +905,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_default_with_residue(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me', code='Ser')])
@@ -914,9 +914,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_custom_with_residue(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
-        dummy_mod_namespace = n8()
+        dummy_mod_namespace = n()
         dummy_mod_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name,
@@ -926,7 +926,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_default_full(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me', code='Ser', position=5)])
@@ -935,9 +935,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_pmod_custom_full(self, mock):
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_name = n()
-        dummy_mod_namespace = n8()
+        dummy_mod_namespace = n()
         dummy_mod_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name,
@@ -1067,7 +1067,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         super(TestReconstituteEdges, self).setUp()
         self.graph = BELGraph(
             name=n(),
-            version=n8()
+            version=n()
         )
 
     def help_insert_graph(self):
@@ -1168,7 +1168,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     def test_subject_activity_custom(self, mock):
         p1_name = n()
         p2_name = n()
-        dummy_activity_namespace = n8()
+        dummy_activity_namespace = n()
         dummy_activity_name = n()
 
         self.graph.add_qualified_edge(
@@ -1235,7 +1235,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     def test_object_activity_custom(self, mock):
         p1_name = n()
         p2_name = n()
-        dummy_activity_namespace = n8()
+        dummy_activity_namespace = n()
         dummy_activity_name = n()
 
         self.graph.add_qualified_edge(
@@ -1420,7 +1420,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Test that a node whose namespace is in the uncached namespaces set can't be added"""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
-        dummy_namespace = n8()
+        dummy_namespace = n()
         dummy_url = n()
 
         graph.namespace_url[dummy_namespace] = dummy_url
@@ -1437,7 +1437,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Test that a fusion node whose 3P partner's namespace is in the uncached namespaces set can't be added"""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
-        dummy_namespace_name = n8()
+        dummy_namespace_name = n()
         dummy_url = n()
 
         graph.namespace_url[dummy_namespace_name] = dummy_url
@@ -1457,7 +1457,7 @@ class TestNoAddNode(TemporaryCacheMixin):
     @mock_bel_resources
     def test_no_node_fusion_5p(self, mock):
         """Test that a node whose namespace is in the uncached namespaces set can't be added"""
-        dummy_namespace_name = n8()
+        dummy_namespace_name = n()
 
         node_data = protein_fusion(
             partner_3p=protein(namespace='HGNC', name='YFG'),
@@ -1478,7 +1478,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Test that a protein node whose pmod variant is in the uncached namespaces set can't be added"""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
-        dummy_namespace_name = n8()
+        dummy_namespace_name = n()
         dummy_url = n()
 
         graph.namespace_url[dummy_namespace_name] = dummy_url
@@ -1500,7 +1500,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Test that a gene node whose gmod variant is in the uncached namespaces set can't be added"""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
-        dummy_namespace_name = n8()
+        dummy_namespace_name = n()
         dummy_url = n()
 
         graph.namespace_url[dummy_namespace_name] = dummy_url
@@ -1522,7 +1522,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """This test checks that a translocation using custom namespaces doesn't get stored"""
         graph = BELGraph(name='dummy graph', version='0.0.1')
 
-        dummy_namespace_name = n8()
+        dummy_namespace_name = n()
         dummy_namespace_url = n()
 
         graph.namespace_url[dummy_namespace_name] = dummy_namespace_url
@@ -1551,7 +1551,7 @@ class TestNoAddNode(TemporaryCacheMixin):
     def test_no_location(self, mock):
         """Tests that when using a custom namespace in the location the edge doesn't get stored"""
         graph = BELGraph(name='dummy graph', version='0.0.1')
-        dummy_namespace_name = n8()
+        dummy_namespace_name = n()
         dummy_url = n()
         graph.namespace_url[dummy_namespace_name] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
@@ -1579,7 +1579,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         """Tests that when an uncached custom namespace is used in the activity on an edge, the edge doesn't get
         stored"""
         graph = BELGraph(name='dummy graph', version='0.0.1')
-        dummy_namespace_name = n8()
+        dummy_namespace_name = n()
         dummy_url = n()
         graph.namespace_url[dummy_namespace_name] = dummy_url
         graph.uncached_namespaces.add(dummy_url)

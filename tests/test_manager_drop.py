@@ -6,7 +6,7 @@ from pybel.dsl import protein
 from pybel.manager.models import Edge, Namespace, NamespaceEntry, Network, Node
 from tests.constants import TemporaryCacheMixin, test_citation_dict, test_evidence_text
 from tests.mocks import mock_bel_resources
-from tests.utils import make_dummy_annotations, make_dummy_namespaces, n, n8
+from tests.utils import make_dummy_annotations, make_dummy_namespaces, n
 
 yfg1 = protein(name='YFG1', namespace='HGNC')
 yfg2 = protein(name='YFG1', namespace='HGNC')
@@ -56,8 +56,8 @@ class TestCascades(TemporaryCacheMixin):
         self.e1 = Edge(source=self.n1, target=self.n2, relation=INCREASES, bel='p(HGNC:A) increases p(HGNC:B)')
         self.e2 = Edge(source=self.n2, target=self.n3, relation=INCREASES, bel='p(HGNC:B) increases p(HGNC:C)')
         self.e3 = Edge(source=self.n1, target=self.n3, relation=INCREASES, bel='p(HGNC:A) increases p(HGNC:C)')
-        self.g1 = Network(name=n(), version=n8(), edges=[self.e1, self.e2, self.e3])
-        self.g2 = Network(name=n(), version=n8(), edges=[self.e1])
+        self.g1 = Network(name=n(), version=n(), edges=[self.e1, self.e2, self.e3])
+        self.g2 = Network(name=n(), version=n(), edges=[self.e1])
 
         self.manager.session.add_all([self.n1, self.n2, self.n3, self.e1, self.e2, self.e3, self.g1, self.g2])
         self.manager.session.commit()
@@ -119,7 +119,7 @@ class TestCascades(TemporaryCacheMixin):
         """Don't let this happen"""
 
     def test_drop_namespace(self):
-        keyword, url = n8(), n()
+        keyword, url = n(), n()
 
         namespace = Namespace(keyword=keyword, url=url)
         self.manager.session.add(namespace)
