@@ -9,13 +9,13 @@ enable this option, but can specify a database location if they choose.
 
 from __future__ import unicode_literals
 
+import logging
+import time
 from collections import defaultdict
+from copy import deepcopy
 from itertools import chain, groupby
 
-import logging
 import six
-import time
-from copy import deepcopy
 from six import string_types
 from sqlalchemy import and_, exists, func
 from tqdm import tqdm
@@ -447,6 +447,16 @@ class AnnotationManager(BaseManager):
 
         self.session.query(AnnotationEntry).delete()
         self.session.query(Annotation).delete()
+        self.session.commit()
+
+    def drop_namespace_by_url(self, url):
+        """Drops the annotation at the given URL. Won't work if the edge store is in use.
+
+        :param str url: The URL of the namespace to drop
+        """
+        annotation = self.get_annotation_by_url(url)
+        self.session.query(AnnotationEntry).filter(AnnotationEntry.annotation == annotation).delete()
+        self.session.delete(annotation)
         self.session.commit()
 
     def _cache_annotation(self, annotation):
