@@ -10,7 +10,7 @@ def n():
 
     :rtype: str
     """
-    return str(uuid4())[:8]
+    return str(uuid4())[:15]
 
 
 def make_dummy_namespaces(manager, graph, namespaces):

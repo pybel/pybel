@@ -39,7 +39,7 @@ packages that support special features of PyBEL optional to install, in order to
 default. A single extra can be installed from PyPI like :code:`python3 -m pip install -e pybel[ndex]` or multiple can
 be installed using a list like :code:`python3 -m pip install -e pybel[ndex,owl]`. Likewise, for developer installation,
 extras can be installed in editable mode with :code:`python3 -m pip install -e .[ndex]` or multiple can be installed
-using a list like :code:`python3 -m pip install -e .[ndex,owl]`. The avaliable extras are:
+using a list like :code:`python3 -m pip install -e .[neo4j,ndex]`. The available extras are:
 
 ndex
 ~~~~
@@ -49,11 +49,6 @@ ndex2 supports download and upload to the `Network Data Exchange <ndexbio.org>`_
 
     - :func:`pybel.to_ndex`
     - :func:`pybel.from_ndex`
-
-owl
-~~~
-This extra installs support for using OWL ontologies as namespaces via the :mod:`onto2nx` package. In the future,
-this extra will include other wrappers around packages like :mod:`obonet` for OBO support.
 
 neo4j
 ~~~~~

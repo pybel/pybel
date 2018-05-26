@@ -9,6 +9,5 @@ tqdm
 
 # Extras
 indra[indra]
-onto2nx[owl]
 ndex2[ndex]
 py2neo[neo4j]

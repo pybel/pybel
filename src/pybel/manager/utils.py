@@ -1,64 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import networkx as nx
-from requests.compat import urldefrag
-
-from ..resources.utils import download
 from ..utils import parse_datetime
-
-
-def parse_owl(url):
-    """Downloads and parses an OWL resource in OWL/XML or any format supported by onto2nx/ontospy package.
-    Is a thin wrapper around :func:`parse_owl_pybel` and :func:`parse_owl_rdf`.
-    
-    :param str url: The URL to the OWL resource
-    :return: A directional graph representing the OWL document's hierarchy
-    :rtype: networkx.DiGraph
-    """
-    try:
-        return parse_owl_xml(url)
-    except:
-        return parse_owl_rdf(url)
-
-
-def parse_owl_xml(url):
-    """Downloads and parses an OWL resource in OWL/XML format using :class:`onto2nx.parse_owl_xml.OWLParser`
-    
-    :param str url: The URL to the OWL resource
-    :return: A directional graph representing the OWL document's hierarchy
-    :rtype: networkx.DiGraph
-    """
-    from onto2nx.parse_owl_xml import OWLParser
-
-    res = download(url)
-    rv = OWLParser(content=res.content)
-
-    return rv
-
-
-def parse_owl_rdf(url):
-    """Downloads and parses an OWL resource in OWL/RDF format
-
-    :param str url: The URL to the OWL resource
-    :return: A directional graph representing the OWL document's hierarchy
-    :rtype: networkx.DiGraph
-    """
-    from onto2nx.ontospy import Ontospy
-
-    rv = nx.DiGraph(IRI=url)
-    o = Ontospy(url)
-
-    for cls in o.classes:
-        rv.add_node(cls.locale, type='Class')
-
-        for parent in cls.parents():
-            rv.add_edge(cls.locale, parent.locale, type='SubClassOf')
-
-        for instance in cls.instances():
-            _, frag = urldefrag(instance)
-            rv.add_edge(frag, cls.locale, type='ClassAssertion')
-
-    return rv
 
 
 def extract_shared_required(config, definition_header='Namespace'):
