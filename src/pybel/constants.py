@@ -102,9 +102,10 @@ def get_cache_connection(connection=None):
         log.info('getting user-defined connection: %s', connection)
         return connection
 
-    if PYBEL_CONNECTION in environ:
-        log.info('getting environment-defined connection: %s', environ[PYBEL_CONNECTION])
-        return environ[PYBEL_CONNECTION]
+    connection = environ.get(PYBEL_CONNECTION)
+    if connection is not None:
+        log.info('getting environment-defined connection: %s', connection)
+        return connection
 
     log.info('getting default connection %s', config[PYBEL_CONNECTION])
     return config[PYBEL_CONNECTION]
