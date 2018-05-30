@@ -97,6 +97,21 @@ def _clean_bel_namespace_values(bel_resource):
     }
 
 
+def _normalize_url(graph, keyword):  # FIXME move to utilities and unit test
+    """
+    :type graph: BELGraph
+    :param str keyword: Namespace URL keyword
+    :rtype: Optional[str]
+    """
+    if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
+        return BEL_DEFAULT_NAMESPACE_URL
+
+    if keyword == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
+        return GOCC_LATEST
+
+    return graph.namespace_url.get(keyword)
+
+
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces"""
 
@@ -1323,7 +1338,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
                 elif mod_type in {GMOD, PMOD}:
                     variant_identifier = variant[IDENTIFIER]
-                    namespace_url = normalize_url(graph, variant_identifier[NAMESPACE])
+                    namespace_url = _normalize_url(graph, variant_identifier[NAMESPACE])
 
                     if namespace_url in graph.uncached_namespaces:
                         log.warning('uncached namespace %s in fusion()', namespace_url)
@@ -1467,7 +1482,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 elif modifier == ACTIVITY:
                     effect = participant_data.get(EFFECT)
                     if effect is not None:
-                        namespace_url = normalize_url(graph, effect[NAMESPACE])
+                        namespace_url = _normalize_url(graph, effect[NAMESPACE])
 
                         if namespace_url in graph.uncached_namespaces:
                             log.warning('uncached namespace %s in fusion()', namespace_url)
@@ -1509,18 +1524,3 @@ class Manager(QueryManager, InsertManager, NetworkManager):
             return Manager(connection=connection, *args, **kwargs)
 
         return connection
-
-
-def normalize_url(graph, keyword):  # FIXME move to utilities and unit test
-    """
-    :type graph: BELGraph
-    :param str keyword: Namespace URL keyword
-    :rtype: Optional[str]
-    """
-    if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
-        return BEL_DEFAULT_NAMESPACE_URL
-
-    if keyword == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
-        return GOCC_LATEST
-
-    return graph.namespace_url.get(keyword)
