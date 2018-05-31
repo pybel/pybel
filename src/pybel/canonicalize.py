@@ -5,11 +5,12 @@
 from __future__ import print_function
 
 import itertools as itt
+
 import logging
 
 from .constants import *
 from .resources.document import make_knowledge_header
-from .utils import ensure_quotes, flatten_citation, hash_edge
+from .utils import ensure_quotes
 
 __all__ = [
     'to_bel_lines',
@@ -289,9 +290,9 @@ def _unset_annotation_to_str(keys):
 
 
 def _to_bel_lines_header(graph):
-    """
+    """Iterate the lines of a BEL graph's corresponding BEL script's header.
 
-    :param graph:
+    :param pybel.BELGraph graph: A BEL graph
     :rtype: iter[str]
     """
     if GOCC_KEYWORD not in graph.namespace_url:
@@ -299,10 +300,8 @@ def _to_bel_lines_header(graph):
 
     return make_knowledge_header(
         namespace_url=graph.namespace_url,
-        namespace_owl=graph.namespace_owl,
         namespace_patterns=graph.namespace_pattern,
         annotation_url=graph.annotation_url,
-        annotation_owl=graph.annotation_owl,
         annotation_patterns=graph.annotation_pattern,
         annotation_list=graph.annotation_list,
         **graph.document
@@ -328,9 +327,9 @@ def group_evidence_edges(edges_iter):
 
 
 def _to_bel_lines_body(graph):
-    """
+    """Iterate the lines of a BEL graph's corresponding BEL script's body.
 
-    :param graph:
+    :param pybel.BELGraph graph: A BEL graph
     :rtype: iter[str]
     """
     qualified_edges = sort_qualified_edges(graph)
@@ -359,9 +358,9 @@ def _to_bel_lines_body(graph):
 
 
 def _to_bel_lines_footer(graph):
-    """
+    """Iterate the lines of a BEL graph's corresponding BEL script's footer.
 
-    :param graph:
+    :param pybel.BELGraph graph: A BEL graph
     :rtype: iter[str]
     """
     unqualified_edges_to_serialize = [
@@ -450,7 +449,7 @@ def calculate_canonical_name(graph, node):
         return node_to_bel(data)
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
-        return graph.node[node][NAME]
+        return data[NAME]
 
     raise ValueError('Unexpected node data: {}'.format(data))
 

@@ -57,7 +57,7 @@ def and_edge_predicates(edge_predicates=None):
     if not isinstance(edge_predicates, Iterable):
         return edge_predicates
 
-    edge_predicates = list(edge_predicates)
+    edge_predicates = tuple(edge_predicates)
 
     # If only one predicate is given, don't bother wrapping it
     if 1 == len(edge_predicates):

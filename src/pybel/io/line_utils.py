@@ -29,7 +29,7 @@ parse_log = logging.getLogger('pybel.parser')
 METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, **kwargs):
+def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False, **kwargs):
     """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
     and :func:`parse_statements`.
 
@@ -41,6 +41,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool allow_nested: If true, turns off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
+    :param bool use_tqdm: If true, use tqdm for logging
 
     .. warning::
 
@@ -79,7 +80,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         no_identifier_validation=kwargs.get('no_identifier_validation'),
     )
 
-    if kwargs.get('use_tqdm'):
+    if use_tqdm:
         statements = tqdm(statements, desc='Statements', total=len(statements))
 
     parse_statements(graph, statements, bel_parser)
@@ -154,11 +155,9 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
                 six.raise_from(MalformedMetadataException(line_number, line), e)
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
-    graph.namespace_owl.update(metadata_parser.namespace_owl_dict)
     graph.namespace_pattern.update(metadata_parser.namespace_regex)
 
     graph.annotation_url.update(metadata_parser.annotation_url_dict)
-    graph.annotation_owl.update(metadata_parser.annotation_owl_dict)
     graph.annotation_pattern.update(metadata_parser.annotation_regex)
     graph.annotation_list.update({
         keyword: metadata_parser.annotation_dict[keyword]

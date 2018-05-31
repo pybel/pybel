@@ -17,9 +17,6 @@ from .constants import (
 
 log = logging.getLogger(__name__)
 
-PYBEL_MYSQL_FMT_NOPASS = 'mysql+pymysql://{user}@{host}/{database}?charset={charset}'
-PYBEL_MYSQL_FMT_PASS = 'mysql+pymysql://{user}:{password}@{host}/{database}?charset={charset}'
-
 
 def expand_dict(flat_dict, sep='_'):
     """Expands a flattened dictionary
@@ -224,7 +221,7 @@ def hash_node(node_tuple):
     """Converts a PyBEL node tuple to a hash
 
     :param tuple node_tuple: A BEL node
-    :return: A hashed version of the node tuple using md5 hash of the binary pickle dump
+    :return: A hashed version of the node tuple using :func:`hashlib.sha512` hash of the binary pickle dump
     :rtype: str
     """
     return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()

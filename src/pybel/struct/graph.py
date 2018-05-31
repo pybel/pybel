@@ -24,10 +24,8 @@ log = logging.getLogger(__name__)
 
 RESOURCE_DICTIONARY_NAMES = (
     GRAPH_NAMESPACE_URL,
-    GRAPH_NAMESPACE_OWL,
     GRAPH_NAMESPACE_PATTERN,
     GRAPH_ANNOTATION_URL,
-    GRAPH_ANNOTATION_OWL,
     GRAPH_ANNOTATION_PATTERN,
     GRAPH_ANNOTATION_LIST,
 )
@@ -226,14 +224,6 @@ class BELGraph(networkx.MultiDiGraph):
         """
         return self.graph[GRAPH_NAMESPACE_URL]
 
-    @property
-    def namespace_owl(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the OWL files from the
-        ``DEFINE NAMESPACE [key] AS OWL "[value]"`` entries in the definitions section
-
-        :rtype: dict[str,str]
-        """
-        return self.graph[GRAPH_NAMESPACE_OWL]
 
     @property
     def defined_namespace_keywords(self):
@@ -243,8 +233,7 @@ class BELGraph(networkx.MultiDiGraph):
         """
         return (
                 set(self.namespace_pattern) |
-                set(self.namespace_url) |
-                set(self.namespace_owl)
+                set(self.namespace_url)
         )
 
     @property
@@ -275,15 +264,6 @@ class BELGraph(networkx.MultiDiGraph):
         return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
-    def annotation_owl(self):
-        """A dictionary mapping the annotation keywords used to creat ethis graph to the URLs of the OWL files
-        from the ``DEFINE ANNOTATION [key] AS OWL "[value]"`` entries in the definitions section
-
-        :rtype: dict[str,str]
-        """
-        return self.graph[GRAPH_ANNOTATION_OWL]
-
-    @property
     def annotation_pattern(self):
         """A dictionary mapping the annotation keywords used to create this graph to their regex patterns
         from the ``DEFINE ANNOTATION [key] AS PATTERN "[value]"`` entries in the definitions section
@@ -310,7 +290,6 @@ class BELGraph(networkx.MultiDiGraph):
         return (
                 set(self.annotation_pattern) |
                 set(self.annotation_url) |
-                set(self.annotation_owl) |
                 set(self.annotation_list)
         )
 
@@ -452,15 +431,6 @@ class BELGraph(networkx.MultiDiGraph):
             for _, data in self.nodes_iter(data=True)
         )
 
-    @staticmethod
-    def hash_node(data):
-        """Converts a PyBEL node data dictionary to a PyBEL node tuple
-
-        :param dict data: A PyBEL node data dictionary
-        :rtype: tuple
-        """
-        return node_to_tuple(data)
-
     def add_node_from_data(self, attr_dict):
         """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
@@ -468,7 +438,7 @@ class BELGraph(networkx.MultiDiGraph):
         :return: A PyBEL node tuple
         :rtype: tuple
         """
-        node_tuple = self.hash_node(attr_dict)
+        node_tuple = node_to_tuple(attr_dict)
 
         if node_tuple in self:
             return node_tuple

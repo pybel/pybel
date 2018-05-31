@@ -12,13 +12,13 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 :data:`pybel.constants.config`.
 """
 
-from json import dump, load
+from json import load
 from logging import getLogger
 from os import environ, makedirs, mkdir, path
 
 log = getLogger(__name__)
 
-VERSION = '0.11.1'
+VERSION = '0.11.2'
 
 #: The last PyBEL version where the graph data definition changed
 PYBEL_MINIMUM_IMPORT_VERSION = 0, 11, 0
@@ -43,7 +43,10 @@ PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 #: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
 PYBEL_DIR = environ.get('PYBEL_RESOURCE_DIRECTORY', path.join(path.expanduser('~'), '.pybel'))
 if not path.exists(PYBEL_DIR):
-    mkdir(PYBEL_DIR)
+    try:
+        mkdir(PYBEL_DIR)
+    except FileExistsError:
+        log.debug('pybel data directory was created already: %s', PYBEL_DIR)
 
 DEFAULT_CACHE_NAME = 'pybel_{}.{}.{}_cache.db'.format(*PYBEL_MINIMUM_IMPORT_VERSION)
 #: The default cache location is ``~/.pybel/data/pybel_cache.db``
@@ -51,22 +54,42 @@ DEFAULT_CACHE_LOCATION = path.join(PYBEL_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
-PYBEL_CONFIG_DIR = environ.get('PYBEL_CONFIG_DIRECTORY', path.join(path.expanduser('~'), '.config', 'pybel'))
-if not path.exists(PYBEL_CONFIG_DIR):
-    makedirs(PYBEL_CONFIG_DIR)
+
+def get_config_dir():
+    """Returns the path to the directory where configuration is stored for PyBEL. Can be overridden by setting the
+    environment variable ``PYBEL_CONFIG_DIRECTORY``.
+
+    :rtype: str
+    """
+    return environ.get('PYBEL_CONFIG_DIRECTORY', path.join(path.expanduser('~'), '.config', 'pybel'))
+
+
+_config_dir = get_config_dir()
+if not path.exists(_config_dir):
+    try:
+        makedirs(_config_dir)
+    except FileExistsError:
+        log.debug('config folder was already created: %s', _config_dir)
 
 #: The global configuration for PyBEL is stored here. By default, it loads from ``~/.config/pybel/config.json``
-config = {}
+config = {
+    PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION
+}
 
-PYBEL_CONFIG_PATH = path.join(PYBEL_CONFIG_DIR, 'config.json')
-if not path.exists(PYBEL_CONFIG_PATH):
-    with open(PYBEL_CONFIG_PATH, 'w') as f:
-        config.update({PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION})
-        dump(config, f)
-else:
-    with open(PYBEL_CONFIG_PATH) as f:
+
+def get_config_path():
+    """Returns the path of the configuration file, which should just be a file called ``config.json`` inside the
+    directory returned by :func:`get_config_dir`
+
+    :rtype: str
+    """
+    return path.join(_config_dir, 'config.json')
+
+
+_config_path = get_config_path()
+if path.exists(_config_path):
+    with open(_config_path) as f:
         config.update(load(f))
-        config.setdefault(PYBEL_CONNECTION, DEFAULT_CACHE_CONNECTION)
 
 
 def get_cache_connection(connection=None):
@@ -79,9 +102,10 @@ def get_cache_connection(connection=None):
         log.info('getting user-defined connection: %s', connection)
         return connection
 
-    if PYBEL_CONNECTION in environ:
-        log.info('getting environment-defined connection: %s', environ[PYBEL_CONNECTION])
-        return environ[PYBEL_CONNECTION]
+    connection = environ.get(PYBEL_CONNECTION)
+    if connection is not None:
+        log.info('getting environment-defined connection: %s', connection)
+        return connection
 
     log.info('getting default connection %s', config[PYBEL_CONNECTION])
     return config[PYBEL_CONNECTION]
@@ -484,10 +508,8 @@ BEL_KEYWORD_METADATA_PROJECT = 'Project'
 #: the property built in to the :class:`pybel.BELGraph`, :func:`pybel.BELGraph.document`
 GRAPH_METADATA = 'document_metadata'
 GRAPH_NAMESPACE_URL = 'namespace_url'
-GRAPH_NAMESPACE_OWL = 'namespace_owl'
 GRAPH_NAMESPACE_PATTERN = 'namespace_pattern'
 GRAPH_ANNOTATION_URL = 'annotation_url'
-GRAPH_ANNOTATION_OWL = 'annotation_owl'
 GRAPH_ANNOTATION_PATTERN = 'annotation_pattern'
 GRAPH_ANNOTATION_LIST = 'annotation_list'
 GRAPH_WARNINGS = 'warnings'
@@ -608,5 +630,9 @@ belns_encodings = {
 
 BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))
 
+PYBEL_REMOTE_HOST = 'PYBEL_REMOTE_HOST'
+PYBEL_REMOTE_USER = 'PYBEL_REMOTE_USER'
+PYBEL_REMOTE_PASSWORD = 'PYBEL_REMOTE_PASSWORD'
+
 #: The default location of PyBEL Web
-DEFAULT_SERVICE_URL = 'https://pybel.scai.fraunhofer.de'
+DEFAULT_SERVICE_URL = 'https://bel-commons.scai.fraunhofer.de'

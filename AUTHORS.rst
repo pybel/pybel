@@ -11,6 +11,7 @@ Code Contributors
 - `Andrej Konotopez <https://github.com/lekono>`_
 - `Scott Colby <https://github.com/scolby33>`_
 - `Daniel Domingo-Fernández <https://github.com/ddomingof>`_
+- `Ben Gyori <https://github.com/bgyori>`_
 
 Other Contributors
 ------------------

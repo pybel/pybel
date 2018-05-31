@@ -14,21 +14,23 @@ problems--the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
-import json
 import logging
 import sys
 
 import click
 
 from .canonicalize import to_bel
-from .constants import PYBEL_CONFIG_PATH, PYBEL_CONNECTION, config, get_cache_connection
+from .constants import get_cache_connection
 from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
 from .manager import Manager, defaults
 from .manager.database_io import from_database, to_database
-from .manager.models import Base, Edge
-from .utils import PYBEL_MYSQL_FMT_NOPASS, PYBEL_MYSQL_FMT_PASS
+from .manager.models import Base, Edge, Namespace
 
 log = logging.getLogger(__name__)
+
+
+def _page(it):
+    click.echo_via_pager('\n'.join(map(str, it)))
 
 
 @click.group(
@@ -151,78 +153,6 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
     sys.exit(0 if 0 == len(g.warnings) else 1)
 
 
-def set_default(key, value):
-    """Sets the default setting for this key/value pair. Does NOT update the current config.
-
-    :param str key:
-    :param str value:
-    """
-    with open(PYBEL_CONFIG_PATH) as f:
-        default_config = json.load(f)
-
-    default_config[key] = value
-
-    with open(PYBEL_CONFIG_PATH, 'w') as f:
-        json.dump(f, default_config)
-
-
-def set_default_connection(value):
-    """Sets the default connection string with the given value. See
-    http://docs.sqlalchemy.org/en/latest/core/engines.html for examples"""
-    set_default(PYBEL_CONNECTION, value)
-
-
-def set_default_mysql_connection(user=None, password=None, host=None, database=None, charset=None):
-    """Sets the default connection string with MySQL settings
-
-    :param host: MySQL database host
-    :param user: MySQL database user
-    :param password: MySQL database password. Can be None if no password is used.
-    :param database: MySQL database name
-    :param charset: MySQL database character set
-    """
-    kwargs = dict(
-        user=user or 'pybel',
-        host=host or 'localhost',
-        password=password,
-        database=database or 'pybel',
-        charset=charset or 'utf8'
-    )
-
-    fmt = PYBEL_MYSQL_FMT_NOPASS if password is None else PYBEL_MYSQL_FMT_PASS
-
-    set_default_connection(fmt.format(**kwargs))
-
-
-@main.group(help="Edit connection settings. Set to: {}".format(config[PYBEL_CONNECTION]))
-def connection():
-    pass
-
-
-@connection.command()
-@click.argument('value')
-def set(value):
-    """Set custom connection string"""
-    set_default_connection(value)
-
-
-@connection.command()
-@click.option('--user')
-@click.option('--password')
-@click.option('--host')
-@click.option('--database')
-@click.option('--charset')
-def set_mysql(user, password, host, database, charset):
-    """Sets MySQL connection string"""
-    set_default_mysql_connection(
-        user=user,
-        password=password,
-        host=host,
-        database=database,
-        charset=charset
-    )
-
-
 @main.group()
 @click.option('-c', '--connection', help='Cache connection. Defaults to {}'.format(get_cache_connection()))
 @click.pass_context
@@ -288,10 +218,7 @@ def ensure(manager, debug):
 @click.pass_obj
 def insert(manager, url):
     """Manually add namespace by URL"""
-    if url.endswith('.belns'):
-        manager.ensure_namespace(url)
-    else:
-        manager.ensure_namespace_owl(url)
+    manager.ensure_namespace(url)
 
 
 @annotations.command()
@@ -299,30 +226,26 @@ def insert(manager, url):
 @click.pass_obj
 def insert(manager, url):
     """Manually add annotation by URL"""
-    if url.endswith('.belanno'):
-        manager.ensure_annotation(url)
-    else:
-        manager.ensure_annotation_owl(url)
+    manager.ensure_annotation(url)
 
 
 @namespace.command()
 @click.option('--url', help='Specific resource URL to list')
+@click.option('-i', '--namespace-id', help='Specific resource URL to list')
 @click.pass_obj
-def ls(manager, url):
-    """Lists cached namespaces"""
-    if not url:
-        for namespace, in manager.list_namespaces():
-            click.echo(namespace.url)
+def ls(manager, url, namespace_id):
+    """Lists cached namespaces."""
+    if url:
+        n = manager.ensure_namespace(url)
+        _page(n.entries)
+
+    elif namespace_id:
+        n = manager.session.query(Namespace).get(namespace_id)
+        _page(n.entries)
 
     else:
-        if url.endswith('.belns'):
-            res = manager.ensure_namespace(url).to_values()
-
-        else:
-            res = manager.get_namespace_owl_terms(url)
-
-        for l in res:
-            click.echo(l)
+        for n in manager.session.query(Namespace).order_by(Namespace.uploaded.desc()):
+            click.echo('\t'.join(map(str, (n.id, n.keyword, n.version, n.url))))
 
 
 @annotations.command()
@@ -335,11 +258,7 @@ def ls(manager, url):
             click.echo(annotation.url)
 
     else:
-        if url.endswith('.belanno'):
-            annotation = manager.ensure_annotation(url)
-        else:
-            annotation = manager.ensure_annotation_owl(url)
-
+        annotation = manager.ensure_annotation(url)
         for l in annotation.get_entries():
             click.echo(l)
 

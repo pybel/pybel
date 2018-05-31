@@ -1,5 +1,5 @@
 networkx==1.11
-sqlalchemy==1.1.15
+sqlalchemy
 click
 requests
 requests_file
@@ -9,7 +9,5 @@ tqdm
 
 # Extras
 indra[indra]
-artifactory[deployment]
-onto2nx[owl]
 ndex2[ndex]
 py2neo[neo4j]

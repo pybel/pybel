@@ -70,6 +70,15 @@ has_product_code = unqualified_edge_code[HAS_PRODUCT]
 
 
 class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
+
+    def test_get_network_missing(self):
+        network = self.manager.get_most_recent_network_by_name('This network is not here')
+        self.assertIsNone(network)
+
+    def test_get_graph_missing(self):
+        network = self.manager.get_graph_by_most_recent('This network is not here')
+        self.assertIsNone(network)
+
     @mock_bel_resources
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
@@ -91,7 +100,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], network.version)
         self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], network.description)
 
-        reconstituted = self.manager.get_network_by_name_version(
+        reconstituted = self.manager.get_graph_by_name_version(
             expected_test_thorough_metadata[METADATA_NAME],
             expected_test_thorough_metadata[METADATA_VERSION]
         )
@@ -178,17 +187,16 @@ class TestQuery(TemporaryCacheMixin):
         graph = BELGraph(name='test', version='0.0.0')
         graph.annotation_list['TEST'] = {'a', 'b', 'c'}
 
-        u = graph.add_node_from_data(fos_data)
-        v = graph.add_node_from_data(jun_data)
-
-        graph.add_edge(u, v, attr_dict={
-            RELATION: INCREASES,
-            EVIDENCE: test_evidence_text,
-            CITATION: test_citation_dict,
-            ANNOTATIONS: {
+        graph.add_qualified_edge(
+            fos_data,
+            jun_data,
+            relation=INCREASES,
+            evidence=test_evidence_text,
+            citation=test_citation_dict,
+            annotations={
                 'TEST': 'a'
             }
-        })
+        )
 
         make_dummy_namespaces(self.manager, graph, {'HGNC': ['FOS', 'JUN']})
 
@@ -298,10 +306,14 @@ class TestQuery(TemporaryCacheMixin):
     def test_query_citation_by_type(self):
         rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED)
         self.assertEqual(1, len(rv))
+        self.assertTrue(rv[0].is_pubmed)
+        self.assertFalse(rv[0].is_enriched)
 
     def test_query_citaiton_by_reference(self):
         rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED, reference=test_citation_dict[CITATION_REFERENCE])
         self.assertEqual(1, len(rv))
+        self.assertTrue(rv[0].is_pubmed)
+        self.assertFalse(rv[0].is_enriched)
         self.assertEqual(test_citation_dict, rv[0].to_json())
 
     @unittest.skip
@@ -372,7 +384,7 @@ class TestEnsure(TemporaryCacheMixin):
             CITATION_NAME: 'TestCitation_full',
             CITATION_REFERENCE: reference,
             CITATION_DATE: '2017-04-11',
-            CITATION_AUTHORS: 'Jackson M|Lajoie J'
+            CITATION_AUTHORS: sorted(['Jackson M', 'Lajoie J'])
         }
 
         citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
@@ -519,7 +531,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         )
 
     def test_reconstitute(self):
-        g2 = self.manager.get_network_by_name_version(
+        g2 = self.manager.get_graph_by_name_version(
             expected_test_simple_metadata[METADATA_NAME],
             expected_test_simple_metadata[METADATA_VERSION]
         )

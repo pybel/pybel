@@ -32,7 +32,6 @@ Clone the repository from `GitHub <https://github.com/pybel/pybel>`_ and install
    $ cd pybel
    $ python3 -m pip install -e .
 
-
 Extras
 ------
 The ``setup.py`` makes use of the ``extras_require`` argument of :func:`setuptools.setup` in order to make some heavy
@@ -40,7 +39,7 @@ packages that support special features of PyBEL optional to install, in order to
 default. A single extra can be installed from PyPI like :code:`python3 -m pip install -e pybel[ndex]` or multiple can
 be installed using a list like :code:`python3 -m pip install -e pybel[ndex,owl]`. Likewise, for developer installation,
 extras can be installed in editable mode with :code:`python3 -m pip install -e .[ndex]` or multiple can be installed
-using a list like :code:`python3 -m pip install -e .[ndex,owl]`. The avaliable extras are:
+using a list like :code:`python3 -m pip install -e .[neo4j,ndex]`. The available extras are:
 
 ndex
 ~~~~
@@ -50,11 +49,6 @@ ndex2 supports download and upload to the `Network Data Exchange <ndexbio.org>`_
 
     - :func:`pybel.to_ndex`
     - :func:`pybel.from_ndex`
-
-owl
-~~~
-This extra installs support for using OWL ontologies as namespaces via the :mod:`onto2nx` package. In the future,
-this extra will include other wrappers around packages like :mod:`obonet` for OBO support.
 
 neo4j
 ~~~~~
@@ -114,10 +108,10 @@ __all__ = (
     examples.__all__
 )
 
-__version__ = '0.11.1'
+__version__ = '0.11.2'
 
 __title__ = 'PyBEL'
-__description__ = 'Parsing, validation, and data exchange of BEL graphs'
+__description__ = 'Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)'
 __url__ = 'https://github.com/pybel/pybel'
 
 __author__ = 'Charles Tapley Hoyt'

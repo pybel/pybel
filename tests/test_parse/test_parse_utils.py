@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import os
 import unittest
 
 import networkx as nx
 
 from pybel.resources.document import sanitize_file_lines
 from pybel.utils import ensure_quotes, subdict_matches
-from tests.constants import any_subdict_matches
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
+from tests.constants import any_subdict_matches, test_bel_simple
 
 
 class TestSubdictMatching(unittest.TestCase):
@@ -141,8 +138,8 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
 
         expect = [
             (1,
-             'SET Evidence = "The phosphorylation of S6K at Thr389, which is the TORC1-mediated site, was not inhibited '
-             'in the SIN1-/- cells (Figure 5A)."')]
+             'SET Evidence = "The phosphorylation of S6K at Thr389, which is the TORC1-mediated site, was not '
+             'inhibited in the SIN1-/- cells (Figure 5A)."')]
         result = list(sanitize_file_lines(s))
         self.assertEqual(expect, result)
 
@@ -164,8 +161,8 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
             (2, 'SET Species = 9606'),
             (3, 'SET Tissue = "t-cells"'),
             (5,
-             'SET Evidence = "Here we show that interfereon-alpha (IFNalpha) is a potent producer of SOCS expression in '
-             'human T cells, as high expression of CIS, SOCS-1, SOCS-2, and SOCS-3 was detectable after IFNalpha '
+             'SET Evidence = "Here we show that interfereon-alpha (IFNalpha) is a potent producer of SOCS expression '
+             'in human T cells, as high expression of CIS, SOCS-1, SOCS-2, and SOCS-3 was detectable after IFNalpha '
              'stimulation. After 4 h of stimulation CIS, SOCS-1, and SOCS-3 had ret')
         ]
 
@@ -195,9 +192,7 @@ in the SIN1-/- cells (Figure 5A)."'''.split('\n')
         self.assertEqual(expect, result)
 
     def test_e(self):
-        path = os.path.join(dir_path, 'bel', 'test_bel.bel')
-
-        with open(path) as f:
+        with open(test_bel_simple) as f:
             lines = list(sanitize_file_lines(f))
 
         self.assertEqual(26, len(lines))

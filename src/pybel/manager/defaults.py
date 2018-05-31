@@ -25,7 +25,6 @@ __all__ = [
     'default_equivalences_2013',
     'default_equivalences_2015',
     'default_equivalences',
-    'default_owl'
 ]
 
 BEL_FRAMEWORK_BASE = 'http://resources.openbel.org/belframework'
@@ -329,8 +328,3 @@ default_equivalences_2015 = [
 ]
 
 default_equivalences = default_equivalences_2012 + default_equivalences_2013 + default_equivalences_2015
-
-default_owl = [
-    'http://purl.obolibrary.org/obo/hp/releases/2016-09-03/hp.owl',  # Human Phenotype Ontology
-    'http://purl.obolibrary.org/obo/pr/49.0./pr-non-classified.owl'  # Protein Ontology
-]

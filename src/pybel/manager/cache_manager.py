@@ -17,23 +17,23 @@ from itertools import chain, groupby
 
 import six
 from six import string_types
-from sqlalchemy import and_, exists, func
+from sqlalchemy import and_, create_engine, exists, func
+from sqlalchemy.orm import scoped_session, sessionmaker
 from tqdm import tqdm
 
 from .base_manager import BaseManager
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
-    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace,
-    NamespaceEntry, NamespaceEntryEquivalence, Network, Node, Property,
+    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
+    Node, Property,
 )
 from .query_manager import QueryManager
-from .utils import extract_shared_optional, extract_shared_required, parse_owl, update_insert_values
+from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..canonicalize import node_to_bel
 from ..constants import *
 from ..language import (
-    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings,
-    pmod_mappings,
+    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
 )
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
@@ -96,6 +96,21 @@ def _clean_bel_namespace_values(bel_resource):
         for name, encoding in bel_resource['Values'].items()
         if name
     }
+
+
+def _normalize_url(graph, keyword):  # FIXME move to utilities and unit test
+    """
+    :type graph: BELGraph
+    :param str keyword: Namespace URL keyword
+    :rtype: Optional[str]
+    """
+    if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
+        return BEL_DEFAULT_NAMESPACE_URL
+
+    if keyword == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
+        return GOCC_LATEST
+
+    return graph.namespace_url.get(keyword)
 
 
 class NamespaceManager(BaseManager):
@@ -384,94 +399,6 @@ class NamespaceManager(BaseManager):
         return name_model
 
 
-class OwlNamespaceManager(NamespaceManager):
-    """Manages OWL namespaces"""
-
-    def get_or_create_owl_namespace(self, url, keyword=None, encoding=None):
-        """Caches an ontology at the given IRI
-
-        :param str url: The location of the ontology
-        :param str keyword: The keyword for the namespace
-        :param str encoding: The encoding for the entries in the namespace
-        :rtype: Namespace
-        """
-        namespace = self.get_namespace_by_url(url)
-
-        if namespace is not None:
-            return namespace
-
-        log.debug('inserting owl %s', url)
-
-        namespace = Namespace(url=url, keyword=keyword)
-
-        graph = parse_owl(url)
-
-        encoding = BELNS_ENCODING_STR if encoding is None else encoding
-
-        name_to_entry = {
-            node: NamespaceEntry(name=node, encoding=encoding)
-            for node in graph
-        }
-        namespace.entries = list(name_to_entry.values())
-
-        for parent, child in graph.edges_iter():
-            parent_entry = name_to_entry[parent]
-            child_entry = name_to_entry[child]
-            parent_entry.children.append(child_entry)
-
-        self.session.add(namespace)
-        self.session.commit()
-
-        return namespace
-
-    def ensure_namespace_owl(self, url, keyword=None, encoding=None):
-        """Caches an ontology at the given URL if it is not already in the cache
-
-        :param str url: The location of the ontology
-        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
-        :param str encoding: The optional encoding to use for the namespace if it gets downloaded
-        :rtype: Namespace
-        """
-        if url in self.namespace_model:
-            return self.namespace_model[url]
-
-        namespace = self.get_or_create_owl_namespace(url, keyword=keyword, encoding=encoding)
-
-        if not self.use_namespace_cache:
-            return namespace
-
-        for entry in namespace.entries:
-            self.namespace_object_cache[namespace.url][entry.name] = entry
-
-        return namespace
-
-    def get_namespace_owl_terms(self, url, keyword=None, encoding=None):
-        """
-
-        :param str url: The location of the ontology
-        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
-        :param str encoding: The optional encoding to use for the namespace if it gets downloaded
-        :rtype: dict[str,str]
-        """
-        namespace = self.ensure_namespace_owl(url, keyword=keyword, encoding=encoding)
-
-        if isinstance(namespace, dict):
-            return namespace
-
-        return namespace.to_values()
-
-    def get_namespace_owl_edges(self, url, keyword=None):
-        """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
-
-        :param str url: The location of the ontology
-        :param str keyword: The optional keyword to use for the namespace if it gets downloaded
-        :rtype: list[tuple[str,str]]
-        """
-        namespace = self.ensure_namespace_owl(url, keyword=keyword)
-
-        return namespace.to_tree_list()
-
-
 class AnnotationManager(BaseManager):
     """Manages BEL annotations"""
 
@@ -536,6 +463,16 @@ class AnnotationManager(BaseManager):
 
         self.session.query(AnnotationEntry).delete()
         self.session.query(Annotation).delete()
+        self.session.commit()
+
+    def drop_annotation_by_url(self, url):
+        """Drops the annotation at the given URL. Won't work if the edge store is in use.
+
+        :param str url: The URL of the annotation to drop
+        """
+        annotation = self.get_annotation_by_url(url)
+        self.session.query(AnnotationEntry).filter(AnnotationEntry.annotation == annotation).delete()
+        self.session.delete(annotation)
         self.session.commit()
 
     def _cache_annotation(self, annotation):
@@ -641,166 +578,6 @@ class AnnotationManager(BaseManager):
         return annotation_entry
 
 
-class OwlAnnotationManager(AnnotationManager):
-    """Manages OWL annotations"""
-
-    def get_or_create_owl_annotation(self, url, keyword=None):
-        """Caches an ontology as a namespace from the given IRI
-
-        :param str url: the location of the ontology
-        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
-        :rtype: Annotation
-        """
-        annotation = self.get_annotation_by_url(url)
-
-        if annotation is not None:
-            return annotation
-
-        log.debug('inserting owl %s', url)
-
-        annotation = Annotation(url=url, keyword=keyword)
-
-        graph = parse_owl(url)
-
-        entries = {
-            node: AnnotationEntry(name=node, annotation=annotation)  # TODO add label
-            for node in graph
-        }
-        annotation.entries = list(entries.values())
-
-        for u, v in graph.edges_iter():
-            entries[u].children.append(entries[v])
-
-        self.session.add(annotation)
-        self.session.commit()
-
-        return annotation
-
-    def ensure_annotation_owl(self, url, keyword=None):
-        """Caches an ontology as an annotation from the given IRI
-
-        :param str url: the location of the ontology
-        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
-        :rtype: Annotation
-        """
-        if url in self.annotation_model:
-            return self.annotation_model[url]
-
-        annotation = self.get_or_create_owl_annotation(url, keyword)
-
-        for entry in annotation.entries:
-            self.annotation_object_cache[url][entry.name] = entry
-
-        return annotation
-
-    def get_annotation_owl_terms(self, url, keyword=None):
-        """Gets a set of classes and individuals in the ontology at the given IRI
-
-        :param str url: the location of the ontology
-        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
-        :rtype: set[str]
-        """
-        annotation = self.ensure_annotation_owl(url, keyword)
-        return annotation.get_entries()
-
-    def get_annotation_owl_edges(self, url, keyword=None):
-        """Gets a set of directed edge pairs from the graph representing the ontology at the given IRI
-
-        :param str url: the location of the ontology
-        :param str keyword: The optional keyword to use for the annotation if it gets downloaded
-        """
-        annotation = self.ensure_annotation_owl(url, keyword=keyword)
-        return annotation.to_tree_list()
-
-
-class EquivalenceManager(NamespaceManager):
-    """Manages BEL equivalences"""
-
-    def drop_equivalences(self):
-        """Drops all equivalence classes"""
-        self.session.query(NamespaceEntryEquivalence).delete()
-        self.session.commit()
-
-    def get_equivalence_by_label(self, label):
-        """Gets an equivalence class by its label.
-
-        :param str label: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
-                                    for Alzheimer's Disease
-        :rtype: NamespaceEntryEquivalence
-        """
-        return self.session.query(NamespaceEntryEquivalence).filter(NamespaceEntryEquivalence.label == label).one()
-
-    def ensure_equivalence_class(self, label):
-        """Ensures the equivalence class is loaded in the database"""
-        result = self.session.query(NamespaceEntryEquivalence).filter_by(label=label).one_or_none()
-
-        if result is None:
-            result = NamespaceEntryEquivalence(label=label)
-            self.session.add(result)
-            self.session.commit()
-
-        return result
-
-    def insert_equivalences(self, equivalence_url, namespace_url):
-        """Given a url to a .beleq file and its accompanying namespace url, populate the database
-
-        :param str equivalence_url:
-        :param str namespace_url:
-        :raises: pybel.resources.exc.ResourceError
-        """
-        namespace = self.ensure_namespace(namespace_url)
-
-        if not isinstance(namespace, Namespace):
-            raise ValueError("Can't insert equivalences for non-cachable namespace")
-
-        equivalence_resource = get_bel_resource(equivalence_url)
-        values = equivalence_resource['Values']
-
-        for entry in namespace.entries:
-            label = values[entry.name]
-            entry.equivalence = self.ensure_equivalence_class(label=label)
-
-        namespace.has_equivalences = True
-
-        log.info('inserted equivalences: %s (%d terms)', equivalence_url, len(values))
-
-        self.session.commit()
-
-    def ensure_equivalences(self, url, namespace_url):
-        """Check if the equivalence file is already loaded, and if not, load it
-
-        :param str url: The URL of the equivalence file corresponding to the namespace file
-        :param str namespace_url: The URL of the namespace file
-        :raises: pybel.resources.exc.ResourceError
-        """
-        self.ensure_namespace(namespace_url)
-
-        ns = self.get_namespace_by_url(namespace_url)
-
-        if not ns.has_equivalences:
-            self.insert_equivalences(url, namespace_url)
-
-    def get_equivalence_by_entry(self, url, name):
-        """Gets the equivalence class of the entry in the given namespace
-
-        :param str url: The url of the namespace source
-        :param str name: The value of the namespace from the given url's document
-        :rtype: NamespaceEntryEquivalence
-        """
-        entry = self.get_namespace_entry(url, name)
-        return entry.equivalence
-
-    def get_equivalence_members(self, label):
-        """Gets all members of the given equivalence class
-
-        :param str label: the label of the equivalence class. example: '0b20937b-5eb4-4c04-8033-63b981decce7'
-                                    for Alzheimer's Disease
-        :rtype: list[NamespaceEntry]
-        """
-        eq = self.get_equivalence_by_label(label)
-        return eq.members
-
-
 class NetworkManager(NamespaceManager, AnnotationManager):
     """Groups functions for inserting and querying networks in the database's network store."""
 
@@ -889,13 +666,28 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         }
 
     def get_network_by_name_version(self, name, version):
+        """Loads most network with the given name and version
+
+        :param str name: The name of the network.
+        :param str version: The version string of the network.
+        :rtype: Optional[Network]
+        """
+        name_version_filter = and_(Network.name == name, Network.version == version)
+        network = self.session.query(Network).filter(name_version_filter).one_or_none()
+        return network
+
+    def get_graph_by_name_version(self, name, version):
         """Loads most recently added graph with the given name, or allows for specification of version
 
         :param str name: The name of the network.
         :param str version: The version string of the network.
-        :rtype: BELGraph
+        :rtype: Optional[BELGraph]
         """
-        network = self.session.query(Network).filter(Network.name == name, Network.version == version).one()
+        network = self.get_network_by_name_version(name, version)
+
+        if network is None:
+            return
+
         return network.as_bel()
 
     def get_networks_by_name(self, name):
@@ -910,9 +702,23 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """Gets the most recently created network with the given name.
 
         :param str name: The name of the network
-        :rtype: Network
+        :rtype: Optional[Network]
         """
-        return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+        network = self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+        return network
+
+    def get_graph_by_most_recent(self, name):
+        """Gets the most recently created network with the given name as a :class:`pybel.BELGraph`.
+
+        :param str name: The name of the network
+        :rtype: Optional[BELGraph]
+        """
+        network = self.get_most_recent_network_by_name(name)
+
+        if network is None:
+            return
+
+        return network.as_bel()
 
     def get_network_by_id(self, network_id):
         """Gets a network from the database by its identifier.
@@ -929,6 +735,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :rtype: BELGraph
         """
         network = self.get_network_by_id(network_id)
+        log.debug('converting network [id=%d] %s to bel graph', network_id, network)
         return network.as_bel()
 
     def get_networks_by_ids(self, network_ids):
@@ -937,7 +744,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param iter[int] network_ids: The identifiers of networks in the database
         :rtype: list[Network]
         """
-        return self.session.query(Network).filter(Network.id.in_(network_ids)).all()
+        log.debug('getting networks by identifiers: %s', network_ids)
+        return self.session.query(Network).filter(Network.id_in(network_ids)).all()
 
     def get_graphs_by_ids(self, network_ids):
         """Gets a list of networks with the given identifiers and converts to BEL graphs. Note: order is not
@@ -946,10 +754,12 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :param iter[int] network_ids: The identifiers of networks in the database
         :rtype: list[BELGraph]
         """
-        return [
+        rv = [
             self.get_graph_by_id(network_id)
             for network_id in network_ids
         ]
+        log.debug('returning graphs for network identifiers: %s', network_ids)
+        return rv
 
     def get_graph_by_ids(self, network_ids):
         """Gets a combine BEL Graph from a list of network identifiers
@@ -960,7 +770,13 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         if len(network_ids) == 1:
             return self.get_graph_by_id(network_ids[0])
 
-        return union(self.get_graphs_by_ids(network_ids))
+        log.debug('getting graph by identifiers: %s', network_ids)
+        graphs = self.get_graphs_by_ids(network_ids)
+
+        log.debug('getting union of graphs: %s', network_ids)
+        rv = union(graphs)
+
+        return rv
 
 
 class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
@@ -1111,8 +927,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         for key, values in data.items():
             if key in graph.annotation_url:
                 url = graph.annotation_url[key]
-            elif key in graph.annotation_owl:
-                url = graph.annotation_owl[key]
             elif key in graph.annotation_list:
                 continue  # skip those
             elif key in graph.annotation_pattern:
@@ -1525,7 +1339,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
                 elif mod_type in {GMOD, PMOD}:
                     variant_identifier = variant[IDENTIFIER]
-                    namespace_url = normalize_url(graph, variant_identifier[NAMESPACE])
+                    namespace_url = _normalize_url(graph, variant_identifier[NAMESPACE])
 
                     if namespace_url in graph.uncached_namespaces:
                         log.warning('uncached namespace %s in fusion()', namespace_url)
@@ -1669,7 +1483,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 elif modifier == ACTIVITY:
                     effect = participant_data.get(EFFECT)
                     if effect is not None:
-                        namespace_url = normalize_url(graph, effect[NAMESPACE])
+                        namespace_url = _normalize_url(graph, effect[NAMESPACE])
 
                         if namespace_url in graph.uncached_namespaces:
                             log.warning('uncached namespace %s in fusion()', namespace_url)
@@ -1691,39 +1505,92 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         ]
 
 
-class Manager(QueryManager, InsertManager, NetworkManager, EquivalenceManager, OwlNamespaceManager,
-              OwlAnnotationManager):
-    """The definition cache manager takes care of storing BEL namespace and annotation files for later use. It uses
-    SQLite by default for speed and lightness, but any database can be used with its SQLAlchemy interface.
+class _Manager(QueryManager, InsertManager, NetworkManager):
+    """A wrapper around PyBEL managers that can be directly instantiated with an engine and session."""
+
+
+class Manager(_Manager):
+    """Creates a connection to database and a persistent session using SQLAlchemy.
+
+    A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
+    using an `RFC-1738 <http://rfc.net/rfc1738.html>`_ string. For example, a MySQL string can be given with the
+    following form:
+
+    :code:`mysql+pymysql://<username>:<password>@<host>/<dbname>?charset=utf8[&<options>]`
+
+    A SQLite connection string can be given in the form:
+
+    ``sqlite:///~/Desktop/cache.db``
+
+    Further options and examples can be found on the SQLAlchemy documentation on
+    `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
     """
+
+    def __init__(self, connection=None, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
+                 scopefunc=None):
+        """
+        :param Optional[str] connection: An RFC-1738 database connection string. If ``None``, tries to load from the
+         environment variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json`` whose
+         value for ``PYBEL_CONNECTION`` defaults to :data:`pybel.constants.DEFAULT_CACHE_LOCATION`.
+        :param bool echo: Turn on echoing sql
+        :param Optional[bool] autoflush: Defaults to True if not specified in kwargs or configuration.
+        :param Optional[bool] autocommit: Defaults to False if not specified in kwargs or configuration.
+        :param Optional[bool] expire_on_commit: Defaults to False if not specified in kwargs or configuration.
+        :param scopefunc: Scoped function to pass to :func:`sqlalchemy.orm.scoped_session`
+
+        From the Flask-SQLAlchemy documentation:
+
+        An extra key ``'scopefunc'`` can be set on the ``options`` dict to
+        specify a custom scope function.  If it's not provided, Flask's app
+        context stack identity is used. This will ensure that sessions are
+        created and removed with the request/response cycle, and should be fine
+        in most cases.
+        """
+        self.connection = get_cache_connection(connection)
+
+        engine = create_engine(self.connection, echo=echo)
+
+        self.autoflush = autoflush if autoflush is not None else config.get('PYBEL_MANAGER_AUTOFLUSH', False)
+        self.autocommit = autocommit if autocommit is not None else config.get('PYBEL_MANAGER_AUTOCOMMIT', False)
+        self.expire_on_commit = expire_on_commit if expire_on_commit is not None else config.get(
+            'PYBEL_MANAGER_AUTOEXPIRE', True)
+        self.scopefunc = scopefunc
+
+        log.info(
+            'auto flush: %s, auto commit: %s, expire on commmit: %s',
+            self.autoflush,
+            self.autoflush,
+            self.expire_on_commit
+        )
+
+        #: A SQLAlchemy session maker
+        self.session_maker = sessionmaker(
+            bind=engine,
+            autoflush=self.autoflush,
+            autocommit=self.autocommit,
+            expire_on_commit=self.expire_on_commit,
+        )
+
+        #: A SQLAlchemy session object
+        session = scoped_session(self.session_maker, scopefunc=self.scopefunc)
+
+        super(Manager, self).__init__(engine=engine, session=session)
+
+        self.create_all()
 
     @staticmethod
     def ensure(connection=None, *args, **kwargs):
         """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
 
+        Args and kwargs are passed through to the constructor for :class:`Manager` if the given connection is not a
+        string.
+
         :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
                             for default connection
         :type connection: Optional[str or Manager]
-        :param list args: Positional arguments to pass to the constructor of :class:`Manager`
-        :param dict kwargs: Keyword arguments to pass to the constructor of :class:`Manager`
         :rtype: Manager
         """
         if connection is None or isinstance(connection, string_types):
             return Manager(connection=connection, *args, **kwargs)
 
         return connection
-
-
-def normalize_url(graph, keyword):  # FIXME move to utilities and unit test
-    """
-    :type graph: BELGraph
-    :param str keyword: Namespace URL keyword
-    :rtype: Optional[str]
-    """
-    if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
-        return BEL_DEFAULT_NAMESPACE_URL
-
-    if keyword == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
-        return GOCC_LATEST
-
-    return graph.namespace_url.get(keyword)

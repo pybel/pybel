@@ -6,7 +6,8 @@ import unittest
 
 from pybel.constants import ABUNDANCE, COMPLEX
 from pybel.dsl import abundance, complex_abundance, protein
-from pybel.utils import ensure_quotes
+from pybel.utils import ensure_quotes, hash_node
+
 from tests.utils import n
 
 
@@ -14,19 +15,21 @@ class TestDSL(unittest.TestCase):
     def test_str_has_name(self):
         namespace, name = n(), n()
         node = abundance(namespace=namespace, name=name)
-        self.assertEqual('a({namespace}:{name})'.format(namespace=namespace, name=ensure_quotes(name)), str(node))
+        self.assertEqual('a({namespace}:{name})'.format(namespace=namespace, name=ensure_quotes(name)), node.as_bel())
 
     def test_str_has_identifier(self):
         namespace, identifier = n(), n()
         node = abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)), str(node))
+            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            node.as_bel())
 
     def test_str_has_both(self):
         namespace, identifier = n(), n()
         node = abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)), str(node))
+            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            node.as_bel())
 
     def test_as_tuple(self):
         namespace, name = n(), n()
@@ -36,6 +39,7 @@ class TestDSL(unittest.TestCase):
 
         self.assertEqual(node_tuple, node.as_tuple())
         self.assertEqual(hash(node_tuple), hash(node))
+        self.assertEqual(hash_node(node_tuple), node.as_sha512())
 
     def test_complex_with_name(self):
         """Tests a what happens with a named complex
@@ -58,6 +62,7 @@ class TestDSL(unittest.TestCase):
 
         self.assertEqual(node_tuple, nine_one_one.as_tuple())
         self.assertEqual(hash(node_tuple), hash(nine_one_one))
+        self.assertEqual(hash_node(node_tuple), nine_one_one.as_sha512())
 
 
 if __name__ == '__main__':

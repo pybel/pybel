@@ -197,7 +197,7 @@ class NamespaceEntry(Base):
     )
 
     def __str__(self):
-        return '{}:{}'.format(self.namespace.url, self.name)
+        return '[{}]{}:[{}]{}'.format(self.namespace.id, self.namespace, self.identifier, self.name)
 
     def to_json(self, include_id=False):
         """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name.
@@ -333,6 +333,14 @@ class AnnotationEntry(Base):
 
         return result
 
+    @staticmethod
+    def name_contains(name_query):
+        """Makes a filter if the name contains a certain substring
+
+        :param str name_query:
+        """
+        return AnnotationEntry.name.contains(name_query)
+
     def __str__(self):
         return '{}:{}'.format(self.annotation, self.name)
 
@@ -366,7 +374,7 @@ class Network(Base):
     disclaimer = Column(Text, nullable=True, doc='Disclaimer information')
     licenses = Column(Text, nullable=True, doc='License information')
 
-    created = Column(DateTime, default=datetime.datetime.utcnow)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
 
     nodes = relationship('Node', secondary=network_node, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
@@ -383,10 +391,12 @@ class Network(Base):
         :rtype: dict[str,str]
         """
         result = {
-            'created': self.created,
             METADATA_NAME: self.name,
             METADATA_VERSION: self.version,
         }
+
+        if self.created:
+            result['created'] = str(self.created)
 
         if include_id:
             result['id'] = self.id
@@ -410,6 +420,27 @@ class Network(Base):
             result[METADATA_LICENSES] = self.licenses
 
         return result
+
+    @staticmethod
+    def name_contains(name_query):
+        """
+        :param str name_query:
+        """
+        return Network.name.contains(name_query)
+
+    @staticmethod
+    def description_contains(description_query):
+        """
+        :param str description_query:
+        """
+        return Network.description.contains(description_query)
+
+    @staticmethod
+    def id_in(network_ids):
+        """
+        :param iter[int] network_ids:
+        """
+        return Network.id.in_(network_ids)
 
     def __repr__(self):
         return '{} v{}'.format(self.name, self.version)
@@ -456,6 +487,10 @@ class Node(Base):
 
     modifications = relationship("Modification", secondary=node_modification, lazy='dynamic',
                                  backref=backref('nodes', lazy='dynamic'))
+
+    @staticmethod
+    def bel_contains(bel_query):
+        return Node.bel.contains(bel_query)
 
     def __str__(self):
         return self.bel
@@ -631,6 +666,10 @@ class Author(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True, index=True)
 
+    @staticmethod
+    def name_contains(name_query):
+        return Author.name.contains(name_query)
+
     def __str__(self):
         return self.name
 
@@ -666,6 +705,22 @@ class Citation(Base):
 
     def __str__(self):
         return '{}:{}'.format(self.type, self.reference)
+
+    @property
+    def is_pubmed(self):
+        """Returns if this is a PubMed citation
+
+        :rtype:
+        """
+        return CITATION_TYPE_PUBMED == self.type
+
+    @property
+    def is_enriched(self):
+        """Returns if this citation has been enriched for name, title, etc.
+
+        :rtype:
+        """
+        return self.title is not None and self.name is not None
 
     def to_json(self, include_id=False):
         """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
@@ -704,10 +759,10 @@ class Citation(Base):
             result[CITATION_LAST_AUTHOR] = self.last.name
 
         if self.authors:
-            result[CITATION_AUTHORS] = "|".join(sorted(
+            result[CITATION_AUTHORS] = sorted(
                 author.name
                 for author in self.authors
-            ))
+            )
 
         return result
 
@@ -780,7 +835,8 @@ class Edge(Base):
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship("Evidence", backref=backref('edges', lazy='dynamic'))
 
-    annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic")  # , backref='edges'
+    annotations = relationship('AnnotationEntry', secondary=edge_annotation, lazy="dynamic",
+                               backref=backref('edges', lazy='dynamic'))
     properties = relationship('Property', secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
 
     sha512 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')

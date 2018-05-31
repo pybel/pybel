@@ -11,6 +11,7 @@ from ...constants import (
 from ...tokens import node_to_tuple
 
 __all__ = [
+    'node_predicate',
     'keep_node_permissive',
     'is_abundance',
     'is_gene',
