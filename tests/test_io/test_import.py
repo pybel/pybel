@@ -23,13 +23,17 @@ from pybel.io.ndex_utils import NDEX_PASSWORD, NDEX_USERNAME
 from pybel.parser import BelParser
 from pybel.parser.exc import *
 from pybel.struct.summary import get_syntax_errors
+from pybel.testing.cases import TemporaryCacheClsMixin
+from pybel.testing.constants import (
+    test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy,
+    test_bel_thorough,
+)
+from pybel.testing.mocks import mock_bel_resources
 from pybel.utils import hash_node
 from tests.constants import (
-    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TemporaryCacheClsMixin, TestTokenParserBase, citation_1,
-    evidence_1, test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough,
-    test_citation_dict, test_evidence_text, test_set_evidence,
+    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TestTokenParserBase, citation_1, evidence_1, test_citation_dict,
+    test_evidence_text, test_set_evidence,
 )
-from tests.mocks import mock_bel_resources
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)

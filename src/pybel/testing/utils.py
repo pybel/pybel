@@ -1,8 +1,31 @@
 # -*- coding: utf-8 -*-
 
+"""Utilities for PyBEL testing."""
+
 from uuid import uuid4
 
-from pybel.manager.models import Annotation, AnnotationEntry, Namespace, NamespaceEntry
+from requests.compat import urlparse
+
+from ..constants import FRAUNHOFER_RESOURCES
+from ..manager.models import Annotation, AnnotationEntry, Namespace, NamespaceEntry
+
+
+def get_uri_name(url):
+    """Gets the file name from the end of the URL.
+
+    Only useful for PyBEL's testing though since it looks specifically if the file is from the weird owncloud
+    resources distributed by Fraunhofer.
+
+    :type url: str
+    :rtype: str
+    """
+    url_parsed = urlparse(url)
+
+    if url.startswith(FRAUNHOFER_RESOURCES):
+        return url_parsed.query.split('=')[-1]
+    else:
+        url_parts = url_parsed.path.split('/')
+        return url_parts[-1]
 
 
 def n():

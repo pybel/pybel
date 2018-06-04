@@ -6,9 +6,8 @@ import unittest
 
 from pybel.constants import ABUNDANCE, COMPLEX
 from pybel.dsl import abundance, complex_abundance, protein
+from pybel.testing.utils import n
 from pybel.utils import ensure_quotes, hash_node
-
-from tests.utils import n
 
 
 class TestDSL(unittest.TestCase):

@@ -5,8 +5,9 @@ import unittest
 import networkx as nx
 
 from pybel.resources.document import sanitize_file_lines
+from pybel.testing.constants import test_bel_simple
 from pybel.utils import ensure_quotes, subdict_matches
-from tests.constants import any_subdict_matches, test_bel_simple
+from tests.constants import any_subdict_matches
 
 
 class TestSubdictMatching(unittest.TestCase):

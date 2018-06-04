@@ -11,7 +11,7 @@ from pybel.constants import (
 )
 from pybel.dsl import *
 from pybel.examples import sialic_acid_graph
-from tests.utils import n
+from pybel.testing.utils import n
 
 
 class TestStruct(unittest.TestCase):

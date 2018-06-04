@@ -14,11 +14,10 @@ from pybel import cli
 from pybel.constants import METADATA_NAME, PYBEL_CONTEXT_TAG
 from pybel.io import from_json, from_path, from_pickle
 from pybel.manager.database_io import from_database
-from tests.constants import (
-    BelReconstitutionMixin, FleetingTemporaryCacheMixin, expected_test_thorough_metadata,
-    test_bel_simple, test_bel_thorough,
-)
-from tests.mocks import mock_bel_resources
+from pybel.testing.cases import FleetingTemporaryCacheMixin
+from pybel.testing.constants import test_bel_simple, test_bel_thorough
+from pybel.testing.mocks import mock_bel_resources
+from tests.constants import BelReconstitutionMixin, expected_test_thorough_metadata
 
 log = logging.getLogger(__name__)
 

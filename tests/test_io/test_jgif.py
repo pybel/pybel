@@ -9,7 +9,8 @@ import unittest
 
 from pybel import from_cbn_jgif, to_jgif
 from pybel.constants import *
-from tests.constants import TestGraphMixin, bel_dir_path
+from pybel.testing.constants import bel_dir_path
+from tests.constants import TestGraphMixin
 
 test_path = os.path.join(bel_dir_path, 'Cytotoxic T-cell Signaling-2.0-Hs.json')
 
@@ -82,8 +83,8 @@ jgif_expected_edges = [
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'phos'}},
         ANNOTATIONS: {
-            'Species': {'10116':True},
-            'Cell': {'neuron':True}
+            'Species': {'10116': True},
+            'Cell': {'neuron': True}
         }
     }),
     (foxo3, tcell_proliferation, {
@@ -94,8 +95,8 @@ jgif_expected_edges = [
             CITATION_REFERENCE: "22359505"
         },
         ANNOTATIONS: {
-            'Species': {'10090':True},
-            'Disease': {'Viral infection':True}
+            'Species': {'10090': True},
+            'Disease': {'Viral infection': True}
         }
     }),
     (il15, il2rg, {
@@ -107,7 +108,7 @@ jgif_expected_edges = [
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
         ANNOTATIONS: {
-            'Tissue': {'lung':True}
+            'Tissue': {'lung': True}
         }
     })
 ]

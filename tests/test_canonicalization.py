@@ -10,7 +10,7 @@ from pybel.constants import (
 )
 from pybel.dsl import *
 from pybel.dsl.edges import extracellular, intracellular
-from tests.utils import n
+from pybel.testing.utils import n
 
 
 class TestCanonicalize(unittest.TestCase):

@@ -4,9 +4,10 @@ from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl import protein
 from pybel.manager.models import Edge, Namespace, NamespaceEntry, Network, Node
-from tests.constants import TemporaryCacheMixin, test_citation_dict, test_evidence_text
-from tests.mocks import mock_bel_resources
-from tests.utils import make_dummy_annotations, make_dummy_namespaces, n
+from pybel.testing.cases import TemporaryCacheMixin
+from pybel.testing.mocks import mock_bel_resources
+from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
+from tests.constants import test_citation_dict, test_evidence_text
 
 yfg1 = protein(name='YFG1', namespace='HGNC')
 yfg2 = protein(name='YFG1', namespace='HGNC')
