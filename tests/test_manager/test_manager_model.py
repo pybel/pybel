@@ -8,7 +8,7 @@ import unittest
 
 from pybel.constants import *
 from pybel.manager.models import *
-from tests.utils import n
+from pybel.testing.utils import n
 
 
 class TestNetwork(unittest.TestCase):

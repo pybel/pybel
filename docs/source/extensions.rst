@@ -1,3 +1,0 @@
-Extensions
-==========
-.. automodule:: pybel.ext

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.11.3 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-06-04
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Made testing code and date install as part of main package(https://github.com/pybel/pybel/pull/298)
+
+Removed
+~~~~~~~
+- Remove extension hook and extension loader (https://github.com/pybel/pybel/pull/300)
+
 `0.11.2 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-05-10
 --------------------------------------------------------------------------------
 Added

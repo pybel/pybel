@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Setup module for the PyBEL package"""
+"""Setup.py for PyBEL."""
 
 import codecs  # To use a consistent encoding
 import os
@@ -102,13 +102,14 @@ if __name__ == '__main__':
         url=find_meta('url'),
         author=find_meta('author'),
         author_email=find_meta('email'),
-        maintainer='Charles Tapley Hoyt',
+        maintainer=find_meta('author'),
         maintainer_email=find_meta('email'),
         license=find_meta('license'),
         classifiers=CLASSIFIERS,
         keywords=KEYWORDS,
         packages=PACKAGES,
         package_dir={'': 'src'},
+        include_package_data=True,
         install_requires=INSTALL_REQUIRES,
         extras_require=EXTRAS_REQUIRE,
         tests_require=TESTS_REQUIRE,

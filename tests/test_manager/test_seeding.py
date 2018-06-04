@@ -4,8 +4,8 @@ from pybel.examples import sialic_acid_graph
 from pybel.examples.sialic_acid_example import cd33, cd33_phosphorylated, shp2, syk, trem2
 from pybel.manager.models import Edge, Namespace, Network
 from pybel.manager.query_manager import graph_from_edges
-from tests.constants import TemporaryCacheClsMixin
-from tests.mocks import mock_bel_resources
+from pybel.testing.cases import TemporaryCacheClsMixin
+from pybel.testing.mocks import mock_bel_resources
 
 chebi_url = 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns'
 
