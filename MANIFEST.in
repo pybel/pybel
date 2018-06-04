@@ -4,6 +4,9 @@ prune scripts
 
 recursive-include docs/source *.py
 recursive-include docs/source *.rst
+recursive-include src/pybel/testing/bel *.bel
+recursive-include src/pybel/testing/belanno *.belanno
+recursive-include src/pybel/testing/belns *.belns
 include docs/Makefile
 
 global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store *.gpickle

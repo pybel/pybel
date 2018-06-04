@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
 
-"""This module holds the mocks used in testing"""
+"""Mocks for PyBEL testing."""
 
 import os
 
-from pybel.constants import GOCC_LATEST
-from tests.constants import bel_dir_path, belanno_dir_path, belns_dir_path, get_uri_name
+from .constants import bel_dir_path, belanno_dir_path, belns_dir_path
+from .utils import get_uri_name
+from ..constants import GOCC_LATEST
 
 try:
     from unittest import mock
 except ImportError:
     import mock
+
+__all__ = [
+    'MockResponse',
+    'MockSession',
+    'mock_bel_resources',
+]
 
 
 class MockResponse:

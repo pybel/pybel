@@ -2,43 +2,19 @@
 
 import logging
 import os
-import tempfile
 import unittest
 from json import dumps
-from pathlib import Path
+
 from requests.compat import urlparse
 
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl import *
-from pybel.manager import Manager
 from pybel.parser.exc import *
 from pybel.parser.parse_bel import BelParser
 from pybel.utils import subdict_matches
 
 log = logging.getLogger(__name__)
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-resources_dir_path = os.path.join(dir_path, 'resources')
-bel_dir_path = os.path.join(resources_dir_path, 'bel')
-belns_dir_path = os.path.join(resources_dir_path, 'belns')
-belanno_dir_path = os.path.join(resources_dir_path, 'belanno')
-
-test_bel_simple = os.path.join(bel_dir_path, 'test_bel.bel')
-test_bel_slushy = os.path.join(bel_dir_path, 'slushy.bel')
-test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
-test_bel_isolated = os.path.join(bel_dir_path, 'isolated.bel')
-test_bel_misordered = os.path.join(bel_dir_path, 'misordered.bel')
-test_bel_no_identifier_valiation = os.path.join(bel_dir_path, 'no_identifier_validation_test.bel')
-
-test_an_1 = os.path.join(belanno_dir_path, 'test_an_1.belanno')
-
-test_ns_1 = os.path.join(belns_dir_path, 'test_ns_1.belns')
-test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
-test_ns_nocache = os.path.join(belns_dir_path, 'test_nocache.belns')
-test_ns_empty = os.path.join(belns_dir_path, 'test_ns_empty.belns')
-
-test_ns_nocache_path = Path(test_ns_nocache).as_uri()
 
 test_citation_dict = {
     CITATION_TYPE: 'PubMed',
@@ -64,7 +40,7 @@ test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
 def update_provenance(control_parser):
     """Sticks provenance in a BEL parser
     
-    :param pybel.parser.parse_control.ControlParser bel_parser:
+    :param pybel.parser.parse_control.ControlParser control_parser:
     :return: 
     """
     control_parser.citation.update(test_citation_dict)
@@ -164,68 +140,6 @@ class TestGraphMixin(unittest.TestCase):
         :param kwargs: 
         """
         assertHasEdge(self, u, v, g, **kwargs)
-
-
-class TemporaryCacheMixin(unittest.TestCase):
-    def setUp(self):
-        if test_connection:
-            self.connection = test_connection
-        else:
-            self.fd, self.path = tempfile.mkstemp()
-            self.connection = 'sqlite:///' + self.path
-            log.info('Test generated connection string %s', self.connection)
-
-        self.manager = Manager(connection=self.connection)
-        self.manager.create_all()
-
-    def tearDown(self):
-        self.manager.session.close()
-
-        if not test_connection:
-            os.close(self.fd)
-            os.remove(self.path)
-        else:
-            self.manager.drop_all()
-
-
-class TemporaryCacheClsMixin(unittest.TestCase):
-    """Facilitates generating a database in a temporary file on a class-by-class basis"""
-
-    @classmethod
-    def setUpClass(cls):
-        if test_connection:
-            cls.connection = test_connection
-        else:
-            cls.fd, cls.path = tempfile.mkstemp()
-            cls.connection = 'sqlite:///' + cls.path
-            log.info('Test generated connection string %s', cls.connection)
-
-        cls.manager = Manager(connection=cls.connection)
-        cls.manager.create_all()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.manager.session.close()
-
-        if not test_connection:
-            os.close(cls.fd)
-            os.remove(cls.path)
-        else:
-            cls.manager.drop_all()
-
-
-class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
-    """This class makes a manager available for the entire existence of the class but deletes everything that gets
-    stuck in it after each test"""
-
-    def setUp(self):
-        super(FleetingTemporaryCacheMixin, self).setUp()
-
-        self.manager.drop_networks()
-        self.manager.drop_edges()
-        self.manager.drop_nodes()
-        self.manager.drop_namespaces()
-        self.manager.drop_annotations()
 
 
 class TestTokenParserBase(unittest.TestCase):

@@ -4,14 +4,12 @@ from __future__ import unicode_literals
 
 import json
 import logging
-import os
 import unittest
 
 from pybel import from_cbn_jgif, to_jgif
 from pybel.constants import *
-from tests.constants import TestGraphMixin, bel_dir_path
-
-test_path = os.path.join(bel_dir_path, 'Cytotoxic T-cell Signaling-2.0-Hs.json')
+from pybel.testing.constants import test_jgif_path
+from tests.constants import TestGraphMixin
 
 logging.getLogger('pybel.parser').setLevel(20)
 
@@ -82,8 +80,8 @@ jgif_expected_edges = [
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'phos'}},
         ANNOTATIONS: {
-            'Species': {'10116':True},
-            'Cell': {'neuron':True}
+            'Species': {'10116': True},
+            'Cell': {'neuron': True}
         }
     }),
     (foxo3, tcell_proliferation, {
@@ -94,8 +92,8 @@ jgif_expected_edges = [
             CITATION_REFERENCE: "22359505"
         },
         ANNOTATIONS: {
-            'Species': {'10090':True},
-            'Disease': {'Viral infection':True}
+            'Species': {'10090': True},
+            'Disease': {'Viral infection': True}
         }
     }),
     (il15, il2rg, {
@@ -107,7 +105,7 @@ jgif_expected_edges = [
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
         ANNOTATIONS: {
-            'Tissue': {'lung':True}
+            'Tissue': {'lung': True}
         }
     })
 ]
@@ -118,7 +116,7 @@ class TestJgif(TestGraphMixin):
 
     def test_jgif_interchange(self):
         """Tests data from CBN"""
-        with open(test_path) as f:
+        with open(test_jgif_path) as f:
             graph_jgif_dict = json.load(f)
 
         graph = from_cbn_jgif(graph_jgif_dict)

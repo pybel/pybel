@@ -10,7 +10,7 @@ from pybel.constants import *
 from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids, sanitize_date
 from pybel.manager.models import Citation
 from pybel.struct.summary.provenance import get_pubmed_identifiers
-from tests.constants import TemporaryCacheMixin
+from pybel.testing.cases import TemporaryCacheMixin
 
 
 class TestSanitizeDate(unittest.TestCase):

@@ -15,9 +15,9 @@ from pybel.parser.utils import nest
 from pybel.resources.definitions import get_bel_resource
 from pybel.resources.exc import EmptyResourceError
 from pybel.resources.utils import get_iso_8601_date
+from pybel.testing.constants import test_an_1, test_ns_empty
+from pybel.testing.mocks import mock_bel_resources
 from pybel.utils import flatten_citation, list2tuple, tokenize_version
-from tests.constants import test_an_1, test_ns_empty
-from tests.mocks import mock_bel_resources
 
 
 class TestTokenizeVersion(unittest.TestCase):

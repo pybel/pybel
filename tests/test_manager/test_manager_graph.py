@@ -20,15 +20,16 @@ from pybel.dsl import (
 from pybel.dsl.namespaces import chebi, hgnc
 from pybel.manager import models
 from pybel.manager.models import Author, Evidence
+from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMixin, TemporaryCacheMixin
+from pybel.testing.constants import test_bel_simple, test_bel_thorough
+from pybel.testing.mocks import mock_bel_resources
+from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
 from pybel.utils import hash_citation, hash_evidence, hash_node
 from tests import constants
 from tests.constants import (
-    BelReconstitutionMixin, FleetingTemporaryCacheMixin, TemporaryCacheClsMixin,
-    TemporaryCacheMixin, expected_test_simple_metadata, expected_test_thorough_metadata, test_bel_simple,
-    test_bel_thorough, test_citation_dict, test_evidence_text,
+    BelReconstitutionMixin, expected_test_simple_metadata, expected_test_thorough_metadata, test_citation_dict,
+    test_evidence_text,
 )
-from tests.mocks import mock_bel_resources
-from tests.utils import make_dummy_annotations, make_dummy_namespaces, n
 
 log = logging.getLogger(__name__)
 
