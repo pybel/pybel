@@ -80,7 +80,6 @@ Links
    utilities
    dsl
    logging
-   extensions
 
 .. toctree::
    :caption: Project
