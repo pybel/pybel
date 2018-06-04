@@ -4,15 +4,12 @@ from __future__ import unicode_literals
 
 import json
 import logging
-import os
 import unittest
 
 from pybel import from_cbn_jgif, to_jgif
 from pybel.constants import *
-from pybel.testing.constants import bel_dir_path
+from pybel.testing.constants import test_jgif_path
 from tests.constants import TestGraphMixin
-
-test_path = os.path.join(bel_dir_path, 'Cytotoxic T-cell Signaling-2.0-Hs.json')
 
 logging.getLogger('pybel.parser').setLevel(20)
 
@@ -119,7 +116,7 @@ class TestJgif(TestGraphMixin):
 
     def test_jgif_interchange(self):
         """Tests data from CBN"""
-        with open(test_path) as f:
+        with open(test_jgif_path) as f:
             graph_jgif_dict = json.load(f)
 
         graph = from_cbn_jgif(graph_jgif_dict)

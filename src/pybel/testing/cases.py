@@ -7,10 +7,10 @@ import os
 import tempfile
 import unittest
 
-from .constants import test_connection
 from ..manager import Manager
 
 __all__ = [
+    'TEST_CONNECTION',
     'TemporaryCacheMixin',
     'TemporaryCacheClsMixin',
     'FleetingTemporaryCacheMixin',
@@ -18,11 +18,13 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
+TEST_CONNECTION = os.environ.get('PYBEL_TEST_CONNECTION')
+
 
 class TemporaryCacheMixin(unittest.TestCase):
     def setUp(self):
-        if test_connection:
-            self.connection = test_connection
+        if TEST_CONNECTION:
+            self.connection = TEST_CONNECTION
         else:
             self.fd, self.path = tempfile.mkstemp()
             self.connection = 'sqlite:///' + self.path
@@ -34,7 +36,7 @@ class TemporaryCacheMixin(unittest.TestCase):
     def tearDown(self):
         self.manager.session.close()
 
-        if not test_connection:
+        if not TEST_CONNECTION:
             os.close(self.fd)
             os.remove(self.path)
         else:
@@ -48,8 +50,8 @@ class TemporaryCacheClsMixin(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if test_connection:
-            cls.connection = test_connection
+        if TEST_CONNECTION:
+            cls.connection = TEST_CONNECTION
         else:
             cls.fd, cls.path = tempfile.mkstemp()
             cls.connection = 'sqlite:///' + cls.path
@@ -62,7 +64,7 @@ class TemporaryCacheClsMixin(unittest.TestCase):
     def tearDownClass(cls):
         cls.manager.session.close()
 
-        if not test_connection:
+        if not TEST_CONNECTION:
             os.close(cls.fd)
             os.remove(cls.path)
         else:
