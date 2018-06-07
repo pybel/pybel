@@ -1,67 +1,18 @@
 # -*- coding: utf-8 -*-
 
-"""This module assists in running complex workflows on BEL graphs.
-
-Example Pipeline #1
-~~~~~~~~~~~~~~~~~~~
-This example shows a pipeline that acquires a subgraph and finds possible additions to the subgraph.
-
->>> network = ...
->>> example = Pipeline()
->>> example.append('get_subgraph_by_annotation_value', 'Subgraph', 'Blood vessel dilation subgraph')
->>> example.append('enrich_unqualified')
->>> example.append('infer_central_dogma')
->>> example.append('expand_periphery')
->>> result = example.run(network)
-
-Example Pipeline #2
-~~~~~~~~~~~~~~~~~~~
-This example shows how additional data can be integrated into a graph.
-
->>> from pybel.constants import PROTEIN
->>> network = ...
->>> example = Pipeline()
->>> example.append('infer_central_dogma')
->>> example.append('enrich_unqualified')
->>> example.append('infer_central_dogma')
->>> example.append('expand_periphery')
->>> example.append('expand_nodes_neighborhoods', [(PROTEIN, 'HGNC', 'AKT1'), (PROTEIN, 'HGNC', 'AKT2')])
->>> result = example.run(network)
-
-Example Pipeline #3
-~~~~~~~~~~~~~~~~~~~
-This example shows how the results from multiple pipelines can be combine.
-
->>> network = ...
->>> pipeline_a = Pipeline()
->>> pipeline_a.append('get_subgraph_by_annotation_value', 'Subgraph', 'Blood vessel dilation subgraph')
->>> pipeline_b = Pipeline()
->>> pipeline_b.append('get_subgraph_by_annotation_value', 'Subgraph', 'Tau protein subgraph')
->>> pipeline_c = Pipeline.union(pipeline_a, pipeline_b)
->>> result = pipeline_c.run(network)
-
-"""
+"""This module holds the Pipeline class."""
 
 import json
 import logging
 import types
 from functools import wraps
 
+from .decorators import get_transformation, in_place_map, mapped, universe_map
 from .exc import MissingPipelineFunctionError
-from .operations import node_intersection, union
-
-try:
-    from inspect import signature
-except ImportError:
-    from funcsigs import signature
+from ..operations import node_intersection, union
 
 __all__ = [
     'Pipeline',
-    'in_place_transformation',
-    'uni_in_place_transformation',
-    'uni_transformation',
-    'transformation',
-    'splitter',
 ]
 
 log = logging.getLogger(__name__)
@@ -69,110 +20,9 @@ log = logging.getLogger(__name__)
 META_UNION = 'union'
 META_INTERSECTION = 'intersection'
 
-mapped = {}
-universe_map = {}
-no_universe_map = {}
-in_place_map = {}
-out_place_map = {}
-has_arguments_map = {}
-no_arguments_map = {}
-
-#: A map of function names to functions that split graphs into dictionaries of graphs
-splitter_map = {}
-
-
-def _register(universe, in_place):
-    """Build a decorator function to tag transformation functions.
-
-    :param bool universe: Does the first positional argument of this function correspond to a universe graph?
-    :param bool in_place: Does this function return a new graph, or just modify it in-place?
-    :param dict kwargs: Other parameters to annotate to the function
-    """
-
-    def decorator(f):
-        """Tag a transformation function.
-
-        :param f: A function
-        :return: The same function, with additional properties added
-        """
-        mapped[f.__name__] = f
-
-        if universe:
-            universe_map[f.__name__] = f
-        else:
-            no_universe_map[f.__name__] = f
-
-        if in_place:
-            in_place_map[f.__name__] = f
-        else:
-            out_place_map[f.__name__] = f
-
-        z = signature(f)
-        if (universe and 3 <= len(z.parameters)) or (not universe and 2 <= len(z.parameters)):
-            has_arguments_map[f.__name__] = f
-        else:
-            no_arguments_map[f.__name__] = f
-
-        return f
-
-    return decorator
-
-
-#: A function decorator to inform the Pipeline how to handle a function
-in_place_transformation = _register(universe=False, in_place=True)
-#: A function decorator to inform the Pipeline how to handle a function
-uni_in_place_transformation = _register(universe=True, in_place=True)
-#: A function decorator to inform the Pipeline how to handle a function
-uni_transformation = _register(universe=True, in_place=False)
-#: A function decorator to inform the Pipeline how to handle a function
-transformation = _register(universe=False, in_place=False)
-
-SET_UNIVERSE = 'UNIVERSE'
-
-
-def assert_is_mapped_to_pipeline(name):
-    """
-    :param str name:
-    :raises: MissingPipelineFunctionError
-    """
-    if name not in mapped:
-        raise MissingPipelineFunctionError('{} is not registered as a pipeline function'.format(name))
-
-
-def splitter(f):
-    """A function decorator that signifies a function that takes in a graph and returns a dictionary of keys to graphs
-
-    :param types.FunctionType f: A function
-    :rtype: types.FunctionType
-    """
-    splitter_map[f.__name__] = f
-    return f
-
-
-def function_is_registered(name):
-    """Checks if a function is a valid pipeline function
-
-    :param str or types.FunctionType name: The name of the function
-    :rtype: bool
-    """
-    if not isinstance(name, str):
-        return name.__name__ in mapped
-
-    return name in mapped
-
-
-def get_function(name):
-    """Gets a pipeline function by name or raises an error if it doesnt exist
-
-    :param str name:
-    :raises: MissingPipelineFunctionError
-    """
-    assert_is_mapped_to_pipeline(name)
-    return mapped[name]
-
 
 def _get_protocol_tuple(data):
-    """Converts a dictionary to a tuple
+    """Convert a dictionary to a tuple.
 
     :param dict data:
     :rtype: tuple[str,list,dict]
@@ -181,7 +31,19 @@ def _get_protocol_tuple(data):
 
 
 class Pipeline(object):
-    """Builds and runs analytical pipelines on BEL graphs."""
+    """Builds and runs analytical pipelines on BEL graphs.
+
+    Example usage:
+
+    >>> from pybel import BELGraph
+    >>> from pybel.struct.pipeline import Pipeline
+    >>> from pybel.struct.mutation import infer_central_dogma, prune_central_dogma
+    >>> graph = BELGraph()
+    >>> example = Pipeline()
+    >>> example.append(infer_central_dogma)
+    >>> example.append(prune_central_dogma)
+    >>> result = example.run(graph)
+    """
 
     def __init__(self, protocol=None, universe=None):
         """
@@ -221,7 +83,10 @@ class Pipeline(object):
         :rtype: types.FunctionType
         :raises: MissingPipelineFunctionError
         """
-        f = get_function(name)
+        f = mapped.get(name)
+
+        if f is None:
+            raise MissingPipelineFunctionError('{} is not registered as a pipeline function'.format(name))
 
         if name in universe_map and name in in_place_map:
             return self.wrap_in_place(self.wrap_universe(f))
@@ -248,12 +113,9 @@ class Pipeline(object):
         if isinstance(name, types.FunctionType):
             return self.append(name.__name__, *args, **kwargs)
         elif isinstance(name, str):
-            assert_is_mapped_to_pipeline(name)
+            get_transformation(name)
         else:
             raise TypeError('invalid function argument: {}'.format(name))
-
-        if not function_is_registered(name):
-            raise KeyError(name)
 
         av = {
             'function': name,
@@ -355,8 +217,8 @@ class Pipeline(object):
 
         Using __call__ allows for methods to be chained together then applied
 
-        >>> from pybel_tools.mutation import remove_associations, remove_pathologies
-        >>> from pybel.struct.pipeline import Pipeline
+        >>> from pybel.struct.mutation import remove_associations, remove_pathologies
+        >>> from pybel.struct.pipeline.pipeline import Pipeline
         >>> from pybel import BELGraph
         >>> pipe = Pipeline.from_functions([remove_associations, remove_pathologies])
         >>> graph = BELGraph() ...
@@ -365,7 +227,7 @@ class Pipeline(object):
         return self.run(graph=graph, universe=universe, in_place=in_place)
 
     def wrap_universe(self, f):
-        """Takes a function that needs a universe graph as the first argument and returns a wrapped one"""
+        """Take a function that needs a universe graph as the first argument and returns a wrapped one."""
 
         @wraps(f)
         def wrapper(graph, *args, **kwargs):
@@ -379,7 +241,7 @@ class Pipeline(object):
 
     @staticmethod
     def wrap_in_place(f):
-        """Takes a function that doesn't return the graph and returns the graph"""
+        """Take a function that doesn't return the graph and returns the graph."""
 
         @wraps(f)
         def wrapper(graph, *args, **kwargs):
@@ -390,21 +252,21 @@ class Pipeline(object):
         return wrapper
 
     def to_json(self):
-        """Gives this pipeline as json
+        """Give this pipeline as JSON.
 
         :rtype: list[dict]
         """
         return self.protocol
 
     def to_jsons(self):
-        """Gives this pipeline as a JSON string
+        """Give this pipeline as a JSON string.
 
         :rtype: str
         """
         return json.dumps(self.to_json())
 
     def dump_json(self, file):
-        """Dumps this protocol to a file in JSON
+        """Dump this protocol to a file in JSON.
 
         :param file: A file or file-like to pass to :func:`json.dump`
         """
@@ -412,7 +274,7 @@ class Pipeline(object):
 
     @staticmethod
     def from_json(protocol):
-        """Loads a pipeline from a JSON object
+        """Load a pipeline from a JSON object.
 
         :param list[dict] protocol:
         :return: The pipeline represented by the JSON
@@ -423,7 +285,7 @@ class Pipeline(object):
 
     @staticmethod
     def from_json_file(file):
-        """Loads a protocol from JSON contained in file using :meth:`Pipeline.from_json`.
+        """Load a protocol from JSON contained in file using :meth:`Pipeline.from_json`.
 
         :return: The pipeline represented by the JSON in the file
         :rtype: Pipeline
@@ -438,7 +300,7 @@ class Pipeline(object):
     def _build_meta(meta, pipelines):
         """
         :param str meta: either union or intersection
-        :param list[Pipeline] pipelines:
+        :param iter[Pipeline] pipelines:
         :rtype: Pipeline
         """
         return Pipeline.from_json([{
@@ -451,9 +313,9 @@ class Pipeline(object):
 
     @staticmethod
     def union(pipelines):
-        """Takes the union of multiple pipelines
+        """Take the union of multiple pipelines.
 
-        :param list[Pipeline] pipelines: A list of pipelines
+        :param iter[Pipeline] pipelines: A list of pipelines
         :return: The union of the results from multiple pipelines
         :rtype: Pipeline
         """
@@ -461,9 +323,9 @@ class Pipeline(object):
 
     @staticmethod
     def intersection(pipelines):
-        """Takes the intersection of the results from multiple pipelines
+        """Take the intersection of the results from multiple pipelines.
 
-        :param list[Pipeline] pipelines: A list of pipelines
+        :param iter[Pipeline] pipelines: A list of pipelines
         :return: The intersection of results from multiple pipelines
         :rtype: Pipeline
         """

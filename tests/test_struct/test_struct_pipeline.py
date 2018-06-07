@@ -4,9 +4,10 @@ import logging
 import unittest
 
 from pybel.examples.egf_example import egf_graph
-from pybel.struct.exc import MissingPipelineFunctionError
 from pybel.struct.mutation import infer_central_dogma
-from pybel.struct.pipeline import Pipeline, assert_is_mapped_to_pipeline, mapped
+from pybel.struct.pipeline import Pipeline
+from pybel.struct.pipeline.decorators import get_transformation, mapped
+from pybel.struct.pipeline.exc import MissingPipelineFunctionError
 
 log = logging.getLogger(__name__)
 log.setLevel(10)
@@ -31,13 +32,14 @@ class TestPipelineFailures(unittest.TestCase):
 
     def test_assert_failure(self):
         with self.assertRaises(MissingPipelineFunctionError):
-            assert_is_mapped_to_pipeline('missing function')
+            get_transformation('missing function')
 
     def test_assert_success(self):
         m = list(mapped)
         self.assertLess(0, len(m))
         m = m[0]
-        assert_is_mapped_to_pipeline(m)
+        f = get_transformation(m)
+        self.assertIsNotNone(f)
 
     def test_append_invalid(self):
         """Test when an invalid type is given to a :class:`pybel.struct.Pipeline`."""

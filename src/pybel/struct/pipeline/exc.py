@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Exceptions for the :mod:`pybel.struct` module."""
+"""Exceptions for the :mod:`pybel.struct.pipeline` module."""
 
 __all__ = [
     'MissingPipelineFunctionError',
