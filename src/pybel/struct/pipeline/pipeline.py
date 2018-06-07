@@ -131,7 +131,7 @@ class Pipeline(object):
         :param kwargs: The keyword arguments to call in the function
         :return: This pipeline for fluid query building
         :rtype: Pipeline
-        :raises MissingPipelineFunctionError: If the functions is not registered
+        :raises MissingPipelineFunctionError: If the function is not registered
         """
         if isinstance(name, types.FunctionType):
             return self.append(name.__name__, *args, **kwargs)

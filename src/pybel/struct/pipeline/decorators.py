@@ -59,6 +59,8 @@ def _register(universe, in_place):
 
         if _has_arguments(func, universe):
             has_arguments_map[func.__name__] = func
+        else:
+            no_arguments_map[func.__name__] = func
 
         return func
 
