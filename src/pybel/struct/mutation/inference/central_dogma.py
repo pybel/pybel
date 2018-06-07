@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from ...pipeline import in_place_transformation
 from ....constants import FUNCTION, MIRNA, NAMESPACE, PROTEIN, RNA, VARIANTS
 
 __all__ = [
@@ -19,6 +20,7 @@ def _infer_converter_helper(node, data, new_function):
     return new_tup, new_dict
 
 
+@in_place_transformation
 def infer_central_dogmatic_translations_by_namespace(graph, namespaces):
     """Adds the missing origin :class:`pybel.dsl.rna` and RNA-Protein translation edge for all proteins.
 
@@ -43,6 +45,7 @@ def infer_central_dogmatic_translations_by_namespace(graph, namespaces):
         graph.add_translation(data.get_rna(), data)
 
 
+@in_place_transformation
 def infer_central_dogmatic_translations(graph):
     """Add the missing origin RNA and RNA-Protein translation edge for all HGNC Protein entities.
 
@@ -51,6 +54,7 @@ def infer_central_dogmatic_translations(graph):
     infer_central_dogmatic_translations_by_namespace(graph, 'HGNC')
 
 
+@in_place_transformation
 def infer_central_dogmatic_transcriptions(graph):
     """Add the missing origin Gene and Gene-RNA transcription edge for all RNA entities.
 
@@ -69,6 +73,7 @@ def infer_central_dogmatic_transcriptions(graph):
         graph.add_transcription(data.get_gene(), data)
 
 
+@in_place_transformation
 def infer_central_dogma(graph):
     """Add all RNA-Protein translations then all Gene-RNA transcriptions.
 

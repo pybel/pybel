@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ...filters.node_selection import get_nodes_by_function
+from ...pipeline import in_place_transformation
 from ....constants import GENE, RELATION, RNA, TRANSCRIBED_TO, TRANSLATED_TO
 
 __all__ = [
@@ -46,6 +47,7 @@ def get_rna_leaves(graph):
             yield node
 
 
+@in_place_transformation
 def prune_central_dogma(graph):
     """Prune genes, then RNA, in place.
 
