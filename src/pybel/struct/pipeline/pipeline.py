@@ -47,14 +47,14 @@ class Pipeline(object):
 
     def __init__(self, protocol=None, universe=None):
         """
-        :param list[dict] protocol: The list of dictionaries describing how to transform a network
+        :param iter[dict] protocol: An iterable of dictionaries describing how to transform a network
         :param pybel.BELGraph universe: The entire set of known knowledge to draw from
         """
         self.universe = universe
         self.protocol = []
 
         if protocol is not None:
-            self._extend_helper(protocol)
+            self.extend(protocol)
 
     def __nonzero__(self):
         return self.protocol
@@ -62,12 +62,35 @@ class Pipeline(object):
     def __len__(self):
         return len(self.protocol)
 
+    def __iter__(self):
+        return iter(self.protocol)
+
     @staticmethod
     def from_functions(functions):
         """Build a pipeline from a list of functions.
 
-        :param iter[(pybel.BELGraph) -> pybel.BELGraph or (pybel.BELGraph) -> None] functions: A list of functions
+        :param functions: A list of functions or names of functions
+        :type functions: iter[((pybel.BELGraph) -> pybel.BELGraph) or ((pybel.BELGraph) -> None) or str]
         :rtype: Pipeline
+
+        Example with function:
+
+        >>> from pybel.struct.pipeline import Pipeline
+        >>> from pybel.struct.mutation import remove_associations
+        >>> pipeline = Pipeline.from_functions([remove_associations])
+
+        Equivalent example with function names:
+
+        >>> from pybel.struct.pipeline import Pipeline
+        >>> pipeline = Pipeline.from_functions(['remove_associations'])
+
+        Lookup by name is possible for built in functions, and those that have been registered correctly using one of
+        the four decorators:
+
+        1. :func:`pybel.struct.pipeline.transformation`,
+        2. :func:`pybel.struct.pipeline.in_place_transformation`,
+        3. :func:`pybel.struct.pipeline.uni_transformation`,
+        4. :func:`pybel.struct.pipeline.uni_in_place_transformation`,
         """
         result = Pipeline()
 
@@ -81,7 +104,7 @@ class Pipeline(object):
 
         :param str name: The name of the function
         :rtype: types.FunctionType
-        :raises: MissingPipelineFunctionError
+        :raises MissingPipelineFunctionError: If the functions is not registered
         """
         f = mapped.get(name)
 
@@ -108,7 +131,7 @@ class Pipeline(object):
         :param kwargs: The keyword arguments to call in the function
         :return: This pipeline for fluid query building
         :rtype: Pipeline
-        :raises: MissingPipelineFunctionError
+        :raises MissingPipelineFunctionError: If the functions is not registered
         """
         if isinstance(name, types.FunctionType):
             return self.append(name.__name__, *args, **kwargs)
@@ -130,20 +153,11 @@ class Pipeline(object):
         self.protocol.append(av)
         return self
 
-    def _extend_helper(self, protocol):
-        """Extend this pipeline's protocol with another protocol.
-
-        :param list[dict] protocol:
-        """
-        if protocol:
-            for data in protocol:
-                name, args, kwargs = _get_protocol_tuple(data)
-                self.append(name, *args, **kwargs)
-
-    def extend(self, pipeline):
+    def extend(self, protocol):
         """Add another pipeline to the end of the current pipeline.
 
-        :param Pipeline pipeline: Another pipeline
+        :param protocol: An iterable of dictionaries (or another Pipeline)
+        :type protocol: iter[dict] or Pipeline
         :return: This pipeline for fluid query building
         :rtype: Pipeline
 
@@ -152,8 +166,11 @@ class Pipeline(object):
         >>> p1 = Pipeline.from_functions(['infer_central_dogma'])
         >>> p2 = Pipeline.from_functions(['remove_pathologies'])
         >>> p1.extend(p2)
-         """
-        self._extend_helper(pipeline.protocol)
+        """
+        for data in protocol:
+            name, args, kwargs = _get_protocol_tuple(data)
+            self.append(name, *args, **kwargs)
+
         return self
 
     def _run_helper(self, graph, protocol):
@@ -199,7 +216,7 @@ class Pipeline(object):
         :return: The new graph is returned if not applied in-place
         :rtype: pybel.BELGraph
         """
-        self.universe = graph if universe is None else universe
+        self.universe = graph.copy() if universe is None else universe
 
         result = graph if in_place else graph.copy()
         result = self._run_helper(result, self.protocol)
@@ -226,27 +243,27 @@ class Pipeline(object):
         """
         return self.run(graph=graph, universe=universe, in_place=in_place)
 
-    def wrap_universe(self, f):
+    def wrap_universe(self, func):
         """Take a function that needs a universe graph as the first argument and returns a wrapped one."""
 
-        @wraps(f)
+        @wraps(func)
         def wrapper(graph, *args, **kwargs):
             """Applies the enclosed function with the universe given as the first argument"""
             if self.universe is None:
-                raise ValueError('Can not run universe function [{}] - No universe is set'.format(f.__name__))
+                raise ValueError('Can not run universe function [{}] - No universe is set'.format(func.__name__))
 
-            return f(self.universe, graph, *args, **kwargs)
+            return func(self.universe, graph, *args, **kwargs)
 
         return wrapper
 
     @staticmethod
-    def wrap_in_place(f):
+    def wrap_in_place(func):
         """Take a function that doesn't return the graph and returns the graph."""
 
-        @wraps(f)
+        @wraps(func)
         def wrapper(graph, *args, **kwargs):
             """Applies the enclosed function and returns the graph"""
-            f(graph, *args, **kwargs)
+            func(graph, *args, **kwargs)
             return graph
 
         return wrapper
@@ -279,7 +296,7 @@ class Pipeline(object):
         :param list[dict] protocol:
         :return: The pipeline represented by the JSON
         :rtype: Pipeline
-        :raises: MissingPipelineFunctionError
+        :raises MissingPipelineFunctionError: If any functions are not registered
         """
         return Pipeline(protocol=protocol)
 
@@ -289,7 +306,7 @@ class Pipeline(object):
 
         :return: The pipeline represented by the JSON in the file
         :rtype: Pipeline
-        :raises: MissingPipelineFunctionError
+        :raises MissingPipelineFunctionError: If any functions are not registered
         """
         return Pipeline.from_json(json.load(file))
 

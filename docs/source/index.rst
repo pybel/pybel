@@ -48,6 +48,7 @@ Links
    summary
    filters
    mutation
+   pipeline
 
 .. toctree::
    :maxdepth: 2
