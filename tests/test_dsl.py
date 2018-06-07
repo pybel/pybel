@@ -5,7 +5,7 @@
 import unittest
 
 from pybel.constants import ABUNDANCE, COMPLEX
-from pybel.dsl import abundance, complex_abundance, protein
+from pybel.dsl import abundance, complex_abundance, fragment, protein
 from pybel.testing.utils import n
 from pybel.utils import ensure_quotes, hash_node
 
@@ -62,6 +62,18 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(node_tuple, nine_one_one.as_tuple())
         self.assertEqual(hash(node_tuple), hash(nine_one_one))
         self.assertEqual(hash_node(node_tuple), nine_one_one.as_sha512())
+
+
+class TestCentralDogma(unittest.TestCase):
+    def get_parent(self):
+        ab42 = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
+        app = ab42.get_parent()
+        self.assertEqual('p(HGNC:APP)', app.as_bel())
+
+    def test_with_variants(self):
+        app = protein(name='APP', namespace='HGNC')
+        ab42 = app.with_variants([fragment(start=672, stop=713)])
+        self.assertEqual('p(HGNC:APP, frag(672_713))', ab42.as_bel())
 
 
 if __name__ == '__main__':
