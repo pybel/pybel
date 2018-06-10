@@ -56,9 +56,6 @@ class Pipeline(object):
         if protocol is not None:
             self.extend(protocol)
 
-    def __nonzero__(self):
-        return self.protocol
-
     def __len__(self):
         return len(self.protocol)
 
