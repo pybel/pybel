@@ -278,14 +278,26 @@ class Pipeline(object):
         return json.dump(self.protocol, file)
 
     @staticmethod
-    def from_json_file(file):
-        """Load a protocol from JSON contained in file using :meth:`Pipeline.from_json`.
+    def load(file):
+        """Load a protocol from JSON contained in file.
 
+        :param file: A file or file-like
         :return: The pipeline represented by the JSON in the file
         :rtype: Pipeline
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
         return Pipeline(protocol=json.load(file))
+
+    @staticmethod
+    def loads(s):
+        """Load a protocol from a JSON string.
+
+        :param str s: A JSON string
+        :return: The pipeline represented by the JSON in the file
+        :rtype: Pipeline
+        :raises MissingPipelineFunctionError: If any functions are not registered
+        """
+        return Pipeline(protocol=json.loads(s))
 
     def __str__(self):
         return json.dumps(self.protocol, indent=2)

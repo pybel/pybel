@@ -3,6 +3,8 @@
 import logging
 import unittest
 
+from six.moves import StringIO
+
 from pybel import BELGraph
 from pybel.examples.egf_example import egf_graph
 from pybel.struct.mutation import get_random_subgraph, infer_central_dogma
@@ -88,6 +90,20 @@ class TestPipeline(TestEgfExample):
         p1.extend(p2)
 
         self.assertEqual(2, len(p1))
+
+    def test_serialize_string(self):
+        p = Pipeline.from_functions(['infer_central_dogma'])
+        s = p.dumps()
+        p_reconstituted = Pipeline.loads(s)
+        self.assertEqual(p.protocol, p_reconstituted.protocol)
+
+    def test_serialize_file(self):
+        p = Pipeline.from_functions(['infer_central_dogma'])
+        sio = StringIO()
+        p.dump(sio)
+        sio.seek(0)
+        p_reconstituted = Pipeline.load(sio)
+        self.assertEqual(p.protocol, p_reconstituted.protocol)
 
     def test_pipeline_by_string(self):
         pipeline = Pipeline.from_functions([
