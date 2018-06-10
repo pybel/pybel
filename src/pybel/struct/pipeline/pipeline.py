@@ -8,7 +8,7 @@ import types
 from functools import wraps
 
 from .decorators import get_transformation, in_place_map, mapped, universe_map
-from .exc import MissingPipelineFunctionError
+from .exc import MetaValueError, MissingPipelineFunctionError, MissingUniverseError
 from ..operations import node_intersection, union
 
 __all__ = [
@@ -196,7 +196,7 @@ class Pipeline(object):
                     result = node_intersection(networks)
 
                 else:
-                    raise ValueError('invalid meta-command: {}'.format(meta_entry))
+                    raise MetaValueError('invalid meta-command: {}'.format(meta_entry))
 
         return result
 
@@ -244,7 +244,8 @@ class Pipeline(object):
         def wrapper(graph, *args, **kwargs):
             """Applies the enclosed function with the universe given as the first argument"""
             if self.universe is None:
-                raise ValueError('Can not run universe function [{}] - No universe is set'.format(func.__name__))
+                raise MissingUniverseError(
+                    'Can not run universe function [{}] - No universe is set'.format(func.__name__))
 
             return func(self.universe, graph, *args, **kwargs)
 

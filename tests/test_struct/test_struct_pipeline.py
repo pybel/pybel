@@ -3,11 +3,12 @@
 import logging
 import unittest
 
+from pybel import BELGraph
 from pybel.examples.egf_example import egf_graph
 from pybel.struct.mutation import get_random_subgraph, infer_central_dogma
 from pybel.struct.pipeline import Pipeline
 from pybel.struct.pipeline.decorators import get_transformation, mapped
-from pybel.struct.pipeline.exc import MissingPipelineFunctionError
+from pybel.struct.pipeline.exc import MetaValueError, MissingPipelineFunctionError
 from tests.utils import generate_random_graph
 
 log = logging.getLogger(__name__)
@@ -54,8 +55,13 @@ class TestPipelineFailures(unittest.TestCase):
         with self.assertRaises(MissingPipelineFunctionError):
             p.get_function('nonsense name')
 
-    def test_get_function_success(self):
-        pass
+    def test_build_meta_failure(self):
+        p1, p2 = Pipeline(), Pipeline()
+
+        p = Pipeline._build_meta('wrong', [p1, p2])
+
+        with self.assertRaises(MetaValueError):
+            p(BELGraph())
 
     def test_fail_add(self):
         pipeline = Pipeline()
