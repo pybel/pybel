@@ -1,43 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import itertools as itt
-import random
 import unittest
 
 from pybel import BELGraph
 from pybel.constants import ASSOCIATION, DECREASES, INCREASES
 from pybel.dsl import gene, protein, rna
 from pybel.struct.mutation import expand_upstream_causal_subgraph, get_random_subgraph
-from pybel.testing.utils import n
+from tests.utils import generate_random_graph
 
 trem2_gene = gene(namespace='HGNC', name='TREM2')
 trem2_rna = rna(namespace='HGNC', name='TREM2')
 trem2_protein = protein(namespace='HGNC', name='TREM2')
-
-
-def _generate_random_graph(n_nodes, n_edges):
-    """Generate a subgraph with random nodes and edges.
-
-    :rtype: pybel.BELGraph
-    """
-    graph = BELGraph()
-    nodes = [
-        protein(namespace='NS', name=str(i))
-        for i in range(1, n_nodes)
-    ]
-
-    edges = list(itt.combinations(nodes, r=2))
-    random.shuffle(edges)
-
-    for u, v in edges[:n_edges]:
-        graph.add_qualified_edge(
-            u, v,
-            relation=INCREASES,
-            citation=n(),
-            evidence=n(),
-        )
-
-    return graph
 
 
 class TestInduction(unittest.TestCase):
@@ -73,7 +46,7 @@ class TestInduction(unittest.TestCase):
 
     def test_random_sample(self):
         n_nodes, n_edges = 50, 500
-        graph = _generate_random_graph(n_nodes=n_nodes, n_edges=n_edges)
+        graph = generate_random_graph(n_nodes=n_nodes, n_edges=n_edges)
 
         self.assertEqual(n_edges, graph.number_of_edges())
 
@@ -82,7 +55,7 @@ class TestInduction(unittest.TestCase):
 
     def test_random_sample_small(self):
         n_nodes, n_edges = 11, 25
-        graph = _generate_random_graph(n_nodes, n_edges)
+        graph = generate_random_graph(n_nodes, n_edges)
 
         self.assertEqual(n_edges, graph.number_of_edges())
 

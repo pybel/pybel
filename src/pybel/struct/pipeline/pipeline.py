@@ -51,10 +51,7 @@ class Pipeline(object):
         :param pybel.BELGraph universe: The entire set of known knowledge to draw from
         """
         self.universe = universe
-        self.protocol = []
-
-        if protocol is not None:
-            self.extend(protocol)
+        self.protocol = [] if protocol is None else protocol
 
     def __len__(self):
         return len(self.protocol)
@@ -189,7 +186,7 @@ class Pipeline(object):
             else:
                 networks = (
                     self._run_helper(graph, subprotocol)
-                    for subprotocol in entry['pipeline']
+                    for subprotocol in entry['pipelines']
                 )
 
                 if meta_entry == META_UNION:
@@ -265,37 +262,19 @@ class Pipeline(object):
 
         return wrapper
 
-    def to_json(self):
-        """Give this pipeline as JSON.
-
-        :rtype: list[dict]
-        """
-        return self.protocol
-
-    def to_jsons(self):
+    def dumps(self, **kwargs):
         """Give this pipeline as a JSON string.
 
         :rtype: str
         """
-        return json.dumps(self.to_json())
+        return json.dumps(self.protocol, **kwargs)
 
-    def dump_json(self, file):
+    def dump(self, file):
         """Dump this protocol to a file in JSON.
 
         :param file: A file or file-like to pass to :func:`json.dump`
         """
         return json.dump(self.protocol, file)
-
-    @staticmethod
-    def from_json(protocol):
-        """Load a pipeline from a JSON object.
-
-        :param list[dict] protocol:
-        :return: The pipeline represented by the JSON
-        :rtype: Pipeline
-        :raises MissingPipelineFunctionError: If any functions are not registered
-        """
-        return Pipeline(protocol=protocol)
 
     @staticmethod
     def from_json_file(file):
@@ -305,7 +284,7 @@ class Pipeline(object):
         :rtype: Pipeline
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
-        return Pipeline.from_json(json.load(file))
+        return Pipeline(protocol=json.load(file))
 
     def __str__(self):
         return json.dumps(self.protocol, indent=2)
@@ -317,13 +296,15 @@ class Pipeline(object):
         :param iter[Pipeline] pipelines:
         :rtype: Pipeline
         """
-        return Pipeline.from_json([{
-            'meta': meta,
-            'pipelines': [
-                pipeline.to_json()
-                for pipeline in pipelines
-            ]
-        }])
+        return Pipeline(protocol=[
+            {
+                'meta': meta,
+                'pipelines': [
+                    pipeline.protocol
+                    for pipeline in pipelines
+                ]
+            },
+        ])
 
     @staticmethod
     def union(pipelines):
