@@ -78,7 +78,7 @@ def filter_nodes(graph, node_predicates=None):
     :param node_predicates: A node predicate or list/tuple of node predicates
     :type node_predicates: types.FunctionType or iter[types.FunctionType]
     :return: An iterable of nodes that pass all predicates
-    :rtype: iter
+    :rtype: iter[tuple]
     """
 
     # If no predicates are given, return the standard node iterator
