@@ -502,22 +502,46 @@ class BELGraph(networkx.MultiDiGraph):
 
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
                            object_modifier=None, **attr):
-        """Adds an edge, qualified with a relation, evidence, citation, and optional annotations, subject modifications,
-        and object modifications
+        """Add an edge, qualified with a relation, evidence, citation, and optional attributes.
 
-        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
-        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
         :param str relation: The type of relation this edge represents
         :param str evidence: The evidence string from an article
-        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and auto-fills the citation type.
+        :param citation: The citation data dictionary for this evidence. If a string is given, assumes it's a PubMed
+         identifier and auto-fills the citation type.
+        :type citation: dict[str,str] or str
         :param annotations: The annotations data dictionary
         :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
-        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
-        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
+         documentation.
+        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
+         documentation.
 
         :return: The hash of the edge
         :rtype: str
+
+        Example using a general activity:
+
+        >>> from pybel import BELGraph
+        >>> from pybel.dsl import protein, activity
+        >>> graph = BELGraph()
+        >>> braf = protein(namespace='HGNC', name='BRAF', identifier='1097')
+        >>> elk1 = protein(namespace='HGNC', name='ELK1', identifier='3321')
+        >>> graph.add_qualified_edge(
+        ... braf,
+        ... elk1,
+        ... relation=INCREASES,
+        ... evidence="Expression of both dominant negative forms, RasN17 and Rap1N17, in UT7-Mpl cells decreased " \
+        ...          "thrombopoietin-mediated Elk1-dependent transcription. This suggests that both Ras and Rap1 " \
+        ...          "contribute to thrombopoietin-induced ELK1 transcription.",
+        ... citation='11283246',
+        ... subject_modifier=activity(name='kin'),
+        ... object_modifier=activity(name='tscript'),
+        ... annotations={'Species': '9606'}
+        ... )
         """
         attr.update({
             RELATION: relation,
@@ -570,6 +594,44 @@ class BELGraph(networkx.MultiDiGraph):
 
         :return: The hash of the edge
         :rtype: str
+
+        Example:
+
+        >>> from pybel import BELGraph
+        >>> from pybel.dsl import abundance, protein
+        >>> graph = BELGraph()
+        >>> hmgcr_inhibitor = abundance(namespace='CHEBI', identifier='35664',
+        ...                             name='EC 1.1.1.34/EC 1.1.1.88 (hydroxymethylglutaryl-CoA reductase) inhibitor')
+        >>> ec_11188 = protein(namespace='EC', name='1.1.1.88')
+        >>> graph.add_inhibits(
+        ...     hmgcr_inhibitor,
+        ...     ec_11188,
+        ...     evidence='From ChEBI',
+        ...     citation='23180789',
+        ...     annotations={
+        ...         'Confidence': 'Axiomatic'
+        ...     }
+        ... )
+
+        Example using specific activity. This one is nice, since a GO term corresponds exactly to an enzyme class:
+
+        >>> from pybel import BELGraph
+        >>> from pybel.dsl import abundance, protein, activity
+        >>> graph = BELGraph()
+        >>> hmgcr_inhibitor = abundance(namespace='CHEBI', identifier='35664',
+        ...                             name='EC 1.1.1.34/EC 1.1.1.88 (hydroxymethylglutaryl-CoA reductase) inhibitor')
+        >>> ec_11188 = protein(namespace='EC', name='1.1.1.88')
+        >>> graph.add_inhibits(
+        ...     hmgcr_inhibitor,
+        ...     ec_11188,
+        ...     evidence='From ChEBI',
+        ...     citation='23180789',
+        ...     annotations={
+        ...         'Confidence': 'Axiomatic'
+        ...     },
+        ...     object_modifier=activity(namespace='GO', name='hydroxymethylglutaryl-CoA reductase activity',
+        ...                              identifier='GO:0042282')
+        ... )
         """
         return self.add_qualified_edge(
             u,
