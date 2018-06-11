@@ -2,12 +2,14 @@
 
 import logging
 import unittest
+from six.moves import StringIO
 
+from pybel import BELGraph
 from pybel.examples.egf_example import egf_graph
 from pybel.struct.mutation import infer_central_dogma
 from pybel.struct.pipeline import Pipeline
 from pybel.struct.pipeline.decorators import get_transformation, mapped
-from pybel.struct.pipeline.exc import MissingPipelineFunctionError
+from pybel.struct.pipeline.exc import MetaValueError, MissingPipelineFunctionError
 
 log = logging.getLogger(__name__)
 log.setLevel(10)
@@ -48,25 +50,23 @@ class TestPipelineFailures(unittest.TestCase):
             p.append(4)
 
     def test_get_function_failure(self):
-        pass
+        p = Pipeline()
 
-    def test_get_function_success(self):
-        pass
+        with self.assertRaises(MissingPipelineFunctionError):
+            p.get_function('nonsense name')
+
+    def test_build_meta_failure(self):
+        p1, p2 = Pipeline(), Pipeline()
+
+        p = Pipeline._build_meta('wrong', [p1, p2])
+
+        with self.assertRaises(MetaValueError):
+            p(BELGraph())
 
     def test_fail_add(self):
         pipeline = Pipeline()
         with self.assertRaises(MissingPipelineFunctionError):
             pipeline.append('missing function')
-
-    def test_fail_build(self):
-        protocol = [{'function': 'missing function'}]
-        with self.assertRaises(MissingPipelineFunctionError):
-            Pipeline(protocol=protocol)
-
-    def test_fail_from_json(self):
-        protocol = [{'function': 'missing function'}]
-        with self.assertRaises(MissingPipelineFunctionError):
-            Pipeline.from_json(protocol)
 
 
 class TestPipeline(TestEgfExample):
@@ -82,14 +82,32 @@ class TestPipeline(TestEgfExample):
 
     def test_extend(self):
         p1 = Pipeline.from_functions(['infer_central_dogma'])
+        self.assertEqual(1, len(p1))
+
         p2 = Pipeline.from_functions(['remove_pathologies'])
         p1.extend(p2)
+
+        self.assertEqual(2, len(p1))
+
+    def test_serialize_string(self):
+        p = Pipeline.from_functions(['infer_central_dogma'])
+        s = p.dumps()
+        p_reconstituted = Pipeline.loads(s)
+        self.assertEqual(p.protocol, p_reconstituted.protocol)
+
+    def test_serialize_file(self):
+        p = Pipeline.from_functions(['infer_central_dogma'])
+        sio = StringIO()
+        p.dump(sio)
+        sio.seek(0)
+        p_reconstituted = Pipeline.load(sio)
+        self.assertEqual(p.protocol, p_reconstituted.protocol)
 
     def test_pipeline_by_string(self):
         pipeline = Pipeline.from_functions([
             'infer_central_dogma',
         ])
-        result = pipeline.run(self.graph, in_place=False)
+        result = pipeline(self.graph, in_place=False)
 
         self.assertEqual(32, result.number_of_nodes())
 
@@ -102,7 +120,7 @@ class TestPipeline(TestEgfExample):
         pipeline = Pipeline.from_functions([
             infer_central_dogma,
         ])
-        result = pipeline.run(self.graph, in_place=False)
+        result = pipeline(self.graph, in_place=False)
 
         self.assertEqual(32, result.number_of_nodes())
 

@@ -8,7 +8,7 @@ import types
 from functools import wraps
 
 from .decorators import get_transformation, in_place_map, mapped, universe_map
-from .exc import MissingPipelineFunctionError
+from .exc import MetaValueError, MissingPipelineFunctionError, MissingUniverseError
 from ..operations import node_intersection, union
 
 __all__ = [
@@ -51,13 +51,7 @@ class Pipeline(object):
         :param pybel.BELGraph universe: The entire set of known knowledge to draw from
         """
         self.universe = universe
-        self.protocol = []
-
-        if protocol is not None:
-            self.extend(protocol)
-
-    def __nonzero__(self):
-        return self.protocol
+        self.protocol = [] if protocol is None else protocol
 
     def __len__(self):
         return len(self.protocol)
@@ -131,7 +125,7 @@ class Pipeline(object):
         :param kwargs: The keyword arguments to call in the function
         :return: This pipeline for fluid query building
         :rtype: Pipeline
-        :raises MissingPipelineFunctionError: If the functions is not registered
+        :raises MissingPipelineFunctionError: If the function is not registered
         """
         if isinstance(name, types.FunctionType):
             return self.append(name.__name__, *args, **kwargs)
@@ -192,7 +186,7 @@ class Pipeline(object):
             else:
                 networks = (
                     self._run_helper(graph, subprotocol)
-                    for subprotocol in entry['pipeline']
+                    for subprotocol in entry['pipelines']
                 )
 
                 if meta_entry == META_UNION:
@@ -202,7 +196,7 @@ class Pipeline(object):
                     result = node_intersection(networks)
 
                 else:
-                    raise ValueError('invalid meta-command: {}'.format(meta_entry))
+                    raise MetaValueError('invalid meta-command: {}'.format(meta_entry))
 
         return result
 
@@ -250,7 +244,8 @@ class Pipeline(object):
         def wrapper(graph, *args, **kwargs):
             """Applies the enclosed function with the universe given as the first argument"""
             if self.universe is None:
-                raise ValueError('Can not run universe function [{}] - No universe is set'.format(func.__name__))
+                raise MissingUniverseError(
+                    'Can not run universe function [{}] - No universe is set'.format(func.__name__))
 
             return func(self.universe, graph, *args, **kwargs)
 
@@ -268,21 +263,14 @@ class Pipeline(object):
 
         return wrapper
 
-    def to_json(self):
-        """Give this pipeline as JSON.
-
-        :rtype: list[dict]
-        """
-        return self.protocol
-
-    def to_jsons(self):
+    def dumps(self, **kwargs):
         """Give this pipeline as a JSON string.
 
         :rtype: str
         """
-        return json.dumps(self.to_json())
+        return json.dumps(self.protocol, **kwargs)
 
-    def dump_json(self, file):
+    def dump(self, file):
         """Dump this protocol to a file in JSON.
 
         :param file: A file or file-like to pass to :func:`json.dump`
@@ -290,25 +278,26 @@ class Pipeline(object):
         return json.dump(self.protocol, file)
 
     @staticmethod
-    def from_json(protocol):
-        """Load a pipeline from a JSON object.
+    def load(file):
+        """Load a protocol from JSON contained in file.
 
-        :param list[dict] protocol:
-        :return: The pipeline represented by the JSON
-        :rtype: Pipeline
-        :raises MissingPipelineFunctionError: If any functions are not registered
-        """
-        return Pipeline(protocol=protocol)
-
-    @staticmethod
-    def from_json_file(file):
-        """Load a protocol from JSON contained in file using :meth:`Pipeline.from_json`.
-
+        :param file: A file or file-like
         :return: The pipeline represented by the JSON in the file
         :rtype: Pipeline
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
-        return Pipeline.from_json(json.load(file))
+        return Pipeline(protocol=json.load(file))
+
+    @staticmethod
+    def loads(s):
+        """Load a protocol from a JSON string.
+
+        :param str s: A JSON string
+        :return: The pipeline represented by the JSON in the file
+        :rtype: Pipeline
+        :raises MissingPipelineFunctionError: If any functions are not registered
+        """
+        return Pipeline(protocol=json.loads(s))
 
     def __str__(self):
         return json.dumps(self.protocol, indent=2)
@@ -320,13 +309,15 @@ class Pipeline(object):
         :param iter[Pipeline] pipelines:
         :rtype: Pipeline
         """
-        return Pipeline.from_json([{
-            'meta': meta,
-            'pipelines': [
-                pipeline.to_json()
-                for pipeline in pipelines
-            ]
-        }])
+        return Pipeline(protocol=[
+            {
+                'meta': meta,
+                'pipelines': [
+                    pipeline.protocol
+                    for pipeline in pipelines
+                ]
+            },
+        ])
 
     @staticmethod
     def union(pipelines):
