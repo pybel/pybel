@@ -233,7 +233,6 @@ class BELGraph(networkx.MultiDiGraph):
         """
         return self.graph[GRAPH_NAMESPACE_URL]
 
-
     @property
     def defined_namespace_keywords(self):
         """Returns the set of all keywords defined as namespaces in this graph
@@ -337,7 +336,13 @@ class BELGraph(networkx.MultiDiGraph):
         )
 
     def add_warning(self, line_number, line, exception, context=None):
-        """Adds a warning to the internal warning log in the graph, with optional context information"""
+        """Add a warning to the internal warning log in the graph, with optional context information.
+
+        :param int line_number: The line number on which the exception occurred
+        :param str line: The line on which the exception occurred
+        :param Exception exception: The exception that occurred
+        :param Optional[dict] context: The context from the parser when the exeption occurred
+        """
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
     def add_unqualified_edge(self, u, v, relation):
