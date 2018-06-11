@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """Tests for node deletion functions."""
+
 import unittest
 
 from pybel import BELGraph
 from pybel.constants import ASSOCIATION, INCREASES, POSITIVE_CORRELATION, RELATION
 from pybel.dsl import pathology, protein
 from pybel.struct.mutation import remove_associations, remove_pathologies
+from pybel.struct.mutation.utils import remove_isolated_nodes, remove_isolated_nodes_op
 from pybel.testing.utils import n
 
 
@@ -47,5 +49,29 @@ class TestDeletions(unittest.TestCase):
         self.assertTrue(g.has_node_with_data(p1))
         self.assertTrue(g.has_node_with_data(p2))
         self.assertTrue(g.has_node_with_data(p3))
+        self.assertEqual(3, g.number_of_nodes())
+        self.assertEqual(2, g.number_of_edges())
+
+    def test_remove_isolated_in_place(self):
+        g = BELGraph()
+
+        g.add_edge(1, 2)
+        g.add_edge(2, 3)
+        g.add_node(4)
+
+        remove_isolated_nodes(g)
+
+        self.assertEqual(3, g.number_of_nodes())
+        self.assertEqual(2, g.number_of_edges())
+
+    def test_remove_isolated_out_of_place(self):
+        g = BELGraph()
+
+        g.add_edge(1, 2)
+        g.add_edge(2, 3)
+        g.add_node(4)
+
+        g = remove_isolated_nodes_op(g)
+
         self.assertEqual(3, g.number_of_nodes())
         self.assertEqual(2, g.number_of_edges())
