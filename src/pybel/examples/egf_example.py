@@ -40,10 +40,7 @@
     UNSET ALL
 """
 
-from ..constants import *
-from ..dsl.edges import translocation
-from ..dsl.nodes import bioprocess, complex_abundance, protein
-from ..dsl.utils import entity
+from ..dsl import activity, bioprocess, complex_abundance, entity, protein, translocation
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -85,47 +82,37 @@ nfkb_complex = complex_abundance([nfkb1, nfkb2, rel, rela, relb])
 
 apoptosis = bioprocess(namespace='GOBP', name='apoptotic process', identifier='0006915')
 
-egf_graph.add_qualified_edge(
+egf_graph.add_increases(
     ar,
     egf,
-    relation=INCREASES,
     citation='12855613',
     evidence='This induction was not seen either when LNCaP cells were treated with flutamide or conditioned medium '
              'were pretreated with antibody to the epidermal growth factor (EGF)',
     annotations={'Species': '9606'},
-    subject_modifier={
-        MODIFIER: ACTIVITY,
-        EFFECT: {
-            NAMESPACE: BEL_DEFAULT_NAMESPACE,
-            NAME: 'tscript'
-        }
-    }
+    subject_modifier=activity('tscript'),
 )
 
-egf_graph.add_qualified_edge(
+egf_graph.add_decreases(
     ifna1,
     egf,
-    relation=DECREASES,
     citation='9639405',
     evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN '
              'gamma reduction more significant.',
     annotations={'Species': '9606'}
 )
 
-egf_graph.add_qualified_edge(
+egf_graph.add_decreases(
     ifng,
     egf,
-    relation=DECREASES,
     citation='9639405',
     evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN '
              'gamma reduction more significant.',
     annotations={'Species': '9606'}
 )
 
-egf_graph.add_qualified_edge(
+egf_graph.add_increases(
     egf,
     vcp,
-    relation=INCREASES,
     citation='10855792',
     evidence='Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be '
              'translocated from the nucleus after stimulation with epidermal growth factor.',
@@ -136,41 +123,23 @@ egf_graph.add_qualified_edge(
     )
 )
 
-egf_graph.add_qualified_edge(
+egf_graph.add_increases(
     vcp,
     nfkb_complex,
-    relation=INCREASES,
     citation='12560433',
-    evidence="Valosin-containing protein (VCP; also known as p97) has been shown to be associated with antiapoptotic function and metastasis via activation of the nuclear factor-kappaB signaling pathway.",
+    evidence="Valosin-containing protein (VCP; also known as p97) has been shown to be associated with antiapoptotic"
+             " function and metastasis via activation of the nuclear factor-kappaB signaling pathway.",
     annotations={'Species': '9606'},
-    subject_modifier={
-        MODIFIER: ACTIVITY,
-        EFFECT: {
-            NAMESPACE: BEL_DEFAULT_NAMESPACE,
-            NAME: 'cat'
-        }
-    },
-    object_modifier={
-        MODIFIER: ACTIVITY,
-        EFFECT: {
-            NAMESPACE: BEL_DEFAULT_NAMESPACE,
-            NAME: 'tscript'
-        }
-    }
+    subject_modifier=activity('cat'),
+    object_modifier=activity('tscript'),
 )
 
-egf_graph.add_qualified_edge(
+egf_graph.add_decreases(
     nfkb_complex,
     apoptosis,
-    relation=DECREASES,
     citation='12560433',
-    evidence="Valosin-containing protein (VCP; also known as p97) has been shown to be associated with antiapoptotic function and metastasis via activation of the nuclear factor-kappaB signaling pathway.",
+    evidence="Valosin-containing protein (VCP; also known as p97) has been shown to be associated with antiapoptotic "
+             "function and metastasis via activation of the nuclear factor-kappaB signaling pathway.",
     annotations={'Species': '9606'},
-    subject_modifier={
-        MODIFIER: ACTIVITY,
-        EFFECT: {
-            NAMESPACE: BEL_DEFAULT_NAMESPACE,
-            NAME: 'tscript'
-        }
-    }
+    subject_modifier=activity('tscript'),
 )
