@@ -20,7 +20,7 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-RECIEVE_ENDPOINT = '/api/receive'
+RECIEVE_ENDPOINT = '/api/receive/'
 GET_ENDPOINT = '/api/network/{}/export/nodelink'
 
 
