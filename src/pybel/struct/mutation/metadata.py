@@ -42,6 +42,9 @@ def add_annotation_value(graph, annotation, value):
         if ANNOTATIONS not in graph[u][v][k]:
             continue
 
+        if annotation not in graph[u][v][k][ANNOTATIONS]:
+            graph[u][v][k][ANNOTATIONS] = {annotation: {}}
+
         graph[u][v][k][ANNOTATIONS][annotation][value] = True
 
 
@@ -57,14 +60,14 @@ def remove_annotation_value(graph, annotation, value):
         log.warning('annotation was not defined: %s', annotation)
         return
 
-    for u, v, k in graph.edges(data=True):
+    for u, v, k in graph.edges(keys=True):
         if ANNOTATIONS not in graph[u][v][k]:
             continue
 
-        if annotation not in graph[u][v][k][ANNOTATIONS][annotation]:
+        if annotation not in graph[u][v][k][ANNOTATIONS]:
             continue
 
-        if value not in graph[u][v][k][ANNOTATIONS][annotation][value]:
+        if value not in graph[u][v][k][ANNOTATIONS][annotation]:
             continue
 
         del graph[u][v][k][ANNOTATIONS][annotation][value]

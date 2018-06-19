@@ -37,10 +37,13 @@ class TestMetadata(unittest.TestCase):
         self.assertNotIn(ANNOTATIONS, graph.edge[x.as_tuple()][y.as_tuple()][1])
 
     def test_add_and_remove_annotation(self):
+        """Test the :func:`pybel.struct.mutation.add_annotation_value` and
+        :func:`pybel.struct.mutation.remove_annotation_value` functions.
+        """
         graph = sialic_acid_graph.copy()
-        annotation = n()
+        annotation = 'test-annotation'
+        value = 'test-value'
         url = n()
-        value = n()
 
         graph.annotation_url[annotation] = url
 
