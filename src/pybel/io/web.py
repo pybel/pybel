@@ -8,10 +8,8 @@ import os
 import requests
 
 from .nodelink import from_json, to_json
-from ..constants import (
-    DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER, VERSION,
-    config,
-)
+from ..constants import DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER, config
+from ..utils import get_version
 
 __all__ = [
     'to_web',
@@ -85,7 +83,7 @@ def to_web(graph, host=None, user=None, password=None):
         json=to_json(graph),
         headers={
             'content-type': 'application/json',
-            'User-Agent': 'PyBEL v{}'.format(VERSION),
+            'User-Agent': 'PyBEL v{}'.format(get_version()),
         },
         auth=(user, password)
     )
