@@ -16,6 +16,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 
 import logging
 import sys
+import time
 
 import click
 
@@ -151,6 +152,28 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
         to_neo4j(g, neo_graph, neo_context)
 
     sys.exit(0 if 0 == len(g.warnings) else 1)
+
+
+@main.command()
+@click.argument('agents', nargs=-1)
+@click.option('--host')
+def machine(agents, host):
+    """Get content from the INDRA machine and upload to BEL Commons."""
+    from indra.sources import indra_db_rest
+    from pybel import from_indra_statements, to_web
+
+    statements = indra_db_rest.get_statements(agents=agents)
+    click.echo('got {} statements from INDRA'.format(len(statements)))
+
+    graph = from_indra_statements(
+        statements,
+        name='INDRA Machine for {}'.format(', '.join(sorted(agents))),
+        version=time.strftime('%Y%m%d'),
+    )
+    click.echo('built BEL graph with {} nodes and {} edges'.format(graph.number_of_nodes(), graph.number_of_edges()))
+
+    resp = to_web(graph, host=host)
+    resp.raise_for_status()
 
 
 @main.group()
