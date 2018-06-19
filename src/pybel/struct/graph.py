@@ -112,7 +112,7 @@ class BELGraph(networkx.MultiDiGraph):
 
     def fresh_copy(self):
         """Create an unfilled :class:`BELGraph` as a hook for other networkx functions.
-    
+
         Is necessary for .copy() to work.
 
         :rtype: BELGraph

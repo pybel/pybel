@@ -5,8 +5,9 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import ASSOCIATION, DECREASES, INCREASES
 from pybel.dsl import gene, protein, rna
-from pybel.struct.mutation import expand_upstream_causal_subgraph
+from pybel.struct.mutation import expand_upstream_causal_subgraph, get_random_subgraph
 from pybel.testing.utils import n
+from tests.utils import generate_random_graph
 
 trem2_gene = gene(namespace='HGNC', name='TREM2')
 trem2_rna = rna(namespace='HGNC', name='TREM2')
@@ -71,3 +72,22 @@ class TestInduction(unittest.TestCase):
         self.assertInEdge(f, b, subgraph)
         self.assertEqual(3, subgraph.number_of_edges())
 
+    def test_random_sample(self):
+        n_nodes, n_edges = 50, 500
+        graph = generate_random_graph(n_nodes=n_nodes, n_edges=n_edges)
+
+        self.assertEqual(n_edges, graph.number_of_edges())
+
+        sg = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, seed=127)
+        self.assertEqual(250, sg.number_of_edges())
+
+    def test_random_sample_small(self):
+        n_nodes, n_edges = 11, 25
+        graph = generate_random_graph(n_nodes, n_edges)
+
+        self.assertEqual(n_edges, graph.number_of_edges())
+
+        sg = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, seed=127)
+
+        self.assertEqual(graph.number_of_edges(), sg.number_of_edges(),
+                         msg='since graph is too small, the subgraph should contain the whole thing')
