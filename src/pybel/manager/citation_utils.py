@@ -140,7 +140,7 @@ def enrich_citation_model(manager, citation, p):
 def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
     """Gets the citation information for the given list of PubMed identifiers using the NCBI's eutils service
 
-    :type manager: Manager
+    :type manager: pybel.Manager
     :param pmids: an iterable of PubMed identifiers
     :type pmids: iter[str] or iter[int]
     :param int group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
@@ -151,7 +151,6 @@ def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
     """
     group_size = group_size if group_size is not None else 200
     sleep_time = sleep_time if sleep_time is not None else 1
-    manager = Manager.ensure(manager)
 
     pmids = clean_pubmed_identifiers(pmids)
     log.info('Ensuring %d PubMed identifiers', len(pmids))

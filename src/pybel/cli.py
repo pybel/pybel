@@ -78,7 +78,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
         log.setLevel(logging.DEBUG)
         logging.basicConfig(level=logging.DEBUG, format='%(name)s:%(levelname)s - %(message)s')
 
-    manager = Manager(connection=connection)
+    manager = Manager.from_connection(connection)
 
     if database_name:
         g = from_database(database_name, connection=manager)
@@ -181,7 +181,7 @@ def machine(agents, host):
 @click.pass_context
 def manage(ctx, connection):
     """Manage database"""
-    ctx.obj = Manager(connection)
+    ctx.obj = Manager.from_connection(connection)
     Base.metadata.bind = ctx.obj.engine
     Base.query = ctx.obj.session.query_property()
 

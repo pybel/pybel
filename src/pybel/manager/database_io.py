@@ -33,7 +33,7 @@ def to_database(graph, connection=None, store_parts=True):
     :return: If successful, returns the network object from the database.
     :rtype: Optional[Network]
     """
-    manager = Manager.ensure(connection=connection)
+    manager = Manager.ensure(connection)
 
     try:
         return manager.insert_graph(graph, store_parts=store_parts)
@@ -58,7 +58,7 @@ def from_database(name, version=None, connection=None):
     :return: A BEL graph loaded from the database
     :rtype: Optional[BELGraph]
     """
-    manager = Manager.ensure(connection=connection)
+    manager = Manager.ensure(connection)
 
     if version is None:
         return manager.get_graph_by_most_recent(name)

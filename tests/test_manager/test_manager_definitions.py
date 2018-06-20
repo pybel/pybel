@@ -3,7 +3,6 @@
 import os
 from pathlib import Path
 
-from pybel.manager import Manager
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.constants import belns_dir_path, test_ns_nocache_path
 from pybel.testing.mocks import mock_bel_resources
@@ -18,8 +17,9 @@ ns2_url = 'http://resources.openbel.org/belframework/20150611/namespace/mesh-dis
 
 class TestDefinitionManagers(TemporaryCacheClsMixin):
     def _help_check_hgnc(self, manager):
-        """Helps check the HGNC namespace was loaded properly
-        :param Manager manager:
+        """Help check the HGNC namespace was loaded properly.
+
+        :type manager: pybel.Manager
         """
         entry = manager.get_namespace_entry(HGNC_URL, 'MHS2')
         self.assertIsNotNone(entry)
