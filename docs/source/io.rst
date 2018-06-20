@@ -96,12 +96,16 @@ Database
 .. autofunction:: pybel.from_ndex
 .. autofunction:: pybel.to_ndex
 
-PyBEL Web
----------
+BEL Commons
+-----------
 .. automodule:: pybel.io.web
-    :members:
+.. autofunction:: pybel.from_web
+.. autofunction:: pybel.to_web
 
 INDRA
 -----
 .. automodule:: pybel.io.indra
-    :members:
+.. autofunction:: pybel.from_indra_statements
+.. autofunction:: pybel.to_indra_statements
+.. autofunction:: pybel.from_biopax
+
