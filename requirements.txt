@@ -8,6 +8,6 @@ six
 tqdm
 
 # Extras
-indra[indra]
-ndex2[ndex]
-py2neo==3.1.2[neo4j]
+indra
+ndex2
+py2neo==3.1.2
