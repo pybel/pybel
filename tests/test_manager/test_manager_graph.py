@@ -1646,11 +1646,15 @@ class TestEquivalentNodes(unittest.TestCase):
     def test_direct_has_namespace(self):
         graph = BELGraph()
 
-        n = graph.add_node_from_data(protein(namespace='HGNC', name='CD33', identifier='1659'))
+        n1 = graph.add_node_from_data(protein(namespace='HGNC', name='CD33', identifier='1659'))
+        n2 = graph.add_node_from_data(protein(namespace='NOPE', name='NOPE', identifier='NOPE'))
 
-        self.assertEqual({n}, graph.get_equivalent_nodes(n))
+        graph.add_increases(n1, n2, n(), n())
 
-        self.assertTrue(graph.node_has_namespace(n, 'HGNC'))
+        self.assertEqual({n1}, graph.get_equivalent_nodes(n1))
+
+        self.assertTrue(graph.node_has_namespace(n1, 'HGNC'))
+        self.assertFalse(graph.node_has_namespace(n2, 'HGNC'))
 
     def test_indirect_has_namespace(self):
         graph = BELGraph()
