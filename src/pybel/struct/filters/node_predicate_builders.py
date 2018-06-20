@@ -30,6 +30,9 @@ def _single_function_inclusion_filter_builder(func):
 def _collection_function_inclusion_builder(funcs):
     funcs = set(funcs)
 
+    if not funcs:
+        raise ValueError('can not build function inclusion filter with empty list of functions')
+
     def functions_inclusion_filter(graph, node):
         """Passes only for a node that is one of the enclosed functions
 
@@ -57,4 +60,4 @@ def function_inclusion_filter_builder(func):
     elif isinstance(func, Iterable):
         return _collection_function_inclusion_builder(func)
 
-    raise ValueError('Invalid type for argument: {}'.format(func))
+    raise TypeError('Invalid type for argument: {}'.format(func))

@@ -2,11 +2,12 @@
 
 from functools import wraps
 
+from .node_predicate_builders import function_inclusion_filter_builder
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND,
-    OBJECT, PATHOLOGY, PMOD, PROTEIN, RELATION, SUBJECT, TRANSLOCATION, VARIANTS,
+    ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND, MIRNA, OBJECT,
+    PATHOLOGY, PMOD, PROTEIN, RELATION, RNA, SUBJECT, TRANSLOCATION, VARIANTS,
 )
 from ...tokens import node_to_tuple
 
@@ -40,8 +41,8 @@ def node_predicate(f):
     """Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
     sure that it can also accept a pair of arguments, a BELGraph and a PyBEL node tuple as well.
 
-    :type f: types.FunctionType
-    :rtype: types.FunctionType
+    :type f: (dict) -> bool
+    :rtype: (dict) or (pybel.BELGraph,tuple,*) -> bool
     """
 
     @wraps(f)
@@ -101,6 +102,14 @@ def is_protein(data):
     :rtype: bool
     """
     return data[FUNCTION] == PROTEIN
+
+
+is_central_dogma = function_inclusion_filter_builder([GENE, RNA, MIRNA, PROTEIN])
+"""Return true if the node is a gene, RNA, miRNA, or Protein.
+
+:param dict data: A PyBEL data dictionary
+:rtype: bool
+"""
 
 
 @node_predicate
@@ -233,7 +242,7 @@ def is_degraded(graph, node):
 
 
 def is_translocated(graph, node):
-    """Returns true if over any of the node's edges it is transloated
+    """Returns true if over any of the node's edges it is translocated
 
     :param pybel.BELGraph graph: A BEL graph
     :param tuple node: A BEL node

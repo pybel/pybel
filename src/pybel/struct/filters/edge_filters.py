@@ -18,19 +18,18 @@ from collections import Iterable
 from .edge_predicates import keep_edge_permissive
 
 __all__ = [
-    'invert_edge_filter',
+    'invert_edge_predicate',
     'and_edge_predicates',
     'filter_edges',
     'count_passed_edge_filter',
 ]
 
 
-def invert_edge_filter(edge_predicate):
-    """Builds a filter that is the inverse of the given filter
+def invert_edge_predicate(edge_predicate):
+    """Build an edge predicate that is the inverse of the given edge predicate.
 
-    :param edge_predicate: An edge filter function (graph, node, node, key, data) -> bool
-    :type edge_predicate: types.FunctionType
-    :return: An edge filter function
+    :param edge_predicate: An edge predicate
+    :type edge_predicate: (pybel.BELGraph, tuple, tuple, int) -> bool
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
@@ -41,7 +40,7 @@ def invert_edge_filter(edge_predicate):
 
 
 def and_edge_predicates(edge_predicates=None):
-    """Concatenates multiple edge predicates to a new predicate that requires all predicates to be met.
+    """Concatenate multiple edge predicates to a new predicate that requires all predicates to be met.
 
     :param edge_predicates: a list of predicates (graph, node, node, key, data) -> bool
     :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
@@ -64,7 +63,7 @@ def and_edge_predicates(edge_predicates=None):
         return edge_predicates[0]
 
     def concatenated_edge_predicate(graph, u, v, k):
-        """Passes only for an edge that pass all enclosed predicates
+        """Pass only for an edge that pass all enclosed predicates.
 
         :param BELGraph graph: A BEL Graph
         :param tuple u: A BEL node
@@ -82,7 +81,7 @@ def and_edge_predicates(edge_predicates=None):
 
 
 def filter_edges(graph, edge_predicates=None):
-    """Applies a set of filters to the edges iterator of a BEL graph
+    """Applie a set of filters to the edges iterator of a BEL graph.
 
     :param BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
@@ -103,7 +102,7 @@ def filter_edges(graph, edge_predicates=None):
 
 
 def count_passed_edge_filter(graph, edge_predicates=None):
-    """Returns the number of edges passing a given set of predicates
+    """Return the number of edges passing a given set of predicates.
 
     :param pybel.BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
