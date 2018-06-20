@@ -12,7 +12,7 @@ __all__ = [
 
 
 @in_place_transformation
-def collapse_pair(graph, *, survivor, victim):
+def collapse_pair(graph, survivor, victim):
     """Rewire all edges from the synonymous node to the survivor node, then deletes the synonymous node.
 
     Does not keep edges between the two nodes.
@@ -53,7 +53,7 @@ def collapse_nodes(graph, survivor_mapping):
     """
     for survivor, victims in survivor_mapping.items():
         for victim in victims:
-            collapse_pair(graph, victim=victim, survivor=survivor)
+            collapse_pair(graph, survivor=survivor, victim=victim)
 
     # Remove self edges
     graph.remove_edges_from(
