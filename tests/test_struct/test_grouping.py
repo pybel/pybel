@@ -3,11 +3,16 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import INCREASES
+from pybel.constants import FUNCTION, INCREASES, PROTEIN
 from pybel.dsl import protein
 from pybel.dsl.nodes import BaseEntity
 from pybel.struct.grouping import get_subgraphs_by_annotation
 from pybel.testing.utils import n
+
+test_namespace_url = n()
+test_annotation_url = n()
+citation, evidence = n(), n()
+a, b, c, d = [protein(namespace='test', name=str(i)) for i in range(4)]
 
 
 class TestGrouping(unittest.TestCase):
@@ -21,24 +26,23 @@ class TestGrouping(unittest.TestCase):
             return unittest.TestCase.assertIn(self, x, c)
         raise TypeError
 
+    def setUp(self):
+        self.graph = BELGraph()
+
+        self.graph.namespace_url['test'] = test_namespace_url
+        self.graph.annotation_url['subgraph'] = test_annotation_url
+
+        self.graph.add_qualified_edge(a, b, INCREASES, citation, evidence, annotations={'subgraph': {'1', '2'}})
+        self.graph.add_qualified_edge(a, c, INCREASES, citation, evidence, annotations={'subgraph': {'1'}})
+        self.graph.add_qualified_edge(b, d, INCREASES, citation, evidence, annotations={'subgraph': {'1', '2'}})
+        self.graph.add_qualified_edge(a, d, INCREASES, citation, evidence, annotations={'subgraph': {'2'}})
+        self.graph.add_qualified_edge(c, d, INCREASES, citation, evidence)
+
     def test_get_subgraphs_by_annotation(self):
-        graph = BELGraph()
-        test_namespace_url = n()
-        test_annotation_url = n()
-        graph.namespace_url['test'] = test_namespace_url
-        graph.annotation_url['subgraph'] = test_annotation_url
 
-        a, b, c, d = [protein(namespace='test', name=str(i)) for i in range(4)]
-        citation, evidence = n(), n()
+        subgraphs = get_subgraphs_by_annotation(self.graph, annotation='subgraph')
 
-        graph.add_qualified_edge(a, b, INCREASES, citation, evidence, annotations={'subgraph': {'1', '2'}})
-        graph.add_qualified_edge(a, c, INCREASES, citation, evidence, annotations={'subgraph': {'1'}})
-        graph.add_qualified_edge(b, d, INCREASES, citation, evidence, annotations={'subgraph': {'1', '2'}})
-        graph.add_qualified_edge(a, d, INCREASES, citation, evidence, annotations={'subgraph': {'2'}})
-        graph.add_qualified_edge(c, d, INCREASES, citation, evidence)
-
-        subgraphs = get_subgraphs_by_annotation(graph, annotation='subgraph', keep_undefined=False)
-
+        self.assertEqual(2, len(subgraphs))
         self.assertIn('1', subgraphs)
         self.assertIn('2', subgraphs)
 
@@ -49,6 +53,8 @@ class TestGrouping(unittest.TestCase):
         self.assertIn('subgraph', subgraph_1.annotation_url)
 
         self.assertIn(a, subgraph_1)
+        self.assertIn(FUNCTION, subgraph_1.node[a.as_tuple()])
+        self.assertEqual(PROTEIN, subgraph_1.node[a.as_tuple()][FUNCTION])
         self.assertIn(b, subgraph_1)
         self.assertIn(c, subgraph_1)
         self.assertIn(d, subgraph_1)
@@ -74,3 +80,12 @@ class TestGrouping(unittest.TestCase):
         self.assertNotIn(c.as_tuple(), subgraph_2[a.as_tuple()])
         self.assertIn(d.as_tuple(), subgraph_2[b.as_tuple()])
         self.assertIn(d.as_tuple(), subgraph_2[a.as_tuple()])
+
+    def test_get_subgraphs_by_annotation_with_sentinel(self):
+        sentinel = n()
+        subgraphs = get_subgraphs_by_annotation(self.graph, annotation='subgraph', sentinel=sentinel)
+
+        self.assertEqual(3, len(subgraphs))
+        self.assertIn('1', subgraphs)
+        self.assertIn('2', subgraphs)
+        self.assertIn(sentinel, subgraphs)

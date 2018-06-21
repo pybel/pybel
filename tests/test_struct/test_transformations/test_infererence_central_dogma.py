@@ -5,6 +5,7 @@
 import unittest
 
 from pybel import BELGraph
+from pybel.constants import FUNCTION, PROTEIN
 from pybel.dsl import gene, hgvs, protein, protein_fusion, rna, rna_fusion
 from pybel.struct.mutation import infer_central_dogma, prune_central_dogma
 from pybel.testing.utils import n
@@ -53,6 +54,10 @@ class TestProcessing(unittest.TestCase):
 
         self.assertNotInGraph(trem2_gene, graph)
         self.assertNotInGraph(trem2_rna, graph)
+        self.assertInGraph(trem2_protein, graph)
+
+        self.assertIn(FUNCTION, graph.node[trem2_protein.as_tuple()])
+        self.assertIn(PROTEIN, graph.node[trem2_protein.as_tuple()][FUNCTION])
 
     def test_no_infer_on_protein_variants(self):
         p = protein('HGNC', n(), variants=[hgvs(n())])
