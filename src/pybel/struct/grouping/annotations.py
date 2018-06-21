@@ -47,17 +47,15 @@ def _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel):
     return dict(result)
 
 
-def get_subgraphs_by_annotation(graph, annotation, keep_undefined=True, sentinel='Undefined'):
+def get_subgraphs_by_annotation(graph, annotation, sentinel=None):
     """Stratifies the given graph into sub-graphs based on the values for edges' annotations
 
     :param pybel.BELGraph graph: A BEL graph
     :param str annotation: The annotation to group by
-    :param bool keep_undefined: If true, uses the sentinel value to store a sub-graph of edges not matching the given
-     annotation.
-    :param str sentinel: The value to stick unannotated edges into
+    :param Optional[str] sentinel: The value to stick unannotated edges into. If none, does not keep undefined.
     :rtype: dict[str,pybel.BELGraph]
     """
-    if keep_undefined:
+    if sentinel is not None:
         rv = _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel)
     else:
         rv = _get_subgraphs_by_annotation_disregard_undefined(graph, annotation)
