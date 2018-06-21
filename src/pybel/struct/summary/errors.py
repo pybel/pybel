@@ -20,7 +20,7 @@ __all__ = [
 
 def get_syntax_errors(graph):
     """Gets a list of the syntax errors from the BEL script underlying the graph. Uses SyntaxError as a
-    stand-in for :exc:`pybel.parser.parse_exceptions.BelSyntaxError`
+    stand-in for :exc:`pybel.parser.exc.BelSyntaxError`
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A list of 4-tuples of line number, line text, exception, and annotations present in the parser
