@@ -1,0 +1,8 @@
+networkx==1.11
+sqlalchemy
+click
+requests
+requests_file
+pyparsing
+six
+tqdm
