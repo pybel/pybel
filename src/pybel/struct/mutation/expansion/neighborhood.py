@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Functions for expanding the neighborhoods of nodes."""
+
 from ..utils import ensure_node_from_universe
 from ...filters.node_predicates import is_pathology
 from ...pipeline import uni_in_place_transformation as uni_in_place_mutator
@@ -56,7 +58,7 @@ def expand_node_successors(universe, graph, node):
             skip_predecessors.add(predecessor)
             continue
 
-        graph.add_entity(predecessor)
+        graph.add_node(predecessor, universe.node[predecessor])
 
     for predecessor, target, key, data in universe.in_edges(node, data=True, keys=True):
         if predecessor in skip_predecessors:
