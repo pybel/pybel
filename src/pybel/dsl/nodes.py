@@ -492,7 +492,7 @@ class _Transcribable(CentralDogma):
     def get_gene(self):
         """Gets the corresponding gene. Raises an exception if it's not the reference node.
 
-        :rtype: gene
+        :rtype: pybel.dsl.gene
         :raises: InferCentralDogmaException
         """
         if self.variants:
@@ -582,7 +582,7 @@ class protein(CentralDogma):
     def get_rna(self):
         """Gets the corresponding RNA. Raises an exception if it's not the reference node.
 
-        :rtype: rna
+        :rtype: pybel.dsl.rna
         :raises: InferCentralDogmaException
         """
         if self.variants:

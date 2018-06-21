@@ -47,7 +47,8 @@ Links
    examples
    summary
    filters
-   mutation
+   transformations
+   grouping
    pipeline
 
 .. toctree::
