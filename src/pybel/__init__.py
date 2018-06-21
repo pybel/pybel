@@ -108,7 +108,7 @@ __all__ = (
     examples.__all__
 )
 
-__version__ = '0.11.4'
+__version__ = '0.11.5-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)'
