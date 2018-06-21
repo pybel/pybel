@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import logging
 
-from .utils import update_metadata
+from ..utils import update_metadata, update_node_helper
 from ...constants import ANNOTATIONS
 
 log = logging.getLogger(__name__)
@@ -56,11 +56,12 @@ def get_subgraphs_by_annotation(graph, annotation, sentinel=None):
     :rtype: dict[str,pybel.BELGraph]
     """
     if sentinel is not None:
-        rv = _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel)
+        subgraphs = _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel)
     else:
-        rv = _get_subgraphs_by_annotation_disregard_undefined(graph, annotation)
+        subgraphs = _get_subgraphs_by_annotation_disregard_undefined(graph, annotation)
 
-    for value in rv.values():
-        update_metadata(value, graph)
+    for subgraph in subgraphs.values():
+        update_node_helper(graph, subgraph)
+        update_metadata(graph, subgraph)
 
-    return rv
+    return subgraphs

@@ -19,6 +19,9 @@ __all__ = [
     'uni_transformation',
     'transformation',
     'get_transformation',
+    'mapped',
+    'has_arguments_map',
+    'no_arguments_map',
 ]
 
 mapped = {}

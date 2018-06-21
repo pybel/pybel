@@ -2,9 +2,9 @@
 
 """Functions for expanding the neighborhoods of nodes."""
 
-from ..utils import ensure_node_from_universe,update_node_helper
 from ...filters.node_predicates import is_pathology
 from ...pipeline import uni_in_place_transformation as uni_in_place_mutator
+from ...utils import ensure_node_from_universe
 
 __all__ = [
     'expand_node_predecessors',
@@ -65,8 +65,6 @@ def expand_node_successors(universe, graph, node):
         for predecessor, target, key, data in universe.in_edges(node, data=True, keys=True)
         if predecessor not in skip_predecessors
     )
-
-
 
 
 @uni_in_place_mutator

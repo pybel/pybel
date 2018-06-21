@@ -2,13 +2,13 @@
 
 """This module assists in running complex workflows on BEL graphs."""
 
-from .decorators import in_place_transformation, transformation, uni_in_place_transformation, uni_transformation
-from .pipeline import Pipeline
+from . import decorators, exc, pipeline
+from .decorators import *
+from .exc import *
+from .pipeline import *
 
-__all__ = [
-    'Pipeline',
-    'transformation',
-    'uni_in_place_transformation',
-    'in_place_transformation',
-    'uni_transformation',
-]
+__all__ = (
+        decorators.__all__ +
+        exc.__all__ +
+        pipeline.__all__
+)
