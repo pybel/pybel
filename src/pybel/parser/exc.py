@@ -53,9 +53,16 @@ class RedefinedAnnotationError(InconsistentDefinitionError):
 # Naming Warnings
 
 class NameWarning(PyBelParserWarning):
-    """The base class for errors related to nomenclature"""
+    """The base class for errors related to nomenclature."""
 
     def __init__(self, line_number, line, position, name, *args):
+        """Build a NameWarning.
+
+        :param int line_number: The line number on which the warning occurred
+        :param str line: The line on which the warning occurred
+        :param int position: The position in the line that caused the warning
+        :param str name: The name that caused the warning
+        """
         super(NameWarning, self).__init__(line_number, line, position, name, *args)
         self.name = name
 
@@ -114,6 +121,13 @@ class AnnotationWarning(PyBelParserWarning):
     """Base exception for annotation warnings"""
 
     def __init__(self, line_number, line, position, annotation, *args):
+        """Build an AnnotationWarning.
+
+        :param int line_number: The line number on which the warning occurred
+        :param str line: The line on which the warning occurred
+        :param int position: The position in the line that caused the warning
+        :param str annotation: The annotation name that caused the warning
+        """
         super(AnnotationWarning, self).__init__(line_number, line, position, annotation, *args)
         self.annotation = annotation
 

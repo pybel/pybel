@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import abc
+
 import six
 
 from .exc import InferCentralDogmaException, PyBELDSLException
@@ -98,6 +99,10 @@ class BaseAbundance(BaseEntity):
     @property
     def name(self):
         return self.get(NAME)
+
+    @property
+    def namespace(self):
+        return self.get(NAMESPACE)
 
     @property
     def identifier(self):
@@ -241,7 +246,7 @@ class CentralDogma(BaseAbundance):
 
         >>> app = protein(name='APP', namespace='HGNC')
         >>> ab42 = app.with_variants([fragment(start=672, stop=713)])
-        >>> assert 'p(HGNC:APP, frag(672_713)' == ab42.as_bel()
+        >>> assert 'p(HGNC:APP, frag(672_713))' == ab42.as_bel()
         """
         return self.__class__(
             namespace=self.namespace,
@@ -487,7 +492,7 @@ class _Transcribable(CentralDogma):
     def get_gene(self):
         """Gets the corresponding gene. Raises an exception if it's not the reference node.
 
-        :rtype: gene
+        :rtype: pybel.dsl.gene
         :raises: InferCentralDogmaException
         """
         if self.variants:
@@ -577,7 +582,7 @@ class protein(CentralDogma):
     def get_rna(self):
         """Gets the corresponding RNA. Raises an exception if it's not the reference node.
 
-        :rtype: rna
+        :rtype: pybel.dsl.rna
         :raises: InferCentralDogmaException
         """
         if self.variants:

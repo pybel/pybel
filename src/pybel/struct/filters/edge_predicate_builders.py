@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from .edge_predicates import edge_predicate
+from .edge_predicates import edge_predicate, keep_edge_permissive
 from ...constants import ANNOTATIONS
 
 __all__ = [
@@ -37,11 +37,15 @@ def _annotation_dict_all_filter(data, query):
 
 def build_annotation_dict_all_filter(annotations):
     """Builds a filter that keeps edges whose data dictionaries's annotations entry are super-dictionaries to the given
-    dictionary
+    dictionary.
+
+    If no annotations are given, will always evaluate to true.
 
     :param dict annotations: The annotation query dict to match
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
+    if not annotations:
+        return keep_edge_permissive
 
     @edge_predicate
     def annotation_dict_all_filter(data):
@@ -76,11 +80,15 @@ def _annotation_dict_any_filter(data, query):
 
 def build_annotation_dict_any_filter(annotations):
     """Builds a filter that keeps edges whose data dictionaries's annotations entry contain any match to
-    the target dictionary
+    the target dictionary.
+
+    If no annotations are given, will always evaluate to true.
 
     :param dict annotations: The annotation query dict to match
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
+    if not annotations:
+        return keep_edge_permissive
 
     @edge_predicate
     def annotation_dict_any_filter(data):

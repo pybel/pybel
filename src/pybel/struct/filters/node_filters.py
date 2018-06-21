@@ -14,14 +14,30 @@ A general use for a node predicate is to use the built-in :func:`filter` in code
 """
 
 from collections import Iterable
+
 from .node_predicates import keep_node_permissive
 
 __all__ = [
+    'invert_node_predicate',
     'concatenate_node_predicates',
     'filter_nodes',
     'get_nodes',
     'count_passed_node_filter',
 ]
+
+
+def invert_node_predicate(node_predicate):
+    """Build a node predicate that is the inverse of the given node predicate.
+
+    :param node_predicate: An edge predicate
+    :type node_predicate: (pybel.BELGraph, tuple) -> bool
+    :rtype: (pybel.BELGraph, tuple) -> bool
+    """
+
+    def inverse_filter(graph, node):
+        return not node_predicate(graph, node)
+
+    return inverse_filter
 
 
 def concatenate_node_predicates(node_predicates=None):
@@ -78,7 +94,7 @@ def filter_nodes(graph, node_predicates=None):
     :param node_predicates: A node predicate or list/tuple of node predicates
     :type node_predicates: types.FunctionType or iter[types.FunctionType]
     :return: An iterable of nodes that pass all predicates
-    :rtype: iter
+    :rtype: iter[tuple]
     """
 
     # If no predicates are given, return the standard node iterator

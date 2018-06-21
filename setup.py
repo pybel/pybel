@@ -43,11 +43,12 @@ if sys.version_info < (3, ):
     INSTALL_REQUIRES.append('configparser')
     INSTALL_REQUIRES.append('enum34')  # Only necessary for NDEx?
     INSTALL_REQUIRES.append('functools32')
+    INSTALL_REQUIRES.append('funcsigs')
 
 EXTRAS_REQUIRE = {
     'indra': ['indra'],
     'ndex': ['ndex2'],
-    'neo4j': ['py2neo'],
+    'neo4j': ['py2neo==3.1.2'],
 }
 TESTS_REQUIRE = [
     'mock',

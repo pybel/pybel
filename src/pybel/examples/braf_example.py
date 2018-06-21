@@ -19,9 +19,7 @@
 
 """
 
-from ..constants import INCREASES
-from ..dsl import activity
-from ..dsl.nodes import protein
+from ..dsl import activity, protein
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -53,30 +51,27 @@ evidence = "Expression of both dominant negative forms, RasN17 and Rap1N17, in U
            "thrombopoietin-mediated Elk1-dependent transcription. This suggests that both Ras and Rap1 contribute to " \
            "thrombopoietin-induced ELK1 transcription."
 
-braf_graph.add_qualified_edge(
+braf_graph.add_increases(
     thpo,
     braf,
-    relation=INCREASES,
     evidence=evidence,
     citation='11283246',
     object_modifier=activity(name='kin'),
     annotations={'Species': '9606'}
 )
 
-braf_graph.add_qualified_edge(
+braf_graph.add_increases(
     thpo,
     raf1,
-    relation=INCREASES,
     evidence=evidence,
     citation='11283246',
     object_modifier=activity(name='kin'),
     annotations={'Species': '9606'}
 )
 
-braf_graph.add_qualified_edge(
+braf_graph.add_increases(
     braf,
     elk1,
-    relation=INCREASES,
     evidence=evidence,
     citation='11283246',
     subject_modifier=activity(name='kin'),

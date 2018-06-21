@@ -1,0 +1,10 @@
+# This requirements file does not contain the extras
+
+networkx==1.11
+sqlalchemy
+click
+requests
+requests_file
+pyparsing
+six
+tqdm

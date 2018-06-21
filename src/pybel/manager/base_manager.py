@@ -21,15 +21,25 @@ log = logging.getLogger(__name__)
 
 def _build_engine_session(connection=None, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
                           scopefunc=None):
-    """Builds an engine and session
+    """Build an engine and a session.
 
-    :param connection:
-    :param echo:
-    :param autoflush:
-    :param autocommit:
-    :param expire_on_commit:
-    :param scopefunc:
-    :return:
+    :param Optional[str] connection: An RFC-1738 database connection string. If ``None``, tries to load from the
+     environment variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json`` whose
+     value for ``PYBEL_CONNECTION`` defaults to :data:`pybel.constants.DEFAULT_CACHE_LOCATION`.
+    :param bool echo: Turn on echoing sql
+    :param Optional[bool] autoflush: Defaults to True if not specified in kwargs or configuration.
+    :param Optional[bool] autocommit: Defaults to False if not specified in kwargs or configuration.
+    :param Optional[bool] expire_on_commit: Defaults to False if not specified in kwargs or configuration.
+    :param scopefunc: Scoped function to pass to :func:`sqlalchemy.orm.scoped_session`
+    :rtype: tuple[Engine,Session]
+
+    From the Flask-SQLAlchemy documentation:
+
+    An extra key ``'scopefunc'`` can be set on the ``options`` dict to
+    specify a custom scope function.  If it's not provided, Flask's app
+    context stack identity is used. This will ensure that sessions are
+    created and removed with the request/response cycle, and should be fine
+    in most cases.
     """
     engine = create_engine(connection, echo=echo)
 
@@ -60,7 +70,7 @@ class BaseManager(object):
 
     @classmethod
     def from_connection(cls, connection=None, *args, **kwargs):
-        """Creates a connection to database and a persistent session using SQLAlchemy
+        """Creates a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
         using an `RFC-1738 <http://rfc.net/rfc1738.html>`_ string. For example, a MySQL string can be given with the

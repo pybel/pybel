@@ -8,10 +8,8 @@ import os
 import requests
 
 from .nodelink import from_json, to_json
-from ..constants import (
-    DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER, VERSION,
-    config,
-)
+from ..constants import DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER, config
+from ..utils import get_version
 
 __all__ = [
     'to_web',
@@ -20,7 +18,7 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-RECIEVE_ENDPOINT = '/api/receive'
+RECIEVE_ENDPOINT = '/api/receive/'
 GET_ENDPOINT = '/api/network/{}/export/nodelink'
 
 
@@ -49,10 +47,11 @@ def _get_password():
 
 
 def to_web(graph, host=None, user=None, password=None):
-    """Sends a graph to the receiver service and returns the :mod:`requests` response object
+    """Send a graph to the receiver service and returns the :mod:`requests` response object.
 
     :param pybel.BELGraph graph: A BEL network
-    :param Optional[str] host: The location of the BEL Commons server. Defaults to
+    :param Optional[str] host: The location of the BEL Commons server. Alternatively, looks up in PyBEL config with
+     ``PYBEL_REMOTE_HOST`` or the environment as ``PYBEL_REMOTE_HOST`` Defaults to
      :data:`pybel.constants.DEFAULT_SERVICE_URL`
     :param Optional[str] user: Username for BEL Commons. Alternatively, looks up in PyBEL config with
      ``PYBEL_REMOTE_USER`` or the environment as ``PYBEL_REMOTE_USER``
@@ -84,7 +83,7 @@ def to_web(graph, host=None, user=None, password=None):
         json=to_json(graph),
         headers={
             'content-type': 'application/json',
-            'User-Agent': 'PyBEL v{}'.format(VERSION),
+            'User-Agent': 'PyBEL v{}'.format(get_version()),
         },
         auth=(user, password)
     )
@@ -94,13 +93,14 @@ def to_web(graph, host=None, user=None, password=None):
 
 
 def from_web(network_id, host=None):
-    """Retrieves a public network from BEL Commons. In the future, this function may be extended to support
-    authentication.
+    """Retrieve a public network from BEL Commons.
+
+    In the future, this function may be extended to support authentication.
 
     :param int network_id: The BEL Commons network identifier
-    :param Optional[str] host: The location of the BEL Commons server. Defaults to
-     :data:`pybel.constants.DEFAULT_SERVICE_URL`, can be overridden with PYBEL_REMOTE_HOST in either the config or
-     the environment
+    :param Optional[str] host: The location of the BEL Commons server. Alternatively, looks up in PyBEL config with
+     ``PYBEL_REMOTE_HOST`` or the environment as ``PYBEL_REMOTE_HOST`` Defaults to
+     :data:`pybel.constants.DEFAULT_SERVICE_URL`
     :rtype: pybel.BELGraph
     """
     if host is None:

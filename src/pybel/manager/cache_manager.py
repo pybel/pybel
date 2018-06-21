@@ -17,11 +17,10 @@ from itertools import chain, groupby
 
 import six
 from six import string_types
-from sqlalchemy import and_, create_engine, exists, func
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import and_, exists, func
 from tqdm import tqdm
 
-from .base_manager import BaseManager
+from .base_manager import BaseManager, _build_engine_session
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
@@ -1510,25 +1509,25 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
 
 
 class Manager(_Manager):
-    """Creates a connection to database and a persistent session using SQLAlchemy.
+    """A manager for the PyBEL database."""
 
-    A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
-    using an `RFC-1738 <http://rfc.net/rfc1738.html>`_ string. For example, a MySQL string can be given with the
-    following form:
+    def __init__(self, connection=None, *args, **kwargs):
+        """Create a connection to database and a persistent session using SQLAlchemy.
 
-    :code:`mysql+pymysql://<username>:<password>@<host>/<dbname>?charset=utf8[&<options>]`
+        A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
+        using an `RFC-1738 <http://rfc.net/rfc1738.html>`_ string. For example, a MySQL string can be given with the
+        following form:
 
-    A SQLite connection string can be given in the form:
+        :code:`mysql+pymysql://<username>:<password>@<host>/<dbname>?charset=utf8[&<options>]`
 
-    ``sqlite:///~/Desktop/cache.db``
+        A SQLite connection string can be given in the form:
 
-    Further options and examples can be found on the SQLAlchemy documentation on
-    `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
-    """
+        ``sqlite:///~/Desktop/cache.db``
 
-    def __init__(self, connection=None, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
-                 scopefunc=None):
-        """
+        Further options and examples can be found on the SQLAlchemy documentation on
+        `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
+
+
         :param Optional[str] connection: An RFC-1738 database connection string. If ``None``, tries to load from the
          environment variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json`` whose
          value for ``PYBEL_CONNECTION`` defaults to :data:`pybel.constants.DEFAULT_CACHE_LOCATION`.
@@ -1546,40 +1545,12 @@ class Manager(_Manager):
         created and removed with the request/response cycle, and should be fine
         in most cases.
         """
-        self.connection = get_cache_connection(connection)
-
-        engine = create_engine(self.connection, echo=echo)
-
-        self.autoflush = autoflush if autoflush is not None else config.get('PYBEL_MANAGER_AUTOFLUSH', False)
-        self.autocommit = autocommit if autocommit is not None else config.get('PYBEL_MANAGER_AUTOCOMMIT', False)
-        self.expire_on_commit = expire_on_commit if expire_on_commit is not None else config.get(
-            'PYBEL_MANAGER_AUTOEXPIRE', True)
-        self.scopefunc = scopefunc
-
-        log.info(
-            'auto flush: %s, auto commit: %s, expire on commmit: %s',
-            self.autoflush,
-            self.autoflush,
-            self.expire_on_commit
-        )
-
-        #: A SQLAlchemy session maker
-        self.session_maker = sessionmaker(
-            bind=engine,
-            autoflush=self.autoflush,
-            autocommit=self.autocommit,
-            expire_on_commit=self.expire_on_commit,
-        )
-
-        #: A SQLAlchemy session object
-        session = scoped_session(self.session_maker, scopefunc=self.scopefunc)
-
+        engine, session = _build_engine_session(connection=connection, *args, **kwargs)
         super(Manager, self).__init__(engine=engine, session=session)
-
         self.create_all()
 
-    @staticmethod
-    def ensure(connection=None, *args, **kwargs):
+    @classmethod
+    def ensure(cls, connection=None, *args, **kwargs):
         """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
 
         Args and kwargs are passed through to the constructor for :class:`Manager` if the given connection is not a
@@ -1591,6 +1562,6 @@ class Manager(_Manager):
         :rtype: Manager
         """
         if connection is None or isinstance(connection, string_types):
-            return Manager(connection=connection, *args, **kwargs)
+            return cls.from_connection(connection=connection, *args, **kwargs)
 
         return connection
