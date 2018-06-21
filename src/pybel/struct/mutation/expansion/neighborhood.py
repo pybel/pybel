@@ -2,7 +2,7 @@
 
 """Functions for expanding the neighborhoods of nodes."""
 
-from ..utils import ensure_node_from_universe
+from ..utils import ensure_node_from_universe,update_node_helper
 from ...filters.node_predicates import is_pathology
 from ...pipeline import uni_in_place_transformation as uni_in_place_mutator
 
@@ -22,7 +22,7 @@ def expand_node_predecessors(universe, graph, node):
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
-    :param BaseEntity node: A BEL node
+    :param tuple node: A BEL node
     """
     ensure_node_from_universe(universe, graph, node)
 
@@ -37,7 +37,7 @@ def expand_node_predecessors(universe, graph, node):
     graph.add_edges_from(
         (source, successor, key, data)
         for source, successor, key, data in universe.out_edges(node, data=True, keys=True)
-        if successor in skip_successors
+        if successor not in skip_successors
     )
 
 
@@ -48,7 +48,7 @@ def expand_node_successors(universe, graph, node):
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
-    :param BaseEntity node: A BEL node
+    :param tuple node: A BEL node
     """
     ensure_node_from_universe(universe, graph, node)
 
@@ -60,11 +60,13 @@ def expand_node_successors(universe, graph, node):
 
         graph.add_node(predecessor, universe.node[predecessor])
 
-    for predecessor, target, key, data in universe.in_edges(node, data=True, keys=True):
-        if predecessor in skip_predecessors:
-            continue
+    graph.add_edges_from(
+        (predecessor, target, key, data)
+        for predecessor, target, key, data in universe.in_edges(node, data=True, keys=True)
+        if predecessor not in skip_predecessors
+    )
 
-        graph.add_edge(predecessor, target, key=key, **data)
+
 
 
 @uni_in_place_mutator
@@ -74,7 +76,7 @@ def expand_node_neighborhood(universe, graph, node):
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
-    :param BaseEntity node: A BEL node
+    :param tuple node: A BEL node
     """
     expand_node_predecessors(universe, graph, node)
     expand_node_successors(universe, graph, node)

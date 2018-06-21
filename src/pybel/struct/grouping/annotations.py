@@ -5,7 +5,6 @@ from collections import defaultdict
 import logging
 
 from .utils import update_metadata
-from ..graph import BELGraph
 from ...constants import ANNOTATIONS
 
 log = logging.getLogger(__name__)
@@ -16,12 +15,15 @@ __all__ = [
 
 
 def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):
-    result = defaultdict(BELGraph)
+    result = defaultdict(graph.fresh_copy)
 
     for source, target, key, data in graph.edges_iter(keys=True, data=True):
         annotation_dict = data.get(ANNOTATIONS)
 
-        if annotation_dict is None or annotation not in annotation_dict:
+        if annotation_dict is None:
+            continue
+
+        if annotation not in annotation_dict:
             continue
 
         for value in annotation_dict[annotation]:
@@ -31,7 +33,7 @@ def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):
 
 
 def _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel):
-    result = defaultdict(BELGraph)
+    result = defaultdict(graph.fresh_copy)
 
     for source, target, key, data in graph.edges_iter(keys=True, data=True):
         annotation_dict = data.get(ANNOTATIONS)
@@ -46,11 +48,11 @@ def _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel):
 
 
 def get_subgraphs_by_annotation(graph, annotation, keep_undefined=True, sentinel='Undefined'):
-    """Stratifies the given graph into subgraphs based on the values for edges' annotations
+    """Stratifies the given graph into sub-graphs based on the values for edges' annotations
 
     :param pybel.BELGraph graph: A BEL graph
     :param str annotation: The annotation to group by
-    :param bool keep_undefined: If true, uses the sentinel value to store a subgraph of edges not matching the given
+    :param bool keep_undefined: If true, uses the sentinel value to store a sub-graph of edges not matching the given
      annotation.
     :param str sentinel: The value to stick unannotated edges into
     :rtype: dict[str,pybel.BELGraph]
