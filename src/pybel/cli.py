@@ -166,6 +166,10 @@ def machine(agents, host):
     )
     click.echo('built BEL graph with {} nodes and {} edges'.format(graph.number_of_nodes(), graph.number_of_edges()))
 
+    if 0 == len(graph):
+        click.echo('not uploading empty graph')
+        sys.exit(-1)
+
     resp = to_web(graph, host=host)
     resp.raise_for_status()
 
