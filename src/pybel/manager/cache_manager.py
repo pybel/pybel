@@ -1511,7 +1511,8 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
 class Manager(_Manager):
     """A manager for the PyBEL database."""
 
-    def __init__(self, connection=None, *args, **kwargs):
+    def __init__(self, connection=None, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
+                 scopefunc=None):
         """Create a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
@@ -1545,6 +1546,13 @@ class Manager(_Manager):
         created and removed with the request/response cycle, and should be fine
         in most cases.
         """
-        engine, session = _build_engine_session(connection=connection, *args, **kwargs)
+        engine, session = _build_engine_session(
+            connection=connection,
+            echo=echo,
+            autoflush=autoflush,
+            autocommit=autocommit,
+            expire_on_commit=expire_on_commit,
+            scopefunc=scopefunc
+        )
         super(Manager, self).__init__(engine=engine, session=session)
         self.create_all()
