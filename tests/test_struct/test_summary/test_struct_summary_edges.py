@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 from collections import Counter
+
+import unittest
 
 from pybel import BELGraph
 from pybel.constants import INCREASES
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
 from pybel.struct.summary.edge_summary import (
-    get_annotation_values_by_annotation, iter_annotation_value_pairs,
-    iter_annotation_values,
+    get_annotation_values, get_annotation_values_by_annotation, iter_annotation_value_pairs, iter_annotation_values,
 )
 
 
@@ -76,5 +76,8 @@ class TestEdgeSummary(unittest.TestCase):
             'Confidence': {'High', 'Low'},
             'Species': {'9606'}
         }
-        result = get_annotation_values_by_annotation(sialic_acid_graph)
-        self.assertEqual(expected, result)
+        annotation_values_by_annotation = get_annotation_values_by_annotation(sialic_acid_graph)
+        self.assertEqual(expected, annotation_values_by_annotation)
+
+        annotation_values = get_annotation_values(sialic_acid_graph, 'Confidence')
+        self.assertEqual(expected['Confidence'], annotation_values)
