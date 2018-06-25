@@ -10,17 +10,17 @@ enable this option, but can specify a database location if they choose.
 from __future__ import unicode_literals
 
 import logging
-import time
 from collections import defaultdict
 from copy import deepcopy
 from itertools import chain, groupby
 
 import six
+import time
 from six import string_types
 from sqlalchemy import and_, exists, func
 from tqdm import tqdm
 
-from .base_manager import BaseManager, _build_engine_session
+from .base_manager import BaseManager, build_engine_session
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
@@ -1511,8 +1511,7 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
 class Manager(_Manager):
     """A manager for the PyBEL database."""
 
-    def __init__(self, connection=None, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
-                 scopefunc=None):
+    def __init__(self, *args, **kwargs):
         """Create a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
@@ -1527,7 +1526,6 @@ class Manager(_Manager):
 
         Further options and examples can be found on the SQLAlchemy documentation on
         `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
-
 
         :param Optional[str] connection: An RFC-1738 database connection string. If ``None``, tries to load from the
          environment variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json`` whose
@@ -1545,14 +1543,53 @@ class Manager(_Manager):
         context stack identity is used. This will ensure that sessions are
         created and removed with the request/response cycle, and should be fine
         in most cases.
+
+        Allowed Usages:
+
+        Instantiation with connection string as positional argument
+
+        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> manager = Manager(my_connection)
+
+        Instantiation with connection string as positional argument with keyword arguments
+
+        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> manager = Manager(my_connection, echo=True)
+
+        Instantiation with connection string as keyword argument
+
+        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> manager = Manager(connection=my_connection)
+
+        Instantiation with connection string as keyword argument with keyword arguments
+
+        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> manager = Manager(connection=my_connection, echo=True)
+
+        Instantiation with user-supplied engine and session objects as keyword arguments
+
+        >>> my_engine, my_session = ...  # magical creation! See SQLAlchemy documentation
+        >>> manager = Manager(engine=my_engine, session=my_session)
         """
-        engine, session = _build_engine_session(
-            connection=connection,
-            echo=echo,
-            autoflush=autoflush,
-            autocommit=autocommit,
-            expire_on_commit=expire_on_commit,
-            scopefunc=scopefunc
-        )
+        connection = kwargs.pop('connection', None)
+        engine = kwargs.pop('engine', None)
+        session = kwargs.pop('session', None)
+
+        if connection and engine and session:
+            raise ValueError('can not specify connection with engine/session')
+
+        if connection is None and engine is None and session is None:
+            if len(args) == 0:
+                connection = get_cache_connection()
+            elif len(args) > 1:
+                raise ValueError('unknown positional arguments used with positional connection')
+            else: # len(args) == 1
+                connection = args[0]
+
+        if engine is None and session is None:
+            engine, session = build_engine_session(connection=connection, **kwargs)
+        elif kwargs:
+            raise ValueError('unknown keyword arguments used with engine/session')
+
         super(Manager, self).__init__(engine=engine, session=session)
         self.create_all()

@@ -92,23 +92,29 @@ if path.exists(_config_path):
         config.update(load(f))
 
 
-def get_cache_connection(connection=None):
-    """Returns the default cache connection string. If a connection string is explicitly given, passes it through
+def get_cache_connection():
+    """Get the preferred RFC-1738 database connection string.
 
-    :param str connection: RFC connection string
+    1. Check the environment variable ``PYBEL_CONNECTION``
+    2. Check the ``PYBEL_CONNECTION`` key in the config file ``~/.config/pybel/config.json``. Optionally, this config
+       file might be in a different place if the environment variable ``PYBEL_CONFIG_DIRECTORY`` has been set.
+    3. Return a default connection string using a SQLite database in the ``~/.pybel``. Optionally, this directory
+       might be in a different place if the environment variable ``PYBEL_RESOURCE_DIRECTORY`` has been set.
+
     :rtype: str
     """
-    if connection is not None:
-        log.info('getting user-defined connection: %s', connection)
-        return connection
-
     connection = environ.get(PYBEL_CONNECTION)
     if connection is not None:
         log.info('getting environment-defined connection: %s', connection)
         return connection
 
-    log.info('getting default connection %s', config[PYBEL_CONNECTION])
-    return config[PYBEL_CONNECTION]
+    connection = config.get(PYBEL_CONNECTION)
+    if connection is not None:
+        log.info('getting configured connection %s', connection)
+        return connection
+
+    log.debug('using default connection %s', DEFAULT_CACHE_CONNECTION)
+    return DEFAULT_CACHE_CONNECTION
 
 
 PYBEL_CONTEXT_TAG = 'pybel_context'
