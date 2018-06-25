@@ -23,9 +23,8 @@ def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, 
     """Loads a BEL graph from an iterable over the lines of a BEL script
 
     :param iter[str] lines: An iterable of strings (the lines in a BEL script)
-    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
-    :type manager: Optional[str or pybel.manager.Manager]
-
+    :type manager: Optional[pybel.manager.Manager]
+    :param bool allow_nested: if true, turn off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
     :param bool use_tqdm: If true, use tqdm for logging
@@ -50,8 +49,7 @@ def from_path(path, manager=None, allow_nested=False, citation_clearing=True, en
     """Loads a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str path: A file path
-    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
-    :type manager: None or str or pybel.manager.Manager
+    :type manager: Optional[pybel.manager.Manager]
     :param bool allow_nested: if true, turn off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`

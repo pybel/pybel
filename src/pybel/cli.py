@@ -14,11 +14,11 @@ problems--the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
-import logging
 import sys
-import time
 
 import click
+import logging
+import time
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
@@ -57,9 +57,7 @@ def main():
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
-@click.option('-s', '--store-default', is_flag=True,
-              help="Stores to default cache at {}".format(get_cache_connection()))
-@click.option('--store-connection', help="Database connection string")
+@click.option('-s', '--store', is_flag=True, help='Stores to database specified by -c')
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
 @click.option('--allow-unqualified-translocations', is_flag=True,
@@ -68,8 +66,8 @@ def main():
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-v', '--debug', count=True)
 def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
-            neo_context, store_default, store_connection, allow_naked_names, allow_nested,
-            allow_unqualified_translocations, no_identifier_validation, no_citation_clearing, debug):
+            neo_context, store, allow_naked_names, allow_nested, allow_unqualified_translocations,
+            no_identifier_validation, no_citation_clearing, debug):
     """Convert BEL"""
     if debug == 1:
         log.setLevel(logging.INFO)
@@ -81,7 +79,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
     manager = Manager.from_connection(connection)
 
     if database_name:
-        g = from_database(database_name, connection=manager)
+        g = from_database(database_name, manager=manager)
 
     elif url:
         g = from_url(
@@ -136,13 +134,9 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
         log.info('Outputting BEL to %s', bel)
         to_bel(g, bel)
 
-    if store_default:
+    if store:
         log.info('Storing to database')
-        to_database(g, store_parts=True)
-
-    if store_connection:
-        log.info('Storing to database: %s', store_connection)
-        to_database(g, connection=store_connection, store_parts=True)
+        to_database(g, manager=manager, store_parts=True)
 
     if neo:
         import py2neo
@@ -171,6 +165,10 @@ def machine(agents, host):
         version=time.strftime('%Y%m%d'),
     )
     click.echo('built BEL graph with {} nodes and {} edges'.format(graph.number_of_nodes(), graph.number_of_edges()))
+
+    if 0 == len(graph):
+        click.echo('not uploading empty graph')
+        sys.exit(-1)
 
     resp = to_web(graph, host=host)
     resp.raise_for_status()

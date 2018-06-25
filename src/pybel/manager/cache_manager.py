@@ -10,17 +10,17 @@ enable this option, but can specify a database location if they choose.
 from __future__ import unicode_literals
 
 import logging
-import time
 from collections import defaultdict
 from copy import deepcopy
 from itertools import chain, groupby
 
 import six
+import time
 from six import string_types
 from sqlalchemy import and_, exists, func
 from tqdm import tqdm
 
-from .base_manager import BaseManager, _build_engine_session
+from .base_manager import BaseManager, build_engine_session
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
@@ -1511,7 +1511,7 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
 class Manager(_Manager):
     """A manager for the PyBEL database."""
 
-    def __init__(self, connection=None, *args, **kwargs):
+    def __init__(self, connection=None, engine=None, session=None, **kwargs):
         """Create a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
@@ -1527,10 +1527,11 @@ class Manager(_Manager):
         Further options and examples can be found on the SQLAlchemy documentation on
         `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
 
-
         :param Optional[str] connection: An RFC-1738 database connection string. If ``None``, tries to load from the
          environment variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json`` whose
          value for ``PYBEL_CONNECTION`` defaults to :data:`pybel.constants.DEFAULT_CACHE_LOCATION`.
+        :param engine: Optional engine to use. Must be specified with a session and no connection.
+        :param session: Optional session to use. Must be specified with an engine and no connection.
         :param bool echo: Turn on echoing sql
         :param Optional[bool] autoflush: Defaults to True if not specified in kwargs or configuration.
         :param Optional[bool] autocommit: Defaults to False if not specified in kwargs or configuration.
@@ -1544,24 +1545,48 @@ class Manager(_Manager):
         context stack identity is used. This will ensure that sessions are
         created and removed with the request/response cycle, and should be fine
         in most cases.
+
+        Allowed Usages:
+
+        Instantiation with connection string as positional argument
+
+        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> manager = Manager(my_connection)
+
+        Instantiation with connection string as positional argument with keyword arguments
+
+        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> manager = Manager(my_connection, echo=True)
+
+        Instantiation with connection string as keyword argument
+
+        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> manager = Manager(connection=my_connection)
+
+        Instantiation with connection string as keyword argument with keyword arguments
+
+        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> manager = Manager(connection=my_connection, echo=True)
+
+        Instantiation with user-supplied engine and session objects as keyword arguments
+
+        >>> my_engine, my_session = ...  # magical creation! See SQLAlchemy documentation
+        >>> manager = Manager(engine=my_engine, session=my_session)
         """
-        engine, session = _build_engine_session(connection=connection, *args, **kwargs)
+        if connection and (engine or session):
+            raise ValueError('can not specify connection with engine/session')
+
+        if engine is None and session is None:
+            if connection is None:
+                connection = get_cache_connection()
+
+            engine, session = build_engine_session(connection=connection, **kwargs)
+
+        elif engine is None or session is None:
+            raise ValueError('need both engine and session to be specified')
+
+        elif kwargs:
+            raise ValueError('keyword arguments should not be used with engine/session')
+
         super(Manager, self).__init__(engine=engine, session=session)
         self.create_all()
-
-    @classmethod
-    def ensure(cls, connection=None, *args, **kwargs):
-        """A convenience method for turning a string into a connection, or passing a :class:`Manager` through.
-
-        Args and kwargs are passed through to the constructor for :class:`Manager` if the given connection is not a
-        string.
-
-        :param connection: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None``
-                            for default connection
-        :type connection: Optional[str or Manager]
-        :rtype: Manager
-        """
-        if connection is None or isinstance(connection, string_types):
-            return cls.from_connection(connection=connection, *args, **kwargs)
-
-        return connection

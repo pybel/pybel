@@ -2,12 +2,12 @@
 
 """This module contains helper functions for reading BEL scripts"""
 
-import logging
-import re
-import time
 from collections import Counter, defaultdict
 
+import logging
+import re
 import six
+import time
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 from tqdm import tqdm
@@ -35,9 +35,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
 
     :param BELGraph graph: A BEL graph
     :param iter[str] lines: An iterable over lines of BEL script
-    :param manager: An RFC-1738 database connection string, a pre-built :class:`Manager`, or ``None`` for
-                    default connection
-    :type manager: None or str or Manager
+    :type manager: Optional[Manager]
     :param bool allow_nested: If true, turns off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
@@ -54,7 +52,8 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
-    manager = Manager.ensure(manager)
+    if manager is None:
+        manager = Manager()
 
     metadata_parser = MetadataParser(manager, allow_redefinition=kwargs.get('allow_redefinition'))
 

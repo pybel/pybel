@@ -5,7 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.11.3 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-06-04
+`0.11.6 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-06-25
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Added get_annotation_values function to pybel.struct.summary
+
+Removed
+~~~~~~~
+- Removed Manager.ensure function
+
+Fixed
+~~~~~
+- Fixed a bug in Manager.from_connection (https://github.com/pybel/pybel/issues/#306)
+
+`0.11.5 <https://github.com/pybel/pybel/compare/v0.11.4...0.11.5>`_ - 2018-06-22
+--------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Changed arguments in pybel.struct.mutations.get_subgraphs_by_annotation
+- Moved utility functions in pybel.struct.mutations
+
+`0.11.4 <https://github.com/pybel/pybel/compare/v0.11.3...0.11.4>`_ - 2018-06-22
+--------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Use BELGraph.fresh_copy instead of importing the class in mutator functions
+
+Added
+~~~~~
+- Add pipeline (https://github.com/pybel/pybel/issues/301)
+- Testing of neighborhood functions
+- Added several transformation and grouping functions for BELGraph
+- INDRA Machine in CLI
+
+Fixed
+~~~~~
+- Add missing field from BaseAbundance (https://github.com/pybel/pybel/issues/302)
+
+`0.11.3 <https://github.com/pybel/pybel/compare/v0.11.2...0.11.3>`_ - 2018-06-04
 --------------------------------------------------------------------------------
 Added
 ~~~~~

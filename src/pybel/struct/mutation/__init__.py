@@ -2,7 +2,8 @@
 
 """This module contains functions that mutate or make transformations on a network."""
 
-from . import deletion, expansion, induction, inference, metadata, transfer
+from . import collapse, deletion, expansion, induction, inference, metadata, transfer
+from .collapse import *
 from .deletion import *
 from .expansion import *
 from .induction import *
@@ -11,6 +12,7 @@ from .metadata import *
 from .transfer import *
 
 __all__ = (
+        collapse.__all__ +
         deletion.__all__ +
         expansion.__all__ +
         induction.__all__ +

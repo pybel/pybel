@@ -3,14 +3,13 @@
 import json
 import logging
 import os
-import traceback
-import unittest
-
 import py2neo
 import py2neo.database.status
+import traceback
+import unittest
 from click.testing import CliRunner
 
-from pybel import cli
+from pybel import Manager, cli
 from pybel.constants import METADATA_NAME, PYBEL_CONTEXT_TAG
 from pybel.io import from_json, from_path, from_pickle
 from pybel.manager.database_io import from_database
@@ -45,21 +44,25 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
                 '--csv', test_csv,
                 '--pickle', test_gpickle,
                 '--bel', test_canon,
-                '--store-connection', self.connection,
+                '--store',
                 '--allow-nested'
             ]
 
             result = self.runner.invoke(cli.main, args)
-            self.assertEqual(0, result.exit_code, msg='{}\n{}\n{}'.format(result.exc_info[0],
-                                                                          result.exc_info[1],
-                                                                          traceback.format_tb(result.exc_info[2])))
+            self.assertEqual(0, result.exit_code, msg='{}\n{}\n{}'.format(
+                result.exc_info[0],
+                result.exc_info[1],
+                traceback.format_tb(result.exc_info[2])
+            ))
 
             self.assertTrue(os.path.exists(test_csv))
 
             self.bel_thorough_reconstituted(from_pickle(test_gpickle))
             self.bel_thorough_reconstituted(from_path(test_canon))
-            self.bel_thorough_reconstituted(from_database(expected_test_thorough_metadata[METADATA_NAME],
-                                                          connection=self.connection))
+
+            manager = Manager.from_connection(self.connection)
+            self.bel_thorough_reconstituted(
+                from_database(expected_test_thorough_metadata[METADATA_NAME], manager=manager))
 
     @mock_bel_resources
     def test_convert_json(self, mock_get):

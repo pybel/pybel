@@ -86,7 +86,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
         self.assertEqual('1.0.0', self.graph.version)
 
-        to_database(self.graph, connection=self.manager, store_parts=False)
+        to_database(self.graph, manager=self.manager, store_parts=False)
 
         time.sleep(1)
 
@@ -140,15 +140,15 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         expected_versions = {'1.0.1', self.graph.version}
         self.assertEqual(expected_versions, set(self.manager.get_network_versions(self.graph.name)))
 
-        exact_name_version = from_database(self.graph.name, self.graph.version, connection=self.manager)
+        exact_name_version = from_database(self.graph.name, self.graph.version, manager=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual(self.graph.version, exact_name_version.version)
 
-        exact_name_version = from_database(self.graph.name, '1.0.1', connection=self.manager)
+        exact_name_version = from_database(self.graph.name, '1.0.1', manager=self.manager)
         self.assertEqual(self.graph.name, exact_name_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
-        most_recent_version = from_database(self.graph.name, connection=self.manager)
+        most_recent_version = from_database(self.graph.name, manager=self.manager)
         self.assertEqual(self.graph.name, most_recent_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
