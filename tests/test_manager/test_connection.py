@@ -73,6 +73,14 @@ class TestInstantiation(unittest.TestCase):
         with self.assertRaises(ValueError):
             Manager(engine='something', session='something', echo=True)
 
+    def test_instantiate_manager_engine_missing(self):
+        with self.assertRaises(ValueError):
+            Manager(engine=None, session='fake-session')
+
+    def test_instantiate_manager_session_missing(self):
+        with self.assertRaises(ValueError):
+            Manager(engine='fake-engine', session=None)
+
     def test_fail_instantiate_base_manager_from_connection(self):
         """Test that from_connection fails"""
         with self.assertRaises(ValueError):

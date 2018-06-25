@@ -1511,7 +1511,7 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
 class Manager(_Manager):
     """A manager for the PyBEL database."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, connection=None, engine=None, session=None, **kwargs):
         """Create a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
@@ -1530,6 +1530,8 @@ class Manager(_Manager):
         :param Optional[str] connection: An RFC-1738 database connection string. If ``None``, tries to load from the
          environment variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json`` whose
          value for ``PYBEL_CONNECTION`` defaults to :data:`pybel.constants.DEFAULT_CACHE_LOCATION`.
+        :param engine: Optional engine to use. Must be specified with a session and no connection.
+        :param session: Optional session to use. Must be specified with an engine and no connection.
         :param bool echo: Turn on echoing sql
         :param Optional[bool] autoflush: Defaults to True if not specified in kwargs or configuration.
         :param Optional[bool] autocommit: Defaults to False if not specified in kwargs or configuration.
@@ -1571,25 +1573,20 @@ class Manager(_Manager):
         >>> my_engine, my_session = ...  # magical creation! See SQLAlchemy documentation
         >>> manager = Manager(engine=my_engine, session=my_session)
         """
-        connection = kwargs.pop('connection', None)
-        engine = kwargs.pop('engine', None)
-        session = kwargs.pop('session', None)
-
-        if connection and engine and session:
+        if connection and (engine or session):
             raise ValueError('can not specify connection with engine/session')
 
-        if connection is None and engine is None and session is None:
-            if len(args) == 0:
-                connection = get_cache_connection()
-            elif len(args) > 1:
-                raise ValueError('unknown positional arguments used with positional connection')
-            else: # len(args) == 1
-                connection = args[0]
-
         if engine is None and session is None:
+            if connection is None:
+                connection = get_cache_connection()
+
             engine, session = build_engine_session(connection=connection, **kwargs)
+
+        elif engine is None or session is None:
+            raise ValueError('need both engine and session to be specified')
+
         elif kwargs:
-            raise ValueError('unknown keyword arguments used with engine/session')
+            raise ValueError('keyword arguments should not be used with engine/session')
 
         super(Manager, self).__init__(engine=engine, session=session)
         self.create_all()
