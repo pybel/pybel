@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
+from collections import Iterable, MutableMapping, defaultdict
+
 import hashlib
 import json
 import logging
-import pickle
-from collections import Iterable, MutableMapping, defaultdict
-from datetime import datetime
-
 import networkx as nx
+import pickle
+from datetime import datetime
 from six import string_types
 
 from .constants import (
-    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
-    PYBEL_EDGE_DATA_KEYS, VERSION,RELATION
+    CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
+    PYBEL_EDGE_DATA_KEYS, VERSION,
 )
 
 log = logging.getLogger(__name__)
