@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+Unreleased
+----------
+Fixed
+~~~~~
+- Bug where data did not get copied to sub-graphs on induction (https://github.com/pybel/pybel/issues/#307)
+
+Changed
+~~~~~~~
+- Rely on edge predicates more heavily in selection/induction/expansion transformations
+
 `0.11.6 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-06-25
 --------------------------------------------------------------------------------
 Added
