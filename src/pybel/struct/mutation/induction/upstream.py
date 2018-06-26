@@ -2,11 +2,13 @@
 
 import logging
 
+from .utils import get_subgraph_by_edge_filter
+from ...filters import build_downstream_edge_predicate, build_upstream_edge_predicate
 from ...pipeline import transformation
-from ....constants import CAUSAL_RELATIONS, RELATION
 
 __all__ = [
     'get_upstream_causal_subgraph',
+    'get_downstream_causal_subgraph',
 ]
 
 log = logging.getLogger(__name__)
@@ -14,18 +16,23 @@ log = logging.getLogger(__name__)
 
 @transformation
 def get_upstream_causal_subgraph(graph, nbunch):
-    """Induce a subgraph from all of the upstream causal entities of the nodes in the nbunch.
+    """Induce a sub-graph from all of the upstream causal entities of the nodes in the nbunch.
 
     :param pybel.BELGraph graph: A BEL graph
     :param nbunch: A BEL node or iterable of BEL nodes
     :type nbunch: tuple or iter[tuple]
     :rtype: pybel.BELGraph
     """
-    rv = graph.fresh_copy()
+    return get_subgraph_by_edge_filter(graph, build_upstream_edge_predicate(nbunch))
 
-    rv.add_edges_from(
-        (u, v, key, data)
-        for u, v, key, data in graph.in_edges(nbunch, keys=True, data=True)
-        if data[RELATION] in CAUSAL_RELATIONS
-    )
-    return rv
+
+@transformation
+def get_downstream_causal_subgraph(graph, nbunch):
+    """Induce a sub-graph from all of the downstream causal entities of the nodes in the nbunch.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param nbunch: A BEL node or iterable of BEL nodes
+    :type nbunch: tuple or iter[tuple]
+    :rtype: pybel.BELGraph
+    """
+    return get_subgraph_by_edge_filter(graph, build_downstream_edge_predicate(nbunch))
