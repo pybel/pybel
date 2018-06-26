@@ -76,7 +76,7 @@ def to_web(graph, host=None, user=None, password=None):
         if password is None:
             raise ValueError('no password found')
 
-    url = host + RECIEVE_ENDPOINT
+    url = host.rstrip('/') + RECIEVE_ENDPOINT
 
     response = requests.post(
         url,
