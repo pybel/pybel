@@ -3,7 +3,7 @@
 import networkx as nx
 
 from ..filters import filter_edges
-from ..pipeline import in_place_transformation, transformation
+from ..pipeline import in_place_transformation, transformation, uni_in_place_transformation
 from ..utils import update_metadata, update_node_helper
 
 __all__ = [
@@ -36,6 +36,7 @@ def remove_isolated_nodes_op(graph):
     return rv
 
 
+@uni_in_place_transformation
 def expand_by_edge_filter(source, target, edge_predicates=None):
     """Expand a target graph by edges in the source matching the given predicates.
 
