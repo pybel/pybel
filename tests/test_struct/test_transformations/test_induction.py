@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import string
 import unittest
 
 from pybel import BELGraph
@@ -77,7 +78,7 @@ class TestInduction(unittest.TestCase):
         self.assertEqual(3, subgraph.number_of_edges())
 
     def test_expand_upstream_causal_subgraph(self):
-        a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
+        a, b, c, d, e, f = [protein(namespace='test', name=i) for i in string.ascii_lowercase[:6]]
         citation, evidence = '', ''
 
         universe = BELGraph()
@@ -107,4 +108,5 @@ class TestInduction(unittest.TestCase):
         self.assertInEdge(e, a, subgraph)
         self.assertInEdge(a, b, subgraph)
         self.assertInEdge(f, b, subgraph)
-        self.assertEqual(3, subgraph.number_of_edges())
+        self.assertEqual(2, len(subgraph[a.as_tuple()][b.as_tuple()]))
+        self.assertEqual(4, subgraph.number_of_edges(), msg='\n'.join(map(str, subgraph.edges())))
