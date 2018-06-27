@@ -11,9 +11,14 @@ Fixed
 ~~~~~
 - Bug where data did not get copied to sub-graphs on induction (https://github.com/pybel/pybel/issues/#307)
 
+Added
+~~~~~
+- Deprecation system for pipeline functions (for when they're renamed)
+
 Changed
 ~~~~~~~
 - Rely on edge predicates more heavily in selection/induction/expansion transformations
+- Rename several functions related to the "central dogma" for more clarity
 
 `0.11.6 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-06-25
 --------------------------------------------------------------------------------
