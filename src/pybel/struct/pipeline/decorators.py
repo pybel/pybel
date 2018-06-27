@@ -8,7 +8,7 @@ A transformation function takes in a :class:`pybel.BELGraph` and either returns 
 
 import logging
 
-from .exc import MissingPipelineFunctionError
+from .exc import DeprecationMappingError, MissingPipelineFunctionError, PipelineNameError
 
 try:
     from inspect import signature
@@ -55,7 +55,12 @@ def _register_function(name, func, universe, in_place):
     :return: The same function, with additional properties added
     """
     if name in mapped:
-        raise ValueError('can not re-map {}'.format(name))
+        mapped_func = mapped[name]
+        raise PipelineNameError('{name} is already registered with {func_mod}.{func_name}'.format(
+            name=name,
+            func_mod=mapped_func.__module__,
+            func_name=mapped_func.__name__
+        ))
 
     mapped[name] = func
 
@@ -101,14 +106,6 @@ uni_transformation = _build_register_function(universe=True, in_place=False)
 transformation = _build_register_function(universe=False, in_place=False)
 
 
-class DeprecationMappingError(ValueError):
-    pass
-
-
-class MissingMappingError(ValueError):
-    pass
-
-
 def register_deprecated(deprecated_name):
     """Register a function as deprecated.
 
@@ -135,7 +132,7 @@ def register_deprecated(deprecated_name):
         log.warning('%s is deprecated. please migrate to %s', deprecated_name, name)
 
         if name not in mapped:
-            raise MissingMappingError('function not mapped with transformation, uni_transformation, etc.')
+            raise MissingPipelineFunctionError('function not mapped with transformation, uni_transformation, etc.')
 
         universe = name in universe_map
         in_place = name in in_place_map

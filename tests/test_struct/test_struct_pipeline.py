@@ -9,10 +9,10 @@ from pybel.examples.egf_example import egf_graph
 from pybel.struct.mutation import enrich_protein_and_rna_origins
 from pybel.struct.pipeline import Pipeline, transformation
 from pybel.struct.pipeline.decorators import (
-    DeprecationMappingError, MissingMappingError, deprecated, get_transformation, in_place_map, mapped,
-    register_deprecated, universe_map,
+    deprecated, get_transformation, in_place_map, mapped, register_deprecated,
+    universe_map,
 )
-from pybel.struct.pipeline.exc import MetaValueError, MissingPipelineFunctionError
+from pybel.struct.pipeline.exc import DeprecationMappingError, MetaValueError, MissingPipelineFunctionError
 
 log = logging.getLogger(__name__)
 log.setLevel(10)
@@ -180,7 +180,7 @@ class TestDeprecation(unittest.TestCase):
 
     def test_register_missing(self):
         """Test that a deprecation mapping fails if it's missing a transformation function."""
-        with self.assertRaises(MissingMappingError):
+        with self.assertRaises(MissingPipelineFunctionError):
             @register_deprecated('test_function_3_old')
             def test_function_3():
                 pass
