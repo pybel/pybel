@@ -23,6 +23,7 @@ import time
 from .canonicalize import to_bel
 from .constants import get_cache_connection
 from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
+from .io.web import _get_host
 from .manager import Manager, defaults
 from .manager.database_io import from_database, to_database
 from .manager.models import Base, Edge, Namespace
@@ -150,7 +151,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 
 @main.command()
 @click.argument('agents', nargs=-1)
-@click.option('--host')
+@click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
 def machine(agents, host):
     """Get content from the INDRA machine and upload to BEL Commons."""
     from indra.sources import indra_db_rest

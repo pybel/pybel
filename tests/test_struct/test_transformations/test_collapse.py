@@ -5,7 +5,7 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import *
 from pybel.dsl import *
-from pybel.struct.mutation.collapse import collapse_by_central_dogma, collapse_nodes
+from pybel.struct.mutation.collapse import collapse_nodes, collapse_to_genes
 from pybel.testing.utils import n
 
 HGNC = 'HGNC'
@@ -61,8 +61,9 @@ class TestCollapseDownstream(unittest.TestCase):
         self.assertEqual(2, graph.number_of_nodes())
         self.assertEqual(1, graph.number_of_edges())
 
-        collapse_by_central_dogma(graph)
+        collapse_to_genes(graph)
 
+        self.assertTrue(graph.has_node_with_data(g1))
         self.assertEqual(1, graph.number_of_nodes())
         self.assertEqual(0, graph.number_of_edges())
 
@@ -74,8 +75,9 @@ class TestCollapseDownstream(unittest.TestCase):
         self.assertEqual(3, graph.number_of_nodes())
         self.assertEqual(2, graph.number_of_edges())
 
-        collapse_by_central_dogma(graph)
+        collapse_to_genes(graph)
 
+        self.assertTrue(graph.has_node_with_data(g1))
         self.assertEqual(1, graph.number_of_nodes())
         self.assertEqual(0, graph.number_of_edges())
 
@@ -86,7 +88,8 @@ class TestCollapseDownstream(unittest.TestCase):
         self.assertEqual(2, graph.number_of_nodes())
         self.assertEqual(1, graph.number_of_edges())
 
-        collapse_by_central_dogma(graph)
+        collapse_to_genes(graph)
 
+        self.assertTrue(graph.has_node_with_data(g1))
         self.assertEqual(1, graph.number_of_nodes())
         self.assertEqual(0, graph.number_of_edges())

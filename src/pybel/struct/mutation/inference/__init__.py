@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from . import central_dogma
-from .central_dogma import *
+from . import protein_rna_origins
+from .protein_rna_origins import *
 
-__all__ = central_dogma.__all__
+__all__ = protein_rna_origins.__all__

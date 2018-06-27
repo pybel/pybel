@@ -5,10 +5,14 @@
 import unittest
 
 from pybel import BELGraph
+from pybel.constants import COMPLEX, FUNCTION
 from pybel.examples.sialic_acid_example import (
     cd33, cd33_phosphorylated, shp1, shp2, sialic_acid, sialic_acid_cd33_complex, sialic_acid_graph, syk,
 )
-from pybel.struct.mutation.expansion.neighborhood import expand_node_neighborhood, expand_nodes_neighborhoods
+from pybel.struct.mutation.expansion.neighborhood import (
+    expand_node_neighborhood, expand_node_predecessors,
+    expand_node_successors, expand_nodes_neighborhoods,
+)
 
 
 class TestNeighborhood(unittest.TestCase):
@@ -22,6 +26,8 @@ class TestNeighborhood(unittest.TestCase):
 
         self.assertEqual(3, graph.number_of_nodes())
         self.assertIn(sialic_acid_cd33_complex.as_tuple(), graph)
+        self.assertIn(FUNCTION, graph.node[sialic_acid_cd33_complex.as_tuple()])
+        self.assertEqual(COMPLEX, graph.node[sialic_acid_cd33_complex.as_tuple()][FUNCTION])
         self.assertIn(cd33_phosphorylated.as_tuple(), graph)
 
     def test_neighborhood_with_predecessors(self):
@@ -30,7 +36,7 @@ class TestNeighborhood(unittest.TestCase):
         graph.add_node_from_data(sialic_acid_cd33_complex)
         self.assertEqual(3, graph.number_of_nodes())
 
-        expand_node_neighborhood(sialic_acid_graph, graph, cd33.as_tuple())
+        expand_node_predecessors(sialic_acid_graph, graph, cd33.as_tuple())
 
         self.assertEqual(4, graph.number_of_nodes())
         self.assertIn(sialic_acid.as_tuple(), graph)
@@ -43,7 +49,7 @@ class TestNeighborhood(unittest.TestCase):
         graph.add_node_from_data(cd33_phosphorylated)
         self.assertEqual(2, graph.number_of_nodes())
 
-        expand_node_neighborhood(sialic_acid_graph, graph, cd33.as_tuple())
+        expand_node_successors(sialic_acid_graph, graph, cd33.as_tuple())
 
         self.assertEqual(3, graph.number_of_nodes())
         self.assertIn(sialic_acid_cd33_complex.as_tuple(), graph)
@@ -65,3 +71,5 @@ class TestNeighborhood(unittest.TestCase):
         self.assertEqual(8, graph.number_of_edges(), msg='wrong number of edges')
         self.assertIn(sialic_acid_cd33_complex.as_tuple(), graph)
         self.assertIn(cd33_phosphorylated.as_tuple(), graph)
+
+    # TODO test that if new nodes with metadata that's missing (namespace_url definition, etc) then that gets added too

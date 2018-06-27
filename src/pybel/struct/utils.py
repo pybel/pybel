@@ -32,40 +32,37 @@ def stratify_hash_edges(graph):
     return dict(qualified_edges), dict(unqualified_edges)
 
 
-def update_metadata(universe, graph):
+def update_metadata(source, target):
+    """Update the namespace and annotation metadata in the target graph.
+
+    :param pybel.BELGraph source:
+    :param pybel.BELGraph target:
     """
-    :param pybel.BELGraph graph:
-    :param pybel.BELGraph universe:
-    """
-    graph.namespace_url.update(universe.namespace_url)
-    graph.namespace_pattern.update(universe.namespace_pattern)
-    graph.annotation_url.update(universe.annotation_url)
-    graph.annotation_pattern.update(universe.annotation_pattern)
-    graph.annotation_list.update(universe.annotation_list)
+    target.namespace_url.update(source.namespace_url)
+    target.namespace_pattern.update(source.namespace_pattern)
+    target.annotation_url.update(source.annotation_url)
+    target.annotation_pattern.update(source.annotation_pattern)
+    target.annotation_list.update(source.annotation_list)
 
 
-def update_node_helper(universe, graph):
-    """Update the nodes' data dictionaries from the universe.
+def update_node_helper(source, target):
+    """Update the nodes' data dictionaries in the target graph from the source graph.
 
-    :param nx.Graph universe: The universe of all knowledge
-    :param nx.Graph graph: The target BEL graph
+    :param nx.Graph source: The universe of all knowledge
+    :param nx.Graph target: The target BEL graph
     """
-    for node in graph:
-        if node not in universe:
+    for node in target:
+        if node not in source:
             continue
-        graph.node[node].update(universe.node[node])
+        target.node[node].update(source.node[node])
 
 
-def ensure_node_from_universe(universe, graph, node, raise_for_missing=False):
-    """Makes sure that the sub-graph has the given node.
+def ensure_node_from_universe(source, target, node):
+    """Ensure the target graph has the given node using data from the source graph.
 
-    :param pybel.BELGraph universe: The universe of all knowledge
-    :param pybel.BELGraph graph: The target BEL graph
+    :param pybel.BELGraph source: The universe of all knowledge
+    :param pybel.BELGraph target: The target BEL graph
     :param tuple node: A BEL node
-    :param bool raise_for_missing: Should an error be thrown if the given node is not in the universe?
     """
-    if raise_for_missing and node not in universe:
-        raise IndexError('{} not in {}'.format(node, universe.name))
-
-    if node not in graph:
-        graph.add_node(node, attr_dict=universe.node[node])
+    if node not in target:
+        target.add_node(node, attr_dict=source.node[node])

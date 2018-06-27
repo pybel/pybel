@@ -2,11 +2,13 @@
 
 
 from .edge_predicates import edge_predicate, keep_edge_permissive
-from ...constants import ANNOTATIONS
+from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, RELATION
 
 __all__ = [
     'build_annotation_dict_all_filter',
     'build_annotation_dict_any_filter',
+    'build_upstream_edge_predicate',
+    'build_downstream_edge_predicate',
 ]
 
 
@@ -100,3 +102,17 @@ def build_annotation_dict_any_filter(annotations):
         return _annotation_dict_any_filter(data, query=annotations)
 
     return annotation_dict_any_filter
+
+
+def build_upstream_edge_predicate(nodes):
+    def upstream_filter(graph, u, v, k):
+        return v in nodes and graph[u][v][k][RELATION] in CAUSAL_RELATIONS
+
+    return upstream_filter
+
+
+def build_downstream_edge_predicate(nodes):
+    def downstream_filter(graph, u, v, k):
+        return u in nodes and graph[u][v][k][RELATION] in CAUSAL_RELATIONS
+
+    return downstream_filter

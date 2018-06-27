@@ -37,11 +37,11 @@ class Pipeline(object):
 
     >>> from pybel import BELGraph
     >>> from pybel.struct.pipeline import Pipeline
-    >>> from pybel.struct.mutation import infer_central_dogma, prune_central_dogma
+    >>> from pybel.struct.mutation import enrich_protein_and_rna_origins, prune_protein_rna_origins
     >>> graph = BELGraph()
     >>> example = Pipeline()
-    >>> example.append(infer_central_dogma)
-    >>> example.append(prune_central_dogma)
+    >>> example.append(enrich_protein_and_rna_origins)
+    >>> example.append(prune_protein_rna_origins)
     >>> result = example.run(graph)
     """
 
@@ -93,7 +93,7 @@ class Pipeline(object):
 
         return result
 
-    def get_function(self, name):
+    def _get_function(self, name):
         """Wrap a function with the universe and in-place.
 
         :param str name: The name of the function
@@ -106,13 +106,13 @@ class Pipeline(object):
             raise MissingPipelineFunctionError('{} is not registered as a pipeline function'.format(name))
 
         if name in universe_map and name in in_place_map:
-            return self.wrap_in_place(self.wrap_universe(f))
+            return self._wrap_in_place(self._wrap_universe(f))
 
         if name in universe_map:
-            return self.wrap_universe(f)
+            return self._wrap_universe(f)
 
         if name in in_place_map:
-            return self.wrap_in_place(f)
+            return self._wrap_in_place(f)
 
         return f
 
@@ -157,7 +157,7 @@ class Pipeline(object):
 
         Example:
 
-        >>> p1 = Pipeline.from_functions(['infer_central_dogma'])
+        >>> p1 = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
         >>> p2 = Pipeline.from_functions(['remove_pathologies'])
         >>> p1.extend(p2)
         """
@@ -181,7 +181,7 @@ class Pipeline(object):
 
             if meta_entry is None:
                 name, args, kwargs = _get_protocol_tuple(entry)
-                func = self.get_function(name)
+                func = self._get_function(name)
                 result = func(result, *args, **kwargs)
             else:
                 networks = (
@@ -199,6 +199,18 @@ class Pipeline(object):
                     raise MetaValueError('invalid meta-command: {}'.format(meta_entry))
 
         return result
+
+    def _can_be_run_in_place(self):
+        """Checks if this pipeline can be run in place.
+
+        Requirements:
+
+        - All functions have the "in place" tag
+        - No splitting, unioning, or other exotic things happen.
+
+        :rtype: bool
+        """
+        raise NotImplementedError  # TODO implement
 
     def run(self, graph, universe=None, in_place=True):
         """Run the contained protocol on a seed graph.
@@ -237,7 +249,7 @@ class Pipeline(object):
         """
         return self.run(graph=graph, universe=universe, in_place=in_place)
 
-    def wrap_universe(self, func):
+    def _wrap_universe(self, func):
         """Take a function that needs a universe graph as the first argument and returns a wrapped one."""
 
         @wraps(func)
@@ -252,7 +264,7 @@ class Pipeline(object):
         return wrapper
 
     @staticmethod
-    def wrap_in_place(func):
+    def _wrap_in_place(func):
         """Take a function that doesn't return the graph and returns the graph."""
 
         @wraps(func)

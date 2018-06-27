@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from ...filters.node_selection import get_nodes_by_function
-from ...pipeline import in_place_transformation
+from ...pipeline.decorators import in_place_transformation, register_deprecated
 from ....constants import GENE, RELATION, RNA, TRANSCRIBED_TO, TRANSLATED_TO
 
 __all__ = [
-    'prune_central_dogma',
+    'prune_protein_rna_origins',
 ]
 
 
@@ -48,13 +48,31 @@ def get_rna_leaves(graph):
 
 
 @in_place_transformation
-def prune_central_dogma(graph):
-    """Prune genes, then RNA, in place.
+def prune_rna_origins(graph):
+    """Delete gene nodes that are only connected to one node, their correspond RNA, by a transcription edge.
 
     :param pybel.BELGraph graph: A BEL graph
     """
     gene_leaves = list(get_gene_leaves(graph))
     graph.remove_nodes_from(gene_leaves)
 
+
+@in_place_transformation
+def prune_protein_origins(graph):
+    """Delete RNA nodes that are only connected to one node - their correspond protein - by a translation edge.
+
+    :param pybel.BELGraph graph: A BEL graph
+    """
     rna_leaves = list(get_rna_leaves(graph))
     graph.remove_nodes_from(rna_leaves)
+
+
+@register_deprecated('prune_central_dogma')
+@in_place_transformation
+def prune_protein_rna_origins(graph):
+    """Delete genes that are only connected to one node, their correspond RNA, by a translation edge.
+
+    :param pybel.BELGraph graph: A BEL graph
+    """
+    prune_rna_origins(graph)
+    prune_protein_origins(graph)

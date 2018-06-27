@@ -57,7 +57,8 @@ def collapse_nodes(graph, survivor_mapping):
 
     # Remove self edges
     graph.remove_edges_from(
-        (u, v, k)
-        for u, v, k in graph.edges(keys=True)
-        if u == v
+        (u, u, k)
+        for u in graph
+        if u in graph[u]
+        for k in graph[u][u]
     )

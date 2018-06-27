@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
 from ...pipeline import in_place_transformation
+from ...pipeline.decorators import register_deprecated
 from ....constants import FUNCTION, IDENTIFIER, MIRNA, NAME, NAMESPACE, PROTEIN, RNA, VARIANTS
 from ....dsl import gene, rna
 
 __all__ = [
-    'infer_central_dogmatic_transcriptions',
-    'infer_central_dogmatic_translations',
-    'infer_central_dogma',
+    'enrich_rnas_with_genes',
+    'enrich_proteins_with_rnas',
+    'enrich_protein_and_rna_origins',
 ]
 
 
+@register_deprecated('infer_central_dogmatic_translations')
 @in_place_transformation
-def infer_central_dogmatic_translations(graph):
-    """Add the missing origin RNA and RNA-Protein translation edge for all Protein entities.
+def enrich_proteins_with_rnas(graph):
+    """Add the corresponding RNA node for each protein node and connect them with a translation edge.
 
     :param pybel.BELGraph graph: A BEL graph
     """
@@ -36,9 +38,10 @@ def infer_central_dogmatic_translations(graph):
         graph.add_translation(rna_node, protein_node)
 
 
+@register_deprecated('infer_central_dogmatic_transcriptions')
 @in_place_transformation
-def infer_central_dogmatic_transcriptions(graph):
-    """Add the missing origin Gene and Gene-RNA transcription edge for all RNA entities.
+def enrich_rnas_with_genes(graph):
+    """Add the corresponding gene node for each RNA/miRNA node and connect them with a transcription edge.
 
     :param pybel.BELGraph graph: A BEL graph
     """
@@ -61,14 +64,12 @@ def infer_central_dogmatic_transcriptions(graph):
         graph.add_transcription(gene_node, rna_node)
 
 
+@register_deprecated('infer_central_dogma')
 @in_place_transformation
-def infer_central_dogma(graph):
-    """Add all RNA-Protein translations then all Gene-RNA transcriptions.
-
-     Applies :func:`infer_central_dogmatic_translations` then :func:`infer_central_dogmatic_transcriptions` in
-     succession.
+def enrich_protein_and_rna_origins(graph):
+    """Add the corresponding RNA for each protein then the corresponding gene for each RNA/miRNA.
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    infer_central_dogmatic_translations(graph)
-    infer_central_dogmatic_transcriptions(graph)
+    enrich_proteins_with_rnas(graph)
+    enrich_rnas_with_genes(graph)
