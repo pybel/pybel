@@ -37,11 +37,11 @@ class Pipeline(object):
 
     >>> from pybel import BELGraph
     >>> from pybel.struct.pipeline import Pipeline
-    >>> from pybel.struct.mutation import infer_central_dogma, prune_central_dogma
+    >>> from pybel.struct.mutation import enrich_protein_and_rna_origins, prune_protein_rna_origins
     >>> graph = BELGraph()
     >>> example = Pipeline()
-    >>> example.append(infer_central_dogma)
-    >>> example.append(prune_central_dogma)
+    >>> example.append(enrich_protein_and_rna_origins)
+    >>> example.append(prune_protein_rna_origins)
     >>> result = example.run(graph)
     """
 
@@ -157,7 +157,7 @@ class Pipeline(object):
 
         Example:
 
-        >>> p1 = Pipeline.from_functions(['infer_central_dogma'])
+        >>> p1 = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
         >>> p2 = Pipeline.from_functions(['remove_pathologies'])
         >>> p1.extend(p2)
         """

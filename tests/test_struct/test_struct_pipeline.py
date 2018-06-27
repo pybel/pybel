@@ -6,7 +6,7 @@ from six.moves import StringIO
 
 from pybel import BELGraph
 from pybel.examples.egf_example import egf_graph
-from pybel.struct.mutation import infer_central_dogma
+from pybel.struct.mutation import enrich_protein_and_rna_origins
 from pybel.struct.pipeline import Pipeline, transformation
 from pybel.struct.pipeline.decorators import (
     DeprecationMappingError, MissingMappingError, deprecated, get_transformation, in_place_map, mapped,
@@ -73,8 +73,11 @@ class TestPipelineFailures(unittest.TestCase):
 
 
 class TestPipeline(TestEgfExample):
-    def test_central_dogma_is_registered(self):
+    def test_deprecated_central_dogma_is_registered(self):
+        """Tests that a deprecated function is properly registered"""
+        self.assertIn('enrich_protein_and_rna_origins', mapped)
         self.assertIn('infer_central_dogma', mapped)
+        self.assertEqual(mapped['enrich_protein_and_rna_origins'], mapped['infer_central_dogma'])
 
     def test_append(self):
         pipeline = Pipeline()
@@ -121,7 +124,7 @@ class TestPipeline(TestEgfExample):
 
     def test_pipeline_by_function(self):
         pipeline = Pipeline.from_functions([
-            infer_central_dogma,
+            enrich_protein_and_rna_origins,
         ])
         result = pipeline(self.graph, in_place=False)
 

@@ -20,6 +20,7 @@ __all__ = [
     'uni_in_place_transformation',
     'uni_transformation',
     'transformation',
+    'register_deprecated',
     'get_transformation',
     'mapped',
     'has_arguments_map',

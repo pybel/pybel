@@ -2,11 +2,11 @@
 
 """Modules supporting deletion and degradation of graphs."""
 
-from . import central_dogma, deletion
-from .central_dogma import *
+from . import protein_rna_origins, deletion
+from .protein_rna_origins import *
 from .deletion import *
 
 __all__ = (
-        central_dogma.__all__ +
+        protein_rna_origins.__all__ +
         deletion.__all__
 )
