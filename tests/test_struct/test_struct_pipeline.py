@@ -7,8 +7,11 @@ from six.moves import StringIO
 from pybel import BELGraph
 from pybel.examples.egf_example import egf_graph
 from pybel.struct.mutation import infer_central_dogma
-from pybel.struct.pipeline import Pipeline
-from pybel.struct.pipeline.decorators import get_transformation, mapped
+from pybel.struct.pipeline import Pipeline, transformation
+from pybel.struct.pipeline.decorators import (
+    DeprecationMappingError, MissingMappingError, deprecated, get_transformation, in_place_map, mapped,
+    register_deprecated, universe_map,
+)
 from pybel.struct.pipeline.exc import MetaValueError, MissingPipelineFunctionError
 
 log = logging.getLogger(__name__)
@@ -128,3 +131,62 @@ class TestPipeline(TestEgfExample):
             self.assertIn(node, result)
 
         self.check_original_unchanged()
+
+
+class TestDeprecation(unittest.TestCase):
+
+    def test_register_deprecation_remapping_error(self):
+        """Test that a deprecation mapping doesn't override a pre-existing mapping."""
+
+        @transformation
+        def test_function_1():
+            pass
+
+        self.assertNotIn('test_function_1', deprecated)
+        self.assertIn('test_function_1', mapped)
+        self.assertNotIn('test_function_1', universe_map)
+        self.assertNotIn('test_function_1', in_place_map)
+
+        with self.assertRaises(DeprecationMappingError):
+            @register_deprecated('test_function_1')
+            @transformation
+            def test_function_1_new():
+                pass
+
+        self.assertNotIn('test_function_1', deprecated)
+
+    def test_register_deprecated(self):
+        """Test that a deprecation mapping doesn't override a pre-existing mapping."""
+
+        @register_deprecated('test_function_2_old')
+        @transformation
+        def test_function_2():
+            pass
+
+        self.assertNotIn('test_function_2', deprecated)
+        self.assertIn('test_function_2', mapped)
+        self.assertNotIn('test_function_2', universe_map)
+        self.assertNotIn('test_function_2', in_place_map)
+
+        self.assertIn('test_function_2_old', deprecated)
+        self.assertIn('test_function_2_old', mapped)
+        self.assertNotIn('test_function_2_old', universe_map)
+        self.assertNotIn('test_function_2_old', in_place_map)
+
+        self.assertEqual(mapped['test_function_2_old'], mapped['test_function_2'])
+
+    def test_register_missing(self):
+        """Test that a deprecation mapping fails if it's missing a transformation function."""
+        with self.assertRaises(MissingMappingError):
+            @register_deprecated('test_function_3_old')
+            def test_function_3():
+                pass
+
+        self.assertNotIn('test_function_3', mapped)
+        self.assertNotIn('test_function_3', universe_map)
+        self.assertNotIn('test_function_3', in_place_map)
+
+        self.assertNotIn('test_function_3_old', deprecated)
+        self.assertNotIn('test_function_3_old', mapped)
+        self.assertNotIn('test_function_3_old', universe_map)
+        self.assertNotIn('test_function_3_old', in_place_map)
