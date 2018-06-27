@@ -96,13 +96,13 @@ def _build_register_function(universe, in_place):
     return register
 
 
-#: A function decorator to inform the Pipeline how to handle a function
+#: A decorator for functions that modify BEL graphs in-place
 in_place_transformation = _build_register_function(universe=False, in_place=True)
-#: A function decorator to inform the Pipeline how to handle a function
+#: A decorator for functions that require a "universe" graph and modify BEL graphs in-place
 uni_in_place_transformation = _build_register_function(universe=True, in_place=True)
-#: A function decorator to inform the Pipeline how to handle a function
+#: A decorator for functions that require a "universe" graph and create new BEL graphs from old BEL graphs
 uni_transformation = _build_register_function(universe=True, in_place=False)
-#: A function decorator to inform the Pipeline how to handle a function
+#: A decorator for functions that create new BEL graphs from old BEL graphs
 transformation = _build_register_function(universe=False, in_place=False)
 
 
@@ -116,12 +116,10 @@ def register_deprecated(deprecated_name):
 
     This function must be applied last, since it introspects on the definitions from before
 
-    .. code-block::
-
-        @register_deprecated('my_function')
-        @transformation
-        def my_old_function()
-            pass
+    >>> @register_deprecated('my_function')
+    >>> @transformation
+    >>> def my_old_function()
+    >>> ... pass
     """
     if deprecated_name in mapped:
         raise DeprecationMappingError('function name already mapped. can not register as deprecated name.')
@@ -147,9 +145,9 @@ def register_deprecated(deprecated_name):
 def get_transformation(name):
     """Get a transformation function and error if its name is not registered.
 
-    :param str name:
+    :param str name: The name of a function to look up
     :return: A transformation function
-    :raises: MissingPipelineFunctionError
+    :raises MissingPipelineFunctionError: If the given function name is not registered
     """
     func = mapped.get(name)
 

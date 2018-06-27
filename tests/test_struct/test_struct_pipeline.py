@@ -56,7 +56,7 @@ class TestPipelineFailures(unittest.TestCase):
         p = Pipeline()
 
         with self.assertRaises(MissingPipelineFunctionError):
-            p.get_function('nonsense name')
+            p._get_function('nonsense name')
 
     def test_build_meta_failure(self):
         p1, p2 = Pipeline(), Pipeline()
