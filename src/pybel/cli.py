@@ -151,8 +151,10 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 
 @main.command()
 @click.argument('agents', nargs=-1)
+@click.option('--local', is_flag=True)
+@click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
 @click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
-def machine(agents, host):
+def machine(agents, local, connection, host):
     """Get content from the INDRA machine and upload to BEL Commons."""
     from indra.sources import indra_db_rest
     from pybel import from_indra_statements, to_web
@@ -171,8 +173,12 @@ def machine(agents, host):
         click.echo('not uploading empty graph')
         sys.exit(-1)
 
-    resp = to_web(graph, host=host)
-    resp.raise_for_status()
+    if local:
+        manager = Manager.from_connection(connection)
+        to_database(graph, manager=manager)
+    else:
+        resp = to_web(graph, host=host)
+        resp.raise_for_status()
 
 
 @main.group()
