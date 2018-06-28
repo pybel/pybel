@@ -34,7 +34,7 @@ universe_map = {}
 in_place_map = {}
 has_arguments_map = {}
 no_arguments_map = {}
-deprecated = set()
+deprecated = {}
 
 
 def _has_arguments(func, universe):
@@ -127,7 +127,7 @@ def register_deprecated(deprecated_name):
     def register_deprecated_f(func):
         name = func.__name__
 
-        log.warning('%s is deprecated. please migrate to %s', deprecated_name, name)
+        log.debug('%s is deprecated. please migrate to %s', deprecated_name, name)
 
         if name not in mapped:
             raise MissingPipelineFunctionError('function not mapped with transformation, uni_transformation, etc.')
@@ -135,7 +135,8 @@ def register_deprecated(deprecated_name):
         universe = name in universe_map
         in_place = name in in_place_map
 
-        deprecated.add(deprecated_name)
+        # Add back-reference from deprecated function name to actual function name
+        deprecated[deprecated_name] = name
 
         return _register_function(deprecated_name, func, universe, in_place)
 
