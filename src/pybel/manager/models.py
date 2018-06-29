@@ -254,7 +254,7 @@ class Annotation(Base):
     citation_published = Column(Date, nullable=True)
     citation_url = Column(String(255), nullable=True)
 
-    def get_entries(self):
+    def get_entry_names(self):
         """Gets a set of the names of all entries
 
         :rtype: set[str]

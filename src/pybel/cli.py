@@ -287,8 +287,8 @@ def ls(manager, url):
 
     else:
         annotation = manager.ensure_annotation(url)
-        for l in annotation.get_entries():
-            click.echo(l)
+        for name in annotation.get_entry_names():
+            click.echo(name)
 
 
 @namespace.command()

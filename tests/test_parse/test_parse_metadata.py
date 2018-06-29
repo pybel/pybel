@@ -162,7 +162,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             'TestAnnot5': 'O'
         }
 
-        self.assertEqual(set(expected_values), self.parser.manager.get_annotation_entries(url))
+        self.assertEqual(set(expected_values), self.parser.manager.get_annotation_entry_names(url))
 
     # FIXME
     '''
