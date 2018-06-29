@@ -3,17 +3,17 @@
 """Contains the main data structure for PyBEL"""
 
 import logging
-from copy import deepcopy
-
 import networkx
+from copy import deepcopy
 from six import string_types
+from tqdm import tqdm
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import *
 from ..dsl import activity
 from ..tokens import node_to_tuple
-from ..utils import get_version, hash_edge
+from ..utils import get_version, hash_edge, hash_node
 
 __all__ = [
     'BELGraph',
@@ -811,7 +811,8 @@ class BELGraph(networkx.MultiDiGraph):
         :param str sep: The separator between the source, relation, and target. Defaults to ' '
         :rtype: str
         """
-        return edge_to_bel(self.node[u], self.node[v], data=data, sep=sep)
+        source, target = self.node[u], self.node[v]
+        return edge_to_bel(source, target, data=data, sep=sep)
 
     def _has_no_equivalent_edge(self, u, v):
         return unqualified_edge_code[EQUIVALENT_TO] not in self[u][v]
@@ -877,3 +878,31 @@ class BELGraph(networkx.MultiDiGraph):
             self._node_has_namespace_helper(n, namespace)
             for n in self.iter_equivalent_nodes(node)
         )
+
+    def hash_node(self, node_tuple):
+        """Hash the node.
+
+        :type node_tuple: tuple
+        :rtype: str
+        """
+        sha512 = self.node[node_tuple].get(HASH)
+
+        if sha512 is None:
+            sha512 = self.node[node_tuple][HASH] = hash_node(node_tuple)
+
+        return sha512
+
+    def hash_edge(self, u, v, k):
+        """Hash the edge.
+
+        :type u: tuple
+        :type v: tuple
+        :type k: int
+        :rtype: str
+        """
+        sha512 = self[u][v][k].get(HASH)
+
+        if sha512 is None:
+            sha512 = self[u][v][k][HASH] = hash_edge(u, v, self[u][v][k])
+
+        return sha512
