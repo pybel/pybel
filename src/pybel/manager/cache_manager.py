@@ -257,7 +257,7 @@ class NamespaceManager(BaseManager):
         values = bel_resource['Values']
 
         if not_resource_cachable(bel_resource):
-            log.info('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
+            log.debug('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
             return values
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
