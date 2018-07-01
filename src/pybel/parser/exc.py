@@ -255,11 +255,11 @@ class CitationTooLongException(InvalidCitationLengthException):
 
 class MissingCitationException(PyBelParserWarning):
     """Raised when trying to parse a BEL statement, but no citation is currently set. This might be due to a previous
-    error in the formatting of a citation. 
-    
+    error in the formatting of a citation.
+
     Though it's not a best practice, some BEL curators set other annotations before the citation. If this is the case
-    in your BEL document, and you're absolutly sure that all UNSET statements are correctly written, you can use 
-    ``citation_clearing=True`` as a keyword argument in any of the IO functions in :func:`pybel.from_lines`, 
+    in your BEL document, and you're absolutly sure that all UNSET statements are correctly written, you can use
+    ``citation_clearing=True`` as a keyword argument in any of the IO functions in :func:`pybel.from_lines`,
     :func:`pybel.from_url`, or :func:`pybel.from_path`.
     """
 
@@ -269,8 +269,8 @@ class MissingCitationException(PyBelParserWarning):
 
 class MissingSupportWarning(PyBelParserWarning):
     """Raised when trying to parse a BEL statement, but no evidence is currently set. All BEL statements must be
-    qualified with evidence. 
-    
+    qualified with evidence.
+
     If your data is serialized from a database and provenance information is not readily
     accessible, consider referencing the publication for the database, or a url pointing to the data from either
     a programmatically or human-readable endpoint.
@@ -328,8 +328,8 @@ class MalformedTranslocationWarning(PyBelParserWarning):
 
 class PlaceholderAminoAcidWarning(PyBelParserWarning):
     """Raised when an invalid amino acid code is given.
-    
-    
+
+
     One example might be the usage of X, which is a colloquial signifier for a truncation in a given position. Text
     mining efforts for knowledge extraction make this mistake often. X might also signify a placeholder amino acid.
     """
@@ -358,8 +358,8 @@ class LexicographyWarning(PyBelWarning):
 # Semantic Warnings
 
 class InvalidFunctionSemantic(PyBelParserWarning):
-    """Raised when an invalid function is used for a given node. 
-    
+    """Raised when an invalid function is used for a given node.
+
     For example, an HGNC symbol for a protein-coding gene YFG cannot be referenced as an miRNA with ``m(HGNC:YFG)``
     """
 

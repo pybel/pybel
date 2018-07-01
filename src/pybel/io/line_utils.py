@@ -30,7 +30,7 @@ METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOT
 
 
 def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False, **kwargs):
-    """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`, 
+    """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`,
     and :func:`parse_statements`.
 
     :param BELGraph graph: A BEL graph
