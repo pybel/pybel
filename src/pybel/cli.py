@@ -46,7 +46,8 @@ def main():
 @main.command()
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
-@click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
+@click.option('-c', '--connection', default=get_cache_connection(),
+              help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
 @click.option('--database-name', help='Input network name from database')
 @click.option('--csv', type=click.File('w'), help='Output path for *.csv')
 @click.option('--sif', type=click.File('w'), help='Output path for *.sif')
@@ -65,10 +66,11 @@ def main():
               help="Enable lenient parsing for unqualified translocations")
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
+@click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
 @click.option('-v', '--debug', count=True)
 def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
             neo_context, store, allow_naked_names, allow_nested, allow_unqualified_translocations,
-            no_identifier_validation, no_citation_clearing, debug):
+            no_identifier_validation, no_citation_clearing, debug, required_annotations):
     """Convert BEL"""
     if debug == 1:
         log.setLevel(logging.INFO)
@@ -91,6 +93,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
             no_identifier_validation=no_identifier_validation,
+            required_annotations=required_annotations,
         )
 
     else:
@@ -101,6 +104,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_naked_names=allow_naked_names,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
+            required_annotations=required_annotations,
         )
 
     if csv:

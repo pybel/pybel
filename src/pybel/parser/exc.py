@@ -280,6 +280,17 @@ class MissingSupportWarning(PyBelParserWarning):
         return "Missing evidence; can't add: {}".format(self.line)
 
 
+class MissingAnnotationWarning(PyBelParserWarning):
+    """Raised when trying to parse a BEL statement and a required annotation is not present."""
+
+    def __init__(self, line_number, line, position, required_annotations):
+        super(MissingAnnotationWarning, self).__init__(line_number, line, position, required_annotations)
+        self.required_annotations = required_annotations
+
+    def __str__(self):
+        return 'Missing annotations: {}'.format(', '.join(sorted(self.required_annotations)))
+
+
 class InvalidCitationType(PyBelParserWarning):
     """Raise when a citation is set with an incorrect type. Valid citation types include:
 

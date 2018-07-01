@@ -13,8 +13,8 @@ from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Supp
 
 from .baseparser import BaseParser
 from .exc import (
-    InvalidFunctionSemantic, MalformedTranslocationWarning, MissingCitationException, MissingSupportWarning,
-    NestedRelationWarning, RelabelWarning,
+    InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning, MissingCitationException,
+    MissingSupportWarning, NestedRelationWarning, RelabelWarning,
 )
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
@@ -52,7 +52,8 @@ class BelParser(BaseParser):
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
                  allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-                 citation_clearing=True, no_identifier_validation=False, autostreamline=True):
+                 citation_clearing=True, no_identifier_validation=False, autostreamline=True,
+                 required_annotations=None):
         """
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
         :param namespace_dict: A dictionary of {namespace: {name: encoding}}. Delegated to
@@ -75,6 +76,7 @@ class BelParser(BaseParser):
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
          Delegated to :class:`pybel.parser.ControlParser`
         :param bool autostreamline: Should the parser be streamlined on instantiation?
+        :param Optional[list[str]] required_annotations: Optional list of required annotations
         """
         self.graph = graph
         self.allow_nested = allow_nested
@@ -82,12 +84,13 @@ class BelParser(BaseParser):
         self.control_parser = ControlParser(
             annotation_dict=annotation_dict,
             annotation_regex=annotation_regex,
-            citation_clearing=citation_clearing
+            citation_clearing=citation_clearing,
+            required_annotations=required_annotations,
         )
 
         if no_identifier_validation:
             self.identifier_parser = IdentifierParser(
-                allow_naked_names=allow_naked_names
+                allow_naked_names=allow_naked_names,
             )
         else:
             self.identifier_parser = IdentifierParser(
@@ -718,6 +721,10 @@ class BelParser(BaseParser):
 
         if not self.control_parser.evidence:
             raise MissingSupportWarning(self.line_number, line, position)
+
+        missing_required_annotations = self.control_parser.get_missing_required_annotations()
+        if missing_required_annotations:
+            raise MissingAnnotationWarning(self.line_number, line, position, missing_required_annotations)
 
         self._handle_relation(tokens)
 

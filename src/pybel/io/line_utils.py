@@ -2,12 +2,12 @@
 
 """This module contains helper functions for reading BEL scripts"""
 
-from collections import Counter, defaultdict
-
 import logging
 import re
-import six
 import time
+from collections import Counter, defaultdict
+
+import six
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 from tqdm import tqdm
@@ -49,6 +49,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool allow_naked_names: If true, turns off naked namespace failures
     :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param bool no_identifier_validation: If true, turns off namespace validation
+    :param Optional[list[str]] required_annotations: Annotations that are required for all statements
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
@@ -77,6 +78,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         allow_naked_names=kwargs.get('allow_naked_names'),
         allow_unqualified_translocations=kwargs.get('allow_unqualified_translocations'),
         no_identifier_validation=kwargs.get('no_identifier_validation'),
+        required_annotations=kwargs.get('required_annotations'),
     )
 
     if use_tqdm:
