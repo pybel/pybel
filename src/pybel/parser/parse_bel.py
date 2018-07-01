@@ -55,21 +55,25 @@ class BelParser(BaseParser):
                  citation_clearing=True, no_identifier_validation=False, autostreamline=True):
         """
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
-        :param dict[str,dict[str,str]] namespace_dict: A dictionary of {namespace: {name: encoding}}.
-                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param dict[str,set[str]] annotation_dict: A dictionary of {annotation: set of values}.
-                                    Delegated to :class:`pybel.parser.ControlParser`
-        :param dict[str,str] namespace_regex: A dictionary of {namespace: regular expression strings}.
-                                        Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param dict[str,str] annotation_regex: A dictionary of {annotation: regular expression strings}.
-                                        Delegated to :class:`pybel.parser.ControlParser`
-        :param bool allow_naked_names: If true, turn off naked namespace failures.
-                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param bool allow_nested: If true, turn off nested statement failures.
-                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :param namespace_dict: A dictionary of {namespace: {name: encoding}}. Delegated to
+         :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :type namespace_dict: Optional[dict[str,dict[str,str]]]
+        :param annotation_dict: A dictionary of {annotation: set of values}. Delegated to
+         :class:`pybel.parser.ControlParser`
+        :rype annotation_dict: Optional[dict[str,set[str]]]
+        :param namespace_regex: A dictionary of {namespace: regular expression strings}. Delegated to
+         :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :type namespace_regex: Optional[dict[str,str]]
+        :param annotation_regex: A dictionary of {annotation: regular expression strings}. Delegated to
+         :class:`pybel.parser.ControlParser`
+        :type annotation_regex: Optional[dict[str,str]]
+        :param bool allow_naked_names: If true, turn off naked namespace failures. Delegated to
+         :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :param bool allow_nested: If true, turn off nested statement failures. Delegated to
+         :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-                                    Delegated to :class:`pybel.parser.ControlParser`
+         Delegated to :class:`pybel.parser.ControlParser`
         :param bool autostreamline: Should the parser be streamlined on instantiation?
         """
         self.graph = graph
@@ -683,7 +687,9 @@ class BelParser(BaseParser):
                 {
                     ae: True
                     for ae in annotation_entry
-                } if isinstance(annotation_entry, set) else {
+                }
+                if isinstance(annotation_entry, set) else
+                {
                     annotation_entry: True
                 }
             )

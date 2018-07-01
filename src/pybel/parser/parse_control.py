@@ -37,7 +37,7 @@ set_evidence_stub = And([Suppress(supporting_text_tags), Suppress('='), quote('v
 
 
 class ControlParser(BaseParser):
-    """A parser for BEL control statements
+    """A parser for BEL control statements.
 
     .. seealso::
 
@@ -46,8 +46,10 @@ class ControlParser(BaseParser):
 
     def __init__(self, annotation_dict=None, annotation_regex=None, citation_clearing=True):
         """
-        :param dict[str,set[str]] annotation_dict: A dictionary of {annotation: set of valid values} for parsing
-        :param dict[str,str] annotation_regex: A dictionary of {annotation: regular expression string}
+        :param annotation_dict: A dictionary of {annotation: set of valid values} for parsing
+        :type annotation_dict: Optional[dict[str,set[str]]]
+        :param annotation_regex: A dictionary of {annotation: regular expression string}
+        :type annotation_regex: Optional[dict[str,str]]
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
         """
         self.citation_clearing = citation_clearing
