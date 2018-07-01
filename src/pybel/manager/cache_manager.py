@@ -801,7 +801,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_citation = {}
         self.object_cache_author = {}
 
-    def insert_graph(self, graph, store_parts=True):
+    def insert_graph(self, graph, store_parts=True, use_tqdm=False):
         """Inserts a graph in the database and returns the corresponding Network model.
 
         :param BELGraph graph: A BEL graph
@@ -842,7 +842,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         network.store_bel(graph)
 
         if store_parts:
-            self._store_graph_parts(network, graph)
+            self._store_graph_parts(network, graph, use_tqdm=use_tqdm)
 
         self.session.add(network)
         self.session.commit()
@@ -851,7 +851,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         return network
 
-    def _store_graph_parts(self, network, graph):
+    def _store_graph_parts(self, network, graph, use_tqdm=False):
         """Stores the given graph into the edge store.
 
         :param Network network: A SQLAlchemy PyBEL Network object
@@ -866,7 +866,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: nodes')
         t = time.time()
 
-        for node in tqdm(graph, total=graph.number_of_nodes(), desc='Nodes'):
+        nodes_iter = (
+            tqdm(graph, total=graph.number_of_nodes(), desc='Nodes')
+            if use_tqdm else
+            graph
+        )
+
+        for node in nodes_iter:
             namespace = graph.node[node].get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
@@ -884,7 +890,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
-        for u, v, data in tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges'):
+
+        edges_iter = (
+            tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges')
+            if use_tqdm else
+            graph.edges_iter(data=True)
+        )
+
+        for u, v, data in edges_iter:
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue

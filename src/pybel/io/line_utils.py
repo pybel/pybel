@@ -65,6 +65,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         definitions,
         metadata_parser,
         allow_failures=kwargs.get('allow_definition_failures')
+        use_tqdm=use_tqdm,
     )
 
     bel_parser = BelParser(
@@ -81,10 +82,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         required_annotations=kwargs.get('required_annotations'),
     )
 
-    if use_tqdm:
-        statements = tqdm(statements, desc='Statements', total=len(statements))
-
-    parse_statements(graph, statements, bel_parser)
+    parse_statements(graph, statements, bel_parser, use_tqdm=use_tqdm)
 
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
 
@@ -124,18 +122,22 @@ def parse_document(graph, document_metadata, metadata_parser):
     log.info('Finished parsing document section in %.02f seconds', time.time() - t)
 
 
-def parse_definitions(graph, definitions, metadata_parser, allow_failures=False):
+def parse_definitions(graph, definitions, metadata_parser, allow_failures=False, use_tqdm=False):
     """Parses the lines in the definitions section of a BEL script.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param iter[str] definitions: An enumerated iterable over the lines in the definitions section of a BEL script
+    :param list[str] definitions: An enumerated iterable over the lines in the definitions section of a BEL script
     :param MetadataParser metadata_parser: A metadata parser
     :param bool allow_failures: If true, allows parser to continue past strange failures
+    :param bool use_tqdm: Use TQDM for progress bar
     :raises: pybel.parser.parse_exceptions.InconsistentDefinitionError
     :raises: pybel.resources.exc.ResourceError
     :raises: sqlalchemy.exc.OperationalError
     """
     t = time.time()
+
+    if use_tqdm:
+        definitions = tqdm(definitions, total=len(definitions), desc='Definitions')
 
     for line_number, line in definitions:
         try:
@@ -166,17 +168,21 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False)
     })
     graph.uncached_namespaces.update(metadata_parser.uncachable_namespaces)
 
-    log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
+    if not use_tqdm:
+        log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
 
 
-def parse_statements(graph, statements, bel_parser):
-    """Parses a list of statements from a BEL Script.
+def parse_statements(graph, statements, bel_parser, use_tqdm=False):
+    """Parse a list of statements from a BEL Script.
 
     :param BELGraph graph: A BEL graph
     :param iter[str] statements: An enumerated iterable over the lines in the statements section of a BEL script
     :param BelParser bel_parser: A BEL parser
     """
     t = time.time()
+
+    if use_tqdm:
+        statements = tqdm(statements, desc='Statements', total=len(statements))
 
     for line_number, line in statements:
         try:
@@ -192,7 +198,8 @@ def parse_statements(graph, statements, bel_parser):
             parse_log.exception('Line %07d - General Failure: %s', line_number, line)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
 
-    log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(graph.warnings))
+    if not use_tqdm:
+        log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(graph.warnings))
 
     for k, v in sorted(Counter(e.__class__.__name__ for _, _, e, _ in graph.warnings).items(), reverse=True):
         log.debug('  %s: %d', k, v)

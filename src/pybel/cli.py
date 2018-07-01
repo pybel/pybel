@@ -105,6 +105,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
             allow_unqualified_translocations=allow_unqualified_translocations,
             citation_clearing=(not no_citation_clearing),
             required_annotations=required_annotations,
+            use_tqdm=True,
         )
 
     if csv:
