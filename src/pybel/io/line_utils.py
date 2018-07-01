@@ -56,15 +56,22 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     if manager is None:
         manager = Manager()
 
-    metadata_parser = MetadataParser(manager, allow_redefinition=kwargs.get('allow_redefinition'))
+    metadata_parser = MetadataParser(
+        manager,
+        allow_redefinition=kwargs.get('allow_redefinition'),
+    )
 
-    parse_document(graph, docs, metadata_parser)
+    parse_document(
+        graph,
+        docs,
+        metadata_parser,
+    )
 
     parse_definitions(
         graph,
         definitions,
         metadata_parser,
-        allow_failures=kwargs.get('allow_definition_failures')
+        allow_failures=kwargs.get('allow_definition_failures'),
         use_tqdm=use_tqdm,
     )
 
@@ -82,7 +89,12 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         required_annotations=kwargs.get('required_annotations'),
     )
 
-    parse_statements(graph, statements, bel_parser, use_tqdm=use_tqdm)
+    parse_statements(
+        graph,
+        statements,
+        bel_parser,
+        use_tqdm=use_tqdm,
+    )
 
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
 
