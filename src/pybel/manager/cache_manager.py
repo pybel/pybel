@@ -16,6 +16,7 @@ from itertools import chain, groupby
 import logging
 import six
 from copy import deepcopy
+from operator import attrgetter
 from six import string_types
 from sqlalchemy import and_, exists, func
 from tqdm import tqdm
@@ -610,8 +611,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         networks = self.session.query(Network).order_by(Network.name, Network.created.desc())
         return [
-            next(si)
-            for k, si in groupby(networks, lambda n: n.name)
+            next(networks_with_that_name)  # just get the first once, since it will be the latest
+            for name, networks_with_that_name in groupby(networks, attrgetter('name'))
         ]
 
     def has_name_version(self, name, version):
