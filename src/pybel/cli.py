@@ -14,15 +14,15 @@ problems--the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
+import logging
 import sys
+import time
 
 import click
-import logging
-import time
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
-from .io import from_lines, from_url, to_csv, to_cx_file, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
+from .io import from_lines, from_url, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
 from .io.web import _get_host
 from .manager import Manager, defaults
 from .manager.database_io import from_database, to_database
@@ -55,7 +55,6 @@ def main():
 @click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
 @click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
 @click.option('--pickle', help='Output path for NetworkX *.gpickle')
-@click.option('--cx', type=click.File('w'), help='Output CX JSON for use with NDEx')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
@@ -68,10 +67,10 @@ def main():
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
 @click.option('-v', '--debug', count=True)
-def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, cx, bel, neo,
-            neo_context, store, allow_naked_names, allow_nested, allow_unqualified_translocations,
-            no_identifier_validation, no_citation_clearing, debug, required_annotations):
-    """Convert BEL"""
+def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, bel, neo, neo_context, store,
+            allow_naked_names, allow_nested, allow_unqualified_translocations, no_identifier_validation,
+            no_citation_clearing, debug, required_annotations):
+    """Convert BEL."""
     if debug == 1:
         log.setLevel(logging.INFO)
         logging.basicConfig(level=logging.INFO, format='%(name)s:%(levelname)s - %(message)s')
@@ -131,10 +130,6 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
     if pickle:
         log.info('Outputting pickle to %s', pickle)
         to_pickle(g, pickle)
-
-    if cx:
-        log.info('Outputting CX to %s', cx)
-        to_cx_file(g, cx)
 
     if bel:
         log.info('Outputting BEL to %s', bel)
