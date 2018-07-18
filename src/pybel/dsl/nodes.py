@@ -184,11 +184,12 @@ class CentralDogma(BaseAbundance):
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
-        :param list[Variant] variants: A list of variants
+        :param variants: A variant or list of variants
+        :type: variants: Variant or list[Variant]
         """
         super(CentralDogma, self).__init__(func, namespace, name=name, identifier=identifier)
         if variants:
-            self[VARIANTS] = variants
+            self[VARIANTS] = [variants] if isinstance(variants, Variant) else variants
 
     @property
     def variants(self):
