@@ -22,6 +22,7 @@ Added
 ~~~~~
 - Flag to INDRA machine to run locally
 - Add require annotations option to parser (https://github.com/pybel/pybel/issues/255)
+- Data missing key node predicate builder
 
 `0.11.8 <https://github.com/pybel/pybel/compare/v0.11.7...0.11.8>`_ - 2018-06-27
 --------------------------------------------------------------------------------
