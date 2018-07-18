@@ -9,6 +9,7 @@ __all__ = [
     'build_annotation_dict_any_filter',
     'build_upstream_edge_predicate',
     'build_downstream_edge_predicate',
+    'build_relation_predicate',
 ]
 
 
@@ -116,3 +117,23 @@ def build_downstream_edge_predicate(nodes):
         return u in nodes and graph[u][v][k][RELATION] in CAUSAL_RELATIONS
 
     return downstream_filter
+
+
+def build_relation_predicate(relation):
+    """Build an edge predicate that matches edges with the given relation
+
+    :param str relation: A relation string
+    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    """
+
+    @edge_predicate
+    def is_relation(data):
+        """Only passes on associative edges
+
+        :param dict data: The PyBEL edge data dictionary
+        :return: If the edge is a causal edge
+        :rtype: bool
+        """
+        return data[RELATION] == relation
+
+    return is_relation

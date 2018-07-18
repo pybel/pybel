@@ -13,6 +13,7 @@ from pybel.dsl import (
     abundance, activity, degradation, entity, fragment, gene, gmod, hgvs, pmod, protein, secretion,
     translocation,
 )
+from pybel.struct.filters.edge_predicate_builders import build_relation_predicate
 from pybel.struct.filters.edge_predicates import (
     edge_has_activity, edge_has_annotation, edge_has_degradation,
     edge_has_translocation, has_authors, has_polarity, has_provenance, has_pubmed, is_associative_relation,
@@ -420,6 +421,17 @@ class TestEdgePredicate(unittest.TestCase):
         self.assertFalse(is_associative_relation({RELATION: DECREASES}))
         self.assertFalse(is_associative_relation({RELATION: DIRECTLY_INCREASES}))
         self.assertFalse(is_associative_relation({RELATION: DIRECTLY_DECREASES}))
+
+    def test_build_is_association(self):
+        alternate_is_associative_relation = build_relation_predicate(ASSOCIATION)
+
+        self.assertTrue(alternate_is_associative_relation({RELATION: ASSOCIATION}))
+
+        self.assertFalse(alternate_is_associative_relation({RELATION: INCREASES}))
+        self.assertFalse(alternate_is_associative_relation({RELATION: CAUSES_NO_CHANGE}))
+        self.assertFalse(alternate_is_associative_relation({RELATION: DECREASES}))
+        self.assertFalse(alternate_is_associative_relation({RELATION: DIRECTLY_INCREASES}))
+        self.assertFalse(alternate_is_associative_relation({RELATION: DIRECTLY_DECREASES}))
 
     def test_has_degradation(self):
         self.assertTrue(edge_has_degradation({SUBJECT: {MODIFIER: DEGRADATION}}))
