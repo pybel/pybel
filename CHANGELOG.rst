@@ -5,8 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.11.9 <https://github.com/pybel/pybel/compare/v0.11.8...0.11.9>`_ - 2018-07-??
+--------------------------------------------------------------------------------
+Removed
+~~~~~~~
+- Removed CX and NDEx IO in favor of https://github.com/pybel/pybel-cx
 
-`0.11.7 <https://github.com/pybel/pybel/compare/v0.11.7...0.11.8>`_ - 2018-06-27
+Changed
+~~~~~~~
+- Better (less annoying) logging for deprecated transformations
+- Turn off SQL echoing by default
+- Update getting annotation entries
+- Better options for using TQDM while parsing
+
+Added
+~~~~~
+- Flag to INDRA machine to run locally
+- Add require annotations option to parser (https://github.com/pybel/pybel/issues/255)
+
+`0.11.8 <https://github.com/pybel/pybel/compare/v0.11.7...0.11.8>`_ - 2018-06-27
 --------------------------------------------------------------------------------
 Added
 ~~~~~
