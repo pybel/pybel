@@ -82,7 +82,7 @@ class BaseManager(object):
         self.session = session
 
     @classmethod
-    def from_connection(cls, connection, echo=True, autoflush=None, autocommit=None, expire_on_commit=None,
+    def from_connection(cls, connection, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
                         scopefunc=None):
         """Create a connection to database and a persistent session using SQLAlchemy.
 

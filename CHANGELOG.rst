@@ -5,12 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-Unreleased
-----------
-Fixed
-~~~~~
-- Bug where data did not get copied to sub-graphs on induction (https://github.com/pybel/pybel/issues/#307)
+`0.11.9 <https://github.com/pybel/pybel/compare/v0.11.8...0.11.9>`_ - 2018-07-??
+--------------------------------------------------------------------------------
+Removed
+~~~~~~~
+- Removed CX and NDEx IO in favor of https://github.com/pybel/pybel-cx
 
+Changed
+~~~~~~~
+- Better (less annoying) logging for deprecated transformations
+- Turn off SQL echoing by default
+- Update getting annotation entries
+- Better options for using TQDM while parsing
+
+Added
+~~~~~
+- Flag to INDRA machine to run locally
+- Add require annotations option to parser (https://github.com/pybel/pybel/issues/255)
+- Data missing key node predicate builder
+
+`0.11.8 <https://github.com/pybel/pybel/compare/v0.11.7...0.11.8>`_ - 2018-06-27
+--------------------------------------------------------------------------------
 Added
 ~~~~~
 - Deprecation system for pipeline functions (for when they're renamed)
@@ -20,7 +35,13 @@ Changed
 - Rely on edge predicates more heavily in selection/induction/expansion transformations
 - Rename several functions related to the "central dogma" for more clarity
 
-`0.11.6 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-06-25
+`0.11.7 <https://github.com/pybel/pybel/compare/v0.11.6...0.11.7>`_ - 2018-06-26
+--------------------------------------------------------------------------------
+Fixed
+~~~~~
+- Bug where data did not get copied to sub-graphs on induction (https://github.com/pybel/pybel/issues/#307)
+
+`0.11.6 <https://github.com/pybel/pybel/compare/v0.11.5...0.11.6>`_ - 2018-06-25
 --------------------------------------------------------------------------------
 Added
 ~~~~~

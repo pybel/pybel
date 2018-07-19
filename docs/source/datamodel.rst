@@ -299,7 +299,7 @@ edge like :code:`p(HGNC:YFG) actsIn kin(p(HGNC:YFG))`. For transformations, a st
 :code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane") translocates p(HGNC:YFG)`.
 
 In PyBEL, we recognize that these modifications are actually annotations to the type of relationship between the
-subject's entity and the object's entity. :code:`p(HGNC:ABC) -> tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")`
+subject's entity and the object's entity. ``p(HGNC:ABC) -> tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")``
 is about the relationship between :code:`p(HGNC:ABC)` and :code:`p(HGNC:YFG)`, while
 the information about the translocation qualifies that the object is undergoing an event, and not just the abundance.
 This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use

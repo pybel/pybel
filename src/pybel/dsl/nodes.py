@@ -184,11 +184,12 @@ class CentralDogma(BaseAbundance):
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
-        :param list[Variant] variants: A list of variants
+        :param variants: A variant or list of variants
+        :type: variants: Variant or list[Variant]
         """
         super(CentralDogma, self).__init__(func, namespace, name=name, identifier=identifier)
         if variants:
-            self[VARIANTS] = variants
+            self[VARIANTS] = [variants] if isinstance(variants, Variant) else variants
 
     @property
     def variants(self):
@@ -421,10 +422,12 @@ class protein_substitution(hgvs):
 
 class fragment(Variant):
     def __init__(self, start=None, stop=None, description=None):
-        """Make a protein fragment dictionary
+        """Make a protein fragment dictionary.
 
-        :param Optional[int or str] start: The starting position
-        :param Optional[int or str] stop: The stopping position
+        :param start: The starting position
+        :type start: None or int or str
+        :param stop: The stopping position
+        :type stop: None or int or str
         :param Optional[str] description: An optional description
 
         Example of specified fragment:
@@ -447,7 +450,8 @@ class fragment(Variant):
             self[FRAGMENT_DESCRIPTION] = description
 
     def as_tuple(self):
-        """Converts the fragment to a tuple
+        """Convert the fragment to a tuple.
+
         :rtype: tuple
         """
         if FRAGMENT_MISSING in self:

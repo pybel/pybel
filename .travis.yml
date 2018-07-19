@@ -12,6 +12,12 @@ python:
     - 3.6
     - 2.7
 
+
+stages:
+  - lint
+  - docs
+  - test
+
 env:
   - TOXENV=py DB=mysql
     PYBEL_TEST_CONNECTOR=mysqlclient
@@ -23,11 +29,28 @@ env:
 
   - TOXENV=py DB=sqlite
 
+
+jobs:
+  include:
+    # lint stage
+    - stage: lint
+      env: TOXENV=manifest
+    - env: TOXENV=flake8
+    # - env: TOXENV=pylint
+
+    # docs stage
+    - stage: docs
+      env: TOXENV=doc8
+    - env: TOXENV=readme
+    - env: TOXENV=docs
+
 matrix:
-    include:
-        - env: TOXENV=docs
-        - env: TOXENV=manifest
-        - env: TOXENV=rst-lint
+  allow_failures:
+      - env: TOXENV=flake8
+      # - env: TOXENV=pylint
+
+install:
+    - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'
 
 before_script:
   - sh -c "if [ '$DB' = 'postgres' ]; then psql -c 'DROP DATABASE IF EXISTS tests;' -U postgres; fi"
@@ -38,18 +61,11 @@ before_script:
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE test CHARACTER SET utf8 COLLATE utf8_general_ci;'; fi"
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e \"GRANT ALL PRIVILEGES ON test.* to 'travis'@'%' WITH GRANT OPTION;\"; fi"
 
-before_install:
-    - pip install codecov
-
-install:
-    - pip install tox
-
 script:
     - tox
 
 after_success:
-    - tox -e coverage-report
-    - codecov
+    - sh -c 'if [ "$TOXENV" = "py" ]; then tox -e coverage-report; codecov; fi'
 
 notifications:
   slack: pybel:n2KbWKBum3musnBg3L76gGwq

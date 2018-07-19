@@ -2,12 +2,16 @@
 
 """Utilities for functions for collapsing nodes."""
 
+from ...filters import filter_edges
+from ...filters.edge_predicate_builders import build_relation_predicate
 from ...pipeline import in_place_transformation
-from ....constants import RELATION, unqualified_edges
+from ....constants import HAS_VARIANT, RELATION, unqualified_edges
 
 __all__ = [
     'collapse_pair',
     'collapse_nodes',
+    'collapse_edges_passing_predicates',
+    'collapse_all_variants',
 ]
 
 
@@ -62,3 +66,24 @@ def collapse_nodes(graph, survivor_mapping):
         if u in graph[u]
         for k in graph[u][u]
     )
+
+
+@in_place_transformation
+def collapse_edges_passing_predicates(graph, edge_predicates=None):
+    """Collapse all edges passing the given edge predicates.
+
+    :param pybel.BELGraph graph: A BEL Graph
+    :param edge_predicates: A predicate or list of predicates
+    :type edge_predicates: None or (pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]
+    """
+    for u, v, _ in filter_edges(graph, edge_predicates=edge_predicates):
+        collapse_pair(graph, survivor=u, victim=v)
+
+
+@in_place_transformation
+def collapse_all_variants(graph):
+    """Collapse all genes', RNAs', miRNAs', and proteins' variants to their parents.
+
+    :param pybel.BELGraph graph: A BEL Graph
+    """
+    collapse_edges_passing_predicates(graph, build_relation_predicate(HAS_VARIANT))

@@ -3,7 +3,6 @@
 import logging
 import os
 import tempfile
-import time
 import unittest
 from pathlib import Path
 
@@ -11,15 +10,13 @@ import networkx as nx
 from six import BytesIO, StringIO
 
 from pybel import (
-    BELGraph, from_bytes, from_cx, from_cx_jsons, from_json, from_json_file, from_jsons, from_lines, from_ndex,
-    from_path, from_pickle, from_url, to_bel_lines, to_bytes, to_csv, to_cx, to_cx_jsons, to_graphml, to_gsea, to_json,
-    to_json_file, to_jsons, to_ndex, to_pickle, to_sif,
+    BELGraph, from_bytes, from_json, from_json_file, from_jsons, from_lines, from_path, from_pickle, from_url,
+    to_bel_lines, to_bytes, to_csv, to_graphml, to_gsea, to_json, to_json_file, to_jsons, to_pickle, to_sif,
 )
 from pybel.constants import *
 from pybel.dsl import gene
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
-from pybel.io.ndex_utils import NDEX_PASSWORD, NDEX_USERNAME
 from pybel.parser import BelParser
 from pybel.parser.exc import *
 from pybel.struct.summary import get_syntax_errors
@@ -199,33 +196,6 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         os.close(handle)
         os.remove(path)
 
-    def test_thorough_cx(self):
-        graph_cx_json_dict = to_cx(self.thorough_graph)
-        reconstituted = from_cx(graph_cx_json_dict)
-
-        do_remapping(self.thorough_graph, reconstituted)
-
-        self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
-
-    def test_thorough_cxs(self):
-        graph_cx_str = to_cx_jsons(self.thorough_graph)
-        reconstituted = from_cx_jsons(graph_cx_str)
-
-        do_remapping(self.thorough_graph, reconstituted)
-
-        self.bel_thorough_reconstituted(reconstituted, check_warnings=False)
-
-    @unittest.skipUnless(NDEX_USERNAME in os.environ and NDEX_PASSWORD in os.environ, 'Need NDEx credentials')
-    def test_thorough_ndex(self):
-        """Tests that a document can be uploaded and downloaded. Sleeps in the middle so that NDEx can process"""
-        network_id = to_ndex(self.thorough_graph)
-        time.sleep(10)
-        reconstituted = from_ndex(network_id)
-
-        do_remapping(self.thorough_graph, reconstituted)
-
-        self.bel_thorough_reconstituted(reconstituted, check_warnings=False, check_citation_name=False)
-
     def test_thorough_upgrade(self):
         lines = to_bel_lines(self.thorough_graph)
         reconstituted = from_lines(lines, manager=self.manager)
@@ -258,31 +228,8 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         os.close(handle)
         os.remove(path)
 
-    def test_slushy_cx(self):
-        reconstituted = from_cx(to_cx(self.slushy_graph))
-
-        do_remapping(self.slushy_graph, reconstituted)
-
-        self.bel_slushy_reconstituted(reconstituted)
-
-    def test_slushy_cxs(self):
-        reconstituted = from_cx_jsons(to_cx_jsons(self.slushy_graph))
-
-        do_remapping(self.slushy_graph, reconstituted)
-
-        self.bel_slushy_reconstituted(reconstituted)
-
     def test_simple_compile(self):
         self.bel_simple_reconstituted(self.simple_graph)
-
-    def test_simple_cx(self):
-        """Tests the CX input/output on test_bel.bel"""
-        graph_cx_json = to_cx(self.simple_graph)
-
-        reconstituted = from_cx(graph_cx_json)
-        do_remapping(self.simple_graph, reconstituted)
-
-        self.bel_simple_reconstituted(reconstituted)
 
     def test_isolated_compile(self):
         self.bel_isolated_reconstituted(self.isolated_graph)

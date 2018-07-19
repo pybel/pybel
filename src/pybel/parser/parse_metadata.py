@@ -221,7 +221,7 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_annotation(line, position, keyword)
 
         url = tokens['url']
-        self.annotation_dict[keyword] = self.manager.get_annotation_entries(url)
+        self.annotation_dict[keyword] = self.manager.get_annotation_entry_names(url)
         self.annotation_url_dict[keyword] = url
 
         return tokens

@@ -9,13 +9,14 @@ enable this option, but can specify a database location if they choose.
 
 from __future__ import unicode_literals
 
-import logging
+import time
 from collections import defaultdict
-from copy import deepcopy
 from itertools import chain, groupby
 
+import logging
 import six
-import time
+from copy import deepcopy
+from operator import attrgetter
 from six import string_types
 from sqlalchemy import and_, exists, func
 from tqdm import tqdm
@@ -257,7 +258,7 @@ class NamespaceManager(BaseManager):
         values = bel_resource['Values']
 
         if not_resource_cachable(bel_resource):
-            log.info('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
+            log.debug('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
             return values
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
@@ -552,29 +553,37 @@ class AnnotationManager(BaseManager):
 
         return self.get_or_create_annotation(url)
 
-    def get_annotation_entries(self, url):
-        """Returns a dict of annotations and their labels for the given annotation file
+    def get_annotation_entry_names(self, url):
+        """Return a dict of annotations and their labels for the given annotation file.
 
         :param str url: the location of the annotation file
         :rtype: set[str]
         """
         annotation = self.ensure_annotation(url)
-        return annotation.get_entries()
+        return annotation.get_entry_names()
 
-    def get_annotation_entry(self, url, value):
-        """Gets a given AnnotationEntry object.
+    def get_annotation_entry_by_name(self, url, name):
+        """Get an annotation entry by URL and name.
 
         :param str url: The url of the annotation source
-        :param str value: The name of the annotation entry from the given url's document
+        :param str name: The name of the annotation entry from the given url's document
         :rtype: AnnotationEntry
         """
         if self.annotation_object_cache and url in self.annotation_object_cache:
-            annotation_entry = self.annotation_object_cache[url][value]
-        else:
-            annotation = self.session.query(Annotation).filter(Annotation.url == url).one()
-            annotation_entry = self.session.query(AnnotationEntry).filter_by(annotation=annotation, name=value).one()
+            return self.annotation_object_cache[url][name]
 
-        return annotation_entry
+        annotation_filter = and_(Annotation.url == url, AnnotationEntry.name == name)
+        return self.session.query(AnnotationEntry).join(Annotation).filter(annotation_filter).one()
+
+    def get_annotation_entries_by_names(self, url, names):
+        """Get annotation entries by URL and names.
+
+        :param str url: The url of the annotation source
+        :param list[str] names: The names of the annotation entries from the given url's document
+        :rtype: list[AnnotationEntry]
+        """
+        annotation_filter = and_(Annotation.url == url, AnnotationEntry.name.in_(names))
+        return self.session.query(AnnotationEntry).join(Annotation).filter(annotation_filter).all()
 
 
 class NetworkManager(NamespaceManager, AnnotationManager):
@@ -602,8 +611,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         networks = self.session.query(Network).order_by(Network.name, Network.created.desc())
         return [
-            next(si)
-            for k, si in groupby(networks, lambda n: n.name)
+            next(networks_with_that_name)  # just get the first once, since it will be the latest
+            for name, networks_with_that_name in groupby(networks, attrgetter('name'))
         ]
 
     def has_name_version(self, name, version):
@@ -793,7 +802,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_citation = {}
         self.object_cache_author = {}
 
-    def insert_graph(self, graph, store_parts=True):
+    def insert_graph(self, graph, store_parts=True, use_tqdm=False):
         """Inserts a graph in the database and returns the corresponding Network model.
 
         :param BELGraph graph: A BEL graph
@@ -834,7 +843,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         network.store_bel(graph)
 
         if store_parts:
-            self._store_graph_parts(network, graph)
+            self._store_graph_parts(network, graph, use_tqdm=use_tqdm)
 
         self.session.add(network)
         self.session.commit()
@@ -843,7 +852,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         return network
 
-    def _store_graph_parts(self, network, graph):
+    def _store_graph_parts(self, network, graph, use_tqdm=False):
         """Stores the given graph into the edge store.
 
         :param Network network: A SQLAlchemy PyBEL Network object
@@ -858,7 +867,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: nodes')
         t = time.time()
 
-        for node in tqdm(graph, total=graph.number_of_nodes(), desc='Nodes'):
+        nodes_iter = (
+            tqdm(graph, total=graph.number_of_nodes(), desc='Nodes')
+            if use_tqdm else
+            graph
+        )
+
+        for node in nodes_iter:
             namespace = graph.node[node].get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
@@ -876,7 +891,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: edges')
         t = time.time()
         c = 0
-        for u, v, data in tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges'):
+
+        edges_iter = (
+            tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges')
+            if use_tqdm else
+            graph.edges_iter(data=True)
+        )
+
+        for u, v, data in edges_iter:
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue
@@ -916,14 +938,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             log.info('skipped %d edges', c)
 
     @staticmethod
-    def _iter_annotations_from_dict(graph, data):
-        """Iterates over the key/value pairs in this edge data dictionary normalized to their source URLs
+    def _iter_from_annotations_dict(graph, annotations_dict):
+        """Iterate over the key/value pairs in this edge data dictionary normalized to their source URLs.
 
         :param BELGraph graph: A BEL graph
-        :param dict[str,dict[str,bool]] data: A PyBEL edge data dictionary
-        :rtype: iter[tuple[str,str]]
+        :param dict[str,dict[str,bool]] annotations_dict: A PyBEL edge data dictionary
+        :rtype: iter[tuple[str,set[str]]]
         """
-        for key, values in data.items():
+        for key, names in annotations_dict.items():
             if key in graph.annotation_url:
                 url = graph.annotation_url[key]
             elif key in graph.annotation_list:
@@ -934,24 +956,24 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             else:
                 raise ValueError('Graph resources does not contain keyword: {}'.format(key))
 
-            for value in values:
-                yield url, value
+            yield url, set(names)
 
-    def _get_annotation_entries(self, graph, data):
-        """Gets the annotation entries for this edge's data
+    def _get_annotation_entries_from_data(self, graph, data):
+        """Get the annotation entries from an edge data dictionary.
 
         :param BELGraph graph: A BEL graph
         :param dict data: A PyBEL edge data dictionary
-        :rtype: list[AnnotationEntry]
+        :rtype: Optional[list[AnnotationEntry]]
         """
-        annotations = data.get(ANNOTATIONS)
+        annotations_dict = data.get(ANNOTATIONS)
 
-        if annotations is None:
+        if annotations_dict is None:
             return
 
         return [
-            self.get_annotation_entry(url, value)
-            for url, value in self._iter_annotations_from_dict(graph, annotations)
+            entry
+            for url, names in self._iter_from_annotations_dict(graph, annotations_dict=annotations_dict)
+            for entry in self.get_annotation_entries_by_names(url, names)
         ]
 
     def _add_qualified_edge(self, network, graph, u, v, data):
@@ -977,7 +999,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         if properties is None:
             return
 
-        annotations = self._get_annotation_entries(graph, data)
+        annotations = self._get_annotation_entries_from_data(graph, data)
 
         bel = graph.edge_to_bel(u, v, data=data)
         edge_hash = hash_edge(u, v, data)
