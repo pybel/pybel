@@ -1702,6 +1702,15 @@ class TestActivity(TestTokenParserBase):
         self.assertHasNode(node)
 
 
+    def test_activity_on_named_complex(self):
+        statement = 'kin(complex(FPLX:C1))'
+        result = self.parser.activity.parseString(statement)
+
+
+    def test_activity_on_listed_complex(self):
+        statement = 'kin(complex(p(HGNC:A), p(HGNC:B))'
+        result = self.parser.activity.parseString(statement)
+
 class TestTranslocationPermissive(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
