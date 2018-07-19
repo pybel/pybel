@@ -122,7 +122,10 @@ statement for labeling nodes has been added, such that the resulting data struct
 
 When InChI is used, these strings are very hard to visualize. Using a label is helpful for later visualization:
 
-``a(INCHI:"InChI=1S/C20H28N2O5/c1-3-27-20(26)16(12-11-15-8-5-4-6-9-15)21-14(2)18(23)22-13-7-10-17(22)19(24)25/h4-6,8-9,14,16-17,21H,3,7,10-13H2,1-2H3,(H,24,25)/t14-,16-,17-/m0/s1") labeled "Enalapril"``
+.. code-block::none
+
+    a(INCHI:"InChI=1S/C20H28N2O5/c1-3-27-20(26)16(12-11-15-8-5-4-6-9-15)21-14(2)18(23)22-13-7-10-17(22)19(24)25/h4-6,
+    8-9,14,16-17,21H,3,7,10-13H2,1-2H3,(H,24,25)/t14-,16-,17-/m0/s1") labeled "Enalapril"``
 
 Below is the same molecule again, but represented with an InChIKey:
 
