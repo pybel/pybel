@@ -1563,12 +1563,14 @@ class TestPathology(TestTokenParserBase):
 
 
 class TestActivity(TestTokenParserBase):
+    """Tests for molecular activity terms."""
+
     def setUp(self):
+        """Set up parser for testing the activity language."""
         self.parser.clear()
         self.parser.activity.setParseAction(self.parser.handle_term)
 
     def test_activity_bare(self):
-        """"""
         statement = 'act(p(HGNC:AKT1))'
         result = self.parser.activity.parseString(statement)
 
@@ -1701,15 +1703,22 @@ class TestActivity(TestTokenParserBase):
         self.assertEqual(node, node_to_tuple(result))
         self.assertHasNode(node)
 
+    def test_kinase_activity_on_named_complex(self):
+        statement = 'kin(complex(FPLX:C1))'
+        self.parser.activity.parseString(statement)
 
     def test_activity_on_named_complex(self):
-        statement = 'kin(complex(FPLX:C1))'
-        result = self.parser.activity.parseString(statement)
+        statement = 'act(complex(FPLX:C1), ma(kin))'
+        self.parser.activity.parseString(statement)
 
+    def test_kinase_activity_on_listed_complex(self):
+        statement = 'kin(complex(p(HGNC:A), p(HGNC:B)))'
+        self.parser.activity.parseString(statement)
 
     def test_activity_on_listed_complex(self):
-        statement = 'kin(complex(p(HGNC:A), p(HGNC:B))'
-        result = self.parser.activity.parseString(statement)
+        statement = 'act(complex(p(HGNC:A), p(HGNC:B)), ma(kin))'
+        self.parser.activity.parseString(statement)
+
 
 class TestTranslocationPermissive(unittest.TestCase):
     @classmethod
