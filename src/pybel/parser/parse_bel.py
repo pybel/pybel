@@ -237,12 +237,12 @@ class BelParser(BaseParser):
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
-            Group(self.abundance)(TARGET) +
+            Group(self.simple_abundance)(TARGET) +
             Optional(WCW + Group(self.molecular_activity)(EFFECT))
         )
 
         activity_legacy_tags = oneOf(language.activities)(MODIFIER)
-        self.activity_legacy = activity_legacy_tags + nest(Group(self.abundance)(TARGET))
+        self.activity_legacy = activity_legacy_tags + nest(Group(self.simple_abundance)(TARGET))
         self.activity_legacy.setParseAction(handle_activity_legacy)
 
         self.activity = self.activity_standard | self.activity_legacy
