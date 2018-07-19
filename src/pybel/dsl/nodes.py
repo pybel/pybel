@@ -422,10 +422,12 @@ class protein_substitution(hgvs):
 
 class fragment(Variant):
     def __init__(self, start=None, stop=None, description=None):
-        """Make a protein fragment dictionary
+        """Make a protein fragment dictionary.
 
-        :param Optional[int or str] start: The starting position
-        :param Optional[int or str] stop: The stopping position
+        :param start: The starting position
+        :type start: None or int or str
+        :param stop: The stopping position
+        :type stop: None or int or str
         :param Optional[str] description: An optional description
 
         Example of specified fragment:
@@ -448,7 +450,8 @@ class fragment(Variant):
             self[FRAGMENT_DESCRIPTION] = description
 
     def as_tuple(self):
-        """Converts the fragment to a tuple
+        """Convert the fragment to a tuple.
+
         :rtype: tuple
         """
         if FRAGMENT_MISSING in self:
