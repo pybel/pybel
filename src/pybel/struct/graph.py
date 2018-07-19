@@ -418,7 +418,7 @@ class BELGraph(networkx.MultiDiGraph):
         self._add_two_way_unqualified_edge(u, v, ORTHOLOGOUS)
 
     def add_is_a(self, u, v):
-        """Adds an isA relationship such that u isA v.
+        """Add an isA relationship such that u isA v.
 
         :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
         :type u: tuple or dict
@@ -426,6 +426,26 @@ class BELGraph(networkx.MultiDiGraph):
         :type v: tuple or dict
         """
         self.add_unqualified_edge(u, v, IS_A)
+
+    def add_part_of(self, u, v):
+        """Add an partOf relationship such that u partOf v.
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        return self.add_unqualified_edge(u,v, PART_OF)
+
+    def add_has_member(self, u, v):
+        """Add an hasMember relationship such that u hasMember v.
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        return self.add_unqualified_edge(u,v, HAS_MEMBER)
 
     def add_increases(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
                       **attr):
