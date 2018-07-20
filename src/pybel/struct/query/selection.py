@@ -25,26 +25,6 @@ __all__ = [
 ]
 
 
-def search_node_names(graph, query):
-    """Search for nodes containing a given string(s).
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param query: The search query
-    :type query: str or iter[str]
-    :return: An iterator over nodes whose names match the search query
-    :rtype: iter
-
-    Example:
-
-    .. code-block:: python
-
-        >>> from pybel.examples import sialic_acid_graph
-        >>> list(search_node_names(sialic_acid_graph, 'CD33'))
-        [('Protein', 'HGNC', 'CD33'), ('Protein', 'HGNC', 'CD33', ('pmod', ('bel', 'Ph')))]
-    """
-    return filter_nodes(graph, build_node_name_search(query))
-
-
 @transformation
 def get_subgraph_by_node_filter(graph, node_filters):
     """Induces a graph on the nodes that pass all filters
@@ -110,31 +90,6 @@ def get_subgraph_by_second_neighbors(graph, nodes, filter_pathologies=False):
     expand_all_node_neighborhoods(graph, result, filter_pathologies=filter_pathologies)
     return result
 
-
-@transformation
-def get_causal_subgraph(graph):
-    """Builds a new subgraph induced over all edges that are causal
-
-    :param pybel.BELGraph graph: A BEL graph
-    :return: A subgraph of the original BEL graph
-    :rtype: pybel.BELGraph
-    """
-    return get_subgraph_by_edge_filter(graph, is_causal_relation)
-
-
-@transformation
-def get_subgraph_by_node_search(graph, query):
-    """Gets a subgraph induced over all nodes matching the query string
-
-    :param pybel.BELGraph graph: A BEL Graph
-    :param str or iter[str] query: A query string or iterable of query strings for node names
-    :return: A subgraph induced over the original BEL graph
-    :rtype: pybel.BELGraph
-
-    Thinly wraps :func:`search_node_names` and :func:`get_subgraph_by_induction`.
-    """
-    nodes = search_node_names(graph, query)
-    return get_subgraph_by_induction(graph, nodes)
 
 
 @transformation
@@ -226,14 +181,3 @@ def get_subgraph(graph, seed_method=None, seed_data=None, expand_nodes=None, rem
     )
 
     return result
-
-
-@transformation
-def get_largest_component(graph):
-    """Gets the giant component of a subgraph
-
-    :param pybel.BELGraph graph: A BEL Graph
-    :return: The giant component of the graph
-    :rtype: pybel.BELGraph
-    """
-    return max(nx.weakly_connected_component_subgraphs(graph), key=len)
