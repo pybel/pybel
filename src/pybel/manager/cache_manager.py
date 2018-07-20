@@ -615,7 +615,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
             )
             .group_by(Network.name)
             .having(func.max(Network.created))
-            #.subquery('most_recent_ids')
+            .subquery('most_recent_ids')
         )
 
         most_recent_networks = (
