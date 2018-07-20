@@ -9,6 +9,7 @@ from pybel import BELGraph
 from pybel.constants import ASSOCIATION, DECREASES, FUNCTION, INCREASES, PROTEIN
 from pybel.dsl import gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal
+from pybel.struct.mutation.induction.paths import get_nodes_in_all_shortest_paths, get_subgraph_by_all_shortest_paths
 from pybel.struct.mutation.induction.upstream import get_upstream_causal_subgraph
 from pybel.struct.mutation.induction.utils import get_subgraph_by_induction
 from pybel.testing.utils import n
@@ -74,6 +75,39 @@ class TestInduction(TestGraphMixin):
         self.assertInGraph(b, subgraph)
         self.assertInGraph(c, subgraph)
         self.assertNotInGraph(d, subgraph)
+
+    def test_get_subgraph_by_all_shortest_paths(self):
+        """Test get_subgraph_by_all_shortest_paths."""
+        graph = BELGraph()
+        keyword, url = n(), n()
+        graph.namespace_url[keyword] = url
+        a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
+        graph.add_increases(a, b, n(), n())
+        graph.add_increases(a, c, n(), n())
+        graph.add_increases(b, d, n(), n())
+        graph.add_increases(c, d, n(), n())
+        graph.add_increases(a, e, n(), n())
+        graph.add_increases(e, f, n(), n())
+        graph.add_increases(f, d, n(), n())
+
+        query_nodes = [a.as_tuple(), d.as_tuple()]
+        shortest_paths_nodes = get_nodes_in_all_shortest_paths(graph, query_nodes)
+        self.assertIn(a.as_tuple(), shortest_paths_nodes)
+        self.assertIn(b.as_tuple(), shortest_paths_nodes)
+        self.assertIn(c.as_tuple(), shortest_paths_nodes)
+        self.assertIn(d.as_tuple(), shortest_paths_nodes)
+
+        subgraph = get_subgraph_by_all_shortest_paths(graph, query_nodes)
+
+        self.assertIn(keyword, graph.namespace_url)
+        self.assertEqual(url, graph.namespace_url[keyword])
+
+        self.assertInGraph(a, subgraph)
+        self.assertInGraph(b, subgraph)
+        self.assertInGraph(c, subgraph)
+        self.assertInGraph(d, subgraph)
+        self.assertNotInGraph(e, subgraph)
+        self.assertNotInGraph(f, subgraph)
 
     def test_get_upstream_causal_subgraph(self):
         """Test get_upstream_causal_subgraph."""
