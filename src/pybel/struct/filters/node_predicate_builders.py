@@ -88,13 +88,13 @@ def data_missing_key_builder(key):
     return data_does_not_contain_key
 
 
-def build_node_data_search(key, data_filter):
+def build_node_data_search(key, data_predicate):
     """Pass for nodes who have the given key in their data dictionaries and whose associated values pass the given
     filter function.
 
     :param str key: The node data dictionary key to check
-    :param data_filter: The filter to apply to the node data dictionary
-    :type data_filter: (dict) -> bool
+    :param data_predicate: The filter to apply to the node data dictionary
+    :type data_predicate: (Any) -> bool
     :return: A node predicate
     :rtype: (pybel.BELGraph, tuple) -> bool
     """
@@ -108,7 +108,7 @@ def build_node_data_search(key, data_filter):
         :rtype: bool
         """
         data = graph.node[node]
-        return key in data and data_filter(data[key])
+        return key in data and data_predicate(data[key])
 
     return node_data_filter
 
@@ -142,4 +142,4 @@ def build_node_name_search(query):
     :return: A node predicate
     :rtype: (pybel.BELGraph, tuple) -> bool
     """
-    return build_node_key_search(query, NAME)
+    return build_node_key_search(query=query, key=NAME)
