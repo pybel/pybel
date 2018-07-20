@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import itertools as itt
-import logging
 
+import logging
 import networkx as nx
 
 from .constants import *
@@ -12,8 +12,7 @@ from ..filters import (
     build_annotation_dict_all_filter, build_annotation_dict_any_filter, filter_nodes, is_causal_relation,
 )
 from ..filters.edge_predicate_builders import (
-    build_author_inclusion_filter, build_edge_data_filter,
-    build_pmid_inclusion_filter,
+    build_author_inclusion_filter, build_pmid_inclusion_filter,
 )
 from ..filters.node_predicate_builders import build_node_name_search
 from ..mutation import (
@@ -159,18 +158,6 @@ def get_subgraph_by_all_shortest_paths(graph, nodes, weight=None, remove_patholo
         return
 
     return get_subgraph_by_induction(graph, induced_nodes)
-
-
-@transformation
-def get_subgraph_by_data(graph, annotations):
-    """Returns the subgraph filtering for Citation, Evidence or Annotation in the edges.
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param dict annotations: Annotation filters (match all with :func:`pybel.utils.subdict_matches`)
-    :return: A subgraph of the original BEL graph
-    :rtype: pybel.BELGraph
-    """
-    return get_subgraph_by_edge_filter(graph, build_edge_data_filter(annotations))
 
 
 @transformation

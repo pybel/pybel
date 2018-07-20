@@ -4,7 +4,6 @@ from six import string_types
 
 from .edge_predicates import edge_predicate, has_authors, has_pubmed, keep_edge_permissive
 from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, RELATION
-from ...utils import subdict_matches
 
 __all__ = [
     'build_annotation_dict_all_filter',
@@ -12,7 +11,6 @@ __all__ = [
     'build_upstream_edge_predicate',
     'build_downstream_edge_predicate',
     'build_relation_predicate',
-    'build_edge_data_filter',
     'build_pmid_inclusion_filter',
     'build_author_inclusion_filter',
 ]
@@ -142,27 +140,6 @@ def build_relation_predicate(relation):
         return data[RELATION] == relation
 
     return is_relation
-
-
-def build_edge_data_filter(annotations, partial_match=True):
-    """Build a filter that keeps edges whose data dictionaries are super-dictionaries to the given dictionary.
-
-    :param dict annotations: The annotation query dict to match
-    :param bool partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
-    :return: An edge predicate
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
-    """
-
-    @edge_predicate
-    def annotation_dict_filter(data):
-        """Pass for edges with the given dictionary as a sub-dictionary.
-
-        :param dict data: The edge data dictionary
-        :rtype: bool
-        """
-        return subdict_matches(data, annotations, partial_match=partial_match)
-
-    return annotation_dict_filter
 
 
 def build_pmid_inclusion_filter(pmid):
