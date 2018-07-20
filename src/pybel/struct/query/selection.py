@@ -6,14 +6,14 @@ import logging
 import networkx as nx
 
 from .constants import *
+from .induction import get_multi_causal_downstream, get_multi_causal_upstream
 from .random_subgraph import get_random_subgraph
-from ..filters import (
-    build_annotation_dict_all_filter, build_annotation_dict_any_filter, filter_nodes, is_causal_relation,
-)
+from ..filters import filter_nodes, is_causal_relation
 from ..filters.node_predicate_builders import build_node_name_search
-from ..mutation import (
-    expand_all_node_neighborhoods, expand_nodes_neighborhoods, get_subgraph_by_edge_filter, get_subgraph_by_induction,
-)
+from ..mutation.expansion import expand_all_node_neighborhoods, expand_nodes_neighborhoods
+from ..mutation.induction import get_subgraph_by_edge_filter, get_subgraph_by_induction
+from ..mutation.induction.annotations import get_subgraph_by_annotations
+from ..mutation.induction.citation import get_subgraph_by_authors, get_subgraph_by_pubmed
 from ..mutation.induction.paths import get_subgraph_by_all_shortest_paths
 from ..pipeline import transformation
 from ..utils import update_metadata, update_node_helper
@@ -109,38 +109,6 @@ def get_subgraph_by_second_neighbors(graph, nodes, filter_pathologies=False):
 
     expand_all_node_neighborhoods(graph, result, filter_pathologies=filter_pathologies)
     return result
-
-
-@transformation
-def get_subgraph_by_annotations(graph, annotations, or_=None):
-    """Returns the subgraph given an annotations filter.
-
-    :param graph: pybel.BELGraph graph: A BEL graph
-    :param dict[str,set[str]] annotations: Annotation filters (match all with :func:`pybel.utils.subdict_matches`)
-    :param boolean or_: if True any annotation should be present, if False all annotations should be present in the
-                        edge. Defaults to True.
-    :return: A subgraph of the original BEL graph
-    :rtype: pybel.BELGraph
-    """
-    edge_filter_builder = (
-        build_annotation_dict_any_filter
-        if (or_ is None or or_) else build_annotation_dict_all_filter
-    )
-
-    return get_subgraph_by_edge_filter(graph, edge_filter_builder(annotations))
-
-
-@transformation
-def get_subgraph_by_annotation_value(graph, annotation, value):
-    """Builds a new subgraph induced over all edges whose annotations match the given key and value
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param str annotation: The annotation to group by
-    :param str value: The value for the annotation
-    :return: A subgraph of the original BEL graph
-    :rtype: pybel.BELGraph
-    """
-    return get_subgraph_by_annotations(graph, {annotation: {value}})
 
 
 @transformation
