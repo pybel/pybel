@@ -9,6 +9,7 @@ from pybel import BELGraph
 from pybel.constants import ASSOCIATION, DECREASES, FUNCTION, INCREASES, PROTEIN
 from pybel.dsl import gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal
+from pybel.struct.mutation.induction.citation import get_subgraph_by_authors, get_subgraph_by_pubmed
 from pybel.struct.mutation.induction.paths import get_nodes_in_all_shortest_paths, get_subgraph_by_all_shortest_paths
 from pybel.struct.mutation.induction.upstream import get_upstream_causal_subgraph
 from pybel.struct.mutation.induction.utils import get_subgraph_by_induction
@@ -177,3 +178,147 @@ class TestInduction(TestGraphMixin):
         self.assertInEdge(f, b, subgraph)
         self.assertEqual(2, len(subgraph[a.as_tuple()][b.as_tuple()]))
         self.assertEqual(4, subgraph.number_of_edges(), msg='\n'.join(map(str, subgraph.edges())))
+
+
+class TestEdgePredicateBuilders(TestGraphMixin):
+    """Tests for edge predicate builders."""
+
+    def test_build_pmid_inclusion_filter(self):
+        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        p1, p2, p3, p4 = n(), n(), n(), ()
+
+        graph = BELGraph()
+        keyword, url = n(), n()
+        graph.namespace_url[keyword] = url
+        graph.add_increases(a, b, n(), citation=p1)
+        graph.add_increases(a, b, n(), citation=p2)
+        graph.add_increases(b, c, n(), citation=p1)
+        graph.add_increases(b, c, n(), citation=p3)
+        graph.add_increases(c, d, n(), citation=p3)
+
+        subgraph = get_subgraph_by_pubmed(graph, p1)
+
+        self.assertIn(keyword, subgraph.namespace_url)
+        self.assertEqual(url, subgraph.namespace_url[keyword])
+
+        self.assertInGraph(a, subgraph)
+        self.assertInGraph(b, subgraph)
+        self.assertInGraph(c, subgraph)
+        self.assertNotInGraph(d, subgraph)
+
+        empty_subgraph = get_subgraph_by_pubmed(graph, p4)
+        self.assertIn(keyword, subgraph.namespace_url)
+        self.assertEqual(url, subgraph.namespace_url[keyword])
+        self.assertEqual(0, empty_subgraph.number_of_nodes())
+
+    def test_build_pmid_set_inclusion_filter(self):
+        a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
+        p1, p2, p3, p4, p5, p6 = n(), n(), n(), n(), n(), n()
+
+        graph = BELGraph()
+        keyword, url = n(), n()
+        graph.namespace_url[keyword] = url
+        graph.add_increases(a, b, n(), citation=p1)
+        graph.add_increases(a, b, n(), citation=p2)
+        graph.add_increases(b, c, n(), citation=p1)
+        graph.add_increases(b, c, n(), citation=p3)
+        graph.add_increases(c, d, n(), citation=p3)
+        graph.add_increases(e, f, n(), citation=p4)
+
+        subgraph = get_subgraph_by_pubmed(graph, [p1, p4])
+
+        self.assertIn(keyword, subgraph.namespace_url)
+        self.assertEqual(url, subgraph.namespace_url[keyword])
+
+        self.assertInGraph(a, subgraph)
+        self.assertInGraph(b, subgraph)
+        self.assertInGraph(c, subgraph)
+        self.assertNotInGraph(d, subgraph)
+        self.assertInGraph(e, subgraph)
+        self.assertInGraph(f, subgraph)
+
+        empty_subgraph = get_subgraph_by_pubmed(graph, [p5, p6])
+        self.assertIn(keyword, subgraph.namespace_url)
+        self.assertEqual(url, subgraph.namespace_url[keyword])
+        self.assertEqual(0, empty_subgraph.number_of_nodes())
+
+    def test_build_author_inclusion_filter(self):
+        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        a1, a2, a3, a4, a5 = n(), n(), n(), n(), n()
+
+        c1 = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: n(),
+            CITATION_AUTHORS: [a1, a2, a3]
+        }
+        c2 = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: n(),
+            CITATION_AUTHORS: [a1, a4]
+        }
+
+        graph = BELGraph()
+        keyword, url = n(), n()
+        graph.namespace_url[keyword] = url
+        graph.add_increases(a, b, n(), citation=c1)
+        graph.add_increases(a, b, n(), citation=c2)
+        graph.add_increases(b, c, n(), citation=c1)
+        graph.add_increases(c, d, n(), citation=c2)
+
+        subgraph1 = get_subgraph_by_authors(graph, a1)
+
+        self.assertIn(keyword, subgraph1.namespace_url)
+        self.assertEqual(url, subgraph1.namespace_url[keyword])
+
+        self.assertInGraph(a, subgraph1)
+        self.assertInGraph(b, subgraph1)
+        self.assertInGraph(c, subgraph1)
+        self.assertInGraph(d, subgraph1)
+
+        subgraph2 = get_subgraph_by_authors(graph, a2)
+
+        self.assertIn(keyword, subgraph2.namespace_url)
+        self.assertEqual(url, subgraph2.namespace_url[keyword])
+
+        self.assertInGraph(a, subgraph2)
+        self.assertInGraph(b, subgraph2)
+        self.assertInGraph(c, subgraph2)
+        self.assertNotInGraph(d, subgraph2)
+
+        subgraph3 = get_subgraph_by_authors(graph, a5)
+        self.assertIn(keyword, subgraph3.namespace_url)
+        self.assertEqual(url, subgraph3.namespace_url[keyword])
+        self.assertEqual(0, subgraph3.number_of_nodes())
+
+    def test_build_author_set_inclusion_filter(self):
+        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        a1, a2, a3, a4, a5 = n(), n(), n(), n(), n()
+
+        c1 = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: n(),
+            CITATION_AUTHORS: [a1, a2, a3]
+        }
+        c2 = {
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: n(),
+            CITATION_AUTHORS: [a1, a4]
+        }
+
+        graph = BELGraph()
+        keyword, url = n(), n()
+        graph.namespace_url[keyword] = url
+        graph.add_increases(a, b, n(), citation=c1)
+        graph.add_increases(a, b, n(), citation=c2)
+        graph.add_increases(b, c, n(), citation=c1)
+        graph.add_increases(c, d, n(), citation=c2)
+
+        subgraph1 = get_subgraph_by_authors(graph, [a1, a2])
+
+        self.assertIn(keyword, subgraph1.namespace_url)
+        self.assertEqual(url, subgraph1.namespace_url[keyword])
+
+        self.assertInGraph(a, subgraph1)
+        self.assertInGraph(b, subgraph1)
+        self.assertInGraph(c, subgraph1)
+        self.assertInGraph(d, subgraph1)

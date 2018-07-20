@@ -293,26 +293,7 @@ def get_subgraph(graph, seed_method=None, seed_data=None, expand_nodes=None, rem
     return result
 
 
-@transformation
-def get_subgraph_by_pubmed(graph, pubmed_identifiers):
-    """Induces a subgraph over the edges retrieved from the given PubMed identifier(s)
 
-    :param pybel.BELGraph graph: A BEL graph
-    :param str or list[str] pubmed_identifiers: A PubMed identifier or list of PubMed identifiers
-    :rtype: pybel.BELGraph
-    """
-    return get_subgraph_by_edge_filter(graph, build_pmid_inclusion_filter(pubmed_identifiers))
-
-
-@transformation
-def get_subgraph_by_authors(graph, authors):
-    """Induces a subgraph over the edges retrieved publications by the given author(s)
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param str or list[str] authors: An author or list of authors
-    :rtype: pybel.BELGraph
-    """
-    return get_subgraph_by_edge_filter(graph, build_author_inclusion_filter(authors))
 
 
 @transformation
