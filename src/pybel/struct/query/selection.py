@@ -1,75 +1,23 @@
 # -*- coding: utf-8 -*-
 
-import itertools as itt
-
 import logging
-import networkx as nx
 
 from .constants import *
 from .induction import get_multi_causal_downstream, get_multi_causal_upstream
 from .random_subgraph import get_random_subgraph
-from ..filters import filter_nodes, is_causal_relation
-from ..filters.node_predicate_builders import build_node_name_search
 from ..mutation.expansion import expand_all_node_neighborhoods, expand_nodes_neighborhoods
-from ..mutation.induction import get_subgraph_by_edge_filter, get_subgraph_by_induction
+from ..mutation.induction import get_subgraph_by_induction
 from ..mutation.induction.annotations import get_subgraph_by_annotations
 from ..mutation.induction.citation import get_subgraph_by_authors, get_subgraph_by_pubmed
+from ..mutation.induction.neighborhood import get_subgraph_by_neighborhood
 from ..mutation.induction.paths import get_subgraph_by_all_shortest_paths
 from ..pipeline import transformation
-from ..utils import update_metadata, update_node_helper
 
 log = logging.getLogger(__name__)
 
 __all__ = [
     'get_subgraph',
 ]
-
-
-@transformation
-def get_subgraph_by_node_filter(graph, node_filters):
-    """Induces a graph on the nodes that pass all filters
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param node_filters: A node filter or list/tuple of node filters
-    :type node_filters: types.FunctionType or iter[types.FunctionType]
-    :return: A subgraph induced over the nodes passing the given filters
-    :rtype: pybel.BELGraph
-    """
-    return get_subgraph_by_induction(graph, filter_nodes(graph, node_filters))
-
-
-@transformation
-def get_subgraph_by_neighborhood(graph, nodes):
-    """Gets a BEL graph around the neighborhoods of the given nodes. Returns none if no nodes are in the graph
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param iter[tuple] nodes: An iterable of BEL nodes
-    :return: A BEL graph induced around the neighborhoods of the given nodes
-    :rtype: Optional[pybel.BELGraph]
-    """
-    rv = graph.fresh_copy()
-
-    node_set = set(nodes)
-
-    if all(node not in graph for node in node_set):
-        return
-
-    rv.add_edges_from(
-        (
-            (u, v, k, d)
-            if k < 0 else
-            (u, v, d)
-        )
-        for u, v, k, d in itt.chain(
-            graph.in_edges_iter(nodes, keys=True, data=True),
-            graph.out_edges_iter(nodes, keys=True, data=True)
-        )
-    )
-
-    update_node_helper(graph, rv)
-    update_metadata(graph, rv)
-
-    return rv
 
 
 @transformation
@@ -89,7 +37,6 @@ def get_subgraph_by_second_neighbors(graph, nodes, filter_pathologies=False):
 
     expand_all_node_neighborhoods(graph, result, filter_pathologies=filter_pathologies)
     return result
-
 
 
 @transformation
