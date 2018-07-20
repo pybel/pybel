@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for PyBEL induction functions."""
+
 import string
 import unittest
 
 from pybel import BELGraph
 from pybel.constants import ASSOCIATION, DECREASES, FUNCTION, INCREASES, PROTEIN
 from pybel.dsl import gene, protein, rna
-from pybel.struct.mutation import expand_upstream_causal, get_upstream_causal_subgraph
+from pybel.struct.mutation.expansion import expand_upstream_causal
+from pybel.struct.mutation.induction.upstream import get_upstream_causal_subgraph
+from pybel.struct.mutation.induction.utils import get_subgraph_by_induction
 from pybel.testing.utils import n
 
 trem2_gene = gene(namespace='HGNC', name='TREM2')
@@ -14,7 +18,9 @@ trem2_rna = rna(namespace='HGNC', name='TREM2')
 trem2_protein = protein(namespace='HGNC', name='TREM2')
 
 
-class TestInduction(unittest.TestCase):
+class TestGraphMixin(unittest.TestCase):
+    """A mixin to enable testing nodes and edge membership in the graph."""
+
     def assertInGraph(self, node, graph):
         """Assert the node is in the graph.
 
@@ -34,16 +40,43 @@ class TestInduction(unittest.TestCase):
         self.assertFalse(graph.has_node_with_data(node))
 
     def assertInEdge(self, source, target, graph):
-        """
+        """Assert the edge is in the graph.
 
         :param source:
         :param target:
-        :param graph:
-        :return:
+        :type graph: pybel.BELGraph
+        :rtype: bool
         """
         self.assertIn(target.as_tuple(), graph[source.as_tuple()])
 
+
+class TestInduction(TestGraphMixin):
+    """Test induction functions."""
+
+    def test_get_subgraph_by_induction(self):
+        """Test get_subgraph_by_induction."""
+        graph = BELGraph()
+        keyword, url = n(), n()
+        graph.namespace_url[keyword] = url
+        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        graph.add_directly_increases(a, b, n(), n())
+        graph.add_directly_increases(b, c, n(), n())
+        graph.add_directly_increases(c, d, n(), n())
+        graph.add_increases(a, d, n(), n())
+
+        nodes = [b.as_tuple(), c.as_tuple()]
+        subgraph = get_subgraph_by_induction(graph, nodes)
+
+        self.assertIn(keyword, graph.namespace_url)
+        self.assertEqual(url, graph.namespace_url[keyword])
+
+        self.assertNotInGraph(a, subgraph)
+        self.assertInGraph(b, subgraph)
+        self.assertInGraph(c, subgraph)
+        self.assertNotInGraph(d, subgraph)
+
     def test_get_upstream_causal_subgraph(self):
+        """Test get_upstream_causal_subgraph."""
         a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
         citation, evidence = '', ''
 

@@ -5,6 +5,7 @@ from ...pipeline import transformation
 
 __all__ = [
     'get_subgraph_by_edge_filter',
+    'get_subgraph_by_induction',
 ]
 
 
@@ -21,3 +22,17 @@ def get_subgraph_by_edge_filter(graph, edge_predicates=None):
     rv = graph.fresh_copy()
     expand_by_edge_filter(graph, rv, edge_predicates=edge_predicates)
     return rv
+
+
+@transformation
+def get_subgraph_by_induction(graph, nodes):
+    """Induce a sub-graph over the given nodes or return None if none of the nodes are in the given graph.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param iter[tuple] nodes: A list of BEL nodes in the graph
+    :rtype: Optional[pybel.BELGraph]
+    """
+    if all(node not in graph for node in nodes):
+        return
+
+    return graph.subgraph(nodes)
