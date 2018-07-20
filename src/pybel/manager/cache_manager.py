@@ -614,7 +614,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
                 Network.id.label('network_id')
             )
             .group_by(Network.name)
-            .having(func.max(Network.created))
+            .having(Network.created == func.max(Network.created))
             .subquery('most_recent_ids')
         )
 
