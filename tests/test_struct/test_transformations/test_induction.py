@@ -69,8 +69,8 @@ class TestInduction(TestGraphMixin):
         nodes = [b.as_tuple(), c.as_tuple()]
         subgraph = get_subgraph_by_induction(graph, nodes)
 
-        self.assertIn(keyword, graph.namespace_url)
-        self.assertEqual(url, graph.namespace_url[keyword])
+        self.assertIn(keyword, subgraph.namespace_url)
+        self.assertEqual(url, subgraph.namespace_url[keyword])
 
         self.assertNotInGraph(a, subgraph)
         self.assertInGraph(b, subgraph)
@@ -100,8 +100,8 @@ class TestInduction(TestGraphMixin):
 
         subgraph = get_subgraph_by_all_shortest_paths(graph, query_nodes)
 
-        self.assertIn(keyword, graph.namespace_url)
-        self.assertEqual(url, graph.namespace_url[keyword])
+        self.assertIn(keyword, subgraph.namespace_url)
+        self.assertEqual(url, subgraph.namespace_url[keyword])
 
         self.assertInGraph(a, subgraph)
         self.assertInGraph(b, subgraph)
