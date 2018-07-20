@@ -10,7 +10,16 @@ from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel, node_to_bel
-from ..constants import *
+from ..constants import (
+    ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
+    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, FUNCTION, GRAPH_ANNOTATION_LIST,
+    GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
+    GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES, HASH, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT,
+    HAS_VARIANT, IDENTIFIER, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
+    METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
+    OBJECT, ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
+    unqualified_edge_code,
+)
 from ..dsl import activity
 from ..tokens import node_to_tuple
 from ..utils import get_version, hash_edge
@@ -435,7 +444,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
         :type v: tuple or dict
         """
-        return self.add_unqualified_edge(u,v, PART_OF)
+        return self.add_unqualified_edge(u, v, PART_OF)
 
     def add_has_member(self, u, v):
         """Add an hasMember relationship such that u hasMember v.
@@ -445,7 +454,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
         :type v: tuple or dict
         """
-        return self.add_unqualified_edge(u,v, HAS_MEMBER)
+        return self.add_unqualified_edge(u, v, HAS_MEMBER)
 
     def add_increases(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
                       **attr):
@@ -470,6 +479,29 @@ class BELGraph(networkx.MultiDiGraph):
                                        annotations=annotations, subject_modifier=subject_modifier,
                                        object_modifier=object_modifier, **attr)
 
+    def add_directly_increases(self, u, v, evidence, citation, annotations=None, subject_modifier=None,
+                               object_modifier=None, **attr):
+        """Wraps :meth:`add_qualified_edge` for :data:`pybel.constants.DIRECTLY_INCREASES`.
+
+        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param str evidence: The evidence string from an article
+        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
+                                                assumes it's a PubMed identifier and auto-fills the citation type.
+        :param annotations: The annotations data dictionary
+        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
+        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
+         documentation.
+        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
+         documentation.
+
+        :return: The hash of the edge
+        :rtype: str
+        """
+        return self.add_qualified_edge(u=u, v=v, relation=DIRECTLY_INCREASES, evidence=evidence, citation=citation,
+                                       annotations=annotations, subject_modifier=subject_modifier,
+                                       object_modifier=object_modifier, **attr)
+
     def add_decreases(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
                       **attr):
         """Wraps :meth:`add_qualified_edge` for :data:`pybel.constants.DECREASES`.
@@ -490,6 +522,29 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: str
         """
         return self.add_qualified_edge(u=u, v=v, relation=DECREASES, evidence=evidence, citation=citation,
+                                       annotations=annotations, subject_modifier=subject_modifier,
+                                       object_modifier=object_modifier, **attr)
+
+    def add_directly_decreases(self, u, v, evidence, citation, annotations=None, subject_modifier=None,
+                               object_modifier=None, **attr):
+        """Wraps :meth:`add_qualified_edge` for :data:`pybel.constants.DIRECTLY_DECREASES`.
+
+        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param str evidence: The evidence string from an article
+        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
+                                                assumes it's a PubMed identifier and auto-fills the citation type.
+        :param annotations: The annotations data dictionary
+        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
+        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
+         documentation.
+        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
+         documentation.
+
+        :return: The hash of the edge
+        :rtype: str
+        """
+        return self.add_qualified_edge(u=u, v=v, relation=DIRECTLY_DECREASES, evidence=evidence, citation=citation,
                                        annotations=annotations, subject_modifier=subject_modifier,
                                        object_modifier=object_modifier, **attr)
 
