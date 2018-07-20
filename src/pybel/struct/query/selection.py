@@ -10,14 +10,9 @@ from .random_subgraph import get_random_subgraph
 from ..filters import (
     build_annotation_dict_all_filter, build_annotation_dict_any_filter, filter_nodes, is_causal_relation,
 )
-from ..filters.edge_predicate_builders import (
-    build_author_inclusion_filter, build_pmid_inclusion_filter,
-)
 from ..filters.node_predicate_builders import build_node_name_search
 from ..mutation import (
-    expand_all_node_neighborhoods, expand_downstream_causal, expand_nodes_neighborhoods, expand_upstream_causal,
-    get_downstream_causal_subgraph, get_subgraph_by_edge_filter, get_subgraph_by_induction,
-    get_upstream_causal_subgraph,
+    expand_all_node_neighborhoods, expand_nodes_neighborhoods, get_subgraph_by_edge_filter, get_subgraph_by_induction,
 )
 from ..mutation.induction.paths import get_subgraph_by_all_shortest_paths
 from ..pipeline import transformation
@@ -160,34 +155,6 @@ def get_causal_subgraph(graph):
 
 
 @transformation
-def get_multi_causal_upstream(graph, nbunch):
-    """Gets the union of all the 2-level deep causal upstream subgraphs from the nbunch
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param tuple or list[tuple] nbunch: A BEL node or list of BEL nodes
-    :return: A subgraph of the original BEL graph
-    :rtype: pybel.BELGraph
-    """
-    result = get_upstream_causal_subgraph(graph, nbunch)
-    expand_upstream_causal(graph, result)
-    return result
-
-
-@transformation
-def get_multi_causal_downstream(graph, nbunch):
-    """Gets the union of all of the 2-level deep causal downstream subgraphs from the nbunch
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param tuple or list[tuple] nbunch: A BEL node or list of BEL nodes
-    :return: A subgraph of the original BEL graph
-    :rtype: pybel.BELGraph
-    """
-    result = get_downstream_causal_subgraph(graph, nbunch)
-    expand_downstream_causal(graph, result)
-    return result
-
-
-@transformation
 def get_subgraph_by_node_search(graph, query):
     """Gets a subgraph induced over all nodes matching the query string
 
@@ -291,9 +258,6 @@ def get_subgraph(graph, seed_method=None, seed_data=None, expand_nodes=None, rem
     )
 
     return result
-
-
-
 
 
 @transformation
