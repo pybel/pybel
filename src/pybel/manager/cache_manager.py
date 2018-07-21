@@ -637,11 +637,11 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
-    def iterate_singleton_edges_from_network(self, network):
-        """Gets all edges that only belong to the given network
+    def query_singleton_edges_from_network(self, network):
+        """Returns a query that gets all edges that only belong to the given network
 
         :type network: Network
-        :rtype: iter[Edge]
+        :rtype: sqlalchemy.orm.query.Query
         """
         ne1 = aliased(network_edge, name='ne1')
         ne2 = aliased(network_edge, name='ne2')
@@ -661,16 +661,14 @@ class NetworkManager(NamespaceManager, AnnotationManager):
             self.session.query(Edge)
             .filter(Edge.id.in_(singleton_edge_ids_for_network))
         )
-        return iter(singleton_edges_for_network)
+        return singleton_edges_for_network
 
     def drop_network(self, network):
         """Drops a network, while also cleaning up any edges that are no longer part of any network.
 
         :type network: Network
         """
-        for edge in self.iterate_singleton_edges_from_network(network):
-            self.session.delete(edge)
-
+        self.query_singleton_edges_from_network(network).delete(synchronize_session=False)
         self.session.delete(network)
         self.session.commit()
 
