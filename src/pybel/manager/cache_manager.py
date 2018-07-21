@@ -609,19 +609,23 @@ class NetworkManager(NamespaceManager, AnnotationManager):
 
         :rtype: list[Network]
         """
-        most_recent_ids = (
+        most_recent_times = (
             self.session.query(
-                Network.id.label('network_id')
+                Network.name.label('network_name'),
+                func.max(Network.created).label('max_created')
             )
             .group_by(Network.name)
-            .having(Network.created == func.max(Network.created))
-            .subquery('most_recent_ids')
+            .subquery('most_recent_times')
         )
 
         most_recent_networks = (
             self.session.query(Network)
-            .filter(Network.id.in_(most_recent_ids))
+            .join(most_recent_times, and_(
+                most_recent_times.c.network_name == Network.name,
+                most_recent_times.c.max_created == Network.created
+            ))
         )
+
         return most_recent_networks.all()
 
     def has_name_version(self, name, version):
