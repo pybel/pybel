@@ -113,6 +113,13 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(1, self.manager.count_networks())
         self.assertEqual(3, self.g1.edges.count())
 
+    def test_drop_all_networks(self):
+        """When all networks are dropped, make sure all the edges and network_edge mappings are gone too"""
+        self.manager.drop_networks()
+
+        self.assertEqual(0, self.manager.count_edges())
+        self.assertEqual(0, self.manager.count_networks())
+
     def test_drop_modification(self):
         """Don't let this happen"""
 
