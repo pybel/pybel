@@ -110,6 +110,14 @@ def build_annotation_dict_any_filter(annotations):
 
 def build_upstream_edge_predicate(nodes):
     def upstream_filter(graph, u, v, k):
+        """Pass for relations for which one of the given nodes is the object.
+
+        :type graph: pybel.BELGraph
+        :type u: tuple
+        :type v: tuple
+        :type k: int
+        :rtype: bool
+        """
         return v in nodes and graph[u][v][k][RELATION] in CAUSAL_RELATIONS
 
     return upstream_filter
@@ -117,6 +125,14 @@ def build_upstream_edge_predicate(nodes):
 
 def build_downstream_edge_predicate(nodes):
     def downstream_filter(graph, u, v, k):
+        """Pass for relations for which one of the given nodes is the subject.
+
+        :type graph: pybel.BELGraph
+        :type u: tuple
+        :type v: tuple
+        :type k: int
+        :rtype: bool
+        """
         return u in nodes and graph[u][v][k][RELATION] in CAUSAL_RELATIONS
 
     return downstream_filter
@@ -129,17 +145,18 @@ def build_relation_predicate(relation):
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
-    @edge_predicate
-    def is_relation(data):
-        """Only passes on associative edges
+    def relation_predicate(graph, u, v, k):
+        """Pass for relations matching the enclosed value.
 
-        :param dict data: The PyBEL edge data dictionary
-        :return: If the edge is a causal edge
+        :type graph: pybel.BELGraph
+        :type u: tuple
+        :type v: tuple
+        :type k: int
         :rtype: bool
         """
-        return data[RELATION] == relation
+        return relation == graph[u][v][k][RELATION]
 
-    return is_relation
+    return relation_predicate
 
 
 def build_pmid_inclusion_filter(pmid):
