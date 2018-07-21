@@ -19,6 +19,7 @@ from copy import deepcopy
 from operator import attrgetter
 from six import string_types
 from sqlalchemy import and_, exists, func
+from sqlalchemy.orm import aliased
 from tqdm import tqdm
 
 from .base_manager import BaseManager, build_engine_session
@@ -26,7 +27,7 @@ from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
     Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
-    Node, Property,
+    Node, Property, network_edge
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
@@ -624,18 +625,31 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
-    @staticmethod
-    def iterate_singleton_edges_from_network(network):
+    def iterate_singleton_edges_from_network(self, network):
         """Gets all edges that only belong to the given network
 
         :type network: Network
         :rtype: iter[Edge]
         """
-        return (  # TODO implement with nested SQLAlchemy query for better speed
-            edge
-            for edge in network.edges
-            if edge.networks.count() == 1
+        ne1 = aliased(network_edge, name='ne1')
+        ne2 = aliased(network_edge, name='ne2')
+        singleton_edge_ids_for_network = (
+            self.session.query(ne1.c.edge_id)
+            .outerjoin(ne2, and_(
+                ne1.c.edge_id == ne2.c.edge_id,
+                ne1.c.network_id != ne2.c.network_id
+            ))
+            .filter(and_(
+                ne1.c.network_id == network.id,
+                ne2.c.edge_id == None
+            ))
+            .subquery('singleton_edge_ids_for_network')
         )
+        singleton_edges_for_network = (
+            self.session.query(Edge)
+            .filter(Edge.id.in_(singleton_edge_ids_for_network))
+        )
+        return iter(singleton_edges_for_network)
 
     def drop_network(self, network):
         """Drops a network, while also cleaning up any edges that are no longer part of any network.
