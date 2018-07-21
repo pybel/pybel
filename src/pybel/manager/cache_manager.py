@@ -604,17 +604,29 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).all()
 
-    # FIXME there must be a better way to do this on the server without getting problems with logical inconsistencies
     def list_recent_networks(self):
         """Lists the most recently created version of each network (by name)
 
         :rtype: list[Network]
         """
-        networks = self.session.query(Network).order_by(Network.name, Network.created.desc())
-        return [
-            next(networks_with_that_name)  # just get the first once, since it will be the latest
-            for name, networks_with_that_name in groupby(networks, attrgetter('name'))
-        ]
+        most_recent_times = (
+            self.session.query(
+                Network.name.label('network_name'),
+                func.max(Network.created).label('max_created')
+            )
+            .group_by(Network.name)
+            .subquery('most_recent_times')
+        )
+
+        most_recent_networks = (
+            self.session.query(Network)
+            .join(most_recent_times, and_(
+                most_recent_times.c.network_name == Network.name,
+                most_recent_times.c.max_created == Network.created
+            ))
+        )
+
+        return most_recent_networks.all()
 
     def has_name_version(self, name, version):
         """Checks if the name/version combination is already in the database
