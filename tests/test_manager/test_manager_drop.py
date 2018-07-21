@@ -90,7 +90,7 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(0, self.g2.edges.count())
 
     def test_get_orphan_edges(self):
-        edges = list(self.manager.query_singleton_edges_from_network(self.g1))
+        edges = list(self.manager.iterate_singleton_edges_from_network(self.g1))
         self.assertEqual(2, len(edges))
         self.assertIn(self.e2, edges)
         self.assertIn(self.e3, edges)
