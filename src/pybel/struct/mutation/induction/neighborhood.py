@@ -7,6 +7,10 @@ import itertools as itt
 from ...pipeline import transformation
 from ...utils import update_metadata, update_node_helper
 
+__all__ = [
+    'get_subgraph_by_neighborhood',
+]
+
 
 @transformation
 def get_subgraph_by_neighborhood(graph, nodes):

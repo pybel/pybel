@@ -8,6 +8,11 @@ from ...filters.edge_predicate_builders import build_author_inclusion_filter, bu
 from ...mutation import get_subgraph_by_edge_filter
 from ...pipeline import transformation
 
+__all__ = [
+    'get_subgraph_by_pubmed',
+    'get_subgraph_by_authors',
+]
+
 log = logging.getLogger(__name__)
 
 

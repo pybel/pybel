@@ -3,15 +3,12 @@
 import logging
 
 from .constants import *
-from .induction import get_multi_causal_downstream, get_multi_causal_upstream
 from .random_subgraph import get_random_subgraph
-from ..mutation.expansion import expand_all_node_neighborhoods, expand_nodes_neighborhoods
-from ..mutation.induction import get_subgraph_by_induction
-from ..mutation.induction.annotations import get_subgraph_by_annotations
-from ..mutation.induction.citation import get_subgraph_by_authors, get_subgraph_by_pubmed
-from ..mutation.induction.neighborhood import get_subgraph_by_neighborhood
-from ..mutation.induction.paths import get_subgraph_by_all_shortest_paths
-from ..pipeline import transformation
+from ..mutation import (
+    expand_nodes_neighborhoods, get_multi_causal_downstream, get_multi_causal_upstream,
+    get_subgraph_by_all_shortest_paths, get_subgraph_by_annotations, get_subgraph_by_authors, get_subgraph_by_induction,
+    get_subgraph_by_neighborhood, get_subgraph_by_pubmed, get_subgraph_by_second_neighbors,
+)
 
 log = logging.getLogger(__name__)
 
@@ -20,28 +17,8 @@ __all__ = [
 ]
 
 
-@transformation
-def get_subgraph_by_second_neighbors(graph, nodes, filter_pathologies=False):
-    """Gets a BEL graph around the neighborhoods of the given nodes, and expands to the neighborhood of those nodes
-
-    :param pybel.BELGraph graph: A BEL graph
-    :param iter[tuple] nodes: An iterable of BEL nodes
-    :param bool filter_pathologies: Should expansion take place around pathologies?
-    :return: A BEL graph induced around the neighborhoods of the given nodes
-    :rtype: Optional[pybel.BELGraph]
-    """
-    result = get_subgraph_by_neighborhood(graph, nodes)
-
-    if result is None:
-        return
-
-    expand_all_node_neighborhoods(graph, result, filter_pathologies=filter_pathologies)
-    return result
-
-
-@transformation
 def get_subgraph(graph, seed_method=None, seed_data=None, expand_nodes=None, remove_nodes=None):
-    """Runs pipeline query on graph with multiple subgraph filters and expanders.
+    """Run a pipeline query on graph with multiple subgraph filters and expanders.
 
     Order of Operations:
 
