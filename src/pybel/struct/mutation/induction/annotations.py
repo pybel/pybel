@@ -2,8 +2,8 @@
 
 import logging
 
+from .utils import get_subgraph_by_edge_filter
 from ...filters import build_annotation_dict_all_filter, build_annotation_dict_any_filter
-from ...mutation.induction import get_subgraph_by_edge_filter
 from ...pipeline import transformation
 
 log = logging.getLogger(__name__)

@@ -4,8 +4,8 @@
 
 import logging
 
+from .utils import get_subgraph_by_edge_filter
 from ...filters.edge_predicate_builders import build_author_inclusion_filter, build_pmid_inclusion_filter
-from ...mutation import get_subgraph_by_edge_filter
 from ...pipeline import transformation
 
 __all__ = [

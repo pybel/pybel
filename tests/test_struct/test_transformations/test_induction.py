@@ -6,7 +6,10 @@ import string
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import ASSOCIATION, DECREASES, FUNCTION, INCREASES, PROTEIN
+from pybel.constants import (
+    ASSOCIATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
+    DECREASES, FUNCTION, INCREASES, PROTEIN,
+)
 from pybel.dsl import gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal
 from pybel.struct.mutation.induction.citation import get_subgraph_by_authors, get_subgraph_by_pubmed
@@ -185,7 +188,7 @@ class TestEdgePredicateBuilders(TestGraphMixin):
 
     def test_build_pmid_inclusion_filter(self):
         a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
-        p1, p2, p3, p4 = n(), n(), n(), ()
+        p1, p2, p3, p4 = n(), n(), n(), n()
 
         graph = BELGraph()
         keyword, url = n(), n()
