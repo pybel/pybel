@@ -423,15 +423,15 @@ class TestEdgePredicate(unittest.TestCase):
         self.assertFalse(is_associative_relation({RELATION: DIRECTLY_DECREASES}))
 
     def test_build_is_association(self):
+        """Test build_relation_predicate."""
         alternate_is_associative_relation = build_relation_predicate(ASSOCIATION)
 
-        self.assertTrue(alternate_is_associative_relation({RELATION: ASSOCIATION}))
+        g = BELGraph()
+        g.add_edge(p1.as_tuple(), p2.as_tuple(), key=0, **{RELATION: ASSOCIATION})
+        g.add_edge(p2.as_tuple(), p3.as_tuple(), key=0, **{RELATION: INCREASES})
 
-        self.assertFalse(alternate_is_associative_relation({RELATION: INCREASES}))
-        self.assertFalse(alternate_is_associative_relation({RELATION: CAUSES_NO_CHANGE}))
-        self.assertFalse(alternate_is_associative_relation({RELATION: DECREASES}))
-        self.assertFalse(alternate_is_associative_relation({RELATION: DIRECTLY_INCREASES}))
-        self.assertFalse(alternate_is_associative_relation({RELATION: DIRECTLY_DECREASES}))
+        self.assertTrue(alternate_is_associative_relation(g, p1.as_tuple(), p2.as_tuple(), 0))
+        self.assertFalse(alternate_is_associative_relation(g, p2.as_tuple(), p3.as_tuple(), 0))
 
     def test_has_degradation(self):
         self.assertTrue(edge_has_degradation({SUBJECT: {MODIFIER: DEGRADATION}}))

@@ -46,30 +46,26 @@ class BaseEntity(dict):
 
     @abc.abstractmethod
     def as_tuple(self):
-        """Returns this entity as a canonical tuple
+        """Return this entity as a PyBEL tuple.
 
         :rtype: tuple
         """
 
     @abc.abstractmethod
     def as_bel(self):
-        """Returns this entity as canonical BEL
+        """Return this entity as a BEL string.
 
         :rtype: tuple
         """
 
     def as_sha512(self):
-        """Returns this entity as a hash
+        """Return this entity as a SHA512 hash encoded in UTF-8.
 
         :rtype: str
         """
         return hash_node(self.as_tuple())
 
     def __hash__(self):
-        """Use the tuple serialization of this node as the hash
-
-        :rtype: int
-        """
         return hash(self.as_tuple())
 
     def __str__(self):
@@ -77,14 +73,14 @@ class BaseEntity(dict):
 
 
 class BaseAbundance(BaseEntity):
-    """The superclass for building node data dictionaries"""
+    """The superclass for building node data dictionaries."""
 
     def __init__(self, func, namespace, name=None, identifier=None):
-        """
+        """Build an abundance from a function, namespace and a name and/or identifier.
         :param str func: The PyBEL function
         :param str namespace: The name of the namespace
-        :param Optional[str] name:
-        :param Optional[str] identifier:
+        :param Optional[str] name: The name of this abundance
+        :param Optional[str] identifier: The database identifier for this abundance
         """
         if name is None and identifier is None:
             raise PyBELDSLException('Either name or identifier must be specified')
@@ -94,29 +90,45 @@ class BaseAbundance(BaseEntity):
 
     @property
     def function(self):
+        """The function of this abundance.
+
+        :rtype: str
+        """
         return self[FUNCTION]
 
     @property
     def name(self):
+        """The name of this abundance.
+
+        :rtype: Optional[str]
+        """
         return self.get(NAME)
 
     @property
     def namespace(self):
+        """The namespace of this abundance.
+
+        :rtype: str
+        """
         return self.get(NAMESPACE)
 
     @property
     def identifier(self):
+        """The identifier of this abundance.
+
+        :rtype: Optional[str]
+        """
         return self.get(IDENTIFIER)
 
     def as_tuple(self):
-        """Returns this node as a PyBEL node tuple
+        """Return this node as a PyBEL node tuple.
 
         :rtype: tuple
         """
         return self[FUNCTION], self[NAMESPACE], self[NAME]
 
     def as_bel(self):
-        """Returns this node as BEL
+        """Return this node as a BEL string.
 
         :rtype: str
         """
@@ -128,13 +140,14 @@ class BaseAbundance(BaseEntity):
 
 
 class abundance(BaseAbundance):
-    """Builds an abundance node data dictionary"""
+    """Builds an abundance node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None):
-        """
+        """Build a general abundance entitiy.
+
         :param str namespace: The name of the database used to identify this entity
-        :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
+        :param Optional[str] name: The database's preferred name or label for this entity
+        :param Optional[str] identifier: The database's identifier for this entity
 
         Example:
 
