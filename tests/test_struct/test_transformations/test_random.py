@@ -54,6 +54,7 @@ class TestRandom(unittest.TestCase):
         self.assertAlmostEqual(1 / 8, r[5] / n, places=2)
 
     def test_random_sample(self):
+        """Test randomly sampling a graph."""
         n_nodes, n_edges = 50, 500
         graph = generate_random_graph(n_nodes=n_nodes, n_edges=n_edges)
 
@@ -63,6 +64,7 @@ class TestRandom(unittest.TestCase):
         self.assertEqual(250, sg.number_of_edges())
 
     def test_random_sample_small(self):
+        """Test a graph that is too small to sample."""
         n_nodes, n_edges = 11, 25
         graph = generate_random_graph(n_nodes, n_edges)
 
