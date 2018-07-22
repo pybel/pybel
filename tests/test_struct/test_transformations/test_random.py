@@ -8,7 +8,10 @@ from collections import Counter
 
 import networkx as nx
 
-from pybel.struct.mutation.induction.random_subgraph import get_graph_with_random_edges, get_random_node
+from pybel.struct.mutation.induction.random_subgraph import (
+    get_graph_with_random_edges, get_random_node,
+    get_random_subgraph,
+)
 from pybel.testing.generate import generate_random_graph
 
 
@@ -49,3 +52,23 @@ class TestRandom(unittest.TestCase):
         self.assertAlmostEqual(1 / 8, r[3] / n, places=2)
         self.assertAlmostEqual(1 / 8, r[4] / n, places=2)
         self.assertAlmostEqual(1 / 8, r[5] / n, places=2)
+
+    def test_random_sample(self):
+        n_nodes, n_edges = 50, 500
+        graph = generate_random_graph(n_nodes=n_nodes, n_edges=n_edges)
+
+        self.assertEqual(n_edges, graph.number_of_edges())
+
+        sg = get_random_subgraph(graph, number_edges=250, number_seed_edges=5)
+        self.assertEqual(250, sg.number_of_edges())
+
+    def test_random_sample_small(self):
+        n_nodes, n_edges = 11, 25
+        graph = generate_random_graph(n_nodes, n_edges)
+
+        self.assertEqual(n_edges, graph.number_of_edges())
+
+        sg = get_random_subgraph(graph, number_edges=250, number_seed_edges=5)
+
+        self.assertEqual(graph.number_of_edges(), sg.number_of_edges(),
+                         msg='since graph is too small, the subgraph should contain the whole thing')
