@@ -2,7 +2,7 @@
 
 """Functions for inducing random sub-graphs."""
 
-import random
+from random import choice, shuffle
 
 __all__ = [
     'get_graph_with_random_edges',
@@ -17,11 +17,11 @@ def _random_edge_iterator(graph, n_edges):
     :rtype: iter[tuple[tuple,tuple,int,dict]]
     """
     universe_edges = graph.edges()
-    random.shuffle(universe_edges)
+    shuffle(universe_edges)
 
     for u, v in universe_edges[:n_edges]:
         keys = list(graph[u][v])
-        k = random.choice(keys)
+        k = choice(keys)
         yield u, v, k, graph[u][v][k]
 
 

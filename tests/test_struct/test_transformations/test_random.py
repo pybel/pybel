@@ -5,7 +5,7 @@
 import random
 import unittest
 
-from pybel.struct.mutation.induction.random import get_graph_with_random_edges
+from pybel.struct.mutation.induction.random_subgraph import get_graph_with_random_edges
 from pybel.testing.generate import generate_random_graph
 
 

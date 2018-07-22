@@ -3,7 +3,7 @@
 """Utilities for PyBEL testing."""
 
 import itertools as itt
-import random
+from random import shuffle
 
 from .utils import n
 from ..dsl import protein
@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-def generate_random_graph(n_nodes, n_edges, seed=None):
+def generate_random_graph(n_nodes, n_edges):
     """Generate a sub-graph with random nodes and edges.
 
     :param int n_nodes: Number of nodes to make
@@ -29,7 +29,7 @@ def generate_random_graph(n_nodes, n_edges, seed=None):
     ]
 
     edges = list(itt.combinations(nodes, r=2))
-    random.shuffle(edges)
+    shuffle(edges)
 
     for u, v in edges[:n_edges]:
         graph.add_increases(u, v, citation=n(), evidence=n())
