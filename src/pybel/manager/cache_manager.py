@@ -664,6 +664,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         :type network: Network
         """
         # get the IDs of the edges that will be orphaned by deleting this network
+        # FIXME: this list could be a problem if it becomes very large; possible optimization is a temporary table in DB
         edge_ids = [result.edge_id for result in self.query_singleton_edges_from_network(network)]
 
         # delete the network-to-node mappings for this network
