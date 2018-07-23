@@ -27,7 +27,7 @@ from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
     Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
-    Node, Property,
+    Node, Property, network_edge, network_node, edge_property, edge_annotation
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
@@ -637,28 +637,55 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
-    @staticmethod
-    def iterate_singleton_edges_from_network(network):
-        """Gets all edges that only belong to the given network
+    def query_singleton_edges_from_network(self, network):
+        """Returns a query selecting all edge ids that only belong to the given network
 
         :type network: Network
-        :rtype: iter[Edge]
+        :rtype: sqlalchemy.orm.query.Query
         """
-        return (  # TODO implement with nested SQLAlchemy query for better speed
-            edge
-            for edge in network.edges
-            if edge.networks.count() == 1
+        ne1 = aliased(network_edge, name='ne1')
+        ne2 = aliased(network_edge, name='ne2')
+        singleton_edge_ids_for_network = (
+            self.session.query(ne1.c.edge_id)
+            .outerjoin(ne2, and_(
+                ne1.c.edge_id == ne2.c.edge_id,
+                ne1.c.network_id != ne2.c.network_id
+            ))
+            .filter(and_(
+                ne1.c.network_id == network.id,
+                ne2.c.edge_id == None
+            ))
         )
+        return singleton_edge_ids_for_network
 
     def drop_network(self, network):
         """Drops a network, while also cleaning up any edges that are no longer part of any network.
 
         :type network: Network
         """
-        for edge in self.iterate_singleton_edges_from_network(network):
-            self.session.delete(edge)
+        # get the IDs of the edges that will be orphaned by deleting this network
+        # FIXME: this list could be a problem if it becomes very large; possible optimization is a temporary table in DB
+        edge_ids = [result.edge_id for result in self.query_singleton_edges_from_network(network)]
 
-        self.session.delete(network)
+        # delete the network-to-node mappings for this network
+        self.session.query(network_node).filter(network_node.c.network_id == network.id).delete(synchronize_session=False)
+
+        # delete the edge-to-property mappings for the to-be-orphaned edges
+        self.session.query(edge_property).filter(edge_property.c.edge_id.in_(edge_ids)).delete(synchronize_session=False)
+
+        # delete the edge-to-annotation mappings for the to-be-orphaned edges
+        self.session.query(edge_annotation).filter(edge_annotation.c.edge_id.in_(edge_ids)).delete(synchronize_session=False)
+
+        # delete the edge-to-network mappings for this network
+        self.session.query(network_edge).filter(network_edge.c.network_id == network.id).delete(synchronize_session=False)
+
+        # delete the now-orphaned edges
+        self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete(synchronize_session=False)
+
+        # delete the network
+        self.session.query(Network).filter(Network.id == network.id).delete(synchronize_session=False)
+
+        # commit it!
         self.session.commit()
 
     def drop_network_by_id(self, network_id):
@@ -672,8 +699,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
     def drop_networks(self):
         """Drops all networks"""
         for network in self.session.query(Network).all():
-            self.session.delete(network)
-            self.session.commit()
+            self.drop_network(network)
 
     def get_network_versions(self, name):
         """Returns all of the versions of a network with the given name
