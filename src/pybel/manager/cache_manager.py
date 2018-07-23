@@ -1018,6 +1018,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                         edge_hash = edge_tuple_to_hash[u, v, k]
                         bel = edge_tuple_to_bel[u, v, k]
                         edge = self._add_qualified_edge(graph, source, target, bel, edge_hash, data)
+                        if edge is None:
+                            continue
                         self.session.add(edge)
                         edge_hash_to_model[edge_hash] = edge
                     except Exception as e:
@@ -1532,8 +1534,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         return edge_property
 
-    def _get_or_create_properties(self, graph,
-                                  edge_data):  # TODO make for just single property then loop with other fn.
+    def _get_or_create_properties(self, graph, edge_data):  # TODO make for just single property and loop with other fn
         """Creates a list of all subject and object related properties of the edge. Returns None if the property cannot
         be constructed due to missing cache entries.
 
@@ -1618,9 +1619,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     effect = participant_data.get(EFFECT)
                     if effect is not None:
                         namespace_url = _normalize_url(graph, effect[NAMESPACE])
-
                         if namespace_url in graph.uncached_namespaces:
-                            log.warning('uncached namespace %s in fusion()', namespace_url)
+                            log.warning('uncached namespace %s', namespace_url)
                             return
 
                         modifier_property_dict['effect'] = self.get_namespace_entry(namespace_url, effect[NAME])
