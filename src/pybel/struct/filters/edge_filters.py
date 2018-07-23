@@ -85,7 +85,7 @@ def filter_edges(graph, edge_predicates=None):
 
     :param BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
-    :type edge_predicates: None or (pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]
+    :type edge_predicates: None or ((pybel.BELGraph, tuple, tuple, int) -> bool) or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]
     :return: An iterable of edges that pass all predicates
     :rtype: iter[tuple,tuple,int]
     """
