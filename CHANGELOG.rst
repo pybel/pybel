@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.11.10 <https://github.com/pybel/pybel/compare/v0.11.9...0.11.10>`_ - 2018-07-23
+----------------------------------------------------------------------------------
+Added
+~~~~~
+- Several subgraph functions (https://github.com/pybel/pybel/pull/315)
+
+Changed
+~~~~~~~
+- Better SQL implementation of get_recent_networks (https://github.com/pybel/pybel/pull/312)
+
 `0.11.9 <https://github.com/pybel/pybel/compare/v0.11.8...0.11.9>`_ - 2018-07-??
 --------------------------------------------------------------------------------
 Removed

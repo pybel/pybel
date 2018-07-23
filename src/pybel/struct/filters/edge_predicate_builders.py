@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import Iterable
+
 from six import string_types
 
 from .edge_predicates import edge_predicate, has_authors, has_pubmed, keep_edge_permissive
@@ -151,23 +153,41 @@ def build_downstream_edge_predicate(nodes):
     return downstream_filter
 
 
-def build_relation_predicate(relation):
+def build_relation_predicate(relations):
     """Build an edge predicate that passes for edges with the given relation.
 
-    :param str relation: A relation string
+    :param relations: A relation string
+    :type relations: str or iter[str]
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
+    if isinstance(relations, str):
+        @edge_predicate
+        def relation_predicate(data):
+            """Pass for relations matching the enclosed value.
 
-    def relation_predicate(graph, u, v, k):
-        """Pass for relations matching the enclosed value.
+            :param dict data: A PyBEL edge data dictionary
+            :return: If the edge has the contained relation
+            :rtype: bool
+            """
+            return data[RELATION] == relations
 
-        :type graph: pybel.BELGraph
-        :type u: tuple
-        :type v: tuple
-        :type k: int
-        :rtype: bool
-        """
-        return relation == graph[u][v][k][RELATION]
+        return relation_predicate
+
+    elif isinstance(relations, Iterable):
+        relation_set = set(relations)
+
+        @edge_predicate
+        def relation_predicate(data):
+            """Pass for relations matching the enclosed values.
+
+            :param dict data: A PyBEL edge data dictionary
+            :return: If the edge has one of the contained relations
+            :rtype: bool
+            """
+            return data[RELATION] in relation_set
+
+    else:
+        raise TypeError
 
     return relation_predicate
 

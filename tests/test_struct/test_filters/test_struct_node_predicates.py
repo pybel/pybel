@@ -29,6 +29,7 @@ from pybel.struct.filters.node_predicates import (
 p1 = protein(name='BRAF', namespace='HGNC')
 p2 = protein(name='BRAF', namespace='HGNC', variants=[hgvs('p.Val600Glu'), pmod('Ph')])
 p3 = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
+p4 = protein(name='2', namespace='HGNC')
 
 g1 = gene(name='BRAF', namespace='HGNC', variants=[gmod('Me')])
 
@@ -432,6 +433,19 @@ class TestEdgePredicate(unittest.TestCase):
 
         self.assertTrue(alternate_is_associative_relation(g, p1.as_tuple(), p2.as_tuple(), 0))
         self.assertFalse(alternate_is_associative_relation(g, p2.as_tuple(), p3.as_tuple(), 0))
+
+    def test_build_is_increases_or_decreases(self):
+        """Test build_relation_predicate with multiple relations."""
+        is_increase_or_decrease = build_relation_predicate([INCREASES, DECREASES])
+
+        g = BELGraph()
+        g.add_edge(p1.as_tuple(), p2.as_tuple(), key=0, **{RELATION: ASSOCIATION})
+        g.add_edge(p2.as_tuple(), p3.as_tuple(), key=0, **{RELATION: INCREASES})
+        g.add_edge(p3.as_tuple(), p4.as_tuple(), key=0, **{RELATION: DECREASES})
+
+        self.assertFalse(is_increase_or_decrease(g, p1.as_tuple(), p2.as_tuple(), 0))
+        self.assertTrue(is_increase_or_decrease(g, p2.as_tuple(), p3.as_tuple(), 0))
+        self.assertTrue(is_increase_or_decrease(g, p3.as_tuple(), p4.as_tuple(), 0))
 
     def test_has_degradation(self):
         self.assertTrue(edge_has_degradation({SUBJECT: {MODIFIER: DEGRADATION}}))
