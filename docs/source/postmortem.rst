@@ -1,10 +1,9 @@
 Current Issues
 ==============
-
 Speed
 -----
 Speed is still an issue, because documents above 100K lines still take a couple minutes to run. This issue is
-  exacerbated by (optionally) logging output to the console, which can make it more than 3x or 4x as slow.
+exacerbated by (optionally) logging output to the console, which can make it more than 3x or 4x as slow.
 
 Namespaces
 ----------

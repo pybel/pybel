@@ -45,4 +45,4 @@ class BaseParser(object):
         """Streamlines the language represented by this parser to make queries run faster"""
         t = time.time()
         self.language.streamline()
-        log.info('Finished streamlining %s in %.02fs', self.__class__.__name__, time.time() - t)
+        log.info('Streamlined %s in %.02f seconds', self.__class__.__name__, time.time() - t)

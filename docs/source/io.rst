@@ -68,14 +68,6 @@ All transport pairs are reflective and data-preserving.
 .. autofunction:: pybel.from_cbn_jgif
 .. autofunction:: pybel.to_jgif
 
-.. automodule:: pybel.io.cx
-.. autofunction:: pybel.from_cx
-.. autofunction:: pybel.to_cx
-.. autofunction:: pybel.from_cx_file
-.. autofunction:: pybel.to_cx_file
-.. autofunction:: pybel.from_cx_jsons
-.. autofunction:: pybel.to_cx_jsons
-
 Export
 ------
 .. autofunction:: pybel.to_graphml
@@ -91,10 +83,6 @@ Database
 
 .. automodule:: pybel.io.neo4j
 .. autofunction:: pybel.to_neo4j
-
-.. automodule:: pybel.io.ndex_utils
-.. autofunction:: pybel.from_ndex
-.. autofunction:: pybel.to_ndex
 
 BEL Commons
 -----------

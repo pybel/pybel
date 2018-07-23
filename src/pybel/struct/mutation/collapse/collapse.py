@@ -2,13 +2,26 @@
 
 """Utilities for functions for collapsing nodes."""
 
+from ...filters import filter_edges
+from ...filters.edge_predicate_builders import build_relation_predicate
 from ...pipeline import in_place_transformation
-from ....constants import RELATION, unqualified_edges
+from ....constants import HAS_VARIANT, RELATION, unqualified_edges
 
 __all__ = [
     'collapse_pair',
     'collapse_nodes',
+    'collapse_all_variants',
 ]
+
+
+def _remove_self_edges(graph):
+    self_edges = [
+        (u, u, k)
+        for u in graph
+        if u in graph[u]
+        for k in graph[u][u]
+    ]
+    graph.remove_edges_from(self_edges)
 
 
 @in_place_transformation
@@ -42,6 +55,8 @@ def collapse_pair(graph, survivor, victim):
     graph.remove_node(victim)
 
 
+# TODO what happens when collapsing is not consistent? Need to build intermediate mappings and test their consistency.
+
 @in_place_transformation
 def collapse_nodes(graph, survivor_mapping):
     """Collapse all nodes in values to the key nodes, in place.
@@ -55,10 +70,20 @@ def collapse_nodes(graph, survivor_mapping):
         for victim in victims:
             collapse_pair(graph, survivor=survivor, victim=victim)
 
-    # Remove self edges
-    graph.remove_edges_from(
-        (u, u, k)
-        for u in graph
-        if u in graph[u]
-        for k in graph[u][u]
-    )
+    _remove_self_edges(graph)
+
+
+@in_place_transformation
+def collapse_all_variants(graph):
+    """Collapse all genes', RNAs', miRNAs', and proteins' variants to their parents.
+
+    :param pybel.BELGraph graph: A BEL Graph
+    """
+    has_variant_predicate = build_relation_predicate(HAS_VARIANT)
+
+    edges = list(filter_edges(graph, has_variant_predicate))
+
+    for u, v, _ in edges:
+        collapse_pair(graph, survivor=u, victim=v)
+
+    _remove_self_edges(graph)

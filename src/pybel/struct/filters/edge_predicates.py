@@ -12,8 +12,9 @@ from ...constants import (
 
 __all__ = [
     'edge_predicate',
-    'has_pubmed',
+    'keep_edge_permissive',
     'has_provenance',
+    'has_pubmed',
     'has_authors',
     'is_causal_relation',
     'is_direct_causal_relation',

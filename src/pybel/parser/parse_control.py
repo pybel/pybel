@@ -37,18 +37,21 @@ set_evidence_stub = And([Suppress(supporting_text_tags), Suppress('='), quote('v
 
 
 class ControlParser(BaseParser):
-    """A parser for BEL control statements
+    """A parser for BEL control statements.
 
     .. seealso::
 
         BEL 1.0 specification on `control records <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_control_records>`_
     """
 
-    def __init__(self, annotation_dict=None, annotation_regex=None, citation_clearing=True):
+    def __init__(self, annotation_dict=None, annotation_regex=None, citation_clearing=True, required_annotations=None):
         """
-        :param dict[str,set[str]] annotation_dict: A dictionary of {annotation: set of valid values} for parsing
-        :param dict[str,str] annotation_regex: A dictionary of {annotation: regular expression string}
+        :param annotation_dict: A dictionary of {annotation: set of valid values} for parsing
+        :type annotation_dict: Optional[dict[str,set[str]]]
+        :param annotation_regex: A dictionary of {annotation: regular expression string}
+        :type annotation_regex: Optional[dict[str,str]]
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+        :param Optional[list[str]] required_annotations: Annotations that are required
         """
         self.citation_clearing = citation_clearing
 
@@ -63,6 +66,7 @@ class ControlParser(BaseParser):
         self.citation = {}
         self.evidence = None
         self.annotations = {}
+        self.required_annotations = required_annotations or []
 
         annotation_key = ppc.identifier('key').setParseAction(self.handle_annotation_key)
 
@@ -376,6 +380,17 @@ class ControlParser(BaseParser):
             CITATION: self.citation.copy(),
             ANNOTATIONS: self.annotations.copy()
         }
+
+    def get_missing_required_annotations(self):
+        """Return missing required annotations.
+
+        :rtype: list[str]
+        """
+        return [
+            required_annotation
+            for required_annotation in self.required_annotations
+            if required_annotation not in self.annotations
+        ]
 
     def clear_citation(self):
         """Clears the citation. Additionally, if citation clearing is enabled, clears the evidence and annotations."""

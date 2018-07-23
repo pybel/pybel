@@ -44,7 +44,7 @@ conversion. In this example, a BEL Script is exported to GraphML for viewing in 
 .. code-block:: sh
 
     $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
-   
+
 In Cytoscape, open with :code:`Import > Network > From File`.
 
 Installation |pypi_version| |python_versions| |pypi_license|

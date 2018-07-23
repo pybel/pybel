@@ -11,13 +11,14 @@ from __future__ import unicode_literals
 
 import time
 from collections import defaultdict
-from itertools import chain, groupby
+from itertools import chain
 
 import logging
 import six
 from copy import deepcopy
 from six import string_types
 from sqlalchemy import and_, exists, func
+from sqlalchemy.orm import aliased
 from tqdm import tqdm
 
 from .base_manager import BaseManager, build_engine_session
@@ -25,7 +26,7 @@ from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
     Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
-    Node, Property,
+    Node, Property, edge_annotation, edge_property, network_edge, network_node,
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
@@ -257,7 +258,7 @@ class NamespaceManager(BaseManager):
         values = bel_resource['Values']
 
         if not_resource_cachable(bel_resource):
-            log.info('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
+            log.debug('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
             return values
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
@@ -602,17 +603,29 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(Network).all()
 
-    # FIXME there must be a better way to do this on the server without getting problems with logical inconsistencies
     def list_recent_networks(self):
         """Lists the most recently created version of each network (by name)
 
         :rtype: list[Network]
         """
-        networks = self.session.query(Network).order_by(Network.name, Network.created.desc())
-        return [
-            next(si)
-            for k, si in groupby(networks, lambda n: n.name)
-        ]
+        most_recent_times = (
+            self.session.query(
+                Network.name.label('network_name'),
+                func.max(Network.created).label('max_created')
+            )
+                .group_by(Network.name)
+                .subquery('most_recent_times')
+        )
+
+        most_recent_networks = (
+            self.session.query(Network)
+                .join(most_recent_times, and_(
+                most_recent_times.c.network_name == Network.name,
+                most_recent_times.c.max_created == Network.created
+            ))
+        )
+
+        return most_recent_networks.all()
 
     def has_name_version(self, name, version):
         """Checks if the name/version combination is already in the database
@@ -623,28 +636,59 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
-    @staticmethod
-    def iterate_singleton_edges_from_network(network):
-        """Gets all edges that only belong to the given network
+    def query_singleton_edges_from_network(self, network):
+        """Returns a query selecting all edge ids that only belong to the given network
 
         :type network: Network
-        :rtype: iter[Edge]
+        :rtype: sqlalchemy.orm.query.Query
         """
-        return (  # TODO implement with nested SQLAlchemy query for better speed
-            edge
-            for edge in network.edges
-            if edge.networks.count() == 1
+        ne1 = aliased(network_edge, name='ne1')
+        ne2 = aliased(network_edge, name='ne2')
+        singleton_edge_ids_for_network = (
+            self.session.query(ne1.c.edge_id)
+                .outerjoin(ne2, and_(
+                ne1.c.edge_id == ne2.c.edge_id,
+                ne1.c.network_id != ne2.c.network_id
+            ))
+                .filter(and_(
+                ne1.c.network_id == network.id,
+                ne2.c.edge_id == None
+            ))
         )
+        return singleton_edge_ids_for_network
 
     def drop_network(self, network):
         """Drops a network, while also cleaning up any edges that are no longer part of any network.
 
         :type network: Network
         """
-        for edge in self.iterate_singleton_edges_from_network(network):
-            self.session.delete(edge)
+        # get the IDs of the edges that will be orphaned by deleting this network
+        # FIXME: this list could be a problem if it becomes very large; possible optimization is a temporary table in DB
+        edge_ids = [result.edge_id for result in self.query_singleton_edges_from_network(network)]
 
-        self.session.delete(network)
+        # delete the network-to-node mappings for this network
+        self.session.query(network_node).filter(network_node.c.network_id == network.id).delete(
+            synchronize_session=False)
+
+        # delete the edge-to-property mappings for the to-be-orphaned edges
+        self.session.query(edge_property).filter(edge_property.c.edge_id.in_(edge_ids)).delete(
+            synchronize_session=False)
+
+        # delete the edge-to-annotation mappings for the to-be-orphaned edges
+        self.session.query(edge_annotation).filter(edge_annotation.c.edge_id.in_(edge_ids)).delete(
+            synchronize_session=False)
+
+        # delete the edge-to-network mappings for this network
+        self.session.query(network_edge).filter(network_edge.c.network_id == network.id).delete(
+            synchronize_session=False)
+
+        # delete the now-orphaned edges
+        self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete(synchronize_session=False)
+
+        # delete the network
+        self.session.query(Network).filter(Network.id == network.id).delete(synchronize_session=False)
+
+        # commit it!
         self.session.commit()
 
     def drop_network_by_id(self, network_id):
@@ -658,8 +702,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
     def drop_networks(self):
         """Drops all networks"""
         for network in self.session.query(Network).all():
-            self.session.delete(network)
-            self.session.commit()
+            self.drop_network(network)
 
     def get_network_versions(self, name):
         """Returns all of the versions of a network with the given name
@@ -800,7 +843,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_citation = {}
         self.object_cache_author = {}
 
-    def insert_graph(self, graph, store_parts=True):
+    def insert_graph(self, graph, store_parts=True, use_tqdm=False):
         """Inserts a graph in the database and returns the corresponding Network model.
 
         :param BELGraph graph: A BEL graph
@@ -850,7 +893,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         return network
 
-    def _store_graph_parts(self, graph):
+    def _store_graph_parts(self, graph, use_tqdm=False):
         """Stores the given graph into the edge store.
 
         :param BELGraph graph: A BEL Graph
@@ -877,7 +920,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         }
         log.debug('prepopulated edges in %.2f seconds', time.time() - node_prepopopulation_start_time)
 
-        for node_tuple in tqdm(graph, total=graph.number_of_nodes(), desc='building node models'):
+        nodes_iter = (
+            tqdm(graph, total=graph.number_of_nodes(), desc='Nodes')
+            if use_tqdm else
+            graph
+        )
+
+        for node_tuple in nodes_iter:
             if node_tuple in node_tuple_to_model:
                 continue  # already got it
 
@@ -925,10 +974,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         }
         log.debug('prepopulated edges in %.2f seconds', time.time() - edge_prepopulation_start_time)
 
+        edges_iter = (
+            tqdm(graph.edges_iter(keys=True, data=True), total=graph.number_of_edges(), desc='Edges')
+            if use_tqdm else
+            graph.edges_iter(keys=True, data=True)
+        )
 
         s = 0
-        for u, v, k, data in tqdm(graph.edges_iter(keys=True, data=True), total=graph.number_of_edges(),
-                                  desc='building edge models'):
+        for u, v, k, data in edges_iter:
             source = node_tuple_to_model.get(u)
             if source is None:
                 log.debug('Skipping uncached node: %s', u)

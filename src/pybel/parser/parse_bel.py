@@ -13,8 +13,8 @@ from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Supp
 
 from .baseparser import BaseParser
 from .exc import (
-    InvalidFunctionSemantic, MalformedTranslocationWarning, MissingCitationException, MissingSupportWarning,
-    NestedRelationWarning, RelabelWarning,
+    InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning, MissingCitationException,
+    MissingSupportWarning, NestedRelationWarning, RelabelWarning,
 )
 from .modifiers import *
 from .modifiers.fusion import build_legacy_fusion
@@ -52,25 +52,31 @@ class BelParser(BaseParser):
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
                  allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
-                 citation_clearing=True, no_identifier_validation=False, autostreamline=True):
+                 citation_clearing=True, no_identifier_validation=False, autostreamline=True,
+                 required_annotations=None):
         """
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
-        :param dict[str,dict[str,str]] namespace_dict: A dictionary of {namespace: {name: encoding}}.
-                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param dict[str,set[str]] annotation_dict: A dictionary of {annotation: set of values}.
-                                    Delegated to :class:`pybel.parser.ControlParser`
-        :param dict[str,str] namespace_regex: A dictionary of {namespace: regular expression strings}.
-                                        Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param dict[str,str] annotation_regex: A dictionary of {annotation: regular expression strings}.
-                                        Delegated to :class:`pybel.parser.ControlParser`
-        :param bool allow_naked_names: If true, turn off naked namespace failures.
-                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param bool allow_nested: If true, turn off nested statement failures.
-                                    Delegated to :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :param namespace_dict: A dictionary of {namespace: {name: encoding}}. Delegated to
+         :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :type namespace_dict: Optional[dict[str,dict[str,str]]]
+        :param annotation_dict: A dictionary of {annotation: set of values}. Delegated to
+         :class:`pybel.parser.ControlParser`
+        :rype annotation_dict: Optional[dict[str,set[str]]]
+        :param namespace_regex: A dictionary of {namespace: regular expression strings}. Delegated to
+         :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :type namespace_regex: Optional[dict[str,str]]
+        :param annotation_regex: A dictionary of {annotation: regular expression strings}. Delegated to
+         :class:`pybel.parser.ControlParser`
+        :type annotation_regex: Optional[dict[str,str]]
+        :param bool allow_naked_names: If true, turn off naked namespace failures. Delegated to
+         :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :param bool allow_nested: If true, turn off nested statement failures. Delegated to
+         :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-                                    Delegated to :class:`pybel.parser.ControlParser`
+         Delegated to :class:`pybel.parser.ControlParser`
         :param bool autostreamline: Should the parser be streamlined on instantiation?
+        :param Optional[list[str]] required_annotations: Optional list of required annotations
         """
         self.graph = graph
         self.allow_nested = allow_nested
@@ -78,12 +84,13 @@ class BelParser(BaseParser):
         self.control_parser = ControlParser(
             annotation_dict=annotation_dict,
             annotation_regex=annotation_regex,
-            citation_clearing=citation_clearing
+            citation_clearing=citation_clearing,
+            required_annotations=required_annotations,
         )
 
         if no_identifier_validation:
             self.identifier_parser = IdentifierParser(
-                allow_naked_names=allow_naked_names
+                allow_naked_names=allow_naked_names,
             )
         else:
             self.identifier_parser = IdentifierParser(
@@ -230,12 +237,12 @@ class BelParser(BaseParser):
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
-            Group(self.abundance)(TARGET) +
+            Group(self.simple_abundance)(TARGET) +
             Optional(WCW + Group(self.molecular_activity)(EFFECT))
         )
 
         activity_legacy_tags = oneOf(language.activities)(MODIFIER)
-        self.activity_legacy = activity_legacy_tags + nest(Group(self.abundance)(TARGET))
+        self.activity_legacy = activity_legacy_tags + nest(Group(self.simple_abundance)(TARGET))
         self.activity_legacy.setParseAction(handle_activity_legacy)
 
         self.activity = self.activity_standard | self.activity_legacy
@@ -683,7 +690,9 @@ class BelParser(BaseParser):
                 {
                     ae: True
                     for ae in annotation_entry
-                } if isinstance(annotation_entry, set) else {
+                }
+                if isinstance(annotation_entry, set) else
+                {
                     annotation_entry: True
                 }
             )
@@ -712,6 +721,10 @@ class BelParser(BaseParser):
 
         if not self.control_parser.evidence:
             raise MissingSupportWarning(self.line_number, line, position)
+
+        missing_required_annotations = self.control_parser.get_missing_required_annotations()
+        if missing_required_annotations:
+            raise MissingAnnotationWarning(self.line_number, line, position, missing_required_annotations)
 
         self._handle_relation(tokens)
 

@@ -3,9 +3,9 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import *
-from pybel.dsl import *
-from pybel.struct.mutation.collapse import collapse_nodes, collapse_to_genes
+from pybel.constants import DIRECTLY_INCREASES
+from pybel.dsl import abundance, gene, mirna, pathology, pmod, protein, rna
+from pybel.struct.mutation.collapse import collapse_all_variants, collapse_nodes, collapse_to_genes
 from pybel.testing.utils import n
 
 HGNC = 'HGNC'
@@ -15,6 +15,7 @@ CHEBI = 'CHEBI'
 g1 = gene(HGNC, '1')
 r1 = rna(HGNC, '1')
 p1 = protein(HGNC, '1')
+p1_phosphorylated = protein(HGNC, '1', variants=[pmod('Ph')])
 
 g2 = gene(HGNC, '2')
 r2 = rna(HGNC, '2')
@@ -93,3 +94,21 @@ class TestCollapseDownstream(unittest.TestCase):
         self.assertTrue(graph.has_node_with_data(g1))
         self.assertEqual(1, graph.number_of_nodes())
         self.assertEqual(0, graph.number_of_edges())
+
+    def test_collapse_all_variants(self):
+        graph = BELGraph()
+        graph.add_node_from_data(p1_phosphorylated)
+
+        graph.add_increases(p1_phosphorylated, p2, n(), n())
+
+        self.assertEqual(3, graph.number_of_nodes())
+        self.assertEqual(2, graph.number_of_edges())
+
+        collapse_all_variants(graph)
+
+        self.assertEqual(2, graph.number_of_nodes())
+        self.assertEqual(1, graph.number_of_edges())
+
+        self.assertIn(p1.as_tuple(), graph)
+        self.assertNotIn(p1_phosphorylated.as_tuple(), graph)
+        self.assertIn(p2.as_tuple(), graph)
