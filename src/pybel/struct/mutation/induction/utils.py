@@ -15,7 +15,7 @@ def get_subgraph_by_edge_filter(graph, edge_predicates=None):
 
     :param pybel.BELGraph graph: A BEL graph
     :param edge_predicates: An edge predicate or list of edge predicates
-    :type edge_predicates: None or (pybel.BELGraph, tuple, tuple, int) -> bool or list[(pybel.BELGraph, tuple, tuple, int) -> bool]
+    :type edge_predicates: None or ((pybel.BELGraph, tuple, tuple, int)) -> bool or list[(pybel.BELGraph, tuple, tuple, int) -> bool]
     :return: A BEL sub-graph induced over the edges passing the given filters
     :rtype: pybel.BELGraph
     """
