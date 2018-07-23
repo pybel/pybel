@@ -10,7 +10,7 @@ import click
 
 import pybel
 
-CONNECTION = 'mysql+mysqldb://root@localhost/pbt?charset=utf8'
+DEFAULT_CONNECTION = 'mysql+mysqldb://root@localhost/pbt?charset=utf8'
 PICKLE = 'small_corpus.bel.gpickle'
 SMALL_CORPUS_URL = 'https://arty.scai.fraunhofer.de/artifactory/bel/knowledge/selventa-small-corpus/selventa-small-corpus-20150611.bel'
 
@@ -24,8 +24,8 @@ def time_me(start_string):
     print(f'ran in {time.time() - parse_start_time:.2f} seconds')
 
 
-def get_numbers(graph):
-    manager = pybel.Manager.from_connection(CONNECTION)
+def get_numbers(graph, connection=None):
+    manager = pybel.Manager.from_connection(connection if connection else DEFAULT_CONNECTION)
     print('inserting')
     parse_start_time = time.time()
     network = manager.insert_graph(graph)
@@ -41,7 +41,8 @@ def get_numbers(graph):
 
 
 @click.command()
-def main():
+@click.option('--connection', help=f'SQLAlchemy connection. Defaults to {DEFAULT_CONNECTION}')
+def main(connection):
     """Parse a network, load it to the database, then test how fast it drops."""
 
     if os.path.exists(PICKLE):
@@ -49,7 +50,7 @@ def main():
         graph = pybel.from_pickle(PICKLE)
     else:
         with time_me(f'opening from {SMALL_CORPUS_URL}'):
-            manager = pybel.Manager.from_connection(CONNECTION)
+            manager = pybel.Manager.from_connection(connection if connection else DEFAULT_CONNECTION)
             graph = pybel.from_url(SMALL_CORPUS_URL, manager=manager, use_tqdm=True, citation_clearing=False)
 
         pybel.to_pickle(graph, PICKLE)
@@ -58,7 +59,7 @@ def main():
     # FIXME this fails if you do it with the same manager
 
     times = [
-        get_numbers(graph)
+        get_numbers(graph, connection)
         for _ in range(n)
     ]
 
