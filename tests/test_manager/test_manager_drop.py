@@ -90,10 +90,10 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(0, self.g2.edges.count())
 
     def test_get_orphan_edges(self):
-        edges = list(self.manager.iterate_singleton_edges_from_network(self.g1))
+        edges = [result.edge_id for result in self.manager.query_singleton_edges_from_network(self.g1)]
         self.assertEqual(2, len(edges))
-        self.assertIn(self.e2, edges)
-        self.assertIn(self.e3, edges)
+        self.assertIn(self.e2.id, edges)
+        self.assertIn(self.e3.id, edges)
 
     def test_drop_network_1(self):
         """When a network gets dropped, drop all of the edges if they don't appear in other networks"""
