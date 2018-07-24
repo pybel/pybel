@@ -4,6 +4,7 @@
 
 from collections import Counter
 
+from ..filters.node_predicates import has_variant
 from ...constants import *
 
 __all__ = [
@@ -11,8 +12,10 @@ __all__ = [
     'count_functions',
     'count_namespaces',
     'get_namespaces',
+    'count_names_by_namespace',
     'get_names_by_namespace',
     'get_unused_namespaces',
+    'count_variants',
 ]
 
 
@@ -128,3 +131,17 @@ def get_names_by_namespace(graph, namespace):
         raise IndexError('{} is not defined in {}'.format(namespace, graph))
 
     return set(_namespace_filtered_iterator(graph, namespace))
+
+
+def count_variants(graph):
+    """Count how many of each type of variant a graph has.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :rtype: Counter
+    """
+    return Counter(
+        variant_data[KIND]
+        for node, data in graph.nodes(data=True)
+        if has_variant(graph, node)
+        for variant_data in data[VARIANTS]
+    )
