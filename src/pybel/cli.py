@@ -78,7 +78,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
         log.setLevel(logging.DEBUG)
         logging.basicConfig(level=logging.DEBUG, format='%(name)s:%(levelname)s - %(message)s')
 
-    manager = Manager.from_connection(connection)
+    manager = Manager(connection=connection)
 
     if database_name:
         g = from_database(database_name, manager=manager)
@@ -174,7 +174,7 @@ def machine(agents, local, connection, host):
         sys.exit(-1)
 
     if local:
-        manager = Manager.from_connection(connection)
+        manager = Manager(connection=connection)
         to_database(graph, manager=manager)
     else:
         resp = to_web(graph, host=host)
@@ -186,7 +186,7 @@ def machine(agents, local, connection, host):
 @click.pass_context
 def manage(ctx, connection):
     """Manage database"""
-    ctx.obj = Manager.from_connection(connection)
+    ctx.obj = Manager(connection=connection)
     Base.metadata.bind = ctx.obj.engine
     Base.query = ctx.obj.session.query_property()
 
