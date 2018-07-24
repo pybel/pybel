@@ -1201,7 +1201,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         log.info('dropped all edges in %.2f seconds', time.time() - t)
 
-    def get_or_create_edge(self, source, target, relation, bel, edge_hash, evidence=None, annotations=None,
+    def get_or_create_edge(self, source, target, relation, bel, sha512, evidence=None, annotations=None,
                            properties=None):
         """Creates entry for given edge if it does not exist.
 
@@ -1209,21 +1209,21 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param Node target: Target node of the relation
         :param str relation: Type of the relation between source and target node
         :param str bel: BEL statement that describes the relation
-        :param str edge_hash: A hash of the edge
+        :param str sha512: The SHA512 hash of the edge as a string
         :param Evidence evidence: Evidence object that proves the given relation
-        :param list[Property] properties: List of all properties that belong to the edge
-        :param list[AnnotationEntry] annotations: List of all annotations that belong to the edge
+        :param Optional[list[Property]] properties: List of all properties that belong to the edge
+        :param Optional[list[AnnotationEntry]] annotations: List of all annotations that belong to the edge
         :rtype: Edge
         """
-        if edge_hash in self.object_cache_edge:
-            edge = self.object_cache_edge[edge_hash]
+        if sha512 in self.object_cache_edge:
+            edge = self.object_cache_edge[sha512]
             self.session.add(edge)
             return edge
 
-        edge = self.get_edge_by_hash(edge_hash)
+        edge = self.get_edge_by_hash(sha512)
 
         if edge is not None:
-            self.object_cache_edge[edge_hash] = edge
+            self.object_cache_edge[sha512] = edge
             return edge
 
         edge = Edge(
@@ -1231,7 +1231,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             target=target,
             relation=relation,
             bel=bel,
-            sha512=edge_hash,
+            sha512=sha512,
         )
 
         if evidence is not None:
@@ -1242,46 +1242,47 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             edge.annotations = annotations
 
         self.session.add(edge)
-        self.object_cache_edge[edge_hash] = edge
+        self.object_cache_edge[sha512] = edge
         return edge
 
     def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None,
                                date=None, first=None, last=None, authors=None):
-        """Creates entry for given citation if it does not exist.
+        """Create an entry for given citation if it does not exist, or return it if it does.
 
         :param str type: Citation type (e.g. PubMed)
         :param str reference: Identifier of the given citation (e.g. PubMed id)
-        :param str name: Name of the publication
-        :param str title: Title of article
-        :param str volume: Volume of publication
-        :param str issue: Issue of publication
-        :param str pages: Pages of issue
-        :param str date: Date of publication in ISO 8601 (YYYY-MM-DD) format
-        :param str first: Name of first author
-        :param str last: Name of last author
-        :param str or list[str] authors: Either a list of authors separated by |, or an actual list of authors
+        :param Optional[str] name: Name of the publication
+        :param Optional[str] title: Title of article
+        :param Optional[str] volume: Volume of publication
+        :param Optional[str] issue: Issue of publication
+        :param Optional[str] pages: Pages of issue
+        :param Optional[str] date: Date of publication in ISO 8601 (YYYY-MM-DD) format
+        :param Optional[str] first: Name of first author
+        :param Optional[str] last: Name of last author
+        :param authors: Either a list of authors separated by |, or an actual list of authors
+        :type authors: None or str or list[str]
         :rtype: Citation
         """
         type = type.strip()
         reference = reference.strip()
 
-        citation_hash = hash_citation(type=type, reference=reference)
+        sha512 = hash_citation(type=type, reference=reference)
 
-        if citation_hash in self.object_cache_citation:
-            citation = self.object_cache_citation[citation_hash]
+        if sha512 in self.object_cache_citation:
+            citation = self.object_cache_citation[sha512]
             self.session.add(citation)
             return citation
 
-        citation = self.get_citation_by_hash(citation_hash)
+        citation = self.get_citation_by_hash(sha512)
 
         if citation is not None:
-            self.object_cache_citation[citation_hash] = citation
+            self.object_cache_citation[sha512] = citation
             return citation
 
         citation = Citation(
             type=type,
             reference=reference,
-            sha512=citation_hash,
+            sha512=sha512,
             name=name,
             title=title,
             volume=volume,
@@ -1304,7 +1305,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     citation.authors.append(author_model)
 
         self.session.add(citation)
-        self.object_cache_citation[citation_hash] = citation
+        self.object_cache_citation[sha512] = citation
         return citation
 
     def get_or_create_author(self, name):
