@@ -1092,51 +1092,51 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param str text: Evidence text
         :rtype: Evidence
         """
-        evidence_hash = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
+        sha512 = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
 
-        if evidence_hash in self.object_cache_evidence:
-            evidence = self.object_cache_evidence[evidence_hash]
+        if sha512 in self.object_cache_evidence:
+            evidence = self.object_cache_evidence[sha512]
             self.session.add(evidence)
             return evidence
 
-        evidence = self.get_evidence_by_hash(evidence_hash)
+        evidence = self.get_evidence_by_hash(sha512)
 
         if evidence is not None:
-            self.object_cache_evidence[evidence_hash] = evidence
+            self.object_cache_evidence[sha512] = evidence
             return evidence
 
         evidence = Evidence(
             text=text,
             citation=citation,
-            sha512=evidence_hash
+            sha512=sha512
         )
 
         self.session.add(evidence)
-        self.object_cache_evidence[evidence_hash] = evidence
+        self.object_cache_evidence[sha512] = evidence
         return evidence
 
-    def get_or_create_node(self, graph, node_identifier):
+    def get_or_create_node(self, graph, node_tuple):
         """Creates entry and object for given node if it does not exist.
 
         :param BELGraph graph: A BEL graph
-        :param tuple node_identifier: A PyBEL node tuple
+        :param tuple node_tuple: A PyBEL node tuple
         :rtype: Node
         """
-        node_hash = hash_node(node_identifier)
-        if node_hash in self.object_cache_node:
-            return self.object_cache_node[node_hash]
+        sha512 = hash_node(node_tuple)
+        if sha512 in self.object_cache_node:
+            return self.object_cache_node[sha512]
 
-        node_data = graph.node[node_identifier]
+        node_data = graph.node[node_tuple]
         bel = node_to_bel(node_data)
 
-        node = self.get_node_by_hash(node_hash)
+        node = self.get_node_by_hash(sha512)
 
         if node is not None:
-            self.object_cache_node[node_hash] = node
+            self.object_cache_node[sha512] = node
             return node
 
         type = node_data[FUNCTION]
-        node = Node(type=type, bel=bel, sha512=node_hash)
+        node = Node(type=type, bel=bel, sha512=sha512)
 
         namespace = node_data.get(NAMESPACE)
 
@@ -1180,7 +1180,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             node.modifications = modifications
 
         self.session.add(node)
-        self.object_cache_node[node_hash] = node
+        self.object_cache_node[sha512] = node
         return node
 
     def drop_nodes(self):
@@ -1309,7 +1309,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return citation
 
     def get_or_create_author(self, name):
-        """Gets an author by name, or creates one
+        """Get an author by name, or creates one if it does not exist.
 
         :param str name: An author's name
         :rtype: Author
@@ -1340,7 +1340,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param BELGraph graph: A BEL graph
         :param dict node_data: Describes the given node and contains is_variant information
         :return: A list of modification objects belonging to the given node
-        :rtype: list[Modification]
+        :rtype: Optional[list[Modification]]
         """
         modification_list = []
         if FUSION in node_data:
@@ -1457,7 +1457,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return modifications
 
     def get_property_by_hash(self, property_hash):
-        """Gets a property by its hash if it exists
+        """Get a property by its hash if it exists.
 
         :param str property_hash: The hash of the property to search
         :rtype: Optional[Property]
@@ -1465,6 +1465,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
 
     def _make_property_from_dict(self, property_def):
+        """
+
+        :param property_def:
+        :rtype: Property
+        """
         property_hash = hash_dump(property_def)
 
         edge_property = self.object_cache_property.get(property_hash)
@@ -1486,7 +1491,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param BELGraph graph: A BEL graph
         :param dict edge_data: Describes the context of the given edge.
         :return: A list of all subject and object properties of the edge
-        :rtype: list[Property]
+        :rtype: Optional[list[Property]]
         """
         property_list = []
         for participant in (SUBJECT, OBJECT):
