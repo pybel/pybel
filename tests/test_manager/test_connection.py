@@ -6,7 +6,7 @@ import os
 import unittest
 
 from pybel import Manager
-from pybel.manager.base_manager import BaseManager, build_engine_session
+from pybel.manager.base_manager import build_engine_session
 
 try:
     from unittest import mock
@@ -80,21 +80,3 @@ class TestInstantiation(unittest.TestCase):
     def test_instantiate_manager_session_missing(self):
         with self.assertRaises(ValueError):
             Manager(engine='fake-engine', session=None)
-
-    def test_fail_instantiate_base_manager_from_connection(self):
-        """Test that from_connection fails"""
-        with self.assertRaises(ValueError):
-            BaseManager.from_connection(None)
-
-    def test_fail_instantiate_manager_from_connection(self):
-        """Test that from_connection fails"""
-        with self.assertRaises(ValueError):
-            Manager.from_connection(None)
-
-    def test_instantiate_base_manager_from_connection(self):
-        manager = BaseManager.from_connection(self.connection)
-        self.assertEqual(self.connection, str(manager.engine.url))
-
-    def test_instantiate_manager_from_connection(self):
-        manager = Manager.from_connection(self.connection)
-        self.assertEqual(self.connection, str(manager.engine.url))

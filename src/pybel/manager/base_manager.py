@@ -81,49 +81,6 @@ class BaseManager(object):
         self.engine = engine
         self.session = session
 
-    @classmethod
-    def from_connection(cls, connection, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
-                        scopefunc=None):
-        """Create a connection to database and a persistent session using SQLAlchemy.
-
-        A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
-        using an `RFC-1738 <http://rfc.net/rfc1738.html>`_ string. For example, a MySQL string can be given with the
-        following form:
-
-        :code:`mysql+pymysql://<username>:<password>@<host>/<dbname>?charset=utf8[&<options>]`
-
-        A SQLite connection string can be given in the form:
-
-        ``sqlite:///~/Desktop/cache.db``
-
-        Further options and examples can be found on the SQLAlchemy documentation on
-        `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
-
-        :param str connection: An RFC-1738 database connection string.
-        :param bool echo: Turn on echoing sql
-        :param Optional[bool] autoflush: Defaults to True if not specified in kwargs or configuration.
-        :param Optional[bool] autocommit: Defaults to False if not specified in kwargs or configuration.
-        :param Optional[bool] expire_on_commit: Defaults to False if not specified in kwargs or configuration.
-        :param scopefunc: Scoped function to pass to :func:`sqlalchemy.orm.scoped_session`
-
-        From the Flask-SQLAlchemy documentation:
-
-        An extra key ``'scopefunc'`` can be set on the ``options`` dict to
-        specify a custom scope function.  If it's not provided, Flask's app
-        context stack identity is used. This will ensure that sessions are
-        created and removed with the request/response cycle, and should be fine
-        in most cases.
-        """
-        engine, session = build_engine_session(
-            connection,
-            echo=echo,
-            autoflush=autoflush,
-            autocommit=autocommit,
-            expire_on_commit=expire_on_commit,
-            scopefunc=scopefunc,
-        )
-        return cls(engine=engine, session=session)
-
     def create_all(self, checkfirst=True):
         """Create the PyBEL cache's database and tables.
 

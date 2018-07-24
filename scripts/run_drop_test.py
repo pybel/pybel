@@ -24,8 +24,13 @@ def time_me(start_string):
     print(f'ran in {time.time() - parse_start_time:.2f} seconds')
 
 
-def get_numbers(graph, connection=None):
-    manager = pybel.Manager.from_connection(connection if connection else DEFAULT_CONNECTION)
+def get_numbers(graph: pybel.BELGraph, manager: pybel.Manager)->float:
+    """Insert and drop a graph to count how long it takes.
+
+    :param graph:
+    :param manager:
+    :return: The time it took to drop
+    """
     print('inserting')
     parse_start_time = time.time()
     network = manager.insert_graph(graph)
@@ -41,16 +46,17 @@ def get_numbers(graph, connection=None):
 
 
 @click.command()
-@click.option('--connection', help=f'SQLAlchemy connection. Defaults to {DEFAULT_CONNECTION}')
+@click.option('--connection', default=DEFAULT_CONNECTION, help='SQLAlchemy connection.')
 def main(connection):
     """Parse a network, load it to the database, then test how fast it drops."""
+    manager = pybel.Manager(connection)
 
     if os.path.exists(PICKLE):
         print(f'opening from {PICKLE}')
         graph = pybel.from_pickle(PICKLE)
     else:
         with time_me(f'opening from {SMALL_CORPUS_URL}'):
-            manager = pybel.Manager.from_connection(connection if connection else DEFAULT_CONNECTION)
+
             graph = pybel.from_url(SMALL_CORPUS_URL, manager=manager, use_tqdm=True, citation_clearing=False)
 
         pybel.to_pickle(graph, PICKLE)
@@ -59,7 +65,7 @@ def main(connection):
     # FIXME this fails if you do it with the same manager
 
     times = [
-        get_numbers(graph, connection)
+        get_numbers(graph, manager)
         for _ in range(n)
     ]
 

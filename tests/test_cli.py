@@ -60,7 +60,7 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
             self.bel_thorough_reconstituted(from_pickle(test_gpickle))
             self.bel_thorough_reconstituted(from_path(test_canon))
 
-            manager = Manager.from_connection(self.connection)
+            manager = Manager(connection=self.connection)
             self.bel_thorough_reconstituted(
                 from_database(expected_test_thorough_metadata[METADATA_NAME], manager=manager))
 
