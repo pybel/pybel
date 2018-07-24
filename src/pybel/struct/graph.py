@@ -963,7 +963,7 @@ class BELGraph(networkx.MultiDiGraph):
         sha512 = self.node[node_tuple].get(HASH)
 
         if sha512 is None:
-            sha512 = self.node[node_tuple][HASH] = hash_node(node_tuple)
+            return hash_node(node_tuple)
 
         return sha512
 
@@ -978,6 +978,6 @@ class BELGraph(networkx.MultiDiGraph):
         sha512 = self[u][v][k].get(HASH)
 
         if sha512 is None:
-            sha512 = self[u][v][k][HASH] = hash_edge(u, v, self[u][v][k])
+            return hash_edge(u, v, self[u][v][k])
 
         return sha512

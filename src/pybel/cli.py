@@ -174,7 +174,7 @@ def machine(agents, local, connection, host):
         sys.exit(-1)
 
     if local:
-        manager = Manager.from_connection(connection)
+        manager = Manager(connection=connection)
         to_database(graph, manager=manager)
     else:
         resp = to_web(graph, host=host)
