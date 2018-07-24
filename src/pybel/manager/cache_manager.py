@@ -11,12 +11,11 @@ from __future__ import unicode_literals
 
 import time
 from collections import defaultdict
-from itertools import chain, groupby
+from itertools import chain
 
 import logging
 import six
 from copy import deepcopy
-from operator import attrgetter
 from six import string_types
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
@@ -27,7 +26,7 @@ from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
     Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
-    Node, Property, network_edge, network_node, edge_property, edge_annotation
+    Node, Property, edge_annotation, edge_property, network_edge, network_node,
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
@@ -614,13 +613,13 @@ class NetworkManager(NamespaceManager, AnnotationManager):
                 Network.name.label('network_name'),
                 func.max(Network.created).label('max_created')
             )
-            .group_by(Network.name)
-            .subquery('most_recent_times')
+                .group_by(Network.name)
+                .subquery('most_recent_times')
         )
 
         most_recent_networks = (
             self.session.query(Network)
-            .join(most_recent_times, and_(
+                .join(most_recent_times, and_(
                 most_recent_times.c.network_name == Network.name,
                 most_recent_times.c.max_created == Network.created
             ))
@@ -647,11 +646,11 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         ne2 = aliased(network_edge, name='ne2')
         singleton_edge_ids_for_network = (
             self.session.query(ne1.c.edge_id)
-            .outerjoin(ne2, and_(
+                .outerjoin(ne2, and_(
                 ne1.c.edge_id == ne2.c.edge_id,
                 ne1.c.network_id != ne2.c.network_id
             ))
-            .filter(and_(
+                .filter(and_(
                 ne1.c.network_id == network.id,
                 ne2.c.edge_id == None
             ))
@@ -668,16 +667,20 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         edge_ids = [result.edge_id for result in self.query_singleton_edges_from_network(network)]
 
         # delete the network-to-node mappings for this network
-        self.session.query(network_node).filter(network_node.c.network_id == network.id).delete(synchronize_session=False)
+        self.session.query(network_node).filter(network_node.c.network_id == network.id).delete(
+            synchronize_session=False)
 
         # delete the edge-to-property mappings for the to-be-orphaned edges
-        self.session.query(edge_property).filter(edge_property.c.edge_id.in_(edge_ids)).delete(synchronize_session=False)
+        self.session.query(edge_property).filter(edge_property.c.edge_id.in_(edge_ids)).delete(
+            synchronize_session=False)
 
         # delete the edge-to-annotation mappings for the to-be-orphaned edges
-        self.session.query(edge_annotation).filter(edge_annotation.c.edge_id.in_(edge_ids)).delete(synchronize_session=False)
+        self.session.query(edge_annotation).filter(edge_annotation.c.edge_id.in_(edge_ids)).delete(
+            synchronize_session=False)
 
         # delete the edge-to-network mappings for this network
-        self.session.query(network_edge).filter(network_edge.c.network_id == network.id).delete(synchronize_session=False)
+        self.session.query(network_edge).filter(network_edge.c.network_id == network.id).delete(
+            synchronize_session=False)
 
         # delete the now-orphaned edges
         self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete(synchronize_session=False)
