@@ -1019,6 +1019,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         ]
 
     def _add_qualified_edge(self, network, graph, u, v, data):
+        """Add a qualified edge to the network.
+
+        :type network: Network
+        :type graph: BELGraph
+        :type u: tuple
+        :type v: tuple
+        :type data: dict
+        """
         citation_dict = data[CITATION]
 
         citation = self.get_or_create_citation(
@@ -1044,13 +1052,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         annotations = self._get_annotation_entries_from_data(graph, data)
 
         bel = graph.edge_to_bel(u, v, data=data)
-        edge_hash = hash_edge(u, v, data)
+        sha512 = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
-            edge_hash=edge_hash,
+            sha512=sha512,
             evidence=evidence,
             properties=properties,
             annotations=annotations,
@@ -1058,14 +1066,22 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         network.edges.append(edge)
 
     def _add_unqualified_edge(self, network, graph, u, v, data):
+        """Add an unqualified edge to the network.
+
+        :type network: Network
+        :type graph: BELGraph
+        :type u: tuple
+        :type v: tuple
+        :type data: dict
+        """
         bel = graph.edge_to_bel(u, v, data=data)
-        edge_hash = hash_edge(u, v, data)
+        sha512 = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
-            edge_hash=edge_hash,
+            sha512=sha512,
         )
         network.edges.append(edge)
 
