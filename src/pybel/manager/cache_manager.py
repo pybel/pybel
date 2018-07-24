@@ -1330,12 +1330,16 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.session.add(author)
         return author
 
-    def get_modification_by_hash(self, modification_hash):
-        return self.session.query(Modification).filter(Modification.sha512 == modification_hash).one_or_none()
+    def get_modification_by_hash(self, sha512):
+        """Get a modification by a SHA512 hash.
+
+        :param str sha512: A SHA512 hash of a modification
+        :rtype: Optional[Modification]
+        """
+        return self.session.query(Modification).filter(Modification.sha512 == sha512).one_or_none()
 
     def get_or_create_modification(self, graph, node_data):
-        """Creates a list of modification objects (Modification) that belong to the node described by
-        node_data.
+        """Creates a list of modification objects that belong to the node described by node_data.
 
         :param BELGraph graph: A BEL graph
         :param dict node_data: Describes the given node and contains is_variant information
