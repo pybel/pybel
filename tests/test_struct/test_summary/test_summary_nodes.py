@@ -7,8 +7,8 @@ from pybel.constants import *
 from pybel.dsl.nodes import fusion_range, protein, protein_fusion
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (
-    count_functions, count_names_by_namespace, count_namespaces, get_functions,
-    get_names_by_namespace, get_namespaces,
+    count_functions, count_names_by_namespace, count_namespaces, count_variants, get_functions, get_names_by_namespace,
+    get_namespaces,
 )
 
 
@@ -93,3 +93,8 @@ class TestSummary(unittest.TestCase):
     def test_count_names_raise(self):
         with self.assertRaises(IndexError):
             count_names_by_namespace(sialic_acid_graph, 'NOPE')
+
+    def test_count_variants(self):
+        """Test counting the number of variants in a graph."""
+        variants = count_variants(sialic_acid_graph)
+        self.assertEqual(1, variants['pmod'])
