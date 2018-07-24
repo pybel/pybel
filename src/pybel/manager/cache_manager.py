@@ -1469,24 +1469,24 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
 
     def _make_property_from_dict(self, property_def):
-        """
+        """Build an edge property from a dictionary.
 
         :param property_def:
         :rtype: Property
         """
         property_hash = hash_dump(property_def)
 
-        edge_property = self.object_cache_property.get(property_hash)
-        if edge_property is None:
-            edge_property = self.get_property_by_hash(property_hash)
+        edge_property_model = self.object_cache_property.get(property_hash)
+        if edge_property_model is None:
+            edge_property_model = self.get_property_by_hash(property_hash)
 
-            if not edge_property:
+            if not edge_property_model:
                 property_def['sha512'] = property_hash
-                edge_property = Property(**property_def)
+                edge_property_model = Property(**property_def)
 
-            self.object_cache_property[property_hash] = edge_property
+            self.object_cache_property[property_hash] = edge_property_model
 
-        return edge_property
+        return edge_property_model
 
     def get_or_create_properties(self, graph, edge_data):  # TODO make for just single property then loop with other fn.
         """Creates a list of all subject and object related properties of the edge. Returns None if the property cannot
