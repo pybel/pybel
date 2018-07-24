@@ -14,6 +14,7 @@ __all__ = [
     'remove_filtered_nodes',
     'remove_associations',
     'remove_pathologies',
+    'remove_biological_processes',
 ]
 
 
@@ -23,8 +24,7 @@ def remove_filtered_edges(graph, edge_predicates=None):
 
     :param pybel.BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
-    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
-    :return:
+    :type edge_predicates: None or ((pybel.BELGraph, tuple, tuple, int) -> bool) or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
     """
     edges = list(filter_edges(graph, edge_predicates=edge_predicates))
     graph.remove_edges_from(edges)
@@ -35,6 +35,7 @@ def remove_filtered_nodes(graph, node_predicates=None):
     """Remove nodes passing the given node predicates.
 
     :param pybel.BELGraph graph: A BEL graph
+    :type node_predicates: None or ((pybel.BELGraph, tuple) -> bool) or iter[(pybel.BELGraph, tuple) -> bool]
     """
     nodes = list(filter_nodes(graph, node_predicates=node_predicates))
     graph.remove_nodes_from(nodes)
