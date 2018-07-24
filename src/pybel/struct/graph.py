@@ -6,6 +6,7 @@ import logging
 import networkx
 from copy import deepcopy
 from six import string_types
+from tqdm import tqdm
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel, node_to_bel
@@ -885,7 +886,8 @@ class BELGraph(networkx.MultiDiGraph):
         :param str sep: The separator between the source, relation, and target. Defaults to ' '
         :rtype: str
         """
-        return edge_to_bel(self.node[u], self.node[v], data=data, sep=sep)
+        source, target = self.node[u], self.node[v]
+        return edge_to_bel(source, target, data=data, sep=sep)
 
     def _has_no_equivalent_edge(self, u, v):
         return unqualified_edge_code[EQUIVALENT_TO] not in self[u][v]

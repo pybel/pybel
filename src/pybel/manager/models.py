@@ -3,7 +3,6 @@
 """This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
 import datetime
-
 from sqlalchemy import (
     Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text,
     UniqueConstraint,
@@ -505,13 +504,13 @@ class Node(Base):
         :param bool include_hash: Include the node hash?
         :rtype: dict[str,str]
         """
-        result = {FUNCTION: self.type}
+        result = {
+            FUNCTION: self.type,
+            HASH: self.sha512
+        }
 
         if include_id:
             result['id'] = self.id
-
-        if include_hash:
-            result[HASH] = self.sha512
 
         if self.namespace_entry:
             namespace_entry = self.namespace_entry.to_json()
@@ -531,10 +530,10 @@ class Node(Base):
             products = []
 
             for edge in self.out_edges.filter(Edge.relation == HAS_PRODUCT):
-                products.append(edge.target.to_json())
+                products.append(edge.target.to_json(include_id=include_id, include_hash=include_hash))
 
             for edge in self.out_edges.filter(Edge.relation == HAS_REACTANT):
-                reactants.append(edge.target.to_json())
+                reactants.append(edge.target.to_json(include_id=include_id, include_hash=include_hash))
 
             result[REACTANTS] = sort_dict_list(reactants)
             result[PRODUCTS] = sort_dict_list(products)
@@ -542,7 +541,7 @@ class Node(Base):
         elif self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
             # FIXME handle when there's a named complex with member list as well
             result[MEMBERS] = sort_dict_list(
-                edge.target.to_json()
+                edge.target.to_json(include_id=include_id, include_hash=include_hash)
                 for edge in self.out_edges.filter(Edge.relation == HAS_COMPONENT)
             )
 
