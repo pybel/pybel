@@ -71,6 +71,7 @@ Links
 
    cookbook
    troubleshooting
+   cli
 
 .. toctree::
    :caption: Reference

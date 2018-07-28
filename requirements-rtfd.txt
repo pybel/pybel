@@ -9,3 +9,6 @@ requests_file
 pyparsing
 six
 tqdm
+
+# for automatically generating CLI documentation. See: https://github.com/click-contrib/sphinx-click
+sphinx-click
