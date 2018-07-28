@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Module that contains the command line app
+"""Command line interface for PyBEL.
 
 Why does this file exist, and why not put this in __main__?
 You might be tempted to import things from __main__ later, but that will cause
