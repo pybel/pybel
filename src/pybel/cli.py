@@ -5,7 +5,7 @@
 Why does this file exist, and why not put this in __main__?
 You might be tempted to import things from __main__ later, but that will cause
 problems--the code will get executed twice:
- - When you run `python3 -m pybel` python will execute
+ - When you run ``python3 -m pybel`` python will execute
    ``__main__.py`` as a script. That means there won't be any
    ``pybel.__main__`` in ``sys.modules``.
  - When you import __main__ it will get executed again (as a module) because
@@ -45,12 +45,11 @@ connection_option = click.option(
 
 
 @with_plugins(iter_entry_points('pybel.cli_plugins'))
-@click.group(
-    help="PyBEL Command Line Utilities on {} using default connection {}".format(sys.executable,
-                                                                                 get_cache_connection()))
+@click.group(help="PyBEL Command Line Utilities on {} using default "
+                  "connection {}".format(sys.executable, get_cache_connection()))
 @click.version_option()
 def main():
-    """PyBEL Command Line """
+    """PyBEL Command Line."""
 
 
 @main.command()
@@ -58,12 +57,12 @@ def main():
 @click.option('--url', help='Input BEL file URL')
 @connection_option
 @click.option('--database-name', help='Input network name from database')
-@click.option('--csv', type=click.File('w'), help='Output path for *.csv')
-@click.option('--sif', type=click.File('w'), help='Output path for *.sif')
-@click.option('--gsea', type=click.File('w'), help='Output path for *.grp for gene set enrichment analysis')
-@click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
-@click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
-@click.option('--pickle', help='Output path for NetworkX *.gpickle')
+@click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
+@click.option('--sif', type=click.File('w'), help='Path to output an SIF file.')
+@click.option('--gsea', type=click.File('w'), help='Path to output a GRP file for gene set enrichment analysis')
+@click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape')
+@click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
+@click.option('--pickle', help='Path to output a pickle file.')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
