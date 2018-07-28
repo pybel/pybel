@@ -34,6 +34,14 @@ def _page(it):
     click.echo_via_pager('\n'.join(map(str, it)))
 
 
+connection_option = click.option(
+    '-c',
+    '--connection',
+    default=get_cache_connection(),
+    help='Connection to cache. Defaults to {}'.format(get_cache_connection()),
+)
+
+
 @click.group(
     help="PyBEL Command Line Utilities on {} using default connection {}".format(sys.executable,
                                                                                  get_cache_connection()))
@@ -45,8 +53,7 @@ def main():
 @main.command()
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @click.option('--url', help='Input BEL file URL')
-@click.option('-c', '--connection', default=get_cache_connection(),
-              help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
+@connection_option
 @click.option('--database-name', help='Input network name from database')
 @click.option('--csv', type=click.File('w'), help='Output path for *.csv')
 @click.option('--sif', type=click.File('w'), help='Output path for *.sif')
@@ -151,7 +158,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 @main.command()
 @click.argument('agents', nargs=-1)
 @click.option('--local', is_flag=True)
-@click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
+@connection_option
 @click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
 def machine(agents, local, connection, host):
     """Get content from the INDRA machine and upload to BEL Commons."""
@@ -181,7 +188,7 @@ def machine(agents, local, connection, host):
 
 
 @main.group()
-@click.option('-c', '--connection', help='Cache connection. Defaults to {}'.format(get_cache_connection()))
+@connection_option
 @click.pass_context
 def manage(ctx, connection):
     """Manage database"""
