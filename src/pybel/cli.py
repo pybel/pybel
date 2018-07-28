@@ -14,10 +14,12 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
+from pkg_resources import iter_entry_points
 import sys
 import time
 
 import click
+from click_plugins import with_plugins
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
@@ -42,6 +44,7 @@ connection_option = click.option(
 )
 
 
+@with_plugins(iter_entry_points('pybel.cli_plugins'))
 @click.group(
     help="PyBEL Command Line Utilities on {} using default connection {}".format(sys.executable,
                                                                                  get_cache_connection()))

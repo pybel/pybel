@@ -32,6 +32,7 @@ INSTALL_REQUIRES = [
     'networkx==1.11',
     'sqlalchemy',
     'click',
+    'click-plugins',
     'requests',
     'requests_file',
     'pyparsing',
