@@ -353,7 +353,7 @@ class BELGraph(networkx.MultiDiGraph):
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
     def add_unqualified_edge(self, u, v, relation):
-        """Adds unique edge that has no annotations
+        """Add a unique edge that has no annotations.
 
         :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
         :type u: tuple or dict

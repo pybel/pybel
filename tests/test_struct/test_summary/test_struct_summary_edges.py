@@ -15,7 +15,10 @@ from pybel.testing.utils import n
 
 
 class TestEdgeSummary(unittest.TestCase):
+    """Test summary functions for edges."""
+
     def test_1(self):
+        """Test iterating over annotation/value pairs."""
         graph = BELGraph()
         u = protein('HGNC', name='U')
         v = protein('HGNC', name='V')
@@ -70,6 +73,7 @@ class TestEdgeSummary(unittest.TestCase):
         self.assertEqual(x['C', 'a'], sum(y.values()))
 
     def test_get_annotation_values(self):
+        """Test getting annotation values."""
         expected = {
             'Confidence': {'High', 'Low'},
             'Species': {'9606'}

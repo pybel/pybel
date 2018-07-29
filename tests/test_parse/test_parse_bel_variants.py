@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Test parsing variants."""
+
 import logging
 import unittest
 

@@ -149,6 +149,7 @@ class TestInduction(TestGraphMixin):
         self.assertEqual(3, subgraph.number_of_edges())
 
     def test_expand_upstream_causal_subgraph(self):
+        """Test expanding on the upstream causal subgraph."""
         a, b, c, d, e, f = [protein(namespace='test', name=i) for i in string.ascii_lowercase[:6]]
         citation, evidence = '', ''
 
@@ -187,6 +188,7 @@ class TestEdgePredicateBuilders(TestGraphMixin):
     """Tests for edge predicate builders."""
 
     def test_build_pmid_inclusion_filter(self):
+        """Test getting a sub-graph by a single PubMed identifier."""
         a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
         p1, p2, p3, p4 = n(), n(), n(), n()
 
@@ -215,6 +217,7 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertEqual(0, empty_subgraph.number_of_nodes())
 
     def test_build_pmid_set_inclusion_filter(self):
+        """Test getting a sub-graph by a set of PubMed identifiers."""
         a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
         p1, p2, p3, p4, p5, p6 = n(), n(), n(), n(), n(), n()
 
@@ -246,6 +249,7 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertEqual(0, empty_subgraph.number_of_nodes())
 
     def test_build_author_inclusion_filter(self):
+        """Test getting a sub-graph by a single author."""
         a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
         a1, a2, a3, a4, a5 = n(), n(), n(), n(), n()
 
@@ -294,8 +298,9 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertEqual(0, subgraph3.number_of_nodes())
 
     def test_build_author_set_inclusion_filter(self):
+        """Test getting a sub-graph by a set of authors."""
         a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
-        a1, a2, a3, a4, a5 = n(), n(), n(), n(), n()
+        a1, a2, a3, a4 = n(), n(), n(), n()
 
         c1 = {
             CITATION_TYPE: CITATION_TYPE_PUBMED,

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for manager functions handling BEL networks."""
+
 from __future__ import unicode_literals
 
 import logging
@@ -1405,7 +1407,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_no_node_name(self, mock):
-        """Test that a node whose namespace is in the uncached namespaces set can't be added"""
+        """Test that a node whose namespace is in the uncached namespaces set can't be added."""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
         dummy_namespace = n()
@@ -1422,7 +1424,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_no_node_fusion_3p(self, mock):
-        """Test that a fusion node whose 3P partner's namespace is in the uncached namespaces set can't be added"""
+        """Test that a fusion node whose 3P partner's namespace is in the uncached namespaces set can't be added."""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
         dummy_namespace_name = n()
@@ -1444,7 +1446,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_no_node_fusion_5p(self, mock):
-        """Test that a node whose namespace is in the uncached namespaces set can't be added"""
+        """Test that a node whose namespace is in the uncached namespaces set can't be added."""
         dummy_namespace_name = n()
 
         node_data = protein_fusion(
@@ -1463,7 +1465,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_no_protein_modification(self, mock):
-        """Test that a protein node whose pmod variant is in the uncached namespaces set can't be added"""
+        """Test that a protein node whose pmod variant is in the uncached namespaces set can't be added."""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
         dummy_namespace_name = n()
@@ -1485,7 +1487,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_no_gene_modification(self, mock):
-        """Test that a gene node whose gmod variant is in the uncached namespaces set can't be added"""
+        """Test that a gene node whose gmod variant is in the uncached namespaces set can't be added."""
         graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
 
         dummy_namespace_name = n()
@@ -1507,7 +1509,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_no_translocation(self, mock):
-        """This test checks that a translocation using custom namespaces doesn't get stored"""
+        """Test that a translocation using custom namespaces doesn't get stored."""
         graph = BELGraph(name='dummy graph', version='0.0.1')
 
         dummy_namespace_name = n()
@@ -1536,7 +1538,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_no_location(self, mock):
-        """Tests that when using a custom namespace in the location the edge doesn't get stored"""
+        """Test that when using a custom namespace in the location the edge doesn't get stored."""
         graph = BELGraph(name='dummy graph', version='0.0.1')
         dummy_namespace_name = n()
         dummy_url = n()
@@ -1562,8 +1564,8 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_no_activity(self, mock):
-        """Tests that when an uncached custom namespace is used in the activity on an edge, the edge doesn't get
-        stored"""
+        """Test that when an uncached custom namespace is used in the activity on an edge, the edge doesn't get
+        stored."""
         graph = BELGraph(name='dummy graph', version='0.0.1')
         dummy_namespace_name = n()
         dummy_url = n()
@@ -1587,7 +1589,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_regex_lookup(self, mock):  # FIXME this test needs to be put somewhere else
-        """Tests that regular expression nodes get love too"""
+        """Test that regular expression nodes get love too."""
         graph = BELGraph(name='Regular Expression Test Graph', description='Help test regular expression namespaces',
                          version='1.0.0')
         dbsnp = 'dbSNP'
