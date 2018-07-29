@@ -4,12 +4,11 @@
 
 import unittest
 
-from six import string_types
-
 from pybel import BELGraph
 from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, PART_OF, unqualified_edge_code
 from pybel.dsl import protein
 from pybel.testing.utils import n
+from six import string_types
 
 PART_OF_CODE = unqualified_edge_code[PART_OF]
 

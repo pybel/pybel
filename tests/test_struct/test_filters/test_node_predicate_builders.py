@@ -104,7 +104,6 @@ class TestNodePredicateBuilders(unittest.TestCase):
 
     def test_build_node_data_search(self):
         """Test build_node_data_search."""
-
         def test_key_predicate(datum):
             """Check the data is greater than zero.
 

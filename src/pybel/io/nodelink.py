@@ -25,7 +25,7 @@ __all__ = [
 
 
 def to_json(graph):
-    """Converts this graph to a Node-Link JSON object
+    """Convert this graph to a Node-Link JSON object.
 
     :param BELGraph graph: A BEL graph
     :return: A Node-Link JSON object representing the given graph
@@ -33,8 +33,8 @@ def to_json(graph):
     """
     graph_json_dict = node_link_data(graph)
     graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
-        k: list(sorted(v))
-        for k, v in graph_json_dict['graph'][GRAPH_ANNOTATION_LIST].items()
+        keyword: list(sorted(values))
+        for keyword, values in graph_json_dict['graph'][GRAPH_ANNOTATION_LIST].items()
     }
     graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = list(graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES])
 
@@ -42,7 +42,7 @@ def to_json(graph):
 
 
 def to_json_path(graph, path, **kwargs):
-    """Writes this graph to the given path as a Node-Link JSON
+    """Write this graph to the given path as a Node-Link JSON.
 
     :param BELGraph graph: A BEL graph
     :param str path: A file path
@@ -52,7 +52,7 @@ def to_json_path(graph, path, **kwargs):
 
 
 def to_json_file(graph, file, **kwargs):
-    """Writes this graph as Node-Link JSON to a file
+    """Write this graph as Node-Link JSON to a file.
 
     :param BELGraph graph: A BEL graph
     :param file file: A write-supporting file or file-like object
@@ -62,7 +62,7 @@ def to_json_file(graph, file, **kwargs):
 
 
 def to_jsons(graph, **kwargs):
-    """Dumps this graph as a Node-Link JSON object to a string
+    """Dump this graph as a Node-Link JSON object to a string.
 
     :param BELGraph graph: A BEL graph
     :return: A string representation of the Node-Link JSON produced for this graph by :func:`pybel.to_json`
@@ -73,7 +73,7 @@ def to_jsons(graph, **kwargs):
 
 
 def from_json(graph_json_dict, check_version=True):
-    """Builds a graph from Node-Link JSON Object
+    """Build a graph from Node-Link JSON Object.
 
     :param dict graph_json_dict: A JSON dictionary representing a graph
     :param bool check_version: Checks if the graph was produced by this version of PyBEL
@@ -88,7 +88,7 @@ def from_json(graph_json_dict, check_version=True):
 
 
 def from_json_path(path, check_version=True):
-    """Builds a graph from a file containing Node-Link JSON
+    """Build a graph from a file containing Node-Link JSON.
 
     :param str path: A file path. Expands user.
     :param bool check_version: Checks if the graph was produced by this version of PyBEL
@@ -99,7 +99,7 @@ def from_json_path(path, check_version=True):
 
 
 def from_json_file(file, check_version=True):
-    """Builds a graph from the Node-Link JSON contained in the given file
+    """Build a graph from the Node-Link JSON contained in the given file.
 
     :param file file: A readable file or file-like
     :param bool check_version: Checks if the graph was produced by this version of PyBEL
@@ -110,7 +110,7 @@ def from_json_file(file, check_version=True):
 
 
 def from_jsons(graph_json_str, check_version=True):
-    """Reads a BEL graph from a Node-Link JSON string
+    """Read a BEL graph from a Node-Link JSON string.
 
     :param str graph_json_str: A Node-Link JSON string produced by PyBEL
     :param bool check_version: Checks if the graph was produced by this version of PyBEL

@@ -12,7 +12,6 @@ from collections import Counter, defaultdict
 import sqlalchemy.exc
 from sqlalchemy import not_
 
-import pybel
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME,
@@ -464,23 +463,16 @@ class TestEnsure(TemporaryCacheMixin):
 
 
 class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
-    """Tests that the cache can be queried"""
+    """Tests that the cache can be queried."""
 
     @classmethod
     def setUpClass(cls):
+        """Set up the class with a BEL graph and its corresponding SQLAlchemy model."""
         super(TestEdgeStore, cls).setUpClass()
 
-        @mock_bel_resources
-        def get_graph(mock):
-            return pybel.from_path(test_bel_simple, manager=cls.manager, allow_nested=True)
-
-        cls.graph = get_graph()
-
-        @mock_bel_resources
-        def insert_graph(mock):
+        with mock_bel_resources:
+            cls.graph = from_path(test_bel_simple, manager=cls.manager, allow_nested=True)
             cls.network = cls.manager.insert_graph(cls.graph, store_parts=True)
-
-        insert_graph()
 
     def test_citations(self):
         citations = self.manager.session.query(models.Citation).all()

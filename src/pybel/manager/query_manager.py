@@ -10,7 +10,7 @@ from sqlalchemy import and_, func, or_
 
 from .lookup_manager import LookupManager
 from .models import Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
-from ..constants import *
+from ..constants import CITATION_TYPE_PUBMED
 from ..struct import BELGraph
 from ..utils import hash_node, parse_datetime
 
@@ -146,7 +146,7 @@ class QueryManager(LookupManager):
 
     @staticmethod
     def _add_edge_function_filter(query, edge_node_id, node_type):
-        """See usage in self.query_edges"""
+        """See usage in self.query_edges."""
         return query.join(Node, edge_node_id == Node.id).filter(Node.type == node_type)
 
     def query_edges(self, bel=None, source_function=None, source=None, target_function=None, target=None,

@@ -21,9 +21,9 @@ def to_neo4j(graph, neo_connection, context=None):
     :type neo_connection: :class:`py2neo.Graph`
     :param str context: A disease context to allow for multiple disease models in one neo4j instance.
                         Each edge will be assigned an attribute :code:`pybel_context` with this value
-    
+
     Example Usage:
-    
+
     >>> import pybel, py2neo
     >>> url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
     >>> g = pybel.from_url(url)

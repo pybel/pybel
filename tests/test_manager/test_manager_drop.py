@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pybel import BELGraph
-from pybel.constants import *
+from pybel.constants import INCREASES, PROTEIN
 from pybel.dsl import protein
 from pybel.manager.models import Edge, Namespace, NamespaceEntry, Network, Node
 from pybel.testing.cases import TemporaryCacheMixin
@@ -30,10 +30,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, graph, namespaces)
         make_dummy_annotations(self.manager, graph, annotations)
 
-        graph.add_qualified_edge(
+        graph.add_increases(
             yfg1,
             yfg2,
-            relation=INCREASES,
             evidence=test_evidence_text,
             citation=test_citation_dict,
             annotations={

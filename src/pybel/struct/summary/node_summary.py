@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains functions that provide summaries of the nodes in a graph"""
+"""This module contains functions that provide summaries of the nodes in a graph."""
 
 from collections import Counter
 
 from ..filters.node_predicates import has_variant
-from ...constants import *
+from ...constants import FUNCTION, FUSION, KIND, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, VARIANTS
 
 __all__ = [
     'get_functions',
@@ -20,7 +20,7 @@ __all__ = [
 
 
 def _function_iterator(graph):
-    """Iterates over the functions in a graph"""
+    """Iterate over the functions in a graph."""
     return (
         data[FUNCTION]
         for data in graph.iter_data()
@@ -28,7 +28,7 @@ def _function_iterator(graph):
 
 
 def get_functions(graph):
-    """Gets the set of all functions used in this graph
+    """Get the set of all functions used in this graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A set of functions
@@ -38,7 +38,7 @@ def get_functions(graph):
 
 
 def count_functions(graph):
-    """Counts the frequency of each function present in a graph
+    """Count the frequency of each function present in a graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A Counter from {function: frequency}
@@ -56,7 +56,7 @@ def _iterate_namespaces(graph):
 
 
 def count_namespaces(graph):
-    """Counts the frequency of each namespace across all nodes (that have namespaces)
+    """Count the frequency of each namespace across all nodes (that have namespaces).
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A Counter from {namespace: frequency}
@@ -66,7 +66,7 @@ def count_namespaces(graph):
 
 
 def get_namespaces(graph):
-    """Gets the set of all namespaces used in this graph
+    """Get the set of all namespaces used in this graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A set of namespaces
@@ -76,7 +76,7 @@ def get_namespaces(graph):
 
 
 def get_unused_namespaces(graph):
-    """Gets the set of all namespaces that are defined in a graph, but are never used.
+    """Get the set of all namespaces that are defined in a graph, but are never used.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A set of namespaces that are included but not used
@@ -86,7 +86,7 @@ def get_unused_namespaces(graph):
 
 
 def _identifier_filtered_iterator(graph):
-    """Iterates over names in the given namespace"""
+    """Iterate over names in the given namespace."""
     for data in graph.iter_data():
         if NAMESPACE in data:
             yield data[NAMESPACE], data[NAME]
@@ -97,20 +97,21 @@ def _identifier_filtered_iterator(graph):
 
 
 def _namespace_filtered_iterator(graph, namespace):
-    """Iterates over names in the given namespace"""
+    """Iterate over names in the given namespace."""
     for it_namespace, name in _identifier_filtered_iterator(graph):
         if namespace == it_namespace:
             yield name
 
 
 def count_names_by_namespace(graph, namespace):
-    """Get the set of all of the names in a given namespace that are in the graph. Raises :data:`IndexError` if the
-    namespace is not defined in the graph.
+    """Get the set of all of the names in a given namespace that are in the graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :param str namespace: A namespace keyword
     :return: A counter from {name: frequency}
     :rtype: collections.Counter
+
+    :raises IndexError: if the namespace is not defined in the graph.
     """
     if namespace not in graph.defined_namespace_keywords:
         raise IndexError('{} is not defined in {}'.format(namespace, graph))
@@ -119,13 +120,14 @@ def count_names_by_namespace(graph, namespace):
 
 
 def get_names_by_namespace(graph, namespace):
-    """Get the set of all of the names in a given namespace that are in the graph. Raises :data:`IndexError` if the
-    namespace is not defined in the graph.
+    """Get the set of all of the names in a given namespace that are in the graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :param str namespace: A namespace keyword
     :return: A set of names belonging to the given namespace that are in the given graph
     :rtype: set[str]
+
+    :raises IndexError: if the namespace is not defined in the graph.
     """
     if namespace not in graph.defined_namespace_keywords:
         raise IndexError('{} is not defined in {}'.format(namespace, graph))
