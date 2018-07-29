@@ -5,6 +5,7 @@
 import bisect
 import logging
 import random
+from operator import itemgetter
 
 from ..utils import remove_isolated_nodes, update_metadata, update_node_helper
 from ...pipeline import transformation
@@ -87,7 +88,7 @@ def get_random_node(graph, node_blacklist):
     try:
         nodes, degrees = zip(*(
             (node, degree)
-            for node, degree in graph.degree_iter()
+            for node, degree in sorted(graph.degree_iter(), key=itemgetter(1))
             if node not in node_blacklist
         ))
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter
