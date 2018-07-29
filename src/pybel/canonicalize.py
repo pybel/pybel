@@ -5,10 +5,16 @@
 from __future__ import print_function
 
 import itertools as itt
-
 import logging
 
-from .constants import *
+from .constants import (
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, CITATION_REFERENCE, CITATION_TYPE,
+    COMPLEX, COMPOSITE, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START,
+    FRAGMENT_STOP, FROM_LOC, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE, GMOD, GOCC_KEYWORD,
+    GOCC_LATEST, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
+    PARTNER_5P, PATHOLOGY, PMOD, PMOD_ORDER, PRODUCTS, PROTEIN, PYBEL_AUTOEVIDENCE, RANGE_3P, RANGE_5P, REACTANTS,
+    REACTION, RELATION, RNA, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS, rev_abundance_labels, unqualified_edge_code,
+)
 from .resources.document import make_knowledge_header
 from .utils import ensure_quotes
 
@@ -24,7 +30,7 @@ log = logging.getLogger(__name__)
 
 
 def postpend_location(bel_string, location_model):
-    """Rips off the closing parentheses and adds canonicalized modification.
+    """Rip off the closing parentheses and adds canonicalized modification.
 
     I did this because writing a whole new parsing model for the data would be sad and difficult
 
@@ -48,18 +54,20 @@ def _get_variant_name(tokens):
     if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
         return tokens[IDENTIFIER][NAME]
     else:
-        return'{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
+        return '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
 
 
 def _get_fragment_range_str(tokens):
     if FRAGMENT_MISSING in tokens:
-        return'?'
+        return '?'
     else:
         return '{}_{}'.format(tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
 
 
 def variant_to_bel(tokens):  # Replace with class-method of different Variant instances
-    """Canonicalizes the variant dictionary produced by one of :func:`pybel.dsl.hgvs`, :func:`pybel.dsl.fragment`,
+    """Canonicalize a variant dictionary.
+
+    Assumes the dictionary was produced by one of :func:`pybel.dsl.hgvs`, :func:`pybel.dsl.fragment`,
     :func:`pybel.dsl.pmod`, or :func:`pybel.dsl.gmod`.
 
     :param dict tokens: A variant data dictionary
@@ -88,7 +96,7 @@ def variant_to_bel(tokens):  # Replace with class-method of different Variant in
 
 
 def fusion_range_to_bel(tokens):
-    """
+    """Convert a fusion range to BEL.
 
     :param tokens:
     :rtype: str
@@ -100,7 +108,7 @@ def fusion_range_to_bel(tokens):
 
 
 def node_to_bel(data):
-    """Returns a node data dictionary as a BEL string
+    """Return a node data dictionary as a BEL string.
 
     :param dict data: A PyBEL node data dictionary
     :rtype: str
@@ -148,7 +156,7 @@ def node_to_bel(data):
 
 
 def _decanonicalize_edge_node(node, edge_data, node_position):
-    """Canonicalizes a node with its modifiers stored in the given edge to a BEL string
+    """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
     :param dict node: A PyBEL node data dictionary
     :param dict edge_data: A PyBEL edge data dictionary
@@ -207,7 +215,7 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
 
 
 def edge_to_bel(u, v, data, sep=None):
-    """Takes two nodes and gives back a BEL string representing the statement
+    """Take two nodes and gives back a BEL string representing the statement.
 
     :param dict u: The edge's source's PyBEL node data dictionary
     :param dict v: The edge's target's PyBEL node data dictionary
@@ -233,7 +241,7 @@ def _sort_qualified_edges_helper(edge_tuple):
 
 
 def sort_qualified_edges(graph):
-    """Returns the qualified edges, sorted first by citation, then by evidence, then by annotations
+    """Return the qualified edges, sorted first by citation, then by evidence, then by annotations.
 
     :param BELGraph graph: A BEL graph
     :rtype: tuple[tuple,tuple,int,dict]
@@ -248,7 +256,7 @@ def sort_qualified_edges(graph):
 
 
 def _citation_sort_key(t):
-    """Makes a confusing 4 tuple sortable by citation
+    """Make a confusing 4 tuple sortable by citation.
 
     :param tuple t: A 4-tuple of source node, target node, key, and data
     :rtype: tuple[str,str]
@@ -257,7 +265,7 @@ def _citation_sort_key(t):
 
 
 def _evidence_sort_key(t):
-    """Makes a confusing 4 tuple sortable by citation
+    """Make a confusing 4 tuple sortable by citation,
 
     :param tuple t: A 4-tuple of source node, target node, key, and data
     :rtype: str
@@ -266,7 +274,7 @@ def _evidence_sort_key(t):
 
 
 def _set_annotation_to_str(annotation_data, key):
-    """
+    """Return a set annotation string.
 
     :param dict[str,dict[str,bool] annotation_data:
     :param key:
@@ -281,8 +289,12 @@ def _set_annotation_to_str(annotation_data, key):
 
     return 'SET {} = {{{}}}'.format(key, ', '.join(x))
 
-def _unset_annotation_to_str(keys):
 
+def _unset_annotation_to_str(keys):
+    """Return an unset annotation string.
+
+    :rtype: str
+    """
     if len(keys) == 1:
         return 'UNSET {}'.format(list(keys)[0])
 
@@ -309,7 +321,7 @@ def _to_bel_lines_header(graph):
 
 
 def group_citation_edges(edges_iter):
-    """Returns an iterator over pairs of citation values and their corresponding edge iterators
+    """Return an iterator over pairs of citation values and their corresponding edge iterators.
 
     :param tuple[tuple,tuple,int,dict] edges_iter: An iterator over the 4-tuples of edges
     :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
@@ -318,7 +330,7 @@ def group_citation_edges(edges_iter):
 
 
 def group_evidence_edges(edges_iter):
-    """Returns an iterator over pairs of evidence values and their corresponding edge iterators
+    """Return an iterator over pairs of evidence values and their corresponding edge iterators.
 
     :param tuple[tuple,tuple,int,dict] edges_iter: An iterator over the 4-tuples of edges
     :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
@@ -391,7 +403,7 @@ def _to_bel_lines_footer(graph):
 
 
 def to_bel_lines(graph):
-    """Returns an iterable over the lines of the BEL graph as a canonical BEL Script (.bel)
+    """Return an iterable over the lines of the BEL graph as a canonical BEL Script (.bel).
 
     :param pybel.BELGraph graph: the BEL Graph to output as a BEL Script
     :return: An iterable over the lines of the representative BEL script
@@ -405,7 +417,7 @@ def to_bel_lines(graph):
 
 
 def to_bel(graph, file=None):
-    """Outputs the BEL graph as canonical BEL to the given file/file-like/stream. Defaults to standard out.
+    """Output the BEL graph as canonical BEL to the given file/file-like/stream.
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
     :param file file: A writable file-like object. If None, defaults to standard out.
@@ -415,7 +427,7 @@ def to_bel(graph, file=None):
 
 
 def to_bel_path(graph, path, mode='w', **kwargs):
-    """Writes the BEL graph as a canonical BEL Script to the given path
+    """Write the BEL graph as a canonical BEL Script to the given path.
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
     :param str path: A file path
@@ -426,8 +438,9 @@ def to_bel_path(graph, path, mode='w', **kwargs):
 
 
 def calculate_canonical_name(graph, node):
-    """Calculates the canonical name for a given node. If it is a simple node, uses the already given name.
-    Otherwise, it uses the BEL string.
+    """Calculatesthe canonical name for a given node.
+
+    If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
 
     :param BELGraph graph: A BEL Graph
     :param tuple node: A PyBEL node tuple
@@ -455,7 +468,7 @@ def calculate_canonical_name(graph, node):
 
 
 def _canonicalize_edge_modifications(data):
-    """Returns the SUBJECT or OBJECT entry of a PyBEL edge data dictioanry as a canonicalized tuple
+    """Return the SUBJECT or OBJECT entry of a PyBEL edge data dictioanry as a canonicalized tuple.
 
     :param dict data: A PyBEL edge data dictionary
     :rtype: tuple
@@ -503,7 +516,7 @@ def _canonicalize_edge_modifications(data):
 
 
 def canonicalize_edge(data):
-    """Canonicalizes the edge to a tuple based on the relation, subject modifications, and object modifications
+    """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications.
 
     :param dict data: A PyBEL edge data dictionary
     :return: A 3-tuple that's specific for the edge (relation, subject, object)
