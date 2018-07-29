@@ -25,9 +25,9 @@ from .canonicalize import to_bel
 from .constants import get_cache_connection
 from .io import from_lines, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
 from .io.web import _get_host
-from .manager import Manager, defaults
+from .manager import Manager
 from .manager.database_io import to_database
-from .manager.models import Base, Edge, Namespace
+from .manager.models import Annotation, Base, Edge, Namespace
 
 log = logging.getLogger(__name__)
 
@@ -191,7 +191,7 @@ def drop(manager, yes):
 
 
 @manage.group()
-def namespace():
+def namespaces():
     """Manage namespaces."""
 
 
@@ -200,23 +200,7 @@ def annotations():
     """Manage annotations."""
 
 
-@namespace.command()
-@click.pass_obj
-def ensure(manager):
-    """Set up default cache with default definitions."""
-    for url in defaults.fraunhofer_namespaces:
-        manager.ensure_namespace(url)
-
-
-@annotations.command()
-@click.pass_obj
-def ensure(manager):
-    """Set up default cache with default annotations."""
-    for url in defaults.fraunhofer_annotations:
-        manager.ensure_annotation(url)
-
-
-@namespace.command()
+@namespaces.command()
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
@@ -232,7 +216,17 @@ def insert(manager, url):
     manager.ensure_annotation(url)
 
 
-@namespace.command()
+def _ls(manager, model_cls, model_id):
+    if model_id:
+        n = manager.session.query(model_cls).get(model_id)
+        _page(n.entries)
+
+    else:
+        for n in manager.session.query(model_cls).order_by(model_cls.uploaded.desc()):
+            click.echo('\t'.join(map(str, (n.id, n.keyword, n.version, n.url))))
+
+
+@namespaces.command()
 @click.option('--url', help='Specific resource URL to list')
 @click.option('-i', '--namespace-id', help='Specific resource URL to list')
 @click.pass_obj
@@ -241,32 +235,24 @@ def ls(manager, url, namespace_id):
     if url:
         n = manager.ensure_namespace(url)
         _page(n.entries)
-
-    elif namespace_id:
-        n = manager.session.query(Namespace).get(namespace_id)
-        _page(n.entries)
-
     else:
-        for n in manager.session.query(Namespace).order_by(Namespace.uploaded.desc()):
-            click.echo('\t'.join(map(str, (n.id, n.keyword, n.version, n.url))))
+        _ls(manager, Namespace, namespace_id)
 
 
 @annotations.command()
 @click.option('--url', help='Specific resource URL to list')
+@click.option('-i', '--annotation-id', help='Specific resource URL to list')
 @click.pass_obj
-def ls(manager, url):
+def ls(manager, url, annotation_id):
     """List cached annotations."""
-    if not url:
-        for annotation, in manager.list_annotations():
-            click.echo(annotation.url)
-
+    if url:
+        n = manager.ensure_annotation(url)
+        _page(n.entries)
     else:
-        annotation = manager.ensure_annotation(url)
-        for name in annotation.get_entry_names():
-            click.echo(name)
+        _ls(manager, Annotation, annotation_id)
 
 
-@namespace.command()
+@namespaces.command()
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
@@ -283,11 +269,11 @@ def drop(manager, url):
 
 
 @manage.group()
-def network():
+def networks():
     """Manage networks."""
 
 
-@network.command()
+@networks.command()
 @click.pass_obj
 def ls(manager):
     """List network names, versions, and optionally, descriptions."""
@@ -295,7 +281,7 @@ def ls(manager):
         click.echo('{}\t{}\t{}'.format(n.id, n.name, n.version))
 
 
-@network.command()
+@networks.command()
 @click.option('-n', '--network-id', type=int, help='Identifier of network to drop')
 @click.option('-y', '--yes', is_flag=True, help='Drop all networks without confirmation if no identifier is given')
 @click.pass_obj
@@ -304,16 +290,16 @@ def drop(manager, network_id, yes):
     if network_id:
         manager.drop_network_by_id(network_id)
 
-    if yes or click.confirm('Drop all networks?'):
+    elif yes or click.confirm('Drop all networks?'):
         manager.drop_networks()
 
 
 @manage.group()
-def edge():
+def edges():
     """Manage edges."""
 
 
-@edge.command()
+@edges.command()
 @click.option('--offset', type=int)
 @click.option('--limit', type=int, default=10)
 @click.pass_obj
