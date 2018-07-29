@@ -6,13 +6,14 @@ from six import string_types
 
 from pybel import BELGraph
 from pybel.constants import (
-    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION, HAS_VARIANT, IDENTIFIER,
-    INCREASES, NAME, NAMESPACE, PROTEIN, unqualified_edge_code,
+    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION, IDENTIFIER, NAME, NAMESPACE, PART_OF, PROTEIN,
+    unqualified_edge_code,
 )
 from pybel.dsl import entity, protein
 from pybel.examples import sialic_acid_graph
 from pybel.testing.utils import n
 
+PART_OF_CODE = unqualified_edge_code[PART_OF]
 
 class TestStruct(unittest.TestCase):
     def test_example_metadata(self):
@@ -211,22 +212,19 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertTrue(annotations['Confidence']['Very High'])
 
     def test_get_unqualified_edge(self):
-        test_source = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG'))
-        test_target = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG2'))
+        """Test adding an unqualified edge."""
+        test_source = protein(namespace='TEST', name='YFG')
+        test_target = protein(namespace='TEST', name='YFG2')
 
-        self.graph.add_unqualified_edge(
-            test_source,
-            test_target,
-            relation=HAS_VARIANT,
-        )
+        self.graph.add_part_of(test_source,test_target)
 
-        citation = self.graph.get_edge_citation(test_source, test_target, unqualified_edge_code[HAS_VARIANT])
+        citation = self.graph.get_edge_citation(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
         self.assertIsNone(citation)
 
-        evidence = self.graph.get_edge_evidence(test_source, test_target, unqualified_edge_code[HAS_VARIANT])
+        evidence = self.graph.get_edge_evidence(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
         self.assertIsNone(evidence)
 
-        annotations = self.graph.get_edge_annotations(test_source, test_target, unqualified_edge_code[HAS_VARIANT])
+        annotations = self.graph.get_edge_annotations(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
         self.assertIsNone(annotations)
 
     def test_get_node_name(self):
