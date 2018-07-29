@@ -106,7 +106,7 @@ def to_gsea(graph, file=None):
     print('# {}'.format(graph.name), file=file)
     nodes = {
         data[NAME]
-        for data in graph.iter_data()
+        for _, data in graph.nodes_iter(data=True)
         if NAMESPACE in data and data[NAMESPACE] == 'HGNC'
     }
     for node in sorted(nodes):
