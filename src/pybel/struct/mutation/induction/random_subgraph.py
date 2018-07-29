@@ -94,14 +94,9 @@ def get_random_node(graph, node_blacklist):
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter
         return
 
-    normalized_degrees = [
-        degree / (2 * graph.number_of_edges())
-        for degree in degrees
-    ]
-
-    wrg = WeightedRandomGenerator(normalized_degrees)
-
-    return nodes[wrg.next()]
+    wrg = WeightedRandomGenerator(degrees)
+    index = wrg.next()
+    return nodes[index]
 
 
 def _helper(rv, graph, number_edges_remaining, no_grow, original_node_count):
