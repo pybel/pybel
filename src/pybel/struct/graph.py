@@ -603,7 +603,8 @@ class BELGraph(networkx.MultiDiGraph):
     def add_node_from_data(self, attr_dict):
         """Convert a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
-        :param dict attr_dict: A PyBEL node data dictionary
+        :param attr_dict: A PyBEL node data dictionary
+        :type attr_dict: BaseEntity or dict
         :return: A PyBEL node tuple
         :rtype: tuple
         """
@@ -638,7 +639,8 @@ class BELGraph(networkx.MultiDiGraph):
     def has_node_with_data(self, attr_dict):
         """Check if this graph has a node with the given data dictionary.
 
-        :param dict attr_dict: A PyBEL node data dictionary
+        :param attr_dict: A PyBEL node data dictionary
+        :type attr_dict: BaseEntity or dict
         :rtype: bool
         """
         node_tuple = node_to_tuple(attr_dict)
