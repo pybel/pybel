@@ -4,11 +4,15 @@
 
 import unittest
 
-from pybel import BELGraph
-from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, PART_OF, unqualified_edge_code
-from pybel.dsl import protein
-from pybel.testing.utils import n
 from six import string_types
+
+from pybel import BELGraph
+from pybel.constants import (
+    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, IDENTIFIER, PART_OF,
+    unqualified_edge_code,
+)
+from pybel.dsl import hgvs, protein
+from pybel.testing.utils import n
 
 PART_OF_CODE = unqualified_edge_code[PART_OF]
 
@@ -207,3 +211,17 @@ class TestGetGraphProperties(unittest.TestCase):
         test_description = n()
         self.graph.set_node_description(node.as_tuple(), test_description)
         self.assertEqual(test_description, self.graph.get_node_description(node.as_tuple()))
+
+    def test_add_node_with_variant(self):
+        """Test that the identifier is carried through to the child."""
+        graph = BELGraph()
+        namespace, name, identifier, variant_name = n(), n(), n(), n()
+        node = protein(namespace=namespace, name=name, identifier=identifier, variants=hgvs(variant_name))
+        parent = node.get_parent()
+
+        graph.add_node_from_data(node)
+
+        self.assertEqual(2, graph.number_of_nodes())
+
+        self.assertIn(IDENTIFIER, graph.node[node.as_tuple()])
+        self.assertIn(IDENTIFIER, graph.node[parent.as_tuple()])

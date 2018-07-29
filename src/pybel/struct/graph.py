@@ -617,29 +617,21 @@ class BELGraph(networkx.MultiDiGraph):
         if VARIANTS in attr_dict:
             parent_node_dict = {
                 key: attr_dict[key]
-                for key in (FUNCTION, NAME, NAMESPACE)
+                for key in (FUNCTION, NAME, NAMESPACE, IDENTIFIER)
+                if key in attr_dict
             }
-
-            if IDENTIFIER in attr_dict:
-                parent_node_dict[IDENTIFIER] = attr_dict[IDENTIFIER]
-
-            parent_node_tuple = self.add_node_from_data(parent_node_dict)
-
-            self.add_has_variant(parent_node_tuple, node_tuple)
+            self.add_has_variant(parent_node_dict, node_tuple)
 
         elif MEMBERS in attr_dict:
             for member in attr_dict[MEMBERS]:
-                member_node_tuple = self.add_node_from_data(member)
-                self.add_has_component(node_tuple, member_node_tuple)
+                self.add_has_component(node_tuple, member)
 
         elif PRODUCTS in attr_dict and REACTANTS in attr_dict:
             for reactant_tokens in attr_dict[REACTANTS]:
-                reactant_node_tuple = self.add_node_from_data(reactant_tokens)
-                self.add_unqualified_edge(node_tuple, reactant_node_tuple, HAS_REACTANT)
+                self.add_unqualified_edge(node_tuple, reactant_tokens, HAS_REACTANT)
 
             for product_tokens in attr_dict[PRODUCTS]:
-                product_node_tuple = self.add_node_from_data(product_tokens)
-                self.add_unqualified_edge(node_tuple, product_node_tuple, HAS_PRODUCT)
+                self.add_unqualified_edge(node_tuple, product_tokens, HAS_PRODUCT)
 
         return node_tuple
 
