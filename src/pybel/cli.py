@@ -159,7 +159,7 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 
 @main.command()
 @click.argument('agents', nargs=-1)
-@click.option('--local', is_flag=True)
+@click.option('--local', is_flag=True, help='Upload to local database.')
 @connection_option
 @click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
 def machine(agents, local, connection, host):
@@ -193,7 +193,7 @@ def machine(agents, local, connection, host):
 @connection_option
 @click.pass_context
 def manage(ctx, connection):
-    """Manage database"""
+    """Manage the database."""
     ctx.obj = Manager(connection=connection)
     Base.metadata.bind = ctx.obj.engine
     Base.query = ctx.obj.session.query_property()
@@ -212,19 +212,19 @@ def setup(manager, debug):
 @click.option('-y', '--yes', is_flag=True)
 @click.pass_obj
 def drop(manager, yes):
-    """Drops cache"""
+    """Drop the database."""
     if yes or click.confirm('Drop database?'):
         manager.drop_all()
 
 
 @manage.group()
 def namespace():
-    """Manage namespaces"""
+    """Manage namespaces."""
 
 
 @manage.group()
 def annotations():
-    """Manage annotations"""
+    """Manage annotations."""
 
 
 @namespace.command()
@@ -253,7 +253,7 @@ def ensure(manager, debug):
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
-    """Manually add namespace by URL"""
+    """Add a namespace by URL."""
     manager.ensure_namespace(url)
 
 
@@ -261,7 +261,7 @@ def insert(manager, url):
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
-    """Manually add annotation by URL"""
+    """Add an annotation by URL."""
     manager.ensure_annotation(url)
 
 
@@ -270,7 +270,7 @@ def insert(manager, url):
 @click.option('-i', '--namespace-id', help='Specific resource URL to list')
 @click.pass_obj
 def ls(manager, url, namespace_id):
-    """Lists cached namespaces."""
+    """List cached namespaces."""
     if url:
         n = manager.ensure_namespace(url)
         _page(n.entries)
@@ -288,7 +288,7 @@ def ls(manager, url, namespace_id):
 @click.option('--url', help='Specific resource URL to list')
 @click.pass_obj
 def ls(manager, url):
-    """Lists cached annotations"""
+    """List cached annotations."""
     if not url:
         for annotation, in manager.list_annotations():
             click.echo(annotation.url)
@@ -303,7 +303,7 @@ def ls(manager, url):
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
-    """Drops a namespace by URL"""
+    """Drop a namespace by URL."""
     manager.drop_namespace_by_url(url)
 
 
@@ -311,19 +311,19 @@ def drop(manager, url):
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
-    """Drops an annotation by URL"""
+    """Drop an annotation by URL."""
     manager.drop_annotation_by_url(url)
 
 
 @manage.group()
 def network():
-    """Manage networks"""
+    """Manage networks."""
 
 
 @network.command()
 @click.pass_obj
 def ls(manager):
-    """Lists network names, versions, and optionally descriptions"""
+    """List network names, versions, and optionally, descriptions."""
     for n in manager.list_networks():
         click.echo('{}\t{}\t{}'.format(n.id, n.name, n.version))
 
@@ -333,7 +333,7 @@ def ls(manager):
 @click.option('-y', '--yes', is_flag=True, help='Drop all networks without confirmation if no identifier is given')
 @click.pass_obj
 def drop(manager, network_id, yes):
-    """Drops a network by its identifier or drops all networks"""
+    """Drop a network by its identifier or drop all networks."""
     if network_id:
         manager.drop_network_by_id(network_id)
 
@@ -343,7 +343,7 @@ def drop(manager, network_id, yes):
 
 @manage.group()
 def edge():
-    """Manage edges"""
+    """Manage edges."""
 
 
 @edge.command()
@@ -351,7 +351,7 @@ def edge():
 @click.option('--limit', type=int, default=10)
 @click.pass_obj
 def ls(manager, offset, limit):
-    """Lists edges"""
+    """List edges."""
     q = manager.session.query(Edge)
 
     if offset:
@@ -367,7 +367,7 @@ def ls(manager, offset, limit):
 @manage.command()
 @click.pass_obj
 def summarize(manager):
-    """Summarizes the contents of the database"""
+    """Summarize the contents of the database."""
     click.echo('Networks: {}'.format(manager.count_networks()))
     click.echo('Edges: {}'.format(manager.count_edges()))
     click.echo('Nodes: {}'.format(manager.count_nodes()))
