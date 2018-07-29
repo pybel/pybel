@@ -128,12 +128,16 @@ class BaseAbundance(BaseEntity):
         """
         return self.get(IDENTIFIER)
 
+    @property
+    def _priority_id(self):
+        return self.name or self.identifier
+
     def as_tuple(self):
         """Return this node as a PyBEL node tuple.
 
         :rtype: tuple
         """
-        return self[FUNCTION], self[NAMESPACE], self[NAME]
+        return self.function, self.namespace, self._priority_id
 
     def as_bel(self):
         """Return this node as a BEL string.
@@ -143,7 +147,7 @@ class BaseAbundance(BaseEntity):
         return "{}({}:{})".format(
             rev_abundance_labels[self.function],
             self[NAMESPACE],
-            ensure_quotes(self.identifier if self.identifier else self.name)
+            ensure_quotes(self._priority_id)
         )
 
 
