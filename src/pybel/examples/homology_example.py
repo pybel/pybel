@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""The following is an example of orthology annotations from
+"""An example with orthology statements.
+
+The following is an example of orthology annotations from
 `HomoloGene:37670 <https://www.ncbi.nlm.nih.gov/homologene?LinkName=gene_homologene&from_uid=5594>`_
-
-
 
 .. code-block: none
 
@@ -11,9 +11,6 @@
     SET Evidence = "M-CSF triggers the activation of extracellular signal-regulated protein kinases (ERK)-1/2."
     SET Species = 10090
     p(MGI:Csf1) increases kin(p(MGI:Mapk1))
-
-
-
 """
 
 from ..constants import INCREASES

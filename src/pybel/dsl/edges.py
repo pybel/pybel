@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains the DSL functions to add subject and object modifiers to :py:class:`pybel.BELGraphs`"""
+"""Internal DSL functions for edges."""
 
 from .utils import entity
 from ..constants import (
@@ -22,7 +22,7 @@ surface = entity(name='cell surface', namespace='GOCC')
 
 
 def _activity_helper(modifier, location=None):
-    """Help make activity function
+    """Make an activity dictionary.
 
     :param str modifier:
     :param Optional[dict] location: An entity from :func:`pybel.dsl.entity`
@@ -37,7 +37,7 @@ def _activity_helper(modifier, location=None):
 
 
 def activity(name=None, namespace=None, identifier=None, location=None):
-    """Makes a subject/object modifier dictionary
+    """Make a subject/object modifier dictionary.
 
     :param str name: The name of the activity. If no namespace given, uses BEL default namespace
     :param Optional[str] namespace: The namespace of the activity
@@ -58,7 +58,7 @@ def activity(name=None, namespace=None, identifier=None, location=None):
 
 
 def degradation(location=None):
-    """Adds the degradation
+    """Make a degradation dictionary.
 
     :param Optional[dict] location: An entity from :func:`pybel.dsl.entity` representing the location of the node
     :rtype: dict
@@ -67,7 +67,7 @@ def degradation(location=None):
 
 
 def translocation(from_loc, to_loc):
-    """Makes a translocation dict
+    """Make a translocation dictionary.
 
     :param dict from_loc: An entity dictionary from :func:`pybel.dsl.entity`
     :param dict to_loc: An entity dictionary from :func:`pybel.dsl.entity`
@@ -82,8 +82,10 @@ def translocation(from_loc, to_loc):
 
 
 def secretion():
-    """Convenient wrapper representing the :func:`translocation` from the intracellular location to the extracellular
-    space
+    """Make a secretion translocation dictionary.
+
+    This is a convenient wrapper representing the :func:`translocation` from the intracellular location to the
+    extracellular space.
 
     :rtype: dict
     """
@@ -94,7 +96,10 @@ def secretion():
 
 
 def cell_surface_expression():
-    """Convenient wrapper representing the :func:`translocation` from the intracellular location to the cell surface
+    """Make a cellular surface expression translocation dictionary.
+
+    This is a convenient wrapper representing the :func:`translocation` from the intracellular location to the cell
+    surface.
 
     :rtype: dict
     """

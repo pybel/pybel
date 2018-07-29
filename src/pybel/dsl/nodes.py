@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Internal DSL functions for nodes."""
+
 import abc
 
 import six
@@ -163,13 +165,14 @@ class abundance(BaseAbundance):
 
 
 class bioprocess(BaseAbundance):
-    """Builds a biological process node data dictionary"""
+    """Builds a biological process node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None):
-        """
-        :param str namespace: The name of the database used to identify this entity
-        :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
+        """Build a biological process node data dictionary.
+
+        :param str namespace: The name of the database used to identify this biological process
+        :param str name: The database's preferred name or label for this biological process
+        :param str identifier: The database's identifier for this biological process
 
         Example:
 
@@ -179,13 +182,14 @@ class bioprocess(BaseAbundance):
 
 
 class pathology(BaseAbundance):
-    """Builds a pathology node data dictionary"""
+    """Builds a pathology node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None):
-        """
-        :param str namespace: The name of the database used to identify this entity
-        :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
+        """Build a pathology node data dictionary.
+
+        :param str namespace: The name of the database used to identify this pathology
+        :param str name: The database's preferred name or label for this pathology
+        :param str identifier: The database's identifier for this pathology
 
         Example:
 
@@ -198,13 +202,14 @@ class CentralDogma(BaseAbundance):
     """Builds a central dogma (gene, mirna, rna, protein) node data dictionary"""
 
     def __init__(self, func, namespace, name=None, identifier=None, variants=None):
-        """
+        """Build a node data dictionary for a gene, RNA, miRNA, or protein.
+
         :param str func: The PyBEL function to use
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
         :param variants: A variant or list of variants
-        :type: variants: Variant or list[Variant]
+        :type: variants: None or Variant or list[Variant]
         """
         super(CentralDogma, self).__init__(func, namespace, name=name, identifier=identifier)
         if variants:
@@ -212,13 +217,17 @@ class CentralDogma(BaseAbundance):
 
     @property
     def variants(self):
-        """Returns the variants, if they exist
+        """Return this entity's variants, if they exist.
+
         :rtype: Optional[list[Variant]]
         """
         return self.get(VARIANTS)
 
     def as_tuple(self):
-        """Converts to a tuple"""
+        """Return this node as a PyBEL node tuple.
+
+        :rtype: tuple
+        """
         t = super(CentralDogma, self).as_tuple()
 
         if self.variants:
@@ -227,6 +236,10 @@ class CentralDogma(BaseAbundance):
         return t
 
     def as_bel(self):
+        """Return this node as a BEL string.
+
+        :rtype: str
+        """
         variants = self.get(VARIANTS)
 
         if not variants:
@@ -242,11 +255,12 @@ class CentralDogma(BaseAbundance):
         )
 
     def get_parent(self):
-        """Gets the parent, or none if it's already a reference node.
+        """Get the parent, or none if it's already a reference node.
 
         :rtype: Optional[CentralDogma]
 
         Example usage:
+
         >>> ab42 = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
         >>> app = ab42.get_parent()
         >>> assert 'p(HGNC:APP)' == app.as_bel()
@@ -257,7 +271,7 @@ class CentralDogma(BaseAbundance):
         return self.__class__(namespace=self.namespace, name=self.name, identifier=self.identifier)
 
     def with_variants(self, variants):
-        """Creates a new entity with the given variants.
+        """Create a new entity with the given variants.
 
         :param Variant or list[Variant] variants: An optional variant or list of variants
         :rtype: CentralDogma
@@ -272,16 +286,17 @@ class CentralDogma(BaseAbundance):
             namespace=self.namespace,
             name=self.name,
             identifier=self.identifier,
-            variants=variants
+            variants=variants,
         )
 
 
 @six.add_metaclass(abc.ABCMeta)
 class Variant(dict):
-    """The superclass for variant dictionaries"""
+    """The superclass for variant dictionaries."""
 
     def __init__(self, kind):
-        """
+        """Build the variant data dictionary.
+
         :param str kind: The kind of variant
         """
         super(Variant, self).__init__({KIND: kind})
@@ -291,23 +306,25 @@ class Variant(dict):
 
     @abc.abstractmethod
     def as_tuple(self):
-        """Returns this entity as a canonical tuple
+        """Return this node as a tuple.
+
         :rtype: tuple
         """
 
     @abc.abstractmethod
     def as_bel(self):
-        """Returns this variant as BEL
+        """Return this variant as a BEL string.
 
         :rtype: str
         """
 
 
 class pmod(Variant):
-    """Builds a protein modification variant dictionary"""
+    """Build a protein modification variant dictionary."""
 
     def __init__(self, name, code=None, position=None, namespace=None, identifier=None):
-        """
+        """Build a protein modification variant data dictionary.
+
         :param str name: The name of the modification
         :param str code: The three letter amino acid code for the affected residue. Capital first letter.
         :param int position: The position of the affected residue
@@ -344,7 +361,8 @@ class pmod(Variant):
             self[PMOD_POSITION] = position
 
     def as_tuple(self):
-        """Convert a pmod to tuple
+        """Return this protein modification variant as a tuple.
+
         :rtype: tuple
         """
         identifier = self[IDENTIFIER][NAMESPACE], self[IDENTIFIER][NAME]
@@ -352,6 +370,10 @@ class pmod(Variant):
         return (PMOD,) + (identifier,) + params
 
     def as_bel(self):
+        """Return this protein modification variant as a BEL string.
+
+        :rtype: str
+        """
         return 'pmod({}{})'.format(
             str(self[IDENTIFIER]),
             ''.join(', {}'.format(self[x]) for x in PMOD_ORDER[2:] if x in self)
@@ -359,7 +381,7 @@ class pmod(Variant):
 
 
 class gmod(Variant):
-    """Builds a gene modification variant dictionary"""
+    """Build a gene modification variant dictionary."""
 
     def __init__(self, name, namespace=None, identifier=None):
         """
@@ -387,7 +409,8 @@ class gmod(Variant):
         )
 
     def as_tuple(self):
-        """Converts a gmod to a tuple
+        """Return this gene modification variant as a tuple.
+
         :rtype: tuple
         """
         identifier = self[IDENTIFIER][NAMESPACE], self[IDENTIFIER][NAME]
@@ -395,6 +418,10 @@ class gmod(Variant):
         return (GMOD,) + (identifier,) + params
 
     def as_bel(self):
+        """Return this gene modification variant as a BEL string.
+
+        :rtype: str
+        """
         return 'gmod({})'.format(str(self[IDENTIFIER]))
 
 
@@ -414,12 +441,17 @@ class hgvs(Variant):
         self[IDENTIFIER] = variant
 
     def as_tuple(self):
-        """Converts the HGVS variant to a tuple
+        """Return this HGVS variant as a tuple.
+
         :rtype: tuple
         """
         return self[KIND], self[IDENTIFIER]
 
     def as_bel(self):
+        """Return this HGVS variant as a BEL string.
+
+        :rtype: str
+        """
         return 'var({})'.format(self[IDENTIFIER])
 
 
@@ -469,7 +501,7 @@ class fragment(Variant):
             self[FRAGMENT_DESCRIPTION] = description
 
     def as_tuple(self):
-        """Convert the fragment to a tuple.
+        """Return this fragment variant as a tuple.
 
         :rtype: tuple
         """
@@ -484,6 +516,10 @@ class fragment(Variant):
         return result
 
     def as_bel(self):
+        """Return this HGVS variant as a BEL string.
+
+        :rtype: str
+        """
         if FRAGMENT_MISSING in self:
             res = '?'
         else:
@@ -513,7 +549,7 @@ class _Transcribable(CentralDogma):
     get their corresponding gene"""
 
     def get_gene(self):
-        """Gets the corresponding gene. Raises an exception if it's not the reference node.
+        """Get the corresponding gene or raise an exception if it's not the reference node.
 
         :rtype: pybel.dsl.gene
         :raises: InferCentralDogmaException
@@ -529,10 +565,11 @@ class _Transcribable(CentralDogma):
 
 
 class rna(_Transcribable):
-    """Builds an RNA node data dictionary"""
+    """Build an RNA node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None, variants=None):
-        """
+        """Build an RNA node data dictionary.
+
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
@@ -550,10 +587,11 @@ class rna(_Transcribable):
 
 
 class mirna(_Transcribable):
-    """Builds a miRNA node data dictionary"""
+    """Build an miRNA node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None, variants=None):
-        """
+        """Build an miRNA node data dictionary.
+
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
@@ -578,10 +616,10 @@ class mirna(_Transcribable):
 
 
 class protein(CentralDogma):
-    """Builds a protein node data dictionary"""
+    """Build a protein node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None, variants=None):
-        """Returns the node data dictionary for a protein
+        """Build an protein node data dictionary.
 
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
@@ -603,7 +641,7 @@ class protein(CentralDogma):
         super(protein, self).__init__(PROTEIN, namespace, name=name, identifier=identifier, variants=variants)
 
     def get_rna(self):
-        """Gets the corresponding RNA. Raises an exception if it's not the reference node.
+        """Get the corresponding RNA or raise an exception if it's not the reference node.
 
         :rtype: pybel.dsl.rna
         :raises: InferCentralDogmaException
@@ -619,7 +657,7 @@ class protein(CentralDogma):
 
 
 def _tuplable_list_as_tuple(entities):
-    """Help convert a reaction list to tuples
+    """Convert a reaction list to tuples.
 
     :type entities: iter[BaseEntity]
     :rtype: tuple[tuple]
@@ -628,7 +666,7 @@ def _tuplable_list_as_tuple(entities):
 
 
 def _entity_list_as_tuple(entities):
-    """Help convert a reaction list to tuples
+    """Convert a reaction list to tuples.
 
     :type entities: iter[BaseEntity]
     :rtype: tuple
@@ -640,7 +678,7 @@ def _entity_list_as_tuple(entities):
 
 
 def _entity_list_as_bel(entities):  # TODO sorted?
-    """Help stringify a list of BEL entities
+    """Stringify a list of BEL entities.
 
     :type entities: iter[BaseEntity]
     :rtype: str
@@ -655,7 +693,8 @@ class reaction(BaseEntity):
     """Build a reaction node data dictionary."""
 
     def __init__(self, reactants, products):
-        """
+        """Build a reaction node data dictionary.
+
         :param list[BaseAbundance] reactants: A list of PyBEL node data dictionaries representing the reactants
         :param list[BaseAbundance] products: A list of PyBEL node data dictionaries representing the products
 

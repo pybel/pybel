@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 
+"""Utilities for the internal DSL."""
+
 from .exc import PyBELDSLException
 from ..constants import IDENTIFIER, NAME, NAMESPACE, BEL_DEFAULT_NAMESPACE
 from ..utils import ensure_quotes
 
 
 class entity(dict):
+    """Represents a named entity with a namespace and name/identifier."""
+
     def __init__(self, namespace, name=None, identifier=None):
-        """Creates a dictionary representing a reference to an entity
+        """Create a dictionary representing a reference to an entity.
 
         :param str namespace: The namespace to which the entity belongs
         :param str name: The name of the entity

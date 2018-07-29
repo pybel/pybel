@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module tests the to_json functions for all of the database models"""
+"""This module tests the to_json functions for all of the database models."""
 
 import datetime
 import json

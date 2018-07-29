@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This example has some stuff about statins"""
+"""An example describing statins."""
 
 from ..constants import *
 from ..dsl.nodes import abundance, protein

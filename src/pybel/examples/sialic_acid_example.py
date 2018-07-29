@@ -1,20 +1,27 @@
 # -*- coding: utf-8 -*-
 
-"""This is the first attempt at curating an excerpt from the research article, "Genetics ignite focus on microglial
-inflammation in Alzheimer's disease".
+"""Curation of the article "Genetics ignite focus on microglial inflammation in Alzheimer's disease".
 
 .. code-block:: none
 
     SET Citation = {"PubMed", "26438529"}
-    SET Evidence = "Sialic acid binding activates CD33, resulting in phosphorylation of the CD33 immunoreceptor tyrosine-based inhibitory motif (ITIM) domains and activation of the SHP-1 and SHP-2 tyrosine phosphatases [66, 67]."
-    SET Species = 9606
+    SET Evidence = "Sialic acid binding activates CD33, resulting in phosphorylation of the CD33
+    immunoreceptor tyrosine-based inhibitory motif (ITIM) domains and activation of the SHP-1 and
+    SHP-2 tyrosine phosphatases [66, 67]."
+
+
 
     complex(p(HGNC:CD33),a(CHEBI:"sialic acid")) -> p(HGNC:CD33, pmod(P))
     act(p(HGNC:CD33, pmod(P))) => act(p(HGNC:PTPN6), ma(phos))
     act(p(HGNC:CD33, pmod(P))) => act(p(HGNC:PTPN11), ma(phos))
 
     UNSET {Evidence, Species}
-    SET Evidence = "These phosphatases act on multiple substrates, including Syk, to inhibit immune activation [68, 69].  Hence, CD33 activation leads to increased SHP-1 and SHP-2 activity that antagonizes Syk, inhibiting ITAM-signaling proteins, possibly including TREM2/DAP12 (Fig. 1, [70, 71])."
+
+    SET Evidence = "These phosphatases act on multiple substrates, including Syk, to inhibit immune
+    activation [68, 69].  Hence, CD33 activation leads to increased SHP-1 and SHP-2 activity that antagonizes Syk,
+    inhibiting ITAM-signaling proteins, possibly including TREM2/DAP12 (Fig. 1, [70, 71])."
+
+    SET Species = 9606
 
     act(p(HGNC:PTPN6)) =| act(p(HGNC:SYK))
     act(p(HGNC:PTPN11)) =| act(p(HGNC:SYK))
