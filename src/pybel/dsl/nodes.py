@@ -84,7 +84,8 @@ class BaseAbundance(BaseEntity):
     """The superclass for building node data dictionaries."""
 
     def __init__(self, func, namespace, name=None, identifier=None):
-        """Build an abundance from a function, namespace and a name and/or identifier.
+        """Build an abundance from a function, namespace, and a name and/or identifier.
+
         :param str func: The PyBEL function
         :param str namespace: The name of the namespace
         :param Optional[str] name: The name of this abundance
@@ -105,20 +106,20 @@ class BaseAbundance(BaseEntity):
         return self[FUNCTION]
 
     @property
+    def namespace(self):
+        """Return the namespace of this abundance.
+
+        :rtype: str
+        """
+        return self[NAMESPACE]
+
+    @property
     def name(self):
         """Return the name of this abundance.
 
         :rtype: Optional[str]
         """
         return self.get(NAME)
-
-    @property
-    def namespace(self):
-        """Return the namespace of this abundance.
-
-        :rtype: str
-        """
-        return self.get(NAMESPACE)
 
     @property
     def identifier(self):
@@ -178,8 +179,8 @@ class BiologicalProcess(BaseAbundance):
         """Build a biological process node data dictionary.
 
         :param str namespace: The name of the database used to identify this biological process
-        :param str name: The database's preferred name or label for this biological process
-        :param str identifier: The database's identifier for this biological process
+        :param Optional[str] name: The database's preferred name or label for this biological process
+        :param Optional[str] identifier: The database's identifier for this biological process
 
         Example:
 
@@ -198,8 +199,8 @@ class Pathology(BaseAbundance):
         """Build a pathology node data dictionary.
 
         :param str namespace: The name of the database used to identify this pathology
-        :param str name: The database's preferred name or label for this pathology
-        :param str identifier: The database's identifier for this pathology
+        :param Optional[str] name: The database's preferred name or label for this pathology
+        :param Optional[str] identifier: The database's identifier for this pathology
 
         Example:
 
@@ -219,8 +220,8 @@ class CentralDogma(BaseAbundance):
 
         :param str func: The PyBEL function to use
         :param str namespace: The name of the database used to identify this entity
-        :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
+        :param Optional[str] name: The database's preferred name or label for this entity
+        :param Optional[str] identifier: The database's identifier for this entity
         :param variants: An optional variant or list of variants
         :type variants: None or Variant or list[Variant]
         """

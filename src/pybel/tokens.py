@@ -77,7 +77,7 @@ def _identifier_to_tuple(tokens):
 
 # TODO figure out how to just get dictionary rather than slicing it up like this
 def _fusion_range_po_to_dict(tokens):
-    """Convert a PyParsing data dictionary into a PyBEL
+    """Convert a PyParsing data dictionary into a PyBEL.
 
     :type tokens: ParseResult
     :rtype: pybel.dsl.FusionRangeBase
