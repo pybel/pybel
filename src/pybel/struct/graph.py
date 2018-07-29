@@ -456,6 +456,26 @@ class BELGraph(networkx.MultiDiGraph):
         """
         return self.add_unqualified_edge(u, v, HAS_MEMBER)
 
+    def add_has_component(self, u, v):
+        """Add an hasComponent relationship such that u hasComponent v.
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        return self.add_unqualified_edge(u, v, HAS_COMPONENT)
+
+    def add_has_variant(self, u, v):
+        """Add an hasVariant relationship such that u hasVariant v.
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        return self.add_unqualified_edge(u, v, HAS_VARIANT)
+
     def add_increases(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
                       **attr):
         """Wraps :meth:`add_qualified_edge` for :data:`pybel.constants.INCREASES`.
@@ -605,12 +625,12 @@ class BELGraph(networkx.MultiDiGraph):
 
             parent_node_tuple = self.add_node_from_data(parent_node_dict)
 
-            self.add_unqualified_edge(parent_node_tuple, node_tuple, HAS_VARIANT)
+            self.add_has_variant(parent_node_tuple, node_tuple)
 
         elif MEMBERS in attr_dict:
             for member in attr_dict[MEMBERS]:
                 member_node_tuple = self.add_node_from_data(member)
-                self.add_unqualified_edge(node_tuple, member_node_tuple, HAS_COMPONENT)
+                self.add_has_component(node_tuple, member_node_tuple)
 
         elif PRODUCTS in attr_dict and REACTANTS in attr_dict:
             for reactant_tokens in attr_dict[REACTANTS]:
