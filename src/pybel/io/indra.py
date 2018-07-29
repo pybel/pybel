@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a list of
+"""Conversion functions for BEL graphs with INDRA.
+
+After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a list of
 :class:`indra.statements.Statement` can be converted to a :class:`pybel.BELGraph` with
 :class:`indra.assemblers.PybelAssembler`.
 
@@ -28,7 +30,6 @@
 
     These functions are hard to unit test because they rely on a whole set of java dependencies and will likely
     not be for a while.
-
 """
 
 import warnings

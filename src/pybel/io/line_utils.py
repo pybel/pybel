@@ -29,8 +29,9 @@ METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOT
 
 
 def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False, **kwargs):
-    """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`,
-    and :func:`parse_statements`.
+    """Parse an iterable of lines into this graph.
+
+    Delegates to :func:`parse_document`, :func:`parse_definitions`, and :func:`parse_statements`.
 
     :param BELGraph graph: A BEL graph
     :param iter[str] lines: An iterable over lines of BEL script
@@ -38,7 +39,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool allow_nested: If true, turns off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
-    :param bool use_tqdm: If true, use tqdm for logging
+    :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
 
     .. warning::
 
@@ -99,7 +100,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
 
 
 def parse_document(graph, document_metadata, metadata_parser):
-    """Parses the lines in the document section of a BEL script.
+    """Parse the lines in the document section of a BEL script.
 
     :param BELGraph graph: A BEL graph
     :param iter[str] document_metadata: An enumerated iterable over the lines in the document section of a BEL script
@@ -132,7 +133,7 @@ def parse_document(graph, document_metadata, metadata_parser):
 
 
 def parse_definitions(graph, definitions, metadata_parser, allow_failures=False, use_tqdm=False):
-    """Parses the lines in the definitions section of a BEL script.
+    """Parse the lines in the definitions section of a BEL script.
 
     :param pybel.BELGraph graph: A BEL graph
     :param list[str] definitions: An enumerated iterable over the lines in the definitions section of a BEL script
@@ -186,6 +187,7 @@ def parse_statements(graph, statements, bel_parser, use_tqdm=False):
     :param BELGraph graph: A BEL graph
     :param iter[str] statements: An enumerated iterable over the lines in the statements section of a BEL script
     :param BelParser bel_parser: A BEL parser
+    :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
     """
     parse_statements_start_time = time.time()
 

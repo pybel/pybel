@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-
-Node-Link JSON
---------------
-This module contains IO functions for interconversion between BEL graphs and Node-Link JSON
-
-"""
+"""Conversion functions for BEL graphs with Node-Link JSON."""
 
 import json
 import os
