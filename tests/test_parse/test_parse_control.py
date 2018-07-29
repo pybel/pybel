@@ -8,7 +8,11 @@ from pybel.constants import (
     CITATION_REFERENCE, CITATION_TYPE, EVIDENCE,
 )
 from pybel.parser import ControlParser
-from pybel.parser.exc import *
+from pybel.parser.exc import (
+    CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
+    InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
+    UndefinedAnnotationWarning,
+)
 from pybel.parser.parse_control import set_citation_stub
 from pybel.resources.document import sanitize_file_lines
 from tests.constants import SET_CITATION_TEST, test_citation_dict

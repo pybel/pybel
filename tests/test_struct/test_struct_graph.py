@@ -9,7 +9,7 @@ from pybel.constants import (
     CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION, HAS_VARIANT, IDENTIFIER,
     INCREASES, NAME, NAMESPACE, PROTEIN, unqualified_edge_code,
 )
-from pybel.dsl import *
+from pybel.dsl import entity, protein
 from pybel.examples import sialic_acid_graph
 from pybel.testing.utils import n
 

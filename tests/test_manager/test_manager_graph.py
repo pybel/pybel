@@ -14,7 +14,14 @@ from sqlalchemy import not_
 
 import pybel
 from pybel import BELGraph, from_database, from_path, to_database
-from pybel.constants import *
+from pybel.constants import (
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME,
+    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, COMPLEX, COMPOSITE, DECREASES,
+    EVIDENCE, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
+    HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER, INCREASES, KIND, LOCATION, MEMBERS,
+    METADATA_DESCRIPTION, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PATHOLOGY, PRODUCTS,
+    PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RELATION, VARIANTS, unqualified_edge_code,
+)
 from pybel.dsl import (
     activity, complex_abundance, degradation, entity, fragment, gene, gmod, pmod, protein, protein_fusion, reaction,
     secretion, translocation,

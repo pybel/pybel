@@ -24,7 +24,10 @@ inflammation in Alzheimer's disease".
     UNSET ALL
 """
 
-from ..constants import *
+from ..constants import (
+    ACTIVITY, BEL_DEFAULT_NAMESPACE, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, EFFECT, MODIFIER, NAME,
+    NAMESPACE,
+)
 from ..dsl.nodes import abundance, bioprocess, complex_abundance, pmod, protein
 from ..struct.graph import BELGraph
 

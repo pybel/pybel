@@ -5,8 +5,12 @@
 import logging
 import unittest
 
-from pybel.constants import *
 from pybel.dsl.nodes import gmod, hgvs, pmod
+from pybel.constants import (
+    BEL_DEFAULT_NAMESPACE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP,
+    FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, IDENTIFIER, KIND, LOCATION, NAME, NAMESPACE,
+    PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
+)
 from pybel.parser.modifiers import (
     FragmentParser, FusionParser, GeneModificationParser, GeneSubstitutionParser, LocationParser,
     ProteinModificationParser, ProteinSubstitutionParser, TruncationParser, VariantParser,

@@ -13,17 +13,19 @@ from pybel import (
     BELGraph, from_bytes, from_json, from_json_file, from_jsons, from_lines, from_path, from_pickle, from_url,
     to_bel_lines, to_bytes, to_csv, to_graphml, to_gsea, to_json, to_json_file, to_jsons, to_pickle, to_sif,
 )
-from pybel.constants import *
+from pybel.constants import (
+    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GENE, GRAPH_PYBEL_VERSION, INCREASES,
+    PYBEL_MINIMUM_IMPORT_VERSION, RELATION,
+)
 from pybel.dsl import gene
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BelParser
-from pybel.parser.exc import *
+from pybel.parser.exc import InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.constants import (
-    test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy,
-    test_bel_thorough,
+    test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough,
 )
 from pybel.testing.mocks import mock_bel_resources
 from pybel.utils import hash_node

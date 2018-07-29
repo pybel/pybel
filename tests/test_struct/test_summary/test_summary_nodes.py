@@ -3,7 +3,7 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import *
+from pybel.constants import ABUNDANCE, BIOPROCESS, COMPLEX, PROTEIN
 from pybel.dsl.nodes import fusion_range, protein, protein_fusion
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (
