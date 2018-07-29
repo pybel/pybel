@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""
-BEL Language
-------------
+"""Language constants for BEL.
 
-This module contains mappings between PyBEL's internal constants and BEL language keywords
+This module contains mappings between PyBEL's internal constants and BEL language keywords.
 """
 
 import logging

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for the BEL parser."""
+
 import logging
 import unittest
 

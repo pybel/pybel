@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Citation utilities for the database manager."""
+
 import logging
 import re
 import time
@@ -8,8 +10,7 @@ from datetime import datetime
 import requests
 from six.moves import zip_longest
 
-from .cache_manager import Manager
-from ..constants import *
+from ..constants import CITATION, CITATION_REFERENCE, CITATION_TYPE_PUBMED
 from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import has_pubmed
 from ..struct.summary.provenance import get_pubmed_identifiers
@@ -35,7 +36,7 @@ season_map = {'Spring': '03', 'Summer': '06', 'Fall': '09', 'Winter': '12'}
 
 
 def sanitize_date(publication_date):
-    """Sanitizes lots of different date strings into ISO 8601
+    """Sanitize lots of different date strings into ISO-8601.
 
     :param str publication_date:
     :rtype: str
@@ -70,13 +71,16 @@ def sanitize_date(publication_date):
 
 
 def grouper(n, iterable, fillvalue=None):
-    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    """Groups iterables into tuples.
+
+    grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
+    """
     args = [iter(iterable)] * n
     return zip_longest(*args, fillvalue=fillvalue)
 
 
 def clean_pubmed_identifiers(pmids):
-    """String strips, deduplicates, and sorts a list of PubMed identifiers
+    """Cleans a list of PubMed identifiers with string strips, deduplicates, and sorting.
 
     :param iter[str] pmids: An iterable of PubMed identifiers
     :return:
@@ -85,7 +89,7 @@ def clean_pubmed_identifiers(pmids):
 
 
 def get_pubmed_citation_response(pubmed_identifiers):
-    """Gets the response from PubMed E-Utils for a given list of PubMed identifiers
+    """Get the response from PubMed E-Utils for a given list of PubMed identifiers.
 
     :param list[str] pubmed_identifiers:
     :rtype: dict
@@ -101,7 +105,7 @@ def get_pubmed_citation_response(pubmed_identifiers):
 
 
 def enrich_citation_model(manager, citation, p):
-    """Enriches a citation model with the information from PubMed
+    """Enrich a citation model with the information from PubMed.
 
     :param pybel.manager.Manager manager:
     :param Citation citation: A citation model
@@ -138,7 +142,7 @@ def enrich_citation_model(manager, citation, p):
 
 
 def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
-    """Gets the citation information for the given list of PubMed identifiers using the NCBI's eutils service
+    """Get citation information for the given list of PubMed identifiers using the NCBI's eutils service.
 
     :type manager: pybel.Manager
     :param pmids: an iterable of PubMed identifiers
@@ -212,7 +216,7 @@ def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
 
 
 def enrich_pubmed_citations(manager, graph, group_size=None, sleep_time=None):
-    """Overwrites all PubMed citations with values from NCBI's eUtils lookup service.
+    """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
     Sets authors as list, so probably a good idea to run :func:`pybel_tools.mutation.serialize_authors` before
     exporting.

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
+"""Exceptions for the BEL parser.
+
 A message for "General Parser Failure" is displayed when a problem was caused due to an unforseen error. The line
 number and original statement are printed for the user to debug.
 """

@@ -5,14 +5,21 @@
 import datetime
 
 from sqlalchemy import (
-    Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text,
-    UniqueConstraint,
+    Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
-from ..constants import *
+from ..constants import (
+    ANNOTATIONS, BELNS_ENCODING_STR, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
+    CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE,
+    CITATION_TYPE_PUBMED, CITATION_VOLUME, COMPLEX, COMPOSITE, EFFECT, EVIDENCE, FRAGMENT, FUNCTION, FUSION, HASH,
+    HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, METADATA_AUTHORS,
+    METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME,
+    METADATA_VERSION, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION,
+    PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RELATION, SUBJECT, VARIANTS,
+)
 from ..dsl import fragment, fusion_range, hgvs, missing_fusion_range
 from ..io.gpickle import from_bytes, to_bytes
 from ..tokens import node_to_tuple, sort_dict_list, sort_variant_dict_list
@@ -32,6 +39,10 @@ __all__ = [
     'Evidence',
     'Edge',
     'Property',
+    'edge_annotation',
+    'edge_property',
+    'network_edge',
+    'network_node',
 ]
 
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
@@ -708,7 +719,7 @@ class Citation(Base):
 
     @property
     def is_pubmed(self):
-        """Returns if this is a PubMed citation
+        """Return if this is a PubMed citation.
 
         :rtype:
         """
@@ -716,14 +727,14 @@ class Citation(Base):
 
     @property
     def is_enriched(self):
-        """Returns if this citation has been enriched for name, title, etc.
+        """Return if this citation has been enriched for name, title, and other metadata.
 
         :rtype:
         """
         return self.title is not None and self.name is not None
 
     def to_json(self, include_id=False):
-        """Creates a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
+        """Create a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
         :param bool include_id: If true, includes the model identifier
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.

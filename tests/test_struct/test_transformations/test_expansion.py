@@ -15,9 +15,11 @@ from pybel.struct.mutation.expansion.neighborhood import (
 )
 
 
-class TestNeighborhood(unittest.TestCase):
+class TestExpansion(unittest.TestCase):
+    """Test expansion functions."""
 
     def test_neighborhood(self):
+        """Test expansion around the neighborhood of a given node."""
         graph = BELGraph()
         graph.add_node_from_data(cd33)
         self.assertEqual(1, graph.number_of_nodes())
@@ -31,6 +33,7 @@ class TestNeighborhood(unittest.TestCase):
         self.assertIn(cd33_phosphorylated.as_tuple(), graph)
 
     def test_neighborhood_with_predecessors(self):
+        """Test expansion on the predecessors of a given node."""
         graph = BELGraph()
         graph.add_node_from_data(cd33)
         graph.add_node_from_data(sialic_acid_cd33_complex)
@@ -44,6 +47,7 @@ class TestNeighborhood(unittest.TestCase):
         self.assertIn(cd33_phosphorylated.as_tuple(), graph)
 
     def test_neighborhood_with_successors(self):
+        """Test expansion on the successors of a given node."""
         graph = BELGraph()
         graph.add_node_from_data(cd33)
         graph.add_node_from_data(cd33_phosphorylated)
@@ -56,7 +60,9 @@ class TestNeighborhood(unittest.TestCase):
         self.assertIn(cd33_phosphorylated.as_tuple(), graph)
 
     def test_neighborhoods(self):
-        """The edge between PTPN6/CD33ph should not be added"""
+        """Test expansion on the neighborhood of given nodes.
+        
+        The edge between PTPN6/CD33ph should not be added"""
         graph = BELGraph()
         graph.add_node_from_data(cd33)
         graph.add_node_from_data(syk)

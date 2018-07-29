@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
-Relation Parser
-~~~~~~~~~~~~~~~
+"""A parser for BEL.
+
 This module handles parsing BEL relations and validation of semantics.
 """
 

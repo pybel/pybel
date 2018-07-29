@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 
-"""
-Definition Cache Manager
-------------------------
+"""The database manager for PyBEL.
+
 Under the hood, PyBEL caches namespace and annotation files for quick recall on later use. The user doesn't need to
 enable this option, but can specify a database location if they choose.
 """
 
 from __future__ import unicode_literals
 
+import logging
 import time
 from collections import defaultdict
+from copy import deepcopy
 from itertools import chain
 
-import logging
 import six
-from copy import deepcopy
 from six import string_types
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
@@ -31,7 +30,15 @@ from .models import (
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..canonicalize import node_to_bel
-from ..constants import *
+from ..constants import (
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
+    CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
+    CITATION_TYPE, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING, FRAGMENT_START,
+    FRAGMENT_STOP, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST, HGVS,
+    IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
+    PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    belns_encodings, config, get_cache_connection,
+)
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
 )

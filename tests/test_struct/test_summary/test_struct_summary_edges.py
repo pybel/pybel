@@ -2,8 +2,8 @@
 
 """Test summary functions for edges."""
 
-import unittest
 from collections import Counter
+import unittest
 
 from pybel import BELGraph
 from pybel.dsl import protein
