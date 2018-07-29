@@ -246,13 +246,12 @@ def sort_qualified_edges(graph):
     :param BELGraph graph: A BEL graph
     :rtype: tuple[tuple,tuple,int,dict]
     """
-    qualified_edges_iter = (
+    qualified_edges = (
         (u, v, k, d)
-        for u, v, k, d in graph.edges_iter(keys=True, data=True)
+        for u, v, k, d in graph.edges(keys=True, data=True)
         if graph.has_edge_citation(u, v, k) and graph.has_edge_evidence(u, v, k)
     )
-    qualified_edges = sorted(qualified_edges_iter, key=_sort_qualified_edges_helper)
-    return qualified_edges
+    return sorted(qualified_edges, key=_sort_qualified_edges_helper)
 
 
 def _citation_sort_key(t):
@@ -320,22 +319,22 @@ def _to_bel_lines_header(graph):
     )
 
 
-def group_citation_edges(edges_iter):
+def group_citation_edges(edges):
     """Return an iterator over pairs of citation values and their corresponding edge iterators.
 
-    :param tuple[tuple,tuple,int,dict] edges_iter: An iterator over the 4-tuples of edges
+    :param iter[tuple,tuple,int,dict] edges: An iterator over the 4-tuples of edges
     :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
     """
-    return itt.groupby(edges_iter, key=_citation_sort_key)
+    return itt.groupby(edges, key=_citation_sort_key)
 
 
-def group_evidence_edges(edges_iter):
+def group_evidence_edges(edges):
     """Return an iterator over pairs of evidence values and their corresponding edge iterators.
 
-    :param tuple[tuple,tuple,int,dict] edges_iter: An iterator over the 4-tuples of edges
+    :param iter[tuple,tuple,int,dict] edges: An iterator over the 4-tuples of edges
     :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
     """
-    return itt.groupby(edges_iter, key=_evidence_sort_key)
+    return itt.groupby(edges, key=_evidence_sort_key)
 
 
 def _to_bel_lines_body(graph):
@@ -377,7 +376,7 @@ def _to_bel_lines_footer(graph):
     """
     unqualified_edges_to_serialize = [
         (u, v, d)
-        for u, v, d in graph.edges_iter(data=True)
+        for u, v, d in graph.edges(data=True)
         if d[RELATION] in unqualified_edge_code and EVIDENCE not in d
     ]
 
@@ -438,7 +437,7 @@ def to_bel_path(graph, path, mode='w', **kwargs):
 
 
 def calculate_canonical_name(graph, node):
-    """Calculatesthe canonical name for a given node.
+    """Calculates the canonical name for a given node.
 
     If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
 
