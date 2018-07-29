@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from collections import Counter
+"""Test summary functions for edges."""
 
 import unittest
+from collections import Counter
 
 from pybel import BELGraph
-from pybel.constants import INCREASES
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
 from pybel.struct.summary.edge_summary import (
     get_annotation_values, get_annotation_values_by_annotation, iter_annotation_value_pairs, iter_annotation_values,
 )
+from pybel.testing.utils import n
 
 
 class TestEdgeSummary(unittest.TestCase):
@@ -20,36 +21,33 @@ class TestEdgeSummary(unittest.TestCase):
         v = protein('HGNC', name='V')
         w = protein('HGNC', name='W')
 
-        graph.add_qualified_edge(
+        graph.add_increases(
             u,
             v,
-            relation=INCREASES,
-            evidence='',
-            citation='',
+            evidence=n(),
+            citation=n(),
             annotations={
                 'A': {'1', '2'},
                 'B': {'X'}
             }
         )
 
-        graph.add_qualified_edge(
+        graph.add_increases(
             u,
             w,
-            relation=INCREASES,
-            evidence='',
-            citation='',
+            evidence=n(),
+            citation=n(),
             annotations={
                 'A': {'1', '3'},
                 'C': {'a'}
             }
         )
 
-        graph.add_qualified_edge(
+        graph.add_increases(
             w,
             v,
-            relation=INCREASES,
-            evidence='',
-            citation='',
+            evidence=n(),
+            citation=n(),
         )
 
         x = dict(Counter(iter_annotation_value_pairs(graph)))

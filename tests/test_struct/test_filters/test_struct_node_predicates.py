@@ -188,10 +188,9 @@ class TestNodePredicate(unittest.TestCase):
         u = g.add_node_from_data(protein(name='Il4', namespace='MGI'))
         v = g.add_node_from_data(protein(name='Cxcl1', namespace='MGI'))
 
-        g.add_qualified_edge(
+        g.add_increases(
             u,
             v,
-            relation=INCREASES,
             citation='10072486',
             evidence='Compared with controls treated with culture medium alone, IL-4 and IL-5 induced significantly higher levels of MIP-2 and KC production; IL-4 also increased the production of MCP-1 (Fig. 2, A and B)....we only tested the effects of IL-3, IL-4, IL-5, and IL-13 on chemokine expression and cellular infiltration....Recombinant cytokines were used, ... to treat naive BALB/c mice.',
             annotations={'Species': '10090', 'MeSH': 'bronchoalveolar lavage fluid'},

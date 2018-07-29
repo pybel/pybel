@@ -166,10 +166,9 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
         graph = BELGraph(name='test', version='0.0.0')
         graph.annotation_list['TEST'] = {'a', 'b', 'c'}
 
-        graph.add_qualified_edge(
+        graph.add_increases(
             fos_data,
             jun_data,
-            relation=INCREASES,
             evidence=test_evidence_text,
             citation=test_citation_dict,
             annotations={'TEST': 'a'}
@@ -188,10 +187,9 @@ class TestQuery(TemporaryCacheMixin):
         graph = BELGraph(name='test', version='0.0.0')
         graph.annotation_list['TEST'] = {'a', 'b', 'c'}
 
-        graph.add_qualified_edge(
+        graph.add_increases(
             fos_data,
             jun_data,
-            relation=INCREASES,
             evidence=test_evidence_text,
             citation=test_citation_dict,
             annotations={
@@ -1087,12 +1085,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     @mock_bel_resources
     def test_translocation_default(self, mock):
         """This test checks that a translocation gets in the database properly"""
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(name='F2', namespace='HGNC'),
             protein(name='EDN1', namespace='HGNC'),
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
             citation='10473669',
-            relation=INCREASES,
             subject_modifier=secretion()
         )
 
@@ -1109,12 +1106,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_subject_translocation_custom_to_loc(self, mock):
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(name='F2', namespace='HGNC'),
             protein(name='EDN1', namespace='HGNC'),
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
             citation='10473669',
-            relation=INCREASES,
             subject_modifier=translocation(
                 from_loc=entity(namespace='TEST', name='A'),
                 to_loc=entity(namespace='GOCC', name='extracellular space'),
@@ -1138,12 +1134,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         p1_name = n()
         p2_name = n()
 
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(name=p1_name, namespace='HGNC'),
             protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=INCREASES,
             subject_modifier=activity('kin')
         )
 
@@ -1172,12 +1167,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         dummy_activity_namespace = n()
         dummy_activity_name = n()
 
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(name=p1_name, namespace='HGNC'),
             protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=INCREASES,
             subject_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
         )
 
@@ -1205,12 +1199,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         p1_name = n()
         p2_name = n()
 
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(name=p1_name, namespace='HGNC'),
             protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=INCREASES,
             object_modifier=activity('kin')
         )
 
@@ -1239,12 +1232,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         dummy_activity_namespace = n()
         dummy_activity_name = n()
 
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(name=p1_name, namespace='HGNC'),
             protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=INCREASES,
             object_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
         )
 
@@ -1269,13 +1261,12 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_subject_degradation(self, mock):
-        self.graph.add_qualified_edge(
+        self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=ASSOCIATION,
-            subject_modifier=degradation()
+            subject_modifier=degradation(),
         )
         make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
 
@@ -1289,13 +1280,12 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_object_degradation(self, mock):
-        self.graph.add_qualified_edge(
+        self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=ASSOCIATION,
-            object_modifier=degradation()
+            object_modifier=degradation(),
         )
         make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
 
@@ -1309,15 +1299,14 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_subject_location(self, mock):
-        self.graph.add_qualified_edge(
+        self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=ASSOCIATION,
             subject_modifier={
                 LOCATION: entity(namespace='GOCC', name='nucleus')
-            }
+            },
         )
         make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['nucleus']})
 
@@ -1331,9 +1320,9 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_mixed_1(self, mock):
-        """Test mixed having location and something else"""
+        """Test mixed having location and something else."""
 
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(namespace='HGNC', name='CDC42'),
             protein(namespace='HGNC', name='PAK2'),
             evidence="""Summary: PAK proteins, a family of serine/threonine p21-activating kinases, include PAK1, PAK2,
@@ -1347,7 +1336,6 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             annotations={'Species': '9606'},
             subject_modifier=activity('gtp'),
             object_modifier=activity('kin'),
-            relation=INCREASES,
         )
 
         make_dummy_namespaces(self.manager, self.graph, {
@@ -1379,11 +1367,10 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_mixed_2(self, mock):
-        """Tests both subject and object activity with location information as well"""
-        self.graph.add_qualified_edge(
+        """Tests both subject and object activity with location information as well."""
+        self.graph.add_directly_increases(
             protein(namespace='HGNC', name='HDAC4'),
             protein(namespace='HGNC', name='MEF2A'),
-            relation=DIRECTLY_INCREASES,
             citation='10487761',
             evidence=""""In the nucleus, HDAC4 associates with the myocyte enhancer factor MEF2A. Binding of HDAC4 to 
             MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the 
@@ -1529,12 +1516,11 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url[dummy_namespace_name] = dummy_namespace_url
         graph.uncached_namespaces.add(dummy_namespace_url)
 
-        graph.add_qualified_edge(
+        graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=ASSOCIATION,
             subject_modifier=translocation(
                 from_loc=entity(namespace=dummy_namespace_name, name='intracellular'),
                 to_loc=entity(namespace='GOCC', name='extracellular space')
@@ -1557,15 +1543,14 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url[dummy_namespace_name] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
 
-        graph.add_qualified_edge(
+        graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=ASSOCIATION,
             subject_modifier={
                 LOCATION: entity(namespace=dummy_namespace_name, name='lysozome')
-            }
+            },
         )
 
         make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
@@ -1585,12 +1570,11 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url[dummy_namespace_name] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
 
-        graph.add_qualified_edge(
+        graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            relation=ASSOCIATION,
             subject_modifier=activity(name='dummy', namespace=dummy_namespace_name)
         )
 

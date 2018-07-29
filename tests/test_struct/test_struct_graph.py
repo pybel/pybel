@@ -106,12 +106,11 @@ class TestStruct(unittest.TestCase):
         g = BELGraph()
 
         with self.assertRaises(TypeError):
-            g.add_qualified_edge(
+            g.add_increases(
                 protein(namespace='TEST', name='YFG1'),
                 protein(namespace='TEST', name='YFG2'),
-                relation=INCREASES,
                 evidence=n(),
-                citation=5
+                citation=5,
             )
 
 
@@ -174,10 +173,9 @@ class TestGetGraphProperties(unittest.TestCase):
         test_evidence = n()
         test_pmid = n()
 
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             test_source,
             test_target,
-            relation=INCREASES,
             citation=test_pmid,
             evidence=test_evidence,
             annotations={

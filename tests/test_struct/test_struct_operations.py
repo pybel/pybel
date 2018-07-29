@@ -4,11 +4,9 @@ import json
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import *
 from pybel.dsl import protein
 from pybel.struct.operations import (
-    left_full_join, left_node_intersection_join, left_outer_join, node_intersection,
-    union,
+    left_full_join, left_node_intersection_join, left_outer_join, node_intersection, union,
 )
 
 HGNC = 'HGNC'
@@ -32,7 +30,7 @@ class TestLeftFullJoin(unittest.TestCase):
         g.add_node_from_data(p1)
         g.add_node_from_data(p2)
 
-        g.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID1', evidence='Evidence 1')
+        g.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
 
         h = BELGraph()
 
@@ -43,9 +41,9 @@ class TestLeftFullJoin(unittest.TestCase):
         h.node[p1_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
         h.node[p3_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
 
-        h.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID1', evidence='Evidence 1')
-        h.add_qualified_edge(p1, p2, relation=INCREASES, citation='PMID2', evidence='Evidence 2')
-        h.add_qualified_edge(p1, p3, relation=INCREASES, citation='PMID1', evidence='Evidence 3')
+        h.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
+        h.add_increases(p1, p2, citation='PMID2', evidence='Evidence 2')
+        h.add_increases(p1, p3, citation='PMID1', evidence='Evidence 3')
 
         self.g = g
         self.h = h
