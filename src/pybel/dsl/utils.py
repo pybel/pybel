@@ -3,7 +3,7 @@
 """Utilities for the internal DSL."""
 
 from .exc import PyBELDSLException
-from ..constants import IDENTIFIER, NAME, NAMESPACE, BEL_DEFAULT_NAMESPACE
+from ..constants import BEL_DEFAULT_NAMESPACE, IDENTIFIER, NAME, NAMESPACE
 from ..utils import ensure_quotes
 
 

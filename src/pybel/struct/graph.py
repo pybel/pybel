@@ -3,8 +3,9 @@
 """Contains the main data structure for PyBEL"""
 
 import logging
-import networkx
 from copy import deepcopy
+
+import networkx
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join

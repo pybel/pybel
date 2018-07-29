@@ -3,10 +3,11 @@
 import json
 import logging
 import os
-import py2neo
-import py2neo.database.status
 import traceback
 import unittest
+
+import py2neo
+import py2neo.database.status
 from click.testing import CliRunner
 
 from pybel import Manager, cli
