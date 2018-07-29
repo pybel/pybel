@@ -6,7 +6,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import DIRECTLY_INCREASES
-from pybel.dsl import abundance, gene, mirna, pathology, pmod, protein, rna
+from pybel.dsl import gene, mirna, pathology, pmod, protein, rna
 from pybel.struct.mutation.collapse import collapse_all_variants, collapse_nodes, collapse_to_genes
 from pybel.testing.utils import n
 
@@ -30,7 +30,6 @@ p3 = protein(HGNC, '3')
 g4 = gene(HGNC, '4')
 m4 = mirna(HGNC, '4')
 
-a5 = abundance(CHEBI, '5')
 p5 = pathology(GO, '5')
 
 
