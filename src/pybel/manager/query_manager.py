@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""The query manager for the database."""
+
 import datetime
 from collections import Iterable
 
@@ -13,12 +15,12 @@ from ..struct import BELGraph
 from ..utils import hash_node, parse_datetime
 
 __all__ = [
-    'QueryManager'
+    'QueryManager',
 ]
 
 
 def graph_from_edges(edges, **kwargs):
-    """Builds a BEL graph from edges
+    """Build a BEL graph from edges.
 
     :param iter[Edge] edges: An iterable of edges from the database
     :param kwargs: Arguments to pass to :class:`pybel.BELGraph`
@@ -33,10 +35,10 @@ def graph_from_edges(edges, **kwargs):
 
 
 class QueryManager(LookupManager):
-    """Groups queries over the edge store"""
+    """An extension to the Manager to make queries over the database."""
 
     def count_nodes(self):
-        """Counts the number of nodes in the cache
+        """Count the number of nodes in the database.
 
         :rtype: int
         """
@@ -65,7 +67,7 @@ class QueryManager(LookupManager):
         return self.get_node_by_hash(node_hash)
 
     def query_nodes(self, bel=None, type=None, namespace=None, name=None):
-        """Builds and runs a query over all nodes in the PyBEL cache.
+        """Query nodes in the database.
 
         :param str bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
         :param str type: Type of the biological entity. e.g. Protein
@@ -93,14 +95,14 @@ class QueryManager(LookupManager):
         return q.all()
 
     def count_edges(self):
-        """Counts the number of edges in the cache
+        """Count the number of edges in the database.
 
         :rtype: int
         """
         return self.session.query(func.count(Edge.id)).scalar()
 
     def get_edges_with_citation(self, citation):
-        """Gets the edges with the given citation
+        """Get the edges with the given citation.
 
         :param Citation citation:
         :rtype: iter[Edge]
@@ -108,7 +110,7 @@ class QueryManager(LookupManager):
         return self.session.query(Edge).join(Evidence).filter(Evidence.citation == citation)
 
     def get_edges_with_citations(self, citations):
-        """Gets the edges with the given citations
+        """Get edges with one of the given citations.
 
         :param iter[Citation] citations:
         :rtype: list[Edge]
@@ -149,7 +151,7 @@ class QueryManager(LookupManager):
 
     def query_edges(self, bel=None, source_function=None, source=None, target_function=None, target=None,
                     relation=None):
-        """Builds and runs a query over all edges in the PyBEL cache.
+        """Query edges in the database.
 
         :param str bel: BEL statement that represents the desired edge.
         :param str source_function: Filter source nodes with the given BEL function
@@ -200,7 +202,7 @@ class QueryManager(LookupManager):
         return query.all()
 
     def query_citations(self, type=None, reference=None, name=None, author=None, date=None, evidence_text=None):
-        """Builds and runs a query over all citations in the PyBEL cache.
+        """Query citations in the database.
 
         :param str type: Type of the citation. e.g. PubMed
         :param str reference: The identifier used for the citation. e.g. PubMed_ID
@@ -244,7 +246,7 @@ class QueryManager(LookupManager):
         return query.all()
 
     def query_edges_by_pubmed_identifiers(self, pubmed_identifiers):
-        """Gets all edges annotated to the given documents
+        """Get all edges annotated to the documents identified by the given PubMed identifiers.
 
         :param list[str] pubmed_identifiers: A list of PubMed document identifiers
         :rtype: list[Edge]
@@ -253,17 +255,20 @@ class QueryManager(LookupManager):
         return self.session.query(Edge).join(Evidence).join(Citation).filter(fi).all()
 
     @staticmethod
-    def _edge_both_nodes(node_ids):
+    def _edge_both_nodes(nodes):
+        """Get edges where both the source and target are in the list of nodes.
+
+        :param list[Node] nodes: A list of node identifiers
         """
-        :param list[int] node_ids: A list of node identifiers
-        """
+        node_ids = [node.id for node in nodes]
+
         return and_(
             Edge.source_id.in_(node_ids),
-            Edge.target_id.in_(node_ids)
+            Edge.target_id.in_(node_ids),
         )
 
     def query_induction(self, nodes):
-        """Gets all edges between any of the given nodes
+        """Get all edges between any of the given nodes.
 
         :param list[Node] nodes: A list of nodes (length > 2)
         :rtype: list[Edge]
@@ -271,27 +276,34 @@ class QueryManager(LookupManager):
         if len(nodes) < 2:
             raise ValueError('not enough nodes given to induce over')
 
-        node_ids = [node.id for node in nodes]
-
-        fi = self._edge_both_nodes(node_ids)
-        return self.session.query(Edge).filter(fi).all()
+        return self.session.query(Edge).filter(self._edge_both_nodes(nodes)).all()
 
     @staticmethod
-    def _edge_one_node(node_ids):
+    def _edge_one_node(nodes):
+        """Get edges where either the source or target are in the list of nodes.
+
+        :param list[Node] nodes: A list of node identifiers
+
+        Note: doing this with the nodes directly is not yet supported by SQLAlchemy
+
+        .. code-block:: python
+
+            return or_(
+                Edge.source.in_(nodes),
+                Edge.target.in_(nodes),
+            )
         """
-        :param list[int] node_ids: A list of node identifiers
-        """
+        node_ids = [node.id for node in nodes]
+
         return or_(
             Edge.source_id.in_(node_ids),
-            Edge.target_id.in_(node_ids)
+            Edge.target_id.in_(node_ids),
         )
 
     def query_neighbors(self, nodes):
-        """Gets all edges incident to any of the given nodes
+        """Get all edges incident to any of the given nodes.
 
         :param list[Node] nodes: A list of nodes
         :rtype: list[Edge]
         """
-        node_ids = [node.id for node in nodes]
-        fi = self._edge_one_node(node_ids)
-        return self.session.query(Edge).filter(fi).all()
+        return self.session.query(Edge).filter(self._edge_one_node(nodes)).all()
