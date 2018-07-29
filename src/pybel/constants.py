@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-PyBEL Constants
----------------
+"""Constants for PyBEL.
 
 This module maintains the strings used throughout the PyBEL codebase to promote consistency.
 
@@ -56,8 +54,9 @@ DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
 
 def get_config_dir():
-    """Returns the path to the directory where configuration is stored for PyBEL. Can be overridden by setting the
-    environment variable ``PYBEL_CONFIG_DIRECTORY``.
+    """Return the path to the directory where configuration is stored for PyBEL.
+
+     Can be overridden by setting the environment variable ``PYBEL_CONFIG_DIRECTORY``.
 
     :rtype: str
     """
@@ -78,8 +77,9 @@ config = {
 
 
 def get_config_path():
-    """Returns the path of the configuration file, which should just be a file called ``config.json`` inside the
-    directory returned by :func:`get_config_dir`
+    """Returns the path of the configuration file.
+
+    By default, should just be a file called ``config.json`` inside the directory returned by :func:`get_config_dir`.
 
     :rtype: str
     """

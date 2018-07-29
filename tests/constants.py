@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Constants for PyBEL tests."""
+
 import logging
 import os
 import unittest
@@ -38,17 +40,16 @@ test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
 
 
 def update_provenance(control_parser):
-    """Sticks provenance in a BEL parser
+    """Put a default evidence and citation in a BEL parser.
     
     :param pybel.parser.parse_control.ControlParser control_parser:
-    :return: 
     """
     control_parser.citation.update(test_citation_dict)
     control_parser.evidence = test_evidence_text
 
 
 def assertHasNode(self, node, graph, **kwargs):
-    """A helper function for checking if a node with the given properties is contained within a graph
+    """Check if a node with the given properties is contained within a graph.
 
     :param self: A Test Case
     :type self: unittest.TestCase
@@ -122,8 +123,10 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
 
 
 class TestGraphMixin(unittest.TestCase):
+    """A test case with additional functions for testing graphs."""
+
     def assertHasNode(self, g, n, **kwargs):
-        """Helper for asserting node membership
+        """Help assert node membership.
         
         :param g: Graph 
         :param n: Node
@@ -132,7 +135,7 @@ class TestGraphMixin(unittest.TestCase):
         assertHasNode(self, n, g, **kwargs)
 
     def assertHasEdge(self, g, u, v, **kwargs):
-        """Helper for asserting edge membership
+        """Help assert edge membership.
         
         :param g: Graph
         :param u: Source node
@@ -143,12 +146,16 @@ class TestGraphMixin(unittest.TestCase):
 
 
 class TestTokenParserBase(unittest.TestCase):
+    """A test case that has a BEL parser available."""
+
     @classmethod
     def setUpClass(cls):
+        """Build a BEL graph and BEL parser that persist through the class."""
         cls.graph = BELGraph()
         cls.parser = BelParser(cls.graph, autostreamline=False)
 
     def setUp(self):
+        """Clear the parser at the beginning of each test."""
         self.parser.clear()
 
     def assertHasNode(self, member, **kwargs):
@@ -158,6 +165,7 @@ class TestTokenParserBase(unittest.TestCase):
         assertHasEdge(self, u, v, self.graph, **kwargs)
 
     def add_default_provenance(self):
+        """Add a default citation and evidence to the parser."""
         update_provenance(self.parser.control_parser)
 
 
