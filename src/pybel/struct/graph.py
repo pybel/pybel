@@ -594,7 +594,7 @@ class BELGraph(networkx.MultiDiGraph):
                                        object_modifier=object_modifier, **attr)
 
     def iter_node_data_pairs(self):
-        """Iterates over pairs of nodes and their data dictionaries
+        """Iterate over pairs of nodes and their data dictionaries.
 
         :rtype: iter[tuple[tuple,dict]]
         """
@@ -654,7 +654,9 @@ class BELGraph(networkx.MultiDiGraph):
 
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
                            object_modifier=None, **attr):
-        """Add an edge, qualified with a relation, evidence, citation, and optional annotations, subject modifications,
+        """Add a qualified edge.
+
+        Qualified edges have a relation, evidence, citation, and optional annotations, subject modifications,
         and object modifications.
 
         :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
@@ -710,7 +712,9 @@ class BELGraph(networkx.MultiDiGraph):
         return attr[HASH]
 
     def add_inhibits(self, u, v, evidence, citation, annotations=None, object_modifier=None):
-        """A more specific version of add_qualified edge that automatically populates the relation and object
+        """Add an "inhibits" relationship.
+
+        A more specific version of add_qualified edge that automatically populates the relation and object
         modifier
 
         :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
@@ -743,7 +747,7 @@ class BELGraph(networkx.MultiDiGraph):
         return CITATION in self[u][v][key]
 
     def get_edge_citation(self, u, v, key):
-        """Gets the citation for a given edge
+        """Get the citation for a given edge
 
         :rtype: Optional[dict]
         """
