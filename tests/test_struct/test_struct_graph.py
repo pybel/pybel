@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for data structures in PyBEL."""
+
 import unittest
 
 from six import string_types
@@ -10,104 +12,94 @@ from pybel.constants import (
     unqualified_edge_code,
 )
 from pybel.dsl import entity, protein
-from pybel.examples import sialic_acid_graph
 from pybel.testing.utils import n
 
 PART_OF_CODE = unqualified_edge_code[PART_OF]
 
+
+class TestGraphProperties(unittest.TestCase):
+    """Test setting and access to graph properties."""
+
+    def setUp(self):
+        """Make fake metadata for the graphs."""
+        (
+            self.name,
+            self.version,
+            self.description,
+            self.authors,
+            self.contact,
+            self.licenses,
+            self.copyrights,
+            self.disclaimer
+        ) = [n() for _ in range(8)]
+
+    def help_test_metadata(self, graph):
+        """Help test the right metadata got in the graph.
+
+        :type graph: BELGraph
+        """
+        self.assertEqual(self.name, graph.name)
+        self.assertEqual(self.version, graph.version)
+        self.assertEqual(self.description, graph.description)
+        self.assertEqual(self.authors, graph.authors)
+        self.assertEqual(self.contact, graph.contact)
+        self.assertEqual(self.licenses, graph.license)
+        self.assertEqual(self.copyrights, graph.copyright)
+        self.assertEqual(self.disclaimer, graph.disclaimer)
+
+        self.assertEqual('{name} v{version}'.format(name=self.name, version=self.version), str(graph))
+
+    def test_str_kwargs(self):
+        """Test setting of metadata through keyword arguments."""
+        graph = BELGraph(
+            name=self.name,
+            version=self.version,
+            description=self.description,
+            authors=self.authors,
+            contact=self.contact,
+            license=self.licenses,
+            copyright=self.copyrights,
+            disclaimer=self.disclaimer
+        )
+        self.help_test_metadata(graph)
+
+    def test_name(self):
+        """Test setting of metadata through attributes."""
+        graph = BELGraph()
+
+        graph.name = self.name
+        graph.version = self.version
+        graph.description = self.description
+        graph.authors = self.authors
+        graph.contact = self.contact
+        graph.license = self.licenses
+        graph.copyright = self.copyrights
+        graph.disclaimer = self.disclaimer
+
+        self.help_test_metadata(graph)
+
+
 class TestStruct(unittest.TestCase):
-    def test_example_metadata(self):
-        self.assertIsNotNone(sialic_acid_graph.name)
-        self.assertIsNotNone(sialic_acid_graph.version)
-        self.assertIsNotNone(sialic_acid_graph.description)
-        self.assertIsNone(sialic_acid_graph.disclaimer)
-        self.assertIsNone(sialic_acid_graph.copyright)
-        self.assertIsNone(sialic_acid_graph.license)
+    """Test the BEL graph data structure."""
 
     def test_add_simple(self):
-        g = BELGraph()
+        """Test that a simple node can be added, but not duplicated."""
+        graph = BELGraph()
 
         namespace, name = n(), n()
 
-        g.add_node_from_data(protein(namespace=namespace, name=name))
-        self.assertEqual(1, g.number_of_nodes())
+        graph.add_node_from_data(protein(namespace=namespace, name=name))
+        self.assertEqual(1, graph.number_of_nodes())
 
-        g.add_node_from_data(protein(namespace=namespace, name=name))
-        self.assertEqual(1, g.number_of_nodes())
-
-    def test_str_kwargs(self):
-        (
-            name,
-            version,
-            description,
-            authors,
-            contact,
-            licenses,
-            copyrights,
-            disclaimer
-        ) = [n() for _ in range(8)]
-
-        g = BELGraph(
-            name=name,
-            version=version,
-            description=description,
-            authors=authors,
-            contact=contact,
-            license=licenses,
-            copyright=copyrights,
-            disclaimer=disclaimer
-        )
-
-        self.assertEqual(name, g.name)
-        self.assertEqual(version, g.version)
-        self.assertEqual(description, g.description)
-        self.assertEqual(authors, g.authors)
-        self.assertEqual(contact, g.contact)
-        self.assertEqual(licenses, g.license)
-        self.assertEqual(copyrights, g.copyright)
-        self.assertEqual(disclaimer, g.disclaimer)
-
-        self.assertEqual('{name} v{version}'.format(name=name, version=version), str(g))
-
-    def test_name(self):
-        (
-            name,
-            version,
-            description,
-            authors,
-            contact,
-            licenses,
-            copyrights,
-            disclaimer
-        ) = [n() for _ in range(8)]
-
-        g = BELGraph()
-
-        g.name = name
-        g.version = version
-        g.description = description
-        g.authors = authors
-        g.contact = contact
-        g.license = licenses
-        g.copyright = copyrights
-        g.disclaimer = disclaimer
-
-        self.assertEqual(name, g.name)
-        self.assertEqual(version, g.version)
-        self.assertEqual(description, g.description)
-        self.assertEqual(authors, g.authors)
-        self.assertEqual(contact, g.contact)
-        self.assertEqual(licenses, g.license)
-        self.assertEqual(copyrights, g.copyright)
-        self.assertEqual(disclaimer, g.disclaimer)
-
-        self.assertEqual('{name} v{version}'.format(name=name, version=version), str(g))
+        graph.add_node_from_data(protein(namespace=namespace, name=name))
+        self.assertEqual(1, graph.number_of_nodes())
 
     def test_citation_type_error(self):
-        g = BELGraph()
+        """Test error handling on adding qualified edges."""
+        graph = BELGraph()
 
         with self.assertRaises(TypeError):
-            g.add_increases(
+            graph.add_increases(
                 protein(namespace='TEST', name='YFG1'),
                 protein(namespace='TEST', name='YFG2'),
                 evidence=n(),
@@ -117,43 +109,58 @@ class TestStruct(unittest.TestCase):
 
 class TestDSL(unittest.TestCase):
     def test_add_robust_node(self):
-        g = BELGraph()
+        graph = BELGraph()
+        namespace, name, identifier = n(), n(), n()
+        node = protein(namespace=namespace, name=name, identifier=identifier)
 
-        p = protein(name='yfg', namespace='test', identifier='1')
-
-        p_tuple = g.add_node_from_data(p)
+        graph.add_node_from_data(node)
 
         self.assertEqual(
             {
                 FUNCTION: PROTEIN,
-                NAMESPACE: 'test',
-                NAME: 'yfg',
-                IDENTIFIER: '1'
+                NAMESPACE: namespace,
+                NAME: name,
+                IDENTIFIER: identifier,
             },
-            g.node[p_tuple]
+            graph.node[node.as_tuple()]
         )
 
     def test_add_identified_node(self):
-        """What happens when a node with only an identifier is added to a graph"""
-        g = BELGraph()
+        """Test what happens when a node with only an identifier is added to a graph."""
+        graph = BELGraph()
+        namespace, identifier = n(), n()
+        node = protein(namespace=namespace, identifier=identifier)
+        self.assertNotIn(NAME, node)
 
-        p = protein(namespace='test', identifier='1')
-
-        self.assertNotIn(NAME, p)
-
-        p_tuple = g.add_node_from_data(p)
+        t = graph.add_node_from_data(node)
 
         self.assertEqual(
             {
                 FUNCTION: PROTEIN,
-                NAMESPACE: 'test',
-                IDENTIFIER: '1'
+                NAMESPACE: namespace,
+                IDENTIFIER: identifier,
             },
-            g.node[p_tuple]
+            graph.node[t]
+        )
+
+    def test_add_named_node(self):
+        graph = BELGraph()
+        namespace, name = n(), n()
+        node = protein(namespace=namespace, name=name)
+
+        graph.add_node_from_data(node)
+
+        self.assertEqual(
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: namespace,
+                NAME: name,
+            },
+            graph.node[node.as_tuple()]
         )
 
     def test_missing_information(self):
-        """Checks that entity and abundance functions raise on missing name/identifier"""
+        """Check that entity and abundance functions raise on missing name/identifier."""
         with self.assertRaises(ValueError):
             entity(namespace='test')
 
@@ -162,7 +169,7 @@ class TestDSL(unittest.TestCase):
 
 
 class TestGetGraphProperties(unittest.TestCase):
-    """The tests in this class check the getting and setting of node properties"""
+    """The tests in this class check the getting and setting of node properties."""
 
     def setUp(self):
         self.graph = BELGraph()
@@ -216,7 +223,7 @@ class TestGetGraphProperties(unittest.TestCase):
         test_source = protein(namespace='TEST', name='YFG')
         test_target = protein(namespace='TEST', name='YFG2')
 
-        self.graph.add_part_of(test_source,test_target)
+        self.graph.add_part_of(test_source, test_target)
 
         citation = self.graph.get_edge_citation(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
         self.assertIsNone(citation)
