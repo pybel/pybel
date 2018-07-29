@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains helper functions for reading BEL scripts"""
+"""This module contains helper functions for reading BEL scripts."""
 
 import logging
 import re
 import time
-from collections import Counter, defaultdict
 
 import six
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 from tqdm import tqdm
 
-from ..constants import FUNCTION, GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, NAMESPACE, REQUIRED_METADATA
+from ..constants import GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
 from ..exceptions import PyBelWarning
 from ..manager import Manager
 from ..parser import BelParser, MetadataParser
@@ -30,8 +29,9 @@ METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOT
 
 
 def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False, **kwargs):
-    """Parses an iterable of lines into this graph. Delegates to :func:`parse_document`, :func:`parse_definitions`,
-    and :func:`parse_statements`.
+    """Parse an iterable of lines into this graph.
+
+    Delegates to :func:`parse_document`, :func:`parse_definitions`, and :func:`parse_statements`.
 
     :param BELGraph graph: A BEL graph
     :param iter[str] lines: An iterable over lines of BEL script
@@ -39,7 +39,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool allow_nested: If true, turns off nested statement failures
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
-    :param bool use_tqdm: If true, use tqdm for logging
+    :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
 
     .. warning::
 
@@ -98,17 +98,15 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
 
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
 
-    _log_graph_summary(graph)
-
 
 def parse_document(graph, document_metadata, metadata_parser):
-    """Parses the lines in the document section of a BEL script.
+    """Parse the lines in the document section of a BEL script.
 
     :param BELGraph graph: A BEL graph
     :param iter[str] document_metadata: An enumerated iterable over the lines in the document section of a BEL script
     :param MetadataParser metadata_parser: A metadata parser
     """
-    t = time.time()
+    parse_document_start_time = time.time()
 
     for line_number, line in document_metadata:
         try:
@@ -131,22 +129,22 @@ def parse_document(graph, document_metadata, metadata_parser):
 
     graph.graph[GRAPH_METADATA] = metadata_parser.document_metadata
 
-    log.info('Finished parsing document section in %.02f seconds', time.time() - t)
+    log.info('Finished parsing document section in %.02f seconds', time.time() - parse_document_start_time)
 
 
 def parse_definitions(graph, definitions, metadata_parser, allow_failures=False, use_tqdm=False):
-    """Parses the lines in the definitions section of a BEL script.
+    """Parse the lines in the definitions section of a BEL script.
 
     :param pybel.BELGraph graph: A BEL graph
     :param list[str] definitions: An enumerated iterable over the lines in the definitions section of a BEL script
     :param MetadataParser metadata_parser: A metadata parser
     :param bool allow_failures: If true, allows parser to continue past strange failures
-    :param bool use_tqdm: Use TQDM for progress bar
+    :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
     :raises: pybel.parser.parse_exceptions.InconsistentDefinitionError
     :raises: pybel.resources.exc.ResourceError
     :raises: sqlalchemy.exc.OperationalError
     """
-    t = time.time()
+    parse_definitions_start_time = time.time()
 
     if use_tqdm:
         definitions = tqdm(definitions, total=len(definitions), desc='Definitions')
@@ -180,8 +178,7 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False,
     })
     graph.uncached_namespaces.update(metadata_parser.uncachable_namespaces)
 
-    if not use_tqdm:
-        log.info('Finished parsing definitions section in %.02f seconds', time.time() - t)
+    log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
 
 
 def parse_statements(graph, statements, bel_parser, use_tqdm=False):
@@ -190,8 +187,9 @@ def parse_statements(graph, statements, bel_parser, use_tqdm=False):
     :param BELGraph graph: A BEL graph
     :param iter[str] statements: An enumerated iterable over the lines in the statements section of a BEL script
     :param BelParser bel_parser: A BEL parser
+    :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
     """
-    t = time.time()
+    parse_statements_start_time = time.time()
 
     if use_tqdm:
         statements = tqdm(statements, desc='Statements', total=len(statements))
@@ -210,24 +208,5 @@ def parse_statements(graph, statements, bel_parser, use_tqdm=False):
             parse_log.exception('Line %07d - General Failure: %s', line_number, line)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
 
-    if not use_tqdm:
-        log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - t, len(graph.warnings))
-
-    for k, v in sorted(Counter(e.__class__.__name__ for _, _, e, _ in graph.warnings).items(), reverse=True):
-        log.debug('  %s: %d', k, v)
-
-
-def _log_graph_summary(graph):
-    """Logs simple information about a graph
-
-    :param pybel.BELGraph graph: A BEL graph
-    """
-    counter = defaultdict(lambda: defaultdict(int))
-
-    for data in graph.iter_data():
-        counter[data[FUNCTION]][data.get(NAMESPACE, "DEFAULT")] += 1
-
-    for fn, nss in sorted(counter.items()):
-        log.debug(' %s: %d', fn, sum(nss.values()))
-        for ns, count in sorted(nss.items()):
-            log.debug('   %s: %d', ns, count)
+    log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - parse_statements_start_time,
+             len(graph.warnings))

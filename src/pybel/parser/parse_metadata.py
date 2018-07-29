@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
-"""
-Metadata Parser
-~~~~~~~~~~~~~~~
-This module supports the relation parser by handling statements.
-"""
+"""This module supports the relation parser by handling statements."""
 
 import logging
 import re
+
 from pyparsing import And, MatchFirst, Suppress, Word, pyparsing_common as ppc
 
 from .baseparser import BaseParser
-from .exc import *
+from .exc import InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning
 from .utils import delimited_quoted_list, qid, quote, word
-from ..constants import *
+from ..constants import (
+    BEL_KEYWORD_ANNOTATION, BEL_KEYWORD_AS, BEL_KEYWORD_DEFINE, BEL_KEYWORD_DOCUMENT, BEL_KEYWORD_LIST,
+    BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_PATTERN, BEL_KEYWORD_SET, BEL_KEYWORD_URL, DOCUMENT_KEYS, METADATA_VERSION,
+    belns_encodings,
+)
 from ..utils import valid_date_version
 
 __all__ = ['MetadataParser']
@@ -44,7 +45,8 @@ class MetadataParser(BaseParser):
 
     def __init__(self, manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
                  annotation_regex=None, default_namespace=None, allow_redefinition=False):
-        """
+        """Build a metadata parser.
+
         :param pybel.manager.Manager manager: A cache manager
         :param dict[str,dict[str,str]] namespace_dict: A dictionary of pre-loaded, enumerated namespaces from
                                 {namespace keyword: {name: encoding}}
@@ -121,7 +123,7 @@ class MetadataParser(BaseParser):
         super(MetadataParser, self).__init__(self.language)
 
     def handle_document(self, line, position, tokens):
-        """Handles statements like ``SET DOCUMENT X = "Y"``
+        """Handle statements like ``SET DOCUMENT X = "Y"``.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -147,7 +149,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def raise_for_redefined_namespace(self, line, position, namespace):
-        """Raises an exception if a namespace is already defined
+        """Raise an exception if a namespace is already defined.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -158,7 +160,7 @@ class MetadataParser(BaseParser):
             raise RedefinedNamespaceError(self.line_number, line, position, namespace)
 
     def handle_namespace_url(self, line, position, tokens):
-        """Handles statements like ``DEFINE NAMESPACE X AS URL "Y"``
+        """Handle statements like ``DEFINE NAMESPACE X AS URL "Y"``.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -184,7 +186,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_namespace_pattern(self, line, position, tokens):
-        """Handles statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``
+        """Handle statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -199,7 +201,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def raise_for_redefined_annotation(self, line, position, annotation):
-        """Raises an exception if the given annotation is already defined
+        """Raise an exception if the given annotation is already defined.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -210,7 +212,7 @@ class MetadataParser(BaseParser):
             raise RedefinedAnnotationError(self.line_number, line, position, annotation)
 
     def handle_annotations_url(self, line, position, tokens):
-        """Handles statements like ``DEFINE ANNOTATION X AS URL "Y"``
+        """Handle statements like ``DEFINE ANNOTATION X AS URL "Y"``.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -227,7 +229,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_list(self, line, position, tokens):
-        """Handles statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``
+        """Handle statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -245,7 +247,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def handle_annotation_pattern(self, line, position, tokens):
-        """Handles statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``
+        """Handle statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -258,7 +260,7 @@ class MetadataParser(BaseParser):
         return tokens
 
     def has_enumerated_annotation(self, annotation):
-        """Checks if this annotation is defined by an enumeration
+        """Check if this annotation is defined by an enumeration.
 
         :param str annotation: The keyword of a annotation
         :rtype: bool
@@ -266,7 +268,7 @@ class MetadataParser(BaseParser):
         return annotation in self.annotation_dict
 
     def has_regex_annotation(self, annotation):
-        """Checks if this annotation is defined by a regular expression
+        """Check if this annotation is defined by a regular expression.
 
         :param str annotation: The keyword of a annotation
         :rtype: bool
@@ -274,7 +276,7 @@ class MetadataParser(BaseParser):
         return annotation in self.annotation_regex
 
     def has_annotation(self, annotation):
-        """Checks if this annotation is defined
+        """Check if this annotation is defined.
 
         :param str annotation: The keyword of a annotation
         :rtype: bool
@@ -282,7 +284,7 @@ class MetadataParser(BaseParser):
         return self.has_enumerated_annotation(annotation) or self.has_regex_annotation(annotation)
 
     def has_enumerated_namespace(self, namespace):
-        """Checks if this namespace is defined by an enumeration
+        """Check if this namespace is defined by an enumeration.
 
         :param str namespace: The keyword of a namespace
         :rtype: bool
@@ -290,7 +292,7 @@ class MetadataParser(BaseParser):
         return namespace in self.namespace_dict
 
     def has_regex_namespace(self, namespace):
-        """Checks if this namespace is defined by a regular expression
+        """Check if this namespace is defined by a regular expression.
 
         :param str namespace: The keyword of a namespace
         :rtype: bool
@@ -298,7 +300,7 @@ class MetadataParser(BaseParser):
         return namespace in self.namespace_regex
 
     def has_namespace(self, namespace):
-        """Checks if this namespace is defined
+        """Check if this namespace is defined.
 
         :param str namespace: The keyword of a namespace
         :rtype: bool
@@ -306,8 +308,9 @@ class MetadataParser(BaseParser):
         return self.has_enumerated_namespace(namespace) or self.has_regex_namespace(namespace)
 
     def raise_for_version(self, line, position, version):
-        """Checks that a version string is valid for BEL documents, meaning it's either in the YYYYMMDD or semantic version
-        format
+        """Check that a version string is valid for BEL documents.
+
+        This means it's either in the YYYYMMDD or semantic version format.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -319,17 +322,3 @@ class MetadataParser(BaseParser):
 
         if not SEMANTIC_VERSION_STRING_RE.match(version):
             raise VersionFormatWarning(self.line_number, line, position, version)
-
-
-def extend_version(value):
-    """
-    :param str value: A version string, that might not be a semantic one
-    :rtype: str
-    """
-    if not SEMANTIC_VERSION_STRING_RE.match(value) and MALFORMED_VERSION_STRING_RE.match(value):
-        k = value.split('.')
-        while len(k) < 3:
-            k.append('0')
-        return ".".join(k)
-
-    return value

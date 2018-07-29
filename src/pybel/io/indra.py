@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a list of
+"""Conversion functions for BEL graphs with INDRA.
+
+After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a list of
 :class:`indra.statements.Statement` can be converted to a :class:`pybel.BELGraph` with
 :class:`indra.assemblers.PybelAssembler`.
 
@@ -28,7 +30,6 @@
 
     These functions are hard to unit test because they rely on a whole set of java dependencies and will likely
     not be for a while.
-
 """
 
 import warnings
@@ -44,7 +45,7 @@ __all__ = [
 
 def from_indra_statements(stmts, name=None, version=None, description=None, authors=None, contact=None, license=None,
                           copyright=None, disclaimer=None):
-    """Imports a model from :mod:`indra`.
+    """Import a model from :mod:`indra`.
 
     :param list[indra.statements.Statement] stmts: A list of statements
     :param str name: The graph's name
@@ -77,7 +78,7 @@ def from_indra_statements(stmts, name=None, version=None, description=None, auth
 
 
 def from_indra_pickle(path, name=None, version=None, description=None):
-    """Imports a model from :mod:`indra`.
+    """Import a model from :mod:`indra`.
 
     :param str path: Path to pickled list of :class:`indra.statements.Statement`
     :param str name: The name for the BEL graph
@@ -97,12 +98,12 @@ def from_indra_pickle(path, name=None, version=None, description=None):
 
 
 def to_indra_statements(graph):
-    """Exports this graph as a list of INDRA statements using `indra.sources.pybel.PybelProcessor`
+    """Export this graph as a list of INDRA statements using `indra.sources.pybel.PybelProcessor`.
 
     :param pybel.BELGraph graph: A BEL graph
     :rtype: list[indra.statements.Statement]
 
-    .. warning:: Not fully implemented yet! Needs the pybel_client branch of sorgerlab/indra
+
     """
     warnings.warn('export to INDRA is not yet complete')
     from indra.sources.bel import process_pybel_graph
@@ -112,13 +113,15 @@ def to_indra_statements(graph):
 
 
 def from_biopax(path, name=None, version=None, description=None):
-    """Imports a model encoded in `BioPAX <http://www.biopax.org/>`_ via :mod:`indra`.
+    """Import a model encoded in Pathway Commons `BioPAX <http://www.biopax.org/>`_ via :mod:`indra`.
 
     :param str path: Path to a BioPAX OWL file
     :param str name: The name for the BEL graph
     :param str version: The version of the BEL graph
     :param str description: The description of the BEL graph
     :rtype: pybel.BELGraph
+
+    .. warning:: Not compatible with all BioPAX! See INDRA documentation.
     """
     from indra.sources.biopax.biopax_api import process_owl
 

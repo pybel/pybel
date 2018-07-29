@@ -16,17 +16,21 @@ from pybel.struct.filters.node_predicate_builders import (
 from pybel.testing.utils import n
 
 
-class TestNodePredicateBuilders(unittest.TestCase):
+class TestFunctionInclusionFilterBuilder(unittest.TestCase):
+    """Tests for the function_inclusion_filter_builder function."""
 
     def test_type_error(self):
+        """Test that a type error is thrown for an invalid argument type."""
         with self.assertRaises(TypeError):
             function_inclusion_filter_builder(5)
 
     def test_empty_list_error(self):
+        """Test that a value error is thrown for an empty list."""
         with self.assertRaises(ValueError):
             function_inclusion_filter_builder([])
 
     def test_single(self):
+        """Test building a node predicate with a single function."""
         f = function_inclusion_filter_builder(GENE)
 
         p1 = protein(n(), n())
@@ -48,6 +52,7 @@ class TestNodePredicateBuilders(unittest.TestCase):
         self.assertFalse(f(g, g1.as_tuple()))
 
     def test_multiple(self):
+        """Test building a node predicate with multiple functions."""
         f = function_inclusion_filter_builder([GENE, PROTEIN])
 
         p1 = protein(n(), n())
@@ -73,6 +78,10 @@ class TestNodePredicateBuilders(unittest.TestCase):
         self.assertFalse(f(g, g1.as_tuple()))
         self.assertTrue(f(g, b1.as_tuple()))
 
+
+class TestNodePredicateBuilders(unittest.TestCase):
+    """Tests for node predicate builders."""
+
     def test_data_missing_key_builder(self):
         """Test the data_missing_key_builder function."""
         graph = BELGraph()
@@ -95,7 +104,6 @@ class TestNodePredicateBuilders(unittest.TestCase):
 
     def test_build_node_data_search(self):
         """Test build_node_data_search."""
-
         def test_key_predicate(datum):
             """Check the data is greater than zero.
 

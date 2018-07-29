@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""
-Module that contains the command line app
+"""Command line interface for PyBEL.
 
 Why does this file exist, and why not put this in __main__?
 You might be tempted to import things from __main__ later, but that will cause
 problems--the code will get executed twice:
- - When you run `python3 -m pybel` python will execute
+ - When you run ``python3 -m pybel`` python will execute
    ``__main__.py`` as a script. That means there won't be any
    ``pybel.__main__`` in ``sys.modules``.
  - When you import __main__ it will get executed again (as a module) because
@@ -15,18 +14,20 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
+from pkg_resources import iter_entry_points
 import sys
 import time
 
 import click
+from click_plugins import with_plugins
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
-from .io import from_lines, from_url, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
+from .io import from_lines, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
 from .io.web import _get_host
-from .manager import Manager, defaults
-from .manager.database_io import from_database, to_database
-from .manager.models import Base, Edge, Namespace
+from .manager import Manager
+from .manager.database_io import to_database
+from .manager.models import Annotation, Base, Edge, Namespace
 
 log = logging.getLogger(__name__)
 
@@ -35,26 +36,31 @@ def _page(it):
     click.echo_via_pager('\n'.join(map(str, it)))
 
 
-@click.group(
-    help="PyBEL Command Line Utilities on {} using default connection {}".format(sys.executable,
-                                                                                 get_cache_connection()))
+connection_option = click.option(
+    '-c',
+    '--connection',
+    default=get_cache_connection(),
+    help='Connection to cache. Defaults to {}'.format(get_cache_connection()),
+)
+
+
+@with_plugins(iter_entry_points('pybel.cli_plugins'))
+@click.group(help="PyBEL Command Line Utilities on {} using default "
+                  "connection {}".format(sys.executable, get_cache_connection()))
 @click.version_option()
 def main():
-    """PyBEL Command Line """
+    """PyBEL Command Line."""
 
 
 @main.command()
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
-@click.option('--url', help='Input BEL file URL')
-@click.option('-c', '--connection', default=get_cache_connection(),
-              help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
-@click.option('--database-name', help='Input network name from database')
-@click.option('--csv', type=click.File('w'), help='Output path for *.csv')
-@click.option('--sif', type=click.File('w'), help='Output path for *.sif')
-@click.option('--gsea', type=click.File('w'), help='Output path for *.grp for gene set enrichment analysis')
-@click.option('--graphml', help='Output path for GraphML output. Use *.graphml for Cytoscape')
-@click.option('--json', type=click.File('w'), help='Output path for Node-link *.json')
-@click.option('--pickle', help='Output path for NetworkX *.gpickle')
+@connection_option
+@click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
+@click.option('--sif', type=click.File('w'), help='Path to output an SIF file.')
+@click.option('--gsea', type=click.File('w'), help='Path to output a GRP file for gene set enrichment analysis')
+@click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape')
+@click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
+@click.option('--pickle', help='Path to output a pickle file.')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL')
 @click.option('--neo', help="Connection string for neo4j upload")
 @click.option('--neo-context', help="Optional context for neo4j upload")
@@ -66,46 +72,23 @@ def main():
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
-@click.option('-v', '--debug', count=True)
-def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json, pickle, bel, neo, neo_context, store,
-            allow_naked_names, allow_nested, allow_unqualified_translocations, no_identifier_validation,
-            no_citation_clearing, debug, required_annotations):
+def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, neo_context, store, allow_naked_names,
+            allow_nested, allow_unqualified_translocations, no_identifier_validation, no_citation_clearing,
+            required_annotations):
     """Convert BEL."""
-    if debug == 1:
-        log.setLevel(logging.INFO)
-        logging.basicConfig(level=logging.INFO, format='%(name)s:%(levelname)s - %(message)s')
-    elif debug == 2:
-        log.setLevel(logging.DEBUG)
-        logging.basicConfig(level=logging.DEBUG, format='%(name)s:%(levelname)s - %(message)s')
-
     manager = Manager(connection=connection)
 
-    if database_name:
-        g = from_database(database_name, manager=manager)
-
-    elif url:
-        g = from_url(
-            url,
-            manager=manager,
-            allow_nested=allow_nested,
-            allow_naked_names=allow_naked_names,
-            allow_unqualified_translocations=allow_unqualified_translocations,
-            citation_clearing=(not no_citation_clearing),
-            no_identifier_validation=no_identifier_validation,
-            required_annotations=required_annotations,
-        )
-
-    else:
-        g = from_lines(
-            path,
-            manager=manager,
-            allow_nested=allow_nested,
-            allow_naked_names=allow_naked_names,
-            allow_unqualified_translocations=allow_unqualified_translocations,
-            citation_clearing=(not no_citation_clearing),
-            required_annotations=required_annotations,
-            use_tqdm=True,
-        )
+    g = from_lines(
+        path,
+        manager=manager,
+        allow_nested=allow_nested,
+        allow_naked_names=allow_naked_names,
+        allow_unqualified_translocations=allow_unqualified_translocations,
+        citation_clearing=(not no_citation_clearing),
+        required_annotations=required_annotations,
+        no_identifier_validation=no_identifier_validation,
+        use_tqdm=True,
+    )
 
     if csv:
         log.info('Outputting CSV to %s', csv)
@@ -151,8 +134,8 @@ def convert(path, url, connection, database_name, csv, sif, gsea, graphml, json,
 
 @main.command()
 @click.argument('agents', nargs=-1)
-@click.option('--local', is_flag=True)
-@click.option('-c', '--connection', help='Connection to cache. Defaults to {}'.format(get_cache_connection()))
+@click.option('--local', is_flag=True, help='Upload to local database.')
+@connection_option
 @click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
 def machine(agents, local, connection, host):
     """Get content from the INDRA machine and upload to BEL Commons."""
@@ -182,21 +165,19 @@ def machine(agents, local, connection, host):
 
 
 @main.group()
-@click.option('-c', '--connection', help='Cache connection. Defaults to {}'.format(get_cache_connection()))
+@connection_option
 @click.pass_context
 def manage(ctx, connection):
-    """Manage database"""
+    """Manage the database."""
     ctx.obj = Manager(connection=connection)
     Base.metadata.bind = ctx.obj.engine
     Base.query = ctx.obj.session.query_property()
 
 
 @manage.command()
-@click.option('-v', '--debug', count=True)
 @click.pass_obj
-def setup(manager, debug):
-    """Create the cache if it doesn't exist"""
-    log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
+def setup(manager):
+    """Create the database, if it doesn't exist."""
     manager.create_all()
 
 
@@ -204,48 +185,26 @@ def setup(manager, debug):
 @click.option('-y', '--yes', is_flag=True)
 @click.pass_obj
 def drop(manager, yes):
-    """Drops cache"""
+    """Drop the database."""
     if yes or click.confirm('Drop database?'):
         manager.drop_all()
 
 
 @manage.group()
-def namespace():
-    """Manage namespaces"""
+def namespaces():
+    """Manage namespaces."""
 
 
 @manage.group()
 def annotations():
-    """Manage annotations"""
+    """Manage annotations."""
 
 
-@namespace.command()
-@click.option('-v', '--debug', count=True)
-@click.pass_obj
-def ensure(manager, debug):
-    """Set up default cache with default definitions"""
-    log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
-
-    for url in defaults.fraunhofer_namespaces:
-        manager.ensure_namespace(url)
-
-
-@annotations.command()
-@click.option('-v', '--debug', count=True)
-@click.pass_obj
-def ensure(manager, debug):
-    """Set up default cache with default annotations"""
-    log.setLevel(int(5 * debug ** 2 / 2 - 25 * debug / 2 + 20))
-
-    for url in defaults.fraunhofer_annotations:
-        manager.ensure_annotation(url)
-
-
-@namespace.command()
+@namespaces.command()
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
-    """Manually add namespace by URL"""
+    """Add a namespace by URL."""
     manager.ensure_namespace(url)
 
 
@@ -253,49 +212,51 @@ def insert(manager, url):
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
-    """Manually add annotation by URL"""
+    """Add an annotation by URL."""
     manager.ensure_annotation(url)
 
 
-@namespace.command()
+def _ls(manager, model_cls, model_id):
+    if model_id:
+        n = manager.session.query(model_cls).get(model_id)
+        _page(n.entries)
+
+    else:
+        for n in manager.session.query(model_cls).order_by(model_cls.uploaded.desc()):
+            click.echo('\t'.join(map(str, (n.id, n.keyword, n.version, n.url))))
+
+
+@namespaces.command()
 @click.option('--url', help='Specific resource URL to list')
 @click.option('-i', '--namespace-id', help='Specific resource URL to list')
 @click.pass_obj
 def ls(manager, url, namespace_id):
-    """Lists cached namespaces."""
+    """List cached namespaces."""
     if url:
         n = manager.ensure_namespace(url)
         _page(n.entries)
-
-    elif namespace_id:
-        n = manager.session.query(Namespace).get(namespace_id)
-        _page(n.entries)
-
     else:
-        for n in manager.session.query(Namespace).order_by(Namespace.uploaded.desc()):
-            click.echo('\t'.join(map(str, (n.id, n.keyword, n.version, n.url))))
+        _ls(manager, Namespace, namespace_id)
 
 
 @annotations.command()
 @click.option('--url', help='Specific resource URL to list')
+@click.option('-i', '--annotation-id', help='Specific resource URL to list')
 @click.pass_obj
-def ls(manager, url):
-    """Lists cached annotations"""
-    if not url:
-        for annotation, in manager.list_annotations():
-            click.echo(annotation.url)
-
+def ls(manager, url, annotation_id):
+    """List cached annotations."""
+    if url:
+        n = manager.ensure_annotation(url)
+        _page(n.entries)
     else:
-        annotation = manager.ensure_annotation(url)
-        for name in annotation.get_entry_names():
-            click.echo(name)
+        _ls(manager, Annotation, annotation_id)
 
 
-@namespace.command()
+@namespaces.command()
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
-    """Drops a namespace by URL"""
+    """Drop a namespace by URL."""
     manager.drop_namespace_by_url(url)
 
 
@@ -303,47 +264,47 @@ def drop(manager, url):
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
-    """Drops an annotation by URL"""
+    """Drop an annotation by URL."""
     manager.drop_annotation_by_url(url)
 
 
 @manage.group()
-def network():
-    """Manage networks"""
+def networks():
+    """Manage networks."""
 
 
-@network.command()
+@networks.command()
 @click.pass_obj
 def ls(manager):
-    """Lists network names, versions, and optionally descriptions"""
+    """List network names, versions, and optionally, descriptions."""
     for n in manager.list_networks():
         click.echo('{}\t{}\t{}'.format(n.id, n.name, n.version))
 
 
-@network.command()
+@networks.command()
 @click.option('-n', '--network-id', type=int, help='Identifier of network to drop')
 @click.option('-y', '--yes', is_flag=True, help='Drop all networks without confirmation if no identifier is given')
 @click.pass_obj
 def drop(manager, network_id, yes):
-    """Drops a network by its identifier or drops all networks"""
+    """Drop a network by its identifier or drop all networks."""
     if network_id:
         manager.drop_network_by_id(network_id)
 
-    if yes or click.confirm('Drop all networks?'):
+    elif yes or click.confirm('Drop all networks?'):
         manager.drop_networks()
 
 
 @manage.group()
-def edge():
-    """Manage edges"""
+def edges():
+    """Manage edges."""
 
 
-@edge.command()
+@edges.command()
 @click.option('--offset', type=int)
 @click.option('--limit', type=int, default=10)
 @click.pass_obj
 def ls(manager, offset, limit):
-    """Lists edges"""
+    """List edges."""
     q = manager.session.query(Edge)
 
     if offset:
@@ -359,7 +320,7 @@ def ls(manager, offset, limit):
 @manage.command()
 @click.pass_obj
 def summarize(manager):
-    """Summarizes the contents of the database"""
+    """Summarize the contents of the database."""
     click.echo('Networks: {}'.format(manager.count_networks()))
     click.echo('Edges: {}'.format(manager.count_edges()))
     click.echo('Nodes: {}'.format(manager.count_nodes()))

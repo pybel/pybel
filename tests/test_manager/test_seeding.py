@@ -70,10 +70,19 @@ class TestSeeding(TemporaryCacheClsMixin):
         self.assertEqual(0, len(edges))
 
     def test_seed_by_induction_raise(self):
+        """Test that seeding by induction fails when an empty list is given."""
         with self.assertRaises(ValueError):
             self.manager.query_induction([])
 
+    def test_seed_by_induction_raise_length_one(self):
+        """Test that seeding by induction fails when a list of length one is given."""
+        shp2_model = self.manager.get_node_by_dict(shp2)
+
+        with self.assertRaises(ValueError):
+            self.manager.query_induction([shp2_model])
+
     def test_seed_by_induction(self):
+        """Test seeding by inducing over a list of nodes."""
         shp2_model = self.manager.get_node_by_dict(shp2)
         syk_model = self.manager.get_node_by_dict(syk)
         trem2_model = self.manager.get_node_by_dict(trem2)
@@ -92,6 +101,7 @@ class TestSeeding(TemporaryCacheClsMixin):
         self.assertEqual(2, graph.number_of_edges())
 
     def test_seed_by_neighbors(self):
+        """Test seeding a graph by neighbors of a list of nodes."""
         node = self.manager.get_node_by_dict(shp2)
         edges = self.manager.query_neighbors([node])
         self.assertEqual(2, len(edges))

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for metadata transforations."""
+
 import unittest
 
 from pybel import BELGraph
@@ -37,7 +39,9 @@ class TestMetadata(unittest.TestCase):
         self.assertNotIn(ANNOTATIONS, graph.edge[x.as_tuple()][y.as_tuple()][1])
 
     def test_add_and_remove_annotation(self):
-        """Test the :func:`pybel.struct.mutation.add_annotation_value` and
+        """Test adding and removing annotations.
+
+        See: :func:`pybel.struct.mutation.add_annotation_value` and
         :func:`pybel.struct.mutation.remove_annotation_value` functions.
         """
         graph = sialic_acid_graph.copy()

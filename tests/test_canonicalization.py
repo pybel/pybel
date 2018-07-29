@@ -5,11 +5,14 @@ import unittest
 from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body, canonicalize_edge, fusion_range_to_bel, variant_to_bel
 from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, INCREASES, KIND, MODIFIER,
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, KIND, MODIFIER,
     PATHOLOGY, PMOD, PROTEIN, REACTION, RNA,
 )
-from pybel.dsl import *
-from pybel.dsl.edges import extracellular, intracellular
+from pybel.dsl import (
+    abundance, activity, bioprocess, complex_abundance, composite_abundance, degradation, entity, extracellular,
+    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, intracellular, mirna, named_complex_abundance, pathology,
+    pmod, protein, protein_substitution, reaction, rna, rna_fusion, secretion, translocation,
+)
 from pybel.testing.utils import n
 
 
@@ -191,10 +194,9 @@ class TestCanonicalizeEdge(unittest.TestCase):
     def add_edge(self, subject_modifier=None, object_modifier=None, annotations=None):
         self.key += 1
 
-        self.g.add_qualified_edge(
+        self.g.add_increases(
             self.u,
             self.v,
-            relation=INCREASES,
             evidence=n(),
             citation=n(),
             subject_modifier=subject_modifier,
@@ -291,10 +293,9 @@ class TestSerializeBEL(unittest.TestCase):
 
     def test_simple(self):
         """Tests a scenario with a qualified edge, but no annotaitons"""
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(namespace='HGNC', name='YFG1'),
             protein(namespace='HGNC', name='YFG'),
-            relation=INCREASES,
             citation=self.citation,
             evidence=self.evidence
         )
@@ -317,10 +318,9 @@ class TestSerializeBEL(unittest.TestCase):
         """Tests a scenario with a qualified edge, but no annotaitons"""
         a1, v1 = map(lambda _: n(), range(2))
 
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(namespace='HGNC', name='YFG1'),
             protein(namespace='HGNC', name='YFG'),
-            relation=INCREASES,
             citation=self.citation,
             evidence=self.evidence,
             annotations={
@@ -348,10 +348,9 @@ class TestSerializeBEL(unittest.TestCase):
         a1, v1, v2 = map(lambda _: n(), range(3))
         v1, v2 = sorted([v1, v2])
 
-        self.graph.add_qualified_edge(
+        self.graph.add_increases(
             protein(namespace='HGNC', name='YFG1'),
             protein(namespace='HGNC', name='YFG'),
-            relation=INCREASES,
             citation=self.citation,
             evidence=self.evidence,
             annotations={

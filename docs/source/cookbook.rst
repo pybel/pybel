@@ -15,14 +15,7 @@ MariaDB, it could look like this:
 
     $ export PYBEL_CONNECTION="mysql+pymysql://user:password@server_name/database_name?charset=utf8"
 
-Command Line
-------------
 
-.. note:: The command line wrapper might not work on Windows. Use :code:`python3 -m pybel` if it has issues.
-
-PyBEL automatically installs the command :code:`pybel`. This command can be used to easily compile BEL documents
-and convert to other formats. See :code:`pybel --help` for usage details. This command makes logs of all conversions
-and warnings to the directory :code:`~/.pybel/`.
 
 Prepare a Cytoscape Network
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

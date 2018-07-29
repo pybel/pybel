@@ -90,6 +90,7 @@ from ...constants import (
 __all__ = [
     'pmod_tag',
     'ProteinModificationParser',
+    'amino_acid',
 ]
 
 log = logging.getLogger(__name__)

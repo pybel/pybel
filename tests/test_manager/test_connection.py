@@ -3,6 +3,7 @@
 """Tests for instantiating the manager"""
 
 import os
+import tempfile
 import unittest
 
 from pybel import Manager
@@ -12,7 +13,6 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-import tempfile
 
 
 class TestInstantiation(unittest.TestCase):
@@ -39,7 +39,7 @@ class TestInstantiation(unittest.TestCase):
         os.remove(self.path)
 
     def test_fail_connection_none(self):
-        """Test that a None causes a huge error"""
+        """Test that a None causes a huge error."""
         with self.assertRaises(ValueError):
             build_engine_session(None)
 

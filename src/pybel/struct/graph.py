@@ -3,14 +3,15 @@
 """Contains the main data structure for PyBEL"""
 
 import logging
-import networkx
 from copy import deepcopy
+
+import networkx
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import (
-    ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
+    ANNOTATIONS, ASSOCIATION, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
     DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, FUNCTION, GRAPH_ANNOTATION_LIST,
     GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
     GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES, HASH, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT,
@@ -353,7 +354,7 @@ class BELGraph(networkx.MultiDiGraph):
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
     def add_unqualified_edge(self, u, v, relation):
-        """Adds unique edge that has no annotations
+        """Add a unique edge that has no annotations.
 
         :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
         :type u: tuple or dict
@@ -544,6 +545,31 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: str
         """
         return self.add_qualified_edge(u=u, v=v, relation=DIRECTLY_DECREASES, evidence=evidence, citation=citation,
+                                       annotations=annotations, subject_modifier=subject_modifier,
+                                       object_modifier=object_modifier, **attr)
+
+    def add_association(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
+                        **attr):
+        """Add an association relation to the network.
+
+        Wraps :meth:`add_qualified_edge` for :data:`pybel.constants.ASSOCIATION`.
+
+        :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :param tuple or dict v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :param str evidence: The evidence string from an article
+        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
+                                                assumes it's a PubMed identifier and auto-fills the citation type.
+        :param annotations: The annotations data dictionary
+        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
+        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
+         documentation.
+        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
+         documentation.
+
+        :return: The hash of the edge
+        :rtype: str
+        """
+        return self.add_qualified_edge(u=u, v=v, relation=ASSOCIATION, evidence=evidence, citation=citation,
                                        annotations=annotations, subject_modifier=subject_modifier,
                                        object_modifier=object_modifier, **attr)
 

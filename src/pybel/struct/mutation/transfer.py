@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module facilitates the transfer of knowledge through ontological relationships"""
+"""This module facilitates the transfer of knowledge through ontological relationships."""
 
 from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, EVIDENCE, IS_A, OBJECT, RELATION, SUBJECT
 from ...dsl.nodes import BaseEntity
@@ -11,7 +11,7 @@ __all__ = [
 
 
 def iter_children(graph, node):
-    """Iterates over children of the node
+    """Iterate over children of the node.
 
     :param pybel.BELGraph graph:
     :param tuple node:
@@ -24,7 +24,7 @@ def iter_children(graph, node):
 
 
 def transfer_causal_edges(graph, source, target):
-    """Transfer causal edges that the source has to the target
+    """Transfer causal edges that the source has to the target.
 
     :param pybel.BELGraph graph:
     :param tuple source:
@@ -62,7 +62,7 @@ def transfer_causal_edges(graph, source, target):
 
 
 def infer_child_relations(graph, node):
-    """Propagates causal relations to children
+    """Propagate causal relations to children.
 
     :param pybel.BELGraph graph: A BEL graph
     :param node: A PyBEL node tuple, on which to propagate the children's relations

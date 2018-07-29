@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for collapse functions."""
+
 import unittest
 
 from pybel import BELGraph
 from pybel.constants import DIRECTLY_INCREASES
-from pybel.dsl import abundance, gene, mirna, pathology, pmod, protein, rna
+from pybel.dsl import gene, mirna, pathology, pmod, protein, rna
 from pybel.struct.mutation.collapse import collapse_all_variants, collapse_nodes, collapse_to_genes
 from pybel.testing.utils import n
 
@@ -28,12 +30,14 @@ p3 = protein(HGNC, '3')
 g4 = gene(HGNC, '4')
 m4 = mirna(HGNC, '4')
 
-a5 = abundance(CHEBI, '5')
 p5 = pathology(GO, '5')
 
 
-class TestCollapseDownstream(unittest.TestCase):
-    def test_collapse_1(self):
+class TestCollapse(unittest.TestCase):
+    """Tests for collapse functions."""
+
+    def test_collapse_by_dict(self):
+        """Test collapsing nodes by a dictionary."""
         graph = BELGraph()
         graph.add_node_from_data(p1)
         graph.add_node_from_data(p2)
@@ -56,6 +60,7 @@ class TestCollapseDownstream(unittest.TestCase):
         self.assertEqual(1, graph.number_of_edges(), msg=graph.edges(data=True, keys=True))
 
     def test_collapse_dogma_1(self):
+        """Test collapsing to genes, only with translations."""
         graph = BELGraph()
         graph.add_translation(r1, p1)
 
@@ -69,6 +74,7 @@ class TestCollapseDownstream(unittest.TestCase):
         self.assertEqual(0, graph.number_of_edges())
 
     def test_collapse_dogma_2(self):
+        """Test collapsing to genes with translations and transcriptions."""
         graph = BELGraph()
         graph.add_transcription(g1, r1)
         graph.add_translation(r1, p1)
@@ -83,6 +89,7 @@ class TestCollapseDownstream(unittest.TestCase):
         self.assertEqual(0, graph.number_of_edges())
 
     def test_collapse_dogma_3(self):
+        """Test collapsing to genes, only with transcriptions."""
         graph = BELGraph()
         graph.add_transcription(g1, r1)
 
@@ -96,6 +103,7 @@ class TestCollapseDownstream(unittest.TestCase):
         self.assertEqual(0, graph.number_of_edges())
 
     def test_collapse_all_variants(self):
+        """Test collapsing all variants to their reference nodes."""
         graph = BELGraph()
         graph.add_node_from_data(p1_phosphorylated)
 

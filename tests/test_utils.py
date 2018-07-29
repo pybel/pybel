@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for PyBEL utilities."""
+
 import time
 import unittest
 
 import networkx as nx
 from six import string_types
 
-import pybel.utils
 from pybel.canonicalize import node_to_bel, postpend_location
-from pybel.constants import *
+from pybel.constants import (
+    CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION,
+)
 from pybel.parser.exc import PlaceholderAminoAcidWarning
 from pybel.parser.modifiers.protein_modification import amino_acid
 from pybel.parser.utils import nest
@@ -17,24 +20,26 @@ from pybel.resources.exc import EmptyResourceError
 from pybel.resources.utils import get_iso_8601_date
 from pybel.testing.constants import test_an_1, test_ns_empty
 from pybel.testing.mocks import mock_bel_resources
-from pybel.utils import flatten_citation, list2tuple, tokenize_version
+from pybel.utils import expand_dict, flatten_citation, flatten_dict, flatten_graph_data, list2tuple, tokenize_version
 
 
 class TestTokenizeVersion(unittest.TestCase):
+    """Test tokenization of version strings."""
+
     def test_simple(self):
-        """Test the simplest version string case"""
+        """Test the simplest version string case."""
         version_str = '0.1.2'
         version_tuple = 0, 1, 2
         self.assertEqual(version_tuple, tokenize_version(version_str))
 
     def test_long(self):
-        """Tests when the version pieces have more than 1 digit"""
+        """Test when the version pieces have more than 1 digit."""
         version_str = '0.12.20'
         version_tuple = 0, 12, 20
         self.assertEqual(version_tuple, tokenize_version(version_str))
 
     def test_dev(self):
-        """Test when there's a dash after"""
+        """Test when there's a dash after."""
         version_str = '0.1.2-dev'
         version_tuple = 0, 1, 2
         self.assertEqual(version_tuple, tokenize_version(version_str))
@@ -62,11 +67,9 @@ class TestRandom(unittest.TestCase):
             amino_acid.parseString('X')
 
     def test_list2tuple(self):
-        l = [None, 1, 's', [1, 2, [4], [[]]]]
-        e = (None, 1, 's', (1, 2, (4,), ((),)))
-        t = list2tuple(l)
-
-        self.assertEqual(t, e)
+        deeply_nested_list = [None, 1, 's', [1, 2, [4], [[]]]]
+        expected_tuple = (None, 1, 's', (1, 2, (4,), ((),)))
+        self.assertEqual(expected_tuple, list2tuple(deeply_nested_list))
 
     def test_get_date(self):
         d = get_iso_8601_date()
@@ -77,9 +80,10 @@ class TestRandom(unittest.TestCase):
 
 
 class TestUtils(unittest.TestCase):
-    @mock_bel_resources
-    def test_download_url(self, mock):
-        res = get_bel_resource(test_an_1)
+    def test_download_url(self):
+        """Test downloading a resource by URL."""
+        with mock_bel_resources:
+            res = get_bel_resource(test_an_1)
 
         expected_values = {
             'TestAnnot1': 'O',
@@ -91,9 +95,9 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(expected_values, res['Values'])
 
-    @mock_bel_resources
-    def test_download_raises_on_empty(self, mock):
-        with self.assertRaises(EmptyResourceError):
+    def test_download_raises_on_empty(self):
+        """Test that an error is thrown if an empty resource is downloaded."""
+        with mock_bel_resources, self.assertRaises(EmptyResourceError):
             get_bel_resource(test_ns_empty)
 
     def test_expand_dict(self):
@@ -117,7 +121,7 @@ class TestUtils(unittest.TestCase):
             }
         }
 
-        self.assertEqual(expected_dict, pybel.utils.expand_dict(flat_dict))
+        self.assertEqual(expected_dict, expand_dict(flat_dict))
 
     def test_flatten_dict(self):
         d = {
@@ -135,7 +139,7 @@ class TestUtils(unittest.TestCase):
             'C_D': 'd',
             'C_E': 'e'
         }
-        self.assertEqual(expected, pybel.utils.flatten_dict(d))
+        self.assertEqual(expected, flatten_dict(d))
 
     def test_flatten_dict_withLists(self):
         d = {
@@ -153,13 +157,13 @@ class TestUtils(unittest.TestCase):
             'C_D': 'd,delta',
             'C_E': 'e'
         }
-        self.assertEqual(expected, pybel.utils.flatten_dict(d))
+        self.assertEqual(expected, flatten_dict(d))
 
     def test_flatten_edges(self):
         g = nx.MultiDiGraph()
         g.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}})
 
-        result = pybel.utils.flatten_graph_data(g)
+        result = flatten_graph_data(g)
 
         expected = nx.MultiDiGraph()
         expected.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B_C': 'c', 'B_D': 'd'})

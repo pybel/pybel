@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 
-"""This module tests the to_json functions for all of the database models"""
+"""This module tests the to_json functions for all of the database models."""
 
 import datetime
 import json
 import unittest
 
-from pybel.constants import *
-from pybel.manager.models import *
+from pybel.constants import (
+    CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE, CITATION_TYPE_PUBMED, IDENTIFIER,
+    METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
+    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, NAMESPACE_DOMAIN_OTHER,
+)
+from pybel.manager.models import Annotation, AnnotationEntry, Citation, Namespace, NamespaceEntry, Network
 from pybel.testing.utils import n
 
 

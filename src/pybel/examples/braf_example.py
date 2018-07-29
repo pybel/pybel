@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This file contains a small subgrpah representing one evidence about BRAF.
+"""An example describing a single evidence about BRAF.
 
 .. code-block::
 
@@ -16,7 +16,6 @@
     kin(p(HGNC:BRAF)) increases tscript(p(HGNC:ELK1))
 
     UNSET ALL
-
 """
 
 from ..dsl import activity, protein
