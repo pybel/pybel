@@ -90,30 +90,27 @@ trem2 = protein(namespace='HGNC', name='TREM2', identifier='17761')
 cd33_phosphorylated = protein(name='CD33', namespace='HGNC', identifier='1659', variants=[pmod('Ph')])
 immune_response = bioprocess(name='immune response', namespace='GOBP', identifier='0006955')
 
-sialic_acid_graph.add_qualified_edge(
+sialic_acid_graph.add_increases(
     sialic_acid_cd33_complex,
     cd33,
-    relation=INCREASES,
     citation=citation,
     annotations={'Species': '9606', 'Confidence': 'High'},
     evidence=evidence_1,
     object_modifier={MODIFIER: ACTIVITY}
 )
 
-sialic_acid_graph.add_qualified_edge(
+sialic_acid_graph.add_increases(
     cd33,
     cd33_phosphorylated,
-    relation=INCREASES,
     citation=citation,
     annotations={'Species': '9606', 'Confidence': 'High'},
     evidence=evidence_1,
     subject_modifier={MODIFIER: ACTIVITY}
 )
 
-sialic_acid_graph.add_qualified_edge(
+sialic_acid_graph.add_directly_increases(
     cd33_phosphorylated,
     shp1,
-    relation=DIRECTLY_INCREASES,
     citation=citation,
     evidence=evidence_1,
     annotations={'Species': '9606', 'Confidence': 'High'},
@@ -127,10 +124,9 @@ sialic_acid_graph.add_qualified_edge(
     }
 )
 
-sialic_acid_graph.add_qualified_edge(
+sialic_acid_graph.add_directly_increases(
     cd33_phosphorylated,
     shp2,
-    relation=DIRECTLY_INCREASES,
     citation=citation,
     evidence=evidence_1,
     annotations={'Species': '9606', 'Confidence': 'High'},
@@ -144,10 +140,9 @@ sialic_acid_graph.add_qualified_edge(
     }
 )
 
-sialic_acid_graph.add_qualified_edge(
+sialic_acid_graph.add_directly_decreases(
     shp1,
     syk,
-    relation=DIRECTLY_DECREASES,
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'High'},
@@ -155,10 +150,9 @@ sialic_acid_graph.add_qualified_edge(
     object_modifier={MODIFIER: ACTIVITY}
 )
 
-sialic_acid_graph.add_qualified_edge(
+sialic_acid_graph.add_directly_decreases(
     shp2,
     syk,
-    relation=DIRECTLY_DECREASES,
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'High'},
@@ -166,10 +160,9 @@ sialic_acid_graph.add_qualified_edge(
     object_modifier={MODIFIER: ACTIVITY}
 )
 
-sialic_acid_graph.add_qualified_edge(
+sialic_acid_graph.add_increases(
     syk,
     trem2,
-    relation=INCREASES,
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'Low'},
@@ -177,10 +170,9 @@ sialic_acid_graph.add_qualified_edge(
     object_modifier={MODIFIER: ACTIVITY}
 )
 
-sialic_acid_graph.add_qualified_edge(
+sialic_acid_graph.add_increases(
     syk,
     dap12,
-    relation=INCREASES,
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'Low'},
