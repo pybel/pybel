@@ -63,9 +63,18 @@ def get_graph_with_random_edges(graph, n_edges):
 
 
 class WeightedRandomGenerator(object):
-    """A weighted random number generator."""
+    """A weighted random number generator.
 
-    def __init__(self, weights):
+    Adapted from: https://eli.thegreenplace.net/2010/01/22/weighted-random-generation-in-python
+    """
+
+    def __init__(self, values, weights):
+        """Build a weighted random generator.
+
+        :param values: A sequence corresponding to the weights
+        :param weights: Weights for each. Should all be positive, but not necessarily normalized.
+        """
+        self.values = values
         self.totals = []
         weight_total = 0
 
@@ -73,10 +82,19 @@ class WeightedRandomGenerator(object):
             weight_total += weight
             self.totals.append(weight_total)
 
-    def next(self):
+    @property
+    def total(self):
+        """Get the total weight stored."""
+        return self.totals[-1]
+
+    def next_index(self):
         """Get a random index."""
-        rnd = random.random() * self.totals[-1]
-        return bisect.bisect_right(self.totals, rnd)
+        r = random.random() * self.total
+        return bisect.bisect_right(self.totals, r)
+
+    def next(self):
+        """Get a random value"""
+        return self.values[self.next_index()]
 
 
 def get_random_node(graph, node_blacklist):
@@ -95,9 +113,9 @@ def get_random_node(graph, node_blacklist):
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter
         return
 
-    wrg = WeightedRandomGenerator(degrees)
-    index = wrg.next()
-    return nodes[index]
+    # TODO keep in mind that total weight is always 2 * |E|, and that this could be done without a data structure
+    wrg = WeightedRandomGenerator(nodes, degrees)
+    return wrg.next()
 
 
 def _helper(rv, graph, number_edges_remaining, no_grow, original_node_count):
@@ -114,7 +132,7 @@ def _helper(rv, graph, number_edges_remaining, no_grow, original_node_count):
                 log.warning('infinite loop happening')
                 log.warning('source: %s', source)
                 log.warning('no grow: %s', no_grow)
-                return  # This happens when we've exhaused the connected components. Try increasing the number seed edges
+                return  # Happens when after exhausting the connected components. Try increasing the number seed edges
 
             if source is None:
                 continue  # maybe do something else?
@@ -134,8 +152,7 @@ def _helper(rv, graph, number_edges_remaining, no_grow, original_node_count):
 
 @transformation
 def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=None):
-    """Randomly picks a node from the graph, and performs a weighted random walk to sample the given number of edges
-    around it
+    """Generate a random subgraph based on weighted random walks from random seed edges.
 
     :type graph: pybel.BELGraph graph
     :param Optional[int] number_edges: Maximum number of edges. Defaults to
@@ -159,7 +176,7 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
         log.info('sampled full graph')
         return graph.copy()
 
-    log.debug('getting random subgraph with %d seed edges, %d final edges, and seed=%s', number_seed_edges,
+    log.debug('getting random sub-graph with %d seed edges, %d final edges, and seed=%s', number_seed_edges,
               number_edges, seed)
 
     original_node_count = graph.number_of_nodes()
@@ -169,7 +186,6 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
     rv = get_graph_with_random_edges(graph, number_seed_edges)
 
     number_edges_remaining = number_edges - number_seed_edges
-
     _helper(rv, graph, number_edges_remaining, no_grow, original_node_count)
 
     log.debug('removing isolated nodes')
