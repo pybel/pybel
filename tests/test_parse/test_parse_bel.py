@@ -6,7 +6,13 @@ import logging
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import *
+from pybel.constants import (
+    ABUNDANCE, ACTIVITY, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, DEGRADATION, DIRECTLY_INCREASES, DIRTY,
+    EFFECT, FRAGMENT, FROM_LOC, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
+    GMOD, HAS_COMPONENT, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE,
+    OBJECT, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION,
+    RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
+)
 from pybel.dsl import cell_surface_expression, entity, secretion, translocation
 from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
 from pybel.parser import BelParser

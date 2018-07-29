@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for the command line interface."""
+
 import json
 import logging
 import os

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module tests the DSL"""
+"""Tests for the internal DSL."""
 
 import unittest
 

@@ -10,9 +10,24 @@ from json import dumps
 from requests.compat import urlparse
 
 from pybel import BELGraph
-from pybel.constants import *
-from pybel.dsl import *
-from pybel.parser.exc import *
+from pybel.constants import (
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION,
+    CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
+    DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FRAGMENT, FRAUNHOFER_RESOURCES, FROM_LOC, GENE, GMOD,
+    HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, LOCATION, METADATA_AUTHORS,
+    METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_PROJECT,
+    METADATA_VERSION, MIRNA, MODIFIER, NAME, NAMESPACE, OBJECT, OPENBEL_ANNOTATION_RESOURCES,
+    OPENBEL_NAMESPACE_RESOURCES, PATHOLOGY, PMOD, POSITIVE_CORRELATION, PROTEIN, RATE_LIMITING_STEP_OF, REACTION,
+    REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
+)
+from pybel.dsl import complex_abundance, pathology, protein, translocation
+from pybel.parser.exc import (
+    BelSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException, InvalidCitationType,
+    InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning, MissingAnnotationKeyWarning,
+    MissingAnnotationRegexWarning, MissingCitationException, MissingMetadataException, MissingNamespaceNameWarning,
+    MissingNamespaceRegexWarning, MissingSupportWarning, NakedNameWarning, NestedRelationWarning,
+    PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning, VersionFormatWarning,
+)
 from pybel.parser.parse_bel import BelParser
 from pybel.utils import subdict_matches
 
@@ -1097,7 +1112,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         })
 
     def bel_isolated_reconstituted(self, graph):
-        """Runs the isolated node test
+        """Run the isolated node test.
 
         :type graph: BELGraph
         """
