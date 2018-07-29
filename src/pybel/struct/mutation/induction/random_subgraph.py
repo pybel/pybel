@@ -7,8 +7,9 @@ import logging
 import random
 from operator import itemgetter
 
-from ..utils import remove_isolated_nodes, update_metadata, update_node_helper
+from ..utils import remove_isolated_nodes
 from ...pipeline import transformation
+from ...utils import update_metadata, update_node_helper
 
 __all__ = [
     'get_graph_with_random_edges',
