@@ -456,6 +456,26 @@ class BELGraph(networkx.MultiDiGraph):
         """
         return self.add_unqualified_edge(u, v, HAS_MEMBER)
 
+    def add_has_component(self, u, v):
+        """Add an hasComponent relationship such that u hasComponent v.
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        return self.add_unqualified_edge(u, v, HAS_COMPONENT)
+
+    def add_has_variant(self, u, v):
+        """Add an hasVariant relationship such that u hasVariant v.
+
+        :param u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
+        :type u: tuple or dict
+        :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
+        :type v: tuple or dict
+        """
+        return self.add_unqualified_edge(u, v, HAS_VARIANT)
+
     def add_increases(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
                       **attr):
         """Wraps :meth:`add_qualified_edge` for :data:`pybel.constants.INCREASES`.
@@ -574,26 +594,17 @@ class BELGraph(networkx.MultiDiGraph):
                                        object_modifier=object_modifier, **attr)
 
     def iter_node_data_pairs(self):
-        """Iterates over pairs of nodes and their data dictionaries
+        """Iterate over pairs of nodes and their data dictionaries.
 
         :rtype: iter[tuple[tuple,dict]]
         """
         return self.nodes_iter(data=True)
 
-    def iter_data(self):
-        """Iterates over the node data dictionaries
-
-        :rtype: iter[dict]
-        """
-        return (
-            data
-            for _, data in self.nodes_iter(data=True)
-        )
-
     def add_node_from_data(self, attr_dict):
-        """Converts a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
+        """Convert a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
-        :param dict attr_dict: A PyBEL node data dictionary
+        :param attr_dict: A PyBEL node data dictionary
+        :type attr_dict: BaseEntity or dict
         :return: A PyBEL node tuple
         :rtype: tuple
         """
@@ -607,36 +618,29 @@ class BELGraph(networkx.MultiDiGraph):
         if VARIANTS in attr_dict:
             parent_node_dict = {
                 key: attr_dict[key]
-                for key in (FUNCTION, NAME, NAMESPACE)
+                for key in (FUNCTION, NAME, NAMESPACE, IDENTIFIER)
+                if key in attr_dict
             }
-
-            if IDENTIFIER in attr_dict:
-                parent_node_dict[IDENTIFIER] = attr_dict[IDENTIFIER]
-
-            parent_node_tuple = self.add_node_from_data(parent_node_dict)
-
-            self.add_unqualified_edge(parent_node_tuple, node_tuple, HAS_VARIANT)
+            self.add_has_variant(parent_node_dict, node_tuple)
 
         elif MEMBERS in attr_dict:
             for member in attr_dict[MEMBERS]:
-                member_node_tuple = self.add_node_from_data(member)
-                self.add_unqualified_edge(node_tuple, member_node_tuple, HAS_COMPONENT)
+                self.add_has_component(node_tuple, member)
 
         elif PRODUCTS in attr_dict and REACTANTS in attr_dict:
             for reactant_tokens in attr_dict[REACTANTS]:
-                reactant_node_tuple = self.add_node_from_data(reactant_tokens)
-                self.add_unqualified_edge(node_tuple, reactant_node_tuple, HAS_REACTANT)
+                self.add_unqualified_edge(node_tuple, reactant_tokens, HAS_REACTANT)
 
             for product_tokens in attr_dict[PRODUCTS]:
-                product_node_tuple = self.add_node_from_data(product_tokens)
-                self.add_unqualified_edge(node_tuple, product_node_tuple, HAS_PRODUCT)
+                self.add_unqualified_edge(node_tuple, product_tokens, HAS_PRODUCT)
 
         return node_tuple
 
     def has_node_with_data(self, attr_dict):
-        """Checks if this graph has a node with the given data dictionary
+        """Check if this graph has a node with the given data dictionary.
 
-        :param dict attr_dict: A PyBEL node data dictionary
+        :param attr_dict: A PyBEL node data dictionary
+        :type attr_dict: BaseEntity or dict
         :rtype: bool
         """
         node_tuple = node_to_tuple(attr_dict)
@@ -644,7 +648,9 @@ class BELGraph(networkx.MultiDiGraph):
 
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
                            object_modifier=None, **attr):
-        """Add an edge, qualified with a relation, evidence, citation, and optional annotations, subject modifications,
+        """Add a qualified edge.
+
+        Qualified edges have a relation, evidence, citation, and optional annotations, subject modifications,
         and object modifications.
 
         :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
@@ -700,7 +706,9 @@ class BELGraph(networkx.MultiDiGraph):
         return attr[HASH]
 
     def add_inhibits(self, u, v, evidence, citation, annotations=None, object_modifier=None):
-        """A more specific version of add_qualified edge that automatically populates the relation and object
+        """Add an "inhibits" relationship.
+
+        A more specific version of add_qualified edge that automatically populates the relation and object
         modifier
 
         :param tuple or dict u: Either a PyBEL node tuple or PyBEL node data dictionary representing the source node
@@ -733,7 +741,7 @@ class BELGraph(networkx.MultiDiGraph):
         return CITATION in self[u][v][key]
 
     def get_edge_citation(self, u, v, key):
-        """Gets the citation for a given edge
+        """Get the citation for a given edge
 
         :rtype: Optional[dict]
         """

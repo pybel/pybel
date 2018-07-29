@@ -3,6 +3,7 @@
 """Tests for summary functions for nodes."""
 
 import unittest
+from collections import Counter
 
 from pybel import BELGraph
 from pybel.constants import ABUNDANCE, BIOPROCESS, COMPLEX, PROTEIN
@@ -26,7 +27,7 @@ class TestSummary(unittest.TestCase):
         }
 
         self.assertEqual(set(result), get_functions(sialic_acid_graph))
-        self.assertEqual(result, count_functions(sialic_acid_graph))
+        self.assertEqual(Counter(result), count_functions(sialic_acid_graph))
 
     def test_functions_egf(self):
         """Test counting nodes and grouping by function on the EGF graph."""
@@ -47,7 +48,7 @@ class TestSummary(unittest.TestCase):
         }
 
         self.assertEqual(set(result), get_namespaces(sialic_acid_graph))
-        self.assertEqual(result, count_namespaces(sialic_acid_graph))
+        self.assertEqual(Counter(result), count_namespaces(sialic_acid_graph))
 
     def test_namespaces_egf(self):
         """Test getting and counting namespaces' contents on the EGF graph."""
@@ -57,7 +58,7 @@ class TestSummary(unittest.TestCase):
         }
 
         self.assertEqual(set(result), get_namespaces(egf_graph))
-        self.assertEqual(result, count_namespaces(egf_graph))
+        self.assertEqual(Counter(result), count_namespaces(egf_graph))
 
     def test_names_sialic(self):
         """Test getting and counting names by namespace."""
@@ -71,7 +72,7 @@ class TestSummary(unittest.TestCase):
         }
 
         self.assertEqual(set(result), get_names_by_namespace(sialic_acid_graph, 'HGNC'))
-        self.assertEqual(result, count_names_by_namespace(sialic_acid_graph, 'HGNC'))
+        self.assertEqual(Counter(result), count_names_by_namespace(sialic_acid_graph, 'HGNC'))
 
     def test_names_fusions(self):
         """Test that names inside fusions are still found by the iterator."""

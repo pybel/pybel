@@ -9,6 +9,7 @@ from .constants import (
     PARTNER_5P, PMOD, PMOD_ORDER, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, TARGET, TRANSLOCATION, VARIANTS,
 )
 from .dsl import cell_surface_expression, fusion_range, missing_fusion_range, secretion
+from .dsl.nodes import BaseEntity
 from .exceptions import PyBELCanonicalizeError
 from .utils import hash_node
 
@@ -38,9 +39,12 @@ def node_to_tuple(tokens):
     """Create a PyBEL node tuple given tokens from either PyParsing or following the PyBEL node data dictionary model.
 
     :param tokens: Either a PyParsing ParseObject or a PyBEL node data dictionary
-    :type tokens: ParseObject or dict
+    :type tokens: ParseObject or dict or BaseEntity
     :rtype: tuple
     """
+    if isinstance(tokens, BaseEntity):
+        return tokens.as_tuple()
+
     if MODIFIER in tokens:
         return node_to_tuple(tokens[TARGET])
 
@@ -77,7 +81,7 @@ def _identifier_to_tuple(tokens):
 
 # TODO figure out how to just get dictionary rather than slicing it up like this
 def _fusion_range_po_to_dict(tokens):
-    """Convert a PyParsing data dictionary into a PyBEL
+    """Convert a PyParsing data dictionary into a PyBEL.
 
     :type tokens: ParseResult
     :rtype: pybel.dsl.FusionRangeBase
