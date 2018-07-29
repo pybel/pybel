@@ -7,11 +7,8 @@ import unittest
 from six import string_types
 
 from pybel import BELGraph
-from pybel.constants import (
-    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION, IDENTIFIER, NAME, NAMESPACE, PART_OF, PROTEIN,
-    unqualified_edge_code,
-)
-from pybel.dsl import entity, protein
+from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, PART_OF, unqualified_edge_code
+from pybel.dsl import protein
 from pybel.testing.utils import n
 
 PART_OF_CODE = unqualified_edge_code[PART_OF]
@@ -107,76 +104,21 @@ class TestStruct(unittest.TestCase):
             )
 
 
-class TestDSL(unittest.TestCase):
-    def test_add_robust_node(self):
-        graph = BELGraph()
-        namespace, name, identifier = n(), n(), n()
-        node = protein(namespace=namespace, name=name, identifier=identifier)
-
-        graph.add_node_from_data(node)
-
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                NAME: name,
-                IDENTIFIER: identifier,
-            },
-            graph.node[node.as_tuple()]
-        )
-
-    def test_add_identified_node(self):
-        """Test what happens when a node with only an identifier is added to a graph."""
-        graph = BELGraph()
-        namespace, identifier = n(), n()
-        node = protein(namespace=namespace, identifier=identifier)
-        self.assertNotIn(NAME, node)
-
-        t = graph.add_node_from_data(node)
-
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                IDENTIFIER: identifier,
-            },
-            graph.node[t]
-        )
-
-    def test_add_named_node(self):
-        graph = BELGraph()
-        namespace, name = n(), n()
-        node = protein(namespace=namespace, name=name)
-
-        graph.add_node_from_data(node)
-
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                NAME: name,
-            },
-            graph.node[node.as_tuple()]
-        )
-
-    def test_missing_information(self):
-        """Check that entity and abundance functions raise on missing name/identifier."""
-        with self.assertRaises(ValueError):
-            entity(namespace='test')
-
-        with self.assertRaises(ValueError):
-            protein(namespace='test')
-
-
 class TestGetGraphProperties(unittest.TestCase):
     """The tests in this class check the getting and setting of node properties."""
 
     def setUp(self):
+        """Set up the test case with a fresh BEL graph."""
         self.graph = BELGraph()
 
     def test_get_qualified_edge(self):
-        test_source = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG'))
-        test_target = self.graph.add_node_from_data(protein(namespace='TEST', name='YFG2'))
+        """Test adding an edge to a graph."""
+        test_source = protein(namespace='TEST', name='YFG')
+        test_target = protein(namespace='TEST', name='YFG2')
+
+        self.graph.add_node_from_data(test_source)
+        self.graph.add_node_from_data(test_target)
+
         test_key = n()
         test_evidence = n()
         test_pmid = n()
@@ -190,10 +132,10 @@ class TestGetGraphProperties(unittest.TestCase):
                 'Species': '9606',
                 'Confidence': 'Very High'
             },
-            key=test_key
+            key=test_key,
         )
 
-        citation = self.graph.get_edge_citation(test_source, test_target, test_key)
+        citation = self.graph.get_edge_citation(test_source.as_tuple(), test_target.as_tuple(), test_key)
 
         self.assertIsNotNone(citation)
         self.assertIsInstance(citation, dict)
@@ -202,13 +144,13 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertIn(CITATION_REFERENCE, citation)
         self.assertEqual(test_pmid, citation[CITATION_REFERENCE])
 
-        evidence = self.graph.get_edge_evidence(test_source, test_target, test_key)
+        evidence = self.graph.get_edge_evidence(test_source.as_tuple(), test_target.as_tuple(), test_key)
 
         self.assertIsNotNone(evidence)
         self.assertIsInstance(evidence, string_types)
         self.assertEqual(test_evidence, evidence)
 
-        annotations = self.graph.get_edge_annotations(test_source, test_target, test_key)
+        annotations = self.graph.get_edge_annotations(test_source.as_tuple(), test_target.as_tuple(), test_key)
         self.assertIsNotNone(annotations)
         self.assertIsInstance(annotations, dict)
         self.assertIn('Species', annotations)
@@ -235,32 +177,34 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertIsNone(annotations)
 
     def test_get_node_name(self):
+        """Test looking up the node name from the graph."""
         test_identifier = n()
-        node = self.graph.add_node_from_data(protein(namespace='TEST', identifier=test_identifier))
-        self.assertIsNone(self.graph.get_node_name(node))
-        self.assertIsNotNone(self.graph.get_node_identifier(node))
+        node = protein(namespace='TEST', identifier=test_identifier)
+        node_tuple = self.graph.add_node_from_data(node)
+        self.assertIsNone(self.graph.get_node_name(node_tuple))
+        self.assertIsNotNone(self.graph.get_node_identifier(node_tuple))
 
     def test_get_node_identifier(self):
+        """Test looking up the node identifier from the graph."""
         test_name = n()
-        node = self.graph.add_node_from_data(protein(namespace='TEST', name=test_name))
-        self.assertIsNotNone(self.graph.get_node_name(node))
-        self.assertIsNone(self.graph.get_node_identifier(node))
+        node = protein(namespace='TEST', name=test_name)
+        self.graph.add_node_from_data(node)
+        self.assertIsNotNone(self.graph.get_node_name(node.as_tuple()))
+        self.assertIsNone(self.graph.get_node_identifier(node.as_tuple()))
 
     def test_get_node_properties(self):
+        """Test looking up node properties."""
         test_name = n()
         test_identifier = n()
 
-        node = self.graph.add_node_from_data(protein(namespace='TEST', name=test_name, identifier=test_identifier))
+        node = protein(namespace='TEST', name=test_name, identifier=test_identifier)
+        self.graph.add_node_from_data(node)
 
-        self.assertEqual(test_name, self.graph.get_node_name(node))
-        self.assertEqual(test_identifier, self.graph.get_node_identifier(node))
+        self.assertEqual(test_name, self.graph.get_node_name(node.as_tuple()))
+        self.assertEqual(test_identifier, self.graph.get_node_identifier(node.as_tuple()))
 
-        self.assertIsNone(self.graph.get_node_description(node))
+        self.assertIsNone(self.graph.get_node_description(node.as_tuple()))
 
         test_description = n()
-        self.graph.set_node_description(node, test_description)
-        self.assertEqual(test_description, self.graph.get_node_description(node))
-
-
-if __name__ == '__main__':
-    unittest.main()
+        self.graph.set_node_description(node.as_tuple(), test_description)
+        self.assertEqual(test_description, self.graph.get_node_description(node.as_tuple()))

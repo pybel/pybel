@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for node predicates."""
+
 import unittest
 
 from pybel import BELGraph
@@ -25,22 +27,31 @@ from pybel.struct.filters.node_predicates import (
     is_causal_sink, is_causal_source, is_degraded, is_gene, is_pathology, is_protein, is_translocated,
     keep_node_permissive, node_exclusion_predicate_builder, node_inclusion_predicate_builder, not_pathology,
 )
+from pybel.testing.utils import n
 
 p1 = protein(name='BRAF', namespace='HGNC')
 p2 = protein(name='BRAF', namespace='HGNC', variants=[hgvs('p.Val600Glu'), pmod('Ph')])
-p3 = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
+p3 = protein(name='APP', namespace='HGNC', variants=fragment(start=672, stop=713))
 p4 = protein(name='2', namespace='HGNC')
 
-g1 = gene(name='BRAF', namespace='HGNC', variants=[gmod('Me')])
+g1 = gene(name='BRAF', namespace='HGNC', variants=gmod('Me'))
 
 
-class TestNodePredicate(unittest.TestCase):
+class TestNodePredicates(unittest.TestCase):
+    """Tests for node predicates."""
+
+    def test_none_data(self):
+        """Test permissive node predicate with a node data dictionary."""
+        self.assertTrue(keep_node_permissive(p1))
+
     def test_none(self):
+        """Test permissive node predicate with graph and tuple."""
         g = BELGraph()
         p1_tuple = g.add_node_from_data(p1)
         self.assertTrue(keep_node_permissive(g, p1_tuple))
 
     def test_p1_data_variants(self):
+        """Test node predicates on BRAF."""
         self.assertFalse(is_abundance(p1))
         self.assertFalse(is_gene(p1))
         self.assertTrue(is_protein(p1))
@@ -54,6 +65,7 @@ class TestNodePredicate(unittest.TestCase):
         self.assertFalse(has_fragment(p1))
 
     def test_p1_tuple_variants(self):
+        """Test node predicates on the node tuple from BRAF.s"""
         g = BELGraph()
         p1_tuple = g.add_node_from_data(p1)
 
@@ -137,7 +149,12 @@ class TestNodePredicate(unittest.TestCase):
             citation={
                 CITATION_TYPE: CITATION_TYPE_ONLINE, CITATION_REFERENCE: 'https://www.ncbi.nlm.nih.gov/gene/3290'
             },
-            evidence="Entrez Gene Summary: Human: The protein encoded by this gene is a microsomal enzyme that catalyzes the conversion of the stress hormone cortisol to the inactive metabolite cortisone. In addition, the encoded protein can catalyze the reverse reaction, the conversion of cortisone to cortisol. Too much cortisol can lead to central obesity, and a particular variation in this gene has been associated with obesity and insulin resistance in children. Two transcript variants encoding the same protein have been found for this gene.",
+            evidence="Entrez Gene Summary: Human: The protein encoded by this gene is a microsomal enzyme that "
+                     "catalyzes the conversion of the stress hormone cortisol to the inactive metabolite cortisone. "
+                     "In addition, the encoded protein can catalyze the reverse reaction, the conversion of cortisone "
+                     "to cortisol. Too much cortisol can lead to central obesity, and a particular variation in this "
+                     "gene has been associated with obesity and insulin resistance in children. Two transcript "
+                     "variants encoding the same protein have been found for this gene.",
             annotations={'Species': '9606'},
             subject_modifier=activity('cat'),
             object_modifier=degradation()
@@ -162,7 +179,8 @@ class TestNodePredicate(unittest.TestCase):
             v,
             relation=INCREASES,
             citation='10855792',
-            evidence="Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be translocated from the nucleus after stimulation with epidermal growth factor.",
+            evidence="Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be "
+                     "translocated from the nucleus after stimulation with epidermal growth factor.",
             annotations={'Species': '9606'},
             object_modifier=translocation(
                 from_loc=entity(namespace='GO', identifier='0005634'),
@@ -192,7 +210,11 @@ class TestNodePredicate(unittest.TestCase):
             u,
             v,
             citation='10072486',
-            evidence='Compared with controls treated with culture medium alone, IL-4 and IL-5 induced significantly higher levels of MIP-2 and KC production; IL-4 also increased the production of MCP-1 (Fig. 2, A and B)....we only tested the effects of IL-3, IL-4, IL-5, and IL-13 on chemokine expression and cellular infiltration....Recombinant cytokines were used, ... to treat naive BALB/c mice.',
+            evidence='Compared with controls treated with culture medium alone, IL-4 and IL-5 induced significantly '
+                     'higher levels of MIP-2 and KC production; IL-4 also increased the production of MCP-1 '
+                     '(Fig. 2, A and B)....we only tested the effects of IL-3, IL-4, IL-5, and IL-13 on chemokine '
+                     'expression and cellular infiltration....Recombinant cytokines were used, ... to treat naive '
+                     'BALB/c mice.',
             annotations={'Species': '10090', 'MeSH': 'bronchoalveolar lavage fluid'},
             object_modifier=secretion()
         )
@@ -215,12 +237,12 @@ class TestNodePredicate(unittest.TestCase):
         u = g.add_node_from_data(protein(name='S100b', namespace='MGI'))
         v = g.add_node_from_data(abundance(name='nitric oxide', namespace='CHEBI'))
 
-        g.add_qualified_edge(
+        g.add_increases(
             u,
             v,
-            relation=INCREASES,
             citation='11180510',
-            evidence='S100B protein is also secreted by astrocytes and acts on these cells to stimulate nitric oxide secretion in an autocrine manner.',
+            evidence='S100B protein is also secreted by astrocytes and acts on these cells to stimulate nitric oxide '
+                     'secretion in an autocrine manner.',
             annotations={'Species': '10090', 'Cell': 'astrocyte'},
             subject_modifier=secretion()
         )
@@ -345,21 +367,22 @@ class TestNodePredicate(unittest.TestCase):
 
     def test_causal_source(self):
         g = BELGraph()
+        a, b, c = (protein(n(), n()) for _ in range(3))
 
-        g.add_edge(1, 2, relation=INCREASES)
-        g.add_edge(2, 3, relation=INCREASES)
+        g.add_increases(a, b, n(), n())
+        g.add_increases(b, c, n(), n())
 
-        self.assertTrue(is_causal_source(g, 1))
-        self.assertFalse(is_causal_central(g, 1))
-        self.assertFalse(is_causal_sink(g, 1))
+        self.assertTrue(is_causal_source(g, a.as_tuple()))
+        self.assertFalse(is_causal_central(g, a.as_tuple()))
+        self.assertFalse(is_causal_sink(g, a.as_tuple()))
 
-        self.assertFalse(is_causal_source(g, 2))
-        self.assertTrue(is_causal_central(g, 2))
-        self.assertFalse(is_causal_sink(g, 2))
+        self.assertFalse(is_causal_source(g, b.as_tuple()))
+        self.assertTrue(is_causal_central(g, b.as_tuple()))
+        self.assertFalse(is_causal_sink(g, b.as_tuple()))
 
-        self.assertFalse(is_causal_source(g, 3))
-        self.assertFalse(is_causal_central(g, 3))
-        self.assertTrue(is_causal_sink(g, 3))
+        self.assertFalse(is_causal_source(g, c.as_tuple()))
+        self.assertFalse(is_causal_central(g, c.as_tuple()))
+        self.assertTrue(is_causal_sink(g, c.as_tuple()))
 
 
 class TestEdgePredicate(unittest.TestCase):
@@ -371,12 +394,12 @@ class TestEdgePredicate(unittest.TestCase):
 
     def test_has_polarity(self):
         g = BELGraph()
+        a, b, c = (protein(n(), n()) for _ in range(3))
+        g.add_increases(a, b, n(), n(), key=0)
+        self.assertTrue(has_polarity(g, a.as_tuple(), b.as_tuple(), 0))
 
-        g.add_edge(1, 2, key=0, relation=INCREASES)
-        self.assertTrue(has_polarity(g, 1, 2, 0))
-
-        g.add_edge(2, 3, key=0, relation=ASSOCIATION)
-        self.assertFalse(has_polarity(g, 2, 3, 0))
+        g.add_association(b, c, n(), n(), key=0)
+        self.assertFalse(has_polarity(g, b.as_tuple(), c.as_tuple(), 0))
 
     def test_has_provenance(self):
         self.assertFalse(has_provenance({}))

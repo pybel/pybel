@@ -128,7 +128,7 @@ class TestJgif(TestGraphMixin):
         self.assertEqual(set(jgif_expected_nodes), set(graph))
 
         for u, v, d in jgif_expected_edges:
-            self.assertHasEdge(graph, u, v, **d)
+            self.assert_has_edge(graph, u, v, **d)
 
         # TODO test more thoroughly?
         export_jgif = to_jgif(graph)

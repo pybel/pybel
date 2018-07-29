@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Test parsing metadata from a BEL script."""
+
 import logging
 import os
 import unittest

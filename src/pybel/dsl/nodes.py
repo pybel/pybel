@@ -98,7 +98,7 @@ class BaseAbundance(BaseEntity):
 
     @property
     def function(self):
-        """The function of this abundance.
+        """Return the function of this abundance.
 
         :rtype: str
         """
@@ -106,7 +106,7 @@ class BaseAbundance(BaseEntity):
 
     @property
     def name(self):
-        """The name of this abundance.
+        """Return the name of this abundance.
 
         :rtype: Optional[str]
         """
@@ -114,7 +114,7 @@ class BaseAbundance(BaseEntity):
 
     @property
     def namespace(self):
-        """The namespace of this abundance.
+        """Return the namespace of this abundance.
 
         :rtype: str
         """
@@ -122,7 +122,7 @@ class BaseAbundance(BaseEntity):
 
     @property
     def identifier(self):
-        """The identifier of this abundance.
+        """Return the identifier of this abundance.
 
         :rtype: Optional[str]
         """
@@ -147,11 +147,11 @@ class BaseAbundance(BaseEntity):
         )
 
 
-class abundance(BaseAbundance):
+class Abundance(BaseAbundance):
     """Builds an abundance node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None):
-        """Build a general abundance entitiy.
+        """Build a general abundance entity.
 
         :param str namespace: The name of the database used to identify this entity
         :param Optional[str] name: The database's preferred name or label for this entity
@@ -161,10 +161,13 @@ class abundance(BaseAbundance):
 
         >>> abundance(namespace='CHEBI', name='water')
         """
-        super(abundance, self).__init__(ABUNDANCE, namespace=namespace, name=name, identifier=identifier)
+        super(Abundance, self).__init__(ABUNDANCE, namespace=namespace, name=name, identifier=identifier)
 
 
-class bioprocess(BaseAbundance):
+abundance = Abundance
+
+
+class BiologicalProcess(BaseAbundance):
     """Builds a biological process node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None):
@@ -178,10 +181,13 @@ class bioprocess(BaseAbundance):
 
         >>> bioprocess(namespace='GO', name='apoptosis')
         """
-        super(bioprocess, self).__init__(BIOPROCESS, namespace=namespace, name=name, identifier=identifier)
+        super(BiologicalProcess, self).__init__(BIOPROCESS, namespace=namespace, name=name, identifier=identifier)
 
 
-class pathology(BaseAbundance):
+bioprocess = BiologicalProcess
+
+
+class Pathology(BaseAbundance):
     """Builds a pathology node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None):
@@ -195,7 +201,10 @@ class pathology(BaseAbundance):
 
         >>> pathology(namespace='DO', name='Alzheimer Disease')
         """
-        super(pathology, self).__init__(PATHOLOGY, namespace=namespace, name=name, identifier=identifier)
+        super(Pathology, self).__init__(PATHOLOGY, namespace=namespace, name=name, identifier=identifier)
+
+
+pathology = Pathology
 
 
 class CentralDogma(BaseAbundance):
@@ -208,8 +217,8 @@ class CentralDogma(BaseAbundance):
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
-        :param variants: A variant or list of variants
-        :type: variants: None or Variant or list[Variant]
+        :param variants: An optional variant or list of variants
+        :type variants: None or Variant or list[Variant]
         """
         super(CentralDogma, self).__init__(func, namespace, name=name, identifier=identifier)
         if variants:
@@ -301,9 +310,6 @@ class Variant(dict):
         """
         super(Variant, self).__init__({KIND: kind})
 
-    def __str__(self):
-        return self.as_bel()
-
     @abc.abstractmethod
     def as_tuple(self):
         """Return this node as a tuple.
@@ -318,8 +324,11 @@ class Variant(dict):
         :rtype: str
         """
 
+    def __str__(self):
+        return self.as_bel()
 
-class pmod(Variant):
+
+class ProteinModification(Variant):
     """Build a protein modification variant dictionary."""
 
     def __init__(self, name, code=None, position=None, namespace=None, identifier=None):
@@ -346,7 +355,7 @@ class pmod(Variant):
 
         >>> pmod(name='protein phosphorylation', namespace='GO', identifier='GO:0006468', code='Thr', position=308)
         """
-        super(pmod, self).__init__(PMOD)
+        super(ProteinModification, self).__init__(PMOD)
 
         self[IDENTIFIER] = entity(
             namespace=(namespace or BEL_DEFAULT_NAMESPACE),
@@ -380,11 +389,15 @@ class pmod(Variant):
         )
 
 
-class gmod(Variant):
+pmod = ProteinModification
+
+
+class GeneModification(Variant):
     """Build a gene modification variant dictionary."""
 
     def __init__(self, name, namespace=None, identifier=None):
-        """
+        """Build a gene modification variant data dictionary.
+
         :param str name: The name of the gene modification
         :param Optional[str] namespace: The namespace of the gene modification
         :param Optional[str] identifier: The identifier of the name in the database
@@ -400,7 +413,7 @@ class gmod(Variant):
 
         >>> gmod(name='DNA methylation', namespace='GO', identifier='GO:0006306',)
         """
-        super(gmod, self).__init__(GMOD)
+        super(GeneModification, self).__init__(GMOD)
 
         self[IDENTIFIER] = entity(
             namespace=(namespace or BEL_DEFAULT_NAMESPACE),
@@ -425,18 +438,22 @@ class gmod(Variant):
         return 'gmod({})'.format(str(self[IDENTIFIER]))
 
 
-class hgvs(Variant):
-    """Builds a HGVS variant dictionary"""
+gmod = GeneModification
+
+
+class Hgvs(Variant):
+    """Builds a HGVS variant dictionary."""
 
     def __init__(self, variant):
-        """
+        """Build an HGVS variant data dictionary.
+
         :param str variant: The HGVS variant string
 
         Example:
 
         >>> protein(namespace='HGNC', name='AKT1', variants=[hgvs('p.Ala127Tyr')])
         """
-        super(hgvs, self).__init__(HGVS)
+        super(Hgvs, self).__init__(HGVS)
 
         self[IDENTIFIER] = variant
 
@@ -455,11 +472,15 @@ class hgvs(Variant):
         return 'var({})'.format(self[IDENTIFIER])
 
 
-class protein_substitution(hgvs):
-    """Builds a HGVS variant dictionary for the given protein substitution"""
+hgvs = Hgvs
+
+
+class ProteinSubstitution(Hgvs):
+    """A protein substitution variant."""
 
     def __init__(self, from_aa, position, to_aa):
-        """
+        """Build an HGVS variant data dictionary for the given protein substitution.
+
         :param str from_aa: The 3-letter amino acid code of the original residue
         :param int position: The position of the residue
         :param str to_aa: The 3-letter amino acid code of the new residue
@@ -468,12 +489,17 @@ class protein_substitution(hgvs):
 
         >>> protein(namespace='HGNC', name='AKT1', variants=[protein_substitution('Ala', 127, 'Tyr')])
         """
-        super(protein_substitution, self).__init__('p.{}{}{}'.format(from_aa, position, to_aa))
+        super(ProteinSubstitution, self).__init__('p.{}{}{}'.format(from_aa, position, to_aa))
 
 
-class fragment(Variant):
+protein_substitution = ProteinSubstitution
+
+
+class Fragment(Variant):
+    """A protein fragment variant."""
+
     def __init__(self, start=None, stop=None, description=None):
-        """Make a protein fragment dictionary.
+        """Build a protein fragment data dictionary.
 
         :param start: The starting position
         :type start: None or int or str
@@ -489,7 +515,7 @@ class fragment(Variant):
 
         >>> protein(name='APP', namespace='HGNC', variants=[fragment()])
         """
-        super(fragment, self).__init__(FRAGMENT)
+        super(Fragment, self).__init__(FRAGMENT)
 
         if start and stop:
             self[FRAGMENT_START] = start
@@ -516,7 +542,7 @@ class fragment(Variant):
         return result
 
     def as_bel(self):
-        """Return this HGVS variant as a BEL string.
+        """Return this fragment variant as a BEL string.
 
         :rtype: str
         """
@@ -531,17 +557,23 @@ class fragment(Variant):
         return 'frag({})'.format(res)
 
 
-class gene(CentralDogma):
+fragment = Fragment
+
+
+class Gene(CentralDogma):
     """Builds a gene node data dictionary"""
 
     def __init__(self, namespace, name=None, identifier=None, variants=None):
         """
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
-        :param list[Variant] variants: A list of variants
+        :param variants: An optional variant or list of variants
+        :type variants: None or Variant or list[Variant]
         """
-        super(gene, self).__init__(GENE, namespace, name=name, identifier=identifier, variants=variants)
+        super(Gene, self).__init__(GENE, namespace, name=name, identifier=identifier, variants=variants)
+
+
+gene = Gene
 
 
 class _Transcribable(CentralDogma):
@@ -564,7 +596,7 @@ class _Transcribable(CentralDogma):
         )
 
 
-class rna(_Transcribable):
+class Rna(_Transcribable):
     """Build an RNA node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None, variants=None):
@@ -573,7 +605,8 @@ class rna(_Transcribable):
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
-        :param list[Variant] variants: A list of variants
+        :param variants: An optional variant or list of variants
+        :type variants: None or Variant or list[Variant]
 
         Example: AKT1 protein coding gene's RNA:
 
@@ -583,10 +616,13 @@ class rna(_Transcribable):
 
         >>> rna(namespace='SNORNABASE', identifer='SR0000073')
         """
-        super(rna, self).__init__(RNA, namespace, name=name, identifier=identifier, variants=variants)
+        super(Rna, self).__init__(RNA, namespace, name=name, identifier=identifier, variants=variants)
 
 
-class mirna(_Transcribable):
+rna = Rna
+
+
+class MiRNA(_Transcribable):
     """Build an miRNA node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None, variants=None):
@@ -595,7 +631,8 @@ class mirna(_Transcribable):
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
-        :param list[Variant] variants: A list of variants
+        :param variants: A list of variants
+        :type variants: None or Variant or list[Variant]
 
         Human miRNA's are listed on HUGO's `MicroRNAs (MIR) <https://www.genenames.org/cgi-bin/genefamilies/set/476>`_
         gene family.
@@ -612,10 +649,13 @@ class mirna(_Transcribable):
 
         >>> mirna(namespace='ENTREZ', identifier='406904')
         """
-        super(mirna, self).__init__(MIRNA, namespace, name=name, identifier=identifier, variants=variants)
+        super(MiRNA, self).__init__(MIRNA, namespace, name=name, identifier=identifier, variants=variants)
 
 
-class protein(CentralDogma):
+mirna = MiRNA
+
+
+class Protein(CentralDogma):
     """Build a protein node data dictionary."""
 
     def __init__(self, namespace, name=None, identifier=None, variants=None):
@@ -624,7 +664,8 @@ class protein(CentralDogma):
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
-        :param list[Variant] variants: A list of variants
+        :param variants: An optional variant or list of variants
+        :type variants: None or Variant or list[Variant]
 
         Example: AKT
 
@@ -638,7 +679,7 @@ class protein(CentralDogma):
 
         >>> protein(namespace='HGNC', name='AKT', variants=[pmod('Ph', code='Thr', position=308)])
         """
-        super(protein, self).__init__(PROTEIN, namespace, name=name, identifier=identifier, variants=variants)
+        super(Protein, self).__init__(PROTEIN, namespace, name=name, identifier=identifier, variants=variants)
 
     def get_rna(self):
         """Get the corresponding RNA or raise an exception if it's not the reference node.
@@ -654,6 +695,9 @@ class protein(CentralDogma):
             name=self.name,
             identifier=self.identifier
         )
+
+
+protein = Protein
 
 
 def _tuplable_list_as_tuple(entities):
@@ -689,7 +733,7 @@ def _entity_list_as_bel(entities):  # TODO sorted?
     )
 
 
-class reaction(BaseEntity):
+class Reaction(BaseEntity):
     """Build a reaction node data dictionary."""
 
     def __init__(self, reactants, products):
@@ -702,66 +746,91 @@ class reaction(BaseEntity):
 
         >>> reaction([protein(namespace='HGNC', name='KNG1')], [abundance(namespace='CHEBI', name='bradykinin')])
         """
-        super(reaction, self).__init__(func=REACTION)
+        super(Reaction, self).__init__(func=REACTION)
         self.update({
             REACTANTS: reactants,
             PRODUCTS: products
         })
 
     def as_tuple(self):
+        """Return this reaction as a tuple.
+
+        :rtype: tuple
+        """
         return self[FUNCTION], _entity_list_as_tuple(self[REACTANTS]), _entity_list_as_tuple(self[PRODUCTS])
 
     def as_bel(self):
+        """Return this reaction as a BEL string.
+
+        :rtype: str
+        """
         return 'rxn(reactants({}), products({}))'.format(
             _entity_list_as_bel(self[REACTANTS]),
             _entity_list_as_bel(self[PRODUCTS])
         )
 
 
+reaction = Reaction
+
+
 class ListAbundance(BaseEntity):
     """The superclass for building list abundance (complex, abundance) node data dictionaries"""
 
     def __init__(self, func, members):
-        """
+        """Build a list abundance node data dictionary.
+
         :param str func: The PyBEL function
         :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
         """
         super(ListAbundance, self).__init__(func=func)
         self.update({
-            MEMBERS: members
+            MEMBERS: members,
         })
 
     def as_tuple(self):
+        """Return this list abundance as a tuple.
+
+        :rtype: tuple
+        """
         return (self[FUNCTION],) + _entity_list_as_tuple(self[MEMBERS])
 
     def as_bel(self):
+        """Return this list abundance as a BEL string.
+
+        :rtype: str
+        """
         return '{}({})'.format(
             rev_abundance_labels[self[FUNCTION]],
             _entity_list_as_bel(self[MEMBERS])
         )
 
 
-class complex_abundance(ListAbundance):
+class ComplexAbundance(ListAbundance):
     """Build a complex abundance node data dictionary with the optional ability to specify a name."""
 
     def __init__(self, members, namespace=None, name=None, identifier=None):
-        """
+        """Build a complex list node data dictionary.
+
         :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
         :param Optional[str] namespace: The namespace from which the name originates
         :param Optional[str] name: The name of the complex
         :param Optional[str] identifier: The identifier in the namespace in which the name originates
         """
-        super(complex_abundance, self).__init__(func=COMPLEX, members=members)
+        super(ComplexAbundance, self).__init__(func=COMPLEX, members=members)
 
         if namespace:
             self.update(entity(namespace=namespace, name=name, identifier=identifier))
 
 
-class named_complex_abundance(BaseAbundance):
+complex_abundance = ComplexAbundance
+
+
+class NamedComplexAbundance(BaseAbundance):
     """Build a named complex abundance node data dictionary."""
 
     def __init__(self, namespace=None, name=None, identifier=None):
-        """
+        """Build a complex abundance node data dictionary.
+
         :param str namespace: The name of the database used to identify this entity
         :param str name: The database's preferred name or label for this entity
         :param str identifier: The database's identifier for this entity
@@ -770,33 +839,48 @@ class named_complex_abundance(BaseAbundance):
 
         >>> named_complex_abundance(namespace='SCOMP', name='Calcineurin Complex')
         """
-        super(named_complex_abundance, self).__init__(
+        super(NamedComplexAbundance, self).__init__(
             func=COMPLEX,
             namespace=namespace,
             name=name,
-            identifier=identifier
+            identifier=identifier,
         )
 
 
-class composite_abundance(ListAbundance):
+named_complex_abundance = NamedComplexAbundance
+
+
+class CompositeAbundance(ListAbundance):
     """Build a composite abundance node data dictionary."""
 
     def __init__(self, members):
-        """
+        """Build a composite abundance node data dictionary.
+
         :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
         """
-        super(composite_abundance, self).__init__(func=COMPOSITE, members=members)
+        super(CompositeAbundance, self).__init__(func=COMPOSITE, members=members)
 
 
+composite_abundance = CompositeAbundance
+
+
+@six.add_metaclass(abc.ABCMeta)
 class FusionRangeBase(dict):
     """The superclass for fusion range data dictionaries"""
 
+    @abc.abstractmethod
+    def as_tuple(self):
+        """Return this fusion range as a tuple.
 
-class missing_fusion_range(FusionRangeBase):
+        :rtype: tuple
+        """
+
+
+class MissingFusionRange(FusionRangeBase):
     """Builds a missing fusion range data dictionary"""
 
     def __init__(self):
-        super(missing_fusion_range, self).__init__({
+        super(MissingFusionRange, self).__init__({
             FUSION_MISSING: '?'
         })
 
@@ -804,13 +888,17 @@ class missing_fusion_range(FusionRangeBase):
         return '?'
 
     def as_tuple(self):
-        """
+        """Return this fusion range as a tuple.
+
         :rtype: tuple
         """
         return self[FUSION_MISSING],
 
 
-class fusion_range(FusionRangeBase):
+missing_fusion_range = MissingFusionRange
+
+
+class EnumeratedFusionRange(FusionRangeBase):
     """Creates a fusion range data dictionary"""
 
     def __init__(self, reference, start, stop):
@@ -824,14 +912,14 @@ class fusion_range(FusionRangeBase):
         >>> fusion_range('r', 1, 79)
 
         """
-        super(fusion_range, self).__init__({
+        super(EnumeratedFusionRange, self).__init__({
             FUSION_REFERENCE: reference,
             FUSION_START: start,
             FUSION_STOP: stop
         })
 
     def as_tuple(self):
-        """
+        """Return this fusion range as a tuple.
 
         :rtype: tuple
         """
@@ -842,6 +930,10 @@ class fusion_range(FusionRangeBase):
         )
 
     def as_bel(self):
+        """Return this fusion range as a BEL string.
+
+        :rtype: str
+        """
         return '{reference}.{start}_{stop}'.format(
             reference=self[FUSION_REFERENCE],
             start=self[FUSION_START],
@@ -852,11 +944,15 @@ class fusion_range(FusionRangeBase):
         return self.as_bel()
 
 
+fusion_range = EnumeratedFusionRange
+
+
 class FusionBase(BaseEntity):
-    """The superclass for building fusion node data dictionaries"""
+    """The superclass for building fusion node data dictionaries."""
 
     def __init__(self, func, partner_5p, partner_3p, range_5p=None, range_3p=None):
-        """
+        """Build a fusion node data dictionary.
+
         :param str func: A PyBEL function
         :param CentralDogma partner_5p: A PyBEL node data dictionary for the 5-prime partner
         :param CentralDogma partner_3p: A PyBEL node data dictionary for the 3-prime partner
@@ -874,19 +970,9 @@ class FusionBase(BaseEntity):
             }
         })
 
-    def as_bel(self):
-        return "{}(fus({}:{}, {}, {}:{}, {}))".format(
-            rev_abundance_labels[self[FUNCTION]],
-            self[FUSION][PARTNER_5P][NAMESPACE],
-            self[FUSION][PARTNER_5P][NAME],
-            str(self[FUSION][RANGE_5P]),
-            self[FUSION][PARTNER_3P][NAMESPACE],
-            self[FUSION][PARTNER_3P][NAME],
-            str(self[FUSION][RANGE_3P])
-        )
-
     def as_tuple(self):
-        """
+        """Return this fusion as a tuple.
+
         :rtype: tuple
         """
         fusion = self[FUSION]
@@ -904,26 +990,51 @@ class FusionBase(BaseEntity):
             range3p,
         )
 
+    def as_bel(self):
+        """Return this fusion as a BEL string
 
-class protein_fusion(FusionBase):
+        :rtype: str
+        """
+        return "{}(fus({}:{}, {}, {}:{}, {}))".format(
+            rev_abundance_labels[self[FUNCTION]],
+            self[FUSION][PARTNER_5P][NAMESPACE],
+            self[FUSION][PARTNER_5P][NAME],
+            str(self[FUSION][RANGE_5P]),
+            self[FUSION][PARTNER_3P][NAMESPACE],
+            self[FUSION][PARTNER_3P][NAME],
+            str(self[FUSION][RANGE_3P])
+        )
+
+
+class ProteinFusion(FusionBase):
     """Builds a protein fusion data dictionary"""
 
     def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
-        """
+        """Build a protein fusion node data dictionary.
+
         :param pybel.dsl.protein partner_5p: A PyBEL node data dictionary for the 5-prime partner
         :param pybel.dsl.protein partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         """
-        super(protein_fusion, self).__init__(PROTEIN, partner_5p=partner_5p, range_5p=range_5p, partner_3p=partner_3p,
-                                             range_3p=range_3p)
+        super(ProteinFusion, self).__init__(
+            func=PROTEIN,
+            partner_5p=partner_5p,
+            range_5p=range_5p,
+            partner_3p=partner_3p,
+            range_3p=range_3p,
+        )
 
 
-class rna_fusion(FusionBase):
+protein_fusion = ProteinFusion
+
+
+class RnaFusion(FusionBase):
     """Builds an RNA fusion data dictionary"""
 
     def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
-        """
+        """Build an RNA fusion node data dictionary.
+
         :param pybel.dsl.rna partner_5p: A PyBEL node data dictionary for the 5-prime partner
         :param pybel.dsl.rna partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
@@ -946,15 +1057,24 @@ class rna_fusion(FusionBase):
         >>> ... partner_3p=rna(namespace='HGNC', name='ERG'),
         >>> )
         """
-        super(rna_fusion, self).__init__(RNA, partner_5p=partner_5p, range_5p=range_5p, partner_3p=partner_3p,
-                                         range_3p=range_3p)
+        super(RnaFusion, self).__init__(
+            func=RNA,
+            partner_5p=partner_5p,
+            range_5p=range_5p,
+            partner_3p=partner_3p,
+            range_3p=range_3p,
+        )
 
 
-class gene_fusion(FusionBase):
-    """Builds a gene fusion data dictionary"""
+rna_fusion = RnaFusion
+
+
+class GeneFusion(FusionBase):
+    """Builds a gene fusion data dictionary."""
 
     def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
-        """
+        """Build a gene fusion node data dictionary.
+
         :param pybel.dsl.gene partner_5p: A PyBEL node data dictionary for the 5-prime partner
         :param pybel.dsl.gene partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
@@ -977,5 +1097,13 @@ class gene_fusion(FusionBase):
         >>> ... partner_3p=gene(namespace='HGNC', name='ERG'),
         >>> )
         """
-        super(gene_fusion, self).__init__(GENE, partner_5p=partner_5p, range_5p=range_5p, partner_3p=partner_3p,
-                                          range_3p=range_3p)
+        super(GeneFusion, self).__init__(
+            func=GENE,
+            partner_5p=partner_5p,
+            range_5p=range_5p,
+            partner_3p=partner_3p,
+            range_3p=range_3p,
+        )
+
+
+gene_fusion = GeneFusion

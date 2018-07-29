@@ -12,6 +12,8 @@ __all__ = [
     'activity',
     'degradation',
     'translocation',
+    'extracellular',
+    'intracellular',
     'secretion',
     'cell_surface_expression',
 ]

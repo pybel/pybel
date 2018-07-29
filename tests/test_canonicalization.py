@@ -8,8 +8,11 @@ from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, KIND, MODIFIER,
     PATHOLOGY, PMOD, PROTEIN, REACTION, RNA,
 )
-from pybel.dsl import *
-from pybel.dsl.edges import extracellular, intracellular
+from pybel.dsl import (
+    abundance, activity, bioprocess, complex_abundance, composite_abundance, degradation, entity, extracellular,
+    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, intracellular, mirna, named_complex_abundance, pathology,
+    pmod, protein, protein_substitution, reaction, rna, rna_fusion, secretion, translocation,
+)
 from pybel.testing.utils import n
 
 

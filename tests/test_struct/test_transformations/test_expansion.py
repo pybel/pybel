@@ -61,8 +61,9 @@ class TestExpansion(unittest.TestCase):
 
     def test_neighborhoods(self):
         """Test expansion on the neighborhood of given nodes.
-        
-        The edge between PTPN6/CD33ph should not be added"""
+
+        The edge between PTPN6/CD33ph should not be added.
+        """
         graph = BELGraph()
         graph.add_node_from_data(cd33)
         graph.add_node_from_data(syk)

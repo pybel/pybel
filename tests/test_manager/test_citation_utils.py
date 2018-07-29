@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 
+"""Test the manager's citation utilities."""
+
 from __future__ import unicode_literals
 
 import os
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import *
+from pybel.constants import (
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE,
+    CITATION_TYPE_PUBMED,
+)
 from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids, sanitize_date
 from pybel.manager.models import Citation
 from pybel.struct.summary.provenance import get_pubmed_identifiers
@@ -14,28 +19,38 @@ from pybel.testing.cases import TemporaryCacheMixin
 
 
 class TestSanitizeDate(unittest.TestCase):
+    """Test sanitization of dates in various formats."""
+
     def test_sanitize_1(self):
+        """Test YYYY Mon DD."""
         self.assertEqual('2012-12-19', sanitize_date('2012 Dec 19'))
 
     def test_sanitize_2(self):
+        """Test YYYY Mon."""
         self.assertEqual('2012-12-01', sanitize_date('2012 Dec'))
 
     def test_sanitize_3(self):
+        """Test YYYY."""
         self.assertEqual('2012-01-01', sanitize_date('2012'))
 
     def test_sanitize_4(self):
+        """Test YYYY Mon-Mon."""
         self.assertEqual('2012-10-01', sanitize_date('2012 Oct-Dec'))
 
     def test_sanitize_5(self):
+        """Test YYYY Season."""
         self.assertEqual('2012-03-01', sanitize_date('2012 Spring'))
 
     def test_sanitize_6(self):
+        """Test YYYY Mon DD-DD."""
         self.assertEqual('2012-12-12', sanitize_date('2012 Dec 12-15'))
 
     def test_sanitize_7(self):
+        """Test YYYY Mon DD-Mon DD."""
         self.assertEqual('2005-01-29', sanitize_date('2005 Jan 29-Feb 4'))
 
     def test_sanitize_nope(self):
+        """Test failure."""
         self.assertEqual(None, sanitize_date('2012 Early Spring'))
 
 
@@ -138,7 +153,7 @@ class TestCitations(TemporaryCacheMixin):
 
     @unittest.skipIf(os.environ.get('DB') == 'mysql', reason='MySQL collation is wonky')
     def test_accent_duplicate(self):
-        """This tests when two authors, Gomez C and Goméz C are both checked that they are not counted as duplicates"""
+        """Test when two authors, Gomez C and Goméz C are both checked that they are not counted as duplicates."""
         g1 = u'Gomez C'
         g2 = u'Gómez C'
         pmid_1, pmid_2 = pmids = [
@@ -158,7 +173,3 @@ class TestCitations(TemporaryCacheMixin):
 
         a2 = self.manager.get_author_by_name(g2)
         self.assertEqual(g2, a2.name)
-
-
-if __name__ == '__main__':
-    unittest.main()

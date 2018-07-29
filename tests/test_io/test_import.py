@@ -226,7 +226,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assertHasEdge(self.misordered_graph, AKT1, EGFR, **e1)
+        self.assert_has_edge(self.misordered_graph, AKT1, EGFR, **e1)
 
         e2 = {
             RELATION: DECREASES,
@@ -236,7 +236,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assertHasEdge(self.misordered_graph, EGFR, FADD, **e2)
+        self.assert_has_edge(self.misordered_graph, EGFR, FADD, **e2)
 
         e3 = {
             RELATION: DIRECTLY_DECREASES,
@@ -246,7 +246,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assertHasEdge(self.misordered_graph, EGFR, CASP8, **e3)
+        self.assert_has_edge(self.misordered_graph, EGFR, CASP8, **e3)
 
 
 namespaces = {
@@ -334,7 +334,7 @@ class TestFull(TestTokenParserBase):
             EVIDENCE: test_evidence_text,
             CITATION: test_citation_dict
         }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
+        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_with_list(self):
         self.add_default_provenance()
@@ -365,7 +365,7 @@ class TestFull(TestTokenParserBase):
             },
             CITATION: test_citation_dict
         }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
+        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_with_multilist(self):
         self.add_default_provenance()
@@ -398,7 +398,7 @@ class TestFull(TestTokenParserBase):
             },
             CITATION: test_citation_dict
         }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
+        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
 
 
 class TestRandom(unittest.TestCase):
