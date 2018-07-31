@@ -7,7 +7,11 @@ import logging
 import unittest
 
 from pybel import from_cbn_jgif, to_jgif
-from pybel.constants import *
+from pybel.constants import (
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, CITATION_REFERENCE, CITATION_TYPE,
+    CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, COMPLEX, DECREASES, DIRECTLY_INCREASES, EFFECT, EVIDENCE, MODIFIER, NAME,
+    NAMESPACE, OBJECT, PATHOLOGY, PMOD, PROTEIN, RELATION,
+)
 from pybel.testing.constants import test_jgif_path
 from tests.constants import TestGraphMixin
 
@@ -124,7 +128,7 @@ class TestJgif(TestGraphMixin):
         self.assertEqual(set(jgif_expected_nodes), set(graph))
 
         for u, v, d in jgif_expected_edges:
-            self.assertHasEdge(graph, u, v, **d)
+            self.assert_has_edge(graph, u, v, **d)
 
         # TODO test more thoroughly?
         export_jgif = to_jgif(graph)

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for parsing utilities."""
+
 import unittest
 
 import networkx as nx
@@ -11,6 +13,8 @@ from tests.constants import any_subdict_matches
 
 
 class TestSubdictMatching(unittest.TestCase):
+    """Tests for matching sub-dictionaries."""
+
     def test_dict_matches_1(self):
         target = {
             'k1': 'v1',
@@ -92,7 +96,7 @@ class TestSubdictMatching(unittest.TestCase):
         self.assertFalse(subdict_matches(target, query))
 
     def test_dict_matches_7_exact(self):
-        """Tests a partial match"""
+        """Test a partial match."""
         target = {
             'k1': 'v1',
             'k2': 'v2'
@@ -105,7 +109,7 @@ class TestSubdictMatching(unittest.TestCase):
         self.assertFalse(subdict_matches(target, query, partial_match=False))
 
     def test_dict_matches_8_partial(self):
-        """Tests a partial match"""
+        """Test a partial match."""
         target = {
             'k1': 'v1',
             'k2': {'v2': 'v3', 'v4': 'v5'}
@@ -117,9 +121,8 @@ class TestSubdictMatching(unittest.TestCase):
 
         self.assertTrue(subdict_matches(target, query))
 
-
-class TestUtils(unittest.TestCase):
     def test_dict_matches_graph(self):
+        """Test matching a graph."""
         g = nx.MultiDiGraph()
 
         g.add_node(1)

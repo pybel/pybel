@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""PyBEL has a partially implemented domain specific language that makes it much easier to programmatically create and
-populate :py:class:`pybel.BELGraph` instances."""
+"""An internal domain-specific language (DSL) for BEL."""
 
 from . import edges, nodes
 from .edges import *

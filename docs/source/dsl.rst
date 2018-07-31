@@ -1,4 +1,4 @@
-Domain Specific Language
-========================
+Internal DSL
+============
 .. automodule:: pybel.dsl
     :members:

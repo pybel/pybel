@@ -1,32 +1,34 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for input and output."""
+
 import logging
 import os
 import tempfile
 import unittest
 from pathlib import Path
 
-import networkx as nx
 from six import BytesIO, StringIO
 
 from pybel import (
     BELGraph, from_bytes, from_json, from_json_file, from_jsons, from_lines, from_path, from_pickle, from_url,
     to_bel_lines, to_bytes, to_csv, to_graphml, to_gsea, to_json, to_json_file, to_jsons, to_pickle, to_sif,
 )
-from pybel.constants import *
+from pybel.constants import (
+    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GENE, GRAPH_PYBEL_VERSION, INCREASES,
+    PYBEL_MINIMUM_IMPORT_VERSION, RELATION,
+)
 from pybel.dsl import gene
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BelParser
-from pybel.parser.exc import *
+from pybel.parser.exc import InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.constants import (
-    test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy,
-    test_bel_thorough,
+    test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough,
 )
 from pybel.testing.mocks import mock_bel_resources
-from pybel.utils import hash_node
 from tests.constants import (
     AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TestTokenParserBase, citation_1, evidence_1, test_citation_dict,
     test_evidence_text, test_set_evidence,
@@ -38,37 +40,25 @@ log = logging.getLogger(__name__)
 testan1 = '1'
 
 
-def do_remapping(original, reconstituted):
-    """Remaps nodes to use the reconstitution tests
-    
-    :param BELGraph original: The original bel graph 
-    :param BELGraph reconstituted: The reconstituted BEL graph from CX input/output
-    """
-    node_mapping = dict(enumerate(sorted(original, key=hash_node)))
-    try:
-        nx.relabel.relabel_nodes(reconstituted, node_mapping, copy=False)
-    except KeyError as e:
-        missing_nodes = set(node_mapping) - set(reconstituted)
-        log.exception('missing %s', [node_mapping[n] for n in missing_nodes])
-        raise e
-
-
 class TestExampleInterchange(unittest.TestCase):
+    """Test round-trip interchange of the sialic acid graph example."""
+
     def help_test_equal(self, graph):
-        """Checks that a graph is equal to the sialic acid graph example
+        """Check that a graph is equal to the sialic acid graph example.
 
         :type graph: pybel.BELGraph
         """
         self.assertEqual(set(sialic_acid_graph), set(graph))
-
-        self.assertEqual(set(sialic_acid_graph.edges_iter()), set(graph.edges_iter()))
+        self.assertEqual(set(sialic_acid_graph.edges()), set(graph.edges()))
 
     def test_example_bytes(self):
+        """Test the round-trip through bytes."""
         graph_bytes = to_bytes(sialic_acid_graph)
         graph = from_bytes(graph_bytes)
         self.help_test_equal(graph)
 
     def test_example_pickle(self):
+        """Test the round-trip through a pickle."""
         bio = BytesIO()
         to_pickle(sialic_acid_graph, bio)
         bio.seek(0)
@@ -76,16 +66,19 @@ class TestExampleInterchange(unittest.TestCase):
         self.help_test_equal(graph)
 
     def test_thorough_json(self):
+        """Test the round-trip through node-link JSON."""
         graph_json_dict = to_json(sialic_acid_graph)
         graph = from_json(graph_json_dict)
         self.help_test_equal(graph)
 
     def test_thorough_jsons(self):
+        """Test the round-trip through a node-link JSON string."""
         graph_json_str = to_jsons(sialic_acid_graph)
         graph = from_jsons(graph_json_str)
         self.help_test_equal(graph)
 
     def test_thorough_json_file(self):
+        """Test the round-trip through a node-link JSON file."""
         sio = StringIO()
         to_json_file(sialic_acid_graph, sio)
         sio.seek(0)
@@ -96,37 +89,15 @@ class TestExampleInterchange(unittest.TestCase):
 class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
+        """Set up this class with several pre-loaded BEL graphs."""
         super(TestInterchange, cls).setUpClass()
 
-        @mock_bel_resources
-        def get_thorough_graph(mock):
-            return from_path(test_bel_thorough, manager=cls.manager, allow_nested=True)
-
-        cls.thorough_graph = get_thorough_graph()
-
-        @mock_bel_resources
-        def get_slushy_graph(mock):
-            return from_path(test_bel_slushy, manager=cls.manager)
-
-        cls.slushy_graph = get_slushy_graph()
-
-        @mock_bel_resources
-        def get_simple_graph(mock_get):
-            return from_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
-
-        cls.simple_graph = get_simple_graph()
-
-        @mock_bel_resources
-        def get_isolated_graph(mock_get):
-            return from_path(test_bel_isolated, manager=cls.manager)
-
-        cls.isolated_graph = get_isolated_graph()
-
-        @mock_bel_resources
-        def get_misordered_graph(mock_get):
-            return from_path(test_bel_misordered, manager=cls.manager, citation_clearing=False)
-
-        cls.misordered_graph = get_misordered_graph()
+        with mock_bel_resources:
+            cls.thorough_graph = from_path(test_bel_thorough, manager=cls.manager, allow_nested=True)
+            cls.slushy_graph = from_path(test_bel_slushy, manager=cls.manager)
+            cls.simple_graph = from_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
+            cls.isolated_graph = from_path(test_bel_isolated, manager=cls.manager)
+            cls.misordered_graph = from_path(test_bel_misordered, manager=cls.manager, citation_clearing=False)
 
     def test_thorough_path(self):
         self.bel_thorough_reconstituted(self.thorough_graph)
@@ -234,15 +205,16 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_isolated_compile(self):
         self.bel_isolated_reconstituted(self.isolated_graph)
 
-    @mock_bel_resources
-    def test_isolated_upgrade(self, mock):
+    def test_isolated_upgrade(self):
         lines = to_bel_lines(self.isolated_graph)
-        reconstituted = from_lines(lines, manager=self.manager)
+
+        with mock_bel_resources:
+            reconstituted = from_lines(lines, manager=self.manager)
+
         self.bel_isolated_reconstituted(reconstituted)
 
-    @mock_bel_resources
-    def test_misordered_compile(self, mock):
-        """This test ensures that non-citation clearing mode works"""
+    def test_misordered_compile(self):
+        """Test that non-citation clearing mode works."""
         self.assertEqual(4, self.misordered_graph.number_of_nodes())
         self.assertEqual(3, self.misordered_graph.number_of_edges())
 
@@ -254,7 +226,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assertHasEdge(self.misordered_graph, AKT1, EGFR, **e1)
+        self.assert_has_edge(self.misordered_graph, AKT1, EGFR, **e1)
 
         e2 = {
             RELATION: DECREASES,
@@ -264,7 +236,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assertHasEdge(self.misordered_graph, EGFR, FADD, **e2)
+        self.assert_has_edge(self.misordered_graph, EGFR, FADD, **e2)
 
         e3 = {
             RELATION: DIRECTLY_DECREASES,
@@ -274,7 +246,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assertHasEdge(self.misordered_graph, EGFR, CASP8, **e3)
+        self.assert_has_edge(self.misordered_graph, EGFR, CASP8, **e3)
 
 
 namespaces = {
@@ -362,7 +334,7 @@ class TestFull(TestTokenParserBase):
             EVIDENCE: test_evidence_text,
             CITATION: test_citation_dict
         }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
+        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_with_list(self):
         self.add_default_provenance()
@@ -393,7 +365,7 @@ class TestFull(TestTokenParserBase):
             },
             CITATION: test_citation_dict
         }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
+        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
 
     def test_annotations_with_multilist(self):
         self.add_default_provenance()
@@ -426,7 +398,7 @@ class TestFull(TestTokenParserBase):
             },
             CITATION: test_citation_dict
         }
-        self.assertHasEdge(test_node_1, test_node_2, **kwargs)
+        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
 
 
 class TestRandom(unittest.TestCase):

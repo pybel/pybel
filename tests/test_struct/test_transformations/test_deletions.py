@@ -5,11 +5,10 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import ASSOCIATION, FUNCTION, INCREASES, POSITIVE_CORRELATION, PROTEIN, RELATION
+from pybel.constants import FUNCTION, POSITIVE_CORRELATION, PROTEIN, RELATION
 from pybel.dsl import gene, hgvs, pathology, protein, protein_fusion, rna, rna_fusion
 from pybel.struct.mutation import (
-    enrich_protein_and_rna_origins, prune_protein_rna_origins, remove_associations,
-    remove_pathologies,
+    enrich_protein_and_rna_origins, prune_protein_rna_origins, remove_associations, remove_pathologies,
 )
 from pybel.struct.mutation.utils import remove_isolated_nodes, remove_isolated_nodes_op
 from pybel.testing.utils import n
@@ -29,11 +28,11 @@ class TestDeletions(unittest.TestCase):
         p1, p2, p3 = (protein(namespace='HGNC', name=n()) for _ in range(3))
         d1, d2 = (pathology(namespace='MESH', name=n()) for _ in range(2))
 
-        g.add_qualified_edge(p1, p2, INCREASES, n(), n())
-        g.add_qualified_edge(p2, p3, INCREASES, n(), n())
+        g.add_increases(p1, p2, n(), n())
+        g.add_increases(p2, p3, n(), n())
         g.add_qualified_edge(p1, d1, POSITIVE_CORRELATION, n(), n())
         g.add_qualified_edge(p2, d1, POSITIVE_CORRELATION, n(), n())
-        g.add_qualified_edge(p2, d1, ASSOCIATION, n(), n())
+        g.add_association(p2, d1, n(), n())
         g.add_qualified_edge(d1, d2, POSITIVE_CORRELATION, n(), n())
         g.add_qualified_edge(d1, d2, POSITIVE_CORRELATION, n(), n())
 
@@ -60,6 +59,7 @@ class TestDeletions(unittest.TestCase):
         self.assertEqual(2, g.number_of_edges())
 
     def test_remove_isolated_in_place(self):
+        """Test removing isolated nodes (in-place)."""
         g = BELGraph()
 
         g.add_edge(1, 2)
@@ -72,6 +72,7 @@ class TestDeletions(unittest.TestCase):
         self.assertEqual(2, g.number_of_edges())
 
     def test_remove_isolated_out_of_place(self):
+        """Test removing isolated nodes (out-of-place)."""
         g = BELGraph()
 
         g.add_edge(1, 2)
@@ -87,7 +88,7 @@ class TestDeletions(unittest.TestCase):
 class TestProcessing(unittest.TestCase):
     """Test inference of the central dogma."""
 
-    def assertInGraph(self, node, graph):
+    def assert_in_graph(self, node, graph):
         """Assert the node is in the graph.
 
         :type node: pybel.dsl.BaseEntity
@@ -96,7 +97,7 @@ class TestProcessing(unittest.TestCase):
         """
         self.assertTrue(graph.has_node_with_data(node))
 
-    def assertNotInGraph(self, node, graph):
+    def assert_not_in_graph(self, node, graph):
         """Assert the node is not in the graph.
 
         :type node: pybel.dsl.BaseEntity
@@ -110,25 +111,26 @@ class TestProcessing(unittest.TestCase):
         graph = BELGraph()
         graph.add_node_from_data(trem2_protein)
 
-        self.assertInGraph(trem2_protein, graph)
-        self.assertNotInGraph(trem2_gene, graph)
-        self.assertNotInGraph(trem2_rna, graph)
+        self.assert_in_graph(trem2_protein, graph)
+        self.assert_not_in_graph(trem2_gene, graph)
+        self.assert_not_in_graph(trem2_rna, graph)
 
         enrich_protein_and_rna_origins(graph)
 
-        self.assertInGraph(trem2_gene, graph)
-        self.assertInGraph(trem2_rna, graph)
+        self.assert_in_graph(trem2_gene, graph)
+        self.assert_in_graph(trem2_rna, graph)
 
         prune_protein_rna_origins(graph)
 
-        self.assertNotInGraph(trem2_gene, graph)
-        self.assertNotInGraph(trem2_rna, graph)
-        self.assertInGraph(trem2_protein, graph)
+        self.assert_not_in_graph(trem2_gene, graph)
+        self.assert_not_in_graph(trem2_rna, graph)
+        self.assert_in_graph(trem2_protein, graph)
 
         self.assertIn(FUNCTION, graph.node[trem2_protein.as_tuple()])
         self.assertIn(PROTEIN, graph.node[trem2_protein.as_tuple()][FUNCTION])
 
     def test_no_infer_on_protein_variants(self):
+        """Test that expansion doesn't occur on protein variants."""
         p = protein('HGNC', n(), variants=[hgvs(n())])
 
         graph = BELGraph()
@@ -143,6 +145,7 @@ class TestProcessing(unittest.TestCase):
         self.assertEqual(3, graph.number_of_edges())
 
     def test_no_infer_on_rna_variants(self):
+        """Test that expansion doesn't occur on RNA variants."""
         r = rna('HGNC', n(), variants=[hgvs(n())])
 
         graph = BELGraph()
@@ -157,7 +160,7 @@ class TestProcessing(unittest.TestCase):
         self.assertEqual(2, graph.number_of_edges())
 
     def test_no_infer_protein_fusion(self):
-        """Test that np gene is inferred from a RNA fusion node."""
+        """Test that no gene is inferred from a RNA fusion node."""
         partner5p = protein(n(), n())
         partner3p = protein(n(), n())
 

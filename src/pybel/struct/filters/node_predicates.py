@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Pre-defined predicates for nodes."""
+
 from functools import wraps
 
 from .node_predicate_builders import function_inclusion_filter_builder
@@ -38,7 +40,9 @@ __all__ = [
 
 
 def node_predicate(f):
-    """Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
+    """Tag a node predicate that takes a dictionary to also accept a pair of (BELGraph, tuple).
+
+    Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
     sure that it can also accept a pair of arguments, a BELGraph and a PyBEL node tuple as well.
 
     :type f: (dict) -> bool
@@ -59,15 +63,15 @@ def node_predicate(f):
     return wrapped
 
 
-def keep_node_permissive(graph, node):
-    """A default node predicate that always evaluates to :data:`True`.
+@node_predicate
+def keep_node_permissive(data):
+    """Return true for all nodes.
 
     Given BEL graph :code:`graph`, applying :func:`keep_node_permissive` with a predicate on the nodes iterable
     as in :code:`filter(keep_node_permissive, graph)` will result in the same iterable as iterating directly over a
     :class:`BELGraph`
 
-    :param BELGraph graph: A BEL graph
-    :param tuple node: The node
+    :param dict data: A PyBEL data dictionary
     :return: Always returns :data:`True`
     :rtype: bool
     """
@@ -76,7 +80,7 @@ def keep_node_permissive(graph, node):
 
 @node_predicate
 def is_abundance(data):
-    """Returns true if the node is an abundance
+    """Return true if the node is an abundance.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -86,7 +90,7 @@ def is_abundance(data):
 
 @node_predicate
 def is_gene(data):
-    """Returns true if the node is a gene
+    """Return true if the node is a gene.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -96,7 +100,7 @@ def is_gene(data):
 
 @node_predicate
 def is_protein(data):
-    """Returns true if the node is a protein
+    """Return true if the node is a protein.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -114,7 +118,7 @@ is_central_dogma = function_inclusion_filter_builder([GENE, RNA, MIRNA, PROTEIN]
 
 @node_predicate
 def is_pathology(data):
-    """Returns true if the node is a pathology
+    """Return true if the node is a pathology.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -124,7 +128,7 @@ def is_pathology(data):
 
 @node_predicate
 def not_pathology(data):
-    """Returns false if the node is a pathology
+    """Return false if the node is a pathology.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -134,7 +138,7 @@ def not_pathology(data):
 
 @node_predicate
 def has_variant(data):
-    """Returns true if the node has any variants
+    """Return true if the node has any variants.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -143,7 +147,7 @@ def has_variant(data):
 
 
 def _node_has_variant(data, variant):
-    """Checks if a node has at least one of the given variant
+    """Return true if the node has at least one of the given variant.
 
     :param dict data: A PyBEL data dictionary
     :param str variant: :data:`PMOD`, :data:`HGVS`, :data:`GMOD`, or :data:`FRAGMENT`
@@ -157,7 +161,7 @@ def _node_has_variant(data, variant):
 
 @node_predicate
 def has_protein_modification(data):
-    """Returns true if the node has a protein modification variant
+    """Return true if the node has a protein modification variant.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -167,7 +171,7 @@ def has_protein_modification(data):
 
 @node_predicate
 def has_gene_modification(data):
-    """Checks if a node has a gene modification
+    """Return true if the node has a gene modification.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -177,7 +181,7 @@ def has_gene_modification(data):
 
 @node_predicate
 def has_hgvs(data):
-    """Checks if a node has an HGVS variant
+    """Return true if the node has an HGVS variant.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -187,7 +191,7 @@ def has_hgvs(data):
 
 @node_predicate
 def has_fragment(data):
-    """Checks if a node has a fragment
+    """Return true if the node has a fragment.
 
     :param dict data: A PyBEL data dictionary
     :rtype: bool
@@ -196,8 +200,13 @@ def has_fragment(data):
 
 
 def _node_has_modifier(graph, node, modifier):
-    """Returns true if over any of a nodes edges, it has a given modifier - :data:`pybel.constants.ACTIVITY`,
-     :data:`pybel.constants.DEGRADATION`, or :data:`pybel.constants.TRANSLOCATION`.
+    """Return true if over any of a nodes edges, it has a given modifier.
+
+     Modifier can be one of:
+
+     - :data:`pybel.constants.ACTIVITY`,
+     - :data:`pybel.constants.DEGRADATION`
+     - :data:`pybel.constants.TRANSLOCATION`.
 
     :param pybel.BELGraph graph: A BEL graph
     :param tuple node: A BEL node
@@ -220,7 +229,7 @@ def _node_has_modifier(graph, node, modifier):
 
 
 def has_activity(graph, node):
-    """Returns true if over any of the node's edges it has a molecular activity
+    """Return true if over any of the node's edges, it has a molecular activity.
 
     :param pybel.BELGraph graph: A BEL graph
     :param tuple node: A BEL node
@@ -231,7 +240,7 @@ def has_activity(graph, node):
 
 
 def is_degraded(graph, node):
-    """Returns true if over any of the node's edges it is degraded
+    """Return true if over any of the node's edges, it is degraded.
 
     :param pybel.BELGraph graph: A BEL graph
     :param tuple node: A BEL node
@@ -242,7 +251,7 @@ def is_degraded(graph, node):
 
 
 def is_translocated(graph, node):
-    """Returns true if over any of the node's edges it is translocated
+    """Return true if over any of the node's edges, it is translocated.
 
     :param pybel.BELGraph graph: A BEL graph
     :param tuple node: A BEL node
@@ -253,7 +262,7 @@ def is_translocated(graph, node):
 
 
 def has_causal_in_edges(graph, node):
-    """Returns true if the node contains any in_edges that are causal
+    """Return true if the node contains any in_edges that are causal.
 
     :param pybel.BELGraph graph: A BEL graph
     :param tuple node: A BEL node
@@ -266,7 +275,7 @@ def has_causal_in_edges(graph, node):
 
 
 def has_causal_out_edges(graph, node):
-    """Returns true if the node contains any out_edges that are causal
+    """Return true if the node contains any out_edges that are causal.
 
     :param pybel.BELGraph graph: A BEL graph
     :param tuple node: A BEL node
@@ -286,9 +295,10 @@ def _hash_node_list(nodes):
 
 
 def node_exclusion_predicate_builder(nodes):
-    """Builds a function that returns true
+    """Build a node predicate that returns false for the given nodes.
 
-    :param list[tuple or dict] nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
+    :param nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
+    :type nodes: list[tuple] or list[data]
     :rtype: types.FunctionType
     """
     nodes = _hash_node_list(nodes)
@@ -306,9 +316,10 @@ def node_exclusion_predicate_builder(nodes):
 
 
 def node_inclusion_predicate_builder(nodes):
-    """Builds a function that returns true
+    """Build a function that returns true for the given nodes.
 
-    :param list[tuple or dict] nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
+    :param nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
+    :type nodes: list[tuple] or list[data]
     :rtype: types.FunctionType
     """
     nodes = _hash_node_list(nodes)
@@ -326,7 +337,7 @@ def node_inclusion_predicate_builder(nodes):
 
 
 def is_causal_source(graph, node):
-    """Is the node is a causal source?
+    """Return true of the node is a causal source.
 
     - Doesn't have any causal in edge(s)
     - Does have causal out edge(s)
@@ -341,7 +352,7 @@ def is_causal_source(graph, node):
 
 
 def is_causal_sink(graph, node):
-    """Is the node is a causal sink?
+    """Return true if the node is a causal sink.
 
     - Does have causal in edge(s)
     - Doesn't have any causal out edge(s)
@@ -355,7 +366,7 @@ def is_causal_sink(graph, node):
 
 
 def is_causal_central(graph, node):
-    """Is the node neither a causal sink nor a causal source?
+    """Return true if the node is neither a causal sink nor a causal source.
 
     - Does have causal in edges(s)
     - Does have causal out edge(s)

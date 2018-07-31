@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux using
+"""Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL).
+
+PyBEL is tested on both Python3 and legacy Python2 installations on Mac OS and Linux using
 `Travis CI <https://travis-ci.org/pybel/pybel>`_ as well as on Windows using
 `AppVeyor <https://ci.appveyor.com/project/cthoyt/pybel>`_.
 
@@ -36,19 +38,10 @@ Extras
 ------
 The ``setup.py`` makes use of the ``extras_require`` argument of :func:`setuptools.setup` in order to make some heavy
 packages that support special features of PyBEL optional to install, in order to make the installation more lean by
-default. A single extra can be installed from PyPI like :code:`python3 -m pip install -e pybel[ndex]` or multiple can
-be installed using a list like :code:`python3 -m pip install -e pybel[ndex,owl]`. Likewise, for developer installation,
-extras can be installed in editable mode with :code:`python3 -m pip install -e .[ndex]` or multiple can be installed
-using a list like :code:`python3 -m pip install -e .[neo4j,ndex]`. The available extras are:
-
-ndex
-~~~~
-ndex2 supports download and upload to the `Network Data Exchange <ndexbio.org>`_.
-
-.. seealso::
-
-    - :func:`pybel.to_ndex`
-    - :func:`pybel.from_ndex`
+default. A single extra can be installed from PyPI like :code:`python3 -m pip install -e pybel[neo4j]` or multiple can
+be installed using a list like :code:`python3 -m pip install -e pybel[neo4j,inra]`. Likewise, for developer installation,
+extras can be installed in editable mode with :code:`python3 -m pip install -e .[neo4j]` or multiple can be installed
+using a list like :code:`python3 -m pip install -e .[neo4j,indra]`. The available extras are:
 
 neo4j
 ~~~~~
@@ -98,17 +91,20 @@ from .manager import cache_manager, database_io
 from .manager.cache_manager import *
 from .manager.database_io import *
 from .struct import *
+from .utils import get_version
 
 __all__ = (
-    struct.__all__ +
-    io.__all__ +
-    canonicalize.__all__ +
-    database_io.__all__ +
-    cache_manager.__all__ +
-    examples.__all__
+        struct.__all__ +
+        io.__all__ +
+        canonicalize.__all__ +
+        database_io.__all__ +
+        cache_manager.__all__ +
+        examples.__all__ + [
+            'get_version',
+        ]
 )
 
-__version__ = '0.11.10'
+__version__ = '0.11.11'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)'

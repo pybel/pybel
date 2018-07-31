@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-"""
-BEL Language
-------------
+"""Language constants for BEL.
 
-This module contains mappings between PyBEL's internal constants and BEL language keywords
+This module contains mappings between PyBEL's internal constants and BEL language keywords.
 """
 
 import logging
 
-from .constants import *
+from .constants import (
+    ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, MIRNA, PATHOLOGY, PROTEIN, RNA, TRANSCRIBED_TO, TRANSLATED_TO,
+)
 from .dsl import entity
 
 log = logging.getLogger(__name__)
@@ -136,7 +136,6 @@ rna_nucleotide_labels = {
     'c': 'cytosine',
     'g': 'guanine'
 }
-
 
 #: A dictionary of default protein modifications to their preferred value
 pmod_namespace = {
@@ -431,4 +430,4 @@ gmod_mappings = {
 }
 
 BEL_DEFAULT_NAMESPACE_VERSION = '2.1.0'
-BEL_DEFAULT_NAMESPACE_URL = 'http://openbel.org/2.1.0.belns' # just needs something unique... will change later
+BEL_DEFAULT_NAMESPACE_URL = 'http://openbel.org/2.1.0.belns'  # just needs something unique... will change later

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains simple wrappers around node DSL functions for common namespaces"""
+"""This module contains simple wrappers around node DSL functions for common namespaces."""
 
 from .nodes import abundance, protein
 

@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 
-"""
-
-Neo4j
-~~~~~
-This module contains IO functions for outputting BEL graphs to a Neo4J graph database
-
-"""
+"""Output functions for BEL graphs to Neo4j."""
 
 from ..canonicalize import calculate_canonical_name, node_to_bel
 from ..constants import FUNCTION, NAME, PYBEL_CONTEXT_TAG, RELATION
 from ..utils import flatten_dict
 
-__all__ = ['to_neo4j']
+__all__ = [
+    'to_neo4j',
+]
 
 
 def to_neo4j(graph, neo_connection, context=None):
-    """Uploads a BEL graph to Neo4J graph database using :mod:`py2neo`
+    """Upload a BEL graph to a Neo4j graph database using :mod:`py2neo`.
 
     :param BELGraph graph: A BEL Graph
     :param neo_connection: A :mod:`py2neo` connection object. Refer to the
@@ -25,9 +21,9 @@ def to_neo4j(graph, neo_connection, context=None):
     :type neo_connection: :class:`py2neo.Graph`
     :param str context: A disease context to allow for multiple disease models in one neo4j instance.
                         Each edge will be assigned an attribute :code:`pybel_context` with this value
-    
+
     Example Usage:
-    
+
     >>> import pybel, py2neo
     >>> url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
     >>> g = pybel.from_url(url)

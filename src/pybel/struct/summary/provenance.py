@@ -10,7 +10,7 @@ __all__ = [
 
 
 def iterate_pubmed_identifiers(graph):
-    """Iterates over all PubMed identifiers in a graph
+    """Iterate over all PubMed identifiers in a graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: An iterator over the PubMed identifiers in the graph
@@ -18,13 +18,13 @@ def iterate_pubmed_identifiers(graph):
     """
     return (
         data[CITATION][CITATION_REFERENCE].strip()
-        for _, _, data in graph.edges_iter(data=True)
+        for _, _, data in graph.edges(data=True)
         if has_pubmed(data)
     )
 
 
 def get_pubmed_identifiers(graph):
-    """Gets the set of all PubMed identifiers cited in the construction of a graph
+    """Get the set of all PubMed identifiers cited in the construction of a graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A set of all PubMed identifiers cited in the construction of this graph

@@ -18,6 +18,14 @@ class LookupManager(BaseManager):
         """
         return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
 
+    def get_nodes_by_hashes(self, node_hashes):
+        """Look up several nodes by hashes of their PyBEL node tuples.
+
+        :param List[str] node_hashes: The hashes of PyBEL node tuples from :func:`pybel.utils.hash_node`
+        :rtype: List[Node]
+        """
+        return self.session.query(Node).filter(Node.sha512.in_(node_hashes)).all()
+
     def get_node_by_dict(self, node_dict):
         """Looks up a node by its data dictionary by hashing it then using :func:`get_node_by_hash`
 
@@ -33,6 +41,14 @@ class LookupManager(BaseManager):
         :rtype: Optional[Edge]
         """
         return self.session.query(Edge).filter(Edge.sha512 == edge_hash).one_or_none()
+
+    def get_edges_by_hashes(self, edge_hashes):
+        """Looks up several edges by hashes of their PyBEL edge data dictionaries.
+
+        :param List[str] edge_hashes: The hashes of PyBEL edge data dictionaries from :func:`pybel.utils.hash_edge`
+        :rtype: List[Edge]
+        """
+        return self.session.query(Edge).filter(Edge.sha512.in_(edge_hashes)).all()
 
     def get_citation_by_reference(self, type, reference):
         """Gets a citation object by its type and reference

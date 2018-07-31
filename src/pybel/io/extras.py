@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains IO functions for outputting BEL graphs to lossy formats, such as GraphML and CSV"""
+"""This module contains IO functions for outputting BEL graphs to lossy formats, such as GraphML and CSV."""
 
 from __future__ import print_function
 
@@ -23,8 +23,9 @@ log = logging.getLogger(__name__)
 
 
 def to_graphml(graph, file):
-    """Writes this graph to GraphML XML file using :func:`networkx.write_graphml`. The .graphml file extension is
-    suggested so Cytoscape can recognize it.
+    """Write this graph to GraphML XML file using :func:`networkx.write_graphml`.
+
+    The .graphml file extension is suggested so Cytoscape can recognize it.
 
     :param BELGraph graph: A BEL graph
     :param file file: A file or file-like object
@@ -40,19 +41,21 @@ def to_graphml(graph, file):
             graph.node_to_bel(u),
             graph.node_to_bel(v),
             key=key,
-            interaction=data[RELATION]
+            interaction=data[RELATION],
         )
 
     nx.write_graphml(g, file)
 
 
 def to_csv(graph, file=None, sep='\t'):
-    """Writes the graph as a tab-separated edge list with the columns:
+    """Write the graph as a tab-separated edge list.
+
+    The resulting file will contain the following columns:
 
     1. Source BEL term
     2. Relation
     3. Target BEL term
-    4. Edge data dictionary.
+    4. Edge data dictionary
 
     See the Data Models section of the documentation for which data are stored in the edge data dictionary, such
     as queryable information about transforms on the subject and object and their associated metadata.
@@ -61,7 +64,7 @@ def to_csv(graph, file=None, sep='\t'):
     :param file file: A writable file or file-like. Defaults to stdout.
     :param str sep: The separator. Defaults to tab.
     """
-    for u, v, data in graph.edges_iter(data=True):
+    for u, v, data in graph.edges(data=True):
         print(
             graph.edge_to_bel(u, v, data=data, sep=sep),
             json.dumps(data),
@@ -71,7 +74,9 @@ def to_csv(graph, file=None, sep='\t'):
 
 
 def to_sif(graph, file=None, sep='\t'):
-    """Writes the graph as a tab-separated SIF file with the following columns:
+    """Write the graph as a tab-separated SIF file.
+
+    The resulting file will contain the following columns:
 
     1. Source BEL term
     2. Relation
@@ -84,7 +89,7 @@ def to_sif(graph, file=None, sep='\t'):
     :param file file: A writable file or file-like. Defaults to stdout.
     :param str sep: The separator. Defaults to tab.
     """
-    for u, v, data in graph.edges_iter(data=True):
+    for u, v, data in graph.edges(data=True):
         print(
             graph.edge_to_bel(u, v, data=data, sep=sep),
             file=file
@@ -92,7 +97,7 @@ def to_sif(graph, file=None, sep='\t'):
 
 
 def to_gsea(graph, file=None):
-    """Writes the genes/gene products to a GRP file for use with GSEA gene set enrichment analysis
+    """Write the genes/gene products to a GRP file for use with GSEA gene set enrichment analysis.
 
     :param BELGraph graph: A BEL graph 
     :param file file: A writeable file or file-like object. Defaults to stdout.
@@ -106,7 +111,7 @@ def to_gsea(graph, file=None):
     print('# {}'.format(graph.name), file=file)
     nodes = {
         data[NAME]
-        for data in graph.iter_data()
+        for _, data in graph.nodes(data=True)
         if NAMESPACE in data and data[NAMESPACE] == 'HGNC'
     }
     for node in sorted(nodes):

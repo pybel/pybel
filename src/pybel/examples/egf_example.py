@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""The following is an example on EGF's effect on cellular processes
+"""An example describing EGF's effect on cellular processes.
 
 .. code-block:: none
 

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from collections import defaultdict
+"""Functions for grouping sub-graphs."""
 
 import logging
+from collections import defaultdict
 
 from ..utils import update_metadata, update_node_helper
 from ...constants import ANNOTATIONS
@@ -17,7 +18,7 @@ __all__ = [
 def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):
     result = defaultdict(graph.fresh_copy)
 
-    for source, target, key, data in graph.edges_iter(keys=True, data=True):
+    for source, target, key, data in graph.edges(keys=True, data=True):
         annotation_dict = data.get(ANNOTATIONS)
 
         if annotation_dict is None:
@@ -35,7 +36,7 @@ def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):
 def _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel):
     result = defaultdict(graph.fresh_copy)
 
-    for source, target, key, data in graph.edges_iter(keys=True, data=True):
+    for source, target, key, data in graph.edges(keys=True, data=True):
         annotation_dict = data.get(ANNOTATIONS)
 
         if annotation_dict is None or annotation not in annotation_dict:

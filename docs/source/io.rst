@@ -1,11 +1,9 @@
 Input and Output
 ================
-
 .. automodule:: pybel.io
 
 Import
 ------
-
 Parsing Modes
 ~~~~~~~~~~~~~
 The PyBEL parser has several modes that can be enabled and disabled. They are described below.
@@ -47,13 +45,18 @@ Transport
 ---------
 All transport pairs are reflective and data-preserving.
 
+Bytes
+~~~~~
 .. automodule:: pybel.io.gpickle
 .. autofunction:: pybel.from_pickle
 .. autofunction:: pybel.to_pickle
 .. autofunction:: pybel.from_bytes
 .. autofunction:: pybel.to_bytes
 
+Node-Link JSON
+~~~~~~~~~~~~~~
 .. automodule:: pybel.io.nodelink
+
 .. autofunction:: pybel.from_json
 .. autofunction:: pybel.to_json
 .. autofunction:: pybel.from_json_file
@@ -63,13 +66,18 @@ All transport pairs are reflective and data-preserving.
 .. autofunction:: pybel.from_jsons
 .. autofunction:: pybel.to_jsons
 
+JSON Graph Interchange Format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.io.jgif
+
 .. autofunction:: pybel.from_jgif
 .. autofunction:: pybel.from_cbn_jgif
 .. autofunction:: pybel.to_jgif
 
 Export
 ------
+.. automodule:: pybel.io.extras
+
 .. autofunction:: pybel.to_graphml
 .. autofunction:: pybel.to_csv
 .. autofunction:: pybel.to_sif
@@ -78,22 +86,27 @@ Export
 Database
 --------
 .. automodule:: pybel.manager.database_io
+
 .. autofunction:: pybel.from_database
 .. autofunction:: pybel.to_database
 
+Neo4j
+~~~~~
 .. automodule:: pybel.io.neo4j
+
 .. autofunction:: pybel.to_neo4j
 
 BEL Commons
 -----------
 .. automodule:: pybel.io.web
+
 .. autofunction:: pybel.from_web
 .. autofunction:: pybel.to_web
 
 INDRA
 -----
 .. automodule:: pybel.io.indra
+
 .. autofunction:: pybel.from_indra_statements
 .. autofunction:: pybel.to_indra_statements
 .. autofunction:: pybel.from_biopax
-

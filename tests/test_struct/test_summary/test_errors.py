@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Unit tests for :mod:`pybel.struct.summary.errors`."""
+"""Tests for :mod:`pybel.struct.summary.errors`."""
 
 import unittest
 
@@ -14,7 +14,7 @@ class TestErrors(unittest.TestCase):
     """Test :mod:`pybel.struct.summary.errors`."""
 
     def test_count_error_types(self):
-        """Test counting error types.s"""
+        """Test counting error types."""
         graph = BELGraph()
 
         line_number = 30

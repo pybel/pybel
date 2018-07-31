@@ -22,6 +22,7 @@ class TestEdgePredicateBuilders(unittest.TestCase):
     """Tests for edge predicate builders."""
 
     def test_build_pmid_inclusion_filter(self):
+        """Test building a predicate for a single PubMed identifier."""
         pmid_inclusion_filter = build_pmid_inclusion_filter(pmid1)
 
         self.assertTrue(pmid_inclusion_filter({
@@ -39,6 +40,7 @@ class TestEdgePredicateBuilders(unittest.TestCase):
         }))
 
     def test_build_pmid_set_inclusion_filter(self):
+        """Test building a predicate for multiple PubMed identifiers."""
         pmids = {pmid1, pmid2}
         pmid_inclusion_filter = build_pmid_inclusion_filter(pmids)
 
@@ -64,6 +66,7 @@ class TestEdgePredicateBuilders(unittest.TestCase):
         }))
 
     def test_build_author_inclusion_filter(self):
+        """Test building a predicate for a single author."""
         author_inclusion_filter = build_author_inclusion_filter(author1)
 
         self.assertTrue(author_inclusion_filter({
@@ -85,6 +88,7 @@ class TestEdgePredicateBuilders(unittest.TestCase):
         }))
 
     def test_build_author_set_inclusion_filter(self):
+        """Test building a predicate for multiple authors."""
         author = {author1, author2}
         author_inclusion_filter = build_author_inclusion_filter(author)
 

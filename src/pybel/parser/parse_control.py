@@ -16,9 +16,17 @@ import re
 from pyparsing import And, MatchFirst, Suppress, oneOf, pyparsing_common as ppc
 
 from .baseparser import BaseParser
-from .exc import *
+from .exc import (
+    CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
+    InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
+    MissingCitationException, UndefinedAnnotationWarning,
+)
 from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
-from ..constants import *
+from ..constants import (
+    ANNOTATIONS, BEL_KEYWORD_ALL, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SET,
+    BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_ENTRIES, CITATION_REFERENCE,
+    CITATION_TYPE, CITATION_TYPES, CITATION_TYPE_PUBMED, EVIDENCE,
+)
 from ..utils import valid_date
 
 __all__ = ['ControlParser']

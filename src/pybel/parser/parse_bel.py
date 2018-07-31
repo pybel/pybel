@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
-Relation Parser
-~~~~~~~~~~~~~~~
+"""A parser for BEL.
+
 This module handles parsing BEL relations and validation of semantics.
 """
 
@@ -16,13 +15,25 @@ from .exc import (
     InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning, MissingCitationException,
     MissingSupportWarning, NestedRelationWarning, RelabelWarning,
 )
-from .modifiers import *
+from .modifiers import (
+    FragmentParser, FusionParser, GeneModificationParser, GeneSubstitutionParser, LocationParser,
+    ProteinModificationParser, ProteinSubstitutionParser, TruncationParser, VariantParser,
+)
 from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_identifier import IdentifierParser
 from .utils import WCW, nest, one_of_tags, quote, triple
 from .. import language
-from ..constants import *
+from ..constants import (
+    ABUNDANCE, ACTIVITY, ANALOGOUS_TO, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOMARKER_FOR, BIOPROCESS, CAUSES_NO_CHANGE,
+    CELL_SECRETION, CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
+    DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, HAS_COMPONENT, HAS_MEMBER,
+    HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER, INCREASES, IS_A, LINE, MEMBERS, MIRNA, MODIFIER, NAME,
+    NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS,
+    PROGONSTIC_BIOMARKER_FOR, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT,
+    SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS,
+    belns_encodings,
+)
 from ..tokens import modifier_po_to_dict, po_to_dict
 
 __all__ = ['BelParser']

@@ -1,16 +1,79 @@
 # -*- coding: utf-8 -*-
 
-"""This module tests the DSL"""
+"""Tests for the internal DSL."""
 
 import unittest
 
-from pybel.constants import ABUNDANCE, COMPLEX
-from pybel.dsl import abundance, complex_abundance, fragment, protein
+from pybel import BELGraph
+from pybel.constants import ABUNDANCE, COMPLEX, FUNCTION, IDENTIFIER, NAME, NAMESPACE, PROTEIN
+from pybel.dsl import abundance, complex_abundance, entity, fragment, protein
 from pybel.testing.utils import n
 from pybel.utils import ensure_quotes, hash_node
 
 
 class TestDSL(unittest.TestCase):
+    """Tests for the internal DSL."""
+
+    def test_add_robust_node(self):
+        """Test adding a node with both a name and identifier."""
+        graph = BELGraph()
+        namespace, name, identifier = n(), n(), n()
+        node = protein(namespace=namespace, name=name, identifier=identifier)
+
+        graph.add_node_from_data(node)
+
+        self.assertEqual(
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: namespace,
+                NAME: name,
+                IDENTIFIER: identifier,
+            },
+            graph.node[node.as_tuple()]
+        )
+
+    def test_add_identified_node(self):
+        """Test what happens when a node with only an identifier is added to a graph."""
+        graph = BELGraph()
+        namespace, identifier = n(), n()
+        node = protein(namespace=namespace, identifier=identifier)
+        self.assertNotIn(NAME, node)
+
+        t = graph.add_node_from_data(node)
+
+        self.assertEqual(
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: namespace,
+                IDENTIFIER: identifier,
+            },
+            graph.node[t]
+        )
+
+    def test_add_named_node(self):
+        graph = BELGraph()
+        namespace, name = n(), n()
+        node = protein(namespace=namespace, name=name)
+
+        graph.add_node_from_data(node)
+
+        self.assertEqual(
+            {
+                FUNCTION: PROTEIN,
+                NAMESPACE: namespace,
+                NAME: name,
+            },
+            graph.node[node.as_tuple()]
+        )
+
+    def test_missing_information(self):
+        """Check that entity and abundance functions raise on missing name/identifier."""
+        with self.assertRaises(ValueError):
+            entity(namespace='test')
+
+        with self.assertRaises(ValueError):
+            protein(namespace='test')
+
     def test_str_has_name(self):
         namespace, name = n(), n()
         node = abundance(namespace=namespace, name=name)

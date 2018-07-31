@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
 
-"""
-Definition Cache Manager
-------------------------
+"""The database manager for PyBEL.
+
 Under the hood, PyBEL caches namespace and annotation files for quick recall on later use. The user doesn't need to
 enable this option, but can specify a database location if they choose.
 """
 
 from __future__ import unicode_literals
 
+import logging
 import time
 from collections import defaultdict
-from itertools import chain, groupby
-
-import logging
-import six
 from copy import deepcopy
-from operator import attrgetter
+from itertools import chain
+
+import six
 from six import string_types
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
@@ -27,12 +25,20 @@ from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
     Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
-    Node, Property,
+    Node, Property, edge_annotation, edge_property, network_edge, network_node,
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..canonicalize import node_to_bel
-from ..constants import *
+from ..constants import (
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
+    CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
+    CITATION_TYPE, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING, FRAGMENT_START,
+    FRAGMENT_STOP, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST, HGVS,
+    IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
+    PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    belns_encodings, config, get_cache_connection,
+)
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
 )
@@ -614,13 +620,13 @@ class NetworkManager(NamespaceManager, AnnotationManager):
                 Network.name.label('network_name'),
                 func.max(Network.created).label('max_created')
             )
-            .group_by(Network.name)
-            .subquery('most_recent_times')
+                .group_by(Network.name)
+                .subquery('most_recent_times')
         )
 
         most_recent_networks = (
             self.session.query(Network)
-            .join(most_recent_times, and_(
+                .join(most_recent_times, and_(
                 most_recent_times.c.network_name == Network.name,
                 most_recent_times.c.max_created == Network.created
             ))
@@ -637,28 +643,59 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
-    @staticmethod
-    def iterate_singleton_edges_from_network(network):
-        """Gets all edges that only belong to the given network
+    def query_singleton_edges_from_network(self, network):
+        """Returns a query selecting all edge ids that only belong to the given network
 
         :type network: Network
-        :rtype: iter[Edge]
+        :rtype: sqlalchemy.orm.query.Query
         """
-        return (  # TODO implement with nested SQLAlchemy query for better speed
-            edge
-            for edge in network.edges
-            if edge.networks.count() == 1
+        ne1 = aliased(network_edge, name='ne1')
+        ne2 = aliased(network_edge, name='ne2')
+        singleton_edge_ids_for_network = (
+            self.session.query(ne1.c.edge_id)
+                .outerjoin(ne2, and_(
+                ne1.c.edge_id == ne2.c.edge_id,
+                ne1.c.network_id != ne2.c.network_id
+            ))
+                .filter(and_(
+                ne1.c.network_id == network.id,
+                ne2.c.edge_id == None
+            ))
         )
+        return singleton_edge_ids_for_network
 
     def drop_network(self, network):
         """Drops a network, while also cleaning up any edges that are no longer part of any network.
 
         :type network: Network
         """
-        for edge in self.iterate_singleton_edges_from_network(network):
-            self.session.delete(edge)
+        # get the IDs of the edges that will be orphaned by deleting this network
+        # FIXME: this list could be a problem if it becomes very large; possible optimization is a temporary table in DB
+        edge_ids = [result.edge_id for result in self.query_singleton_edges_from_network(network)]
 
-        self.session.delete(network)
+        # delete the network-to-node mappings for this network
+        self.session.query(network_node).filter(network_node.c.network_id == network.id).delete(
+            synchronize_session=False)
+
+        # delete the edge-to-property mappings for the to-be-orphaned edges
+        self.session.query(edge_property).filter(edge_property.c.edge_id.in_(edge_ids)).delete(
+            synchronize_session=False)
+
+        # delete the edge-to-annotation mappings for the to-be-orphaned edges
+        self.session.query(edge_annotation).filter(edge_annotation.c.edge_id.in_(edge_ids)).delete(
+            synchronize_session=False)
+
+        # delete the edge-to-network mappings for this network
+        self.session.query(network_edge).filter(network_edge.c.network_id == network.id).delete(
+            synchronize_session=False)
+
+        # delete the now-orphaned edges
+        self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete(synchronize_session=False)
+
+        # delete the network
+        self.session.query(Network).filter(Network.id == network.id).delete(synchronize_session=False)
+
+        # commit it!
         self.session.commit()
 
     def drop_network_by_id(self, network_id):
@@ -672,8 +709,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
     def drop_networks(self):
         """Drops all networks"""
         for network in self.session.query(Network).all():
-            self.session.delete(network)
-            self.session.commit()
+            self.drop_network(network)
 
     def get_network_versions(self, name):
         """Returns all of the versions of a network with the given name
@@ -905,13 +941,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         t = time.time()
         c = 0
 
-        edges_iter = (
-            tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges')
+        edges = (
+            tqdm(graph.edges(data=True), total=graph.number_of_edges(), desc='Edges')
             if use_tqdm else
-            graph.edges_iter(data=True)
+            graph.edges(data=True)
         )
 
-        for u, v, data in edges_iter:
+        for u, v, data in edges:
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue
@@ -990,6 +1026,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         ]
 
     def _add_qualified_edge(self, network, graph, u, v, data):
+        """Add a qualified edge to the network.
+
+        :type network: Network
+        :type graph: BELGraph
+        :type u: tuple
+        :type v: tuple
+        :type data: dict
+        """
         citation_dict = data[CITATION]
 
         citation = self.get_or_create_citation(
@@ -1015,13 +1059,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         annotations = self._get_annotation_entries_from_data(graph, data)
 
         bel = graph.edge_to_bel(u, v, data=data)
-        edge_hash = hash_edge(u, v, data)
+        sha512 = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
-            edge_hash=edge_hash,
+            sha512=sha512,
             evidence=evidence,
             properties=properties,
             annotations=annotations,
@@ -1029,14 +1073,22 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         network.edges.append(edge)
 
     def _add_unqualified_edge(self, network, graph, u, v, data):
+        """Add an unqualified edge to the network.
+
+        :type network: Network
+        :type graph: BELGraph
+        :type u: tuple
+        :type v: tuple
+        :type data: dict
+        """
         bel = graph.edge_to_bel(u, v, data=data)
-        edge_hash = hash_edge(u, v, data)
+        sha512 = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
-            edge_hash=edge_hash,
+            sha512=sha512,
         )
         network.edges.append(edge)
 
@@ -1047,51 +1099,51 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param str text: Evidence text
         :rtype: Evidence
         """
-        evidence_hash = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
+        sha512 = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
 
-        if evidence_hash in self.object_cache_evidence:
-            evidence = self.object_cache_evidence[evidence_hash]
+        if sha512 in self.object_cache_evidence:
+            evidence = self.object_cache_evidence[sha512]
             self.session.add(evidence)
             return evidence
 
-        evidence = self.get_evidence_by_hash(evidence_hash)
+        evidence = self.get_evidence_by_hash(sha512)
 
         if evidence is not None:
-            self.object_cache_evidence[evidence_hash] = evidence
+            self.object_cache_evidence[sha512] = evidence
             return evidence
 
         evidence = Evidence(
             text=text,
             citation=citation,
-            sha512=evidence_hash
+            sha512=sha512
         )
 
         self.session.add(evidence)
-        self.object_cache_evidence[evidence_hash] = evidence
+        self.object_cache_evidence[sha512] = evidence
         return evidence
 
-    def get_or_create_node(self, graph, node_identifier):
+    def get_or_create_node(self, graph, node_tuple):
         """Creates entry and object for given node if it does not exist.
 
         :param BELGraph graph: A BEL graph
-        :param tuple node_identifier: A PyBEL node tuple
+        :param tuple node_tuple: A PyBEL node tuple
         :rtype: Node
         """
-        node_hash = hash_node(node_identifier)
-        if node_hash in self.object_cache_node:
-            return self.object_cache_node[node_hash]
+        sha512 = hash_node(node_tuple)
+        if sha512 in self.object_cache_node:
+            return self.object_cache_node[sha512]
 
-        node_data = graph.node[node_identifier]
+        node_data = graph.node[node_tuple]
         bel = node_to_bel(node_data)
 
-        node = self.get_node_by_hash(node_hash)
+        node = self.get_node_by_hash(sha512)
 
         if node is not None:
-            self.object_cache_node[node_hash] = node
+            self.object_cache_node[sha512] = node
             return node
 
         type = node_data[FUNCTION]
-        node = Node(type=type, bel=bel, sha512=node_hash)
+        node = Node(type=type, bel=bel, sha512=sha512)
 
         namespace = node_data.get(NAMESPACE)
 
@@ -1135,7 +1187,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             node.modifications = modifications
 
         self.session.add(node)
-        self.object_cache_node[node_hash] = node
+        self.object_cache_node[sha512] = node
         return node
 
     def drop_nodes(self):
@@ -1156,7 +1208,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         log.info('dropped all edges in %.2f seconds', time.time() - t)
 
-    def get_or_create_edge(self, source, target, relation, bel, edge_hash, evidence=None, annotations=None,
+    def get_or_create_edge(self, source, target, relation, bel, sha512, evidence=None, annotations=None,
                            properties=None):
         """Creates entry for given edge if it does not exist.
 
@@ -1164,21 +1216,21 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param Node target: Target node of the relation
         :param str relation: Type of the relation between source and target node
         :param str bel: BEL statement that describes the relation
-        :param str edge_hash: A hash of the edge
+        :param str sha512: The SHA512 hash of the edge as a string
         :param Evidence evidence: Evidence object that proves the given relation
-        :param list[Property] properties: List of all properties that belong to the edge
-        :param list[AnnotationEntry] annotations: List of all annotations that belong to the edge
+        :param Optional[list[Property]] properties: List of all properties that belong to the edge
+        :param Optional[list[AnnotationEntry]] annotations: List of all annotations that belong to the edge
         :rtype: Edge
         """
-        if edge_hash in self.object_cache_edge:
-            edge = self.object_cache_edge[edge_hash]
+        if sha512 in self.object_cache_edge:
+            edge = self.object_cache_edge[sha512]
             self.session.add(edge)
             return edge
 
-        edge = self.get_edge_by_hash(edge_hash)
+        edge = self.get_edge_by_hash(sha512)
 
         if edge is not None:
-            self.object_cache_edge[edge_hash] = edge
+            self.object_cache_edge[sha512] = edge
             return edge
 
         edge = Edge(
@@ -1186,7 +1238,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             target=target,
             relation=relation,
             bel=bel,
-            sha512=edge_hash,
+            sha512=sha512,
         )
 
         if evidence is not None:
@@ -1197,46 +1249,47 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             edge.annotations = annotations
 
         self.session.add(edge)
-        self.object_cache_edge[edge_hash] = edge
+        self.object_cache_edge[sha512] = edge
         return edge
 
     def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None,
                                date=None, first=None, last=None, authors=None):
-        """Creates entry for given citation if it does not exist.
+        """Create an entry for given citation if it does not exist, or return it if it does.
 
         :param str type: Citation type (e.g. PubMed)
         :param str reference: Identifier of the given citation (e.g. PubMed id)
-        :param str name: Name of the publication
-        :param str title: Title of article
-        :param str volume: Volume of publication
-        :param str issue: Issue of publication
-        :param str pages: Pages of issue
-        :param str date: Date of publication in ISO 8601 (YYYY-MM-DD) format
-        :param str first: Name of first author
-        :param str last: Name of last author
-        :param str or list[str] authors: Either a list of authors separated by |, or an actual list of authors
+        :param Optional[str] name: Name of the publication
+        :param Optional[str] title: Title of article
+        :param Optional[str] volume: Volume of publication
+        :param Optional[str] issue: Issue of publication
+        :param Optional[str] pages: Pages of issue
+        :param Optional[str] date: Date of publication in ISO 8601 (YYYY-MM-DD) format
+        :param Optional[str] first: Name of first author
+        :param Optional[str] last: Name of last author
+        :param authors: Either a list of authors separated by |, or an actual list of authors
+        :type authors: None or str or list[str]
         :rtype: Citation
         """
         type = type.strip()
         reference = reference.strip()
 
-        citation_hash = hash_citation(type=type, reference=reference)
+        sha512 = hash_citation(type=type, reference=reference)
 
-        if citation_hash in self.object_cache_citation:
-            citation = self.object_cache_citation[citation_hash]
+        if sha512 in self.object_cache_citation:
+            citation = self.object_cache_citation[sha512]
             self.session.add(citation)
             return citation
 
-        citation = self.get_citation_by_hash(citation_hash)
+        citation = self.get_citation_by_hash(sha512)
 
         if citation is not None:
-            self.object_cache_citation[citation_hash] = citation
+            self.object_cache_citation[sha512] = citation
             return citation
 
         citation = Citation(
             type=type,
             reference=reference,
-            sha512=citation_hash,
+            sha512=sha512,
             name=name,
             title=title,
             volume=volume,
@@ -1259,11 +1312,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     citation.authors.append(author_model)
 
         self.session.add(citation)
-        self.object_cache_citation[citation_hash] = citation
+        self.object_cache_citation[sha512] = citation
         return citation
 
     def get_or_create_author(self, name):
-        """Gets an author by name, or creates one
+        """Get an author by name, or creates one if it does not exist.
 
         :param str name: An author's name
         :rtype: Author
@@ -1284,17 +1337,21 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.session.add(author)
         return author
 
-    def get_modification_by_hash(self, modification_hash):
-        return self.session.query(Modification).filter(Modification.sha512 == modification_hash).one_or_none()
+    def get_modification_by_hash(self, sha512):
+        """Get a modification by a SHA512 hash.
+
+        :param str sha512: A SHA512 hash of a modification
+        :rtype: Optional[Modification]
+        """
+        return self.session.query(Modification).filter(Modification.sha512 == sha512).one_or_none()
 
     def get_or_create_modification(self, graph, node_data):
-        """Creates a list of modification objects (Modification) that belong to the node described by
-        node_data.
+        """Creates a list of modification objects that belong to the node described by node_data.
 
         :param BELGraph graph: A BEL graph
         :param dict node_data: Describes the given node and contains is_variant information
         :return: A list of modification objects belonging to the given node
-        :rtype: list[Modification]
+        :rtype: Optional[list[Modification]]
         """
         modification_list = []
         if FUSION in node_data:
@@ -1411,7 +1468,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return modifications
 
     def get_property_by_hash(self, property_hash):
-        """Gets a property by its hash if it exists
+        """Get a property by its hash if it exists.
 
         :param str property_hash: The hash of the property to search
         :rtype: Optional[Property]
@@ -1419,19 +1476,24 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
 
     def _make_property_from_dict(self, property_def):
+        """Build an edge property from a dictionary.
+
+        :param property_def:
+        :rtype: Property
+        """
         property_hash = hash_dump(property_def)
 
-        edge_property = self.object_cache_property.get(property_hash)
-        if edge_property is None:
-            edge_property = self.get_property_by_hash(property_hash)
+        edge_property_model = self.object_cache_property.get(property_hash)
+        if edge_property_model is None:
+            edge_property_model = self.get_property_by_hash(property_hash)
 
-            if not edge_property:
+            if not edge_property_model:
                 property_def['sha512'] = property_hash
-                edge_property = Property(**property_def)
+                edge_property_model = Property(**property_def)
 
-            self.object_cache_property[property_hash] = edge_property
+            self.object_cache_property[property_hash] = edge_property_model
 
-        return edge_property
+        return edge_property_model
 
     def get_or_create_properties(self, graph, edge_data):  # TODO make for just single property then loop with other fn.
         """Creates a list of all subject and object related properties of the edge. Returns None if the property cannot
@@ -1440,7 +1502,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :param BELGraph graph: A BEL graph
         :param dict edge_data: Describes the context of the given edge.
         :return: A list of all subject and object properties of the edge
-        :rtype: list[Property]
+        :rtype: Optional[list[Property]]
         """
         property_list = []
         for participant in (SUBJECT, OBJECT):

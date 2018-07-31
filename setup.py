@@ -32,6 +32,7 @@ INSTALL_REQUIRES = [
     'networkx==1.11',
     'sqlalchemy',
     'click',
+    'click-plugins',
     'requests',
     'requests_file',
     'pyparsing',
@@ -47,7 +48,6 @@ if sys.version_info < (3, ):
 
 EXTRAS_REQUIRE = {
     'indra': ['indra'],
-    'ndex': ['ndex2'],
     'neo4j': ['py2neo==3.1.2'],
 }
 TESTS_REQUIRE = [
@@ -77,7 +77,7 @@ META_FILE = read(META_PATH)
 
 
 def find_meta(meta):
-    """Extract __*meta*__ from META_FILE"""
+    """Extract __*meta*__ from META_FILE."""
     meta_match = re.search(
         r'^__{meta}__ = ["\']([^"\']*)["\']'.format(meta=meta),
         META_FILE, re.M

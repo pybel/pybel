@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Constants for PyBEL tests."""
+
 import logging
 import os
 import unittest
@@ -8,9 +10,24 @@ from json import dumps
 from requests.compat import urlparse
 
 from pybel import BELGraph
-from pybel.constants import *
-from pybel.dsl import *
-from pybel.parser.exc import *
+from pybel.constants import (
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION,
+    CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
+    DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FRAGMENT, FRAUNHOFER_RESOURCES, FROM_LOC, GENE, GMOD,
+    HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, LOCATION, METADATA_AUTHORS,
+    METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_PROJECT,
+    METADATA_VERSION, MIRNA, MODIFIER, NAME, NAMESPACE, OBJECT, OPENBEL_ANNOTATION_RESOURCES,
+    OPENBEL_NAMESPACE_RESOURCES, PATHOLOGY, PMOD, POSITIVE_CORRELATION, PROTEIN, RATE_LIMITING_STEP_OF, REACTION,
+    REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
+)
+from pybel.dsl import complex_abundance, pathology, protein, translocation
+from pybel.parser.exc import (
+    BelSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException, InvalidCitationType,
+    InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning, MissingAnnotationKeyWarning,
+    MissingAnnotationRegexWarning, MissingCitationException, MissingMetadataException, MissingNamespaceNameWarning,
+    MissingNamespaceRegexWarning, MissingSupportWarning, NakedNameWarning, NestedRelationWarning,
+    PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning, VersionFormatWarning,
+)
 from pybel.parser.parse_bel import BelParser
 from pybel.utils import subdict_matches
 
@@ -38,17 +55,16 @@ test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
 
 
 def update_provenance(control_parser):
-    """Sticks provenance in a BEL parser
+    """Put a default evidence and citation in a BEL parser.
     
     :param pybel.parser.parse_control.ControlParser control_parser:
-    :return: 
     """
     control_parser.citation.update(test_citation_dict)
     control_parser.evidence = test_evidence_text
 
 
-def assertHasNode(self, node, graph, **kwargs):
-    """A helper function for checking if a node with the given properties is contained within a graph
+def assert_has_node(self, node, graph, **kwargs):
+    """Check if a node with the given properties is contained within a graph.
 
     :param self: A Test Case
     :type self: unittest.TestCase
@@ -94,7 +110,7 @@ def any_subdict_matches(dict_of_dicts, query_dict):
     )
 
 
-def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
+def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
     """A helper function for checking if an edge with the given properties is contained within a graph
 
     :param unittest.TestCase self: A TestCase
@@ -122,42 +138,51 @@ def assertHasEdge(self, u, v, graph, permissive=True, **kwargs):
 
 
 class TestGraphMixin(unittest.TestCase):
-    def assertHasNode(self, g, n, **kwargs):
-        """Helper for asserting node membership
+    """A test case with additional functions for testing graphs."""
+
+    def assert_has_node(self, g, n, **kwargs):
+        """Help assert node membership.
         
         :param g: Graph 
         :param n: Node
         :param kwargs: 
         """
-        assertHasNode(self, n, g, **kwargs)
+        assert_has_node(self, n, g, **kwargs)
 
-    def assertHasEdge(self, g, u, v, **kwargs):
-        """Helper for asserting edge membership
+    def assert_has_edge(self, g, u, v, **kwargs):
+        """Help assert edge membership.
         
         :param g: Graph
         :param u: Source node
         :param v: Target node
         :param kwargs: 
         """
-        assertHasEdge(self, u, v, g, **kwargs)
+        assert_has_edge(self, u, v, g, **kwargs)
 
 
 class TestTokenParserBase(unittest.TestCase):
+    """A test case that has a BEL parser available."""
+
     @classmethod
     def setUpClass(cls):
+        """Build a BEL graph and BEL parser that persist through the class."""
         cls.graph = BELGraph()
         cls.parser = BelParser(cls.graph, autostreamline=False)
 
     def setUp(self):
+        """Clear the parser at the beginning of each test."""
         self.parser.clear()
 
-    def assertHasNode(self, member, **kwargs):
-        assertHasNode(self, member, self.graph, **kwargs)
+    def assert_has_node(self, member, **kwargs):
+        """Assert that this test case's graph has the given node."""
+        assert_has_node(self, member, self.graph, **kwargs)
 
-    def assertHasEdge(self, u, v, **kwargs):
-        assertHasEdge(self, u, v, self.graph, **kwargs)
+    def assert_has_edge(self, u, v, **kwargs):
+        """Assert that this test case's graph has the given edge."""
+        assert_has_edge(self, u, v, self.graph, **kwargs)
 
     def add_default_provenance(self):
+        """Add a default citation and evidence to the parser."""
         update_provenance(self.parser.control_parser)
 
 
@@ -192,8 +217,11 @@ expected_test_slushy_metadata = {
 
 
 def get_uri_name(url):
-    """Gets the file name from the end of the URL. Only useful for PyBEL's testing though since it looks specifically
-    if the file is from the weird owncloud resources distributed by Fraunhofer"""
+    """Get the file name from the end of the URL.
+
+    Only useful for PyBEL's testing though since it looks specifically if the file is from the weird owncloud
+    resources distributed by Fraunhofer.
+    """
     url_parsed = urlparse(url)
 
     if url.startswith(FRAUNHOFER_RESOURCES):
@@ -203,17 +231,23 @@ def get_uri_name(url):
         return url_parts[-1]
 
 
-def help_check_hgnc(self, namespace_dict):
-    self.assertIn(HGNC_KEYWORD, namespace_dict)
+def help_check_hgnc(test_case, namespace_dict):
+    """Assert that the namespace dictionary is correct.
 
-    self.assertIn('MHS2', namespace_dict[HGNC_KEYWORD])
-    self.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD]['MHS2']))
+    :param unittest.TestCase test_case:
+    :param namespace_dict:
+    :return:
+    """
+    test_case.assertIn(HGNC_KEYWORD, namespace_dict)
 
-    self.assertIn('MIATNB', namespace_dict[HGNC_KEYWORD])
-    self.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD]['MIATNB']))
+    test_case.assertIn('MHS2', namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD]['MHS2']))
 
-    self.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
-    self.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
+    test_case.assertIn('MIATNB', namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD]['MIATNB']))
+
+    test_case.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
 
 
 AKT1 = (PROTEIN, 'HGNC', 'AKT1')
@@ -891,8 +925,10 @@ BEL_THOROUGH_EDGES = [
 
 
 class BelReconstitutionMixin(TestGraphMixin):
+    """A test case that has checks for properly loading several BEL Scripts."""
+
     def bel_simple_reconstituted(self, graph, check_metadata=True):
-        """Checks that test_bel.bel was loaded properly
+        """Check that test_bel.bel was loaded properly.
 
         :param BELGraph graph: A BEL grpah
         :param bool check_metadata: Check the graph's document section is correct
@@ -908,7 +944,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertEqual(4, graph.number_of_nodes())
 
         # FIXME this should work, but is getting 8 for the upgrade function
-        # self.assertEqual(6, graph.number_of_edges(), msg='Edges:\n{}'.format('\n'.join(map(str, graph.edges(keys=True, data=True)))))
+        # self.assertEqual(6, graph.number_of_edges(),
+        #                  msg='Edges:\n{}'.format('\n'.join(map(str, graph.edges(keys=True, data=True)))))
 
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
@@ -931,7 +968,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         evidence_2 = 'Evidence 2'
         evidence_3 = 'Evidence 3'
 
-        assertHasEdge(self, AKT1, EGFR, graph, **{
+        assert_has_edge(self, AKT1, EGFR, graph, **{
             RELATION: INCREASES,
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_1_extra,
@@ -939,7 +976,7 @@ class BelReconstitutionMixin(TestGraphMixin):
                 'Species': {'9606': True}
             }
         })
-        assertHasEdge(self, EGFR, FADD, graph, **{
+        assert_has_edge(self, EGFR, FADD, graph, **{
             RELATION: DECREASES,
             ANNOTATIONS: {
                 'Species': {'9606': True},
@@ -948,7 +985,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2
         })
-        assertHasEdge(self, EGFR, CASP8, graph, **{
+        assert_has_edge(self, EGFR, CASP8, graph, **{
             RELATION: DIRECTLY_DECREASES,
             ANNOTATIONS: {
                 'Species': {'9606': True},
@@ -957,7 +994,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2,
         })
-        assertHasEdge(self, FADD, CASP8, graph, **{
+        assert_has_edge(self, FADD, CASP8, graph, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
                 'Species': {'10116': True}
@@ -965,7 +1002,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
         })
-        assertHasEdge(self, AKT1, CASP8, graph, **{
+        assert_has_edge(self, AKT1, CASP8, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
                 'Species': {'10116': True}
@@ -973,7 +1010,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
         })
-        assertHasEdge(self, CASP8, AKT1, graph, **{
+        assert_has_edge(self, CASP8, AKT1, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
                 'Species': {'10116': True}
@@ -984,7 +1021,7 @@ class BelReconstitutionMixin(TestGraphMixin):
 
     def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True,
                                    check_citation_name=True):
-        """Checks that thorough.bel was loaded properly
+        """Check that thorough.bel was loaded properly.
 
         :param BELGraph graph: A BEL graph
         :param bool check_metadata: Check the graph's document section is correct
@@ -1025,10 +1062,10 @@ class BelReconstitutionMixin(TestGraphMixin):
                 d[CITATION] = d[CITATION].copy()
                 del d[CITATION][CITATION_NAME]
 
-            assertHasEdge(self, u, v, graph, permissive=True, **d)
+            assert_has_edge(self, u, v, graph, permissive=True, **d)
 
     def bel_slushy_reconstituted(self, graph, check_metadata=True, check_warnings=True):
-        """Check that slushy.bel was loaded properly
+        """Check that slushy.bel was loaded properly.
         
         :param BELGraph graph: A BEL graph
         :param bool check_metadata: Check the graph's document section is correct
@@ -1082,14 +1119,14 @@ class BelReconstitutionMixin(TestGraphMixin):
 
         self.assertLess(0, graph.number_of_edges())
 
-        assertHasEdge(self, AKT1, EGFR, graph, **{
+        assert_has_edge(self, AKT1, EGFR, graph, **{
             RELATION: INCREASES,
             CITATION: citation_1,
             EVIDENCE: evidence_1,
         })
 
     def bel_isolated_reconstituted(self, graph):
-        """Runs the isolated node test
+        """Run the isolated node test.
 
         :type graph: BELGraph
         """
@@ -1110,5 +1147,5 @@ class BelReconstitutionMixin(TestGraphMixin):
         c = adgrb2.as_tuple()
         d = adgrb_complex.as_tuple()
 
-        assertHasEdge(self, d, b, graph)
-        assertHasEdge(self, d, c, graph)
+        assert_has_edge(self, d, b, graph)
+        assert_has_edge(self, d, c, graph)

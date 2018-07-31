@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""The following is an example of orthology annotations from
+"""An example with orthology statements.
+
+The following is an example of orthology annotations from
 `HomoloGene:37670 <https://www.ncbi.nlm.nih.gov/homologene?LinkName=gene_homologene&from_uid=5594>`_
-
-
 
 .. code-block: none
 
@@ -11,12 +11,8 @@
     SET Evidence = "M-CSF triggers the activation of extracellular signal-regulated protein kinases (ERK)-1/2."
     SET Species = 10090
     p(MGI:Csf1) increases kin(p(MGI:Mapk1))
-
-
-
 """
 
-from ..constants import INCREASES
 from ..dsl import activity, gene, protein, rna
 from ..struct.graph import BELGraph
 
@@ -96,10 +92,9 @@ homology_graph.add_orthology(human_mapk1_gene, fly_mapk1)
     SET Species = 10090
     p(MGI:Csf1) increases kin(p(MGI:Mapk1))"""
 
-homology_graph.add_qualified_edge(
+homology_graph.add_increases(
     u=mouse_csf1_protein,
     v=mouse_mapk1_protein,
-    relation=INCREASES,
     citation='10452980',
     evidence='M-CSF triggers the activation of extracellular signal-regulated protein kinases (ERK)-1/2.',
     object_modifier=activity('kin'),

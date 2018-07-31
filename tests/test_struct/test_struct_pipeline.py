@@ -2,6 +2,7 @@
 
 import logging
 import unittest
+
 from six.moves import StringIO
 
 from pybel import BELGraph

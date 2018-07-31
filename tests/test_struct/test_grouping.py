@@ -3,7 +3,7 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import FUNCTION, INCREASES, PROTEIN
+from pybel.constants import FUNCTION, PROTEIN
 from pybel.dsl import protein
 from pybel.dsl.nodes import BaseEntity
 from pybel.struct.grouping import get_subgraphs_by_annotation
@@ -32,11 +32,11 @@ class TestGrouping(unittest.TestCase):
         self.graph.namespace_url['test'] = test_namespace_url
         self.graph.annotation_url['subgraph'] = test_annotation_url
 
-        self.graph.add_qualified_edge(a, b, INCREASES, citation, evidence, annotations={'subgraph': {'1', '2'}})
-        self.graph.add_qualified_edge(a, c, INCREASES, citation, evidence, annotations={'subgraph': {'1'}})
-        self.graph.add_qualified_edge(b, d, INCREASES, citation, evidence, annotations={'subgraph': {'1', '2'}})
-        self.graph.add_qualified_edge(a, d, INCREASES, citation, evidence, annotations={'subgraph': {'2'}})
-        self.graph.add_qualified_edge(c, d, INCREASES, citation, evidence)
+        self.graph.add_increases(a, b, citation=citation, evidence=evidence, annotations={'subgraph': {'1', '2'}})
+        self.graph.add_increases(a, c, citation=citation, evidence=evidence,  annotations={'subgraph': {'1'}})
+        self.graph.add_increases(b, d, citation=citation, evidence=evidence,  annotations={'subgraph': {'1', '2'}})
+        self.graph.add_increases(a, d, citation=citation, evidence=evidence,  annotations={'subgraph': {'2'}})
+        self.graph.add_increases(c, d, citation=citation, evidence=evidence)
 
     def test_get_subgraphs_by_annotation(self):
 

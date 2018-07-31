@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for the command line interface."""
+
 import json
 import logging
 import os
-import py2neo
-import py2neo.database.status
 import traceback
 import unittest
+
+import py2neo
+import py2neo.database.status
 from click.testing import CliRunner
 
 from pybel import Manager, cli
@@ -60,7 +63,7 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
             self.bel_thorough_reconstituted(from_pickle(test_gpickle))
             self.bel_thorough_reconstituted(from_path(test_canon))
 
-            manager = Manager.from_connection(self.connection)
+            manager = Manager(connection=self.connection)
             self.bel_thorough_reconstituted(
                 from_database(expected_test_thorough_metadata[METADATA_NAME], manager=manager))
 

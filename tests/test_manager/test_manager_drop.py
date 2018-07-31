@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pybel import BELGraph
-from pybel.constants import *
+from pybel.constants import INCREASES, PROTEIN
 from pybel.dsl import protein
 from pybel.manager.models import Edge, Namespace, NamespaceEntry, Network, Node
 from pybel.testing.cases import TemporaryCacheMixin
@@ -30,10 +30,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, graph, namespaces)
         make_dummy_annotations(self.manager, graph, annotations)
 
-        graph.add_qualified_edge(
+        graph.add_increases(
             yfg1,
             yfg2,
-            relation=INCREASES,
             evidence=test_evidence_text,
             citation=test_citation_dict,
             annotations={
@@ -90,10 +89,10 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(0, self.g2.edges.count())
 
     def test_get_orphan_edges(self):
-        edges = list(self.manager.iterate_singleton_edges_from_network(self.g1))
+        edges = [result.edge_id for result in self.manager.query_singleton_edges_from_network(self.g1)]
         self.assertEqual(2, len(edges))
-        self.assertIn(self.e2, edges)
-        self.assertIn(self.e3, edges)
+        self.assertIn(self.e2.id, edges)
+        self.assertIn(self.e3.id, edges)
 
     def test_drop_network_1(self):
         """When a network gets dropped, drop all of the edges if they don't appear in other networks"""
@@ -112,6 +111,13 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(3, self.manager.count_edges())
         self.assertEqual(1, self.manager.count_networks())
         self.assertEqual(3, self.g1.edges.count())
+
+    def test_drop_all_networks(self):
+        """When all networks are dropped, make sure all the edges and network_edge mappings are gone too"""
+        self.manager.drop_networks()
+
+        self.assertEqual(0, self.manager.count_edges())
+        self.assertEqual(0, self.manager.count_networks())
 
     def test_drop_modification(self):
         """Don't let this happen"""
