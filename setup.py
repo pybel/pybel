@@ -48,7 +48,6 @@ if sys.version_info < (3, ):
 
 EXTRAS_REQUIRE = {
     'indra': ['indra'],
-    'ndex': ['ndex2'],
     'neo4j': ['py2neo==3.1.2'],
 }
 TESTS_REQUIRE = [
