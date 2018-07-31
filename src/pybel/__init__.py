@@ -104,7 +104,7 @@ __all__ = (
         ]
 )
 
-__version__ = '0.11.11-dev'
+__version__ = '0.11.11'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)'
