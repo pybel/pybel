@@ -977,9 +977,9 @@ class TestWrite(TestTokenParserBase):
     def test_1(self):
         cases = [
             ('abundance(CHEBI:"superoxide")', 'a(CHEBI:superoxide)'),
-            ('g(HGNC:AKT1,var(p.Phe508del))', 'g(HGNC:AKT1, var(p.Phe508del))'),
+            ('g(HGNC:AKT1,var(p.Phe508del))', 'g(HGNC:AKT1, var("p.Phe508del"))'),
             ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))',
-             'g(HGNC:AKT1, var(c.1521_1523delCTT), var(c.308G>A), var(p.Phe508del))'),
+             'g(HGNC:AKT1, var("c.1521_1523delCTT"), var("c.308G>A"), var("p.Phe508del"))'),
             ('p(HGNC:MAPT,proteinModification(P))', 'p(HGNC:MAPT, pmod(Ph))'),
             ('proteinAbundance(HGNC:SFN)', 'p(HGNC:SFN)'),
             ('complex(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'complex(p(HGNC:SFN), p(HGNC:YWHAB))'),

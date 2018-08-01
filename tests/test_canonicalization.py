@@ -26,8 +26,8 @@ class TestCanonicalize(unittest.TestCase):
             variant_to_bel({KIND: 'nope'})
 
     def test_canonicalize_variant(self):
-        self.assertEqual('var(p.Val600Glu)', variant_to_bel(hgvs('p.Val600Glu')))
-        self.assertEqual('var(p.Val600Glu)', variant_to_bel(protein_substitution('Val', 600, 'Glu')))
+        self.assertEqual('var("p.Val600Glu")', variant_to_bel(hgvs('p.Val600Glu')))
+        self.assertEqual('var("p.Val600Glu")', variant_to_bel(protein_substitution('Val', 600, 'Glu')))
 
         self.assertEqual('pmod(Ph)', variant_to_bel(pmod('Ph')))
         self.assertEqual('pmod(TEST:Ph)', variant_to_bel(pmod('Ph', namespace='TEST')))
@@ -36,10 +36,10 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('pmod(GO:"protein phosphorylation", Thr, 308)',
                          variant_to_bel(pmod(name='protein phosphorylation', namespace='GO', code='Thr', position=308)))
 
-        self.assertEqual('frag(?)', variant_to_bel(fragment()))
-        self.assertEqual('frag(672_713)', variant_to_bel(fragment(start=672, stop=713)))
-        self.assertEqual('frag(?, "descr")', variant_to_bel(fragment(description='descr')))
-        self.assertEqual('frag(672_713, "descr")', variant_to_bel(fragment(start=672, stop=713, description='descr')))
+        self.assertEqual('frag("?")', variant_to_bel(fragment()))
+        self.assertEqual('frag("672_713")', variant_to_bel(fragment(start=672, stop=713)))
+        self.assertEqual('frag("?", "descr")', variant_to_bel(fragment(description='descr')))
+        self.assertEqual('frag("672_713", "descr")', variant_to_bel(fragment(start=672, stop=713, description='descr')))
 
         self.assertEqual('gmod(Me)', variant_to_bel(gmod('Me')))
         self.assertEqual('gmod(TEST:Me)', variant_to_bel(gmod('Me', namespace='TEST')))
@@ -57,10 +57,10 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('pmod(GO:"protein phosphorylation", Thr, 308)',
                          str(pmod(name='protein phosphorylation', namespace='GO', code='Thr', position=308)))
 
-        self.assertEqual('frag(?)', str(fragment()))
-        self.assertEqual('frag(672_713)', str(fragment(start=672, stop=713)))
-        self.assertEqual('frag(?, "descr")', str(fragment(description='descr')))
-        self.assertEqual('frag(672_713, "descr")', str(fragment(start=672, stop=713, description='descr')))
+        self.assertEqual('frag("?")', str(fragment()))
+        self.assertEqual('frag("672_713")', str(fragment(start=672, stop=713)))
+        self.assertEqual('frag("?", "descr")', str(fragment(description='descr')))
+        self.assertEqual('frag("672_713", "descr")', str(fragment(start=672, stop=713, description='descr')))
 
         self.assertEqual('gmod(Me)', str(gmod('Me')))
         self.assertEqual('gmod(TEST:Me)', str(gmod('Me', namespace='TEST')))

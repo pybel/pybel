@@ -82,10 +82,10 @@ def variant_to_bel(tokens):  # Replace with class-method of different Variant in
         return 'gmod({})'.format(name)
 
     elif tokens[KIND] == HGVS:
-        return 'var({})'.format(tokens[IDENTIFIER])
+        return 'var("{}")'.format(tokens[IDENTIFIER])
 
     elif tokens[KIND] == FRAGMENT:
-        res = _get_fragment_range_str(tokens)
+        res = '"{}"'.format(_get_fragment_range_str(tokens))
 
         if FRAGMENT_DESCRIPTION in tokens:
             res += ', "{}"'.format(tokens[FRAGMENT_DESCRIPTION])
