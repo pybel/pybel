@@ -8,8 +8,6 @@ import os
 import traceback
 import unittest
 
-import py2neo
-import py2neo.database.status
 from click.testing import CliRunner
 
 from pybel import Manager, cli
@@ -32,7 +30,7 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
 
     @mock_bel_resources
     def test_convert(self, mock_get):
-
+        """Test conversion via the CLI."""
         with self.runner.isolated_filesystem():
             test_csv = os.path.abspath('test.csv')
             test_gpickle = os.path.abspath('test.gpickle')
@@ -89,13 +87,16 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     @mock_bel_resources
     def test_neo4j_remote(self, mock_get):
+        from py2neo.database.status import GraphError
+        from py2neo import Graph
+
         test_context = 'PYBEL_TEST_CTX'
         neo_path = os.environ['NEO_PATH']
 
         try:
-            neo = py2neo.Graph(neo_path)
+            neo = Graph(neo_path)
             neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
-        except py2neo.database.status.GraphError:
+        except GraphError:
             self.skipTest("Can't query Neo4J ")
         except:
             self.skipTest("Can't connect to Neo4J server")
