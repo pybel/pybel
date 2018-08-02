@@ -474,7 +474,7 @@ class Hgvs(Variant):
 
         :rtype: str
         """
-        return 'var({})'.format(self[IDENTIFIER])
+        return 'var("{}")'.format(self[IDENTIFIER])
 
 
 hgvs = Hgvs
@@ -552,9 +552,9 @@ class Fragment(Variant):
         :rtype: str
         """
         if FRAGMENT_MISSING in self:
-            res = '?'
+            res = '"?"'
         else:
-            res = '{}_{}'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
+            res = '"{}_{}"'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
 
         if FRAGMENT_DESCRIPTION in self:
             res += ', "{}"'.format(self[FRAGMENT_DESCRIPTION])

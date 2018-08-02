@@ -47,8 +47,8 @@ class TestCanonicalize(unittest.TestCase):
 
     def test_canonicalize_variant_dsl(self):
         """Uses the __str__ functions in the DSL to create BEL instead of external pybel.canonicalize"""
-        self.assertEqual('var(p.Val600Glu)', str(hgvs('p.Val600Glu')))
-        self.assertEqual('var(p.Val600Glu)', str(protein_substitution('Val', 600, 'Glu')))
+        self.assertEqual('var("p.Val600Glu")', str(hgvs('p.Val600Glu')))
+        self.assertEqual('var("p.Val600Glu")', str(protein_substitution('Val', 600, 'Glu')))
 
         self.assertEqual('pmod(Ph)', str(pmod('Ph')))
         self.assertEqual('pmod(TEST:Ph)', str(pmod('Ph', namespace='TEST')))
@@ -100,7 +100,7 @@ class TestCanonicalize(unittest.TestCase):
     def test_protein_fragment(self):
         node = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
 
-        self.assertEqual('p(HGNC:APP, frag(672_713))', str(node))
+        self.assertEqual('p(HGNC:APP, frag("672_713"))', str(node))
         self.assertEqual((PROTEIN, 'HGNC', 'APP', ((FRAGMENT, (672, 713)))), node.as_tuple())
 
     def test_mirna_reference(self):
