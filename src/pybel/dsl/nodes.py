@@ -904,7 +904,7 @@ missing_fusion_range = MissingFusionRange
 
 
 class EnumeratedFusionRange(FusionRangeBase):
-    """Creates a fusion range data dictionary"""
+    """Creates a fusion range data dictionary."""
 
     def __init__(self, reference, start, stop):
         """
@@ -1000,7 +1000,7 @@ class FusionBase(BaseEntity):
 
         :rtype: str
         """
-        return "{}(fus({}:{}, {}, {}:{}, {}))".format(
+        return '{}(fus({}:{}, "{}", {}:{}, "{}"))'.format(
             rev_abundance_labels[self[FUNCTION]],
             self[FUSION][PARTNER_5P][NAMESPACE],
             self[FUSION][PARTNER_5P][NAME],

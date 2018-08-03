@@ -135,21 +135,21 @@ class TestCentralDogma(unittest.TestCase):
         ab42 = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
         app = ab42.get_parent()
         self.assertEqual('p(HGNC:APP)', app.as_bel())
-        self.assertEqual('p(HGNC:APP, frag(672_713))', ab42.as_bel())
+        self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
     def test_with_variants(self):
         """Test the `with_variant` function in :class:`CentralDogmaAbundance`s."""
         app = protein(name='APP', namespace='HGNC')
         ab42 = app.with_variants(fragment(start=672, stop=713))
         self.assertEqual('p(HGNC:APP)', app.as_bel())
-        self.assertEqual('p(HGNC:APP, frag(672_713))', ab42.as_bel())
+        self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
     def test_with_variants_list(self):
         """Test the `with_variant` function in :class:`CentralDogmaAbundance`s."""
         app = protein(name='APP', namespace='HGNC')
         ab42 = app.with_variants([fragment(start=672, stop=713)])
         self.assertEqual('p(HGNC:APP)', app.as_bel())
-        self.assertEqual('p(HGNC:APP, frag(672_713))', ab42.as_bel())
+        self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
 
 if __name__ == '__main__':

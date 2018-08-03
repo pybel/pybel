@@ -135,7 +135,7 @@ def node_to_bel(data):
         )
 
     if FUSION in data:
-        return "{}(fus({}:{}, {}, {}:{}, {}))".format(
+        return '{}(fus({}:{}, "{}", {}:{}, "{}"))'.format(
             rev_abundance_labels[data[FUNCTION]],
             data[FUSION][PARTNER_5P][NAMESPACE],
             data[FUSION][PARTNER_5P][NAME],
