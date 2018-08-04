@@ -55,11 +55,14 @@ fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
 
 
 class FusionParser(BaseParser):
-    """Parses the BEL representation of gene and gene product fusions"""
+    """Parses the BEL representation of gene and gene product fusions."""
 
-    def __init__(self, identifier_parser=None):
+    def __init__(self, identifier_parser=None, permissive=True):
         """
+
         :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
+        :param bool permissive: If true, allows being permissive to unquoted fusion ranges. Turning this off makes the
+         parser more strict and faster.
         """
         self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
         identifier = self.identifier_parser.language
@@ -68,9 +71,21 @@ class FusionParser(BaseParser):
         coordinate = pyparsing_common.integer | '?'
         missing = Keyword('?')
 
-        range_coordinate = missing(FUSION_MISSING) | (
-            reference_seq(FUSION_REFERENCE) + Suppress('.') + coordinate(FUSION_START) + Suppress('_') + coordinate(
-                FUSION_STOP))
+        range_coordinate_unquoted = (
+                missing(FUSION_MISSING) |
+                (
+                        reference_seq(FUSION_REFERENCE) +
+                        Suppress('.') +
+                        coordinate(FUSION_START) +
+                        Suppress('_') +
+                        coordinate(FUSION_STOP)
+                )
+        )
+
+        range_coordinate = Suppress('"') + range_coordinate_unquoted + Suppress('"')
+
+        if permissive:  # permissive to wrong quoting
+            range_coordinate = range_coordinate | range_coordinate_unquoted
 
         self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
                                            Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
@@ -82,8 +97,19 @@ def build_legacy_fusion(identifier, reference):
     break_start = (ppc.integer | '?').setParseAction(fusion_break_handler_wrapper(reference, start=True))
     break_end = (ppc.integer | '?').setParseAction(fusion_break_handler_wrapper(reference, start=False))
 
-    res = identifier(PARTNER_5P) + WCW + fusion_tags + nest(identifier(PARTNER_3P) + Optional(
-        WCW + Group(break_start)(RANGE_5P) + WCW + Group(break_end)(RANGE_3P)))
+    res = (
+            identifier(PARTNER_5P) +
+            WCW +
+            fusion_tags +
+            nest(
+                identifier(PARTNER_3P) +
+                Optional(
+                    WCW +
+                    Group(break_start)(RANGE_5P)
+                    + WCW + Group(break_end)(RANGE_3P)
+                )
+            )
+    )
 
     res.setParseAction(fusion_legacy_handler)
 
