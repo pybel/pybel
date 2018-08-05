@@ -116,8 +116,10 @@ def get_random_node(graph, node_blacklist):
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter
         return
 
-    # TODO keep in mind that total weight is always 2 * |E|, and that this could be done without a data structure
-    wrg = WeightedRandomGenerator(nodes, degrees)
+    # More likely to choose low degree nodes to explore, so don't make hubs
+    inv_degrees = [1 / degree for degree in degrees]
+
+    wrg = WeightedRandomGenerator(nodes, inv_degrees)
     return wrg.next()
 
 
