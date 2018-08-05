@@ -18,15 +18,6 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     def test_simple(self, mock):
         """This test checks that the network can be added and dropped"""
         graph = BELGraph(name='test', version='0.0.0')
-
-        annotations = {
-            'Disease': ['Disease1', 'Disease2'],
-            'Cell': ['Cell1']
-        }
-
-        make_dummy_namespaces(self.manager, graph)
-        make_dummy_annotations(self.manager, graph, annotations)
-
         graph.add_increases(
             yfg1,
             yfg2,
@@ -37,6 +28,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
                 'Cell': {'Cell1': True}
             }
         )
+
+        make_dummy_namespaces(self.manager, graph)
+        make_dummy_annotations(self.manager, graph)
 
         network = self.manager.insert_graph(graph, store_parts=True)
 

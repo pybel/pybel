@@ -189,6 +189,7 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
 class TestQuery(TemporaryCacheMixin):
     def setUp(self):
         super(TestQuery, self).setUp()
+
         graph = BELGraph(name='test', version='0.0.0')
         graph.annotation_list['TEST'] = {'a', 'b', 'c'}
 
@@ -202,13 +203,11 @@ class TestQuery(TemporaryCacheMixin):
             }
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['FOS', 'JUN']})
+        make_dummy_namespaces(self.manager, graph)
+        make_dummy_annotations(self.manager, graph)
 
-        @mock_bel_resources
-        def insert(mock):
+        with mock_bel_resources:
             self.manager.insert_graph(graph, store_parts=True)
-
-        insert()
 
     def test_query_node_bel_1(self):
         rv = self.manager.query_nodes(bel='p(HGNC:FOS)')
@@ -838,660 +837,657 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         )
         self.help_reconstitute(node_data, 2, 1)
 
-        @mock_bel_resources
-        def test_multiple_variants(self, mock):
-            node_data = gene(namespace='HGNC', name='AKT1', variants=[
-                hgvs('p.Phe508del'),
-                hgvs('p.Phe509del')
-            ])
-            self.help_reconstitute(node_data, 2, 1)
+    @mock_bel_resources
+    def test_multiple_variants(self, mock):
+        node_data = gene(namespace='HGNC', name='AKT1', variants=[
+            hgvs('p.Phe508del'),
+            hgvs('p.Phe509del')
+        ])
+        self.help_reconstitute(node_data, 2, 1)
 
-        @mock_bel_resources
-        def test_fusion_specified(self, mock):
-            node_data = gene_fusion(
-                gene('HGNC', 'TMPRSS2'),
-                gene('HGNC', 'ERG'),
-                fusion_range('c', 1, 79),
-                fusion_range('c', 312, 5034),
+    @mock_bel_resources
+    def test_fusion_specified(self, mock):
+        node_data = gene_fusion(
+            gene('HGNC', 'TMPRSS2'),
+            gene('HGNC', 'ERG'),
+            fusion_range('c', 1, 79),
+            fusion_range('c', 312, 5034),
+        )
+        self.help_reconstitute(node_data, 1, 0)
+
+    @mock_bel_resources
+    def test_fusion_unspecified(self, mock):
+        node_data = gene_fusion(
+            gene('HGNC', 'TMPRSS2'),
+            gene('HGNC', 'ERG'),
+        )
+        self.help_reconstitute(node_data, 1, 0)
+
+    @mock_bel_resources
+    def test_composite(self, mock):
+        interleukin_23_complex = named_complex_abundance('GOCC', 'interleukin-23 complex')
+        il6 = hgnc('IL6')
+        interleukin_23_and_il6 = composite_abundance([interleukin_23_complex, il6])
+
+        self.help_reconstitute(interleukin_23_and_il6, 3, 2)
+
+    @mock_bel_resources
+    def test_reaction(self, mock):
+        self.help_reconstitute(superoxide_decomposition, 4, 3)
+
+    @mock_bel_resources
+    def test_complex(self, mock):
+        self.help_reconstitute(ap1_complex, 3, 2)
+
+    @mock_bel_resources
+    def test_nested_complex(self, mock):
+        self.help_reconstitute(bound_ap1_e2f4, 5, 4)
+
+
+class TestReconstituteEdges(TemporaryCacheMixin):
+    """This class tests that edges with varying properties can be added and extracted losslessly"""
+
+    def setUp(self):
+        """Creates a unit test with a manager and graph"""
+        super(TestReconstituteEdges, self).setUp()
+        self.graph = BELGraph(
+            name=n(),
+            version=n()
+        )
+
+    @mock_bel_resources
+    def test_translocation_default(self, mock):
+        """This test checks that a translocation gets in the database properly"""
+        self.graph.add_increases(
+            protein(name='F2', namespace='HGNC'),
+            protein(name='EDN1', namespace='HGNC'),
+            evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
+            citation='10473669',
+            subject_modifier=secretion()
+        )
+
+        make_dummy_namespaces(self.manager, self.graph, {
+            'HGNC': ['F2', 'EDN1'],
+            'GOCC': ['intracellular', 'cell surface', 'extracellular space']
+        })
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        edge = network.edges.first()
+        self.assertEqual(2, edge.properties.count())
+
+    @mock_bel_resources
+    def test_subject_translocation_custom_to_loc(self, mock):
+        self.graph.add_increases(
+            protein(name='F2', namespace='HGNC'),
+            protein(name='EDN1', namespace='HGNC'),
+            evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
+            citation='10473669',
+            subject_modifier=translocation(
+                from_loc=entity(namespace='TEST', name='A'),
+                to_loc=entity(namespace='GOCC', name='extracellular space'),
             )
-            self.help_reconstitute(node_data, 1, 0)
-
-        @mock_bel_resources
-        def test_fusion_unspecified(self, mock):
-            node_data = gene_fusion(
-                gene('HGNC', 'TMPRSS2'),
-                gene('HGNC', 'ERG'),
-            )
-            self.help_reconstitute(node_data, 1, 0)
-
-        @mock_bel_resources
-        def test_composite(self, mock):
-            interleukin_23_complex = named_complex_abundance('GOCC', 'interleukin-23 complex')
-            il6 = hgnc('IL6')
-            interleukin_23_and_il6 = composite_abundance([interleukin_23_complex, il6])
-
-            self.help_reconstitute(interleukin_23_and_il6, 3, 2)
-
-        @mock_bel_resources
-        def test_reaction(self, mock):
-            self.help_reconstitute(superoxide_decomposition, 4, 3)
-
-        @mock_bel_resources
-        def test_complex(self, mock):
-            self.help_reconstitute(ap1_complex, 3, 2)
-
-        @mock_bel_resources
-        def test_nested_complex(self, mock):
-            self.help_reconstitute(bound_ap1_e2f4, 5, 4)
-
-    class TestReconstituteEdges(TemporaryCacheMixin):
-        """This class tests that edges with varying properties can be added and extracted losslessly"""
-
-        def setUp(self):
-            """Creates a unit test with a manager and graph"""
-            super(TestReconstituteEdges, self).setUp()
-            self.graph = BELGraph(
-                name=n(),
-                version=n()
-            )
-
-        @mock_bel_resources
-        def test_translocation_default(self, mock):
-            """This test checks that a translocation gets in the database properly"""
-            self.graph.add_increases(
-                protein(name='F2', namespace='HGNC'),
-                protein(name='EDN1', namespace='HGNC'),
-                evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
-                citation='10473669',
-                subject_modifier=secretion()
-            )
-
-            make_dummy_namespaces(self.manager, self.graph, {
-                'HGNC': ['F2', 'EDN1'],
-                'GOCC': ['intracellular', 'cell surface', 'extracellular space']
-            })
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            edge = network.edges.first()
-            self.assertEqual(2, edge.properties.count())
-
-        @mock_bel_resources
-        def test_subject_translocation_custom_to_loc(self, mock):
-            self.graph.add_increases(
-                protein(name='F2', namespace='HGNC'),
-                protein(name='EDN1', namespace='HGNC'),
-                evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
-                citation='10473669',
-                subject_modifier=translocation(
-                    from_loc=entity(namespace='TEST', name='A'),
-                    to_loc=entity(namespace='GOCC', name='extracellular space'),
-                )
-            )
-
-            make_dummy_namespaces(self.manager, self.graph, {
-                'HGNC': ['F2', 'EDN1'],
-                'GOCC': ['extracellular space'], 'TEST': ['A']
-            })
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            edge = network.edges.first()
-            self.assertEqual(2, edge.properties.count())
-
-        @mock_bel_resources
-        def test_subject_activity_default(self, mock):
-            p1_name = n()
-            p2_name = n()
-
-            self.graph.add_increases(
-                protein(name=p1_name, namespace='HGNC'),
-                protein(name=p2_name, namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                subject_modifier=activity('kin')
-            )
-
-            make_dummy_namespaces(self.manager, self.graph, {
-                'HGNC': [p1_name, p2_name],
-            })
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-                models.NamespaceEntry.name == 'kin').all()
-            self.assertEqual(1, len(kin_list))
-
-            kin = list(kin_list)[0]
-            self.assertEqual('kin', kin.name)
-
-            effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-                models.Property.effect == kin)
-            self.assertEqual(1, effects.count())
-
-        @mock_bel_resources
-        def test_subject_activity_custom(self, mock):
-            p1_name = n()
-            p2_name = n()
-            dummy_activity_namespace = n()
-            dummy_activity_name = n()
-
-            self.graph.add_increases(
-                protein(name=p1_name, namespace='HGNC'),
-                protein(name=p2_name, namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                subject_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
-            )
-
-            make_dummy_namespaces(self.manager, self.graph, {
-                'HGNC': [p1_name, p2_name], dummy_activity_namespace: [dummy_activity_name]
-            })
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-                models.NamespaceEntry.name == dummy_activity_name).all()
-            self.assertEqual(1, len(kin_list))
-
-            kin = list(kin_list)[0]
-            self.assertEqual(dummy_activity_name, kin.name)
-
-            effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-                models.Property.effect == kin)
-            self.assertEqual(1, effects.count())
-
-        @mock_bel_resources
-        def test_object_activity_default(self, mock):
-            p1_name = n()
-            p2_name = n()
-
-            self.graph.add_increases(
-                protein(name=p1_name, namespace='HGNC'),
-                protein(name=p2_name, namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                object_modifier=activity('kin')
-            )
-
-            make_dummy_namespaces(self.manager, self.graph, {
-                'HGNC': [p1_name, p2_name],
-            })
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-                models.NamespaceEntry.name == 'kin').all()
-            self.assertEqual(1, len(kin_list))
-
-            kin = list(kin_list)[0]
-            self.assertEqual('kin', kin.name)
-
-            effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-                models.Property.effect == kin)
-            self.assertEqual(1, effects.count())
-
-        @mock_bel_resources
-        def test_object_activity_custom(self, mock):
-            p1_name = n()
-            p2_name = n()
-            dummy_activity_namespace = n()
-            dummy_activity_name = n()
-
-            self.graph.add_increases(
-                protein(name=p1_name, namespace='HGNC'),
-                protein(name=p2_name, namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                object_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
-            )
-
-            make_dummy_namespaces(self.manager, self.graph, {
-                'HGNC': [p1_name, p2_name], dummy_activity_namespace: [dummy_activity_name]
-            })
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-                models.NamespaceEntry.name == dummy_activity_name).all()
-            self.assertEqual(1, len(kin_list))
-
-            kin = list(kin_list)[0]
-            self.assertEqual(dummy_activity_name, kin.name)
-
-            effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-                models.Property.effect == kin)
-            self.assertEqual(1, effects.count())
-
-        @mock_bel_resources
-        def test_subject_degradation(self, mock):
-            self.graph.add_association(
-                protein(name='YFG', namespace='HGNC'),
-                protein(name='YFG2', namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                subject_modifier=degradation(),
-            )
-            make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            edge = network.edges.first()
-            self.assertEqual(1, edge.properties.count())
-
-        @mock_bel_resources
-        def test_object_degradation(self, mock):
-            self.graph.add_association(
-                protein(name='YFG', namespace='HGNC'),
-                protein(name='YFG2', namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                object_modifier=degradation(),
-            )
-            make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            edge = network.edges.first()
-            self.assertEqual(1, edge.properties.count())
-
-        @mock_bel_resources
-        def test_subject_location(self, mock):
-            self.graph.add_association(
-                protein(name='YFG', namespace='HGNC'),
-                protein(name='YFG2', namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                subject_modifier={
-                    LOCATION: entity(namespace='GOCC', name='nucleus')
-                },
-            )
-            make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['nucleus']})
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            edge = network.edges.first()
-            self.assertEqual(1, edge.properties.count())
-
-        @mock_bel_resources
-        def test_mixed_1(self, mock):
-            """Test mixed having location and something else."""
-
-            self.graph.add_increases(
-                protein(namespace='HGNC', name='CDC42'),
-                protein(namespace='HGNC', name='PAK2'),
-                evidence="""Summary: PAK proteins, a family of serine/threonine p21-activating kinases, include PAK1, PAK2,
-             PAK3 and PAK4. PAK proteins are critical effectors that link Rho GTPases to cytoskeleton reorganization 
-             and nuclear signaling. They serve as targets for the small GTP binding proteins Cdc42 and Rac and have 
-             been implicated in a wide range of biological activities. PAK4 interacts specifically with the GTP-bound 
-             form of Cdc42Hs and weakly activates the JNK family of MAP kinases. PAK4 is a mediator of filopodia 
-             formation and may play a role in the reorganization of the actin cytoskeleton. Multiple alternatively 
-             spliced transcript variants encoding distinct isoforms have been found for this gene.""",
-                citation={CITATION_TYPE: "Online Resource", CITATION_REFERENCE: "PAK4 Hs ENTREZ Gene Summary"},
-                annotations={'Species': '9606'},
-                subject_modifier=activity('gtp'),
-                object_modifier=activity('kin'),
-            )
-
-            make_dummy_namespaces(self.manager, self.graph, {
-                'HGNC': ['CDC42', 'PAK2']
-            })
-
-            make_dummy_annotations(self.manager, self.graph, {
-                'Species': ['9606']
-            })
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            edge = network.edges.first()
-            self.assertEqual(2, edge.properties.count())
-
-            subject = edge.properties.filter(models.Property.is_subject).one()
-            self.assertTrue(subject.is_subject)
-            self.assertEqual('gtp', subject.effect.name)
-            self.assertIsNotNone(subject.effect.namespace)
-            self.assertEqual(BEL_DEFAULT_NAMESPACE, subject.effect.namespace.keyword)
-
-            object = edge.properties.filter(not_(models.Property.is_subject)).one()
-            self.assertFalse(object.is_subject)
-            self.assertEqual('kin', object.effect.name)
-            self.assertIsNotNone(object.effect.namespace)
-            self.assertEqual(BEL_DEFAULT_NAMESPACE, object.effect.namespace.keyword)
-
-        @mock_bel_resources
-        def test_mixed_2(self, mock):
-            """Tests both subject and object activity with location information as well."""
-            self.graph.add_directly_increases(
-                protein(namespace='HGNC', name='HDAC4'),
-                protein(namespace='HGNC', name='MEF2A'),
-                citation='10487761',
-                evidence=""""In the nucleus, HDAC4 associates with the myocyte enhancer factor MEF2A. Binding of HDAC4 to 
-            MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the 
-            deacetylase domain of HDAC4.""",
-                annotations={'Species': '9606'},
-                subject_modifier=activity('cat', location=entity(namespace='GOCC', name='nucleus')),
-                object_modifier=activity('tscript', location=entity(namespace='GOCC', name='nucleus'))
-            )
-
-            make_dummy_namespaces(self.manager, self.graph, {
-                'HGNC': ['HDAC4', 'MEF2A'],
-                'GOCC': ['nucleus']
-            })
-
-            make_dummy_annotations(self.manager, self.graph, {
-                'Species': ['9606']
-            })
-
-            network = self.manager.insert_graph(self.graph, store_parts=True)
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(1, network.edges.count())
-
-            edge = network.edges.first()
-            self.assertEqual(4, edge.properties.count())
-            self.assertEqual(2, edge.properties.filter(models.Property.is_subject).count())
-            self.assertEqual(2, edge.properties.filter(not_(models.Property.is_subject)).count())
-
-    class TestNoAddNode(TemporaryCacheMixin):
-        """Tests scenarios where an instance of :class:`BELGraph` may contain edges that refer to uncached resources, and
-        therefore should not be added to the edge store."""
-
-        @mock_bel_resources
-        def test_no_node_name(self, mock):
-            """Test that a node whose namespace is in the uncached namespaces set can't be added."""
-            graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
-
-            dummy_namespace = n()
-            dummy_url = n()
-
-            graph.namespace_url[dummy_namespace] = dummy_url
-            graph.uncached_namespaces.add(dummy_url)
-
-            node_data = protein(name=n(), namespace=dummy_namespace)
-            graph.add_node_from_data(node_data)
-
-            make_dummy_namespaces(self.manager, graph)
-            network = self.manager.insert_graph(graph)
-            self.assertEqual(0, len(network.nodes.all()))
-
-        @mock_bel_resources
-        def test_no_node_fusion_3p(self, mock):
-            """Test that a fusion node whose 3P partner's namespace is in the uncached namespaces set can't be added."""
-            graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
-
-            dummy_namespace_name = n()
-            dummy_url = n()
-
-            graph.namespace_url[dummy_namespace_name] = dummy_url
-            graph.uncached_namespaces.add(dummy_url)
-
-            node_data = protein_fusion(
-                partner_3p=protein(namespace=dummy_namespace_name, name='AKT1'),
-                partner_5p=protein(namespace='HGNC', name='YFG'),
-            )
-            graph.add_node_from_data(node_data)
-
-            make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
-            network = self.manager.insert_graph(graph)
-
-            self.assertEqual(0, len(network.nodes.all()))
-
-        @mock_bel_resources
-        def test_no_node_fusion_5p(self, mock):
-            """Test that a node whose namespace is in the uncached namespaces set can't be added."""
-            dummy_namespace_name = n()
-
-            node_data = protein_fusion(
-                partner_3p=protein(namespace='HGNC', name='YFG'),
-                partner_5p=protein(namespace=dummy_namespace_name, name='YFG'),
-            )
-
-            graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
-            dummy_url = n()
-            graph.namespace_url[dummy_namespace_name] = dummy_url
-            graph.uncached_namespaces.add(dummy_url)
-            graph.add_node_from_data(node_data)
-            make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
-            network = self.manager.insert_graph(graph)
-            self.assertEqual(0, len(network.nodes.all()))
-
-        @mock_bel_resources
-        def test_no_protein_modification(self, mock):
-            """Test that a protein node whose pmod variant is in the uncached namespaces set can't be added."""
-            graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
-
-            dummy_namespace_name = n()
-            dummy_url = n()
-
-            graph.namespace_url[dummy_namespace_name] = dummy_url
-            graph.uncached_namespaces.add(dummy_url)
-
-            node_data = protein(namespace='HGNC', name='YFG', variants=[
-                pmod(name='dummy', namespace=dummy_namespace_name)
-            ])
-
-            graph.add_node_from_data(node_data)
-
-            make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
-            network = self.manager.insert_graph(graph)
-
-            self.assertEqual(1, network.nodes.count())
-
-        @mock_bel_resources
-        def test_no_gene_modification(self, mock):
-            """Test that a gene node whose gmod variant is in the uncached namespaces set can't be added."""
-            graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
-
-            dummy_namespace_name = n()
-            dummy_url = n()
-
-            graph.namespace_url[dummy_namespace_name] = dummy_url
-            graph.uncached_namespaces.add(dummy_url)
-
-            node_data = gene(namespace='HGNC', name='YFG', variants=[
-                gmod(name='dummy', namespace=dummy_namespace_name)
-            ])
-
-            graph.add_node_from_data(node_data)
-
-            make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
-            network = self.manager.insert_graph(graph)
-
-            self.assertEqual(1, network.nodes.count())
-
-        @mock_bel_resources
-        def test_no_translocation(self, mock):
-            """Test that a translocation using custom namespaces doesn't get stored."""
-            graph = BELGraph(name='dummy graph', version='0.0.1')
-
-            dummy_namespace_name = n()
-            dummy_namespace_url = n()
-
-            graph.namespace_url[dummy_namespace_name] = dummy_namespace_url
-            graph.uncached_namespaces.add(dummy_namespace_url)
-
-            graph.add_association(
-                protein(name='YFG', namespace='HGNC'),
-                protein(name='YFG2', namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                subject_modifier=translocation(
-                    from_loc=entity(namespace=dummy_namespace_name, name='intracellular'),
-                    to_loc=entity(namespace='GOCC', name='extracellular space')
-                ),
-            )
-
-            make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['extracellular space']})
-
-            network = self.manager.insert_graph(graph, store_parts=True)
-
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(0, network.edges.count())
-
-        @mock_bel_resources
-        def test_no_location(self, mock):
-            """Test that when using a custom namespace in the location the edge doesn't get stored."""
-            graph = BELGraph(name='dummy graph', version='0.0.1')
-            dummy_namespace_name = n()
-            dummy_url = n()
-            graph.namespace_url[dummy_namespace_name] = dummy_url
-            graph.uncached_namespaces.add(dummy_url)
-
-            graph.add_association(
-                protein(name='YFG', namespace='HGNC'),
-                protein(name='YFG2', namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                subject_modifier={
-                    LOCATION: entity(namespace=dummy_namespace_name, name='lysozome')
-                },
-            )
-
-            make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
-
-            network = self.manager.insert_graph(graph, store_parts=True)
-
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(0, network.edges.count())
-
-        @mock_bel_resources
-        def test_no_activity(self, mock):
-            """Test that when an uncached custom namespace is used in the activity on an edge, the edge doesn't get
-            stored."""
-            graph = BELGraph(name='dummy graph', version='0.0.1')
-            dummy_namespace_name = n()
-            dummy_url = n()
-            graph.namespace_url[dummy_namespace_name] = dummy_url
-            graph.uncached_namespaces.add(dummy_url)
-
-            graph.add_association(
-                protein(name='YFG', namespace='HGNC'),
-                protein(name='YFG2', namespace='HGNC'),
-                evidence=n(),
-                citation=n(),
-                subject_modifier=activity(name='dummy', namespace=dummy_namespace_name)
-            )
-
-            make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
-
-            network = self.manager.insert_graph(graph, store_parts=True)
-
-            self.assertEqual(2, network.nodes.count())
-            self.assertEqual(0, network.edges.count())
-
-        @mock_bel_resources
-        def test_regex_lookup(self, mock):  # FIXME this test needs to be put somewhere else
-            """Test that regular expression nodes get love too."""
-            graph = BELGraph(name='Regular Expression Test Graph',
-                             description='Help test regular expression namespaces',
-                             version='1.0.0')
-            dbsnp = 'dbSNP'
-            DBSNP_PATTERN = 'rs[0-9]+'
-            graph.namespace_pattern[dbsnp] = DBSNP_PATTERN
-
-            rs1234 = gene(namespace=dbsnp, name='rs1234')
-            rs1235 = gene(namespace=dbsnp, name='rs1235')
-
-            rs1234_tuple = graph.add_node_from_data(rs1234)
-            rs1235_tuple = graph.add_node_from_data(rs1235)
-
-            rs1234_hash = hash_node(rs1234_tuple)
-            rs1235_hash = hash_node(rs1235_tuple)
-
-            self.manager.insert_graph(graph, store_parts=True)
-
-            rs1234_lookup = self.manager.get_node_by_hash(rs1234_hash)
-            self.assertIsNotNone(rs1234_lookup)
-            self.assertEqual('Gene', rs1234_lookup.type)
-            self.assertEqual('g(dbSNP:rs1234)', rs1234_lookup.bel)
-            self.assertEqual(rs1234_hash, rs1234_lookup.sha512)
-            self.assertIsNotNone(rs1234_lookup.namespace_entry)
-            self.assertEqual('rs1234', rs1234_lookup.namespace_entry.name)
-            self.assertEqual('dbSNP', rs1234_lookup.namespace_entry.namespace.keyword)
-            self.assertEqual(DBSNP_PATTERN, rs1234_lookup.namespace_entry.namespace.pattern)
-
-            rs1235_lookup = self.manager.get_node_by_hash(rs1235_hash)
-            self.assertIsNotNone(rs1235_lookup)
-            self.assertEqual('Gene', rs1235_lookup.type)
-            self.assertEqual('g(dbSNP:rs1235)', rs1235_lookup.bel)
-            self.assertEqual(rs1235_hash, rs1235_lookup.sha512)
-            self.assertIsNotNone(rs1235_lookup.namespace_entry)
-            self.assertEqual('rs1235', rs1235_lookup.namespace_entry.name)
-            self.assertEqual('dbSNP', rs1235_lookup.namespace_entry.namespace.keyword)
-            self.assertEqual(DBSNP_PATTERN, rs1235_lookup.namespace_entry.namespace.pattern)
-
-    class TestEquivalentNodes(unittest.TestCase):
-        def test_direct_has_namespace(self):
-            graph = BELGraph()
-
-            n1 = graph.add_node_from_data(protein(namespace='HGNC', name='CD33', identifier='1659'))
-            n2 = graph.add_node_from_data(protein(namespace='NOPE', name='NOPE', identifier='NOPE'))
-
-            graph.add_increases(n1, n2, n(), n())
-
-            self.assertEqual({n1}, graph.get_equivalent_nodes(n1))
-
-            self.assertTrue(graph.node_has_namespace(n1, 'HGNC'))
-            self.assertFalse(graph.node_has_namespace(n2, 'HGNC'))
-
-        def test_indirect_has_namespace(self):
-            graph = BELGraph()
-
-            a = graph.add_node_from_data(protein(namespace='HGNC', name='CD33'))
-            b = graph.add_node_from_data(protein(namespace='HGNCID', identifier='1659'))
-
-            graph.add_equivalence(a, b)
-
-            self.assertEqual({a, b}, graph.get_equivalent_nodes(a))
-            self.assertEqual({a, b}, graph.get_equivalent_nodes(b))
-
-            self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
-            self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
-
-        def test_triangle_has_namespace(self):
-            graph = BELGraph()
-
-            a = graph.add_node_from_data(protein(namespace='A', name='CD33'))
-            b = graph.add_node_from_data(protein(namespace='B', identifier='1659'))
-            c = graph.add_node_from_data(protein(namespace='C', identifier='1659'))
-            d = graph.add_node_from_data(protein(namespace='HGNC', identifier='1659'))
-
-            graph.add_equivalence(a, b)
-            graph.add_equivalence(b, c)
-            graph.add_equivalence(c, a)
-            graph.add_equivalence(c, d)
-
-            self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(a))
-            self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(b))
-            self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(c))
-            self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(d))
-
-            self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
-            self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
-            self.assertTrue(graph.node_has_namespace(c, 'HGNC'))
-            self.assertTrue(graph.node_has_namespace(d, 'HGNC'))
-
-    if __name__ == '__main__':
-        unittest.main()
+        )
+
+        make_dummy_namespaces(self.manager, self.graph, {
+            'HGNC': ['F2', 'EDN1'],
+            'GOCC': ['extracellular space'], 'TEST': ['A']
+        })
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        edge = network.edges.first()
+        self.assertEqual(2, edge.properties.count())
+
+    @mock_bel_resources
+    def test_subject_activity_default(self, mock):
+        p1_name = n()
+        p2_name = n()
+
+        self.graph.add_increases(
+            protein(name=p1_name, namespace='HGNC'),
+            protein(name=p2_name, namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            subject_modifier=activity('kin')
+        )
+
+        make_dummy_namespaces(self.manager, self.graph, {
+            'HGNC': [p1_name, p2_name],
+        })
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
+            models.NamespaceEntry.name == 'kin').all()
+        self.assertEqual(1, len(kin_list))
+
+        kin = list(kin_list)[0]
+        self.assertEqual('kin', kin.name)
+
+        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
+            models.Property.effect == kin)
+        self.assertEqual(1, effects.count())
+
+    @mock_bel_resources
+    def test_subject_activity_custom(self, mock):
+        p1_name = n()
+        p2_name = n()
+        dummy_activity_namespace = n()
+        dummy_activity_name = n()
+
+        self.graph.add_increases(
+            protein(name=p1_name, namespace='HGNC'),
+            protein(name=p2_name, namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            subject_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
+        )
+
+        make_dummy_namespaces(self.manager, self.graph, {
+            'HGNC': [p1_name, p2_name], dummy_activity_namespace: [dummy_activity_name]
+        })
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
+            models.NamespaceEntry.name == dummy_activity_name).all()
+        self.assertEqual(1, len(kin_list))
+
+        kin = list(kin_list)[0]
+        self.assertEqual(dummy_activity_name, kin.name)
+
+        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
+            models.Property.effect == kin)
+        self.assertEqual(1, effects.count())
+
+    @mock_bel_resources
+    def test_object_activity_default(self, mock):
+        p1_name = n()
+        p2_name = n()
+
+        self.graph.add_increases(
+            protein(name=p1_name, namespace='HGNC'),
+            protein(name=p2_name, namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            object_modifier=activity('kin')
+        )
+
+        make_dummy_namespaces(self.manager, self.graph, {
+            'HGNC': [p1_name, p2_name],
+        })
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
+            models.NamespaceEntry.name == 'kin').all()
+        self.assertEqual(1, len(kin_list))
+
+        kin = list(kin_list)[0]
+        self.assertEqual('kin', kin.name)
+
+        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
+            models.Property.effect == kin)
+        self.assertEqual(1, effects.count())
+
+    @mock_bel_resources
+    def test_object_activity_custom(self, mock):
+        p1_name = n()
+        p2_name = n()
+        dummy_activity_namespace = n()
+        dummy_activity_name = n()
+
+        self.graph.add_increases(
+            protein(name=p1_name, namespace='HGNC'),
+            protein(name=p2_name, namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            object_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
+        )
+
+        make_dummy_namespaces(self.manager, self.graph, {
+            'HGNC': [p1_name, p2_name], dummy_activity_namespace: [dummy_activity_name]
+        })
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
+            models.NamespaceEntry.name == dummy_activity_name).all()
+        self.assertEqual(1, len(kin_list))
+
+        kin = list(kin_list)[0]
+        self.assertEqual(dummy_activity_name, kin.name)
+
+        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
+            models.Property.effect == kin)
+        self.assertEqual(1, effects.count())
+
+    @mock_bel_resources
+    def test_subject_degradation(self, mock):
+        self.graph.add_association(
+            protein(name='YFG', namespace='HGNC'),
+            protein(name='YFG2', namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            subject_modifier=degradation(),
+        )
+        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        edge = network.edges.first()
+        self.assertEqual(1, edge.properties.count())
+
+    @mock_bel_resources
+    def test_object_degradation(self, mock):
+        self.graph.add_association(
+            protein(name='YFG', namespace='HGNC'),
+            protein(name='YFG2', namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            object_modifier=degradation(),
+        )
+        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        edge = network.edges.first()
+        self.assertEqual(1, edge.properties.count())
+
+    @mock_bel_resources
+    def test_subject_location(self, mock):
+        self.graph.add_association(
+            protein(name='YFG', namespace='HGNC'),
+            protein(name='YFG2', namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            subject_modifier={
+                LOCATION: entity(namespace='GOCC', name='nucleus')
+            },
+        )
+        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['nucleus']})
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        edge = network.edges.first()
+        self.assertEqual(1, edge.properties.count())
+
+    @mock_bel_resources
+    def test_mixed_1(self, mock):
+        """Test mixed having location and something else."""
+
+        self.graph.add_increases(
+            protein(namespace='HGNC', name='CDC42'),
+            protein(namespace='HGNC', name='PAK2'),
+            evidence="""Summary: PAK proteins, a family of serine/threonine p21-activating kinases, include PAK1, PAK2,
+         PAK3 and PAK4. PAK proteins are critical effectors that link Rho GTPases to cytoskeleton reorganization 
+         and nuclear signaling. They serve as targets for the small GTP binding proteins Cdc42 and Rac and have 
+         been implicated in a wide range of biological activities. PAK4 interacts specifically with the GTP-bound 
+         form of Cdc42Hs and weakly activates the JNK family of MAP kinases. PAK4 is a mediator of filopodia 
+         formation and may play a role in the reorganization of the actin cytoskeleton. Multiple alternatively 
+         spliced transcript variants encoding distinct isoforms have been found for this gene.""",
+            citation={CITATION_TYPE: "Online Resource", CITATION_REFERENCE: "PAK4 Hs ENTREZ Gene Summary"},
+            annotations={'Species': '9606'},
+            subject_modifier=activity('gtp'),
+            object_modifier=activity('kin'),
+        )
+
+        make_dummy_namespaces(self.manager, self.graph)
+        make_dummy_annotations(self.manager, self.graph)
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        edge = network.edges.first()
+        self.assertEqual(2, edge.properties.count())
+
+        subject = edge.properties.filter(models.Property.is_subject).one()
+        self.assertTrue(subject.is_subject)
+        self.assertEqual('gtp', subject.effect.name)
+        self.assertIsNotNone(subject.effect.namespace)
+        self.assertEqual(BEL_DEFAULT_NAMESPACE, subject.effect.namespace.keyword)
+
+        object = edge.properties.filter(not_(models.Property.is_subject)).one()
+        self.assertFalse(object.is_subject)
+        self.assertEqual('kin', object.effect.name)
+        self.assertIsNotNone(object.effect.namespace)
+        self.assertEqual(BEL_DEFAULT_NAMESPACE, object.effect.namespace.keyword)
+
+    @mock_bel_resources
+    def test_mixed_2(self, mock):
+        """Tests both subject and object activity with location information as well."""
+        self.graph.add_directly_increases(
+            protein(namespace='HGNC', name='HDAC4'),
+            protein(namespace='HGNC', name='MEF2A'),
+            citation='10487761',
+            evidence=""""In the nucleus, HDAC4 associates with the myocyte enhancer factor MEF2A. Binding of HDAC4 to 
+        MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the 
+        deacetylase domain of HDAC4.""",
+            annotations={'Species': '9606'},
+            subject_modifier=activity('cat', location=entity(namespace='GOCC', name='nucleus')),
+            object_modifier=activity('tscript', location=entity(namespace='GOCC', name='nucleus'))
+        )
+
+        make_dummy_namespaces(self.manager, self.graph, {
+            'HGNC': ['HDAC4', 'MEF2A'],
+            'GOCC': ['nucleus']
+        })
+
+        make_dummy_annotations(self.manager, self.graph)
+
+        network = self.manager.insert_graph(self.graph, store_parts=True)
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(1, network.edges.count())
+
+        edge = network.edges.first()
+        self.assertEqual(4, edge.properties.count())
+        self.assertEqual(2, edge.properties.filter(models.Property.is_subject).count())
+        self.assertEqual(2, edge.properties.filter(not_(models.Property.is_subject)).count())
+
+
+class TestNoAddNode(TemporaryCacheMixin):
+    """Tests scenarios where an instance of :class:`BELGraph` may contain edges that refer to uncached resources, and
+    therefore should not be added to the edge store."""
+
+    @mock_bel_resources
+    def test_no_node_name(self, mock):
+        """Test that a node whose namespace is in the uncached namespaces set can't be added."""
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+
+        dummy_namespace = n()
+        dummy_url = n()
+
+        graph.namespace_url[dummy_namespace] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        node_data = protein(name=n(), namespace=dummy_namespace)
+        graph.add_node_from_data(node_data)
+
+        make_dummy_namespaces(self.manager, graph)
+        network = self.manager.insert_graph(graph)
+        self.assertEqual(0, len(network.nodes.all()))
+
+    @mock_bel_resources
+    def test_no_node_fusion_3p(self, mock):
+        """Test that a fusion node whose 3P partner's namespace is in the uncached namespaces set can't be added."""
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+
+        dummy_namespace_name = n()
+        dummy_url = n()
+
+        graph.namespace_url[dummy_namespace_name] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        node_data = protein_fusion(
+            partner_3p=protein(namespace=dummy_namespace_name, name='AKT1'),
+            partner_5p=protein(namespace='HGNC', name='YFG'),
+        )
+        graph.add_node_from_data(node_data)
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        network = self.manager.insert_graph(graph)
+
+        self.assertEqual(0, len(network.nodes.all()))
+
+    @mock_bel_resources
+    def test_no_node_fusion_5p(self, mock):
+        """Test that a node whose namespace is in the uncached namespaces set can't be added."""
+        dummy_namespace_name = n()
+
+        node_data = protein_fusion(
+            partner_3p=protein(namespace='HGNC', name='YFG'),
+            partner_5p=protein(namespace=dummy_namespace_name, name='YFG'),
+        )
+
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+        dummy_url = n()
+        graph.namespace_url[dummy_namespace_name] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+        graph.add_node_from_data(node_data)
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        network = self.manager.insert_graph(graph)
+        self.assertEqual(0, len(network.nodes.all()))
+
+    @mock_bel_resources
+    def test_no_protein_modification(self, mock):
+        """Test that a protein node whose pmod variant is in the uncached namespaces set can't be added."""
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+
+        dummy_namespace_name = n()
+        dummy_url = n()
+
+        graph.namespace_url[dummy_namespace_name] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        node_data = protein(namespace='HGNC', name='YFG', variants=[
+            pmod(name='dummy', namespace=dummy_namespace_name)
+        ])
+
+        graph.add_node_from_data(node_data)
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        network = self.manager.insert_graph(graph)
+
+        self.assertEqual(1, network.nodes.count())
+
+    @mock_bel_resources
+    def test_no_gene_modification(self, mock):
+        """Test that a gene node whose gmod variant is in the uncached namespaces set can't be added."""
+        graph = BELGraph(name='Test No Add Nodes', version='1.0.0')
+
+        dummy_namespace_name = n()
+        dummy_url = n()
+
+        graph.namespace_url[dummy_namespace_name] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        node_data = gene(namespace='HGNC', name='YFG', variants=[
+            gmod(name='dummy', namespace=dummy_namespace_name)
+        ])
+
+        graph.add_node_from_data(node_data)
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        network = self.manager.insert_graph(graph)
+
+        self.assertEqual(1, network.nodes.count())
+
+    @mock_bel_resources
+    def test_no_translocation(self, mock):
+        """Test that a translocation using custom namespaces doesn't get stored."""
+        graph = BELGraph(name='dummy graph', version='0.0.1')
+
+        dummy_namespace_name = n()
+        dummy_namespace_url = n()
+
+        graph.namespace_url[dummy_namespace_name] = dummy_namespace_url
+        graph.uncached_namespaces.add(dummy_namespace_url)
+
+        graph.add_association(
+            protein(name='YFG', namespace='HGNC'),
+            protein(name='YFG2', namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            subject_modifier=translocation(
+                from_loc=entity(namespace=dummy_namespace_name, name='intracellular'),
+                to_loc=entity(namespace='GOCC', name='extracellular space')
+            ),
+        )
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['extracellular space']})
+
+        network = self.manager.insert_graph(graph, store_parts=True)
+
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(0, network.edges.count())
+
+    @mock_bel_resources
+    def test_no_location(self, mock):
+        """Test that when using a custom namespace in the location the edge doesn't get stored."""
+        graph = BELGraph(name='dummy graph', version='0.0.1')
+        dummy_namespace_name = n()
+        dummy_url = n()
+        graph.namespace_url[dummy_namespace_name] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        graph.add_association(
+            protein(name='YFG', namespace='HGNC'),
+            protein(name='YFG2', namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            subject_modifier={
+                LOCATION: entity(namespace=dummy_namespace_name, name='lysozome')
+            },
+        )
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+
+        network = self.manager.insert_graph(graph, store_parts=True)
+
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(0, network.edges.count())
+
+    @mock_bel_resources
+    def test_no_activity(self, mock):
+        """Test that when an uncached custom namespace is used in the activity on an edge, the edge doesn't get
+        stored."""
+        graph = BELGraph(name='dummy graph', version='0.0.1')
+        dummy_namespace_name = n()
+        dummy_url = n()
+        graph.namespace_url[dummy_namespace_name] = dummy_url
+        graph.uncached_namespaces.add(dummy_url)
+
+        graph.add_association(
+            protein(name='YFG', namespace='HGNC'),
+            protein(name='YFG2', namespace='HGNC'),
+            evidence=n(),
+            citation=n(),
+            subject_modifier=activity(name='dummy', namespace=dummy_namespace_name)
+        )
+
+        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+
+        network = self.manager.insert_graph(graph, store_parts=True)
+
+        self.assertEqual(2, network.nodes.count())
+        self.assertEqual(0, network.edges.count())
+
+    @mock_bel_resources
+    def test_regex_lookup(self, mock):  # FIXME this test needs to be put somewhere else
+        """Test that regular expression nodes get love too."""
+        graph = BELGraph(name='Regular Expression Test Graph',
+                         description='Help test regular expression namespaces',
+                         version='1.0.0')
+        dbsnp = 'dbSNP'
+        DBSNP_PATTERN = 'rs[0-9]+'
+        graph.namespace_pattern[dbsnp] = DBSNP_PATTERN
+
+        rs1234 = gene(namespace=dbsnp, name='rs1234')
+        rs1235 = gene(namespace=dbsnp, name='rs1235')
+
+        rs1234_tuple = graph.add_node_from_data(rs1234)
+        rs1235_tuple = graph.add_node_from_data(rs1235)
+
+        rs1234_hash = hash_node(rs1234_tuple)
+        rs1235_hash = hash_node(rs1235_tuple)
+
+        self.manager.insert_graph(graph, store_parts=True)
+
+        rs1234_lookup = self.manager.get_node_by_hash(rs1234_hash)
+        self.assertIsNotNone(rs1234_lookup)
+        self.assertEqual('Gene', rs1234_lookup.type)
+        self.assertEqual('g(dbSNP:rs1234)', rs1234_lookup.bel)
+        self.assertEqual(rs1234_hash, rs1234_lookup.sha512)
+        self.assertIsNotNone(rs1234_lookup.namespace_entry)
+        self.assertEqual('rs1234', rs1234_lookup.namespace_entry.name)
+        self.assertEqual('dbSNP', rs1234_lookup.namespace_entry.namespace.keyword)
+        self.assertEqual(DBSNP_PATTERN, rs1234_lookup.namespace_entry.namespace.pattern)
+
+        rs1235_lookup = self.manager.get_node_by_hash(rs1235_hash)
+        self.assertIsNotNone(rs1235_lookup)
+        self.assertEqual('Gene', rs1235_lookup.type)
+        self.assertEqual('g(dbSNP:rs1235)', rs1235_lookup.bel)
+        self.assertEqual(rs1235_hash, rs1235_lookup.sha512)
+        self.assertIsNotNone(rs1235_lookup.namespace_entry)
+        self.assertEqual('rs1235', rs1235_lookup.namespace_entry.name)
+        self.assertEqual('dbSNP', rs1235_lookup.namespace_entry.namespace.keyword)
+        self.assertEqual(DBSNP_PATTERN, rs1235_lookup.namespace_entry.namespace.pattern)
+
+
+class TestEquivalentNodes(unittest.TestCase):
+    def test_direct_has_namespace(self):
+        graph = BELGraph()
+
+        n1 = graph.add_node_from_data(protein(namespace='HGNC', name='CD33', identifier='1659'))
+        n2 = graph.add_node_from_data(protein(namespace='NOPE', name='NOPE', identifier='NOPE'))
+
+        graph.add_increases(n1, n2, n(), n())
+
+        self.assertEqual({n1}, graph.get_equivalent_nodes(n1))
+
+        self.assertTrue(graph.node_has_namespace(n1, 'HGNC'))
+        self.assertFalse(graph.node_has_namespace(n2, 'HGNC'))
+
+    def test_indirect_has_namespace(self):
+        graph = BELGraph()
+
+        a = graph.add_node_from_data(protein(namespace='HGNC', name='CD33'))
+        b = graph.add_node_from_data(protein(namespace='HGNCID', identifier='1659'))
+
+        graph.add_equivalence(a, b)
+
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(a))
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(b))
+
+        self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
+        self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
+
+    def test_triangle_has_namespace(self):
+        graph = BELGraph()
+
+        a = graph.add_node_from_data(protein(namespace='A', name='CD33'))
+        b = graph.add_node_from_data(protein(namespace='B', identifier='1659'))
+        c = graph.add_node_from_data(protein(namespace='C', identifier='1659'))
+        d = graph.add_node_from_data(protein(namespace='HGNC', identifier='1659'))
+
+        graph.add_equivalence(a, b)
+        graph.add_equivalence(b, c)
+        graph.add_equivalence(c, a)
+        graph.add_equivalence(c, d)
+
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(a))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(b))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(c))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(d))
+
+        self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
+        self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
+        self.assertTrue(graph.node_has_namespace(c, 'HGNC'))
+        self.assertTrue(graph.node_has_namespace(d, 'HGNC'))
+
+
+if __name__ == '__main__':
+    unittest.main()
