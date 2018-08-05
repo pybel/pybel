@@ -45,7 +45,7 @@ def get_graph_with_random_edges(graph, n_edges):
     :rtype: pybel.BELGraph
     """
     result = graph.fresh_copy()
-    
+
     result.add_edges_from(
         (
             (u, v, k, d)
@@ -74,7 +74,7 @@ class WeightedRandomGenerator(object):
     def __init__(self, values, weights):
         """Build a weighted random generator.
 
-        :param values: A sequence corresponding to the weights
+        :param Any values: A sequence corresponding to the weights
         :param weights: Weights for each. Should all be positive, but not necessarily normalized.
         """
         self.values = values
@@ -91,12 +91,17 @@ class WeightedRandomGenerator(object):
         return self.totals[-1]
 
     def next_index(self):
-        """Get a random index."""
-        r = random.random() * self.total
-        return bisect.bisect_right(self.totals, r)
+        """Get a random index.
+
+        :rtype: int
+        """
+        return bisect.bisect_right(self.totals, random.random() * self.total)
 
     def next(self):
-        """Get a random value"""
+        """Get a random value.
+
+        :rtype: Any
+        """
         return self.values[self.next_index()]
 
 
@@ -123,13 +128,14 @@ def get_random_node(graph, node_blacklist):
     return wrg.next()
 
 
-def _helper(rv, graph, number_edges_remaining, no_grow, original_node_count):
-    log.debug('adding remaining %d edges', number_edges_remaining)
-    for i in range(number_edges_remaining):
-        possible_step_nodes = None
+def _helper(rv, graph, number_edges_remaining, no_grow):
+    original_node_count = graph.number_of_nodes()
 
-        c = 0
-        while not possible_step_nodes:
+    log.debug('adding remaining %d edges', number_edges_remaining)
+    for _ in range(number_edges_remaining):
+
+        source, possible_step_nodes, c = None, set(), 0
+        while not source or not possible_step_nodes:
             source = get_random_node(rv, no_grow)
 
             c += 1
@@ -142,6 +148,7 @@ def _helper(rv, graph, number_edges_remaining, no_grow, original_node_count):
             if source is None:
                 continue  # maybe do something else?
 
+            # Only keep targets in the original graph that aren't in the result graph
             possible_step_nodes = set(graph[source]) - set(rv[source])
 
             if not possible_step_nodes:
@@ -184,14 +191,14 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
     log.debug('getting random sub-graph with %d seed edges, %d final edges, and seed=%s', number_seed_edges,
               number_edges, seed)
 
-    original_node_count = graph.number_of_nodes()
-    no_grow = set()  #: This is the set of nodes that should no longer be chosen to grow from
-
     # Get initial graph with `number_seed_edges` edges
     rv = get_graph_with_random_edges(graph, number_seed_edges)
 
-    number_edges_remaining = number_edges - number_seed_edges
-    _helper(rv, graph, number_edges_remaining, no_grow, original_node_count)
+    # This is the set of nodes that should no longer be chosen to grow from
+    no_grow = set()
+
+    number_edges_remaining = number_edges - rv.number_of_edges()
+    _helper(rv, graph, number_edges_remaining, no_grow)
 
     log.debug('removing isolated nodes')
     remove_isolated_nodes(rv)
