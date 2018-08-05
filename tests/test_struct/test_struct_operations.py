@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for graph operations."""
+
 import json
 import unittest
 
@@ -29,12 +31,15 @@ class TestLeftFullJoin(unittest.TestCase):
         g = BELGraph()
         g.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
 
+        self.tag = 'EXTRANEOUS'
+        self.tag_value = 'MOST DEFINITELY'
+
         h = BELGraph()
         h.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
         h.add_increases(p1, p2, citation='PMID2', evidence='Evidence 2')
         h.add_increases(p1, p3, citation='PMID1', evidence='Evidence 3')
-        h.node[p1_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
-        h.node[p3_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
+        h.node[p1_tuple][self.tag] = self.tag_value
+        h.node[p3_tuple][self.tag] = self.tag_value
 
         self.g = g
         self.h = h
@@ -59,55 +64,64 @@ class TestLeftFullJoin(unittest.TestCase):
         self.assertEqual(3, graph.number_of_edges(), msg='initial graph H had wrong number of edges')
 
     def help_check_result(self, j):
-        """Helps check the result of left joining H into G
+        """Help check the result of left joining H into G.
 
         :param pybel.BELGraph j: The resulting graph from G += H
         """
-        self.assertNotIn('EXTRANEOUS', j.node[p1_tuple])
-        self.assertNotIn('EXTRANEOUS', j.node[p2_tuple])
-        self.assertIn('EXTRANEOUS', j.node[p3_tuple])
-        self.assertEqual('MOST DEFINITELY', j.node[p3_tuple]['EXTRANEOUS'])
+        self.assertIn(self.tag, j.node[p1_tuple])
+        self.assertNotIn(self.tag, j.node[p2_tuple])
+        self.assertIn(self.tag, j.node[p3_tuple])
+        self.assertEqual(self.tag_value, j.node[p1_tuple][self.tag])
+        self.assertEqual(self.tag_value, j.node[p3_tuple][self.tag])
 
         self.assertEqual(3, j.number_of_nodes())
         self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format(json.dumps(j.edges(data=True), indent=2)))
 
-    def test_in_place_type_failure(self):
-        with self.assertRaises(TypeError):
-            self.g += None
-
-    def test_type_failure(self):
-        with self.assertRaises(TypeError):
-            self.g + None
-
-    def test_magic(self):
-        self.g += self.h
-        self.help_check_result(self.g)
-        self.help_check_initial_h(self.h)
-
-    def test_full_join(self):
+    def test_function(self):
+        """Test full joining two networks using the function."""
         left_full_join(self.g, self.h)
         self.help_check_result(self.g)
         self.help_check_initial_h(self.h)
 
+    def test_in_place_operator_failure(self):
+        """Test that using the wrong type with the in-place addition operator raises an error."""
+        with self.assertRaises(TypeError):
+            self.g += None
+
+    def test_in_place_operator(self):
+        """Test full joining two networks using the BELGraph in-place addition operator."""
+        self.g += self.h
+        self.help_check_result(self.g)
+        self.help_check_initial_h(self.h)
+
+    def test_operator_failure(self):
+        """Test that using the wrong type with the addition operator raises an error."""
+        with self.assertRaises(TypeError):
+            self.g + None
+
     def test_operator(self):
+        """Test full joining two networks using the BELGraph addition operator."""
         j = self.g + self.h
         self.help_check_result(j)
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
 
-    def test_union(self):
-        j = union([self.g, self.h])
-        self.help_check_result(j)
-        self.help_check_initial_g(self.g)
-        self.help_check_initial_h(self.h)
-
     def test_union_failure(self):
+        """Test that the union of no graphs raises a value error."""
         with self.assertRaises(ValueError):
             union([])
 
     def test_union_trivial(self):
+        """Test that the union of a single graph returns that graph."""
         res = union([self.g])
         self.assertEqual(self.g, res)
+
+    def test_union(self):
+        """Test that the union of a pair of graphs is the same as the full join."""
+        j = union([self.g, self.h])
+        self.help_check_result(j)
+        self.help_check_initial_g(self.g)
+        self.help_check_initial_h(self.h)
 
 
 class TestLeftFullOuterJoin(unittest.TestCase):

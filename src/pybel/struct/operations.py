@@ -16,8 +16,8 @@ __all__ = [
 def left_full_join(g, h):
     """Add all nodes and edges from ``h`` to ``g``, in-place for ``g``
 
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
+    :param pybel.BELGraph g: A BEL network
+    :param pybel.BELGraph h: A BEL network
 
     Example usage:
 
@@ -26,10 +26,11 @@ def left_full_join(g, h):
     >>> h = pybel.from_path('...')
     >>> left_full_join(g, h)
     """
-
-    for u, v, key, data in h.edges_iter(keys=True, data=True):
-        if u not in g or v not in g[u] or key not in g[u][v]:
-            g.add_edge(u, v, key=key, **data)
+    g.add_edges_from(
+        (u, v, key, data)
+        for u, v, key, data in h.edges(keys=True, data=True)
+        if u not in g or v not in g[u] or key not in g[u][v]
+    )
 
     update_metadata(h, g)
     update_node_helper(h, g)
@@ -57,20 +58,6 @@ def left_outer_join(g, h):
     for comp in nx.weakly_connected_components(h):
         if g_nodes.intersection(comp):
             left_full_join(g, h.subgraph(comp))
-
-
-def _left_full_join_networks(target, networks):
-    """Full join a list of networks to a target network
-
-    The order of the networks will not impact the result.
-
-    :param BELGraph target: A BEL network
-    :param iter[BELGraph] networks: An iterator of BEL networks
-    :rtype: BELGraph
-    """
-    for network in networks:
-        left_full_join(target, network)
-    return target
 
 
 def _left_outer_join_networks(target, networks):
@@ -115,7 +102,10 @@ def union(networks):
 
     target = networks[0].copy()
 
-    return _left_full_join_networks(target, networks[1:])
+    for network in networks[1:]:
+        left_full_join(target, network)
+
+    return target
 
 
 def left_node_intersection_join(g, h):
