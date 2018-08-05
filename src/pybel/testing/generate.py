@@ -2,9 +2,8 @@
 
 """Utilities for PyBEL testing."""
 
-from random import shuffle
-
 import itertools as itt
+from random import shuffle
 
 from .utils import n
 from ..dsl import protein
@@ -24,6 +23,7 @@ def generate_random_graph(n_nodes, n_edges, namespace='NS'):
     :rtype: pybel.BELGraph
     """
     graph = BELGraph()
+
     nodes = [
         protein(namespace=namespace, name=str(i))
         for i in range(1, n_nodes)
