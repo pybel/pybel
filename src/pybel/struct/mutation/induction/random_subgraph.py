@@ -19,11 +19,6 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-#: How many edges should be sampled from a graph that's still reasonable to display
-SAMPLE_RANDOM_EDGE_COUNT = 250
-#: How many edges should be sampled as "seed" edges
-SAMPLE_RANDOM_EDGE_SEED_COUNT = 5
-
 
 def _random_edge_iterator(graph, n_edges):
     """Get a random set of edges from the graph and randomly samples a key from each.
@@ -58,8 +53,15 @@ def get_graph_with_random_edges(graph, n_edges):
         )
         for u, v, k, d in _random_edge_iterator(graph, n_edges)
     )
-
+    update_metadata(graph, result)
+    update_node_helper(graph, result)
     return result
+
+
+#: How many edges should be sampled from a graph that's still reasonable to display
+SAMPLE_RANDOM_EDGE_COUNT = 250
+#: How many edges should be sampled as "seed" edges
+SAMPLE_RANDOM_EDGE_SEED_COUNT = 5
 
 
 class WeightedRandomGenerator(object):
