@@ -14,7 +14,7 @@ from .utils import int_or_str
 from ..constants import (
     ANNOTATIONS, BELNS_ENCODING_STR, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE,
-    CITATION_TYPE_PUBMED, CITATION_VOLUME, COMPLEX, COMPOSITE, EFFECT, EVIDENCE, FRAGMENT, FUNCTION, FUSION, HASH,
+    CITATION_TYPE_PUBMED, CITATION_VOLUME, COMPLEX, COMPOSITE, EFFECT, EVIDENCE, FRAGMENT, FUNCTION, FUSION,
     HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, METADATA_AUTHORS,
     METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME,
     METADATA_VERSION, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION,
@@ -522,7 +522,7 @@ class Node(Base):
             result['id'] = self.id
 
         if include_hash:
-            result[HASH] = self.sha512
+            result['sha512'] = self.sha512
 
         if self.namespace_entry:
             namespace_entry = self.namespace_entry.to_json()
@@ -897,11 +897,10 @@ class Edge(Base):
 
         return data
 
-    def to_json(self, include_id=False, include_hash=False):
-        """Creates a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
+    def to_json(self, include_id=False):
+        """Create a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
         :param bool include_id: Include the database identifier?
-        :param bool include_hash: Include the node hash?
         :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
                  and edge data information.
         :rtype: dict
@@ -909,26 +908,24 @@ class Edge(Base):
         result = {
             'source': self.source.to_json(),
             'target': self.target.to_json(),
+            'key': self.sha512,
             'data': self.get_data_json(),
         }
 
         if include_id:
             result['id'] = self.id
 
-        if include_hash:
-            result[HASH] = self.sha512
-
         return result
 
     def insert_into_graph(self, graph):
-        """Inserts this edge into a BEL Graph
+        """Insert this edge into a BEL graph.
 
         :param pybel.BELGraph graph: A BEL graph
         """
         u = graph.add_node_from_data(self.source.to_json())
         v = graph.add_node_from_data(self.target.to_json())
 
-        graph.add_edge(u, v, attr_dict=self.get_data_json())
+        graph.add_edge(u, v, key=self.sha512, **self.get_data_json())
 
 
 class Property(Base):

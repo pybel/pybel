@@ -18,7 +18,6 @@ from ..constants import (
     HAS_VARIANT, IDENTIFIER, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
     METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
     OBJECT, ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
-    unqualified_edge_code,
 )
 from ..dsl import activity
 from ..tokens import node_to_tuple
@@ -353,6 +352,20 @@ class BELGraph(networkx.MultiDiGraph):
         """
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
+    def _help_add_edge(self, u, v, attr):
+        if isinstance(u, dict):
+            u = self.add_node_from_data(u)
+
+        if isinstance(v, dict):
+            v = self.add_node_from_data(v)
+
+        key = hash_edge(u, v, attr)
+
+        if not self.has_edge(u, v, key):
+            self.add_edge(u, v, key=key, **attr)
+
+        return key
+
     def add_unqualified_edge(self, u, v, relation):
         """Add a unique edge that has no annotations.
 
@@ -365,21 +378,8 @@ class BELGraph(networkx.MultiDiGraph):
         :return: The hash of this edge
         :rtype: str
         """
-        key = unqualified_edge_code[relation]
-
-        if isinstance(u, dict):
-            u = self.add_node_from_data(u)
-
-        if isinstance(v, dict):
-            v = self.add_node_from_data(v)
-
         attr = {RELATION: relation}
-        attr[HASH] = hash_edge(u, v, attr)
-
-        if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **attr)
-
-        return attr[HASH]
+        return self._help_add_edge(u, v, attr)
 
     def add_transcription(self, u, v):
         """Adds a transcription relation from a gene to an RNA or miRNA node
@@ -402,9 +402,9 @@ class BELGraph(networkx.MultiDiGraph):
         self.add_unqualified_edge(u, v, TRANSLATED_TO)
 
     def _add_two_way_unqualified_edge(self, u, v, relation):
-        """Adds an unqualified edge both ways"""
-        self.add_unqualified_edge(u, v, relation)
+        """Add an unqualified edge both ways."""
         self.add_unqualified_edge(v, u, relation)
+        return self.add_unqualified_edge(u, v, relation)
 
     def add_equivalence(self, u, v):
         """Adds two equivalence relations for the nodes
@@ -414,7 +414,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
         :type v: tuple or dict
         """
-        self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
+        return self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
 
     def add_orthology(self, u, v):
         """Adds two orthology relations for the nodes
@@ -424,7 +424,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
         :type v: tuple or dict
         """
-        self._add_two_way_unqualified_edge(u, v, ORTHOLOGOUS)
+        return self._add_two_way_unqualified_edge(u, v, ORTHOLOGOUS)
 
     def add_is_a(self, u, v):
         """Add an isA relationship such that u isA v.
@@ -434,7 +434,7 @@ class BELGraph(networkx.MultiDiGraph):
         :param v: Either a PyBEL node tuple or PyBEL node data dictionary representing the target node
         :type v: tuple or dict
         """
-        self.add_unqualified_edge(u, v, IS_A)
+        return self.add_unqualified_edge(u, v, IS_A)
 
     def add_part_of(self, u, v):
         """Add an partOf relationship such that u partOf v.
@@ -613,7 +613,7 @@ class BELGraph(networkx.MultiDiGraph):
         if node_tuple in self:
             return node_tuple
 
-        self.add_node(node_tuple, attr_dict=attr_dict)
+        self.add_node(node_tuple, **attr_dict)
 
         if VARIANTS in attr_dict:
             parent_node_dict = {
@@ -693,17 +693,7 @@ class BELGraph(networkx.MultiDiGraph):
         if object_modifier:
             attr[OBJECT] = object_modifier
 
-        if isinstance(u, dict):
-            u = self.add_node_from_data(u)
-
-        if isinstance(v, dict):
-            v = self.add_node_from_data(v)
-
-        attr[HASH] = hash_edge(u, v, attr)
-
-        self.add_edge(u, v, **attr)
-
-        return attr[HASH]
+        return self._help_add_edge(u, v, attr)
 
     def add_inhibits(self, u, v, evidence, citation, annotations=None, object_modifier=None):
         """Add an "inhibits" relationship.
@@ -923,7 +913,10 @@ class BELGraph(networkx.MultiDiGraph):
         return edge_to_bel(source, target, data=data, sep=sep)
 
     def _has_no_equivalent_edge(self, u, v):
-        return unqualified_edge_code[EQUIVALENT_TO] not in self[u][v]
+        return not any(
+            EQUIVALENT_TO == data[RELATION]
+            for data in self[u][v].values()
+        )
 
     def _equivalent_node_iterator_helper(self, node, visited):
         """Iterate over nodes and their data that are equal to the given node, starting with the original.
@@ -1008,9 +1001,4 @@ class BELGraph(networkx.MultiDiGraph):
         :type k: int
         :rtype: str
         """
-        sha512 = self[u][v][k].get(HASH)
-
-        if sha512 is None:
-            return hash_edge(u, v, self[u][v][k])
-
-        return sha512
+        return k

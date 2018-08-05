@@ -457,9 +457,7 @@ CORRELATIVE_RELATIONS = {
 POLAR_RELATIONS = CAUSAL_RELATIONS | CORRELATIVE_RELATIONS
 
 #: A list of relationship types that don't require annotations or evidence
-#: This must be maintained as a list, since the :data:`unqualified_edge_code` is calculated based on the order
-#: and needs to be consistent
-unqualified_edges = [
+UNQUALIFIED_EDGES = {
     HAS_REACTANT,
     HAS_PRODUCT,
     HAS_COMPONENT,
@@ -471,12 +469,7 @@ unqualified_edges = [
     EQUIVALENT_TO,
     PART_OF,
     ORTHOLOGOUS,
-]
-
-UNQUALIFIED_EDGES = set(unqualified_edges)
-
-#: Unqualified edges are given negative keys since the standard NetworkX edge key factory starts at 0 and counts up
-unqualified_edge_code = {relation: -i for i, relation in enumerate(unqualified_edges, start=1)}
+}
 
 # BEL Keywords
 

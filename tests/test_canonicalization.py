@@ -186,15 +186,12 @@ class TestCanonicalizeEdge(unittest.TestCase):
         self.g = BELGraph()
         self.u = self.g.add_node_from_data(protein(name='u', namespace='TEST'))
         self.v = self.g.add_node_from_data(protein(name='v', namespace='TEST'))
-        self.key = 0
 
     def get_data(self, k):
-        return self.g.edge[self.u][self.v][k]
+        return self.g[self.u][self.v][k]
 
     def add_edge(self, subject_modifier=None, object_modifier=None, annotations=None):
-        self.key += 1
-
-        self.g.add_increases(
+        key = self.g.add_increases(
             self.u,
             self.v,
             evidence=n(),
@@ -202,10 +199,9 @@ class TestCanonicalizeEdge(unittest.TestCase):
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
             annotations=annotations,
-            key=self.key
         )
 
-        return canonicalize_edge(self.get_data(self.key))
+        return canonicalize_edge(self.get_data(key))
 
     def test_failure(self):
         with self.assertRaises(ValueError):

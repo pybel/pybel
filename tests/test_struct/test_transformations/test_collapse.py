@@ -57,7 +57,7 @@ class TestCollapse(unittest.TestCase):
 
         self.assertEqual({p1.as_tuple(), p3.as_tuple()}, set(graph))
         self.assertEqual({(p1.as_tuple(), p3.as_tuple()), (p1.as_tuple(), p3.as_tuple())}, set(graph.edges()))
-        self.assertEqual(1, graph.number_of_edges(), msg=graph.edges(data=True, keys=True))
+        self.assertEqual(2, graph.number_of_edges(), msg=graph.edges(data=True, keys=True))
 
     def test_collapse_dogma_1(self):
         """Test collapsing to genes, only with translations."""

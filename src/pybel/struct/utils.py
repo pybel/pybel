@@ -1,35 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from collections import defaultdict
-
-from ..utils import hash_edge
-
 __all__ = [
-    'stratify_hash_edges',
     'update_metadata',
     'update_node_helper',
     'ensure_node_from_universe',
 ]
-
-
-def stratify_hash_edges(graph):
-    """Split all qualified and unqualified edges by different indexing strategies.
-
-    :param BELGraph graph: A BEL network
-    :rtype dict[tuple, dict[int, int]], dict[tuple, dict[int, set[int]]]
-    """
-    qualified_edges = defaultdict(dict)
-    unqualified_edges = defaultdict(lambda: defaultdict(set))
-
-    for u, v, k, d in graph.edges(keys=True, data=True):
-        hashed_data = hash_edge(u, v, d)
-
-        if k < 0:
-            unqualified_edges[u, v][k].add(hashed_data)
-        else:
-            qualified_edges[u, v][hashed_data] = k
-
-    return dict(qualified_edges), dict(unqualified_edges)
 
 
 def update_metadata(source, target):
@@ -65,4 +40,4 @@ def ensure_node_from_universe(source, target, node):
     :param tuple node: A BEL node
     """
     if node not in target:
-        target.add_node(node, attr_dict=source.node[node])
+        target.add_node(node, **source.node[node])

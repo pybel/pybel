@@ -395,11 +395,11 @@ class TestEdgePredicate(unittest.TestCase):
     def test_has_polarity(self):
         g = BELGraph()
         a, b, c = (protein(n(), n()) for _ in range(3))
-        g.add_increases(a, b, n(), n(), key=0)
-        self.assertTrue(has_polarity(g, a.as_tuple(), b.as_tuple(), 0))
+        key1 = g.add_increases(a, b, n(), n())
+        self.assertTrue(has_polarity(g, a.as_tuple(), b.as_tuple(), key1))
 
-        g.add_association(b, c, n(), n(), key=0)
-        self.assertFalse(has_polarity(g, b.as_tuple(), c.as_tuple(), 0))
+        key2 = g.add_association(b, c, n(), n())
+        self.assertFalse(has_polarity(g, b.as_tuple(), c.as_tuple(), key2))
 
     def test_has_provenance(self):
         self.assertFalse(has_provenance({}))

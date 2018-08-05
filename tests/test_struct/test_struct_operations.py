@@ -15,10 +15,6 @@ p1 = protein(namespace=HGNC, name='a')
 p2 = protein(namespace=HGNC, name='b')
 p3 = protein(namespace=HGNC, name='c')
 
-p1_tuple = p1.as_tuple()
-p2_tuple = p2.as_tuple()
-p3_tuple = p3.as_tuple()
-
 
 class TestLeftFullJoin(unittest.TestCase):
     """Tests the variants of the left full join, including the exhaustive vs. hash algorithms and calling by function
@@ -38,8 +34,8 @@ class TestLeftFullJoin(unittest.TestCase):
         h.add_node_from_data(p2)
         h.add_node_from_data(p3)
 
-        h.node[p1_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
-        h.node[p3_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
+        h.node[p1.as_tuple()]['EXTRANEOUS'] = 'MOST DEFINITELY'
+        h.node[p3.as_tuple()]['EXTRANEOUS'] = 'MOST DEFINITELY'
 
         h.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
         h.add_increases(p1, p2, citation='PMID2', evidence='Evidence 2')
@@ -65,12 +61,12 @@ class TestLeftFullJoin(unittest.TestCase):
 
         :param pybel.BELGraph j: The resulting graph from G += H
         """
-        self.assertIn('EXTRANEOUS', j.node[p1_tuple])
-        self.assertNotIn('EXTRANEOUS', j.node[p2_tuple])
-        self.assertIn('EXTRANEOUS', j.node[p3_tuple])
+        self.assertIn('EXTRANEOUS', j.node[p1.as_tuple()])
+        self.assertNotIn('EXTRANEOUS', j.node[p2.as_tuple()])
+        self.assertIn('EXTRANEOUS', j.node[p3.as_tuple()])
 
-        self.assertEqual('MOST DEFINITELY', j.node[p1_tuple]['EXTRANEOUS'])
-        self.assertEqual('MOST DEFINITELY', j.node[p3_tuple]['EXTRANEOUS'])
+        self.assertEqual('MOST DEFINITELY', j.node[p1.as_tuple()]['EXTRANEOUS'])
+        self.assertEqual('MOST DEFINITELY', j.node[p3.as_tuple()]['EXTRANEOUS'])
 
         self.assertEqual(3, j.number_of_nodes())
         self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format(json.dumps(j.edges(data=True), indent=2)))
@@ -88,13 +84,8 @@ class TestLeftFullJoin(unittest.TestCase):
         self.help_check_result(self.g)
         self.help_check_initial_h(self.h)
 
-    def test_full_hash_join(self):
-        left_full_join(self.g, self.h, use_hash=True)
-        self.help_check_result(self.g)
-        self.help_check_initial_h(self.h)
-
-    def test_full_exhaustive_join(self):
-        left_full_join(self.g, self.h, use_hash=False)
+    def test_full_join(self):
+        left_full_join(self.g, self.h)
         self.help_check_result(self.g)
         self.help_check_initial_h(self.h)
 
@@ -104,14 +95,8 @@ class TestLeftFullJoin(unittest.TestCase):
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
 
-    def test_union_hash(self):
-        j = union([self.g, self.h], use_hash=True)
-        self.help_check_result(j)
-        self.help_check_initial_g(self.g)
-        self.help_check_initial_h(self.h)
-
-    def test_union_exhaustive(self):
-        j = union([self.g, self.h], use_hash=True)
+    def test_union(self):
+        j = union([self.g, self.h])
         self.help_check_result(j)
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
@@ -181,14 +166,14 @@ class TestLeftFullOuterJoin(unittest.TestCase):
         self.help_check_initial_g(self.g)
         self.help_check_result(j)
 
-    def test_left_outer_hash_join(self):
-        left_outer_join(self.g, self.h, use_hash=True)
+    def test_left_outer_join(self):
+        left_outer_join(self.g, self.h)
         self.help_check_initial_h(self.h)
         self.help_check_result(self.g)
 
     def test_left_outer_exhaustive_join(self):
         self.g &= self.h
-        left_outer_join(self.g, self.h, use_hash=False)
+        left_outer_join(self.g, self.h)
         self.help_check_initial_h(self.h)
         self.help_check_result(self.g)
 
@@ -246,20 +231,14 @@ class TestInnerJoin(unittest.TestCase):
         self.help_check_initialize_h(self.h)
         self.help_check_initialize_g(self.g)
 
-    def test_left_node_intersection_hash_join(self):
-        j = left_node_intersection_join(self.g, self.h, use_hash=True)
-        self.help_check_join(j)
-        self.help_check_initialize_h(self.h)
-        self.help_check_initialize_g(self.g)
-
-    def test_left_node_intersection_exhaustive_join(self):
-        j = left_node_intersection_join(self.g, self.h, use_hash=False)
+    def test_left_node_intersection_join(self):
+        j = left_node_intersection_join(self.g, self.h)
         self.help_check_join(j)
         self.help_check_initialize_h(self.h)
         self.help_check_initialize_g(self.g)
 
     def test_node_intersection(self):
-        j = node_intersection([self.h, self.g], use_hash=True)
+        j = node_intersection([self.h, self.g])
         self.help_check_join(j)
         self.help_check_initialize_h(self.h)
         self.help_check_initialize_g(self.g)

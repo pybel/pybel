@@ -77,7 +77,7 @@ def flatten_graph_data(graph):
         g.add_node(node, data)
 
     for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
+        g.add_edge(u, v, key=key, **flatten_dict(data))
 
     return g
 

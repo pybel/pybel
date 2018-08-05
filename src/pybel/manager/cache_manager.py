@@ -9,12 +9,12 @@ enable this option, but can specify a database location if they choose.
 from __future__ import unicode_literals
 
 import logging
-import time
 from collections import defaultdict
 from copy import deepcopy
-from itertools import chain
 
 import six
+import time
+from itertools import chain
 from six import string_types
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
@@ -44,7 +44,7 @@ from ..language import (
 )
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
-from ..utils import hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
+from ..utils import hash_citation, hash_dump, hash_evidence, hash_node, parse_datetime
 
 __all__ = [
     'Manager',
@@ -941,13 +941,12 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         t = time.time()
         c = 0
 
-        edges = (
-            tqdm(graph.edges(data=True), total=graph.number_of_edges(), desc='Edges')
-            if use_tqdm else
-            graph.edges(data=True)
-        )
+        edges = graph.edges(keys=True, data=True)
 
-        for u, v, data in edges:
+        if use_tqdm:
+            edges = tqdm(edges, total=graph.number_of_edges(), desc='Edges')
+
+        for u, v, key, data in edges:
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue
@@ -961,11 +960,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             if data[RELATION] in UNQUALIFIED_EDGES:
                 try:
-                    self._add_unqualified_edge(network, graph, u, v, data)
+                    self._add_unqualified_edge(network, graph, u, v, key, data)
                 except Exception as e:
                     self.session.rollback()
                     log.exception('error storing edge in database. edge data: %s', data)
-                    six.raise_from(EdgeAddError(e, u, v, data), e)
+                    six.raise_from(EdgeAddError(e, u, v, key, data), e)
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -975,11 +974,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             else:
                 try:
-                    self._add_qualified_edge(network, graph, u, v, data)
+                    self._add_qualified_edge(network, graph, u, v, key, data)
                 except Exception as e:
                     self.session.rollback()
                     log.exception('error storing edge in database. edge data: %s', data)
-                    six.raise_from(EdgeAddError(e, u, v, data), e)
+                    six.raise_from(EdgeAddError(e, u, v, key, data), e)
 
         log.debug('stored edges in %.2f seconds', time.time() - t)
 
@@ -1025,7 +1024,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             for entry in self.get_annotation_entries_by_names(url, names)
         ]
 
-    def _add_qualified_edge(self, network, graph, u, v, data):
+    def _add_qualified_edge(self, network, graph, u, v, key, data):
         """Add a qualified edge to the network.
 
         :type network: Network
@@ -1059,20 +1058,19 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         annotations = self._get_annotation_entries_from_data(graph, data)
 
         bel = graph.edge_to_bel(u, v, data=data)
-        sha512 = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
-            sha512=sha512,
+            sha512=key,
             evidence=evidence,
             properties=properties,
             annotations=annotations,
         )
         network.edges.append(edge)
 
-    def _add_unqualified_edge(self, network, graph, u, v, data):
+    def _add_unqualified_edge(self, network, graph, u, v, key, data):
         """Add an unqualified edge to the network.
 
         :type network: Network
@@ -1082,13 +1080,12 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :type data: dict
         """
         bel = graph.edge_to_bel(u, v, data=data)
-        sha512 = hash_edge(u, v, data)
         edge = self.get_or_create_edge(
             source=self.object_cache_node[hash_node(u)],
             target=self.object_cache_node[hash_node(v)],
             relation=data[RELATION],
             bel=bel,
-            sha512=sha512,
+            sha512=key,
         )
         network.edges.append(edge)
 

@@ -5,11 +5,11 @@
 from __future__ import unicode_literals
 
 import logging
-import time
 import unittest
 from collections import Counter, defaultdict
 
 import sqlalchemy.exc
+import time
 from sqlalchemy import not_
 
 from pybel import BELGraph, from_database, from_path, to_database
@@ -19,7 +19,7 @@ from pybel.constants import (
     EVIDENCE, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
     HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER, INCREASES, KIND, LOCATION, MEMBERS,
     METADATA_DESCRIPTION, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PATHOLOGY, PRODUCTS,
-    PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RELATION, VARIANTS, unqualified_edge_code,
+    PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RELATION, VARIANTS,
 )
 from pybel.dsl import (
     activity, complex_abundance, degradation, entity, fragment, gene, gmod, pmod, protein, protein_fusion, reaction,
@@ -47,11 +47,16 @@ def protein_tuple(name):
 
 
 def protein_pair(name):
+    """Make a protein pair.
+
+    :param str name: name of the protein
+    :rtype: tuple[tuple,pybel.dsl.protein]
+    """
     return protein_tuple(name), hgnc(name=name)
 
 
-fos = fos_tuple, fos_data = protein_pair('FOS')
-jun = jun_tuple, jun_data = protein_pair('JUN')
+fos_tuple, fos_data = protein_pair('FOS')
+jun_tuple, jun_data = protein_pair('JUN')
 
 ap1_complex_tuple = COMPLEX, fos_tuple, jun_tuple
 ap1_complex_data = complex_abundance([fos_data, jun_data])
@@ -73,9 +78,22 @@ oxygen = chebi('oxygen')
 
 reaction_1 = reaction(reactants=[superoxide], products=[hydrogen_peroxide, oxygen])
 
-has_component_code = unqualified_edge_code[HAS_COMPONENT]
-has_reactant_code = unqualified_edge_code[HAS_REACTANT]
-has_product_code = unqualified_edge_code[HAS_PRODUCT]
+
+def assert_unqualified_edge(self, u, v, rel):
+    """Assert there's only one edge and get the data for it
+
+    :param unittest.TestCase self:
+    :param u:
+    :param v:
+    :param rel:
+    :return:
+    """
+    self.assertIn(u, self.graph)
+    self.assertIn(v, self.graph[u])
+    edges = list(self.graph[u][v].values())
+    self.assertEqual(1, len(edges))
+    data = edges[0]
+    self.assertEqual(rel, data[RELATION])
 
 
 class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
@@ -663,81 +681,39 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(il6, self.graph)
         self.assertIn(il23, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
+
         self.assertIn(il6, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][il6])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][il6][has_component_code][RELATION])
+        edges = list(self.graph.edge[node_tuple][il6].values())
+        self.assertEqual(1, len(edges))
+        data = edges[0]
+        self.assertEqual(HAS_COMPONENT, data[RELATION])
+
         self.assertIn(il23, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][il23])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][il23][has_component_code][RELATION])
+        edges = list(self.graph.edge[node_tuple][il23].values())
+        self.assertEqual(1, len(edges))
+        data = edges[0]
+        self.assertEqual(HAS_COMPONENT, data[RELATION])
 
     def test_reaction(self):
-        superoxide_node = ABUNDANCE, 'CHEBI', 'superoxide'
-        hydrogen_peroxide = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
-        oxygen_node = ABUNDANCE, 'CHEBI', 'oxygen'
-
-        node_tuple = REACTION, (superoxide_node,), (hydrogen_peroxide, oxygen_node)
-        node_data = {
-            FUNCTION: REACTION,
-            REACTANTS: [
-                {
-                    FUNCTION: ABUNDANCE,
-                    NAMESPACE: 'CHEBI',
-                    NAME: 'superoxide'
-                }
-            ],
-            PRODUCTS: [
-                {
-                    FUNCTION: ABUNDANCE,
-                    NAMESPACE: 'CHEBI',
-                    NAME: 'hydrogen peroxide'
-                },
-                {
-
-                    FUNCTION: ABUNDANCE,
-                    NAMESPACE: 'CHEBI',
-                    NAME: 'oxygen'
-                }
-            ]
-        }
-        self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
+        self.graph.add_node_from_data(reaction_1)
+        self.assertIn(reaction_1.as_tuple(), self.graph)
         self.assertEqual(4, self.graph.number_of_nodes())
-        self.assertIn(superoxide_node, self.graph)
-        self.assertIn(hydrogen_peroxide, self.graph)
-        self.assertIn(oxygen_node, self.graph)
         self.assertEqual(3, self.graph.number_of_edges())
-        self.assertIn(superoxide_node, self.graph.edge[node_tuple])
-        self.assertIn(has_reactant_code, self.graph.edge[node_tuple][superoxide_node])
-        self.assertEqual(HAS_REACTANT, self.graph.edge[node_tuple][superoxide_node][has_reactant_code][RELATION])
-        self.assertIn(hydrogen_peroxide, self.graph.edge[node_tuple])
-        self.assertIn(has_product_code, self.graph.edge[node_tuple][hydrogen_peroxide])
-        self.assertEqual(HAS_PRODUCT, self.graph.edge[node_tuple][hydrogen_peroxide][has_product_code][RELATION])
-        self.assertIn(oxygen_node, self.graph.edge[node_tuple])
-        self.assertIn(has_product_code, self.graph.edge[node_tuple][oxygen_node])
-        self.assertEqual(HAS_PRODUCT, self.graph.edge[node_tuple][oxygen_node][has_product_code][RELATION])
+
+        assert_unqualified_edge(self, reaction_1.as_tuple(), superoxide.as_tuple(), HAS_REACTANT)
+        assert_unqualified_edge(self, reaction_1.as_tuple(), hydrogen_peroxide.as_tuple(), HAS_PRODUCT)
+        assert_unqualified_edge(self, reaction_1.as_tuple(), oxygen.as_tuple(), HAS_PRODUCT)
 
     def test_complex(self):
-        has_component_code = unqualified_edge_code[HAS_COMPONENT]
-        node_tuple = ap1_complex_tuple
-        node_data = {
-            FUNCTION: COMPLEX,
-            MEMBERS: [
-                fos_data,
-                jun_data
-            ]
-        }
-        self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
+        node = complex_abundance(members=[fos_data, jun_data])
+
+        self.graph.add_node_from_data(node)
+        self.assertIn(node.as_tuple(), self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
-        self.assertIn(fos_tuple, self.graph)
-        self.assertIn(jun_tuple, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
-        self.assertIn(fos_tuple, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][fos_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][fos_tuple][has_component_code][RELATION])
-        self.assertIn(jun_tuple, self.graph.edge[node_tuple])
-        self.assertIn(has_component_code, self.graph.edge[node_tuple][jun_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[node_tuple][jun_tuple][has_component_code][RELATION])
+
+        assert_unqualified_edge(self, node.as_tuple(), fos_tuple, HAS_COMPONENT)
+        assert_unqualified_edge(self, node.as_tuple(), jun_tuple, HAS_COMPONENT)
 
     def test_dimer_complex(self):
         """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
@@ -748,9 +724,7 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
-        self.assertIn(egfr_tuple, self.graph.edge[egfr_dimer])
-        self.assertIn(has_component_code, self.graph.edge[egfr_dimer][egfr_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[egfr_dimer][egfr_tuple][has_component_code][RELATION])
+        assert_unqualified_edge(self, egfr_dimer, egfr_tuple, HAS_COMPONENT)
 
     def test_nested_complex(self):
         """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
@@ -762,19 +736,11 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(e2f4_tuple, self.graph)
         self.assertIn(ap1_complex_tuple, self.graph)
         self.assertEqual(4, self.graph.number_of_edges())
-        self.assertIn(fos_tuple, self.graph.edge[ap1_complex_tuple])
-        self.assertIn(has_component_code, self.graph.edge[ap1_complex_tuple][fos_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[ap1_complex_tuple][fos_tuple][has_component_code][RELATION])
-        self.assertIn(jun_tuple, self.graph.edge[ap1_complex_tuple])
-        self.assertIn(has_component_code, self.graph.edge[ap1_complex_tuple][jun_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[ap1_complex_tuple][jun_tuple][has_component_code][RELATION])
 
-        self.assertIn(has_component_code, self.graph.edge[bound_ap1_e2f4_tuple][ap1_complex_tuple])
-        self.assertEqual(HAS_COMPONENT,
-                         self.graph.edge[bound_ap1_e2f4_tuple][ap1_complex_tuple][has_component_code][RELATION])
-
-        self.assertIn(has_component_code, self.graph.edge[bound_ap1_e2f4_tuple][e2f4_tuple])
-        self.assertEqual(HAS_COMPONENT, self.graph.edge[bound_ap1_e2f4_tuple][e2f4_tuple][has_component_code][RELATION])
+        assert_unqualified_edge(self, ap1_complex_tuple, fos_tuple, HAS_COMPONENT)
+        assert_unqualified_edge(self, ap1_complex_tuple, jun_tuple, HAS_COMPONENT)
+        assert_unqualified_edge(self, bound_ap1_e2f4_tuple, ap1_complex_tuple, HAS_COMPONENT)
+        assert_unqualified_edge(self, bound_ap1_e2f4_tuple, e2f4_tuple, HAS_COMPONENT)
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):

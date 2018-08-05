@@ -13,7 +13,7 @@ from .constants import (
     FRAGMENT_STOP, FROM_LOC, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE, GMOD, GOCC_KEYWORD,
     GOCC_LATEST, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
     PARTNER_5P, PATHOLOGY, PMOD, PMOD_ORDER, PRODUCTS, PROTEIN, PYBEL_AUTOEVIDENCE, RANGE_3P, RANGE_5P, REACTANTS,
-    REACTION, RELATION, RNA, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS, rev_abundance_labels, unqualified_edge_code,
+    REACTION, RELATION, RNA, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS, rev_abundance_labels, UNQUALIFIED_EDGES
 )
 from .resources.document import make_knowledge_header
 from .utils import ensure_quotes
@@ -377,7 +377,7 @@ def _to_bel_lines_footer(graph):
     unqualified_edges_to_serialize = [
         (u, v, d)
         for u, v, d in graph.edges(data=True)
-        if d[RELATION] in unqualified_edge_code and EVIDENCE not in d
+        if d[RELATION] in UNQUALIFIED_EDGES and EVIDENCE not in d
     ]
 
     isolated_nodes_to_serialize = [

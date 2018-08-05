@@ -45,15 +45,8 @@ def get_graph_with_random_edges(graph, n_edges):
     :rtype: pybel.BELGraph
     """
     result = graph.fresh_copy()
+    result.add_edges_from(_random_edge_iterator(graph, n_edges))
 
-    result.add_edges_from(
-        (
-            (u, v, k, d)
-            if k < 0 else
-            (u, v, d)
-        )
-        for u, v, k, d in _random_edge_iterator(graph, n_edges)
-    )
     update_metadata(graph, result)
     update_node_helper(graph, result)
     return result

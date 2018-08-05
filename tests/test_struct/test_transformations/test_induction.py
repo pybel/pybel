@@ -151,17 +151,16 @@ class TestInduction(TestGraphMixin):
     def test_expand_upstream_causal_subgraph(self):
         """Test expanding on the upstream causal subgraph."""
         a, b, c, d, e, f = [protein(namespace='test', name=i) for i in string.ascii_lowercase[:6]]
-        citation, evidence = '', ''
 
         universe = BELGraph()
-        universe.add_qualified_edge(a, b, INCREASES, citation, evidence)
-        universe.add_qualified_edge(b, c, INCREASES, citation, evidence)
-        universe.add_qualified_edge(d, a, ASSOCIATION, citation, evidence)
-        universe.add_qualified_edge(e, a, INCREASES, citation, evidence)
-        universe.add_qualified_edge(f, b, DECREASES, citation, evidence)
+        universe.add_qualified_edge(a, b, INCREASES, n(), n())
+        universe.add_qualified_edge(b, c, INCREASES, n(), n())
+        universe.add_qualified_edge(d, a, ASSOCIATION, n(), n())
+        universe.add_qualified_edge(e, a, INCREASES, n(), n())
+        universe.add_qualified_edge(f, b, DECREASES, n(), n())
 
         subgraph = BELGraph()
-        subgraph.add_qualified_edge(a, b, INCREASES, citation, evidence)
+        subgraph.add_qualified_edge(a, b, INCREASES, n(), n())
 
         expand_upstream_causal(universe, subgraph)
 

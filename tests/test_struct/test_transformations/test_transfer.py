@@ -74,7 +74,6 @@ class TestTransfer(unittest.TestCase):
         self.assertEqual(9, statin_graph.number_of_nodes(), msg='original graph nodes should not be modified')
         self.assertEqual(8, statin_graph.number_of_edges(), msg='original graph edges should not be modified')
 
-    @unittest.skip('not yet sure if this is necessary')
     def test_does_not_redo(self):
         """Test that :func:`propagate_node_relations` does not add the same edges twice."""
         graph = statin_graph.copy()

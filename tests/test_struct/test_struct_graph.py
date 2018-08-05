@@ -7,14 +7,9 @@ import unittest
 from six import string_types
 
 from pybel import BELGraph
-from pybel.constants import (
-    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, IDENTIFIER, PART_OF,
-    unqualified_edge_code,
-)
+from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, IDENTIFIER
 from pybel.dsl import hgvs, protein
 from pybel.testing.utils import n
-
-PART_OF_CODE = unqualified_edge_code[PART_OF]
 
 
 class TestGraphProperties(unittest.TestCase):
@@ -122,11 +117,10 @@ class TestGetGraphProperties(unittest.TestCase):
         self.graph.add_node_from_data(test_source)
         self.graph.add_node_from_data(test_target)
 
-        test_key = n()
         test_evidence = n()
         test_pmid = n()
 
-        self.graph.add_increases(
+        test_key = self.graph.add_increases(
             test_source,
             test_target,
             citation=test_pmid,
@@ -135,7 +129,6 @@ class TestGetGraphProperties(unittest.TestCase):
                 'Species': '9606',
                 'Confidence': 'Very High'
             },
-            key=test_key,
         )
 
         citation = self.graph.get_edge_citation(test_source.as_tuple(), test_target.as_tuple(), test_key)
@@ -168,15 +161,15 @@ class TestGetGraphProperties(unittest.TestCase):
         test_source = protein(namespace='TEST', name='YFG')
         test_target = protein(namespace='TEST', name='YFG2')
 
-        self.graph.add_part_of(test_source, test_target)
+        key = self.graph.add_part_of(test_source, test_target)
 
-        citation = self.graph.get_edge_citation(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
+        citation = self.graph.get_edge_citation(test_source.as_tuple(), test_target.as_tuple(), key)
         self.assertIsNone(citation)
 
-        evidence = self.graph.get_edge_evidence(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
+        evidence = self.graph.get_edge_evidence(test_source.as_tuple(), test_target.as_tuple(), key)
         self.assertIsNone(evidence)
 
-        annotations = self.graph.get_edge_annotations(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
+        annotations = self.graph.get_edge_annotations(test_source.as_tuple(), test_target.as_tuple(), key)
         self.assertIsNone(annotations)
 
     def test_get_node_name(self):
