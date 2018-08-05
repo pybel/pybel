@@ -131,6 +131,14 @@ def get_random_node(graph, node_blacklist, invert_degrees=None):
 
 
 def _helper(rv, graph, number_edges_remaining, no_grow, invert_degrees=None):
+    """Help build a random graph.
+
+    :type rv: networkx.Graph
+    :type graph: networkx.Graph
+    :type number_edges_remaining: int
+    :type no_grow: set
+    :type invert_degrees: Optional[bool]
+    """
     original_node_count = graph.number_of_nodes()
 
     log.debug('adding remaining %d edges', number_edges_remaining)
