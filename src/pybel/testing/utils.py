@@ -39,7 +39,8 @@ def n():
 
 
 def make_dummy_namespaces(manager, graph, namespace_dict=None):
-    """
+    """Make dummy namespaces for the test.
+
     :param pybel.manager.Manager manager:
     :type namespaces: dict[str,iter[str]]
     :param pybel.BELGraph graph:
@@ -50,6 +51,9 @@ def make_dummy_namespaces(manager, graph, namespace_dict=None):
         node_names.update(namespace_dict)
 
     for keyword, names in node_names.items():
+        if keyword in graph.namespace_url and graph.namespace_url[keyword] in graph.uncached_namespaces:
+            continue
+
         url = n()
         graph.namespace_url[keyword] = url
 
@@ -65,7 +69,8 @@ def make_dummy_namespaces(manager, graph, namespace_dict=None):
 
 
 def make_dummy_annotations(manager, graph):
-    """
+    """Make dummy annotations for the test.
+
     :param pybel.manager.Manager manager:
     :param pybel.BELGraph graph:
     """

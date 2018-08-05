@@ -1247,7 +1247,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         )
         graph.add_node_from_data(node_data)
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        make_dummy_namespaces(self.manager, graph)
         network = self.manager.insert_graph(graph)
 
         self.assertEqual(0, len(network.nodes.all()))
@@ -1267,7 +1267,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url[dummy_namespace_name] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
         graph.add_node_from_data(node_data)
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        make_dummy_namespaces(self.manager, graph)
         network = self.manager.insert_graph(graph)
         self.assertEqual(0, len(network.nodes.all()))
 
@@ -1282,13 +1282,11 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.namespace_url[dummy_namespace_name] = dummy_url
         graph.uncached_namespaces.add(dummy_url)
 
-        node_data = protein(namespace='HGNC', name='YFG', variants=[
-            pmod(name='dummy', namespace=dummy_namespace_name)
-        ])
+        node_data = protein(namespace='HGNC', name='YFG', variants=pmod(name='dummy', namespace=dummy_namespace_name))
 
         graph.add_node_from_data(node_data)
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        make_dummy_namespaces(self.manager, graph)
         network = self.manager.insert_graph(graph)
 
         self.assertEqual(1, network.nodes.count())
@@ -1310,7 +1308,7 @@ class TestNoAddNode(TemporaryCacheMixin):
 
         graph.add_node_from_data(node_data)
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG']})
+        make_dummy_namespaces(self.manager, graph)
         network = self.manager.insert_graph(graph)
 
         self.assertEqual(1, network.nodes.count())
