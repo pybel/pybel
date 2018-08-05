@@ -105,11 +105,12 @@ class WeightedRandomGenerator(object):
         return self.values[self.next_index()]
 
 
-def get_random_node(graph, node_blacklist):
+def get_random_node(graph, node_blacklist, invert_degrees=None):
     """Choose a node from the graph with probabilities based on their degrees.
 
     :type graph: networkx.Graph
     :param set[tuple] node_blacklist: Nodes to filter out
+    :param Optional[bool] invert_degrees: Should the degrees be inverted? Defaults to true.
     :rtype: Optional[tuple]
     """
     try:
@@ -121,14 +122,15 @@ def get_random_node(graph, node_blacklist):
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter
         return
 
-    # More likely to choose low degree nodes to explore, so don't make hubs
-    inv_degrees = [1 / degree for degree in degrees]
+    if invert_degrees is None or invert_degrees:
+        # More likely to choose low degree nodes to explore, so don't make hubs
+        degrees = [1 / degree for degree in degrees]
 
-    wrg = WeightedRandomGenerator(nodes, inv_degrees)
+    wrg = WeightedRandomGenerator(nodes, degrees)
     return wrg.next()
 
 
-def _helper(rv, graph, number_edges_remaining, no_grow):
+def _helper(rv, graph, number_edges_remaining, no_grow, invert_degrees=None):
     original_node_count = graph.number_of_nodes()
 
     log.debug('adding remaining %d edges', number_edges_remaining)
@@ -136,7 +138,7 @@ def _helper(rv, graph, number_edges_remaining, no_grow):
 
         source, possible_step_nodes, c = None, set(), 0
         while not source or not possible_step_nodes:
-            source = get_random_node(rv, no_grow)
+            source = get_random_node(rv, no_grow, invert_degrees=invert_degrees)
 
             c += 1
             if c >= original_node_count:
@@ -163,7 +165,7 @@ def _helper(rv, graph, number_edges_remaining, no_grow):
 
 
 @transformation
-def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=None):
+def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=None, invert_degrees=None):
     """Generate a random subgraph based on weighted random walks from random seed edges.
 
     :type graph: pybel.BELGraph graph
@@ -172,6 +174,7 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
     :param Optional[int] number_seed_edges: Number of nodes to start with (which likely results in different components
      in large graphs). Defaults to :data:`SAMPLE_RANDOM_EDGE_SEED_COUNT` (5).
     :param Optional[int] seed: A seed for the random state
+    :param Optional[bool] invert_degrees: Should the degrees be inverted? Defaults to true.
     :rtype: pybel.BELGraph
     """
     if number_edges is None:
@@ -198,7 +201,7 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
     no_grow = set()
 
     number_edges_remaining = number_edges - rv.number_of_edges()
-    _helper(rv, graph, number_edges_remaining, no_grow)
+    _helper(rv, graph, number_edges_remaining, no_grow, invert_degrees=invert_degrees)
 
     log.debug('removing isolated nodes')
     remove_isolated_nodes(rv)

@@ -40,17 +40,40 @@ class TestRandom(unittest.TestCase):
 
         n = 30000
         r = Counter(
-            get_random_node(graph, set())
+            get_random_node(graph, set(), invert_degrees=False)
             for _ in range(n)
         )
 
-        print(r)
+        degree_sum = 4 + 1 + 1 + 1 + 1
 
-        self.assertAlmostEqual(4 / 8, r[1] / n, places=2)
-        self.assertAlmostEqual(1 / 8, r[2] / n, places=2)
-        self.assertAlmostEqual(1 / 8, r[3] / n, places=2)
-        self.assertAlmostEqual(1 / 8, r[4] / n, places=2)
-        self.assertAlmostEqual(1 / 8, r[5] / n, places=2)
+        self.assertAlmostEqual(4 / degree_sum, r[1] / n, places=2)
+        self.assertAlmostEqual(1 / degree_sum, r[2] / n, places=2)
+        self.assertAlmostEqual(1 / degree_sum, r[3] / n, places=2)
+        self.assertAlmostEqual(1 / degree_sum, r[4] / n, places=2)
+        self.assertAlmostEqual(1 / degree_sum, r[5] / n, places=2)
+
+    def test_random_nodes_inverted(self):
+        """Test getting random nodes."""
+        graph = nx.MultiDiGraph()
+
+        graph.add_edge(1, 2)
+        graph.add_edge(1, 3)
+        graph.add_edge(1, 4)
+        graph.add_edge(1, 5)
+
+        n = 30000
+        r = Counter(
+            get_random_node(graph, set(), invert_degrees=True)
+            for _ in range(n)
+        )
+
+        degree_sum = (1 / 4) + (1 / 1) + (1 / 1) + (1 / 1) + (1 / 1)
+
+        self.assertAlmostEqual((1 / 4) / degree_sum, r[1] / n, places=2)
+        self.assertAlmostEqual((1 / 1) / degree_sum, r[2] / n, places=2)
+        self.assertAlmostEqual((1 / 1) / degree_sum, r[3] / n, places=2)
+        self.assertAlmostEqual((1 / 1) / degree_sum, r[4] / n, places=2)
+        self.assertAlmostEqual((1 / 1) / degree_sum, r[5] / n, places=2)
 
     def test_random_sample(self):
         """Test randomly sampling a graph."""
@@ -59,8 +82,11 @@ class TestRandom(unittest.TestCase):
 
         self.assertEqual(n_edges, graph.number_of_edges())
 
-        sg = get_random_subgraph(graph, number_edges=250, number_seed_edges=5)
-        self.assertEqual(250, sg.number_of_edges())
+        sg_1 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=False)
+        self.assertEqual(250, sg_1.number_of_edges())
+
+        sg_2 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=True)
+        self.assertEqual(250, sg_2.number_of_edges())
 
     def test_random_sample_small(self):
         """Test a graph that is too small to sample."""
@@ -69,7 +95,10 @@ class TestRandom(unittest.TestCase):
 
         self.assertEqual(n_edges, graph.number_of_edges())
 
-        sg = get_random_subgraph(graph, number_edges=250, number_seed_edges=5)
+        sg_1 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=False)
+        self.assertEqual(graph.number_of_edges(), sg_1.number_of_edges(),
+                         msg='since graph is too small, the subgraph should contain the whole thing')
 
-        self.assertEqual(graph.number_of_edges(), sg.number_of_edges(),
+        sg_2 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=True)
+        self.assertEqual(graph.number_of_edges(), sg_2.number_of_edges(),
                          msg='since graph is too small, the subgraph should contain the whole thing')
