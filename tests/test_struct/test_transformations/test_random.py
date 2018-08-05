@@ -10,7 +10,7 @@ from collections import Counter
 import networkx as nx
 
 from pybel.struct.mutation.induction.random_subgraph import (
-    get_graph_with_random_edges, get_random_node, get_random_subgraph,
+    _helper, get_graph_with_random_edges, get_random_node, get_random_subgraph,
 )
 from pybel.testing.generate import generate_random_graph
 
@@ -104,3 +104,20 @@ class TestRandom(unittest.TestCase):
         sg_2 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=True)
         self.assertEqual(graph.number_of_edges(), sg_2.number_of_edges(),
                          msg='since graph is too small, the subgraph should contain the whole thing')
+
+    def test_helper_failure(self):
+        graph = nx.MultiDiGraph()
+        graph.add_edge(1, 2)
+        graph.add_edge(2, 3)
+
+        result = nx.MultiDiGraph()
+        result.add_edge(1, 2)
+
+        _helper(
+            result,
+            graph,
+            number_edges_remaining=5,
+            no_grow={1, 2, 3},
+        )
+
+        self.assertNotIn(3, result)
