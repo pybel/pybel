@@ -132,7 +132,7 @@ class TestSubdictMatching(unittest.TestCase):
 
         d = {'relation': 'yup'}
 
-        self.assertTrue(any_subdict_matches(g.edge[1][2], d))
+        self.assertTrue(any_subdict_matches(g[1][2], d))
 
 
 class TestSanitize(unittest.TestCase):

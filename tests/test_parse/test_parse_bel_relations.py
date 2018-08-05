@@ -638,7 +638,7 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual(1, self.graph.number_of_edges())
         self.assertTrue(self.graph.has_edge(source, target))
 
-        key_data = self.parser.graph.edge[source][target]
+        key_data = self.parser.graph[source][target]
         self.assertEqual(1, len(key_data))
 
         key = list(key_data)[0]
@@ -818,9 +818,9 @@ class TestRelations(TestTokenParserBase):
         cs_node = node_to_tuple(corpus_striatum)
         bg_node = node_to_tuple(basal_ganglion)
 
-        self.assertIn(bg_node, self.parser.graph.edge[cs_node])
+        self.assertIn(bg_node, self.parser.graph[cs_node])
 
-        v = list(self.parser.graph.edge[cs_node][bg_node].values())
+        v = list(self.parser.graph[cs_node][bg_node].values())
         self.assertEqual(1, len(v))
 
         v = v[0]

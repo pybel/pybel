@@ -32,10 +32,10 @@ class TestMetadata(unittest.TestCase):
             },
         )
 
-        self.assertIn(ANNOTATIONS, graph.edge[x.as_tuple()][y.as_tuple()][key])
+        self.assertIn(ANNOTATIONS, graph[x.as_tuple()][y.as_tuple()][key])
 
         strip_annotations(graph)
-        self.assertNotIn(ANNOTATIONS, graph.edge[x.as_tuple()][y.as_tuple()][key])
+        self.assertNotIn(ANNOTATIONS, graph[x.as_tuple()][y.as_tuple()][key])
 
     def test_add_and_remove_annotation(self):
         """Test adding and removing annotations.

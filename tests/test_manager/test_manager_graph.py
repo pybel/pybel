@@ -682,14 +682,14 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(il23, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
 
-        self.assertIn(il6, self.graph.edge[node_tuple])
-        edges = list(self.graph.edge[node_tuple][il6].values())
+        self.assertIn(il6, self.graph[node_tuple])
+        edges = list(self.graph[node_tuple][il6].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
         self.assertEqual(HAS_COMPONENT, data[RELATION])
 
-        self.assertIn(il23, self.graph.edge[node_tuple])
-        edges = list(self.graph.edge[node_tuple][il23].values())
+        self.assertIn(il23, self.graph[node_tuple])
+        edges = list(self.graph[node_tuple][il23].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
         self.assertEqual(HAS_COMPONENT, data[RELATION])

@@ -41,7 +41,7 @@ def edge_predicate(f):
 
         if isinstance(x, BELGraph):
             u, v, k = args[1:4]
-            return f(x.edge[u][v][k])
+            return f(x[u][v][k])
 
         return f(*args)
 
