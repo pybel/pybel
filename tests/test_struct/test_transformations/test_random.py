@@ -3,6 +3,7 @@
 """Test for functions for inducing random sub-graphs."""
 
 import random
+import sys
 import unittest
 from collections import Counter
 
@@ -14,6 +15,7 @@ from pybel.struct.mutation.induction.random_subgraph import (
 from pybel.testing.generate import generate_random_graph
 
 
+@unittest.skipIf(sys.version < (3,), 'Will not support random operations on python2')
 class TestRandom(unittest.TestCase):
     """Test random graph induction functions."""
 
