@@ -8,6 +8,8 @@ from requests.compat import urlparse
 
 from ..constants import FRAUNHOFER_RESOURCES
 from ..manager.models import Annotation, AnnotationEntry, Namespace, NamespaceEntry
+from ..struct.summary.node_summary import get_names
+from ..struct.summary import get_annotation_values_by_annotation
 
 
 def get_uri_name(url):
@@ -36,13 +38,18 @@ def n():
     return str(uuid4())[:15]
 
 
-def make_dummy_namespaces(manager, graph, namespaces):
+def make_dummy_namespaces(manager, graph, namespace_dict=None):
     """
     :param pybel.manager.Manager manager:
+    :type namespaces: dict[str,iter[str]]
     :param pybel.BELGraph graph:
-    :param dict[str,iter[str]] namespaces:
     """
-    for keyword, names in namespaces.items():
+    node_names = get_names(graph)
+
+    if namespace_dict:
+        node_names.update(namespace_dict)
+
+    for keyword, names in node_names.items():
         url = n()
         graph.namespace_url[keyword] = url
 
@@ -63,6 +70,8 @@ def make_dummy_annotations(manager, graph, annotations):
     :param pybel.BELGraph graph:
     :param dict[str,iter[str]] annotations:
     """
+    annotation_names = get_annotation_values_by_annotation(graph)
+
     for keyword, names in annotations.items():
         url = n()
         graph.annotation_url[keyword] = url

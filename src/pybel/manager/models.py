@@ -530,6 +530,8 @@ class Node(Base):
 
         if self.has_fusion:
             result[FUSION] = self.modifications[0].to_json()
+            result[FUSION][PARTNER_3P][FUNCTION] = self.type
+            result[FUSION][PARTNER_5P][FUNCTION] = self.type
 
         elif self.is_variant:
             result[VARIANTS] = sort_variant_dict_list(

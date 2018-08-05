@@ -15,58 +15,58 @@ p1 = protein(namespace=HGNC, name='a')
 p2 = protein(namespace=HGNC, name='b')
 p3 = protein(namespace=HGNC, name='c')
 
+p1_tuple = p1.as_tuple()
+p2_tuple = p2.as_tuple()
+p3_tuple = p3.as_tuple()
+
 
 class TestLeftFullJoin(unittest.TestCase):
     """Tests the variants of the left full join, including the exhaustive vs. hash algorithms and calling by function
     or magic functions"""
 
     def setUp(self):
+        """Set up tests for the left full join with two example graphs."""
         g = BELGraph()
-
-        g.add_node_from_data(p1)
-        g.add_node_from_data(p2)
-
         g.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
 
         h = BELGraph()
-
-        h.add_node_from_data(p1)
-        h.add_node_from_data(p2)
-        h.add_node_from_data(p3)
-
-        h.node[p1.as_tuple()]['EXTRANEOUS'] = 'MOST DEFINITELY'
-        h.node[p3.as_tuple()]['EXTRANEOUS'] = 'MOST DEFINITELY'
-
         h.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
         h.add_increases(p1, p2, citation='PMID2', evidence='Evidence 2')
         h.add_increases(p1, p3, citation='PMID1', evidence='Evidence 3')
+        h.node[p1_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
+        h.node[p3_tuple]['EXTRANEOUS'] = 'MOST DEFINITELY'
 
         self.g = g
         self.h = h
 
-    def help_check_initial_g(self, g):
-        self.assertEqual(2, g.number_of_nodes(), msg='initial graph G had wrong number of nodes')
-        self.assertEqual(1, g.number_of_edges(), msg='initial graph G had wrong number of edges')
-
-    def help_check_initial_h(self, h):
-        self.assertEqual(3, h.number_of_nodes(), msg='initial graph H had wrong number of nodes')
-        self.assertEqual(3, h.number_of_edges(), msg='initial graph H had wrong number of edges')
-
-    def test_initial(self):
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
+
+    def help_check_initial_g(self, graph):
+        """Test the initial G graph.
+
+        :type graph: pybel.BELGraph
+        """
+        self.assertEqual(2, graph.number_of_nodes(), msg='initial graph G had wrong number of nodes')
+        self.assertEqual(1, graph.number_of_edges(), msg='initial graph G had wrong number of edges')
+
+    def help_check_initial_h(self, graph):
+        """Test the initial H graph.
+
+        :type graph: pybel.BELGraph
+        """
+        self.assertEqual(3, graph.number_of_nodes(), msg='initial graph H had wrong number of nodes')
+        self.assertEqual(3, graph.number_of_edges(), msg='initial graph H had wrong number of edges')
 
     def help_check_result(self, j):
         """Helps check the result of left joining H into G
 
         :param pybel.BELGraph j: The resulting graph from G += H
         """
-        self.assertIn('EXTRANEOUS', j.node[p1.as_tuple()])
-        self.assertNotIn('EXTRANEOUS', j.node[p2.as_tuple()])
-        self.assertIn('EXTRANEOUS', j.node[p3.as_tuple()])
-
-        self.assertEqual('MOST DEFINITELY', j.node[p1.as_tuple()]['EXTRANEOUS'])
-        self.assertEqual('MOST DEFINITELY', j.node[p3.as_tuple()]['EXTRANEOUS'])
+        self.assertNotIn('EXTRANEOUS', j.node[p1_tuple])
+        self.assertNotIn('EXTRANEOUS', j.node[p2_tuple])
+        self.assertIn('EXTRANEOUS', j.node[p3_tuple])
+        self.assertEqual('MOST DEFINITELY', j.node[p3_tuple]['EXTRANEOUS'])
 
         self.assertEqual(3, j.number_of_nodes())
         self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format(json.dumps(j.edges(data=True), indent=2)))

@@ -39,6 +39,7 @@ __all__ = [
     'protein_fusion',
     'rna_fusion',
     'gene_fusion',
+    'BaseEntity',
 ]
 
 

@@ -13,13 +13,7 @@ class TestIdentifierParser(unittest.TestCase):
             'A': {'1', '2', '3'},
             'B': {'4', '5', '6'}
         }
-
-        self.namespace_re = {
-
-        }
-
-        self.parser = IdentifierParser(
-            namespace_dict=self.namespace_dicts)
+        self.parser = IdentifierParser(namespace_dict=self.namespace_dicts)
 
     def test_valid_1(self):
         s = 'A:3'

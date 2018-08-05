@@ -19,15 +19,12 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         """This test checks that the network can be added and dropped"""
         graph = BELGraph(name='test', version='0.0.0')
 
-        namespaces = {
-            'HGNC': ['YFG1', 'YFG2']
-        }
         annotations = {
             'Disease': ['Disease1', 'Disease2'],
             'Cell': ['Cell1']
         }
 
-        make_dummy_namespaces(self.manager, graph, namespaces)
+        make_dummy_namespaces(self.manager, graph)
         make_dummy_annotations(self.manager, graph, annotations)
 
         graph.add_increases(

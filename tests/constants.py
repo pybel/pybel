@@ -7,13 +7,11 @@ import os
 import unittest
 from json import dumps
 
-from requests.compat import urlparse
-
 from pybel import BELGraph
 from pybel.constants import (
     ABUNDANCE, ACTIVITY, ANNOTATIONS, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION,
     CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FRAGMENT, FRAUNHOFER_RESOURCES, FROM_LOC, GENE, GMOD,
+    DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FRAGMENT, FROM_LOC, GENE, GMOD,
     HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, LOCATION, METADATA_AUTHORS,
     METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_PROJECT,
     METADATA_VERSION, MIRNA, MODIFIER, NAME, NAMESPACE, OBJECT, OPENBEL_ANNOTATION_RESOURCES,
@@ -42,10 +40,6 @@ SET_CITATION_TEST = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(
 test_evidence_text = 'I read it on Twitter'
 test_set_evidence = 'SET Evidence = "{}"'.format(test_evidence_text)
 
-CHEBI_KEYWORD = 'CHEBI'
-CHEBI_URL = OPENBEL_NAMESPACE_RESOURCES + 'chebi.belns'
-CELL_LINE_KEYWORD = 'CellLine'
-CELL_LINE_URL = OPENBEL_ANNOTATION_RESOURCES + 'cell-line.belanno'
 HGNC_KEYWORD = 'HGNC'
 HGNC_URL = OPENBEL_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
@@ -214,21 +208,6 @@ expected_test_slushy_metadata = {
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
 }
-
-
-def get_uri_name(url):
-    """Get the file name from the end of the URL.
-
-    Only useful for PyBEL's testing though since it looks specifically if the file is from the weird owncloud
-    resources distributed by Fraunhofer.
-    """
-    url_parsed = urlparse(url)
-
-    if url.startswith(FRAUNHOFER_RESOURCES):
-        return url_parsed.query.split('=')[-1]
-    else:
-        url_parts = url_parsed.path.split('/')
-        return url_parts[-1]
 
 
 def help_check_hgnc(test_case, namespace_dict):

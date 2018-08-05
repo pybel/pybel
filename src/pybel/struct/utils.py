@@ -15,9 +15,16 @@ def update_metadata(source, target):
     """
     target.namespace_url.update(source.namespace_url)
     target.namespace_pattern.update(source.namespace_pattern)
+
     target.annotation_url.update(source.annotation_url)
     target.annotation_pattern.update(source.annotation_pattern)
-    target.annotation_list.update(source.annotation_list)
+
+    for keyword, values in source.annotation_list.items():
+        if keyword not in target.annotation_list:
+            target.annotation_list[keyword] = values
+        else:
+            for value in values:
+                target.annotation_list[keyword].add(value)
 
 
 def update_node_helper(source, target):

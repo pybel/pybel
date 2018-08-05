@@ -4,17 +4,20 @@ import os
 from pathlib import Path
 
 from pybel import BELGraph
-from pybel.constants import ANNOTATIONS
+from pybel.constants import ANNOTATIONS, OPENBEL_ANNOTATION_RESOURCES
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.constants import belns_dir_path, test_ns_nocache_path
 from pybel.testing.mocks import mock_bel_resources
-from tests.constants import CELL_LINE_URL, HGNC_URL
+from tests.constants import HGNC_URL
 
 ns1 = Path(os.path.join(belns_dir_path, 'disease-ontology.belns')).as_uri()
 ns1_url = 'http://resources.openbel.org/belframework/20150611/namespace/disease-ontology-ids.belns'
 
 ns2 = Path(os.path.join(belns_dir_path, 'mesh-diseases.belns')).as_uri()
 ns2_url = 'http://resources.openbel.org/belframework/20150611/namespace/mesh-diseases.belns'
+
+CELL_LINE_URL = OPENBEL_ANNOTATION_RESOURCES + 'cell-line.belanno'
+CELL_LINE_KEYWORD = 'CellLine'
 
 
 class TestDefinitionManagers(TemporaryCacheClsMixin):
@@ -87,11 +90,11 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         self.assertEqual('CLO_0001072', entry.label)
 
         graph = BELGraph()
-        graph.annotation_url['Cell'] = CELL_LINE_URL
+        graph.annotation_url[CELL_LINE_KEYWORD] = CELL_LINE_URL
 
         data = {
             ANNOTATIONS: {
-                'Cell': {
+                CELL_LINE_KEYWORD: {
                     '1321N1 cell': True
                 }
             }

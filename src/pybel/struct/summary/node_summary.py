@@ -2,10 +2,10 @@
 
 """This module contains functions that provide summaries of the nodes in a graph."""
 
-from collections import Counter
+from collections import Counter, defaultdict
 
 from ..filters.node_predicates import has_variant
-from ...constants import FUNCTION, FUSION, KIND, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, VARIANTS
+from ...constants import FUNCTION, FUSION, IDENTIFIER, KIND, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, VARIANTS
 
 __all__ = [
     'get_functions',
@@ -16,6 +16,7 @@ __all__ = [
     'get_names_by_namespace',
     'get_unused_namespaces',
     'count_variants',
+    'get_names',
 ]
 
 
@@ -94,6 +95,24 @@ def _identifier_filtered_iterator(graph):
         elif FUSION in data:
             yield data[FUSION][PARTNER_3P][NAMESPACE], data[FUSION][PARTNER_3P][NAME]
             yield data[FUSION][PARTNER_5P][NAMESPACE], data[FUSION][PARTNER_5P][NAME]
+
+        if VARIANTS in data:
+            for variant in data[VARIANTS]:
+                identifier = variant.get(IDENTIFIER)
+                if identifier is not None and NAMESPACE in identifier and NAME in identifier:
+                    yield identifier[NAMESPACE], identifier[NAME]
+
+
+def get_names(graph):
+    """Get all names for each namespace.
+
+    :type graph: pybel.BELGraph
+    :rtype: dict[str,set[str]]
+    """
+    rv = defaultdict(set)
+    for namespace, name in _identifier_filtered_iterator(graph):
+        rv[namespace].add(name)
+    return dict(rv)
 
 
 def _namespace_filtered_iterator(graph, namespace):

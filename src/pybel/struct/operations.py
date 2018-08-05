@@ -2,6 +2,8 @@
 
 import networkx as nx
 
+from .utils import update_metadata, update_node_helper
+
 __all__ = [
     'left_full_join',
     'left_outer_join',
@@ -11,40 +13,8 @@ __all__ = [
 ]
 
 
-def _left_full_node_join(g, h):
-    """Adds all nodes from ``h`` to ``g``, in-place for ``g``
-
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
-    """
-    for node in h:
-        if node in g:
-            continue
-        g.add_node(node, **h.node[node])
-
-
-def _left_full_metadata_join(g, h):
-    """Adds all metadata from ``h`` to ``g``, in-place for ``g``
-
-    :param pybel.BELGraph g: A BEL network
-    :param pybel.BELGraph h: A BEL network
-    """
-    g.namespace_url.update(h.namespace_url)
-    g.namespace_pattern.update(h.namespace_pattern)
-
-    g.annotation_url.update(h.annotation_url)
-    g.annotation_pattern.update(h.annotation_pattern)
-
-    for keyword, values in h.annotation_list.items():
-        if keyword not in g.annotation_list:
-            g.annotation_list[keyword] = values
-        else:
-            for value in values:
-                g.annotation_list[keyword].add(value)
-
-
 def left_full_join(g, h):
-    """Adds all nodes and edges from ``h`` to ``g``, in-place for ``g``
+    """Add all nodes and edges from ``h`` to ``g``, in-place for ``g``
 
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
@@ -54,18 +24,19 @@ def left_full_join(g, h):
     >>> import pybel
     >>> g = pybel.from_path('...')
     >>> h = pybel.from_path('...')
-    >>> merged = left_full_join(g, h)
+    >>> left_full_join(g, h)
     """
-    _left_full_node_join(g, h)
-    _left_full_metadata_join(g, h)
 
     for u, v, key, data in h.edges_iter(keys=True, data=True):
         if u not in g or v not in g[u] or key not in g[u][v]:
             g.add_edge(u, v, key=key, **data)
 
+    update_metadata(h, g)
+    update_node_helper(h, g)
+
 
 def left_outer_join(g, h):
-    """Only adds components from the ``h`` that are touching ``g``.
+    """Only add components from the ``h`` that are touching ``g``.
 
     Algorithm:
 
@@ -80,7 +51,7 @@ def left_outer_join(g, h):
     >>> import pybel
     >>> g = pybel.from_path('...')
     >>> h = pybel.from_path('...')
-    >>> merged = left_outer_join(g, h)
+    >>> left_outer_join(g, h)
     """
     g_nodes = set(g)
     for comp in nx.weakly_connected_components(h):
@@ -89,7 +60,7 @@ def left_outer_join(g, h):
 
 
 def _left_full_join_networks(target, networks):
-    """Full joins a list of networks to a target network
+    """Full join a list of networks to a target network
 
     The order of the networks will not impact the result.
 
@@ -103,7 +74,7 @@ def _left_full_join_networks(target, networks):
 
 
 def _left_outer_join_networks(target, networks):
-    """Outer joins a list of networks to a target network.
+    """Outer join a list of networks to a target network.
 
     Note: the order of networks will have significant results!
 
@@ -117,7 +88,7 @@ def _left_outer_join_networks(target, networks):
 
 
 def union(networks):
-    """Takes the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
+    """Take the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
     infinite.
 
     :param iter[BELGraph] networks: An iterator over BEL networks. Can't be infinite.
@@ -148,7 +119,7 @@ def union(networks):
 
 
 def left_node_intersection_join(g, h):
-    """Takes the intersection over two networks. This intersection of two graphs is defined by the
+    """Take the intersection over two networks. This intersection of two graphs is defined by the
      union of the subgraphs induced over the intersection of their nodes
 
     :param BELGraph g: A BEL network
@@ -173,7 +144,7 @@ def left_node_intersection_join(g, h):
 
 
 def node_intersection(networks):
-    """Takes the node intersection over a collection of networks into a new network. This intersection is defined
+    """Take the node intersection over a collection of networks into a new network. This intersection is defined
     the same way as by :func:`left_node_intersection_join`
 
     :param iter[BELGraph] networks: An iterable of networks. Since it's iterated over twice, it gets converted to a

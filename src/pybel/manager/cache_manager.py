@@ -916,22 +916,21 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.debug('storing graph parts: nodes')
         t = time.time()
 
-        nodes_iter = (
-            tqdm(graph, total=graph.number_of_nodes(), desc='Nodes')
-            if use_tqdm else
-            graph
-        )
+        nodes = graph.nodes()
+        if use_tqdm:
+            nodes = tqdm(nodes, total=graph.number_of_nodes(), desc='Nodes')
 
-        for node in nodes_iter:
-            namespace = graph.node[node].get(NAMESPACE)
+        for node_tuple in nodes:
+            namespace = graph.node[node_tuple].get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
                 continue  # already know this node won't be cached
 
-            node_object = self.get_or_create_node(graph, node)
+            sha512 = hash_node(node_tuple)
+            node_object = self.get_or_create_node(graph, sha512, node_tuple)
 
             if node_object is None:
-                log.warning('can not add node %s', node)
+                log.warning('can not add node %s', node_tuple)
                 continue
 
             network.nodes.append(node_object)
@@ -942,7 +941,6 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         c = 0
 
         edges = graph.edges(keys=True, data=True)
-
         if use_tqdm:
             edges = tqdm(edges, total=graph.number_of_edges(), desc='Edges')
 
@@ -1119,14 +1117,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_evidence[sha512] = evidence
         return evidence
 
-    def get_or_create_node(self, graph, node_tuple):
+    def get_or_create_node(self, graph, sha512, node_tuple):
         """Creates entry and object for given node if it does not exist.
 
         :param BELGraph graph: A BEL graph
+        :param str sha512: sha512 string
         :param tuple node_tuple: A PyBEL node tuple
         :rtype: Node
         """
-        sha512 = hash_node(node_tuple)
         if sha512 in self.object_cache_node:
             return self.object_cache_node[sha512]
 
