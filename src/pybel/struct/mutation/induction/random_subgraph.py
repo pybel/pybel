@@ -27,7 +27,7 @@ def _random_edge_iterator(graph, n_edges):
     :param int n_edges: Number of edges to randomly select from the given graph
     :rtype: iter[tuple[tuple,tuple,int,dict]]
     """
-    universe_edges = graph.edges()
+    universe_edges = list(graph.edges())
     random.shuffle(universe_edges)
 
     for u, v in universe_edges[:n_edges]:
@@ -109,7 +109,7 @@ def get_random_node(graph, node_blacklist, invert_degrees=None):
     try:
         nodes, degrees = zip(*(
             (node, degree)
-            for node, degree in sorted(graph.degree_iter(), key=itemgetter(1))
+            for node, degree in sorted(graph.degree().items(), key=itemgetter(1))
             if node not in node_blacklist
         ))
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter

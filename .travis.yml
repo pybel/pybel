@@ -29,6 +29,7 @@ env:
 
   - TOXENV=py DB=sqlite
 
+  - TOXENV=networkx2
 
 jobs:
   include:
@@ -47,6 +48,7 @@ jobs:
 matrix:
   allow_failures:
       - env: TOXENV=flake8
+      - env: TOXENV=networkx2
       # - env: TOXENV=pylint
 
 install:

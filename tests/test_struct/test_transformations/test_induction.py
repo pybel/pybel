@@ -63,7 +63,7 @@ class TestInduction(TestGraphMixin):
         graph = BELGraph()
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
-        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        a, b, c, d = [protein(namespace='test', name=str(i)) for i in range(4)]
         graph.add_directly_increases(a, b, n(), n())
         graph.add_directly_increases(b, c, n(), n())
         graph.add_directly_increases(c, d, n(), n())
@@ -72,6 +72,8 @@ class TestInduction(TestGraphMixin):
         nodes = [b.as_tuple(), c.as_tuple()]
         subgraph = get_subgraph_by_induction(graph, nodes)
 
+        self.assertIsInstance(subgraph, BELGraph)
+        self.assertNotEqual(0, len(subgraph.namespace_url), msg='improperly found metadata: {}'.format(subgraph.graph))
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
 
@@ -102,7 +104,7 @@ class TestInduction(TestGraphMixin):
         self.assertIn(d.as_tuple(), shortest_paths_nodes)
 
         subgraph = get_subgraph_by_all_shortest_paths(graph, query_nodes)
-
+        self.assertIsInstance(subgraph, BELGraph)
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
 

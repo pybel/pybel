@@ -5,12 +5,30 @@ import networkx as nx
 from .utils import update_metadata, update_node_helper
 
 __all__ = [
+    'subgraph',
     'left_full_join',
     'left_outer_join',
     'union',
     'left_node_intersection_join',
     'node_intersection',
 ]
+
+
+def subgraph(graph, nodes):
+    subgraph = graph.subgraph(nodes)
+
+    # see implementation for .copy()
+    result = graph.fresh_copy()
+    result.graph.update(subgraph.graph)
+    result.add_nodes_from(
+        (n, d.copy())
+        for n, d in subgraph.nodes(data=True)
+    )
+    result.add_edges_from(
+        (u, v, key, datadict.copy())
+        for u, v, key, datadict in subgraph.edges(keys=True, data=True)
+    )
+    return result
 
 
 def left_full_join(g, h):
@@ -57,7 +75,8 @@ def left_outer_join(g, h):
     g_nodes = set(g)
     for comp in nx.weakly_connected_components(h):
         if g_nodes.intersection(comp):
-            left_full_join(g, h.subgraph(comp))
+            h_subgraph = subgraph(h, comp)
+            left_full_join(g, h_subgraph)
 
 
 def _left_outer_join_networks(target, networks):
@@ -125,8 +144,8 @@ def left_node_intersection_join(g, h):
     """
     intersecting = set(g).intersection(set(h))
 
-    g_inter = g.subgraph(intersecting)
-    h_inter = h.subgraph(intersecting)
+    g_inter = subgraph(g, intersecting)
+    h_inter = subgraph(h, intersecting)
 
     left_full_join(g_inter, h_inter)
 
@@ -159,14 +178,12 @@ def node_intersection(networks):
     if n_networks == 1:
         return networks[0]
 
-    nodes = set(networks[0])
+    nodes = set(networks[0].nodes())
 
     for network in networks[1:]:
         nodes.intersection_update(network)
 
-    subgraphs = (
-        network.subgraph(nodes)
+    return union(
+        subgraph(network, nodes)
         for network in networks
     )
-
-    return union(subgraphs)

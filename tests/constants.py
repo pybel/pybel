@@ -126,7 +126,7 @@ def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
         u,
         v,
         dumps(kwargs, indent=2, sort_keys=True),
-        dumps(graph[u][v], indent=2, sort_keys=True)
+        str(graph[u][v])
     )
     self.assertTrue(matches, msg=msg)
 

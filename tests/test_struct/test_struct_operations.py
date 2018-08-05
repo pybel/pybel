@@ -75,7 +75,7 @@ class TestLeftFullJoin(unittest.TestCase):
         self.assertEqual(self.tag_value, j.node[p3_tuple][self.tag])
 
         self.assertEqual(3, j.number_of_nodes())
-        self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format(json.dumps(j.edges(data=True), indent=2)))
+        self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format('\n'.join(map(str, j.edges(data=True)))))
 
     def test_function(self):
         """Test full joining two networks using the function."""

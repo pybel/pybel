@@ -22,7 +22,7 @@ def get_gene_leaves(graph):
         if graph.out_degree(node) != 1:
             continue
 
-        _, _, d = graph.out_edges(node, data=True)[0]
+        _, _, d = list(graph.out_edges(node, data=True))[0]
 
         if d[RELATION] == TRANSCRIBED_TO:
             yield node
@@ -41,7 +41,7 @@ def get_rna_leaves(graph):
         if graph.out_degree(node) != 1:
             continue
 
-        _, _, d = graph.out_edges(node, data=True)[0]
+        _, _, d = list(graph.out_edges(node, data=True))[0]
 
         if d[RELATION] == TRANSLATED_TO:
             yield node

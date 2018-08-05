@@ -161,12 +161,12 @@ class TestUtils(unittest.TestCase):
 
     def test_flatten_edges(self):
         g = nx.MultiDiGraph()
-        g.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}})
+        g.add_edge(1, 2, key=5, **{'A': 'a', 'B': {'C': 'c', 'D': 'd'}})
 
         result = flatten_graph_data(g)
 
         expected = nx.MultiDiGraph()
-        expected.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B_C': 'c', 'B_D': 'd'})
+        expected.add_edge(1, 2, key=5, **{'A': 'a', 'B_C': 'c', 'B_D': 'd'})
 
         self.assertEqual(set(result.nodes()), set(expected.nodes()))
 

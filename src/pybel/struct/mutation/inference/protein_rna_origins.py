@@ -19,7 +19,7 @@ def enrich_proteins_with_rnas(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for protein_node, data in graph.nodes(data=True):
+    for protein_node, data in list(graph.nodes(data=True)):
         if data[FUNCTION] != PROTEIN:
             continue
 
@@ -45,7 +45,7 @@ def enrich_rnas_with_genes(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for rna_node, data in graph.nodes(data=True):
+    for rna_node, data in list(graph.nodes(data=True)):
         if data[FUNCTION] not in {MIRNA, RNA}:
             continue
 

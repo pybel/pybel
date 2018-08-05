@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ..utils import expand_by_edge_filter
+from ...operations import subgraph
 from ...pipeline import transformation
 
 __all__ = [
@@ -35,4 +36,4 @@ def get_subgraph_by_induction(graph, nodes):
     if all(node not in graph for node in nodes):
         return
 
-    return graph.subgraph(nodes)
+    return subgraph(graph, nodes)
