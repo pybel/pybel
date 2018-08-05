@@ -15,7 +15,7 @@ from pybel.struct.mutation.induction.random_subgraph import (
 from pybel.testing.generate import generate_random_graph
 
 
-@unittest.skipIf(sys.version_info < (3, ), 'Will not support random operations on python2')
+@unittest.skipIf(sys.version_info < (3,), 'Will not support random operations on python2')
 class TestRandom(unittest.TestCase):
     """Test random graph induction functions."""
 

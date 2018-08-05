@@ -130,10 +130,10 @@ def get_random_node(graph, node_blacklist, invert_degrees=None):
     return wrg.next()
 
 
-def _helper(rv, graph, number_edges_remaining, no_grow, invert_degrees=None):
+def _helper(result, graph, number_edges_remaining, no_grow, invert_degrees=None):
     """Help build a random graph.
 
-    :type rv: networkx.Graph
+    :type result: networkx.Graph
     :type graph: networkx.Graph
     :type number_edges_remaining: int
     :type no_grow: set
@@ -146,7 +146,7 @@ def _helper(rv, graph, number_edges_remaining, no_grow, invert_degrees=None):
 
         source, possible_step_nodes, c = None, set(), 0
         while not source or not possible_step_nodes:
-            source = get_random_node(rv, no_grow, invert_degrees=invert_degrees)
+            source = get_random_node(result, no_grow, invert_degrees=invert_degrees)
 
             c += 1
             if c >= original_node_count:
@@ -159,7 +159,7 @@ def _helper(rv, graph, number_edges_remaining, no_grow, invert_degrees=None):
                 continue  # maybe do something else?
 
             # Only keep targets in the original graph that aren't in the result graph
-            possible_step_nodes = set(graph[source]) - set(rv[source])
+            possible_step_nodes = set(graph[source]) - set(result[source])
 
             if not possible_step_nodes:
                 no_grow.add(source)  # there aren't any possible nodes to step to, so try growing from somewhere else
@@ -169,7 +169,7 @@ def _helper(rv, graph, number_edges_remaining, no_grow, invert_degrees=None):
         # it's not really a big deal which, but it might be possible to weight this by the utility of edges later
         key, attr_dict = random.choice(list(graph[source][step_node].items()))
 
-        rv.add_edge(source, step_node, key=key, **attr_dict)
+        result.add_edge(source, step_node, key=key, **attr_dict)
 
 
 @transformation
@@ -203,19 +203,22 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
               number_edges, seed)
 
     # Get initial graph with `number_seed_edges` edges
-    rv = get_graph_with_random_edges(graph, number_seed_edges)
+    result = get_graph_with_random_edges(graph, number_seed_edges)
 
-    # This is the set of nodes that should no longer be chosen to grow from
-    no_grow = set()
-
-    number_edges_remaining = number_edges - rv.number_of_edges()
-    _helper(rv, graph, number_edges_remaining, no_grow, invert_degrees=invert_degrees)
+    number_edges_remaining = number_edges - result.number_of_edges()
+    _helper(
+        result,
+        graph,
+        number_edges_remaining,
+        no_grow=set(),  # This is the set of nodes that should no longer be chosen to grow from
+        invert_degrees=invert_degrees,
+    )
 
     log.debug('removing isolated nodes')
-    remove_isolated_nodes(rv)
+    remove_isolated_nodes(result)
 
-    log.debug('updating metadata')
-    update_node_helper(graph, rv)
-    update_metadata(graph, rv)
+    # update metadata
+    update_node_helper(graph, result)
+    update_metadata(graph, result)
 
-    return rv
+    return result
