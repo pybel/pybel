@@ -36,6 +36,7 @@ def _random_edge_iterator(graph, n_edges):
         yield u, v, k, graph[u][v][k]
 
 
+@transformation
 def get_graph_with_random_edges(graph, n_edges):
     """Build a new graph from a seeding of edges.
 
@@ -44,7 +45,7 @@ def get_graph_with_random_edges(graph, n_edges):
     :rtype: pybel.BELGraph
     """
     result = graph.fresh_copy()
-
+    
     result.add_edges_from(
         (
             (u, v, k, d)

@@ -145,20 +145,20 @@ class TestLeftFullOuterJoin(unittest.TestCase):
         self.assertEqual(2, g.number_of_nodes())
         self.assertEqual({1, 2}, set(g))
         self.assertEqual(1, g.number_of_edges())
-        self.assertEqual({(1, 2)}, set(g.edges_iter()))
+        self.assertEqual({(1, 2)}, set(g.edges()))
 
     def help_check_initial_h(self, h):
         self.assertEqual(6, h.number_of_nodes())
         self.assertEqual({1, 3, 4, 5, 6, 7}, set(h))
         self.assertEqual(3, h.number_of_edges())
-        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(h.edges_iter()))
+        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(h.edges()))
 
     def help_check_result(self, j):
         """After H has been full outer joined into G, this is what it should be"""
         self.assertEqual(4, j.number_of_nodes())
         self.assertEqual({1, 2, 3, 4}, set(j))
         self.assertEqual(3, j.number_of_edges())
-        self.assertEqual({(1, 2), (1, 3), (1, 4)}, set(j.edges_iter()))
+        self.assertEqual({(1, 2), (1, 3), (1, 4)}, set(j.edges()))
 
     def test_in_place_type_failure(self):
         with self.assertRaises(TypeError):
@@ -220,7 +220,7 @@ class TestInnerJoin(unittest.TestCase):
         self.assertEqual(6, graph.number_of_nodes())
         self.assertEqual({1, 3, 4, 5, 6, 7}, set(graph))
         self.assertEqual(3, graph.number_of_edges())
-        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(graph.edges_iter()))
+        self.assertEqual({(1, 3), (1, 4), (5, 6)}, set(graph.edges()))
 
     def test_initialize(self):
         self.help_check_initialize_g(self.g)
@@ -230,7 +230,7 @@ class TestInnerJoin(unittest.TestCase):
         self.assertEqual(2, j.number_of_nodes())
         self.assertEqual({1, 3}, set(j))
         self.assertEqual(1, j.number_of_edges())
-        self.assertEqual({(1, 3), }, set(j.edges_iter()))
+        self.assertEqual({(1, 3), }, set(j.edges()))
 
     def test_in_place_type_failure(self):
         with self.assertRaises(TypeError):

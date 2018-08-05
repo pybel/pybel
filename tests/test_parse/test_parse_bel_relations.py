@@ -971,37 +971,3 @@ class TestCustom(unittest.TestCase):
 
         with self.assertRaises(MissingNamespaceNameWarning):
             self.parser.protein.parseString(s)
-
-
-class TestWrite(TestTokenParserBase):
-    def test_1(self):
-        cases = [
-            ('abundance(CHEBI:"superoxide")', 'a(CHEBI:superoxide)'),
-            ('g(HGNC:AKT1,var(p.Phe508del))', 'g(HGNC:AKT1, var(p.Phe508del))'),
-            ('geneAbundance(HGNC:AKT1, variant(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))',
-             'g(HGNC:AKT1, var(c.1521_1523delCTT), var(c.308G>A), var(p.Phe508del))'),
-            ('p(HGNC:MAPT,proteinModification(P))', 'p(HGNC:MAPT, pmod(Ph))'),
-            ('proteinAbundance(HGNC:SFN)', 'p(HGNC:SFN)'),
-            ('complex(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'complex(p(HGNC:SFN), p(HGNC:YWHAB))'),
-            ('composite(proteinAbundance(HGNC:SFN), p(HGNC:YWHAB))', 'composite(p(HGNC:SFN), p(HGNC:YWHAB))'),
-            ('reaction(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"oxygen"),a(CHEBI:"hydrogen peroxide")))',
-             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
-            ('rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))',
-             'rxn(reactants(a(CHEBI:superoxide)), products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:oxygen)))'),
-            ('g(HGNC:AKT1, geneModification(M))', 'g(HGNC:AKT1, gmod(Me))'),
-            'g(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))',
-            'g(fus(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.312_5034))',
-            'g(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.?_5034))',
-            ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'),
-            ('g(HGNC:CHCHD4, fusion(HGNC:AIFM1, ?, ?))', 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'),
-            'g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))',
-        ]
-
-        self.parser.bel_term.addParseAction(self.parser.handle_term)
-
-        for case in cases:
-            source_bel, expected_bel = case if 2 == len(case) else (case, case)
-
-            result = self.parser.bel_term.parseString(source_bel)
-            bel = self.graph.node_to_bel(node_to_tuple(result))
-            self.assertEqual(expected_bel, bel)

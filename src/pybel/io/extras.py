@@ -41,7 +41,7 @@ def to_graphml(graph, file):
             graph.node_to_bel(u),
             graph.node_to_bel(v),
             key=key,
-            interaction=data[RELATION]
+            interaction=data[RELATION],
         )
 
     nx.write_graphml(g, file)
@@ -64,7 +64,7 @@ def to_csv(graph, file=None, sep='\t'):
     :param file file: A writable file or file-like. Defaults to stdout.
     :param str sep: The separator. Defaults to tab.
     """
-    for u, v, data in graph.edges_iter(data=True):
+    for u, v, data in graph.edges(data=True):
         print(
             graph.edge_to_bel(u, v, data=data, sep=sep),
             json.dumps(data),
@@ -89,7 +89,7 @@ def to_sif(graph, file=None, sep='\t'):
     :param file file: A writable file or file-like. Defaults to stdout.
     :param str sep: The separator. Defaults to tab.
     """
-    for u, v, data in graph.edges_iter(data=True):
+    for u, v, data in graph.edges(data=True):
         print(
             graph.edge_to_bel(u, v, data=data, sep=sep),
             file=file
@@ -111,7 +111,7 @@ def to_gsea(graph, file=None):
     print('# {}'.format(graph.name), file=file)
     nodes = {
         data[NAME]
-        for _, data in graph.nodes_iter(data=True)
+        for _, data in graph.nodes(data=True)
         if NAMESPACE in data and data[NAMESPACE] == 'HGNC'
     }
     for node in sorted(nodes):

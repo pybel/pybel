@@ -9,8 +9,7 @@ from collections import Counter
 import networkx as nx
 
 from pybel.struct.mutation.induction.random_subgraph import (
-    get_graph_with_random_edges, get_random_node,
-    get_random_subgraph,
+    get_graph_with_random_edges, get_random_node, get_random_subgraph,
 )
 from pybel.testing.generate import generate_random_graph
 

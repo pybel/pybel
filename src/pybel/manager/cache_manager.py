@@ -941,13 +941,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         t = time.time()
         c = 0
 
-        edges_iter = (
-            tqdm(graph.edges_iter(data=True), total=graph.number_of_edges(), desc='Edges')
+        edges = (
+            tqdm(graph.edges(data=True), total=graph.number_of_edges(), desc='Edges')
             if use_tqdm else
-            graph.edges_iter(data=True)
+            graph.edges(data=True)
         )
 
-        for u, v, data in edges_iter:
+        for u, v, data in edges:
             if hash_node(u) not in self.object_cache_node:
                 log.debug('Skipping uncached node: %s', u)
                 continue

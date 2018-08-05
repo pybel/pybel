@@ -129,6 +129,14 @@ def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, n
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
         to_neo4j(g, neo_graph, neo_context)
 
+    click.secho('Statistics', bold=True)
+    click.secho('Number of Nodes: ', nl=False, color='green')
+    click.echo(g.number_of_nodes())
+    click.secho('Number of Edges: ', nl=False, color='green')
+    click.echo(g.number_of_edges())
+    click.secho('Number of Errors: ', nl=False, color='green')
+    click.echo(len(g.warnings))
+
     sys.exit(0 if 0 == len(g.warnings) else 1)
 
 

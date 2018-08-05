@@ -91,17 +91,20 @@ from .manager import cache_manager, database_io
 from .manager.cache_manager import *
 from .manager.database_io import *
 from .struct import *
+from .utils import get_version
 
 __all__ = (
-    struct.__all__ +
-    io.__all__ +
-    canonicalize.__all__ +
-    database_io.__all__ +
-    cache_manager.__all__ +
-    examples.__all__
+        struct.__all__ +
+        io.__all__ +
+        canonicalize.__all__ +
+        database_io.__all__ +
+        cache_manager.__all__ +
+        examples.__all__ + [
+            'get_version',
+        ]
 )
 
-__version__ = '0.11.11-dev'
+__version__ = '0.11.12-dev'
 
 __title__ = 'PyBEL'
 __description__ = 'Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)'

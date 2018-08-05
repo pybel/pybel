@@ -29,6 +29,7 @@ def generate_random_graph(n_nodes, n_edges, namespace='NS'):
         for i in range(1, n_nodes)
     ]
 
+    # TODO is there a better way to randomly sample without replacement from an iterator?
     edges = list(itt.combinations(nodes, r=2))
     shuffle(edges)
 

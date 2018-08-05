@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.11.11 <https://github.com/pybel/pybel/compare/v0.11.10...0.11.11>`_ - 2018-07-31
+-----------------------------------------------------------------------------------
+Added
+~~~~~
+- Automatic generation of CLI documentation with ``sphinx-click``
+- Several edge creation convenience functions to the ``BELGraph``
+- Graph summary functions
+
+Changed
+~~~~~~~
+- Improve Drop networks (Thanks @scolby33) (https://github.com/pybel/pybel/pull/319)
+- Huge improvements to documentation and code style reccomended by flake8
+
+Fixed
+~~~~~
+- Fixed handling of tuples (64d0685)
+
+Removed
+~~~~~~~
+- Remove function ``BELGraph.iter_data``
+
 `0.11.10 <https://github.com/pybel/pybel/compare/v0.11.9...0.11.10>`_ - 2018-07-23
 ----------------------------------------------------------------------------------
 Added

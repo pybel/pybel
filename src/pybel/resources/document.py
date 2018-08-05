@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Utilities for reading BEL Script."""
+
 from __future__ import absolute_import, print_function, unicode_literals
 
 import itertools as itt
@@ -16,14 +18,15 @@ from ..constants import VERSION
 log = logging.getLogger(__name__)
 
 
-def sanitize_file_line_iter(f, note_char=':'):
-    """Enumerates the given lines and removes empty lines/comments
+def sanitize_file_line_iter(file, note_char=':'):
+    """Clean a line iterator by removing extra whitespace, blank lines, comment lines, and log nodes.
 
-    :param iter[str] f: An iterable over strings
+    :param iter[str] file: An iterable over the lines in a BEL Script
     :param str note_char: The character sequence denoting a special note
+    :returns: An iterator over the line number and the lines that should be processed
     :rtype: iter[tuple[int,str]]
     """
-    for line_number, line in enumerate(f, start=1):
+    for line_number, line in enumerate(file, start=1):
         line = line.strip()
 
         if not line:
@@ -37,34 +40,34 @@ def sanitize_file_line_iter(f, note_char=':'):
         yield line_number, line
 
 
-def sanitize_file_lines(f):
-    """Enumerates a line iterator and returns the pairs of (line number, line) that are cleaned
+def sanitize_file_lines(file):
+    """Enumerate a line iterator and returns the pairs of (line number, line) that are cleaned.
 
-    :param iter[str] f: An iterable of strings
+    :param iter[str] file: An iterable over the lines in a BEL Script
     :rtype: iter[tuple[int,str]]
     """
-    it = sanitize_file_line_iter(f)
+    line_iterator = sanitize_file_line_iter(file)
 
-    for line_number, line in it:
+    for line_number, line in line_iterator:
         if line.endswith('\\'):
             log.log(4, 'Multiline quote starting on line: %d', line_number)
             line = line.strip('\\').strip()
-            next_line_number, next_line = next(it)
+            next_line_number, next_line = next(line_iterator)
             while next_line.endswith('\\'):
                 log.log(3, 'Extending line: %s', next_line)
                 line += " " + next_line.strip('\\').strip()
-                next_line_number, next_line = next(it)
+                next_line_number, next_line = next(line_iterator)
             line += " " + next_line.strip()
             log.log(3, 'Final line: %s', line)
 
         elif 1 == line.count('"'):
             log.log(4, 'PyBEL013 Missing new line escapes [line: %d]', line_number)
-            next_line_number, next_line = next(it)
+            next_line_number, next_line = next(line_iterator)
             next_line = next_line.strip()
             while not next_line.endswith('"'):
                 log.log(3, 'Extending line: %s', next_line)
                 line = '{} {}'.format(line.strip(), next_line)
-                next_line_number, next_line = next(it)
+                next_line_number, next_line = next(line_iterator)
                 next_line = next_line.strip()
             line = '{} {}'.format(line, next_line)
             log.log(3, 'Final line: %s', line)
@@ -77,7 +80,7 @@ def sanitize_file_lines(f):
 
 
 def split_file_to_annotations_and_definitions(file):
-    """Enumerates a line iterable and splits into 3 parts
+    """Enumerate a line iterable and splits into 3 parts.
 
     :param iter[str] file:
     :rtype: tuple[list[str],list[str],list[str]]
@@ -107,7 +110,7 @@ def split_file_to_annotations_and_definitions(file):
 
 def make_document_metadata(name, version=None, contact=None, description=None, authors=None, copyright=None,
                            licenses=None, disclaimer=None):
-    """Builds a list of lines for the document metadata section of a BEL document
+    """Build a list of lines for the document metadata section of a BEL document.
 
     :param str name: The unique name for this BEL document
     :param Optional[str] version: The version. Defaults to the current date in ``YYYYMMDD`` format.
@@ -151,10 +154,9 @@ def make_document_metadata(name, version=None, contact=None, description=None, a
 
 
 def make_document_namespaces(namespace_url=None, namespace_patterns=None):
-    """Builds a list of lines for the namespace definitions
+    """Iterate over lines for the namespace definitions.
 
     :param Optional[dict[str,str]] namespace_url: dictionary of {str name: str URL} of namespaces
-    :param Optional[dict[str,str]] namespace_owl: dictionary of {str name: str URL} of namespaces
     :param Optional[dict[str,str]] namespace_patterns: A dictionary of {str name: str regex}
     :return: An iterator over the lines for the namespace definitions
     :rtype: iter[str]
@@ -178,10 +180,9 @@ def make_document_namespaces(namespace_url=None, namespace_patterns=None):
 
 
 def make_document_annotations(annotation_url=None, annotation_patterns=None, annotation_list=None):
-    """Builds a list of lines for the annotation definitions
+    """Iterate over lines for the annotation definitions.
 
     :param Optional[dict[str,str]] annotation_url: A dictionary of {str name: str URL} of annotations
-    :param Optional[dict[str,str]] annotation_owl: A dictionary of {str name: str URL} of annotations from OWL
     :param Optional[dict[str,str]] annotation_patterns: A dictionary of {str name: str regex}
     :param Optional[dict[str,set[str]]] annotation_list: A dictionary of {str name: set of name str}
     :return: An iterator over the lines for the annotation definitions
@@ -210,21 +211,19 @@ def make_document_annotations(annotation_url=None, annotation_patterns=None, ann
 def make_knowledge_header(name, version=None, description=None, authors=None, contact=None, copyright=None,
                           licenses=None, disclaimer=None, namespace_url=None, namespace_patterns=None,
                           annotation_url=None, annotation_patterns=None, annotation_list=None, ):
-    """Iterates over the strings for the header of a BEL document, with standard document metadata, definitions.
+    """Iterate over lines for the header of a BEL document, with standard document metadata and definitions.
 
     :param str name: The unique name for this BEL document
-    :param str contact: The email address of the maintainer
-    :param str description: A description of the contents of this document
-    :param str authors: The authors of this document
-    :param str version: The version. Defaults to current date in format ``YYYYMMDD``.
-    :param str copyright: Copyright information about this document
-    :param str licenses: The license applied to this document
-    :param str disclaimer: The disclaimer for this document
+    :param Optional[str] version: The version. Defaults to current date in format ``YYYYMMDD``.
+    :param Optional[str] description: A description of the contents of this document
+    :param Optional[str] authors: The authors of this document
+    :param Optional[str] contact: The email address of the maintainer
+    :param Optional[str] copyright: Copyright information about this document
+    :param Optional[str] licenses: The license applied to this document
+    :param Optional[str] disclaimer: The disclaimer for this document
     :param Optional[dict[str,str]] namespace_url: an optional dictionary of {str name: str URL} of namespaces
-    :param Optional[dict[str,str]] namespace_owl: an optional dictionary of {str name: str URL} of namespaces
     :param Optional[dict[str,str]] namespace_patterns: An optional dictionary of {str name: str regex} namespaces
     :param Optional[dict[str,str]] annotation_url: An optional dictionary of {str name: str URL} of annotations
-    :param Optional[dict[str,str]] annotation_owl: An optional dictionary of {str name: str URL} of OWL annotations
     :param Optional[dict[str,str]] annotation_patterns: An optional dictionary of {str name: str regex} of regex
      annotations
     :param Optional[dict[str,set[str]]] annotation_list: An optional dictionary of {str name: set of names} of list

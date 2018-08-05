@@ -21,14 +21,14 @@ def _build_collapse_to_gene_dict(graph):
     collapse_dict = defaultdict(set)
     r2g = {}
 
-    for gene_node, rna_node, d in graph.edges_iter(data=True):
+    for gene_node, rna_node, d in graph.edges(data=True):
         if d[RELATION] != TRANSCRIBED_TO:
             continue
 
         collapse_dict[gene_node].add(rna_node)
         r2g[rna_node] = gene_node
 
-    for rna_node, protein_node, d in graph.edges_iter(data=True):
+    for rna_node, protein_node, d in graph.edges(data=True):
         if d[RELATION] != TRANSLATED_TO:
             continue
 

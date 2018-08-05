@@ -474,7 +474,7 @@ class Hgvs(Variant):
 
         :rtype: str
         """
-        return 'var({})'.format(self[IDENTIFIER])
+        return 'var("{}")'.format(self[IDENTIFIER])
 
 
 hgvs = Hgvs
@@ -552,9 +552,9 @@ class Fragment(Variant):
         :rtype: str
         """
         if FRAGMENT_MISSING in self:
-            res = '?'
+            res = '"?"'
         else:
-            res = '{}_{}'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
+            res = '"{}_{}"'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
 
         if FRAGMENT_DESCRIPTION in self:
             res += ', "{}"'.format(self[FRAGMENT_DESCRIPTION])
@@ -904,7 +904,7 @@ missing_fusion_range = MissingFusionRange
 
 
 class EnumeratedFusionRange(FusionRangeBase):
-    """Creates a fusion range data dictionary"""
+    """Creates a fusion range data dictionary."""
 
     def __init__(self, reference, start, stop):
         """
@@ -1000,7 +1000,7 @@ class FusionBase(BaseEntity):
 
         :rtype: str
         """
-        return "{}(fus({}:{}, {}, {}:{}, {}))".format(
+        return '{}(fus({}:{}, "{}", {}:{}, "{}"))'.format(
             rev_abundance_labels[self[FUNCTION]],
             self[FUSION][PARTNER_5P][NAMESPACE],
             self[FUSION][PARTNER_5P][NAME],
