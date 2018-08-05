@@ -291,9 +291,7 @@ class TestGene(TestTokenParserBase):
 
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
-    def test_gene_fusion_1(self):
-        self.maxDiff = None
-        statement = 'g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))'
+    def _help_test_gene_fusion_1(self, statement):
         result = self.parser.gene.parseString(statement)
         expected_dict = {
             FUNCTION: GENE,
@@ -322,12 +320,15 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))', canonical_bel)
 
-    def test_gene_fusion_2(self):
-        self.maxDiff = None
-        statement = 'g(fus(HGNC:TMPRSS2, c.1_?, HGNC:ERG, c.312_5034))'
+    def test_gene_fusion_1(self):
+        # no quotes
+        self._help_test_gene_fusion_1('g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))')
+        # quotes
+        self._help_test_gene_fusion_1('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))')
+
+    def _help_test_gene_fusion_2(self, statement):
         result = self.parser.gene.parseString(statement)
         expected_dict = {
             FUNCTION: GENE,
@@ -356,12 +357,15 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_?", HGNC:ERG, "c.312_5034"))', canonical_bel)
 
-    def test_gene_fusion_3(self):
-        self.maxDiff = None
-        statement = 'g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, c.312_5034))'
+    def test_gene_fusion_2(self):
+        # no quotes
+        self._help_test_gene_fusion_2('g(fus(HGNC:TMPRSS2, c.1_?, HGNC:ERG, c.312_5034))')
+        # correct
+        self._help_test_gene_fusion_2('g(fus(HGNC:TMPRSS2, "c.1_?", HGNC:ERG, "c.312_5034"))')
+
+    def _help_test_gene_fusion_3(self, statement):
         result = self.parser.gene.parseString(statement)
         expected_dict = {
             FUNCTION: GENE,
@@ -387,12 +391,15 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "c.312_5034"))', canonical_bel)
 
-    def test_gene_fusion_legacy_1(self):
-        self.maxDiff = None
-        statement = 'g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
+    def test_gene_fusion_3(self):
+        # no quotes
+        self._help_test_gene_fusion_3('g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, c.312_5034))')
+        # correct
+        self._help_test_gene_fusion_3('g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "c.312_5034"))')
+
+    def _help_test_gene_fusion_legacy_1(self, statement):
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
@@ -425,11 +432,18 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = 'g(fus(HGNC:BCR, c.?_1875, HGNC:JAK2, c.2626_?))'
+        expected_canonical_bel = 'g(fus(HGNC:BCR, "c.?_1875", HGNC:JAK2, "c.2626_?"))'
         self.assertEqual(expected_canonical_bel, canonical_bel)
 
-    def test_gene_fusion_legacy_2(self):
-        statement = 'g(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
+    def test_gene_fusion_legacy_1(self):
+        # legacy
+        self._help_test_gene_fusion_legacy_1('g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))')
+        # no quotes
+        self._help_test_gene_fusion_legacy_1('g(fus(HGNC:BCR, c.?_1875, HGNC:JAK2, c.2626_?))')
+        # correct
+        self._help_test_gene_fusion_legacy_1('g(fus(HGNC:BCR, "c.?_1875", HGNC:JAK2, "c.2626_?"))')
+
+    def _help_test_gene_fusion_legacy_2(self, statement):
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
@@ -452,8 +466,15 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = 'g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('g(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))', canonical_bel)
+
+    def test_gene_fusion_legacy_2(self):
+        # legacy
+        self._help_test_gene_fusion_legacy_2('g(HGNC:CHCHD4, fusion(HGNC:AIFM1))')
+        # no quotes
+        self._help_test_gene_fusion_legacy_2('g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))')
+        # correct
+        self._help_test_gene_fusion_legacy_2('g(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))')
 
     def test_gene_variant_snp(self):
         """2.2.2 SNP"""
@@ -732,8 +753,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_node(parent, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
         self.assert_has_edge(parent, node, relation=HAS_VARIANT)
 
-    def test_protein_fusion_1(self):
-        statement = 'p(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))'
+    def _help_test_protein_fusion_1(self, statement):
         result = self.parser.protein.parseString(statement)
         expected_dict = {
             FUNCTION: PROTEIN,
@@ -761,12 +781,15 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_node(expected_node)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('p(fus(HGNC:TMPRSS2, "p.1_79", HGNC:ERG, "p.312_5034"))', canonical_bel)
 
-    def test_protein_fusion_legacy_1(self):
-        self.maxDiff = None
-        statement = 'p(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
+    def test_protein_fusion_1(self):
+        # no quotes
+        self._help_test_protein_fusion_1('p(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))')
+        # quotes
+        self._help_test_protein_fusion_1('p(fus(HGNC:TMPRSS2, "p.1_79", HGNC:ERG, "p.312_5034"))')
+
+    def _help_test_protein_fusion_legacy_1(self, statement):
         result = self.parser.protein.parseString(statement)
 
         expected_dict = {
@@ -794,11 +817,17 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_node(expected_node)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = 'p(fus(HGNC:BCR, p.?_1875, HGNC:JAK2, p.2626_?))'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('p(fus(HGNC:BCR, "p.?_1875", HGNC:JAK2, "p.2626_?"))', canonical_bel)
 
-    def test_protein_fusion_legacy_2(self):
-        statement = 'p(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
+    def test_protein_fusion_legacy_1(self):
+        # legacy (BEL 1.0)
+        self._help_test_protein_fusion_legacy_1('p(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))')
+        # missing quotes
+        self._help_test_protein_fusion_legacy_1('p(fus(HGNC:BCR, p.?_1875, HGNC:JAK2, p.2626_?))')
+        # correct
+        self._help_test_protein_fusion_legacy_1('p(fus(HGNC:BCR, "p.?_1875", HGNC:JAK2, "p.2626_?"))')
+
+    def _help_test_protein_legacy_fusion_2(self, statement):
         result = self.parser.protein.parseString(statement)
 
         expected_dict = {
@@ -817,11 +846,19 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_node(expected_node)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = 'p(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('p(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))', canonical_bel)
 
-    def test_protein_trunc_1(self):
-        statement = 'p(HGNC:AKT1, trunc(40))'
+    def test_protein_fusion_legacy_2(self):
+        # legacy (BEL 1.0)
+        self._help_test_protein_legacy_fusion_2('proteinAbundance(HGNC:CHCHD4, fusion(HGNC:AIFM1))')
+        # legacy shorthand (BEL 1.0)
+        self._help_test_protein_legacy_fusion_2('p(HGNC:CHCHD4, fus(HGNC:AIFM1))')
+        # missing quotes
+        self._help_test_protein_legacy_fusion_2('p(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))')
+        # correct
+        self._help_test_protein_legacy_fusion_2('p(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))')
+
+    def _help_test_protein_trunc_1(self, statement):
         result = self.parser.protein.parseString(statement)
 
         expected_node = PROTEIN, 'HGNC', 'AKT1', (HGVS, 'p.40*')
@@ -835,6 +872,14 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_node(protein_node, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
 
         self.assert_has_edge(protein_node, expected_node, relation=HAS_VARIANT)
+
+    def test_protein_trunc_1(self):
+        # legacy
+        self._help_test_protein_trunc_1('p(HGNC:AKT1, trunc(40))')
+        # missing quotes
+        self._help_test_protein_trunc_1('p(HGNC:AKT1, var(p.40*))')
+        # correct
+        self._help_test_protein_trunc_1('p(HGNC:AKT1, var("p.40*"))')
 
     def test_protein_trunc_2(self):
         statement = 'p(HGNC:AKT1, var(p.Cys40*))'
@@ -1181,9 +1226,7 @@ class TestRna(TestTokenParserBase):
 
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
-    def test_rna_fusion_1(self):
-        """2.6.1 RNA abundance of fusion with known breakpoints"""
-        statement = 'r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))'
+    def _help_test_rna_fusion_1(self, statement):
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -1210,12 +1253,19 @@ class TestRna(TestTokenParserBase):
         self.assert_has_node(expected_node)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        # TODO remove all of these: expected_canonical_bel = statement
+        self.assertEqual('r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))', canonical_bel)
 
-    def test_rna_fusion_2(self):
-        """2.6.1 RNA abundance of fusion with unspecified breakpoints"""
-        statement = 'r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))'
+    def test_rna_fusion_known_breakpoints(self):
+        """Test RNA fusions (2.6.1) with known breakpoints (2.6.1)."""
+        # missing quotes
+        self._help_test_rna_fusion_1('r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))')
+        # correct (short form)
+        self._help_test_rna_fusion_1('r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))')
+        # correct (long form)
+        self._help_test_rna_fusion_1('rnaAbundance(fusion(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))')
+
+    def _help_test_rna_fusion_unspecified_breakpoints(self, statement):
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -1236,11 +1286,18 @@ class TestRna(TestTokenParserBase):
         expected_node = node_to_tuple(result)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = statement
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))', canonical_bel)
 
-    def test_rna_fusion_legacy_1(self):
-        statement = 'r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))'
+    def test_rna_fusion_unspecified_breakpoints(self):
+        """Test RNA fusions (2.6.1) with unspecified breakpoints."""
+        # missing quotes
+        self._help_test_rna_fusion_unspecified_breakpoints('r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))')
+        # correct (short form)
+        self._help_test_rna_fusion_unspecified_breakpoints('r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))')
+        # correct (long form)
+        self._help_test_rna_fusion_unspecified_breakpoints('rnaAbundance(fusion(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))')
+
+    def _help_test_rna_fusion_legacy_1(self, statement):
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -1268,11 +1325,17 @@ class TestRna(TestTokenParserBase):
         self.assert_has_node(expected_node)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = 'r(fus(HGNC:BCR, r.?_1875, HGNC:JAK2, r.2626_?))'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('r(fus(HGNC:BCR, "r.?_1875", HGNC:JAK2, "r.2626_?"))', canonical_bel)
 
-    def test_rna_fusion_legacy_2(self):
-        statement = 'r(HGNC:CHCHD4, fusion(HGNC:AIFM1))'
+    def test_rna_fusion_legacy_1(self):
+        # legacy
+        self._help_test_rna_fusion_legacy_1('r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))')
+        # no quotes
+        self._help_test_rna_fusion_legacy_1('r(fus(HGNC:BCR, r.?_1875, HGNC:JAK2, r.2626_?))')
+        # correct
+        self._help_test_rna_fusion_legacy_1('r(fus(HGNC:BCR, "r.?_1875", HGNC:JAK2, "r.2626_?"))')
+
+    def _help_test_rna_fusion_legacy_2(self, statement):
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
@@ -1290,8 +1353,15 @@ class TestRna(TestTokenParserBase):
         self.assert_has_node(expected_node)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
-        expected_canonical_bel = 'r(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))'
-        self.assertEqual(expected_canonical_bel, canonical_bel)
+        self.assertEqual('r(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))', canonical_bel)
+
+    def test_rna_fusion_legacy_2(self):
+        # legacy
+        self._help_test_rna_fusion_legacy_2('r(HGNC:CHCHD4, fusion(HGNC:AIFM1))')
+        # no quotes
+        self._help_test_rna_fusion_legacy_2('r(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))')
+        # correct
+        self._help_test_rna_fusion_legacy_2('r(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))')
 
     def test_rna_variant_codingReference(self):
         """2.2.2 RNA coding reference sequence"""

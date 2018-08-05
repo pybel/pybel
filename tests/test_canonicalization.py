@@ -113,14 +113,14 @@ class TestCanonicalize(unittest.TestCase):
             partner_3p=rna(namespace='HGNC', name='ERG'),
             range_3p=fusion_range('r', 312, 5034)
         )
-        self.assertEqual('r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))', str(node))
+        self.assertEqual('r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))', str(node))
 
     def test_rna_fusion_unspecified(self):
         node = rna_fusion(
             partner_5p=rna(namespace='HGNC', name='TMPRSS2'),
             partner_3p=rna(namespace='HGNC', name='ERG'),
         )
-        self.assertEqual('r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))', str(node))
+        self.assertEqual('r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))', str(node))
 
         t = RNA, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('?',)
         self.assertEqual(t, node.as_tuple())
@@ -133,7 +133,7 @@ class TestCanonicalize(unittest.TestCase):
             range_3p=fusion_range('c', 312, 5034)
         )
 
-        self.assertEqual('g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))', str(node))
+        self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))', str(node))
         t = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
         self.assertEqual(t, node.as_tuple())
 
