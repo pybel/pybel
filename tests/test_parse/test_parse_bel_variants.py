@@ -12,16 +12,18 @@ from pybel.constants import (
 )
 from pybel.dsl.nodes import entity, gmod, hgvs, pmod
 from pybel.parser.modifiers import (
-    FragmentParser, FusionParser, GeneModificationParser, GeneSubstitutionParser, LocationParser,
-    ProteinModificationParser, ProteinSubstitutionParser, TruncationParser, VariantParser,
+    get_fragment_language, get_fusion_language, get_gene_modification_language, get_gene_substitution_language,
+    get_hgvs_language, get_location_language, get_protein_modification_language, get_protein_substitution_language,
+    get_truncation_language,
 )
+from pybel.parser.parse_identifier import IdentifierParser
 
 log = logging.getLogger(__name__)
 
 
 class TestHGVSParser(unittest.TestCase):
     def setUp(self):
-        self.parser = VariantParser()
+        self.parser = get_hgvs_language()
 
     def test_protein_del(self):
         statement = 'variant(p.Phe508del)'
@@ -92,7 +94,9 @@ class TestHGVSParser(unittest.TestCase):
 
 class TestPmod(unittest.TestCase):
     def setUp(self):
-        self.parser = ProteinModificationParser()
+        identifier_parser = IdentifierParser()
+        identifier_qualified = identifier_parser.identifier_qualified
+        self.parser = get_protein_modification_language(identifier_qualified)
 
     def test_pmod1(self):
         statement = 'pmod(Ph, Ser, 473)'
@@ -160,9 +164,11 @@ class TestPmod(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
 
-class TestGmod(unittest.TestCase):
+class TestGeneModification(unittest.TestCase):
     def setUp(self):
-        self.parser = GeneModificationParser()
+        identifier_parser = IdentifierParser()
+        identifier_qualified = identifier_parser.identifier_qualified
+        self.parser = get_gene_modification_language(identifier_qualified)
 
         self.expected = gmod('Me')
 
@@ -191,9 +197,9 @@ class TestGmod(unittest.TestCase):
         self.assertEqual(self.expected, result.asDict())
 
 
-class TestPsub(unittest.TestCase):
+class TestProteinSubstitution(unittest.TestCase):
     def setUp(self):
-        self.parser = ProteinSubstitutionParser()
+        self.parser = get_protein_substitution_language()
 
     def test_psub_1(self):
         statement = 'sub(A, 127, Y)'
@@ -210,9 +216,9 @@ class TestPsub(unittest.TestCase):
         self.assertEqual(expected_list, result.asDict())
 
 
-class TestGsubParser(unittest.TestCase):
+class TestGeneSubstitutionParser(unittest.TestCase):
     def setUp(self):
-        self.parser = GeneSubstitutionParser()
+        self.parser = get_gene_substitution_language()
 
     def test_gsub(self):
         statement = 'sub(G,308,A)'
@@ -226,7 +232,7 @@ class TestFragmentParser(unittest.TestCase):
     """See http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_examples_2"""
 
     def setUp(self):
-        self.parser = FragmentParser()
+        self.parser = get_fragment_language()
 
     def help_test_known_length(self, s):
         result = self.parser.parseString(s)
@@ -307,7 +313,7 @@ class TestFragmentParser(unittest.TestCase):
 
 class TestTruncationParser(unittest.TestCase):
     def setUp(self):
-        self.parser = TruncationParser()
+        self.parser = get_truncation_language()
 
     def test_trunc_1(self):
         statement = 'trunc(40)'
@@ -319,7 +325,9 @@ class TestTruncationParser(unittest.TestCase):
 
 class TestFusionParser(unittest.TestCase):
     def setUp(self):
-        self.parser = FusionParser()
+        identifier_parser = IdentifierParser()
+        identifier_qualified = identifier_parser.identifier_qualified
+        self.parser = get_fusion_language(identifier_qualified)
 
     def test_rna_fusion_known_breakpoints(self):
         """RNA abundance of fusion with known breakpoints"""
@@ -436,7 +444,9 @@ class TestFusionParser(unittest.TestCase):
 
 class TestLocation(unittest.TestCase):
     def setUp(self):
-        self.parser = LocationParser()
+        identifier_parser = IdentifierParser()
+        identifier_qualified = identifier_parser.identifier_qualified
+        self.parser = get_location_language(identifier_qualified)
 
     def test_a(self):
         statement = 'loc(GOCC:intracellular)'

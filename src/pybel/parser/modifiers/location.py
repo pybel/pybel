@@ -39,28 +39,23 @@ This calls for thoughtful consideration of the following two statements:
 .. seealso::
 
     - BEL 2.0 specification on `cellular location (2.2.4) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
-    - PyBEL module :py:class:`pybel.parser.modifiers.LocationParser`
+    - PyBEL module :py:class:`pybel.parser.modifiers.get_location_language`
 """
 
 from pyparsing import Group, Suppress, oneOf
 
-from ..baseparser import BaseParser
-from ..parse_identifier import IdentifierParser
 from ..utils import nest
 from ...constants import LOCATION
 
 __all__ = [
-    'location_tag',
-    'LocationParser',
+    'get_location_language',
 ]
 
 location_tag = Suppress(oneOf(['loc', 'location']))
 
 
-class LocationParser(BaseParser):
-    def __init__(self, identifier_parser=None):
-        """
-        :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
-        """
-        identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
-        super(LocationParser, self).__init__(Group(location_tag + nest(identifier_parser.language))(LOCATION))
+def get_location_language(identifier):
+    return Group(
+        location_tag +
+        nest(identifier)
+    )(LOCATION)

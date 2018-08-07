@@ -39,42 +39,41 @@ in the OpenBEL community.
 
 .. seealso::
 
-    - PyBEL module :py:class:`pybel.parser.modifiers.GeneModificationParser`
+    - PyBEL module :py:func:`pybel.parser.modifiers.get_gene_modification_language`
 """
 
-from pyparsing import Group, oneOf
+from pyparsing import Group, MatchFirst, oneOf
 
-from ..baseparser import BaseParser
-from ..parse_identifier import IdentifierParser
 from ..utils import nest, one_of_tags
 from ... import language
 from ...constants import BEL_DEFAULT_NAMESPACE, GMOD, IDENTIFIER, KIND, NAME, NAMESPACE
 
 __all__ = [
-    'gmod_tag',
-    'GeneModificationParser',
+    'get_gene_modification_language',
 ]
 
+
+def _handle_gmod_default(line, position, tokens):
+    tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
+    tokens[NAME] = language.gmod_namespace[tokens[0]]
+    return tokens
+
+
 gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, name=KIND)
+gmod_default_ns = oneOf(list(language.gmod_namespace.keys())).setParseAction(_handle_gmod_default)
 
 
-class GeneModificationParser(BaseParser):
-    def __init__(self, identifier_parser=None):
-        """
-        :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
-        """
-        self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
+def get_gene_modification_language(identifier_qualified):
+    """
 
-        gmod_default_ns = oneOf(list(language.gmod_namespace.keys())).setParseAction(self.handle_gmod_default)
+    :param pyparsing.ParseElement identifier_qualified:
+    :rtype: pyparsing.ParseElement
+    """
+    gmod_identifier = MatchFirst([
+        Group(identifier_qualified),
+        Group(gmod_default_ns),
+    ])
 
-        gmod_identifier = Group(self.identifier_parser.identifier_qualified) | Group(gmod_default_ns)
-
-        self.language = gmod_tag + nest(gmod_identifier(IDENTIFIER))
-
-        super(GeneModificationParser, self).__init__(self.language)
-
-    @staticmethod
-    def handle_gmod_default(line, position, tokens):
-        tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
-        tokens[NAME] = language.gmod_namespace[tokens[0]]
-        return tokens
+    return gmod_tag + nest(
+        gmod_identifier(IDENTIFIER)
+    )

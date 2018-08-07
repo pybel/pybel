@@ -13,7 +13,7 @@ from pybel.constants import (
     CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION,
 )
 from pybel.parser.exc import PlaceholderAminoAcidWarning
-from pybel.parser.modifiers.protein_modification import amino_acid
+from pybel.parser.modifiers.constants import amino_acid
 from pybel.parser.utils import nest
 from pybel.resources.definitions import get_bel_resource
 from pybel.resources.exc import EmptyResourceError

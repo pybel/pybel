@@ -16,10 +16,10 @@ from .exc import (
     MissingSupportWarning, NestedRelationWarning, RelabelWarning,
 )
 from .modifiers import (
-    FragmentParser, FusionParser, GeneModificationParser, GeneSubstitutionParser, LocationParser,
-    ProteinModificationParser, ProteinSubstitutionParser, TruncationParser, VariantParser,
+    get_fragment_language, get_fusion_language, get_gene_modification_language, get_gene_substitution_language,
+    get_hgvs_language, get_legacy_fusion_langauge, get_location_language, get_protein_modification_language,
+    get_protein_substitution_language, get_truncation_language,
 )
-from .modifiers.fusion import build_legacy_fusion
 from .parse_control import ControlParser
 from .parse_identifier import IdentifierParser
 from .utils import WCW, nest, one_of_tags, quote, triple
@@ -116,35 +116,35 @@ class BelParser(BaseParser):
         # 2.2 Abundance Modifier Functions
 
         #: `2.2.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_protein_modifications>`_
-        self.pmod = ProteinModificationParser(self.identifier_parser).language
+        self.pmod = get_protein_modification_language(self.identifier_parser.identifier_qualified)
 
         #: `2.2.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variant_var>`_
-        self.variant = VariantParser().language
+        self.variant = get_hgvs_language()
 
         #: `2.2.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
-        self.fragment = FragmentParser().language
+        self.fragment = get_fragment_language()
 
         #: `2.2.4 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
-        self.location = LocationParser(self.identifier_parser).language
+        self.location = get_location_language(self.identifier_parser.language)
         opt_location = Optional(WCW + self.location)
 
         #: DEPRECATED: `2.2.X Amino Acid Substitutions <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_amino_acid_substitutions>`_
-        self.psub = ProteinSubstitutionParser().language
+        self.psub = get_protein_substitution_language()
 
         #: DEPRECATED: `2.2.X Sequence Variations <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_sequence_variations>`_
-        self.gsub = GeneSubstitutionParser().language
+        self.gsub = get_gene_substitution_language()
 
         #: DEPRECATED
         #: `Truncated proteins <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_truncated_proteins>`_
-        self.trunc = TruncationParser().language
+        self.trunc = get_truncation_language()
 
         #: PyBEL BEL Specification variant
-        self.gmod = GeneModificationParser().language  # FIXME add identifier parser to this
+        self.gmod = get_gene_modification_language(self.identifier_parser.identifier_qualified)
 
         # 2.6 Other Functions
 
         #: `2.6.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
-        self.fusion = FusionParser(self.identifier_parser).language
+        self.fusion = get_fusion_language(self.identifier_parser.language)
 
         # 2.1 Abundance Functions
 
@@ -155,7 +155,7 @@ class BelParser(BaseParser):
             WCW + delimitedList(Group(self.variant | self.gsub | self.gmod))(VARIANTS))
 
         self.gene_fusion = Group(self.fusion)(FUSION)
-        self.gene_fusion_legacy = Group(build_legacy_fusion(identifier, 'c'))(FUSION)
+        self.gene_fusion_legacy = Group(get_legacy_fusion_langauge(identifier, 'c'))(FUSION)
 
         self.gene = gene_tag + nest(MatchFirst([
             self.gene_fusion,
@@ -175,7 +175,7 @@ class BelParser(BaseParser):
                 VARIANTS))
 
         self.protein_fusion = Group(self.fusion)(FUSION)
-        self.protein_fusion_legacy = Group(build_legacy_fusion(identifier, 'p'))(FUSION)
+        self.protein_fusion_legacy = Group(get_legacy_fusion_langauge(identifier, 'p'))(FUSION)
 
         self.protein = protein_tag + nest(MatchFirst([
             self.protein_fusion,
@@ -187,7 +187,7 @@ class BelParser(BaseParser):
         self.rna_modified = ungrouped_identifier + Optional(WCW + delimitedList(Group(self.variant))(VARIANTS))
 
         self.rna_fusion = Group(self.fusion)(FUSION)
-        self.rna_fusion_legacy = Group(build_legacy_fusion(identifier, 'r'))(FUSION)
+        self.rna_fusion_legacy = Group(get_legacy_fusion_langauge(identifier, 'r'))(FUSION)
 
         self.rna = rna_tag + nest(MatchFirst([
             self.rna_fusion,

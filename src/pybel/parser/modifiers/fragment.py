@@ -54,35 +54,32 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
 .. seealso::
 
     - BEL 2.0 specification on `proteolytic fragments (2.2.3) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments>`_
-    - PyBEL module :py:class:`pybel.parser.modifiers.FragmentParser`
+    - PyBEL module :py:class:`pybel.parser.modifiers.get_fragment_language`
 """
 
 from pyparsing import And, Keyword, Optional, Suppress, pyparsing_common as ppc
 
-from ..baseparser import BaseParser
 from ..utils import WCW, nest, one_of_tags, quote
 from ...constants import FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, KIND
 
 __all__ = [
-    'fragment_tag',
-    'FragmentParser',
+    'get_fragment_language',
 ]
 
 fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, name=KIND)
+fragment_range = (ppc.integer | '?')(FRAGMENT_START) + '_' + (ppc.integer | '?' | '*')(FRAGMENT_STOP)
+missing_fragment = Keyword('?')(FRAGMENT_MISSING)
 
 
-class FragmentParser(BaseParser):
-    def __init__(self):
-        self.fragment_range = (ppc.integer | '?')(FRAGMENT_START) + '_' + (ppc.integer | '?' | '*')(FRAGMENT_STOP)
-        self.missing_fragment = Keyword('?')(FRAGMENT_MISSING)
+def get_fragment_language():
+    _fragment_value_inner = fragment_range | missing_fragment(FRAGMENT_MISSING)
 
-        self._fragment_value_inner = self.fragment_range | self.missing_fragment(FRAGMENT_MISSING)
+    _fragment_value = (
+            _fragment_value_inner |
+            And([Suppress('"'), _fragment_value_inner, Suppress('"')])
+    )
 
-        self._fragment_value = (
-                self._fragment_value_inner |
-                And([Suppress('"'), self._fragment_value_inner, Suppress('"')])
-        )
+    language = fragment_tag + nest(
+        _fragment_value + Optional(WCW + quote(FRAGMENT_DESCRIPTION)))
 
-        self.language = fragment_tag + nest(self._fragment_value + Optional(WCW + quote(FRAGMENT_DESCRIPTION)))
-
-        super(FragmentParser, self).__init__(self.language)
+    return language
