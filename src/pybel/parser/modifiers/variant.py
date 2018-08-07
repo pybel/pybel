@@ -45,4 +45,6 @@ def get_hgvs_language():
 
     :rtype: pyparsing.ParseElement
     """
-    return variant_tags + nest((variant_characters | quote)(IDENTIFIER))
+    hgvs = (variant_characters | quote)(IDENTIFIER)
+    language = variant_tags + nest(hgvs)
+    return language
