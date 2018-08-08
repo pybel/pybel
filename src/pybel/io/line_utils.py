@@ -28,7 +28,8 @@ parse_log = logging.getLogger('pybel.parser')
 METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False, **kwargs):
+def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False,
+                no_identifier_validation=False, **kwargs):
     """Parse an iterable of lines into this graph.
 
     Delegates to :func:`parse_document`, :func:`parse_definitions`, and :func:`parse_statements`.
@@ -59,6 +60,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     metadata_parser = MetadataParser(
         manager,
         allow_redefinition=kwargs.get('allow_redefinition'),
+        skip_validation=no_identifier_validation,
     )
 
     parse_document(
@@ -83,9 +85,9 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         annotation_regex=metadata_parser.annotation_regex,
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
+        skip_validation=no_identifier_validation,
         allow_naked_names=kwargs.get('allow_naked_names'),
         allow_unqualified_translocations=kwargs.get('allow_unqualified_translocations'),
-        no_identifier_validation=kwargs.get('no_identifier_validation'),
         required_annotations=kwargs.get('required_annotations'),
     )
 
