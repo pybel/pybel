@@ -317,7 +317,25 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assert_has_node(expected_node)
 
-        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+        expected_node_dict = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'TMPRSS2', },
+                PARTNER_3P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'ERG', },
+                RANGE_5P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 1,
+                    FUSION_STOP: 79
+
+                },
+                RANGE_3P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
+                }
+            }
+        }
+        self.assertEqual(expected_node_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
         self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))', canonical_bel)
@@ -354,7 +372,25 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assert_has_node(expected_node)
 
-        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+        expected_node_dict = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 1,
+                    FUSION_STOP: '?'
+
+                },
+                RANGE_3P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
+                }
+            }
+        }
+        self.assertEqual(expected_node_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
         self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_?", HGNC:ERG, "c.312_5034"))', canonical_bel)
@@ -388,7 +424,22 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assert_has_node(expected_node)
 
-        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+        expected_node_dict = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
+                PARTNER_3P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'ERG'},
+                RANGE_5P: {
+                    FUSION_MISSING: '?'
+                },
+                RANGE_3P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 312,
+                    FUSION_STOP: 5034
+                }
+            }
+        }
+        self.assertEqual(expected_node_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
         self.assertEqual('g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "c.312_5034"))', canonical_bel)
@@ -429,7 +480,25 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assert_has_node(expected_node)
 
-        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+        expected_node_dict = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'BCR'},
+                PARTNER_3P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'JAK2'},
+                RANGE_5P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: '?',
+                    FUSION_STOP: 1875
+
+                },
+                RANGE_3P: {
+                    FUSION_REFERENCE: 'c',
+                    FUSION_START: 2626,
+                    FUSION_STOP: '?'
+                }
+            }
+        }
+        self.assertEqual(expected_node_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
         expected_canonical_bel = 'g(fus(HGNC:BCR, "c.?_1875", HGNC:JAK2, "c.2626_?"))'
@@ -463,7 +532,16 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(expected_node, node_to_tuple(result))
         self.assert_has_node(expected_node)
 
-        self.assertEqual(expected_dict, self.parser.graph.node[expected_node])
+        expected_node_dict = {
+            FUNCTION: GENE,
+            FUSION: {
+                PARTNER_5P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'CHCHD4'},
+                PARTNER_3P: {FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AIFM1'},
+                RANGE_5P: {FUSION_MISSING: '?'},
+                RANGE_3P: {FUSION_MISSING: '?'}
+            }
+        }
+        self.assertEqual(expected_node_dict, self.parser.graph.node[expected_node])
 
         canonical_bel = self.graph.node_to_bel(expected_node)
         self.assertEqual('g(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))', canonical_bel)

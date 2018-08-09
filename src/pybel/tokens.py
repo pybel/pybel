@@ -3,13 +3,18 @@
 """This module helps handle node data dictionaries."""
 
 from .constants import (
-    ACTIVITY, CELL_SECRETION, CELL_SURFACE_EXPRESSION, DEGRADATION, EFFECT, FRAGMENT, FRAGMENT_DESCRIPTION,
-    FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START,
-    FUSION_STOP, GMOD, GMOD_ORDER, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, PARTNER_3P,
-    PARTNER_5P, PMOD, PMOD_ORDER, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, TARGET, TRANSLOCATION, VARIANTS,
+    ABUNDANCE, ACTIVITY, BIOPROCESS, CELL_SECRETION, CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, DEGRADATION, EFFECT,
+    FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING,
+    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE, GMOD, GMOD_ORDER, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS,
+    MIRNA, MODIFIER, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_ORDER, PMOD_POSITION,
+    PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, TARGET, TRANSLOCATION, VARIANTS,
 )
 from .dsl import cell_surface_expression, fusion_range, missing_fusion_range, secretion
-from .dsl.nodes import BaseEntity
+from .dsl.nodes import (
+    BaseAbundance, BaseEntity, CentralDogma, FusionBase, Variant, abundance, bioprocess, complex_abundance,
+    composite_abundance, fragment, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod,
+    protein, protein_fusion, reaction, rna, rna_fusion,
+)
 from .exceptions import PyBELCanonicalizeError
 from .utils import hash_node
 
@@ -19,6 +24,28 @@ __all__ = [
     'sort_variant_dict_list',
     'hash_node_dict',
 ]
+
+_list_func_to_dsl = {
+    COMPLEX: complex_abundance,
+    COMPOSITE: composite_abundance
+}
+
+_fusion_func_to_dsl = {
+    GENE: gene_fusion,
+    RNA: rna_fusion,
+    PROTEIN: protein_fusion,
+}
+
+_func_dsl = {
+    PROTEIN: protein,
+    RNA: rna,
+    MIRNA: mirna,
+    GENE: gene,
+    PATHOLOGY: pathology,
+    BIOPROCESS: bioprocess,
+    COMPLEX: named_complex_abundance,
+    ABUNDANCE: abundance,
+}
 
 
 def hash_node_dict(node_dict):
@@ -44,6 +71,8 @@ def node_to_tuple(tokens):
     """
     if isinstance(tokens, BaseEntity):
         return tokens.as_tuple()
+
+    raise ValueError('NO')
 
     if MODIFIER in tokens:
         return node_to_tuple(tokens[TARGET])
@@ -79,7 +108,6 @@ def _identifier_to_tuple(tokens):
     return tokens[NAMESPACE], tokens[NAME]
 
 
-# TODO figure out how to just get dictionary rather than slicing it up like this
 def _fusion_range_po_to_dict(tokens):
     """Convert a PyParsing data dictionary into a PyBEL.
 
@@ -96,28 +124,36 @@ def _fusion_range_po_to_dict(tokens):
     )
 
 
-def _fusion_po_to_dict(tokens):  # FIXME use DSL
+def _fusion_po_to_dict(tokens):
     """Convert a PyParsing data dictionary to a PyBEL fusion data dictionary.
 
     :param tokens: A PyParsing data dictionary representing a fusion
     :type tokens: ParseResult
-    :rtype: dict
+    :rtype: FusionBase
     """
-    return {
-        FUNCTION: tokens[FUNCTION],
-        FUSION: {
-            PARTNER_5P: {
-                NAMESPACE: tokens[FUSION][PARTNER_5P][NAMESPACE],
-                NAME: tokens[FUSION][PARTNER_5P][NAME]
-            },
-            RANGE_5P: _fusion_range_po_to_dict(tokens[FUSION][RANGE_5P]),
-            PARTNER_3P: {
-                NAMESPACE: tokens[FUSION][PARTNER_3P][NAMESPACE],
-                NAME: tokens[FUSION][PARTNER_3P][NAME]
-            },
-            RANGE_3P: _fusion_range_po_to_dict(tokens[FUSION][RANGE_3P])
-        }
-    }
+    func = tokens[FUNCTION]
+    fusion_dsl = _fusion_func_to_dsl[func]
+    member_dsl = _func_dsl[func]
+
+    partner_5p = member_dsl(
+        namespace=tokens[FUSION][PARTNER_5P][NAMESPACE],
+        name=tokens[FUSION][PARTNER_5P][NAME]
+    )
+
+    partner_3p = member_dsl(
+        namespace=tokens[FUSION][PARTNER_3P][NAMESPACE],
+        name=tokens[FUSION][PARTNER_3P][NAME]
+    )
+
+    range_5p = _fusion_range_po_to_dict(tokens[FUSION][RANGE_5P])
+    range_3p = _fusion_range_po_to_dict(tokens[FUSION][RANGE_3P])
+
+    return fusion_dsl(
+        partner_5p=partner_5p,
+        partner_3p=partner_3p,
+        range_5p=range_5p,
+        range_3p=range_3p,
+    )
 
 
 def sort_variant_dict_list(variants):
@@ -129,27 +165,76 @@ def sort_variant_dict_list(variants):
     return sorted(variants, key=_variant_po_to_tuple)
 
 
-def _variant_po_to_dict_helper(tokens):
-    """Convert a PyParsing data dictionary to a PyBEL variant data dictionary.
+def _simple_po_to_dict(tokens):
+    """Convert a simple named entity to a DSL object.
 
     :type tokens: ParseResult
-    :rtype: dict
+    :rtype: BaseAbundance
     """
-    return [
-        _safe_get_dict(variant)
-        for variant in sort_variant_dict_list(tokens[VARIANTS])
-    ]
+    dsl = _func_dsl.get(tokens[FUNCTION])
+    if dsl is None:
+        raise ValueError('invalid tokens: {}'.format(tokens))
+
+    return dsl(
+        namespace=tokens[NAMESPACE],
+        name=tokens[NAME],
+    )
 
 
 def _variant_po_to_dict(tokens):
-    """Convert a PyParsing data dictionary to a PyBEL variant data dictionary.
+    """Convert a PyParsing data dictionary to a central dogma abundance (i.e., Protein, RNA, miRNA, Gene).
 
     :type tokens: ParseResult
-    :rtype: dict
+    :rtype: CentralDogma
     """
-    attr_data = _simple_po_to_dict(tokens)
-    attr_data[VARIANTS] = _variant_po_to_dict_helper(tokens)
-    return attr_data
+    dsl = _func_dsl.get(tokens[FUNCTION])
+    if dsl is None:
+        raise ValueError('invalid tokens: {}'.format(tokens))
+
+    return dsl(
+        namespace=tokens[NAMESPACE],
+        name=tokens[NAME],
+        variants=[
+            _variant_tokens_to_dsl(variant_tokens)
+            for variant_tokens in sort_variant_dict_list(tokens[VARIANTS])
+        ],
+    )
+
+
+def _variant_tokens_to_dsl(tokens):
+    """Convert variant tokens to DSL objects.
+
+    :type tokens: ParseResult
+    :rtype: Variant
+    """
+    kind = tokens[KIND]
+
+    if kind == HGVS:
+        return hgvs(tokens[IDENTIFIER])
+
+    if kind == GMOD:
+        return gmod(
+            name=tokens[IDENTIFIER][NAME],
+            namespace=tokens[IDENTIFIER][NAMESPACE],
+        )
+
+    if kind == PMOD:
+        return pmod(
+            name=tokens[IDENTIFIER][NAME],
+            namespace=tokens[IDENTIFIER][NAMESPACE],
+            code=tokens.get(PMOD_CODE),
+            position=tokens.get(PMOD_POSITION),
+        )
+
+    if kind == FRAGMENT:
+        start, stop = tokens.get(FRAGMENT_START), tokens.get(FRAGMENT_STOP)
+        return fragment(
+            start=start,
+            stop=stop,
+            description=tokens.get(FRAGMENT_DESCRIPTION)
+        )
+
+    raise ValueError('invalid fragment kind: {}'.format(kind))
 
 
 def _fusion_range_po_to_tuple(tokens, tag):
@@ -206,17 +291,6 @@ def _reaction_part_po_to_tuple(tokens):
     ))
 
 
-def _reaction_part_po_to_dict(tokens):
-    """
-    :type tokens: ParseResult
-    :rtype: dict
-    """
-    return [
-        po_to_dict(token)
-        for token in sort_dict_list(tokens)
-    ]
-
-
 def _reaction_po_to_tuple(tokens):
     """Convert a PyParsing ParseObject to PyBEL node tuple.
 
@@ -233,23 +307,19 @@ def _reaction_po_to_dict(tokens):
     :type tokens: ParseResult
     :rtype: dict
     """
-    return {
-        FUNCTION: REACTION,
-        REACTANTS: _reaction_part_po_to_dict(tokens[REACTANTS]),
-        PRODUCTS: _reaction_part_po_to_dict(tokens[PRODUCTS]),
-    }
+    return reaction(
+        reactants=_reaction_part_po_to_dict(tokens[REACTANTS]),
+        products=_reaction_part_po_to_dict(tokens[PRODUCTS]),
+    )
 
 
-def _simple_po_to_dict(tokens):
-    """
+def _reaction_part_po_to_dict(tokens):
+    """Convert a PyParsing result to a reaction.
+
     :type tokens: ParseResult
-    :rtype: dict
+    :rtype: list[BaseAbundance]
     """
-    return {
-        FUNCTION: tokens[FUNCTION],
-        NAMESPACE: tokens[NAMESPACE],
-        NAME: tokens[NAME]
-    }
+    return [po_to_dict(token) for token in sort_dict_list(tokens)]
 
 
 def _simple_to_tuple(tokens):
@@ -378,21 +448,22 @@ def _list_po_to_dict(tokens):
     :param tokens: PyParsing ParseObject
     :rtype: dict
     """
-    list_entries = [
+    func = tokens[FUNCTION]
+    dsl = _list_func_to_dsl[func]
+
+    members = [
         po_to_dict(token)
         for token in sort_dict_list(tokens[MEMBERS])
     ]
 
-    return {
-        FUNCTION: tokens[FUNCTION],
-        MEMBERS: list_entries
-    }
+    return dsl(members)
 
 
 def po_to_dict(tokens):
-    """
+    """Convert a ParseResult to a PyBEL DSL object
+
     :type tokens: ParseResult
-    :rtype: dict
+    :rtype: BaseEntity
     """
     if MODIFIER in tokens:
         return po_to_dict(tokens[TARGET])
