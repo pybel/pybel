@@ -45,8 +45,6 @@ HGNC_URL = OPENBEL_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
 MESH_DISEASES_URL = OPENBEL_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
 
-test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
-
 
 def update_provenance(control_parser):
     """Put a default evidence and citation in a BEL parser.
