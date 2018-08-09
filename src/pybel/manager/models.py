@@ -643,7 +643,7 @@ class Modification(Base):
         if self.type == FRAGMENT:
             return fragment(
                 start=int_or_str(self.p3_start),
-                stop=int_or_str(self.p3_stop)
+                stop=int_or_str(self.p3_stop),
             )
 
         if self.type == HGVS:
@@ -655,6 +655,7 @@ class Modification(Base):
             IDENTIFIER: self.identifier.to_json()
         }
 
+        # FIXME use DSL functions and fix type annotations
         if self.type == PMOD:
             if self.residue:
                 mod_dict[PMOD_CODE] = self.residue

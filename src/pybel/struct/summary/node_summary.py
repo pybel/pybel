@@ -102,6 +102,8 @@ def _identifier_filtered_iterator(graph):
                 if identifier is not None and NAMESPACE in identifier and NAME in identifier:
                     yield identifier[NAMESPACE], identifier[NAME]
 
+        # FIXME recur on list abundances!!!
+
 
 def get_names(graph):
     """Get all names for each namespace.
