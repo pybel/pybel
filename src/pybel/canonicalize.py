@@ -461,6 +461,12 @@ def calculate_canonical_name(graph, node):
         return node_to_bel(data)
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
+        if IDENTIFIER in data and NAME in data:
+            return '{namespace}:{identifier} ({name})'.format(**data)
+
+        if IDENTIFIER in data:
+            return '{namespace}:{identifier}'.format(namespace=data[NAMESPACE], identifier=data[IDENTIFIER])
+
         return data[NAME]
 
     raise ValueError('Unexpected node data: {}'.format(data))
