@@ -895,9 +895,12 @@ class BELGraph(networkx.MultiDiGraph):
     def node_to_bel(self, n):
         """Serialize a node as BEL.
 
-        :param tuple n: A PyBEL node tuple
+        :param n: A PyBEL node tuple
+        :type n: tuple or BaseEntity
         :rtype: str
         """
+        if isinstance(n, BaseEntity):
+            return node_to_bel(self.node[n.as_tuple()])
         return node_to_bel(self.node[n])
 
     def edge_to_bel(self, u, v, data, sep=None):
