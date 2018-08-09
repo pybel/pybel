@@ -3,7 +3,6 @@
 """Constants for PyBEL tests."""
 
 import logging
-import os
 import unittest
 from json import dumps
 
@@ -19,6 +18,7 @@ from pybel.constants import (
     REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
 )
 from pybel.dsl import complex_abundance, pathology, protein, translocation
+from pybel.dsl.nodes import BaseEntity
 from pybel.parser.exc import (
     BelSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException, InvalidCitationType,
     InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning, MissingAnnotationKeyWarning,
@@ -45,8 +45,6 @@ HGNC_URL = OPENBEL_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
 MESH_DISEASES_URL = OPENBEL_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
 
-test_connection = os.environ.get('PYBEL_TEST_CONNECTION')
-
 
 def update_provenance(control_parser):
     """Put a default evidence and citation in a BEL parser.
@@ -67,7 +65,11 @@ def assert_has_node(self, node, graph, **kwargs):
     :type graph: BELGraph
     :param kwargs:
     """
-    self.assertTrue(graph.has_node(node), msg='{} not found in graph'.format(node))
+    if isinstance(node, BaseEntity):
+        node = node.as_tuple()
+
+    self.assertTrue(graph.has_node(node), msg='{} not found in graph. Other nodes: {}'.format(node, graph.nodes()))
+
     if kwargs:
         missing = set(kwargs) - set(graph.node[node])
         self.assertFalse(missing, msg="Missing {} in node data".format(', '.join(sorted(missing))))
@@ -112,7 +114,7 @@ def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
     :param tuple v: target node
     :param BELGraph graph: underlying graph
     """
-    self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph'.format(u, v))
+    self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph. Other edges:\n{}'.format(u, v, '\n'.join(map(str, graph.edges()))))
 
     if not kwargs:
         return
@@ -168,7 +170,10 @@ class TestTokenParserBase(unittest.TestCase):
         self.parser.clear()
 
     def assert_has_node(self, member, **kwargs):
-        """Assert that this test case's graph has the given node."""
+        """Assert that this test case's graph has the given node.
+
+        :type member: tuple or BaseEntity
+        """
         assert_has_node(self, member, self.graph, **kwargs)
 
     def assert_has_edge(self, u, v, **kwargs):

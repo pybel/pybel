@@ -4,20 +4,20 @@
 
 from __future__ import unicode_literals
 
+import time
 import unittest
 from collections import Counter
 
 import sqlalchemy.exc
-import time
 from sqlalchemy import not_
 
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, COMPLEX, COMPOSITE, DECREASES, FUNCTION, FUSION,
-    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER,
-    INCREASES, KIND, LOCATION, MEMBERS, METADATA_DESCRIPTION, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
-    PARTNER_3P, PARTNER_5P, PATHOLOGY, PROTEIN, RANGE_3P, RANGE_5P, RELATION, VARIANTS,
+    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, FUNCTION, GENE, HAS_COMPONENT, HAS_PRODUCT,
+    HAS_REACTANT, HGVS, IDENTIFIER,
+    INCREASES, KIND, LOCATION, METADATA_DESCRIPTION, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
+    PATHOLOGY, PROTEIN, RELATION, VARIANTS,
 )
 from pybel.dsl import (
     BaseEntity, activity, complex_abundance, composite_abundance, degradation, entity, fragment, fusion_range, gene,
@@ -508,25 +508,11 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_nodes())
 
     def test_single_variant(self):
-        node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del')
-        node_data = {
-            FUNCTION: GENE,
-            NAMESPACE: 'HGNC',
-            NAME: 'AKT1',
-            VARIANTS: [
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: 'p.Phe508del'
-                }
-            ]
-        }
 
-        node_parent_tuple = GENE, 'HGNC', 'AKT1'
-        node_parent_data = {
-            FUNCTION: GENE,
-            NAMESPACE: 'HGNC',
-            NAME: 'AKT1'
-        }
+        node_data = gene('HGNC', 'AKT1', variants=hgvs('p.Phe508del'))
+        node_tuple = node_data.as_tuple()
+        node_parent_data = node_data.get_parent()
+        node_parent_tuple = node_parent_data.as_tuple()
 
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
@@ -537,28 +523,13 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
     def test_multiple_variants(self):
-        node_tuple = GENE, 'HGNC', 'AKT1', (HGVS, 'p.Phe508del'), (HGVS, 'p.Phe509del')
-        node_data = {
-            FUNCTION: GENE,
-            NAMESPACE: 'HGNC',
-            NAME: 'AKT1',
-            VARIANTS: [
-                {
-                    KIND: HGVS,
-                    IDENTIFIER: 'p.Phe508del'
-                }, {
-                    KIND: HGVS,
-                    IDENTIFIER: 'p.Phe509del'
-                }
-            ]
-        }
+        node_data = gene('HGNC', 'AKT1', variants=[
+            hgvs('p.Phe508del'), hgvs('p.Phe509del')
+        ])
+        node_tuple = node_data.as_tuple()
 
-        node_parent_tuple = GENE, 'HGNC', 'AKT1'
-        node_parent_data = {
-            FUNCTION: GENE,
-            NAMESPACE: 'HGNC',
-            NAME: 'AKT1'
-        }
+        node_parent_data = node_data.get_parent()
+        node_parent_tuple = node_parent_data.as_tuple()
 
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
@@ -569,25 +540,13 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
     def test_fusion(self):
-        node_tuple = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
-        node_data = {
-            FUNCTION: GENE,
-            FUSION: {
-                PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'},
-                PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'ERG'},
-                RANGE_5P: {
-                    FUSION_REFERENCE: 'c',
-                    FUSION_START: 1,
-                    FUSION_STOP: 79
-
-                },
-                RANGE_3P: {
-                    FUSION_REFERENCE: 'c',
-                    FUSION_START: 312,
-                    FUSION_STOP: 5034
-                }
-            }
-        }
+        node_data = gene_fusion(
+            partner_5p=gene('HGNC', 'TMPRSS2'),
+            partner_3p=gene('HGNC', 'ERG'),
+            range_5p=fusion_range('c', 1, 79),
+            range_3p=fusion_range('c', 312, 5034)
+        )
+        node_tuple = node_data.as_tuple()
 
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_tuple, self.graph)
@@ -596,40 +555,25 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(0, self.graph.number_of_edges())
 
     def test_composite(self):
-        il23 = COMPLEX, 'GOCC', 'interleukin-23 complex'
-        il6 = PROTEIN, 'HGNC', 'IL6'
-        node_tuple = COMPOSITE, il23, il6
-        node_data = {
-            FUNCTION: COMPOSITE,
-            MEMBERS: [
-                {
-                    FUNCTION: COMPLEX,
-                    NAMESPACE: 'GOCC',
-                    NAME: 'interleukin-23 complex'
-                },
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'IL6'
-                }
-            ]
-        }
+        il23 = named_complex_abundance('GOCC', 'interleukin-23 complex')
+        il6 = protein('HGNC', 'IL6')
+        node_data = composite_abundance([il23, il6])
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
+        self.assertIn(node_data.as_tuple(), self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
-        self.assertIn(il6, self.graph)
-        self.assertIn(il23, self.graph)
+        self.assertIn(il6.as_tuple(), self.graph, msg='Nodes:\n'.format('\n'.join(map(str, self.graph))))
+        self.assertIn(il23.as_tuple(), self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
 
-        self.assertIn(il6, self.graph[node_tuple])
-        edges = list(self.graph[node_tuple][il6].values())
+        self.assertIn(il6.as_tuple(), self.graph[node_data.as_tuple()])
+        edges = list(self.graph[node_data.as_tuple()][il6.as_tuple()].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
         self.assertEqual(HAS_COMPONENT, data[RELATION])
 
-        self.assertIn(il23, self.graph[node_tuple])
-        edges = list(self.graph[node_tuple][il23].values())
+        self.assertIn(il23.as_tuple(), self.graph[node_data.as_tuple()])
+        edges = list(self.graph[node_data.as_tuple()][il23.as_tuple()].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
         self.assertEqual(HAS_COMPONENT, data[RELATION])

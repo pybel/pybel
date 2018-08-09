@@ -16,6 +16,7 @@ __all__ = [
     'intracellular',
     'secretion',
     'cell_surface_expression',
+    'location',
 ]
 
 intracellular = entity(name='intracellular', namespace='GOCC')
@@ -109,3 +110,56 @@ def cell_surface_expression():
         from_loc=intracellular,
         to_loc=surface,
     )
+
+
+def location(identifier):
+    """Make a location object modifier dictionary.
+
+    :param entity identifier: A namespace/name/identifier pair
+
+    Usage:
+
+    X increases the abundance of Y in the cytoplasm
+
+    .. code-block:: python
+
+        from pybel import BELGraph
+        from pybel.dsl import protein, location
+
+        graph = BELGraph()
+
+        source = protein('HGNC', 'IRAK1')
+        target = protein('HGNC', 'IRF7, variants=[
+            pmod('Ph', 'Ser', 477), pmod('Ph', 'Ser', 479),
+        ])
+        graph.add_increases(
+            source,
+            target,
+            citation=...,
+            evidence=...,
+            object_modifier=location(entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
+        )
+
+    X increases the kinase activity of Y in the cytoplasm. In this case, the :func:`activity` function takes a location as
+    an optional argument.
+
+    .. code-block:: python
+
+        from pybel import BELGraph
+        from pybel.dsl import protein, location
+
+        graph = BELGraph()
+
+        source = ...
+        target = ...
+        graph.add_increases(
+            source,
+            target,
+            citation=...,
+            evidence=...,
+            object_modifier=activity('kin', location=entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
+        )
+    """
+    return {
+        LOCATION: identifier
+    }

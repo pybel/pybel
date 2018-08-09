@@ -20,6 +20,7 @@ from ..constants import (
     OBJECT, ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import activity
+from ..dsl.nodes import BaseEntity, CentralDogma
 from ..tokens import node_to_tuple
 from ..utils import get_version, hash_edge, hash_node
 
@@ -608,31 +609,33 @@ class BELGraph(networkx.MultiDiGraph):
         :return: A PyBEL node tuple
         :rtype: tuple
         """
-        node_tuple = node_to_tuple(attr_dict)
+        if not isinstance(attr_dict, BaseEntity):
+            raise TypeError('not BaseEntity: {}'.format(attr_dict))
+
+        node_tuple = attr_dict.as_tuple()
 
         if node_tuple in self:
             return node_tuple
 
-        self.add_node(node_tuple, **attr_dict)
+        self.add_node(node_tuple)
+        self.node[node_tuple] = attr_dict
 
         if VARIANTS in attr_dict:
-            parent_node_dict = {
-                key: attr_dict[key]
-                for key in (FUNCTION, NAME, NAMESPACE, IDENTIFIER)
-                if key in attr_dict
-            }
-            self.add_has_variant(parent_node_dict, node_tuple)
+            if isinstance(attr_dict, CentralDogma):
+                self.add_has_variant(attr_dict.get_parent(), attr_dict)
+            else:
+                raise ValueError('can not do this on not central dogma: {} {}'.format(attr_dict.__class__, attr_dict))
 
         elif MEMBERS in attr_dict:
             for member in attr_dict[MEMBERS]:
-                self.add_has_component(node_tuple, member)
+                self.add_has_component(attr_dict, member)
 
         elif PRODUCTS in attr_dict and REACTANTS in attr_dict:
             for reactant_tokens in attr_dict[REACTANTS]:
-                self.add_unqualified_edge(node_tuple, reactant_tokens, HAS_REACTANT)
+                self.add_unqualified_edge(attr_dict, reactant_tokens, HAS_REACTANT)
 
             for product_tokens in attr_dict[PRODUCTS]:
-                self.add_unqualified_edge(node_tuple, product_tokens, HAS_PRODUCT)
+                self.add_unqualified_edge(attr_dict, product_tokens, HAS_PRODUCT)
 
         return node_tuple
 
@@ -643,8 +646,10 @@ class BELGraph(networkx.MultiDiGraph):
         :type attr_dict: BaseEntity or dict
         :rtype: bool
         """
-        node_tuple = node_to_tuple(attr_dict)
-        return self.has_node(node_tuple)
+        if not isinstance(attr_dict, BaseEntity):
+            raise TypeError('not BaseEntity: {}'.format(attr_dict))
+
+        return self.has_node(attr_dict.as_tuple())
 
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
                            object_modifier=None, **attr):
@@ -895,9 +900,12 @@ class BELGraph(networkx.MultiDiGraph):
     def node_to_bel(self, n):
         """Serialize a node as BEL.
 
-        :param tuple n: A PyBEL node tuple
+        :param n: A PyBEL node tuple
+        :type n: tuple or BaseEntity
         :rtype: str
         """
+        if isinstance(n, BaseEntity):
+            return node_to_bel(self.node[n.as_tuple()])
         return node_to_bel(self.node[n])
 
     def edge_to_bel(self, u, v, data, sep=None):

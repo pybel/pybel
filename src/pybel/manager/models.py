@@ -14,15 +14,18 @@ from .utils import int_or_str
 from ..constants import (
     ANNOTATIONS, BELNS_ENCODING_STR, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE,
-    CITATION_TYPE_PUBMED, CITATION_VOLUME, COMPLEX, COMPOSITE, EFFECT, EVIDENCE, FRAGMENT, FUNCTION, FUSION,
-    HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, METADATA_AUTHORS,
-    METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME,
-    METADATA_VERSION, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION,
-    PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RELATION, SUBJECT, VARIANTS,
+    CITATION_TYPE_PUBMED, CITATION_VOLUME, COMPLEX, COMPOSITE, EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD,
+    HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
+    METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
+    MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, RANGE_3P, RANGE_5P, REACTION,
+    RELATION, SUBJECT,
 )
-from ..dsl import fragment, fusion_range, hgvs, missing_fusion_range
+from ..dsl import (
+    complex_abundance, composite_abundance, fragment, fusion_range, hgvs, missing_fusion_range,
+    named_complex_abundance, reaction,
+)
 from ..io.gpickle import from_bytes, to_bytes
-from ..tokens import node_to_tuple, sort_dict_list, sort_variant_dict_list
+from ..tokens import _func_dsl, _fusion_func_to_dsl, gmod, node_to_tuple, pmod
 
 __all__ = [
     'Base',
@@ -509,57 +512,86 @@ class Node(Base):
     def __repr__(self):
         return '<Node {}: {}>'.format(self.sha512[:10], self.bel)
 
-    def to_json(self, include_id=False, include_hash=False):
-        """Serializes this node as a PyBEL node data dictionary
+    def to_json(self):
+        """Serialize this node as a PyBEL DSL object.
 
-        :param bool include_id: Include the database identifier?
-        :param bool include_hash: Include the node hash?
-        :rtype: dict[str,str]
+        :rtype: BaseEntity
         """
-        result = {FUNCTION: self.type}
-
-        if include_id:
-            result['id'] = self.id
-
-        if include_hash:
-            result['sha512'] = self.sha512
-
-        if self.namespace_entry:
-            namespace_entry = self.namespace_entry.to_json()
-            result.update(namespace_entry)
+        func = self.type
 
         if self.has_fusion:
-            result[FUSION] = self.modifications[0].to_json()
-            result[FUSION][PARTNER_3P][FUNCTION] = self.type
-            result[FUSION][PARTNER_5P][FUNCTION] = self.type
+            j = self.modifications[0].to_json()
+            fusion_dsl = _fusion_func_to_dsl[func]
+            member_dsl = _func_dsl[func]
+            partner_5p = member_dsl(**j[PARTNER_5P])
+            partner_3p = member_dsl(**j[PARTNER_3P])
 
-        elif self.is_variant:
-            result[VARIANTS] = sort_variant_dict_list(
-                modification.to_json()
-                for modification in self.modifications
+            return fusion_dsl(
+                partner_5p=partner_5p,
+                partner_3p=partner_3p,
+                range_5p=j.get(RANGE_5P),
+                range_3p=j.get(RANGE_3P),
             )
 
-        elif self.type == REACTION:
-            reactants = []
-            products = []
+        if self.type == REACTION:
+            return reaction(
+                reactants=[
+                    edge.target.to_json()
+                    for edge in self.out_edges.filter(Edge.relation == HAS_REACTANT)
+                ],
+                products=[
+                    edge.target.to_json()
+                    for edge in self.out_edges.filter(Edge.relation == HAS_PRODUCT)
+                ]
+            )
 
-            for edge in self.out_edges.filter(Edge.relation == HAS_PRODUCT):
-                products.append(edge.target.to_json())
-
-            for edge in self.out_edges.filter(Edge.relation == HAS_REACTANT):
-                reactants.append(edge.target.to_json())
-
-            result[REACTANTS] = sort_dict_list(reactants)
-            result[PRODUCTS] = sort_dict_list(products)
-
-        elif self.type == COMPOSITE or (self.type == COMPLEX and not self.namespace_entry):
-            # FIXME handle when there's a named complex with member list as well
-            result[MEMBERS] = sort_dict_list(
+        if self.type in {COMPLEX, COMPOSITE}:
+            members = [
                 edge.target.to_json()
                 for edge in self.out_edges.filter(Edge.relation == HAS_COMPONENT)
+            ]
+
+            if self.type == COMPOSITE:
+                return composite_abundance(members)
+
+            if self.namespace_entry:
+                if members:
+                    return complex_abundance(
+                        members=members,
+                        namespace=self.namespace_entry.namespace.keyword,
+                        name=self.namespace_entry.name,
+                        identifier=self.namespace_entry.identifier,
+                    )
+                else:  # no members means named complex abundance
+                    return named_complex_abundance(
+                        namespace=self.namespace_entry.namespace.keyword,
+                        name=self.namespace_entry.name,
+                        identifier=self.namespace_entry.identifier,
+                    )
+
+            elif not members:
+                raise ValueError('complex can not be nameless and have no members')
+
+            return complex_abundance(members=members)
+
+        dsl = _func_dsl[func]
+
+        if self.is_variant:
+            return dsl(
+                namespace=self.namespace_entry.namespace.keyword,
+                name=self.namespace_entry.name,
+                identifier=self.namespace_entry.identifier,
+                variants=[
+                    modification.to_json()
+                    for modification in self.modifications
+                ]
             )
 
-        return result
+        return dsl(
+            namespace=self.namespace_entry.namespace.keyword,
+            name=self.namespace_entry.name,
+            identifier=self.namespace_entry.identifier,
+        )
 
     def to_tuple(self):
         """Converts this node to a PyBEL tuple
@@ -604,38 +636,36 @@ class Modification(Base):
     def _fusion_to_json(self):
         """Converts this modification to a FUSION data dictionary. Don't use this without checking
         ``self.type == FUSION`` first"""
-        fusion_dict = {
-            PARTNER_3P: self.p3_partner.to_json(),
-            PARTNER_5P: self.p5_partner.to_json(),
-            RANGE_3P: {},
-            RANGE_5P: {}
-        }
-
         if self.p5_reference:
-            fusion_dict[RANGE_5P] = fusion_range(
+            range_5p = fusion_range(
                 reference=str(self.p5_reference),
                 start=int_or_str(self.p5_start),
                 stop=int_or_str(self.p5_stop),
             )
         else:
-            fusion_dict[RANGE_5P] = missing_fusion_range()
+            range_5p = missing_fusion_range()
 
         if self.p3_reference:
-            fusion_dict[RANGE_3P] = fusion_range(
+            range_3p = fusion_range(
                 reference=str(self.p3_reference),
                 start=int_or_str(self.p3_start),
                 stop=int_or_str(self.p3_stop),
             )
         else:
-            fusion_dict[RANGE_3P] = missing_fusion_range()
+            range_3p = missing_fusion_range()
 
-        return fusion_dict
+        return {
+            PARTNER_5P: self.p5_partner.to_json(),  # just the identifier pair
+            PARTNER_3P: self.p3_partner.to_json(),  # just the identifier pair
+            RANGE_5P: range_5p,
+            RANGE_3P: range_3p,
+        }
 
     def to_json(self):
-        """Recreates a is_variant dictionary for :class:`BELGraph`
+        """Recreate a is_variant dictionary for :class:`BELGraph`.
 
         :return: Dictionary that describes a variant or a fusion.
-        :rtype: dict
+        :rtype: Variant or FusionBase
         """
         if self.type == FUSION:
             return self._fusion_to_json()
@@ -643,26 +673,29 @@ class Modification(Base):
         if self.type == FRAGMENT:
             return fragment(
                 start=int_or_str(self.p3_start),
-                stop=int_or_str(self.p3_stop)
+                stop=int_or_str(self.p3_stop),
             )
 
         if self.type == HGVS:
             return hgvs(str(self.variantString))
 
-        # must be GMOD or PMOD now
-        mod_dict = {
-            KIND: self.type,
-            IDENTIFIER: self.identifier.to_json()
-        }
+        if self.type == GMOD:
+            return gmod(
+                namespace=self.identifier.namespace.keyword,
+                name=self.identifier.name,
+                identifier=self.identifier.identifier,
+            )
 
         if self.type == PMOD:
-            if self.residue:
-                mod_dict[PMOD_CODE] = self.residue
+            return pmod(
+                namespace=self.identifier.namespace.keyword,
+                name=self.identifier.name,
+                identifier=self.identifier.identifier,
+                code=self.residue,
+                position=self.position
+            )
 
-            if self.position:
-                mod_dict[PMOD_POSITION] = self.position
-
-        return mod_dict
+        raise TypeError('unhandled type ({}) for modification {}'.format(self.type, self))
 
 
 author_citation = Table(
